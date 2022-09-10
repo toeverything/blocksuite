@@ -1,5 +1,5 @@
 {
-  "name": "@building-blocks/framework",
+  "name": "@building-blocks/core",
   "version": "0.0.0",
   "type": "module",
   "description": "",
@@ -9,8 +9,5 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "Apache-2.0",
-  "dependencies": {
-    "@building-blocks/core": "workspace:*"
-  }
+  "license": "Apache-2.0"
 }
