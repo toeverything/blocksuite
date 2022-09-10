@@ -11,6 +11,7 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
-    "@building-blocks/core": "workspace:*"
+    "@building-blocks/core": "workspace:*",
+    "lit": "^2.3.1"
   }
 }
