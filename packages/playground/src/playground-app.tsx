@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { hello } from '@building-blocks/framework';
+import { hello } from '@building-blocks/blocks';
 
 export function App() {
   const [count, setCount] = useState(hello());

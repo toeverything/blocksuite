@@ -20,20 +20,20 @@ importers:
       typescript: 4.8.3
       vite: 3.1.0
 
-  packages/core:
-    specifiers: {}
-
-  packages/framework:
+  packages/blocks:
     specifiers:
       '@building-blocks/core': workspace:*
     dependencies:
       '@building-blocks/core': link:../core
 
+  packages/core:
+    specifiers: {}
+
   packages/playground:
     specifiers:
-      '@building-blocks/framework': workspace:*
+      '@building-blocks/blocks': workspace:*
     dependencies:
-      '@building-blocks/framework': link:../framework
+      '@building-blocks/blocks': link:../blocks
 
 packages:
 
