@@ -1,0 +1,13 @@
+{
+  "name": "@building-blocks/framework",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "Apache-2.0"
+}
