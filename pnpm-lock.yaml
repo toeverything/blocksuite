@@ -4,6 +4,7 @@ importers:
 
   .:
     specifiers:
+      '@lit-labs/react': ^1.0.8
       '@types/react': ^18.0.19
       '@types/react-dom': ^18.0.6
       '@typescript-eslint/eslint-plugin': ^5.36.2
@@ -17,6 +18,7 @@ importers:
       typescript: ^4.8.3
       vite: ^3.1.0
     dependencies:
+      '@lit-labs/react': 1.0.8
       '@types/react': 18.0.19
       '@types/react-dom': 18.0.6
       '@typescript-eslint/eslint-plugin': 5.36.2_2l2r3i3lm6jysqd4ac3ql4n2mm
@@ -402,6 +404,10 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
+    dev: false
+
+  /@lit-labs/react/1.0.8:
+    resolution: {integrity: sha512-5qQzixu/bVqI819cNgr/fY8KX0v5C3FmanMaT7Q8qzUJ+EpB4BsOSQwacdaWfNkm7SV4jkWerSHxa9hvncszCA==}
     dev: false
 
   /@lit/reactive-element/1.4.1:

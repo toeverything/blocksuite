@@ -10,6 +10,7 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
+    "@lit-labs/react": "^1.0.8",
     "@types/react": "^18.0.19",
     "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
