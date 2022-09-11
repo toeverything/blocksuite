@@ -19,7 +19,10 @@ export class PageBlock extends LitElement {
   }
 
   render() {
-    return html` <text-block .store=${this.store}></text-block> `;
+    return html`
+      <text-block .store=${this.store}></text-block>
+      <text-block .store=${this.store}></text-block>
+    `;
   }
 }
 

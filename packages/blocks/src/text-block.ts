@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { DebugProvider, Store, TextBinding } from '@building-blocks/core';
+import { Store, TextBinding } from '@building-blocks/core';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
@@ -9,7 +9,7 @@ Quill.register('modules/cursors', QuillCursors);
 
 @customElement('text-block')
 export class TextBlock extends LitElement {
-  @query('#text-container')
+  @query('.text-block.quill-container')
   textContainer!: HTMLDivElement;
 
   @property({ type: Store })
@@ -20,9 +20,8 @@ export class TextBlock extends LitElement {
     return this;
   }
 
-  private _initEditorContainer(store: Store, i: number) {
-    const provider = new DebugProvider(`quill-demo-${i}`, store.doc);
-    const yText = store.doc.getText(`q-${i}`);
+  private _initEditorContainer(store: Store, id: string) {
+    const yText = store.doc.getText(`q-${id}`);
     store.history.addToScope([yText]);
 
     const { textContainer } = this;
@@ -60,22 +59,25 @@ export class TextBlock extends LitElement {
       theme: 'snow', // or 'bubble'
     });
 
-    const binding = new TextBinding(yText, quill, provider.awareness);
-    store.containers.push({ provider, quill, yText, binding });
+    const binding = new TextBinding(yText, quill, store.provider.awareness);
+    store.containers.push({ quill, binding });
   }
 
   protected firstUpdated() {
-    this._initEditorContainer(this.store, 0);
+    this._initEditorContainer(this.store, this.store.getId());
   }
 
   render() {
     return html`
       <style>
-        ${style}
+        ${style} .text-block.quill-container {
+          margin-bottom: 12px;
+        }
+        .ql-editor {
+          padding: 6px;
+        }
       </style>
-      <div>
-        <div id="text-container"></div>
-      </div>
+      <div class="text-block quill-container"></div>
     `;
   }
 }
