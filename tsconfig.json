@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "target": "ESNext",
     "useDefineForClassFields": false,
     "experimentalDecorators": true,

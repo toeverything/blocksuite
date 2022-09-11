@@ -9,5 +9,14 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "lib0": "^0.2.52",
+    "y-protocols": "^1.0.5",
+    "y-webrtc": "^10.2.3",
+    "yjs": "^13.5.41"
+  },
+  "devDependencies": {
+    "@types/quill": "^2.0.9"
+  }
 }

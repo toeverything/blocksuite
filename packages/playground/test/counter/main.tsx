@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { CounterBlock } from '@building-blocks/blocks';
+import ReactDOM from 'react-dom/client';
+import { CounterBlock } from '@building-blocks/blocks/src/counter-block';
 import { createComponent, type EventName } from '@lit-labs/react';
 
 const CounterBlockComponent = createComponent(
@@ -11,7 +12,7 @@ const CounterBlockComponent = createComponent(
   }
 );
 
-export function App() {
+function App() {
   const onUpdate = useCallback((e: CustomEvent<number>) => {
     console.log('new count', e.detail);
   }, []);
@@ -22,3 +23,9 @@ export function App() {
     </div>
   );
 }
+
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
