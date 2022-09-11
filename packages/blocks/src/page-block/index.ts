@@ -34,7 +34,6 @@ export class PageBlock extends LitElement {
   render() {
     return html`
       <text-block .store=${this.store}></text-block>
-      <text-block .store=${this.store}></text-block>
       <button @click=${this._onToggleConnection}>${this.text}</button>
     `;
   }

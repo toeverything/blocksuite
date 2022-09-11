@@ -30,7 +30,7 @@ export class TextBlock extends LitElement {
 
     const quill = new Quill(textContainer, {
       modules: {
-        cursors: false,
+        cursors: true,
         toolbar: false,
         history: {
           maxStack: 0,

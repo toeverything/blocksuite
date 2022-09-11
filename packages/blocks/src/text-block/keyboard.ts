@@ -39,6 +39,9 @@ type KeyboardBindingHandler = (
 ) => void;
 
 export const createkeyboardBindings = (store: Store) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clientID = store.doc.clientID as any;
+
   function undo() {
     store.history.undo();
   }
@@ -47,11 +50,29 @@ export const createkeyboardBindings = (store: Store) => {
     store.history.redo();
   }
 
+  function hardEnter(this: KeyboardEventThis) {
+    // TODO
+  }
+
+  function softEnter(this: KeyboardEventThis) {
+    const index = this.quill.getSelection()?.index || 0;
+    this.quill.insertText(index, '\n', clientID);
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
       shortKey: true,
       handler: undo,
+    },
+    hardEnter: {
+      key: 'enter',
+      handler: hardEnter,
+    },
+    softEnter: {
+      key: 'enter',
+      shiftKey: true,
+      handler: softEnter,
     },
     redo: {
       key: 'z',
