@@ -4,7 +4,7 @@
   "description": "Building Blocks framework workspace",
   "scripts": {
     "dev": "pnpm --filter @building-blocks/playground dev",
-    "lint": "eslint ./"
+    "lint": "eslint ./ --max-warnings=0"
   },
   "keywords": [],
   "author": "toeverything",

@@ -4,6 +4,7 @@ import { Store, TextBinding } from '@building-blocks/core';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
+import { createkeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
 
@@ -25,6 +26,7 @@ export class TextBlock extends LitElement {
     store.history.addToScope([yText]);
 
     const { textContainer } = this;
+    const keyboardBindings = createkeyboardBindings(store);
 
     const quill = new Quill(textContainer, {
       modules: {
@@ -35,25 +37,7 @@ export class TextBlock extends LitElement {
           userOnly: true,
         },
         keyboard: {
-          bindings: {
-            undo: {
-              key: 'z',
-              shortKey: true,
-              handler() {
-                store.history.undo();
-                return false;
-              },
-            },
-            redo: {
-              key: 'z',
-              shiftKey: true,
-              shortKey: true,
-              handler() {
-                store.history.redo();
-                return false;
-              },
-            },
-          },
+          bindings: keyboardBindings,
         },
       },
       theme: 'snow', // or 'bubble'
