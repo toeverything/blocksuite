@@ -5,6 +5,8 @@ importers:
   .:
     specifiers:
       '@lit-labs/react': ^1.0.8
+      '@playwright/test': ^1.25.2
+      '@types/node': ^18.7.16
       '@types/react': ^18.0.19
       '@types/react-dom': ^18.0.6
       '@typescript-eslint/eslint-plugin': ^5.36.2
@@ -20,6 +22,8 @@ importers:
       vite: ^3.1.0
     dependencies:
       '@lit-labs/react': 1.0.8
+      '@playwright/test': 1.25.2
+      '@types/node': 18.7.16
       '@types/react': 18.0.19
       '@types/react-dom': 18.0.6
       '@typescript-eslint/eslint-plugin': 5.36.2_2l2r3i3lm6jysqd4ac3ql4n2mm
@@ -453,8 +457,21 @@ packages:
       fastq: 1.13.0
     dev: false
 
+  /@playwright/test/1.25.2:
+    resolution: {integrity: sha512-6qPznIR4Fw02OMbqXUPMG6bFFg1hDVNEdihKy0t9K0dmRbus1DyP5Q5XFQhGwEHQkLG5hrSfBuu9CW/foqhQHQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      '@types/node': 18.7.16
+      playwright-core: 1.25.2
+    dev: false
+
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
+    dev: false
+
+  /@types/node/18.7.16:
+    resolution: {integrity: sha512-EQHhixfu+mkqHMZl1R2Ovuvn47PUw18azMJOTwSZr9/fhzHNGXAJ0ma0dayRVchprpCj0Kc1K1xKoWaATWF1qg==}
     dev: false
 
   /@types/prop-types/15.7.5:
@@ -1985,6 +2002,12 @@ packages:
   /picomatch/2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+    dev: false
+
+  /playwright-core/1.25.2:
+    resolution: {integrity: sha512-0yTbUE9lIddkEpLHL3u8PoCL+pWiZtj5A/j3U7YoNjcmKKDGBnCrgHJMzwd2J5vy6l28q4ki3JIuz7McLHhl1A==}
+    engines: {node: '>=14'}
+    hasBin: true
     dev: false
 
   /postcss/8.4.16:
