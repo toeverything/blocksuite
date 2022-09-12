@@ -34,6 +34,7 @@ export class Store {
 
   readonly slots = {
     update: new Slot(),
+    historyUpdate: new Slot(),
     addBlock: new Slot<BlockProps>(),
     deleteBlock: new Slot<string>(),
     updateText: new Slot<Y.YTextEvent>(),
@@ -55,7 +56,16 @@ export class Store {
       trackedOrigins: new Set([this.doc.clientID]),
       doc: this.doc,
     });
+
+    this.history.on('stack-cleared', this._historyObserver);
+    this.history.on('stack-item-added', this._historyObserver);
+    this.history.on('stack-item-popped', this._historyObserver);
+    this.history.on('stack-item-updated', this._historyObserver);
   }
+
+  private _historyObserver = () => {
+    this.slots.historyUpdate.emit();
+  };
 
   private _yBlocksObserver = (events: Y.YEvent<YBlock | Y.Text>[]) => {
     for (const event of events) {
@@ -67,8 +77,6 @@ export class Store {
   };
 
   private _yParentMapObserver = (events: Y.YEvent<Y.Map<string>>[]) => {
-    this.slots.update.emit();
-
     for (const event of events) {
       event.keys.forEach((value, id) => {
         if (value.action === 'add') {
@@ -82,6 +90,8 @@ export class Store {
         }
       });
     }
+
+    this.slots.update.emit();
   };
 
   /** key-value store of blocks */

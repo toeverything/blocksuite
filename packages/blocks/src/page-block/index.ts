@@ -14,7 +14,8 @@ export class PageBlockModel extends BaseBlockModel {
   }
 }
 
-const room = new URLSearchParams(location.search).get('room') || 'virgo-default';
+const room =
+  new URLSearchParams(location.search).get('room') || 'virgo-default';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
@@ -29,6 +30,12 @@ export class PageBlockElement extends LitElement {
 
   @property()
   isVoidState = true;
+
+  @property()
+  canUndo = false;
+
+  @property()
+  canRedo = false;
 
   @query('.block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
@@ -46,9 +53,13 @@ export class PageBlockElement extends LitElement {
   }
 
   private _subscribeStore() {
-    const onceDisposable = this.store.slots.update.on(() => {
+    this.store.slots.update.on(() => {
       this.isVoidState = false;
-      onceDisposable.dispose();
+    });
+
+    this.store.slots.historyUpdate.on(() => {
+      this.canUndo = this.store.history.canUndo();
+      this.canRedo = this.store.history.canRedo();
     });
 
     this.store.slots.addBlock.on(blockProps => {
@@ -138,14 +149,23 @@ export class PageBlockElement extends LitElement {
       )}
     `;
 
-    const connectionBtn = html`<button @click=${this._onToggleConnection}>
-      ${this.btnText}
-    </button>`;
+    const buttons = html`
+      <button @click=${this._onToggleConnection}>${this.btnText}</button>
+      <button
+        .disabled=${!this.canUndo}
+        @click=${() => this.store.history.undo()}
+      >
+        Undo
+      </button>
+      <button
+        .disabled=${!this.canRedo}
+        @click=${() => this.store.history.redo()}
+      >
+        Redo
+      </button>
+    `;
 
-    return [
-      this.isVoidState ? voidStatePlaceholder : blockContent,
-      connectionBtn,
-    ];
+    return [this.isVoidState ? voidStatePlaceholder : blockContent, buttons];
   }
 }
 
