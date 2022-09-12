@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  run-linters:
-    name: Run linters
+  test:
+    name: lint and test
     runs-on: ubuntu-latest
 
     steps:
@@ -22,5 +22,22 @@ jobs:
         with:
           node-version: '16'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: CI=1 PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run Playwright tests
+        run: CI=1 PLAYWRIGHT_BROWSERS_PATH=0 npx playwright test
+
+      # - name: Upload test results
+      #   if: always()
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: playwright-report
+      #     path: playwright-report

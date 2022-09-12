@@ -18,6 +18,15 @@ type BlockProps = Record<string, any> & {
 let i = 1; // for debug use, 0 for root
 let created = false;
 
+export interface SerializedStore {
+  blocks: {
+    [key: string]: BlockProps;
+  };
+  parentMap: {
+    [key: string]: string;
+  };
+}
+
 export class Store {
   readonly doc = new Y.Doc();
   readonly provider = new DebugProvider('virgo-demo', this.doc);

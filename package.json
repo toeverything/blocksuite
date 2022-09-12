@@ -4,13 +4,17 @@
   "description": "Building Blocks framework workspace",
   "scripts": {
     "dev": "pnpm --filter @building-blocks/playground dev",
-    "lint": "eslint ./ --max-warnings=0"
+    "lint": "eslint ./ --max-warnings=0",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
     "@lit-labs/react": "^1.0.8",
+    "@playwright/test": "^1.25.2",
+    "@types/node": "^18.7.16",
     "@types/react": "^18.0.19",
     "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
