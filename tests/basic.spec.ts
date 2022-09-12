@@ -6,7 +6,8 @@ import {
   emptyInput,
   assertStore,
   assertText,
-  awaitAll,
+  all,
+  enterPlaygroundRoom,
 } from './utils';
 
 test('basic input', async ({ page }) => {
@@ -25,12 +26,12 @@ test('basic input', async ({ page }) => {
 });
 
 test('basic multi user state', async ({ browser, page: pageA }) => {
-  await pageA.goto(defaultPlayground);
+  const room = await enterPlaygroundRoom(pageA);
   await pageA.click(emptyInput);
   await pageA.type(richTextBox, 'hello');
 
   const pageB = await browser.newPage();
-  await pageB.goto(defaultPlayground);
+  await enterPlaygroundRoom(pageB, room);
 
   const expected: SerializedStore = {
     blocks: { '1': { type: 'text', id: '1', parentId: '0', text: 'hello' } },
@@ -38,8 +39,29 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   };
   // wait until pageB content updated
   await assertText(pageB, 'hello');
-  await awaitAll([
+  await all([
     assertText(pageA, 'hello'),
+    assertStore(pageA, expected),
+    assertStore(pageB, expected),
+  ]);
+});
+
+test('A first init, B first edit', async ({ browser, page: pageA }) => {
+  const room = await enterPlaygroundRoom(pageA);
+  await pageA.click(emptyInput); // first init
+
+  const pageB = await browser.newPage();
+  await enterPlaygroundRoom(pageB, room);
+  await pageB.type(richTextBox, 'hello');
+
+  const expected: SerializedStore = {
+    blocks: { '1': { type: 'text', id: '1', parentId: '0', text: 'hello' } },
+    parentMap: { '1': '0' },
+  };
+  // wait until pageA content updated
+  await assertText(pageA, 'hello');
+  await all([
+    assertText(pageB, 'hello'),
     assertStore(pageA, expected),
     assertStore(pageB, expected),
   ]);

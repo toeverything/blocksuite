@@ -5,6 +5,14 @@ export const defaultPlayground = 'http://localhost:5173/';
 export const emptyInput = 'input';
 export const richTextBox = '.ql-editor';
 
+export async function enterPlaygroundRoom(page: Page, room?: string) {
+  if (!room) {
+    room = `virgo-${Math.random().toFixed(8).substring(2)}`;
+  }
+  await page.goto(`${defaultPlayground}?room=${room}`);
+  return room;
+}
+
 export async function getStore(page: Page): Promise<SerializedStore> {
   // @ts-ignore
   return page.evaluate(() => window.store.doc.toJSON());
@@ -20,6 +28,6 @@ export async function assertStore(page: Page, expected: SerializedStore) {
   expect(actual).toEqual(expected);
 }
 
-export async function awaitAll(promises: Promise<unknown>[]) {
+export async function all(promises: Promise<unknown>[]) {
   return Promise.all(promises);
 }

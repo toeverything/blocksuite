@@ -29,7 +29,7 @@ export interface SerializedStore {
 
 export class Store {
   readonly doc = new Y.Doc();
-  readonly provider = new DebugProvider('virgo-demo', this.doc);
+  readonly provider: DebugProvider;
   readonly history: Y.UndoManager;
 
   readonly slots = {
@@ -41,12 +41,13 @@ export class Store {
 
   readonly textBindings = new Map<string, TextBinding>();
 
-  constructor() {
+  constructor(room: string) {
     if (created) {
       throw new Error('Store should only be created once');
     }
     created = true;
 
+    this.provider = new DebugProvider(room, this.doc);
     this._yBlocks.observeDeep(this._yBlocksObserver);
     this._yParentMap.observeDeep(this._yParentMapObserver);
 

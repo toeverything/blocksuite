@@ -14,10 +14,12 @@ export class PageBlockModel extends BaseBlockModel {
   }
 }
 
+const room = new URLSearchParams(location.search).get('room') || 'virgo-default';
+
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
   @property()
-  store = new Store();
+  store = new Store(room);
 
   @property()
   model = new PageBlockModel(this.store);
