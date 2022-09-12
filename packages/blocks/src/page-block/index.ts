@@ -60,6 +60,16 @@ export class PageBlockElement extends LitElement {
 
       this.requestUpdate();
     });
+
+    this.store.slots.deleteBlock.on(id => {
+      const index = this.model.children.findIndex(child => child.id === id);
+      if (index !== -1) {
+        this.model.children.splice(index, 1);
+      }
+
+      this.isVoidState = this.model.children.length === 0;
+      this.requestUpdate();
+    });
   }
 
   private _onVoidStateClick() {
