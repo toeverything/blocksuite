@@ -1,3 +1,3 @@
-export { CounterBlock } from './counter-block';
-export { TextBlock } from './text-block';
-export { PageBlock } from './page-block';
+export * from './counter-block';
+export * from './text-block';
+export * from './page-block';

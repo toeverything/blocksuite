@@ -1,8 +1,8 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('counter-block')
-export class CounterBlock extends LitElement {
+@customElement('counter-block-element')
+export class CounterBlockElement extends LitElement {
   @property()
   count: number;
 
@@ -31,6 +31,6 @@ export class CounterBlock extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'counter-block': CounterBlock;
+    'counter-block-element': CounterBlockElement;
   }
 }

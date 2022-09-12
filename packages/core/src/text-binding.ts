@@ -2,6 +2,7 @@
 import * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness.js';
 import type { Quill } from 'quill';
+import type { Store } from './store';
 
 interface AwarenessState {
   user: {
@@ -44,7 +45,7 @@ const updateCursor = (
   aw: AwarenessState,
   clientId: number,
   doc: Y.Doc,
-  type: Y.Text
+  yText: Y.Text
 ) => {
   try {
     if (aw && aw.cursor && clientId !== doc.clientID) {
@@ -60,7 +61,7 @@ const updateCursor = (
         Y.createRelativePositionFromJSON(aw.cursor.head),
         doc
       );
-      if (anchor && head && anchor.type === type) {
+      if (anchor && head && anchor.type === yText) {
         quillCursors.moveCursor(clientId.toString(), {
           index: anchor.index,
           length: head.index - anchor.index,
@@ -75,44 +76,52 @@ const updateCursor = (
 };
 
 export class TextBinding {
-  type: Y.Text;
-  quill: Quill;
-  doc: Y.Doc;
-  quillCursors: any;
-  _negatedUsedFormats: any;
-  awareness: Awareness;
+  readonly store: Store;
+  readonly doc: Y.Doc;
+  readonly yText: Y.Text;
+  readonly quill: Quill;
+  readonly quillCursors: any;
+  readonly awareness: Awareness;
+  private _negatedUsedFormats: Record<string, any>;
 
-  constructor(type: Y.Text, quill: Quill, awareness: Awareness) {
-    const doc = type.doc as Y.Doc;
-    this.type = type;
-    this.doc = doc;
+  constructor(store: Store, yText: Y.Text, quill: Quill) {
+    this.store = store;
+    this.yText = yText;
+    this.doc = store.doc;
     this.quill = quill;
+
+    const awareness = store.provider.awareness;
     const quillCursors = quill.getModule('cursors') || null;
     this.quillCursors = quillCursors;
     // This object contains all attributes used in the quill instance
     this._negatedUsedFormats = {};
     this.awareness = awareness;
 
-    /**
-     * @param {Y.YTextEvent} event
-     */
+    this.store.slots.updateText.on(event => {
+      this._yObserver(event);
+    });
 
-    type.observe(this._typeObserver);
     quill.on('editor-change', this._quillObserver as any);
     // This indirectly initializes _negatedUsedFormats.
     // Make sure that this call this after the _quillObserver is set.
-    quill.setContents(type.toDelta(), this as any);
+    quill.setContents(yText.toDelta(), this as any);
 
     // init remote cursors
     if (quillCursors !== null && awareness) {
       awareness.getStates().forEach((aw, clientId) => {
-        updateCursor(quillCursors, aw as AwarenessState, clientId, doc, type);
+        updateCursor(
+          quillCursors,
+          aw as AwarenessState,
+          clientId,
+          store.doc,
+          yText
+        );
       });
       awareness.on('change', this._awarenessChange);
     }
   }
 
-  private _typeObserver = (event: Y.YTextEvent) => {
+  private _yObserver = (event: Y.YTextEvent) => {
     if (event.transaction.origin !== this.doc.clientID) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
@@ -145,7 +154,7 @@ export class TextBinding {
     _state: AwarenessState,
     origin: any
   ) => {
-    const { awareness, quill, quillCursors, type, doc } = this;
+    const { awareness, quill, quillCursors, yText, doc } = this;
 
     if (delta && delta.ops) {
       // update content
@@ -159,10 +168,10 @@ export class TextBinding {
           }
         }
       });
-      if (origin !== this.doc.clientID) {
-        this.doc.transact(() => {
-          this.type.applyDelta(ops);
-        }, this.doc.clientID);
+      if (origin === 'user') {
+        this.store.transact(() => {
+          yText.applyDelta(ops);
+        });
       }
     }
 
@@ -172,12 +181,12 @@ export class TextBinding {
       const aw = awareness.getLocalState();
       if (sel === null) {
         if (awareness.getLocalState() !== null) {
-          awareness.setLocalStateField('cursor', /** @type {any} */ null);
+          awareness.setLocalStateField('cursor', null);
         }
       } else {
-        const anchor = Y.createRelativePositionFromTypeIndex(type, sel.index);
+        const anchor = Y.createRelativePositionFromTypeIndex(yText, sel.index);
         const head = Y.createRelativePositionFromTypeIndex(
-          type,
+          yText,
           sel.index + sel.length
         );
         if (
@@ -194,7 +203,7 @@ export class TextBinding {
       }
       // update all remote cursor locations
       awareness.getStates().forEach((aw, clientId) => {
-        updateCursor(quillCursors, aw as any, clientId, doc, type);
+        updateCursor(quillCursors, aw as any, clientId, doc, yText);
       });
     }
   };
@@ -204,7 +213,7 @@ export class TextBinding {
     removed: number[];
     updated: number[];
   }) => {
-    const { doc, type } = this;
+    const { doc, yText } = this;
     const { added, removed, updated } = diff;
 
     const states = this.awareness.getStates();
@@ -214,7 +223,7 @@ export class TextBinding {
         states.get(id) as AwarenessState,
         id,
         doc,
-        type
+        yText
       );
     });
     updated.forEach(id => {
@@ -223,7 +232,7 @@ export class TextBinding {
         states.get(id) as AwarenessState,
         id,
         doc,
-        type
+        yText
       );
     });
     removed.forEach(id => {
@@ -232,7 +241,7 @@ export class TextBinding {
   };
 
   destroy() {
-    this.type.unobserve(this._typeObserver);
+    this.yText.unobserve(this._yObserver);
     this.quill.off('editor-change', this._quillObserver as any);
     if (this.awareness) {
       this.awareness.off('change', this._awarenessChange);

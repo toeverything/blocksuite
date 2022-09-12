@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
-import { CounterBlock } from '@building-blocks/blocks/src/counter-block';
+import { CounterBlockElement } from '@building-blocks/blocks/src/counter-block';
 import { createComponent, type EventName } from '@lit-labs/react';
 
 const CounterBlockComponent = createComponent(
   React,
-  'counter-block',
-  CounterBlock,
+  'counter-block-element',
+  CounterBlockElement,
   {
     onUpdate: 'block-count-update' as EventName<CustomEvent<number>>,
   }

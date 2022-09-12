@@ -51,7 +51,11 @@ export const createkeyboardBindings = (store: Store) => {
   }
 
   function hardEnter(this: KeyboardEventThis) {
-    // TODO
+    const isAtBlockEnd =
+      this.quill.getLength() - 1 === this.quill.getSelection()?.index;
+    if (isAtBlockEnd) {
+      // TODO insert new block
+    }
   }
 
   function softEnter(this: KeyboardEventThis) {
