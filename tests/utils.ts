@@ -17,3 +17,7 @@ export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = await getStore(page);
   expect(actual).toEqual(expected);
 }
+
+export async function awaitAll(promises: Promise<unknown>[]) {
+  return Promise.all(promises);
+}
