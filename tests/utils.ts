@@ -1,7 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 import type { SerializedStore } from '../packages/core';
 
-export const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
+export const defaultPlayground = 'http://localhost:5173/';
+export const emptyInput = 'input';
+export const richTextBox = '.ql-editor';
 
 export async function getStore(page: Page): Promise<SerializedStore> {
   // @ts-ignore
