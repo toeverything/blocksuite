@@ -4,6 +4,7 @@ const config: PlaywrightTestConfig = {
   testDir: 'tests',
   fullyParallel: true,
   use: {
+    browserName: 'chromium',
     viewport: { width: 900, height: 600 },
   },
 };

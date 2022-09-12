@@ -27,7 +27,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Browsers
-        run: CI=1 PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install --with-deps
+        run: CI=1 PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 
       - name: Run lint
         run: pnpm lint
