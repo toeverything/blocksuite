@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  run-linters:
-    name: Run linters
+  test:
+    name: lint and test
     runs-on: ubuntu-latest
 
     steps:
@@ -22,5 +22,15 @@ jobs:
         with:
           node-version: '16'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install --with-deps
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run Playwright tests
+        run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright test
