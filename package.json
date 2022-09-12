@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "pnpm --filter @building-blocks/playground dev",
     "lint": "eslint ./ --max-warnings=0",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
   },
   "keywords": [],
   "author": "toeverything",

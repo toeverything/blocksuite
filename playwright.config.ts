@@ -4,12 +4,15 @@ const config: PlaywrightTestConfig = {
   testDir: 'tests',
   fullyParallel: true,
   use: {
-    viewport: { width: 500, height: 500 },
-  },
-  webServer: {
-    command: 'pnpm dev',
-    port: 5173,
+    viewport: { width: 900, height: 600 },
   },
 };
+
+if (process.env.CI) {
+  config.webServer = {
+    command: 'pnpm dev',
+    port: 5173,
+  };
+}
 
 export default config;
