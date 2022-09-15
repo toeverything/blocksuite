@@ -30,7 +30,7 @@ export interface SerializedStore {
 export class Store {
   readonly doc = new Y.Doc();
   readonly provider: DebugProvider;
-  readonly history: Y.UndoManager;
+  private _history: Y.UndoManager;
 
   readonly slots = {
     update: new Slot(),
@@ -52,15 +52,15 @@ export class Store {
     this._yBlocks.observeDeep(this._yBlocksObserver);
     this._yParentMap.observeDeep(this._yParentMapObserver);
 
-    this.history = new Y.UndoManager([this._yBlocks, this._yParentMap], {
+    this._history = new Y.UndoManager([this._yBlocks, this._yParentMap], {
       trackedOrigins: new Set([this.doc.clientID]),
       doc: this.doc,
     });
 
-    this.history.on('stack-cleared', this._historyObserver);
-    this.history.on('stack-item-added', this._historyObserver);
-    this.history.on('stack-item-popped', this._historyObserver);
-    this.history.on('stack-item-updated', this._historyObserver);
+    this._history.on('stack-cleared', this._historyObserver);
+    this._history.on('stack-item-added', this._historyObserver);
+    this._history.on('stack-item-popped', this._historyObserver);
+    this._history.on('stack-item-updated', this._historyObserver);
   }
 
   private _historyObserver = () => {
@@ -112,6 +112,35 @@ export class Store {
     return yBlock;
   }
 
+  get isEmpty() {
+    return this._yBlocks.size === 0;
+  }
+
+  get canUndo() {
+    // XXX: Empty state is avoided by always having at least one item on undo stack.
+    // Otherwise the redo state will be problematic after undo stack is cleared.
+    // This works for single user mode with empty init state.
+    // For second user and after, their first operation can't be undone.
+    return this._history.undoStack.length > 1;
+  }
+
+  get canRedo() {
+    return this._history.canRedo();
+  }
+
+  undo() {
+    this._history.undo();
+  }
+
+  redo() {
+    this._history.redo();
+  }
+
+  /** capture current operations to undo stack synchronously */
+  captureSync() {
+    this._history.stopCapturing();
+  }
+
   transact(fn: () => void) {
     this.doc.transact(fn, this.doc.clientID);
   }
@@ -151,8 +180,6 @@ export class Store {
     this.doc.transact(() => {
       yBlock.set('text', yText);
     }, null);
-    // const yText = this.doc.getText(id);
-    this.history.addToScope(yText);
     const binding = new TextBinding(this, yText, quill);
     this.textBindings.set(id, binding);
   }

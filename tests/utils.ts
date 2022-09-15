@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import type { SerializedStore } from '../packages/core';
 
-export const defaultPlayground = 'http://localhost:5173/';
+const defaultPlayground = 'http://localhost:5173/';
 export const emptyInput = 'input';
 export const richTextBox = '.ql-editor';
 
@@ -11,6 +11,14 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   }
   await page.goto(`${defaultPlayground}?room=${room}`);
   return room;
+}
+
+export async function clickUndo(page: Page) {
+  await page.click('text=Undo');
+}
+
+export async function clickRedo(page: Page) {
+  await page.click('text=Redo');
 }
 
 export async function getStore(page: Page): Promise<SerializedStore> {

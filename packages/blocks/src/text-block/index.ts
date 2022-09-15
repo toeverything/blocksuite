@@ -62,6 +62,7 @@ export class TextBlockElement extends LitElement {
     });
     quill.focus();
     store.attachText(model.id, model.text, quill);
+    store.captureSync();
   }
 
   protected firstUpdated() {

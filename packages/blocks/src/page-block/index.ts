@@ -29,7 +29,7 @@ export class PageBlockElement extends LitElement {
   btnText = 'Disconnect';
 
   @property()
-  isVoidState = true;
+  isEmptyPage = true;
 
   @property()
   canUndo = false;
@@ -53,13 +53,14 @@ export class PageBlockElement extends LitElement {
   }
 
   private _subscribeStore() {
+    // if undo to empty page, reset to empty placeholder
     this.store.slots.update.on(() => {
-      this.isVoidState = false;
+      this.isEmptyPage = this.store.isEmpty;
     });
 
     this.store.slots.historyUpdate.on(() => {
-      this.canUndo = this.store.history.canUndo();
-      this.canRedo = this.store.history.canRedo();
+      this.canUndo = this.store.canUndo;
+      this.canRedo = this.store.canRedo;
     });
 
     this.store.slots.addBlock.on(blockProps => {
@@ -80,14 +81,16 @@ export class PageBlockElement extends LitElement {
         this.model.children.splice(index, 1);
       }
 
-      this.isVoidState = this.model.children.length === 0;
+      this.isEmptyPage = this.model.children.length === 0;
       this.requestUpdate();
     });
   }
 
-  private _onVoidStateClick() {
-    if (this.isVoidState) {
-      this.isVoidState = false;
+  private _onVoidStateUpdate(e: MouseEvent | KeyboardEvent) {
+    e.preventDefault();
+
+    if (this.isEmptyPage) {
+      this.isEmptyPage = false;
 
       const blockProps: ITextBlockModel = {
         type: 'text',
@@ -99,7 +102,7 @@ export class PageBlockElement extends LitElement {
     }
   }
 
-  protected firstUpdated() {
+  firstUpdated() {
     this._placeholderInput.focus();
   }
 
@@ -114,7 +117,7 @@ export class PageBlockElement extends LitElement {
   }
 
   render() {
-    const voidStatePlaceholder = html`
+    const emptyPagePlaceholder = html`
       <style>
         .block-placeholder {
           box-sizing: border-box;
@@ -131,7 +134,11 @@ export class PageBlockElement extends LitElement {
           outline: none;
         }
       </style>
-      <div @click=${this._onVoidStateClick} class="block-placeholder">
+      <div
+        @click=${this._onVoidStateUpdate}
+        @keydown=${this._onVoidStateUpdate}
+        class="block-placeholder"
+      >
         <input class="block-placeholder-input" />
       </div>
     `;
@@ -151,21 +158,15 @@ export class PageBlockElement extends LitElement {
 
     const buttons = html`
       <button @click=${this._onToggleConnection}>${this.btnText}</button>
-      <button
-        .disabled=${!this.canUndo}
-        @click=${() => this.store.history.undo()}
-      >
+      <button .disabled=${!this.canUndo} @click=${() => this.store.undo()}>
         Undo
       </button>
-      <button
-        .disabled=${!this.canRedo}
-        @click=${() => this.store.history.redo()}
-      >
+      <button .disabled=${!this.canRedo} @click=${() => this.store.redo()}>
         Redo
       </button>
     `;
 
-    return [this.isVoidState ? voidStatePlaceholder : blockContent, buttons];
+    return [this.isEmptyPage ? emptyPagePlaceholder : blockContent, buttons];
   }
 }
 
