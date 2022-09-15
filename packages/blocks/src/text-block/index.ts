@@ -60,9 +60,9 @@ export class TextBlockElement extends LitElement {
       },
       theme: 'snow',
     });
-    quill.focus();
     store.attachText(model.id, model.text, quill);
     store.captureSync();
+    quill.focus();
   }
 
   protected firstUpdated() {
