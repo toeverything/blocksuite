@@ -4,6 +4,7 @@ import { Slot } from './utils/slot';
 import { isPrimitive } from './utils/common';
 import { TextBinding } from './text-binding';
 import Quill from 'quill';
+import { AwarenessMessage, YAwareness } from './awareness';
 
 type YBlock = Y.Map<unknown>;
 type YBlocks = Y.Map<YBlock>;
@@ -31,6 +32,7 @@ export class Store {
   readonly doc = new Y.Doc();
   readonly provider: DebugProvider;
   private _history: Y.UndoManager;
+  readonly awareness: YAwareness;
 
   readonly slots = {
     update: new Slot(),
@@ -57,11 +59,35 @@ export class Store {
       doc: this.doc,
     });
 
+    this.awareness = new YAwareness(this);
+
     this._history.on('stack-cleared', this._historyObserver);
-    this._history.on('stack-item-added', this._historyObserver);
-    this._history.on('stack-item-popped', this._historyObserver);
+    this._history.on('stack-item-added', this._historyAddObserver);
+    this._history.on('stack-item-popped', this._historyPopObserver);
     this._history.on('stack-item-updated', this._historyObserver);
+
+    // todo selectmanage中实现
+    this.awareness.slots.update.on((awMsg: AwarenessMessage) => {
+      if (awMsg.type !== 'remove' && awMsg.state) {
+        const anchor = Y.createAbsolutePositionFromRelativePosition(awMsg.state?.cursor.anchor, this.doc);
+        const focus = Y.createAbsolutePositionFromRelativePosition(awMsg.state?.cursor.focus, this.doc);
+        if (anchor && focus) {
+          const textbind = this.textBindings.get(awMsg.state?.cursor.id || '');
+          textbind?.quill.setSelection(anchor.index, focus.index - anchor.index);
+        }
+      }
+    });
   }
+
+  private _historyAddObserver = (event: any) => {
+    event.stackItem.meta.set('cursor-location', this.awareness.getLocalCursor());
+    this._historyObserver();
+  };
+
+  private _historyPopObserver = (event: any) => {
+    this.awareness.setLocalCursor(event.stackItem.meta.get('cursor-location'));
+    this._historyObserver();
+  };
 
   private _historyObserver = () => {
     this.slots.historyUpdate.emit();
@@ -182,5 +208,11 @@ export class Store {
     }, null);
     const binding = new TextBinding(this, yText, quill);
     this.textBindings.set(id, binding);
+
+    // todo selectmanage中实现
+    quill.on('selection-change', () => {
+      const cursor = binding.getCursor()
+      cursor && this.awareness.setLocalCursor({...cursor, id: id});
+    });
   }
 }
