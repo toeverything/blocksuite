@@ -117,11 +117,7 @@ export class Store {
   }
 
   get canUndo() {
-    // XXX: Empty state is avoided by always having at least one item on undo stack.
-    // Otherwise the redo state will be problematic after undo stack is cleared.
-    // This works for single user mode with empty init state.
-    // For second user and after, their first operation can't be undone.
-    return this._history.undoStack.length > 1;
+    return this._history.canUndo();
   }
 
   get canRedo() {
@@ -139,6 +135,10 @@ export class Store {
   /** capture current operations to undo stack synchronously */
   captureSync() {
     this._history.stopCapturing();
+  }
+
+  restHistory() {
+    this._history.clear();
   }
 
   transact(fn: () => void) {

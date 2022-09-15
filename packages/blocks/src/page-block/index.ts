@@ -99,6 +99,10 @@ export class PageBlockElement extends LitElement {
         text: '',
       };
       this.store.addBlock(blockProps);
+      // after first block is added, never go back to empty block state
+      queueMicrotask(() => {
+        this.store.restHistory();
+      });
     }
   }
 
