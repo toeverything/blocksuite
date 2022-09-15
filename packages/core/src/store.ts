@@ -4,7 +4,7 @@ import { Slot } from './utils/slot';
 import { isPrimitive } from './utils/common';
 import { TextBinding } from './text-binding';
 import Quill from 'quill';
-import { AwarenessMessage, YAwareness } from './awareness';
+import { AwarenessMessage, SelectRange, YAwareness } from './awareness';
 
 type YBlock = Y.Map<unknown>;
 type YBlocks = Y.Map<YBlock>;
@@ -26,6 +26,13 @@ export interface SerializedStore {
   parentMap: {
     [key: string]: string;
   };
+}
+
+export interface StackItem {
+  stackItem: {
+    meta: Map<unknown, unknown>,
+    type: 'undo'|'redo'
+  }
 }
 
 export class Store {
@@ -79,13 +86,13 @@ export class Store {
     });
   }
 
-  private _historyAddObserver = (event: any) => {
+  private _historyAddObserver = (event: StackItem) => {
     event.stackItem.meta.set('cursor-location', this.awareness.getLocalCursor());
     this._historyObserver();
   };
 
-  private _historyPopObserver = (event: any) => {
-    this.awareness.setLocalCursor(event.stackItem.meta.get('cursor-location'));
+  private _historyPopObserver = (event: StackItem) => {
+    this.awareness.setLocalCursor(event.stackItem.meta.get('cursor-location') as SelectRange);
     this._historyObserver();
   };
 
