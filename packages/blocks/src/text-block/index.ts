@@ -35,7 +35,7 @@ export class TextBlockElement extends LitElement {
   @property({ type: TextBlockModel })
   model!: TextBlockModel;
 
-  @property()
+  @property({ reflect: true })
   id!: string;
 
   // disable shadow DOM
@@ -79,7 +79,7 @@ export class TextBlockElement extends LitElement {
           padding: 6px;
         }
       </style>
-      <div data-id="${this.id}" class="text-block quill-container"></div>
+      <div class="text-block quill-container"></div>
     `;
   }
 }

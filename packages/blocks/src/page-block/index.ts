@@ -25,6 +25,9 @@ export class PageBlockElement extends LitElement {
   @property()
   model = new PageBlockModel(this.store);
 
+  @property({ reflect: true })
+  id = this.model.id;
+
   @property()
   btnText = 'Disconnect';
 
@@ -148,18 +151,16 @@ export class PageBlockElement extends LitElement {
     `;
 
     const blockContent = html`
-      <div data-id="${this.id}">
-        ${repeat(
-          this.model.children,
-          child => child.id,
-          child =>
-            html`<text-block-element
-              .store=${this.store}
-              .id=${child.id}
-              .model=${child}
-            />`
-        )}
-      </div>
+      ${repeat(
+        this.model.children,
+        child => child.id,
+        child =>
+          html`<text-block-element
+            .store=${this.store}
+            .id=${child.id}
+            .model=${child}
+          />`
+      )}
     `;
 
     const buttons = html`
