@@ -148,16 +148,18 @@ export class PageBlockElement extends LitElement {
     `;
 
     const blockContent = html`
-      ${repeat(
-        this.model.children,
-        child => child.id,
-        child =>
-          html`<text-block-element
-            .store=${this.store}
-            .id=${child.id}
-            .model=${child}
-          />`
-      )}
+      <div data-id="${this.id}">
+        ${repeat(
+          this.model.children,
+          child => child.id,
+          child =>
+            html`<text-block-element
+              .store=${this.store}
+              .id=${child.id}
+              .model=${child}
+            />`
+        )}
+      </div>
     `;
 
     const buttons = html`

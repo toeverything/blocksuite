@@ -79,7 +79,7 @@ export class TextBlockElement extends LitElement {
           padding: 6px;
         }
       </style>
-      <div class="text-block quill-container"></div>
+      <div data-id="${this.id}" class="text-block quill-container"></div>
     `;
   }
 }
