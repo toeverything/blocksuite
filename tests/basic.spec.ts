@@ -65,3 +65,21 @@ test('A first init, B first edit', async ({ browser, page: pageA }) => {
     assertStore(pageB, expected),
   ]);
 });
+
+test('conflict occurs as expected when two same id generated together', async ({
+  browser,
+  page: pageA,
+}) => {
+  test.fail();
+
+  const room = await enterPlaygroundRoom(pageA);
+  const pageB = await browser.newPage();
+  await enterPlaygroundRoom(pageB, room);
+
+  // click together, both init with default id leads to conflicts
+  await all([pageB.click(emptyInput), pageA.click(emptyInput)]);
+  await pageB.type(richTextBox, 'hello');
+
+  await assertText(pageB, 'hello');
+  await assertText(pageA, 'hello'); // actually '\n'
+});
