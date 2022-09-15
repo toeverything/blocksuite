@@ -44,11 +44,11 @@ export const createkeyboardBindings = (store: Store) => {
   const clientID = store.doc.clientID as any;
 
   function undo() {
-    store.history.undo();
+    store.undo();
   }
 
   function redo() {
-    store.history.redo();
+    store.redo();
   }
 
   function hardEnter(this: KeyboardEventThis) {

@@ -89,12 +89,7 @@ export class TextBinding {
     }
   };
 
-  private _quillObserver = (
-    _: string,
-    delta: any,
-    old: any,
-    origin: any
-  ) => {
+  private _quillObserver = (_: string, delta: any, _old: any, origin: any) => {
     const { yText } = this;
 
     if (delta && delta.ops) {
@@ -121,13 +116,19 @@ export class TextBinding {
     const selection = this.quill.getSelection();
     if (!selection) {
       return null;
-    } 
-    const anchor = Y.createRelativePositionFromTypeIndex(this.yText, selection.index);
-    const focus = Y.createRelativePositionFromTypeIndex(this.yText, selection.index + selection.length);
+    }
+    const anchor = Y.createRelativePositionFromTypeIndex(
+      this.yText,
+      selection.index
+    );
+    const focus = Y.createRelativePositionFromTypeIndex(
+      this.yText,
+      selection.index + selection.length
+    );
     return {
       anchor,
-      focus
-    }
+      focus,
+    };
   }
 
   destroy() {

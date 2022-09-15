@@ -4,7 +4,7 @@ import { Slot } from './utils/slot';
 import { isPrimitive } from './utils/common';
 import { TextBinding } from './text-binding';
 import Quill from 'quill';
-import { AwarenessMessage, SelectRange, YAwareness } from './awareness';
+import { AwarenessMessage, SelectionRange, YAwareness } from './awareness';
 
 type YBlock = Y.Map<unknown>;
 type YBlocks = Y.Map<YBlock>;
@@ -30,9 +30,9 @@ export interface SerializedStore {
 
 export interface StackItem {
   stackItem: {
-    meta: Map<unknown, unknown>,
-    type: 'undo'|'redo'
-  }
+    meta: Map<'cursor-location', SelectionRange>;
+    type: 'undo' | 'redo';
+  };
 }
 
 export class Store {
@@ -73,26 +73,45 @@ export class Store {
     this._history.on('stack-item-popped', this._historyPopObserver);
     this._history.on('stack-item-updated', this._historyObserver);
 
-    // todo selectmanage中实现
+    // TODO use SelectionManager
     this.awareness.slots.update.on((awMsg: AwarenessMessage) => {
       if (awMsg.type !== 'remove' && awMsg.state) {
-        const anchor = Y.createAbsolutePositionFromRelativePosition(awMsg.state?.cursor.anchor, this.doc);
-        const focus = Y.createAbsolutePositionFromRelativePosition(awMsg.state?.cursor.focus, this.doc);
+        const anchor = Y.createAbsolutePositionFromRelativePosition(
+          awMsg.state?.cursor.anchor,
+          this.doc
+        );
+        const focus = Y.createAbsolutePositionFromRelativePosition(
+          awMsg.state?.cursor.focus,
+          this.doc
+        );
         if (anchor && focus) {
-          const textbind = this.textBindings.get(awMsg.state?.cursor.id || '');
-          textbind?.quill.setSelection(anchor.index, focus.index - anchor.index);
+          const textBinding = this.textBindings.get(
+            awMsg.state?.cursor.id || ''
+          );
+          textBinding?.quill.setSelection(
+            anchor.index,
+            focus.index - anchor.index
+          );
         }
       }
     });
   }
 
   private _historyAddObserver = (event: StackItem) => {
-    event.stackItem.meta.set('cursor-location', this.awareness.getLocalCursor());
+    event.stackItem.meta.set(
+      'cursor-location',
+      this.awareness.getLocalCursor()
+    );
     this._historyObserver();
   };
 
   private _historyPopObserver = (event: StackItem) => {
-    this.awareness.setLocalCursor(event.stackItem.meta.get('cursor-location') as SelectRange);
+    const cursor = event.stackItem.meta.get('cursor-location');
+    if (!cursor) {
+      return;
+    }
+
+    this.awareness.setLocalCursor(cursor);
     this._historyObserver();
   };
 
@@ -216,10 +235,13 @@ export class Store {
     const binding = new TextBinding(this, yText, quill);
     this.textBindings.set(id, binding);
 
-    // todo selectmanage中实现
+    // TODO use SelectionManager
     quill.on('selection-change', () => {
-      const cursor = binding.getCursor()
-      cursor && this.awareness.setLocalCursor({...cursor, id: id});
+      const cursor = binding.getCursor();
+      if (!cursor) {
+        return;
+      }
+      this.awareness.setLocalCursor({ ...cursor, id: id });
     });
   }
 }

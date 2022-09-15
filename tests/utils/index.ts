@@ -1,24 +1,12 @@
 import { expect, type Page } from '@playwright/test';
-import type { SerializedStore } from '../packages/core';
+import type { SerializedStore } from '../../packages/core/src';
 
 const defaultPlayground = 'http://localhost:5173/';
 export const emptyInput = 'input';
 export const richTextBox = '.ql-editor';
 
-export async function enterPlaygroundRoom(page: Page, room?: string) {
-  if (!room) {
-    room = `virgo-${Math.random().toFixed(8).substring(2)}`;
-  }
-  await page.goto(`${defaultPlayground}?room=${room}`);
-  return room;
-}
-
-export async function clickUndo(page: Page) {
-  await page.click('text=Undo');
-}
-
-export async function clickRedo(page: Page) {
-  await page.click('text=Redo');
+export async function all(promises: Promise<unknown>[]) {
+  return Promise.all(promises);
 }
 
 export async function getStore(page: Page): Promise<SerializedStore> {
@@ -36,6 +24,19 @@ export async function assertStore(page: Page, expected: SerializedStore) {
   expect(actual).toEqual(expected);
 }
 
-export async function all(promises: Promise<unknown>[]) {
-  return Promise.all(promises);
+export async function enterPlaygroundRoom(page: Page, room?: string) {
+  if (!room) {
+    room = `virgo-${Math.random().toFixed(8).substring(2)}`;
+  }
+  await page.goto(`${defaultPlayground}?room=${room}`);
+  return room;
 }
+
+export async function clickUndo(page: Page) {
+  await page.click('text=Undo');
+}
+
+export async function clickRedo(page: Page) {
+  await page.click('text=Redo');
+}
+
