@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { expect, type Page } from '@playwright/test';
 import type { SerializedStore } from '../../packages/framework/src';
 
