@@ -8,17 +8,18 @@ export class Slot<T = void> implements IDisposable {
   private disposables: IDisposable[] = [];
 
   static fromEvent<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement,
-    eventName: N
+    element: HTMLElement | Window,
+    eventName: N,
+    eventOptions?: boolean | AddEventListenerOptions
   ): Slot<HTMLElementEventMap[N]> {
     const slot = new Slot<HTMLElementEventMap[N]>();
     const handler = (ev: HTMLElementEventMap[N]) => {
       slot.emit(ev);
     };
-    element.addEventListener(eventName, handler);
+    (element as HTMLElement).addEventListener(eventName, handler, eventOptions);
     slot.disposables.push({
       dispose: () => {
-        element.removeEventListener(eventName, handler);
+        (element as HTMLElement).removeEventListener(eventName, handler);
       },
     });
     return slot;
@@ -57,6 +58,17 @@ export class Slot<T = void> implements IDisposable {
         }
       },
     };
+  }
+
+  once(callback: (v: T) => unknown): void {
+    let dispose: IDisposable['dispose'] | undefined = undefined;
+    const handler = (v: T) => {
+      callback(v);
+      if (dispose) {
+        dispose();
+      }
+    }
+    dispose = this.on(handler).dispose;
   }
 
   unshift(callback: (v: T) => unknown): IDisposable {
