@@ -17,6 +17,7 @@ interface EditableModel {
 export class RichText extends LitElement {
   @query('.rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
+  private _quill?: Quill;
 
   @property({ type: Store })
   store!: Store;
@@ -33,7 +34,7 @@ export class RichText extends LitElement {
     const { store, model } = this;
     const { _textContainer } = this;
     const keyboardBindings = createkeyboardBindings(store);
-    const quill = new Quill(_textContainer, {
+    this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,
         toolbar: false,
@@ -47,9 +48,9 @@ export class RichText extends LitElement {
       },
       theme: 'snow',
     });
-    store.attachText(model.id, model.text, quill);
+    store.attachText(model.id, model.text, this._quill);
     store.captureSync();
-    quill.focus();
+    this._quill.focus();
   }
 
   render() {
