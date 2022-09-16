@@ -61,6 +61,8 @@ export const createkeyboardBindings = (store: Store) => {
         parentId: '0',
         text: '',
       };
+      // make adding text block by enter a standalone operation
+      store.captureSync();
       store.addBlock(blockProps);
     }
   }

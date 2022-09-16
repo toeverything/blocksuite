@@ -20,13 +20,13 @@ async function keyUpCtrlOrMeta(page: Page) {
   }
 }
 
-export async function keyboardUndo(page: Page) {
+export async function undoByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('z');
   await keyUpCtrlOrMeta(page);
 }
 
-export async function keyboardRedo(page: Page) {
+export async function redoByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.down('Shift');
   await page.keyboard.press('z');

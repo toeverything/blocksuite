@@ -5,10 +5,6 @@ const defaultPlayground = 'http://localhost:5173/';
 export const emptyInput = 'input';
 export const richTextBox = '.ql-editor';
 
-export async function all(promises: Promise<unknown>[]) {
-  return Promise.all(promises);
-}
-
 export async function getStore(page: Page): Promise<SerializedStore> {
   // @ts-ignore
   return page.evaluate(() => window.store.doc.toJSON());
@@ -17,6 +13,11 @@ export async function getStore(page: Page): Promise<SerializedStore> {
 export async function assertText(page: Page, text: string) {
   const actual = await page.innerText('.ql-editor');
   expect(actual).toBe(text);
+}
+
+export async function assertTextBlocks(page: Page, texts: string[]) {
+  const actual = await page.locator('.ql-editor').allInnerTexts();
+  expect(actual).toEqual(texts);
 }
 
 export async function assertStore(page: Page, expected: SerializedStore) {
@@ -32,10 +33,10 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   return room;
 }
 
-export async function clickUndo(page: Page) {
+export async function undoByClick(page: Page) {
   await page.click('text=Undo');
 }
 
-export async function clickRedo(page: Page) {
+export async function redoByClick(page: Page) {
   await page.click('text=Redo');
 }

@@ -4,10 +4,10 @@ import {
   emptyInput,
   assertText,
   enterPlaygroundRoom,
-  clickUndo,
-  clickRedo,
+  undoByClick,
+  redoByClick,
 } from './utils';
-import { keyboardRedo, keyboardUndo } from './utils/keyboard';
+import { redoByKeyboard, undoByKeyboard } from './utils/keyboard';
 
 test('basic paired undo/redo', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -15,14 +15,14 @@ test('basic paired undo/redo', async ({ page }) => {
   await page.type(richTextBox, 'hello');
 
   await assertText(page, 'hello');
-  await clickUndo(page);
+  await undoByClick(page);
   await assertText(page, '\n');
-  await clickRedo(page);
+  await redoByClick(page);
   await assertText(page, 'hello');
 
-  await clickUndo(page);
+  await undoByClick(page);
   await assertText(page, '\n');
-  await clickRedo(page);
+  await redoByClick(page);
   await assertText(page, 'hello');
 });
 
@@ -32,8 +32,8 @@ test('undo/redo with keyboard', async ({ page }) => {
   await page.type(richTextBox, 'hello');
 
   await assertText(page, 'hello');
-  await keyboardUndo(page);
+  await undoByKeyboard(page);
   await assertText(page, '\n');
-  await keyboardRedo(page);
+  await redoByKeyboard(page);
   await assertText(page, 'hello');
 });
