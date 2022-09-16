@@ -58,7 +58,6 @@ export const createkeyboardBindings = (store: Store) => {
       const blockProps: ITextBlockModel = {
         type: 'text',
         id: store.createId(),
-        parentId: '0',
         text: '',
       };
       // make adding text block by enter a standalone operation

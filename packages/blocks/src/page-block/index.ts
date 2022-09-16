@@ -11,7 +11,7 @@ export class PageBlockModel extends BaseBlockModel {
   children: TextBlockModel[] = [];
 
   constructor(store: Store) {
-    super(store, { id: '0', parentId: '' });
+    super(store, { id: '0' });
   }
 }
 
@@ -93,7 +93,6 @@ export class PageBlockElement extends LitElement {
       const blockProps: ITextBlockModel = {
         type: 'text',
         id: this.store.createId(),
-        parentId: this.model.id,
         text: '',
       };
       this.store.addBlock(blockProps);

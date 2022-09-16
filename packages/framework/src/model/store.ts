@@ -12,7 +12,6 @@ type YBlocks = Y.Map<YBlock>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BlockProps = Record<string, any> & {
   id: string;
-  parentId: string;
   type: string;
 };
 
@@ -22,9 +21,6 @@ let created = false;
 export interface SerializedStore {
   blocks: {
     [key: string]: BlockProps;
-  };
-  parentMap: {
-    [key: string]: string;
   };
 }
 
@@ -59,9 +55,8 @@ export class Store {
 
     this.provider = new DebugProvider(room, this.doc);
     this._yBlocks.observeDeep(this._yBlocksObserver);
-    this._yParentMap.observeDeep(this._yParentMapObserver);
 
-    this._history = new Y.UndoManager([this._yBlocks, this._yParentMap], {
+    this._history = new Y.UndoManager([this._yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
       doc: this.doc,
     });
@@ -123,37 +118,26 @@ export class Store {
     for (const event of events) {
       if (event instanceof Y.YTextEvent) {
         this.slots.updateText.emit(event);
+      } else if (event instanceof Y.YMapEvent) {
+        event.keys.forEach((value, id) => {
+          if (value.action === 'add') {
+            const yBlock = this._getYBlock(id);
+            const props = yBlock.toJSON() as BlockProps;
+            this.slots.addBlock.emit(props);
+          } else if (value.action === 'update') {
+            // TODO
+          } else if (value.action === 'delete') {
+            this.slots.deleteBlock.emit(id);
+          }
+        });
       }
     }
-    this.slots.update.emit();
-  };
-
-  private _yParentMapObserver = (events: Y.YEvent<Y.Map<string>>[]) => {
-    for (const event of events) {
-      event.keys.forEach((value, id) => {
-        if (value.action === 'add') {
-          const yBlock = this._getYBlock(id);
-          const props = yBlock.toJSON() as BlockProps;
-          this.slots.addBlock.emit(props);
-        } else if (value.action === 'update') {
-          // TODO
-        } else if (value.action === 'delete') {
-          this.slots.deleteBlock.emit(id);
-        }
-      });
-    }
-
     this.slots.update.emit();
   };
 
   /** key-value store of blocks */
   private get _yBlocks() {
     return this.doc.getMap('blocks') as YBlocks;
-  }
-
-  /** mapping for finding parent of certain block */
-  private get _yParentMap() {
-    return this.doc.getMap('parentMap') as Y.Map<string>;
   }
 
   private _getYBlock(id: string): YBlock {
@@ -205,8 +189,8 @@ export class Store {
     if (this._yBlocks.has(blockProps.id)) {
       throw new Error(`Block with id ${blockProps.id} already exists`);
     }
-    if (!blockProps.id || !blockProps.parentId || !blockProps.type) {
-      throw new Error('Block props must contain id, parentId, and type');
+    if (!blockProps.id || !blockProps.type) {
+      throw new Error('Block props must contain id and type');
     }
 
     const yBlock = new Y.Map() as YBlock;
@@ -222,7 +206,6 @@ export class Store {
 
     this.transact(() => {
       this._yBlocks.set(blockProps.id, yBlock);
-      this._yParentMap.set(blockProps.id, blockProps.parentId);
     });
   }
 
