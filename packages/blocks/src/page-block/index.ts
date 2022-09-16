@@ -43,7 +43,7 @@ export class PageBlockElement extends LitElement {
   canRedo = false;
 
   @property()
-  mouse = new Mouse(this.addEventListener.bind(this))
+  mouse = new Mouse(this.addEventListener.bind(this));
 
   @query('.block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
@@ -181,11 +181,13 @@ export class PageBlockElement extends LitElement {
       </button>
     `;
 
-    return  html`<div class="page-container">${[
-      this.isEmptyPage ? emptyPagePlaceholder : blockContent, 
-      buttons,
-       html`<selection-rect .mouse=${this.mouse}></selection-rect>`
-    ]}</div>`;
+    return html`<div class="page-container">
+      ${[
+        this.isEmptyPage ? emptyPagePlaceholder : blockContent,
+        buttons,
+        html`<selection-rect .mouse=${this.mouse}></selection-rect>`,
+      ]}
+    </div>`;
   }
 }
 

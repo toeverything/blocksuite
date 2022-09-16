@@ -1,9 +1,12 @@
-import { Point, pointsToRect, Rect } from '@building-blocks/core/src/utils/rect';
-import { html, LitElement, unsafeCSS } from 'lit';
+import {
+  Point,
+  pointsToRect,
+  Rect,
+} from '@building-blocks/core/src/utils/rect';
+import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Mouse } from '../mouse';
 import { styleMap } from 'lit/directives/style-map.js';
-
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {
@@ -29,12 +32,12 @@ export class SelectionRect extends LitElement {
 
   protected firstUpdated(): void {
     if (this.mouse) {
-      this.mouse.onmousedown((e) => {
+      this.mouse.onmousedown(e => {
         this._handlerEditorMousedown(e);
-      })
-      this.mouse.onmousemove((e) => {
+      });
+      this.mouse.onmousemove(e => {
         this._handlerMouseMove(e);
-      })
+      });
     }
   }
 
@@ -60,26 +63,28 @@ export class SelectionRect extends LitElement {
   }
 
   protected render() {
-
-    const rectStyle = this.isShow && this.rect ?{
-      display: 'block',
-      left: `${this.rect.left}px`,
-      top: ` ${this.rect.top}px`,
-      height: `${this.rect.height}px`,
-      width: `${this.rect.width}px`,
-    } : {
-      display: 'none'
-    };
+    const rectStyle =
+      this.isShow && this.rect
+        ? {
+            display: 'block',
+            left: `${this.rect.left}px`,
+            top: ` ${this.rect.top}px`,
+            height: `${this.rect.height}px`,
+            width: `${this.rect.width}px`,
+          }
+        : {
+            display: 'none',
+          };
     return html`
-            <style>
-                .selection-rect {
-                    background-color: rgba(62, 111, 219, 0.1);
-                    position: absolute;
-                    z-index: 99;
-                }
-            </style>
-            <div class="selection-rect" style=${styleMap(rectStyle)}></div>
-        `;
+      <style>
+        .selection-rect {
+          background-color: rgba(62, 111, 219, 0.1);
+          position: absolute;
+          z-index: 99;
+        }
+      </style>
+      <div class="selection-rect" style=${styleMap(rectStyle)}></div>
+    `;
   }
 }
 

@@ -67,7 +67,7 @@ export class Slot<T = void> implements IDisposable {
       if (dispose) {
         dispose();
       }
-    }
+    };
     dispose = this.on(handler).dispose;
   }
 

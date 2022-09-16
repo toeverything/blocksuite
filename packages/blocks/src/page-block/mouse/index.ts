@@ -1,7 +1,9 @@
-import { flattenDisposable, IDisposable } from "@building-blocks/core/src/utils/disposable";
-import { Slot } from "@building-blocks/core/src/utils/slot";
-import { MouseEventHandler } from "./type";
-
+import {
+  flattenDisposable,
+  IDisposable,
+} from '@building-blocks/core/src/utils/disposable';
+import { Slot } from '@building-blocks/core/src/utils/slot';
+import { MouseEventHandler } from './type';
 
 export class Mouse {
   private is_mouse_down = false;
@@ -11,27 +13,29 @@ export class Mouse {
     documentMouseUp: Slot.fromEvent(window, 'mouseup', { capture: true }),
     mousedown: new Slot<MouseEvent>(),
     mouseup: new Slot<MouseEvent>(),
-    mousemove: new Slot<MouseEvent>
+    mousemove: new Slot<MouseEvent>(),
   };
 
   constructor(eventBinder: HTMLElement['addEventListener']) {
-    this._disposables = [{
-      dispose: this.slots.documentMouseUp.dispose
-    }];
+    this._disposables = [
+      {
+        dispose: this.slots.documentMouseUp.dispose,
+      },
+    ];
     this._eventBinder = eventBinder;
     this._initEditorMouseEventHandler();
   }
 
   private _initEditorMouseEventHandler() {
-    this._eventBinder('mousedown', (e) => {
+    this._eventBinder('mousedown', e => {
       this._emitMouseDown(e);
     });
-    this._eventBinder('mouseup', (e) => {
+    this._eventBinder('mouseup', e => {
       this._emitMouseUp(e);
     });
-    this._eventBinder('mousemove', (e) => {
+    this._eventBinder('mousemove', e => {
       this._emitMouseMove(e);
-    })
+    });
   }
 
   public onmousedown(cb: MouseEventHandler) {
@@ -74,8 +78,10 @@ export class Mouse {
 
   public dispose() {
     flattenDisposable(this._disposables);
-    this._disposables = [{
-      dispose: this.slots.documentMouseUp.dispose
-    }];
+    this._disposables = [
+      {
+        dispose: this.slots.documentMouseUp.dispose,
+      },
+    ];
   }
 }

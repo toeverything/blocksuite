@@ -29,8 +29,7 @@ export class Point {
 
   public distance(point: Point) {
     return Math.sqrt(
-      Math.pow(this.xDistance(point), 2) +
-      Math.pow(this.yDistance(point), 2)
+      Math.pow(this.xDistance(point), 2) + Math.pow(this.yDistance(point), 2)
     );
   }
 }
@@ -87,10 +86,7 @@ export class Rect {
 
   isContainPoint({ x, y }: Point) {
     return (
-      y >= this._top &&
-      y <= this._bottom &&
-      x >= this.left &&
-      x <= this._right
+      y >= this._top && y <= this._bottom && x >= this.left && x <= this._right
     );
   }
 
