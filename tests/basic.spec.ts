@@ -1,12 +1,7 @@
 import { test, expect } from '@playwright/test';
 import type { SerializedStore } from '../packages/framework';
-import {
-  emptyInput,
-  assertStore,
-  assertText,
-  enterPlaygroundRoom,
-  richTextBox,
-} from './utils';
+import { enterPlaygroundRoom, emptyInput, richTextBox } from './utils/actions';
+import { assertStore, assertText } from './utils/asserts';
 
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);

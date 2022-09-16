@@ -1,11 +1,11 @@
 import { test } from '@playwright/test';
+import { assertSelection, assertTextBlocks } from './utils/asserts';
 import {
-  assertSelection,
-  assertTextBlocks,
   emptyInput,
   enterPlaygroundRoom,
-} from './utils';
-import { redoByKeyboard, undoByKeyboard } from './utils/keyboard';
+  redoByKeyboard,
+  undoByKeyboard,
+} from './utils/actions';
 
 test('add new text block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);

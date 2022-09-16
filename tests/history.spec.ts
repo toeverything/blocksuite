@@ -1,13 +1,14 @@
 import { test } from '@playwright/test';
+import { assertText } from './utils/asserts';
 import {
-  richTextBox,
   emptyInput,
-  assertText,
   enterPlaygroundRoom,
-  undoByClick,
   redoByClick,
-} from './utils';
-import { redoByKeyboard, undoByKeyboard } from './utils/keyboard';
+  redoByKeyboard,
+  richTextBox,
+  undoByClick,
+  undoByKeyboard,
+} from './utils/actions';
 
 test('basic paired undo/redo', async ({ page }) => {
   await enterPlaygroundRoom(page);
