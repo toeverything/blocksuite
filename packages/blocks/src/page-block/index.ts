@@ -5,7 +5,7 @@ import { Store } from '@building-blocks/framework';
 import { TextBlockModel, ITextBlockModel } from '../text-block';
 import { BaseBlockModel } from '../base';
 import { Mouse } from '@building-blocks/framework/src/managers/mouse';
-export * from './selection';
+export * from '@building-blocks/framework/src/managers/selection';
 
 export class PageBlockModel extends BaseBlockModel {
   type = 'page';
