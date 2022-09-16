@@ -63,8 +63,8 @@ export class SelectionRect extends LitElement {
 
     const rectStyle = this.isShow && this.rect ?{
       display: 'block',
-      left: `${unsafeCSS(this.rect.left)}px`,
-      top: ` ${unsafeCSS(this.rect.top)}px`,
+      left: `${this.rect.left}px`,
+      top: ` ${this.rect.top}px`,
       height: `${this.rect.height}px`,
       width: `${this.rect.width}px`,
     } : {
