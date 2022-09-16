@@ -3,14 +3,14 @@ import { Slot } from '../../model/utils/slot';
 import { MouseEventHandler } from './type';
 
 export class Mouse {
-  private is_mouse_down = false;
+  private _isMouseDown = false;
   private _eventBinder: HTMLElement['addEventListener'];
   private _disposables: IDisposable[] = [];
   private slots = {
     documentMouseUp: Slot.fromEvent(window, 'mouseup', { capture: true }),
-    mousedown: new Slot<MouseEvent>(),
-    mouseup: new Slot<MouseEvent>(),
-    mousemove: new Slot<MouseEvent>(),
+    mouseDown: new Slot<MouseEvent>(),
+    mouseUp: new Slot<MouseEvent>(),
+    mouseMove: new Slot<MouseEvent>(),
   };
 
   constructor(eventBinder: HTMLElement['addEventListener']) {
@@ -35,42 +35,42 @@ export class Mouse {
     });
   }
 
-  public onmousedown(cb: MouseEventHandler) {
-    const disposable = this.slots.mousedown.on(cb);
+  public onMouseDown(handler: MouseEventHandler) {
+    const disposable = this.slots.mouseDown.on(handler);
     this._disposables.push(disposable);
     return disposable;
   }
 
   private _emitMouseDown(e: MouseEvent) {
-    this.slots.mousedown.emit(e);
+    this.slots.mouseDown.emit(e);
   }
 
-  public onmouseup(cb: MouseEventHandler) {
-    const disposable = this.slots.mouseup.on(cb);
+  public onMouseUp(handler: MouseEventHandler) {
+    const disposable = this.slots.mouseUp.on(handler);
     this._disposables.push(disposable);
     return disposable;
   }
 
   private _emitMouseUp(e: MouseEvent) {
-    this.slots.mouseup.emit(e);
+    this.slots.mouseUp.emit(e);
   }
 
-  public onmousemove(cb: MouseEventHandler) {
-    const disposable = this.slots.mousemove.on(cb);
+  public onMouseMove(handler: MouseEventHandler) {
+    const disposable = this.slots.mouseMove.on(handler);
     this._disposables.push(disposable);
     return disposable;
   }
 
   private _emitMouseMove(e: MouseEvent) {
-    this.slots.mousemove.emit(e);
+    this.slots.mouseMove.emit(e);
   }
 
   get isMouseDown() {
-    return this.is_mouse_down;
+    return this._isMouseDown;
   }
 
-  public onDocumentMouseUpOnce(cb: (e: MouseEvent) => void) {
-    this.slots.documentMouseUp.once(cb);
+  public onDocumentMouseUpOnce(handler: (e: MouseEvent) => void) {
+    this.slots.documentMouseUp.once(handler);
   }
 
   public dispose() {

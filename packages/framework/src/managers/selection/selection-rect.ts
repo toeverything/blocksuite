@@ -28,10 +28,10 @@ export class SelectionRect extends LitElement {
 
   protected firstUpdated(): void {
     if (this.mouse) {
-      this.mouse.onmousedown(e => {
+      this.mouse.onMouseDown(e => {
         this._handlerEditorMousedown(e);
       });
-      this.mouse.onmousemove(e => {
+      this.mouse.onMouseMove(e => {
         this._handlerMouseMove(e);
       });
     }
