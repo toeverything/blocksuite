@@ -19,7 +19,7 @@ export class SelectionRect extends LitElement {
   isShow = false;
 
   @property({ type: Mouse })
-  mouse?: Mouse;
+  mouse!: Mouse;
 
   // disable shadow DOM
   createRenderRoot() {

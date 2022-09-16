@@ -17,7 +17,7 @@ export class PageBlockModel extends BaseBlockModel {
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
   @property()
-  store?: Store;
+  store!: Store;
 
   @property()
   model = new PageBlockModel(this.store);
