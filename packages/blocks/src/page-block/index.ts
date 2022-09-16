@@ -4,8 +4,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { Store } from '@building-blocks/framework';
 import { TextBlockModel, ITextBlockModel } from '../text-block';
 import { BaseBlockModel } from '../base';
-import { Mouse } from '@building-blocks/framework/src/managers/mouse';
-export * from '@building-blocks/framework/src/managers/selection';
 
 export class PageBlockModel extends BaseBlockModel {
   type = 'page';
@@ -16,13 +14,10 @@ export class PageBlockModel extends BaseBlockModel {
   }
 }
 
-const room =
-  new URLSearchParams(location.search).get('room') || 'virgo-default';
-
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
   @property()
-  store = new Store(room);
+  store?: Store;
 
   @property()
   model = new PageBlockModel(this.store);
@@ -42,9 +37,6 @@ export class PageBlockElement extends LitElement {
   @property()
   canRedo = false;
 
-  @property()
-  mouse = new Mouse(this.addEventListener.bind(this));
-
   @query('.block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
@@ -55,9 +47,6 @@ export class PageBlockElement extends LitElement {
 
   constructor() {
     super();
-    this._subscribeStore();
-    // @ts-ignore
-    window.store = this.store;
   }
 
   private _subscribeStore() {
@@ -115,6 +104,7 @@ export class PageBlockElement extends LitElement {
   }
 
   firstUpdated() {
+    this._subscribeStore();
     this._placeholderInput.focus();
   }
 
@@ -131,9 +121,6 @@ export class PageBlockElement extends LitElement {
   protected render() {
     const emptyPagePlaceholder = html`
       <style>
-        .page-container {
-          position: relative;
-        }
         .block-placeholder {
           box-sizing: border-box;
         }
@@ -182,11 +169,7 @@ export class PageBlockElement extends LitElement {
     `;
 
     return html`<div class="page-container">
-      ${[
-        this.isEmptyPage ? emptyPagePlaceholder : blockContent,
-        buttons,
-        html`<selection-rect .mouse=${this.mouse}></selection-rect>`,
-      ]}
+      ${[this.isEmptyPage ? emptyPagePlaceholder : blockContent, buttons]}
     </div>`;
   }
 }

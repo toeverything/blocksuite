@@ -1,8 +1,8 @@
 import { Point, pointsToRect, Rect } from '../../utils/rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Mouse } from '../mouse';
 import { styleMap } from 'lit/directives/style-map.js';
+import { Mouse } from '../../managers';
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {

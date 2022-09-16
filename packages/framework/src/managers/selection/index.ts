@@ -1,1 +1,1 @@
-export * from './selection-rect';
+export * from './manager';
