@@ -1,9 +1,11 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, PropertyValueMap, CSSResultGroup, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Store } from '@building-blocks/core';
 import { TextBlockModel, ITextBlockModel } from '../text-block';
 import { BaseBlockModel } from '../base';
+import { Mouse } from './mouse';
+export * from './selection';
 
 export class PageBlockModel extends BaseBlockModel {
   type = 'page';
@@ -39,6 +41,9 @@ export class PageBlockElement extends LitElement {
 
   @property()
   canRedo = false;
+
+  @property()
+  mouse = new Mouse(this.addEventListener.bind(this))
 
   @query('.block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
@@ -123,9 +128,12 @@ export class PageBlockElement extends LitElement {
     }
   }
 
-  render() {
+  protected render() {
     const emptyPagePlaceholder = html`
       <style>
+        .page-container {
+          position: relative;
+        }
         .block-placeholder {
           box-sizing: border-box;
         }
@@ -173,7 +181,11 @@ export class PageBlockElement extends LitElement {
       </button>
     `;
 
-    return [this.isEmptyPage ? emptyPagePlaceholder : blockContent, buttons];
+    return  html`<div class="page-container">${[
+      this.isEmptyPage ? emptyPagePlaceholder : blockContent, 
+      buttons,
+       html`<selection-rect .mouse=${this.mouse}></selection-rect>`
+    ]}</div>`;
   }
 }
 
