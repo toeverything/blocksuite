@@ -13,9 +13,6 @@ export class PageContainer extends LitElement {
   store = new Store(room);
 
   @property()
-  btnText = 'Disconnect';
-
-  @property()
   mouse = new Mouse(this.addEventListener.bind(this));
 
   @property()
