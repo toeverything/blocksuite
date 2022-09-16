@@ -39,4 +39,3 @@ export async function clickUndo(page: Page) {
 export async function clickRedo(page: Page) {
   await page.click('text=Redo');
 }
-
