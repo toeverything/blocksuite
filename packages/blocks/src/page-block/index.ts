@@ -3,7 +3,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Store } from '@building-blocks/framework';
 import { TextBlockModel, ITextBlockModel } from '../text-block';
-import { BaseBlockModel } from '../base';
+import { BaseBlockModel } from '@building-blocks/framework/src/model/base';
+export * from '@building-blocks/framework/src/managers/selection';
 
 export class PageBlockModel extends BaseBlockModel {
   type = 'page';
@@ -40,7 +41,7 @@ export class PageBlockElement extends LitElement {
   @query('.block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
-  // disable shadow DOM
+  // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }

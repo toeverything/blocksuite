@@ -3,6 +3,11 @@ import { customElement, property } from 'lit/decorators.js';
 import { SelectionManager } from '../../managers';
 import { Mouse } from '../../managers/mouse';
 import { Store } from '../../model/store';
+import { noop } from '../../utils/common';
+import { RichText } from '../rich-text/rich-text';
+
+// avoid being tree-shaked
+noop(RichText);
 
 const room =
   new URLSearchParams(location.search).get('room') || 'virgo-default';

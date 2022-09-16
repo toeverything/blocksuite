@@ -4,3 +4,8 @@ export function isPrimitive(
 ): a is null | undefined | boolean | number | string {
   return a !== Object(a);
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function noop(_: unknown) {
+  // do nothing
+}

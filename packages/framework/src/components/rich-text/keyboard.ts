@@ -1,6 +1,6 @@
 import type { Quill, RangeStatic } from 'quill';
-import type { Store } from '@building-blocks/framework';
-import { ITextBlockModel } from './index';
+import type { Store } from '../../';
+import { ITextBlockModel } from '../../../../blocks/src/text-block/index';
 
 interface BindingContext {
   collapsed: boolean;

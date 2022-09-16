@@ -21,11 +21,6 @@ export class SelectionRect extends LitElement {
   @property({ type: Mouse })
   mouse!: Mouse;
 
-  // disable shadow DOM
-  createRenderRoot() {
-    return this;
-  }
-
   protected firstUpdated(): void {
     if (this.mouse) {
       this.mouse.onMouseDown(e => {
@@ -40,7 +35,7 @@ export class SelectionRect extends LitElement {
   private _handlerEditorMousedown(e: MouseEvent) {
     this.startPoint = new Point(e.clientX, e.clientY);
     this.isShow = true;
-    this.mouse?.onDocumentMouseUpOnce(() => {
+    this.mouse.onDocumentMouseUpOnce(() => {
       this._handlerEditorMouseup();
     });
   }

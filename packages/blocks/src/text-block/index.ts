@@ -1,13 +1,7 @@
 import { LitElement, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { Store } from '@building-blocks/framework';
-import Quill from 'quill';
-import QuillCursors from 'quill-cursors';
-import style from 'quill/dist/quill.snow.css';
-import { createkeyboardBindings } from './keyboard';
-import { BaseBlockModel, IBaseBlockModel } from '../base';
-
-Quill.register('modules/cursors', QuillCursors);
+import { BaseBlockModel, IBaseBlockModel } from '@building-blocks/framework';
 
 export interface ITextBlockModel extends IBaseBlockModel {
   type: 'text';
@@ -26,9 +20,6 @@ export class TextBlockModel extends BaseBlockModel implements ITextBlockModel {
 
 @customElement('text-block-element')
 export class TextBlockElement extends LitElement {
-  @query('.text-block.quill-container')
-  textContainer!: HTMLDivElement;
-
   @property({ type: Store })
   store!: Store;
 
@@ -38,49 +29,16 @@ export class TextBlockElement extends LitElement {
   @property({ reflect: true })
   id!: string;
 
-  // disable shadow DOM
+  // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }
 
-  private _initEditorContainer(store: Store, model: TextBlockModel) {
-    const { textContainer } = this;
-    const keyboardBindings = createkeyboardBindings(store);
-    const quill = new Quill(textContainer, {
-      modules: {
-        cursors: true,
-        toolbar: false,
-        history: {
-          maxStack: 0,
-          userOnly: true,
-        },
-        keyboard: {
-          bindings: keyboardBindings,
-        },
-      },
-      theme: 'snow',
-    });
-    store.attachText(model.id, model.text, quill);
-    store.captureSync();
-    quill.focus();
-  }
-
-  protected firstUpdated() {
-    this._initEditorContainer(this.store, this.model);
-  }
-
   render() {
-    return html`
-      <style>
-        ${style} .text-block.quill-container {
-          margin-bottom: 12px;
-        }
-        .ql-editor {
-          padding: 6px;
-        }
-      </style>
-      <div class="text-block quill-container"></div>
-    `;
+    return html`<rich-text
+      .store=${this.store}
+      .model=${this.model}
+    ></rich-text>`;
   }
 }
 

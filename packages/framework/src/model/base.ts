@@ -1,4 +1,4 @@
-import type { Store } from '@building-blocks/framework';
+import type { Store } from './store';
 
 export interface IBaseBlockModel {
   type: string;
