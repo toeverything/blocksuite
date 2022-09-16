@@ -1,4 +1,4 @@
-import { LitElement, html, PropertyValueMap, CSSResultGroup, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Store } from '@building-blocks/core';
