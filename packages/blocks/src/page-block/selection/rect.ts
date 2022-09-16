@@ -2,10 +2,10 @@ import {
   Point,
   pointsToRect,
   Rect,
-} from '@building-blocks/core/src/utils/rect';
+} from '@building-blocks/framework/src/utils/rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Mouse } from '../mouse';
+import { Mouse } from '@building-blocks/framework/src/managers/mouse';
 import { styleMap } from 'lit/directives/style-map.js';
 
 @customElement('selection-rect')

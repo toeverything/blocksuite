@@ -1,8 +1,5 @@
-import {
-  flattenDisposable,
-  IDisposable,
-} from '@building-blocks/core/src/utils/disposable';
-import { Slot } from '@building-blocks/core/src/utils/slot';
+import { flattenDisposable, IDisposable } from '../../model/utils/disposable';
+import { Slot } from '../../model/utils/slot';
 import { MouseEventHandler } from './type';
 
 export class Mouse {

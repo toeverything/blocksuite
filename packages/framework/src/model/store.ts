@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import { WebrtcProvider as DebugProvider } from 'y-webrtc';
 import { Slot } from './utils/slot';
-import { isPrimitive } from './utils/common';
+import { isPrimitive } from '../utils/common';
 import { TextBinding } from './text-binding';
 import Quill from 'quill';
 import { AwarenessMessage, SelectionRange, YAwareness } from './awareness';

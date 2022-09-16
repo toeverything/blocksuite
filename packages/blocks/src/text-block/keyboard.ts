@@ -1,5 +1,5 @@
 import type { Quill, RangeStatic } from 'quill';
-import type { Store } from '@building-blocks/core';
+import type { Store } from '@building-blocks/framework';
 import { ITextBlockModel } from './index';
 
 interface BindingContext {

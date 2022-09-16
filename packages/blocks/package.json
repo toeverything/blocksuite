@@ -11,7 +11,7 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
-    "@building-blocks/core": "workspace:*",
+    "@building-blocks/framework": "workspace:*",
     "@types/quill": "^2.0.9",
     "quill": "^1.3.7",
     "quill-cursors": "^4.0.0"

@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test';
-import type { SerializedStore } from '../../packages/core/src';
+import type { SerializedStore } from '../../packages/framework/src';
 
 const defaultPlayground = 'http://localhost:5173/';
 export const emptyInput = 'input';

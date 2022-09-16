@@ -1,10 +1,10 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { Store } from '@building-blocks/core';
+import { Store } from '@building-blocks/framework';
 import { TextBlockModel, ITextBlockModel } from '../text-block';
 import { BaseBlockModel } from '../base';
-import { Mouse } from './mouse';
+import { Mouse } from '@building-blocks/framework/src/managers/mouse';
 export * from './selection';
 
 export class PageBlockModel extends BaseBlockModel {

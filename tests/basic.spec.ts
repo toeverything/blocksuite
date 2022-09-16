@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import type { SerializedStore } from '../packages/core';
+import type { SerializedStore } from '../packages/framework';
 import {
   richTextBox,
   emptyInput,
