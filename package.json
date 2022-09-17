@@ -7,7 +7,8 @@
     "lint": "eslint ./ --max-warnings=0",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "format": "prettier --write packages tests"
+    "format": "prettier --write packages tests",
+    "build:playground": "pnpm --filter @building-blocks/playground build"
   },
   "keywords": [],
   "author": "toeverything",

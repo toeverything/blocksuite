@@ -68,7 +68,6 @@ export class Store {
     this._history.on('stack-item-popped', this._historyPopObserver);
     this._history.on('stack-item-updated', this._historyObserver);
 
-    // TODO use SelectionManager
     this.awareness.slots.update.on((awMsg: AwarenessMessage) => {
       if (awMsg.type !== 'remove' && awMsg.state) {
         const anchor = Y.createAbsolutePositionFromRelativePosition(
@@ -218,7 +217,6 @@ export class Store {
     const binding = new TextBinding(this, yText, quill);
     this.textBindings.set(id, binding);
 
-    // TODO use SelectionManager
     quill.on('selection-change', () => {
       const cursor = binding.getCursor();
       if (!cursor) {

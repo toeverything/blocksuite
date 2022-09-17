@@ -3,6 +3,7 @@ import { PageContainer } from '../../components';
 export class SelectionManager {
   private _type: 'block' | 'range' | 'none' = 'none';
   private _selectedBlockIds: Array<string> = [];
+  // @ts-ignore
   private _page: PageContainer;
 
   constructor(page: PageContainer) {
