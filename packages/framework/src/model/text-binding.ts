@@ -4,7 +4,7 @@ import { AwarenessManager } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
 
-/** Removes the pending '\n's if it has no attributes */
+// Removes the pending '\n's if it has no attributes
 export const normQuillDelta = (delta: any) => {
   if (delta.length > 0) {
     const d = delta[delta.length - 1];
@@ -61,6 +61,12 @@ export class TextBinding {
   }
 
   private _yObserver = (event: Y.YTextEvent) => {
+    // Should listen to global text event instead the curent yText instance,
+    // since an empty yText on yMap can be replaced by another yText.
+    if (event.target.parent !== this.yText.parent) {
+      return;
+    }
+
     // remote update doesn't carry clientID
     if (event.transaction.origin !== this.doc.clientID) {
       const eventDelta = event.delta;

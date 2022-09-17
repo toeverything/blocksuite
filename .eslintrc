@@ -9,6 +9,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended"
   ],
+  "ignorePatterns": ["packages/playground/dist/assets/*"],
   "overrides": [
     {
       "plugins": ["react", "@typescript-eslint"],

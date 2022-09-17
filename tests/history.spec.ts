@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { assertText } from './utils/asserts';
+import { assertText, assertTextBlocks } from './utils/asserts';
 import {
   emptyInput,
   enterPlaygroundRoom,
@@ -37,4 +37,17 @@ test('undo/redo with keyboard', async ({ page }) => {
   await assertText(page, '\n');
   await redoByKeyboard(page);
   await assertText(page, 'hello');
+});
+
+test('undo after adding block twice', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.click(emptyInput);
+  await page.keyboard.type('hello');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('world');
+
+  await undoByKeyboard(page);
+  await assertTextBlocks(page, ['hello', '\n']);
+  await redoByKeyboard(page);
+  await assertTextBlocks(page, ['hello', 'world']);
 });
