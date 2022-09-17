@@ -2,7 +2,7 @@ import * as Y from 'yjs';
 import { WebrtcProvider as DebugProvider } from 'y-webrtc';
 import { Slot } from './utils/slot';
 import { isPrimitive } from '../utils/common';
-import { TextBinding } from './text-binding';
+import { TextAdapter } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessManager } from './awareness';
 
@@ -45,7 +45,7 @@ export class Store {
     updateText: new Slot<Y.YTextEvent>(),
   };
 
-  readonly textBindings = new Map<string, TextBinding>();
+  readonly textAdapters = new Map<string, TextAdapter>();
 
   constructor(room: string) {
     if (created) {
@@ -192,11 +192,11 @@ export class Store {
     this.doc.transact(() => {
       yBlock.set('text', yText);
     }, null);
-    const binding = new TextBinding(this, yText, quill);
-    this.textBindings.set(id, binding);
+    const apapter = new TextAdapter(this, yText, quill);
+    this.textAdapters.set(id, apapter);
 
     quill.on('selection-change', () => {
-      const cursor = binding.getCursor();
+      const cursor = apapter.getCursor();
       if (!cursor) {
         return;
       }

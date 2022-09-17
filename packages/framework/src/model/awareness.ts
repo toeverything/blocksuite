@@ -90,10 +90,10 @@ export class AwarenessManager {
         this.store.doc
       );
       if (anchor && focus) {
-        const textBinding = this.store.textBindings.get(
+        const textAdapter = this.store.textAdapters.get(
           awMsg.state?.cursor.id || ''
         );
-        textBinding?.quill.setSelection(
+        textAdapter?.quill.setSelection(
           anchor.index,
           focus.index - anchor.index
         );

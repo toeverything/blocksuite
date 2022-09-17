@@ -29,7 +29,7 @@ export const normQuillDelta = (delta: any) => {
   return delta;
 };
 
-export class TextBinding {
+export class TextAdapter {
   readonly store: Store;
   readonly doc: Y.Doc;
   readonly yText: Y.Text;
