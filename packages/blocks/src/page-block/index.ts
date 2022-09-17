@@ -7,7 +7,7 @@ import { BaseBlockModel } from '@building-blocks/framework/src/model/base';
 export * from '@building-blocks/framework/src/managers/selection';
 
 export class PageBlockModel extends BaseBlockModel {
-  type = 'page';
+  flavour = 'page';
   children: TextBlockModel[] = [];
 
   constructor(store: Store) {
@@ -91,7 +91,7 @@ export class PageBlockElement extends LitElement {
       this.isEmptyPage = false;
 
       const blockProps: ITextBlockModel = {
-        type: 'text',
+        flavour: 'text',
         id: this.store.createId(),
         text: '',
       };

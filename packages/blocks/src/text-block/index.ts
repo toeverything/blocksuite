@@ -4,12 +4,12 @@ import { Store } from '@building-blocks/framework';
 import { BaseBlockModel, IBaseBlockModel } from '@building-blocks/framework';
 
 export interface ITextBlockModel extends IBaseBlockModel {
-  type: 'text';
+  flavour: 'text';
   text: string;
 }
 
 export class TextBlockModel extends BaseBlockModel implements ITextBlockModel {
-  type = 'text' as const;
+  flavour = 'text' as const;
   text = '';
 
   constructor(store: Store, props: Partial<ITextBlockModel>) {

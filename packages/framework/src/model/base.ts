@@ -1,13 +1,13 @@
 import type { Store } from './store';
 
 export interface IBaseBlockModel {
-  type: string;
+  flavour: string;
   id: string;
 }
 
 export class BaseBlockModel implements IBaseBlockModel {
   store: Store;
-  type!: string;
+  flavour!: string;
   id: string;
   constructor(store: Store, props: Partial<IBaseBlockModel>) {
     this.store = store;

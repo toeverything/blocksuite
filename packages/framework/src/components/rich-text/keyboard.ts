@@ -56,7 +56,7 @@ export const createkeyboardBindings = (store: Store) => {
       this.quill.getLength() - 1 === this.quill.getSelection()?.index;
     if (isAtBlockEnd) {
       const blockProps: ITextBlockModel = {
-        type: 'text',
+        flavour: 'text',
         id: store.createId(),
         text: '',
       };

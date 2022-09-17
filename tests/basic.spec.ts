@@ -9,7 +9,7 @@ test('basic input', async ({ page }) => {
   await page.keyboard.type('hello');
 
   const expected: SerializedStore = {
-    blocks: { '1': { type: 'text', id: '1', text: 'hello' } },
+    blocks: { '1': { flavour: 'text', id: '1', text: 'hello' } },
   };
 
   await expect(page).toHaveTitle(/Building Blocks/);
@@ -26,7 +26,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
 
   const expected: SerializedStore = {
-    blocks: { '1': { type: 'text', id: '1', text: 'hello' } },
+    blocks: { '1': { flavour: 'text', id: '1', text: 'hello' } },
   };
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -46,7 +46,7 @@ test('A first init, B first edit', async ({ browser, page: pageA }) => {
   await pageB.type(richTextBox, 'hello');
 
   const expected: SerializedStore = {
-    blocks: { '1': { type: 'text', id: '1', text: 'hello' } },
+    blocks: { '1': { flavour: 'text', id: '1', text: 'hello' } },
   };
   // wait until pageA content updated
   await assertText(pageA, 'hello');

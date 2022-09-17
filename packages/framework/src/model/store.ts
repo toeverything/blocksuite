@@ -12,7 +12,7 @@ type YBlocks = Y.Map<YBlock>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BlockProps = Record<string, any> & {
   id: string;
-  type: string;
+  flavour: string;
 };
 
 let i = 1; // for debug use, 0 for root
@@ -166,8 +166,8 @@ export class Store {
     if (this._yBlocks.has(blockProps.id)) {
       throw new Error(`Block with id ${blockProps.id} already exists`);
     }
-    if (!blockProps.id || !blockProps.type) {
-      throw new Error('Block props must contain id and type');
+    if (!blockProps.id || !blockProps.flavour) {
+      throw new Error('Block props must contain id and flavour');
     }
 
     const yBlock = new Y.Map() as YBlock;
