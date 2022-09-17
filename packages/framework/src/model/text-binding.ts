@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { YAwareness } from './awareness';
+import { AwarenessManager } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
 
@@ -35,7 +35,7 @@ export class TextBinding {
   readonly yText: Y.Text;
   readonly quill: Quill;
   readonly quillCursors: any;
-  readonly awareness: YAwareness;
+  readonly awareness: AwarenessManager;
   private _negatedUsedFormats: Record<string, any>;
 
   constructor(store: Store, yText: Y.Text, quill: Quill) {

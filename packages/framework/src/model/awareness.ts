@@ -1,3 +1,4 @@
+import * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness.js';
 import { RelativePosition } from 'yjs';
 import type { Store } from './store';
@@ -9,17 +10,17 @@ export interface SelectionRange {
   focus: RelativePosition;
 }
 
-export interface AwarenessState {
+interface AwarenessState {
   cursor: SelectionRange;
 }
 
-export interface AwarenessMessage {
+interface AwarenessMessage {
   id: number;
   type: 'add' | 'update' | 'remove';
   state?: AwarenessState;
 }
 
-export class YAwareness {
+export class AwarenessManager {
   readonly store: Store;
   readonly awareness: Awareness;
 
@@ -31,6 +32,7 @@ export class YAwareness {
     this.store = store;
     this.awareness = store.provider.awareness;
     this.awareness.on('change', this._onAwarenessChange);
+    this.slots.update.on(this._onAwarenessMessage);
   }
 
   public setLocalCursor(range: SelectionRange) {
@@ -77,9 +79,32 @@ export class YAwareness {
     });
   };
 
+  private _onAwarenessMessage = (awMsg: AwarenessMessage) => {
+    if (awMsg.type !== 'remove' && awMsg.state) {
+      const anchor = Y.createAbsolutePositionFromRelativePosition(
+        awMsg.state?.cursor.anchor,
+        this.store.doc
+      );
+      const focus = Y.createAbsolutePositionFromRelativePosition(
+        awMsg.state?.cursor.focus,
+        this.store.doc
+      );
+      if (anchor && focus) {
+        const textBinding = this.store.textBindings.get(
+          awMsg.state?.cursor.id || ''
+        );
+        textBinding?.quill.setSelection(
+          anchor.index,
+          focus.index - anchor.index
+        );
+      }
+    }
+  };
+
   destroy() {
     if (this.awareness) {
       this.awareness.off('change', this._onAwarenessChange);
+      this.slots.update.dispose();
     }
   }
 }

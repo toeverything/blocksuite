@@ -4,7 +4,7 @@ import { Slot } from './utils/slot';
 import { isPrimitive } from '../utils/common';
 import { TextBinding } from './text-binding';
 import Quill from 'quill';
-import { AwarenessMessage, SelectionRange, YAwareness } from './awareness';
+import { SelectionRange, AwarenessManager } from './awareness';
 
 type YBlock = Y.Map<unknown>;
 type YBlocks = Y.Map<YBlock>;
@@ -35,7 +35,7 @@ export class Store {
   readonly doc = new Y.Doc();
   readonly provider: DebugProvider;
   private _history: Y.UndoManager;
-  readonly awareness: YAwareness;
+  readonly awareness: AwarenessManager;
 
   readonly slots = {
     update: new Slot(),
@@ -61,34 +61,12 @@ export class Store {
       doc: this.doc,
     });
 
-    this.awareness = new YAwareness(this);
+    this.awareness = new AwarenessManager(this);
 
     this._history.on('stack-cleared', this._historyObserver);
     this._history.on('stack-item-added', this._historyAddObserver);
     this._history.on('stack-item-popped', this._historyPopObserver);
     this._history.on('stack-item-updated', this._historyObserver);
-
-    this.awareness.slots.update.on((awMsg: AwarenessMessage) => {
-      if (awMsg.type !== 'remove' && awMsg.state) {
-        const anchor = Y.createAbsolutePositionFromRelativePosition(
-          awMsg.state?.cursor.anchor,
-          this.doc
-        );
-        const focus = Y.createAbsolutePositionFromRelativePosition(
-          awMsg.state?.cursor.focus,
-          this.doc
-        );
-        if (anchor && focus) {
-          const textBinding = this.textBindings.get(
-            awMsg.state?.cursor.id || ''
-          );
-          textBinding?.quill.setSelection(
-            anchor.index,
-            focus.index - anchor.index
-          );
-        }
-      }
-    });
   }
 
   private _historyAddObserver = (event: StackItem) => {
