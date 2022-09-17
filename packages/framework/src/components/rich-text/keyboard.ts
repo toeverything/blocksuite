@@ -39,7 +39,7 @@ type KeyboardBindingHandler = (
   context: BindingContext
 ) => void;
 
-export const createkeyboardBindings = (store: Store) => {
+export const createKeyboardBindings = (store: Store) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clientID = store.doc.clientID as any;
 

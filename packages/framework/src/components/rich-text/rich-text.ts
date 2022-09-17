@@ -4,7 +4,7 @@ import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
 import { Store } from '../..';
-import { createkeyboardBindings } from './keyboard';
+import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
 
@@ -33,7 +33,7 @@ export class RichText extends LitElement {
   firstUpdated() {
     const { store, model } = this;
     const { _textContainer } = this;
-    const keyboardBindings = createkeyboardBindings(store);
+    const keyboardBindings = createKeyboardBindings(store);
     this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,
