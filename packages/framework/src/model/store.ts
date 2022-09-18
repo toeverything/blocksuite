@@ -1,26 +1,28 @@
 import * as Y from 'yjs';
 import { WebrtcProvider as DebugProvider } from 'y-webrtc';
 import { Slot } from './utils/slot';
-import { isPrimitive } from '../utils/common';
 import { TextAdapter } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
+import { syncBlockProps, toBlockProps } from './utils/utils';
 
-type YBlock = Y.Map<unknown>;
-type YBlocks = Y.Map<YBlock>;
+export type YBlock = Y.Map<unknown>;
+export type YBlocks = Y.Map<YBlock>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type BlockProps = Record<string, any> & {
+export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
 };
 
-let i = 1; // for debug use, 0 for root
-let created = false;
+export type PrefixedBlockProps = Record<string, unknown> & {
+  'sys:id': string;
+  'sys:flavour': string;
+};
 
 export interface SerializedStore {
   blocks: {
-    [key: string]: BlockProps;
+    [key: string]: PrefixedBlockProps;
   };
 }
 
@@ -30,6 +32,9 @@ export interface StackItem {
     type: 'undo' | 'redo';
   };
 }
+
+let i = 1; // for debug use, 0 for root
+let created = false;
 
 export class Store {
   readonly doc = new Y.Doc();
@@ -100,7 +105,8 @@ export class Store {
           event.keys.forEach((value, id) => {
             if (value.action === 'add') {
               const yBlock = this._getYBlock(id);
-              const props = yBlock.toJSON() as BlockProps;
+              const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
+              const props = toBlockProps(prefixedProps) as BlockProps;
               this.slots.addBlock.emit(props);
             } else if (value.action === 'delete') {
               this.slots.deleteBlock.emit(id);
@@ -173,21 +179,7 @@ export class Store {
     }
 
     const yBlock = new Y.Map() as YBlock;
-    Object.keys(blockProps).forEach(key => {
-      // workaround yText init
-      // TODO use schema
-      if (blockProps.flavour === 'text' && key === 'text') {
-        return;
-      }
-
-      if (!isPrimitive(blockProps[key])) {
-        throw new Error('Only top level primitives are supported for now');
-      }
-
-      if (blockProps[key] !== undefined) {
-        yBlock.set(key, blockProps[key]);
-      }
-    });
+    syncBlockProps(yBlock, blockProps);
 
     this.transact(() => {
       this._yBlocks.set(blockProps.id, yBlock);
@@ -197,12 +189,13 @@ export class Store {
   attachText(id: string, quill: Quill) {
     const yBlock = this._getYBlock(id);
 
-    const isVoidText = yBlock.get('text') === undefined;
-    const yText = isVoidText ? new Y.Text() : (yBlock.get('text') as Y.Text);
+    const isVoidText = yBlock.get('prop:text') === undefined;
+    const yText = isVoidText
+      ? new Y.Text()
+      : (yBlock.get('prop:text') as Y.Text);
+
     if (isVoidText) {
-      this.transact(() => {
-        yBlock.set('text', yText);
-      });
+      this.transact(() => yBlock.set('prop:text', yText));
     }
 
     const adapter = new TextAdapter(this, yText, quill);

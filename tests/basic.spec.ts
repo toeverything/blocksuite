@@ -3,17 +3,19 @@ import type { SerializedStore } from '../packages/framework';
 import { enterPlaygroundRoom, emptyInput, richTextBox } from './utils/actions';
 import { assertStore, assertText } from './utils/asserts';
 
+const defaultStore: SerializedStore = {
+  blocks: {
+    '1': { 'sys:flavour': 'text', 'sys:id': '1', 'prop:text': 'hello' },
+  },
+};
+
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.click(emptyInput);
   await page.keyboard.type('hello');
 
-  const expected: SerializedStore = {
-    blocks: { '1': { flavour: 'text', id: '1', text: 'hello' } },
-  };
-
   await expect(page).toHaveTitle(/Building Blocks/);
-  await assertStore(page, expected);
+  await assertStore(page, defaultStore);
   await assertText(page, 'hello');
 });
 
@@ -25,15 +27,12 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
 
-  const expected: SerializedStore = {
-    blocks: { '1': { flavour: 'text', id: '1', text: 'hello' } },
-  };
   // wait until pageB content updated
   await assertText(pageB, 'hello');
   await Promise.all([
     assertText(pageA, 'hello'),
-    assertStore(pageA, expected),
-    assertStore(pageB, expected),
+    assertStore(pageA, defaultStore),
+    assertStore(pageB, defaultStore),
   ]);
 });
 
@@ -45,15 +44,12 @@ test('A first init, B first edit', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await pageB.type(richTextBox, 'hello');
 
-  const expected: SerializedStore = {
-    blocks: { '1': { flavour: 'text', id: '1', text: 'hello' } },
-  };
   // wait until pageA content updated
   await assertText(pageA, 'hello');
   await Promise.all([
     assertText(pageB, 'hello'),
-    assertStore(pageA, expected),
-    assertStore(pageB, expected),
+    assertStore(pageA, defaultStore),
+    assertStore(pageB, defaultStore),
   ]);
 });
 

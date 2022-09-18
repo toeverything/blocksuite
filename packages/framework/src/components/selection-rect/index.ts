@@ -1,4 +1,4 @@
-import { Point, pointsToRect, Rect } from '../../utils/rect';
+import { Point, pointsToRect, Rect } from './rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

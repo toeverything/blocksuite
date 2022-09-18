@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { SelectionManager } from '../../managers';
 import { Mouse } from '../../managers/mouse';
 import { Store } from '../../model/store';
-import { noop } from '../../utils/common';
+import { noop } from '../../model/utils/utils';
 import { RichText } from '../rich-text/rich-text';
 
 // avoid being tree-shaked
