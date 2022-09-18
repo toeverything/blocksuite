@@ -2,7 +2,7 @@ import { LitElement, html } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Store } from '@building-blocks/framework';
-import { TextBlockModel, ITextBlockModel } from '../text-block';
+import { TextBlockModel, ITextBlockModel } from '../text-block/text-block';
 import { BaseBlockModel } from '@building-blocks/framework/src/model/base';
 export * from '@building-blocks/framework/src/managers/selection';
 

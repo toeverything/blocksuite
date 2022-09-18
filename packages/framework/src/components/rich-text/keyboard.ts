@@ -1,6 +1,5 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { Store } from '../../';
-import { ITextBlockModel } from '../../../../blocks/src/text-block/index';
 
 interface BindingContext {
   collapsed: boolean;
@@ -55,7 +54,7 @@ export const createKeyboardBindings = (store: Store) => {
     const isAtBlockEnd =
       this.quill.getLength() - 1 === this.quill.getSelection()?.index;
     if (isAtBlockEnd) {
-      const blockProps: ITextBlockModel = {
+      const blockProps = {
         flavour: 'text',
         id: store.createId(),
         text: '',

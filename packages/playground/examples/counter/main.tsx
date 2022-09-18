@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
-import { CounterBlockElement } from '@building-blocks/blocks/src/counter-block';
+import { CounterBlockElement } from '@building-blocks/blocks';
 import { createComponent, type EventName } from '@lit-labs/react';
 
 const CounterBlockComponent = createComponent(
