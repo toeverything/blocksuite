@@ -8,7 +8,7 @@ export * from '@building-blocks/framework/src/managers/selection';
 
 export class PageBlockModel extends BaseBlockModel {
   flavour = 'page';
-  children: TextBlockModel[] = [];
+  children: BaseBlockModel[] = [];
 
   constructor(store: Store) {
     super(store, { id: '0' });
@@ -23,13 +23,10 @@ export class PageBlockElement extends LitElement {
   @state()
   model = new PageBlockModel(this.store);
 
-  @property({ reflect: true })
-  id = this.model.id;
-
   @state()
   connectionBtnText = 'Disconnect';
 
-  @property()
+  @state()
   isEmptyPage = true;
 
   @state()
@@ -48,6 +45,14 @@ export class PageBlockElement extends LitElement {
 
   constructor() {
     super();
+  }
+
+  update(changedProperties: Map<string | number | symbol, unknown>) {
+    super.update(changedProperties);
+
+    if (changedProperties.has('store')) {
+      this._subscribeStore();
+    }
   }
 
   private _subscribeStore() {
@@ -100,7 +105,6 @@ export class PageBlockElement extends LitElement {
   }
 
   firstUpdated() {
-    this._subscribeStore();
     this._placeholderInput.focus();
   }
 
@@ -115,6 +119,8 @@ export class PageBlockElement extends LitElement {
   }
 
   protected render() {
+    this.setAttribute('data-block-id', this.model.id);
+
     const emptyPagePlaceholder = html`
       <style>
         .block-placeholder {
@@ -146,11 +152,13 @@ export class PageBlockElement extends LitElement {
         this.model.children,
         child => child.id,
         child =>
-          html`<text-block-element
-            .store=${this.store}
-            .id=${child.id}
-            .model=${child}
-          />`
+          html`
+            <text-block-element
+              .store=${this.store}
+              .model=${child as TextBlockModel}
+            >
+            </text-block-element>
+          `
       )}
     `;
 
@@ -168,9 +176,11 @@ export class PageBlockElement extends LitElement {
       </div>
     `;
 
-    return html`<div class="page-container">
-      ${[buttons, this.isEmptyPage ? emptyPagePlaceholder : blockContent]}
-    </div>`;
+    return html`
+      <div class="page-container" data-block-id=${this.model.id}>
+        ${[buttons, this.isEmptyPage ? emptyPagePlaceholder : blockContent]}
+      </div>
+    `;
   }
 }
 

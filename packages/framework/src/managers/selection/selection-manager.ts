@@ -1,12 +1,12 @@
-import { PageContainer } from '../../components';
+import { PaperContainer } from '../../components';
 
 export class SelectionManager {
   private _type: 'block' | 'range' | 'none' = 'none';
   private _selectedBlockIds: Array<string> = [];
   // @ts-ignore
-  private _page: PageContainer;
+  private _page: PaperContainer;
 
-  constructor(page: PageContainer) {
+  constructor(page: PaperContainer) {
     // console.log(page);
     this._page = page;
   }

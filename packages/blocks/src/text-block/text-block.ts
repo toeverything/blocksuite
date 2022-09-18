@@ -20,14 +20,11 @@ export class TextBlockModel extends BaseBlockModel implements ITextBlockModel {
 
 @customElement('text-block-element')
 export class TextBlockElement extends LitElement {
-  @property({ type: Store })
+  @property()
   store!: Store;
 
-  @property({ type: TextBlockModel })
+  @property()
   model!: TextBlockModel;
-
-  @property({ reflect: true })
-  id!: string;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -35,10 +32,11 @@ export class TextBlockElement extends LitElement {
   }
 
   render() {
-    return html`<rich-text
-      .store=${this.store}
-      .model=${this.model}
-    ></rich-text>`;
+    this.setAttribute('data-block-id', this.model.id);
+
+    return html`
+      <rich-text .store=${this.store} .model=${this.model}></rich-text>
+    `;
   }
 }
 

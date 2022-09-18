@@ -2,7 +2,7 @@ import { Point, pointsToRect, Rect } from './rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Mouse } from '../../managers';
+import { MouseManager } from '../../managers';
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {
@@ -18,8 +18,8 @@ export class SelectionRect extends LitElement {
   @state()
   isShow = false;
 
-  @property({ type: Mouse })
-  mouse!: Mouse;
+  @property({ type: MouseManager })
+  mouse!: MouseManager;
 
   protected firstUpdated(): void {
     if (this.mouse) {

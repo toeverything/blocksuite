@@ -2,7 +2,7 @@ import { flattenDisposable, IDisposable } from '../../model/utils/disposable';
 import { Slot } from '../../model/utils/slot';
 import { MouseEventHandler } from './type';
 
-export class Mouse {
+export class MouseManager {
   private _isMouseDown = false;
   private _eventBinder: HTMLElement['addEventListener'];
   private _disposables: IDisposable[] = [];

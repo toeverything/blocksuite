@@ -19,7 +19,7 @@ export class RichText extends LitElement {
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
 
-  @property({ type: Store })
+  @property()
   store!: Store;
 
   @property()

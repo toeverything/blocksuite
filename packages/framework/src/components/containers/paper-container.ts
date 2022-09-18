@@ -1,8 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { SelectionManager } from '../../managers';
-import { Mouse } from '../../managers/mouse';
-import { Store } from '../../model/store';
+import { Store, SelectionManager, MouseManager } from '../..';
 import { noop } from '../../model/utils/utils';
 import { RichText } from '../rich-text/rich-text';
 
@@ -12,13 +10,13 @@ noop(RichText);
 const room =
   new URLSearchParams(location.search).get('room') || 'virgo-default';
 
-@customElement('page-container')
-export class PageContainer extends LitElement {
+@customElement('paper-container')
+export class PaperContainer extends LitElement {
   @property()
   store = new Store(room);
 
   @property()
-  mouse = new Mouse(this.addEventListener.bind(this));
+  mouse = new MouseManager(this.addEventListener.bind(this));
 
   @property()
   selectionManager = new SelectionManager(this);
@@ -37,11 +35,11 @@ export class PageContainer extends LitElement {
   protected render() {
     return html`
       <style>
-        .page-container {
+        .paper-container {
           position: relative;
         }
       </style>
-      <div class="page-container">
+      <div class="paper-container">
         <selection-rect .mouse=${this.mouse}></selection-rect>
         <page-block-element .store=${this.store}></page-block-element>
       </div>
@@ -51,6 +49,6 @@ export class PageContainer extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'page-container': PageContainer;
+    'paper-container': PaperContainer;
   }
 }

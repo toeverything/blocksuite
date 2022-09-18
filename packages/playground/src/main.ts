@@ -5,6 +5,6 @@ window.onload = () => {
   // avoid being tree-shaked
   noop(PageBlockElement);
 
-  const pageBlock = document.createElement('page-container');
-  document.body.appendChild(pageBlock);
+  const container = document.createElement('paper-container');
+  document.body.appendChild(container);
 };
