@@ -1,5 +1,5 @@
 import { LitElement, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, state, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { Store } from '@building-blocks/framework';
 import { TextBlockModel, ITextBlockModel } from '../text-block';
@@ -20,22 +20,22 @@ export class PageBlockElement extends LitElement {
   @property()
   store!: Store;
 
-  @property()
+  @state()
   model = new PageBlockModel(this.store);
 
   @property({ reflect: true })
   id = this.model.id;
 
-  @property()
-  btnText = 'Disconnect';
+  @state()
+  connectionBtnText = 'Disconnect';
 
   @property()
   isEmptyPage = true;
 
-  @property()
+  @state()
   canUndo = false;
 
-  @property()
+  @state()
   canRedo = false;
 
   @query('.block-placeholder-input')
@@ -96,10 +96,6 @@ export class PageBlockElement extends LitElement {
         text: '',
       };
       this.store.addBlock(blockProps);
-      // after first block is added, never go back to empty block state
-      queueMicrotask(() => {
-        this.store.restHistory();
-      });
     }
   }
 
@@ -109,12 +105,12 @@ export class PageBlockElement extends LitElement {
   }
 
   private _onToggleConnection() {
-    if (this.btnText === 'Disconnect') {
+    if (this.connectionBtnText === 'Disconnect') {
       this.store.provider.disconnect();
-      this.btnText = 'Connect';
+      this.connectionBtnText = 'Connect';
     } else {
       this.store.provider.connect();
-      this.btnText = 'Disconnect';
+      this.connectionBtnText = 'Disconnect';
     }
   }
 
@@ -159,17 +155,21 @@ export class PageBlockElement extends LitElement {
     `;
 
     const buttons = html`
-      <button @click=${this._onToggleConnection}>${this.btnText}</button>
-      <button .disabled=${!this.canUndo} @click=${() => this.store.undo()}>
-        Undo
-      </button>
-      <button .disabled=${!this.canRedo} @click=${() => this.store.redo()}>
-        Redo
-      </button>
+      <div style="margin-bottom: 10px">
+        <button .disabled=${!this.canUndo} @click=${() => this.store.undo()}>
+          Undo
+        </button>
+        <button .disabled=${!this.canRedo} @click=${() => this.store.redo()}>
+          Redo
+        </button>
+        <button @click=${this._onToggleConnection}>
+          ${this.connectionBtnText}
+        </button>
+      </div>
     `;
 
     return html`<div class="page-container">
-      ${[this.isEmptyPage ? emptyPagePlaceholder : blockContent, buttons]}
+      ${[buttons, this.isEmptyPage ? emptyPagePlaceholder : blockContent]}
     </div>`;
   }
 }

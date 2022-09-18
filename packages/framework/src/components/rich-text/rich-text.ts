@@ -48,8 +48,7 @@ export class RichText extends LitElement {
       },
       theme: 'snow',
     });
-    store.attachText(model.id, model.text, this._quill);
-    store.captureSync();
+    store.attachText(model.id, this._quill);
     this._quill.focus();
   }
 

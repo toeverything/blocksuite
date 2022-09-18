@@ -20,7 +20,7 @@ interface AwarenessMessage {
   state?: AwarenessState;
 }
 
-export class AwarenessManager {
+export class AwarenessAdapter {
   readonly store: Store;
   readonly awareness: Awareness;
 

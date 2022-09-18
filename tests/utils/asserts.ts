@@ -4,6 +4,11 @@
 import { expect, type Page } from '@playwright/test';
 import type { SerializedStore } from '../../packages/framework/src';
 
+export async function assertEmpty(page: Page) {
+  const actual = await page.innerText('.block-placeholder-input');
+  expect(actual).toBe('');
+}
+
 export async function assertText(page: Page, text: string) {
   const actual = await page.innerText('.ql-editor');
   expect(actual).toBe(text);

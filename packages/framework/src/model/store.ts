@@ -4,7 +4,7 @@ import { Slot } from './utils/slot';
 import { isPrimitive } from '../utils/common';
 import { TextAdapter } from './text-adapter';
 import Quill from 'quill';
-import { SelectionRange, AwarenessManager } from './awareness';
+import { SelectionRange, AwarenessAdapter } from './awareness';
 
 type YBlock = Y.Map<unknown>;
 type YBlocks = Y.Map<YBlock>;
@@ -35,7 +35,7 @@ export class Store {
   readonly doc = new Y.Doc();
   readonly provider: DebugProvider;
   private _history: Y.UndoManager;
-  readonly awareness: AwarenessManager;
+  readonly awareness: AwarenessAdapter;
 
   readonly slots = {
     update: new Slot(),
@@ -61,7 +61,7 @@ export class Store {
       doc: this.doc,
     });
 
-    this.awareness = new AwarenessManager(this);
+    this.awareness = new AwarenessAdapter(this);
 
     this._history.on('stack-cleared', this._historyObserver);
     this._history.on('stack-item-added', this._historyAddObserver);
@@ -96,17 +96,19 @@ export class Store {
       if (event instanceof Y.YTextEvent) {
         this.slots.updateText.emit(event);
       } else if (event instanceof Y.YMapEvent) {
-        event.keys.forEach((value, id) => {
-          if (value.action === 'add') {
-            const yBlock = this._getYBlock(id);
-            const props = yBlock.toJSON() as BlockProps;
-            this.slots.addBlock.emit(props);
-          } else if (value.action === 'update') {
-            // TODO
-          } else if (value.action === 'delete') {
-            this.slots.deleteBlock.emit(id);
-          }
-        });
+        if (event.target === this._yBlocks) {
+          event.keys.forEach((value, id) => {
+            if (value.action === 'add') {
+              const yBlock = this._getYBlock(id);
+              const props = yBlock.toJSON() as BlockProps;
+              this.slots.addBlock.emit(props);
+            } else if (value.action === 'delete') {
+              this.slots.deleteBlock.emit(id);
+            } else {
+              console.warn('Unknown update action on blocks', event);
+            }
+          });
+        }
       }
     }
     this.slots.update.emit();
@@ -172,6 +174,12 @@ export class Store {
 
     const yBlock = new Y.Map() as YBlock;
     Object.keys(blockProps).forEach(key => {
+      // workaround yText init
+      // TODO use schema
+      if (blockProps.flavour === 'text' && key === 'text') {
+        return;
+      }
+
       if (!isPrimitive(blockProps[key])) {
         throw new Error('Only top level primitives are supported for now');
       }
@@ -186,21 +194,26 @@ export class Store {
     });
   }
 
-  attachText(id: string, text: string, quill: Quill) {
+  attachText(id: string, quill: Quill) {
     const yBlock = this._getYBlock(id);
-    const yText = new Y.Text(text);
-    this.doc.transact(() => {
-      yBlock.set('text', yText);
-    }, null);
-    const apapter = new TextAdapter(this, yText, quill);
-    this.textAdapters.set(id, apapter);
+
+    const isVoidText = yBlock.get('text') === undefined;
+    const yText = isVoidText ? new Y.Text() : (yBlock.get('text') as Y.Text);
+    if (isVoidText) {
+      this.transact(() => {
+        yBlock.set('text', yText);
+      });
+    }
+
+    const adapter = new TextAdapter(this, yText, quill);
+    this.textAdapters.set(id, adapter);
 
     quill.on('selection-change', () => {
-      const cursor = apapter.getCursor();
+      const cursor = adapter.getCursor();
       if (!cursor) {
         return;
       }
-      this.awareness.setLocalCursor({ ...cursor, id: id });
+      this.awareness.setLocalCursor({ ...cursor, id });
     });
   }
 }

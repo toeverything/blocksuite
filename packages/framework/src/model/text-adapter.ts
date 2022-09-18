@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { AwarenessManager } from './awareness';
+import { AwarenessAdapter } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
 
@@ -35,7 +35,7 @@ export class TextAdapter {
   readonly yText: Y.Text;
   readonly quill: Quill;
   readonly quillCursors: any;
-  readonly awareness: AwarenessManager;
+  readonly awareness: AwarenessAdapter;
   private _negatedUsedFormats: Record<string, any>;
 
   constructor(store: Store, yText: Y.Text, quill: Quill) {
@@ -50,23 +50,15 @@ export class TextAdapter {
     // This object contains all attributes used in the quill instance
     this._negatedUsedFormats = {};
 
-    this.store.slots.updateText.on(event => {
-      this._yObserver(event);
-    });
+    this.yText.observe(this._yObserver);
 
-    quill.on('editor-change', this._quillObserver as any);
     // This indirectly initializes _negatedUsedFormats.
-    // Make sure that this call this after the _quillObserver is set.
+    // Make sure this calls after the _quillObserver is set.
     quill.setContents(yText.toDelta(), this as any);
+    quill.on('editor-change', this._quillObserver as any);
   }
 
   private _yObserver = (event: Y.YTextEvent) => {
-    // Should listen to global text event instead the curent yText instance,
-    // since an empty yText on yMap can be replaced by another yText.
-    if (event.target.parent !== this.yText.parent) {
-      return;
-    }
-
     // remote update doesn't carry clientID
     if (event.transaction.origin !== this.doc.clientID) {
       const eventDelta = event.delta;
@@ -95,7 +87,12 @@ export class TextAdapter {
     }
   };
 
-  private _quillObserver = (_: string, delta: any, _old: any, origin: any) => {
+  private _quillObserver = (
+    _eventType: string,
+    delta: any,
+    _state: any,
+    origin: any
+  ) => {
     const { yText } = this;
 
     if (delta && delta.ops) {
