@@ -1,2 +1,2 @@
 export * from './mouse/mouse-manager';
-export * from './selection';
+export * from './selection/selection-manager';

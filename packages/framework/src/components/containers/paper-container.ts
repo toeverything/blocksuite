@@ -148,7 +148,7 @@ export class PaperContainer extends LitElement {
       </div>
     `;
 
-    const buttons = html`
+    const debugButtons = html`
       <div style="margin-bottom: 10px">
         <button .disabled=${!this.canUndo} @click=${() => this.store.undo()}>
           Undo
@@ -176,8 +176,9 @@ export class PaperContainer extends LitElement {
         }
       </style>
       <div class="paper-container">
+        ${debugButtons}
         <selection-rect .mouse=${this.mouse}></selection-rect>
-        ${[buttons, this.isEmptyPage ? emptyPagePlaceholder : blockRoot]}
+        ${this.isEmptyPage ? emptyPagePlaceholder : blockRoot}
       </div>
     `;
   }

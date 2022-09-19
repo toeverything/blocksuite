@@ -1,6 +1,7 @@
 import { flattenDisposable, IDisposable } from '../../model/utils/disposable';
 import { Slot } from '../../model/utils/slot';
-import { MouseEventHandler } from './type';
+
+export type MouseEventHandler = (e: MouseEvent) => void;
 
 export class MouseManager {
   private _isMouseDown = false;
