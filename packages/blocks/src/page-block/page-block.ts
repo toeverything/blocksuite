@@ -9,7 +9,7 @@ export class PageBlockModel extends BaseBlockModel {
   children: BaseBlockModel[] = [];
 
   constructor(store: Store) {
-    super(store, { id: '0' });
+    super(store, { id: store.createId() });
   }
 }
 

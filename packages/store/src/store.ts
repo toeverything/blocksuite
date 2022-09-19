@@ -33,7 +33,7 @@ export interface StackItem {
   };
 }
 
-let i = 1; // for debug use, 0 for root
+let i = 0;
 let created = false;
 
 export class Store {
