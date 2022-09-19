@@ -1,14 +1,10 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { SelectionManager, MouseManager } from '../..';
-import { Store, noop } from '@building-blocks/store';
-import { RichText } from '../rich-text/rich-text';
+import { Store } from '@building-blocks/store';
 import { BlockMap, TextBlockProps } from '../../block-loader';
 
 const { TextBlockModel, PageBlockModel } = BlockMap;
-
-// avoid being tree-shaked
-noop(RichText);
 
 const room =
   new URLSearchParams(location.search).get('room') || 'virgo-default';

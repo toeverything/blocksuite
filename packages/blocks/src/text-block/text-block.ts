@@ -1,6 +1,11 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { Store, BaseBlockModel, IBaseBlockProps } from '@building-blocks/store';
+import { noop } from '@building-blocks/store';
+import { RichText } from '../__internal__/rich-text/rich-text';
+
+// avoid being tree-shaked
+noop(RichText);
 
 export interface TextBlockProps extends IBaseBlockProps {
   flavour: 'text';
