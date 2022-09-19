@@ -13,6 +13,7 @@ export type YBlocks = Y.Map<YBlock>;
 export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
+  children: string[];
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -134,7 +135,7 @@ export class Store {
   }
 
   get isEmpty() {
-    return this._yBlocks.size === 0;
+    return this._yBlocks.size <= 1; // has one page block by default
   }
 
   get canUndo() {
@@ -158,7 +159,7 @@ export class Store {
     this._history.stopCapturing();
   }
 
-  restHistory() {
+  resetHistory() {
     this._history.clear();
   }
 
@@ -166,23 +167,29 @@ export class Store {
     this.doc.transact(fn, this.doc.clientID);
   }
 
-  createId(): string {
+  private _createId(): string {
     return (i++).toString();
   }
 
-  addBlock(blockProps: BlockProps) {
-    if (this._yBlocks.has(blockProps.id)) {
+  addBlock<T extends Partial<BlockProps>>(blockProps: T) {
+    const { flavour } = blockProps;
+    const id = this._createId();
+
+    if (!flavour) {
+      throw new Error('Block props must contain flavour');
+    }
+
+    if (this._yBlocks.has(id)) {
       throw new Error(`Block with id ${blockProps.id} already exists`);
     }
-    if (!blockProps.id || !blockProps.flavour) {
-      throw new Error('Block props must contain id and flavour');
-    }
+
+    blockProps.id = id;
 
     const yBlock = new Y.Map() as YBlock;
     syncBlockProps(yBlock, blockProps);
 
     this.transact(() => {
-      this._yBlocks.set(blockProps.id, yBlock);
+      this._yBlocks.set(id, yBlock);
     });
   }
 

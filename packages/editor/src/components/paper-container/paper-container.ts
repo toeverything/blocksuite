@@ -15,7 +15,7 @@ export class PaperContainer extends LitElement {
   store = new Store(room);
 
   @state()
-  model = new PageBlockModel(this.store);
+  model!: InstanceType<typeof PageBlockModel>;
 
   @state()
   mouse = new MouseManager(this.addEventListener.bind(this));
@@ -42,6 +42,11 @@ export class PaperContainer extends LitElement {
     super();
     this._subscribeStore();
 
+    this.store.addBlock({
+      flavour: 'page',
+      children: [],
+    });
+
     // @ts-ignore
     window.store = this.store;
   }
@@ -58,24 +63,31 @@ export class PaperContainer extends LitElement {
     });
 
     this.store.slots.addBlock.on(blockProps => {
-      const block = new TextBlockModel(
-        this.store,
-        blockProps as TextBlockProps
-      );
-      if (!this.model.children.find(child => child.id === block.id)) {
-        this.model.children.push(block);
-      }
+      if (blockProps.flavour === 'page') {
+        this.model = new PageBlockModel(this.store, {});
+        queueMicrotask(() => {
+          this.store.resetHistory();
+        });
+      } else if (blockProps.flavour === 'text') {
+        const block = new TextBlockModel(
+          this.store,
+          blockProps as TextBlockProps
+        );
+        if (!this.model.elements.find(child => child.id === block.id)) {
+          this.model.elements.push(block);
+        }
 
-      this.requestUpdate();
+        this.requestUpdate();
+      }
     });
 
     this.store.slots.deleteBlock.on(id => {
-      const index = this.model.children.findIndex(child => child.id === id);
+      const index = this.model.elements.findIndex(child => child.id === id);
       if (index !== -1) {
-        this.model.children.splice(index, 1);
+        this.model.elements.splice(index, 1);
       }
 
-      this.isEmptyPage = this.model.children.length === 0;
+      this.isEmptyPage = this.model.elements.length === 0;
       this.requestUpdate();
     });
   }
@@ -86,9 +98,8 @@ export class PaperContainer extends LitElement {
     if (this.isEmptyPage) {
       this.isEmptyPage = false;
 
-      const blockProps: TextBlockProps = {
+      const blockProps: Partial<TextBlockProps> = {
         flavour: 'text',
-        id: this.store.createId(),
         text: '',
       };
       this.store.addBlock(blockProps);
@@ -111,7 +122,9 @@ export class PaperContainer extends LitElement {
   }
 
   firstUpdated() {
-    this._placeholderInput.focus();
+    console.log(this.model);
+
+    this._placeholderInput?.focus();
   }
 
   render() {

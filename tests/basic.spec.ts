@@ -5,7 +5,17 @@ import { assertStore, assertText } from './utils/asserts';
 
 const defaultStore: SerializedStore = {
   blocks: {
-    '1': { 'sys:flavour': 'text', 'sys:id': '1', 'prop:text': 'hello' },
+    '0': {
+      'sys:id': '0',
+      'sys:flavour': 'page',
+      'sys:children': [], // FIXME
+    },
+    '1': {
+      'sys:flavour': 'text',
+      'sys:id': '1',
+      'sys:children': [],
+      'prop:text': 'hello',
+    },
   },
 };
 

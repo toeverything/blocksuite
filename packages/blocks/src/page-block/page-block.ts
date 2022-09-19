@@ -5,12 +5,8 @@ import { Store, BaseBlockModel } from '@building-blocks/store';
 import { TextBlockModel } from '../text-block/text-block';
 
 export class PageBlockModel extends BaseBlockModel {
-  flavour = 'page';
-  children: BaseBlockModel[] = [];
-
-  constructor(store: Store) {
-    super(store, { id: store.createId() });
-  }
+  flavour = 'page' as const;
+  elements: BaseBlockModel[] = [];
 }
 
 @customElement('page-block-element')
@@ -35,7 +31,7 @@ export class PageBlockElement extends LitElement {
 
     const childBlocks = html`
       ${repeat(
-        this.model.children,
+        this.model.elements,
         child => child.id,
         child =>
           html`

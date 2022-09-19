@@ -1,5 +1,6 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { Store } from '@building-blocks/store';
+import { TextBlockProps } from '../..';
 
 interface BindingContext {
   collapsed: boolean;
@@ -54,9 +55,8 @@ export const createKeyboardBindings = (store: Store) => {
     const isAtBlockEnd =
       this.quill.getLength() - 1 === this.quill.getSelection()?.index;
     if (isAtBlockEnd) {
-      const blockProps = {
+      const blockProps: Partial<TextBlockProps> = {
         flavour: 'text',
-        id: store.createId(),
         text: '',
       };
       // make adding text block by enter a standalone operation
