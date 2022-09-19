@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import { Store } from '../..';
+import { Store } from '@building-blocks/store';
 import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);

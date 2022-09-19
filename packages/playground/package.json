@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@building-blocks/blocks": "workspace:*",
+    "@building-blocks/framework": "workspace:*",
     "@lit-labs/react": "^1.0.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

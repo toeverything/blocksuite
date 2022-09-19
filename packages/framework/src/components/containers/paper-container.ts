@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import { Store, SelectionManager, MouseManager } from '../..';
-import { noop } from '../../model/utils/utils';
+import { SelectionManager, MouseManager } from '../..';
+import { Store, noop } from '@building-blocks/store';
 import { RichText } from '../rich-text/rich-text';
 // FIXME circular deps
 import {

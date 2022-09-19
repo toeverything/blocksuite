@@ -1,7 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { Store } from '@building-blocks/framework';
-import { BaseBlockModel, IBaseBlockModel } from '@building-blocks/framework';
+import { Store, BaseBlockModel, IBaseBlockModel } from '@building-blocks/store';
 
 export interface ITextBlockModel extends IBaseBlockModel {
   flavour: 'text';
