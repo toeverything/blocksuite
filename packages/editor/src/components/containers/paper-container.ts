@@ -8,7 +8,7 @@ import {
   ITextBlockModel,
   TextBlockModel,
   PageBlockModel,
-} from '../../../../blocks';
+} from '../../../../blocks/src';
 
 // avoid being tree-shaked
 noop(RichText);

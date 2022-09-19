@@ -1,4 +1,4 @@
-import { PaperContainer } from '@building-blocks/framework';
+import { PaperContainer } from '@building-blocks/editor';
 import { noop } from './utils';
 
 window.onload = () => {

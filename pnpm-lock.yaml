@@ -47,7 +47,7 @@ importers:
     dependencies:
       '@building-blocks/store': link:../store
 
-  packages/framework:
+  packages/editor:
     specifiers:
       '@building-blocks/blocks': workspace:*
       '@building-blocks/store': workspace:*
@@ -68,12 +68,12 @@ importers:
 
   packages/playground:
     specifiers:
-      '@building-blocks/framework': workspace:*
+      '@building-blocks/editor': workspace:*
       '@lit-labs/react': ^1.0.8
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
-      '@building-blocks/framework': link:../framework
+      '@building-blocks/editor': link:../editor
       '@lit-labs/react': 1.0.8
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
