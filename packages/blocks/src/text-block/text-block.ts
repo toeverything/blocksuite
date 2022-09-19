@@ -1,17 +1,17 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { Store, BaseBlockModel, IBaseBlockModel } from '@building-blocks/store';
+import { Store, BaseBlockModel, IBaseBlockProps } from '@building-blocks/store';
 
-export interface ITextBlockModel extends IBaseBlockModel {
+export interface TextBlockProps extends IBaseBlockProps {
   flavour: 'text';
   text: string;
 }
 
-export class TextBlockModel extends BaseBlockModel implements ITextBlockModel {
+export class TextBlockModel extends BaseBlockModel implements TextBlockProps {
   flavour = 'text' as const;
   text = '';
 
-  constructor(store: Store, props: Partial<ITextBlockModel>) {
+  constructor(store: Store, props: Partial<TextBlockProps>) {
     super(store, props);
     this.text = props.text as string;
   }

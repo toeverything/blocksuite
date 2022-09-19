@@ -3,12 +3,9 @@ import { customElement, state, query } from 'lit/decorators.js';
 import { SelectionManager, MouseManager } from '../..';
 import { Store, noop } from '@building-blocks/store';
 import { RichText } from '../rich-text/rich-text';
-// FIXME circular deps
-import {
-  ITextBlockModel,
-  TextBlockModel,
-  PageBlockModel,
-} from '../../../../blocks/src';
+import { BlockMap, TextBlockProps } from '../../block-loader';
+
+const { TextBlockModel, PageBlockModel } = BlockMap;
 
 // avoid being tree-shaked
 noop(RichText);
@@ -67,7 +64,7 @@ export class PaperContainer extends LitElement {
     this.store.slots.addBlock.on(blockProps => {
       const block = new TextBlockModel(
         this.store,
-        blockProps as ITextBlockModel
+        blockProps as TextBlockProps
       );
       if (!this.model.children.find(child => child.id === block.id)) {
         this.model.children.push(block);
@@ -93,7 +90,7 @@ export class PaperContainer extends LitElement {
     if (this.isEmptyPage) {
       this.isEmptyPage = false;
 
-      const blockProps: ITextBlockModel = {
+      const blockProps: TextBlockProps = {
         flavour: 'text',
         id: this.store.createId(),
         text: '',
