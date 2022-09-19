@@ -1,5 +1,5 @@
 import type { Quill, RangeStatic } from 'quill';
-import type { Store } from '../../';
+import type { Store } from '@building-blocks/store';
 
 interface BindingContext {
   collapsed: boolean;

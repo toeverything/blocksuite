@@ -43,11 +43,42 @@ importers:
 
   packages/blocks:
     specifiers:
-      '@building-blocks/framework': workspace:*
+      '@building-blocks/store': workspace:*
     dependencies:
-      '@building-blocks/framework': link:../framework
+      '@building-blocks/store': link:../store
 
-  packages/framework:
+  packages/editor:
+    specifiers:
+      '@building-blocks/blocks': workspace:*
+      '@building-blocks/store': workspace:*
+      '@types/quill': ^2.0.9
+      lib0: ^0.2.52
+      y-protocols: ^1.0.5
+      y-webrtc: ^10.2.3
+      yjs: ^13.5.41
+    dependencies:
+      '@building-blocks/blocks': link:../blocks
+      '@building-blocks/store': link:../store
+      lib0: 0.2.52
+      y-protocols: 1.0.5
+      y-webrtc: 10.2.3
+      yjs: 13.5.41
+    devDependencies:
+      '@types/quill': 2.0.9
+
+  packages/playground:
+    specifiers:
+      '@building-blocks/editor': workspace:*
+      '@lit-labs/react': ^1.0.8
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@building-blocks/editor': link:../editor
+      '@lit-labs/react': 1.0.8
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+
+  packages/store:
     specifiers:
       '@types/quill': ^2.0.9
       lib0: ^0.2.52
@@ -61,18 +92,6 @@ importers:
       yjs: 13.5.41
     devDependencies:
       '@types/quill': 2.0.9
-
-  packages/playground:
-    specifiers:
-      '@building-blocks/blocks': workspace:*
-      '@lit-labs/react': ^1.0.8
-      react: ^18.2.0
-      react-dom: ^18.2.0
-    dependencies:
-      '@building-blocks/blocks': link:../blocks
-      '@lit-labs/react': 1.0.8
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
 
 packages:
 

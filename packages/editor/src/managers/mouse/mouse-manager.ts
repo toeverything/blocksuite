@@ -1,5 +1,4 @@
-import { flattenDisposable, IDisposable } from '../../model/utils/disposable';
-import { Slot } from '../../model/utils/slot';
+import { Slot, flattenDisposable, IDisposable } from '@building-blocks/store';
 
 export type MouseEventHandler = (e: MouseEvent) => void;
 

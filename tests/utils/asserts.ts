@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { expect, type Page } from '@playwright/test';
-import type { SerializedStore } from '../../packages/framework/src';
+import type { SerializedStore } from '../../packages/store';
 
 export async function assertEmpty(page: Page) {
   const actual = await page.innerText('.block-placeholder-input');
