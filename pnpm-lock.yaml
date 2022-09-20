@@ -21,6 +21,7 @@ importers:
       quill-cursors: ^4.0.0
       typescript: ^4.8.3
       vite: ^3.1.0
+      vitest: ^0.23.4
     dependencies:
       lit: 2.3.1
       quill: 1.3.7
@@ -40,6 +41,7 @@ importers:
       prettier: 2.7.1
       typescript: 4.8.3
       vite: 3.1.1
+      vitest: 0.23.4
 
   packages/blocks:
     specifiers:
@@ -82,7 +84,6 @@ importers:
     specifiers:
       '@types/quill': ^2.0.9
       lib0: ^0.2.52
-      vitest: ^0.23.4
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
       yjs: ^13.5.41
@@ -93,7 +94,6 @@ importers:
       yjs: 13.5.41
     devDependencies:
       '@types/quill': 2.0.9
-      vitest: 0.23.4
 
 packages:
 
