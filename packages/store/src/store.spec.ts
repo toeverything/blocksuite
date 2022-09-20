@@ -1,13 +1,22 @@
 import { assert, describe, it } from 'vitest';
-import { Store } from '../';
+import { Slot, Store } from '../';
 import { BlockMap } from '../../editor/src/block-loader';
 
 function serialize(store: Store) {
   return store.doc.toJSON();
 }
 
+function waitSlot<T>(slot: Slot<T>, asserter: (val: T) => void) {
+  return new Promise<void>(resolve => {
+    slot.once(val => {
+      asserter(val);
+      resolve();
+    });
+  });
+}
+
 describe.concurrent('basic', () => {
-  it('init store', () => {
+  it('can init store', () => {
     const store = new Store();
 
     assert.deepEqual(serialize(store), {
@@ -68,6 +77,16 @@ describe.concurrent('addBlock', () => {
           'sys:id': '1',
         },
       },
+    });
+  });
+
+  it('can observe slot events', async () => {
+    const store = new Store().register(BlockMap);
+
+    queueMicrotask(() => store.addBlock({ flavour: 'page' }));
+
+    await waitSlot(store.slots.addBlock, block => {
+      assert.ok(block instanceof BlockMap.page);
     });
   });
 });
