@@ -172,7 +172,7 @@ export class Store {
   }
 
   private _createId(): string {
-    return this.doc.clientID + (i++).toString();
+    return (i++).toString();
   }
 
   addBlock<T extends Partial<BlockProps>>(blockProps: T) {
