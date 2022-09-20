@@ -26,14 +26,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 
       - name: Run lint
         run: pnpm lint
 
-      - name: Run Playwright tests
-        run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright test
+      - name: Run unit tests
+        run: pnpm test:unit
+
+      - name: Run E2E tests
+        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test:e2e
 
       # - name: Upload test results
       #   if: always()
