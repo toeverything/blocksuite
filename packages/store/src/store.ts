@@ -35,7 +35,6 @@ export interface StackItem {
   };
 }
 
-let i = 0;
 const IS_WEB = !import.meta.env.SSR;
 
 export class Store {
@@ -52,6 +51,7 @@ export class Store {
     updateText: new Slot<Y.YTextEvent>(),
   };
 
+  private _i = 0;
   private _history: Y.UndoManager;
   private _currentRoot: BaseBlockModel | null = null;
 
@@ -75,10 +75,13 @@ export class Store {
   }
 
   private _historyAddObserver = (event: StackItem) => {
-    event.stackItem.meta.set(
-      'cursor-location',
-      this.awareness.getLocalCursor()
-    );
+    if (IS_WEB) {
+      event.stackItem.meta.set(
+        'cursor-location',
+        this.awareness.getLocalCursor()
+      );
+    }
+
     this._historyObserver();
   };
 
@@ -169,7 +172,7 @@ export class Store {
   }
 
   private _createId(): string {
-    return (i++).toString();
+    return (this._i++).toString();
   }
 
   addBlock<T extends Partial<BlockProps>>(blockProps: T) {
