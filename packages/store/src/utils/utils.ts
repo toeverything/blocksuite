@@ -3,11 +3,6 @@ import type { BlockProps, PrefixedBlockProps, YBlock } from '../store';
 
 const SYS_KEYS = ['id', 'flavour', 'children'];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function noop(_: unknown) {
-  // do nothing
-}
-
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
 function isPrimitive(
   a: unknown

@@ -1,10 +1,7 @@
-import { PaperContainer } from '@building-blocks/editor';
-import { noop } from './utils';
+import '@building-blocks/editor';
+import '@building-blocks/blocks';
 
 window.onload = () => {
-  // avoid being tree-shaked
-  noop(PaperContainer);
-
   const container = document.createElement('paper-container');
   document.body.appendChild(container);
 };

@@ -46,7 +46,7 @@ export class Store {
   readonly slots = {
     update: new Slot(),
     historyUpdate: new Slot(),
-    addBlock: new Slot<BlockProps>(),
+    addBlock: new Slot<BaseBlockModel>(),
     deleteBlock: new Slot<string>(),
     updateText: new Slot<Y.YTextEvent>(),
   };
@@ -54,6 +54,7 @@ export class Store {
   private _i = 0;
   private _history: Y.UndoManager;
   private _currentRoot: BaseBlockModel | null = null;
+  private _blockMap = new Map<string, typeof BaseBlockModel>();
 
   constructor(room = '') {
     if (IS_WEB) {
@@ -110,7 +111,14 @@ export class Store {
               const yBlock = this._getYBlock(id);
               const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
               const props = toBlockProps(prefixedProps) as BlockProps;
-              this.slots.addBlock.emit(props);
+              const BlockCtor = this._blockMap.get(props.flavour);
+              if (!BlockCtor) {
+                throw new Error(
+                  `Block flavour ${props.flavour} is not registered`
+                );
+              }
+              const model = new BlockCtor(this, props);
+              this.slots.addBlock.emit(model);
             } else if (value.action === 'delete') {
               this.slots.deleteBlock.emit(id);
             } else {
@@ -175,6 +183,13 @@ export class Store {
     return (this._i++).toString();
   }
 
+  register(blockMap: Record<string, typeof BaseBlockModel>) {
+    Object.keys(blockMap).forEach(key => {
+      this._blockMap.set(key, blockMap[key]);
+    });
+    return this;
+  }
+
   addBlock<T extends Partial<BlockProps>>(blockProps: T) {
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
@@ -224,7 +239,7 @@ export class Store {
     });
   }
 
-  removeText(id: string) {
+  detachText(id: string) {
     this.textAdapters.delete(id);
   }
 

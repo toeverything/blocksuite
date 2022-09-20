@@ -1,13 +1,9 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { Store, BaseBlockModel } from '@building-blocks/store';
-import { TextBlockModel } from '../text-block/text-block';
-
-export class PageBlockModel extends BaseBlockModel {
-  flavour = 'page' as const;
-  elements: BaseBlockModel[] = [];
-}
+import { Store } from '@building-blocks/store';
+import { PageBlockModel } from './page-model';
+import { TextBlockModel } from '../';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {

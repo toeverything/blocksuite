@@ -1,5 +1,6 @@
 import { assert, describe, it } from 'vitest';
 import { Store } from '../';
+import { BlockMap } from '../../editor/src/block-loader';
 
 function serialize(store: Store) {
   return store.doc.toJSON();
@@ -17,7 +18,8 @@ describe.concurrent('basic', () => {
 
 describe.concurrent('addBlock', () => {
   it('can add single model', () => {
-    const store = new Store();
+    const store = new Store().register(BlockMap);
+
     store.addBlock({ flavour: 'page' });
 
     assert.deepEqual(serialize(store), {
@@ -32,7 +34,8 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add model with props', () => {
-    const store = new Store();
+    const store = new Store().register(BlockMap);
+
     store.addBlock({ flavour: 'page', title: 'hello' });
 
     assert.deepEqual(serialize(store), {
@@ -48,7 +51,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add multi models', () => {
-    const store = new Store();
+    const store = new Store().register(BlockMap);
     store.addBlock({ flavour: 'page' });
     store.addBlock({ flavour: 'page' });
 

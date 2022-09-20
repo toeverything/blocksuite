@@ -4,7 +4,7 @@ import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@building-blocks/store';
 import { BlockMap, TextBlockProps } from '../../block-loader';
 
-const { TextBlockModel, PageBlockModel } = BlockMap;
+type PageBlockModel = InstanceType<typeof BlockMap.page>;
 
 const room =
   new URLSearchParams(location.search).get('room') || 'virgo-default';
@@ -12,10 +12,10 @@ const room =
 @customElement('paper-container')
 export class PaperContainer extends LitElement {
   @state()
-  store = new Store(room);
+  store = new Store(room).register(BlockMap);
 
   @state()
-  model!: InstanceType<typeof PageBlockModel>;
+  model!: PageBlockModel;
 
   @state()
   mouse = new MouseManager(this.addEventListener.bind(this));
@@ -40,6 +40,7 @@ export class PaperContainer extends LitElement {
 
   constructor() {
     super();
+
     this._subscribeStore();
 
     // @ts-ignore
@@ -57,16 +58,11 @@ export class PaperContainer extends LitElement {
       this.canRedo = this.store.canRedo;
     });
 
-    this.store.slots.addBlock.on(blockProps => {
-      if (blockProps.flavour === 'page') {
-        const root = new PageBlockModel(this.store, blockProps);
-        this.store.setRoot(root);
-        this.model = root;
-      } else if (blockProps.flavour === 'text') {
-        const block = new TextBlockModel(
-          this.store,
-          blockProps as TextBlockProps
-        );
+    this.store.slots.addBlock.on(block => {
+      if (block.flavour === 'page') {
+        this.store.setRoot(block);
+        this.model = block as PageBlockModel;
+      } else if (block.flavour === 'text') {
         if (!this.model.elements.find(child => child.id === block.id)) {
           this.model.elements.push(block);
         }
