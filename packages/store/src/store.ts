@@ -30,7 +30,7 @@ export interface SerializedStore {
 
 export interface StackItem {
   stackItem: {
-    meta: Map<'cursor-location', SelectionRange>;
+    meta: Map<'cursor-location', SelectionRange | undefined>;
     type: 'undo' | 'redo';
   };
 }
@@ -197,6 +197,7 @@ export class Store {
     this.transact(() => {
       this._yBlocks.set(id, yBlock);
     });
+    return id;
   }
 
   attachText(id: string, quill: Quill) {
@@ -221,6 +222,10 @@ export class Store {
       }
       this.awareness.setLocalCursor({ ...cursor, id });
     });
+  }
+
+  removeText(id: string) {
+    this.textAdapters.delete(id);
   }
 
   setRoot(block: BaseBlockModel) {

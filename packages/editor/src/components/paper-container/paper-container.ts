@@ -101,7 +101,10 @@ export class PaperContainer extends LitElement {
         flavour: 'text',
         text: '',
       };
-      this.store.addBlock(textProps);
+      const id = this.store.addBlock(textProps);
+      setTimeout(() => {
+        this.store.textAdapters.get(id)?.quill.focus();
+      });
     }
   }
 

@@ -10,8 +10,15 @@ export interface SelectionRange {
   focus: RelativePosition;
 }
 
+interface UserInfo {
+  id: number;
+  name: string;
+  color: string;
+}
+
 interface AwarenessState {
-  cursor: SelectionRange;
+  cursor?: SelectionRange;
+  user: UserInfo;
 }
 
 interface AwarenessMessage {
@@ -39,14 +46,14 @@ export class AwarenessAdapter {
     this.awareness.setLocalStateField('cursor', range);
   }
 
-  public getLocalCursor() {
+  public getLocalCursor(): SelectionRange | undefined {
     const states = this.awareness.getStates();
-    const awarenessState = states.get(this.store.doc.clientID);
+    const awarenessState = states.get(this.awareness.clientID);
     return awarenessState?.cursor;
   }
 
-  public getStates() {
-    return this.awareness.getStates();
+  public getStates(): Map<number, AwarenessState> {
+    return this.awareness.getStates() as Map<number, AwarenessState>;
   }
 
   private _onAwarenessChange = (diff: {
@@ -80,26 +87,66 @@ export class AwarenessAdapter {
   };
 
   private _onAwarenessMessage = (awMsg: AwarenessMessage) => {
-    if (awMsg.type !== 'remove' && awMsg.state) {
-      const anchor = Y.createAbsolutePositionFromRelativePosition(
-        awMsg.state?.cursor.anchor,
-        this.store.doc
-      );
-      const focus = Y.createAbsolutePositionFromRelativePosition(
-        awMsg.state?.cursor.focus,
-        this.store.doc
-      );
-      if (anchor && focus) {
-        const textAdapter = this.store.textAdapters.get(
-          awMsg.state?.cursor.id || ''
-        );
-        textAdapter?.quill.setSelection(
-          anchor.index,
-          focus.index - anchor.index
-        );
-      }
+    if (awMsg.id === this.awareness.clientID) {
+      this.updateLocalCursor();
+    } else {
+      this._resetRemoteCursor();
     }
   };
+
+  private _resetRemoteCursor() {
+    this.store.textAdapters.forEach(textAdapter =>
+      textAdapter.quillCursors.clearCursors()
+    );
+    this.getStates().forEach((awState, clientId) => {
+      if (clientId !== this.awareness.clientID && awState.cursor) {
+        const anchor = Y.createAbsolutePositionFromRelativePosition(
+          awState.cursor.anchor,
+          this.store.doc
+        );
+        const focus = Y.createAbsolutePositionFromRelativePosition(
+          awState.cursor.focus,
+          this.store.doc
+        );
+        const textAdapter = this.store.textAdapters.get(
+          awState.cursor.id || ''
+        );
+        if (anchor && focus && textAdapter) {
+          const user = awState.user || {};
+          const color = user.color || '#ffa500';
+          const name = user.name || 'other';
+          textAdapter.quillCursors.createCursor(
+            clientId.toString(),
+            name,
+            color
+          );
+          textAdapter.quillCursors.moveCursor(clientId.toString(), {
+            index: anchor.index,
+            length: focus.index - anchor.index,
+          });
+        }
+      }
+    });
+  }
+
+  public updateLocalCursor() {
+    const localCursor = this.store.awareness.getLocalCursor();
+    if (!localCursor) {
+      return;
+    }
+    const anchor = Y.createAbsolutePositionFromRelativePosition(
+      localCursor.anchor,
+      this.store.doc
+    );
+    const focus = Y.createAbsolutePositionFromRelativePosition(
+      localCursor.focus,
+      this.store.doc
+    );
+    if (anchor && focus) {
+      const textAdapter = this.store.textAdapters.get(localCursor.id || '');
+      textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
+    }
+  }
 
   destroy() {
     if (this.awareness) {
