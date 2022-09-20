@@ -5,6 +5,7 @@ import { TextAdapter } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
 import { syncBlockProps, toBlockProps } from './utils/utils';
+import { BaseBlockModel } from './base';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -40,8 +41,8 @@ let created = false;
 export class Store {
   readonly doc = new Y.Doc();
   readonly provider: DebugProvider;
-  private _history: Y.UndoManager;
   readonly awareness: AwarenessAdapter;
+  readonly textAdapters = new Map<string, TextAdapter>();
 
   readonly slots = {
     update: new Slot(),
@@ -51,7 +52,8 @@ export class Store {
     updateText: new Slot<Y.YTextEvent>(),
   };
 
-  readonly textAdapters = new Map<string, TextAdapter>();
+  private _history: Y.UndoManager;
+  private _currentRoot: BaseBlockModel | null = null;
 
   constructor(room: string) {
     if (created) {
@@ -112,9 +114,11 @@ export class Store {
             } else if (value.action === 'delete') {
               this.slots.deleteBlock.emit(id);
             } else {
-              console.warn('Unknown update action on blocks', event);
+              console.trace('Unknown update action on blocks', event);
             }
           });
+        } else if (event.target.parent === this._yBlocks) {
+          // TODO update yBlock
         }
       }
     }
@@ -135,7 +139,7 @@ export class Store {
   }
 
   get isEmpty() {
-    return this._yBlocks.size <= 1; // has one page block by default
+    return this._yBlocks.size === 0;
   }
 
   get canUndo() {
@@ -172,21 +176,23 @@ export class Store {
   }
 
   addBlock<T extends Partial<BlockProps>>(blockProps: T) {
-    const { flavour } = blockProps;
-    const id = blockProps.id || this._createId();
-
-    if (!flavour) {
+    if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
     }
-
-    if (this._yBlocks.has(id)) {
-      throw new Error(`Block with id ${blockProps.id} already exists`);
-    }
+    const id = this._createId();
 
     blockProps.id = id;
 
     const yBlock = new Y.Map() as YBlock;
     syncBlockProps(yBlock, blockProps);
+
+    // no root when adding root itself
+    const rootId = this._currentRoot?.id;
+    if (rootId) {
+      const yRoot = this._yBlocks.get(rootId) as YBlock;
+      const yChildren = yRoot.get('sys:children') as Y.Array<string>;
+      yChildren.insert(yChildren.length, [id]);
+    }
 
     this.transact(() => {
       this._yBlocks.set(id, yBlock);
@@ -220,5 +226,9 @@ export class Store {
 
   removeText(id: string) {
     this.textAdapters.delete(id);
+  }
+
+  setRoot(block: BaseBlockModel) {
+    this._currentRoot = block;
   }
 }
