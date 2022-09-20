@@ -29,7 +29,7 @@ export interface SerializedStore {
 
 export interface StackItem {
   stackItem: {
-    meta: Map<'cursor-location', SelectionRange>;
+    meta: Map<'cursor-location', SelectionRange | undefined>;
     type: 'undo' | 'redo';
   };
 }
@@ -168,12 +168,12 @@ export class Store {
   }
 
   private _createId(): string {
-    return (i++).toString();
+    return this.doc.clientID + (i++).toString();
   }
 
   addBlock<T extends Partial<BlockProps>>(blockProps: T) {
     const { flavour } = blockProps;
-    const id = this._createId();
+    const id = blockProps.id || this._createId();
 
     if (!flavour) {
       throw new Error('Block props must contain flavour');
@@ -191,6 +191,7 @@ export class Store {
     this.transact(() => {
       this._yBlocks.set(id, yBlock);
     });
+    return id;
   }
 
   attachText(id: string, quill: Quill) {
@@ -215,5 +216,9 @@ export class Store {
       }
       this.awareness.setLocalCursor({ ...cursor, id });
     });
+  }
+
+  removeText(id: string) {
+    this.textAdapters.delete(id);
   }
 }

@@ -49,7 +49,13 @@ export class RichText extends LitElement {
       theme: 'snow',
     });
     store.attachText(model.id, this._quill);
-    this._quill.focus();
+    this.store.awareness.updateLocalCursor();
+  }
+
+  disconnectedCallback(): void {
+      this.store.removeText(this.model.id);
+
+      super.disconnectedCallback();
   }
 
   render() {

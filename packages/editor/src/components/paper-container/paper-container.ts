@@ -44,6 +44,7 @@ export class PaperContainer extends LitElement {
 
     this.store.addBlock({
       flavour: 'page',
+      id: '0',
       children: [],
     });
 
@@ -64,7 +65,7 @@ export class PaperContainer extends LitElement {
 
     this.store.slots.addBlock.on(blockProps => {
       if (blockProps.flavour === 'page') {
-        this.model = new PageBlockModel(this.store, {});
+        this.model = new PageBlockModel(this.store, blockProps);
         queueMicrotask(() => {
           this.store.resetHistory();
         });
@@ -102,7 +103,10 @@ export class PaperContainer extends LitElement {
         flavour: 'text',
         text: '',
       };
-      this.store.addBlock(blockProps);
+      const id = this.store.addBlock(blockProps);
+      setTimeout(() => {
+        this.store.textAdapters.get(id)?.quill.focus();
+      })
     }
   }
 

@@ -61,7 +61,10 @@ export const createKeyboardBindings = (store: Store) => {
       };
       // make adding text block by enter a standalone operation
       store.captureSync();
-      store.addBlock(blockProps);
+      const id = store.addBlock(blockProps);
+      setTimeout(() => {
+        store.textAdapters.get(id)?.quill.focus();
+      });
     }
   }
 
