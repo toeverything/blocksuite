@@ -53,9 +53,9 @@ export class RichText extends LitElement {
   }
 
   disconnectedCallback(): void {
-      this.store.removeText(this.model.id);
+    this.store.removeText(this.model.id);
 
-      super.disconnectedCallback();
+    super.disconnectedCallback();
   }
 
   render() {

@@ -89,14 +89,15 @@ export class AwarenessAdapter {
   private _onAwarenessMessage = (awMsg: AwarenessMessage) => {
     if (awMsg.id === this.awareness.clientID) {
       this.updateLocalCursor();
-    }
-    else {
+    } else {
       this._resetRemoteCursor();
     }
   };
 
   private _resetRemoteCursor() {
-    this.store.textAdapters.forEach((textAdapter) => textAdapter.quillCursors.clearCursors());
+    this.store.textAdapters.forEach(textAdapter =>
+      textAdapter.quillCursors.clearCursors()
+    );
     this.getStates().forEach((awState, clientId) => {
       if (clientId !== this.awareness.clientID && awState.cursor) {
         const anchor = Y.createAbsolutePositionFromRelativePosition(
@@ -114,38 +115,37 @@ export class AwarenessAdapter {
           const user = awState.user || {};
           const color = user.color || '#ffa500';
           const name = user.name || 'other';
-          textAdapter.quillCursors.createCursor(clientId.toString(), name, color);
+          textAdapter.quillCursors.createCursor(
+            clientId.toString(),
+            name,
+            color
+          );
           textAdapter.quillCursors.moveCursor(clientId.toString(), {
             index: anchor.index,
             length: focus.index - anchor.index,
           });
         }
       }
-    })
+    });
   }
 
   public updateLocalCursor() {
-      const localCursor = this.store.awareness.getLocalCursor();
-      if (!localCursor) {
-        return;
-      }
-      const anchor = Y.createAbsolutePositionFromRelativePosition(
-        localCursor.anchor,
-        this.store.doc
-      );
-      const focus = Y.createAbsolutePositionFromRelativePosition(
-        localCursor.focus,
-        this.store.doc
-      );
-      if (anchor && focus) {
-        const textAdapter = this.store.textAdapters.get(
-          localCursor.id || ''
-        );
-        textAdapter?.quill.setSelection(
-          anchor.index,
-          focus.index - anchor.index
-        );
-      }
+    const localCursor = this.store.awareness.getLocalCursor();
+    if (!localCursor) {
+      return;
+    }
+    const anchor = Y.createAbsolutePositionFromRelativePosition(
+      localCursor.anchor,
+      this.store.doc
+    );
+    const focus = Y.createAbsolutePositionFromRelativePosition(
+      localCursor.focus,
+      this.store.doc
+    );
+    if (anchor && focus) {
+      const textAdapter = this.store.textAdapters.get(localCursor.id || '');
+      textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
+    }
   }
 
   destroy() {
