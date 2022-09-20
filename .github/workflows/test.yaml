@@ -32,11 +32,8 @@ jobs:
       - name: Run lint
         run: pnpm lint
 
-      - name: Run unit tests
-        run: pnpm test:unit
-
-      - name: Run E2E tests
-        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test:e2e
+      - name: Run tests
+        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test
 
       # - name: Upload test results
       #   if: always()
