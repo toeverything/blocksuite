@@ -40,8 +40,7 @@ type KeyboardBindingHandler = (
 ) => void;
 
 export const createKeyboardBindings = (store: Store) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const clientID = store.doc.clientID as any;
+  const clientID = store.doc.clientID;
 
   function undo() {
     store.undo();
@@ -70,6 +69,7 @@ export const createKeyboardBindings = (store: Store) => {
 
   function softEnter(this: KeyboardEventThis) {
     const index = this.quill.getSelection()?.index || 0;
+    // @ts-ignore
     this.quill.insertText(index, '\n', clientID);
   }
 

@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "pnpm --filter @building-blocks/playground dev",
     "lint": "eslint ./ --max-warnings=0",
-    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e",
     "test:headed": "playwright test --headed",
+    "test:unit": "pnpm --filter @building-blocks/store test",
     "format": "prettier --write packages tests",
     "build:playground": "pnpm --filter @building-blocks/playground build"
   },
