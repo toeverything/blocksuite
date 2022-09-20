@@ -42,11 +42,6 @@ export class PaperContainer extends LitElement {
     super();
     this._subscribeStore();
 
-    this.store.addBlock({
-      flavour: 'page',
-      children: [],
-    });
-
     // @ts-ignore
     window.store = this.store;
   }
@@ -64,10 +59,9 @@ export class PaperContainer extends LitElement {
 
     this.store.slots.addBlock.on(blockProps => {
       if (blockProps.flavour === 'page') {
-        this.model = new PageBlockModel(this.store, {});
-        queueMicrotask(() => {
-          this.store.resetHistory();
-        });
+        const root = new PageBlockModel(this.store, blockProps);
+        this.store.setRoot(root);
+        this.model = root;
       } else if (blockProps.flavour === 'text') {
         const block = new TextBlockModel(
           this.store,
@@ -98,11 +92,16 @@ export class PaperContainer extends LitElement {
     if (this.isEmptyPage) {
       this.isEmptyPage = false;
 
-      const blockProps: Partial<TextBlockProps> = {
+      this.store.addBlock({
+        flavour: 'page',
+        children: [],
+      });
+
+      const textProps: Partial<TextBlockProps> = {
         flavour: 'text',
         text: '',
       };
-      this.store.addBlock(blockProps);
+      this.store.addBlock(textProps);
     }
   }
 
@@ -122,8 +121,6 @@ export class PaperContainer extends LitElement {
   }
 
   firstUpdated() {
-    console.log(this.model);
-
     this._placeholderInput?.focus();
   }
 

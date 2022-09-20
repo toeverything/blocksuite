@@ -8,7 +8,7 @@ const defaultStore: SerializedStore = {
     '0': {
       'sys:id': '0',
       'sys:flavour': 'page',
-      'sys:children': [], // FIXME
+      'sys:children': ['1'],
     },
     '1': {
       'sys:flavour': 'text',
