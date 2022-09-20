@@ -36,12 +36,12 @@ export interface StackItem {
 }
 
 let i = 0;
-let created = false;
+const IS_WEB = !import.meta.env.SSR;
 
 export class Store {
   readonly doc = new Y.Doc();
-  readonly provider: DebugProvider;
-  readonly awareness: AwarenessAdapter;
+  readonly provider!: DebugProvider;
+  readonly awareness!: AwarenessAdapter;
   readonly textAdapters = new Map<string, TextAdapter>();
 
   readonly slots = {
@@ -55,21 +55,18 @@ export class Store {
   private _history: Y.UndoManager;
   private _currentRoot: BaseBlockModel | null = null;
 
-  constructor(room: string) {
-    if (created) {
-      throw new Error('Store should only be created once');
+  constructor(room = '') {
+    if (IS_WEB) {
+      this.provider = new DebugProvider(room, this.doc);
+      this.awareness = new AwarenessAdapter(this);
     }
-    created = true;
 
-    this.provider = new DebugProvider(room, this.doc);
     this._yBlocks.observeDeep(this._yBlocksObserver);
 
     this._history = new Y.UndoManager([this._yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
       doc: this.doc,
     });
-
-    this.awareness = new AwarenessAdapter(this);
 
     this._history.on('stack-cleared', this._historyObserver);
     this._history.on('stack-item-added', this._historyAddObserver);
