@@ -1,8 +1,7 @@
 import { PageContainer } from '../..';
 import { Rect } from '../../components/selection-rect/rect';
-import { BlockMap } from '../../block-loader';
+import { BlockMap, BLOCK_ID_ATTR } from '../../block-loader';
 import { IDisposable, Slot } from '@building-blocks/store';
-import { BLOCK_ID_ATTR } from '../../const';
 
 export type SelectionInfo = InstanceType<
   typeof SelectionManager

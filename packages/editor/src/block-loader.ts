@@ -1,7 +1,9 @@
-// manual import to support vitest environment
+// Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModel } from '../../blocks/src/page-block/page-model';
 import { TextBlockModel } from '../../blocks/src/text-block/text-model';
 import { ListBlockModel } from '../../blocks/src/list-block/list-model';
+
+export { BLOCK_ID_ATTR } from '../../blocks/src/__internal__/consts';
 export type { TextBlockProps } from '../../blocks';
 
 // TODO support dynamic register

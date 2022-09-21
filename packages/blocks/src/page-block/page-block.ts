@@ -2,9 +2,13 @@ import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { BaseBlockModel, Store } from '@building-blocks/store';
-import { PageBlockModel } from './page-model';
-import { TextBlockModel, ListBlockModel } from '../';
-import { PageContainer, BLOCK_ID_ATTR } from '../types';
+import {
+  TextBlockModel,
+  ListBlockModel,
+  PageBlockModel,
+  BLOCK_ID_ATTR,
+} from '../';
+import { PageContainer } from '../types';
 
 // TODO support dynamic block types
 function getBlockElement(
