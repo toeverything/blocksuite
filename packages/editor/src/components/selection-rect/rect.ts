@@ -151,15 +151,10 @@ export class Rect {
     const { y: bottom, x: right } = endPoint;
     return Rect.fromLTRB(left, top, right, bottom);
   }
+
+  static fromDom(dom: Element) {
+    const { top, width, left, height } = dom.getBoundingClientRect();
+    return Rect.fromLWTH(left, width, top, height);
+  }
 }
 
-export const pointsToRect = (startPoint: Point, endPoint: Point) => {
-  const { y: top, x: left } = startPoint;
-  const { y: bottom, x: right } = endPoint;
-  return Rect.fromLTRB(left, top, right, bottom);
-};
-
-export const domToRect = (dom: HTMLElement) => {
-  const { top, width, left, height } = dom.getBoundingClientRect();
-  return Rect.fromLWTH(left, width, top, height);
-};
