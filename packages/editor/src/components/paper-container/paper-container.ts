@@ -35,6 +35,9 @@ export class PaperContainer extends LitElement {
   @state()
   canRedo = false;
 
+  @state()
+  selectionInfo = this.selection.selectionInfo;
+
   @query('.block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
@@ -132,6 +135,14 @@ export class PaperContainer extends LitElement {
 
   firstUpdated() {
     this._placeholderInput?.focus();
+    this.selection.onSelectionChange((selectionInfo) => {
+        this.selectionInfo = selectionInfo;
+      });
+  }
+
+  disconnectedCallback() {
+    this.mouse.dispose();
+    this.selection.dispose();
   }
 
   render() {
@@ -173,6 +184,10 @@ export class PaperContainer extends LitElement {
           ${this.connectionBtnText}
         </button>
         <button @click=${this._onAddList}>Add List</button>
+        <!-- TODO init model delete -->
+        <button .disabled=${this.selectionInfo.type !== 'Block' || !this.selectionInfo?.selectedNodesIds.length}>
+          Delete
+        </button>
       </div>
     `;
 
@@ -180,6 +195,7 @@ export class PaperContainer extends LitElement {
       <page-block-element
         .model=${this.model}
         .store=${this.store}
+        .selectionManager=${this.selection}
       ></page-block-element>
     `;
 
@@ -187,11 +203,16 @@ export class PaperContainer extends LitElement {
       <style>
         .paper-container {
           position: relative;
+          padding: 0 70px;
         }
       </style>
       <div class="paper-container">
         ${debugButtons}
-        <selection-rect .mouse=${this.mouse}></selection-rect>
+        <selection-rect
+          .selectionManager=${this.selection}
+          .pageModel=${this.model}
+          .page=${this as PaperContainer}
+        ></selection-rect>
         ${this.isEmptyPage ? emptyPagePlaceholder : blockRoot}
       </div>
     `;

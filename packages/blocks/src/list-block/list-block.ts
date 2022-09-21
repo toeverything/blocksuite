@@ -1,8 +1,9 @@
 import { LitElement, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import '../__internal__/rich-text/rich-text';
 import { ListBlockModel } from './list-model';
+import { BLOCK_ID_ATTR, SelectionManager } from '../../../editor';
 
 @customElement('list-block-element')
 export class ListBlockElement extends LitElement {
@@ -12,13 +13,29 @@ export class ListBlockElement extends LitElement {
   @property()
   model!: ListBlockModel;
 
+  @property()
+  selectionManager!: SelectionManager;
+
+  @state()
+  isSelected = false;
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }
 
+  protected firstUpdated(): void {
+    this.selectionManager.onBlockSelectChange(this.model.id, isSelected => {
+      this.isSelected = isSelected;
+    });
+  }
+
+  public disconnectedCallback(): void {
+    this.selectionManager.offBlockSelectChange(this.model.id);
+  }
+
   render() {
-    this.setAttribute('data-block-id', this.model.id);
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     return html`
       <style>
@@ -28,9 +45,11 @@ export class ListBlockElement extends LitElement {
           box-sizing: border-box;
           align-items: center;
         }
-
+        .list-block-container.selected {
+          background-color: rgba(152, 172, 189, 0.1);
+        }
       </style>
-      <div class="list-block-container">
+      <div class=${`list-block-container${this.isSelected ? ' selected' : ''}`}>
         <svg
           style="width: 24px; height: 24px;"
           focusable="false"
