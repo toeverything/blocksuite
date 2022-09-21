@@ -3,7 +3,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import '../__internal__/rich-text/rich-text';
 import { ListBlockModel } from './list-model';
-import { BLOCK_ID_ATTR, SelectionManager } from '../../../editor';
+import { BLOCK_ID_ATTR } from '../../../editor';
+import { Page } from '../types';
 
 @customElement('list-block-element')
 export class ListBlockElement extends LitElement {
@@ -14,7 +15,7 @@ export class ListBlockElement extends LitElement {
   model!: ListBlockModel;
 
   @property()
-  selectionManager!: SelectionManager;
+  page!: Page;
 
   @state()
   isSelected = false;
@@ -22,6 +23,16 @@ export class ListBlockElement extends LitElement {
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
+  }
+
+  protected firstUpdated(): void {
+    this.page.selection.onBlockSelectChange(this.model.id, isSelected => {
+      this.isSelected = isSelected;
+    });
+  }
+
+  public disconnectedCallback(): void {
+    this.page.selection.offBlockSelectChange(this.model.id);
   }
 
   render() {

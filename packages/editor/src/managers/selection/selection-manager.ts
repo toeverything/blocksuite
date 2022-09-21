@@ -1,6 +1,6 @@
 import { PaperContainer } from '../../components';
 import { Rect } from '../../components/selection-rect/rect';
-import { PageBlockModel } from '../../../../blocks/';
+import { BlockMap } from '../../block-loader';
 import { IDisposable, Slot } from '@building-blocks/store';
 import { BLOCK_ID_ATTR } from '../../const';
 
@@ -119,7 +119,7 @@ export class SelectionManager {
     this._emitSelectionChange();
   }
 
-  public calcIntersectBlocks(selectionRect: Rect, blockModel: PageBlockModel) {
+  public calcIntersectBlocks(selectionRect: Rect, blockModel: InstanceType<typeof BlockMap.page>) {
     const selectedBlocks: Array<string> = [];
     const blockDom = this._page.querySelector(
       `[${BLOCK_ID_ATTR}='${blockModel.id}']`
