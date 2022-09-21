@@ -1,1 +1,2 @@
-export type { PaperContainer as Page } from '../../editor';
+export type { PageContainer } from '../../editor';
+export { BLOCK_ID_ATTR } from '../../editor';

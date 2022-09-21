@@ -3,9 +3,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import '../__internal__/rich-text/rich-text';
 import { TextBlockModel } from './text-model';
-import { BLOCK_ID_ATTR } from '../../../editor';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Page } from '../types';
+import { PageContainer, BLOCK_ID_ATTR } from '../types';
+
 @customElement('text-block-element')
 export class TextBlockElement extends LitElement {
   @property()
@@ -15,7 +15,7 @@ export class TextBlockElement extends LitElement {
   model!: TextBlockModel;
 
   @property()
-  page!: Page;
+  page!: PageContainer;
 
   @state()
   isSelected = false;
@@ -43,7 +43,6 @@ export class TextBlockElement extends LitElement {
           'background-color': this.isSelected
             ? 'rgba(152, 172, 189, 0.1)'
             : 'transparent',
-          padding: '2px 8px',
           margin: '5px 0',
         })}
         class="text-block-container"

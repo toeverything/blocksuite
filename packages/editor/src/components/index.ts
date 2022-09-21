@@ -1,2 +1,2 @@
-export * from './paper-container/paper-container';
+export * from './page-container/page-container';
 export * from './selection-rect/selection-rect';

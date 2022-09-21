@@ -2,10 +2,11 @@ import { Point, Rect } from './rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { PageBlockModel } from '../../../../blocks';
-import { PaperContainer } from '../paper-container/paper-container';
-import { SelectionManager } from '../../managers';
+import { BlockMap } from '../../block-loader';
+import { PageContainer, SelectionManager } from '../..';
 import { BLOCK_ID_ATTR } from '../../const';
+
+type PageBlockModel = InstanceType<typeof BlockMap.page>;
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {
@@ -28,7 +29,7 @@ export class SelectionRect extends LitElement {
   pageModel!: PageBlockModel;
 
   @property()
-  page!: PaperContainer;
+  page!: PageContainer;
 
   @property()
   selectionManager!: SelectionManager;

@@ -4,14 +4,13 @@ import { repeat } from 'lit/directives/repeat.js';
 import { BaseBlockModel, Store } from '@building-blocks/store';
 import { PageBlockModel } from './page-model';
 import { TextBlockModel, ListBlockModel } from '../';
-import { BLOCK_ID_ATTR } from '../../../editor';
-import { Page } from '../types';
+import { PageContainer, BLOCK_ID_ATTR } from '../types';
 
 // TODO support dynamic block types
 function getBlockElement(
   model: BaseBlockModel,
   store: Store,
-  page: Page
+  page: PageContainer
 ) {
   switch (model.flavour) {
     case 'text':
@@ -40,7 +39,7 @@ export class PageBlockElement extends LitElement {
   store!: Store;
 
   @property()
-  page!: Page;
+  page!: PageContainer;
 
   @property({
     hasChanged() {

@@ -3,8 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import '../__internal__/rich-text/rich-text';
 import { ListBlockModel } from './list-model';
-import { BLOCK_ID_ATTR } from '../../../editor';
-import { Page } from '../types';
+import { PageContainer, BLOCK_ID_ATTR } from '../types';
 
 @customElement('list-block-element')
 export class ListBlockElement extends LitElement {
@@ -15,7 +14,7 @@ export class ListBlockElement extends LitElement {
   model!: ListBlockModel;
 
   @property()
-  page!: Page;
+  page!: PageContainer;
 
   @state()
   isSelected = false;

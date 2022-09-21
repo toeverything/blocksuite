@@ -1,4 +1,4 @@
-import { PaperContainer } from '../../components';
+import { PageContainer } from '../..';
 import { Rect } from '../../components/selection-rect/rect';
 import { BlockMap } from '../../block-loader';
 import { IDisposable, Slot } from '@building-blocks/store';
@@ -21,7 +21,7 @@ function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
 export class SelectionManager {
   private _selectedBlockIds: Array<string> = [];
   // @ts-ignore
-  private _page: PaperContainer;
+  private _page: PageContainer;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
   private _anchorBlockId = '';
@@ -30,7 +30,7 @@ export class SelectionManager {
     selection: new Slot<SelectionInfo>(),
   };
 
-  constructor(page: PaperContainer) {
+  constructor(page: PageContainer) {
     this._page = page;
     this._handlerBrowserChange = this._handlerBrowserChange.bind(this);
     this._initListenBrowserSelection();
@@ -119,7 +119,10 @@ export class SelectionManager {
     this._emitSelectionChange();
   }
 
-  public calcIntersectBlocks(selectionRect: Rect, blockModel: InstanceType<typeof BlockMap.page>) {
+  public calcIntersectBlocks(
+    selectionRect: Rect,
+    blockModel: InstanceType<typeof BlockMap.page>
+  ) {
     const selectedBlocks: Array<string> = [];
     const blockDom = this._page.querySelector(
       `[${BLOCK_ID_ATTR}='${blockModel.id}']`

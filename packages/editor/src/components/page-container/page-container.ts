@@ -10,8 +10,8 @@ const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 const initType = params.get('init') || 'default';
 
-@customElement('paper-container')
-export class PaperContainer extends LitElement {
+@customElement('page-container')
+export class PageContainer extends LitElement {
   @state()
   store = new Store(room).register(BlockMap);
 
@@ -217,23 +217,23 @@ export class PaperContainer extends LitElement {
       <page-block-element
         .model=${this.model}
         .store=${this.store}
-        .page=${this as PaperContainer}
+        .page=${this as PageContainer}
       ></page-block-element>
     `;
 
     return html`
       <style>
-        .paper-container {
+        .page-container {
           position: relative;
           padding: 0 70px;
         }
       </style>
-      <div class="paper-container">
+      <div class="page-container">
         ${debugButtons}
         <selection-rect
           .selectionManager=${this.selection}
           .pageModel=${this.model}
-          .page=${this as PaperContainer}
+          .page=${this as PageContainer}
         ></selection-rect>
         ${this.isEmptyPage ? emptyPagePlaceholder : blockRoot}
       </div>
@@ -243,6 +243,6 @@ export class PaperContainer extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'paper-container': PaperContainer;
+    'page-container': PageContainer;
   }
 }
