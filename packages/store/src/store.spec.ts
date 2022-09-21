@@ -101,9 +101,12 @@ describe.concurrent('addBlock', () => {
     });
 
     queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    await waitSlot(store.slots.addBlock, block => {
-      assert.ok(block instanceof BlockMap.text);
-      assert.equal(serialize(store).blocks[0]['sys:children'][0], block.id);
+    await waitSlot(store.slots.updateChildren, block => {
+      assert.ok(block instanceof BlockMap.page);
+
+      const serializedChildren = serialize(store).blocks['0']['sys:children'];
+      assert.deepEqual(serializedChildren, ['1']);
+      assert.deepEqual(block.children, ['1']);
     });
   });
 });

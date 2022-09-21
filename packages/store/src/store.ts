@@ -49,6 +49,7 @@ export class Store {
     addBlock: new Slot<BaseBlockModel>(),
     deleteBlock: new Slot<string>(),
     updateText: new Slot<Y.YTextEvent>(),
+    updateChildren: new Slot<BaseBlockModel>(),
   };
 
   private _i = 0;
@@ -225,31 +226,49 @@ export class Store {
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
-    if (event instanceof Y.YTextEvent) {
-      this.slots.updateText.emit(event);
-    } else if (event instanceof Y.YMapEvent) {
-      if (event.target === this._yBlocks) {
-        event.keys.forEach((value, id) => {
-          if (value.action === 'add') {
-            const yBlock = this._getYBlock(id);
-            const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-            const props = toBlockProps(prefixedProps) as BlockProps;
-            const blockModel = this._createBlockModel(props);
+    // event on top-level block store
+    if (event.target === this._yBlocks) {
+      event.keys.forEach((value, id) => {
+        if (value.action === 'add') {
+          const yBlock = this._getYBlock(id);
+          const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
+          const props = toBlockProps(prefixedProps) as BlockProps;
+          const model = this._createBlockModel(props);
 
-            this._blockMap.set(id, blockModel);
-            this.slots.addBlock.emit(blockModel);
-          } else if (value.action === 'delete') {
-            this._blockMap.delete(id);
-            this.slots.deleteBlock.emit(id);
-          } else {
-            // console.trace('unsupported update action on blocks', event);
-          }
-        });
-      } else if (event.target.parent === this._yBlocks) {
-        // TODO update yBlock and blockModel
+          this._blockMap.set(id, model);
+          this.slots.addBlock.emit(model);
+        } else if (value.action === 'delete') {
+          this._blockMap.delete(id);
+          this.slots.deleteBlock.emit(id);
+        } else {
+          console.warn('unknown update action on top-level block store', event);
+        }
+      });
+    }
+    // event on single block
+    else if (event.target.parent === this._yBlocks) {
+      if (event instanceof Y.YTextEvent) {
+        this.slots.updateText.emit(event);
       }
-    } else {
-      // console.trace('unsupported event', event);
+    }
+    // event on block field
+    else if (
+      event.target.parent instanceof Y.Map &&
+      event.target.parent.has('sys:id')
+    ) {
+      if (event instanceof Y.YArrayEvent) {
+        const id = event.target.parent.get('sys:id') as string;
+        const model = this._blockMap.get(id);
+        if (!model) {
+          throw new Error(`Block with id ${id} does not exist`);
+        }
+
+        const key = event.path[event.path.length - 1];
+        if (key === 'sys:children') {
+          model.children = event.target.toArray();
+          this.slots.updateChildren.emit(model);
+        }
+      }
     }
   }
 
