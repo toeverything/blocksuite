@@ -20,6 +20,17 @@ export class ListBlockElement extends LitElement {
   render() {
     this.setAttribute('data-block-id', this.model.id);
 
+    const listIcon = html`
+      <svg
+        style="width: 24px; height: 24px;"
+        focusable="false"
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="2"></circle>
+      </svg>
+    `;
+
     return html`
       <style>
         .list-block-container {
@@ -28,17 +39,9 @@ export class ListBlockElement extends LitElement {
           box-sizing: border-box;
           align-items: center;
         }
-
       </style>
       <div class="list-block-container">
-        <svg
-          style="width: 24px; height: 24px;"
-          focusable="false"
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-        >
-          <circle cx="12" cy="12" r="2"></circle>
-        </svg>
+        ${listIcon}
         <rich-text
           style="flex:1;"
           .store=${this.store}

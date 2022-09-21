@@ -1,6 +1,7 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { Store } from '@building-blocks/store';
 import { TextBlockProps } from '../..';
+import type { EditableModel } from './rich-text';
 
 interface BindingContext {
   collapsed: boolean;
@@ -39,7 +40,7 @@ type KeyboardBindingHandler = (
   context: BindingContext
 ) => void;
 
-export const createKeyboardBindings = (store: Store) => {
+export const createKeyboardBindings = (store: Store, model: EditableModel) => {
   const clientID = store.doc.clientID;
 
   function undo() {
@@ -73,11 +74,27 @@ export const createKeyboardBindings = (store: Store) => {
     this.quill.insertText(index, '\n', clientID);
   }
 
+  function indent(this: KeyboardEventThis) {
+    if (model.flavour !== 'list') return;
+    // TODO indent
+  }
+
+  function unindent(this: KeyboardEventThis) {
+    if (model.flavour !== 'list') return;
+    // TODO unindent
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
       shortKey: true,
       handler: undo,
+    },
+    redo: {
+      key: 'z',
+      shiftKey: true,
+      shortKey: true,
+      handler: redo,
     },
     hardEnter: {
       key: 'enter',
@@ -88,11 +105,14 @@ export const createKeyboardBindings = (store: Store) => {
       shiftKey: true,
       handler: softEnter,
     },
-    redo: {
-      key: 'z',
+    tab: {
+      key: 'tab',
+      handler: indent,
+    },
+    shiftTab: {
+      key: 'tab',
       shiftKey: true,
-      shortKey: true,
-      handler: redo,
+      handler: unindent,
     },
   };
 

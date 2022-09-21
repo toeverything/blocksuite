@@ -8,7 +8,8 @@ import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
 
-interface EditableModel {
+export interface EditableModel {
+  flavour: string;
   id: string;
   text: string;
 }
@@ -33,7 +34,7 @@ export class RichText extends LitElement {
   firstUpdated() {
     const { store, model } = this;
     const { _textContainer } = this;
-    const keyboardBindings = createKeyboardBindings(store);
+    const keyboardBindings = createKeyboardBindings(store, model);
     this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,

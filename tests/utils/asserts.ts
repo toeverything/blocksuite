@@ -19,6 +19,15 @@ export async function assertTextBlocks(page: Page, texts: string[]) {
   expect(actual).toEqual(texts);
 }
 
+export async function assertBlockCount(
+  page: Page,
+  flavour: string,
+  count: number
+) {
+  const actual = await page.locator(`${flavour}-block-element`).count();
+  expect(actual).toBe(count);
+}
+
 export async function assertSelection(
   page: Page,
   richTextIndex: number,
