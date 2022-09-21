@@ -195,7 +195,7 @@ export class PaperContainer extends LitElement {
       <page-block-element
         .model=${this.model}
         .store=${this.store}
-        .selectionManager=${this.selection}
+        .page=${this as PaperContainer}
       ></page-block-element>
     `;
 

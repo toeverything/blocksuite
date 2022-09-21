@@ -3,8 +3,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import '../__internal__/rich-text/rich-text';
 import { TextBlockModel } from './text-model';
-import { BLOCK_ID_ATTR, SelectionManager } from '../../../editor';
+import { BLOCK_ID_ATTR } from '../../../editor';
 import { styleMap } from 'lit/directives/style-map.js';
+import { Page } from '../types';
 @customElement('text-block-element')
 export class TextBlockElement extends LitElement {
   @property()
@@ -14,7 +15,7 @@ export class TextBlockElement extends LitElement {
   model!: TextBlockModel;
 
   @property()
-  selectionManager!: SelectionManager;
+  page!: Page;
 
   @state()
   isSelected = false;
@@ -25,13 +26,13 @@ export class TextBlockElement extends LitElement {
   }
 
   protected firstUpdated(): void {
-    this.selectionManager.onBlockSelectChange(this.model.id, (isSelected) => {
+    this.page.selection.onBlockSelectChange(this.model.id, isSelected => {
       this.isSelected = isSelected;
     });
   }
 
   public disconnectedCallback(): void {
-    this.selectionManager.offBlockSelectChange(this.model.id);
+    this.page.selection.offBlockSelectChange(this.model.id);
   }
 
   render() {
@@ -43,7 +44,7 @@ export class TextBlockElement extends LitElement {
             ? 'rgba(152, 172, 189, 0.1)'
             : 'transparent',
           padding: '2px 8px',
-          'margin': '5px 0',
+          margin: '5px 0',
         })}
         class="text-block-container"
       >

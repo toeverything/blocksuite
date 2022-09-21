@@ -4,13 +4,14 @@ import { repeat } from 'lit/directives/repeat.js';
 import { BaseBlockModel, Store } from '@building-blocks/store';
 import { PageBlockModel } from './page-model';
 import { TextBlockModel, ListBlockModel } from '../';
-import { BLOCK_ID_ATTR, SelectionManager } from '../../../editor';
+import { BLOCK_ID_ATTR } from '../../../editor';
+import { Page } from '../types';
 
 // TODO support dynamic block types
 function getBlockElement(
   model: BaseBlockModel,
   store: Store,
-  selectionManager: SelectionManager
+  page: Page
 ) {
   switch (model.flavour) {
     case 'text':
@@ -18,7 +19,7 @@ function getBlockElement(
         <text-block-element
           .model=${model as TextBlockModel}
           .store=${store}
-          .selectionManager=${selectionManager}
+          .page=${page}
         ></text-block-element>
       `;
     case 'list':
@@ -26,7 +27,7 @@ function getBlockElement(
         <list-block-element
           .model=${model as ListBlockModel}
           .store=${store}
-          .selectionManager=${selectionManager}
+          .page=${page}
         ></list-block-element>
       `;
   }
@@ -39,7 +40,7 @@ export class PageBlockElement extends LitElement {
   store!: Store;
 
   @property()
-  selectionManager!: SelectionManager;
+  page!: Page;
 
   @property({
     hasChanged() {
@@ -60,7 +61,7 @@ export class PageBlockElement extends LitElement {
       ${repeat(
         this.model.elements,
         child => child.id,
-        child => getBlockElement(child, this.store, this.selectionManager)
+        child => getBlockElement(child, this.store, this.page)
       )}
     `;
 

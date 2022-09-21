@@ -9,4 +9,4 @@ export const BlockMap = {
   text: TextBlockModel,
   page: PageBlockModel,
   list: ListBlockModel,
-};
+} as const;
