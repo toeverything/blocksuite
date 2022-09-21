@@ -44,12 +44,12 @@ export class Store {
   readonly textAdapters = new Map<string, TextAdapter>();
 
   readonly slots = {
-    update: new Slot(),
-    historyUpdate: new Slot(),
-    addBlock: new Slot<BaseBlockModel>(),
-    deleteBlock: new Slot<string>(),
-    updateText: new Slot<Y.YTextEvent>(),
-    updateChildren: new Slot<BaseBlockModel>(),
+    historyUpdated: new Slot(),
+    blockAdded: new Slot<BaseBlockModel>(),
+    blockDeleted: new Slot<string>(),
+    textUpdated: new Slot<Y.YTextEvent>(),
+    childrenUpdated: new Slot<BaseBlockModel>(),
+    updated: new Slot(),
   };
 
   private _i = 0;
@@ -213,7 +213,7 @@ export class Store {
   };
 
   private _historyObserver = () => {
-    this.slots.historyUpdate.emit();
+    this.slots.historyUpdated.emit();
   };
 
   private _createBlockModel(props: BlockProps) {
@@ -236,10 +236,10 @@ export class Store {
           const model = this._createBlockModel(props);
 
           this._blockMap.set(id, model);
-          this.slots.addBlock.emit(model);
+          this.slots.blockAdded.emit(model);
         } else if (value.action === 'delete') {
           this._blockMap.delete(id);
-          this.slots.deleteBlock.emit(id);
+          this.slots.blockDeleted.emit(id);
         } else {
           console.warn('unknown update action on top-level block store', event);
         }
@@ -248,7 +248,7 @@ export class Store {
     // event on single block
     else if (event.target.parent === this._yBlocks) {
       if (event instanceof Y.YTextEvent) {
-        this.slots.updateText.emit(event);
+        this.slots.textUpdated.emit(event);
       }
     }
     // event on block field
@@ -266,7 +266,7 @@ export class Store {
         const key = event.path[event.path.length - 1];
         if (key === 'sys:children') {
           model.children = event.target.toArray();
-          this.slots.updateChildren.emit(model);
+          this.slots.childrenUpdated.emit(model);
         }
       }
     }
@@ -276,6 +276,6 @@ export class Store {
     for (const event of events) {
       this._handleYEvent(event);
     }
-    this.slots.update.emit();
+    this.slots.updated.emit();
   };
 }

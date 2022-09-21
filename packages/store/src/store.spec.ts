@@ -86,7 +86,7 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    await waitSlot(store.slots.addBlock, block => {
+    await waitSlot(store.slots.blockAdded, block => {
       assert.ok(block instanceof BlockMap.page);
     });
   });
@@ -95,13 +95,13 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    await waitSlot(store.slots.addBlock, block => {
+    await waitSlot(store.slots.blockAdded, block => {
       assert.ok(block instanceof BlockMap.page);
       store.setRoot(block);
     });
 
     queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    await waitSlot(store.slots.updateChildren, block => {
+    await waitSlot(store.slots.childrenUpdated, block => {
       assert.ok(block instanceof BlockMap.page);
 
       const serializedChildren = serialize(store).blocks['0']['sys:children'];

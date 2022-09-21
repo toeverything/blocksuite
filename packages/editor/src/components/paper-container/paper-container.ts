@@ -49,16 +49,16 @@ export class PaperContainer extends LitElement {
 
   private _subscribeStore() {
     // if undo to empty page, reset to empty placeholder
-    this.store.slots.update.on(() => {
+    this.store.slots.updated.on(() => {
       this.isEmptyPage = this.store.isEmpty;
     });
 
-    this.store.slots.historyUpdate.on(() => {
+    this.store.slots.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
       this.canRedo = this.store.canRedo;
     });
 
-    this.store.slots.addBlock.on(block => {
+    this.store.slots.blockAdded.on(block => {
       if (block.flavour === 'page') {
         this.store.setRoot(block);
         this.model = block as PageBlockModel;
@@ -71,7 +71,7 @@ export class PaperContainer extends LitElement {
       }
     });
 
-    this.store.slots.deleteBlock.on(id => {
+    this.store.slots.blockDeleted.on(id => {
       const index = this.model.elements.findIndex(child => child.id === id);
       if (index !== -1) {
         this.model.elements.splice(index, 1);
