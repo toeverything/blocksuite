@@ -54,7 +54,8 @@ export class Store {
   private _i = 0;
   private _history: Y.UndoManager;
   private _currentRoot: BaseBlockModel | null = null;
-  private _blockMap = new Map<string, typeof BaseBlockModel>();
+  private _flavourMap = new Map<string, typeof BaseBlockModel>();
+  private _blockMap = new Map<string, BaseBlockModel>();
 
   constructor(room = '') {
     if (IS_WEB) {
@@ -75,75 +76,9 @@ export class Store {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
-  private _historyAddObserver = (event: StackItem) => {
-    if (IS_WEB) {
-      event.stackItem.meta.set(
-        'cursor-location',
-        this.awareness.getLocalCursor()
-      );
-    }
-
-    this._historyObserver();
-  };
-
-  private _historyPopObserver = (event: StackItem) => {
-    const cursor = event.stackItem.meta.get('cursor-location');
-    if (!cursor) {
-      return;
-    }
-
-    this.awareness.setLocalCursor(cursor);
-    this._historyObserver();
-  };
-
-  private _historyObserver = () => {
-    this.slots.historyUpdate.emit();
-  };
-
-  private _yBlocksObserver = (events: Y.YEvent<YBlock | Y.Text>[]) => {
-    for (const event of events) {
-      if (event instanceof Y.YTextEvent) {
-        this.slots.updateText.emit(event);
-      } else if (event instanceof Y.YMapEvent) {
-        if (event.target === this._yBlocks) {
-          event.keys.forEach((value, id) => {
-            if (value.action === 'add') {
-              const yBlock = this._getYBlock(id);
-              const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-              const props = toBlockProps(prefixedProps) as BlockProps;
-              const BlockCtor = this._blockMap.get(props.flavour);
-              if (!BlockCtor) {
-                throw new Error(
-                  `Block flavour ${props.flavour} is not registered`
-                );
-              }
-              const model = new BlockCtor(this, props);
-              this.slots.addBlock.emit(model);
-            } else if (value.action === 'delete') {
-              this.slots.deleteBlock.emit(id);
-            } else {
-              console.trace('Unknown update action on blocks', event);
-            }
-          });
-        } else if (event.target.parent === this._yBlocks) {
-          // TODO update yBlock
-        }
-      }
-    }
-    this.slots.update.emit();
-  };
-
   /** key-value store of blocks */
   private get _yBlocks() {
     return this.doc.getMap('blocks') as YBlocks;
-  }
-
-  private _getYBlock(id: string): YBlock {
-    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) {
-      throw new Error(`Block with id ${id} does not exist`);
-    }
-    return yBlock;
   }
 
   get isEmpty() {
@@ -179,13 +114,9 @@ export class Store {
     this.doc.transact(fn, this.doc.clientID);
   }
 
-  private _createId(): string {
-    return (this._i++).toString();
-  }
-
   register(blockMap: Record<string, typeof BaseBlockModel>) {
     Object.keys(blockMap).forEach(key => {
-      this._blockMap.set(key, blockMap[key]);
+      this._flavourMap.set(key, blockMap[key]);
     });
     return this;
   }
@@ -246,4 +177,86 @@ export class Store {
   setRoot(block: BaseBlockModel) {
     this._currentRoot = block;
   }
+
+  private _createId(): string {
+    return (this._i++).toString();
+  }
+
+  private _getYBlock(id: string): YBlock {
+    const yBlock = this._yBlocks.get(id) as YBlock | undefined;
+    if (!yBlock) {
+      throw new Error(`Block with id ${id} does not exist`);
+    }
+    return yBlock;
+  }
+
+  private _historyAddObserver = (event: StackItem) => {
+    if (IS_WEB) {
+      event.stackItem.meta.set(
+        'cursor-location',
+        this.awareness.getLocalCursor()
+      );
+    }
+
+    this._historyObserver();
+  };
+
+  private _historyPopObserver = (event: StackItem) => {
+    const cursor = event.stackItem.meta.get('cursor-location');
+    if (!cursor) {
+      return;
+    }
+
+    this.awareness.setLocalCursor(cursor);
+    this._historyObserver();
+  };
+
+  private _historyObserver = () => {
+    this.slots.historyUpdate.emit();
+  };
+
+  private _createBlockModel(props: BlockProps) {
+    const BlockModelCtor = this._flavourMap.get(props.flavour);
+    if (!BlockModelCtor) {
+      throw new Error(`Block flavour ${props.flavour} is not registered`);
+    }
+    const blockModel = new BlockModelCtor(this, props);
+    return blockModel;
+  }
+
+  private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
+    if (event instanceof Y.YTextEvent) {
+      this.slots.updateText.emit(event);
+    } else if (event instanceof Y.YMapEvent) {
+      if (event.target === this._yBlocks) {
+        event.keys.forEach((value, id) => {
+          if (value.action === 'add') {
+            const yBlock = this._getYBlock(id);
+            const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
+            const props = toBlockProps(prefixedProps) as BlockProps;
+            const blockModel = this._createBlockModel(props);
+
+            this._blockMap.set(id, blockModel);
+            this.slots.addBlock.emit(blockModel);
+          } else if (value.action === 'delete') {
+            this._blockMap.delete(id);
+            this.slots.deleteBlock.emit(id);
+          } else {
+            // console.trace('unsupported update action on blocks', event);
+          }
+        });
+      } else if (event.target.parent === this._yBlocks) {
+        // TODO update yBlock and blockModel
+      }
+    } else {
+      // console.trace('unsupported event', event);
+    }
+  }
+
+  private _yBlocksObserver = (events: Y.YEvent<YBlock | Y.Text>[]) => {
+    for (const event of events) {
+      this._handleYEvent(event);
+    }
+    this.slots.update.emit();
+  };
 }
