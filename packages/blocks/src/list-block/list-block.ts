@@ -24,18 +24,19 @@ export class ListBlockElement extends LitElement {
     return this;
   }
 
-  protected firstUpdated(): void {
-    this.selectionManager.onBlockSelectChange(this.model.id, isSelected => {
-      this.isSelected = isSelected;
-    });
-  }
-
-  public disconnectedCallback(): void {
-    this.selectionManager.offBlockSelectChange(this.model.id);
-  }
-
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
+
+    const listIcon = html`
+      <svg
+        style="width: 24px; height: 24px;"
+        focusable="false"
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="2"></circle>
+      </svg>
+    `;
 
     return html`
       <style>
@@ -50,14 +51,7 @@ export class ListBlockElement extends LitElement {
         }
       </style>
       <div class=${`list-block-container${this.isSelected ? ' selected' : ''}`}>
-        <svg
-          style="width: 24px; height: 24px;"
-          focusable="false"
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-        >
-          <circle cx="12" cy="12" r="2"></circle>
-        </svg>
+        ${listIcon}
         <rich-text
           style="flex:1;"
           .store=${this.store}

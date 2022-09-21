@@ -61,3 +61,7 @@ export async function disconnectByClick(page: Page) {
 export async function connectByClick(page: Page) {
   await page.click('text=Connect');
 }
+
+export async function addListByClick(page: Page) {
+  await page.click('text=Add List');
+}
