@@ -6,8 +6,9 @@ import { BlockMap, TextBlockProps } from '../../block-loader';
 
 type PageBlockModel = InstanceType<typeof BlockMap.page>;
 
-const room =
-  new URLSearchParams(location.search).get('room') || 'virgo-default';
+const params = new URLSearchParams(location.search);
+const room = params.get('room') || 'virgo-default';
+const initType = params.get('init') || 'default';
 
 @customElement('paper-container')
 export class PaperContainer extends LitElement {
@@ -128,6 +129,21 @@ export class PaperContainer extends LitElement {
     });
   }
 
+  private _handleDebugInit() {
+    if (initType === 'list') {
+      this.store.addBlock({
+        flavour: 'page',
+        children: [],
+      });
+      for (let i = 0; i < 3; i++) {
+        this.store.addBlock({
+          flavour: 'list',
+          children: [],
+        });
+      }
+    }
+  }
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -135,9 +151,12 @@ export class PaperContainer extends LitElement {
 
   firstUpdated() {
     this._placeholderInput?.focus();
-    this.selection.onSelectionChange((selectionInfo) => {
-        this.selectionInfo = selectionInfo;
-      });
+
+    this._handleDebugInit();
+
+    this.selection.onSelectionChange(selectionInfo => {
+      this.selectionInfo = selectionInfo;
+    });
   }
 
   disconnectedCallback() {
@@ -185,7 +204,10 @@ export class PaperContainer extends LitElement {
         </button>
         <button @click=${this._onAddList}>Add List</button>
         <!-- TODO init model delete -->
-        <button .disabled=${this.selectionInfo.type !== 'Block' || !this.selectionInfo?.selectedNodesIds.length}>
+        <button
+          .disabled=${this.selectionInfo.type !== 'Block' ||
+          !this.selectionInfo?.selectedNodesIds.length}
+        >
           Delete
         </button>
       </div>

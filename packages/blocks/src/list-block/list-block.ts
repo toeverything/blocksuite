@@ -40,7 +40,7 @@ export class ListBlockElement extends LitElement {
 
     const listIcon = html`
       <svg
-        style="width: 24px; height: 24px;"
+        style="width: 24px; height: 24px; flex-shrink: 0;"
         focusable="false"
         aria-hidden="true"
         viewBox="0 0 24 24"
@@ -53,7 +53,6 @@ export class ListBlockElement extends LitElement {
       <style>
         .list-block-container {
           display: flex;
-          height: 30px;
           box-sizing: border-box;
           align-items: center;
         }

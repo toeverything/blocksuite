@@ -2,7 +2,7 @@ import { Point, Rect } from './rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { PageBlockModel } from '../../../../blocks'
+import { PageBlockModel } from '../../../../blocks';
 import { PaperContainer } from '../paper-container/paper-container';
 import { SelectionManager } from '../../managers';
 import { BLOCK_ID_ATTR } from '../../const';
@@ -27,7 +27,7 @@ export class SelectionRect extends LitElement {
   @property()
   pageModel!: PageBlockModel;
 
-  @property({ type: PaperContainer })
+  @property()
   page!: PaperContainer;
 
   @property()
@@ -39,6 +39,8 @@ export class SelectionRect extends LitElement {
         this._handlerEditorMousedown(e);
       });
       this.page.mouse.onMouseMove(e => {
+        if (!this.page.model) return;
+
         this._handlerMouseMove(e);
       });
     }
