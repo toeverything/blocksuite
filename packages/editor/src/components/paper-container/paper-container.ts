@@ -62,7 +62,7 @@ export class PaperContainer extends LitElement {
       if (block.flavour === 'page') {
         this.store.setRoot(block);
         this.model = block as PageBlockModel;
-      } else if (block.flavour === 'text') {
+      } else {
         if (!this.model.elements.find(child => child.id === block.id)) {
           this.model.elements.push(block);
         }
@@ -82,8 +82,8 @@ export class PaperContainer extends LitElement {
     });
   }
 
-  private _onVoidStateUpdate(e: MouseEvent | KeyboardEvent) {
-    e.preventDefault();
+  private _onVoidStateUpdate(e?: MouseEvent | KeyboardEvent) {
+    if (e) e.preventDefault();
 
     if (this.isEmptyPage) {
       this.isEmptyPage = false;
@@ -114,6 +114,17 @@ export class PaperContainer extends LitElement {
     }
   }
 
+  private _onAddList() {
+    if (this.isEmptyPage) {
+      this._onVoidStateUpdate();
+    }
+
+    this.store.addBlock({
+      flavour: 'list',
+      children: [],
+    });
+  }
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -132,10 +143,10 @@ export class PaperContainer extends LitElement {
         .block-placeholder-input {
           display: block;
           box-sizing: border-box;
-          margin-bottom: 12px;
           padding: 6px;
+          padding-left: 5px;
           width: 100%;
-          line-height: 1.4;
+          height: 30.45px;
           border: 1px solid rgb(204, 204, 204);
           border-radius: 0;
           outline: none;
@@ -161,6 +172,7 @@ export class PaperContainer extends LitElement {
         <button @click=${this._onToggleConnection}>
           ${this.connectionBtnText}
         </button>
+        <button @click=${this._onAddList}>Add List</button>
       </div>
     `;
 

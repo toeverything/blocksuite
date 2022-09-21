@@ -1,9 +1,30 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { Store } from '@building-blocks/store';
+import { BaseBlockModel, Store } from '@building-blocks/store';
 import { PageBlockModel } from './page-model';
-import { TextBlockModel } from '../';
+import { TextBlockModel, ListBlockModel } from '../';
+
+// TODO support dynamic block types
+function getBlockElement(model: BaseBlockModel, store: Store) {
+  switch (model.flavour) {
+    case 'text':
+      return html`
+        <text-block-element
+          .model=${model as TextBlockModel}
+          .store=${store}
+        ></text-block-element>
+      `;
+    case 'list':
+      return html`
+        <list-block-element
+          .model=${model as ListBlockModel}
+          .store=${store}
+        ></list-block-element>
+      `;
+  }
+  return html`<div>Unknown block type: ${model.flavour}</div>`;
+}
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
@@ -29,18 +50,11 @@ export class PageBlockElement extends LitElement {
       ${repeat(
         this.model.elements,
         child => child.id,
-        child =>
-          html`
-            <text-block-element
-              .store=${this.store}
-              .model=${child as TextBlockModel}
-            >
-            </text-block-element>
-          `
+        child => getBlockElement(child, this.store)
       )}
     `;
 
-    return html` <div class="page-container">${childBlocks}</div> `;
+    return html` <div class="page-block-container">${childBlocks}</div> `;
   }
 }
 

@@ -21,7 +21,9 @@ export class TextBlockElement extends LitElement {
     this.setAttribute('data-block-id', this.model.id);
 
     return html`
-      <rich-text .store=${this.store} .model=${this.model}></rich-text>
+      <div class="text-block-container">
+        <rich-text .store=${this.store} .model=${this.model}></rich-text>
+      </div>
     `;
   }
 }

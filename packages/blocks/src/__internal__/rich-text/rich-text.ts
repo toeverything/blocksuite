@@ -62,10 +62,11 @@ export class RichText extends LitElement {
     return html`
       <style>
         ${style} .rich-text.quill-container {
-          margin-bottom: 12px;
+          margin-top: 5px;
+          margin-bottom: 5px;
         }
         .ql-editor {
-          padding: 6px;
+          padding: 5px;
         }
       </style>
       <div class="rich-text quill-container"></div>
