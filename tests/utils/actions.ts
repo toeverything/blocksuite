@@ -53,3 +53,11 @@ export async function undoByClick(page: Page) {
 export async function redoByClick(page: Page) {
   await page.click('text=Redo');
 }
+
+export async function disconnectByClick(page: Page) {
+  await page.click('text=Disconnect');
+}
+
+export async function connectByClick(page: Page) {
+  await page.click('text=Connect');
+}

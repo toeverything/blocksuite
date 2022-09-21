@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
 import type { SerializedStore } from '../packages/store';
-import { enterPlaygroundRoom, emptyInput, richTextBox } from './utils/actions';
+import {
+  enterPlaygroundRoom,
+  emptyInput,
+  richTextBox,
+  disconnectByClick,
+  connectByClick,
+} from './utils/actions';
 import { assertStore, assertText } from './utils/asserts';
 
 const defaultStore: SerializedStore = {
@@ -73,9 +79,17 @@ test('conflict occurs as expected when two same id generated together', async ({
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
 
+  await disconnectByClick(pageA);
+  await disconnectByClick(pageB);
+
   // click together, both init with default id leads to conflicts
-  await Promise.all([pageB.click(emptyInput), pageA.click(emptyInput)]);
-  await pageB.keyboard.type('hello');
+  await pageA.click(emptyInput);
+  await pageB.click(emptyInput);
+
+  await connectByClick(pageA);
+  await connectByClick(pageB);
+
+  await pageA.keyboard.type('hello');
 
   await assertText(pageB, 'hello');
   await assertText(pageA, 'hello'); // actually '\n'

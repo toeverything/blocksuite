@@ -1,11 +1,11 @@
 import * as Y from 'yjs';
-import { WebrtcProvider as DebugProvider } from 'y-webrtc';
 import { Slot } from './utils/slot';
 import { TextAdapter } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
 import { syncBlockProps, toBlockProps } from './utils/utils';
 import { BaseBlockModel } from './base';
+import { DebugProvider } from './providers';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
