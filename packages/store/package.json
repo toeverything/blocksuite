@@ -5,6 +5,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
+    "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "test": "vitest --run"
   },
   "keywords": [],

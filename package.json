@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "description": "Building Blocks framework workspace",
   "scripts": {
-    "dev": "pnpm --filter @building-blocks/playground dev",
+    "serve": "pnpm --filter @building-blocks/store serve",
+    "dev": "pnpm serve & pnpm --filter @building-blocks/playground dev",
     "lint": "eslint ./ --max-warnings=0",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e",
