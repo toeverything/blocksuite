@@ -157,4 +157,3 @@ export class Rect {
     return Rect.fromLWTH(left, width, top, height);
   }
 }
-

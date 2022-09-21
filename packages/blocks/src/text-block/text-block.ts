@@ -25,7 +25,7 @@ export class TextBlockElement extends LitElement {
   }
 
   protected firstUpdated(): void {
-    this.selectionManager.onBlockSelectChange(this.model.id, (isSelected) => {
+    this.selectionManager.onBlockSelectChange(this.model.id, isSelected => {
       this.isSelected = isSelected;
     });
   }
@@ -42,8 +42,7 @@ export class TextBlockElement extends LitElement {
           'background-color': this.isSelected
             ? 'rgba(152, 172, 189, 0.1)'
             : 'transparent',
-          padding: '2px 8px',
-          'margin': '5px 0',
+          margin: '5px 0',
         })}
         class="text-block-container"
       >

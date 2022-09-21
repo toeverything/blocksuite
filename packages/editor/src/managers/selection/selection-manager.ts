@@ -27,8 +27,8 @@ export class SelectionManager {
   private _anchorBlockId = '';
   private _focusBlockId = '';
   private _slots = {
-    selection: new Slot<SelectionInfo>()
-  }
+    selection: new Slot<SelectionInfo>(),
+  };
 
   constructor(page: PaperContainer) {
     this._page = page;

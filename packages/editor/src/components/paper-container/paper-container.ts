@@ -135,9 +135,9 @@ export class PaperContainer extends LitElement {
 
   firstUpdated() {
     this._placeholderInput?.focus();
-    this.selection.onSelectionChange((selectionInfo) => {
-        this.selectionInfo = selectionInfo;
-      });
+    this.selection.onSelectionChange(selectionInfo => {
+      this.selectionInfo = selectionInfo;
+    });
   }
 
   disconnectedCallback() {
@@ -185,7 +185,10 @@ export class PaperContainer extends LitElement {
         </button>
         <button @click=${this._onAddList}>Add List</button>
         <!-- TODO init model delete -->
-        <button .disabled=${this.selectionInfo.type !== 'Block' || !this.selectionInfo?.selectedNodesIds.length}>
+        <button
+          .disabled=${this.selectionInfo.type !== 'Block' ||
+          !this.selectionInfo?.selectedNodesIds.length}
+        >
           Delete
         </button>
       </div>
