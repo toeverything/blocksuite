@@ -1,3 +1,5 @@
+// checkout https://vitest.dev/guide/debugging.html for debugging tests
+
 import { assert, describe, it } from 'vitest';
 import { Slot, Store } from '../';
 import { BlockMap } from '../../editor/src/block-loader';
@@ -84,9 +86,24 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-
     await waitSlot(store.slots.addBlock, block => {
       assert.ok(block instanceof BlockMap.page);
+    });
+  });
+
+  it('can add block to root', async () => {
+    const store = new Store().register(BlockMap);
+
+    queueMicrotask(() => store.addBlock({ flavour: 'page' }));
+    await waitSlot(store.slots.addBlock, block => {
+      assert.ok(block instanceof BlockMap.page);
+      store.setRoot(block);
+    });
+
+    queueMicrotask(() => store.addBlock({ flavour: 'text' }));
+    await waitSlot(store.slots.addBlock, block => {
+      assert.ok(block instanceof BlockMap.text);
+      assert.equal(serialize(store).blocks[0]['sys:children'][0], block.id);
     });
   });
 });
