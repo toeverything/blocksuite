@@ -46,6 +46,16 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
+export async function assertSelectBlocks(page: Page, count: number) {
+  const actual = await page.evaluate(() => {
+    const selectLength =
+      document.querySelector('page-container')?.selection.selectionInfo
+        ?.selectedNodesIds?.length;
+    return selectLength || 0;
+  });
+  expect(actual).toBe(count);
+}
+
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>
     // @ts-ignore
