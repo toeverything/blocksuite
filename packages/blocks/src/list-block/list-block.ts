@@ -62,6 +62,7 @@ export class ListBlockElement extends LitElement {
           display: flex;
           box-sizing: border-box;
           align-items: center;
+          margin: 5px 0;
         }
         .list-block-container.selected {
           background-color: rgba(152, 172, 189, 0.1);
@@ -73,10 +74,9 @@ export class ListBlockElement extends LitElement {
           style="flex:1;"
           .store=${this.store}
           .model=${this.model}
-        ></rich-text>
-      </div>
-
-      <div style="margin-left: 10px">${childBlocks}</div>
+          ></rich-text>
+          <div style="margin-left: 10px">${childBlocks}</div>
+        </div>
     `;
   }
 }

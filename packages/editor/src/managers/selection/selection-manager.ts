@@ -1,7 +1,7 @@
 import { PageContainer } from '../..';
 import { Rect } from '../../components/selection-rect/rect';
-import { BlockMap, BLOCK_ID_ATTR } from '../../block-loader';
-import { IDisposable, Slot } from '@building-blocks/store';
+import { BLOCK_ID_ATTR } from '../../block-loader';
+import { BaseBlockModel, IDisposable, Slot } from '@building-blocks/store';
 
 export type SelectionInfo = InstanceType<
   typeof SelectionManager
@@ -120,32 +120,47 @@ export class SelectionManager {
 
   public calcIntersectBlocks(
     selectionRect: Rect,
-    blockModel: InstanceType<typeof BlockMap.page>
+    blockModel: BaseBlockModel,
   ) {
-    const selectedBlocks: Array<string> = [];
+    let selectedBlocks: Array<string> = [];
     const blockDom = this._page.querySelector(
       `[${BLOCK_ID_ATTR}='${blockModel.id}']`
     );
     if (blockDom) {
       if (selectionRect.isIntersect(Rect.fromDom(blockDom))) {
-        // TODO check if selectable, only page model has elements
         const { children } = blockModel;
         const queryStr = children.reduce((query, child, index) => {
           return `${query}${index ? ',' : ''}[${BLOCK_ID_ATTR}='${child.id}']`;
         }, '');
-        const childrenDoms = this._page.querySelectorAll(queryStr);
+        // IMP: if parent block does not contain child block, this will be not useful
+        const childrenDoms = blockDom.querySelectorAll(queryStr);
         childrenDoms.forEach(dom => {
           if (selectionRect.isIntersect(Rect.fromDom(dom))) {
             const id = dom.attributes.getNamedItem(BLOCK_ID_ATTR)?.value;
             id && selectedBlocks.push(id);
           }
         });
+        // if selected only one block check if select children
         if (selectedBlocks.length === 1) {
-          // TODO run self
+          const selectedBlockModel = children.find(
+            children => children.id === selectedBlocks[0]
+          );
+          if (selectedBlockModel && selectedBlockModel.children.length) {
+            const selectedChildren = this.calcIntersectBlocks(
+              selectionRect,
+              selectedBlockModel
+            );
+            if (selectedChildren.length) {
+              selectedBlocks = selectedChildren;
+            }
+          }
         }
       }
     }
-    this.selectedBlockIds = selectedBlocks;
+    // only page model need call selection change
+    if (this._page.model === blockModel) {
+      this.selectedBlockIds = selectedBlocks;
+    }
     return selectedBlocks;
   }
 
