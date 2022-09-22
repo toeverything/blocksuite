@@ -106,7 +106,7 @@ describe.concurrent('addBlock', () => {
 
       const serializedChildren = serialize(store).blocks['0']['sys:children'];
       assert.deepEqual(serializedChildren, ['1']);
-      assert.deepEqual(block.children, ['1']);
+      assert.equal(block.children[0].id, '1');
     });
   });
 });

@@ -62,7 +62,7 @@ export class PageBlockElement extends LitElement {
 
     const childBlocks = html`
       ${repeat(
-        this.model.elements,
+        this.model.children,
         child => child.id,
         child => getBlockElement(child, this.store, this.page)
       )}

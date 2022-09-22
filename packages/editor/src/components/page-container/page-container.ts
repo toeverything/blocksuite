@@ -67,8 +67,8 @@ export class PageContainer extends LitElement {
         this.store.setRoot(block);
         this.model = block as PageBlockModel;
       } else {
-        if (!this.model.elements.find(child => child.id === block.id)) {
-          this.model.elements.push(block);
+        if (!this.model.children.find(child => child.id === block.id)) {
+          this.model.children.push(block);
         }
 
         this.requestUpdate();
@@ -76,12 +76,12 @@ export class PageContainer extends LitElement {
     });
 
     this.store.slots.blockDeleted.on(id => {
-      const index = this.model.elements.findIndex(child => child.id === id);
+      const index = this.model.children.findIndex(child => child.id === id);
       if (index !== -1) {
-        this.model.elements.splice(index, 1);
+        this.model.children.splice(index, 1);
       }
 
-      this.isEmptyPage = this.model.elements.length === 0;
+      this.isEmptyPage = this.model.children.length === 0;
       this.requestUpdate();
     });
   }

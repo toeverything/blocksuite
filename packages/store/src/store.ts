@@ -14,7 +14,6 @@ export type YBlocks = Y.Map<YBlock>;
 export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
-  children: string[];
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -216,7 +215,7 @@ export class Store {
     this.slots.historyUpdated.emit();
   };
 
-  private _createBlockModel(props: BlockProps) {
+  private _createBlockModel(props: Omit<BlockProps, 'children'>) {
     const BlockModelCtor = this._flavourMap.get(props.flavour);
     if (!BlockModelCtor) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
@@ -265,8 +264,14 @@ export class Store {
 
         const key = event.path[event.path.length - 1];
         if (key === 'sys:children') {
-          model.children = event.target.toArray();
-          this.slots.childrenUpdated.emit(model);
+          const childIds = event.target.toArray();
+          // XXX ensure children exists
+          queueMicrotask(() => {
+            model.children = childIds.map(
+              id => this._blockMap.get(id) as BaseBlockModel
+            );
+            this.slots.childrenUpdated.emit(model);
+          });
         }
       }
     }
