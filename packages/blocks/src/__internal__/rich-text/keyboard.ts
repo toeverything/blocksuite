@@ -1,5 +1,5 @@
 import type { Quill, RangeStatic } from 'quill';
-import type { Store } from '@building-blocks/store';
+import type { BaseBlockModel, Store } from '@building-blocks/store';
 import { TextBlockProps } from '../..';
 
 interface BindingContext {
@@ -39,7 +39,7 @@ type KeyboardBindingHandler = (
   context: BindingContext
 ) => void;
 
-export const createKeyboardBindings = (store: Store) => {
+export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   const clientID = store.doc.clientID;
 
   function undo() {
@@ -73,11 +73,39 @@ export const createKeyboardBindings = (store: Store) => {
     this.quill.insertText(index, '\n', clientID);
   }
 
+  function indent(this: KeyboardEventThis) {
+    const previousSibling = store.getPreviousSibling(model);
+    if (previousSibling) {
+      store.captureSync();
+      store.deleteBlock(model);
+      store.addBlock(model, previousSibling);
+    }
+  }
+
+  function unindent(this: KeyboardEventThis) {
+    const parent = store.getParent(model);
+    if (!parent) return;
+
+    const grandParent = store.getParent(parent);
+    if (!grandParent) return;
+
+    const index = grandParent.children.indexOf(parent);
+    store.captureSync();
+    store.deleteBlock(model);
+    store.addBlock(model, grandParent, index + 1);
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
       shortKey: true,
       handler: undo,
+    },
+    redo: {
+      key: 'z',
+      shiftKey: true,
+      shortKey: true,
+      handler: redo,
     },
     hardEnter: {
       key: 'enter',
@@ -88,11 +116,14 @@ export const createKeyboardBindings = (store: Store) => {
       shiftKey: true,
       handler: softEnter,
     },
-    redo: {
-      key: 'z',
+    tab: {
+      key: 'tab',
+      handler: indent,
+    },
+    shiftTab: {
+      key: 'tab',
       shiftKey: true,
-      shortKey: true,
-      handler: redo,
+      handler: unindent,
     },
   };
 

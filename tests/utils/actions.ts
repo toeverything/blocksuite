@@ -8,12 +8,21 @@ export const defaultPlayground = 'http://localhost:5173/';
 export const emptyInput = 'input';
 export const richTextBox = '.ql-editor';
 
+function generateRandomRoomId() {
+  return `virgo-${Math.random().toFixed(8).substring(2)}`;
+}
+
 export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
-    room = `virgo-${Math.random().toFixed(8).substring(2)}`;
+    room = generateRandomRoomId();
   }
   await page.goto(`${defaultPlayground}?room=${room}`);
   return room;
+}
+
+export async function enterPlaygroundWithList(page: Page) {
+  const room = generateRandomRoomId();
+  await page.goto(`${defaultPlayground}?init=list&room=${room}`);
 }
 
 async function keyDownCtrlOrMeta(page: Page) {
@@ -60,4 +69,26 @@ export async function disconnectByClick(page: Page) {
 
 export async function connectByClick(page: Page) {
   await page.click('text=Connect');
+}
+
+export async function addListByClick(page: Page) {
+  await page.click('text=Add List');
+}
+
+export async function mouseDragFromTo(
+  page: Page,
+  from: { x: number; y: number },
+  to: { x: number; y: number }
+) {
+  const { x: x1, y: y1 } = from;
+  const { x: x2, y: y2 } = to;
+  await page.mouse.move(x1, y1);
+  await page.mouse.down();
+  await page.mouse.move(x2, y2);
+}
+
+export async function shiftTab(page: Page) {
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
 }

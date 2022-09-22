@@ -1,14 +1,17 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { Store } from '@building-blocks/store';
-import { PageBlockModel } from './page-model';
-import { TextBlockModel } from '../';
+import { PageBlockModel, BLOCK_ID_ATTR } from '../';
+import { PageContainer } from '../types';
+import { getChildBlocks } from '../__internal__/utils';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
   @property()
   store!: Store;
+
+  @property()
+  page!: PageContainer;
 
   @property({
     hasChanged() {
@@ -23,24 +26,11 @@ export class PageBlockElement extends LitElement {
   }
 
   render() {
-    this.setAttribute('data-block-id', this.model.id);
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childBlocks = html`
-      ${repeat(
-        this.model.elements,
-        child => child.id,
-        child =>
-          html`
-            <text-block-element
-              .store=${this.store}
-              .model=${child as TextBlockModel}
-            >
-            </text-block-element>
-          `
-      )}
-    `;
+    const childBlocks = getChildBlocks(this.model, this.page);
 
-    return html` <div class="page-container">${childBlocks}</div> `;
+    return html` <div class="page-block-container">${childBlocks}</div> `;
   }
 }
 

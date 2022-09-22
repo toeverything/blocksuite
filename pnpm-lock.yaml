@@ -53,18 +53,10 @@ importers:
     specifiers:
       '@building-blocks/store': workspace:*
       '@types/quill': ^2.0.9
-      lib0: ^0.2.52
       marked: ^4.1.0
-      y-protocols: ^1.0.5
-      y-webrtc: ^10.2.3
-      yjs: ^13.5.41
     dependencies:
       '@building-blocks/store': link:../store
-      lib0: 0.2.52
       marked: 4.1.0
-      y-protocols: 1.0.5
-      y-webrtc: 10.2.3
-      yjs: 13.5.41
     devDependencies:
       '@types/quill': 2.0.9
 

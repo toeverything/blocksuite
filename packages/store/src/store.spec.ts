@@ -8,13 +8,8 @@ function serialize(store: Store) {
   return store.doc.toJSON();
 }
 
-function waitSlot<T>(slot: Slot<T>, asserter: (val: T) => void) {
-  return new Promise<void>(resolve => {
-    slot.once(val => {
-      asserter(val);
-      resolve();
-    });
-  });
+function waitOnce<T>(slot: Slot<T>) {
+  return new Promise<T>(resolve => slot.once(val => resolve(val)));
 }
 
 describe.concurrent('basic', () => {
@@ -33,13 +28,11 @@ describe.concurrent('addBlock', () => {
 
     store.addBlock({ flavour: 'page' });
 
-    assert.deepEqual(serialize(store), {
-      blocks: {
-        '0': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '0',
-        },
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
       },
     });
   });
@@ -49,14 +42,12 @@ describe.concurrent('addBlock', () => {
 
     store.addBlock({ flavour: 'page', title: 'hello' });
 
-    assert.deepEqual(serialize(store), {
-      blocks: {
-        '0': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '0',
-          'prop:title': 'hello',
-        },
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+        'prop:title': 'hello',
       },
     });
   });
@@ -66,18 +57,16 @@ describe.concurrent('addBlock', () => {
     store.addBlock({ flavour: 'page' });
     store.addBlock({ flavour: 'page' });
 
-    assert.deepEqual(serialize(store), {
-      blocks: {
-        '0': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '0',
-        },
-        '1': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '1',
-        },
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
+      '1': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '1',
       },
     });
   });
@@ -86,24 +75,83 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    await waitSlot(store.slots.addBlock, block => {
-      assert.ok(block instanceof BlockMap.page);
-    });
+    const block = await waitOnce(store.slots.blockAdded);
+    assert.ok(block instanceof BlockMap.page);
   });
 
   it('can add block to root', async () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    await waitSlot(store.slots.addBlock, block => {
-      assert.ok(block instanceof BlockMap.page);
-      store.setRoot(block);
-    });
+    const root = await waitOnce(store.slots.blockAdded);
+    assert.ok(root instanceof BlockMap.page);
+    store.setRoot(root);
 
     queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    await waitSlot(store.slots.addBlock, block => {
-      assert.ok(block instanceof BlockMap.text);
-      assert.equal(serialize(store).blocks[0]['sys:children'][0], block.id);
+    const block = await waitOnce(store.slots.childrenUpdated);
+    assert.ok(block instanceof BlockMap.page);
+
+    const serializedChildren = serialize(store).blocks['0']['sys:children'];
+    assert.deepEqual(serializedChildren, ['1']);
+    assert.equal(block.children[0].id, '1');
+  });
+});
+
+async function initWithRoot(store: Store) {
+  queueMicrotask(() => store.addBlock({ flavour: 'page' }));
+  const root = await waitOnce(store.slots.blockAdded);
+  store.setRoot(root);
+  return root;
+}
+
+describe.concurrent('deleteBlock', () => {
+  it('can delete single model', () => {
+    const store = new Store().register(BlockMap);
+
+    store.addBlock({ flavour: 'page' });
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
     });
+
+    store.deleteBlockById('0');
+    assert.deepEqual(serialize(store).blocks, {});
+  });
+
+  it('can delete model with parent', async () => {
+    const store = new Store().register(BlockMap);
+    const root = await initWithRoot(store);
+
+    queueMicrotask(() => store.addBlock({ flavour: 'text' }));
+    await waitOnce(store.slots.childrenUpdated);
+
+    // before delete
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': ['1'],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
+      '1': {
+        'sys:children': [],
+        'sys:flavour': 'text',
+        'sys:id': '1',
+      },
+    });
+
+    store.deleteBlock(root.children[0]);
+
+    // after delete
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
+    });
+    assert.equal(root.children.length, 0);
   });
 });

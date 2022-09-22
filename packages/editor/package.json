@@ -11,12 +11,8 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
-    "@building-blocks/store": "workspace:*",
-    "lib0": "^0.2.52",
     "marked": "^4.1.0",
-    "y-protocols": "^1.0.5",
-    "y-webrtc": "^10.2.3",
-    "yjs": "^13.5.41"
+    "@building-blocks/store": "workspace:*"
   },
   "devDependencies": {
     "@types/quill": "^2.0.9"

@@ -1,8 +1,11 @@
-import { Point, pointsToRect, Rect } from './rect';
+import { Point, Rect } from './rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { MouseManager } from '../../managers';
+import { BlockMap, BLOCK_ID_ATTR } from '../../block-loader';
+import { PageContainer, SelectionManager } from '../..';
+
+type PageBlockModel = InstanceType<typeof BlockMap.page>;
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {
@@ -18,32 +21,56 @@ export class SelectionRect extends LitElement {
   @state()
   isShow = false;
 
-  @property({ type: MouseManager })
-  mouse!: MouseManager;
+  // @property()
+  // mouse!: MouseManager;
+
+  @property()
+  pageModel!: PageBlockModel;
+
+  @property()
+  page!: PageContainer;
+
+  @property()
+  selectionManager!: SelectionManager;
 
   protected firstUpdated(): void {
-    if (this.mouse) {
-      this.mouse.onMouseDown(e => {
+    if (this.page.mouse) {
+      this.page.mouse.onMouseDown(e => {
         this._handlerEditorMousedown(e);
       });
-      this.mouse.onMouseMove(e => {
+      this.page.mouse.onMouseMove(e => {
+        if (!this.page.model) return;
+
         this._handlerMouseMove(e);
       });
     }
   }
 
   private _handlerEditorMousedown(e: MouseEvent) {
-    this.startPoint = new Point(e.clientX, e.clientY);
-    this.isShow = true;
-    this.mouse.onDocumentMouseUpOnce(() => {
-      this._handlerEditorMouseup();
-    });
+    this.selectionManager.selectedBlockIds = [];
+    const closestBlock = (e.target as HTMLDivElement)?.closest(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    // if closest block is not page root , do nothing
+    if (
+      !closestBlock ||
+      closestBlock.attributes.getNamedItem(BLOCK_ID_ATTR)?.value ===
+        this.pageModel.id
+    ) {
+      this.startPoint = new Point(e.clientX, e.clientY);
+      this.isShow = true;
+      this.page.mouse.onDocumentMouseUpOnce(() => {
+        this._handlerEditorMouseup();
+      });
+      e.preventDefault();
+    }
   }
 
   private _handlerMouseMove(e: MouseEvent) {
     if (this.startPoint) {
       this.endPoint = new Point(e.clientX, e.clientY);
-      this.rect = pointsToRect(this.startPoint, this.endPoint);
+      this.rect = Rect.fromPoints(this.startPoint, this.endPoint);
+      this.page.selection.calcIntersectBlocks(this.rect, this.pageModel);
     }
   }
 
@@ -59,7 +86,7 @@ export class SelectionRect extends LitElement {
         ? {
             display: 'block',
             left: `${this.rect.left}px`,
-            top: ` ${this.rect.top}px`,
+            top: `${this.rect.top}px`,
             height: `${this.rect.height}px`,
             width: `${this.rect.width}px`,
           }
