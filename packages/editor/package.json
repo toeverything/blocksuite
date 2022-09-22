@@ -13,6 +13,7 @@
   "dependencies": {
     "@building-blocks/store": "workspace:*",
     "lib0": "^0.2.52",
+    "marked": "^4.1.0",
     "y-protocols": "^1.0.5",
     "y-webrtc": "^10.2.3",
     "yjs": "^13.5.41"
