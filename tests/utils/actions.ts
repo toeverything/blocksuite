@@ -86,3 +86,9 @@ export async function mouseDragFromTo(
   await page.mouse.down();
   await page.mouse.move(x2, y2);
 }
+
+export async function shiftTab(page: Page) {
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
+}
