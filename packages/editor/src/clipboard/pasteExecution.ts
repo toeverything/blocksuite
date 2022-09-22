@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { marked } from 'marked';
 import { PageContainer } from '../components';
 import { ParseHtml } from '../parse/parseHtml';
@@ -26,6 +25,7 @@ export class PasteExecution {
     e.stopPropagation();
 
     const blocks = await this._clipboardEvent2Blocks(e);
+    console.log(blocks);
     // todo insert blocks to editor
   }
 
