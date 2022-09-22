@@ -1,9 +1,10 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
-import { ClipItem } from './clipItem';
+import { ClipItem } from './clip-item';
 import { PageContainer } from '../components';
 import { ParseBlock } from '../parse/parseBlock';
 
 export class CopyCutExecution {
+  // @ts-ignore
   private _page: PageContainer;
 
   constructor(page: PageContainer) {
@@ -11,7 +12,7 @@ export class CopyCutExecution {
     this.handleCopy = this.handleCopy.bind(this);
   }
 
-  public handleCopy(e: ClipboardEvent) {
+  handleCopy(e: ClipboardEvent) {
     e.preventDefault();
     e.stopPropagation();
 
@@ -23,7 +24,7 @@ export class CopyCutExecution {
     this._copyToClipboard(e, clips);
   }
 
-  public handleCut(e: ClipboardEvent) {
+  handleCut(e: ClipboardEvent) {
     this.handleCopy(e);
     // todo delete selected blocks
   }

@@ -2,7 +2,7 @@ import { Slot } from '@building-blocks/store';
 import { ClipboardAction } from './types';
 
 export class ClipEventDispatch {
-  public readonly slots = {
+  readonly slots = {
     [ClipboardAction.copy]: new Slot<ClipboardEvent>(),
     [ClipboardAction.cut]: new Slot<ClipboardEvent>(),
     [ClipboardAction.paste]: new Slot<ClipboardEvent>(),
@@ -15,7 +15,7 @@ export class ClipEventDispatch {
     this.initialClipboardTargetEvent(clipboardTarget);
   }
 
-  public initialClipboardTargetEvent(clipboardTarget: HTMLElement) {
+  initialClipboardTargetEvent(clipboardTarget: HTMLElement) {
     if (!clipboardTarget) {
       return;
     }
@@ -27,7 +27,7 @@ export class ClipEventDispatch {
     clipboardTarget.addEventListener(ClipboardAction.paste, this._pasteHandler);
   }
 
-  public disposeClipboardTargetEvent(clipboardTarget: HTMLElement) {
+  disposeClipboardTargetEvent(clipboardTarget: HTMLElement) {
     if (!clipboardTarget) {
       return;
     }
@@ -54,7 +54,7 @@ export class ClipEventDispatch {
     this.slots.paste.emit(e);
   }
 
-  public dispose(clipboardTarget: HTMLElement) {
+  dispose(clipboardTarget: HTMLElement) {
     this.slots.copy.dispose();
     this.slots.cut.dispose();
     this.slots.paste.dispose();

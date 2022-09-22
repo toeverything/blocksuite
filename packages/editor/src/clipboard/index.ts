@@ -1,7 +1,7 @@
 import { PageContainer } from '../components';
-import { ClipEventDispatch } from './clipEventDispatch';
-import { CopyCutExecution } from './copyCutExecution';
-import { PasteExecution } from './pasteExecution';
+import { ClipEventDispatch } from './clip-event-dispatch';
+import { CopyCutExecution } from './copy-cut-execution';
+import { PasteExecution } from './paste-execution';
 
 export class Clipboard {
   private _page: PageContainer;
@@ -24,7 +24,7 @@ export class Clipboard {
     this._clipboardEventDispatcher.slots.paste.on(this._paste.handlePaste);
   }
 
-  public set clipboardTarget(clipboardTarget: HTMLElement) {
+  set clipboardTarget(clipboardTarget: HTMLElement) {
     this._clipboardEventDispatcher.disposeClipboardTargetEvent(
       this._clipboardTarget
     );
@@ -33,11 +33,11 @@ export class Clipboard {
       this._clipboardTarget
     );
   }
-  public get clipboardTarget() {
+  get clipboardTarget() {
     return this._clipboardTarget;
   }
 
-  public dispose() {
+  dispose() {
     this._clipboardEventDispatcher.dispose(this.clipboardTarget);
   }
 }

@@ -11,10 +11,11 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
-    "marked": "^4.1.0",
-    "@building-blocks/store": "workspace:*"
+    "@building-blocks/store": "workspace:*",
+    "marked": "^4.1.0"
   },
   "devDependencies": {
+    "@types/marked": "^4.0.7",
     "@types/quill": "^2.0.9"
   }
 }

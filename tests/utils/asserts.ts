@@ -46,7 +46,7 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-export async function assertSelectBlocks(page: Page, count: number) {
+export async function assertSelectedBlockCount(page: Page, count: number) {
   const actual = await page.evaluate(() => {
     const selectLength =
       document.querySelector('page-container')?.selection.selectionInfo
