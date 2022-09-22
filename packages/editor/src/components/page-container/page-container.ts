@@ -41,6 +41,8 @@ export class PageContainer extends LitElement {
 
     // @ts-ignore
     window.store = this.store;
+    // @ts-ignore
+    window.page = this;
   }
 
   private _subscribeStore() {
@@ -118,6 +120,7 @@ export class PageContainer extends LitElement {
         .block-placeholder-input {
           display: block;
           box-sizing: border-box;
+          margin-top: 5px;
           padding: 2px;
           padding-left: 2px;
           width: 100%;
@@ -149,7 +152,7 @@ export class PageContainer extends LitElement {
       <style>
         .page-container {
           position: relative;
-          padding: 0 70px;
+          padding: 10px 70px;
         }
       </style>
       <div class="page-container">

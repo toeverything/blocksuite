@@ -1,5 +1,5 @@
-import { LitElement, html } from 'lit';
-import { customElement, state, property } from 'lit/decorators.js';
+import { LitElement, html, css } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import type { PageContainer } from './page-container';
 
 const params = new URLSearchParams(location.search);
@@ -21,6 +21,19 @@ export class DebugMenu extends LitElement {
 
   @state()
   canDelete = false;
+
+  static styles = css`
+    .debug-menu {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 40px;
+    }
+    .debug-menu > button {
+      margin-left: 5px;
+      margin-top: 5px;
+    }
+  `;
 
   get store() {
     return this.page.store;
@@ -75,11 +88,6 @@ export class DebugMenu extends LitElement {
     }
   }
 
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
-
   firstUpdated() {
     this.store.slots.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
@@ -95,7 +103,7 @@ export class DebugMenu extends LitElement {
 
   render() {
     return html`
-      <div style="margin-bottom: 10px">
+      <div class="debug-menu">
         <button
           aria-label="undo"
           title="undo"
