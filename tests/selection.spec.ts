@@ -4,14 +4,15 @@ import {
   enterPlaygroundRoom,
   mouseDragFromTo,
 } from './utils/actions';
-import { assertSelectBlocks } from './utils/asserts';
+import { assertSelectedBlockCount } from './utils/asserts';
 
-test(' select blocks ', async ({ page }) => {
+test('drag to select blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await page.click(emptyInput);
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
+
   const fromTo = await page.evaluate(() => {
     const textBoxes = document.querySelectorAll('rich-text');
     const firstTextBox = textBoxes[0];
@@ -23,7 +24,8 @@ test(' select blocks ', async ({ page }) => {
       { x: Math.floor(x2) + 40, y: Math.floor(y2) - 10 },
     ];
   });
+
   await mouseDragFromTo(page, fromTo[0], fromTo[1]);
-  await assertSelectBlocks(page, 3);
+  await assertSelectedBlockCount(page, 3);
   await page.pause();
 });
