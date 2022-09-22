@@ -2,10 +2,11 @@ import { marked } from 'marked';
 import { PageContainer } from '../components';
 import { ParseHtml } from '../parse/parseHtml';
 import { ParseText } from '../parse/parseTest';
-import { MarkdownUtils } from './markdownUtils';
+import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 
 export class PasteExecution {
+  // @ts-ignore
   private _page: PageContainer;
 
   // The event handler will get the most needed clipboard data based on this array order

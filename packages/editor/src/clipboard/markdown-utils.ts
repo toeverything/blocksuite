@@ -47,7 +47,7 @@ export class MarkdownUtils {
     // turn \t into a placeholder
     text = text.replace(/\t/g, '¨A¨B');
     // Use placeholders to mark tabs to prevent regular backtracking
-    text = text.replace(/¨B(.+?)¨A/g, (wholeMatch, m1) => {
+    text = text.replace(/¨B(.+?)¨A/g, (_wholeMatch, m1) => {
       let leadingText = m1;
       const numSpaces = 4 - (leadingText.length % 4);
 

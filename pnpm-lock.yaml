@@ -52,12 +52,14 @@ importers:
   packages/editor:
     specifiers:
       '@building-blocks/store': workspace:*
+      '@types/marked': ^4.0.7
       '@types/quill': ^2.0.9
       marked: ^4.1.0
     dependencies:
       '@building-blocks/store': link:../store
       marked: 4.1.0
     devDependencies:
+      '@types/marked': 4.0.7
       '@types/quill': 2.0.9
 
   packages/playground:
@@ -496,6 +498,10 @@ packages:
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
+    dev: true
+
+  /@types/marked/4.0.7:
+    resolution: {integrity: sha512-eEAhnz21CwvKVW+YvRvcTuFKNU9CV1qH+opcgVK3pIMI6YZzDm6gc8o2vHjldFk6MGKt5pueSB7IOpvpx5Qekw==}
     dev: true
 
   /@types/node/18.7.18:
