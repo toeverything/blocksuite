@@ -3,6 +3,7 @@ import { customElement, state, query } from 'lit/decorators.js';
 import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@building-blocks/store';
 import { BlockMap, TextBlockProps } from '../../block-loader';
+import { Clipboard } from '../../clipboard';
 
 type PageBlockModel = InstanceType<typeof BlockMap.page>;
 
@@ -23,6 +24,9 @@ export class PageContainer extends LitElement {
 
   @state()
   selection = new SelectionManager(this);
+
+  @state()
+  clipboard1 = new Clipboard(this, this);
 
   @state()
   connectionBtnText = 'Disconnect';
