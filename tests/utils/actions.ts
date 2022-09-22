@@ -56,23 +56,23 @@ export async function redoByKeyboard(page: Page) {
 }
 
 export async function undoByClick(page: Page) {
-  await page.click('text=Undo');
+  await page.click('button[aria-label="undo"]');
 }
 
 export async function redoByClick(page: Page) {
-  await page.click('text=Redo');
+  await page.click('button[aria-label="redo"]');
 }
 
 export async function disconnectByClick(page: Page) {
-  await page.click('text=Disconnect');
+  await page.click('button[aria-label="disconnect"]');
 }
 
 export async function connectByClick(page: Page) {
-  await page.click('text=Connect');
+  await page.click('button[aria-label="connect"]');
 }
 
 export async function addListByClick(page: Page) {
-  await page.click('text=Add List');
+  await page.click('button[aria-label="add list"]');
 }
 
 export async function mouseDragFromTo(

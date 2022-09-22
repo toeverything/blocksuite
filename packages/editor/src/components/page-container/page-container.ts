@@ -31,9 +31,6 @@ export class PageContainer extends LitElement {
   @state()
   isEmptyPage = true;
 
-  @state()
-  selectionInfo = this.selection.selectionInfo;
-
   @query('.block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
@@ -105,10 +102,6 @@ export class PageContainer extends LitElement {
 
   firstUpdated() {
     this._placeholderInput?.focus();
-
-    this.selection.onSelectionChange(selectionInfo => {
-      this.selectionInfo = selectionInfo;
-    });
   }
 
   disconnectedCallback() {
@@ -125,13 +118,14 @@ export class PageContainer extends LitElement {
         .block-placeholder-input {
           display: block;
           box-sizing: border-box;
-          padding: 6px;
-          padding-left: 5px;
+          padding: 2px;
+          padding-left: 2px;
           width: 100%;
-          height: 30.45px;
-          border: 1px solid rgb(204, 204, 204);
+          height: 25px;
+          border: 0;
           border-radius: 0;
           outline: none;
+          border: 1px #eee dashed;
         }
       </style>
       <div

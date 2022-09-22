@@ -11,7 +11,7 @@ export class DebugMenu extends LitElement {
   page!: PageContainer;
 
   @state()
-  connectionBtnText = 'Disconnect';
+  connected = true;
 
   @state()
   canUndo = false;
@@ -19,17 +19,20 @@ export class DebugMenu extends LitElement {
   @state()
   canRedo = false;
 
+  @state()
+  canDelete = false;
+
   get store() {
     return this.page.store;
   }
 
   private _onToggleConnection() {
-    if (this.connectionBtnText === 'Disconnect') {
+    if (this.connected === true) {
       this.store.provider.disconnect();
-      this.connectionBtnText = 'Connect';
+      this.connected = false;
     } else {
       this.store.provider.connect();
-      this.connectionBtnText = 'Disconnect';
+      this.connected = true;
     }
   }
 
@@ -48,6 +51,12 @@ export class DebugMenu extends LitElement {
     this.store.addBlock({
       flavour: 'list',
       children: [],
+    });
+  }
+
+  private _onDelete() {
+    this.page.selection.selectionInfo.selectedNodesIds?.forEach(id => {
+      this.store.deleteBlockById(id);
     });
   }
 
@@ -77,28 +86,53 @@ export class DebugMenu extends LitElement {
       this.canRedo = this.store.canRedo;
     });
 
+    this.page.selection.onSelectionChange(selectionInfo => {
+      this.canDelete = selectionInfo?.selectedNodesIds?.length !== undefined;
+    });
+
     requestAnimationFrame(() => this._handleDebugInit());
   }
 
   render() {
     return html`
       <div style="margin-bottom: 10px">
-        <button .disabled=${!this.canUndo} @click=${() => this.store.undo()}>
-          Undo
-        </button>
-        <button .disabled=${!this.canRedo} @click=${() => this.store.redo()}>
-          Redo
-        </button>
-        <button @click=${this._onToggleConnection}>
-          ${this.connectionBtnText}
-        </button>
-        <button @click=${this._onAddList}>Add List</button>
-        <!-- TODO init model delete -->
         <button
-          .disabled=${this.page.selectionInfo.type !== 'Block' ||
-          !this.page.selectionInfo?.selectedNodesIds.length}
+          aria-label="undo"
+          title="undo"
+          .disabled=${!this.canUndo}
+          @click=${() => this.store.undo()}
         >
-          Delete
+          ⬅️
+        </button>
+        <button
+          aria-label="redo"
+          title="redo"
+          .disabled=${!this.canRedo}
+          @click=${() => this.store.redo()}
+        >
+          ➡️
+        </button>
+        <button
+          aria-label=${this.connected ? 'disconnect' : 'connect'}
+          title=${this.connected ? 'disconnect' : 'connect'}
+          @click=${this._onToggleConnection}
+        >
+          ${this.connected ? '🟢' : '🔴'}
+        </button>
+        <button
+          aria-label="add list"
+          title="add list"
+          @click=${this._onAddList}
+        >
+          *️⃣
+        </button>
+        <button
+          aria-label="delete"
+          title="delete"
+          .disabled=${!this.canDelete}
+          @click=${this._onDelete}
+        >
+          ❌
         </button>
       </div>
     `;

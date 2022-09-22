@@ -60,7 +60,11 @@ export class RichText extends LitElement {
           margin-bottom: 0px;
         }
         .ql-editor {
-          padding: 5px;
+          padding: 2px;
+        }
+        .rich-text.ql-container.ql-snow {
+          /* border: 0; */
+          border: 1px #eee dashed;
         }
       </style>
       <div class="rich-text quill-container"></div>

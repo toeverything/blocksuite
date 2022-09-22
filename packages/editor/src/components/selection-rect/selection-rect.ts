@@ -36,18 +36,18 @@ export class SelectionRect extends LitElement {
   protected firstUpdated(): void {
     if (this.page.mouse) {
       this.page.mouse.onMouseDown(e => {
-        this._handlerEditorMousedown(e);
+        this._handleEditorMousedown(e);
       });
       this.page.mouse.onMouseMove(e => {
         if (!this.page.model) return;
 
-        this._handlerMouseMove(e);
+        this._handleMouseMove(e);
       });
     }
   }
 
-  private _handlerEditorMousedown(e: MouseEvent) {
-    this.selectionManager.selectedBlockIds = [];
+  private _handleEditorMousedown(e: MouseEvent) {
+    // this.selectionManager.selectedBlockIds = [];
     const closestBlock = (e.target as HTMLDivElement)?.closest(
       `[${BLOCK_ID_ATTR}]`
     );
@@ -60,13 +60,13 @@ export class SelectionRect extends LitElement {
       this.startPoint = new Point(e.clientX, e.clientY);
       this.isShow = true;
       this.page.mouse.onDocumentMouseUpOnce(() => {
-        this._handlerEditorMouseup();
+        this._handleEditorMouseup();
       });
       e.preventDefault();
     }
   }
 
-  private _handlerMouseMove(e: MouseEvent) {
+  private _handleMouseMove(e: MouseEvent) {
     if (this.startPoint) {
       this.endPoint = new Point(e.clientX, e.clientY);
       this.rect = Rect.fromPoints(this.startPoint, this.endPoint);
@@ -74,7 +74,7 @@ export class SelectionRect extends LitElement {
     }
   }
 
-  private _handlerEditorMouseup() {
+  private _handleEditorMouseup() {
     this.isShow = false;
     this.startPoint = undefined;
     this.rect = undefined;
