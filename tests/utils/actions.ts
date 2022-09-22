@@ -65,3 +65,15 @@ export async function connectByClick(page: Page) {
 export async function addListByClick(page: Page) {
   await page.click('text=Add List');
 }
+
+export async function mouseDragFromTo(
+  page: Page,
+  from: { x: number; y: number },
+  to: { x: number; y: number }
+) {
+  const { x: x1, y: y1 } = from;
+  const { x: x2, y: y2 } = to;
+  await page.mouse.move(x1, y1);
+  await page.mouse.down();
+  await page.mouse.move(x2, y2);
+}
