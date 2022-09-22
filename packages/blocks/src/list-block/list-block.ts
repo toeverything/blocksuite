@@ -12,7 +12,11 @@ export class ListBlockElement extends LitElement {
   @property()
   store!: Store;
 
-  @property()
+  @property({
+    hasChanged() {
+      return true;
+    },
+  })
   model!: ListBlockModel;
 
   @property()

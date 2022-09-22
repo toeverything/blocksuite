@@ -8,12 +8,21 @@ export const defaultPlayground = 'http://localhost:5173/';
 export const emptyInput = 'input';
 export const richTextBox = '.ql-editor';
 
+function generateRandomRoomId() {
+  return `virgo-${Math.random().toFixed(8).substring(2)}`;
+}
+
 export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
-    room = `virgo-${Math.random().toFixed(8).substring(2)}`;
+    room = generateRandomRoomId();
   }
   await page.goto(`${defaultPlayground}?room=${room}`);
   return room;
+}
+
+export async function enterPlaygroundWithList(page: Page) {
+  const room = generateRandomRoomId();
+  await page.goto(`${defaultPlayground}?init=list&room=${room}`);
 }
 
 async function keyDownCtrlOrMeta(page: Page) {

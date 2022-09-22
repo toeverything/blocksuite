@@ -10,6 +10,7 @@ import { DebugProvider } from './providers';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
+/** JSON-serializable properties of a block */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BlockProps = Record<string, any> & {
   id: string;
@@ -28,10 +29,8 @@ export interface SerializedStore {
 }
 
 export interface StackItem {
-  stackItem: {
-    meta: Map<'cursor-location', SelectionRange | undefined>;
-    type: 'undo' | 'redo';
-  };
+  meta: Map<'cursor-location', SelectionRange | undefined>;
+  type: 'undo' | 'redo';
 }
 
 const IS_WEB = !import.meta.env.SSR;
@@ -146,26 +145,34 @@ export class Store {
     return parent?.children[index - 1] ?? null;
   }
 
-  addBlock<T extends Partial<BlockProps>>(blockProps: T) {
+  addBlock<T extends Partial<BlockProps>>(
+    blockProps: T,
+    parent?: BaseBlockModel,
+    parentIndex?: number
+  ) {
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
     }
-    const id = this._createId();
 
-    blockProps.id = id;
+    const clonedProps = { ...blockProps };
+    // prevent the store field being synced
+    delete clonedProps.store;
+    const id = clonedProps.id ? clonedProps.id : this._createId();
+    clonedProps.id = id;
 
     const yBlock = new Y.Map() as YBlock;
-    syncBlockProps(yBlock, blockProps);
-
-    // no root when adding root itself
-    const rootId = this._currentRoot?.id;
-    if (rootId) {
-      const yRoot = this._yBlocks.get(rootId) as YBlock;
-      const yChildren = yRoot.get('sys:children') as Y.Array<string>;
-      yChildren.insert(yChildren.length, [id]);
-    }
+    syncBlockProps(yBlock, clonedProps);
 
     this.transact(() => {
+      const parentId = parent?.id ?? this._currentRoot?.id;
+
+      if (parentId) {
+        const yParent = this._yBlocks.get(parentId) as YBlock;
+        const yChildren = yParent.get('sys:children') as Y.Array<string>;
+        const index = parentIndex ?? yChildren.length;
+        yChildren.insert(index, [id]);
+      }
+
       this._yBlocks.set(id, yBlock);
     });
     return id;
@@ -241,7 +248,7 @@ export class Store {
     return yBlock;
   }
 
-  private _historyAddObserver = (event: StackItem) => {
+  private _historyAddObserver = (event: { stackItem: StackItem }) => {
     if (IS_WEB) {
       event.stackItem.meta.set(
         'cursor-location',
@@ -252,7 +259,7 @@ export class Store {
     this._historyObserver();
   };
 
-  private _historyPopObserver = (event: StackItem) => {
+  private _historyPopObserver = (event: { stackItem: StackItem }) => {
     const cursor = event.stackItem.meta.get('cursor-location');
     if (!cursor) {
       return;
@@ -291,7 +298,8 @@ export class Store {
           this._blockMap.delete(id);
           this.slots.blockDeleted.emit(id);
         } else {
-          console.warn('unknown update action on top-level block store', event);
+          // fires when undoing delete-and-add operation on a block
+          // console.warn('update action on top-level block store', event);
         }
       });
     }

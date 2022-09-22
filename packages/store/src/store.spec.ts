@@ -28,13 +28,11 @@ describe.concurrent('addBlock', () => {
 
     store.addBlock({ flavour: 'page' });
 
-    assert.deepEqual(serialize(store), {
-      blocks: {
-        '0': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '0',
-        },
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
       },
     });
   });
@@ -44,14 +42,12 @@ describe.concurrent('addBlock', () => {
 
     store.addBlock({ flavour: 'page', title: 'hello' });
 
-    assert.deepEqual(serialize(store), {
-      blocks: {
-        '0': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '0',
-          'prop:title': 'hello',
-        },
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+        'prop:title': 'hello',
       },
     });
   });
@@ -61,18 +57,16 @@ describe.concurrent('addBlock', () => {
     store.addBlock({ flavour: 'page' });
     store.addBlock({ flavour: 'page' });
 
-    assert.deepEqual(serialize(store), {
-      blocks: {
-        '0': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '0',
-        },
-        '1': {
-          'sys:children': [],
-          'sys:flavour': 'page',
-          'sys:id': '1',
-        },
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
+      '1': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '1',
       },
     });
   });
@@ -132,7 +126,7 @@ describe.concurrent('deleteBlock', () => {
     const root = await initWithRoot(store);
 
     queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    const child = await waitOnce(store.slots.blockAdded);
+    await waitOnce(store.slots.childrenUpdated);
 
     // before delete
     assert.deepEqual(serialize(store).blocks, {
@@ -148,7 +142,7 @@ describe.concurrent('deleteBlock', () => {
       },
     });
 
-    store.deleteBlock(child);
+    store.deleteBlock(root.children[0]);
 
     // after delete
     assert.deepEqual(serialize(store).blocks, {
