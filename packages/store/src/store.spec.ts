@@ -8,11 +8,11 @@ function serialize(store: Store) {
   return store.doc.toJSON();
 }
 
-function waitSlot<T>(slot: Slot<T>, asserter: (val: T) => void) {
-  return new Promise<void>(resolve => {
+function waitSlot<T>(slot: Slot<T>, asserter?: (val: T) => void) {
+  return new Promise<T>(resolve => {
     slot.once(val => {
-      asserter(val);
-      resolve();
+      if (asserter) asserter(val);
+      resolve(val);
     });
   });
 }
@@ -108,5 +108,65 @@ describe.concurrent('addBlock', () => {
       assert.deepEqual(serializedChildren, ['1']);
       assert.equal(block.children[0].id, '1');
     });
+  });
+});
+
+async function initWithRoot(store: Store) {
+  queueMicrotask(() => store.addBlock({ flavour: 'page' }));
+  const page = await waitSlot(store.slots.blockAdded);
+  assert.ok(page instanceof BlockMap.page);
+  store.setRoot(page);
+  return page;
+}
+
+describe.concurrent('deleteBlock', () => {
+  it('can delete single model', () => {
+    const store = new Store().register(BlockMap);
+
+    store.addBlock({ flavour: 'page' });
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
+    });
+
+    store.deleteBlockById('0');
+    assert.deepEqual(serialize(store).blocks, {});
+  });
+
+  it('can delete model with parent', async () => {
+    const store = new Store().register(BlockMap);
+    const root = await initWithRoot(store);
+
+    queueMicrotask(() => store.addBlock({ flavour: 'text' }));
+    const child = await waitSlot(store.slots.blockAdded);
+
+    // before delete
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': ['1'],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
+      '1': {
+        'sys:children': [],
+        'sys:flavour': 'text',
+        'sys:id': '1',
+      },
+    });
+
+    store.deleteBlock(child);
+
+    // after delete
+    assert.deepEqual(serialize(store).blocks, {
+      '0': {
+        'sys:children': [],
+        'sys:flavour': 'page',
+        'sys:id': '0',
+      },
+    });
+    assert.equal(root.children.length, 0);
   });
 });

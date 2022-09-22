@@ -129,7 +129,7 @@ export class SelectionManager {
     if (blockDom) {
       if (selectionRect.isIntersect(Rect.fromDom(blockDom))) {
         // TODO check if selectable, only page model has elements
-        const children = blockModel.elements;
+        const { children } = blockModel;
         const queryStr = children.reduce((query, child, index) => {
           return `${query}${index ? ',' : ''}[${BLOCK_ID_ATTR}='${child.id}']`;
         }, '');

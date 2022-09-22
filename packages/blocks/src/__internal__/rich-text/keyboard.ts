@@ -1,7 +1,6 @@
 import type { Quill, RangeStatic } from 'quill';
-import type { Store } from '@building-blocks/store';
+import type { BaseBlockModel, Store } from '@building-blocks/store';
 import { TextBlockProps } from '../..';
-import type { EditableModel } from './rich-text';
 
 interface BindingContext {
   collapsed: boolean;
@@ -40,7 +39,7 @@ type KeyboardBindingHandler = (
   context: BindingContext
 ) => void;
 
-export const createKeyboardBindings = (store: Store, model: EditableModel) => {
+export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   const clientID = store.doc.clientID;
 
   function undo() {
@@ -75,8 +74,8 @@ export const createKeyboardBindings = (store: Store, model: EditableModel) => {
   }
 
   function indent(this: KeyboardEventThis) {
-    if (model.flavour !== 'list') return;
-    // TODO indent
+    // if (model.flavour !== 'list') return;
+    store.deleteBlock(model);
   }
 
   function unindent(this: KeyboardEventThis) {

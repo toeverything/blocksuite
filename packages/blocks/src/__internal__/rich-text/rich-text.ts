@@ -3,16 +3,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import { Store } from '@building-blocks/store';
+import { BaseBlockModel, Store } from '@building-blocks/store';
 import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
-
-export interface EditableModel {
-  flavour: string;
-  id: string;
-  text: string;
-}
 
 @customElement('rich-text')
 export class RichText extends LitElement {
@@ -24,7 +18,7 @@ export class RichText extends LitElement {
   store!: Store;
 
   @property()
-  model!: EditableModel;
+  model!: BaseBlockModel;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {

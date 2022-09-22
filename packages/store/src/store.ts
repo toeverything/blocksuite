@@ -36,6 +36,21 @@ export interface StackItem {
 
 const IS_WEB = !import.meta.env.SSR;
 
+// TODO use cached parent map
+function getParent(
+  root: BaseBlockModel | null,
+  target: BaseBlockModel
+): BaseBlockModel | null {
+  if (!root || root.id === target.id) return null;
+  if (root.children.includes(target)) return root;
+
+  for (const child of root.children) {
+    const parent = getParent(child, target);
+    if (parent !== null) return parent;
+  }
+  return null;
+}
+
 export class Store {
   readonly doc = new Y.Doc();
   readonly provider!: DebugProvider;
@@ -121,6 +136,16 @@ export class Store {
     return this;
   }
 
+  getParent(block: BaseBlockModel) {
+    return getParent(this._currentRoot, block);
+  }
+
+  getPreviousSibling(block: BaseBlockModel) {
+    const parent = getParent(this._currentRoot, block);
+    const index = parent?.children.indexOf(block) ?? -1;
+    return parent?.children[index - 1] ?? null;
+  }
+
   addBlock<T extends Partial<BlockProps>>(blockProps: T) {
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
@@ -144,6 +169,32 @@ export class Store {
       this._yBlocks.set(id, yBlock);
     });
     return id;
+  }
+
+  deleteBlockById(id: string) {
+    const model = this._blockMap.get(id) as BaseBlockModel;
+    this.deleteBlock(model);
+  }
+
+  deleteBlock(model: BaseBlockModel) {
+    const parent = getParent(this._currentRoot, model);
+    const index = parent?.children.indexOf(model) ?? -1;
+    if (index > -1) {
+      parent?.children.splice(parent.children.indexOf(model), 1);
+    }
+
+    this.transact(() => {
+      this._yBlocks.delete(model.id);
+
+      if (parent) {
+        const yParent = this._yBlocks.get(parent.id) as YBlock;
+        const yChildren = yParent.get('sys:children') as Y.Array<string>;
+
+        if (index > -1) {
+          yChildren.delete(index, 1);
+        }
+      }
+    });
   }
 
   attachText(id: string, quill: Quill) {

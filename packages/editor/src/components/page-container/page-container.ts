@@ -46,6 +46,7 @@ export class PageContainer extends LitElement {
     super();
 
     this._subscribeStore();
+    this._handleDebugInit();
 
     // @ts-ignore
     window.store = this.store;
@@ -129,6 +130,12 @@ export class PageContainer extends LitElement {
     });
   }
 
+  private _onDeleteSelected() {
+    this.selectionInfo?.selectedNodesIds?.forEach(id => {
+      this.store.deleteBlockById(id);
+    });
+  }
+
   private _handleDebugInit() {
     if (initType === 'list') {
       this.store.addBlock({
@@ -151,8 +158,6 @@ export class PageContainer extends LitElement {
 
   firstUpdated() {
     this._placeholderInput?.focus();
-
-    this._handleDebugInit();
 
     this.selection.onSelectionChange(selectionInfo => {
       this.selectionInfo = selectionInfo;
@@ -203,10 +208,10 @@ export class PageContainer extends LitElement {
           ${this.connectionBtnText}
         </button>
         <button @click=${this._onAddList}>Add List</button>
-        <!-- TODO init model delete -->
         <button
           .disabled=${this.selectionInfo.type !== 'Block' ||
           !this.selectionInfo?.selectedNodesIds.length}
+          @click=${this._onDeleteSelected}
         >
           Delete
         </button>

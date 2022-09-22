@@ -21,7 +21,7 @@ export class SelectionRect extends LitElement {
   @state()
   isShow = false;
 
-  // @property({ type: MouseManager })
+  // @property()
   // mouse!: MouseManager;
 
   @property()
