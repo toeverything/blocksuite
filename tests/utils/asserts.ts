@@ -48,10 +48,10 @@ export async function assertSelection(
 
 export async function assertSelectBlocks(page: Page, count: number) {
   const actual = await page.evaluate(() => {
-     const selectLength =
-       document.querySelector('page-container')?.selection.selectionInfo
-         ?.selectedNodesIds?.length;
-     return selectLength || 0;
+    const selectLength =
+      document.querySelector('page-container')?.selection.selectionInfo
+        ?.selectedNodesIds?.length;
+    return selectLength || 0;
   });
   expect(actual).toBe(count);
 }
