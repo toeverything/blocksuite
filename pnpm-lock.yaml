@@ -53,8 +53,10 @@ importers:
     specifiers:
       '@building-blocks/store': workspace:*
       '@types/quill': ^2.0.9
+      marked: ^4.1.0
     dependencies:
       '@building-blocks/store': link:../store
+      marked: 4.1.0
     devDependencies:
       '@types/quill': 2.0.9
 
@@ -1887,6 +1889,12 @@ packages:
     dependencies:
       sourcemap-codec: 1.4.8
     dev: true
+
+  /marked/4.1.0:
+    resolution: {integrity: sha512-+Z6KDjSPa6/723PQYyc1axYZpYYpDnECDaU6hkaf5gqBieBkMKYReL5hteF2QizhlMbgbo8umXl/clZ67+GlsA==}
+    engines: {node: '>= 12'}
+    hasBin: true
+    dev: false
 
   /merge2/1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
