@@ -1,10 +1,11 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
-import '../__internal__/rich-text/rich-text';
 import { BLOCK_ID_ATTR } from '../..';
 import { ListBlockModel } from './list-model';
 import { PageContainer } from '../types';
+import { getChildBlocks } from '../__internal__/utils';
+import '../__internal__/rich-text/rich-text';
 
 @customElement('list-block-element')
 export class ListBlockElement extends LitElement {
@@ -49,6 +50,8 @@ export class ListBlockElement extends LitElement {
       </svg>
     `;
 
+    const childBlocks = getChildBlocks(this.model, this.page);
+
     return html`
       <style>
         .list-block-container {
@@ -68,6 +71,8 @@ export class ListBlockElement extends LitElement {
           .model=${this.model}
         ></rich-text>
       </div>
+
+      <div style="margin-left: 10px">${childBlocks}</div>
     `;
   }
 }
