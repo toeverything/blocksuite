@@ -74,7 +74,6 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   }
 
   function indent(this: KeyboardEventThis) {
-    // if (model.flavour !== 'list') return;
     const previousSibling = store.getPreviousSibling(model);
     if (previousSibling) {
       store.captureSync();
@@ -84,8 +83,16 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   }
 
   function unindent(this: KeyboardEventThis) {
-    if (model.flavour !== 'list') return;
-    // TODO unindent
+    const parent = store.getParent(model);
+    if (!parent) return;
+
+    const grandParent = store.getParent(parent);
+    if (!grandParent) return;
+
+    const index = grandParent.children.indexOf(parent);
+    store.captureSync();
+    store.deleteBlock(model);
+    store.addBlock(model, grandParent, index + 1);
   }
 
   const keyboardBindings: KeyboardBindings = {
