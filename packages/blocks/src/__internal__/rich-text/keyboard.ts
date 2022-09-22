@@ -77,6 +77,7 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
     // if (model.flavour !== 'list') return;
     const previousSibling = store.getPreviousSibling(model);
     if (previousSibling) {
+      store.captureSync();
       store.deleteBlock(model);
       store.addBlock(model, previousSibling);
     }

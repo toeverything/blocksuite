@@ -8,6 +8,7 @@ import {
   addListByClick,
   enterPlaygroundRoom,
   enterPlaygroundWithList,
+  undoByKeyboard,
 } from './utils/actions';
 
 test('add new list block by click', async ({ page }) => {
@@ -28,4 +29,7 @@ test('nested list block', async ({ page }) => {
 
   await assertBlockChildren(page, '0', ['1', '3']);
   await assertBlockChildren(page, '1', ['2']);
+
+  await undoByKeyboard(page);
+  await assertBlockChildren(page, '0', ['1', '2', '3']);
 });
