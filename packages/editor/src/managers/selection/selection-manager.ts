@@ -2,6 +2,7 @@ import { PageContainer } from '../..';
 import { Rect } from '../../components/selection-rect/rect';
 import { BLOCK_ID_ATTR } from '../../block-loader';
 import { BaseBlockModel, IDisposable, Slot } from '@building-blocks/store';
+import { SelectPosition } from './type';
 
 export type SelectionInfo = InstanceType<
   typeof SelectionManager
@@ -23,6 +24,7 @@ export class SelectionManager {
   private _page: PageContainer;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
+  private _blockActiveSlotMap: { [k in string]: Slot<SelectPosition> } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
   private _slots = {
@@ -118,10 +120,7 @@ export class SelectionManager {
     this._emitSelectionChange();
   }
 
-  public calcIntersectBlocks(
-    selectionRect: Rect,
-    blockModel: BaseBlockModel,
-  ) {
+  public calcIntersectBlocks(selectionRect: Rect, blockModel: BaseBlockModel) {
     let selectedBlocks: Array<string> = [];
     const blockDom = this._page.querySelector(
       `[${BLOCK_ID_ATTR}='${blockModel.id}']`
@@ -173,6 +172,15 @@ export class SelectionManager {
     return slot;
   }
 
+  private _getBlockActiveSlot(blockId: string) {
+    let slot = this._blockActiveSlotMap[blockId];
+    if (!slot) {
+      slot = new Slot();
+      this._blockActiveSlotMap[blockId] = slot;
+    }
+    return slot;
+  }
+
   public onBlockSelectChange(
     blockId: string,
     cb: (isSelected: boolean) => void
@@ -204,6 +212,39 @@ export class SelectionManager {
 
   private _emitSelectionChange() {
     this._slots.selection.emit(this.selectionInfo);
+  }
+
+  // public activePreviousBlock(
+  //   blockId: string,
+  //   position: SelectPosition = 'start'
+  // ) {
+  //   // do something
+  // }
+
+  // public activeNextBlock(blockId: string, position: SelectPosition = 'start') {
+  //   // do something
+  // }
+
+  public onBlockActive(blockId: string, cb: (position: SelectPosition) => void) {
+    const slot = this._getBlockActiveSlot(blockId);
+    const disposables = slot.on(cb);
+    this._disposables.push(slot.on(cb));
+    return disposables;
+  }
+
+  public offBlockActive(blockId: string) {
+    const slot = this._blockActiveSlotMap[blockId];
+    if (slot) {
+      slot.dispose();
+    }
+    return delete this._blockActiveSlotMap[blockId];
+  }
+
+  public activeBlockById(blockId: string, position: SelectPosition = 'start') {
+    const slot = this._blockActiveSlotMap[blockId];
+    if (slot) {
+      slot.emit(position);
+    }
   }
 
   public dispose() {

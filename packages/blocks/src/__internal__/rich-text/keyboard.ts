@@ -1,6 +1,7 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@building-blocks/store';
 import { TextBlockProps } from '../..';
+import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
 
 interface BindingContext {
   collapsed: boolean;
@@ -95,6 +96,40 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
     store.addBlock(model, grandParent, index + 1);
   }
 
+  function keyup(this: KeyboardEventThis, range: IQuillRange, ) { 
+    if (range.index >= 0) {
+      const selection = window.getSelection();
+      if (selection) {
+        const range = selection.getRangeAt(0);
+        const { top, left, height } = range.getBoundingClientRect();
+        // TODO resolve compatible problem
+        const newRange = document.caretRangeFromPoint(left, top - height / 2);
+        if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
+          console.log('should move out');
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function keydown(this: KeyboardEventThis, range: IQuillRange ) {
+    if (range.index >= 0) {
+      const selection = window.getSelection();
+      if (selection) {
+        const range = selection.getRangeAt(0);
+        const { bottom, left, height } = range.getBoundingClientRect();
+        // TODO resolve compatible problem
+        const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
+        if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
+          console.log('should move out');
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
@@ -124,6 +159,16 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
       key: 'tab',
       shiftKey: true,
       handler: unindent,
+    },
+    up: {
+      key: 'up',
+      shiftKey: false,
+      handler: keyup,
+    },
+    down: {
+      key: 'down',
+      shiftKey: false,
+      handler: keydown,
     },
   };
 
