@@ -5,8 +5,8 @@ import { expect, type Page } from '@playwright/test';
 import type { BaseBlockModel, SerializedStore } from '../../packages/store';
 
 export async function assertEmpty(page: Page) {
-  const actual = await page.innerText('.affine-block-placeholder-input');
-  expect(actual).toBe('');
+  const actual = await page.locator('text-block-element').count();
+  expect(actual).toBe(0);
 }
 
 export async function assertText(page: Page, text: string) {

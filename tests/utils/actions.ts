@@ -5,7 +5,6 @@ export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
 export const defaultPlayground = 'http://localhost:5173/';
-export const emptyInput = 'input';
 export const richTextBox = '.ql-editor';
 
 function generateRandomRoomId() {
@@ -23,6 +22,11 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${defaultPlayground}?init=list&room=${room}`);
+}
+
+export async function focusFirstTextBlock(page: Page) {
+  await page.mouse.move(0, 0);
+  await page.click('text-block-element');
 }
 
 async function keyDownCtrlOrMeta(page: Page) {

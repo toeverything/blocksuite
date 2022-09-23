@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import {
-  emptyInput,
   enterPlaygroundRoom,
+  focusFirstTextBlock,
   mouseDragFromTo,
 } from './utils/actions';
 import { assertSelectedBlockCount } from './utils/asserts';
@@ -9,7 +9,7 @@ import { assertSelectedBlockCount } from './utils/asserts';
 test('drag to select blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
-  await page.click(emptyInput);
+  await focusFirstTextBlock(page);
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
 

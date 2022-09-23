@@ -2,7 +2,7 @@ import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@building-blocks/store';
-import { BlockMap, TextBlockProps } from '../../block-loader';
+import { BlockMap } from '../../block-loader';
 import { Clipboard } from '../../clipboard';
 import './debug-menu';
 
@@ -34,10 +34,14 @@ export class PageContainer extends LitElement {
   @query('.affine-block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
+  @state()
+  placeholderModel = new BlockMap.page(this.store, {});
+
   constructor() {
     super();
 
     this._subscribeStore();
+    this._tryInitFromVoidState();
 
     // @ts-ignore
     window.store = this.store;
@@ -75,23 +79,19 @@ export class PageContainer extends LitElement {
     });
   }
 
-  private _onVoidStateUpdate(e?: MouseEvent | KeyboardEvent) {
-    if (e) e.preventDefault();
+  private _initFromVoidState() {
+    if (!this.isEmptyPage) return;
 
-    if (this.isEmptyPage) {
-      this.isEmptyPage = false;
+    this.store.addBlock({ flavour: 'page' });
+    this.store.addBlock({ flavour: 'text', text: '' });
 
-      this.store.addBlock({ flavour: 'page' });
+    this.isEmptyPage = false;
+  }
 
-      const textProps: Partial<TextBlockProps> = {
-        flavour: 'text',
-        text: '',
-      };
-      const id = this.store.addBlock(textProps);
-      setTimeout(() => {
-        this.store.textAdapters.get(id)?.quill.focus();
-      });
-    }
+  private _tryInitFromVoidState() {
+    window.addEventListener('mousemove', () => this._initFromVoidState(), {
+      once: true,
+    });
   }
 
   // disable shadow DOM to workaround quill
@@ -109,32 +109,12 @@ export class PageContainer extends LitElement {
   }
 
   render() {
-    const emptyPagePlaceholder = html`
-      <style>
-        .affine-block-placeholder {
-          box-sizing: border-box;
-        }
-        .affine-block-placeholder-input {
-          display: block;
-          box-sizing: border-box;
-          margin-top: 5px;
-          padding: 2px;
-          padding-left: 2px;
-          width: 100%;
-          height: 25px;
-          border: 0;
-          border-radius: 0;
-          outline: none;
-          border: 1px #eee dashed;
-        }
-      </style>
-      <div
-        @click=${this._onVoidStateUpdate}
-        @keydown=${this._onVoidStateUpdate}
-        class="affine-block-placeholder"
-      >
-        <input class="affine-block-placeholder-input" />
-      </div>
+    const placeholderRoot = html`
+      <page-block-element
+        .model=${this.placeholderModel}
+        .store=${this.store}
+        .page=${this as PageContainer}
+      ></page-block-element>
     `;
 
     const blockRoot = html`
@@ -159,7 +139,7 @@ export class PageContainer extends LitElement {
           .pageModel=${this.model}
           .page=${this as PageContainer}
         ></selection-rect>
-        ${this.isEmptyPage ? emptyPagePlaceholder : blockRoot}
+        ${this.isEmptyPage ? placeholderRoot : blockRoot}
       </div>
     `;
   }

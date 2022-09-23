@@ -1,5 +1,5 @@
 import { LitElement, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import { PageBlockModel, BLOCK_ID_ATTR } from '../';
 import { PageContainer } from '../types';
@@ -20,9 +20,16 @@ export class PageBlockElement extends LitElement {
   })
   model!: PageBlockModel;
 
+  @query('.affine-page-block-title')
+  _blockTitle!: HTMLInputElement;
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
+  }
+
+  firstUpdated() {
+    this._blockTitle.focus();
   }
 
   render() {
@@ -30,7 +37,30 @@ export class PageBlockElement extends LitElement {
 
     const childBlocks = getChildBlocks(this.model, this.page);
 
-    return html` <div class="affine-page-block-container">${childBlocks}</div> `;
+    return html`
+      <style>
+        .affine-page-block-title {
+          box-sizing: border-box;
+          font-size: 32px;
+          font-weight: 600;
+          outline: none;
+          border: 0;
+        }
+        .affine-page-block-title::placeholder {
+          color: #ddd;
+        }
+      </style>
+      <div class="affine-page-block-container">
+        <div class="affine-page-block-title-contaienr">
+          <input
+            placeholder="Untitled"
+            class="affine-page-block-title"
+            value=${this.model.title}
+          />
+        </div>
+        ${childBlocks}
+      </div>
+    `;
   }
 }
 
