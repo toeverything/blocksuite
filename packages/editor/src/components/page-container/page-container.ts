@@ -57,7 +57,6 @@ export class PageContainer extends LitElement {
 
     this.store.slots.blockAdded.on(block => {
       if (block.flavour === 'page') {
-        this.store.setRoot(block);
         this.model = block as PageBlockModel;
       } else {
         if (!this.model.children.find(child => child.id === block.id)) {

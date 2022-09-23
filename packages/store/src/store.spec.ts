@@ -55,17 +55,17 @@ describe.concurrent('addBlock', () => {
   it('can add multi models', () => {
     const store = new Store().register(BlockMap);
     store.addBlock({ flavour: 'page' });
-    store.addBlock({ flavour: 'page' });
+    store.addBlock({ flavour: 'text' });
 
     assert.deepEqual(serialize(store).blocks, {
       '0': {
-        'sys:children': [],
+        'sys:children': ['1'],
         'sys:flavour': 'page',
         'sys:id': '0',
       },
       '1': {
         'sys:children': [],
-        'sys:flavour': 'page',
+        'sys:flavour': 'text',
         'sys:id': '1',
       },
     });
@@ -85,7 +85,6 @@ describe.concurrent('addBlock', () => {
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
     const root = await waitOnce(store.slots.blockAdded);
     assert.ok(root instanceof BlockMap.page);
-    store.setRoot(root);
 
     queueMicrotask(() => store.addBlock({ flavour: 'text' }));
     const block = await waitOnce(store.slots.childrenUpdated);
@@ -100,7 +99,6 @@ describe.concurrent('addBlock', () => {
 async function initWithRoot(store: Store) {
   queueMicrotask(() => store.addBlock({ flavour: 'page' }));
   const root = await waitOnce(store.slots.blockAdded);
-  store.setRoot(root);
   return root;
 }
 

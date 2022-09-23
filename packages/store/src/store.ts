@@ -67,7 +67,7 @@ export class Store {
 
   private _i = 0;
   private _history: Y.UndoManager;
-  private _currentRoot: BaseBlockModel | null = null;
+  private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
 
@@ -136,11 +136,11 @@ export class Store {
   }
 
   getParent(block: BaseBlockModel) {
-    return getParent(this._currentRoot, block);
+    return getParent(this._root, block);
   }
 
   getPreviousSibling(block: BaseBlockModel) {
-    const parent = getParent(this._currentRoot, block);
+    const parent = getParent(this._root, block);
     const index = parent?.children.indexOf(block) ?? -1;
     return parent?.children[index - 1] ?? null;
   }
@@ -164,7 +164,7 @@ export class Store {
     syncBlockProps(yBlock, clonedProps);
 
     this.transact(() => {
-      const parentId = parent?.id ?? this._currentRoot?.id;
+      const parentId = parent?.id ?? this._root?.id;
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -184,7 +184,7 @@ export class Store {
   }
 
   deleteBlock(model: BaseBlockModel) {
-    const parent = getParent(this._currentRoot, model);
+    const parent = getParent(this._root, model);
     const index = parent?.children.indexOf(model) ?? -1;
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
@@ -230,10 +230,6 @@ export class Store {
 
   detachText(id: string) {
     this.textAdapters.delete(id);
-  }
-
-  setRoot(block: BaseBlockModel) {
-    this._currentRoot = block;
   }
 
   private _createId(): string {
@@ -291,6 +287,11 @@ export class Store {
           const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
           const props = toBlockProps(prefixedProps) as BlockProps;
           const model = this._createBlockModel(props);
+
+          const isRoot = this._blockMap.size === 0;
+          if (isRoot) {
+            this._root = model;
+          }
 
           this._blockMap.set(id, model);
           this.slots.blockAdded.emit(model);
