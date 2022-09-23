@@ -11,6 +11,7 @@ import {
   focusFirstTextBlock,
 } from './utils/actions';
 import {
+  assertBlockChildren,
   assertEmpty,
   assertStore,
   assertText,
@@ -38,7 +39,6 @@ test('basic input', async ({ page }) => {
   await focusFirstTextBlock(page);
   await page.keyboard.type('hello');
 
-  await page.pause();
   await expect(page).toHaveTitle(/Building Blocks/);
   await assertStore(page, defaultStore);
   await assertText(page, 'hello');
@@ -58,6 +58,8 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
     assertText(pageA, 'hello'),
     assertStore(pageA, defaultStore),
     assertStore(pageB, defaultStore),
+    assertBlockChildren(pageA, '0', ['1']),
+    assertBlockChildren(pageB, '0', ['1']),
   ]);
 });
 
@@ -70,7 +72,6 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusFirstTextBlock(pageB);
   await pageB.keyboard.type('hello');
 
-  await pageA.pause();
   // wait until pageA content updated
   await assertText(pageA, 'hello');
   await Promise.all([

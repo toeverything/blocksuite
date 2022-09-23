@@ -5,6 +5,6 @@ export class PageBlockModel extends BaseBlockModel {
   title = '';
   constructor(store: Store, props: Partial<PageBlockModel>) {
     super(store, props);
-    Object.assign(this, props);
+    this.title = props.title ?? '';
   }
 }
