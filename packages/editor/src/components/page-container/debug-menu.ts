@@ -51,20 +51,11 @@ export class DebugMenu extends LitElement {
 
   private _onAddList() {
     if (!this.page.model) {
-      this.store.addBlock({
-        flavour: 'page',
-        children: [],
-      });
-      this.store.addBlock({
-        flavour: 'text',
-        children: [],
-      });
+      this.store.addBlock({ flavour: 'page' });
+      this.store.addBlock({ flavour: 'text' });
     }
 
-    this.store.addBlock({
-      flavour: 'list',
-      children: [],
-    });
+    this.store.addBlock({ flavour: 'list' });
   }
 
   private _onDelete() {
@@ -75,15 +66,9 @@ export class DebugMenu extends LitElement {
 
   private _handleDebugInit() {
     if (initType === 'list') {
-      this.store.addBlock({
-        flavour: 'page',
-        children: [],
-      });
+      this.store.addBlock({ flavour: 'page' });
       for (let i = 0; i < 3; i++) {
-        this.store.addBlock({
-          flavour: 'list',
-          children: [],
-        });
+        this.store.addBlock({ flavour: 'list' });
       }
     }
   }

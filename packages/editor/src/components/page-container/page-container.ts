@@ -81,10 +81,7 @@ export class PageContainer extends LitElement {
     if (this.isEmptyPage) {
       this.isEmptyPage = false;
 
-      this.store.addBlock({
-        flavour: 'page',
-        children: [],
-      });
+      this.store.addBlock({ flavour: 'page' });
 
       const textProps: Partial<TextBlockProps> = {
         flavour: 'text',
