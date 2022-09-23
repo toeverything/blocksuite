@@ -123,7 +123,7 @@ export class Store {
     return this;
   }
 
-  getModelById(id: string) {
+  getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }
 
