@@ -27,5 +27,4 @@ test('drag to select blocks', async ({ page }) => {
 
   await mouseDragFromTo(page, fromTo[0], fromTo[1]);
   await assertSelectedBlockCount(page, 3);
-  await page.pause();
 });

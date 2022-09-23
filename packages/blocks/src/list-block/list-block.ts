@@ -58,25 +58,29 @@ export class ListBlockElement extends LitElement {
 
     return html`
       <style>
-        .list-block-container {
+        .affine-list-block-container {
           display: flex;
           box-sizing: border-box;
           align-items: center;
           margin: 5px 0;
         }
-        .list-block-container.selected {
+        .affine-list-block-container.selected {
           background-color: rgba(152, 172, 189, 0.1);
         }
       </style>
-      <div class=${`list-block-container${this.isSelected ? ' selected' : ''}`}>
+      <div
+        class=${`affine-list-block-container${
+          this.isSelected ? ' selected' : ''
+        }`}
+      >
         ${listIcon}
         <rich-text
           style="flex:1;"
           .store=${this.store}
           .model=${this.model}
-          ></rich-text>
-          <div style="margin-left: 10px">${childBlocks}</div>
-        </div>
+        ></rich-text>
+        <div style="margin-left: 10px">${childBlocks}</div>
+      </div>
     `;
   }
 }

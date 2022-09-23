@@ -53,7 +53,7 @@ export class TextBlockElement extends LitElement {
             : 'transparent',
           margin: '5px 0',
         })}
-        class="text-block-container"
+        class="affine-text-block-container"
       >
         <rich-text .store=${this.store} .model=${this.model}></rich-text>
         <div style="margin-left: 10px">${childBlocks}</div>

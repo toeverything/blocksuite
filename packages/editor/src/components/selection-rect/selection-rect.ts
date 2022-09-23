@@ -95,13 +95,13 @@ export class SelectionRect extends LitElement {
           };
     return html`
       <style>
-        .selection-rect {
+        .affine-selection-rect {
           background-color: rgba(62, 111, 219, 0.1);
           position: absolute;
           z-index: 99;
         }
       </style>
-      <div class="selection-rect" style=${styleMap(rectStyle)}></div>
+      <div class="affine-selection-rect" style=${styleMap(rectStyle)}></div>
     `;
   }
 }

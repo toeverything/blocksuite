@@ -31,7 +31,7 @@ export class PageContainer extends LitElement {
   @state()
   isEmptyPage = true;
 
-  @query('.block-placeholder-input')
+  @query('.affine-block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
   constructor() {
@@ -111,10 +111,10 @@ export class PageContainer extends LitElement {
   render() {
     const emptyPagePlaceholder = html`
       <style>
-        .block-placeholder {
+        .affine-block-placeholder {
           box-sizing: border-box;
         }
-        .block-placeholder-input {
+        .affine-block-placeholder-input {
           display: block;
           box-sizing: border-box;
           margin-top: 5px;
@@ -131,9 +131,9 @@ export class PageContainer extends LitElement {
       <div
         @click=${this._onVoidStateUpdate}
         @keydown=${this._onVoidStateUpdate}
-        class="block-placeholder"
+        class="affine-block-placeholder"
       >
-        <input class="block-placeholder-input" />
+        <input class="affine-block-placeholder-input" />
       </div>
     `;
 
@@ -147,12 +147,12 @@ export class PageContainer extends LitElement {
 
     return html`
       <style>
-        .page-container {
+        .affine-page-container {
           position: relative;
           padding: 10px 70px;
         }
       </style>
-      <div class="page-container">
+      <div class="affine-page-container">
         <debug-menu .page=${this as PageContainer}></debug-menu>
         <selection-rect
           .selectionManager=${this.selection}

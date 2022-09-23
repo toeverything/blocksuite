@@ -10,7 +10,7 @@ Quill.register('modules/cursors', QuillCursors);
 
 @customElement('rich-text')
 export class RichText extends LitElement {
-  @query('.rich-text.quill-container')
+  @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
 
@@ -56,18 +56,18 @@ export class RichText extends LitElement {
   render() {
     return html`
       <style>
-        ${style} .rich-text.quill-container {
+        ${style} .affine-rich-text.quill-container {
           margin-bottom: 0px;
         }
         .ql-editor {
           padding: 2px;
         }
-        .rich-text.ql-container.ql-snow {
+        .affine-rich-text.ql-container.ql-snow {
           /* border: 0; */
           border: 1px #eee dashed;
         }
       </style>
-      <div class="rich-text quill-container"></div>
+      <div class="affine-rich-text quill-container"></div>
     `;
   }
 }

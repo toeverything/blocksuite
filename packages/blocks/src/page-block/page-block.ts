@@ -30,7 +30,7 @@ export class PageBlockElement extends LitElement {
 
     const childBlocks = getChildBlocks(this.model, this.page);
 
-    return html` <div class="page-block-container">${childBlocks}</div> `;
+    return html` <div class="affine-page-block-container">${childBlocks}</div> `;
   }
 }
 
