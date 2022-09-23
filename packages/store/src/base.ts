@@ -1,4 +1,5 @@
 import type { Store } from './store';
+import { Slot } from './utils/slot';
 
 export interface IBaseBlockProps {
   flavour: string;
@@ -8,6 +9,9 @@ export interface IBaseBlockProps {
 
 export class BaseBlockModel implements IBaseBlockProps {
   store: Store;
+  childrenUpdated = new Slot();
+  childMap = new Map<string, number>();
+
   flavour!: string;
   id: string;
   children: BaseBlockModel[];

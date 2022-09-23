@@ -75,7 +75,7 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    const block = await waitOnce(store.slots.blockAdded);
+    const block = await waitOnce(store.slots.rootAdded);
     assert.ok(block instanceof BlockMap.page);
   });
 
@@ -83,22 +83,22 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    const root = await waitOnce(store.slots.blockAdded);
+    const root = await waitOnce(store.slots.rootAdded);
     assert.ok(root instanceof BlockMap.page);
 
-    queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    const block = await waitOnce(store.slots.childrenUpdated);
-    assert.ok(block instanceof BlockMap.page);
+    store.addBlock({ flavour: 'text' });
+    assert.ok(root.children[0] instanceof BlockMap.text);
+    assert.equal(root.childMap.get('1'), 0);
 
     const serializedChildren = serialize(store).blocks['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
-    assert.equal(block.children[0].id, '1');
+    assert.equal(root.children[0].id, '1');
   });
 });
 
 async function initWithRoot(store: Store) {
   queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-  const root = await waitOnce(store.slots.blockAdded);
+  const root = await waitOnce(store.slots.rootAdded);
   return root;
 }
 
@@ -123,8 +123,7 @@ describe.concurrent('deleteBlock', () => {
     const store = new Store().register(BlockMap);
     const root = await initWithRoot(store);
 
-    queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    await waitOnce(store.slots.childrenUpdated);
+    store.addBlock({ flavour: 'text' });
 
     // before delete
     assert.deepEqual(serialize(store).blocks, {

@@ -30,13 +30,15 @@ export class ListBlockElement extends LitElement {
     return this;
   }
 
-  protected firstUpdated(): void {
+  firstUpdated() {
     this.page.selection.onBlockSelectChange(this.model.id, isSelected => {
       this.isSelected = isSelected;
     });
+
+    this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  public disconnectedCallback(): void {
+  disconnectedCallback() {
     this.page.selection.offBlockSelectChange(this.model.id);
   }
 

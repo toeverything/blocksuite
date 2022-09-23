@@ -35,19 +35,8 @@ export interface StackItem {
 
 const IS_WEB = !import.meta.env.SSR;
 
-// TODO use cached parent map
-function getParent(
-  root: BaseBlockModel | null,
-  target: BaseBlockModel
-): BaseBlockModel | null {
-  if (!root || root.id === target.id) return null;
-  if (root.children.includes(target)) return root;
-
-  for (const child of root.children) {
-    const parent = getParent(child, target);
-    if (parent !== null) return parent;
-  }
-  return null;
+function createChildMap(yChildIds: Y.Array<string>) {
+  return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
 export class Store {
@@ -58,10 +47,9 @@ export class Store {
 
   readonly slots = {
     historyUpdated: new Slot(),
-    blockAdded: new Slot<BaseBlockModel>(),
-    blockDeleted: new Slot<string>(),
+    rootAdded: new Slot<BaseBlockModel>(),
+    rootDeleted: new Slot<string>(),
     textUpdated: new Slot<Y.YTextEvent>(),
-    childrenUpdated: new Slot<BaseBlockModel>(),
     updated: new Slot(),
   };
 
@@ -135,12 +123,33 @@ export class Store {
     return this;
   }
 
+  getModelById(id: string) {
+    return this._blockMap.get(id) ?? null;
+  }
+
+  getParentById(rootId: string, target: BaseBlockModel): BaseBlockModel | null {
+    if (rootId === target.id) return null;
+
+    const root = this._blockMap.get(rootId);
+    if (!root) return null;
+
+    for (const [childId] of root.childMap) {
+      if (childId === target.id) return root;
+
+      const parent = this.getParentById(childId, target);
+      if (parent !== null) return parent;
+    }
+    return null;
+  }
+
   getParent(block: BaseBlockModel) {
-    return getParent(this._root, block);
+    if (!this._root) return null;
+
+    return this.getParentById(this._root.id, block);
   }
 
   getPreviousSibling(block: BaseBlockModel) {
-    const parent = getParent(this._root, block);
+    const parent = this.getParent(block);
     const index = parent?.children.indexOf(block) ?? -1;
     return parent?.children[index - 1] ?? null;
   }
@@ -157,6 +166,9 @@ export class Store {
     const clonedProps = { ...blockProps };
     // prevent the store field being synced
     delete clonedProps.store;
+    delete clonedProps.childMap;
+    delete clonedProps.childrenUpdated;
+
     const id = clonedProps.id ? clonedProps.id : this._createId();
     clonedProps.id = id;
 
@@ -184,7 +196,7 @@ export class Store {
   }
 
   deleteBlock(model: BaseBlockModel) {
-    const parent = getParent(this._root, model);
+    const parent = this.getParent(model);
     const index = parent?.children.indexOf(model) ?? -1;
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
@@ -278,26 +290,51 @@ export class Store {
     return blockModel;
   }
 
+  private _handleAddedYBlock(id: string) {
+    const yBlock = this._getYBlock(id);
+    const isRoot = this._blockMap.size === 0;
+
+    const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
+    const props = toBlockProps(prefixedProps) as BlockProps;
+    const model = this._createBlockModel({ ...props, id });
+    this._blockMap.set(props.id, model);
+
+    const yChildren = yBlock.get('sys:children');
+    if (yChildren instanceof Y.Array) {
+      model.childMap = createChildMap(yChildren);
+    }
+
+    if (isRoot) {
+      this._root = model;
+      this.slots.rootAdded.emit(model);
+    } else {
+      const parent = this.getParent(model);
+      const index = parent?.childMap.get(model.id);
+      if (parent && index !== undefined) {
+        parent.children[index] = model;
+        parent.childrenUpdated.emit();
+      }
+    }
+  }
+
+  private _handleDeletedYBlock(id: string) {
+    const model = this._blockMap.get(id);
+    if (model === this._root) {
+      this.slots.rootDeleted.emit(id);
+    } else {
+      // TODO dispatch model delete event
+    }
+    this._blockMap.delete(id);
+  }
+
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
     // event on top-level block store
     if (event.target === this._yBlocks) {
       event.keys.forEach((value, id) => {
         if (value.action === 'add') {
-          const yBlock = this._getYBlock(id);
-          const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-          const props = toBlockProps(prefixedProps) as BlockProps;
-          const model = this._createBlockModel(props);
-
-          const isRoot = this._blockMap.size === 0;
-          if (isRoot) {
-            this._root = model;
-          }
-
-          this._blockMap.set(id, model);
-          this.slots.blockAdded.emit(model);
+          this._handleAddedYBlock(id);
         } else if (value.action === 'delete') {
-          this._blockMap.delete(id);
-          this.slots.blockDeleted.emit(id);
+          this._handleDeletedYBlock(id);
         } else {
           // fires when undoing delete-and-add operation on a block
           // console.warn('update action on top-level block store', event);
@@ -325,13 +362,11 @@ export class Store {
         const key = event.path[event.path.length - 1];
         if (key === 'sys:children') {
           const childIds = event.target.toArray();
-          // XXX ensure children exists
-          queueMicrotask(() => {
-            model.children = childIds.map(
-              id => this._blockMap.get(id) as BaseBlockModel
-            );
-            this.slots.childrenUpdated.emit(model);
-          });
+          model.children = childIds.map(
+            id => this._blockMap.get(id) as BaseBlockModel
+          );
+          model.childrenUpdated.emit();
+          model.childMap = createChildMap(event.target);
         }
       }
     }

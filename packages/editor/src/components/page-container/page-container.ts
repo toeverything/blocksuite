@@ -55,25 +55,9 @@ export class PageContainer extends LitElement {
       this.isEmptyPage = this.store.isEmpty;
     });
 
-    this.store.slots.blockAdded.on(block => {
-      if (block.flavour === 'page') {
-        this.model = block as PageBlockModel;
-      } else {
-        if (!this.model.children.find(child => child.id === block.id)) {
-          this.model.children.push(block);
-        }
-
-        this.requestUpdate();
-      }
-    });
-
-    this.store.slots.blockDeleted.on(id => {
-      const index = this.model.children.findIndex(child => child.id === id);
-      if (index !== -1) {
-        this.model.children.splice(index, 1);
-      }
-
-      this.isEmptyPage = this.model.children.length === 0;
+    this.store.slots.rootAdded.on(block => {
+      this.model = block as PageBlockModel;
+      this.model.childrenUpdated.on(() => this.requestUpdate());
       this.requestUpdate();
     });
   }
