@@ -61,9 +61,9 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   ]);
 });
 
-test.skip('A first init, B first edit', async ({ browser, page: pageA }) => {
+test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
-  await focusFirstTextBlock(pageA);
+  // await focusFirstTextBlock(pageA); // do not init (add blocks) in A
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);

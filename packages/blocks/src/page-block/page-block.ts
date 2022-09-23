@@ -53,7 +53,7 @@ export class PageBlockElement extends LitElement {
       <div class="affine-page-block-container">
         <div class="affine-page-block-title-contaienr">
           <input
-            placeholder="Untitled"
+            placeholder="Title"
             class="affine-page-block-title"
             value=${this.model.title}
           />
