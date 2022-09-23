@@ -3,7 +3,7 @@ import { Slot } from './utils/slot';
 import { TextAdapter } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
-import { syncBlockProps, toBlockProps } from './utils/utils';
+import { initSysProps, syncBlockProps, toBlockProps } from './utils/utils';
 import { BaseBlockModel } from './base';
 import { DebugProvider } from './providers';
 
@@ -164,15 +164,19 @@ export class Store {
     }
 
     const clonedProps = { ...blockProps };
-    // prevent the store field being synced
+    // prevent the non-prop fields being synced
+    // TODO use schema to validate props
     delete clonedProps.store;
     delete clonedProps.childMap;
     delete clonedProps.childrenUpdated;
+    delete clonedProps.propsUpdated;
+    delete clonedProps.dispose;
 
     const id = clonedProps.id ? clonedProps.id : this._createId();
     clonedProps.id = id;
 
     const yBlock = new Y.Map() as YBlock;
+    initSysProps(yBlock, clonedProps);
     syncBlockProps(yBlock, clonedProps);
 
     this.transact(() => {
@@ -190,6 +194,16 @@ export class Store {
     return id;
   }
 
+  updateBlockById(id: string, props: Partial<BlockProps>) {
+    const model = this._blockMap.get(id) as BaseBlockModel;
+    this.updateBlock(model, props);
+  }
+
+  updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
+    const yBlock = this._yBlocks.get(model.id) as YBlock;
+    syncBlockProps(yBlock, props);
+  }
+
   deleteBlockById(id: string) {
     const model = this._blockMap.get(id) as BaseBlockModel;
     this.deleteBlock(model);
@@ -204,6 +218,7 @@ export class Store {
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
+      model.dispose();
 
       if (parent) {
         const yParent = this._yBlocks.get(parent.id) as YBlock;
@@ -290,7 +305,7 @@ export class Store {
     return blockModel;
   }
 
-  private _handleAddedYBlock(id: string) {
+  private _handleYBlockAdd(id: string) {
     const yBlock = this._getYBlock(id);
     const isRoot = this._blockMap.size === 0;
 
@@ -317,7 +332,7 @@ export class Store {
     }
   }
 
-  private _handleDeletedYBlock(id: string) {
+  private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
     if (model === this._root) {
       this.slots.rootDeleted.emit(id);
@@ -327,14 +342,29 @@ export class Store {
     this._blockMap.delete(id);
   }
 
+  private _handleYBlockUpdate(event: Y.YMapEvent<unknown>) {
+    const id = event.target.get('sys:id') as string;
+    const model = this.getBlockById(id);
+    if (!model) return;
+
+    const props: Partial<BlockProps> = {};
+    for (const key of event.keysChanged) {
+      // TODO use schema
+      if (key === 'prop:text') continue;
+      props[key.replace('prop:', '')] = event.target.get(key);
+    }
+    Object.assign(model, props);
+    model.propsUpdated.emit();
+  }
+
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
     // event on top-level block store
     if (event.target === this._yBlocks) {
       event.keys.forEach((value, id) => {
         if (value.action === 'add') {
-          this._handleAddedYBlock(id);
+          this._handleYBlockAdd(id);
         } else if (value.action === 'delete') {
-          this._handleDeletedYBlock(id);
+          this._handleYBlockDelete(id);
         } else {
           // fires when undoing delete-and-add operation on a block
           // console.warn('update action on top-level block store', event);
@@ -345,6 +375,8 @@ export class Store {
     else if (event.target.parent === this._yBlocks) {
       if (event instanceof Y.YTextEvent) {
         this.slots.textUpdated.emit(event);
+      } else if (event instanceof Y.YMapEvent) {
+        this._handleYBlockUpdate(event);
       }
     }
     // event on block field

@@ -29,7 +29,18 @@ export class PageBlockElement extends LitElement {
   }
 
   firstUpdated() {
+    this.model.propsUpdated.on(() => {
+      if (this.model.title !== this._blockTitle.value) {
+        this.requestUpdate();
+      }
+    });
+
     this._blockTitle.focus();
+  }
+
+  private _onTitleUpdate(e: InputEvent) {
+    const title = (e.target as HTMLInputElement).value;
+    this.store.updateBlock(this.model, { title });
   }
 
   render() {
@@ -56,6 +67,7 @@ export class PageBlockElement extends LitElement {
             placeholder="Title"
             class="affine-page-block-title"
             value=${this.model.title}
+            @input=${this._onTitleUpdate}
           />
         </div>
         ${childBlocks}

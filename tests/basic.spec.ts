@@ -9,6 +9,8 @@ import {
   undoByClick,
   undoByKeyboard,
   focusFirstTextBlock,
+  waitNextFrame,
+  waitDefaultPageLoaded,
 } from './utils/actions';
 import {
   assertBlockChildren,
@@ -16,6 +18,7 @@ import {
   assertStore,
   assertText,
   assertTextBlocks,
+  assertTitle,
 } from './utils/asserts';
 
 const defaultStore: SerializedStore = {
@@ -45,6 +48,17 @@ test('basic input', async ({ page }) => {
 });
 
 test('basic multi user state', async ({ browser, page: pageA }) => {
+  const room = await enterPlaygroundRoom(pageA);
+  await pageA.mouse.move(0, 0);
+  await pageA.keyboard.type('hello');
+
+  const pageB = await browser.newPage();
+  await enterPlaygroundRoom(pageB, room);
+  await waitDefaultPageLoaded(pageB);
+  await assertTitle(pageB, 'hello');
+});
+
+test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await focusFirstTextBlock(pageA);
   await pageA.keyboard.type('hello');
@@ -141,7 +155,7 @@ test('undo after adding block twice', async ({ page }) => {
   await focusFirstTextBlock(page);
   await page.keyboard.type('hello');
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(10);
+  await waitNextFrame(page);
   await page.keyboard.type('world');
 
   await undoByKeyboard(page);
@@ -155,7 +169,7 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await focusFirstTextBlock(page);
   await page.keyboard.type('hello');
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(10);
+  await waitNextFrame(page);
   await page.keyboard.type('world');
   await assertTextBlocks(page, ['hello', 'world']);
 

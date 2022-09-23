@@ -10,25 +10,19 @@ function isPrimitive(
   return a !== Object(a);
 }
 
-function syncSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
+export function initSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
   yBlock.set('sys:children', new Y.Array());
 }
 
 export function syncBlockProps(yBlock: YBlock, props: Partial<BlockProps>) {
-  syncSysProps(yBlock, props);
-
   Object.keys(props).forEach(key => {
-    if (SYS_KEYS.includes(key)) {
-      return;
-    }
+    if (SYS_KEYS.includes(key)) return;
 
     // workaround yText init
     // TODO use schema
-    if (props.flavour === 'text' && key === 'text') {
-      return;
-    }
+    if (key === 'text') return;
 
     if (!isPrimitive(props[key])) {
       throw new Error('Only top level primitives are supported for now');
@@ -52,9 +46,7 @@ export function toBlockProps(
   });
 
   Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (SYS_KEYS.includes(prefixedKey)) {
-      return;
-    }
+    if (SYS_KEYS.includes(prefixedKey)) return;
 
     const key = prefixedKey.replace('prop:', '');
     props[key] = prefixedProps[prefixedKey];

@@ -4,8 +4,9 @@ export const IS_MAC = process.platform === 'darwin';
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
-export const defaultPlayground = 'http://localhost:5173/';
-export const richTextBox = '.ql-editor';
+const NEXT_FRAME_TIMEOUT = 10;
+export const DEFAULT_PLAYGROUNT = 'http://localhost:5173/';
+export const RICH_TEXT_SELECTOR = '.ql-editor';
 
 function generateRandomRoomId() {
   return `virgo-${Math.random().toFixed(8).substring(2)}`;
@@ -15,13 +16,21 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
     room = generateRandomRoomId();
   }
-  await page.goto(`${defaultPlayground}?room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUNT}?room=${room}`);
   return room;
+}
+
+export async function waitDefaultPageLoaded(page: Page) {
+  await page.waitForSelector('page-block-element[data-block-id="0"]');
+}
+
+export async function waitNextFrame(page: Page) {
+  await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
 }
 
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
-  await page.goto(`${defaultPlayground}?init=list&room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUNT}?init=list&room=${room}`);
 }
 
 export async function focusFirstTextBlock(page: Page) {

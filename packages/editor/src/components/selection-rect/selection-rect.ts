@@ -48,10 +48,16 @@ export class SelectionRect extends LitElement {
 
   private _handleEditorMousedown(e: MouseEvent) {
     // this.selectionManager.selectedBlockIds = [];
+
+    // ensure page title can be focused
+    if (e.target instanceof HTMLInputElement) {
+      return;
+    }
+
     const closestBlock = (e.target as HTMLDivElement)?.closest(
       `[${BLOCK_ID_ATTR}]`
     );
-    // if closest block is not page root , do nothing
+    // if closest block is not page root, do nothing
     if (
       !closestBlock ||
       closestBlock.attributes.getNamedItem(BLOCK_ID_ATTR)?.value ===

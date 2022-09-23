@@ -9,6 +9,7 @@ export interface IBaseBlockProps {
 
 export class BaseBlockModel implements IBaseBlockProps {
   store: Store;
+  propsUpdated = new Slot();
   childrenUpdated = new Slot();
   childMap = new Map<string, number>();
 
@@ -19,5 +20,10 @@ export class BaseBlockModel implements IBaseBlockProps {
     this.store = store;
     this.id = props.id as string;
     this.children = [];
+  }
+
+  dispose() {
+    this.propsUpdated.dispose();
+    this.childrenUpdated.dispose();
   }
 }

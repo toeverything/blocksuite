@@ -10,6 +10,7 @@ import {
   enterPlaygroundWithList,
   shiftTab,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions';
 
 test('add new list block by click', async ({ page }) => {
@@ -22,7 +23,7 @@ test('add new list block by click', async ({ page }) => {
 
 test('indent list block', async ({ page }) => {
   await enterPlaygroundWithList(page);
-  await page.waitForTimeout(10);
+  await waitNextFrame(page);
 
   const secondList = page.locator('list-block-element').nth(1);
   await secondList.click();
@@ -37,7 +38,7 @@ test('indent list block', async ({ page }) => {
 
 test('unindent list block', async ({ page }) => {
   await enterPlaygroundWithList(page);
-  await page.waitForTimeout(10);
+  await waitNextFrame(page);
 
   const secondList = page.locator('list-block-element').nth(1);
   await secondList.click();

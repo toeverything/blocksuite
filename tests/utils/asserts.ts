@@ -9,6 +9,12 @@ export async function assertEmpty(page: Page) {
   expect(actual).toBe(0);
 }
 
+export async function assertTitle(page: Page, text: string) {
+  const locator = page.locator('input').nth(0);
+  const actual = await locator.inputValue();
+  expect(actual).toBe(text);
+}
+
 export async function assertText(page: Page, text: string) {
   const actual = await page.innerText('.ql-editor');
   expect(actual).toBe(text);
