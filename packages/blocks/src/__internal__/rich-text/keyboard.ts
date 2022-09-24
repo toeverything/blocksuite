@@ -1,6 +1,10 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@building-blocks/store';
-import { TextBlockProps } from '../..';
+import {
+  handleBlockEndEnter,
+  handleIndent,
+  handleUnindent,
+} from '@building-blocks/shared';
 
 interface BindingContext {
   collapsed: boolean;
@@ -54,19 +58,7 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
     const isAtBlockEnd =
       this.quill.getLength() - 1 === this.quill.getSelection()?.index;
     if (isAtBlockEnd) {
-      const parent = store.getParent(model);
-      const index = parent?.children.indexOf(model);
-      if (parent && index !== undefined && index > -1) {
-        // make adding text block by enter a standalone operation
-        store.captureSync();
-
-        const blockProps: Partial<TextBlockProps> = {
-          flavour: 'text',
-          text: '',
-        };
-        const id = store.addBlock(blockProps, parent, index + 1);
-        setTimeout(() => store.textAdapters.get(id)?.quill.focus());
-      }
+      handleBlockEndEnter(store, model);
     }
   }
 
@@ -77,25 +69,11 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   }
 
   function indent(this: KeyboardEventThis) {
-    const previousSibling = store.getPreviousSibling(model);
-    if (previousSibling) {
-      store.captureSync();
-      store.deleteBlock(model);
-      store.addBlock(model, previousSibling);
-    }
+    handleIndent(store, model);
   }
 
   function unindent(this: KeyboardEventThis) {
-    const parent = store.getParent(model);
-    if (!parent) return;
-
-    const grandParent = store.getParent(parent);
-    if (!grandParent) return;
-
-    const index = grandParent.children.indexOf(parent);
-    store.captureSync();
-    store.deleteBlock(model);
-    store.addBlock(model, grandParent, index + 1);
+    handleUnindent(store, model);
   }
 
   const keyboardBindings: KeyboardBindings = {

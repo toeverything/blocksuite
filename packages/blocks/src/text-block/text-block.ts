@@ -2,7 +2,7 @@ import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR, type BlockHost } from '@building-blocks/shared';
-import { TextBlockModel } from '../';
+import { TextBlockModel } from './text-model';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
 
