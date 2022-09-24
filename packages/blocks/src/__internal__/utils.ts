@@ -29,12 +29,22 @@ function getBlockElement(model: BaseBlockModel, page: PageContainer) {
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
 }
 
-export function getChildBlocks(model: BaseBlockModel, page: PageContainer) {
+export function getBlockChildrenContainer(
+  model: BaseBlockModel,
+  page: PageContainer
+) {
   return html`
-    ${repeat(
-      model.children,
-      child => child.id,
-      child => getBlockElement(child, page)
-    )}
+    <style>
+      .affine-block-children-container {
+        padding-left: 1rem;
+      }
+    </style>
+    <div class="affine-block-children-container">
+      ${repeat(
+        model.children,
+        child => child.id,
+        child => getBlockElement(child, page)
+      )}
+    </div>
   `;
 }

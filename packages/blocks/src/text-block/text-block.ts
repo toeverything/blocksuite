@@ -4,7 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { Store } from '@building-blocks/store';
 import { TextBlockModel, BLOCK_ID_ATTR } from '../';
 import { PageContainer } from '../types';
-import { getChildBlocks } from '../__internal__/utils';
+import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
 
 @customElement('text-block-element')
@@ -45,7 +45,7 @@ export class TextBlockElement extends LitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childBlocks = getChildBlocks(this.model, this.page);
+    const childrenContainer = getBlockChildrenContainer(this.model, this.page);
 
     return html`
       <div
@@ -58,7 +58,7 @@ export class TextBlockElement extends LitElement {
         class="affine-text-block-container"
       >
         <rich-text .store=${this.store} .model=${this.model}></rich-text>
-        <div style="margin-left: 10px">${childBlocks}</div>
+        ${childrenContainer}
       </div>
     `;
   }

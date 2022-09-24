@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import { PageBlockModel, BLOCK_ID_ATTR } from '../';
 import { PageContainer } from '../types';
-import { getChildBlocks } from '../__internal__/utils';
+import { getBlockChildrenContainer } from '../__internal__/utils';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
@@ -38,7 +38,7 @@ export class PageBlockElement extends LitElement {
     this._blockTitle.focus();
   }
 
-  private _onTitleUpdate(e: InputEvent) {
+  private _onTitleInput(e: InputEvent) {
     const title = (e.target as HTMLInputElement).value;
     this.store.updateBlock(this.model, { title });
   }
@@ -46,7 +46,7 @@ export class PageBlockElement extends LitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childBlocks = getChildBlocks(this.model, this.page);
+    const childrenContainer = getBlockChildrenContainer(this.model, this.page);
 
     return html`
       <style>
@@ -60,17 +60,20 @@ export class PageBlockElement extends LitElement {
         .affine-page-block-title::placeholder {
           color: #ddd;
         }
+        .affine-page-block-container > .affine-block-children-container {
+          padding-left: 0;
+        }
       </style>
       <div class="affine-page-block-container">
-        <div class="affine-page-block-title-contaienr">
+        <div class="affine-page-block-title-container">
           <input
             placeholder="Title"
             class="affine-page-block-title"
             value=${this.model.title}
-            @input=${this._onTitleUpdate}
+            @input=${this._onTitleInput}
           />
         </div>
-        ${childBlocks}
+        ${childrenContainer}
       </div>
     `;
   }
