@@ -69,6 +69,11 @@ export async function redoByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
 }
 
+export async function pressEnter(page: Page) {
+  // avoid flaky test by simulate real user input
+  await page.keyboard.press('Enter', { delay: 50 });
+}
+
 export async function undoByClick(page: Page) {
   await page.click('button[aria-label="undo"]');
 }

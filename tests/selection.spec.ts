@@ -3,6 +3,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   mouseDragFromTo,
+  pressEnter,
 } from './utils/actions';
 import { assertSelectedBlockCount } from './utils/asserts';
 
@@ -10,8 +11,8 @@ test('drag to select blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await focusRichText(page);
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
+  await pressEnter(page);
 
   const fromTo = await page.evaluate(() => {
     const textBoxes = document.querySelectorAll('rich-text');

@@ -10,6 +10,7 @@ import {
   focusRichText,
   waitNextFrame,
   waitDefaultPageLoaded,
+  pressEnter,
 } from './utils/actions';
 import {
   defaultStore,
@@ -137,7 +138,7 @@ test('undo after adding block twice', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
   await waitNextFrame(page);
   await page.keyboard.type('world');
 
@@ -151,8 +152,7 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(100);
+  await pressEnter(page);
   await page.keyboard.type('world');
   await assertTextBlocks(page, ['hello', 'world']);
 
