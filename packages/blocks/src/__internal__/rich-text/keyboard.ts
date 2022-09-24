@@ -54,16 +54,19 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
     const isAtBlockEnd =
       this.quill.getLength() - 1 === this.quill.getSelection()?.index;
     if (isAtBlockEnd) {
-      const blockProps: Partial<TextBlockProps> = {
-        flavour: 'text',
-        text: '',
-      };
-      // make adding text block by enter a standalone operation
-      store.captureSync();
-      const id = store.addBlock(blockProps);
-      setTimeout(() => {
-        store.textAdapters.get(id)?.quill.focus();
-      });
+      const parent = store.getParent(model);
+      const index = parent?.children.indexOf(model);
+      if (parent && index !== undefined && index > -1) {
+        // make adding text block by enter a standalone operation
+        store.captureSync();
+
+        const blockProps: Partial<TextBlockProps> = {
+          flavour: 'text',
+          text: '',
+        };
+        const id = store.addBlock(blockProps, parent, index + 1);
+        setTimeout(() => store.textAdapters.get(id)?.quill.focus());
+      }
     }
   }
 

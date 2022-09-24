@@ -7,7 +7,7 @@ import {
   redoByKeyboard,
   undoByClick,
   undoByKeyboard,
-  focusFirstTextBlock,
+  focusRichText,
   waitNextFrame,
   waitDefaultPageLoaded,
 } from './utils/actions';
@@ -23,7 +23,7 @@ import {
 
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await focusFirstTextBlock(page);
+  await focusRichText(page);
   await page.keyboard.type('hello');
 
   await expect(page).toHaveTitle(/Building Blocks/);
@@ -43,7 +43,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
 
 test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
-  await focusFirstTextBlock(pageA);
+  await focusRichText(pageA);
   await pageA.keyboard.type('hello');
 
   const pageB = await browser.newPage();
@@ -66,7 +66,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
-  await focusFirstTextBlock(pageB);
+  await focusRichText(pageB);
   await pageB.keyboard.type('hello');
 
   // wait until pageA content updated
@@ -92,8 +92,8 @@ test('conflict occurs as expected when two same id generated together', async ({
   await disconnectByClick(pageB);
 
   // click together, both init with default id leads to conflicts
-  await focusFirstTextBlock(pageA);
-  await focusFirstTextBlock(pageB);
+  await focusRichText(pageA);
+  await focusRichText(pageB);
 
   await connectByClick(pageA);
   await connectByClick(pageB);
@@ -106,7 +106,7 @@ test('conflict occurs as expected when two same id generated together', async ({
 
 test('basic paired undo/redo', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await focusFirstTextBlock(page);
+  await focusRichText(page);
   await page.keyboard.type('hello');
 
   await assertText(page, 'hello');
@@ -123,7 +123,7 @@ test('basic paired undo/redo', async ({ page }) => {
 
 test('undo/redo with keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await focusFirstTextBlock(page);
+  await focusRichText(page);
   await page.keyboard.type('hello');
 
   await assertText(page, 'hello');
@@ -135,7 +135,7 @@ test('undo/redo with keyboard', async ({ page }) => {
 
 test('undo after adding block twice', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await focusFirstTextBlock(page);
+  await focusRichText(page);
   await page.keyboard.type('hello');
   await page.keyboard.press('Enter');
   await waitNextFrame(page);
@@ -149,10 +149,10 @@ test('undo after adding block twice', async ({ page }) => {
 
 test('undo/redo twice after adding block twice', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await focusFirstTextBlock(page);
+  await focusRichText(page);
   await page.keyboard.type('hello');
   await page.keyboard.press('Enter');
-  await waitNextFrame(page);
+  await page.waitForTimeout(100);
   await page.keyboard.type('world');
   await assertTextBlocks(page, ['hello', 'world']);
 

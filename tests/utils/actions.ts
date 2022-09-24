@@ -33,9 +33,10 @@ export async function enterPlaygroundWithList(page: Page) {
   await page.goto(`${DEFAULT_PLAYGROUNT}?init=list&room=${room}`);
 }
 
-export async function focusFirstTextBlock(page: Page) {
+export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
-  await page.click('text-block-element');
+  const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
+  await locator.click();
 }
 
 async function keyDownCtrlOrMeta(page: Page) {
