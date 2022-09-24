@@ -1,18 +1,13 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Store } from '@building-blocks/store';
-import { BLOCK_ID_ATTR } from '@building-blocks/shared';
+import { BLOCK_ID_ATTR, type BlockHost } from '@building-blocks/shared';
 import { TextBlockModel } from '../';
-import { PageContainer } from '../types';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
 
 @customElement('text-block-element')
 export class TextBlockElement extends LitElement {
-  @property()
-  store!: Store;
-
   @property({
     hasChanged() {
       return true;
@@ -21,10 +16,10 @@ export class TextBlockElement extends LitElement {
   model!: TextBlockModel;
 
   @property()
-  page!: PageContainer;
+  host!: BlockHost;
 
   @state()
-  isSelected = false;
+  selected = false;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -32,33 +27,33 @@ export class TextBlockElement extends LitElement {
   }
 
   firstUpdated() {
-    this.page.selection.onBlockSelectChange(this.model.id, isSelected => {
-      this.isSelected = isSelected;
+    this.host.selection.addChangeListener(this.model.id, selected => {
+      this.selected = selected;
     });
 
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
-    this.page.selection.offBlockSelectChange(this.model.id);
+    this.host.selection.removeChangeListener(this.model.id);
   }
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this.page);
+    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
       <div
         style=${styleMap({
-          'background-color': this.isSelected
+          'background-color': this.selected
             ? 'rgba(152, 172, 189, 0.1)'
             : 'transparent',
           margin: '5px 0',
         })}
         class="affine-text-block-container"
       >
-        <rich-text .store=${this.store} .model=${this.model}></rich-text>
+        <rich-text .host=${this.host} .model=${this.model}></rich-text>
         ${childrenContainer}
       </div>
     `;

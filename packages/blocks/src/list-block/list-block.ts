@@ -1,17 +1,13 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Store } from '@building-blocks/store';
+import type { BlockHost } from '@building-blocks/shared';
 import { BLOCK_ID_ATTR } from '@building-blocks/shared';
 import { ListBlockModel } from './list-model';
-import { PageContainer } from '../types';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
 
 @customElement('list-block-element')
 export class ListBlockElement extends LitElement {
-  @property()
-  store!: Store;
-
   @property({
     hasChanged() {
       return true;
@@ -20,10 +16,10 @@ export class ListBlockElement extends LitElement {
   model!: ListBlockModel;
 
   @property()
-  page!: PageContainer;
+  host!: BlockHost;
 
   @state()
-  isSelected = false;
+  selected = false;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -31,15 +27,15 @@ export class ListBlockElement extends LitElement {
   }
 
   firstUpdated() {
-    this.page.selection.onBlockSelectChange(this.model.id, isSelected => {
-      this.isSelected = isSelected;
+    this.host.selection.addChangeListener(this.model.id, selected => {
+      this.selected = selected;
     });
 
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
-    this.page.selection.offBlockSelectChange(this.model.id);
+    this.host.selection.removeChangeListener(this.model.id);
   }
 
   render() {
@@ -56,7 +52,7 @@ export class ListBlockElement extends LitElement {
       </svg>
     `;
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this.page);
+    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
       <style>
@@ -81,12 +77,12 @@ export class ListBlockElement extends LitElement {
       </style>
       <div
         class=${`affine-list-block-container ${
-          this.isSelected ? 'selected' : ''
+          this.selected ? 'selected' : ''
         }`}
       >
         <div class="affine-list-rich-text-wrapper">
           ${listIcon}
-          <rich-text .store=${this.store} .model=${this.model}></rich-text>
+          <rich-text .host=${this.host} .model=${this.model}></rich-text>
         </div>
         ${childrenContainer}
       </div>

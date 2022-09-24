@@ -3,7 +3,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import { BaseBlockModel, Store } from '@building-blocks/store';
+import type { BlockHost } from '@building-blocks/shared';
+import type { BaseBlockModel } from '@building-blocks/store';
 import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
@@ -15,7 +16,7 @@ export class RichText extends LitElement {
   private _quill?: Quill;
 
   @property()
-  store!: Store;
+  host!: BlockHost;
 
   @property()
   model!: BaseBlockModel;
@@ -26,8 +27,8 @@ export class RichText extends LitElement {
   }
 
   firstUpdated() {
-    const { store, model } = this;
-    const { _textContainer } = this;
+    const { host, model, _textContainer } = this;
+    const { store } = host;
     const keyboardBindings = createKeyboardBindings(store, model);
     this._quill = new Quill(_textContainer, {
       modules: {
@@ -48,7 +49,7 @@ export class RichText extends LitElement {
   }
 
   disconnectedCallback(): void {
-    this.store.detachText(this.model.id);
+    this.host.store.detachText(this.model.id);
 
     super.disconnectedCallback();
   }

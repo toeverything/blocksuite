@@ -1,5 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
+import type { BlockHost } from '@building-blocks/shared';
 import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@building-blocks/store';
 import { BlockMap } from '../../block-loader';
@@ -12,7 +13,7 @@ const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
 @customElement('page-container')
-export class PageContainer extends LitElement {
+export class PageContainer extends LitElement implements BlockHost {
   @state()
   store = new Store(room).register(BlockMap);
 
@@ -95,16 +96,14 @@ export class PageContainer extends LitElement {
     const placeholderRoot = html`
       <page-block-element
         .model=${this.placeholderModel}
-        .store=${this.store}
-        .page=${this as PageContainer}
+        .host=${this as BlockHost}
       ></page-block-element>
     `;
 
     const blockRoot = html`
       <page-block-element
         .model=${this.model}
-        .store=${this.store}
-        .page=${this as PageContainer}
+        .host=${this as BlockHost}
       ></page-block-element>
     `;
 

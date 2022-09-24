@@ -6,5 +6,8 @@
   "main": "src/index.ts",
   "keywords": [],
   "author": "toeverything",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@building-blocks/store": "workspace:*"
+  }
 }

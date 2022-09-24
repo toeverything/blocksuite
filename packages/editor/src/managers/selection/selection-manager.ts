@@ -170,17 +170,17 @@ export class SelectionManager {
     return slot;
   }
 
-  public onBlockSelectChange(
+  public addChangeListener(
     blockId: string,
-    cb: (isSelected: boolean) => void
+    handler: (selected: boolean) => void
   ) {
     const slot = this._getBlockSelectSlot(blockId);
-    const disposables = slot.on(cb);
-    this._disposables.push(slot.on(cb));
+    const disposables = slot.on(handler);
+    this._disposables.push(slot.on(handler));
     return disposables;
   }
 
-  public offBlockSelectChange(blockId: string) {
+  public removeChangeListener(blockId: string) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
       slot.dispose();
@@ -188,15 +188,15 @@ export class SelectionManager {
     return delete this._blockSelectSlotMap[blockId];
   }
 
-  private _emitBlockSelectChange(blockId: string, isSelected = true) {
+  private _emitBlockSelectChange(blockId: string, selected = true) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
-      slot.emit(isSelected);
+      slot.emit(selected);
     }
   }
 
-  public onSelectionChange(cb: (selectionInfo: SelectionInfo) => void) {
-    return this._slots.selection.on(cb);
+  public onSelectionChange(handler: (selectionInfo: SelectionInfo) => void) {
+    return this._slots.selection.on(handler);
   }
 
   private _emitSelectionChange() {

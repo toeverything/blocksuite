@@ -81,7 +81,10 @@ importers:
       react-dom: 18.2.0_react@18.2.0
 
   packages/shared:
-    specifiers: {}
+    specifiers:
+      '@building-blocks/store': workspace:*
+    dependencies:
+      '@building-blocks/store': link:../store
 
   packages/store:
     specifiers:

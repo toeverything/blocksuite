@@ -1,28 +1,25 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
+import type { BlockHost } from '@building-blocks/shared';
 import type { BaseBlockModel } from '@building-blocks/store';
 import type { ListBlockModel } from '../list-block/list-model';
 import type { TextBlockModel } from '../text-block/text-model';
-import type { PageContainer } from '../types';
 
 // TODO support dynamic block types
-function getBlockElement(model: BaseBlockModel, page: PageContainer) {
-  const { store } = page;
+function getBlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
     case 'text':
       return html`
         <text-block-element
           .model=${model as TextBlockModel}
-          .store=${store}
-          .page=${page}
+          .host=${host}
         ></text-block-element>
       `;
     case 'list':
       return html`
         <list-block-element
           .model=${model as ListBlockModel}
-          .store=${store}
-          .page=${page}
+          .host=${host}
         ></list-block-element>
       `;
   }
@@ -31,7 +28,7 @@ function getBlockElement(model: BaseBlockModel, page: PageContainer) {
 
 export function getBlockChildrenContainer(
   model: BaseBlockModel,
-  page: PageContainer
+  host: BlockHost
 ) {
   return html`
     <style>
@@ -43,7 +40,7 @@ export function getBlockChildrenContainer(
       ${repeat(
         model.children,
         child => child.id,
-        child => getBlockElement(child, page)
+        child => getBlockElement(child, host)
       )}
     </div>
   `;

@@ -1,18 +1,13 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { Store } from '@building-blocks/store';
-import { BLOCK_ID_ATTR } from '@building-blocks/shared';
+import { BLOCK_ID_ATTR, type BlockHost } from '@building-blocks/shared';
 import { PageBlockModel } from '../';
-import { PageContainer } from '../types';
 import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
   @property()
-  store!: Store;
-
-  @property()
-  page!: PageContainer;
+  host!: BlockHost;
 
   @property({
     hasChanged() {
@@ -40,21 +35,23 @@ export class PageBlockElement extends LitElement {
   }
 
   private _onTitleInput(e: InputEvent) {
+    const { store } = this.host;
+
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
-      this.store.addBlock({ flavour: 'page', title });
-      this.store.addBlock({ flavour: 'text', text: '' });
+      store.addBlock({ flavour: 'page', title });
+      store.addBlock({ flavour: 'text', text: '' });
       return;
     }
 
     const title = (e.target as HTMLInputElement).value;
-    this.store.updateBlock(this.model, { title });
+    store.updateBlock(this.model, { title });
   }
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this.page);
+    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
       <style>
