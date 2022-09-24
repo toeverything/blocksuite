@@ -45,17 +45,21 @@ importers:
 
   packages/blocks:
     specifiers:
+      '@building-blocks/shared': workspace:*
       '@building-blocks/store': workspace:*
     dependencies:
+      '@building-blocks/shared': link:../shared
       '@building-blocks/store': link:../store
 
   packages/editor:
     specifiers:
+      '@building-blocks/shared': workspace:*
       '@building-blocks/store': workspace:*
       '@types/marked': ^4.0.7
       '@types/quill': ^2.0.9
       marked: ^4.1.0
     dependencies:
+      '@building-blocks/shared': link:../shared
       '@building-blocks/store': link:../store
       marked: 4.1.0
     devDependencies:
@@ -75,6 +79,9 @@ importers:
       '@lit-labs/react': 1.0.8
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+
+  packages/shared:
+    specifiers: {}
 
   packages/store:
     specifiers:

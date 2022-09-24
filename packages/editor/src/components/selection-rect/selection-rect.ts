@@ -2,7 +2,8 @@ import { Point, Rect } from './rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { BlockMap, BLOCK_ID_ATTR } from '../../block-loader';
+import { BLOCK_ID_ATTR } from '@building-blocks/shared';
+import { BlockMap } from '../../block-loader';
 import { PageContainer, SelectionManager } from '../..';
 
 type PageBlockModel = InstanceType<typeof BlockMap.page>;

@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
-import { BLOCK_ID_ATTR } from '../..';
+import { BLOCK_ID_ATTR } from '@building-blocks/shared';
 import { ListBlockModel } from './list-model';
 import { PageContainer } from '../types';
 import { getBlockChildrenContainer } from '../__internal__/utils';

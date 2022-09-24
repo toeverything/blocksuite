@@ -1,0 +1,10 @@
+{
+  "name": "@building-blocks/shared",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "",
+  "main": "src/index.ts",
+  "keywords": [],
+  "author": "toeverything",
+  "license": "Apache-2.0"
+}

@@ -1,6 +1,6 @@
 import { PageContainer } from '../..';
 import { Rect } from '../../components/selection-rect/rect';
-import { BLOCK_ID_ATTR } from '../../block-loader';
+import { BLOCK_ID_ATTR } from '@building-blocks/shared';
 import { BaseBlockModel, IDisposable, Slot } from '@building-blocks/store';
 
 export type SelectionInfo = InstanceType<
@@ -118,10 +118,7 @@ export class SelectionManager {
     this._emitSelectionChange();
   }
 
-  public calcIntersectBlocks(
-    selectionRect: Rect,
-    blockModel: BaseBlockModel,
-  ) {
+  public calcIntersectBlocks(selectionRect: Rect, blockModel: BaseBlockModel) {
     let selectedBlocks: Array<string> = [];
     const blockDom = this._page.querySelector(
       `[${BLOCK_ID_ATTR}='${blockModel.id}']`
