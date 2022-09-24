@@ -14,11 +14,11 @@ import {
 } from './utils/actions';
 import {
   defaultStore,
-  assertBlockChildren,
+  assertBlockChildrenIds,
   assertEmpty,
   assertStore,
   assertText,
-  assertTextBlocks,
+  assertRichTexts,
   assertTitle,
 } from './utils/asserts';
 
@@ -56,8 +56,8 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
     assertText(pageA, 'hello'),
     assertStore(pageA, defaultStore),
     assertStore(pageB, defaultStore),
-    assertBlockChildren(pageA, '0', ['1']),
-    assertBlockChildren(pageB, '0', ['1']),
+    assertBlockChildrenIds(pageA, '0', ['1']),
+    assertBlockChildrenIds(pageB, '0', ['1']),
   ]);
 });
 
@@ -143,9 +143,9 @@ test('undo after adding block twice', async ({ page }) => {
   await page.keyboard.type('world');
 
   await undoByKeyboard(page);
-  await assertTextBlocks(page, ['hello']);
+  await assertRichTexts(page, ['hello']);
   await redoByKeyboard(page);
-  await assertTextBlocks(page, ['hello', 'world']);
+  await assertRichTexts(page, ['hello', 'world']);
 });
 
 test('undo/redo twice after adding block twice', async ({ page }) => {
@@ -154,17 +154,17 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await page.keyboard.type('hello');
   await pressEnter(page);
   await page.keyboard.type('world');
-  await assertTextBlocks(page, ['hello', 'world']);
+  await assertRichTexts(page, ['hello', 'world']);
 
   await undoByKeyboard(page);
-  await assertTextBlocks(page, ['hello']);
+  await assertRichTexts(page, ['hello']);
 
   await undoByKeyboard(page);
-  await assertTextBlocks(page, []);
+  await assertRichTexts(page, []);
 
   await redoByClick(page);
-  await assertTextBlocks(page, ['hello']);
+  await assertRichTexts(page, ['hello']);
 
   await redoByKeyboard(page);
-  await assertTextBlocks(page, ['hello', 'world']);
+  await assertRichTexts(page, ['hello', 'world']);
 });

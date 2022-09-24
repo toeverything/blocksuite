@@ -36,7 +36,7 @@ export async function assertText(page: Page, text: string) {
   expect(actual).toBe(text);
 }
 
-export async function assertTextBlocks(page: Page, texts: string[]) {
+export async function assertRichTexts(page: Page, texts: string[]) {
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
 }
@@ -86,7 +86,7 @@ export async function assertStore(page: Page, expected: SerializedStore) {
   expect(actual).toEqual(expected);
 }
 
-export async function assertBlockChildren(
+export async function assertBlockChildrenIds(
   page: Page,
   blockId: string,
   ids: string[]
@@ -101,4 +101,21 @@ export async function assertBlockChildren(
     { blockId }
   );
   expect(actual).toEqual(ids);
+}
+
+export async function assertBlockChildrenFlavours(
+  page: Page,
+  blockId: string,
+  flavours: string[]
+) {
+  const actual = await page.evaluate(
+    ({ blockId }) => {
+      const element = document.querySelector(`[data-block-id="${blockId}"]`);
+      // @ts-ignore
+      const model = element.model as BaseBlockModel;
+      return model.children.map(child => child.flavour);
+    },
+    { blockId }
+  );
+  expect(actual).toEqual(flavours);
 }

@@ -13,7 +13,7 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
     store.captureSync();
 
     const blockProps = {
-      flavour: 'text',
+      flavour: model.flavour,
       text: '',
     };
     const id = store.addBlock(blockProps, parent, index + 1);

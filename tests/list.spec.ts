@@ -1,13 +1,16 @@
 import { test } from '@playwright/test';
 import {
-  assertBlockChildren,
+  assertBlockChildrenFlavours,
+  assertBlockChildrenIds,
   assertBlockCount,
-  assertTextBlocks,
+  assertRichTexts,
 } from './utils/asserts';
 import {
   addListByClick,
   enterPlaygroundRoom,
   enterPlaygroundWithList,
+  focusRichText,
+  pressEnter,
   shiftTab,
   undoByKeyboard,
   waitNextFrame,
@@ -17,7 +20,7 @@ test('add new list block by click', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addListByClick(page);
   await addListByClick(page);
-  await assertTextBlocks(page, ['\n', '\n', '\n']);
+  await assertRichTexts(page, ['\n', '\n', '\n']);
   await assertBlockCount(page, 'list', 2);
 });
 
@@ -29,11 +32,11 @@ test('indent list block', async ({ page }) => {
   await secondList.click();
   await page.keyboard.press('Tab');
 
-  await assertBlockChildren(page, '0', ['1', '3']);
-  await assertBlockChildren(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '0', ['1', '3']);
+  await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByKeyboard(page);
-  await assertBlockChildren(page, '0', ['1', '2', '3']);
+  await assertBlockChildrenIds(page, '0', ['1', '2', '3']);
 });
 
 test('unindent list block', async ({ page }) => {
@@ -44,12 +47,33 @@ test('unindent list block', async ({ page }) => {
   await secondList.click();
   await page.keyboard.press('Tab');
 
-  await assertBlockChildren(page, '0', ['1', '3']);
-  await assertBlockChildren(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '0', ['1', '3']);
+  await assertBlockChildrenIds(page, '1', ['2']);
 
   await shiftTab(page);
-  await assertBlockChildren(page, '0', ['1', '2', '3']);
+  await assertBlockChildrenIds(page, '0', ['1', '2', '3']);
 
   await shiftTab(page);
-  await assertBlockChildren(page, '0', ['1', '2', '3']);
+  await assertBlockChildrenIds(page, '0', ['1', '2', '3']);
+});
+
+test('insert new list block by enter', async ({ page }) => {
+  await enterPlaygroundWithList(page);
+  await waitNextFrame(page);
+
+  await assertRichTexts(page, ['\n', '\n', '\n']);
+
+  await focusRichText(page, 1);
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['\n', 'hello', '\n']);
+
+  await pressEnter(page);
+  await page.keyboard.type('world');
+  await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
+  await assertBlockChildrenFlavours(page, '0', [
+    'list',
+    'list',
+    'list',
+    'list',
+  ]);
 });

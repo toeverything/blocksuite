@@ -1,5 +1,9 @@
 import { test } from '@playwright/test';
-import { assertSelection, assertTextBlocks } from './utils/asserts';
+import {
+  assertSelection,
+  assertRichTexts,
+  assertBlockChildrenFlavours,
+} from './utils/asserts';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -15,15 +19,15 @@ test('append new text block by enter', async ({ page }) => {
   await assertSelection(page, 0, 5, 0);
 
   await pressEnter(page);
-  await assertTextBlocks(page, ['hello', '\n']);
+  await assertRichTexts(page, ['hello', '\n']);
   await assertSelection(page, 1, 0, 0);
 
   await undoByKeyboard(page);
-  await assertTextBlocks(page, ['hello']);
+  await assertRichTexts(page, ['hello']);
   await assertSelection(page, 0, 5, 0);
 
   await redoByKeyboard(page);
-  await assertTextBlocks(page, ['hello', '\n']);
+  await assertRichTexts(page, ['hello', '\n']);
   await assertSelection(page, 1, 0, 0);
 });
 
@@ -32,13 +36,19 @@ test('insert new text block by enter', async ({ page }) => {
   await focusRichText(page);
   await pressEnter(page);
   await pressEnter(page);
-  await assertTextBlocks(page, ['\n', '\n', '\n']);
+  await assertRichTexts(page, ['\n', '\n', '\n']);
 
   await focusRichText(page, 1);
   await page.keyboard.type('hello');
-  await assertTextBlocks(page, ['\n', 'hello', '\n']);
+  await assertRichTexts(page, ['\n', 'hello', '\n']);
 
   await pressEnter(page);
   await page.keyboard.type('world');
-  await assertTextBlocks(page, ['\n', 'hello', 'world', '\n']);
+  await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
+  await assertBlockChildrenFlavours(page, '0', [
+    'text',
+    'text',
+    'text',
+    'text',
+  ]);
 });
