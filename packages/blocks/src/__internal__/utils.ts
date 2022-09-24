@@ -48,3 +48,11 @@ export function getBlockChildrenContainer(
     </div>
   `;
 }
+
+// https://stackoverflow.com/a/2345915
+export function focusTextEnd(input: HTMLInputElement) {
+  const current = input.value;
+  input.focus();
+  input.value = '';
+  input.value = current;
+}

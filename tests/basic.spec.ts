@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import type { SerializedStore } from '../packages/store';
 import {
   enterPlaygroundRoom,
   disconnectByClick,
@@ -13,6 +12,7 @@ import {
   waitDefaultPageLoaded,
 } from './utils/actions';
 import {
+  defaultStore,
   assertBlockChildren,
   assertEmpty,
   assertStore,
@@ -20,22 +20,6 @@ import {
   assertTextBlocks,
   assertTitle,
 } from './utils/asserts';
-
-const defaultStore: SerializedStore = {
-  blocks: {
-    '0': {
-      'sys:id': '0',
-      'sys:flavour': 'page',
-      'sys:children': ['1'],
-    },
-    '1': {
-      'sys:flavour': 'text',
-      'sys:id': '1',
-      'sys:children': [],
-      'prop:text': 'hello',
-    },
-  },
-};
 
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -49,7 +33,6 @@ test('basic input', async ({ page }) => {
 
 test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
-  await pageA.mouse.move(0, 0);
   await pageA.keyboard.type('hello');
 
   const pageB = await browser.newPage();

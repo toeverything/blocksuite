@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { Store } from '@building-blocks/store';
 import { PageBlockModel, BLOCK_ID_ATTR } from '../';
 import { PageContainer } from '../types';
-import { getBlockChildrenContainer } from '../__internal__/utils';
+import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
@@ -35,10 +35,17 @@ export class PageBlockElement extends LitElement {
       }
     });
 
-    this._blockTitle.focus();
+    focusTextEnd(this._blockTitle);
   }
 
   private _onTitleInput(e: InputEvent) {
+    if (!this.model.id) {
+      const title = (e.target as HTMLInputElement).value;
+      this.store.addBlock({ flavour: 'page', title });
+      this.store.addBlock({ flavour: 'text', text: '' });
+      return;
+    }
+
     const title = (e.target as HTMLInputElement).value;
     this.store.updateBlock(this.model, { title });
   }

@@ -4,6 +4,22 @@
 import { expect, type Page } from '@playwright/test';
 import type { BaseBlockModel, SerializedStore } from '../../packages/store';
 
+export const defaultStore: SerializedStore = {
+  blocks: {
+    '0': {
+      'sys:id': '0',
+      'sys:flavour': 'page',
+      'sys:children': ['1'],
+    },
+    '1': {
+      'sys:flavour': 'text',
+      'sys:id': '1',
+      'sys:children': [],
+      'prop:text': 'hello',
+    },
+  },
+};
+
 export async function assertEmpty(page: Page) {
   const actual = await page.locator('text-block-element').count();
   expect(actual).toBe(0);
