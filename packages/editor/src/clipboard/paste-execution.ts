@@ -1,7 +1,7 @@
 import { marked } from 'marked';
 import { PageContainer } from '../components';
-import { ParseHtml } from '../parse/parseHtml';
-import { ParseText } from '../parse/parseTest';
+import { ParseHtml } from '../parse/parse-html';
+import { ParseText } from '../parse/parse-test';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 
