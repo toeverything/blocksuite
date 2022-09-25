@@ -59,6 +59,11 @@ export class Store {
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
 
+  // TODO use schema
+  private _ignoredKeys = new Set<string>(
+    Object.keys(new BaseBlockModel(this, {}))
+  );
+
   constructor(room = '') {
     if (IS_WEB) {
       this.provider = new DebugProvider(room, this.doc);
@@ -164,20 +169,12 @@ export class Store {
     }
 
     const clonedProps = { ...blockProps };
-    // prevent the non-prop fields being synced
-    // TODO use schema to validate props
-    delete clonedProps.store;
-    delete clonedProps.childMap;
-    delete clonedProps.childrenUpdated;
-    delete clonedProps.propsUpdated;
-    delete clonedProps.dispose;
-
     const id = clonedProps.id ? clonedProps.id : this._createId();
     clonedProps.id = id;
 
     const yBlock = new Y.Map() as YBlock;
     initSysProps(yBlock, clonedProps);
-    syncBlockProps(yBlock, clonedProps);
+    syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
 
     this.transact(() => {
       const parentId = parent?.id ?? this._root?.id;
@@ -201,7 +198,7 @@ export class Store {
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
-    syncBlockProps(yBlock, props);
+    syncBlockProps(yBlock, props, this._ignoredKeys);
   }
 
   deleteBlockById(id: string) {

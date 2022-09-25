@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { BlockProps, PrefixedBlockProps, YBlock } from '../store';
 
-const SYS_KEYS = ['id', 'flavour', 'children'];
+const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
 function isPrimitive(
@@ -16,9 +16,13 @@ export function initSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:children', new Y.Array());
 }
 
-export function syncBlockProps(yBlock: YBlock, props: Partial<BlockProps>) {
+export function syncBlockProps(
+  yBlock: YBlock,
+  props: Partial<BlockProps>,
+  ignoredKeys: Set<string>
+) {
   Object.keys(props).forEach(key => {
-    if (SYS_KEYS.includes(key)) return;
+    if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
 
     // workaround yText init
     // TODO use schema
@@ -28,7 +32,7 @@ export function syncBlockProps(yBlock: YBlock, props: Partial<BlockProps>) {
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // TODO compare with current yBlock valur
+    // TODO compare with current yBlock value
     if (props[key] !== undefined) {
       yBlock.set('prop:' + key, props[key]);
     }
@@ -46,7 +50,7 @@ export function toBlockProps(
   });
 
   Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (SYS_KEYS.includes(prefixedKey)) return;
+    if (SYS_KEYS.has(prefixedKey)) return;
 
     const key = prefixedKey.replace('prop:', '');
     props[key] = prefixedProps[prefixedKey];
