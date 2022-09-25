@@ -48,7 +48,7 @@ export class RichText extends LitElement {
     store.awareness.updateLocalCursor();
   }
 
-  disconnectedCallback(): void {
+  disconnectedCallback() {
     this.host.store.detachText(this.model.id);
 
     super.disconnectedCallback();

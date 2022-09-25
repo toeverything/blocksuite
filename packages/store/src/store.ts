@@ -253,6 +253,8 @@ export class Store {
   }
 
   detachText(id: string) {
+    const adapter = this.textAdapters.get(id);
+    adapter?.destroy();
     this.textAdapters.delete(id);
   }
 
