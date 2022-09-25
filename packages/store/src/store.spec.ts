@@ -67,6 +67,7 @@ describe.concurrent('addBlock', () => {
         'sys:children': [],
         'sys:flavour': 'text',
         'sys:id': '1',
+        'prop:text': '',
       },
     });
   });
@@ -136,6 +137,7 @@ describe.concurrent('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'text',
         'sys:id': '1',
+        'prop:text': '',
       },
     });
 

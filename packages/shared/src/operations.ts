@@ -2,7 +2,7 @@ import type { BaseBlockModel, Store } from '@blocksuite/store';
 
 // XXX: workaround quill lifecycle issue
 function asyncFocusRichText(store: Store, id: string) {
-  setTimeout(() => store.textAdapters.get(id)?.quill.focus());
+  setTimeout(() => store.richTextAdapters.get(id)?.quill.focus());
 }
 
 export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {

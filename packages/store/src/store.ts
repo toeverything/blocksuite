@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import { Slot } from './utils/slot';
-import { TextAdapter } from './text-adapter';
+import { RichTextAdapter, TextEntity } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
 import { initSysProps, syncBlockProps, toBlockProps } from './utils/utils';
@@ -43,7 +43,7 @@ export class Store {
   readonly doc = new Y.Doc();
   readonly provider!: DebugProvider;
   readonly awareness!: AwarenessAdapter;
-  readonly textAdapters = new Map<string, TextAdapter>();
+  readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
   readonly slots = {
     historyUpdated: new Slot(),
@@ -58,6 +58,7 @@ export class Store {
   private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
+  private _textMap = new WeakMap<TextEntity, Y.Text>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -108,7 +109,7 @@ export class Store {
     this._history.redo();
   }
 
-  /** capture current operations to undo stack synchronously */
+  /** Capture current operations to undo stack synchronously. */
   captureSync() {
     this._history.stopCapturing();
   }
@@ -228,34 +229,31 @@ export class Store {
     });
   }
 
-  attachText(id: string, quill: Quill) {
+  /** Connect a rich text editor instance with a YText instance. */
+  attachRichText(id: string, quill: Quill) {
     const yBlock = this._getYBlock(id);
 
-    const isVoidText = yBlock.get('prop:text') === undefined;
-    const yText = isVoidText
-      ? new Y.Text()
-      : (yBlock.get('prop:text') as Y.Text);
-
-    if (isVoidText) {
-      this.transact(() => yBlock.set('prop:text', yText));
+    const yText = yBlock.get('prop:text') as Y.Text | null;
+    if (!yText) {
+      throw new Error(`Block "${id}" does not have text`);
     }
 
-    const adapter = new TextAdapter(this, yText, quill);
-    this.textAdapters.set(id, adapter);
+    const adapter = new RichTextAdapter(this, yText, quill);
+    this.richTextAdapters.set(id, adapter);
 
     quill.on('selection-change', () => {
       const cursor = adapter.getCursor();
-      if (!cursor) {
-        return;
-      }
+      if (!cursor) return;
+
       this.awareness.setLocalCursor({ ...cursor, id });
     });
   }
 
-  detachText(id: string) {
-    const adapter = this.textAdapters.get(id);
+  /** Cancel the connection between the rich text editor instance and YText. */
+  detachRichText(id: string) {
+    const adapter = this.richTextAdapters.get(id);
     adapter?.destroy();
-    this.textAdapters.delete(id);
+    this.richTextAdapters.delete(id);
   }
 
   private _createId(): string {
@@ -312,6 +310,18 @@ export class Store {
     const props = toBlockProps(prefixedProps) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
     this._blockMap.set(props.id, model);
+
+    if (
+      // TODO use schema
+      (model.flavour === 'text' || model.flavour === 'list') &&
+      !yBlock.get('prop:text')
+    ) {
+      this.transact(() => yBlock.set('prop:text', new Y.Text()));
+    }
+
+    const yText = yBlock.get('prop:text') as Y.Text;
+    const textEntity = new TextEntity(this._textMap, yText);
+    model.text = textEntity;
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {

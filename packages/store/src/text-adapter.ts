@@ -29,7 +29,19 @@ export const normQuillDelta = (delta: any) => {
   return delta;
 };
 
-export class TextAdapter {
+export class TextEntity {
+  private _textMap: WeakMap<TextEntity, Y.Text>;
+  constructor(textMap: WeakMap<TextEntity, Y.Text>, yText: Y.Text) {
+    this._textMap = textMap;
+    this._textMap.set(this, yText);
+  }
+
+  clone() {
+    return this._textMap.get(this)?.clone();
+  }
+}
+
+export class RichTextAdapter {
   readonly store: Store;
   readonly doc: Y.Doc;
   readonly yText: Y.Text;

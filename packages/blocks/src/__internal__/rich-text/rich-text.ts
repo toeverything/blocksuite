@@ -44,12 +44,12 @@ export class RichText extends LitElement {
       },
       theme: 'snow',
     });
-    store.attachText(model.id, this._quill);
+    store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
   }
 
   disconnectedCallback() {
-    this.host.store.detachText(this.model.id);
+    this.host.store.detachRichText(this.model.id);
 
     super.disconnectedCallback();
   }
