@@ -3,7 +3,12 @@ import { Slot } from './utils/slot';
 import { RichTextAdapter, TextEntity } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
-import { initSysProps, syncBlockProps, toBlockProps, trySyncTextProp } from './utils/utils';
+import {
+  initSysProps,
+  syncBlockProps,
+  toBlockProps,
+  trySyncTextProp,
+} from './utils/utils';
 import { BaseBlockModel } from './base';
 import { DebugProvider } from './providers';
 
@@ -175,7 +180,7 @@ export class Store {
     clonedProps.id = id;
 
     const yBlock = new Y.Map() as YBlock;
-    
+
     this.transact(() => {
       initSysProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
