@@ -25,11 +25,10 @@ export function handleIndent(store: Store, model: BaseBlockModel) {
   if (previousSibling) {
     store.captureSync();
 
-    const clonedText = model?.text?.clone(); // should clone before `deleteBlock`
     const blockProps = {
       id: model.id,
       flavour: model.flavour,
-      text: clonedText,
+      text: model?.text?.clone(), // should clone before `deleteBlock`
     };
     store.deleteBlock(model);
     store.addBlock(blockProps, previousSibling);
@@ -45,6 +44,12 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
 
   const index = grandParent.children.indexOf(parent);
   store.captureSync();
+
+  const blockProps = {
+    id: model.id,
+    flavour: model.flavour,
+    text: model?.text?.clone(), // should clone before `deleteBlock`
+  };
   store.deleteBlock(model);
-  store.addBlock(model, grandParent, index + 1);
+  store.addBlock(blockProps, grandParent, index + 1);
 }

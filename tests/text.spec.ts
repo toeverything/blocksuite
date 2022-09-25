@@ -10,6 +10,7 @@ import {
   focusRichText,
   pressEnter,
   redoByKeyboard,
+  shiftTab,
   undoByKeyboard,
 } from './utils/actions';
 
@@ -54,7 +55,7 @@ test('insert new text block by enter', async ({ page }) => {
   ]);
 });
 
-test('indent existing text block', async ({ page }) => {
+test('indent and unindent existing text block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
@@ -64,9 +65,20 @@ test('indent existing text block', async ({ page }) => {
   await page.keyboard.type('world');
   await assertRichTexts(page, ['hello', 'world']);
 
+  // indent
   await page.keyboard.press('Tab');
   await assertRichTexts(page, ['hello', 'world']);
-
   await assertBlockChildrenIds(page, '0', ['1']);
   await assertBlockChildrenIds(page, '1', ['2']);
+
+  // unindent
+  await shiftTab(page);
+  await assertRichTexts(page, ['hello', 'world']);
+  await assertBlockChildrenIds(page, '0', ['1', '2']);
+
+  await undoByKeyboard(page);
+  await assertBlockChildrenIds(page, '0', ['1']);
+
+  await redoByKeyboard(page);
+  await assertBlockChildrenIds(page, '0', ['1', '2']);
 });
