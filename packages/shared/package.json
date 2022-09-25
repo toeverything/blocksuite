@@ -1,5 +1,5 @@
 {
-  "name": "@building-blocks/shared",
+  "name": "@blocksuite/shared",
   "version": "0.0.0",
   "type": "module",
   "description": "",
@@ -8,6 +8,6 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
-    "@building-blocks/store": "workspace:*"
+    "@blocksuite/store": "workspace:*"
   }
 }

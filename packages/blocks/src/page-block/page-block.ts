@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { BLOCK_ID_ATTR, type BlockHost } from '@building-blocks/shared';
+import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
 import { PageBlockModel } from './page-model';
 import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
 

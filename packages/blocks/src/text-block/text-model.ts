@@ -1,4 +1,4 @@
-import { Store, BaseBlockModel, IBaseBlockProps } from '@building-blocks/store';
+import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
 export interface TextBlockProps extends IBaseBlockProps {
   flavour: 'text';

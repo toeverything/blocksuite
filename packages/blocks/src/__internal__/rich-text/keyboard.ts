@@ -1,10 +1,10 @@
 import type { Quill, RangeStatic } from 'quill';
-import type { BaseBlockModel, Store } from '@building-blocks/store';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
   handleBlockEndEnter,
   handleIndent,
   handleUnindent,
-} from '@building-blocks/shared';
+} from '@blocksuite/shared';
 
 interface BindingContext {
   collapsed: boolean;

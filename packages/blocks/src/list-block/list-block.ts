@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { BlockHost } from '@building-blocks/shared';
-import { BLOCK_ID_ATTR } from '@building-blocks/shared';
+import type { BlockHost } from '@blocksuite/shared';
+import { BLOCK_ID_ATTR } from '@blocksuite/shared';
 import { ListBlockModel } from './list-model';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';

@@ -1,8 +1,8 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import type { BlockHost } from '@building-blocks/shared';
+import type { BlockHost } from '@blocksuite/shared';
 import { SelectionManager, MouseManager } from '../..';
-import { Store } from '@building-blocks/store';
+import { Store } from '@blocksuite/store';
 import { BlockMap } from '../../block-loader';
 import { Clipboard } from '../../clipboard';
 import './debug-menu';

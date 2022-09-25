@@ -1,5 +1,5 @@
-import '@building-blocks/blocks';
-import '@building-blocks/editor';
+import '@blocksuite/blocks';
+import '@blocksuite/editor';
 
 window.onload = () => {
   const container = document.createElement('page-container');

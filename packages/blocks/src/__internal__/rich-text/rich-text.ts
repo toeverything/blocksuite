@@ -3,8 +3,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import type { BlockHost } from '@building-blocks/shared';
-import type { BaseBlockModel } from '@building-blocks/store';
+import type { BlockHost } from '@blocksuite/shared';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);

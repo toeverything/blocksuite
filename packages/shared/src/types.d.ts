@@ -1,4 +1,4 @@
-import type { Store } from '@building-blocks/store';
+import type { Store } from '@blocksuite/store';
 
 /** Common context interface definition for block models. */
 export interface BlockHost {

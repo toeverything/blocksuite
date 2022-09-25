@@ -1,6 +1,10 @@
-# Building Blocks
+# BlockSuite
 
-Building Blocks framework workspace
+BlockSuite provides local-first blocks for collaborative applications.
+
+## Introduction
+
+WIP
 
 ## Development
 

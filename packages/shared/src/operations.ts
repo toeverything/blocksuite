@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Store } from '@building-blocks/store';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
 
 // XXX: workaround quill lifecycle issue
 function asyncFocusRichText(store: Store, id: string) {

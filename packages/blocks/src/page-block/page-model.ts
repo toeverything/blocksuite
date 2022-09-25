@@ -1,4 +1,4 @@
-import { BaseBlockModel, Store } from '@building-blocks/store';
+import { BaseBlockModel, Store } from '@blocksuite/store';
 
 export class PageBlockModel extends BaseBlockModel {
   flavour = 'page' as const;

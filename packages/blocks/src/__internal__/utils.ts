@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost } from '@building-blocks/shared';
-import type { BaseBlockModel } from '@building-blocks/store';
+import type { BlockHost } from '@blocksuite/shared';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel } from '../list-block/list-model';
 import type { TextBlockModel } from '../text-block/text-model';
 

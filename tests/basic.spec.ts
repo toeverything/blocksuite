@@ -27,7 +27,7 @@ test('basic input', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('hello');
 
-  await expect(page).toHaveTitle(/Building Blocks/);
+  await expect(page).toHaveTitle(/BlockSuite/);
   await assertStore(page, defaultStore);
   await assertText(page, 'hello');
 });
