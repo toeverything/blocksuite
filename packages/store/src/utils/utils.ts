@@ -1,5 +1,6 @@
 import * as Y from 'yjs';
 import type { BlockProps, PrefixedBlockProps, YBlock } from '../store';
+import { TextEntity } from '../text-adapter';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -24,7 +25,6 @@ export function syncBlockProps(
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
 
-    // workaround yText init
     // TODO use schema
     if (key === 'text') return;
 
@@ -37,6 +37,17 @@ export function syncBlockProps(
       yBlock.set('prop:' + key, props[key]);
     }
   });
+}
+
+export function trySyncTextProp(
+  yBlock: YBlock,
+  textMap: WeakMap<TextEntity, Y.Text>,
+  textEntity?: TextEntity
+) {
+  if (!textEntity || !textMap.has(textEntity)) return;
+
+  const yText = textMap.get(textEntity) as Y.Text;
+  yBlock.set('prop:text', yText);
 }
 
 export function toBlockProps(

@@ -3,7 +3,7 @@ import { Slot } from './utils/slot';
 import { RichTextAdapter, TextEntity } from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
-import { initSysProps, syncBlockProps, toBlockProps } from './utils/utils';
+import { initSysProps, syncBlockProps, toBlockProps, trySyncTextProp } from './utils/utils';
 import { BaseBlockModel } from './base';
 import { DebugProvider } from './providers';
 
@@ -15,6 +15,7 @@ export type YBlocks = Y.Map<YBlock>;
 export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
+  text?: TextEntity;
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -174,10 +175,12 @@ export class Store {
     clonedProps.id = id;
 
     const yBlock = new Y.Map() as YBlock;
-    initSysProps(yBlock, clonedProps);
-    syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
-
+    
     this.transact(() => {
+      initSysProps(yBlock, clonedProps);
+      syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
+      trySyncTextProp(yBlock, this._textMap, clonedProps.text);
+
       const parentId = parent?.id ?? this._root?.id;
 
       if (parentId) {

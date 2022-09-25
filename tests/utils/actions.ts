@@ -5,8 +5,8 @@ export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
 const NEXT_FRAME_TIMEOUT = 10;
-export const DEFAULT_PLAYGROUNT = 'http://localhost:5173/';
-export const RICH_TEXT_SELECTOR = '.ql-editor';
+const DEFAULT_PLAYGROUNT = 'http://localhost:5173/';
+const RICH_TEXT_SELECTOR = '.ql-editor';
 
 function generateRandomRoomId() {
   return `virgo-${Math.random().toFixed(8).substring(2)}`;

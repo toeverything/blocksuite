@@ -14,7 +14,6 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
 
     const blockProps = {
       flavour: model.flavour,
-      text: '',
     };
     const id = store.addBlock(blockProps, parent, index + 1);
     asyncFocusRichText(store, id);
@@ -25,8 +24,15 @@ export function handleIndent(store: Store, model: BaseBlockModel) {
   const previousSibling = store.getPreviousSibling(model);
   if (previousSibling) {
     store.captureSync();
+
+    const clonedText = model?.text?.clone(); // should clone before `deleteBlock`
+    const blockProps = {
+      id: model.id,
+      flavour: model.flavour,
+      text: clonedText,
+    };
     store.deleteBlock(model);
-    store.addBlock(model, previousSibling);
+    store.addBlock(blockProps, previousSibling);
   }
 }
 

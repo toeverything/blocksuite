@@ -3,6 +3,7 @@ import {
   assertSelection,
   assertRichTexts,
   assertBlockChildrenFlavours,
+  assertBlockChildrenIds,
 } from './utils/asserts';
 import {
   enterPlaygroundRoom,
@@ -51,4 +52,21 @@ test('insert new text block by enter', async ({ page }) => {
     'text',
     'text',
   ]);
+});
+
+test('indent existing text block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+
+  await pressEnter(page);
+  await focusRichText(page, 1);
+  await page.keyboard.type('world');
+  await assertRichTexts(page, ['hello', 'world']);
+
+  await page.keyboard.press('Tab');
+  await assertRichTexts(page, ['hello', 'world']);
+
+  await assertBlockChildrenIds(page, '0', ['1']);
+  await assertBlockChildrenIds(page, '1', ['2']);
 });

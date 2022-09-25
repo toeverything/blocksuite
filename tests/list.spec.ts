@@ -30,8 +30,11 @@ test('indent list block', async ({ page }) => {
 
   const secondList = page.locator('list-block-element').nth(1);
   await secondList.click();
-  await page.keyboard.press('Tab');
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['\n', 'hello', '\n']);
 
+  await page.keyboard.press('Tab');
+  await assertRichTexts(page, ['\n', 'hello', '\n']);
   await assertBlockChildrenIds(page, '0', ['1', '3']);
   await assertBlockChildrenIds(page, '1', ['2']);
 

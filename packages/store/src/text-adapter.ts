@@ -37,7 +37,12 @@ export class TextEntity {
   }
 
   clone() {
-    return this._textMap.get(this)?.clone();
+    const clonedYText = this._textMap.get(this)?.clone();
+    return new TextEntity(this._textMap, clonedYText as Y.Text);
+  }
+
+  toString() {
+    return this._textMap.get(this)?.toString();
   }
 }
 
