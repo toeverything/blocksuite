@@ -37,6 +37,15 @@ export function syncBlockProps(
       yBlock.set('prop:' + key, props[key]);
     }
   });
+
+  // TODO use schema
+  if (
+    props.flavour === 'paragraph' &&
+    !props.type &&
+    !yBlock.has('prop:type')
+  ) {
+    yBlock.set('prop:type', 'text');
+  }
 }
 
 export function trySyncTextProp(

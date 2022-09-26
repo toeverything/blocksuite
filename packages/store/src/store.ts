@@ -207,7 +207,7 @@ export class Store {
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
-    syncBlockProps(yBlock, props, this._ignoredKeys);
+    this.transact(() => syncBlockProps(yBlock, props, this._ignoredKeys));
   }
 
   deleteBlockById(id: string) {

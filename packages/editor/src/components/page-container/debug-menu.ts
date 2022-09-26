@@ -32,6 +32,7 @@ export class DebugMenu extends LitElement {
     .debug-menu > button {
       margin-left: 5px;
       margin-top: 5px;
+      width: 32px;
     }
   `;
 
@@ -62,6 +63,14 @@ export class DebugMenu extends LitElement {
     this.page.selection.selectionInfo.selectedNodesIds?.forEach(id => {
       this.store.deleteBlockById(id);
     });
+  }
+
+  private _onSetParagraphType(type: string) {
+    const selection = window.getSelection();
+    const element = selection?.focusNode?.parentElement as HTMLElement;
+    const block = element.closest('paragraph-block-element')?.model;
+    block?.store.captureSync();
+    block?.store.updateBlock(block, { type });
   }
 
   private _handleDebugInit() {
@@ -106,11 +115,32 @@ export class DebugMenu extends LitElement {
           ➡️
         </button>
         <button
-          aria-label=${this.connected ? 'disconnect' : 'connect'}
-          title=${this.connected ? 'disconnect' : 'connect'}
-          @click=${this._onToggleConnection}
+          aria-label="heading-1"
+          title="heading-1"
+          @click=${() => this._onSetParagraphType('h1')}
         >
-          ${this.connected ? '🟢' : '🔴'}
+          𝐇𝟏
+        </button>
+        <button
+          aria-label="heading-2"
+          title="heading-2"
+          @click=${() => this._onSetParagraphType('h2')}
+        >
+          𝐇𝟐
+        </button>
+        <button
+          aria-label="heading-3"
+          title="heading-3"
+          @click=${() => this._onSetParagraphType('h3')}
+        >
+          𝐇𝟑
+        </button>
+        <button
+          aria-label="text"
+          title="text"
+          @click=${() => this._onSetParagraphType('text')}
+        >
+          𝐓
         </button>
         <button
           aria-label="add list"
@@ -126,6 +156,13 @@ export class DebugMenu extends LitElement {
           @click=${this._onDelete}
         >
           ❌
+        </button>
+        <button
+          aria-label=${this.connected ? 'disconnect' : 'connect'}
+          title=${this.connected ? 'disconnect' : 'connect'}
+          @click=${this._onToggleConnection}
+        >
+          ${this.connected ? '🟢' : '🔴'}
         </button>
       </div>
     `;

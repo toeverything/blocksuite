@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/shared';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
-import { ParagraphBlockModel } from './paragraph-model';
+import type { ParagraphBlockModel } from './paragraph-model';
 
 @customElement('paragraph-block-element')
 export class ParagraphBlockElement extends LitElement {

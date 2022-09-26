@@ -6,6 +6,7 @@ import style from 'quill/dist/quill.snow.css';
 import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
+import { ParagraphBlockModel } from '../..';
 
 Quill.register('modules/cursors', QuillCursors);
 
@@ -46,6 +47,8 @@ export class RichText extends LitElement {
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
+
+    this.model.propsUpdated.on(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
@@ -55,6 +58,8 @@ export class RichText extends LitElement {
   }
 
   render() {
+    const { type } = this.model as ParagraphBlockModel;
+
     return html`
       <style>
         ${style} .affine-rich-text.quill-container {
@@ -63,12 +68,28 @@ export class RichText extends LitElement {
         .ql-editor {
           padding: 2px;
         }
-        .affine-rich-text.ql-container.ql-snow {
+        .affine-rich-text.quill-container.ql-snow {
           /* border: 0; */
           border: 1px #eee dashed;
         }
+        .affine-rich-text.quill-container.h1 p {
+          font-size: 28px;
+        }
+        .affine-rich-text.quill-container.h2 p {
+          font-size: 24px;
+        }
+        .affine-rich-text.quill-container.h3 p {
+          font-size: 20px;
+        }
+        .affine-rich-text.quill-container.quote p {
+          font-size: 13px;
+          color: grey;
+        }
+        .affine-rich-text.quill-container.text p {
+          font-size: 13px;
+        }
       </style>
-      <div class="affine-rich-text quill-container"></div>
+      <div class="affine-rich-text quill-container ${type}"></div>
     `;
   }
 }

@@ -68,6 +68,7 @@ describe.concurrent('addBlock', () => {
         'sys:flavour': 'paragraph',
         'sys:id': '1',
         'prop:text': '',
+        'prop:type': 'text',
       },
     });
   });
@@ -138,6 +139,7 @@ describe.concurrent('deleteBlock', () => {
         'sys:flavour': 'paragraph',
         'sys:id': '1',
         'prop:text': '',
+        'prop:type': 'text',
       },
     });
 

@@ -16,6 +16,7 @@ export const defaultStore: SerializedStore = {
       'sys:id': '1',
       'sys:children': [],
       'prop:text': 'hello',
+      'prop:type': 'text',
     },
   },
 };
@@ -118,4 +119,13 @@ export async function assertBlockChildrenFlavours(
     { blockId }
   );
   expect(actual).toEqual(flavours);
+}
+
+export async function assertClassname(
+  page: Page,
+  selector: string,
+  className: RegExp
+) {
+  const locator = page.locator(selector);
+  await expect(locator).toHaveClass(className);
 }

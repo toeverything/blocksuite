@@ -95,6 +95,8 @@ test('conflict occurs as expected when two same id generated together', async ({
   // click together, both init with default id leads to conflicts
   await focusRichText(pageA);
   await focusRichText(pageB);
+  await pageA.keyboard.type('');
+  await pageB.keyboard.type('');
 
   await connectByClick(pageA);
   await connectByClick(pageB);
