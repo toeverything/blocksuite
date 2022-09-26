@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { BlockHost } from '@blocksuite/shared';
+import { BlockHost, commonTextActiveHandler } from '@blocksuite/shared';
 import { BLOCK_ID_ATTR } from '@blocksuite/shared';
 import { ListBlockModel } from './list-model';
 import { getBlockChildrenContainer } from '../__internal__/utils';
@@ -31,11 +31,19 @@ export class ListBlockElement extends LitElement {
       this.selected = selected;
     });
 
+    this.host.selection.onBlockActive(this.model.id, position => {
+      const editableContainer = this.querySelector('[contenteditable]');
+      if (editableContainer) {
+        commonTextActiveHandler(position, editableContainer);
+      }
+    });
+
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
     this.host.selection.removeChangeListener(this.model.id);
+    this.host.selection.offBlockActive(this.model.id);
   }
 
   render() {

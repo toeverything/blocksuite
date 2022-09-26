@@ -213,57 +213,100 @@ export class SelectionManager {
     this._slots.selection.emit(this.selectionInfo);
   }
 
-  public activePreviousBlock(blockId: string, position?: SelectPosition) {
-    const currentBlock = this._page.querySelector<'text-block-element'>(
-      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'text-block-element'
+  private _getPerviousBlock(blockId: string) {
+    // TODO: resolve type problem
+    const currentBlock = this._page.querySelector<'paragraph-block-element'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
     );
     if (currentBlock) {
       const parentBlock =
-        currentBlock.parentElement?.closest<'text-block-element'>(
-          `[${BLOCK_ID_ATTR}]` as unknown as 'text-block-element'
+        currentBlock.parentElement?.closest<'paragraph-block-element'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
         );
       if (parentBlock) {
         const siblings = parentBlock.model.children;
         const index = siblings.findIndex(block => block.id === blockId);
-        let nextPosition = position;
-        if (nextPosition) {
-          if (nextPosition instanceof Point) {
-            this._lastCursorPosition = nextPosition;
-          } else {
-            this._lastCursorPosition = null;
-          }
-        } else if (this._lastCursorPosition) {
-          nextPosition = this._lastCursorPosition;
-        }
-        if (index >= 1) {
+        if (index > 0) {
           const previousBlock = siblings[index - 1];
-          const prevBlockModel =
-            parentBlock.querySelector<'text-block-element'>(
-              `[${BLOCK_ID_ATTR}='${previousBlock.id}']` as unknown as 'text-block-element'
-            )?.model;
-          if (prevBlockModel) {
-            if (prevBlockModel.children.length) {
-              this.activeBlockById(
-                prevBlockModel.children[prevBlockModel.children.length - 1].id,
-                nextPosition
-              );
-            } else {
-              this.activeBlockById(
-                prevBlockModel.id,
-                nextPosition
-              );
+          if (previousBlock) {
+            if (previousBlock.children.length) {
+              let firstChildren =
+                previousBlock.children[previousBlock.children.length - 1];
+              while (firstChildren.children.length) {
+                firstChildren =
+                  firstChildren.children[firstChildren.children.length - 1];
+              }
+              return firstChildren;
             }
+            return previousBlock;
           }
-        } else {
-          this.activeBlockById(parentBlock.model.id, nextPosition);
+        }
+        return parentBlock.model;
+      }
+    }
+    return null;
+  }
+
+  private _getNextBlock(blockId: string) {
+    // TODO: resolve type problem
+    let currentBlock = this._page.querySelector<'paragraph-block-element'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
+    );
+    if (currentBlock?.model.children.length) {
+      return currentBlock.model.children[0];
+    }
+    while (currentBlock) {
+      const parentBlock =
+        currentBlock.parentElement?.closest<'paragraph-block-element'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
+        ) || null;
+      if (parentBlock) {
+        const siblings = parentBlock.model.children;
+        const index = siblings.findIndex(
+          block => block.id === currentBlock?.model.id
+        );
+        if (index < siblings.length - 1) {
+          return siblings[index + 1];
         }
       }
+      currentBlock = parentBlock;
+    }
+    return null;
+  }
+
+  public activePreviousBlock(blockId: string, position?: SelectPosition) {
+    let nextPosition = position;
+    if (nextPosition) {
+      if (nextPosition instanceof Point) {
+        this._lastCursorPosition = nextPosition;
+      } else {
+        this._lastCursorPosition = null;
+      }
+    } else if (this._lastCursorPosition) {
+      nextPosition = this._lastCursorPosition;
+    }
+    const preNodeModel = this._getPerviousBlock(blockId);
+    if (preNodeModel) {
+      this.activeBlockById(preNodeModel.id, nextPosition);
     }
   }
 
-  // public activeNextBlock(blockId: string, position: SelectPosition = 'start') {
-  //   // do something
-  // }
+  public activeNextBlock(blockId: string, position: SelectPosition = 'start') {
+    let nextPosition = position;
+    if (nextPosition) {
+      if (nextPosition instanceof Point) {
+        this._lastCursorPosition = nextPosition;
+      } else {
+        this._lastCursorPosition = null;
+      }
+    } else if (this._lastCursorPosition) {
+      nextPosition = this._lastCursorPosition;
+    }
+    const nextNodeModel = this._getNextBlock(blockId);
+    if (nextNodeModel) {
+      this.activeBlockById(nextNodeModel.id, nextPosition);
+    }
+  }
 
   public onBlockActive(
     blockId: string,

@@ -1,10 +1,14 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { BLOCK_ID_ATTR, Point, type BlockHost } from '@blocksuite/shared';
-import { ParagraphBlockModel } from './paragraph-model';
+import {
+  BLOCK_ID_ATTR,
+  commonTextActiveHandler,
+  type BlockHost,
+} from '@blocksuite/shared';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
+import { ParagraphBlockModel } from './paragraph-model';
 
 @customElement('paragraph-block-element')
 export class ParagraphBlockElement extends LitElement {
@@ -32,15 +36,9 @@ export class ParagraphBlockElement extends LitElement {
     });
 
     this.host.selection.onBlockActive(this.model.id, position => {
-      if (position instanceof Point) {
-        const range = document.caretRangeFromPoint(
-          position.x,
-          (this.querySelector('[contenteditable]')?.getBoundingClientRect()
-            .bottom || this.getBoundingClientRect().bottom) - 4
-        );
-        const selection = window.getSelection();
-        selection?.removeAllRanges();
-        range && selection?.addRange(range);
+      const editableContainer = this.querySelector('[contenteditable]');
+      if (editableContainer) {
+        commonTextActiveHandler(position, editableContainer);
       }
     });
 
@@ -49,6 +47,7 @@ export class ParagraphBlockElement extends LitElement {
 
   disconnectedCallback() {
     this.host.selection.removeChangeListener(this.model.id);
+    this.host.selection.offBlockActive(this.model.id);
   }
 
   render() {

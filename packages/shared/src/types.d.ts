@@ -21,6 +21,6 @@ export interface BlockHost {
       cb: (position: SelectPosition) => void
     ) => void;
     activePreviousBlock: (blockId: string, position?: SelectPosition) => void;
+    activeNextBlock: (blockId: string, position?: SelectPosition) => void;
   };
 }
-

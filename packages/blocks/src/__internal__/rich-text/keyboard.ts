@@ -117,7 +117,7 @@ export const createKeyboardBindings = (
           bottom + height / 2
         );
         if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
-          console.log('should move out');
+          selectionManager.activeNextBlock(model.id, new Point(left, bottom));
           return false;
         }
       }
