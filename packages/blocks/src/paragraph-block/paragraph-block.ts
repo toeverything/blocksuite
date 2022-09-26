@@ -2,18 +2,18 @@ import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
-import { TextBlockModel } from './text-model';
+import { ParagraphBlockModel } from './paragraph-model';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
 
-@customElement('text-block-element')
-export class TextBlockElement extends LitElement {
+@customElement('paragraph-block-element')
+export class ParagraphBlockElement extends LitElement {
   @property({
     hasChanged() {
       return true;
     },
   })
-  model!: TextBlockModel;
+  model!: ParagraphBlockModel;
 
   @property()
   host!: BlockHost;
@@ -51,7 +51,7 @@ export class TextBlockElement extends LitElement {
             : 'transparent',
           margin: '5px 0',
         })}
-        class="affine-text-block-container"
+        class="affine-paragraph-block-container"
       >
         <rich-text .host=${this.host} .model=${this.model}></rich-text>
         ${childrenContainer}
@@ -62,6 +62,6 @@ export class TextBlockElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'text-block-element': TextBlockElement;
+    'paragraph-block-element': ParagraphBlockElement;
   }
 }

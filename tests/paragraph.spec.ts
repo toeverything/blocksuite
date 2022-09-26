@@ -48,10 +48,10 @@ test('insert new text block by enter', async ({ page }) => {
   await page.keyboard.type('world');
   await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
   await assertBlockChildrenFlavours(page, '0', [
-    'text',
-    'text',
-    'text',
-    'text',
+    'paragraph',
+    'paragraph',
+    'paragraph',
+    'paragraph',
   ]);
 });
 

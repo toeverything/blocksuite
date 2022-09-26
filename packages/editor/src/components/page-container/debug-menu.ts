@@ -52,7 +52,7 @@ export class DebugMenu extends LitElement {
   private _onAddList() {
     if (!this.page.model) {
       this.store.addBlock({ flavour: 'page' });
-      this.store.addBlock({ flavour: 'text' });
+      this.store.addBlock({ flavour: 'paragraph' });
     }
 
     this.store.addBlock({ flavour: 'list' });
