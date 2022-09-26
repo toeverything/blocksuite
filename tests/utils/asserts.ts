@@ -4,9 +4,31 @@
 import { expect, type Page } from '@playwright/test';
 import type { BaseBlockModel, SerializedStore } from '../../packages/store';
 
+export const defaultStore: SerializedStore = {
+  blocks: {
+    '0': {
+      'sys:id': '0',
+      'sys:flavour': 'page',
+      'sys:children': ['1'],
+    },
+    '1': {
+      'sys:flavour': 'text',
+      'sys:id': '1',
+      'sys:children': [],
+      'prop:text': 'hello',
+    },
+  },
+};
+
 export async function assertEmpty(page: Page) {
   const actual = await page.locator('text-block-element').count();
   expect(actual).toBe(0);
+}
+
+export async function assertTitle(page: Page, text: string) {
+  const locator = page.locator('input').nth(0);
+  const actual = await locator.inputValue();
+  expect(actual).toBe(text);
 }
 
 export async function assertText(page: Page, text: string) {
@@ -14,7 +36,7 @@ export async function assertText(page: Page, text: string) {
   expect(actual).toBe(text);
 }
 
-export async function assertTextBlocks(page: Page, texts: string[]) {
+export async function assertRichTexts(page: Page, texts: string[]) {
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
 }
@@ -64,7 +86,7 @@ export async function assertStore(page: Page, expected: SerializedStore) {
   expect(actual).toEqual(expected);
 }
 
-export async function assertBlockChildren(
+export async function assertBlockChildrenIds(
   page: Page,
   blockId: string,
   ids: string[]
@@ -79,4 +101,21 @@ export async function assertBlockChildren(
     { blockId }
   );
   expect(actual).toEqual(ids);
+}
+
+export async function assertBlockChildrenFlavours(
+  page: Page,
+  blockId: string,
+  flavours: string[]
+) {
+  const actual = await page.evaluate(
+    ({ blockId }) => {
+      const element = document.querySelector(`[data-block-id="${blockId}"]`);
+      // @ts-ignore
+      const model = element.model as BaseBlockModel;
+      return model.children.map(child => child.flavour);
+    },
+    { blockId }
+  );
+  expect(actual).toEqual(flavours);
 }

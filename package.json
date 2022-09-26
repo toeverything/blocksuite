@@ -1,17 +1,17 @@
 {
-  "name": "building-blocks",
+  "name": "blocksuite",
   "version": "0.0.0",
-  "description": "Building Blocks framework workspace",
+  "description": "BlockSuite framework workspace",
   "scripts": {
-    "serve": "pnpm --filter @building-blocks/store serve",
-    "dev": "pnpm serve & pnpm --filter @building-blocks/playground dev",
+    "serve": "pnpm --filter @blocksuite/store serve",
+    "dev": "pnpm serve & pnpm --filter @blocksuite/playground dev",
     "lint": "eslint ./ --max-warnings=0",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e",
     "test:headed": "playwright test --headed",
     "test:unit": "vitest --run",
     "format": "prettier --write packages tests",
-    "build:playground": "pnpm --filter @building-blocks/playground build"
+    "build:playground": "pnpm --filter @blocksuite/playground build"
   },
   "keywords": [],
   "author": "toeverything",

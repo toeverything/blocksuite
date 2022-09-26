@@ -1,17 +1,18 @@
 import { test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
-  focusFirstTextBlock,
+  focusRichText,
   mouseDragFromTo,
+  pressEnter,
 } from './utils/actions';
 import { assertSelectedBlockCount } from './utils/asserts';
 
 test('drag to select blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
-  await focusFirstTextBlock(page);
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await focusRichText(page);
+  await pressEnter(page);
+  await pressEnter(page);
 
   const fromTo = await page.evaluate(() => {
     const textBoxes = document.querySelectorAll('rich-text');

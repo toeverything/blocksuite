@@ -1,7 +1,7 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { PageContainer } from '../components';
-import { ParseBlock } from '../parse/parseBlock';
+import { ParseBlock } from '../parse/parse-block';
 
 export class CopyCutExecution {
   // @ts-ignore

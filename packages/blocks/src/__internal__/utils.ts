@@ -1,40 +1,55 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BaseBlockModel } from '@building-blocks/store';
+import type { BlockHost } from '@blocksuite/shared';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel } from '../list-block/list-model';
 import type { TextBlockModel } from '../text-block/text-model';
-import type { PageContainer } from '../types';
 
 // TODO support dynamic block types
-function getBlockElement(model: BaseBlockModel, page: PageContainer) {
-  const { store } = page;
+function getBlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
     case 'text':
       return html`
         <text-block-element
           .model=${model as TextBlockModel}
-          .store=${store}
-          .page=${page}
+          .host=${host}
         ></text-block-element>
       `;
     case 'list':
       return html`
         <list-block-element
           .model=${model as ListBlockModel}
-          .store=${store}
-          .page=${page}
+          .host=${host}
         ></list-block-element>
       `;
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
 }
 
-export function getChildBlocks(model: BaseBlockModel, page: PageContainer) {
+export function getBlockChildrenContainer(
+  model: BaseBlockModel,
+  host: BlockHost
+) {
   return html`
-    ${repeat(
-      model.children,
-      child => child.id,
-      child => getBlockElement(child, page)
-    )}
+    <style>
+      .affine-block-children-container {
+        padding-left: 1rem;
+      }
+    </style>
+    <div class="affine-block-children-container">
+      ${repeat(
+        model.children,
+        child => child.id,
+        child => getBlockElement(child, host)
+      )}
+    </div>
   `;
+}
+
+// https://stackoverflow.com/a/2345915
+export function focusTextEnd(input: HTMLInputElement) {
+  const current = input.value;
+  input.focus();
+  input.value = '';
+  input.value = current;
 }

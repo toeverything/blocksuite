@@ -3,7 +3,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import { BaseBlockModel, Store } from '@building-blocks/store';
+import type { BlockHost } from '@blocksuite/shared';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
@@ -15,7 +16,7 @@ export class RichText extends LitElement {
   private _quill?: Quill;
 
   @property()
-  store!: Store;
+  host!: BlockHost;
 
   @property()
   model!: BaseBlockModel;
@@ -26,9 +27,9 @@ export class RichText extends LitElement {
   }
 
   firstUpdated() {
-    const { store, model } = this;
-    const { _textContainer } = this;
-    const keyboardBindings = createKeyboardBindings(store, model);
+    const { host, model, _textContainer } = this;
+    const { store, selection } = host;
+    const keyboardBindings = createKeyboardBindings(store, model, selection);
     this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,
@@ -43,12 +44,12 @@ export class RichText extends LitElement {
       },
       theme: 'snow',
     });
-    store.attachText(model.id, this._quill);
+    store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
   }
 
-  disconnectedCallback(): void {
-    this.store.detachText(this.model.id);
+  disconnectedCallback() {
+    this.host.store.detachRichText(this.model.id);
 
     super.disconnectedCallback();
   }

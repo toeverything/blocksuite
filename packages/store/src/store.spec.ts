@@ -1,7 +1,7 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { assert, describe, it } from 'vitest';
-import { Slot, Store } from '../';
+import { BaseBlockModel, Slot, Store } from '../';
 import { BlockMap } from '../../editor/src/block-loader';
 
 function serialize(store: Store) {
@@ -55,18 +55,19 @@ describe.concurrent('addBlock', () => {
   it('can add multi models', () => {
     const store = new Store().register(BlockMap);
     store.addBlock({ flavour: 'page' });
-    store.addBlock({ flavour: 'page' });
+    store.addBlock({ flavour: 'text' });
 
     assert.deepEqual(serialize(store).blocks, {
       '0': {
-        'sys:children': [],
+        'sys:children': ['1'],
         'sys:flavour': 'page',
         'sys:id': '0',
       },
       '1': {
         'sys:children': [],
-        'sys:flavour': 'page',
+        'sys:flavour': 'text',
         'sys:id': '1',
+        'prop:text': '',
       },
     });
   });
@@ -75,7 +76,7 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    const block = await waitOnce(store.slots.blockAdded);
+    const block = await waitOnce(store.slots.rootAdded);
     assert.ok(block instanceof BlockMap.page);
   });
 
@@ -83,24 +84,22 @@ describe.concurrent('addBlock', () => {
     const store = new Store().register(BlockMap);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    const root = await waitOnce(store.slots.blockAdded);
+    const root = await waitOnce(store.slots.rootAdded);
     assert.ok(root instanceof BlockMap.page);
-    store.setRoot(root);
 
-    queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    const block = await waitOnce(store.slots.childrenUpdated);
-    assert.ok(block instanceof BlockMap.page);
+    store.addBlock({ flavour: 'text' });
+    assert.ok(root.children[0] instanceof BlockMap.text);
+    assert.equal(root.childMap.get('1'), 0);
 
     const serializedChildren = serialize(store).blocks['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
-    assert.equal(block.children[0].id, '1');
+    assert.equal(root.children[0].id, '1');
   });
 });
 
 async function initWithRoot(store: Store) {
   queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-  const root = await waitOnce(store.slots.blockAdded);
-  store.setRoot(root);
+  const root = await waitOnce(store.slots.rootAdded);
   return root;
 }
 
@@ -125,8 +124,7 @@ describe.concurrent('deleteBlock', () => {
     const store = new Store().register(BlockMap);
     const root = await initWithRoot(store);
 
-    queueMicrotask(() => store.addBlock({ flavour: 'text' }));
-    await waitOnce(store.slots.childrenUpdated);
+    store.addBlock({ flavour: 'text' });
 
     // before delete
     assert.deepEqual(serialize(store).blocks, {
@@ -139,6 +137,7 @@ describe.concurrent('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'text',
         'sys:id': '1',
+        'prop:text': '',
       },
     });
 
@@ -153,5 +152,50 @@ describe.concurrent('deleteBlock', () => {
       },
     });
     assert.equal(root.children.length, 0);
+  });
+});
+
+describe.concurrent('getBlock', () => {
+  it('can get block by id', async () => {
+    const store = new Store().register(BlockMap);
+    const root = await initWithRoot(store);
+
+    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'text' });
+
+    const text = store.getBlockById('2') as BaseBlockModel;
+    assert.ok(text instanceof BlockMap.text);
+    assert.equal(root.children.indexOf(text), 1);
+
+    const invalid = store.getBlockById('😅');
+    assert.equal(invalid, null);
+  });
+
+  it('can get parent', async () => {
+    const store = new Store().register(BlockMap);
+    const root = await initWithRoot(store);
+
+    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'text' });
+
+    const result = store.getParent(root.children[1]) as BaseBlockModel;
+    assert.equal(result, root);
+
+    const invalid = store.getParentById(root.id, root);
+    assert.equal(invalid, null);
+  });
+
+  it('can get previous sibling', async () => {
+    const store = new Store().register(BlockMap);
+    const root = await initWithRoot(store);
+
+    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'text' });
+
+    const result = store.getPreviousSibling(root.children[1]) as BaseBlockModel;
+    assert.equal(result, root.children[0]);
+
+    const invalid = store.getPreviousSibling(root.children[0]);
+    assert.equal(invalid, null);
   });
 });

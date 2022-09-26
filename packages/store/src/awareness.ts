@@ -95,7 +95,7 @@ export class AwarenessAdapter {
   };
 
   private _resetRemoteCursor() {
-    this.store.textAdapters.forEach(textAdapter =>
+    this.store.richTextAdapters.forEach(textAdapter =>
       textAdapter.quillCursors.clearCursors()
     );
     this.getStates().forEach((awState, clientId) => {
@@ -108,7 +108,7 @@ export class AwarenessAdapter {
           awState.cursor.focus,
           this.store.doc
         );
-        const textAdapter = this.store.textAdapters.get(
+        const textAdapter = this.store.richTextAdapters.get(
           awState.cursor.id || ''
         );
         if (anchor && focus && textAdapter) {
@@ -143,7 +143,7 @@ export class AwarenessAdapter {
       this.store.doc
     );
     if (anchor && focus) {
-      const textAdapter = this.store.textAdapters.get(localCursor.id || '');
+      const textAdapter = this.store.richTextAdapters.get(localCursor.id || '');
       textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
     }
   }

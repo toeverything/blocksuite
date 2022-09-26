@@ -1,7 +1,8 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
+import type { BlockHost } from '@blocksuite/shared';
 import { SelectionManager, MouseManager } from '../..';
-import { Store } from '@building-blocks/store';
+import { Store } from '@blocksuite/store';
 import { BlockMap } from '../../block-loader';
 import { Clipboard } from '../../clipboard';
 import './debug-menu';
@@ -12,7 +13,7 @@ const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
 @customElement('page-container')
-export class PageContainer extends LitElement {
+export class PageContainer extends LitElement implements BlockHost {
   @state()
   store = new Store(room).register(BlockMap);
 
@@ -55,26 +56,9 @@ export class PageContainer extends LitElement {
       this.isEmptyPage = this.store.isEmpty;
     });
 
-    this.store.slots.blockAdded.on(block => {
-      if (block.flavour === 'page') {
-        this.store.setRoot(block);
-        this.model = block as PageBlockModel;
-      } else {
-        if (!this.model.children.find(child => child.id === block.id)) {
-          this.model.children.push(block);
-        }
-
-        this.requestUpdate();
-      }
-    });
-
-    this.store.slots.blockDeleted.on(id => {
-      const index = this.model.children.findIndex(child => child.id === id);
-      if (index !== -1) {
-        this.model.children.splice(index, 1);
-      }
-
-      this.isEmptyPage = this.model.children.length === 0;
+    this.store.slots.rootAdded.on(block => {
+      this.model = block as PageBlockModel;
+      this.model.childrenUpdated.on(() => this.requestUpdate());
       this.requestUpdate();
     });
   }
@@ -83,7 +67,7 @@ export class PageContainer extends LitElement {
     if (!this.isEmptyPage) return;
 
     this.store.addBlock({ flavour: 'page' });
-    this.store.addBlock({ flavour: 'text', text: '' });
+    this.store.addBlock({ flavour: 'text' });
 
     this.isEmptyPage = false;
   }
@@ -112,16 +96,14 @@ export class PageContainer extends LitElement {
     const placeholderRoot = html`
       <page-block-element
         .model=${this.placeholderModel}
-        .store=${this.store}
-        .page=${this as PageContainer}
+        .host=${this as BlockHost}
       ></page-block-element>
     `;
 
     const blockRoot = html`
       <page-block-element
         .model=${this.model}
-        .store=${this.store}
-        .page=${this as PageContainer}
+        .host=${this as BlockHost}
       ></page-block-element>
     `;
 

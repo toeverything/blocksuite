@@ -1,7 +1,8 @@
 import * as Y from 'yjs';
 import type { BlockProps, PrefixedBlockProps, YBlock } from '../store';
+import { TextEntity } from '../text-adapter';
 
-const SYS_KEYS = ['id', 'flavour', 'children'];
+const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
 function isPrimitive(
@@ -10,35 +11,43 @@ function isPrimitive(
   return a !== Object(a);
 }
 
-function syncSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
+export function initSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
   yBlock.set('sys:children', new Y.Array());
 }
 
-export function syncBlockProps(yBlock: YBlock, props: Partial<BlockProps>) {
-  syncSysProps(yBlock, props);
-
+export function syncBlockProps(
+  yBlock: YBlock,
+  props: Partial<BlockProps>,
+  ignoredKeys: Set<string>
+) {
   Object.keys(props).forEach(key => {
-    if (SYS_KEYS.includes(key)) {
-      return;
-    }
+    if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
 
-    // workaround yText init
     // TODO use schema
-    if (props.flavour === 'text' && key === 'text') {
-      return;
-    }
+    if (key === 'text') return;
 
     if (!isPrimitive(props[key])) {
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // TODO compare with current yBlock valur
+    // TODO compare with current yBlock value
     if (props[key] !== undefined) {
       yBlock.set('prop:' + key, props[key]);
     }
   });
+}
+
+export function trySyncTextProp(
+  yBlock: YBlock,
+  textMap: WeakMap<TextEntity, Y.Text>,
+  textEntity?: TextEntity
+) {
+  if (!textEntity || !textMap.has(textEntity)) return;
+
+  const yText = textMap.get(textEntity) as Y.Text;
+  yBlock.set('prop:text', yText);
 }
 
 export function toBlockProps(
@@ -52,9 +61,7 @@ export function toBlockProps(
   });
 
   Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (SYS_KEYS.includes(prefixedKey)) {
-      return;
-    }
+    if (SYS_KEYS.has(prefixedKey)) return;
 
     const key = prefixedKey.replace('prop:', '');
     props[key] = prefixedProps[prefixedKey];

@@ -45,18 +45,22 @@ importers:
 
   packages/blocks:
     specifiers:
-      '@building-blocks/store': workspace:*
+      '@blocksuite/shared': workspace:*
+      '@blocksuite/store': workspace:*
     dependencies:
-      '@building-blocks/store': link:../store
+      '@blocksuite/shared': link:../shared
+      '@blocksuite/store': link:../store
 
   packages/editor:
     specifiers:
-      '@building-blocks/store': workspace:*
+      '@blocksuite/shared': workspace:*
+      '@blocksuite/store': workspace:*
       '@types/marked': ^4.0.7
       '@types/quill': ^2.0.9
       marked: ^4.1.0
     dependencies:
-      '@building-blocks/store': link:../store
+      '@blocksuite/shared': link:../shared
+      '@blocksuite/store': link:../store
       marked: 4.1.0
     devDependencies:
       '@types/marked': 4.0.7
@@ -64,17 +68,23 @@ importers:
 
   packages/playground:
     specifiers:
-      '@building-blocks/blocks': workspace:*
-      '@building-blocks/editor': workspace:*
+      '@blocksuite/blocks': workspace:*
+      '@blocksuite/editor': workspace:*
       '@lit-labs/react': ^1.0.8
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
-      '@building-blocks/blocks': link:../blocks
-      '@building-blocks/editor': link:../editor
+      '@blocksuite/blocks': link:../blocks
+      '@blocksuite/editor': link:../editor
       '@lit-labs/react': 1.0.8
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+
+  packages/shared:
+    specifiers:
+      '@blocksuite/store': workspace:*
+    dependencies:
+      '@blocksuite/store': link:../store
 
   packages/store:
     specifiers:

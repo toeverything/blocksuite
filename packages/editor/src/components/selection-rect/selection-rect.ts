@@ -1,8 +1,8 @@
-import { Point, Rect } from './rect';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { BlockMap, BLOCK_ID_ATTR } from '../../block-loader';
+import { BLOCK_ID_ATTR, Point, Rect } from '@blocksuite/shared';
+import { BlockMap } from '../../block-loader';
 import { PageContainer, SelectionManager } from '../..';
 
 type PageBlockModel = InstanceType<typeof BlockMap.page>;
@@ -48,10 +48,16 @@ export class SelectionRect extends LitElement {
 
   private _handleEditorMousedown(e: MouseEvent) {
     // this.selectionManager.selectedBlockIds = [];
+
+    // ensure page title can be focused
+    if (e.target instanceof HTMLInputElement) {
+      return;
+    }
+
     const closestBlock = (e.target as HTMLDivElement)?.closest(
       `[${BLOCK_ID_ATTR}]`
     );
-    // if closest block is not page root , do nothing
+    // if closest block is not page root, do nothing
     if (
       !closestBlock ||
       closestBlock.attributes.getNamedItem(BLOCK_ID_ATTR)?.value ===

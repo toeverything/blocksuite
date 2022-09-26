@@ -1,17 +1,13 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { Store } from '@building-blocks/store';
-import { PageBlockModel, BLOCK_ID_ATTR } from '../';
-import { PageContainer } from '../types';
-import { getChildBlocks } from '../__internal__/utils';
+import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
+import { PageBlockModel } from './page-model';
+import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
   @property()
-  store!: Store;
-
-  @property()
-  page!: PageContainer;
+  host!: BlockHost;
 
   @property({
     hasChanged() {
@@ -29,13 +25,33 @@ export class PageBlockElement extends LitElement {
   }
 
   firstUpdated() {
-    this._blockTitle.focus();
+    this.model.propsUpdated.on(() => {
+      if (this.model.title !== this._blockTitle.value) {
+        this.requestUpdate();
+      }
+    });
+
+    focusTextEnd(this._blockTitle);
+  }
+
+  private _onTitleInput(e: InputEvent) {
+    const { store } = this.host;
+
+    if (!this.model.id) {
+      const title = (e.target as HTMLInputElement).value;
+      store.addBlock({ flavour: 'page', title });
+      store.addBlock({ flavour: 'text' });
+      return;
+    }
+
+    const title = (e.target as HTMLInputElement).value;
+    store.updateBlock(this.model, { title });
   }
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childBlocks = getChildBlocks(this.model, this.page);
+    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
       <style>
@@ -49,16 +65,20 @@ export class PageBlockElement extends LitElement {
         .affine-page-block-title::placeholder {
           color: #ddd;
         }
+        .affine-page-block-container > .affine-block-children-container {
+          padding-left: 0;
+        }
       </style>
       <div class="affine-page-block-container">
-        <div class="affine-page-block-title-contaienr">
+        <div class="affine-page-block-title-container">
           <input
             placeholder="Title"
             class="affine-page-block-title"
             value=${this.model.title}
+            @input=${this._onTitleInput}
           />
         </div>
-        ${childBlocks}
+        ${childrenContainer}
       </div>
     `;
   }

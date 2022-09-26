@@ -1,5 +1,5 @@
 {
-  "name": "@building-blocks/editor",
+  "name": "@blocksuite/editor",
   "version": "0.0.0",
   "type": "module",
   "description": "",
@@ -11,7 +11,8 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
-    "@building-blocks/store": "workspace:*",
+    "@blocksuite/shared": "workspace:*",
+    "@blocksuite/store": "workspace:*",
     "marked": "^4.1.0"
   },
   "devDependencies": {

@@ -1,6 +1,10 @@
-# Building Blocks
+# BlockSuite
 
-Building Blocks framework workspace
+BlockSuite provides local-first blocks for collaborative applications.
+
+## Introduction
+
+WIP
 
 ## Development
 
@@ -17,7 +21,7 @@ pnpm dev
 To test locally, please make sure browser binaries are already installed via `npx playwright install` and Vite playground is started with `pnpm dev`. Then there are multi commands to choose from:
 
 ```bash
-# run tests in headless mode in in another terminal window
+# run tests in headless mode in another terminal window
 pnpm test
 
 # or run tests in headed mode for debugging

@@ -1,4 +1,4 @@
-import { Slot, flattenDisposable, IDisposable } from '@building-blocks/store';
+import { Slot, flattenDisposable, IDisposable } from '@blocksuite/store';
 
 export type MouseEventHandler = (e: MouseEvent) => void;
 

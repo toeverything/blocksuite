@@ -1,4 +1,4 @@
-import { Slot } from '@building-blocks/store';
+import { Slot } from '@blocksuite/store';
 import { ClipboardAction } from './types';
 
 export class ClipEventDispatch {

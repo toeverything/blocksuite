@@ -1,6 +1,12 @@
 import type { Quill, RangeStatic } from 'quill';
-import type { BaseBlockModel, Store } from '@building-blocks/store';
-import { TextBlockProps } from '../..';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
+import {
+  BlockHost,
+  handleBlockEndEnter,
+  handleIndent,
+  handleUnindent,
+  Point,
+} from '@blocksuite/shared';
 import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
 
 interface BindingContext {
@@ -40,7 +46,15 @@ type KeyboardBindingHandler = (
   context: BindingContext
 ) => void;
 
-export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
+function isAtBlockEnd(quill: Quill) {
+  return quill.getLength() - 1 === quill.getSelection(true)?.index;
+}
+
+export const createKeyboardBindings = (
+  store: Store,
+  model: BaseBlockModel,
+  selectionManager: BlockHost['selection']
+) => {
   const clientID = store.doc.clientID;
 
   function undo() {
@@ -52,19 +66,11 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   }
 
   function hardEnter(this: KeyboardEventThis) {
-    const isAtBlockEnd =
-      this.quill.getLength() - 1 === this.quill.getSelection()?.index;
-    if (isAtBlockEnd) {
-      const blockProps: Partial<TextBlockProps> = {
-        flavour: 'text',
-        text: '',
-      };
-      // make adding text block by enter a standalone operation
-      store.captureSync();
-      const id = store.addBlock(blockProps);
-      setTimeout(() => {
-        store.textAdapters.get(id)?.quill.focus();
-      });
+    const isEnd = isAtBlockEnd(this.quill);
+    if (isEnd) {
+      handleBlockEndEnter(store, model);
+    } else {
+      // TODO split text
     }
   }
 
@@ -75,37 +81,23 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   }
 
   function indent(this: KeyboardEventThis) {
-    const previousSibling = store.getPreviousSibling(model);
-    if (previousSibling) {
-      store.captureSync();
-      store.deleteBlock(model);
-      store.addBlock(model, previousSibling);
-    }
+    handleIndent(store, model);
   }
 
   function unindent(this: KeyboardEventThis) {
-    const parent = store.getParent(model);
-    if (!parent) return;
-
-    const grandParent = store.getParent(parent);
-    if (!grandParent) return;
-
-    const index = grandParent.children.indexOf(parent);
-    store.captureSync();
-    store.deleteBlock(model);
-    store.addBlock(model, grandParent, index + 1);
+    handleUnindent(store, model);
   }
 
-  function keyup(this: KeyboardEventThis, range: IQuillRange, ) { 
+  function keyup(this: KeyboardEventThis, range: IQuillRange) {
     if (range.index >= 0) {
       const selection = window.getSelection();
       if (selection) {
         const range = selection.getRangeAt(0);
-        const { top, left, height } = range.getBoundingClientRect();
+        const { height, left, top } = range.getBoundingClientRect();
         // TODO resolve compatible problem
         const newRange = document.caretRangeFromPoint(left, top - height / 2);
         if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
-          console.log('should move out');
+          selectionManager.activePreviousBlock(model.id, new Point(left, top));
           return false;
         }
       }
@@ -113,14 +105,17 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
     return true;
   }
 
-  function keydown(this: KeyboardEventThis, range: IQuillRange ) {
+  function keydown(this: KeyboardEventThis, range: IQuillRange) {
     if (range.index >= 0) {
       const selection = window.getSelection();
       if (selection) {
         const range = selection.getRangeAt(0);
         const { bottom, left, height } = range.getBoundingClientRect();
         // TODO resolve compatible problem
-        const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
+        const newRange = document.caretRangeFromPoint(
+          left,
+          bottom + height / 2
+        );
         if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
           console.log('should move out');
           return false;
