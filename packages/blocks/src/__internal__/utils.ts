@@ -3,17 +3,17 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel } from '../list-block/list-model';
-import type { TextBlockModel } from '../text-block/text-model';
+import type { ParagraphBlockModel } from '../paragraph-block/paragraph-model';
 
 // TODO support dynamic block types
 function getBlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
-    case 'text':
+    case 'paragraph':
       return html`
-        <text-block-element
-          .model=${model as TextBlockModel}
+        <paragraph-block-element
+          .model=${model as ParagraphBlockModel}
           .host=${host}
-        ></text-block-element>
+        ></paragraph-block-element>
       `;
     case 'list':
       return html`

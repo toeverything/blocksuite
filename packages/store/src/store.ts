@@ -321,7 +321,7 @@ export class Store {
 
     if (
       // TODO use schema
-      (model.flavour === 'text' || model.flavour === 'list') &&
+      (model.flavour === 'paragraph' || model.flavour === 'list') &&
       !yBlock.get('prop:text')
     ) {
       this.transact(() => yBlock.set('prop:text', new Y.Text()));

@@ -40,7 +40,7 @@ export class PageBlockElement extends LitElement {
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
       store.addBlock({ flavour: 'page', title });
-      store.addBlock({ flavour: 'text' });
+      store.addBlock({ flavour: 'paragraph' });
       return;
     }
 

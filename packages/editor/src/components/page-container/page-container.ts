@@ -67,7 +67,7 @@ export class PageContainer extends LitElement implements BlockHost {
     if (!this.isEmptyPage) return;
 
     this.store.addBlock({ flavour: 'page' });
-    this.store.addBlock({ flavour: 'text' });
+    this.store.addBlock({ flavour: 'paragraph' });
 
     this.isEmptyPage = false;
   }

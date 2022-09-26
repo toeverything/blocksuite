@@ -55,7 +55,7 @@ describe.concurrent('addBlock', () => {
   it('can add multi models', () => {
     const store = new Store().register(BlockMap);
     store.addBlock({ flavour: 'page' });
-    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'paragraph' });
 
     assert.deepEqual(serialize(store).blocks, {
       '0': {
@@ -65,7 +65,7 @@ describe.concurrent('addBlock', () => {
       },
       '1': {
         'sys:children': [],
-        'sys:flavour': 'text',
+        'sys:flavour': 'paragraph',
         'sys:id': '1',
         'prop:text': '',
       },
@@ -87,8 +87,8 @@ describe.concurrent('addBlock', () => {
     const root = await waitOnce(store.slots.rootAdded);
     assert.ok(root instanceof BlockMap.page);
 
-    store.addBlock({ flavour: 'text' });
-    assert.ok(root.children[0] instanceof BlockMap.text);
+    store.addBlock({ flavour: 'paragraph' });
+    assert.ok(root.children[0] instanceof BlockMap.paragraph);
     assert.equal(root.childMap.get('1'), 0);
 
     const serializedChildren = serialize(store).blocks['0']['sys:children'];
@@ -124,7 +124,7 @@ describe.concurrent('deleteBlock', () => {
     const store = new Store().register(BlockMap);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'paragraph' });
 
     // before delete
     assert.deepEqual(serialize(store).blocks, {
@@ -135,7 +135,7 @@ describe.concurrent('deleteBlock', () => {
       },
       '1': {
         'sys:children': [],
-        'sys:flavour': 'text',
+        'sys:flavour': 'paragraph',
         'sys:id': '1',
         'prop:text': '',
       },
@@ -160,11 +160,11 @@ describe.concurrent('getBlock', () => {
     const store = new Store().register(BlockMap);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'text' });
-    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'paragraph' });
 
     const text = store.getBlockById('2') as BaseBlockModel;
-    assert.ok(text instanceof BlockMap.text);
+    assert.ok(text instanceof BlockMap.paragraph);
     assert.equal(root.children.indexOf(text), 1);
 
     const invalid = store.getBlockById('😅');
@@ -175,8 +175,8 @@ describe.concurrent('getBlock', () => {
     const store = new Store().register(BlockMap);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'text' });
-    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'paragraph' });
 
     const result = store.getParent(root.children[1]) as BaseBlockModel;
     assert.equal(result, root);
@@ -189,8 +189,8 @@ describe.concurrent('getBlock', () => {
     const store = new Store().register(BlockMap);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'text' });
-    store.addBlock({ flavour: 'text' });
+    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'paragraph' });
 
     const result = store.getPreviousSibling(root.children[1]) as BaseBlockModel;
     assert.equal(result, root.children[0]);

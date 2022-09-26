@@ -12,7 +12,7 @@ export const defaultStore: SerializedStore = {
       'sys:children': ['1'],
     },
     '1': {
-      'sys:flavour': 'text',
+      'sys:flavour': 'paragraph',
       'sys:id': '1',
       'sys:children': [],
       'prop:text': 'hello',
@@ -21,7 +21,7 @@ export const defaultStore: SerializedStore = {
 };
 
 export async function assertEmpty(page: Page) {
-  const actual = await page.locator('text-block-element').count();
+  const actual = await page.locator('paragraph-block-element').count();
   expect(actual).toBe(0);
 }
 
