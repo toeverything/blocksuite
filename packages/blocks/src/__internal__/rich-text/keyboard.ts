@@ -43,6 +43,10 @@ type KeyboardBindingHandler = (
   context: BindingContext
 ) => void;
 
+function isAtBlockEnd(quill: Quill) {
+  return quill.getLength() - 1 === quill.getSelection(true)?.index;
+}
+
 export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   const clientID = store.doc.clientID;
 
@@ -55,10 +59,11 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
   }
 
   function hardEnter(this: KeyboardEventThis) {
-    const isAtBlockEnd =
-      this.quill.getLength() - 1 === this.quill.getSelection()?.index;
-    if (isAtBlockEnd) {
+    const isEnd = isAtBlockEnd(this.quill);
+    if (isEnd) {
       handleBlockEndEnter(store, model);
+    } else {
+      // TODO split text
     }
   }
 
