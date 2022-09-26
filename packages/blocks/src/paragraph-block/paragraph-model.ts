@@ -4,7 +4,10 @@ export interface ParagraphBlockProps extends IBaseBlockProps {
   flavour: 'paragraph';
 }
 
-export class ParagraphBlockModel extends BaseBlockModel implements ParagraphBlockProps {
+export class ParagraphBlockModel
+  extends BaseBlockModel
+  implements ParagraphBlockProps
+{
   flavour = 'paragraph' as const;
 
   constructor(store: Store, props: Partial<ParagraphBlockProps>) {

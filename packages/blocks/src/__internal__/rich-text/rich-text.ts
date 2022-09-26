@@ -28,8 +28,8 @@ export class RichText extends LitElement {
 
   firstUpdated() {
     const { host, model, _textContainer } = this;
-    const { store } = host;
-    const keyboardBindings = createKeyboardBindings(store, model);
+    const { store, selection } = host;
+    const keyboardBindings = createKeyboardBindings(store, model, selection);
     this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,

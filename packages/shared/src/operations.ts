@@ -1,4 +1,6 @@
 import type { BaseBlockModel, Store } from '@blocksuite/store';
+import { SelectPosition } from './types';
+import { Point, Rect } from './rect';
 
 // XXX: workaround quill lifecycle issue
 function asyncFocusRichText(store: Store, id: string) {
@@ -52,4 +54,31 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
   };
   store.deleteBlock(model);
   store.addBlock(blockProps, grandParent, index + 1);
+}
+
+export function commonTextActiveHandler(
+  position: SelectPosition,
+  editableContainer: Element
+) {
+  if (position instanceof Point) {
+    const { x, y } = position;
+    let newTop = 0;
+    const containerRect = Rect.fromDom(editableContainer);
+    const lineHeight =
+      Number(
+        window
+          .getComputedStyle(editableContainer)
+          .lineHeight.replace(/\D+$/, '')
+      ) || 16;
+    if (containerRect.bottom <= y) {
+      newTop = containerRect.bottom - lineHeight / 2;
+    }
+    if (containerRect.top >= y) {
+      newTop = containerRect.top + lineHeight / 2;
+    }
+    const range = document.caretRangeFromPoint(x, newTop);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    range && selection?.addRange(range);
+  }
 }

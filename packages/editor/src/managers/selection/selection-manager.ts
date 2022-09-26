@@ -1,6 +1,5 @@
 import { PageContainer } from '../..';
-import { Rect } from '../../components/selection-rect/rect';
-import { BLOCK_ID_ATTR } from '@blocksuite/shared';
+import { BLOCK_ID_ATTR, Point, Rect, SelectPosition } from '@blocksuite/shared';
 import { BaseBlockModel, IDisposable, Slot } from '@blocksuite/store';
 
 export type SelectionInfo = InstanceType<
@@ -23,11 +22,13 @@ export class SelectionManager {
   private _page: PageContainer;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
+  private _blockActiveSlotMap: { [k in string]: Slot<SelectPosition> } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
   private _slots = {
     selection: new Slot<SelectionInfo>(),
   };
+  private _lastCursorPosition: Point | null = null;
 
   constructor(page: PageContainer) {
     this._page = page;
@@ -170,14 +171,23 @@ export class SelectionManager {
     return slot;
   }
 
+  private _getBlockActiveSlot(blockId: string) {
+    let slot = this._blockActiveSlotMap[blockId];
+    if (!slot) {
+      slot = new Slot();
+      this._blockActiveSlotMap[blockId] = slot;
+    }
+    return slot;
+  }
+
   public addChangeListener(
     blockId: string,
     handler: (selected: boolean) => void
   ) {
     const slot = this._getBlockSelectSlot(blockId);
-    const disposables = slot.on(handler);
-    this._disposables.push(slot.on(handler));
-    return disposables;
+    const disposable = slot.on(handler);
+    this._disposables.push(disposable);
+    return disposable;
   }
 
   public removeChangeListener(blockId: string) {
@@ -195,15 +205,136 @@ export class SelectionManager {
     }
   }
 
-  public onSelectionChange(handler: (selectionInfo: SelectionInfo) => void) {
-    return this._slots.selection.on(handler);
+  public onSelectionChange(cb: (selectionInfo: SelectionInfo) => void) {
+    return this._slots.selection.on(cb);
   }
 
   private _emitSelectionChange() {
     this._slots.selection.emit(this.selectionInfo);
   }
 
+  private _getPerviousBlock(blockId: string) {
+    // TODO: resolve type problem
+    const currentBlock = this._page.querySelector<'paragraph-block-element'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
+    );
+    if (currentBlock) {
+      const parentBlock =
+        currentBlock.parentElement?.closest<'paragraph-block-element'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
+        );
+      if (parentBlock) {
+        const siblings = parentBlock.model.children;
+        const index = siblings.findIndex(block => block.id === blockId);
+        if (index > 0) {
+          const previousBlock = siblings[index - 1];
+          if (previousBlock) {
+            if (previousBlock.children.length) {
+              let firstChildren =
+                previousBlock.children[previousBlock.children.length - 1];
+              while (firstChildren.children.length) {
+                firstChildren =
+                  firstChildren.children[firstChildren.children.length - 1];
+              }
+              return firstChildren;
+            }
+            return previousBlock;
+          }
+        }
+        return parentBlock.model;
+      }
+    }
+    return null;
+  }
+
+  private _getNextBlock(blockId: string) {
+    // TODO: resolve type problem
+    let currentBlock = this._page.querySelector<'paragraph-block-element'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
+    );
+    if (currentBlock?.model.children.length) {
+      return currentBlock.model.children[0];
+    }
+    while (currentBlock) {
+      const parentBlock =
+        currentBlock.parentElement?.closest<'paragraph-block-element'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
+        ) || null;
+      if (parentBlock) {
+        const siblings = parentBlock.model.children;
+        const index = siblings.findIndex(
+          block => block.id === currentBlock?.model.id
+        );
+        if (index < siblings.length - 1) {
+          return siblings[index + 1];
+        }
+      }
+      currentBlock = parentBlock;
+    }
+    return null;
+  }
+
+  public activePreviousBlock(blockId: string, position?: SelectPosition) {
+    let nextPosition = position;
+    if (nextPosition) {
+      if (nextPosition instanceof Point) {
+        this._lastCursorPosition = nextPosition;
+      } else {
+        this._lastCursorPosition = null;
+      }
+    } else if (this._lastCursorPosition) {
+      nextPosition = this._lastCursorPosition;
+    }
+    const preNodeModel = this._getPerviousBlock(blockId);
+    if (preNodeModel) {
+      this.activeBlockById(preNodeModel.id, nextPosition);
+    }
+  }
+
+  public activeNextBlock(blockId: string, position: SelectPosition = 'start') {
+    let nextPosition = position;
+    if (nextPosition) {
+      if (nextPosition instanceof Point) {
+        this._lastCursorPosition = nextPosition;
+      } else {
+        this._lastCursorPosition = null;
+      }
+    } else if (this._lastCursorPosition) {
+      nextPosition = this._lastCursorPosition;
+    }
+    const nextNodeModel = this._getNextBlock(blockId);
+    if (nextNodeModel) {
+      this.activeBlockById(nextNodeModel.id, nextPosition);
+    }
+  }
+
+  public onBlockActive(
+    blockId: string,
+    cb: (position: SelectPosition) => void
+  ) {
+    const slot = this._getBlockActiveSlot(blockId);
+    const disposable = slot.on(cb);
+    this._disposables.push(disposable);
+    return disposable;
+  }
+
+  public offBlockActive(blockId: string) {
+    const slot = this._blockActiveSlotMap[blockId];
+    if (slot) {
+      slot.dispose();
+    }
+    return delete this._blockActiveSlotMap[blockId];
+  }
+
+  public activeBlockById(blockId: string, position: SelectPosition = 'start') {
+    const slot = this._blockActiveSlotMap[blockId];
+    if (slot) {
+      slot.emit(position);
+    }
+  }
+
   public dispose() {
+    this._disposables.forEach(disposable => disposable.dispose());
     window.removeEventListener('selectionchange', this._handlerBrowserChange);
     Object.values(this._blockSelectSlotMap).forEach(slot => slot.dispose());
     Object.values(this._slots).forEach(slot => slot.dispose());

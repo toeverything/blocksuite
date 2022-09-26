@@ -1,10 +1,14 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
-import { ParagraphBlockModel } from './paragraph-model';
+import {
+  BLOCK_ID_ATTR,
+  commonTextActiveHandler,
+  type BlockHost,
+} from '@blocksuite/shared';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
+import { ParagraphBlockModel } from './paragraph-model';
 
 @customElement('paragraph-block-element')
 export class ParagraphBlockElement extends LitElement {
@@ -31,11 +35,19 @@ export class ParagraphBlockElement extends LitElement {
       this.selected = selected;
     });
 
+    this.host.selection.onBlockActive(this.model.id, position => {
+      const editableContainer = this.querySelector('[contenteditable]');
+      if (editableContainer) {
+        commonTextActiveHandler(position, editableContainer);
+      }
+    });
+
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
     this.host.selection.removeChangeListener(this.model.id);
+    this.host.selection.offBlockActive(this.model.id);
   }
 
   render() {

@@ -1,10 +1,13 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
+  BlockHost,
   handleBlockEndEnter,
   handleIndent,
   handleUnindent,
+  Point,
 } from '@blocksuite/shared';
+import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
 
 interface BindingContext {
   collapsed: boolean;
@@ -47,7 +50,11 @@ function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
 }
 
-export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
+export const createKeyboardBindings = (
+  store: Store,
+  model: BaseBlockModel,
+  selectionManager: BlockHost['selection']
+) => {
   const clientID = store.doc.clientID;
 
   function undo() {
@@ -81,6 +88,43 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
     handleUnindent(store, model);
   }
 
+  function keyup(this: KeyboardEventThis, range: IQuillRange) {
+    if (range.index >= 0) {
+      const selection = window.getSelection();
+      if (selection) {
+        const range = selection.getRangeAt(0);
+        const { height, left, top } = range.getBoundingClientRect();
+        // TODO resolve compatible problem
+        const newRange = document.caretRangeFromPoint(left, top - height / 2);
+        if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
+          selectionManager.activePreviousBlock(model.id, new Point(left, top));
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function keydown(this: KeyboardEventThis, range: IQuillRange) {
+    if (range.index >= 0) {
+      const selection = window.getSelection();
+      if (selection) {
+        const range = selection.getRangeAt(0);
+        const { bottom, left, height } = range.getBoundingClientRect();
+        // TODO resolve compatible problem
+        const newRange = document.caretRangeFromPoint(
+          left,
+          bottom + height / 2
+        );
+        if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
+          selectionManager.activeNextBlock(model.id, new Point(left, bottom));
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
@@ -110,6 +154,16 @@ export const createKeyboardBindings = (store: Store, model: BaseBlockModel) => {
       key: 'tab',
       shiftKey: true,
       handler: unindent,
+    },
+    up: {
+      key: 'up',
+      shiftKey: false,
+      handler: keyup,
+    },
+    down: {
+      key: 'down',
+      shiftKey: false,
+      handler: keydown,
     },
   };
 
