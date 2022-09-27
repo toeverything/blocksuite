@@ -4,7 +4,7 @@ import {
   assertRichTexts,
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
-  assertClassname,
+  assertClassName,
 } from './utils/asserts';
 import {
   clickMenuButton,
@@ -94,17 +94,17 @@ test('switch between paragraph types', async ({ page }) => {
   const selector = '.affine-rich-text.quill-container';
 
   await clickMenuButton(page, 'heading-1');
-  await assertClassname(page, selector, /h1/);
+  await assertClassName(page, selector, /h1/);
 
   await clickMenuButton(page, 'heading-2');
-  await assertClassname(page, selector, /h2/);
+  await assertClassName(page, selector, /h2/);
 
   await clickMenuButton(page, 'heading-3');
-  await assertClassname(page, selector, /h3/);
+  await assertClassName(page, selector, /h3/);
 
   await undoByClick(page);
-  await assertClassname(page, selector, /h2/);
+  await assertClassName(page, selector, /h2/);
 
   await undoByClick(page);
-  await assertClassname(page, selector, /h1/);
+  await assertClassName(page, selector, /h1/);
 });

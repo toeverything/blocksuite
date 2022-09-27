@@ -5,8 +5,8 @@ import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
 import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
-import { ParagraphBlockModel } from '../..';
 
 Quill.register('modules/cursors', QuillCursors);
 
@@ -58,7 +58,9 @@ export class RichText extends LitElement {
   }
 
   render() {
-    const { type } = this.model as ParagraphBlockModel;
+    const { type } = this.model as ParagraphBlockModel | ListBlockModel;
+
+    console.log('rich text render', type);
 
     return html`
       <style>
@@ -89,7 +91,9 @@ export class RichText extends LitElement {
           font-size: 13px;
         }
       </style>
-      <div class="affine-rich-text quill-container ${type}"></div>
+      <div
+        class="affine-rich-text quill-container ql-container ql-snow ${type}"
+      ></div>
     `;
   }
 }

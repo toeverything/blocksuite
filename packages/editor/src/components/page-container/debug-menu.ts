@@ -50,13 +50,23 @@ export class DebugMenu extends LitElement {
     }
   }
 
-  private _onAddList() {
+  private _onAddBulletedList() {
     if (!this.page.model) {
       this.store.addBlock({ flavour: 'page' });
       this.store.addBlock({ flavour: 'paragraph' });
     }
 
     this.store.addBlock({ flavour: 'list' });
+  }
+
+  private _onSwitchToNumberedList() {
+    const selection = window.getSelection();
+    const element = selection?.focusNode?.parentElement as HTMLElement;
+    const block = element.closest('list-block-element')?.model;
+    if (block?.type === 'bulleted') {
+      block.store.captureSync();
+      block.store.updateBlock(block, { type: 'numbered' });
+    }
   }
 
   private _onDelete() {
@@ -143,11 +153,18 @@ export class DebugMenu extends LitElement {
           𝐓
         </button>
         <button
-          aria-label="add list"
-          title="add list"
-          @click=${this._onAddList}
+          aria-label="add bulleted list"
+          title="add bulleted list"
+          @click=${this._onAddBulletedList}
         >
           *️⃣
+        </button>
+        <button
+          aria-label="switch to numbered list"
+          title="switch to numbered list"
+          @click=${this._onSwitchToNumberedList}
+        >
+          1️⃣
         </button>
         <button
           aria-label="delete"
