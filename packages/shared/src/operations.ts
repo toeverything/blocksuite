@@ -1,6 +1,8 @@
 import type { BaseBlockModel, Store } from '@blocksuite/store';
-import { SelectPosition } from './types';
+import { BlockHost, SelectPosition } from './types';
 import { Point, Rect } from './rect';
+import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
+import Quill from 'quill';
 
 // XXX: workaround quill lifecycle issue
 function asyncFocusRichText(store: Store, id: string) {
@@ -56,29 +58,102 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
   store.addBlock(blockProps, grandParent, index + 1);
 }
 
+export function handleKeyUp(
+  model: BaseBlockModel,
+  selectionManager: BlockHost['selection'],
+  editableContainer: Element
+) {
+  const selection = window.getSelection();
+  if (selection) {
+    const range = selection.getRangeAt(0);
+    const { height, left, top } = range.getBoundingClientRect();
+    // if cursor is on the first line and has no text, height is 0
+    if (height === 0 && top === 0) {
+      const rect = range.startContainer.parentElement?.getBoundingClientRect();
+      rect &&
+        selectionManager.activePreviousBlock(
+          model.id,
+          new Point(rect.left, rect.top)
+        );
+      return false;
+    }
+    // TODO resolve compatible problem
+    const newRange = document.caretRangeFromPoint(left, top - height / 2);
+    if (!newRange || !editableContainer.contains(newRange.startContainer)) {
+      selectionManager.activePreviousBlock(model.id, new Point(left, top));
+      return false;
+    }
+  }
+  return true;
+}
+
+export function handleKeyDown(
+  model: BaseBlockModel,
+  selectionManager: BlockHost['selection'],
+  textContainer: HTMLElement
+) {
+  const selection = window.getSelection();
+  if (selection) {
+    const range = selection.getRangeAt(0);
+    const { bottom, left, height } = range.getBoundingClientRect();
+    // if cursor is on the last line and has no text, height is 0
+    if (height === 0 && bottom === 0) {
+      const rect = range.startContainer.parentElement?.getBoundingClientRect();
+      rect &&
+        selectionManager.activeNextBlock(
+          model.id,
+          new Point(rect.left, rect.top)
+        );
+      return false;
+    }
+    // TODO resolve compatible problem
+    const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
+    if (!newRange || !textContainer.contains(newRange.startContainer)) {
+      selectionManager.activeNextBlock(model.id, new Point(left, bottom));
+      return false;
+    }
+  }
+  return true;
+}
+
 export function commonTextActiveHandler(
   position: SelectPosition,
   editableContainer: Element
 ) {
+  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
+  const lineHeight =
+    Number(
+      window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
+    ) || 16;
+  let range: Range | null = null;
   if (position instanceof Point) {
     const { x, y } = position;
-    let newTop = 0;
-    const containerRect = Rect.fromDom(editableContainer);
-    const lineHeight =
-      Number(
-        window
-          .getComputedStyle(editableContainer)
-          .lineHeight.replace(/\D+$/, '')
-      ) || 16;
-    if (containerRect.bottom <= y) {
-      newTop = containerRect.bottom - lineHeight / 2;
+    let newTop = y;
+    let newLeft = x;
+    if (bottom <= y) {
+      newTop = bottom - lineHeight / 2;
     }
-    if (containerRect.top >= y) {
-      newTop = containerRect.top + lineHeight / 2;
+    if (top >= y) {
+      newTop = top + lineHeight / 2;
     }
-    const range = document.caretRangeFromPoint(x, newTop);
+    if (x < left) {
+      newLeft = left + 1;
+    }
+    if (x > right) {
+      newLeft = right - 1;
+    }
+    range = document.caretRangeFromPoint(newLeft, newTop);
     const selection = window.getSelection();
     selection?.removeAllRanges();
     range && selection?.addRange(range);
   }
+  if (position === 'start') {
+    range = document.caretRangeFromPoint(left, top + lineHeight / 2);
+  }
+  if (position === 'end') {
+    range = document.caretRangeFromPoint(right - 1, bottom - lineHeight / 2);
+  }
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  range && selection?.addRange(range);
 }
