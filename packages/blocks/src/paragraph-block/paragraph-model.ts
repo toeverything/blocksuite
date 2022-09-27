@@ -1,10 +1,11 @@
 import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
+type ParagraphType = 'text' | 'h1' | 'h2' | 'h3' | 'quote';
+
 export interface ParagraphBlockProps extends IBaseBlockProps {
   flavour: 'paragraph';
+  type: ParagraphType;
 }
-
-type ParagraphType = 'text' | 'h1' | 'h2' | 'h3' | 'quote';
 
 export class ParagraphBlockModel
   extends BaseBlockModel
