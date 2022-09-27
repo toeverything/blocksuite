@@ -14,7 +14,7 @@ if (process.env.CI) {
     command: 'pnpm dev',
     port: 5173,
   };
-  config.workers = 2;
+  // config.workers = 2;
 }
 
 export default config;

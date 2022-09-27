@@ -60,8 +60,6 @@ export class RichText extends LitElement {
   render() {
     const { type } = this.model as ParagraphBlockModel | ListBlockModel;
 
-    console.log('rich text render', type);
-
     return html`
       <style>
         ${style} .affine-rich-text.quill-container {
