@@ -10,7 +10,6 @@ import {
   Point,
 } from '@blocksuite/shared';
 import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
-import { start } from 'repl';
 
 interface BindingContext {
   collapsed: boolean;
