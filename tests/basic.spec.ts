@@ -132,7 +132,7 @@ test('undo/redo with keyboard', async ({ page }) => {
   await assertText(page, 'hello');
   await undoByKeyboard(page);
   await assertEmpty(page);
-  await redoByClick(page); // FIXME back to void state without quill, can't simply redo with quill handler
+  await redoByKeyboard(page);
   await assertText(page, 'hello');
 });
 

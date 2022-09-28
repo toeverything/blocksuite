@@ -37,7 +37,7 @@ export class PageContainer extends LitElement implements BlockHost {
   @state()
   placeholderModel = new BlockMap.page(this.store, {});
 
-  private _HotKeys = new Hotkeys();
+  private _hotKeys = new Hotkeys();
 
   constructor() {
     super();
@@ -52,16 +52,24 @@ export class PageContainer extends LitElement implements BlockHost {
   }
 
   private _bindHotkeys() {
-    this._HotKeys.addHotkey(
-      HotkeyMap.test,
+    this._hotKeys.addHotkey(
+      HotkeyMap.undo,
       'page',
       this._placeholderInput,
       () => {
         console.log('undo');
+        this.store.undo()
       }
     );
-    console.log(123123123);
-    //  this._HotKeys.setScope('page')
+    this._hotKeys.addHotkey(
+      HotkeyMap.redo,
+      'page',
+      this._placeholderInput,
+      () => {
+        console.log('undo');
+        this.store.redo()
+      }
+    );
   }
 
   private _subscribeStore() {

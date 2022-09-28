@@ -31,5 +31,5 @@ export const HotkeyMap: HotkeyMapType = {
   left: 'left',
   right: 'right',
   enter: 'enter',
-  test: 'ctrl+n',
+  test: 'command+a',
 };

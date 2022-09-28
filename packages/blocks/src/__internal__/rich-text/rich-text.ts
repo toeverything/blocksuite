@@ -15,7 +15,7 @@ export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
-  private _HotKeys = new Hotkeys();
+  private _hotKeys = new Hotkeys();
   @property()
   host!: BlockHost;
 
@@ -50,22 +50,37 @@ export class RichText extends LitElement {
 
     this.model.propsUpdated.on(() => this.requestUpdate());
 
-    this._HotKeys.addHotkey(
+    this._hotKeys.addHotkey(
       HotkeyMap.test,
       'text',
       this._textContainer,
       this.test
     );
-    this._HotKeys.setScope('text');
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .addEventListener('focus', this._focus);
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .addEventListener('blur', this._blur);
   }
 
-  test() {
-    console.log('rich-text ondo');
+  private _focus() {
+    this._hotKeys.setScope('text');
   }
+  private _blur() {
+    this._hotKeys.setScope('page');
+  }
+  test(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('rich-text');
+  }
+
   disconnectedCallback() {
     this.host.store.detachRichText(this.model.id);
     super.disconnectedCallback();
-    // this._HotKeys.removeHotkey(this.id);
+    this._textContainer.removeEventListener('focus', this._focus);
+    this._textContainer.removeEventListener('blur', this._blur);
   }
 
   render() {
