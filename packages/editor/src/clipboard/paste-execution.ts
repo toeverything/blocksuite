@@ -1,12 +1,12 @@
+import { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
 import { PageContainer } from '../components';
 import { ParseHtml } from '../parse/parse-html';
-import { ParseText } from '../parse/parse-test';
+import { ParseText } from '../parse/parse-text';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 
 export class PasteExecution {
-  // @ts-ignore
   private _page: PageContainer;
 
   // The event handler will get the most needed clipboard data based on this array order
@@ -26,8 +26,7 @@ export class PasteExecution {
     e.stopPropagation();
 
     const blocks = await this._clipboardEvent2Blocks(e);
-    console.log(blocks);
-    // todo insert blocks to editor
+    this._insertBlocks(blocks);
   }
 
   private async _clipboardEvent2Blocks(e: ClipboardEvent) {
@@ -113,5 +112,66 @@ export class PasteExecution {
       return files[0];
     }
     return;
+  }
+
+  private _insertBlocks(blocks: OpenBlockInfo[]) {
+    if (blocks.length === 0) {
+      return;
+    }
+    const currentSelectInfo = this._page.selection.selectionInfo;
+
+    if (
+      currentSelectInfo.type === 'Range' ||
+      currentSelectInfo.type === 'Caret'
+    ) {
+      // TODO split selected block case
+      const selectedBlock = this._page.store.getBlockById(
+        currentSelectInfo.focusBlockId
+      );
+      let parent = selectedBlock;
+      let index = 0;
+      if (selectedBlock && selectedBlock.flavour !== 'page') {
+        parent = this._page.store.getParent(selectedBlock);
+        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+      }
+      const addBlockIds: string[] = [];
+      parent && this._addBlocks(blocks, parent, index, addBlockIds);
+      this._page.selection.selectedBlockIds = addBlockIds;
+    } else if (currentSelectInfo.type === 'Block') {
+      const selectedBlock = this._page.store.getBlockById(
+        currentSelectInfo.selectedNodesIds[
+          currentSelectInfo.selectedNodesIds.length - 1
+        ]
+      );
+
+      let parent = selectedBlock;
+      let index = -1;
+      if (selectedBlock && selectedBlock.flavour !== 'page') {
+        parent = this._page.store.getParent(selectedBlock);
+        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+      }
+      const addBlockIds: string[] = [];
+      parent && this._addBlocks(blocks, parent, index, addBlockIds);
+      this._page.selection.selectedBlockIds = addBlockIds;
+    }
+  }
+
+  private _addBlocks(
+    blocks: OpenBlockInfo[],
+    parent: BaseBlockModel,
+    index: number,
+    addBlockIds: string[]
+  ) {
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      const blockProps = {
+        flavour: block.flavour as string,
+      };
+      const id = this._page.store.addBlock(blockProps, parent, index + i);
+      const model = this._page.store.getBlockById(id);
+      block.text && model?.text?.applyDelta(block.text);
+      addBlockIds.push(id);
+      model && this._addBlocks(block.children, model, 0, addBlockIds);
+    }
   }
 }

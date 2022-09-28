@@ -2,6 +2,7 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { PageContainer } from '../components';
 import { ParseBlock } from '../parse/parse-block';
+import { BaseBlockModel } from '@blocksuite/store';
 
 export class CopyCutExecution {
   // @ts-ignore
@@ -29,11 +30,37 @@ export class CopyCutExecution {
     // todo delete selected blocks
   }
 
+  private _getClipDataOfBlocksById(blockIds: string[]): OpenBlockInfo[] {
+    const clipInfos: OpenBlockInfo[] = [];
+    blockIds.forEach(blockId => {
+      const model = this._page.store.getBlockById(blockId);
+      model && clipInfos.push(this._transToOpenBlockInfo(model));
+    });
+    return clipInfos;
+  }
+
+  private _transToOpenBlockInfo(model: BaseBlockModel): OpenBlockInfo {
+    const blockProps = model && {
+      id: model.id,
+      flavour: model.flavour,
+      text: model?.text?.toDelta(),
+      children: model.children.map(child => this._transToOpenBlockInfo(child)),
+    };
+    return blockProps as OpenBlockInfo;
+  }
+
   private _getClipItems() {
     const clips: ClipItem[] = [];
 
-    // todo get selected blocks
-    const selectBlocks: OpenBlockInfo[] = [];
+    let selectBlocks: OpenBlockInfo[] = [];
+    const selectInfo = this._page.selection.selectionInfo;
+    if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
+      // todo get range selected blocks
+      selectBlocks = this._getClipDataOfBlocksById([selectInfo.focusBlockId]);
+    } else if (selectInfo.type === 'Block') {
+      selectBlocks = this._getClipDataOfBlocksById(selectInfo.selectedNodesIds);
+    }
+
     // get custom clip
     const affineClip = this._getCustomClip(selectBlocks);
     clips.push(affineClip);
@@ -53,8 +80,10 @@ export class CopyCutExecution {
   }
 
   private _getCustomClip(blocks: OpenBlockInfo[]): ClipItem {
-    const blockText = JSON.stringify(blocks);
-    return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, blockText);
+    const blockText = JSON.stringify({
+      data: blocks,
+    });
+    return new ClipItem(CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED, blockText);
   }
 
   private _getTextClip(blocks: OpenBlockInfo[]): ClipItem {
