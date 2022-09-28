@@ -46,6 +46,10 @@ export function syncBlockProps(
   ) {
     yBlock.set('prop:type', 'text');
   }
+  // TODO use schema
+  if (props.flavour === 'list' && !props.type && !yBlock.has('prop:type')) {
+    yBlock.set('prop:type', 'bulleted');
+  }
 }
 
 export function trySyncTextProp(

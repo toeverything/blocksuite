@@ -42,6 +42,7 @@ export class ParagraphBlockElement extends LitElement {
       }
     });
 
+    this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 

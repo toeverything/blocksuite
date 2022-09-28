@@ -121,11 +121,20 @@ export async function assertBlockChildrenFlavours(
   expect(actual).toEqual(flavours);
 }
 
-export async function assertClassname(
+export async function assertClassName(
   page: Page,
   selector: string,
   className: RegExp
 ) {
   const locator = page.locator(selector);
   await expect(locator).toHaveClass(className);
+}
+
+export async function assertTextContent(
+  page: Page,
+  selector: string,
+  text: RegExp
+) {
+  const locator = page.locator(selector);
+  await expect(locator).toHaveText(text);
 }

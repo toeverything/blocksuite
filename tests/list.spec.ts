@@ -1,27 +1,47 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
   assertBlockCount,
   assertRichTexts,
+  assertTextContent,
 } from './utils/asserts';
 import {
-  addListByClick,
+  addBulletedListByClick,
   enterPlaygroundRoom,
   enterPlaygroundWithList,
   focusRichText,
   pressEnter,
   shiftTab,
+  switchToNumberedListByClick,
+  undoByClick,
   undoByKeyboard,
   waitNextFrame,
 } from './utils/actions';
 
-test('add new list block by click', async ({ page }) => {
+test('add new bulleted list', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await addListByClick(page);
-  await addListByClick(page);
+  await addBulletedListByClick(page);
+  await addBulletedListByClick(page);
   await assertRichTexts(page, ['\n', '\n', '\n']);
   await assertBlockCount(page, 'list', 2);
+});
+
+test('switch to numbered list block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await addBulletedListByClick(page);
+
+  const list = page.locator('list-block-element').nth(0);
+  await list.click();
+  await switchToNumberedListByClick(page);
+
+  const listSelector = '.affine-list-rich-text-wrapper';
+  const bulletIconSelector = `${listSelector} > div`;
+  await assertTextContent(page, bulletIconSelector, /1\./);
+
+  await undoByClick(page);
+  const numberIconSelector = `${listSelector} > svg`;
+  await expect(page.locator(numberIconSelector)).toHaveCount(1);
 });
 
 test('indent list block', async ({ page }) => {
