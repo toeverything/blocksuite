@@ -91,7 +91,7 @@ export const createKeyboardBindings = (
   }
 
   function keyup(this: KeyboardEventThis, range: IQuillRange) {
-     if (range.index >= 0) {
+    if (range.index >= 0) {
       return handleKeyUp(model, selectionManager, this.quill.root);
     }
     return true;

@@ -58,7 +58,6 @@ test('cursor move up and down', async ({ page }) => {
   expect(textTwo).toBe('arrow down test 2\n');
 });
 
-
 test('cursor move to up and down with children block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);

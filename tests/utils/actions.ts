@@ -125,7 +125,8 @@ export async function getQuillSelectionIndex(page: Page) {
     const selection = document.getSelection();
     if (selection) {
       const range = selection.getRangeAt(0);
-      const component = range.startContainer.parentElement?.closest('rich-text');
+      const component =
+        range.startContainer.parentElement?.closest('rich-text');
       const index = (component as any)._quill?.getSelection()?.index;
       return index !== undefined ? index : -1;
     }
