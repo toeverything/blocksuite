@@ -3,3 +3,4 @@ export * from './types.d';
 export * from './operations';
 export * from './rect';
 export * from './hotkeys';
+export * from './hotkeys/hotkey-map';

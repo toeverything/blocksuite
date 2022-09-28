@@ -1,12 +1,11 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import type { BlockHost } from '@blocksuite/shared';
+import { BlockHost, HotkeyMap, Hotkeys } from '@blocksuite/shared';
 import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@blocksuite/store';
 import { BlockMap } from '../../block-loader';
 import { Clipboard } from '../../clipboard';
 import './debug-menu';
-
 type PageBlockModel = InstanceType<typeof BlockMap.page>;
 
 const params = new URLSearchParams(location.search);
@@ -38,16 +37,31 @@ export class PageContainer extends LitElement implements BlockHost {
   @state()
   placeholderModel = new BlockMap.page(this.store, {});
 
+  private _HotKeys = new Hotkeys();
+
   constructor() {
     super();
 
     this._subscribeStore();
     this._tryInitFromVoidState();
-
     // @ts-ignore
     window.store = this.store;
     // @ts-ignore
     window.page = this;
+    this._bindHotkeys();
+  }
+
+  private _bindHotkeys() {
+    this._HotKeys.addHotkey(
+      HotkeyMap.test,
+      'page',
+      this._placeholderInput,
+      () => {
+        console.log('undo');
+      }
+    );
+    console.log(123123123);
+    //  this._HotKeys.setScope('page')
   }
 
   private _subscribeStore() {

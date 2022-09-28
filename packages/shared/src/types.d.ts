@@ -23,5 +23,4 @@ export interface BlockHost {
     activePreviousBlock: (blockId: string, position?: SelectPosition) => void;
     activeNextBlock: (blockId: string, position?: SelectPosition) => void;
   };
-  hotKeys: {};
 }

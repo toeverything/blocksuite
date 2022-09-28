@@ -1,5 +1,5 @@
 import hotkeys, { KeyHandler } from 'hotkeys-js';
-
+hotkeys.filter = () => true;
 type Options = {
   scope?: string;
   element?: HTMLElement | null;
@@ -31,6 +31,6 @@ export class Hotkeys {
 
   setScope(scope: string) {
     this._hotkeyScope = scope;
-    this._hotkeys.setScope(scope);
+    this._hotkeys.setScope(this._hotkeyScope);
   }
 }

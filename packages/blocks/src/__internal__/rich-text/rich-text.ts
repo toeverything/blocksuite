@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import type { BlockHost } from '@blocksuite/shared';
+import { BlockHost, HotkeyMap } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
@@ -15,7 +15,7 @@ export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
-
+  private _HotKeys = new Hotkeys();
   @property()
   host!: BlockHost;
 
@@ -49,20 +49,23 @@ export class RichText extends LitElement {
     store.awareness.updateLocalCursor();
 
     this.model.propsUpdated.on(() => this.requestUpdate());
-    const RichHotkeys = new Hotkeys();
 
-    console.log('this._textContainer: ', this._textContainer);
-    RichHotkeys.addHotkey('o', 'all', this, this.test);
-    RichHotkeys.setScope('all');
+    this._HotKeys.addHotkey(
+      HotkeyMap.test,
+      'text',
+      this._textContainer,
+      this.test
+    );
+    this._HotKeys.setScope('text');
   }
 
   test() {
-    console.log('rich-text');
+    console.log('rich-text ondo');
   }
   disconnectedCallback() {
     this.host.store.detachRichText(this.model.id);
-
     super.disconnectedCallback();
+    // this._HotKeys.removeHotkey(this.id);
   }
 
   render() {
