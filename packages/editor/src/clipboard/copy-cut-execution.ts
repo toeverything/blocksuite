@@ -52,6 +52,25 @@ export class CopyCutExecution {
   private _getClipItems() {
     const clips: ClipItem[] = [];
 
+    // get custom clip
+    const affineClip = this._getCustomClip();
+    clips.push(affineClip);
+
+    const textClip = this._getTextClip();
+    clips.push(textClip);
+
+    const htmlClip = this._getHtmlClip();
+    clips.push(htmlClip);
+
+    return clips;
+  }
+
+  private _getHtmlClip(): ClipItem {
+    const htmlStr = ParseBlock.block2Html([]);
+    return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlStr);
+  }
+
+  private _getCustomClip(): ClipItem {
     let selectBlocks: OpenBlockInfo[] = [];
     const selectInfo = this._page.selection.selectionInfo;
     if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
@@ -61,33 +80,13 @@ export class CopyCutExecution {
       selectBlocks = this._getClipDataOfBlocksById(selectInfo.selectedNodesIds);
     }
 
-    // get custom clip
-    const affineClip = this._getCustomClip(selectBlocks);
-    clips.push(affineClip);
-
-    const textClip = this._getTextClip(selectBlocks);
-    clips.push(textClip);
-
-    const htmlClip = this._getHtmlClip(selectBlocks);
-    clips.push(htmlClip);
-
-    return clips;
+    return new ClipItem(CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED, JSON.stringify({
+      data: selectBlocks,
+    }));
   }
 
-  private _getHtmlClip(blocks: OpenBlockInfo[]): ClipItem {
-    const htmlStr = ParseBlock.block2Html(blocks);
-    return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlStr);
-  }
-
-  private _getCustomClip(blocks: OpenBlockInfo[]): ClipItem {
-    const blockText = JSON.stringify({
-      data: blocks,
-    });
-    return new ClipItem(CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED, blockText);
-  }
-
-  private _getTextClip(blocks: OpenBlockInfo[]): ClipItem {
-    const blockText = ParseBlock.block2Text(blocks);
+  private _getTextClip(): ClipItem {
+    const blockText = ParseBlock.block2Text([]);
     return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, blockText);
   }
 
