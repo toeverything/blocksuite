@@ -7,7 +7,7 @@ import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
-
+import {Hotkeys} from '@blocksuite/shared';
 Quill.register('modules/cursors', QuillCursors);
 
 @customElement('rich-text')
@@ -49,8 +49,16 @@ export class RichText extends LitElement {
     store.awareness.updateLocalCursor();
 
     this.model.propsUpdated.on(() => this.requestUpdate());
+    let RichHotkeys = new Hotkeys();
+    
+    console.log('this._textContainer: ', this._textContainer);
+    RichHotkeys.addHotkey('F5','all',this._textContainer.querySelectorAll('p')[0],this.test);
+    RichHotkeys.setScope('all');
   }
 
+  test(){
+    console.log("rich-text");
+  }
   disconnectedCallback() {
     this.host.store.detachRichText(this.model.id);
 
