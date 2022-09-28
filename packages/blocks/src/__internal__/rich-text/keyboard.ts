@@ -89,7 +89,7 @@ export const createKeyboardBindings = (
   }
 
   function keyup(this: KeyboardEventThis, range: IQuillRange) {
-    console.log(123123)
+    console.log(123123);
     if (range.index >= 0) {
       const selection = window.getSelection();
       if (selection) {
@@ -165,8 +165,7 @@ export const createKeyboardBindings = (
       key: 'down',
       shiftKey: false,
       handler: keydown,
-    }
-    
+    },
   };
 
   return keyboardBindings;
