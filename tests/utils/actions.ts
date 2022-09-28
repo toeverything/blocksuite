@@ -119,3 +119,32 @@ export async function shiftTab(page: Page) {
 export async function clickMenuButton(page: Page, title: string) {
   await page.click(`button[aria-label="${title}"]`);
 }
+
+export async function getQuillSelectionIndex(page: Page) {
+  return await page.evaluate(() => {
+    const selection = document.getSelection();
+    if (selection) {
+      const range = selection.getRangeAt(0);
+      const component =
+        range.startContainer.parentElement?.closest('rich-text');
+      // @ts-ignore
+      const index = component._quill?.getSelection()?.index;
+      return index !== undefined ? index : -1;
+    }
+    return -1;
+  });
+}
+
+export async function getQuillSelectionText(page: Page) {
+  return await page.evaluate(() => {
+    const selection = document.getSelection();
+    if (selection) {
+      const range = selection.getRangeAt(0);
+      const component =
+        range.startContainer.parentElement?.closest('rich-text');
+      // @ts-ignore
+      return component._quill?.getText() || '';
+    }
+    return '';
+  });
+}
