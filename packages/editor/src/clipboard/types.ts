@@ -1,5 +1,5 @@
 export enum CLIPBOARD_MIMETYPE {
-  BLOCKS_CLIP_WRAPPED = 'custom/blocks',
+  BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
   TEXT = 'text/plain',
   IMAGE_BMP = 'image/bmp',
@@ -17,4 +17,8 @@ export enum ClipboardAction {
   paste = 'paste',
 }
 
-export type OpenBlockInfo = Record<string, unknown>;
+export type OpenBlockInfo = {
+  flavour: string;
+  text: unknown;
+  children: OpenBlockInfo[];
+};

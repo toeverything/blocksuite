@@ -41,6 +41,14 @@ export class TextEntity {
     return new TextEntity(this._textMap, clonedYText as Y.Text);
   }
 
+  applyDelta(delta: any) {
+    this._textMap.get(this)?.applyDelta(delta);
+  }
+
+  toDelta() {
+    return this._textMap.get(this)?.toDelta();
+  }
+
   toString() {
     return this._textMap.get(this)?.toString();
   }
