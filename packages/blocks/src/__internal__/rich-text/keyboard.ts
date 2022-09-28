@@ -7,7 +7,6 @@ import {
   handleKeyDown,
   handleKeyUp,
   handleUnindent,
-  Point,
 } from '@blocksuite/shared';
 import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
 

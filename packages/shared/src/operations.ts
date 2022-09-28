@@ -1,8 +1,6 @@
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { BlockHost, SelectPosition } from './types';
 import { Point, Rect } from './rect';
-import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
-import Quill from 'quill';
 
 // XXX: workaround quill lifecycle issue
 function asyncFocusRichText(store: Store, id: string) {
