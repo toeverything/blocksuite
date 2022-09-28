@@ -43,6 +43,26 @@ export async function focusRichText(page: Page, i = 0) {
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
   await locator.click();
 }
+/**
+ * Focus on the specified line, the title is line 0 and so on.
+ * If line is not specified, focus on the title
+ *
+ * The implementation is depends on the keyboard behavior.
+ */
+export async function focusLine(page: Page, line = 0) {
+  // Focus on the title
+  await page.click('input.affine-page-block-title');
+  if (!line) {
+    return;
+  }
+  // Workaround move cursor from title to text only can use Tab, remove it after fixed
+  await page.keyboard.press('Tab');
+  line--;
+  // End of workaround
+  while (line-- > 0) {
+    await page.keyboard.press('ArrowDown');
+  }
+}
 
 export async function blurRichText(page: Page) {
   await page.mouse.move(0, 0);
