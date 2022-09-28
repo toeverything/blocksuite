@@ -128,9 +128,9 @@ export class Store {
     this.doc.transact(fn, this.doc.clientID);
   }
 
-  register(blockMap: Record<string, typeof BaseBlockModel>) {
-    Object.keys(blockMap).forEach(key => {
-      this._flavourMap.set(key, blockMap[key]);
+  register(blockSchema: Record<string, typeof BaseBlockModel>) {
+    Object.keys(blockSchema).forEach(key => {
+      this._flavourMap.set(key, blockSchema[key]);
     });
     return this;
   }

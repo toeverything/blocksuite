@@ -3,11 +3,11 @@ import { customElement, state, query } from 'lit/decorators.js';
 import type { BlockHost } from '@blocksuite/shared';
 import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@blocksuite/store';
-import { BlockMap } from '../../block-loader';
+import { BlockSchema } from '../../block-loader';
 import { Clipboard } from '../../clipboard';
 import './debug-menu';
 
-type PageBlockModel = InstanceType<typeof BlockMap.page>;
+type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
@@ -15,7 +15,7 @@ const room = params.get('room') || 'virgo-default';
 @customElement('page-container')
 export class PageContainer extends LitElement implements BlockHost {
   @state()
-  store = new Store(room).register(BlockMap);
+  store = new Store(room).register(BlockSchema);
 
   @state()
   model!: PageBlockModel;
@@ -36,7 +36,7 @@ export class PageContainer extends LitElement implements BlockHost {
   private _placeholderInput!: HTMLInputElement;
 
   @state()
-  placeholderModel = new BlockMap.page(this.store, {});
+  placeholderModel = new BlockSchema.page(this.store, {});
 
   constructor() {
     super();

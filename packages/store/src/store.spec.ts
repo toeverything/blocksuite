@@ -2,7 +2,7 @@
 
 import { assert, describe, it } from 'vitest';
 import { BaseBlockModel, Slot, Store } from '../';
-import { BlockMap } from '../../editor/src/block-loader';
+import { BlockSchema } from '../../editor/src/block-loader';
 
 function serialize(store: Store) {
   return store.doc.toJSON();
@@ -24,7 +24,7 @@ describe.concurrent('basic', () => {
 
 describe.concurrent('addBlock', () => {
   it('can add single model', () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
 
     store.addBlock({ flavour: 'page' });
 
@@ -38,7 +38,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add model with props', () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
 
     store.addBlock({ flavour: 'page', title: 'hello' });
 
@@ -53,7 +53,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add multi models', () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
     store.addBlock({ flavour: 'page' });
     store.addBlock({ flavour: 'paragraph' });
 
@@ -74,22 +74,22 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can observe slot events', async () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
     const block = await waitOnce(store.slots.rootAdded);
-    assert.ok(block instanceof BlockMap.page);
+    assert.ok(block instanceof BlockSchema.page);
   });
 
   it('can add block to root', async () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
     const root = await waitOnce(store.slots.rootAdded);
-    assert.ok(root instanceof BlockMap.page);
+    assert.ok(root instanceof BlockSchema.page);
 
     store.addBlock({ flavour: 'paragraph' });
-    assert.ok(root.children[0] instanceof BlockMap.paragraph);
+    assert.ok(root.children[0] instanceof BlockSchema.paragraph);
     assert.equal(root.childMap.get('1'), 0);
 
     const serializedChildren = serialize(store).blocks['0']['sys:children'];
@@ -106,7 +106,7 @@ async function initWithRoot(store: Store) {
 
 describe.concurrent('deleteBlock', () => {
   it('can delete single model', () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
 
     store.addBlock({ flavour: 'page' });
     assert.deepEqual(serialize(store).blocks, {
@@ -122,7 +122,7 @@ describe.concurrent('deleteBlock', () => {
   });
 
   it('can delete model with parent', async () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
@@ -159,14 +159,14 @@ describe.concurrent('deleteBlock', () => {
 
 describe.concurrent('getBlock', () => {
   it('can get block by id', async () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
     store.addBlock({ flavour: 'paragraph' });
 
     const text = store.getBlockById('2') as BaseBlockModel;
-    assert.ok(text instanceof BlockMap.paragraph);
+    assert.ok(text instanceof BlockSchema.paragraph);
     assert.equal(root.children.indexOf(text), 1);
 
     const invalid = store.getBlockById('😅');
@@ -174,7 +174,7 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get parent', async () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
@@ -188,7 +188,7 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get previous sibling', async () => {
-    const store = new Store().register(BlockMap);
+    const store = new Store().register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
