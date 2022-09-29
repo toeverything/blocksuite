@@ -56,6 +56,25 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
   store.addBlock(blockProps, grandParent, index + 1);
 }
 
+// If cursor is at the edge of a block this previous cursor rect will not equal next cursor .
+// we must to determine if the cursor is at the edge of the block because edge cursor may has two cursor point ,
+// but only one bounding rect .
+function checkIfEdgeOfALine(range: Range) {
+  if (range.startOffset > 0) {
+    const prevRange = range.cloneRange();
+    prevRange.setStart(range.startContainer, range.startOffset - 1);
+    prevRange.setEnd(range.startContainer, range.startOffset - 1);
+    const nextRange = range.cloneRange();
+    nextRange.setStart(range.endContainer, range.endOffset + 1);
+    nextRange.setEnd(range.endContainer, range.endOffset + 1);
+    return (
+      prevRange.getBoundingClientRect().top !==
+      nextRange.getBoundingClientRect().top
+    );
+  }
+  return false;
+}
+
 export function handleKeyUp(
   model: BaseBlockModel,
   selectionManager: BlockHost['selection'],
@@ -77,7 +96,10 @@ export function handleKeyUp(
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, top - height / 2);
-    if (!newRange || !editableContainer.contains(newRange.startContainer)) {
+    if (
+      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
+      !checkIfEdgeOfALine(range)
+    ) {
       selectionManager.activePreviousBlock(model.id, new Point(left, top));
       return false;
     }
@@ -106,7 +128,10 @@ export function handleKeyDown(
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
-    if (!newRange || !textContainer.contains(newRange.startContainer)) {
+    if (
+      (!newRange || !textContainer.contains(newRange.startContainer)) &&
+      !checkIfEdgeOfALine(range)
+    ) {
       selectionManager.activeNextBlock(model.id, new Point(left, bottom));
       return false;
     }
