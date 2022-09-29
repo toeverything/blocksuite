@@ -49,6 +49,45 @@ export class TextEntity {
     return this._textMap.get(this)?.toDelta();
   }
 
+  sliceToDelta(begin: number, end?: number) {
+    if (end && begin >= end) {
+      return [];
+    }
+
+    const delta = this.toDelta();
+    if (begin < 1 && !end) {
+      return delta;
+    }
+    const result = [];
+    if (delta && delta instanceof Array) {
+      let charNum = 0;
+      for (let i = 0; i < delta.length; i++) {
+        const content = delta[i];
+        let contentText = content.insert || '';
+        const contentLen = contentText.length;
+        if (end && charNum + contentLen > end) {
+          contentText = contentText.slice(0, end - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          contentText = contentText.slice(begin - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+        } else {
+          result.length > 0 && result.push(content);
+        }
+        if (end && charNum + contentLen > end) {
+          break;
+        }
+        charNum = charNum + contentLen;
+      }
+    }
+    return result;
+  }
+
   toString() {
     return this._textMap.get(this)?.toString();
   }

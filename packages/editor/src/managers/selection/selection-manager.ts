@@ -6,6 +6,18 @@ export type SelectionInfo = InstanceType<
   typeof SelectionManager
 >['selectionInfo'];
 
+export interface SelectBlock {
+  blockId: string;
+  startPos?: number;
+  endPos?: number;
+  children: SelectBlock[];
+}
+
+export interface SelectInfo {
+  type: 'Block' | 'Range' | 'Caret' | 'None';
+  blocks: SelectBlock[];
+}
+
 // TODO use lodash or move to utils
 function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
   const toRemoveValues = Array.from(new Set(values));
@@ -25,6 +37,8 @@ export class SelectionManager {
   private _blockActiveSlotMap: { [k in string]: Slot<SelectPosition> } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
+  private _anchorBlockPosition: number | null | undefined = null;
+  private _focusBlockPosition: number | null | undefined = null;
   private _slots = {
     selection: new Slot<SelectionInfo>(),
   };
@@ -74,6 +88,8 @@ export class SelectionManager {
         type: this.type,
         anchorBlockId: this._anchorBlockId,
         focusBlockId: this._focusBlockId,
+        anchorBlockPosition: this._anchorBlockPosition,
+        focusBlockPosition: this._focusBlockPosition,
       } as const;
     }
     if (this.type === 'Block') {
@@ -111,10 +127,21 @@ export class SelectionManager {
             ?.getAttribute(BLOCK_ID_ATTR) || '';
         this._anchorBlockId = anchorBlockId;
         this._focusBlockId = focusBlockId;
+        const anchorSelect = this._page.store.richTextAdapters
+          .get(anchorBlockId)
+          ?.quill.getSelection();
+        this._anchorBlockPosition = anchorSelect?.index;
+        const focusSelect = this._page.store.richTextAdapters
+          .get(focusBlockId)
+          ?.quill.getSelection();
+        this._focusBlockPosition =
+          focusSelect && focusSelect.index + focusSelect.length;
       }
     } else {
       this._anchorBlockId = '';
       this._focusBlockId = '';
+      this._anchorBlockPosition = null;
+      this._focusBlockPosition = null;
     }
     this._emitSelectionChange();
   }
@@ -331,6 +358,176 @@ export class SelectionManager {
     if (slot) {
       slot.emit(position);
     }
+  }
+
+  // TODO: does not consider discontinuous situations (such as multi-selection or hidden block scenarios), the product does not have this feature yet
+  public getSelectInfo(): SelectInfo {
+    const selectInfo = this.selectionInfo;
+    const startBlockId = this._getFirstBlockId(selectInfo);
+    const endBlockId = this._getLastBlockId(selectInfo);
+    let startPosition = null;
+    let endPosition = null;
+    if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
+      if (startBlockId === selectInfo.anchorBlockId) {
+        startPosition = selectInfo.anchorBlockPosition;
+        endPosition = selectInfo.focusBlockPosition;
+      } else {
+        startPosition = selectInfo.focusBlockPosition;
+        endPosition = selectInfo.anchorBlockPosition;
+      }
+    }
+    let select: SelectInfo = {
+      type: 'None',
+      blocks: [],
+    };
+    if (!startBlockId || !endBlockId) {
+      return select;
+    }
+
+    const blocks: SelectBlock[] = [];
+    const blockId = startBlockId;
+    let beenFind = false;
+    let curBlock = this._page.store.getBlockById(blockId);
+    while (!beenFind && curBlock) {
+      beenFind = this._collectBlockInfo(
+        curBlock,
+        startBlockId,
+        endBlockId,
+        startPosition,
+        endPosition,
+        blocks
+      );
+      if (beenFind) {
+        break;
+      }
+      let parent: BaseBlockModel | null = curBlock;
+      curBlock = null;
+      while (parent) {
+        const nextSibling = this._page.store.getNextSibling(parent);
+        if (nextSibling) {
+          curBlock = nextSibling;
+          break;
+        }
+        parent = this._page.store.getParent(parent);
+      }
+    }
+
+    select = {
+      type: selectInfo.type,
+      blocks: blocks,
+    };
+    return select;
+  }
+
+  private _collectBlockInfo(
+    block: BaseBlockModel,
+    startId: string,
+    endId: string,
+    startPosition: number | null | undefined,
+    endPosition: number | null | undefined,
+    blocks: SelectBlock[]
+  ): boolean {
+    const selectBlock: SelectBlock = {
+      blockId: block.id,
+      children: [] as SelectBlock[],
+    };
+
+    if (block.id === startId && startPosition) {
+      selectBlock.startPos = startPosition;
+    }
+
+    if (block.id === endId && endPosition) {
+      selectBlock.endPos = endPosition;
+    }
+
+    blocks.push(selectBlock);
+
+    let beenFindEnd = block.id === endId;
+    if (!beenFindEnd) {
+      for (let i = 0; i < block.children.length; i++) {
+        const nextBlock = block.children[i];
+        beenFindEnd = this._collectBlockInfo(
+          nextBlock,
+          startId,
+          endId,
+          startPosition,
+          endPosition,
+          selectBlock.children
+        );
+        if (beenFindEnd) {
+          break;
+        }
+      }
+    }
+
+    return beenFindEnd;
+  }
+
+  private _getFirstBlockId(selectInfo: SelectionInfo) {
+    let blockId = '';
+    if (selectInfo.type === 'Block') {
+      if (selectInfo.selectedNodesIds?.length === 0) {
+        return blockId;
+      }
+
+      blockId = selectInfo.selectedNodesIds[0];
+      let previousBlockId = blockId;
+      while (
+        previousBlockId &&
+        selectInfo.selectedNodesIds.indexOf(previousBlockId) !== 0
+      ) {
+        blockId = previousBlockId;
+        previousBlockId = this._getPerviousBlock(blockId)?.id || '';
+      }
+    } else if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
+      blockId = selectInfo.anchorBlockId;
+      let previousBlockId = blockId;
+      while (previousBlockId) {
+        previousBlockId = this._getPerviousBlock(previousBlockId)?.id || '';
+        if (previousBlockId === selectInfo.focusBlockId) {
+          blockId = previousBlockId;
+          break;
+        }
+      }
+    }
+    return blockId && blockId !== '-1' ? blockId : '';
+  }
+
+  private _getLastBlockId(selectInfo: SelectionInfo) {
+    let blockId = '';
+    if (selectInfo.type === 'Block') {
+      if (selectInfo.selectedNodesIds?.length === 0) {
+        return blockId;
+      }
+
+      blockId =
+        selectInfo.selectedNodesIds[selectInfo.selectedNodesIds.length - 1];
+      let nextBlockId = blockId;
+      while (
+        nextBlockId &&
+        selectInfo.selectedNodesIds.indexOf(nextBlockId) !== -1
+      ) {
+        blockId = nextBlockId;
+        nextBlockId = this._getNextBlock(blockId)?.id || '';
+      }
+
+      let blockModel = this._page.store.getBlockById(blockId);
+      while (blockModel) {
+        blockId = blockModel.id;
+        blockModel = blockModel.lastChild();
+      }
+    } else if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
+      blockId = selectInfo.focusBlockId;
+      let nextBlockId = blockId;
+      while (nextBlockId) {
+        nextBlockId = this._getNextBlock(nextBlockId)?.id || '';
+        if (nextBlockId === selectInfo.anchorBlockId) {
+          blockId = nextBlockId;
+          break;
+        }
+      }
+    }
+    return blockId && blockId !== '-1' ? blockId : '';
   }
 
   public dispose() {

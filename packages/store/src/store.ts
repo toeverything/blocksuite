@@ -166,6 +166,15 @@ export class Store {
     return parent?.children[index - 1] ?? null;
   }
 
+  getNextSibling(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    const index = parent?.children.indexOf(block) ?? -1;
+    if (index === -1) {
+      return null;
+    }
+    return parent?.children[index + 1] ?? null;
+  }
+
   addBlock<T extends Partial<BlockProps>>(
     blockProps: T,
     parent?: BaseBlockModel,

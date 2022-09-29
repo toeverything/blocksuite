@@ -29,6 +29,22 @@ export class BaseBlockModel implements IBaseBlockProps {
     this.children = [];
   }
 
+  firstChild() {
+    const children = this.children;
+    if (!children?.length) {
+      return null;
+    }
+    return children[0];
+  }
+
+  lastChild() {
+    const children = this.children;
+    if (!children?.length) {
+      return null;
+    }
+    return children[children.length - 1];
+  }
+
   dispose() {
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
