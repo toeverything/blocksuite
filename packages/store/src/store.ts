@@ -64,7 +64,6 @@ export class Store {
   private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _textMap = new WeakMap<TextEntity, Y.Text>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -193,7 +192,7 @@ export class Store {
     this.transact(() => {
       initSysProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
-      trySyncTextProp(yBlock, this._textMap, clonedProps.text);
+      trySyncTextProp(yBlock, clonedProps.text);
 
       const parentId = parent?.id ?? this._root?.id;
 
@@ -337,7 +336,7 @@ export class Store {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const textEntity = new TextEntity(this._textMap, yText);
+    const textEntity = new TextEntity(yText);
     model.text = textEntity;
 
     const yChildren = yBlock.get('sys:children');

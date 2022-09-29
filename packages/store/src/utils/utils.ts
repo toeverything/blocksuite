@@ -52,15 +52,11 @@ export function syncBlockProps(
   }
 }
 
-export function trySyncTextProp(
-  yBlock: YBlock,
-  textMap: WeakMap<TextEntity, Y.Text>,
-  textEntity?: TextEntity
-) {
-  if (!textEntity || !textMap.has(textEntity)) return;
+export function trySyncTextProp(yBlock: YBlock, textEntity?: TextEntity) {
+  if (!textEntity) return;
 
-  const yText = textMap.get(textEntity) as Y.Text;
-  yBlock.set('prop:text', yText);
+  // @ts-ignore
+  yBlock.set('prop:text', textEntity._yText);
 }
 
 export function toBlockProps(

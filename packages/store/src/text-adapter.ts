@@ -30,23 +30,21 @@ export const normQuillDelta = (delta: any) => {
 };
 
 export class TextEntity {
-  private _textMap: WeakMap<TextEntity, Y.Text>;
-  constructor(textMap: WeakMap<TextEntity, Y.Text>, yText: Y.Text) {
-    this._textMap = textMap;
-    this._textMap.set(this, yText);
+  private _yText: Y.Text;
+  constructor(yText: Y.Text) {
+    this._yText = yText;
   }
 
   clone() {
-    const clonedYText = this._textMap.get(this)?.clone();
-    return new TextEntity(this._textMap, clonedYText as Y.Text);
+    return new TextEntity(this._yText.clone());
   }
 
   applyDelta(delta: any) {
-    this._textMap.get(this)?.applyDelta(delta);
+    this._yText.applyDelta(delta);
   }
 
   toDelta() {
-    return this._textMap.get(this)?.toDelta();
+    return this._yText.toDelta();
   }
 
   sliceToDelta(begin: number, end?: number) {
@@ -89,7 +87,7 @@ export class TextEntity {
   }
 
   toString() {
-    return this._textMap.get(this)?.toString();
+    return this._yText.toString();
   }
 }
 
