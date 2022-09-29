@@ -60,7 +60,10 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
 // we must to determine if the cursor is at the edge of the block because edge cursor may has two cursor point ,
 // but only one bounding rect .
 function checkIfEdgeOfALine(range: Range) {
-  if (range.startOffset > 0) {
+  if (
+    range.startOffset > 0 &&
+    Number(range.startContainer.textContent?.length) - range.startOffset > 0
+  ) {
     const prevRange = range.cloneRange();
     prevRange.setStart(range.startContainer, range.startOffset - 1);
     prevRange.setEnd(range.startContainer, range.startOffset - 1);
@@ -128,12 +131,31 @@ export function handleKeyDown(
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
-    if (
-      (!newRange || !textContainer.contains(newRange.startContainer)) &&
-      !checkIfEdgeOfALine(range)
-    ) {
+    if (!newRange || !textContainer.contains(newRange.startContainer)) {
       selectionManager.activeNextBlock(model.id, new Point(left, bottom));
       return false;
+    }
+    // if cursor is at the edge of a block, it may out of the textContainer after keydown
+    if (checkIfEdgeOfALine(range)) {
+      const {
+        height,
+        left,
+        bottom: nextBottom,
+      } = newRange.getBoundingClientRect();
+      const nextRange = document.caretRangeFromPoint(
+        left,
+        nextBottom + height / 2
+      );
+      if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
+        selectionManager.activeNextBlock(
+          model.id,
+          new Point(
+            newRange.startContainer.parentElement?.offsetLeft || left,
+            bottom
+          )
+        );
+        return false;
+      }
     }
   }
   return true;

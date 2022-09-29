@@ -80,9 +80,12 @@ export class CopyCutExecution {
       selectBlocks = this._getClipDataOfBlocksById(selectInfo.selectedNodesIds);
     }
 
-    return new ClipItem(CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED, JSON.stringify({
-      data: selectBlocks,
-    }));
+    return new ClipItem(
+      CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
+      JSON.stringify({
+        data: selectBlocks,
+      })
+    );
   }
 
   private _getTextClip(): ClipItem {

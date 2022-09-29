@@ -7,6 +7,7 @@ import {
   mouseDragFromTo,
   pressEnter,
   shiftTab,
+  getCursorBlockIdAndHeight,
 } from './utils/actions';
 import { assertSelectedBlockCount } from './utils/asserts';
 import { expect } from '@playwright/test';
@@ -107,4 +108,44 @@ test('cursor move left and right', async ({ page }) => {
   await page.keyboard.press('ArrowRight');
   const indexTwo = await getQuillSelectionIndex(page);
   expect(indexTwo).toBe(0);
+});
+
+test('cursor move up at edge of the second line', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await pressEnter(page);
+  const [id, height] = await getCursorBlockIdAndHeight(page);
+  if (id && height) {
+    let nextHeight;
+    // type until current block height is changed, means has new line
+    do {
+      await page.keyboard.type('a');
+      [, nextHeight] = await getCursorBlockIdAndHeight(page);
+    } while (nextHeight === height);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowUp');
+    const [currentId] = await getCursorBlockIdAndHeight(page);
+    expect(currentId).toBe(id);
+  }
+});
+
+test('cursor move down at edge of the second line', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await pressEnter(page);
+  const [id] = await getCursorBlockIdAndHeight(page);
+  await page.keyboard.press('ArrowUp');
+  const [, height] = await getCursorBlockIdAndHeight(page);
+  if (id && height) {
+    let nextHeight;
+    // type until current block height is changed, means has new line
+    do {
+      await page.keyboard.type('a');
+      [, nextHeight] = await getCursorBlockIdAndHeight(page);
+    } while (nextHeight === height);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowDown');
+    const [currentId] = await getCursorBlockIdAndHeight(page);
+    expect(currentId).toBe(id);
+  }
 });

@@ -148,3 +148,21 @@ export async function getQuillSelectionText(page: Page) {
     return '';
   });
 }
+
+export async function getCursorBlockIdAndHeight(page: Page) {
+  return await page.evaluate(() => {
+    const selection = document.getSelection();
+    if (selection) {
+      const block =
+        selection.anchorNode?.parentElement?.closest(`[data-block-id]`);
+      if (block) {
+        const id = block?.getAttribute('data-block-id');
+        const height = block.getBoundingClientRect().height;
+        if (id) {
+          return [id, height];
+        }
+      }
+    }
+    return [null, null];
+  });
+}
