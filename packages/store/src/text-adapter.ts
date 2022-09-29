@@ -3,6 +3,7 @@ import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
+import { text } from 'stream/consumers';
 
 // Removes the pending '\n's if it has no attributes
 export const normQuillDelta = (delta: any) => {
@@ -47,6 +48,42 @@ export class TextEntity {
 
   toDelta() {
     return this._textMap.get(this)?.toDelta();
+  }
+
+  sliceToDelta(begin: number, end?: number) {
+    if (end && begin >= end) {
+      return [];
+    }
+
+    const delta = this.toDelta();
+    const result = [];
+    if (delta && delta instanceof Array) {
+      let charNum = 0;
+      for (let i = 0; i < delta.length; i++) {
+        const content = delta[i];
+        let contentText = content.insert || '';
+        const contentLen = contentText.length;
+        if (end && charNum + contentLen > end) {
+          contentText = contentText.slice(0, end - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          contentText = contentText.slice(begin - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+        } else {
+          result.length > 0 && result.push(content);
+        }
+        if (end && charNum + contentLen > end) {
+          break;
+        }
+        charNum = charNum + contentLen;
+      }
+    }
+    return result;
   }
 
   toString() {
