@@ -9,7 +9,11 @@ import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
 import { Hotkeys } from '@blocksuite/shared';
 Quill.register('modules/cursors', QuillCursors);
-
+const KeyHandlerMap = {
+  [HotkeyMap.undo]: function(){
+    console.log("undo")
+  },
+}
 @customElement('rich-text')
 export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
@@ -71,6 +75,14 @@ export class RichText extends LitElement {
       this._textContainer,
       this._selectAll
     );
+    Object.keys(KeyHandlerMap).map((key) => {
+      this._hotKeys.addHotkey(
+        key,
+        this.model.id,
+        this._textContainer,
+        KeyHandlerMap[key]
+      );
+      })
   }
   private _selectAll(e: Event) {
     console.log('selectAll', e);
