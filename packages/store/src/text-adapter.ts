@@ -3,7 +3,6 @@ import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
-import { text } from 'stream/consumers';
 
 // Removes the pending '\n's if it has no attributes
 export const normQuillDelta = (delta: any) => {
@@ -56,6 +55,9 @@ export class TextEntity {
     }
 
     const delta = this.toDelta();
+    if (begin < 1 && !end) {
+      return delta;
+    }
     const result = [];
     if (delta && delta instanceof Array) {
       let charNum = 0;

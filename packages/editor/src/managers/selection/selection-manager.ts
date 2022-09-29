@@ -429,7 +429,7 @@ export class SelectionManager {
   ): boolean {
     const selectBlock: SelectBlock = {
       blockId: block.id,
-      children: [] as any[],
+      children: [] as SelectBlock[],
     };
 
     if (block.id === startId && startPosition) {
@@ -463,7 +463,7 @@ export class SelectionManager {
     return beenFindEnd;
   }
 
-  private _getFirstBlockId(selectInfo: any) {
+  private _getFirstBlockId(selectInfo: SelectionInfo) {
     let blockId = '';
     if (selectInfo.type === 'Block') {
       if (selectInfo.selectedNodesIds?.length === 0) {
@@ -493,7 +493,7 @@ export class SelectionManager {
     return blockId && blockId !== '-1' ? blockId : '';
   }
 
-  private _getLastBlockId(selectInfo: any) {
+  private _getLastBlockId(selectInfo: SelectionInfo) {
     let blockId = '';
     if (selectInfo.type === 'Block') {
       if (selectInfo.selectedNodesIds?.length === 0) {
