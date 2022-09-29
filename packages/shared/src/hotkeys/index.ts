@@ -29,7 +29,7 @@ export class Hotkeys {
     this._hotkeys.unbind(...(Array.isArray(hotkey) ? hotkey : [hotkey]));
   }
 
-  setScope(scope: string) {
+  useHotkey(scope: string) {
     this._hotkeyScope = scope;
     this._hotkeys.setScope(this._hotkeyScope);
   }

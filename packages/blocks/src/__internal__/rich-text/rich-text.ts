@@ -47,15 +47,8 @@ export class RichText extends LitElement {
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
-
+    this._bindHotKey();
     this.model.propsUpdated.on(() => this.requestUpdate());
-
-    this._hotKeys.addHotkey(
-      HotkeyMap.test,
-      'text',
-      this._textContainer,
-      this.test
-    );
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
       .addEventListener('focus', this._focus);
@@ -65,15 +58,22 @@ export class RichText extends LitElement {
   }
 
   private _focus() {
-    this._hotKeys.setScope('text');
+    this._hotKeys.useHotkey(this.model.id);
   }
   private _blur() {
-    this._hotKeys.setScope('page');
+    this._hotKeys.useHotkey('page');
   }
-  test(e: Event) {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('rich-text');
+
+  private _bindHotKey() {
+    this._hotKeys.addHotkey(
+      HotkeyMap.selectAll,
+      this.model.id,
+      this._textContainer,
+      this._selectAll
+    );
+  }
+  private _selectAll(e: Event) {
+    console.log('selectAll', e);
   }
 
   disconnectedCallback() {

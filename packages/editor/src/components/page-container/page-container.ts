@@ -49,6 +49,7 @@ export class PageContainer extends LitElement implements BlockHost {
     // @ts-ignore
     window.page = this;
     this._bindHotkeys();
+    this._hotKeys.useHotkey('page');
   }
 
   private _bindHotkeys() {
@@ -57,8 +58,7 @@ export class PageContainer extends LitElement implements BlockHost {
       'page',
       this._placeholderInput,
       () => {
-        console.log('undo');
-        this.store.undo()
+        this.store.undo();
       }
     );
     this._hotKeys.addHotkey(
@@ -66,8 +66,7 @@ export class PageContainer extends LitElement implements BlockHost {
       'page',
       this._placeholderInput,
       () => {
-        console.log('undo');
-        this.store.redo()
+        this.store.redo();
       }
     );
   }
