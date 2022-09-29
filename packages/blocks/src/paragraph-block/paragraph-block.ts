@@ -52,11 +52,31 @@ export class ParagraphBlockElement extends LitElement {
   }
 
   render() {
+    const { type } = this.model;
+
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
+      <style>
+        .affine-paragraph-block-container.h1 {
+          font-size: 28px;
+        }
+        .affine-paragraph-block-container.h2 {
+          font-size: 24px;
+        }
+        .affine-paragraph-block-container.h3 {
+          font-size: 20px;
+        }
+        .affine-paragraph-block-container.quote {
+          font-size: 13px;
+          color: grey;
+        }
+        .affine-paragraph-block-container.text {
+          font-size: 13px;
+        }
+      </style>
       <div
         style=${styleMap({
           'background-color': this.selected
@@ -64,7 +84,7 @@ export class ParagraphBlockElement extends LitElement {
             : 'transparent',
           margin: '5px 0',
         })}
-        class="affine-paragraph-block-container"
+        class="affine-paragraph-block-container ${type}"
       >
         <rich-text .host=${this.host} .model=${this.model}></rich-text>
         ${childrenContainer}

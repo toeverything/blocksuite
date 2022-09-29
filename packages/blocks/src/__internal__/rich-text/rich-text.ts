@@ -2,10 +2,9 @@ import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
-import style from 'quill/dist/quill.snow.css';
+import style from './styles.css';
 import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
@@ -43,7 +42,6 @@ export class RichText extends LitElement {
           bindings: keyboardBindings,
         },
       },
-      theme: 'snow',
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
@@ -58,40 +56,12 @@ export class RichText extends LitElement {
   }
 
   render() {
-    const { type } = this.model as ParagraphBlockModel | ListBlockModel;
-
     return html`
       <style>
-        ${style} .affine-rich-text.quill-container {
-          margin-bottom: 0px;
-        }
-        .ql-editor {
-          padding: 2px;
-        }
-        .affine-rich-text.quill-container.ql-snow {
-          /* border: 0; */
-          border: 1px #eee dashed;
-        }
-        .affine-rich-text.quill-container.h1 p {
-          font-size: 28px;
-        }
-        .affine-rich-text.quill-container.h2 p {
-          font-size: 24px;
-        }
-        .affine-rich-text.quill-container.h3 p {
-          font-size: 20px;
-        }
-        .affine-rich-text.quill-container.quote p {
-          font-size: 13px;
-          color: grey;
-        }
-        .affine-rich-text.quill-container.text p {
-          font-size: 13px;
-        }
+        ${style}
       </style>
-      <div
-        class="affine-rich-text quill-container ql-container ql-snow ${type}"
-      ></div>
+
+      <div class="affine-rich-text quill-container ql-container"></div>
     `;
   }
 }
