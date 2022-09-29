@@ -2,7 +2,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { expect, type Page } from '@playwright/test';
-import type { BaseBlockModel, SerializedStore } from '../../packages/store';
+import type {
+  BaseBlockModel,
+  PrefixedBlockProps,
+  SerializedStore,
+} from '../../packages/store';
 
 export const defaultStore: SerializedStore = {
   blocks: {
@@ -43,6 +47,9 @@ export async function assertText(page: Page, text: string) {
   expect(actual).toBe(text);
 }
 
+/**
+ * @deprecated Use {@link assertMatchMarkdown} instead
+ */
 export async function assertRichTexts(page: Page, texts: string[]) {
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
@@ -160,4 +167,60 @@ export async function assertBlockType(page: Page, id: string, type: string) {
     { id }
   );
   expect(actual).toBe(type);
+}
+
+export async function assertMatchMarkdown(page: Page, text: string) {
+  const jsonDoc = (await page.evaluate(() =>
+    // @ts-expect-error
+    window.store.doc.toJSON()
+  )) as SerializedStore;
+  const titleNode = jsonDoc.blocks['0'];
+
+  const markdownVisitor = (node: PrefixedBlockProps): string => {
+    // TODO use schema
+    if (node['sys:flavour'] === 'page') {
+      return (node['prop:title'] as string) ?? '';
+    }
+    if (!('prop:type' in node)) {
+      return '[? unknown node]';
+    }
+    if (node['prop:type'] === 'text') {
+      return node['prop:text'] as string;
+    }
+    if (node['prop:type'] === 'bulleted') {
+      return `- ${node['prop:text']}`;
+    }
+    // TODO please fix this
+    return `[? ${node['prop:type']} node]`;
+  };
+
+  const INDENT_SIZE = 2;
+  const visitNodes = (
+    node: PrefixedBlockProps,
+    visitor: (node: PrefixedBlockProps) => string
+  ): string[] => {
+    if (!('sys:children' in node) || !Array.isArray(node['sys:children'])) {
+      throw new Error("Failed to visit nodes: 'sys:children' is not an array");
+      // return visitor(node);
+    }
+
+    const children = node['sys:children'].map(id => jsonDoc.blocks[id]);
+    return [
+      visitor(node),
+      ...children.flatMap(child =>
+        visitNodes(child, visitor).map(line => {
+          if (node['sys:flavour'] === 'page') {
+            // Ad hoc way to remove the title indent
+            return line;
+          }
+
+          return ' '.repeat(INDENT_SIZE) + line;
+        })
+      ),
+    ];
+  };
+  const visitRet = visitNodes(titleNode, markdownVisitor);
+  const actual = visitRet.join('\n');
+
+  expect(actual).toEqual(text);
 }
