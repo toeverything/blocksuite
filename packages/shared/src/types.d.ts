@@ -1,26 +1,29 @@
 import type { Store } from '@blocksuite/store';
 import { Point } from './rect';
-export type SelectPosition = 'start' | 'end' | Point;
+
+export type SelectionPosition = 'start' | 'end' | Point;
+
 /** Common context interface definition for block models. */
 export interface BlockHost {
   store: Store;
 
   selection: {
-    addChangeListener: (
+    addBlockSelectedListener: (
       blockId: string,
       handler: (selected: boolean) => void
     ) => void;
-    removeChangeListener: (blockId: string) => void;
-    onBlockActive: (
+    removeBlockSelectedListener: (blockId: string) => void;
+
+    addBlockActiveListener: (
       blockId: string,
-      handler: (position: 'start' | 'end' | Point) => void
+      handler: (position: SelectionPosition) => void
     ) => void;
-    offBlockActive: (blockId: string) => void;
-    onBlockActive: (
+    removeBlockActiveListener: (blockId: string) => void;
+
+    activePreviousBlock: (
       blockId: string,
-      cb: (position: SelectPosition) => void
+      position?: SelectionPosition
     ) => void;
-    activePreviousBlock: (blockId: string, position?: SelectPosition) => void;
-    activeNextBlock: (blockId: string, position?: SelectPosition) => void;
+    activeNextBlock: (blockId: string, position?: SelectionPosition) => void;
   };
 }

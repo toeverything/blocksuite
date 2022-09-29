@@ -1,5 +1,10 @@
 import { PageContainer } from '../..';
-import { BLOCK_ID_ATTR, Point, Rect, SelectPosition } from '@blocksuite/shared';
+import {
+  BLOCK_ID_ATTR,
+  Point,
+  Rect,
+  SelectionPosition,
+} from '@blocksuite/shared';
 import { BaseBlockModel, IDisposable, Slot } from '@blocksuite/store';
 
 export type SelectionInfo = InstanceType<
@@ -34,7 +39,7 @@ export class SelectionManager {
   private _page: PageContainer;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
-  private _blockActiveSlotMap: { [k in string]: Slot<SelectPosition> } = {};
+  private _blockActiveSlotMap: { [k in string]: Slot<SelectionPosition> } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
   private _anchorBlockPosition: number | null | undefined = null;
@@ -207,7 +212,7 @@ export class SelectionManager {
     return slot;
   }
 
-  public addChangeListener(
+  public addBlockSelectedListener(
     blockId: string,
     handler: (selected: boolean) => void
   ) {
@@ -217,7 +222,7 @@ export class SelectionManager {
     return disposable;
   }
 
-  public removeChangeListener(blockId: string) {
+  public removeBlockSelectedListener(blockId: string) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
       slot.dispose();
@@ -301,7 +306,7 @@ export class SelectionManager {
     return null;
   }
 
-  public activePreviousBlock(blockId: string, position?: SelectPosition) {
+  public activePreviousBlock(blockId: string, position?: SelectionPosition) {
     let nextPosition = position;
     if (nextPosition) {
       if (nextPosition instanceof Point) {
@@ -318,7 +323,10 @@ export class SelectionManager {
     }
   }
 
-  public activeNextBlock(blockId: string, position: SelectPosition = 'start') {
+  public activeNextBlock(
+    blockId: string,
+    position: SelectionPosition = 'start'
+  ) {
     let nextPosition = position;
     if (nextPosition) {
       if (nextPosition instanceof Point) {
@@ -335,9 +343,9 @@ export class SelectionManager {
     }
   }
 
-  public onBlockActive(
+  public addBlockActiveListener(
     blockId: string,
-    cb: (position: SelectPosition) => void
+    cb: (position: SelectionPosition) => void
   ) {
     const slot = this._getBlockActiveSlot(blockId);
     const disposable = slot.on(cb);
@@ -345,7 +353,7 @@ export class SelectionManager {
     return disposable;
   }
 
-  public offBlockActive(blockId: string) {
+  public removeBlockActiveListener(blockId: string) {
     const slot = this._blockActiveSlotMap[blockId];
     if (slot) {
       slot.dispose();
@@ -353,7 +361,10 @@ export class SelectionManager {
     return delete this._blockActiveSlotMap[blockId];
   }
 
-  public activeBlockById(blockId: string, position: SelectPosition = 'start') {
+  public activeBlockById(
+    blockId: string,
+    position: SelectionPosition = 'start'
+  ) {
     const slot = this._blockActiveSlotMap[blockId];
     if (slot) {
       slot.emit(position);
