@@ -129,7 +129,7 @@ test('cursor move up at edge of the second line', async ({ page }) => {
   }
 });
 
-test('cursor move down at edge of the second line', async ({ page }) => {
+test('cursor move down at edge of the last line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await pressEnter(page);
