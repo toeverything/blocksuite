@@ -1,5 +1,5 @@
 import hotkeys, { KeyHandler } from 'hotkeys-js';
-import {HotkeyMapType, MacHotkeyMap} from '../consts'
+import { HotkeyMapType, MacHotkeyMap } from '../consts';
 hotkeys.filter = () => true;
 type Options = {
   scope: string;
@@ -15,21 +15,16 @@ export class Hotkeys {
 
   public hotkeyScope: Options['scope'];
 
-  
-  public hotkeysMap:HotkeyMapType;
+  public hotkeysMap: HotkeyMapType;
   constructor() {
     this._hotkeys = hotkeys;
-    this.hotkeyScope = 'all'
-    this.hotkeysMap = 
-    // TODO add more system hotkeys here
-    this.hotkeysMap = MacHotkeyMap
+    this.hotkeyScope = 'all';
+    this.hotkeysMap =
+      // TODO add more system hotkeys here
+      this.hotkeysMap = MacHotkeyMap;
   }
 
-  addHotkey(
-    hotkey: string,
-    scope: Options['scope'],
-    callback: KeyHandler
-  ) {
+  addHotkey(hotkey: string, scope: Options['scope'], callback: KeyHandler) {
     this._hotkeys(hotkey, { scope }, callback);
   }
 
@@ -42,8 +37,8 @@ export class Hotkeys {
     this._hotkeys.setScope(this.hotkeyScope);
   }
 
-  cancelScope(scope: string,newScope: string) {
-    this._hotkeys.deleteScope(scope??this.hotkeyScope as string,newScope)
+  cancelScope(scope: string, newScope: string) {
+    this._hotkeys.deleteScope(scope ?? (this.hotkeyScope as string), newScope);
   }
 }
 export const HotKeysManage = new Hotkeys();

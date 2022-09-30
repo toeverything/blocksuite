@@ -54,30 +54,26 @@ export class PageContainer extends LitElement implements BlockHost {
     HotKeysManage.addHotkey(
       HotKeysManage.hotkeysMap.undo,
       'page',
-      
+
       () => {
         this.store.undo();
       }
     );
+    HotKeysManage.addHotkey('ctrl+i', 'all', () => {
+      console.log('123123123');
+    });
+    HotKeysManage.addHotkey(HotKeysManage.hotkeysMap.redo, 'page', () => {
+      this.store.redo();
+    });
     HotKeysManage.addHotkey(
-     'ctrl+i',
-      'all',
-      () => {
-        console.log('123123123')
-      }
-    );
-    HotKeysManage.addHotkey(
-      HotKeysManage.hotkeysMap.redo,
+      HotKeysManage.hotkeysMap.selectAll,
       'page',
-      () => {
-        this.store.redo();
+      (e: Event) => {
+        console.log('select all');
+        e.preventDefault();
+        this.selection.selectedBlockIds = ['1', '2', '3'];
       }
     );
-    HotKeysManage.addHotkey(HotKeysManage.hotkeysMap.selectAll,'page',(e:Event) => {
-      console.log('select all')
-      e.preventDefault()
-      this.selection.selectedBlockIds = ['1','2','3']
-    })
   }
 
   private _subscribeStore() {
