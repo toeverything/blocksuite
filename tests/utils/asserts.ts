@@ -138,3 +138,17 @@ export async function assertTextContent(
   const locator = page.locator(selector);
   await expect(locator).toHaveText(text);
 }
+
+export async function assertBlockType(page: Page, id: string, type: string) {
+  const actual = await page.evaluate(
+    ({ id }) => {
+      const element = document.querySelector(`[data-block-id="${id}"]`);
+      // @ts-ignore
+      const model = element.model as BaseBlockModel;
+      // @ts-ignore
+      return model.type;
+    },
+    { id }
+  );
+  expect(actual).toBe(type);
+}

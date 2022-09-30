@@ -93,6 +93,45 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
   store.addBlock(blockProps, grandParent, index + 1);
 }
 
+export function handleLineStartBackspace(
+  store: Store,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  model: BaseBlockModel & Record<string, any>
+) {
+  // When deleting at line start of a paragraph block,
+  // firstly switch it to normal text, then delete this empty block.
+  if (model.flavour === 'paragraph') {
+    if (model.type !== 'text') {
+      store.captureSync();
+      store.updateBlock(model, { type: 'text' });
+    } else {
+      const previousSibling = store.getPreviousSibling(model);
+      if (previousSibling) {
+        store.captureSync();
+        store.deleteBlock(model);
+        asyncFocusRichText(store, previousSibling.id);
+      }
+    }
+  }
+  // When deleting at line start of a list block,
+  // switch it to normal paragraph block.
+  else if (model.flavour === 'list') {
+    const parent = store.getParent(model);
+    if (!parent) return;
+
+    store.captureSync();
+    const blockProps = {
+      flavour: 'paragraph',
+      type: 'text',
+      text: model?.text?.clone(),
+      children: model.children,
+    };
+    store.deleteBlock(model);
+    const id = store.addBlock(blockProps);
+    asyncFocusRichText(store, id);
+  }
+}
+
 export function convertToList(
   store: Store,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

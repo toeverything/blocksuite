@@ -5,6 +5,7 @@ import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
   assertClassName,
+  assertBlockType,
 } from './utils/asserts';
 import {
   clickMenuButton,
@@ -156,6 +157,31 @@ test('switch between paragraph types', async ({ page }) => {
 
   await undoByClick(page);
   await assertClassName(page, selector, /h1/);
+});
+
+test('delete at start of paragraph block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+
+  await pressEnter(page);
+  await focusRichText(page, 1);
+  await page.keyboard.type('a');
+
+  await clickMenuButton(page, 'heading-1');
+  await assertBlockType(page, '1', 'text');
+  await assertBlockType(page, '2', 'h1');
+
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
+  await assertBlockType(page, '2', 'text');
+  await assertBlockChildrenIds(page, '0', ['1', '2']);
+
+  await page.keyboard.press('Backspace');
+  await assertBlockChildrenIds(page, '0', ['1']);
+
+  await undoByClick(page);
+  await assertBlockChildrenIds(page, '0', ['1', '2']);
 });
 
 test('get focus from page title enter', async ({ page }) => {

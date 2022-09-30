@@ -7,6 +7,7 @@ import {
   handleIndent,
   handleKeyDown,
   handleKeyUp,
+  handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
 } from '@blocksuite/shared';
@@ -54,6 +55,10 @@ const ALLOW_DEFAULT = true;
 
 function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
+}
+
+function isAtBlockStart(quill: Quill) {
+  return quill.getSelection(true)?.index === 0;
 }
 
 export const createKeyboardBindings = (
@@ -132,6 +137,15 @@ export const createKeyboardBindings = (
     return ALLOW_DEFAULT;
   }
 
+  function backspace(this: KeyboardEventThis) {
+    if (isAtBlockStart(this.quill)) {
+      handleLineStartBackspace(store, model);
+      return PREVENT_DEFAULT;
+    }
+
+    return ALLOW_DEFAULT;
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
@@ -164,9 +178,7 @@ export const createKeyboardBindings = (
     },
     backspace: {
       key: 'backspace',
-      handler() {
-        return ALLOW_DEFAULT;
-      },
+      handler: backspace,
     },
     up: {
       key: 'up',
