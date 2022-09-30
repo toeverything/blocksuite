@@ -4,6 +4,7 @@ import {
   assertBlockChildrenIds,
   assertBlockCount,
   assertRichTexts,
+  assertSelection,
   assertTextContent,
 } from './utils/asserts';
 import {
@@ -95,6 +96,18 @@ test('insert new list block by enter', async ({ page }) => {
     'list',
     'list',
   ]);
+});
+
+test('delete at start of list block', async ({ page }) => {
+  await enterPlaygroundWithList(page);
+  await focusRichText(page, 1);
+  await page.keyboard.press('Backspace');
+  await assertBlockChildrenFlavours(page, '0', ['list', 'paragraph', 'list']);
+  await assertSelection(page, 1, 0, 0);
+
+  await undoByClick(page);
+  await assertBlockChildrenFlavours(page, '0', ['list', 'list', 'list']);
+  await assertSelection(page, 1, 0, 0);
 });
 
 test('nested list blocks', async ({ page }) => {

@@ -4,7 +4,7 @@ export const IS_MAC = process.platform === 'darwin';
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
-const NEXT_FRAME_TIMEOUT = 10;
+const NEXT_FRAME_TIMEOUT = 50;
 const DEFAULT_PLAYGROUNT = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 

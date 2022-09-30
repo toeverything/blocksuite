@@ -119,7 +119,9 @@ export function handleLineStartBackspace(
     const parent = store.getParent(model);
     if (!parent) return;
 
+    const index = parent.children.indexOf(model);
     store.captureSync();
+
     const blockProps = {
       flavour: 'paragraph',
       type: 'text',
@@ -127,7 +129,7 @@ export function handleLineStartBackspace(
       children: model.children,
     };
     store.deleteBlock(model);
-    const id = store.addBlock(blockProps);
+    const id = store.addBlock(blockProps, parent, index);
     asyncFocusRichText(store, id);
   }
 }
