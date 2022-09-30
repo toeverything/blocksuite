@@ -30,27 +30,64 @@ export const normQuillDelta = (delta: any) => {
 };
 
 export class TextEntity {
-  private _textMap: WeakMap<TextEntity, Y.Text>;
-  constructor(textMap: WeakMap<TextEntity, Y.Text>, yText: Y.Text) {
-    this._textMap = textMap;
-    this._textMap.set(this, yText);
+  private _yText: Y.Text;
+  constructor(yText: Y.Text) {
+    this._yText = yText;
   }
 
   clone() {
-    const clonedYText = this._textMap.get(this)?.clone();
-    return new TextEntity(this._textMap, clonedYText as Y.Text);
+    return new TextEntity(this._yText.clone());
   }
 
   applyDelta(delta: any) {
-    this._textMap.get(this)?.applyDelta(delta);
+    this._yText.applyDelta(delta);
   }
 
   toDelta() {
-    return this._textMap.get(this)?.toDelta();
+    return this._yText.toDelta();
+  }
+
+  sliceToDelta(begin: number, end?: number) {
+    if (end && begin >= end) {
+      return [];
+    }
+
+    const delta = this.toDelta();
+    if (begin < 1 && !end) {
+      return delta;
+    }
+    const result = [];
+    if (delta && delta instanceof Array) {
+      let charNum = 0;
+      for (let i = 0; i < delta.length; i++) {
+        const content = delta[i];
+        let contentText = content.insert || '';
+        const contentLen = contentText.length;
+        if (end && charNum + contentLen > end) {
+          contentText = contentText.slice(0, end - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          contentText = contentText.slice(begin - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+        } else {
+          result.length > 0 && result.push(content);
+        }
+        if (end && charNum + contentLen > end) {
+          break;
+        }
+        charNum = charNum + contentLen;
+      }
+    }
+    return result;
   }
 
   toString() {
-    return this._textMap.get(this)?.toString();
+    return this._yText.toString();
   }
 }
 
