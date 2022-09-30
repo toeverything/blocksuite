@@ -31,6 +31,7 @@ export class PageBlockElement extends LitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => {
       if (this.model.title !== this._blockTitle.value) {
+        this._blockTitle.value = this.model.title || '';
         this.requestUpdate();
       }
     });
