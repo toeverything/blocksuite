@@ -1,8 +1,6 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { PageContainer } from '../components';
-import { ParseBlock } from '../parse/parse-block';
-import { BaseBlockModel } from '@blocksuite/store';
 import { SelectBlock, SelectInfo } from '../managers';
 
 export class CopyCutExecution {
@@ -11,9 +9,10 @@ export class CopyCutExecution {
   constructor(page: PageContainer) {
     this._page = page;
     this.handleCopy = this.handleCopy.bind(this);
+    this.handleCut = this.handleCut.bind(this);
   }
 
-  handleCopy(e: ClipboardEvent) {
+  public handleCopy(e: ClipboardEvent) {
     e.preventDefault();
     e.stopPropagation();
 
@@ -25,69 +24,31 @@ export class CopyCutExecution {
     this._copyToClipboard(e, clips);
   }
 
-  handleCut(e: ClipboardEvent) {
+  public handleCut(e: ClipboardEvent) {
     this.handleCopy(e);
     // todo delete selected blocks
   }
 
-  private _getClipDataOfBlocksById(blockIds: string[]): ClipItem {
-    const clipInfos: OpenBlockInfo[] = [];
-    blockIds.forEach(blockId => {
-      const model = this._page.store.getBlockById(blockId);
-      model && clipInfos.push(this._transToOpenBlockInfo(model));
-    });
-    return new ClipItem(
-      CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
-      JSON.stringify({
-        data: clipInfos,
-      })
-    );
-  }
-
-  private _transToOpenBlockInfo(model: BaseBlockModel): OpenBlockInfo {
-    const blockProps = model && {
-      id: model.id,
-      flavour: model.flavour,
-      text: model?.text?.toDelta(),
-      children: model.children.map(child => this._transToOpenBlockInfo(child)),
-    };
-    return blockProps as OpenBlockInfo;
-  }
-
   private _getClipItems() {
     const clips: ClipItem[] = [];
+    const selectInfo: SelectInfo = this._page.selection.getSelectInfo();
 
-    // get custom clip
-    const affineClip = this._getCustomClip();
+    const affineClip = this._getCustomClip(selectInfo);
     affineClip && clips.push(affineClip);
 
-    const textClip = this._getTextClip();
-    clips.push(textClip);
+    const textClip = this._getTextClip(selectInfo);
+    textClip && clips.push(textClip);
 
-    const htmlClip = this._getHtmlClip();
-    clips.push(htmlClip);
+    const htmlClip = this._getHtmlClip(selectInfo);
+    htmlClip && clips.push(htmlClip);
 
     return clips;
   }
 
-  private _getHtmlClip(): ClipItem {
-    const htmlStr = ParseBlock.block2Html([]);
-    return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlStr);
-  }
-
-  private _getCustomClip(): ClipItem | null {
-    const selectInfo: SelectInfo = this._page.selection.getSelectInfo();
-    if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
-      return this._getClipDataOfBlocksBySelectInfo(selectInfo);
-    } else if (selectInfo.type === 'Block') {
-      return this._getClipDataOfBlocksById(
-        selectInfo.blocks.map(block => block.blockId)
-      );
+  private _getCustomClip(selectInfo: SelectInfo): ClipItem | null {
+    if (selectInfo.type == 'None') {
+      return null;
     }
-    return null;
-  }
-
-  private _getClipDataOfBlocksBySelectInfo(selectInfo: SelectInfo) {
     const clipInfos = selectInfo.blocks.map(selectBlockInfo =>
       this._getClipInfoOfBlockBySelectInfo(selectBlockInfo)
     );
@@ -99,6 +60,22 @@ export class CopyCutExecution {
     );
   }
 
+  private _getHtmlClip(selectInfo: SelectInfo): ClipItem | null {
+    if (selectInfo.type == 'None') {
+      return null;
+    }
+    const htmlText = this._page.parse.block2Html(selectInfo.blocks);
+    return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
+  }
+
+  private _getTextClip(selectInfo: SelectInfo): ClipItem | null {
+    if (selectInfo.type == 'None') {
+      return null;
+    }
+    const text = this._page.parse.block2Text(selectInfo.blocks);
+    return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, text);
+  }
+
   private _getClipInfoOfBlockBySelectInfo(
     selectBlockInfo: SelectBlock
   ): OpenBlockInfo | null {
@@ -106,27 +83,23 @@ export class CopyCutExecution {
     if (!model) {
       return null;
     }
+    // TODO Handling different block by extension
+    const delta = model?.text?.sliceToDelta(
+      selectBlockInfo.startPos || 0,
+      selectBlockInfo.endPos
+    );
+
     const children: OpenBlockInfo[] = [];
     selectBlockInfo.children.forEach(child => {
       const childInfo = this._getClipInfoOfBlockBySelectInfo(child);
       childInfo && children.push(childInfo);
     });
 
-    const delta = model?.text?.sliceToDelta(
-      selectBlockInfo.startPos || 0,
-      selectBlockInfo.endPos
-    );
-    const blockInfo: OpenBlockInfo = {
+    return {
       flavour: model.flavour,
       text: delta,
       children: children,
     };
-    return blockInfo;
-  }
-
-  private _getTextClip(): ClipItem {
-    const blockText = ParseBlock.block2Text([]);
-    return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, blockText);
   }
 
   private _copyToClipboard(e: ClipboardEvent, clipItems: ClipItem[]) {

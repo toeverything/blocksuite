@@ -113,7 +113,7 @@ export class PasteExecution {
     }
     return;
   }
-
+  // TODO Max 15 deeper
   private _insertBlocks(blocks: OpenBlockInfo[]) {
     if (blocks.length === 0) {
       return;
