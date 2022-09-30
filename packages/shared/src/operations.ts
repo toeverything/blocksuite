@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Store } from '@blocksuite/store';
+import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
 import { BlockHost, SelectionPosition } from './types';
 import { Point, Rect } from './rect';
 
@@ -20,6 +20,30 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
     const id = store.addBlock(blockProps, parent, index + 1);
     asyncFocusRichText(store, id);
   }
+}
+
+export function handleBlockSplit(
+  store: Store,
+  model: BaseBlockModel,
+  splitIndex: number
+) {
+  if (!(model.text instanceof TextEntity)) return;
+
+  const parent = store.getParent(model);
+  if (!parent) return;
+
+  const newBlockIndex = parent.children.indexOf(model) + 1;
+
+  const [left, right] = model.text.split(splitIndex);
+  store.captureSync();
+
+  store.markTextSplit(model.text, left, right);
+  store.updateBlock(model, { text: left });
+  store.addBlock(
+    { flavour: model.flavour, text: right },
+    parent,
+    newBlockIndex
+  );
 }
 
 export function handleIndent(store: Store, model: BaseBlockModel) {

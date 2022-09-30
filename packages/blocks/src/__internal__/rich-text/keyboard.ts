@@ -3,6 +3,7 @@ import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
   BlockHost,
   handleBlockEndEnter,
+  handleBlockSplit,
   handleIndent,
   handleKeyDown,
   handleKeyUp,
@@ -71,7 +72,8 @@ export const createKeyboardBindings = (
     if (isEnd) {
       handleBlockEndEnter(store, model);
     } else {
-      // TODO split text
+      const index = this.quill.getSelection()?.index || 0;
+      handleBlockSplit(store, model, index);
     }
   }
 

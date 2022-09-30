@@ -58,6 +58,23 @@ test('insert new paragraph block by enter', async ({ page }) => {
   ]);
 });
 
+test('split paragraph block by enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['hello']);
+
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 2, 0);
+
+  await pressEnter(page);
+  await assertRichTexts(page, ['he', 'llo']);
+  await assertBlockChildrenFlavours(page, '0', ['paragraph', 'paragraph']);
+});
+
 test('indent and unindent existing paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
