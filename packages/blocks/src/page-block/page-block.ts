@@ -1,6 +1,10 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
+import {
+  asyncFocusRichText,
+  BLOCK_ID_ATTR,
+  type BlockHost,
+} from '@blocksuite/shared';
 import type { PageBlockModel } from './page-model';
 import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
 
@@ -27,11 +31,20 @@ export class PageBlockElement extends LitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => {
       if (this.model.title !== this._blockTitle.value) {
+        this._blockTitle.value = this.model.title || '';
         this.requestUpdate();
       }
     });
 
     focusTextEnd(this._blockTitle);
+  }
+
+  private _onKeyDown(e: KeyboardEvent) {
+    const hasContent = this._blockTitle.value.length > 0;
+
+    if (e.key === 'Enter' && hasContent) {
+      asyncFocusRichText(this.host.store, this.model.children[0].id);
+    }
   }
 
   private _onTitleInput(e: InputEvent) {
@@ -75,6 +88,7 @@ export class PageBlockElement extends LitElement {
             placeholder="Title"
             class="affine-page-block-title"
             value=${this.model.title}
+            @keydown=${this._onKeyDown}
             @input=${this._onTitleInput}
           />
         </div>

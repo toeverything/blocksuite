@@ -1,5 +1,5 @@
 import type { Store } from './store';
-import type { TextEntity } from './text-adapter';
+import type { TextType } from './text-adapter';
 import { Slot } from './utils/slot';
 
 export interface IBaseBlockProps {
@@ -8,7 +8,7 @@ export interface IBaseBlockProps {
   children: IBaseBlockProps[];
 
   // TODO use schema
-  text?: TextEntity;
+  text?: TextType;
 }
 
 export class BaseBlockModel implements IBaseBlockProps {
@@ -21,12 +21,28 @@ export class BaseBlockModel implements IBaseBlockProps {
   id: string;
   children: BaseBlockModel[];
   // TODO use schema
-  text?: TextEntity;
+  text?: TextType;
 
   constructor(store: Store, props: Partial<IBaseBlockProps>) {
     this.store = store;
     this.id = props.id as string;
     this.children = [];
+  }
+
+  firstChild() {
+    const children = this.children;
+    if (!children?.length) {
+      return null;
+    }
+    return children[0];
+  }
+
+  lastChild() {
+    const children = this.children;
+    if (!children?.length) {
+      return null;
+    }
+    return children[children.length - 1];
   }
 
   dispose() {

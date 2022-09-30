@@ -131,3 +131,70 @@ export async function shiftTab(page: Page) {
 export async function clickMenuButton(page: Page, title: string) {
   await page.click(`button[aria-label="${title}"]`);
 }
+
+export async function getQuillSelectionIndex(page: Page) {
+  return await page.evaluate(() => {
+    const selection = document.getSelection();
+    if (selection) {
+      const range = selection.getRangeAt(0);
+      const component =
+        range.startContainer.parentElement?.closest('rich-text');
+      // @ts-ignore
+      const index = component._quill?.getSelection()?.index;
+      return index !== undefined ? index : -1;
+    }
+    return -1;
+  });
+}
+
+export async function getQuillSelectionText(page: Page) {
+  return await page.evaluate(() => {
+    const selection = document.getSelection();
+    if (selection) {
+      const range = selection.getRangeAt(0);
+      const component =
+        range.startContainer.parentElement?.closest('rich-text');
+      // @ts-ignore
+      return component._quill?.getText() || '';
+    }
+    return '';
+  });
+}
+
+export async function getCursorBlockIdAndHeight(page: Page) {
+  return await page.evaluate(() => {
+    const selection = document.getSelection();
+    if (selection) {
+      const block =
+        selection.anchorNode?.parentElement?.closest(`[data-block-id]`);
+      if (block) {
+        const id = block?.getAttribute('data-block-id');
+        const height = block.getBoundingClientRect().height;
+        if (id) {
+          return [id, height];
+        }
+      }
+    }
+    return [null, null];
+  });
+}
+
+/**
+ * fill a line by keep triggering key input
+ * @param page
+ * @param toNext if true, fill until soft wrap
+ */
+export async function fillLine(page: Page, toNext = false) {
+  const [id, height] = await getCursorBlockIdAndHeight(page);
+  if (id && height) {
+    let nextHeight;
+    // type until current block height is changed, means has new line
+    do {
+      await page.keyboard.type('a');
+      [, nextHeight] = await getCursorBlockIdAndHeight(page);
+    } while (nextHeight === height);
+    if (!toNext) {
+      page.keyboard.press('Backspace');
+    }
+  }
+}

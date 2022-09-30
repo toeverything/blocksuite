@@ -5,7 +5,7 @@ import type { Quill } from 'quill';
 import type { Store } from './store';
 
 // Removes the pending '\n's if it has no attributes
-export const normQuillDelta = (delta: any) => {
+export function normQuillDelta(delta: any) {
   if (delta.length > 0) {
     const d = delta[delta.length - 1];
     const insert = d.insert;
@@ -27,22 +27,97 @@ export const normQuillDelta = (delta: any) => {
     }
   }
   return delta;
-};
+}
 
-export class TextEntity {
-  private _textMap: WeakMap<TextEntity, Y.Text>;
-  constructor(textMap: WeakMap<TextEntity, Y.Text>, yText: Y.Text) {
-    this._textMap = textMap;
-    this._textMap.set(this, yText);
+type PrelimTextEnityType = 'splitLeft' | 'splitRight';
+
+export type TextType = PrelimTextEntity | TextEntity;
+
+export class PrelimTextEntity {
+  ready = false;
+  type: PrelimTextEnityType;
+  index: number;
+  constructor(type: PrelimTextEnityType, index: number) {
+    this.type = type;
+    this.index = index;
   }
 
   clone() {
-    const clonedYText = this._textMap.get(this)?.clone();
-    return new TextEntity(this._textMap, clonedYText as Y.Text);
+    throw new Error('PrelimTextEntity is not clonable');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  split(_: number): [PrelimTextEntity, PrelimTextEntity] {
+    throw new Error('PrelimTextEntity is not splittable');
+  }
+}
+
+export class TextEntity {
+  private _yText: Y.Text;
+  constructor(yText: Y.Text) {
+    this._yText = yText;
+  }
+
+  clone() {
+    return new TextEntity(this._yText.clone());
+  }
+
+  split(index: number): [PrelimTextEntity, PrelimTextEntity] {
+    return [
+      new PrelimTextEntity('splitLeft', index),
+      new PrelimTextEntity('splitRight', index),
+    ];
+  }
+
+  applyDelta(delta: any) {
+    this._yText.applyDelta(delta);
+  }
+
+  toDelta() {
+    return this._yText.toDelta();
+  }
+
+  sliceToDelta(begin: number, end?: number) {
+    if (end && begin >= end) {
+      return [];
+    }
+
+    const delta = this.toDelta();
+    if (begin < 1 && !end) {
+      return delta;
+    }
+    const result = [];
+    if (delta && delta instanceof Array) {
+      let charNum = 0;
+      for (let i = 0; i < delta.length; i++) {
+        const content = delta[i];
+        let contentText = content.insert || '';
+        const contentLen = contentText.length;
+        if (end && charNum + contentLen > end) {
+          contentText = contentText.slice(0, end - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          contentText = contentText.slice(begin - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+        } else {
+          result.length > 0 && result.push(content);
+        }
+        if (end && charNum + contentLen > end) {
+          break;
+        }
+        charNum = charNum + contentLen;
+      }
+    }
+    return result;
   }
 
   toString() {
-    return this._textMap.get(this)?.toString();
+    return this._yText.toString();
   }
 }
 
@@ -76,8 +151,12 @@ export class RichTextAdapter {
   }
 
   private _yObserver = (event: Y.YTextEvent) => {
+    const isFromLocal = event.transaction.origin === this.doc.clientID;
+    const isFromRemote = !isFromLocal;
+
     // remote update doesn't carry clientID
-    if (event.transaction.origin !== this.doc.clientID) {
+    // @ts-ignore
+    if (isFromRemote || event.target?.meta?.split) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
       // result in quill assuming that a text insertion shall inherit existing
@@ -101,6 +180,12 @@ export class RichTextAdapter {
       }
       // tell quill this is a remote update
       this.quill.updateContents(delta, this.doc.clientID as any);
+
+      // @ts-ignore
+      if (event.target?.meta) {
+        // @ts-ignore
+        delete event.target.meta;
+      }
     }
   };
 

@@ -1,6 +1,11 @@
 import * as Y from 'yjs';
 import { Slot } from './utils/slot';
-import { RichTextAdapter, TextEntity } from './text-adapter';
+import {
+  PrelimTextEntity,
+  RichTextAdapter,
+  TextEntity,
+  TextType,
+} from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
 import {
@@ -20,7 +25,7 @@ export type YBlocks = Y.Map<YBlock>;
 export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
-  text?: TextEntity;
+  text?: void | TextType;
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -64,7 +69,7 @@ export class Store {
   private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _textMap = new WeakMap<TextEntity, Y.Text>();
+  private _splitSet = new Set<TextEntity | PrelimTextEntity>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -128,9 +133,9 @@ export class Store {
     this.doc.transact(fn, this.doc.clientID);
   }
 
-  register(blockMap: Record<string, typeof BaseBlockModel>) {
-    Object.keys(blockMap).forEach(key => {
-      this._flavourMap.set(key, blockMap[key]);
+  register(blockSchema: Record<string, typeof BaseBlockModel>) {
+    Object.keys(blockSchema).forEach(key => {
+      this._flavourMap.set(key, blockSchema[key]);
     });
     return this;
   }
@@ -166,6 +171,15 @@ export class Store {
     return parent?.children[index - 1] ?? null;
   }
 
+  getNextSibling(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    const index = parent?.children.indexOf(block) ?? -1;
+    if (index === -1) {
+      return null;
+    }
+    return parent?.children[index + 1] ?? null;
+  }
+
   addBlock<T extends Partial<BlockProps>>(
     blockProps: T,
     parent?: BaseBlockModel,
@@ -179,12 +193,12 @@ export class Store {
     const id = clonedProps.id ? clonedProps.id : this._createId();
     clonedProps.id = id;
 
-    const yBlock = new Y.Map() as YBlock;
-
     this.transact(() => {
+      const yBlock = new Y.Map() as YBlock;
+
       initSysProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
-      trySyncTextProp(yBlock, this._textMap, clonedProps.text);
+      trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       const parentId = parent?.id ?? this._root?.id;
 
@@ -207,7 +221,14 @@ export class Store {
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
-    this.transact(() => syncBlockProps(yBlock, props, this._ignoredKeys));
+
+    this.transact(() => {
+      if (props.text instanceof PrelimTextEntity) {
+        props.text.ready = true;
+      }
+
+      syncBlockProps(yBlock, props, this._ignoredKeys);
+    });
   }
 
   deleteBlockById(id: string) {
@@ -262,6 +283,14 @@ export class Store {
     const adapter = this.richTextAdapters.get(id);
     adapter?.destroy();
     this.richTextAdapters.delete(id);
+  }
+
+  markTextSplit(
+    base: TextEntity,
+    left: PrelimTextEntity,
+    right: PrelimTextEntity
+  ) {
+    this._splitSet.add(base).add(left).add(right);
   }
 
   private _createId(): string {
@@ -328,7 +357,7 @@ export class Store {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const textEntity = new TextEntity(this._textMap, yText);
+    const textEntity = new TextEntity(yText);
     model.text = textEntity;
 
     const yChildren = yBlock.get('sys:children');

@@ -40,6 +40,9 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
+
+  await pageB.keyboard.type(' world');
+  await assertTitle(pageA, 'hello world');
 });
 
 test('A open and edit, then joins B', async ({ browser, page: pageA }) => {

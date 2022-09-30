@@ -28,11 +28,11 @@ export class ListBlockElement extends LitElement {
   }
 
   firstUpdated() {
-    this.host.selection.addChangeListener(this.model.id, selected => {
+    this.host.selection.addBlockSelectedListener(this.model.id, selected => {
       this.selected = selected;
     });
 
-    this.host.selection.onBlockActive(this.model.id, position => {
+    this.host.selection.addBlockActiveListener(this.model.id, position => {
       const editableContainer = this.querySelector('[contenteditable]');
       if (editableContainer) {
         commonTextActiveHandler(position, editableContainer);
@@ -44,8 +44,8 @@ export class ListBlockElement extends LitElement {
   }
 
   disconnectedCallback() {
-    this.host.selection.removeChangeListener(this.model.id);
-    this.host.selection.offBlockActive(this.model.id);
+    this.host.selection.removeBlockSelectedListener(this.model.id);
+    this.host.selection.removeBlockActiveListener(this.model.id);
   }
 
   render() {

@@ -3,9 +3,11 @@ import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
   BlockHost,
   handleBlockEndEnter,
+  handleBlockSplit,
   handleIndent,
+  handleKeyDown,
+  handleKeyUp,
   handleUnindent,
-  Point,
 } from '@blocksuite/shared';
 import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
 
@@ -70,7 +72,8 @@ export const createKeyboardBindings = (
     if (isEnd) {
       handleBlockEndEnter(store, model);
     } else {
-      // TODO split text
+      const index = this.quill.getSelection()?.index || 0;
+      handleBlockSplit(store, model, index);
     }
   }
 
@@ -90,37 +93,31 @@ export const createKeyboardBindings = (
 
   function keyup(this: KeyboardEventThis, range: IQuillRange) {
     if (range.index >= 0) {
-      const selection = window.getSelection();
-      if (selection) {
-        const range = selection.getRangeAt(0);
-        const { height, left, top } = range.getBoundingClientRect();
-        // TODO resolve compatible problem
-        const newRange = document.caretRangeFromPoint(left, top - height / 2);
-        if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
-          selectionManager.activePreviousBlock(model.id, new Point(left, top));
-          return false;
-        }
-      }
+      return handleKeyUp(model, selectionManager, this.quill.root);
     }
     return true;
   }
 
   function keydown(this: KeyboardEventThis, range: IQuillRange) {
     if (range.index >= 0) {
-      const selection = window.getSelection();
-      if (selection) {
-        const range = selection.getRangeAt(0);
-        const { bottom, left, height } = range.getBoundingClientRect();
-        // TODO resolve compatible problem
-        const newRange = document.caretRangeFromPoint(
-          left,
-          bottom + height / 2
-        );
-        if (!newRange || !this.quill.root.contains(newRange.startContainer)) {
-          selectionManager.activeNextBlock(model.id, new Point(left, bottom));
-          return false;
-        }
-      }
+      return handleKeyDown(model, selectionManager, this.quill.root);
+    }
+    return true;
+  }
+
+  function keyLeft(this: KeyboardEventThis, range: IQuillRange) {
+    if (range.index === 0) {
+      selectionManager.activePreviousBlock(model.id, 'end');
+      return false;
+    }
+    return true;
+  }
+
+  function keyRight(this: KeyboardEventThis, range: IQuillRange) {
+    const textLength = this.quill.getText().length;
+    if (range.index + range.length + 1 === textLength) {
+      selectionManager.activeNextBlock(model.id, 'start');
+      return false;
     }
     return true;
   }
@@ -164,6 +161,16 @@ export const createKeyboardBindings = (
       key: 'down',
       shiftKey: false,
       handler: keydown,
+    },
+    left: {
+      key: 'left',
+      shiftKey: false,
+      handler: keyLeft,
+    },
+    right: {
+      key: 'right',
+      shiftKey: false,
+      handler: keyRight,
     },
   };
 

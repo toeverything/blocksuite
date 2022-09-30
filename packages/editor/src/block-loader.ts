@@ -6,7 +6,7 @@ import { ListBlockModel } from '../../blocks/src/list-block/list-model';
 export type { ParagraphBlockProps as TextBlockProps } from '../../blocks';
 
 // TODO support dynamic register
-export const BlockMap = {
+export const BlockSchema = {
   paragraph: ParagraphBlockModel,
   page: PageBlockModel,
   list: ListBlockModel,

@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import type { BlockProps, PrefixedBlockProps, YBlock } from '../store';
-import { TextEntity } from '../text-adapter';
+import { PrelimTextEntity, TextEntity, TextType } from '../text-adapter';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -53,14 +53,58 @@ export function syncBlockProps(
 }
 
 export function trySyncTextProp(
+  splitSet: Set<TextEntity | PrelimTextEntity>,
   yBlock: YBlock,
-  textMap: WeakMap<TextEntity, Y.Text>,
-  textEntity?: TextEntity
+  text?: TextType | void
 ) {
-  if (!textEntity || !textMap.has(textEntity)) return;
+  if (!text) return;
 
-  const yText = textMap.get(textEntity) as Y.Text;
-  yBlock.set('prop:text', yText);
+  // update by clone
+  if (text instanceof TextEntity) {
+    // @ts-ignore
+    yBlock.set('prop:text', text._yText);
+    return;
+  }
+
+  // update by split
+  if (text instanceof PrelimTextEntity) {
+    const iter = splitSet.values();
+    const base = iter.next().value as TextEntity;
+    const left = iter.next().value as PrelimTextEntity;
+    const right = iter.next().value as PrelimTextEntity;
+
+    if (!left.ready) {
+      throw new Error('PrelimTextEntity left is not ready');
+    }
+    if (
+      left.type !== 'splitLeft' ||
+      right.type !== 'splitRight' ||
+      right !== text
+    ) {
+      throw new Error('Unmatched text entity');
+    }
+
+    // @ts-ignore
+    const yBase = base._yText;
+
+    // attach meta state for identifing split
+    // otherwise local change from y-side will be ignored by TextAdapter
+    // @ts-ignore
+    yBase.meta = { split: true };
+
+    // clone the original text to `yRight` and add it to the doc first
+    const yRight = yBase.clone();
+    yBlock.set('prop:text', yRight);
+
+    // delete the left-half part of `yRight`, making it the new right
+    yRight.delete(0, right.index);
+
+    // delete the right-half part of `yBase`, making it the new left
+    yBase.delete(right.index, yBase.length - right.index);
+
+    // cleanup
+    splitSet.clear();
+  }
 }
 
 export function toBlockProps(
