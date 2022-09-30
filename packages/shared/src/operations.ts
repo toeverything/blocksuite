@@ -3,7 +3,7 @@ import { BlockHost, SelectionPosition } from './types';
 import { Point, Rect } from './rect';
 
 // XXX: workaround quill lifecycle issue
-function asyncFocusRichText(store: Store, id: string) {
+export function asyncFocusRichText(store: Store, id: string) {
   setTimeout(() => store.richTextAdapters.get(id)?.quill.focus());
 }
 

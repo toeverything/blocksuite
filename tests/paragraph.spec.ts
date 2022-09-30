@@ -131,3 +131,13 @@ test('switch between paragraph types', async ({ page }) => {
   await undoByClick(page);
   await assertClassName(page, selector, /h1/);
 });
+
+test('get focus from page title enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['\n']);
+
+  await pressEnter(page);
+  await page.keyboard.type('world');
+  await assertRichTexts(page, ['world']);
+});
