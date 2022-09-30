@@ -8,6 +8,7 @@ import {
   pressEnter,
   shiftTab,
   getCursorBlockIdAndHeight,
+  fillLine,
 } from './utils/actions';
 import { assertSelectedBlockCount } from './utils/asserts';
 import { expect } from '@playwright/test';
@@ -116,12 +117,7 @@ test('cursor move up at edge of the second line', async ({ page }) => {
   await pressEnter(page);
   const [id, height] = await getCursorBlockIdAndHeight(page);
   if (id && height) {
-    let nextHeight;
-    // type until current block height is changed, means has new line
-    do {
-      await page.keyboard.type('a');
-      [, nextHeight] = await getCursorBlockIdAndHeight(page);
-    } while (nextHeight === height);
+    await fillLine(page, true);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowUp');
     const [currentId] = await getCursorBlockIdAndHeight(page);
@@ -137,12 +133,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   await page.keyboard.press('ArrowUp');
   const [, height] = await getCursorBlockIdAndHeight(page);
   if (id && height) {
-    let nextHeight;
-    // type until current block height is changed, means has new line
-    do {
-      await page.keyboard.type('a');
-      [, nextHeight] = await getCursorBlockIdAndHeight(page);
-    } while (nextHeight === height);
+    await fillLine(page, true);
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowDown');
     const [currentId] = await getCursorBlockIdAndHeight(page);

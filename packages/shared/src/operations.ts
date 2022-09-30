@@ -136,7 +136,7 @@ export function handleKeyDown(
       return false;
     }
     // if cursor is at the edge of a block, it may out of the textContainer after keydown
-    if (checkIfEdgeOfALine(range)) {
+    if (isAtLineEdge(range)) {
       const {
         height,
         left,

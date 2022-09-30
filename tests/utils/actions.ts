@@ -166,3 +166,23 @@ export async function getCursorBlockIdAndHeight(page: Page) {
     return [null, null];
   });
 }
+
+/**
+ * fill a line by keep triggering key input
+ * @param page
+ * @param toNext if true, fill until soft wrap
+ */
+export async function fillLine(page: Page, toNext = false) {
+  const [id, height] = await getCursorBlockIdAndHeight(page);
+  if (id && height) {
+    let nextHeight;
+    // type until current block height is changed, means has new line
+    do {
+      await page.keyboard.type('a');
+      [, nextHeight] = await getCursorBlockIdAndHeight(page);
+    } while (nextHeight === height);
+    if (!toNext) {
+      page.keyboard.press('Backspace');
+    }
+  }
+}
