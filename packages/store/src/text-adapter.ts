@@ -55,6 +55,16 @@ export class PrelimTextEntity {
   split(_: number): [PrelimTextEntity, PrelimTextEntity] {
     throw new Error('PrelimTextEntity does not support split');
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  applyDelta(_: any) {
+    throw new Error('PrelimTextEntity does not support applyDelta');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sliceToDelta(_begin: number, _end?: number) {
+    throw new Error('PrelimTextEntity does not support sliceToDelta');
+  }
 }
 
 export class TextEntity {

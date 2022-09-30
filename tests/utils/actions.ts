@@ -28,6 +28,10 @@ export async function waitNextFrame(page: Page) {
   await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
 }
 
+export async function clearLog(page: Page) {
+  await page.evaluate(() => console.clear());
+}
+
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUNT}?init=list&room=${room}`);

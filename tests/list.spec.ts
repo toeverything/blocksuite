@@ -114,4 +114,11 @@ test('nested list blocks', async ({ page }) => {
   await assertBlockChildrenIds(page, '0', ['1']);
   await assertBlockChildrenIds(page, '1', ['2']);
   await assertBlockChildrenIds(page, '2', ['3']);
+
+  await focusRichText(page, 1);
+  await shiftTab(page);
+
+  await assertRichTexts(page, ['123', '456', '789']);
+  await assertBlockChildrenIds(page, '0', ['1', '2']);
+  await assertBlockChildrenIds(page, '2', ['3']);
 });

@@ -66,6 +66,7 @@ export function handleIndent(store: Store, model: BaseBlockModel) {
       id: model.id,
       flavour: model.flavour,
       text: model?.text?.clone(), // should clone before `deleteBlock`
+      children: model.children,
     };
     store.deleteBlock(model);
     store.addBlock(blockProps, previousSibling);
@@ -86,6 +87,7 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
     id: model.id,
     flavour: model.flavour,
     text: model?.text?.clone(), // should clone before `deleteBlock`
+    children: model.children,
   };
   store.deleteBlock(model);
   store.addBlock(blockProps, grandParent, index + 1);
