@@ -60,7 +60,10 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
 // but only one bounding rect.
 // If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
 function isAtLineEdge(range: Range) {
-  if (range.startOffset > 0) {
+  if (
+    range.startOffset > 0 &&
+    Number(range.startContainer.textContent?.length) - range.startOffset > 0
+  ) {
     const prevRange = range.cloneRange();
     prevRange.setStart(range.startContainer, range.startOffset - 1);
     prevRange.setEnd(range.startContainer, range.startOffset - 1);
@@ -128,12 +131,31 @@ export function handleKeyDown(
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
-    if (
-      (!newRange || !textContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
+    if (!newRange || !textContainer.contains(newRange.startContainer)) {
       selectionManager.activeNextBlock(model.id, new Point(left, bottom));
       return false;
+    }
+    // if cursor is at the edge of a block, it may out of the textContainer after keydown
+    if (isAtLineEdge(range)) {
+      const {
+        height,
+        left,
+        bottom: nextBottom,
+      } = newRange.getBoundingClientRect();
+      const nextRange = document.caretRangeFromPoint(
+        left,
+        nextBottom + height / 2
+      );
+      if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
+        selectionManager.activeNextBlock(
+          model.id,
+          new Point(
+            newRange.startContainer.parentElement?.offsetLeft || left,
+            bottom
+          )
+        );
+        return false;
+      }
     }
   }
   return true;
