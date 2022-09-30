@@ -59,9 +59,6 @@ export class PageContainer extends LitElement implements BlockHost {
         this.store.undo();
       }
     );
-    HotKeysManage.addHotkey('ctrl+i', 'all', () => {
-      console.log('123123123');
-    });
     HotKeysManage.addHotkey(HotKeysManage.hotkeysMap.redo, 'page', () => {
       this.store.redo();
     });
@@ -71,7 +68,8 @@ export class PageContainer extends LitElement implements BlockHost {
       (e: Event) => {
         console.log('select all');
         e.preventDefault();
-        this.selection.selectedBlockIds = ['1', '2', '3'];
+        let pageChildrenBlock = this.model.children.map(block => block.id);
+        this.selection.selectedBlockIds = pageChildrenBlock;
       }
     );
   }

@@ -39,6 +39,12 @@ export async function focusRichText(page: Page, i = 0) {
   await locator.click();
 }
 
+export async function blurRichText(page: Page) {
+  await page.mouse.move(0, 0);
+  const locator = page.locator('.affine-page-container');
+  await locator.click();
+}
+
 async function keyDownCtrlOrMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Meta');
@@ -69,6 +75,12 @@ export async function redoByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
 }
 
+export async function selectAllByKeyboard(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.press('a');
+  await page.keyboard.up('a');
+  await keyDownCtrlOrMeta(page);
+}
 export async function pressEnter(page: Page) {
   // avoid flaky test by simulate real user input
   await page.keyboard.press('Enter', { delay: 50 });
