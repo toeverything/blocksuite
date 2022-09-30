@@ -81,7 +81,7 @@ test('split paragraph block by enter', async ({ page }) => {
   await assertRichTexts(page, ['he', 'llo']);
 });
 
-test('indent and unindent existing paragraph block', async ({ page }) => {
+test.skip('indent and unindent existing paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');

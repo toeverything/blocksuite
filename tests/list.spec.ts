@@ -44,7 +44,7 @@ test('switch to numbered list block', async ({ page }) => {
   await expect(page.locator(numberIconSelector)).toHaveCount(1);
 });
 
-test('indent list block', async ({ page }) => {
+test.skip('indent list block', async ({ page }) => {
   await enterPlaygroundWithList(page);
   await waitNextFrame(page);
 

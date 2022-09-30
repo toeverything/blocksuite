@@ -62,7 +62,7 @@ export class PageContainer extends LitElement implements BlockHost {
 
       () => {
         // TODO: undo in page
-        // this.store.undo();
+        this.store.undo();
       }
     );
     HotKeysManage.addHotkey(HotKeysManage.hotkeysMap.redo, 'page', () => {
