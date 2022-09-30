@@ -3,24 +3,18 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import { BlockHost, HotkeyMap } from '@blocksuite/shared';
+import { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
-import { Hotkeys } from '@blocksuite/shared';
+import { HotKeysManage } from '@blocksuite/shared';
 Quill.register('modules/cursors', QuillCursors);
-const KeyHandlerMap = {
-  [HotkeyMap.undo]: function(){
-    console.log("undo")
-  },
-}
 @customElement('rich-text')
 export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
-  private _hotKeys = new Hotkeys();
-  @property()
+  // @property()
   host!: BlockHost;
 
   @property()
@@ -62,27 +56,19 @@ export class RichText extends LitElement {
   }
 
   private _focus() {
-    this._hotKeys.useHotkey(this.model.id);
+    HotKeysManage.useScope('text');
+    // this._hotKeys.delete('page')
   }
   private _blur() {
-    this._hotKeys.useHotkey('page');
+    HotKeysManage.useScope('page');
   }
 
   private _bindHotKey() {
-    this._hotKeys.addHotkey(
-      HotkeyMap.selectAll,
-      this.model.id,
-      this._textContainer,
+    HotKeysManage.addHotkey(
+      HotKeysManage.hotkeysMap.selectAll,
+      'text',
       this._selectAll
     );
-    Object.keys(KeyHandlerMap).map((key) => {
-      this._hotKeys.addHotkey(
-        key,
-        this.model.id,
-        this._textContainer,
-        KeyHandlerMap[key]
-      );
-      })
   }
   private _selectAll(e: Event) {
     console.log('selectAll', e);

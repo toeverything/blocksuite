@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import { BlockHost, HotkeyMap, Hotkeys } from '@blocksuite/shared';
+import { BlockHost, HotKeysManage } from '@blocksuite/shared';
 import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@blocksuite/store';
 import { BlockMap } from '../../block-loader';
@@ -37,8 +37,6 @@ export class PageContainer extends LitElement implements BlockHost {
   @state()
   placeholderModel = new BlockMap.page(this.store, {});
 
-  private _hotKeys = new Hotkeys();
-
   constructor() {
     super();
 
@@ -49,26 +47,37 @@ export class PageContainer extends LitElement implements BlockHost {
     // @ts-ignore
     window.page = this;
     this._bindHotkeys();
-    this._hotKeys.useHotkey('page');
+    HotKeysManage.useScope('page');
   }
 
   private _bindHotkeys() {
-    this._hotKeys.addHotkey(
-      HotkeyMap.undo,
+    HotKeysManage.addHotkey(
+      HotKeysManage.hotkeysMap.undo,
       'page',
-      this._placeholderInput,
+      
       () => {
         this.store.undo();
       }
     );
-    this._hotKeys.addHotkey(
-      HotkeyMap.redo,
+    HotKeysManage.addHotkey(
+     'ctrl+i',
+      'all',
+      () => {
+        console.log('123123123')
+      }
+    );
+    HotKeysManage.addHotkey(
+      HotKeysManage.hotkeysMap.redo,
       'page',
-      this._placeholderInput,
       () => {
         this.store.redo();
       }
     );
+    HotKeysManage.addHotkey(HotKeysManage.hotkeysMap.selectAll,'page',(e:Event) => {
+      console.log('select all')
+      e.preventDefault()
+      this.selection.selectedBlockIds = ['1','2','3']
+    })
   }
 
   private _subscribeStore() {
