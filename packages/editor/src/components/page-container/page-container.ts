@@ -6,6 +6,7 @@ import { Store } from '@blocksuite/store';
 import { BlockSchema } from '../../block-loader';
 import { Clipboard } from '../../clipboard';
 import './debug-menu';
+import { Parse } from '../../parse';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
@@ -28,6 +29,9 @@ export class PageContainer extends LitElement implements BlockHost {
 
   @state()
   clipboard = new Clipboard(this, this);
+
+  @state()
+  parse = new Parse(this);
 
   @state()
   isEmptyPage = true;
