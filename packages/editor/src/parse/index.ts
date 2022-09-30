@@ -1,3 +1,4 @@
+import { OpenBlockInfo } from '../clipboard/types';
 import { PageContainer } from '../components';
 import { SelectBlock } from '../managers';
 
@@ -19,6 +20,14 @@ export class Parse {
       return text + this._getTextInfoOfBlockBySelectInfo(block);
     }, '');
     return text;
+  }
+
+  public htmlText2Block(html: string) {
+    const htmlEl = document.createElement('html');
+    htmlEl.innerHTML = html;
+    htmlEl.querySelector('head')?.remove();
+
+    return this._convertHtml2Blocks(htmlEl);
   }
 
   private _getHtmlInfoOfBlockBySelectInfo(
@@ -95,5 +104,10 @@ export class Parse {
     });
 
     return `${text}${children.join('')}`;
+  }
+
+  private _convertHtml2Blocks(element: Element): OpenBlockInfo[] {
+    console.log(element);
+    return [];
   }
 }
