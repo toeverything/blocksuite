@@ -74,6 +74,7 @@ test('split paragraph block by enter', async ({ page }) => {
   await pressEnter(page);
   await assertRichTexts(page, ['he', 'llo']);
   await assertBlockChildrenFlavours(page, '0', ['paragraph', 'paragraph']);
+  await assertSelection(page, 1, 0, 0);
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
