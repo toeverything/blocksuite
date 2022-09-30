@@ -47,17 +47,17 @@ export class RichText extends LitElement {
     store.awareness.updateLocalCursor();
     this._bindHotKey();
     this.model.propsUpdated.on(() => this.requestUpdate());
+
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
-      .addEventListener('focus', this._focus);
+      .addEventListener('focus', this._focus.bind(this));
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
-      .addEventListener('blur', this._blur);
+      .addEventListener('blur', this._blur.bind(this));
   }
 
   private _focus() {
-    HotKeysManage.switchScope('text');
-    // this._hotKeys.delete('page')
+    HotKeysManage.switchScope(this.model.id);
   }
   private _blur() {
     HotKeysManage.switchScope('page');
@@ -66,7 +66,7 @@ export class RichText extends LitElement {
   private _bindHotKey() {
     HotKeysManage.addHotkey(
       HotKeysManage.hotkeysMap.selectAll,
-      'text',
+      this.model.id,
       this._selectAll
     );
   }
