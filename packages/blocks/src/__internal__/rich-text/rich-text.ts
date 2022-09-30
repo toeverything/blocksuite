@@ -56,11 +56,11 @@ export class RichText extends LitElement {
   }
 
   private _focus() {
-    HotKeysManage.useScope('text');
+    HotKeysManage.switchScope('text');
     // this._hotKeys.delete('page')
   }
   private _blur() {
-    HotKeysManage.useScope('page');
+    HotKeysManage.switchScope('page');
   }
 
   private _bindHotKey() {

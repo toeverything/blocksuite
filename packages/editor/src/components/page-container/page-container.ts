@@ -48,7 +48,7 @@ export class PageContainer extends LitElement implements BlockHost {
     // @ts-ignore
     window.page = this;
     this._bindHotkeys();
-    HotKeysManage.useScope('page');
+    HotKeysManage.switchScope('page');
   }
 
   private _bindHotkeys() {
@@ -69,7 +69,7 @@ export class PageContainer extends LitElement implements BlockHost {
       (e: Event) => {
         console.log('select all');
         e.preventDefault();
-        let pageChildrenBlock = this.model.children.map(block => block.id);
+        const pageChildrenBlock = this.model.children.map(block => block.id);
         this.selection.selectedBlockIds = pageChildrenBlock;
       }
     );
