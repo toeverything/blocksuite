@@ -7,7 +7,7 @@ import {
   assertTextContent,
 } from './utils/asserts';
 import {
-  addBulletedListByClick,
+  convertToBulletedListByClick,
   enterPlaygroundRoom,
   enterPlaygroundWithList,
   focusRichText,
@@ -20,18 +20,21 @@ import {
 
 test('add new bulleted list', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await addBulletedListByClick(page);
-  await addBulletedListByClick(page);
+
+  await focusRichText(page, 0);
+  await convertToBulletedListByClick(page);
+  await pressEnter(page);
+  await pressEnter(page);
+
   await assertRichTexts(page, ['\n', '\n', '\n']);
-  await assertBlockCount(page, 'list', 2);
+  await assertBlockCount(page, 'list', 3);
 });
 
-test('switch to numbered list block', async ({ page }) => {
+test('convert to numbered list block', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await addBulletedListByClick(page);
 
-  const list = page.locator('list-block-element').nth(0);
-  await list.click();
+  await focusRichText(page, 0);
+  await convertToBulletedListByClick(page);
   await switchToNumberedListByClick(page);
 
   const listSelector = '.affine-list-rich-text-wrapper';
@@ -46,8 +49,7 @@ test('switch to numbered list block', async ({ page }) => {
 test('indent list block', async ({ page }) => {
   await enterPlaygroundWithList(page);
 
-  const secondList = page.locator('list-block-element').nth(1);
-  await secondList.click();
+  await focusRichText(page, 1);
   await page.keyboard.type('hello');
   await assertRichTexts(page, ['\n', 'hello', '\n']);
 

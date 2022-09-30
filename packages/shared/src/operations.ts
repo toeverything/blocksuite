@@ -93,6 +93,34 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
   store.addBlock(blockProps, grandParent, index + 1);
 }
 
+export function convertToList(
+  store: Store,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  model: BaseBlockModel & Record<string, any>,
+  listType: 'bulleted' | 'numbered'
+) {
+  if (model.flavour === 'paragraph') {
+    const parent = store.getParent(model);
+    if (!parent) return;
+
+    const index = parent.children.indexOf(model);
+    store.captureSync();
+
+    const blockProps = {
+      flavour: 'list',
+      type: listType,
+      text: model?.text?.clone(),
+      children: model.children,
+    };
+    store.deleteBlock(model);
+    const id = store.addBlock(blockProps, parent, index);
+    asyncFocusRichText(store, id);
+  } else if (model.flavour === 'list' && model['type'] !== listType) {
+    store.captureSync();
+    store.updateBlock(model, { type: listType });
+  }
+}
+
 // We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
 // but only one bounding rect.
 // If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.

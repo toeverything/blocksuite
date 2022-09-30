@@ -95,12 +95,12 @@ export async function connectByClick(page: Page) {
   await page.click('button[aria-label="connect"]');
 }
 
-export async function addBulletedListByClick(page: Page) {
-  await page.click('button[aria-label="add bulleted list"]');
+export async function convertToBulletedListByClick(page: Page) {
+  await page.click('button[aria-label="convert to bulleted list"]');
 }
 
 export async function switchToNumberedListByClick(page: Page) {
-  await page.click('button[aria-label="switch to numbered list"]');
+  await page.click('button[aria-label="convert to numbered list"]');
 }
 
 export async function mouseDragFromTo(
