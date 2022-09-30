@@ -22,6 +22,15 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
   }
 }
 
+export function handleSoftEnter(
+  store: Store,
+  model: BaseBlockModel,
+  index: number
+) {
+  store.captureSync();
+  store.transact(() => model.text?.insert('\n', index));
+}
+
 export function handleBlockSplit(
   store: Store,
   model: BaseBlockModel,

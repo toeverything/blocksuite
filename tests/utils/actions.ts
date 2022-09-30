@@ -116,6 +116,12 @@ export async function shiftTab(page: Page) {
   await page.keyboard.up('Shift');
 }
 
+export async function shiftEnter(page: Page) {
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Enter');
+  await page.keyboard.up('Shift');
+}
+
 export async function clickMenuButton(page: Page, title: string) {
   await page.click(`button[aria-label="${title}"]`);
 }

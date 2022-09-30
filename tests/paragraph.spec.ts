@@ -12,6 +12,7 @@ import {
   focusRichText,
   pressEnter,
   redoByKeyboard,
+  shiftEnter,
   shiftTab,
   undoByClick,
   undoByKeyboard,
@@ -79,6 +80,29 @@ test('split paragraph block by enter', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['he', 'llo']);
+});
+
+test('add multi line by soft enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['hello']);
+
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 2, 0);
+
+  await shiftEnter(page);
+  await page.pause();
+  await assertRichTexts(page, ['he\n\nllo']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he\n\nllo']);
 });
 
 test('indent and unindent existing paragraph block', async ({ page }) => {
