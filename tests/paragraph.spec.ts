@@ -73,6 +73,12 @@ test('split paragraph block by enter', async ({ page }) => {
   await pressEnter(page);
   await assertRichTexts(page, ['he', 'llo']);
   await assertBlockChildrenFlavours(page, '0', ['paragraph', 'paragraph']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he', 'llo']);
 });
 
 test('indent and unindent existing paragraph block', async ({ page }) => {
