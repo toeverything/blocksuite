@@ -7,6 +7,7 @@ import {
   handleIndent,
   handleKeyDown,
   handleKeyUp,
+  handleSoftEnter,
   handleUnindent,
 } from '@blocksuite/shared';
 import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
@@ -57,8 +58,6 @@ export const createKeyboardBindings = (
   model: BaseBlockModel,
   selectionManager: BlockHost['selection']
 ) => {
-  const clientID = store.doc.clientID;
-
   function undo() {
     store.undo();
   }
@@ -79,8 +78,8 @@ export const createKeyboardBindings = (
 
   function softEnter(this: KeyboardEventThis) {
     const index = this.quill.getSelection()?.index || 0;
-    // @ts-ignore
-    this.quill.insertText(index, '\n', clientID);
+    handleSoftEnter(store, model, index);
+    this.quill.setSelection(index + 1, 0);
   }
 
   function indent(this: KeyboardEventThis) {
@@ -91,14 +90,14 @@ export const createKeyboardBindings = (
     handleUnindent(store, model);
   }
 
-  function keyup(this: KeyboardEventThis, range: IQuillRange) {
+  function keyUp(this: KeyboardEventThis, range: IQuillRange) {
     if (range.index >= 0) {
       return handleKeyUp(model, selectionManager, this.quill.root);
     }
     return true;
   }
 
-  function keydown(this: KeyboardEventThis, range: IQuillRange) {
+  function keyDown(this: KeyboardEventThis, range: IQuillRange) {
     if (range.index >= 0) {
       return handleKeyDown(model, selectionManager, this.quill.root);
     }
@@ -155,12 +154,12 @@ export const createKeyboardBindings = (
     up: {
       key: 'up',
       shiftKey: false,
-      handler: keyup,
+      handler: keyUp,
     },
     down: {
       key: 'down',
       shiftKey: false,
-      handler: keydown,
+      handler: keyDown,
     },
     left: {
       key: 'left',

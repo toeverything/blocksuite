@@ -43,12 +43,17 @@ export class PrelimTextEntity {
   }
 
   clone() {
-    throw new Error('PrelimTextEntity is not clonable');
+    throw new Error('PrelimTextEntity does not support clone');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  insert(_content: string, _index: number) {
+    throw new Error('PrelimTextEntity does not support insert');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   split(_: number): [PrelimTextEntity, PrelimTextEntity] {
-    throw new Error('PrelimTextEntity is not splittable');
+    throw new Error('PrelimTextEntity does not support split');
   }
 }
 
@@ -67,6 +72,12 @@ export class TextEntity {
       new PrelimTextEntity('splitLeft', index),
       new PrelimTextEntity('splitRight', index),
     ];
+  }
+
+  insert(content: string, index: number) {
+    this._yText.insert(index, content);
+    // @ts-ignore
+    this._yText.meta = { split: true };
   }
 
   applyDelta(delta: any) {
@@ -153,10 +164,13 @@ export class RichTextAdapter {
   private _yObserver = (event: Y.YTextEvent) => {
     const isFromLocal = event.transaction.origin === this.doc.clientID;
     const isFromRemote = !isFromLocal;
+    // @ts-ignore
+    const isControlledSplit = !!event.target?.meta?.split;
+    // @ts-ignore
+    const isControlledInsert = !!event.target?.meta?.insert;
 
     // remote update doesn't carry clientID
-    // @ts-ignore
-    if (isFromRemote || event.target?.meta?.split) {
+    if (isFromRemote || isControlledSplit || isControlledInsert) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
       // result in quill assuming that a text insertion shall inherit existing

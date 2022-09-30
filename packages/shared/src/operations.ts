@@ -22,6 +22,15 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
   }
 }
 
+export function handleSoftEnter(
+  store: Store,
+  model: BaseBlockModel,
+  index: number
+) {
+  store.captureSync();
+  store.transact(() => model.text?.insert('\n', index));
+}
+
 export function handleBlockSplit(
   store: Store,
   model: BaseBlockModel,
@@ -39,11 +48,13 @@ export function handleBlockSplit(
 
   store.markTextSplit(model.text, left, right);
   store.updateBlock(model, { text: left });
-  store.addBlock(
+  const id = store.addBlock(
     { flavour: model.flavour, text: right },
     parent,
     newBlockIndex
   );
+
+  asyncFocusRichText(store, id);
 }
 
 export function handleIndent(store: Store, model: BaseBlockModel) {

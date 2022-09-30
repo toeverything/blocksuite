@@ -12,6 +12,7 @@ import {
   focusRichText,
   pressEnter,
   redoByKeyboard,
+  shiftEnter,
   shiftTab,
   undoByClick,
   undoByKeyboard,
@@ -73,6 +74,7 @@ test('split paragraph block by enter', async ({ page }) => {
   await pressEnter(page);
   await assertRichTexts(page, ['he', 'llo']);
   await assertBlockChildrenFlavours(page, '0', ['paragraph', 'paragraph']);
+  await assertSelection(page, 1, 0, 0);
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
@@ -81,7 +83,31 @@ test('split paragraph block by enter', async ({ page }) => {
   await assertRichTexts(page, ['he', 'llo']);
 });
 
-test.skip('indent and unindent existing paragraph block', async ({ page }) => {
+test.skip('add multi line by soft enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['hello']);
+
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 2, 0);
+
+  await shiftEnter(page);
+  await page.pause();
+  await assertRichTexts(page, ['he\n\nllo']);
+  await assertSelection(page, 0, 3, 0);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he\n\nllo']);
+});
+
+test('indent and unindent existing paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
