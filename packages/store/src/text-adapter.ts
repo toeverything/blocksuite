@@ -5,7 +5,7 @@ import type { Quill } from 'quill';
 import type { Store } from './store';
 
 // Removes the pending '\n's if it has no attributes
-export const normQuillDelta = (delta: any) => {
+export function normQuillDelta(delta: any) {
   if (delta.length > 0) {
     const d = delta[delta.length - 1];
     const insert = d.insert;
@@ -27,7 +27,30 @@ export const normQuillDelta = (delta: any) => {
     }
   }
   return delta;
-};
+}
+
+type PrelimTextEnityType = 'splitLeft' | 'splitRight';
+
+export type TextType = PrelimTextEntity | TextEntity;
+
+export class PrelimTextEntity {
+  ready = false;
+  type: PrelimTextEnityType;
+  index: number;
+  constructor(type: PrelimTextEnityType, index: number) {
+    this.type = type;
+    this.index = index;
+  }
+
+  clone() {
+    throw new Error('PrelimTextEntity is not clonable');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  split(_: number): [PrelimTextEntity, PrelimTextEntity] {
+    throw new Error('PrelimTextEntity is not splittable');
+  }
+}
 
 export class TextEntity {
   private _yText: Y.Text;
@@ -37,6 +60,13 @@ export class TextEntity {
 
   clone() {
     return new TextEntity(this._yText.clone());
+  }
+
+  split(index: number): [PrelimTextEntity, PrelimTextEntity] {
+    return [
+      new PrelimTextEntity('splitLeft', index),
+      new PrelimTextEntity('splitRight', index),
+    ];
   }
 
   applyDelta(delta: any) {
@@ -121,8 +151,12 @@ export class RichTextAdapter {
   }
 
   private _yObserver = (event: Y.YTextEvent) => {
+    const isFromLocal = event.transaction.origin === this.doc.clientID;
+    const isFromRemote = !isFromLocal;
+
     // remote update doesn't carry clientID
-    if (event.transaction.origin !== this.doc.clientID) {
+    // @ts-ignore
+    if (isFromRemote || event.target?.meta?.split) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
       // result in quill assuming that a text insertion shall inherit existing
@@ -146,6 +180,12 @@ export class RichTextAdapter {
       }
       // tell quill this is a remote update
       this.quill.updateContents(delta, this.doc.clientID as any);
+
+      // @ts-ignore
+      if (event.target?.meta) {
+        // @ts-ignore
+        delete event.target.meta;
+      }
     }
   };
 
