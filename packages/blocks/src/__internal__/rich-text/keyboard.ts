@@ -79,6 +79,7 @@ export const createKeyboardBindings = (
   function softEnter(this: KeyboardEventThis) {
     const index = this.quill.getSelection()?.index || 0;
     handleSoftEnter(store, model, index);
+    this.quill.setSelection(index + 1, 0);
   }
 
   function indent(this: KeyboardEventThis) {

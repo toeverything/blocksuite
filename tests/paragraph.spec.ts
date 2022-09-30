@@ -98,6 +98,7 @@ test('add multi line by soft enter', async ({ page }) => {
   await shiftEnter(page);
   await page.pause();
   await assertRichTexts(page, ['he\n\nllo']);
+  await assertSelection(page, 0, 3, 0);
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
