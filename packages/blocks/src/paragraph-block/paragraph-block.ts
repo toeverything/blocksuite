@@ -1,6 +1,6 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import style from './style.css';
 import {
   BLOCK_ID_ATTR,
   commonTextActiveHandler,
@@ -12,6 +12,10 @@ import type { ParagraphBlockModel } from './paragraph-model';
 
 @customElement('paragraph-block-element')
 export class ParagraphBlockElement extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @property({
     hasChanged() {
       return true;
@@ -59,32 +63,10 @@ export class ParagraphBlockElement extends LitElement {
     const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
-      <style>
-        .affine-paragraph-block-container.h1 {
-          font-size: 28px;
-        }
-        .affine-paragraph-block-container.h2 {
-          font-size: 24px;
-        }
-        .affine-paragraph-block-container.h3 {
-          font-size: 20px;
-        }
-        .affine-paragraph-block-container.quote {
-          font-size: 13px;
-          color: grey;
-        }
-        .affine-paragraph-block-container.text {
-          font-size: 13px;
-        }
-      </style>
       <div
-        style=${styleMap({
-          'background-color': this.selected
-            ? 'rgba(152, 172, 189, 0.1)'
-            : 'transparent',
-          margin: '5px 0',
-        })}
-        class="affine-paragraph-block-container ${type}"
+        class="affine-paragraph-block-container ${type} ${this.selected
+          ? 'selected'
+          : ''}"
       >
         <rich-text .host=${this.host} .model=${this.model}></rich-text>
         ${childrenContainer}

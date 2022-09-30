@@ -32,8 +32,8 @@ export function getBlockChildrenContainer(
 ) {
   return html`
     <style>
-      .affine-block-children-container {
-        padding-left: 1rem;
+      .affine-block-children-container .affine-block-children-container {
+        padding-left: 34px;
       }
     </style>
     <div class="affine-block-children-container">

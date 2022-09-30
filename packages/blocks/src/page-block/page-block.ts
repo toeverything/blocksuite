@@ -1,11 +1,16 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
 import type { PageBlockModel } from './page-model';
 import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
+import style from './style.css';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @property()
   host!: BlockHost;
 
@@ -54,21 +59,6 @@ export class PageBlockElement extends LitElement {
     const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
-      <style>
-        .affine-page-block-title {
-          box-sizing: border-box;
-          font-size: 32px;
-          font-weight: 600;
-          outline: none;
-          border: 0;
-        }
-        .affine-page-block-title::placeholder {
-          color: #ddd;
-        }
-        .affine-page-block-container > .affine-block-children-container {
-          padding-left: 0;
-        }
-      </style>
       <div class="affine-page-block-container">
         <div class="affine-page-block-title-container">
           <input
