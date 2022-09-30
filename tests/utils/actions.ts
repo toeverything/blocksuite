@@ -31,6 +31,7 @@ export async function waitNextFrame(page: Page) {
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUNT}?init=list&room=${room}`);
+  await waitNextFrame(page);
 }
 
 export async function focusRichText(page: Page, i = 0) {
