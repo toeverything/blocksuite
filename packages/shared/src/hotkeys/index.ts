@@ -41,4 +41,4 @@ export class Hotkeys {
     this._hotkeys.deleteScope(scope ?? (this.hotkeyScope as string), newScope);
   }
 }
-export const HotKeysManage = new Hotkeys();
+export const HotkeyManager = new Hotkeys();

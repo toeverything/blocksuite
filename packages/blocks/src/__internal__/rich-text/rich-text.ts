@@ -7,7 +7,7 @@ import { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
-import { HotKeysManage } from '@blocksuite/shared';
+import { HotkeyManager } from '@blocksuite/shared';
 Quill.register('modules/cursors', QuillCursors);
 @customElement('rich-text')
 export class RichText extends LitElement {
@@ -53,19 +53,19 @@ export class RichText extends LitElement {
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
       .addEventListener('blur', this._blur.bind(this));
-    HotKeysManage.switchScope(this.model.id);
+    HotkeyManager.switchScope(this.model.id);
   }
 
   private _focus() {
-    HotKeysManage.switchScope(this.model.id);
+    HotkeyManager.switchScope(this.model.id);
   }
   private _blur() {
-    HotKeysManage.switchScope('page');
+    HotkeyManager.switchScope('page');
   }
 
   private _bindHotKey() {
-    HotKeysManage.addHotkey(
-      HotKeysManage.hotkeysMap.selectAll,
+    HotkeyManager.addHotkey(
+      HotkeyManager.hotkeysMap.selectAll,
       this.model.id,
       this._selectAll
     );

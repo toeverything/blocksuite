@@ -122,7 +122,7 @@ test('basic paired undo/redo', async ({ page }) => {
 
   await undoByClick(page);
   await assertEmpty(page);
-  await redoByClick(page);
+  await redoByKeyboard(page);
   await assertText(page, 'hello');
 });
 
