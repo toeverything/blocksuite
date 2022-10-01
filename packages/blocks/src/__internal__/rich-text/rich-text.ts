@@ -7,14 +7,17 @@ import { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
-import { HotkeyManager } from '@blocksuite/shared';
+import { hotkeyManager } from '@blocksuite/shared';
+
 Quill.register('modules/cursors', QuillCursors);
+
 @customElement('rich-text')
 export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
-  // @property()
+
+  @property()
   host!: BlockHost;
 
   @property()
@@ -53,25 +56,26 @@ export class RichText extends LitElement {
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
       .addEventListener('blur', this._blur.bind(this));
-    HotkeyManager.switchScope(this.model.id);
+    hotkeyManager.setScope(this.model.id);
   }
 
   private _focus() {
-    HotkeyManager.switchScope(this.model.id);
+    hotkeyManager.setScope(this.model.id);
   }
   private _blur() {
-    HotkeyManager.switchScope('page');
+    hotkeyManager.setScope('page');
   }
 
   private _bindHotKey() {
-    HotkeyManager.addHotkey(
-      HotkeyManager.hotkeysMap.selectAll,
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.selectAll,
       this.model.id,
-      this._selectAll
+      this._onSelectAll
     );
   }
-  private _selectAll(e: Event) {
-    console.log('selectAll', e);
+
+  private _onSelectAll() {
+    // console.log('selectAll', e);
   }
 
   disconnectedCallback() {

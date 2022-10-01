@@ -1,12 +1,12 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import { BlockHost, HotkeyManager } from '@blocksuite/shared';
-import { SelectionManager, MouseManager } from '../..';
 import { Store } from '@blocksuite/store';
+import { BlockHost, hotkeyManager } from '@blocksuite/shared';
+import { SelectionManager, MouseManager } from '../..';
 import { BlockSchema } from '../../block-loader';
 import { Clipboard } from '../../clipboard';
-import './debug-menu';
 import { Parse } from '../../parse';
+import './debug-menu';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
@@ -52,23 +52,23 @@ export class PageContainer extends LitElement implements BlockHost {
     // @ts-ignore
     window.page = this;
     this._bindHotkeys();
-    HotkeyManager.switchScope('page');
+    hotkeyManager.setScope('page');
   }
 
   private _bindHotkeys() {
-    HotkeyManager.addHotkey(
-      HotkeyManager.hotkeysMap.undo,
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.undo,
       'page',
 
       () => {
         this.store.undo();
       }
     );
-    HotkeyManager.addHotkey(HotkeyManager.hotkeysMap.redo, 'page', () => {
+    hotkeyManager.addListener(hotkeyManager.hotkeysMap.redo, 'page', () => {
       this.store.redo();
     });
-    HotkeyManager.addHotkey(
-      HotkeyManager.hotkeysMap.selectAll,
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.selectAll,
       'page',
       (e: Event) => {
         e.preventDefault();
