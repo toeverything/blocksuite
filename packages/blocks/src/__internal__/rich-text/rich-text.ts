@@ -47,13 +47,13 @@ export class RichText extends LitElement {
     store.awareness.updateLocalCursor();
     this._bindHotKey();
     this.model.propsUpdated.on(() => this.requestUpdate());
-
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
       .addEventListener('focus', this._focus.bind(this));
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
       .addEventListener('blur', this._blur.bind(this));
+    HotKeysManage.switchScope(this.model.id);
   }
 
   private _focus() {

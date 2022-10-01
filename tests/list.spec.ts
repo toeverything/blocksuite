@@ -59,7 +59,7 @@ test('convert to numbered list block', async ({ page }) => {
   await assertBlockType(page, '4', 'numbered');
 });
 
-test.skip('indent list block', async ({ page }) => {
+test('indent list block', async ({ page }) => {
   await enterPlaygroundWithList(page);
 
   await focusRichText(page, 1);

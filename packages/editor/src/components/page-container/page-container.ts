@@ -61,7 +61,6 @@ export class PageContainer extends LitElement implements BlockHost {
       'page',
 
       () => {
-        // TODO: undo in page
         this.store.undo();
       }
     );
@@ -72,7 +71,6 @@ export class PageContainer extends LitElement implements BlockHost {
       HotKeysManage.hotkeysMap.selectAll,
       'page',
       (e: Event) => {
-        console.log('select all');
         e.preventDefault();
         const pageChildrenBlock = this.model.children.map(block => block.id);
         this.selection.selectedBlockIds = pageChildrenBlock;
