@@ -14,6 +14,7 @@ import {
   enterPlaygroundWithList,
   focusRichText,
   pressEnter,
+  redoByClick,
   shiftTab,
   switchToNumberedListByClick,
   undoByClick,
@@ -46,6 +47,10 @@ test('convert to numbered list block', async ({ page }) => {
   await undoByClick(page);
   const numberIconSelector = `${listSelector} > svg`;
   await expect(page.locator(numberIconSelector)).toHaveCount(1);
+
+  await redoByClick(page);
+  await pressEnter(page);
+  await assertBlockType(page, '3', 'numbered');
 });
 
 test('indent list block', async ({ page }) => {

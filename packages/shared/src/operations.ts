@@ -9,7 +9,11 @@ export function asyncFocusRichText(store: Store, id: string) {
   setTimeout(() => store.richTextAdapters.get(id)?.quill.focus());
 }
 
-export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
+export function handleBlockEndEnter(
+  store: Store,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  model: BaseBlockModel & Record<string, any>
+) {
   const parent = store.getParent(model);
   const index = parent?.children.indexOf(model);
   if (parent && index !== undefined && index > -1) {
@@ -18,6 +22,7 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
 
     const blockProps = {
       flavour: model.flavour,
+      type: model.type,
     };
     const id = store.addBlock(blockProps, parent, index + 1);
     asyncFocusRichText(store, id);
