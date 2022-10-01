@@ -21,8 +21,8 @@ export type HotkeyMapType = Record<HotKeyTypes, string>;
 export const MacHotkeyMap: HotkeyMapType = {
   selectAll: 'command+a,ctrl+a',
   newPage: 'command+n',
-  undo: 'command+z',
-  redo: 'command+shift+z',
+  undo: 'command+z,ctrl+z',
+  redo: 'command+shift+z,ctrl+shift+z',
   remove: 'backspace',
   checkUncheck: 'esc',
   preExpendSelect: 'shift+up',
