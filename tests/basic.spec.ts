@@ -134,7 +134,7 @@ test('undo/redo with keyboard', async ({ page }) => {
   await assertText(page, 'hello');
   await undoByKeyboard(page);
   await assertEmpty(page);
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertText(page, 'hello');
 });
 
