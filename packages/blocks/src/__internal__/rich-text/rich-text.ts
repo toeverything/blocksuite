@@ -1,14 +1,24 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
+
+// // @ts-ignore
+// import SnowTheme from 'quill-themes-snow';
+// // @ts-ignore
+// import QuillToolbar from 'quill-toolbar';
+// import style from 'quill.snow.css';
+
 import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
 
 Quill.register('modules/cursors', QuillCursors);
+// Quill.register('modules/toolbar', QuillToolbar);
+// Quill.register('themes/snow', SnowTheme);
 
 @customElement('rich-text')
 export class RichText extends LitElement {
@@ -31,6 +41,7 @@ export class RichText extends LitElement {
     const { host, model, _textContainer } = this;
     const { store, selection } = host;
     const keyboardBindings = createKeyboardBindings(store, model, selection);
+
     this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,
