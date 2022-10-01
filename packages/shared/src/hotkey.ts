@@ -1,27 +1,28 @@
 import hotkeys, { KeyHandler } from 'hotkeys-js';
-import { MacHotkeyMap } from './consts';
+import { DefaultHotkeyMap } from './consts';
 
 hotkeys.filter = () => true;
 
 type HotkeyOptions = {
   scope: string;
-  element?: HTMLElement | null;
-  keyup?: boolean | null;
-  keydown?: boolean | null;
+  element?: HTMLElement;
+  keyup?: boolean;
+  keydown?: boolean;
   capture?: boolean;
   splitKey?: string;
 };
 
-export class HotkeyManager {
+// Singleton
+class HotkeyManager {
   private _hotkeys: typeof hotkeys;
   public hotkeyScope: HotkeyOptions['scope'];
-  public hotkeysMap: typeof MacHotkeyMap;
+  public hotkeysMap: typeof DefaultHotkeyMap;
 
   constructor() {
     this._hotkeys = hotkeys;
     this.hotkeyScope = 'all';
-    // TODO add more system hotkeys here
-    this.hotkeysMap = MacHotkeyMap;
+    // TODO add more platform hotkeys
+    this.hotkeysMap = DefaultHotkeyMap;
   }
 
   addListener(

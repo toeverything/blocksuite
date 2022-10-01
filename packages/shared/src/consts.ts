@@ -1,7 +1,7 @@
 export const BLOCK_ID_ATTR = 'data-block-id' as const;
 
-/** hot key maps for mac */
-export const MacHotkeyMap = {
+/** default hot keys for macOS */
+export const DefaultHotkeyMap = {
   selectAll: 'command+a,ctrl+a',
   newPage: 'command+n',
   undo: 'command+z,ctrl+z',
@@ -15,7 +15,6 @@ export const MacHotkeyMap = {
   left: 'left',
   right: 'right',
   enter: 'enter',
-  test: 'command+a',
 };
 
 export const PREVENT_DEFAULT = false;
