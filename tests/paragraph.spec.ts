@@ -165,7 +165,6 @@ test('delete at start of paragraph block', async ({ page }) => {
   await page.keyboard.type('hello');
 
   await pressEnter(page);
-  await focusRichText(page, 1);
   await page.keyboard.type('a');
 
   await clickMenuButton(page, 'heading-1');
@@ -182,6 +181,27 @@ test('delete at start of paragraph block', async ({ page }) => {
 
   await undoByClick(page);
   await assertBlockChildrenIds(page, '0', ['1', '2']);
+});
+
+test('delete at start of paragraph with content', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await page.keyboard.type('123');
+
+  await pressEnter(page);
+  await page.keyboard.type('456');
+  await assertRichTexts(page, ['123', '456']);
+
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 1, 0, 0);
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123456']);
+
+  await undoByClick(page);
+  await assertRichTexts(page, ['123', '456']);
 });
 
 test('get focus from page title enter', async ({ page }) => {

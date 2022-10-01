@@ -108,6 +108,9 @@ export function handleLineStartBackspace(
       const previousSibling = store.getPreviousSibling(model);
       if (previousSibling) {
         store.captureSync();
+        store.transact(() => {
+          previousSibling.text?.join(model.text as TextEntity);
+        });
         store.deleteBlock(model);
         asyncFocusRichText(store, previousSibling.id);
       }
