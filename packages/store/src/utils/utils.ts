@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import type { BlockProps, PrefixedBlockProps, YBlock } from '../store';
+import type { BlockProps, PrefixedBlockProps, YBlock, YBlocks } from '../store';
 import { PrelimTextEntity, TextEntity, TextType } from '../text-adapter';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
@@ -11,10 +11,28 @@ function isPrimitive(
   return a !== Object(a);
 }
 
+export function assertValidChildren(
+  yBlocks: YBlocks,
+  props: Partial<BlockProps>
+) {
+  if (!Array.isArray(props.children)) return;
+
+  props.children.forEach(child => {
+    if (!yBlocks.has(child.id)) {
+      throw new Error('Invalid child id: ' + child.id);
+    }
+  });
+}
+
 export function initSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
-  yBlock.set('sys:children', new Y.Array());
+
+  const yChildren = new Y.Array();
+  yBlock.set('sys:children', yChildren);
+  if (Array.isArray(props.children)) {
+    props.children.forEach(child => yChildren.push([child.id]));
+  }
 }
 
 export function syncBlockProps(
@@ -47,8 +65,8 @@ export function syncBlockProps(
     yBlock.set('prop:type', 'text');
   }
   // TODO use schema
-  if (props.flavour === 'list' && !props.type && !yBlock.has('prop:type')) {
-    yBlock.set('prop:type', 'bulleted');
+  if (props.flavour === 'list' && !yBlock.has('prop:type')) {
+    yBlock.set('prop:type', props.type ?? 'bulleted');
   }
 }
 

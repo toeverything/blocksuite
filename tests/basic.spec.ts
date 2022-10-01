@@ -8,7 +8,6 @@ import {
   undoByClick,
   undoByKeyboard,
   focusRichText,
-  waitNextFrame,
   waitDefaultPageLoaded,
   pressEnter,
 } from './utils/actions';
@@ -144,7 +143,6 @@ test('undo after adding block twice', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
-  await waitNextFrame(page);
   await page.keyboard.type('world');
 
   await undoByKeyboard(page);

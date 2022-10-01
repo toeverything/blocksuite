@@ -9,6 +9,7 @@ import {
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
 import {
+  assertValidChildren,
   initSysProps,
   syncBlockProps,
   toBlockProps,
@@ -26,6 +27,7 @@ export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
   text?: void | TextType;
+  children?: BaseBlockModel[];
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -196,6 +198,7 @@ export class Store {
     this.transact(() => {
       const yBlock = new Y.Map() as YBlock;
 
+      assertValidChildren(this._yBlocks, clonedProps);
       initSysProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
@@ -363,6 +366,14 @@ export class Store {
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
       model.childMap = createChildMap(yChildren);
+
+      yChildren.forEach((id: string) => {
+        const index = model.childMap.get(id);
+        if (Number.isInteger(index)) {
+          const child = this._blockMap.get(id) as BaseBlockModel;
+          model.children[index as number] = child;
+        }
+      });
     }
 
     if (isRoot) {

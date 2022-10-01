@@ -33,6 +33,8 @@ type PrelimTextEnityType = 'splitLeft' | 'splitRight';
 
 export type TextType = PrelimTextEntity | TextEntity;
 
+const UNSUPPORTED_MSG = 'PrelimTextEntity does not support ';
+
 export class PrelimTextEntity {
   ready = false;
   type: PrelimTextEnityType;
@@ -43,17 +45,36 @@ export class PrelimTextEntity {
   }
 
   clone() {
-    throw new Error('PrelimTextEntity does not support clone');
+    throw new Error(UNSUPPORTED_MSG + 'clone');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   insert(_content: string, _index: number) {
-    throw new Error('PrelimTextEntity does not support insert');
+    throw new Error(UNSUPPORTED_MSG + 'insert');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   split(_: number): [PrelimTextEntity, PrelimTextEntity] {
-    throw new Error('PrelimTextEntity does not support split');
+    throw new Error(UNSUPPORTED_MSG + 'split');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  join(_: TextEntity) {
+    throw new Error(UNSUPPORTED_MSG + 'join');
+  }
+
+  clear() {
+    throw new Error(UNSUPPORTED_MSG + 'clear');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  applyDelta(_: any) {
+    throw new Error(UNSUPPORTED_MSG + 'applyDelta');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sliceToDelta(_begin: number, _end?: number) {
+    throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
   }
 }
 
@@ -78,6 +99,22 @@ export class TextEntity {
     this._yText.insert(index, content);
     // @ts-ignore
     this._yText.meta = { split: true };
+  }
+
+  join(other: TextEntity) {
+    const yOther = other._yText;
+    const delta = yOther.toDelta();
+
+    delta.splice(0, 0, { retain: this._yText.length });
+    this._yText.applyDelta(delta);
+    // @ts-ignore
+    this._yText.meta = { join: true };
+  }
+
+  clear() {
+    this._yText.delete(0, this._yText.length);
+    // @ts-ignore
+    this._yText.meta = { clear: true };
   }
 
   applyDelta(delta: any) {
@@ -168,9 +205,19 @@ export class RichTextAdapter {
     const isControlledSplit = !!event.target?.meta?.split;
     // @ts-ignore
     const isControlledInsert = !!event.target?.meta?.insert;
+    // @ts-ignore
+    const isControlledJoin = !!event.target?.meta?.join;
+    // @ts-ignore
+    const isControlledClear = !!event.target?.meta?.clear;
 
     // remote update doesn't carry clientID
-    if (isFromRemote || isControlledSplit || isControlledInsert) {
+    if (
+      isFromRemote ||
+      isControlledSplit ||
+      isControlledInsert ||
+      isControlledJoin ||
+      isControlledClear
+    ) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
       // result in quill assuming that a text insertion shall inherit existing

@@ -27,3 +27,8 @@ export interface BlockHost {
     activeNextBlock: (blockId: string, position?: SelectionPosition) => void;
   };
 }
+
+export interface CommonBlockElement extends HTMLElement {
+  host: BlockHost;
+  model: BaseBlockModel;
+}

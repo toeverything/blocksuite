@@ -1,6 +1,8 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { CommonBlockElement, convertToList } from '@blocksuite/shared';
 import type { PageContainer } from './page-container';
+import { BaseBlockModel, Store } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
 const initType = params.get('init') || 'default';
@@ -50,23 +52,24 @@ export class DebugMenu extends LitElement {
     }
   }
 
-  private _onAddBulletedList() {
-    if (!this.page.model) {
-      this.store.addBlock({ flavour: 'page' });
-      this.store.addBlock({ flavour: 'paragraph' });
-    }
-
-    this.store.addBlock({ flavour: 'list' });
-  }
-
-  private _onSwitchToNumberedList() {
+  private _convertToList(listType: 'bulleted' | 'numbered') {
     const selection = window.getSelection();
     const element = selection?.focusNode?.parentElement as HTMLElement;
-    const block = element.closest('list-block-element')?.model;
-    if (block?.type === 'bulleted') {
-      block.store.captureSync();
-      block.store.updateBlock(block, { type: 'numbered' });
-    }
+    const block = element.closest('[data-block-id]') as CommonBlockElement;
+    if (!block) return;
+
+    const store = block.host.store as Store;
+    // @ts-ignore
+    const model = store.getBlockById(block.model.id) as BaseBlockModel;
+    convertToList(this.store, model, listType);
+  }
+
+  private _onConvertToBulletedList() {
+    this._convertToList('bulleted');
+  }
+
+  private _onConvertToNumberedList() {
+    this._convertToList('numbered');
   }
 
   private _onDelete() {
@@ -153,16 +156,16 @@ export class DebugMenu extends LitElement {
           𝐓
         </button>
         <button
-          aria-label="add bulleted list"
-          title="add bulleted list"
-          @click=${this._onAddBulletedList}
+          aria-label="convert to bulleted list"
+          title="convert to bulleted list"
+          @click=${this._onConvertToBulletedList}
         >
           *️⃣
         </button>
         <button
-          aria-label="switch to numbered list"
-          title="switch to numbered list"
-          @click=${this._onSwitchToNumberedList}
+          aria-label="convert to numbered list"
+          title="convert to numbered list"
+          @click=${this._onConvertToNumberedList}
         >
           1️⃣
         </button>

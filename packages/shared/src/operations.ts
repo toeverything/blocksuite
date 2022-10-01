@@ -1,13 +1,18 @@
+import type { Quill } from 'quill';
 import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
 import { BlockHost, SelectionPosition } from './types';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import { Point, Rect } from './rect';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ExtendedModel = BaseBlockModel & Record<string, any>;
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {
   setTimeout(() => store.richTextAdapters.get(id)?.quill.focus());
 }
 
-export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
+export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
   const parent = store.getParent(model);
   const index = parent?.children.indexOf(model);
   if (parent && index !== undefined && index > -1) {
@@ -16,6 +21,7 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
 
     const blockProps = {
       flavour: model.flavour,
+      type: model.type,
     };
     const id = store.addBlock(blockProps, parent, index + 1);
     asyncFocusRichText(store, id);
@@ -24,7 +30,7 @@ export function handleBlockEndEnter(store: Store, model: BaseBlockModel) {
 
 export function handleSoftEnter(
   store: Store,
-  model: BaseBlockModel,
+  model: ExtendedModel,
   index: number
 ) {
   store.captureSync();
@@ -33,7 +39,7 @@ export function handleSoftEnter(
 
 export function handleBlockSplit(
   store: Store,
-  model: BaseBlockModel,
+  model: ExtendedModel,
   splitIndex: number
 ) {
   if (!(model.text instanceof TextEntity)) return;
@@ -57,7 +63,7 @@ export function handleBlockSplit(
   asyncFocusRichText(store, id);
 }
 
-export function handleIndent(store: Store, model: BaseBlockModel) {
+export function handleIndent(store: Store, model: ExtendedModel) {
   const previousSibling = store.getPreviousSibling(model);
   if (previousSibling) {
     store.captureSync();
@@ -65,14 +71,16 @@ export function handleIndent(store: Store, model: BaseBlockModel) {
     const blockProps = {
       id: model.id,
       flavour: model.flavour,
+      type: model.type,
       text: model?.text?.clone(), // should clone before `deleteBlock`
+      children: model.children,
     };
     store.deleteBlock(model);
     store.addBlock(blockProps, previousSibling);
   }
 }
 
-export function handleUnindent(store: Store, model: BaseBlockModel) {
+export function handleUnindent(store: Store, model: ExtendedModel) {
   const parent = store.getParent(model);
   if (!parent) return;
 
@@ -86,9 +94,110 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
     id: model.id,
     flavour: model.flavour,
     text: model?.text?.clone(), // should clone before `deleteBlock`
+    children: model.children,
   };
   store.deleteBlock(model);
   store.addBlock(blockProps, grandParent, index + 1);
+}
+
+export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
+  // When deleting at line start of a paragraph block,
+  // firstly switch it to normal text, then delete this empty block.
+  if (model.flavour === 'paragraph') {
+    if (model.type !== 'text') {
+      store.captureSync();
+      store.updateBlock(model, { type: 'text' });
+    } else {
+      const previousSibling = store.getPreviousSibling(model);
+      if (previousSibling) {
+        store.captureSync();
+        store.transact(() => {
+          previousSibling.text?.join(model.text as TextEntity);
+        });
+        store.deleteBlock(model);
+        asyncFocusRichText(store, previousSibling.id);
+      }
+    }
+  }
+  // When deleting at line start of a list block,
+  // switch it to normal paragraph block.
+  else if (model.flavour === 'list') {
+    const parent = store.getParent(model);
+    if (!parent) return;
+
+    const index = parent.children.indexOf(model);
+    store.captureSync();
+
+    const blockProps = {
+      flavour: 'paragraph',
+      type: 'text',
+      text: model?.text?.clone(),
+      children: model.children,
+    };
+    store.deleteBlock(model);
+    const id = store.addBlock(blockProps, parent, index);
+    asyncFocusRichText(store, id);
+  }
+}
+
+export function tryMatchSpaceHotkey(
+  store: Store,
+  model: ExtendedModel,
+  quill: Quill,
+  prefix: string,
+  range: { index: number; length: number }
+) {
+  const [, offset] = quill.getLine(range.index);
+  if (offset > prefix.length) {
+    return ALLOW_DEFAULT;
+  }
+
+  switch (prefix.trim()) {
+    case '[]':
+    case '[ ]':
+      // TODO convert to unchecked list
+      return ALLOW_DEFAULT;
+    case '[x]':
+      // TODO convert to checked list
+      return ALLOW_DEFAULT;
+    case '-':
+    case '*':
+      store.transact(() => model.text?.clear());
+      convertToList(store, model, 'bulleted');
+      break;
+    default:
+      store.transact(() => model.text?.clear());
+      convertToList(store, model, 'numbered');
+  }
+
+  return PREVENT_DEFAULT;
+}
+
+export function convertToList(
+  store: Store,
+  model: ExtendedModel,
+  listType: 'bulleted' | 'numbered'
+) {
+  if (model.flavour === 'paragraph') {
+    const parent = store.getParent(model);
+    if (!parent) return;
+
+    const index = parent.children.indexOf(model);
+    store.captureSync();
+
+    const blockProps = {
+      flavour: 'list',
+      type: listType,
+      text: model?.text?.clone(),
+      children: model.children,
+    };
+    store.deleteBlock(model);
+    const id = store.addBlock(blockProps, parent, index);
+    asyncFocusRichText(store, id);
+  } else if (model.flavour === 'list' && model['type'] !== listType) {
+    store.captureSync();
+    store.updateBlock(model, { type: listType });
+  }
 }
 
 // We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
@@ -114,7 +223,7 @@ function isAtLineEdge(range: Range) {
 }
 
 export function handleKeyUp(
-  model: BaseBlockModel,
+  model: ExtendedModel,
   selectionManager: BlockHost['selection'],
   editableContainer: Element
 ) {
@@ -130,7 +239,7 @@ export function handleKeyUp(
           model.id,
           new Point(rect.left, rect.top)
         );
-      return false;
+      return PREVENT_DEFAULT;
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, top - height / 2);
@@ -139,14 +248,14 @@ export function handleKeyUp(
       !isAtLineEdge(range)
     ) {
       selectionManager.activePreviousBlock(model.id, new Point(left, top));
-      return false;
+      return PREVENT_DEFAULT;
     }
   }
-  return true;
+  return ALLOW_DEFAULT;
 }
 
 export function handleKeyDown(
-  model: BaseBlockModel,
+  model: ExtendedModel,
   selectionManager: BlockHost['selection'],
   textContainer: HTMLElement
 ) {
@@ -162,13 +271,13 @@ export function handleKeyDown(
           model.id,
           new Point(rect.left, rect.top)
         );
-      return false;
+      return PREVENT_DEFAULT;
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
       selectionManager.activeNextBlock(model.id, new Point(left, bottom));
-      return false;
+      return PREVENT_DEFAULT;
     }
     // if cursor is at the edge of a block, it may out of the textContainer after keydown
     if (isAtLineEdge(range)) {
@@ -189,11 +298,11 @@ export function handleKeyDown(
             bottom
           )
         );
-        return false;
+        return PREVENT_DEFAULT;
       }
     }
   }
-  return true;
+  return ALLOW_DEFAULT;
 }
 
 export function commonTextActiveHandler(

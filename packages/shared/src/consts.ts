@@ -34,3 +34,6 @@ export const MacHotkeyMap: HotkeyMapType = {
   enter: 'enter',
   test: 'command+a',
 };
+
+export const PREVENT_DEFAULT = false;
+export const ALLOW_DEFAULT = true;

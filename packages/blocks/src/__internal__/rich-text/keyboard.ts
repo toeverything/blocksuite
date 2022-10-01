@@ -1,16 +1,24 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
+  ALLOW_DEFAULT,
   BlockHost,
   handleBlockEndEnter,
   handleBlockSplit,
   handleIndent,
   handleKeyDown,
   handleKeyUp,
+  handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
+  PREVENT_DEFAULT,
+  tryMatchSpaceHotkey,
 } from '@blocksuite/shared';
-import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
+
+interface QuillRange {
+  index: number;
+  length: number;
+}
 
 interface BindingContext {
   collapsed: boolean;
@@ -47,10 +55,14 @@ type KeyboardBindingHandler = (
   this: KeyboardEventThis,
   range: RangeStatic,
   context: BindingContext
-) => void;
+) => boolean;
 
 function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
+}
+
+function isAtBlockStart(quill: Quill) {
+  return quill.getSelection(true)?.index === 0;
 }
 
 export const createKeyboardBindings = (
@@ -60,10 +72,12 @@ export const createKeyboardBindings = (
 ) => {
   function undo() {
     store.undo();
+    return PREVENT_DEFAULT;
   }
 
   function redo() {
     store.redo();
+    return PREVENT_DEFAULT;
   }
 
   function hardEnter(this: KeyboardEventThis) {
@@ -74,51 +88,76 @@ export const createKeyboardBindings = (
       const index = this.quill.getSelection()?.index || 0;
       handleBlockSplit(store, model, index);
     }
+
+    return PREVENT_DEFAULT;
   }
 
   function softEnter(this: KeyboardEventThis) {
     const index = this.quill.getSelection()?.index || 0;
     handleSoftEnter(store, model, index);
     this.quill.setSelection(index + 1, 0);
+
+    return PREVENT_DEFAULT;
   }
 
   function indent(this: KeyboardEventThis) {
     handleIndent(store, model);
+    return PREVENT_DEFAULT;
   }
 
   function unindent(this: KeyboardEventThis) {
     handleUnindent(store, model);
+    return PREVENT_DEFAULT;
   }
 
-  function keyUp(this: KeyboardEventThis, range: IQuillRange) {
+  function keyUp(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
       return handleKeyUp(model, selectionManager, this.quill.root);
     }
-    return true;
+    return ALLOW_DEFAULT;
   }
 
-  function keyDown(this: KeyboardEventThis, range: IQuillRange) {
+  function keyDown(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
       return handleKeyDown(model, selectionManager, this.quill.root);
     }
-    return true;
+    return ALLOW_DEFAULT;
   }
 
-  function keyLeft(this: KeyboardEventThis, range: IQuillRange) {
+  function keyLeft(this: KeyboardEventThis, range: QuillRange) {
     if (range.index === 0) {
       selectionManager.activePreviousBlock(model.id, 'end');
-      return false;
+      return PREVENT_DEFAULT;
     }
-    return true;
+    return ALLOW_DEFAULT;
   }
 
-  function keyRight(this: KeyboardEventThis, range: IQuillRange) {
+  function keyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + range.length + 1 === textLength) {
       selectionManager.activeNextBlock(model.id, 'start');
-      return false;
+      return PREVENT_DEFAULT;
     }
-    return true;
+    return ALLOW_DEFAULT;
+  }
+
+  function space(
+    this: KeyboardEventThis,
+    range: QuillRange,
+    context: BindingContext
+  ) {
+    const { quill } = this;
+    const { prefix } = context;
+    return tryMatchSpaceHotkey(store, model, quill, prefix, range);
+  }
+
+  function backspace(this: KeyboardEventThis) {
+    if (isAtBlockStart(this.quill)) {
+      handleLineStartBackspace(store, model);
+      return PREVENT_DEFAULT;
+    }
+
+    return ALLOW_DEFAULT;
   }
 
   const keyboardBindings: KeyboardBindings = {
@@ -150,6 +189,16 @@ export const createKeyboardBindings = (
       key: 'tab',
       shiftKey: true,
       handler: unindent,
+    },
+    // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
+    'list autofill': {
+      key: ' ',
+      prefix: /^\s*?(\d+\.|-|\*|\[ ?\]|\[x\])$/,
+      handler: space,
+    },
+    backspace: {
+      key: 'backspace',
+      handler: backspace,
     },
     up: {
       key: 'up',

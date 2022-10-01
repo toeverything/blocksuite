@@ -9,9 +9,10 @@ export interface ListBlockProps extends IBaseBlockProps {
 
 export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
   flavour = 'list' as const;
-  type: ListType = 'bulleted';
+  type: ListType;
 
   constructor(store: Store, props: Partial<ListBlockProps>) {
     super(store, props);
+    this.type = props.type || 'bulleted';
   }
 }

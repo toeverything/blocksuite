@@ -4,7 +4,7 @@ export const IS_MAC = process.platform === 'darwin';
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
-const NEXT_FRAME_TIMEOUT = 10;
+const NEXT_FRAME_TIMEOUT = 50;
 const DEFAULT_PLAYGROUNT = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 
@@ -28,9 +28,14 @@ export async function waitNextFrame(page: Page) {
   await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
 }
 
+export async function clearLog(page: Page) {
+  await page.evaluate(() => console.clear());
+}
+
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUNT}?init=list&room=${room}`);
+  await waitNextFrame(page);
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -102,12 +107,12 @@ export async function connectByClick(page: Page) {
   await page.click('button[aria-label="connect"]');
 }
 
-export async function addBulletedListByClick(page: Page) {
-  await page.click('button[aria-label="add bulleted list"]');
+export async function convertToBulletedListByClick(page: Page) {
+  await page.click('button[aria-label="convert to bulleted list"]');
 }
 
 export async function switchToNumberedListByClick(page: Page) {
-  await page.click('button[aria-label="switch to numbered list"]');
+  await page.click('button[aria-label="convert to numbered list"]');
 }
 
 export async function mouseDragFromTo(
