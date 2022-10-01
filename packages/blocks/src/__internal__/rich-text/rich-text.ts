@@ -3,20 +3,18 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import type { BlockHost } from '@blocksuite/shared';
+import { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
-
+import { HotkeyManager } from '@blocksuite/shared';
 Quill.register('modules/cursors', QuillCursors);
-
 @customElement('rich-text')
 export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
-
-  @property()
+  // @property()
   host!: BlockHost;
 
   @property()
@@ -47,14 +45,40 @@ export class RichText extends LitElement {
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
-
+    this._bindHotKey();
     this.model.propsUpdated.on(() => this.requestUpdate());
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .addEventListener('focus', this._focus.bind(this));
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .addEventListener('blur', this._blur.bind(this));
+    HotkeyManager.switchScope(this.model.id);
+  }
+
+  private _focus() {
+    HotkeyManager.switchScope(this.model.id);
+  }
+  private _blur() {
+    HotkeyManager.switchScope('page');
+  }
+
+  private _bindHotKey() {
+    HotkeyManager.addHotkey(
+      HotkeyManager.hotkeysMap.selectAll,
+      this.model.id,
+      this._selectAll
+    );
+  }
+  private _selectAll(e: Event) {
+    console.log('selectAll', e);
   }
 
   disconnectedCallback() {
     this.host.store.detachRichText(this.model.id);
-
     super.disconnectedCallback();
+    this._textContainer.removeEventListener('focus', this._focus);
+    this._textContainer.removeEventListener('blur', this._blur);
   }
 
   render() {
