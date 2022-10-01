@@ -4,16 +4,15 @@ import { BlockHost, SelectionPosition } from './types';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import { Point, Rect } from './rect';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ExtendedModel = BaseBlockModel & Record<string, any>;
+
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {
   setTimeout(() => store.richTextAdapters.get(id)?.quill.focus());
 }
 
-export function handleBlockEndEnter(
-  store: Store,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  model: BaseBlockModel & Record<string, any>
-) {
+export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
   const parent = store.getParent(model);
   const index = parent?.children.indexOf(model);
   if (parent && index !== undefined && index > -1) {
@@ -31,7 +30,7 @@ export function handleBlockEndEnter(
 
 export function handleSoftEnter(
   store: Store,
-  model: BaseBlockModel,
+  model: ExtendedModel,
   index: number
 ) {
   store.captureSync();
@@ -40,7 +39,7 @@ export function handleSoftEnter(
 
 export function handleBlockSplit(
   store: Store,
-  model: BaseBlockModel,
+  model: ExtendedModel,
   splitIndex: number
 ) {
   if (!(model.text instanceof TextEntity)) return;
@@ -64,7 +63,7 @@ export function handleBlockSplit(
   asyncFocusRichText(store, id);
 }
 
-export function handleIndent(store: Store, model: BaseBlockModel) {
+export function handleIndent(store: Store, model: ExtendedModel) {
   const previousSibling = store.getPreviousSibling(model);
   if (previousSibling) {
     store.captureSync();
@@ -72,6 +71,7 @@ export function handleIndent(store: Store, model: BaseBlockModel) {
     const blockProps = {
       id: model.id,
       flavour: model.flavour,
+      type: model.type,
       text: model?.text?.clone(), // should clone before `deleteBlock`
       children: model.children,
     };
@@ -80,7 +80,7 @@ export function handleIndent(store: Store, model: BaseBlockModel) {
   }
 }
 
-export function handleUnindent(store: Store, model: BaseBlockModel) {
+export function handleUnindent(store: Store, model: ExtendedModel) {
   const parent = store.getParent(model);
   if (!parent) return;
 
@@ -100,11 +100,7 @@ export function handleUnindent(store: Store, model: BaseBlockModel) {
   store.addBlock(blockProps, grandParent, index + 1);
 }
 
-export function handleLineStartBackspace(
-  store: Store,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  model: BaseBlockModel & Record<string, any>
-) {
+export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
   if (model.flavour === 'paragraph') {
@@ -146,7 +142,7 @@ export function handleLineStartBackspace(
 
 export function tryMatchSpaceHotkey(
   store: Store,
-  model: BaseBlockModel,
+  model: ExtendedModel,
   quill: Quill,
   prefix: string,
   range: { index: number; length: number }
@@ -179,8 +175,7 @@ export function tryMatchSpaceHotkey(
 
 export function convertToList(
   store: Store,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  model: BaseBlockModel & Record<string, any>,
+  model: ExtendedModel,
   listType: 'bulleted' | 'numbered'
 ) {
   if (model.flavour === 'paragraph') {
@@ -228,7 +223,7 @@ function isAtLineEdge(range: Range) {
 }
 
 export function handleKeyUp(
-  model: BaseBlockModel,
+  model: ExtendedModel,
   selectionManager: BlockHost['selection'],
   editableContainer: Element
 ) {
@@ -260,7 +255,7 @@ export function handleKeyUp(
 }
 
 export function handleKeyDown(
-  model: BaseBlockModel,
+  model: ExtendedModel,
   selectionManager: BlockHost['selection'],
   textContainer: HTMLElement
 ) {

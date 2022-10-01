@@ -51,6 +51,12 @@ test('convert to numbered list block', async ({ page }) => {
   await redoByClick(page);
   await pressEnter(page);
   await assertBlockType(page, '3', 'numbered');
+
+  await pressEnter(page);
+  await assertBlockType(page, '4', 'numbered');
+
+  await page.keyboard.press('Tab');
+  await assertBlockType(page, '4', 'numbered');
 });
 
 test('indent list block', async ({ page }) => {
