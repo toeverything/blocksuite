@@ -3,6 +3,7 @@ import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
   assertBlockCount,
+  assertBlockType,
   assertRichTexts,
   assertSelection,
   assertTextContent,
@@ -136,4 +137,23 @@ test('nested list blocks', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
   await assertBlockChildrenIds(page, '0', ['1', '2']);
   await assertBlockChildrenIds(page, '2', ['3']);
+});
+
+test('list autofill hotkey', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  await focusRichText(page, 0);
+  await assertBlockType(page, '1', 'text');
+
+  await page.keyboard.type('1. ');
+  await assertBlockType(page, '2', 'numbered'); // id updated
+  await assertRichTexts(page, ['\n']);
+
+  await undoByClick(page);
+  await assertBlockType(page, '1', 'text');
+  await assertRichTexts(page, ['\n']);
+
+  await page.keyboard.type('* ');
+  await assertBlockType(page, '3', 'bulleted'); // id updated
+  await assertRichTexts(page, ['\n']);
 });

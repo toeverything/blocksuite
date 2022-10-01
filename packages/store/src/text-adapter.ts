@@ -63,6 +63,10 @@ export class PrelimTextEntity {
     throw new Error(UNSUPPORTED_MSG + 'join');
   }
 
+  clear() {
+    throw new Error(UNSUPPORTED_MSG + 'clear');
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   applyDelta(_: any) {
     throw new Error(UNSUPPORTED_MSG + 'applyDelta');
@@ -105,6 +109,12 @@ export class TextEntity {
     this._yText.applyDelta(delta);
     // @ts-ignore
     this._yText.meta = { join: true };
+  }
+
+  clear() {
+    this._yText.delete(0, this._yText.length);
+    // @ts-ignore
+    this._yText.meta = { clear: true };
   }
 
   applyDelta(delta: any) {
@@ -197,13 +207,16 @@ export class RichTextAdapter {
     const isControlledInsert = !!event.target?.meta?.insert;
     // @ts-ignore
     const isControlledJoin = !!event.target?.meta?.join;
+    // @ts-ignore
+    const isControlledClear = !!event.target?.meta?.clear;
 
     // remote update doesn't carry clientID
     if (
       isFromRemote ||
       isControlledSplit ||
       isControlledInsert ||
-      isControlledJoin
+      isControlledJoin ||
+      isControlledClear
     ) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may

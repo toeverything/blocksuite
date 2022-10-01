@@ -1,6 +1,7 @@
 import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
+  ALLOW_DEFAULT,
   BlockHost,
   handleBlockEndEnter,
   handleBlockSplit,
@@ -10,8 +11,14 @@ import {
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
+  PREVENT_DEFAULT,
+  tryMatchSpaceHotkey,
 } from '@blocksuite/shared';
-import IQuillRange from 'quill-cursors/dist/quill-cursors/i-range';
+
+interface QuillRange {
+  index: number;
+  length: number;
+}
 
 interface BindingContext {
   collapsed: boolean;
@@ -49,9 +56,6 @@ type KeyboardBindingHandler = (
   range: RangeStatic,
   context: BindingContext
 ) => boolean;
-
-const PREVENT_DEFAULT = false;
-const ALLOW_DEFAULT = true;
 
 function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
@@ -106,21 +110,21 @@ export const createKeyboardBindings = (
     return PREVENT_DEFAULT;
   }
 
-  function keyUp(this: KeyboardEventThis, range: IQuillRange) {
+  function keyUp(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
       return handleKeyUp(model, selectionManager, this.quill.root);
     }
     return ALLOW_DEFAULT;
   }
 
-  function keyDown(this: KeyboardEventThis, range: IQuillRange) {
+  function keyDown(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
       return handleKeyDown(model, selectionManager, this.quill.root);
     }
     return ALLOW_DEFAULT;
   }
 
-  function keyLeft(this: KeyboardEventThis, range: IQuillRange) {
+  function keyLeft(this: KeyboardEventThis, range: QuillRange) {
     if (range.index === 0) {
       selectionManager.activePreviousBlock(model.id, 'end');
       return PREVENT_DEFAULT;
@@ -128,13 +132,23 @@ export const createKeyboardBindings = (
     return ALLOW_DEFAULT;
   }
 
-  function keyRight(this: KeyboardEventThis, range: IQuillRange) {
+  function keyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + range.length + 1 === textLength) {
       selectionManager.activeNextBlock(model.id, 'start');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
+  }
+
+  function space(
+    this: KeyboardEventThis,
+    range: QuillRange,
+    context: BindingContext
+  ) {
+    const { quill } = this;
+    const { prefix } = context;
+    return tryMatchSpaceHotkey(store, model, quill, prefix, range);
   }
 
   function backspace(this: KeyboardEventThis) {
@@ -175,6 +189,12 @@ export const createKeyboardBindings = (
       key: 'tab',
       shiftKey: true,
       handler: unindent,
+    },
+    // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
+    'list autofill': {
+      key: ' ',
+      prefix: /^\s*?(\d+\.|-|\*|\[ ?\]|\[x\])$/,
+      handler: space,
     },
     backspace: {
       key: 'backspace',

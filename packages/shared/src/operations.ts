@@ -1,5 +1,7 @@
+import type { Quill } from 'quill';
 import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
 import { BlockHost, SelectionPosition } from './types';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import { Point, Rect } from './rect';
 
 // XXX: workaround quill lifecycle issue
@@ -137,6 +139,39 @@ export function handleLineStartBackspace(
   }
 }
 
+export function tryMatchSpaceHotkey(
+  store: Store,
+  model: BaseBlockModel,
+  quill: Quill,
+  prefix: string,
+  range: { index: number; length: number }
+) {
+  const [, offset] = quill.getLine(range.index);
+  if (offset > prefix.length) {
+    return ALLOW_DEFAULT;
+  }
+
+  switch (prefix.trim()) {
+    case '[]':
+    case '[ ]':
+      // TODO convert to unchecked list
+      return ALLOW_DEFAULT;
+    case '[x]':
+      // TODO convert to checked list
+      return ALLOW_DEFAULT;
+    case '-':
+    case '*':
+      store.transact(() => model.text?.clear());
+      convertToList(store, model, 'bulleted');
+      break;
+    default:
+      store.transact(() => model.text?.clear());
+      convertToList(store, model, 'numbered');
+  }
+
+  return PREVENT_DEFAULT;
+}
+
 export function convertToList(
   store: Store,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -204,7 +239,7 @@ export function handleKeyUp(
           model.id,
           new Point(rect.left, rect.top)
         );
-      return false;
+      return PREVENT_DEFAULT;
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, top - height / 2);
@@ -213,10 +248,10 @@ export function handleKeyUp(
       !isAtLineEdge(range)
     ) {
       selectionManager.activePreviousBlock(model.id, new Point(left, top));
-      return false;
+      return PREVENT_DEFAULT;
     }
   }
-  return true;
+  return ALLOW_DEFAULT;
 }
 
 export function handleKeyDown(
@@ -236,13 +271,13 @@ export function handleKeyDown(
           model.id,
           new Point(rect.left, rect.top)
         );
-      return false;
+      return PREVENT_DEFAULT;
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
       selectionManager.activeNextBlock(model.id, new Point(left, bottom));
-      return false;
+      return PREVENT_DEFAULT;
     }
     // if cursor is at the edge of a block, it may out of the textContainer after keydown
     if (isAtLineEdge(range)) {
@@ -263,11 +298,11 @@ export function handleKeyDown(
             bottom
           )
         );
-        return false;
+        return PREVENT_DEFAULT;
       }
     }
   }
-  return true;
+  return ALLOW_DEFAULT;
 }
 
 export function commonTextActiveHandler(
