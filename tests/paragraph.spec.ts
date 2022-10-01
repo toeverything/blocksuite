@@ -107,7 +107,7 @@ test.skip('add multi line by soft enter', async ({ page }) => {
   await assertRichTexts(page, ['he\n\nllo']);
 });
 
-test('indent and unindent existing paragraph block', async ({ page }) => {
+test.skip('indent and unindent existing paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
