@@ -24,20 +24,6 @@ export class DebugMenu extends LitElement {
   @state()
   canDelete = false;
 
-  static styles = css`
-    .debug-menu {
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 40px;
-    }
-    .debug-menu > button {
-      margin-left: 5px;
-      margin-top: 5px;
-      width: 32px;
-    }
-  `;
-
   get store() {
     return this.page.store;
   }
@@ -86,6 +72,10 @@ export class DebugMenu extends LitElement {
     block?.store.updateBlock(block, { type });
   }
 
+  private _onSwitchMode() {
+    // TODO switch mode
+  }
+
   private _handleDebugInit() {
     if (initType === 'list') {
       this.store.addBlock({ flavour: 'page' });
@@ -107,6 +97,21 @@ export class DebugMenu extends LitElement {
 
     requestAnimationFrame(() => this._handleDebugInit());
   }
+
+  static styles = css`
+    .debug-menu {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 40px;
+    }
+    .debug-menu > button {
+      margin-left: 5px;
+      margin-top: 5px;
+      width: 32px;
+      height: 28px;
+    }
+  `;
 
   render() {
     return html`
@@ -183,6 +188,13 @@ export class DebugMenu extends LitElement {
           @click=${this._onToggleConnection}
         >
           ${this.connected ? '🟢' : '🔴'}
+        </button>
+        <button
+          aria-label="switch mode"
+          title="switch mode"
+          @click=${this._onSwitchMode}
+        >
+          🔄
         </button>
       </div>
     `;
