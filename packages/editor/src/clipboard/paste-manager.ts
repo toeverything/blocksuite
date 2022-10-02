@@ -6,7 +6,7 @@ import { ParseText } from '../parse/parse-text';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 
-export class PasteExecution {
+export class PasteManager {
   private _page: PageContainer;
 
   // The event handler will get the most needed clipboard data based on this array order
@@ -35,7 +35,7 @@ export class PasteExecution {
       return;
     }
 
-    const isPureFile = PasteExecution._isPureFileInClipboard(clipboardData);
+    const isPureFile = PasteManager._isPureFileInClipboard(clipboardData);
     if (isPureFile) {
       return this._file2Blocks(clipboardData);
     }
@@ -44,8 +44,8 @@ export class PasteExecution {
 
   // Get the most needed clipboard data based on `_optimalMimeTypes` order
   public getOptimalClip(clipboardData: ClipboardEvent['clipboardData']) {
-    for (let i = 0; i < PasteExecution._optimalMimeTypes.length; i++) {
-      const mimeType = PasteExecution._optimalMimeTypes[i];
+    for (let i = 0; i < PasteManager._optimalMimeTypes.length; i++) {
+      const mimeType = PasteManager._optimalMimeTypes[i];
       const data = clipboardData?.getData(mimeType);
 
       if (data) {
@@ -88,7 +88,7 @@ export class PasteExecution {
   private async _file2Blocks(
     clipboardData: DataTransfer
   ): Promise<OpenBlockInfo[]> {
-    const file = PasteExecution._getImageFile(clipboardData);
+    const file = PasteManager._getImageFile(clipboardData);
     if (file) {
       //  todo upload file to file server
       return [];

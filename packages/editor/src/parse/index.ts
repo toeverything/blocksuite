@@ -2,7 +2,7 @@ import { OpenBlockInfo } from '../clipboard/types';
 import { PageContainer } from '../components';
 import { SelectBlock } from '../managers';
 
-export class Parse {
+export class ContentParser {
   private _page: PageContainer;
   constructor(page: PageContainer) {
     this._page = page;

@@ -3,7 +3,7 @@ import { ClipItem } from './clip-item';
 import { PageContainer } from '../components';
 import { SelectBlock, SelectInfo } from '../managers';
 
-export class CopyCutExecution {
+export class CopyCutManager {
   private _page: PageContainer;
 
   constructor(page: PageContainer) {
@@ -64,7 +64,7 @@ export class CopyCutExecution {
     if (selectInfo.type == 'None') {
       return null;
     }
-    const htmlText = this._page.parse.block2Html(selectInfo.blocks);
+    const htmlText = this._page.contentParser.block2Html(selectInfo.blocks);
     return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
   }
 
@@ -72,7 +72,7 @@ export class CopyCutExecution {
     if (selectInfo.type == 'None') {
       return null;
     }
-    const text = this._page.parse.block2Text(selectInfo.blocks);
+    const text = this._page.contentParser.block2Text(selectInfo.blocks);
     return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, text);
   }
 

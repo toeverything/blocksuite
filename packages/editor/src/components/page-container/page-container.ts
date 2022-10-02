@@ -4,8 +4,8 @@ import { Store } from '@blocksuite/store';
 import { BlockHost, hotkeyManager } from '@blocksuite/shared';
 import { SelectionManager, MouseManager } from '../..';
 import { BlockSchema } from '../../block-loader';
-import { Clipboard } from '../../clipboard';
-import { Parse } from '../../parse';
+import { ClipboardManager } from '../../clipboard';
+import { ContentParser } from '../../parse';
 import './debug-menu';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
@@ -28,10 +28,10 @@ export class PageContainer extends LitElement implements BlockHost {
   selection = new SelectionManager(this);
 
   @state()
-  clipboard = new Clipboard(this, this);
+  clipboard = new ClipboardManager(this, this);
 
   @state()
-  parse = new Parse(this);
+  contentParser = new ContentParser(this);
 
   @state()
   isEmptyPage = true;

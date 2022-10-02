@@ -1,20 +1,20 @@
 import { PageContainer } from '../components';
 import { ClipEventDispatch } from './clip-event-dispatch';
-import { CopyCutExecution } from './copy-cut-execution';
-import { PasteExecution } from './paste-execution';
+import { CopyCutManager } from './copy-cut-manager';
+import { PasteManager } from './paste-manager';
 
-export class Clipboard {
+export class ClipboardManager {
   private _page: PageContainer;
   private _clipboardEventDispatcher: ClipEventDispatch;
-  private _copy: CopyCutExecution;
-  private _paste: PasteExecution;
+  private _copy: CopyCutManager;
+  private _paste: PasteManager;
   private _clipboardTarget: HTMLElement;
 
   constructor(page: PageContainer, clipboardTarget: HTMLElement) {
     this._page = page;
     this._clipboardTarget = clipboardTarget;
-    this._copy = new CopyCutExecution(this._page);
-    this._paste = new PasteExecution(this._page);
+    this._copy = new CopyCutManager(this._page);
+    this._paste = new PasteManager(this._page);
     this._clipboardEventDispatcher = new ClipEventDispatch(
       this._clipboardTarget
     );
