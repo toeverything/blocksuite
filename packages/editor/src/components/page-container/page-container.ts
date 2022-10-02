@@ -2,10 +2,13 @@ import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { Store } from '@blocksuite/store';
 import { BlockHost, hotkeyManager } from '@blocksuite/shared';
-import { SelectionManager, MouseManager } from '../..';
+import {
+  SelectionManager,
+  MouseManager,
+  ClipboardManager,
+  ContentParser,
+} from '../..';
 import { BlockSchema } from '../../block-loader';
-import { ClipboardManager } from '../../clipboard';
-import { ContentParser } from '../../parse';
 import './debug-menu';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;

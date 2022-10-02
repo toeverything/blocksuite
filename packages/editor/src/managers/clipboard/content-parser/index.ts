@@ -1,6 +1,4 @@
-import { OpenBlockInfo } from '../clipboard/types';
-import { PageContainer } from '../components';
-import { SelectBlock } from '../managers';
+import { OpenBlockInfo, PageContainer, SelectBlock } from '../../..';
 
 export class ContentParser {
   private _page: PageContainer;

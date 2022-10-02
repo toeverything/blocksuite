@@ -1,7 +1,7 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
-import { PageContainer } from '../components';
-import { SelectBlock, SelectInfo } from '../managers';
+import { PageContainer } from '../../components';
+import { SelectBlock, SelectInfo } from '..';
 
 export class CopyCutManager {
   private _page: PageContainer;

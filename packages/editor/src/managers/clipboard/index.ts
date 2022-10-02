@@ -1,7 +1,10 @@
-import { PageContainer } from '../components';
+import { PageContainer } from '../../components';
 import { ClipEventDispatch } from './clip-event-dispatch';
 import { CopyCutManager } from './copy-cut-manager';
 import { PasteManager } from './paste-manager';
+
+export * from './types';
+export * from './content-parser';
 
 export class ClipboardManager {
   private _page: PageContainer;
