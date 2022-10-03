@@ -35,7 +35,6 @@ function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
 
 export class SelectionManager {
   private _selectedBlockIds: Array<string> = [];
-  // @ts-ignore
   private _page: PageContainer;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
@@ -159,9 +158,13 @@ export class SelectionManager {
     if (blockDom) {
       if (selectionRect.isIntersect(Rect.fromDom(blockDom))) {
         const { children } = blockModel;
-        const queryStr = children.reduce((query, child, index) => {
-          return `${query}${index ? ',' : ''}[${BLOCK_ID_ATTR}='${child.id}']`;
-        }, '');
+
+        const queryStrs: string[] = [];
+        for (const child of children) {
+          queryStrs.push(`[${BLOCK_ID_ATTR}='${child.id}']`);
+        }
+        const queryStr = queryStrs.join(',');
+
         // IMP: if parent block does not contain child block, this will be not useful
         const childrenDoms = blockDom.querySelectorAll(queryStr);
         childrenDoms.forEach(dom => {

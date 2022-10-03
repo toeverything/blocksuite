@@ -25,7 +25,7 @@ export class PageContainer extends LitElement implements BlockHost {
   model!: PageBlockModel;
 
   @state()
-  mouse = new MouseManager(this.addEventListener.bind(this));
+  mouse = new MouseManager(this);
 
   @state()
   selection = new SelectionManager(this);
