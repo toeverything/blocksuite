@@ -158,12 +158,9 @@ export class SelectionManager {
     if (blockDom) {
       if (selectionRect.isIntersect(Rect.fromDom(blockDom))) {
         const { children } = blockModel;
-
-        const queryStrs: string[] = [];
-        for (const child of children) {
-          queryStrs.push(`[${BLOCK_ID_ATTR}='${child.id}']`);
-        }
-        const queryStr = queryStrs.join(',');
+        const queryStr = children
+          .map(child => `[${BLOCK_ID_ATTR}='${child.id}']`)
+          .join(',');
 
         // IMP: if parent block does not contain child block, this will be not useful
         const childrenDoms = blockDom.querySelectorAll(queryStr);

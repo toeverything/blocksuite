@@ -49,36 +49,27 @@ export class PageContainer extends LitElement implements BlockHost {
     super();
 
     this._subscribeStore();
+    this._bindHotkeys();
     this._tryInitFromVoidState();
+
     // @ts-ignore
     window.store = this.store;
     // @ts-ignore
     window.page = this;
-    this._bindHotkeys();
-    hotkeyManager.setScope('page');
   }
 
   private _bindHotkeys() {
-    hotkeyManager.addListener(
-      hotkeyManager.hotkeysMap.undo,
-      'page',
+    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
+    const scope = 'page';
 
-      () => {
-        this.store.undo();
-      }
-    );
-    hotkeyManager.addListener(hotkeyManager.hotkeysMap.redo, 'page', () => {
-      this.store.redo();
+    hotkeyManager.addListener(undo, scope, () => this.store.undo());
+    hotkeyManager.addListener(redo, scope, () => this.store.redo());
+    hotkeyManager.addListener(selectAll, scope, (e: Event) => {
+      e.preventDefault();
+      const pageChildrenBlock = this.model.children.map(block => block.id);
+      this.selection.selectedBlockIds = pageChildrenBlock;
     });
-    hotkeyManager.addListener(
-      hotkeyManager.hotkeysMap.selectAll,
-      'page',
-      (e: Event) => {
-        e.preventDefault();
-        const pageChildrenBlock = this.model.children.map(block => block.id);
-        this.selection.selectedBlockIds = pageChildrenBlock;
-      }
-    );
+    hotkeyManager.setScope('page');
   }
 
   private _subscribeStore() {
