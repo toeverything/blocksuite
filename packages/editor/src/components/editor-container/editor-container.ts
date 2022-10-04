@@ -116,17 +116,14 @@ export class EditorContainer extends LitElement implements BlockHost {
 
   render() {
     const placeholderRoot = html`
-      <page-block-element
+      <page-block
         .model=${this.placeholderModel}
         .host=${this as BlockHost}
-      ></page-block-element>
+      ></page-block>
     `;
 
     const blockRoot = html`
-      <page-block-element
-        .model=${this.model}
-        .host=${this as BlockHost}
-      ></page-block-element>
+      <page-block .model=${this.model} .host=${this as BlockHost}></page-block>
     `;
 
     return html`

@@ -10,8 +10,8 @@ import { getBlockChildrenContainer } from '../__internal__/utils';
 import '../__internal__/rich-text/rich-text';
 import type { ParagraphBlockModel } from './paragraph-model';
 
-@customElement('paragraph-block-element')
-export class ParagraphBlockElement extends LitElement {
+@customElement('paragraph-block')
+export class ParagraphBlockComponent extends LitElement {
   @property({
     hasChanged() {
       return true;
@@ -75,6 +75,6 @@ export class ParagraphBlockElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'paragraph-block-element': ParagraphBlockElement;
+    'paragraph-block': ParagraphBlockComponent;
   }
 }

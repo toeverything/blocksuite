@@ -67,7 +67,7 @@ export class DebugMenu extends LitElement {
   private _onSetParagraphType(type: string) {
     const selection = window.getSelection();
     const element = selection?.focusNode?.parentElement as HTMLElement;
-    const block = element.closest('paragraph-block-element')?.model;
+    const block = element.closest('paragraph-block')?.model;
     block?.store.captureSync();
     block?.store.updateBlock(block, { type });
   }

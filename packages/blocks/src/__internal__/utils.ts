@@ -10,17 +10,17 @@ function getBlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
     case 'paragraph':
       return html`
-        <paragraph-block-element
+        <paragraph-block
           .model=${model as ParagraphBlockModel}
           .host=${host}
-        ></paragraph-block-element>
+        ></paragraph-block>
       `;
     case 'list':
       return html`
-        <list-block-element
+        <list-block
           .model=${model as ListBlockModel}
           .host=${host}
-        ></list-block-element>
+        ></list-block>
       `;
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;

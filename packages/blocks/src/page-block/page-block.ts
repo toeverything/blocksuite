@@ -8,8 +8,8 @@ import {
 import type { PageBlockModel } from './page-model';
 import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
 
-@customElement('page-block-element')
-export class PageBlockElement extends LitElement {
+@customElement('page-block')
+export class PageBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
@@ -100,6 +100,6 @@ export class PageBlockElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'page-block-element': PageBlockElement;
+    'page-block': PageBlockComponent;
   }
 }

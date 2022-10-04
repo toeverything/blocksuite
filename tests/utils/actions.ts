@@ -21,7 +21,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
 }
 
 export async function waitDefaultPageLoaded(page: Page) {
-  await page.waitForSelector('page-block-element[data-block-id="0"]');
+  await page.waitForSelector('page-block[data-block-id="0"]');
 }
 
 export async function waitNextFrame(page: Page) {

@@ -7,8 +7,8 @@ import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils';
 import '../__internal__/rich-text/rich-text';
 
-@customElement('list-block-element')
-export class ListBlockElement extends LitElement {
+@customElement('list-block')
+export class ListBlockComponent extends LitElement {
   @property({
     hasChanged() {
       return true;
@@ -92,6 +92,6 @@ export class ListBlockElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'list-block-element': ListBlockElement;
+    'list-block': ListBlockComponent;
   }
 }

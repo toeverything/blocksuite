@@ -247,13 +247,13 @@ export class SelectionManager {
 
   private _getPerviousBlock(blockId: string) {
     // TODO: resolve type problem
-    const currentBlock = this._editor.querySelector<'paragraph-block-element'>(
-      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
+    const currentBlock = this._editor.querySelector<'paragraph-block'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
     );
     if (currentBlock) {
       const parentBlock =
-        currentBlock.parentElement?.closest<'paragraph-block-element'>(
-          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
+        currentBlock.parentElement?.closest<'paragraph-block'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block'
         );
       if (parentBlock) {
         const siblings = parentBlock.model.children;
@@ -281,16 +281,16 @@ export class SelectionManager {
 
   private _getNextBlock(blockId: string) {
     // TODO: resolve type problem
-    let currentBlock = this._editor.querySelector<'paragraph-block-element'>(
-      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
+    let currentBlock = this._editor.querySelector<'paragraph-block'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
     );
     if (currentBlock?.model.children.length) {
       return currentBlock.model.children[0];
     }
     while (currentBlock) {
       const parentBlock =
-        currentBlock.parentElement?.closest<'paragraph-block-element'>(
-          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
+        currentBlock.parentElement?.closest<'paragraph-block'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block'
         ) || null;
       if (parentBlock) {
         const siblings = parentBlock.model.children;

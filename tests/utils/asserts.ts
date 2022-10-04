@@ -22,7 +22,7 @@ export const defaultStore: SerializedStore = {
 };
 
 export async function assertEmpty(page: Page) {
-  const actual = await page.locator('paragraph-block-element').count();
+  const actual = await page.locator('paragraph-block').count();
   expect(actual).toBe(0);
 }
 
@@ -47,7 +47,7 @@ export async function assertBlockCount(
   flavour: string,
   count: number
 ) {
-  const actual = await page.locator(`${flavour}-block-element`).count();
+  const actual = await page.locator(`${flavour}-block`).count();
   expect(actual).toBe(count);
 }
 
