@@ -8,8 +8,8 @@ import {
 import type { PageBlockModel } from './page-model';
 import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
 
-@customElement('page-block')
-export class PageBlockComponent extends LitElement {
+@customElement('default-page-block')
+export class DefaultPageBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
@@ -20,7 +20,7 @@ export class PageBlockComponent extends LitElement {
   })
   model!: PageBlockModel;
 
-  @query('.affine-page-block-title')
+  @query('.affine-default-page-block-title')
   _blockTitle!: HTMLInputElement;
 
   // disable shadow DOM to workaround quill
@@ -68,25 +68,26 @@ export class PageBlockComponent extends LitElement {
 
     return html`
       <style>
-        .affine-page-block-title {
+        .affine-default-page-block-title {
           box-sizing: border-box;
           font-size: 32px;
           font-weight: 600;
           outline: none;
           border: 0;
         }
-        .affine-page-block-title::placeholder {
+        .affine-default-page-block-title::placeholder {
           color: #ddd;
         }
-        .affine-page-block-container > .affine-block-children-container {
+        .affine-default-page-block-container
+          > .affine-block-children-container {
           padding-left: 0;
         }
       </style>
-      <div class="affine-page-block-container">
-        <div class="affine-page-block-title-container">
+      <div class="affine-default-page-block-container">
+        <div class="affine-default-page-block-title-container">
           <input
             placeholder="Title"
-            class="affine-page-block-title"
+            class="affine-default-page-block-title"
             value=${this.model.title}
             @keydown=${this._onKeyDown}
             @input=${this._onTitleInput}
@@ -100,6 +101,6 @@ export class PageBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'page-block': PageBlockComponent;
+    'default-page-block': DefaultPageBlockComponent;
   }
 }
