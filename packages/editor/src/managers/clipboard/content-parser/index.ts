@@ -1,9 +1,9 @@
-import { OpenBlockInfo, PageContainer, SelectBlock } from '../../..';
+import { OpenBlockInfo, EditorContainer, SelectBlock } from '../../..';
 
 export class ContentParser {
-  private _page: PageContainer;
-  constructor(page: PageContainer) {
-    this._page = page;
+  private _editor: EditorContainer;
+  constructor(editor: EditorContainer) {
+    this._editor = editor;
   }
 
   public block2Html(blocks: SelectBlock[]): string {
@@ -31,7 +31,7 @@ export class ContentParser {
   private _getHtmlInfoOfBlockBySelectInfo(
     selectBlockInfo: SelectBlock
   ): string {
-    const model = this._page.store.getBlockById(selectBlockInfo.blockId);
+    const model = this._editor.store.getBlockById(selectBlockInfo.blockId);
     if (!model) {
       return '';
     }
@@ -85,7 +85,7 @@ export class ContentParser {
   private _getTextInfoOfBlockBySelectInfo(
     selectBlockInfo: SelectBlock
   ): string {
-    const model = this._page.store.getBlockById(selectBlockInfo.blockId);
+    const model = this._editor.store.getBlockById(selectBlockInfo.blockId);
     if (!model) {
       return '';
     }

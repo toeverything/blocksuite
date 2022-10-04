@@ -1,13 +1,13 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
-import { PageContainer } from '../../components';
+import { EditorContainer } from '../../components';
 import { HtmlParser } from './content-parser/parse-html';
 import { TextParser } from './content-parser/parse-text';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 
 export class PasteManager {
-  private _page: PageContainer;
+  private _editor: EditorContainer;
 
   // The event handler will get the most needed clipboard data based on this array order
   private static _optimalMimeTypes: string[] = [
@@ -16,8 +16,8 @@ export class PasteManager {
     CLIPBOARD_MIMETYPE.TEXT,
   ];
 
-  constructor(page: PageContainer) {
-    this._page = page;
+  constructor(editor: EditorContainer) {
+    this._editor = editor;
     this.handlePaste = this.handlePaste.bind(this);
   }
 
@@ -118,27 +118,27 @@ export class PasteManager {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectInfo = this._page.selection.selectionInfo;
+    const currentSelectInfo = this._editor.selection.selectionInfo;
 
     if (
       currentSelectInfo.type === 'Range' ||
       currentSelectInfo.type === 'Caret'
     ) {
       // TODO split selected block case
-      const selectedBlock = this._page.store.getBlockById(
+      const selectedBlock = this._editor.store.getBlockById(
         currentSelectInfo.focusBlockId
       );
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
-        parent = this._page.store.getParent(selectedBlock);
+        parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._page.selection.selectedBlockIds = addBlockIds;
+      this._editor.selection.selectedBlockIds = addBlockIds;
     } else if (currentSelectInfo.type === 'Block') {
-      const selectedBlock = this._page.store.getBlockById(
+      const selectedBlock = this._editor.store.getBlockById(
         currentSelectInfo.selectedNodesIds[
           currentSelectInfo.selectedNodesIds.length - 1
         ]
@@ -147,12 +147,12 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = -1;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
-        parent = this._page.store.getParent(selectedBlock);
+        parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._page.selection.selectedBlockIds = addBlockIds;
+      this._editor.selection.selectedBlockIds = addBlockIds;
     }
   }
 
@@ -167,8 +167,8 @@ export class PasteManager {
       const blockProps = {
         flavour: block.flavour as string,
       };
-      const id = this._page.store.addBlock(blockProps, parent, index + i);
-      const model = this._page.store.getBlockById(id);
+      const id = this._editor.store.addBlock(blockProps, parent, index + i);
+      const model = this._editor.store.getBlockById(id);
       block.text && model?.text?.applyDelta(block.text);
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);

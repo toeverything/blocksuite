@@ -1,4 +1,4 @@
-import { PageContainer } from '../..';
+import { EditorContainer } from '../..';
 import {
   BLOCK_ID_ATTR,
   Point,
@@ -35,7 +35,7 @@ function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
 
 export class SelectionManager {
   private _selectedBlockIds: Array<string> = [];
-  private _page: PageContainer;
+  private _editor: EditorContainer;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
   private _blockActiveSlotMap: { [k in string]: Slot<SelectionPosition> } = {};
@@ -48,8 +48,8 @@ export class SelectionManager {
   };
   private _lastCursorPosition: Point | null = null;
 
-  constructor(page: PageContainer) {
-    this._page = page;
+  constructor(editor: EditorContainer) {
+    this._editor = editor;
     this._handlerBrowserChange = this._handlerBrowserChange.bind(this);
     this._initListenBrowserSelection();
   }
@@ -118,8 +118,8 @@ export class SelectionManager {
         type !== 'None' &&
         anchorNode &&
         focusNode &&
-        this._page.contains(anchorNode) &&
-        this._page.contains(focusNode)
+        this._editor.contains(anchorNode) &&
+        this._editor.contains(focusNode)
       ) {
         const anchorBlockId =
           anchorNode.parentElement
@@ -131,11 +131,11 @@ export class SelectionManager {
             ?.getAttribute(BLOCK_ID_ATTR) || '';
         this._anchorBlockId = anchorBlockId;
         this._focusBlockId = focusBlockId;
-        const anchorSelect = this._page.store.richTextAdapters
+        const anchorSelect = this._editor.store.richTextAdapters
           .get(anchorBlockId)
           ?.quill.getSelection();
         this._anchorBlockPosition = anchorSelect?.index;
-        const focusSelect = this._page.store.richTextAdapters
+        const focusSelect = this._editor.store.richTextAdapters
           .get(focusBlockId)
           ?.quill.getSelection();
         this._focusBlockPosition =
@@ -152,7 +152,7 @@ export class SelectionManager {
 
   public calcIntersectBlocks(selectionRect: Rect, blockModel: BaseBlockModel) {
     let selectedBlocks: Array<string> = [];
-    const blockDom = this._page.querySelector(
+    const blockDom = this._editor.querySelector(
       `[${BLOCK_ID_ATTR}='${blockModel.id}']`
     );
     if (blockDom) {
@@ -188,7 +188,7 @@ export class SelectionManager {
       }
     }
     // only page model need call selection change
-    if (this._page.model === blockModel) {
+    if (this._editor.model === blockModel) {
       this.selectedBlockIds = selectedBlocks;
     }
     return selectedBlocks;
@@ -247,7 +247,7 @@ export class SelectionManager {
 
   private _getPerviousBlock(blockId: string) {
     // TODO: resolve type problem
-    const currentBlock = this._page.querySelector<'paragraph-block-element'>(
+    const currentBlock = this._editor.querySelector<'paragraph-block-element'>(
       `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
     );
     if (currentBlock) {
@@ -281,7 +281,7 @@ export class SelectionManager {
 
   private _getNextBlock(blockId: string) {
     // TODO: resolve type problem
-    let currentBlock = this._page.querySelector<'paragraph-block-element'>(
+    let currentBlock = this._editor.querySelector<'paragraph-block-element'>(
       `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
     );
     if (currentBlock?.model.children.length) {
@@ -398,7 +398,7 @@ export class SelectionManager {
     const blocks: SelectBlock[] = [];
     const blockId = startBlockId;
     let beenFind = false;
-    let curBlock = this._page.store.getBlockById(blockId);
+    let curBlock = this._editor.store.getBlockById(blockId);
     while (!beenFind && curBlock) {
       beenFind = this._collectBlockInfo(
         curBlock,
@@ -414,12 +414,12 @@ export class SelectionManager {
       let parent: BaseBlockModel | null = curBlock;
       curBlock = null;
       while (parent) {
-        const nextSibling = this._page.store.getNextSibling(parent);
+        const nextSibling = this._editor.store.getNextSibling(parent);
         if (nextSibling) {
           curBlock = nextSibling;
           break;
         }
-        parent = this._page.store.getParent(parent);
+        parent = this._editor.store.getParent(parent);
       }
     }
 
@@ -522,7 +522,7 @@ export class SelectionManager {
         nextBlockId = this._getNextBlock(blockId)?.id || '';
       }
 
-      let blockModel = this._page.store.getBlockById(blockId);
+      let blockModel = this._editor.store.getBlockById(blockId);
       while (blockModel) {
         blockId = blockModel.id;
         blockModel = blockModel.lastChild();

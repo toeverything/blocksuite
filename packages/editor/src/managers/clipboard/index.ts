@@ -1,4 +1,4 @@
-import { PageContainer } from '../../components';
+import { EditorContainer } from '../../components';
 import { ClipEventDispatch } from './clip-event-dispatch';
 import { CopyCutManager } from './copy-cut-manager';
 import { PasteManager } from './paste-manager';
@@ -7,17 +7,17 @@ export * from './types';
 export * from './content-parser';
 
 export class ClipboardManager {
-  private _page: PageContainer;
+  private _editor: EditorContainer;
   private _clipboardEventDispatcher: ClipEventDispatch;
   private _copy: CopyCutManager;
   private _paste: PasteManager;
   private _clipboardTarget: HTMLElement;
 
-  constructor(page: PageContainer, clipboardTarget: HTMLElement) {
-    this._page = page;
+  constructor(editor: EditorContainer, clipboardTarget: HTMLElement) {
+    this._editor = editor;
     this._clipboardTarget = clipboardTarget;
-    this._copy = new CopyCutManager(this._page);
-    this._paste = new PasteManager(this._page);
+    this._copy = new CopyCutManager(this._editor);
+    this._paste = new PasteManager(this._editor);
     this._clipboardEventDispatcher = new ClipEventDispatch(
       this._clipboardTarget
     );

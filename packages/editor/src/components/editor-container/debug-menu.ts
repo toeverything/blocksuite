@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CommonBlockElement, convertToList } from '@blocksuite/shared';
-import type { PageContainer } from './page-container';
+import type { EditorContainer } from './editor-container';
 import { BaseBlockModel, Store } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
@@ -10,7 +10,7 @@ const initType = params.get('init') || 'default';
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
   @property()
-  page!: PageContainer;
+  editor!: EditorContainer;
 
   @state()
   connected = true;
@@ -25,7 +25,7 @@ export class DebugMenu extends LitElement {
   canDelete = false;
 
   get store() {
-    return this.page.store;
+    return this.editor.store;
   }
 
   private _onToggleConnection() {
@@ -59,7 +59,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _onDelete() {
-    this.page.selection.selectionInfo.selectedNodesIds?.forEach(id => {
+    this.editor.selection.selectionInfo.selectedNodesIds?.forEach(id => {
       this.store.deleteBlockById(id);
     });
   }
@@ -91,7 +91,7 @@ export class DebugMenu extends LitElement {
       this.canRedo = this.store.canRedo;
     });
 
-    this.page.selection.onSelectionChange(selectionInfo => {
+    this.editor.selection.onSelectionChange(selectionInfo => {
       this.canDelete = selectionInfo?.selectedNodesIds?.length !== undefined;
     });
 

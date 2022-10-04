@@ -1,13 +1,13 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
-import { PageContainer } from '../../components';
+import { EditorContainer } from '../../components';
 import { SelectBlock, SelectInfo } from '..';
 
 export class CopyCutManager {
-  private _page: PageContainer;
+  private _editor: EditorContainer;
 
-  constructor(page: PageContainer) {
-    this._page = page;
+  constructor(editor: EditorContainer) {
+    this._editor = editor;
     this.handleCopy = this.handleCopy.bind(this);
     this.handleCut = this.handleCut.bind(this);
   }
@@ -31,7 +31,7 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const selectInfo: SelectInfo = this._page.selection.getSelectInfo();
+    const selectInfo: SelectInfo = this._editor.selection.getSelectInfo();
 
     const affineClip = this._getCustomClip(selectInfo);
     affineClip && clips.push(affineClip);
@@ -64,7 +64,7 @@ export class CopyCutManager {
     if (selectInfo.type == 'None') {
       return null;
     }
-    const htmlText = this._page.contentParser.block2Html(selectInfo.blocks);
+    const htmlText = this._editor.contentParser.block2Html(selectInfo.blocks);
     return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
   }
 
@@ -72,14 +72,14 @@ export class CopyCutManager {
     if (selectInfo.type == 'None') {
       return null;
     }
-    const text = this._page.contentParser.block2Text(selectInfo.blocks);
+    const text = this._editor.contentParser.block2Text(selectInfo.blocks);
     return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, text);
   }
 
   private _getClipInfoOfBlockBySelectInfo(
     selectBlockInfo: SelectBlock
   ): OpenBlockInfo | null {
-    const model = this._page.store.getBlockById(selectBlockInfo.blockId);
+    const model = this._editor.store.getBlockById(selectBlockInfo.blockId);
     if (!model) {
       return null;
     }

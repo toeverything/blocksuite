@@ -16,8 +16,8 @@ type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
-@customElement('page-container')
-export class PageContainer extends LitElement implements BlockHost {
+@customElement('editor-container')
+export class EditorContainer extends LitElement implements BlockHost {
   @state()
   store = new Store(room).register(BlockSchema);
 
@@ -131,17 +131,17 @@ export class PageContainer extends LitElement implements BlockHost {
 
     return html`
       <style>
-        .affine-page-container {
+        .affine-editor-container {
           position: relative;
           padding: 10px 70px;
         }
       </style>
-      <div class="affine-page-container">
-        <debug-menu .page=${this as PageContainer}></debug-menu>
+      <div class="affine-editor-container">
+        <debug-menu .editor=${this as EditorContainer}></debug-menu>
         <selection-rect
           .selectionManager=${this.selection}
           .pageModel=${this.model}
-          .page=${this as PageContainer}
+          .editor=${this as EditorContainer}
         ></selection-rect>
         ${this.isEmptyPage ? placeholderRoot : blockRoot}
       </div>
@@ -151,6 +151,6 @@ export class PageContainer extends LitElement implements BlockHost {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'page-container': PageContainer;
+    'editor-container': EditorContainer;
   }
 }

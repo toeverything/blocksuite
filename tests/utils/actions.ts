@@ -46,7 +46,7 @@ export async function focusRichText(page: Page, i = 0) {
 
 export async function blurRichText(page: Page) {
   await page.mouse.move(0, 0);
-  const locator = page.locator('.affine-page-container');
+  const locator = page.locator('.affine-editor-container');
   await locator.click();
 }
 

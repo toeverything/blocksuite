@@ -72,7 +72,7 @@ export async function assertSelection(
 export async function assertSelectedBlockCount(page: Page, count: number) {
   const actual = await page.evaluate(() => {
     const selectLength =
-      document.querySelector('page-container')?.selection.selectionInfo
+      document.querySelector('editor-container')?.selection.selectionInfo
         ?.selectedNodesIds?.length;
     return selectLength || 0;
   });

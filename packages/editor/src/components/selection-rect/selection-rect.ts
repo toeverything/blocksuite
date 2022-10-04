@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR, Point, Rect } from '@blocksuite/shared';
 import { BlockSchema } from '../../block-loader';
-import { PageContainer, SelectionManager } from '../..';
+import { EditorContainer, SelectionManager } from '../..';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
@@ -28,18 +28,18 @@ export class SelectionRect extends LitElement {
   pageModel!: PageBlockModel;
 
   @property()
-  page!: PageContainer;
+  editor!: EditorContainer;
 
   @property()
   selectionManager!: SelectionManager;
 
   protected firstUpdated(): void {
-    if (this.page.mouse) {
-      this.page.mouse.onMouseDown(e => {
+    if (this.editor.mouse) {
+      this.editor.mouse.onMouseDown(e => {
         this._handleEditorMousedown(e);
       });
-      this.page.mouse.onMouseMove(e => {
-        if (!this.page.model) return;
+      this.editor.mouse.onMouseMove(e => {
+        if (!this.editor.model) return;
 
         this._handleMouseMove(e);
       });
@@ -65,7 +65,7 @@ export class SelectionRect extends LitElement {
     ) {
       this.startPoint = new Point(e.clientX, e.clientY);
       this.isShow = true;
-      this.page.mouse.onDocumentMouseUpOnce(() => {
+      this.editor.mouse.onDocumentMouseUpOnce(() => {
         this._handleEditorMouseup();
       });
       e.preventDefault();
@@ -76,7 +76,7 @@ export class SelectionRect extends LitElement {
     if (this.startPoint) {
       this.endPoint = new Point(e.clientX, e.clientY);
       this.rect = Rect.fromPoints(this.startPoint, this.endPoint);
-      this.page.selection.calcIntersectBlocks(this.rect, this.pageModel);
+      this.editor.selection.calcIntersectBlocks(this.rect, this.pageModel);
     }
   }
 
