@@ -264,7 +264,7 @@ export class SelectionManager {
     this._slots.selection.emit(this.selectionInfo);
   }
 
-  private _getPerviousBlock(blockId: string) {
+  private _getPreviousBlock(blockId: string) {
     // TODO: resolve type problem
     const currentBlock = this._container.querySelector<'paragraph-block'>(
       `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
@@ -336,7 +336,7 @@ export class SelectionManager {
     } else if (this._lastCursorPosition) {
       nextPosition = this._lastCursorPosition;
     }
-    const preNodeModel = this._getPerviousBlock(blockId);
+    const preNodeModel = this._getPreviousBlock(blockId);
     if (preNodeModel) {
       this.activeBlockById(preNodeModel.id, nextPosition);
     }
@@ -506,7 +506,7 @@ export class SelectionManager {
         selectionInfo.selectedNodeIds.indexOf(previousBlockId) !== 0
       ) {
         blockId = previousBlockId;
-        previousBlockId = this._getPerviousBlock(blockId)?.id || '';
+        previousBlockId = this._getPreviousBlock(blockId)?.id || '';
       }
     } else if (
       selectionInfo.type === 'Range' ||
@@ -515,7 +515,7 @@ export class SelectionManager {
       blockId = selectionInfo.anchorBlockId;
       let previousBlockId = blockId;
       while (previousBlockId) {
-        previousBlockId = this._getPerviousBlock(previousBlockId)?.id || '';
+        previousBlockId = this._getPreviousBlock(previousBlockId)?.id || '';
         if (previousBlockId === selectionInfo.focusBlockId) {
           blockId = previousBlockId;
           break;
