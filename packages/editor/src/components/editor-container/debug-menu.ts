@@ -3,6 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { CommonBlockElement, convertToList } from '@blocksuite/shared';
 import type { EditorContainer } from './editor-container';
 import { BaseBlockModel, Store } from '@blocksuite/store';
+import type { BlockSelectionInfo } from '../../managers';
 
 const params = new URLSearchParams(location.search);
 const initType = params.get('init') || 'default';
@@ -59,9 +60,10 @@ export class DebugMenu extends LitElement {
   }
 
   private _onDelete() {
-    this.editor.selection.selectionInfo.selectedNodeIds?.forEach(id => {
-      this.store.deleteBlockById(id);
-    });
+    const selectedBlocks = (
+      this.editor.selection.selectionInfo as BlockSelectionInfo
+    ).blocks;
+    selectedBlocks.forEach(({ id }) => this.store.deleteBlockById(id));
   }
 
   private _onSetParagraphType(type: string) {
@@ -92,7 +94,8 @@ export class DebugMenu extends LitElement {
     });
 
     this.editor.selection.onSelectionChange(selectionInfo => {
-      this.canDelete = selectionInfo?.selectedNodeIds?.length !== undefined;
+      this.canDelete =
+        (selectionInfo as BlockSelectionInfo)?.blocks?.length !== undefined;
     });
 
     requestAnimationFrame(() => this._handleDebugInit());

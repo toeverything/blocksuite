@@ -71,10 +71,13 @@ export async function assertSelection(
 
 export async function assertSelectedBlockCount(page: Page, expected: number) {
   const actual = await page.evaluate(() => {
-    const count =
-      document.querySelector('editor-container')?.selection.selectionInfo
-        ?.selectedNodeIds?.length;
-    return count || 0;
+    const selectionInfo =
+      document.querySelector('editor-container')?.selection.selectionInfo;
+    if (selectionInfo?.type === 'Block') {
+      return selectionInfo.blocks.length;
+    }
+
+    return 0;
   });
   expect(actual).toBe(expected);
 }

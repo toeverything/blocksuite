@@ -31,8 +31,7 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const selectionInfo: SelectionInfo =
-      this._editor.selection.getSelectionInfo();
+    const { selectionInfo } = this._editor.selection;
 
     const affineClip = this._getCustomClip(selectionInfo);
     affineClip && clips.push(affineClip);
@@ -82,14 +81,14 @@ export class CopyCutManager {
   private _getClipInfoBySelectionInfo(
     selectedBlock: SelectedBlock
   ): OpenBlockInfo | null {
-    const model = this._editor.store.getBlockById(selectedBlock.blockId);
+    const model = this._editor.store.getBlockById(selectedBlock.id);
     if (!model) {
       return null;
     }
     // TODO Handling different block by extension
     const delta = model?.text?.sliceToDelta(
-      selectedBlock.startPos || 0,
-      selectedBlock.endPos
+      selectedBlock?.startPos || 0,
+      selectedBlock?.endPos
     );
 
     const children: OpenBlockInfo[] = [];

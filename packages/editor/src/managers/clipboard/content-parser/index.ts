@@ -29,7 +29,7 @@ export class ContentParser {
   }
 
   private _getHtmlInfoBySelectionInfo(blocks: SelectedBlock): string {
-    const model = this._editor.store.getBlockById(blocks.blockId);
+    const model = this._editor.store.getBlockById(blocks.id);
     if (!model) {
       return '';
     }
@@ -81,7 +81,7 @@ export class ContentParser {
   }
 
   private _getTextInfoBySelectionInfo(selectedBlock: SelectedBlock): string {
-    const model = this._editor.store.getBlockById(selectedBlock.blockId);
+    const model = this._editor.store.getBlockById(selectedBlock.id);
     if (!model) {
       return '';
     }

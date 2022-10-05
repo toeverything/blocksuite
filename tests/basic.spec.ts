@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   disconnectByClick,
-  connectByClick,
   redoByClick,
   redoByKeyboard,
   undoByClick,
@@ -81,10 +80,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   ]);
 });
 
-test('conflict occurs as expected when two same id generated together', async ({
-  browser,
-  page: pageA,
-}) => {
+test('does not sync when disconnected', async ({ browser, page: pageA }) => {
   test.fail();
 
   const room = await enterPlaygroundRoom(pageA);
@@ -94,14 +90,11 @@ test('conflict occurs as expected when two same id generated together', async ({
   await disconnectByClick(pageA);
   await disconnectByClick(pageB);
 
-  // click together, both init with default id leads to conflicts
+  // click together, both init with default id should lead to conflicts
   await focusRichText(pageA);
   await focusRichText(pageB);
   await pageA.keyboard.type('');
   await pageB.keyboard.type('');
-
-  await connectByClick(pageA);
-  await connectByClick(pageB);
 
   await pageA.keyboard.type('hello');
 

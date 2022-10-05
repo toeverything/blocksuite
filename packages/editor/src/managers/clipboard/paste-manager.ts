@@ -139,9 +139,7 @@ export class PasteManager {
       this._editor.selection.selectedBlockIds = addBlockIds;
     } else if (currentSelectionInfo.type === 'Block') {
       const selectedBlock = this._editor.store.getBlockById(
-        currentSelectionInfo.selectedNodeIds[
-          currentSelectionInfo.selectedNodeIds.length - 1
-        ]
+        currentSelectionInfo.blocks[currentSelectionInfo.blocks.length - 1].id
       );
 
       let parent = selectedBlock;
