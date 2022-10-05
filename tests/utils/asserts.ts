@@ -69,14 +69,14 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-export async function assertSelectedBlockCount(page: Page, count: number) {
+export async function assertSelectedBlockCount(page: Page, expected: number) {
   const actual = await page.evaluate(() => {
-    const selectLength =
+    const count =
       document.querySelector('editor-container')?.selection.selectionInfo
-        ?.selectedNodesIds?.length;
-    return selectLength || 0;
+        ?.selectedNodeIds?.length;
+    return count || 0;
   });
-  expect(actual).toBe(count);
+  expect(actual).toBe(expected);
 }
 
 export async function assertStore(page: Page, expected: SerializedStore) {

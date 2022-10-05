@@ -118,15 +118,15 @@ export class PasteManager {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectInfo = this._editor.selection.selectionInfo;
+    const currentSelectionInfo = this._editor.selection.selectionInfo;
 
     if (
-      currentSelectInfo.type === 'Range' ||
-      currentSelectInfo.type === 'Caret'
+      currentSelectionInfo.type === 'Range' ||
+      currentSelectionInfo.type === 'Caret'
     ) {
       // TODO split selected block case
       const selectedBlock = this._editor.store.getBlockById(
-        currentSelectInfo.focusBlockId
+        currentSelectionInfo.focusBlockId
       );
       let parent = selectedBlock;
       let index = 0;
@@ -137,10 +137,10 @@ export class PasteManager {
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
       this._editor.selection.selectedBlockIds = addBlockIds;
-    } else if (currentSelectInfo.type === 'Block') {
+    } else if (currentSelectionInfo.type === 'Block') {
       const selectedBlock = this._editor.store.getBlockById(
-        currentSelectInfo.selectedNodesIds[
-          currentSelectInfo.selectedNodesIds.length - 1
+        currentSelectionInfo.selectedNodeIds[
+          currentSelectionInfo.selectedNodeIds.length - 1
         ]
       );
 

@@ -1,4 +1,4 @@
-import { OpenBlockInfo, EditorContainer, SelectBlock } from '../../..';
+import { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
 
 export class ContentParser {
   private _editor: EditorContainer;
@@ -6,16 +6,16 @@ export class ContentParser {
     this._editor = editor;
   }
 
-  public block2Html(blocks: SelectBlock[]): string {
+  public block2Html(blocks: SelectedBlock[]): string {
     const htmlText = blocks.reduce((htmlText, block) => {
-      return htmlText + this._getHtmlInfoOfBlockBySelectInfo(block);
+      return htmlText + this._getHtmlInfoBySelectionInfo(block);
     }, '');
     return htmlText;
   }
 
-  public block2Text(blocks: SelectBlock[]): string {
+  public block2Text(blocks: SelectedBlock[]): string {
     const text = blocks.reduce((text, block) => {
-      return text + this._getTextInfoOfBlockBySelectInfo(block);
+      return text + this._getTextInfoBySelectionInfo(block);
     }, '');
     return text;
   }
@@ -28,26 +28,24 @@ export class ContentParser {
     return this._convertHtml2Blocks(htmlEl);
   }
 
-  private _getHtmlInfoOfBlockBySelectInfo(
-    selectBlockInfo: SelectBlock
-  ): string {
-    const model = this._editor.store.getBlockById(selectBlockInfo.blockId);
+  private _getHtmlInfoBySelectionInfo(blocks: SelectedBlock): string {
+    const model = this._editor.store.getBlockById(blocks.blockId);
     if (!model) {
       return '';
     }
 
     // TODO Handling different block by extension
     const delta = model?.text?.sliceToDelta(
-      selectBlockInfo.startPos || 0,
-      selectBlockInfo.endPos
+      blocks.startPos || 0,
+      blocks.endPos
     );
     const text = delta.reduce((html: string, item: Record<string, unknown>) => {
       return html + this.deltaLeaf2Html(item);
     }, '');
 
     const children: string[] = [];
-    selectBlockInfo.children.forEach(child => {
-      const childText = this._getHtmlInfoOfBlockBySelectInfo(child);
+    blocks.children.forEach(child => {
+      const childText = this._getHtmlInfoBySelectionInfo(child);
       childText && children.push(childText);
     });
 
@@ -82,22 +80,20 @@ export class ContentParser {
     return text;
   }
 
-  private _getTextInfoOfBlockBySelectInfo(
-    selectBlockInfo: SelectBlock
-  ): string {
-    const model = this._editor.store.getBlockById(selectBlockInfo.blockId);
+  private _getTextInfoBySelectionInfo(selectedBlock: SelectedBlock): string {
+    const model = this._editor.store.getBlockById(selectedBlock.blockId);
     if (!model) {
       return '';
     }
 
     // TODO Handling different block by extension
     let text = model?.text?.toString() || '';
-    const end = selectBlockInfo.endPos ? selectBlockInfo.endPos : text.length;
-    text = text.slice(selectBlockInfo.startPos || 0, end);
+    const end = selectedBlock.endPos ? selectedBlock.endPos : text.length;
+    text = text.slice(selectedBlock.startPos || 0, end);
 
     const children: string[] = [];
-    selectBlockInfo.children.forEach(child => {
-      const childText = this._getTextInfoOfBlockBySelectInfo(child);
+    selectedBlock.children.forEach(child => {
+      const childText = this._getTextInfoBySelectionInfo(child);
       childText && children.push(childText);
     });
 

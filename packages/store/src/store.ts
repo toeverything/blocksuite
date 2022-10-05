@@ -102,6 +102,10 @@ export class Store {
     return this.doc.getMap('blocks') as YBlocks;
   }
 
+  get root() {
+    return this._root;
+  }
+
   get isEmpty() {
     return this._yBlocks.size === 0;
   }

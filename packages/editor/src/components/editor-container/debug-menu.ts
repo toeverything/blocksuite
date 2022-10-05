@@ -59,7 +59,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _onDelete() {
-    this.editor.selection.selectionInfo.selectedNodesIds?.forEach(id => {
+    this.editor.selection.selectionInfo.selectedNodeIds?.forEach(id => {
       this.store.deleteBlockById(id);
     });
   }
@@ -92,7 +92,7 @@ export class DebugMenu extends LitElement {
     });
 
     this.editor.selection.onSelectionChange(selectionInfo => {
-      this.canDelete = selectionInfo?.selectedNodesIds?.length !== undefined;
+      this.canDelete = selectionInfo?.selectedNodeIds?.length !== undefined;
     });
 
     requestAnimationFrame(() => this._handleDebugInit());

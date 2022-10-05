@@ -1,27 +1,44 @@
-import { EditorContainer } from '../..';
 import {
   BLOCK_ID_ATTR,
   Point,
   Rect,
   SelectionPosition,
 } from '@blocksuite/shared';
-import { BaseBlockModel, IDisposable, Slot } from '@blocksuite/store';
+import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
-export type SelectionInfo = InstanceType<
+export type SelectionState = InstanceType<
   typeof SelectionManager
 >['selectionInfo'];
 
-export interface SelectBlock {
+export interface SelectedBlock {
   blockId: string;
   startPos?: number;
   endPos?: number;
-  children: SelectBlock[];
+  children: SelectedBlock[];
 }
 
-export interface SelectInfo {
-  type: 'Block' | 'Range' | 'Caret' | 'None';
-  blocks: SelectBlock[];
+export interface BlockSelectionInfo {
+  type: 'Block';
+  blocks: SelectedBlock[];
 }
+
+interface RangeSelectionInfo {
+  type: 'Range';
+}
+
+interface NoneSelectionInfo {
+  type: 'None';
+}
+
+interface CaretSelectionInfo {
+  type: 'Caret';
+}
+
+export type SelectionInfo =
+  | BlockSelectionInfo
+  | RangeSelectionInfo
+  | NoneSelectionInfo
+  | CaretSelectionInfo;
 
 // TODO use lodash or move to utils
 function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
@@ -35,7 +52,8 @@ function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
 
 export class SelectionManager {
   private _selectedBlockIds: Array<string> = [];
-  private _editor: EditorContainer;
+  private _container: HTMLElement;
+  private _store: Store;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
   private _blockActiveSlotMap: { [k in string]: Slot<SelectionPosition> } = {};
@@ -44,12 +62,13 @@ export class SelectionManager {
   private _anchorBlockPosition: number | null | undefined = null;
   private _focusBlockPosition: number | null | undefined = null;
   private _slots = {
-    selection: new Slot<SelectionInfo>(),
+    selection: new Slot<SelectionState>(),
   };
   private _lastCursorPosition: Point | null = null;
 
-  constructor(editor: EditorContainer) {
-    this._editor = editor;
+  constructor(container: HTMLElement, store: Store) {
+    this._store = store;
+    this._container = container;
     this._handlerBrowserChange = this._handlerBrowserChange.bind(this);
     this._initListenBrowserSelection();
   }
@@ -99,7 +118,7 @@ export class SelectionManager {
     if (this.type === 'Block') {
       return {
         type: 'Block',
-        selectedNodesIds: this._selectedBlockIds,
+        selectedNodeIds: this._selectedBlockIds,
       } as const;
     }
     return { type: 'None' } as const;
@@ -118,8 +137,8 @@ export class SelectionManager {
         type !== 'None' &&
         anchorNode &&
         focusNode &&
-        this._editor.contains(anchorNode) &&
-        this._editor.contains(focusNode)
+        this._container.contains(anchorNode) &&
+        this._container.contains(focusNode)
       ) {
         const anchorBlockId =
           anchorNode.parentElement
@@ -131,15 +150,15 @@ export class SelectionManager {
             ?.getAttribute(BLOCK_ID_ATTR) || '';
         this._anchorBlockId = anchorBlockId;
         this._focusBlockId = focusBlockId;
-        const anchorSelect = this._editor.store.richTextAdapters
+        const anchorSelection = this._store.richTextAdapters
           .get(anchorBlockId)
           ?.quill.getSelection();
-        this._anchorBlockPosition = anchorSelect?.index;
-        const focusSelect = this._editor.store.richTextAdapters
+        this._anchorBlockPosition = anchorSelection?.index;
+        const focusSelection = this._store.richTextAdapters
           .get(focusBlockId)
           ?.quill.getSelection();
         this._focusBlockPosition =
-          focusSelect && focusSelect.index + focusSelect.length;
+          focusSelection && focusSelection.index + focusSelection.length;
       }
     } else {
       this._anchorBlockId = '';
@@ -152,7 +171,7 @@ export class SelectionManager {
 
   public calcIntersectBlocks(selectionRect: Rect, blockModel: BaseBlockModel) {
     let selectedBlocks: Array<string> = [];
-    const blockDom = this._editor.querySelector(
+    const blockDom = this._container.querySelector(
       `[${BLOCK_ID_ATTR}='${blockModel.id}']`
     );
     if (blockDom) {
@@ -188,7 +207,7 @@ export class SelectionManager {
       }
     }
     // only page model need call selection change
-    if (this._editor.model === blockModel) {
+    if (this._store.root === blockModel) {
       this.selectedBlockIds = selectedBlocks;
     }
     return selectedBlocks;
@@ -237,7 +256,7 @@ export class SelectionManager {
     }
   }
 
-  public onSelectionChange(cb: (selectionInfo: SelectionInfo) => void) {
+  public onSelectionChange(cb: (selectionInfo: SelectionState) => void) {
     return this._slots.selection.on(cb);
   }
 
@@ -247,7 +266,7 @@ export class SelectionManager {
 
   private _getPerviousBlock(blockId: string) {
     // TODO: resolve type problem
-    const currentBlock = this._editor.querySelector<'paragraph-block'>(
+    const currentBlock = this._container.querySelector<'paragraph-block'>(
       `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
     );
     if (currentBlock) {
@@ -281,7 +300,7 @@ export class SelectionManager {
 
   private _getNextBlock(blockId: string) {
     // TODO: resolve type problem
-    let currentBlock = this._editor.querySelector<'paragraph-block'>(
+    let currentBlock = this._container.querySelector<'paragraph-block'>(
       `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
     );
     if (currentBlock?.model.children.length) {
@@ -372,59 +391,58 @@ export class SelectionManager {
   }
 
   // TODO: does not consider discontinuous situations (such as multi-selection or hidden block scenarios), the product does not have this feature yet
-  public getSelectInfo(): SelectInfo {
-    const selectInfo = this.selectionInfo;
-    const startBlockId = this._getFirstBlockId(selectInfo);
-    const endBlockId = this._getLastBlockId(selectInfo);
+  public getSelectionInfo(): SelectionInfo {
+    const selectionInfo = this.selectionInfo;
+    const startBlockId = this._getFirstBlockId(selectionInfo);
+    const endBlockId = this._getLastBlockId(selectionInfo);
     let startPosition = null;
     let endPosition = null;
-    if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
-      if (startBlockId === selectInfo.anchorBlockId) {
-        startPosition = selectInfo.anchorBlockPosition;
-        endPosition = selectInfo.focusBlockPosition;
+    if (selectionInfo.type === 'Range' || selectionInfo.type === 'Caret') {
+      if (startBlockId === selectionInfo.anchorBlockId) {
+        startPosition = selectionInfo.anchorBlockPosition;
+        endPosition = selectionInfo.focusBlockPosition;
       } else {
-        startPosition = selectInfo.focusBlockPosition;
-        endPosition = selectInfo.anchorBlockPosition;
+        startPosition = selectionInfo.focusBlockPosition;
+        endPosition = selectionInfo.anchorBlockPosition;
       }
     }
-    let select: SelectInfo = {
+    let select: SelectionInfo = {
       type: 'None',
-      blocks: [],
     };
     if (!startBlockId || !endBlockId) {
       return select;
     }
 
-    const blocks: SelectBlock[] = [];
+    const blocks: SelectedBlock[] = [];
     const blockId = startBlockId;
-    let beenFind = false;
-    let curBlock = this._editor.store.getBlockById(blockId);
-    while (!beenFind && curBlock) {
-      beenFind = this._collectBlockInfo(
-        curBlock,
+    let founded = false;
+    let currentBlock = this._store.getBlockById(blockId);
+    while (!founded && currentBlock) {
+      founded = this._collectBlockInfo(
+        currentBlock,
         startBlockId,
         endBlockId,
         startPosition,
         endPosition,
         blocks
       );
-      if (beenFind) {
+      if (founded) {
         break;
       }
-      let parent: BaseBlockModel | null = curBlock;
-      curBlock = null;
+      let parent: BaseBlockModel | null = currentBlock;
+      currentBlock = null;
       while (parent) {
-        const nextSibling = this._editor.store.getNextSibling(parent);
+        const nextSibling = this._store.getNextSibling(parent);
         if (nextSibling) {
-          curBlock = nextSibling;
+          currentBlock = nextSibling;
           break;
         }
-        parent = this._editor.store.getParent(parent);
+        parent = this._store.getParent(parent);
       }
     }
 
     select = {
-      type: selectInfo.type,
+      type: selectionInfo.type,
       blocks: blocks,
     };
     return select;
@@ -436,22 +454,22 @@ export class SelectionManager {
     endId: string,
     startPosition: number | null | undefined,
     endPosition: number | null | undefined,
-    blocks: SelectBlock[]
+    blocks: SelectedBlock[]
   ): boolean {
-    const selectBlock: SelectBlock = {
+    const selectedBlock: SelectedBlock = {
       blockId: block.id,
-      children: [] as SelectBlock[],
+      children: [] as SelectedBlock[],
     };
 
     if (block.id === startId && startPosition) {
-      selectBlock.startPos = startPosition;
+      selectedBlock.startPos = startPosition;
     }
 
     if (block.id === endId && endPosition) {
-      selectBlock.endPos = endPosition;
+      selectedBlock.endPos = endPosition;
     }
 
-    blocks.push(selectBlock);
+    blocks.push(selectedBlock);
 
     let beenFindEnd = block.id === endId;
     if (!beenFindEnd) {
@@ -463,7 +481,7 @@ export class SelectionManager {
           endId,
           startPosition,
           endPosition,
-          selectBlock.children
+          selectedBlock.children
         );
         if (beenFindEnd) {
           break;
@@ -474,28 +492,31 @@ export class SelectionManager {
     return beenFindEnd;
   }
 
-  private _getFirstBlockId(selectInfo: SelectionInfo) {
+  private _getFirstBlockId(selectionInfo: SelectionState) {
     let blockId = '';
-    if (selectInfo.type === 'Block') {
-      if (selectInfo.selectedNodesIds?.length === 0) {
+    if (selectionInfo.type === 'Block') {
+      if (selectionInfo.selectedNodeIds?.length === 0) {
         return blockId;
       }
 
-      blockId = selectInfo.selectedNodesIds[0];
+      blockId = selectionInfo.selectedNodeIds[0];
       let previousBlockId = blockId;
       while (
         previousBlockId &&
-        selectInfo.selectedNodesIds.indexOf(previousBlockId) !== 0
+        selectionInfo.selectedNodeIds.indexOf(previousBlockId) !== 0
       ) {
         blockId = previousBlockId;
         previousBlockId = this._getPerviousBlock(blockId)?.id || '';
       }
-    } else if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
-      blockId = selectInfo.anchorBlockId;
+    } else if (
+      selectionInfo.type === 'Range' ||
+      selectionInfo.type === 'Caret'
+    ) {
+      blockId = selectionInfo.anchorBlockId;
       let previousBlockId = blockId;
       while (previousBlockId) {
         previousBlockId = this._getPerviousBlock(previousBlockId)?.id || '';
-        if (previousBlockId === selectInfo.focusBlockId) {
+        if (previousBlockId === selectionInfo.focusBlockId) {
           blockId = previousBlockId;
           break;
         }
@@ -504,35 +525,38 @@ export class SelectionManager {
     return blockId && blockId !== '-1' ? blockId : '';
   }
 
-  private _getLastBlockId(selectInfo: SelectionInfo) {
+  private _getLastBlockId(selectionInfo: SelectionState) {
     let blockId = '';
-    if (selectInfo.type === 'Block') {
-      if (selectInfo.selectedNodesIds?.length === 0) {
+    if (selectionInfo.type === 'Block') {
+      if (selectionInfo.selectedNodeIds?.length === 0) {
         return blockId;
       }
 
       blockId =
-        selectInfo.selectedNodesIds[selectInfo.selectedNodesIds.length - 1];
+        selectionInfo.selectedNodeIds[selectionInfo.selectedNodeIds.length - 1];
       let nextBlockId = blockId;
       while (
         nextBlockId &&
-        selectInfo.selectedNodesIds.indexOf(nextBlockId) !== -1
+        selectionInfo.selectedNodeIds.indexOf(nextBlockId) !== -1
       ) {
         blockId = nextBlockId;
         nextBlockId = this._getNextBlock(blockId)?.id || '';
       }
 
-      let blockModel = this._editor.store.getBlockById(blockId);
+      let blockModel = this._store.getBlockById(blockId);
       while (blockModel) {
         blockId = blockModel.id;
         blockModel = blockModel.lastChild();
       }
-    } else if (selectInfo.type === 'Range' || selectInfo.type === 'Caret') {
-      blockId = selectInfo.focusBlockId;
+    } else if (
+      selectionInfo.type === 'Range' ||
+      selectionInfo.type === 'Caret'
+    ) {
+      blockId = selectionInfo.focusBlockId;
       let nextBlockId = blockId;
       while (nextBlockId) {
         nextBlockId = this._getNextBlock(nextBlockId)?.id || '';
-        if (nextBlockId === selectInfo.anchorBlockId) {
+        if (nextBlockId === selectionInfo.anchorBlockId) {
           blockId = nextBlockId;
           break;
         }

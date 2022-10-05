@@ -1,7 +1,7 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
-import { SelectBlock, SelectInfo } from '..';
+import { SelectedBlock, SelectionInfo } from '..';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -31,26 +31,27 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const selectInfo: SelectInfo = this._editor.selection.getSelectInfo();
+    const selectionInfo: SelectionInfo =
+      this._editor.selection.getSelectionInfo();
 
-    const affineClip = this._getCustomClip(selectInfo);
+    const affineClip = this._getCustomClip(selectionInfo);
     affineClip && clips.push(affineClip);
 
-    const textClip = this._getTextClip(selectInfo);
+    const textClip = this._getTextClip(selectionInfo);
     textClip && clips.push(textClip);
 
-    const htmlClip = this._getHtmlClip(selectInfo);
+    const htmlClip = this._getHtmlClip(selectionInfo);
     htmlClip && clips.push(htmlClip);
 
     return clips;
   }
 
-  private _getCustomClip(selectInfo: SelectInfo): ClipItem | null {
-    if (selectInfo.type == 'None') {
+  private _getCustomClip(selectionInfo: SelectionInfo): ClipItem | null {
+    if (selectionInfo.type !== 'Block') {
       return null;
     }
-    const clipInfos = selectInfo.blocks.map(selectBlockInfo =>
-      this._getClipInfoOfBlockBySelectInfo(selectBlockInfo)
+    const clipInfos = selectionInfo.blocks.map(selectedBlock =>
+      this._getClipInfoBySelectionInfo(selectedBlock)
     );
     return new ClipItem(
       CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
@@ -60,38 +61,40 @@ export class CopyCutManager {
     );
   }
 
-  private _getHtmlClip(selectInfo: SelectInfo): ClipItem | null {
-    if (selectInfo.type == 'None') {
+  private _getHtmlClip(selectionInfo: SelectionInfo): ClipItem | null {
+    if (selectionInfo.type !== 'Block') {
       return null;
     }
-    const htmlText = this._editor.contentParser.block2Html(selectInfo.blocks);
+    const htmlText = this._editor.contentParser.block2Html(
+      selectionInfo.blocks
+    );
     return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
   }
 
-  private _getTextClip(selectInfo: SelectInfo): ClipItem | null {
-    if (selectInfo.type == 'None') {
+  private _getTextClip(selectionInfo: SelectionInfo): ClipItem | null {
+    if (selectionInfo.type !== 'Block') {
       return null;
     }
-    const text = this._editor.contentParser.block2Text(selectInfo.blocks);
+    const text = this._editor.contentParser.block2Text(selectionInfo.blocks);
     return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, text);
   }
 
-  private _getClipInfoOfBlockBySelectInfo(
-    selectBlockInfo: SelectBlock
+  private _getClipInfoBySelectionInfo(
+    selectedBlock: SelectedBlock
   ): OpenBlockInfo | null {
-    const model = this._editor.store.getBlockById(selectBlockInfo.blockId);
+    const model = this._editor.store.getBlockById(selectedBlock.blockId);
     if (!model) {
       return null;
     }
     // TODO Handling different block by extension
     const delta = model?.text?.sliceToDelta(
-      selectBlockInfo.startPos || 0,
-      selectBlockInfo.endPos
+      selectedBlock.startPos || 0,
+      selectedBlock.endPos
     );
 
     const children: OpenBlockInfo[] = [];
-    selectBlockInfo.children.forEach(child => {
-      const childInfo = this._getClipInfoOfBlockBySelectInfo(child);
+    selectedBlock.children.forEach(child => {
+      const childInfo = this._getClipInfoBySelectionInfo(child);
       childInfo && children.push(childInfo);
     });
 

@@ -21,9 +21,6 @@ export class SelectionRect extends LitElement {
   @state()
   isShow = false;
 
-  // @property()
-  // mouse!: MouseManager;
-
   @property()
   pageModel!: PageBlockModel;
 

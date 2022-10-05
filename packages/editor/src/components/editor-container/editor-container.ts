@@ -28,7 +28,7 @@ export class EditorContainer extends LitElement implements BlockHost {
   mouse = new MouseManager(this);
 
   @state()
-  selection = new SelectionManager(this);
+  selection = new SelectionManager(this, this.store);
 
   @state()
   clipboard = new ClipboardManager(this, this);
