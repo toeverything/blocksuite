@@ -49,6 +49,11 @@ export class EdgelessPageBlockComponent
     super.update(changedProperties);
   }
 
+  disconnectedCallback() {
+    this.mouse.dispose();
+    this.selection.dispose();
+  }
+
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
