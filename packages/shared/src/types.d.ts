@@ -70,3 +70,11 @@ export type SelectionInfo =
   | CaretSelectionInfo
   | RangeSelectionInfo
   | BlockSelectionInfo;
+
+declare global {
+  interface WindowEventMap {
+    'affine.switch-mode': CustomEvent<'page' | 'edgeless'>;
+  }
+}
+
+export type Detail<T> = WindowEventMap[T]['detail'];

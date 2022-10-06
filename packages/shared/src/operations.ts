@@ -1,11 +1,18 @@
 import type { Quill } from 'quill';
 import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
-import { BlockHost, SelectionPosition } from './types';
+import { BlockHost, Detail, SelectionPosition } from './types';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import { Point, Rect } from './rect';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExtendedModel = BaseBlockModel & Record<string, any>;
+
+export function createEvent<T extends keyof WindowEventMap>(
+  type: T,
+  detail: Detail<T>
+) {
+  return new CustomEvent<Detail<T>>(type, { detail });
+}
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {

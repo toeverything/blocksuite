@@ -1,9 +1,11 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
 import {
   BlockSelectionInfo,
   CommonBlockElement,
   convertToList,
+  createEvent,
 } from '@blocksuite/shared';
 import { BaseBlockModel, Store } from '@blocksuite/store';
 
@@ -26,6 +28,9 @@ export class DebugMenu extends LitElement {
 
   @state()
   canDelete = false;
+
+  @state()
+  _mode: 'page' | 'edgeless' = 'page';
 
   private get _selection() {
     const page = document.querySelector('default-page-block');
@@ -79,7 +84,10 @@ export class DebugMenu extends LitElement {
   }
 
   private _onSwitchMode() {
-    // TODO switch mode
+    this._mode = this._mode === 'page' ? 'edgeless' : 'page';
+
+    const event = createEvent('affine.switch-mode', this._mode);
+    window.dispatchEvent(event);
   }
 
   private _handleDebugInit() {

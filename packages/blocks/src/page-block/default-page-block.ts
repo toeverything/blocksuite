@@ -1,5 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
 import {
   asyncFocusRichText,
   BLOCK_ID_ATTR,
@@ -7,6 +8,7 @@ import {
   type BlockHost,
 } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
+
 import type { PageBlockModel } from './page-model';
 import {
   SelectionManager,

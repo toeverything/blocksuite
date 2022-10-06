@@ -1,12 +1,14 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
 import {
   BLOCK_ID_ATTR,
   commonTextActiveHandler,
   type BlockHost,
 } from '@blocksuite/shared';
 import type { ParagraphBlockModel } from './paragraph-model';
+
 import { getBlockChildrenContainer } from '../__internal__';
 import '../__internal__';
 

@@ -1,5 +1,7 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
+
 import { Store } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
@@ -13,6 +15,9 @@ const room = params.get('room') || 'virgo-default';
 export class EditorContainer extends LitElement {
   @state()
   store = new Store(room).register(BlockSchema);
+
+  @state()
+  mode: 'page' | 'edgeless' = 'page';
 
   @state()
   model!: PageBlockModel;
@@ -78,6 +83,10 @@ export class EditorContainer extends LitElement {
   }
 
   firstUpdated() {
+    window.addEventListener('affine.switch-mode', ({ detail }) => {
+      this.mode = detail;
+    });
+
     this._placeholderInput?.focus();
   }
 
@@ -90,12 +99,27 @@ export class EditorContainer extends LitElement {
       ></default-page-block>
     `;
 
-    const blockRoot = html`
+    const pageContainer = html`
       <default-page-block
         .mouseRoot=${this as HTMLElement}
         .store=${this.store}
         .model=${this.model}
       ></default-page-block>
+    `;
+
+    const edgelessContainer = html`
+      <edgeless-page-block
+        .mouseRoot=${this as HTMLElement}
+        .store=${this.store}
+        .model=${this.model}
+      ></edgeless-page-block>
+    `;
+
+    const blockRoot = html`
+      ${choose(this.mode, [
+        ['page', () => pageContainer],
+        ['edgeless', () => edgelessContainer],
+      ])}
     `;
 
     return html`
