@@ -1,15 +1,8 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { Store } from '@blocksuite/store';
-import { BlockHost, hotkeyManager } from '@blocksuite/shared';
-import {
-  SelectionManager,
-  MouseManager,
-  ClipboardManager,
-  ContentParser,
-} from '../..';
+import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
-import './debug-menu';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
@@ -17,18 +10,12 @@ const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
 @customElement('editor-container')
-export class EditorContainer extends LitElement implements BlockHost {
+export class EditorContainer extends LitElement {
   @state()
   store = new Store(room).register(BlockSchema);
 
   @state()
   model!: PageBlockModel;
-
-  @state()
-  mouse = new MouseManager(this);
-
-  @state()
-  selection = new SelectionManager(this, this.store);
 
   @state()
   clipboard = new ClipboardManager(this, this);
@@ -49,27 +36,12 @@ export class EditorContainer extends LitElement implements BlockHost {
     super();
 
     this._subscribeStore();
-    this._bindHotkeys();
     this._tryInitFromVoidState();
 
     // @ts-ignore
     window.store = this.store;
     // @ts-ignore
     window.page = this;
-  }
-
-  private _bindHotkeys() {
-    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
-    const scope = 'page';
-
-    hotkeyManager.addListener(undo, scope, () => this.store.undo());
-    hotkeyManager.addListener(redo, scope, () => this.store.redo());
-    hotkeyManager.addListener(selectAll, scope, (e: Event) => {
-      e.preventDefault();
-      const pageChildrenBlock = this.model.children.map(block => block.id);
-      this.selection.selectedBlockIds = pageChildrenBlock;
-    });
-    hotkeyManager.setScope('page');
   }
 
   private _subscribeStore() {
@@ -109,23 +81,20 @@ export class EditorContainer extends LitElement implements BlockHost {
     this._placeholderInput?.focus();
   }
 
-  disconnectedCallback() {
-    this.mouse.dispose();
-    this.selection.dispose();
-  }
-
   render() {
     const placeholderRoot = html`
       <default-page-block
+        .mouseRoot=${this as HTMLElement}
+        .store=${this.store}
         .model=${this.placeholderModel}
-        .host=${this as BlockHost}
       ></default-page-block>
     `;
 
     const blockRoot = html`
       <default-page-block
+        .mouseRoot=${this as HTMLElement}
+        .store=${this.store}
         .model=${this.model}
-        .host=${this as BlockHost}
       ></default-page-block>
     `;
 
@@ -137,12 +106,7 @@ export class EditorContainer extends LitElement implements BlockHost {
         }
       </style>
       <div class="affine-editor-container">
-        <debug-menu .editor=${this as EditorContainer}></debug-menu>
-        <selection-rect
-          .selectionManager=${this.selection}
-          .pageModel=${this.model}
-          .editor=${this as EditorContainer}
-        ></selection-rect>
+        <debug-menu .store=${this.store}></debug-menu>
         ${this.isEmptyPage ? placeholderRoot : blockRoot}
       </div>
     `;

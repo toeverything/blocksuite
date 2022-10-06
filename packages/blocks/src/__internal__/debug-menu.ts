@@ -1,9 +1,8 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { CommonBlockElement, convertToList } from '@blocksuite/shared';
-import type { EditorContainer } from './editor-container';
 import { BaseBlockModel, Store } from '@blocksuite/store';
-import type { BlockSelectionInfo } from '../../managers';
+import { BlockSelectionInfo } from './selection/selection-manager';
 
 const params = new URLSearchParams(location.search);
 const initType = params.get('init') || 'default';
@@ -11,7 +10,7 @@ const initType = params.get('init') || 'default';
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
   @property()
-  editor!: EditorContainer;
+  store!: Store;
 
   @state()
   connected = true;
@@ -25,8 +24,10 @@ export class DebugMenu extends LitElement {
   @state()
   canDelete = false;
 
-  get store() {
-    return this.editor.store;
+  private get _selection() {
+    const page = document.querySelector('default-page-block');
+    if (!page) throw new Error('No page block');
+    return page.selection;
   }
 
   private _onToggleConnection() {
@@ -60,10 +61,10 @@ export class DebugMenu extends LitElement {
   }
 
   private _onDelete() {
-    const selectedBlocks = (
-      this.editor.selection.selectionInfo as BlockSelectionInfo
-    ).blocks;
-    selectedBlocks.forEach(({ id }) => this.store.deleteBlockById(id));
+    const selectionInfo = this._selection.selectionInfo;
+    if (selectionInfo.type !== 'Block') return;
+
+    selectionInfo.blocks.forEach(({ id }) => this.store.deleteBlockById(id));
   }
 
   private _onSetParagraphType(type: string) {
@@ -93,12 +94,13 @@ export class DebugMenu extends LitElement {
       this.canRedo = this.store.canRedo;
     });
 
-    this.editor.selection.onSelectionChange(selectionInfo => {
-      this.canDelete =
-        (selectionInfo as BlockSelectionInfo)?.blocks?.length !== undefined;
+    requestAnimationFrame(() => {
+      this._selection.onSelectionChange(selectionInfo => {
+        this.canDelete =
+          (selectionInfo as BlockSelectionInfo)?.blocks?.length !== undefined;
+      });
+      this._handleDebugInit();
     });
-
-    requestAnimationFrame(() => this._handleDebugInit());
   }
 
   static styles = css`

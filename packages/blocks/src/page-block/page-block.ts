@@ -1,17 +1,30 @@
 import { LitElement, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   asyncFocusRichText,
   BLOCK_ID_ATTR,
+  hotkeyManager,
   type BlockHost,
 } from '@blocksuite/shared';
+import { Store } from '@blocksuite/store';
 import type { PageBlockModel } from './page-model';
 import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
+import { SelectionManager } from '../__internal__/selection/selection-manager';
+import { MouseManager } from '../__internal__/mouse/mouse-manager';
 
 @customElement('default-page-block')
-export class DefaultPageBlockComponent extends LitElement {
+export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
-  host!: BlockHost;
+  store!: Store;
+
+  @state()
+  selection!: SelectionManager;
+
+  @state()
+  mouse!: MouseManager;
+
+  @property()
+  mouseRoot!: HTMLElement;
 
   @property({
     hasChanged() {
@@ -23,32 +36,30 @@ export class DefaultPageBlockComponent extends LitElement {
   @query('.affine-default-page-block-title')
   _blockTitle!: HTMLInputElement;
 
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
+  private _bindHotkeys() {
+    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
+    const scope = 'page';
 
-  firstUpdated() {
-    this.model.propsUpdated.on(() => {
-      if (this.model.title !== this._blockTitle.value) {
-        this._blockTitle.value = this.model.title || '';
-        this.requestUpdate();
-      }
+    hotkeyManager.addListener(undo, scope, () => this.store.undo());
+    hotkeyManager.addListener(redo, scope, () => this.store.redo());
+    hotkeyManager.addListener(selectAll, scope, (e: Event) => {
+      e.preventDefault();
+      const pageChildrenBlock = this.model.children.map(block => block.id);
+      this.selection.selectedBlockIds = pageChildrenBlock;
     });
-
-    focusTextEnd(this._blockTitle);
+    hotkeyManager.setScope('page');
   }
 
   private _onKeyDown(e: KeyboardEvent) {
     const hasContent = this._blockTitle.value.length > 0;
 
     if (e.key === 'Enter' && hasContent) {
-      asyncFocusRichText(this.host.store, this.model.children[0].id);
+      asyncFocusRichText(this.store, this.model.children[0].id);
     }
   }
 
   private _onTitleInput(e: InputEvent) {
-    const { store } = this.host;
+    const { store } = this;
 
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
@@ -61,10 +72,41 @@ export class DefaultPageBlockComponent extends LitElement {
     store.updateBlock(this.model, { title });
   }
 
+  // disable shadow DOM to workaround quill
+  createRenderRoot() {
+    return this;
+  }
+
+  update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('mouseRoot')) {
+      this.selection = new SelectionManager(this.mouseRoot, this.store);
+      this.mouse = new MouseManager(this.mouseRoot);
+    }
+    super.update(changedProperties);
+  }
+
+  firstUpdated() {
+    this._bindHotkeys();
+
+    this.model.propsUpdated.on(() => {
+      if (this.model.title !== this._blockTitle.value) {
+        this._blockTitle.value = this.model.title || '';
+        this.requestUpdate();
+      }
+    });
+
+    focusTextEnd(this._blockTitle);
+  }
+
+  disconnectedCallback() {
+    this.mouse.dispose();
+    this.selection.dispose();
+  }
+
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
+    const childrenContainer = getBlockChildrenContainer(this.model, this);
 
     return html`
       <style>
@@ -83,6 +125,11 @@ export class DefaultPageBlockComponent extends LitElement {
           padding-left: 0;
         }
       </style>
+      <selection-rect
+        .selection=${this.selection}
+        .mouse=${this.mouse}
+        .store=${this.store}
+      ></selection-rect>
       <div class="affine-default-page-block-container">
         <div class="affine-default-page-block-title-container">
           <input

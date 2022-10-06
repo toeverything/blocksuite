@@ -158,14 +158,15 @@ export class SelectionManager {
       this._anchorBlockPosition = null;
       this._focusBlockPosition = null;
     }
+
     this._emitSelectionChange();
   }
 
   public calcIntersectBlocks(selectionRect: Rect, blockModel: BaseBlockModel) {
     let selectedBlocks: Array<string> = [];
-    const blockDom = this._container.querySelector(
-      `[${BLOCK_ID_ATTR}='${blockModel.id}']`
-    );
+    const selector = `[${BLOCK_ID_ATTR}='${blockModel.id}']`;
+    const blockDom = this._container.querySelector(selector);
+
     if (blockDom) {
       if (selectionRect.isIntersect(Rect.fromDom(blockDom))) {
         const { children } = blockModel;

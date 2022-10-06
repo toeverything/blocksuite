@@ -1,6 +1,6 @@
-import './editor-container/debug-menu';
+// FIXME
+import '../../../blocks/src/__internal__/debug-menu';
+import '../../../blocks/src/__internal__/selection-rect/selection-rect';
 import './editor-container/editor-container';
-import './selection-rect/selection-rect';
 
-export * from './editor-container/debug-menu';
 export * from './editor-container/editor-container';
