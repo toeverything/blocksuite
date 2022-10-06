@@ -1,11 +1,14 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
 import { BlockHost, commonTextActiveHandler } from '@blocksuite/shared';
 import { BLOCK_ID_ATTR } from '@blocksuite/shared';
-import { getBlockChildrenContainer } from '../__internal__/utils';
+
 import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils';
-import '../__internal__/rich-text/rich-text';
+
+import { getBlockChildrenContainer } from '../__internal__';
+import '../__internal__';
 
 @customElement('list-block')
 export class ListBlockComponent extends LitElement {

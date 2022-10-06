@@ -6,9 +6,9 @@ import {
   commonTextActiveHandler,
   type BlockHost,
 } from '@blocksuite/shared';
-import { getBlockChildrenContainer } from '../__internal__/utils';
-import '../__internal__/rich-text/rich-text';
 import type { ParagraphBlockModel } from './paragraph-model';
+import { getBlockChildrenContainer } from '../__internal__';
+import '../__internal__';
 
 @customElement('paragraph-block')
 export class ParagraphBlockComponent extends LitElement {

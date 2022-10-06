@@ -1,7 +1,7 @@
 // manual import to avoid being tree-shaked
-import '../../blocks/src/page-block/page-block';
+import './page-block/page-block';
 import './paragraph-block/paragraph-block';
-import '../../blocks/src/list-block/list-block';
+import './list-block/list-block';
 
 export * from './counter-block/counter-block';
 export * from './paragraph-block/paragraph-block';

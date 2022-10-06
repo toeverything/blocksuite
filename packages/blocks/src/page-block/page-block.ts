@@ -8,9 +8,13 @@ import {
 } from '@blocksuite/shared';
 import { Store } from '@blocksuite/store';
 import type { PageBlockModel } from './page-model';
-import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
-import { SelectionManager } from '../__internal__/selection/selection-manager';
-import { MouseManager } from '../__internal__/mouse/mouse-manager';
+import {
+  SelectionManager,
+  MouseManager,
+  focusTextEnd,
+  getBlockChildrenContainer,
+} from '../__internal__';
+import '../__internal__';
 
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
