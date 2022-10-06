@@ -1,5 +1,6 @@
 import type { Quill } from 'quill';
 import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
+
 import { BlockHost, Detail, SelectionPosition } from './types';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import { Point, Rect } from './rect';

@@ -3,11 +3,12 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import style from 'quill/dist/quill.snow.css';
-import { BlockHost } from '@blocksuite/shared';
+
+import { BlockHost, hotkeyManager } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
+
 import type { ListBlockModel, ParagraphBlockModel } from '../..';
 import { createKeyboardBindings } from './keyboard';
-import { hotkeyManager } from '@blocksuite/shared';
 
 Quill.register('modules/cursors', QuillCursors);
 
