@@ -82,7 +82,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot')) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this.selection = new SelectionManager(this.mouseRoot, this.store);
       this.mouse = new MouseManager(this.mouseRoot);
     }
