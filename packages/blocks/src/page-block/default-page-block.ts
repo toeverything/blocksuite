@@ -6,7 +6,7 @@ import {
   hotkeyManager,
   type BlockHost,
 } from '@blocksuite/shared';
-import { Store } from '@blocksuite/store';
+import type { Store } from '@blocksuite/store';
 import type { PageBlockModel } from './page-model';
 import {
   SelectionManager,
