@@ -1,8 +1,11 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { CommonBlockElement, convertToList } from '@blocksuite/shared';
+import {
+  BlockSelectionInfo,
+  CommonBlockElement,
+  convertToList,
+} from '@blocksuite/shared';
 import { BaseBlockModel, Store } from '@blocksuite/store';
-import { BlockSelectionInfo } from './selection/selection-manager';
 
 const params = new URLSearchParams(location.search);
 const initType = params.get('init') || 'default';

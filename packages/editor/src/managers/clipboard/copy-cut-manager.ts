@@ -1,7 +1,7 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
-import { SelectedBlock, SelectionInfo } from '..';
+import { SelectionInfo, SelectedBlock } from '@blocksuite/shared';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -10,6 +10,12 @@ export class CopyCutManager {
     this._editor = editor;
     this.handleCopy = this.handleCopy.bind(this);
     this.handleCut = this.handleCut.bind(this);
+  }
+
+  private get _selection() {
+    const page = document.querySelector('default-page-block');
+    if (!page) throw new Error('No page block');
+    return page.selection;
   }
 
   public handleCopy(e: ClipboardEvent) {
@@ -31,7 +37,7 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const { selectionInfo } = this._editor.selection;
+    const { selectionInfo } = this._selection;
 
     const affineClip = this._getCustomClip(selectionInfo);
     affineClip && clips.push(affineClip);

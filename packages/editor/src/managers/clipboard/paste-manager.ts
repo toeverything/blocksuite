@@ -29,6 +29,12 @@ export class PasteManager {
     this._insertBlocks(blocks);
   }
 
+  private get _selection() {
+    const page = document.querySelector('default-page-block');
+    if (!page) throw new Error('No page block');
+    return page.selection;
+  }
+
   private async _clipboardEvent2Blocks(e: ClipboardEvent) {
     const clipboardData = e.clipboardData;
     if (!clipboardData) {
@@ -113,12 +119,13 @@ export class PasteManager {
     }
     return;
   }
+
   // TODO Max 15 deeper
   private _insertBlocks(blocks: OpenBlockInfo[]) {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectionInfo = this._editor.selection.selectionInfo;
+    const currentSelectionInfo = this._selection.selectionInfo;
 
     if (
       currentSelectionInfo.type === 'Range' ||
@@ -136,7 +143,7 @@ export class PasteManager {
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._editor.selection.selectedBlockIds = addBlockIds;
+      this._selection.selectedBlockIds = addBlockIds;
     } else if (currentSelectionInfo.type === 'Block') {
       const selectedBlock = this._editor.store.getBlockById(
         currentSelectionInfo.blocks[currentSelectionInfo.blocks.length - 1].id
@@ -150,7 +157,7 @@ export class PasteManager {
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._editor.selection.selectedBlockIds = addBlockIds;
+      this._selection.selectedBlockIds = addBlockIds;
     }
   }
 

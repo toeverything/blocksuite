@@ -1,4 +1,5 @@
-import { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
+import type { SelectedBlock } from '@blocksuite/shared';
+import { OpenBlockInfo, EditorContainer } from '../../..';
 
 export class ContentParser {
   private _editor: EditorContainer;

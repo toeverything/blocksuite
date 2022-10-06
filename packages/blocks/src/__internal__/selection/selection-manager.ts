@@ -2,47 +2,11 @@ import {
   BLOCK_ID_ATTR,
   Point,
   Rect,
+  SelectedBlock,
+  SelectionInfo,
   SelectionPosition,
 } from '@blocksuite/shared';
 import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
-
-export interface SelectedBlock {
-  id: string;
-  startPos?: number;
-  endPos?: number;
-  children: SelectedBlock[];
-}
-
-interface NoneSelectionInfo {
-  type: 'None';
-}
-
-interface CaretSelectionInfo {
-  type: 'Caret';
-  anchorBlockId: string;
-  focusBlockId: string;
-  anchorBlockPosition: number | null;
-  focusBlockPosition: number | null;
-}
-
-interface RangeSelectionInfo {
-  type: 'Range';
-  anchorBlockId: string;
-  focusBlockId: string;
-  anchorBlockPosition: number | null;
-  focusBlockPosition: number | null;
-}
-
-export interface BlockSelectionInfo {
-  type: 'Block';
-  blocks: SelectedBlock[];
-}
-
-export type SelectionInfo =
-  | NoneSelectionInfo
-  | CaretSelectionInfo
-  | RangeSelectionInfo
-  | BlockSelectionInfo;
 
 // TODO use lodash or move to utils
 function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
