@@ -13,6 +13,6 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
 
   constructor(store: Store, props: Partial<ListBlockProps>) {
     super(store, props);
-    this.type = props.type || 'bulleted';
+    this.type = props.type ?? 'bulleted';
   }
 }

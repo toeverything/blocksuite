@@ -2,8 +2,10 @@ import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
+
 import type { ListBlockModel } from '../list-block/list-model';
 import type { ParagraphBlockModel } from '../paragraph-block/paragraph-model';
+import type { GroupBlockModel } from '../group-block/group-model';
 
 // TODO support dynamic block types
 function getBlockElement(model: BaseBlockModel, host: BlockHost) {
@@ -21,6 +23,13 @@ function getBlockElement(model: BaseBlockModel, host: BlockHost) {
           .model=${model as ListBlockModel}
           .host=${host}
         ></list-block>
+      `;
+    case 'group':
+      return html`
+        <group-block
+          .model=${model as GroupBlockModel}
+          .host=${host}
+        ></group-block>
       `;
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;

@@ -52,7 +52,7 @@ test('insert new paragraph block by enter', async ({ page }) => {
   await pressEnter(page);
   await page.keyboard.type('world');
   await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
-  await assertBlockChildrenFlavours(page, '0', [
+  await assertBlockChildrenFlavours(page, '1', [
     'paragraph',
     'paragraph',
     'paragraph',
@@ -74,7 +74,7 @@ test('split paragraph block by enter', async ({ page }) => {
 
   await pressEnter(page);
   await assertRichTexts(page, ['he', 'llo']);
-  await assertBlockChildrenFlavours(page, '0', ['paragraph', 'paragraph']);
+  await assertBlockChildrenFlavours(page, '1', ['paragraph', 'paragraph']);
   await assertSelection(page, 1, 0, 0);
 
   await undoByKeyboard(page);
@@ -97,7 +97,6 @@ test('add multi line by soft enter', async ({ page }) => {
   await assertSelection(page, 0, 2, 0);
 
   await shiftEnter(page);
-  await page.pause();
   await assertRichTexts(page, ['he\n\nllo']);
   await assertSelection(page, 0, 3, 0);
 
@@ -121,19 +120,19 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   // indent
   await page.keyboard.press('Tab');
   await assertRichTexts(page, ['hello', 'world']);
-  await assertBlockChildrenIds(page, '0', ['1']);
   await assertBlockChildrenIds(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '2', ['3']);
 
   // unindent
   await shiftTab(page);
   await assertRichTexts(page, ['hello', 'world']);
-  await assertBlockChildrenIds(page, '0', ['1', '2']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
 
   await undoByKeyboard(page);
-  await assertBlockChildrenIds(page, '0', ['1']);
+  await assertBlockChildrenIds(page, '1', ['2']);
 
   await redoByKeyboard(page);
-  await assertBlockChildrenIds(page, '0', ['1', '2']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
 });
 
 test('switch between paragraph types', async ({ page }) => {
@@ -168,19 +167,19 @@ test('delete at start of paragraph block', async ({ page }) => {
   await page.keyboard.type('a');
 
   await clickMenuButton(page, 'heading-1');
-  await assertBlockType(page, '1', 'text');
-  await assertBlockType(page, '2', 'h1');
-
-  await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
   await assertBlockType(page, '2', 'text');
-  await assertBlockChildrenIds(page, '0', ['1', '2']);
+  await assertBlockType(page, '3', 'h1');
 
   await page.keyboard.press('Backspace');
-  await assertBlockChildrenIds(page, '0', ['1']);
+  await page.keyboard.press('Backspace');
+  await assertBlockType(page, '3', 'text');
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
+
+  await page.keyboard.press('Backspace');
+  await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByClick(page);
-  await assertBlockChildrenIds(page, '0', ['1', '2']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
 });
 
 test('delete at start of paragraph with content', async ({ page }) => {

@@ -65,8 +65,9 @@ export class EditorContainer extends LitElement {
   private _initFromVoidState() {
     if (!this.isEmptyPage) return;
 
-    this.store.addBlock({ flavour: 'page' });
-    this.store.addBlock({ flavour: 'paragraph' });
+    const pageId = this.store.addBlock({ flavour: 'page' });
+    const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
+    this.store.addBlock({ flavour: 'paragraph' }, groupId);
 
     this.isEmptyPage = false;
   }

@@ -188,9 +188,9 @@ export class Store {
 
   addBlock<T extends Partial<BlockProps>>(
     blockProps: T,
-    parent?: BaseBlockModel,
+    parent?: BaseBlockModel | string,
     parentIndex?: number
-  ) {
+  ): string {
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
     }
@@ -206,6 +206,10 @@ export class Store {
       initSysProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
+
+      if (typeof parent === 'string') {
+        parent = this._blockMap.get(parent);
+      }
 
       const parentId = parent?.id ?? this._root?.id;
 

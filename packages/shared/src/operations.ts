@@ -90,7 +90,7 @@ export function handleIndent(store: Store, model: ExtendedModel) {
 
 export function handleUnindent(store: Store, model: ExtendedModel) {
   const parent = store.getParent(model);
-  if (!parent) return;
+  if (!parent || parent?.flavour === 'group') return;
 
   const grandParent = store.getParent(parent);
   if (!grandParent) return;

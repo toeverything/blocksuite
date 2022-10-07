@@ -92,9 +92,10 @@ export class DebugMenu extends LitElement {
 
   private _handleDebugInit() {
     if (initType === 'list') {
-      this.store.addBlock({ flavour: 'page' });
+      const pageId = this.store.addBlock({ flavour: 'page' });
+      const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
       for (let i = 0; i < 3; i++) {
-        this.store.addBlock({ flavour: 'list' });
+        this.store.addBlock({ flavour: 'list' }, groupId);
       }
     }
   }
