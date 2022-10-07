@@ -35,6 +35,11 @@ export class GroupBlockComponent extends LitElement {
     const childrenContainer = getBlockChildrenContainer(this.model, this.host);
 
     return html`
+      <style>
+        .affine-group-block-container > .affine-block-children-container {
+          padding-left: 0;
+        }
+      </style>
       <div class="affine-group-block-container">${childrenContainer}</div>
     `;
   }
