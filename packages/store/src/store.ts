@@ -350,7 +350,7 @@ export class Store {
     return blockModel;
   }
 
-  private _handleYBlockAdd(id: string) {
+  private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
     const isRoot = this._blockMap.size === 0;
 
@@ -378,6 +378,13 @@ export class Store {
       yChildren.forEach((id: string) => {
         const index = model.childMap.get(id);
         if (Number.isInteger(index)) {
+          const hasChild = this._blockMap.has(id);
+
+          if (!hasChild) {
+            visited.add(id);
+            this._handleYBlockAdd(visited, id);
+          }
+
           const child = this._blockMap.get(id) as BaseBlockModel;
           model.children[index as number] = child;
         }
@@ -425,9 +432,22 @@ export class Store {
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
     // event on top-level block store
     if (event.target === this._yBlocks) {
+      const visited = new Set<string>();
+
       event.keys.forEach((value, id) => {
         if (value.action === 'add') {
-          this._handleYBlockAdd(id);
+          // Here the key is the id of the blocks.
+          // Generally, the key that appears earlier corresponds to the block added earlier,
+          // and it won't refer to subsequent keys.
+          // However, when redo the operation that adds multiple blocks at once,
+          // the earlier block may have children pointing to subsequent blocks.
+          // In this case, although the yjs-side state is correct, the BlockModel instance may not exist yet.
+          // Therefore, at this point we synchronize the referenced block first,
+          // then mark it in `visited` so that they can be skipped.
+          if (visited.has(id)) return;
+          visited.add(id);
+
+          this._handleYBlockAdd(visited, id);
         } else if (value.action === 'delete') {
           this._handleYBlockDelete(id);
         } else {
@@ -462,8 +482,8 @@ export class Store {
           model.children = childIds.map(
             id => this._blockMap.get(id) as BaseBlockModel
           );
-          model.childrenUpdated.emit();
           model.childMap = createChildMap(event.target);
+          model.childrenUpdated.emit();
         }
       }
     }

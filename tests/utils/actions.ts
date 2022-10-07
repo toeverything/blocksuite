@@ -115,8 +115,8 @@ export async function convertToNumberedListByClick(page: Page) {
   await page.click('button[aria-label="convert to numbered list"]');
 }
 
-export async function switchMode(page: Page) {
-  await page.click('button[aria-label="switch mode"]');
+export async function addGroupByClick(page: Page) {
+  await page.click('button[aria-label="add group"]');
 }
 
 export async function mouseDragFromTo(
@@ -145,6 +145,10 @@ export async function shiftEnter(page: Page) {
 
 export async function clickMenuButton(page: Page, title: string) {
   await page.click(`button[aria-label="${title}"]`);
+}
+
+export async function switchMode(page: Page) {
+  await page.click('button[aria-label="switch mode"]');
 }
 
 export async function getQuillSelectionIndex(page: Page) {

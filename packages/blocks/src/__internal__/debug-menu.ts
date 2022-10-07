@@ -78,9 +78,10 @@ export class DebugMenu extends LitElement {
   private _onSetParagraphType(type: string) {
     const selection = window.getSelection();
     const element = selection?.focusNode?.parentElement as HTMLElement;
-    const block = element.closest('paragraph-block')?.model;
-    block?.store.captureSync();
-    block?.store.updateBlock(block, { type });
+    const block = element.closest('paragraph-block')?.model as BaseBlockModel;
+
+    this.store.captureSync();
+    this.store.updateBlock(block, { type });
   }
 
   private _onSwitchMode() {
@@ -88,6 +89,16 @@ export class DebugMenu extends LitElement {
 
     const event = createEvent('affine.switch-mode', this._mode);
     window.dispatchEvent(event);
+  }
+
+  private _onAddGroup() {
+    const pageId = document.querySelector('default-page-block')?.model.id;
+    if (!pageId) return;
+
+    this.store.captureSync();
+
+    const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
+    this.store.addBlock({ flavour: 'paragraph' }, groupId);
   }
 
   private _handleDebugInit() {
@@ -123,10 +134,10 @@ export class DebugMenu extends LitElement {
       width: 40px;
     }
     .debug-menu > button {
-      margin-left: 5px;
-      margin-top: 5px;
-      width: 32px;
-      height: 28px;
+      margin-left: 2px;
+      margin-top: 2px;
+      width: 30px;
+      height: 24px;
     }
   `;
 
@@ -212,6 +223,13 @@ export class DebugMenu extends LitElement {
           @click=${this._onSwitchMode}
         >
           🔄
+        </button>
+        <button
+          aria-label="add group"
+          title="add group"
+          @click=${this._onAddGroup}
+        >
+          🗄
         </button>
       </div>
     `;

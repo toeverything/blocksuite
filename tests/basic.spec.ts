@@ -9,6 +9,7 @@ import {
   focusRichText,
   waitDefaultPageLoaded,
   pressEnter,
+  addGroupByClick,
 } from './utils/actions';
 import {
   defaultStore,
@@ -163,4 +164,17 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['hello', 'world']);
+});
+
+test('undo multi groups', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await addGroupByClick(page);
+  await assertRichTexts(page, ['\n', '\n']);
+
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+
+  await redoByClick(page);
+  await assertRichTexts(page, ['\n', '\n']);
 });
