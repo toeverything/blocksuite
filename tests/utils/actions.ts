@@ -111,8 +111,12 @@ export async function convertToBulletedListByClick(page: Page) {
   await page.click('button[aria-label="convert to bulleted list"]');
 }
 
-export async function switchToNumberedListByClick(page: Page) {
+export async function convertToNumberedListByClick(page: Page) {
   await page.click('button[aria-label="convert to numbered list"]');
+}
+
+export async function switchMode(page: Page) {
+  await page.click('button[aria-label="switch mode"]');
 }
 
 export async function mouseDragFromTo(

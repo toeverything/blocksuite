@@ -10,13 +10,13 @@ import {
 } from './utils/asserts';
 import {
   convertToBulletedListByClick,
+  convertToNumberedListByClick,
   enterPlaygroundRoom,
   enterPlaygroundWithList,
   focusRichText,
   pressEnter,
   redoByClick,
   shiftTab,
-  switchToNumberedListByClick,
   undoByClick,
   undoByKeyboard,
 } from './utils/actions';
@@ -38,7 +38,7 @@ test('convert to numbered list block', async ({ page }) => {
 
   await focusRichText(page, 0);
   await convertToBulletedListByClick(page);
-  await switchToNumberedListByClick(page);
+  await convertToNumberedListByClick(page);
 
   const listSelector = '.affine-list-rich-text-wrapper';
   const bulletIconSelector = `${listSelector} > div`;
