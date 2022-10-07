@@ -8,7 +8,7 @@ import type { ParagraphBlockModel } from '../paragraph-block/paragraph-model';
 import type { GroupBlockModel } from '../group-block/group-model';
 
 // TODO support dynamic block types
-function getBlockElement(model: BaseBlockModel, host: BlockHost) {
+function BlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
     case 'paragraph':
       return html`
@@ -35,10 +35,9 @@ function getBlockElement(model: BaseBlockModel, host: BlockHost) {
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
 }
 
-export function getBlockChildrenContainer(
-  model: BaseBlockModel,
-  host: BlockHost
-) {
+// Naming convention borrowed from
+// https://codelabs.developers.google.com/codelabs/lit-2-for-react-devs#4
+export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
   return html`
     <style>
       .affine-block-children-container {
@@ -49,7 +48,7 @@ export function getBlockChildrenContainer(
       ${repeat(
         model.children,
         child => child.id,
-        child => getBlockElement(child, host)
+        child => BlockElement(child, host)
       )}
     </div>
   `;

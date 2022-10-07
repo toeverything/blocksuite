@@ -7,7 +7,7 @@ import { BLOCK_ID_ATTR } from '@blocksuite/shared';
 import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils';
 
-import { getBlockChildrenContainer } from '../__internal__';
+import { BlockChildrenContainer } from '../__internal__';
 import '../__internal__';
 
 @customElement('list-block')
@@ -55,7 +55,7 @@ export class ListBlockComponent extends LitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const listIcon = getListIcon(this.model);
-    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
+    const childrenContainer = BlockChildrenContainer(this.model, this.host);
 
     return html`
       <style>

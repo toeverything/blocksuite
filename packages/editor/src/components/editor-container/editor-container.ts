@@ -46,7 +46,7 @@ export class EditorContainer extends LitElement {
     // @ts-ignore
     window.store = this.store;
     // @ts-ignore
-    window.page = this;
+    window.editor = this;
   }
 
   private _subscribeStore() {

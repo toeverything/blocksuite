@@ -6,7 +6,7 @@ import type { Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from './page-model';
 import {
-  getBlockChildrenContainer,
+  BlockChildrenContainer,
   MouseManager,
   SelectionManager,
 } from '../__internal__';
@@ -57,7 +57,7 @@ export class EdgelessPageBlockComponent
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this);
+    const childrenContainer = BlockChildrenContainer(this.model, this);
 
     return html`
       <style>

@@ -9,7 +9,7 @@ import {
 } from '@blocksuite/shared';
 import type { ParagraphBlockModel } from './paragraph-model';
 
-import { getBlockChildrenContainer } from '../__internal__';
+import { BlockChildrenContainer } from '../__internal__';
 import '../__internal__';
 
 @customElement('paragraph-block')
@@ -56,7 +56,7 @@ export class ParagraphBlockComponent extends LitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
+    const childrenContainer = BlockChildrenContainer(this.model, this.host);
 
     return html`
       <div

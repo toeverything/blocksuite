@@ -14,7 +14,7 @@ import {
   SelectionManager,
   MouseManager,
   focusTextEnd,
-  getBlockChildrenContainer,
+  BlockChildrenContainer,
 } from '../__internal__';
 import '../__internal__';
 
@@ -112,7 +112,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this);
+    const childrenContainer = BlockChildrenContainer(this.model, this);
 
     return html`
       <style>
