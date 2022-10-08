@@ -49,10 +49,13 @@ export async function focusRichText(page: Page, i = 0) {
  *
  * The implementation is depends on the keyboard behavior.
  */
-export async function focusLine(page: Page, line = 0) {
+export async function focusLine(page: Page, line = 0, end = true) {
   // Focus on the title
-  await page.click('input.affine-page-block-title');
+  await page.click('input.affine-default-page-block-title');
   if (!line) {
+    if (end) {
+      await page.keyboard.press('End');
+    }
     return;
   }
   // Workaround move cursor from title to text only can use Tab, remove it after fixed
@@ -61,6 +64,9 @@ export async function focusLine(page: Page, line = 0) {
   // End of workaround
   while (line-- > 0) {
     await page.keyboard.press('ArrowDown');
+  }
+  if (end) {
+    await page.keyboard.press('End');
   }
 }
 
