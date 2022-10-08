@@ -7,11 +7,12 @@ import type {
   PrefixedBlockProps,
   SerializedStore,
 } from '../../packages/store';
+import type { JSXElement } from '../../packages/store/src/utils/jsx';
+// See https://github.com/facebook/jest/blob/main/packages/pretty-format
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
-import { blockRecordToJSXNode } from '../../packages/store/src/utils/jsx';
 
 export const defaultStore: SerializedStore = {
   blocks: {
@@ -240,12 +241,32 @@ export async function assertMatchMarkdown(page: Page, text: string) {
 }
 
 export async function assertStoreMatchSnapshot(page: Page, snapshot: string) {
-  const jsonDoc = (await page.evaluate(() =>
+  const element = (await page.evaluate(() =>
     // @ts-expect-error
-    window.store.doc.toJSON()
-  )) as SerializedStore;
-  const node = blockRecordToJSXNode(jsonDoc.blocks);
-  const formatted = prettyFormat(node, {
+    window.store.toJSXElement()
+  )) as JSXElement;
+
+  // Fix symbol can not be serialized, we need to set $$typeof manually
+  // If the function passed to the page.evaluate(pageFunction[, arg]) returns a non-Serializable value,
+  // then page.evaluate(pageFunction[, arg]) resolves to undefined.
+  // See https://playwright.dev/docs/api/class-page#page-evaluate
+  const testSymbol = Symbol.for('react.test.json');
+  const dyeing = (node: JSXElement) => {
+    if (!node.children) {
+      return;
+    }
+    node.$$typeof = testSymbol;
+    node.children.forEach(child => {
+      if (!(typeof child === 'object')) {
+        return;
+      }
+      dyeing(child);
+    });
+  };
+
+  dyeing(element);
+
+  const formatted = prettyFormat(element, {
     plugins: [prettyFormatPlugins.ReactTestComponent],
     printFunctionName: false,
   });
