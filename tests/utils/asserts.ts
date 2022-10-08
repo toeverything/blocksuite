@@ -15,7 +15,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'group',
       'sys:id': '1',
       'sys:children': ['2'],
-      // 'prop:xywh': '[0,0,0,0]',
+      'prop:xywh': '[0,0,0,0]',
     },
     '2': {
       'sys:flavour': 'paragraph',

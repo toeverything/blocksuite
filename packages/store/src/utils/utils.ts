@@ -64,9 +64,11 @@ export function syncBlockProps(
   ) {
     yBlock.set('prop:type', 'text');
   }
-  // TODO use schema
   if (props.flavour === 'list' && !yBlock.has('prop:type')) {
     yBlock.set('prop:type', props.type ?? 'bulleted');
+  }
+  if (props.flavour === 'group' && !yBlock.has('prop:xywh')) {
+    yBlock.set('prop:xywh', props.xywh ?? JSON.stringify([0, 0, 0, 0]));
   }
 }
 
