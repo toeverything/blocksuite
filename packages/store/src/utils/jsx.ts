@@ -26,9 +26,6 @@ const isValidRecord = (data: unknown): data is DocRecord => {
 
 const IGNORE_PROPS = ['sys:id', 'sys:flavour', 'sys:children'];
 
-/**
- * @internal Only for testing
- */
 export const blockRecordToJSXNode = (
   docRecord: Record<string, unknown>,
   nodeId: string
