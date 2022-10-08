@@ -31,7 +31,7 @@ const IGNORE_PROPS = ['sys:id', 'sys:flavour', 'sys:children'];
  */
 export const blockRecordToJSXNode = (
   docRecord: Record<string, unknown>,
-  nodeId = '0'
+  nodeId: string
 ): JSXElement => {
   if (!isValidRecord(docRecord)) {
     throw new Error('Failed to parse doc record! Invalid data.');

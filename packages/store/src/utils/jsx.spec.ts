@@ -6,20 +6,23 @@ import { blockRecordToJSXNode } from './jsx';
 describe('basic', () => {
   it('doc record match snapshot', () => {
     expect(
-      blockRecordToJSXNode({
-        '0': {
-          'sys:id': '0',
-          'sys:children': ['1'],
-          'sys:flavour': 'page',
+      blockRecordToJSXNode(
+        {
+          '0': {
+            'sys:id': '0',
+            'sys:children': ['1'],
+            'sys:flavour': 'page',
+          },
+          '1': {
+            'sys:id': '1',
+            'sys:children': [],
+            'sys:flavour': 'paragraph',
+            'prop:text': '',
+            'prop:type': 'text',
+          },
         },
-        '1': {
-          'sys:id': '1',
-          'sys:children': [],
-          'sys:flavour': 'paragraph',
-          'prop:text': '',
-          'prop:type': 'text',
-        },
-      })
+        '0'
+      )
     ).toMatchInlineSnapshot(`
       <page>
         <paragraph

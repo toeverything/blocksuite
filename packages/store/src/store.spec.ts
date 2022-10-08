@@ -215,6 +215,11 @@ describe('store.toJSXElement works', async () => {
     `);
   });
 
+  it('empty store match snapshot', () => {
+    const store = new Store().register(BlockSchema);
+    expect(store.toJSXElement()).toMatchInlineSnapshot('null');
+  });
+
   it('store with multiple blocks children match snapshot', () => {
     const store = new Store().register(BlockSchema);
 
