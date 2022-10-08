@@ -40,7 +40,7 @@ export const blockRecordToJSXNode = (
       `Failed to parse doc record! Node not found! id: ${nodeId}.`
     );
   }
-  // TODO PascalCase
+  // TODO maybe need set PascalCase
   const flavour = node['sys:flavour'];
   // TODO maybe need check children recursively nested
   const children = node['sys:children'];
@@ -60,62 +60,3 @@ export const blockRecordToJSXNode = (
   ret.$$typeof = Symbol.for('react.test.json');
   return ret;
 };
-
-/**
- * @deprecated
- */
-const convertPropsToString = (props: Record<string, unknown>) => {
-  return Object.entries(props)
-    .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-    .map(([key, value]) => {
-      switch (typeof value) {
-        case 'boolean':
-          return value ? key : `${key}={false}`;
-        case 'string':
-          return `${key}="${value}"`;
-        case 'number':
-          return `${key}={${value}}`;
-        case 'object':
-          return `${key}={${JSON.stringify(value)}}`;
-        case 'undefined':
-          return '';
-        default:
-          throw new Error(
-            `Can't convert prop to string! prop: ${key}, value: ${value}, type: ${typeof value}`
-          );
-      }
-    })
-    .join(' ');
-};
-
-/**
- * @deprecated Use {@link blockRecordToJSXNode} with `vitest.toMatchSnapshot` directly. Vitest has default serializers for React elements.
- */
-const JSXNodeToString = ({ type, props, children }: Node): string => {
-  const propsString = convertPropsToString(props);
-  if (!children || !children.length) {
-    return `<${type} ${propsString} />`;
-  }
-
-  return `<${type} ${propsString}>${children
-    .map(child => JSXNodeToString(child))
-    .join('')}</${type}>`;
-};
-
-/**
- * @internal Only for testing
- * @deprecated Use {@link blockRecordToJSXNode} with `vitest.toMatchSnapshot` directly. Vitest has default serializers for React elements.
- */
-export const docRecordToJSX = (
-  docRecord: Record<string, unknown>,
-  nodeId = '0'
-): string =>
-  format(JSXNodeToString(blockRecordToJSXNode(docRecord, nodeId)), {
-    // Use the mdx parser to prevent the tailing semicolon
-    // parser: 'typescript',
-    parser: 'mdx',
-    singleQuote: true,
-    // trailingComma: 'es5',
-    tabWidth: 2,
-    // arrowParens: 'avoid',
-  });
