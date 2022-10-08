@@ -17,6 +17,7 @@ import {
 } from './utils/utils';
 import { BaseBlockModel } from './base';
 import { DebugProvider } from './providers';
+import { blockRecordToJSXNode } from './utils/jsx';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -495,4 +496,18 @@ export class Store {
     }
     this.slots.updated.emit();
   };
+
+  /**
+   * @internal Only for testing
+   */
+  toJSXElement(id = '0') {
+    const json = this.doc.toJSON();
+    if (!('blocks' in json)) {
+      throw new Error("Failed to convert to JSX: 'blocks' not found");
+    }
+    if (!json.blocks[id]) {
+      return null;
+    }
+    return blockRecordToJSXNode(json.blocks, id);
+  }
 }
