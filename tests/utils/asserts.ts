@@ -7,6 +7,11 @@ import type {
   PrefixedBlockProps,
   SerializedStore,
 } from '../../packages/store';
+import {
+  format as prettyFormat,
+  plugins as prettyFormatPlugins,
+} from 'pretty-format';
+import { blockRecordToJSXNode } from '../../packages/store/src/utils/jsx';
 
 export const defaultStore: SerializedStore = {
   blocks: {
@@ -47,9 +52,6 @@ export async function assertText(page: Page, text: string) {
   expect(actual).toBe(text);
 }
 
-/**
- * @deprecated Use {@link assertMatchMarkdown} instead
- */
 export async function assertRichTexts(page: Page, texts: string[]) {
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
@@ -169,6 +171,18 @@ export async function assertBlockType(page: Page, id: string, type: string) {
   expect(actual).toBe(type);
 }
 
+/**
+ * @example
+ * ```ts
+ * await assertMatchMarkdown(
+ *   page,
+ *   `title
+ * text1
+ * text2`
+ * );
+ * ```
+ * @deprecated experimental, use {@link assertStoreMatchSnapshot} instead
+ */
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
     // @ts-expect-error
@@ -223,4 +237,17 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const actual = visitRet.join('\n');
 
   expect(actual).toEqual(text);
+}
+
+export async function assertStoreMatchSnapshot(page: Page, snapshot: string) {
+  const jsonDoc = (await page.evaluate(() =>
+    // @ts-expect-error
+    window.store.doc.toJSON()
+  )) as SerializedStore;
+  const node = blockRecordToJSXNode(jsonDoc.blocks);
+  const formatted = prettyFormat(node, {
+    plugins: [prettyFormatPlugins.ReactTestComponent],
+    printFunctionName: false,
+  });
+  expect(snapshot, formatted).toEqual(formatted);
 }
