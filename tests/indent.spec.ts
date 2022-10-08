@@ -75,7 +75,7 @@ test('basic indent and unindent', async ({ page }) => {
   );
 });
 
-test('indent with multiple children', async ({ page }) => {
+test.skip('indent with multiple children', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
 
