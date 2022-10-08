@@ -6,7 +6,7 @@ import {
   pressEnter,
   shiftTab,
 } from './utils/actions';
-import { assertStoreMatchSnapshot } from './utils/asserts';
+import { assertStoreMatchJSX } from './utils/asserts';
 
 const indent = (page: Page) => page.keyboard.press('Tab');
 const unindent = shiftTab;
@@ -19,7 +19,7 @@ test('basic indent and unindent', async ({ page }) => {
   await pressEnter(page);
   await page.keyboard.type('text2');
 
-  await assertStoreMatchSnapshot(
+  await assertStoreMatchJSX(
     page,
     `<page>
   <group
@@ -37,7 +37,7 @@ test('basic indent and unindent', async ({ page }) => {
 </page>`
   );
   await indent(page);
-  await assertStoreMatchSnapshot(
+  await assertStoreMatchJSX(
     page,
     `<page>
   <group
@@ -56,7 +56,7 @@ test('basic indent and unindent', async ({ page }) => {
 </page>`
   );
   await unindent(page);
-  await assertStoreMatchSnapshot(
+  await assertStoreMatchJSX(
     page,
     `<page>
   <group
@@ -84,7 +84,7 @@ test.skip('indent with multiple children', async ({ page }) => {
   await page.keyboard.type('text2');
   await pressEnter(page);
   await page.keyboard.type('text3');
-  await assertStoreMatchSnapshot(
+  await assertStoreMatchJSX(
     page,
     `<page>
   <group
@@ -108,7 +108,7 @@ test.skip('indent with multiple children', async ({ page }) => {
   indent(page);
   await focusLine(page, 2);
   indent(page);
-  await assertStoreMatchSnapshot(
+  await assertStoreMatchJSX(
     page,
     `<page>
   <group

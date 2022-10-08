@@ -181,7 +181,7 @@ export async function assertBlockType(page: Page, id: string, type: string) {
  * text2`
  * );
  * ```
- * @deprecated experimental, use {@link assertStoreMatchSnapshot} instead
+ * @deprecated experimental, use {@link assertStoreMatchJSX} instead
  */
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
@@ -239,7 +239,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   expect(actual).toEqual(text);
 }
 
-export async function assertStoreMatchSnapshot(page: Page, snapshot: string) {
+export async function assertStoreMatchJSX(page: Page, snapshot: string) {
   const element = (await page.evaluate(() =>
     // @ts-expect-error
     window.store.toJSXElement()
