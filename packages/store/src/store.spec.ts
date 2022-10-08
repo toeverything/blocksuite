@@ -1,6 +1,6 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
-import { assert, describe, it } from 'vitest';
+import { assert, describe, expect, it } from 'vitest';
 import { BaseBlockModel, Slot, Store } from '../';
 import { BlockSchema } from '../../editor/src/block-loader';
 
@@ -199,5 +199,40 @@ describe.concurrent('getBlock', () => {
 
     const invalid = store.getPreviousSibling(root.children[0]);
     assert.equal(invalid, null);
+  });
+});
+
+describe('store.toJSXElement works', async () => {
+  it('store match snapshot', () => {
+    const store = new Store().register(BlockSchema);
+
+    store.addBlock({ flavour: 'page', title: 'hello' });
+
+    expect(store.toJSXElement()).toMatchInlineSnapshot(`
+      <page
+        prop:title="hello"
+      />
+    `);
+  });
+
+  it('store with multiple blocks children match snapshot', () => {
+    const store = new Store().register(BlockSchema);
+
+    store.addBlock({ flavour: 'page' });
+    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'paragraph' });
+
+    expect(store.toJSXElement()).toMatchInlineSnapshot(`
+        <page>
+          <paragraph
+            prop:text=""
+            prop:type="text"
+          />
+          <paragraph
+            prop:text=""
+            prop:type="text"
+          />
+        </page>
+      `);
   });
 });

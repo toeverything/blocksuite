@@ -1,5 +1,4 @@
 import type { PrefixedBlockProps } from '../store';
-import { format } from 'prettier';
 
 type DocRecord = {
   [id: string]: PrefixedBlockProps & {
@@ -7,12 +6,14 @@ type DocRecord = {
   };
 };
 
-interface Node {
+interface JSXElement {
+  // Ad-hoc for `ReactTestComponent` identify.
+  // Use ReactTestComponent serializer prevent snapshot be be wrapped in a string, which cases " to be escaped.
+  // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L78-L79
+  $$typeof: symbol;
   type: string;
-  props: Record<string, unknown>;
-  children: Node[];
-  // For jsx, we don't need this
-  // isVoidTag: boolean;
+  props?: Record<string, unknown>;
+  children?: null | (JSXElement | string | number)[];
 }
 
 const isValidRecord = (data: unknown): data is DocRecord => {
@@ -24,13 +25,14 @@ const isValidRecord = (data: unknown): data is DocRecord => {
 };
 
 const IGNORE_PROPS = ['sys:id', 'sys:flavour', 'sys:children'];
+
 /**
  * @internal Only for testing
  */
 export const blockRecordToJSXNode = (
   docRecord: Record<string, unknown>,
   nodeId = '0'
-): Node => {
+): JSXElement => {
   if (!isValidRecord(docRecord)) {
     throw new Error('Failed to parse doc record! Invalid data.');
   }
@@ -48,15 +50,12 @@ export const blockRecordToJSXNode = (
     Object.entries(node).filter(([key]) => !IGNORE_PROPS.includes(key))
   );
 
-  const ret = {
+  return {
+    // Ad-hoc for `ReactTestComponent` identify.
+    // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L26-L29
+    $$typeof: Symbol.for('react.test.json'),
     type: flavour,
     props,
     children: children?.map(id => blockRecordToJSXNode(docRecord, id)) ?? [],
   };
-  // Ad-hoc for `ReactTestComponent` identify.
-  // Use ReactTestComponent serializer prevent snapshot be be wrapped in a string, which cases " to be escaped.
-  // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L26-L29
-  // @ts-expect-error
-  ret.$$typeof = Symbol.for('react.test.json');
-  return ret;
 };
