@@ -45,8 +45,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _bindHotkeys() {
     const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
     const scope = 'page';
-
-    hotkeyManager.addListener(undo, scope, () => this.store.undo());
+    hotkeyManager.addListener(undo, scope, () =>{
+      this.store.undo()
+    } );
     hotkeyManager.addListener(redo, scope, () => this.store.redo());
     hotkeyManager.addListener(selectAll, scope, (e: Event) => {
       e.preventDefault();
@@ -56,6 +57,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkeyManager.setScope('page');
   }
 
+  private _removeHotkeys() {
+    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
+    hotkeyManager.removeListener(undo);
+    hotkeyManager.removeListener(redo);
+    hotkeyManager.removeListener(selectAll);
+  }
   private _onKeyDown(e: KeyboardEvent) {
     const hasContent = this._blockTitle.value.length > 0;
 
@@ -107,6 +114,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   disconnectedCallback() {
     this.mouse.dispose();
     this.selection.dispose();
+    this._removeHotkeys()
   }
 
   render() {
