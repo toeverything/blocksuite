@@ -8,7 +8,6 @@ import type {
   SerializedStore,
 } from '../../packages/store';
 import type { JSXElement } from '../../packages/store/src/utils/jsx';
-// See https://github.com/facebook/jest/blob/main/packages/pretty-format
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
@@ -251,7 +250,7 @@ export async function assertStoreMatchSnapshot(page: Page, snapshot: string) {
   // then page.evaluate(pageFunction[, arg]) resolves to undefined.
   // See https://playwright.dev/docs/api/class-page#page-evaluate
   const testSymbol = Symbol.for('react.test.json');
-  const dyeing = (node: JSXElement) => {
+  const markSymbol = (node: JSXElement) => {
     if (!node.children) {
       return;
     }
@@ -260,15 +259,16 @@ export async function assertStoreMatchSnapshot(page: Page, snapshot: string) {
       if (!(typeof child === 'object')) {
         return;
       }
-      dyeing(child);
+      markSymbol(child);
     });
   };
 
-  dyeing(element);
+  markSymbol(element);
 
-  const formatted = prettyFormat(element, {
+  // See https://github.com/facebook/jest/blob/main/packages/pretty-format
+  const formattedJSX = prettyFormat(element, {
     plugins: [prettyFormatPlugins.ReactTestComponent],
     printFunctionName: false,
   });
-  expect(snapshot, formatted).toEqual(formatted);
+  expect(snapshot, formattedJSX).toEqual(formattedJSX);
 }
