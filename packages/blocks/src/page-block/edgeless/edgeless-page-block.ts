@@ -1,16 +1,39 @@
 import { LitElement, html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { BlockHost, BLOCK_ID_ATTR } from '@blocksuite/shared';
-import type { Store } from '@blocksuite/store';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
 
-import type { PageBlockModel } from './page-model';
+import type { PageBlockModel } from '../page-model';
 import {
-  BlockChildrenContainer,
   MouseManager,
   SelectionManager,
-} from '../__internal__';
-import '../__internal__';
+  BlockElement,
+} from '../../__internal__';
+import '../../__internal__';
+
+function EdgelessBlockChildrenContainer(
+  model: BaseBlockModel,
+  host: BlockHost
+) {
+  return html`
+    <style>
+      .affine-block-children-container {
+        padding-left: 1rem;
+      }
+    </style>
+    <div class="affine-block-children-container edgeless">
+      ${repeat(
+        model.children,
+        child => child.id,
+        child => html`
+          <div style="background:yellow">${BlockElement(child, host)}</div>
+        `
+      )}
+    </div>
+  `;
+}
 
 @customElement('edgeless-page-block')
 export class EdgelessPageBlockComponent
@@ -57,7 +80,7 @@ export class EdgelessPageBlockComponent
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = BlockChildrenContainer(this.model, this);
+    const childrenContainer = EdgelessBlockChildrenContainer(this.model, this);
 
     return html`
       <style>

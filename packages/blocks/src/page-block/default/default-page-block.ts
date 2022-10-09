@@ -9,14 +9,14 @@ import {
 } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
 
-import type { PageBlockModel } from './page-model';
+import type { PageBlockModel } from '../page-model';
 import {
   SelectionManager,
   MouseManager,
   focusTextEnd,
   BlockChildrenContainer,
-} from '../__internal__';
-import '../__internal__';
+} from '../../__internal__';
+import '../../__internal__';
 
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
@@ -45,9 +45,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _bindHotkeys() {
     const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
     const scope = 'page';
-    hotkeyManager.addListener(undo, scope, () =>{
-      this.store.undo()
-    } );
+    hotkeyManager.addListener(undo, scope, () => {
+      this.store.undo();
+    });
     hotkeyManager.addListener(redo, scope, () => this.store.redo());
     hotkeyManager.addListener(selectAll, scope, (e: Event) => {
       e.preventDefault();
@@ -114,7 +114,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   disconnectedCallback() {
     this.mouse.dispose();
     this.selection.dispose();
-    this._removeHotkeys()
+    this._removeHotkeys();
   }
 
   render() {

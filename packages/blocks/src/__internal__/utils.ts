@@ -8,7 +8,7 @@ import type { ParagraphBlockModel } from '../paragraph-block/paragraph-model';
 import type { GroupBlockModel } from '../group-block/group-model';
 
 // TODO support dynamic block types
-function BlockElement(model: BaseBlockModel, host: BlockHost) {
+export function BlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
     case 'paragraph':
       return html`
