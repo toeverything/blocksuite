@@ -78,7 +78,8 @@ export class DebugMenu extends LitElement {
   private _onSetParagraphType(type: string) {
     const selection = window.getSelection();
     const element = selection?.focusNode?.parentElement as HTMLElement;
-    const block = element.closest('paragraph-block')?.model as BaseBlockModel;
+    const block = element.closest('paragraph-block')?.model;
+    if (!block) return;
 
     this.store.captureSync();
     this.store.updateBlock(block, { type });
@@ -92,7 +93,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _onAddGroup() {
-    const pageId = document.querySelector('default-page-block')?.model.id;
+    const pageId = this.store.root?.id;
     if (!pageId) return;
 
     this.store.captureSync();
