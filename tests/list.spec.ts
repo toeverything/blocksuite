@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
@@ -6,6 +6,7 @@ import {
   assertBlockType,
   assertRichTexts,
   assertSelection,
+  assertStoreMatchJSX,
   assertTextContent,
 } from './utils/asserts';
 import {
@@ -42,11 +43,11 @@ test('convert to numbered list block', async ({ page }) => {
 
   const listSelector = '.affine-list-rich-text-wrapper';
   const bulletIconSelector = `${listSelector} > div`;
-  await assertTextContent(page, bulletIconSelector, /1\./);
+  await assertTextContent(page, bulletIconSelector, /1 \./);
 
   await undoByClick(page);
-  const numberIconSelector = `${listSelector} > svg`;
-  await expect(page.locator(numberIconSelector)).toHaveCount(1);
+  // const numberIconSelector = `${listSelector} > svg`;
+  // await expect(page.locator(numberIconSelector)).toHaveCount(1);
 
   await redoByClick(page);
   await pressEnter(page); // created 4
@@ -168,4 +169,68 @@ test('list autofill hotkey', async ({ page }) => {
   await page.keyboard.type('* ');
   await assertBlockType(page, '4', 'bulleted'); // id updated
   await assertRichTexts(page, ['\n']);
+});
+
+test('basic indent and unindent', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('text1');
+  await pressEnter(page);
+  await page.keyboard.type('text2');
+
+  await assertStoreMatchJSX(
+    page,
+    `<page>
+  <group
+    prop:xywh="[0,0,300,50]"
+  >
+    <paragraph
+      prop:text="text1"
+      prop:type="text"
+    />
+    <paragraph
+      prop:text="text2"
+      prop:type="text"
+    />
+  </group>
+</page>`
+  );
+  await page.keyboard.press('Tab');
+  await assertStoreMatchJSX(
+    page,
+    `<page>
+  <group
+    prop:xywh="[0,0,300,50]"
+  >
+    <paragraph
+      prop:text="text1"
+      prop:type="text"
+    >
+      <paragraph
+        prop:text="text2"
+        prop:type="text"
+      />
+    </paragraph>
+  </group>
+</page>`
+  );
+  await shiftTab(page);
+  await assertStoreMatchJSX(
+    page,
+    `<page>
+  <group
+    prop:xywh="[0,0,300,50]"
+  >
+    <paragraph
+      prop:text="text1"
+      prop:type="text"
+    />
+    <paragraph
+      prop:text="text2"
+      prop:type="text"
+    />
+  </group>
+</page>`
+  );
 });

@@ -325,7 +325,7 @@ export class SelectionManager {
     }
   }
 
-  public activePreviousBlock(blockId: string, position?: SelectionPosition) {
+  public activatePreviousBlock(blockId: string, position?: SelectionPosition) {
     let nextPosition = position;
     if (nextPosition) {
       if (nextPosition instanceof Point) {
@@ -342,7 +342,7 @@ export class SelectionManager {
     }
   }
 
-  public activeNextBlock(
+  public activateNextBlock(
     blockId: string,
     position: SelectionPosition = 'start'
   ) {

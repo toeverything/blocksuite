@@ -6,11 +6,11 @@ type DocRecord = {
   };
 };
 
-interface JSXElement {
+export interface JSXElement {
   // Ad-hoc for `ReactTestComponent` identify.
   // Use ReactTestComponent serializer prevent snapshot be be wrapped in a string, which cases " to be escaped.
   // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L78-L79
-  $$typeof: symbol;
+  $$typeof: symbol | 0xea71357;
   type: string;
   props?: Record<string, unknown>;
   children?: null | (JSXElement | string | number)[];

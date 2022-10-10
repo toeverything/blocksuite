@@ -187,8 +187,8 @@ export class Store {
     return parent?.children[index + 1] ?? null;
   }
 
-  addBlock<T extends Partial<BlockProps>>(
-    blockProps: T,
+  addBlock<T extends BlockProps>(
+    blockProps: Partial<T>,
     parent?: BaseBlockModel | string,
     parentIndex?: number
   ): string {

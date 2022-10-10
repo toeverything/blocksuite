@@ -68,7 +68,7 @@ export function syncBlockProps(
     yBlock.set('prop:type', props.type ?? 'bulleted');
   }
   if (props.flavour === 'group' && !yBlock.has('prop:xywh')) {
-    yBlock.set('prop:xywh', props.xywh ?? JSON.stringify([0, 0, 0, 0]));
+    yBlock.set('prop:xywh', props.xywh ?? '[0,0,300,50]');
   }
 }
 

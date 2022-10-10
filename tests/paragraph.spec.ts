@@ -140,7 +140,7 @@ test('switch between paragraph types', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('hello');
 
-  const selector = '.affine-rich-text.quill-container';
+  const selector = '.affine-paragraph-block-container';
 
   await clickMenuButton(page, 'heading-1');
   await assertClassName(page, selector, /h1/);

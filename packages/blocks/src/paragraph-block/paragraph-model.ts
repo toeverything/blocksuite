@@ -1,6 +1,14 @@
 import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
-type ParagraphType = 'text' | 'h1' | 'h2' | 'h3' | 'quote';
+type ParagraphType =
+  | 'paragraph'
+  | 'quote'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6';
 
 export interface ParagraphBlockProps extends IBaseBlockProps {
   flavour: 'paragraph';
@@ -12,10 +20,10 @@ export class ParagraphBlockModel
   implements ParagraphBlockProps
 {
   flavour = 'paragraph' as const;
-  type: ParagraphType = 'text';
+  type: ParagraphType = 'paragraph';
 
   constructor(store: Store, props: Partial<ParagraphBlockProps>) {
     super(store, props);
-    this.type = props.type ?? 'text';
+    this.type = props.type ?? 'paragraph';
   }
 }
