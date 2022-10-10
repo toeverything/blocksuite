@@ -2,7 +2,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
 import type { PageBlockModel } from './page-model';
-import { focusTextEnd, getBlockChildrenContainer } from '../__internal__/utils';
+import { focusTextEnd, BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
 @customElement('page-block-element')
@@ -56,7 +56,7 @@ export class PageBlockElement extends LitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = getBlockChildrenContainer(this.model, this.host);
+    const childrenContainer = BlockChildrenContainer(this.model, this.host);
 
     return html`
       <div class="affine-page-block-container">

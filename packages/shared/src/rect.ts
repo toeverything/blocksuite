@@ -7,27 +7,27 @@ export class Point {
     this.y = y;
   }
 
-  public equals({ x, y }: Point) {
+  equals({ x, y }: Point) {
     return this.x === x && this.y === y;
   }
 
-  public xDistance({ x }: Point) {
+  xDistance({ x }: Point) {
     return this.x - x;
   }
 
-  public yDistance({ y }: Point) {
+  yDistance({ y }: Point) {
     return this.y - y;
   }
 
-  public xDistanceAbsolute(point: Point) {
+  xDistanceAbsolute(point: Point) {
     return Math.abs(this.xDistance(point));
   }
 
-  public yDistanceAbsolute(point: Point) {
+  yDistanceAbsolute(point: Point) {
     return Math.abs(this.yDistance(point));
   }
 
-  public distance(point: Point) {
+  distance(point: Point) {
     return Math.sqrt(
       Math.pow(this.xDistance(point), 2) + Math.pow(this.yDistance(point), 2)
     );

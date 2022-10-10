@@ -2,15 +2,14 @@ import { test, expect } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   disconnectByClick,
-  connectByClick,
   redoByClick,
   redoByKeyboard,
   undoByClick,
   undoByKeyboard,
   focusRichText,
-  waitNextFrame,
   waitDefaultPageLoaded,
   pressEnter,
+  addGroupByClick,
 } from './utils/actions';
 import {
   defaultStore,
@@ -40,6 +39,9 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
+
+  await pageB.keyboard.type(' world');
+  await assertTitle(pageA, 'hello world');
 });
 
 test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
@@ -79,10 +81,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   ]);
 });
 
-test('conflict occurs as expected when two same id generated together', async ({
-  browser,
-  page: pageA,
-}) => {
+test('does not sync when disconnected', async ({ browser, page: pageA }) => {
   test.fail();
 
   const room = await enterPlaygroundRoom(pageA);
@@ -92,14 +91,11 @@ test('conflict occurs as expected when two same id generated together', async ({
   await disconnectByClick(pageA);
   await disconnectByClick(pageB);
 
-  // click together, both init with default id leads to conflicts
+  // click together, both init with default id should lead to conflicts
   await focusRichText(pageA);
   await focusRichText(pageB);
   await pageA.keyboard.type('');
   await pageB.keyboard.type('');
-
-  await connectByClick(pageA);
-  await connectByClick(pageB);
 
   await pageA.keyboard.type('hello');
 
@@ -120,7 +116,7 @@ test('basic paired undo/redo', async ({ page }) => {
 
   await undoByClick(page);
   await assertEmpty(page);
-  await redoByClick(page);
+  await redoByKeyboard(page);
   await assertText(page, 'hello');
 });
 
@@ -132,7 +128,7 @@ test('undo/redo with keyboard', async ({ page }) => {
   await assertText(page, 'hello');
   await undoByKeyboard(page);
   await assertEmpty(page);
-  await redoByClick(page); // FIXME back to void state without quill, can't simply redo with quill handler
+  await redoByClick(page);
   await assertText(page, 'hello');
 });
 
@@ -141,7 +137,6 @@ test('undo after adding block twice', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
-  await waitNextFrame(page);
   await page.keyboard.type('world');
 
   await undoByKeyboard(page);
@@ -169,4 +164,17 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['hello', 'world']);
+});
+
+test('undo multi groups', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await addGroupByClick(page);
+  await assertRichTexts(page, ['\n', '\n']);
+
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+
+  await redoByClick(page);
+  await assertRichTexts(page, ['\n', '\n']);
 });

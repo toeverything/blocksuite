@@ -1,9 +1,15 @@
 import * as Y from 'yjs';
 import { Slot } from './utils/slot';
-import { RichTextAdapter, TextEntity } from './text-adapter';
+import {
+  PrelimTextEntity,
+  RichTextAdapter,
+  TextEntity,
+  TextType,
+} from './text-adapter';
 import Quill from 'quill';
 import { SelectionRange, AwarenessAdapter } from './awareness';
 import {
+  assertValidChildren,
   initSysProps,
   syncBlockProps,
   toBlockProps,
@@ -11,6 +17,7 @@ import {
 } from './utils/utils';
 import { BaseBlockModel } from './base';
 import { DebugProvider } from './providers';
+import { blockRecordToJSXNode } from './utils/jsx';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -20,7 +27,8 @@ export type YBlocks = Y.Map<YBlock>;
 export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
-  text?: TextEntity;
+  text?: void | TextType;
+  children?: BaseBlockModel[];
 };
 
 export type PrefixedBlockProps = Record<string, unknown> & {
@@ -64,7 +72,7 @@ export class Store {
   private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _textMap = new WeakMap<TextEntity, Y.Text>();
+  private _splitSet = new Set<TextEntity | PrelimTextEntity>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -93,6 +101,10 @@ export class Store {
   /** key-value store of blocks */
   private get _yBlocks() {
     return this.doc.getMap('blocks') as YBlocks;
+  }
+
+  get root() {
+    return this._root;
   }
 
   get isEmpty() {
@@ -166,11 +178,20 @@ export class Store {
     return parent?.children[index - 1] ?? null;
   }
 
-  addBlock<T extends Partial<BlockProps>>(
-    blockProps: T,
-    parent?: BaseBlockModel,
+  getNextSibling(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    const index = parent?.children.indexOf(block) ?? -1;
+    if (index === -1) {
+      return null;
+    }
+    return parent?.children[index + 1] ?? null;
+  }
+
+  addBlock<T extends BlockProps>(
+    blockProps: Partial<T>,
+    parent?: BaseBlockModel | string,
     parentIndex?: number
-  ) {
+  ): string {
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
     }
@@ -179,12 +200,17 @@ export class Store {
     const id = clonedProps.id ? clonedProps.id : this._createId();
     clonedProps.id = id;
 
-    const yBlock = new Y.Map() as YBlock;
-
     this.transact(() => {
+      const yBlock = new Y.Map() as YBlock;
+
+      assertValidChildren(this._yBlocks, clonedProps);
       initSysProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
-      trySyncTextProp(yBlock, this._textMap, clonedProps.text);
+      trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
+
+      if (typeof parent === 'string') {
+        parent = this._blockMap.get(parent);
+      }
 
       const parentId = parent?.id ?? this._root?.id;
 
@@ -207,7 +233,14 @@ export class Store {
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
-    this.transact(() => syncBlockProps(yBlock, props, this._ignoredKeys));
+
+    this.transact(() => {
+      if (props.text instanceof PrelimTextEntity) {
+        props.text.ready = true;
+      }
+
+      syncBlockProps(yBlock, props, this._ignoredKeys);
+    });
   }
 
   deleteBlockById(id: string) {
@@ -264,6 +297,14 @@ export class Store {
     this.richTextAdapters.delete(id);
   }
 
+  markTextSplit(
+    base: TextEntity,
+    left: PrelimTextEntity,
+    right: PrelimTextEntity
+  ) {
+    this._splitSet.add(base).add(left).add(right);
+  }
+
   private _createId(): string {
     return (this._i++).toString();
   }
@@ -310,7 +351,7 @@ export class Store {
     return blockModel;
   }
 
-  private _handleYBlockAdd(id: string) {
+  private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
     const isRoot = this._blockMap.size === 0;
 
@@ -328,12 +369,27 @@ export class Store {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const textEntity = new TextEntity(this._textMap, yText);
+    const textEntity = new TextEntity(yText);
     model.text = textEntity;
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
       model.childMap = createChildMap(yChildren);
+
+      yChildren.forEach((id: string) => {
+        const index = model.childMap.get(id);
+        if (Number.isInteger(index)) {
+          const hasChild = this._blockMap.has(id);
+
+          if (!hasChild) {
+            visited.add(id);
+            this._handleYBlockAdd(visited, id);
+          }
+
+          const child = this._blockMap.get(id) as BaseBlockModel;
+          model.children[index as number] = child;
+        }
+      });
     }
 
     if (isRoot) {
@@ -377,9 +433,22 @@ export class Store {
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
     // event on top-level block store
     if (event.target === this._yBlocks) {
+      const visited = new Set<string>();
+
       event.keys.forEach((value, id) => {
         if (value.action === 'add') {
-          this._handleYBlockAdd(id);
+          // Here the key is the id of the blocks.
+          // Generally, the key that appears earlier corresponds to the block added earlier,
+          // and it won't refer to subsequent keys.
+          // However, when redo the operation that adds multiple blocks at once,
+          // the earlier block may have children pointing to subsequent blocks.
+          // In this case, although the yjs-side state is correct, the BlockModel instance may not exist yet.
+          // Therefore, at this point we synchronize the referenced block first,
+          // then mark it in `visited` so that they can be skipped.
+          if (visited.has(id)) return;
+          visited.add(id);
+
+          this._handleYBlockAdd(visited, id);
         } else if (value.action === 'delete') {
           this._handleYBlockDelete(id);
         } else {
@@ -414,8 +483,8 @@ export class Store {
           model.children = childIds.map(
             id => this._blockMap.get(id) as BaseBlockModel
           );
-          model.childrenUpdated.emit();
           model.childMap = createChildMap(event.target);
+          model.childrenUpdated.emit();
         }
       }
     }
@@ -427,4 +496,18 @@ export class Store {
     }
     this.slots.updated.emit();
   };
+
+  /**
+   * @internal Only for testing
+   */
+  toJSXElement(id = '0') {
+    const json = this.doc.toJSON();
+    if (!('blocks' in json)) {
+      throw new Error("Failed to convert to JSX: 'blocks' not found");
+    }
+    if (!json.blocks[id]) {
+      return null;
+    }
+    return blockRecordToJSXNode(json.blocks, id);
+  }
 }

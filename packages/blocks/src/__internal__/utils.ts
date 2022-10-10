@@ -2,34 +2,42 @@ import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
+
 import type { ListBlockModel } from '../list-block/list-model';
 import type { ParagraphBlockModel } from '../paragraph-block/paragraph-model';
+import type { GroupBlockModel } from '../group-block/group-model';
 
 // TODO support dynamic block types
-function getBlockElement(model: BaseBlockModel, host: BlockHost) {
+export function BlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
     case 'paragraph':
       return html`
-        <paragraph-block-element
+        <paragraph-block
           .model=${model as ParagraphBlockModel}
           .host=${host}
-        ></paragraph-block-element>
+        ></paragraph-block>
       `;
     case 'list':
       return html`
-        <list-block-element
+        <list-block
           .model=${model as ListBlockModel}
           .host=${host}
-        ></list-block-element>
+        ></list-block>
+      `;
+    case 'group':
+      return html`
+        <group-block
+          .model=${model as GroupBlockModel}
+          .host=${host}
+        ></group-block>
       `;
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
 }
 
-export function getBlockChildrenContainer(
-  model: BaseBlockModel,
-  host: BlockHost
-) {
+// Naming convention borrowed from
+// https://codelabs.developers.google.com/codelabs/lit-2-for-react-devs#4
+export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
   return html`
     <style>
       .affine-block-children-container .affine-block-children-container {
@@ -40,7 +48,7 @@ export function getBlockChildrenContainer(
       ${repeat(
         model.children,
         child => child.id,
-        child => getBlockElement(child, host)
+        child => BlockElement(child, host)
       )}
     </div>
   `;

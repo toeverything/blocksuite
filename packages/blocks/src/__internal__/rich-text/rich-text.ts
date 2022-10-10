@@ -2,10 +2,11 @@ import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
-import style from './styles.css';
-import type { BlockHost } from '@blocksuite/shared';
+import { BlockHost, hotkeyManager } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
+
+import style from './styles.css';
 
 Quill.register('modules/cursors', QuillCursors);
 
@@ -45,14 +46,41 @@ export class RichText extends LitElement {
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
-
+    this._bindHotKey();
     this.model.propsUpdated.on(() => this.requestUpdate());
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .addEventListener('focus', this._focus.bind(this));
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .addEventListener('blur', this._blur.bind(this));
+    hotkeyManager.setScope(this.model.id);
+  }
+
+  private _focus() {
+    hotkeyManager.setScope(this.model.id);
+  }
+  private _blur() {
+    hotkeyManager.setScope('page');
+  }
+
+  private _bindHotKey() {
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.selectAll,
+      this.model.id,
+      this._onSelectAll
+    );
+  }
+
+  private _onSelectAll() {
+    // console.log('selectAll', e);
   }
 
   disconnectedCallback() {
     this.host.store.detachRichText(this.model.id);
-
     super.disconnectedCallback();
+    this._textContainer.removeEventListener('focus', this._focus);
+    this._textContainer.removeEventListener('blur', this._blur);
   }
 
   render() {

@@ -2,10 +2,9 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR, Point, Rect } from '@blocksuite/shared';
-import { BlockSchema } from '../../block-loader';
-import { PageContainer, SelectionManager } from '../..';
-
-type PageBlockModel = InstanceType<typeof BlockSchema.page>;
+import type { BaseBlockModel, Store } from '@blocksuite/store';
+import { MouseManager } from '../mouse/mouse-manager';
+import { SelectionManager } from '../selection/selection-manager';
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {
@@ -21,30 +20,14 @@ export class SelectionRect extends LitElement {
   @state()
   isShow = false;
 
-  // @property()
-  // mouse!: MouseManager;
+  @property()
+  store!: Store;
 
   @property()
-  pageModel!: PageBlockModel;
+  mouse!: MouseManager;
 
   @property()
-  page!: PageContainer;
-
-  @property()
-  selectionManager!: SelectionManager;
-
-  protected firstUpdated(): void {
-    if (this.page.mouse) {
-      this.page.mouse.onMouseDown(e => {
-        this._handleEditorMousedown(e);
-      });
-      this.page.mouse.onMouseMove(e => {
-        if (!this.page.model) return;
-
-        this._handleMouseMove(e);
-      });
-    }
-  }
+  selection!: SelectionManager;
 
   private _handleEditorMousedown(e: MouseEvent) {
     // this.selectionManager.selectedBlockIds = [];
@@ -61,11 +44,11 @@ export class SelectionRect extends LitElement {
     if (
       !closestBlock ||
       closestBlock.attributes.getNamedItem(BLOCK_ID_ATTR)?.value ===
-        this.pageModel.id
+        this.store.root?.id
     ) {
       this.startPoint = new Point(e.clientX, e.clientY);
       this.isShow = true;
-      this.page.mouse.onDocumentMouseUpOnce(() => {
+      this.mouse.onDocumentMouseUpOnce(() => {
         this._handleEditorMouseup();
       });
       e.preventDefault();
@@ -76,7 +59,10 @@ export class SelectionRect extends LitElement {
     if (this.startPoint) {
       this.endPoint = new Point(e.clientX, e.clientY);
       this.rect = Rect.fromPoints(this.startPoint, this.endPoint);
-      this.page.selection.calcIntersectBlocks(this.rect, this.pageModel);
+      this.selection.calcIntersectBlocks(
+        this.rect,
+        this.store.root as BaseBlockModel
+      );
     }
   }
 
@@ -86,7 +72,19 @@ export class SelectionRect extends LitElement {
     this.rect = undefined;
   }
 
-  protected render() {
+  firstUpdated() {
+    if (!this.mouse) return;
+
+    this.mouse.onMouseDown(e => {
+      this._handleEditorMousedown(e);
+    });
+    this.mouse.onMouseMove(e => {
+      if (!this.store.root) return;
+      this._handleMouseMove(e);
+    });
+  }
+
+  render() {
     const rectStyle =
       this.isShow && this.rect
         ? {

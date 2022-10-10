@@ -1,10 +1,12 @@
-import { PageContainer } from '../..';
-import { BLOCK_ID_ATTR, Point, Rect, SelectPosition } from '@blocksuite/shared';
-import { BaseBlockModel, IDisposable, Slot } from '@blocksuite/store';
-
-export type SelectionInfo = InstanceType<
-  typeof SelectionManager
->['selectionInfo'];
+import {
+  BLOCK_ID_ATTR,
+  Point,
+  Rect,
+  SelectedBlock,
+  SelectionInfo,
+  SelectionPosition,
+} from '@blocksuite/shared';
+import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
 // TODO use lodash or move to utils
 function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
@@ -18,20 +20,24 @@ function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {
 
 export class SelectionManager {
   private _selectedBlockIds: Array<string> = [];
-  // @ts-ignore
-  private _page: PageContainer;
+  private _container: HTMLElement;
+  private _store: Store;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
-  private _blockActiveSlotMap: { [k in string]: Slot<SelectPosition> } = {};
+  private _blockActiveSlotMap: { [k in string]: Slot<SelectionPosition> } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
+  private _anchorBlockPosition: number | null = null;
+  private _focusBlockPosition: number | null = null;
   private _slots = {
     selection: new Slot<SelectionInfo>(),
   };
   private _lastCursorPosition: Point | null = null;
+  private _selectionInfo: SelectionInfo = { type: 'None' };
 
-  constructor(page: PageContainer) {
-    this._page = page;
+  constructor(container: HTMLElement, store: Store) {
+    this._store = store;
+    this._container = container;
     this._handlerBrowserChange = this._handlerBrowserChange.bind(this);
     this._initListenBrowserSelection();
   }
@@ -41,16 +47,18 @@ export class SelectionManager {
   }
 
   set selectedBlockIds(ids: Array<string>) {
-    const blocksNeedUnselect = without<string>(this._selectedBlockIds, ...ids);
-    const blocksNeedSelect = without<string>(ids, ...this._selectedBlockIds);
-    blocksNeedUnselect.forEach(blockId => {
-      this._emitBlockSelectChange(blockId, false);
+    const blocksToUnselect = without<string>(this._selectedBlockIds, ...ids);
+    const blocksToSelect = without<string>(ids, ...this._selectedBlockIds);
+    blocksToUnselect.forEach(blockId => {
+      this._emitBlockSelectionChange(blockId, false);
     });
-    blocksNeedSelect.forEach(blockId => {
-      this._emitBlockSelectChange(blockId);
+    blocksToSelect.forEach(blockId => {
+      this._emitBlockSelectionChange(blockId, true);
     });
     this._selectedBlockIds = ids;
     this._emitSelectionChange();
+
+    this._updateSelectionInfo();
   }
 
   get type() {
@@ -68,21 +76,7 @@ export class SelectionManager {
   }
 
   get selectionInfo() {
-    if (this.type === 'Range' || this.type === 'Caret') {
-      //TODO IMP: Do you need to pass Range and Crate directly here
-      return {
-        type: this.type,
-        anchorBlockId: this._anchorBlockId,
-        focusBlockId: this._focusBlockId,
-      } as const;
-    }
-    if (this.type === 'Block') {
-      return {
-        type: 'Block',
-        selectedNodesIds: this._selectedBlockIds,
-      } as const;
-    }
-    return { type: 'None' } as const;
+    return this._selectionInfo;
   }
 
   private _initListenBrowserSelection() {
@@ -98,8 +92,8 @@ export class SelectionManager {
         type !== 'None' &&
         anchorNode &&
         focusNode &&
-        this._page.contains(anchorNode) &&
-        this._page.contains(focusNode)
+        this._container.contains(anchorNode) &&
+        this._container.contains(focusNode)
       ) {
         const anchorBlockId =
           anchorNode.parentElement
@@ -111,25 +105,39 @@ export class SelectionManager {
             ?.getAttribute(BLOCK_ID_ATTR) || '';
         this._anchorBlockId = anchorBlockId;
         this._focusBlockId = focusBlockId;
+        const anchorSelection = this._store.richTextAdapters
+          .get(anchorBlockId)
+          ?.quill.getSelection();
+        this._anchorBlockPosition = anchorSelection?.index ?? null;
+        const focusSelection = this._store.richTextAdapters
+          .get(focusBlockId)
+          ?.quill.getSelection();
+        this._focusBlockPosition = focusSelection
+          ? focusSelection.index + focusSelection.length
+          : null;
       }
     } else {
       this._anchorBlockId = '';
       this._focusBlockId = '';
+      this._anchorBlockPosition = null;
+      this._focusBlockPosition = null;
     }
+
     this._emitSelectionChange();
   }
 
   public calcIntersectBlocks(selectionRect: Rect, blockModel: BaseBlockModel) {
     let selectedBlocks: Array<string> = [];
-    const blockDom = this._page.querySelector(
-      `[${BLOCK_ID_ATTR}='${blockModel.id}']`
-    );
+    const selector = `[${BLOCK_ID_ATTR}='${blockModel.id}']`;
+    const blockDom = this._container.querySelector(selector);
+
     if (blockDom) {
       if (selectionRect.isIntersect(Rect.fromDom(blockDom))) {
         const { children } = blockModel;
-        const queryStr = children.reduce((query, child, index) => {
-          return `${query}${index ? ',' : ''}[${BLOCK_ID_ATTR}='${child.id}']`;
-        }, '');
+        const queryStr = children
+          .map(child => `[${BLOCK_ID_ATTR}='${child.id}']`)
+          .join(',');
+
         // IMP: if parent block does not contain child block, this will be not useful
         const childrenDoms = blockDom.querySelectorAll(queryStr);
         childrenDoms.forEach(dom => {
@@ -156,7 +164,7 @@ export class SelectionManager {
       }
     }
     // only page model need call selection change
-    if (this._page.model === blockModel) {
+    if (this._store.root === blockModel) {
       this.selectedBlockIds = selectedBlocks;
     }
     return selectedBlocks;
@@ -180,7 +188,7 @@ export class SelectionManager {
     return slot;
   }
 
-  public addChangeListener(
+  public addBlockSelectedListener(
     blockId: string,
     handler: (selected: boolean) => void
   ) {
@@ -190,38 +198,38 @@ export class SelectionManager {
     return disposable;
   }
 
-  public removeChangeListener(blockId: string) {
+  public removeBlockSelectedListener(blockId: string) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
       slot.dispose();
     }
-    return delete this._blockSelectSlotMap[blockId];
+    delete this._blockSelectSlotMap[blockId];
   }
 
-  private _emitBlockSelectChange(blockId: string, selected = true) {
+  private _emitBlockSelectionChange(blockId: string, selected: boolean) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
       slot.emit(selected);
     }
   }
 
-  public onSelectionChange(cb: (selectionInfo: SelectionInfo) => void) {
-    return this._slots.selection.on(cb);
+  public onSelectionChange(handler: (selectionInfo: SelectionInfo) => void) {
+    return this._slots.selection.on(handler);
   }
 
   private _emitSelectionChange() {
     this._slots.selection.emit(this.selectionInfo);
   }
 
-  private _getPerviousBlock(blockId: string) {
+  private _getPreviousBlock(blockId: string) {
     // TODO: resolve type problem
-    const currentBlock = this._page.querySelector<'paragraph-block-element'>(
-      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
+    const currentBlock = this._container.querySelector<'paragraph-block'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
     );
     if (currentBlock) {
       const parentBlock =
-        currentBlock.parentElement?.closest<'paragraph-block-element'>(
-          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
+        currentBlock.parentElement?.closest<'paragraph-block'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block'
         );
       if (parentBlock) {
         const siblings = parentBlock.model.children;
@@ -249,16 +257,16 @@ export class SelectionManager {
 
   private _getNextBlock(blockId: string) {
     // TODO: resolve type problem
-    let currentBlock = this._page.querySelector<'paragraph-block-element'>(
-      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block-element'
+    let currentBlock = this._container.querySelector<'paragraph-block'>(
+      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
     );
     if (currentBlock?.model.children.length) {
       return currentBlock.model.children[0];
     }
     while (currentBlock) {
       const parentBlock =
-        currentBlock.parentElement?.closest<'paragraph-block-element'>(
-          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block-element'
+        currentBlock.parentElement?.closest<'paragraph-block'>(
+          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block'
         ) || null;
       if (parentBlock) {
         const siblings = parentBlock.model.children;
@@ -274,7 +282,50 @@ export class SelectionManager {
     return null;
   }
 
-  public activePreviousBlock(blockId: string, position?: SelectPosition) {
+  private _toSelectedBlock(blockId: string): SelectedBlock {
+    const block = this._store.getBlockById(blockId);
+    if (!block) {
+      throw new Error(`block ${blockId} not found`);
+    }
+
+    return {
+      id: block.id,
+      children: block.children.map(child => this._toSelectedBlock(child.id)),
+    };
+  }
+
+  private _collectSelectedBlocks(): SelectedBlock[] {
+    return this._selectedBlockIds.map(id => this._toSelectedBlock(id));
+  }
+
+  private _updateSelectionInfo() {
+    if (this.type === 'Range') {
+      this._selectionInfo = {
+        type: this.type,
+        anchorBlockId: this._anchorBlockId,
+        focusBlockId: this._focusBlockId,
+        anchorBlockPosition: this._anchorBlockPosition,
+        focusBlockPosition: this._focusBlockPosition,
+      };
+    } else if (this.type === 'Caret') {
+      this._selectionInfo = {
+        type: this.type,
+        anchorBlockId: this._anchorBlockId,
+        focusBlockId: this._focusBlockId,
+        anchorBlockPosition: this._anchorBlockPosition,
+        focusBlockPosition: this._focusBlockPosition,
+      };
+    } else if (this.type === 'Block') {
+      this._selectionInfo = {
+        type: this.type,
+        blocks: this._collectSelectedBlocks(),
+      };
+    } else {
+      this._selectionInfo = { type: 'None' };
+    }
+  }
+
+  public activatePreviousBlock(blockId: string, position?: SelectionPosition) {
     let nextPosition = position;
     if (nextPosition) {
       if (nextPosition instanceof Point) {
@@ -285,13 +336,16 @@ export class SelectionManager {
     } else if (this._lastCursorPosition) {
       nextPosition = this._lastCursorPosition;
     }
-    const preNodeModel = this._getPerviousBlock(blockId);
+    const preNodeModel = this._getPreviousBlock(blockId);
     if (preNodeModel) {
       this.activeBlockById(preNodeModel.id, nextPosition);
     }
   }
 
-  public activeNextBlock(blockId: string, position: SelectPosition = 'start') {
+  public activateNextBlock(
+    blockId: string,
+    position: SelectionPosition = 'start'
+  ) {
     let nextPosition = position;
     if (nextPosition) {
       if (nextPosition instanceof Point) {
@@ -308,17 +362,17 @@ export class SelectionManager {
     }
   }
 
-  public onBlockActive(
+  public addBlockActiveListener(
     blockId: string,
-    cb: (position: SelectPosition) => void
+    handler: (position: SelectionPosition) => void
   ) {
     const slot = this._getBlockActiveSlot(blockId);
-    const disposable = slot.on(cb);
+    const disposable = slot.on(handler);
     this._disposables.push(disposable);
     return disposable;
   }
 
-  public offBlockActive(blockId: string) {
+  public removeBlockActiveListener(blockId: string) {
     const slot = this._blockActiveSlotMap[blockId];
     if (slot) {
       slot.dispose();
@@ -326,7 +380,10 @@ export class SelectionManager {
     return delete this._blockActiveSlotMap[blockId];
   }
 
-  public activeBlockById(blockId: string, position: SelectPosition = 'start') {
+  public activeBlockById(
+    blockId: string,
+    position: SelectionPosition = 'start'
+  ) {
     const slot = this._blockActiveSlotMap[blockId];
     if (slot) {
       slot.emit(position);
@@ -335,8 +392,8 @@ export class SelectionManager {
 
   public dispose() {
     this._disposables.forEach(disposable => disposable.dispose());
-    window.removeEventListener('selectionchange', this._handlerBrowserChange);
     Object.values(this._blockSelectSlotMap).forEach(slot => slot.dispose());
     Object.values(this._slots).forEach(slot => slot.dispose());
+    window.removeEventListener('selectionchange', this._handlerBrowserChange);
   }
 }

@@ -1,33 +1,32 @@
 import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import type { BlockHost } from '@blocksuite/shared';
-import { SelectionManager, MouseManager } from '../..';
+import { choose } from 'lit/directives/choose.js';
+
 import { Store } from '@blocksuite/store';
+import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
-import { Clipboard } from '../../clipboard';
-import './debug-menu';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
-@customElement('page-container')
-export class PageContainer extends LitElement implements BlockHost {
+@customElement('editor-container')
+export class EditorContainer extends LitElement {
   @state()
   store = new Store(room).register(BlockSchema);
+
+  @state()
+  mode: 'page' | 'edgeless' = 'page';
 
   @state()
   model!: PageBlockModel;
 
   @state()
-  mouse = new MouseManager(this.addEventListener.bind(this));
+  clipboard = new ClipboardManager(this, this);
 
   @state()
-  selection = new SelectionManager(this);
-
-  @state()
-  clipboard = new Clipboard(this, this);
+  contentParser = new ContentParser(this);
 
   @state()
   isEmptyPage = true;
@@ -47,7 +46,7 @@ export class PageContainer extends LitElement implements BlockHost {
     // @ts-ignore
     window.store = this.store;
     // @ts-ignore
-    window.page = this;
+    window.editor = this;
   }
 
   private _subscribeStore() {
@@ -66,8 +65,9 @@ export class PageContainer extends LitElement implements BlockHost {
   private _initFromVoidState() {
     if (!this.isEmptyPage) return;
 
-    this.store.addBlock({ flavour: 'page' });
-    this.store.addBlock({ flavour: 'paragraph' });
+    const pageId = this.store.addBlock({ flavour: 'page' });
+    const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
+    this.store.addBlock({ flavour: 'paragraph' }, groupId);
 
     this.isEmptyPage = false;
   }
@@ -84,43 +84,54 @@ export class PageContainer extends LitElement implements BlockHost {
   }
 
   firstUpdated() {
-    this._placeholderInput?.focus();
-  }
+    window.addEventListener('affine.switch-mode', ({ detail }) => {
+      this.mode = detail;
+    });
 
-  disconnectedCallback() {
-    this.mouse.dispose();
-    this.selection.dispose();
+    this._placeholderInput?.focus();
   }
 
   render() {
     const placeholderRoot = html`
-      <page-block-element
+      <default-page-block
+        .mouseRoot=${this as HTMLElement}
+        .store=${this.store}
         .model=${this.placeholderModel}
-        .host=${this as BlockHost}
-      ></page-block-element>
+      ></default-page-block>
+    `;
+
+    const pageContainer = html`
+      <default-page-block
+        .mouseRoot=${this as HTMLElement}
+        .store=${this.store}
+        .model=${this.model}
+      ></default-page-block>
+    `;
+
+    const edgelessContainer = html`
+      <edgeless-page-block
+        .mouseRoot=${this as HTMLElement}
+        .store=${this.store}
+        .model=${this.model}
+      ></edgeless-page-block>
     `;
 
     const blockRoot = html`
-      <page-block-element
-        .model=${this.model}
-        .host=${this as BlockHost}
-      ></page-block-element>
+      ${choose(this.mode, [
+        ['page', () => pageContainer],
+        ['edgeless', () => edgelessContainer],
+      ])}
     `;
 
     return html`
       <style>
-        .affine-page-container {
+        .affine-editor-container {
           position: relative;
           padding: 10px 70px;
         }
       </style>
-      <div class="affine-page-container">
-        <debug-menu .page=${this as PageContainer}></debug-menu>
-        <selection-rect
-          .selectionManager=${this.selection}
-          .pageModel=${this.model}
-          .page=${this as PageContainer}
-        ></selection-rect>
+      <div class="affine-editor-container">
+        <debug-menu .store=${this.store}></debug-menu>
         ${this.isEmptyPage ? placeholderRoot : blockRoot}
       </div>
     `;
@@ -129,6 +140,6 @@ export class PageContainer extends LitElement implements BlockHost {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'page-container': PageContainer;
+    'editor-container': EditorContainer;
   }
 }

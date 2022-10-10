@@ -1,13 +1,13 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
-import { PageContainer } from '../components';
-import { ParseHtml } from '../parse/parse-html';
-import { ParseText } from '../parse/parse-text';
+import { EditorContainer } from '../../components';
+import { HtmlParser } from './content-parser/parse-html';
+import { TextParser } from './content-parser/parse-text';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 
-export class PasteExecution {
-  private _page: PageContainer;
+export class PasteManager {
+  private _editor: EditorContainer;
 
   // The event handler will get the most needed clipboard data based on this array order
   private static _optimalMimeTypes: string[] = [
@@ -16,8 +16,8 @@ export class PasteExecution {
     CLIPBOARD_MIMETYPE.TEXT,
   ];
 
-  constructor(page: PageContainer) {
-    this._page = page;
+  constructor(editor: EditorContainer) {
+    this._editor = editor;
     this.handlePaste = this.handlePaste.bind(this);
   }
 
@@ -29,13 +29,19 @@ export class PasteExecution {
     this._insertBlocks(blocks);
   }
 
+  private get _selection() {
+    const page = document.querySelector('default-page-block');
+    if (!page) throw new Error('No page block');
+    return page.selection;
+  }
+
   private async _clipboardEvent2Blocks(e: ClipboardEvent) {
     const clipboardData = e.clipboardData;
     if (!clipboardData) {
       return;
     }
 
-    const isPureFile = PasteExecution._isPureFileInClipboard(clipboardData);
+    const isPureFile = PasteManager._isPureFileInClipboard(clipboardData);
     if (isPureFile) {
       return this._file2Blocks(clipboardData);
     }
@@ -44,8 +50,8 @@ export class PasteExecution {
 
   // Get the most needed clipboard data based on `_optimalMimeTypes` order
   public getOptimalClip(clipboardData: ClipboardEvent['clipboardData']) {
-    for (let i = 0; i < PasteExecution._optimalMimeTypes.length; i++) {
-      const mimeType = PasteExecution._optimalMimeTypes[i];
+    for (let i = 0; i < PasteManager._optimalMimeTypes.length; i++) {
+      const mimeType = PasteManager._optimalMimeTypes[i];
       const data = clipboardData?.getData(mimeType);
 
       if (data) {
@@ -74,21 +80,21 @@ export class PasteExecution {
       optimalClip?.type === CLIPBOARD_MIMETYPE.HTML &&
       !shouldConvertMarkdown
     ) {
-      return ParseHtml.html2blocks(optimalClip.data);
+      return HtmlParser.html2blocks(optimalClip.data);
     }
 
     if (shouldConvertMarkdown) {
       const md2html = marked.parse(textClipData);
-      return ParseHtml.html2blocks(md2html);
+      return HtmlParser.html2blocks(md2html);
     }
 
-    return ParseText.text2blocks(textClipData);
+    return TextParser.text2blocks(textClipData);
   }
 
   private async _file2Blocks(
     clipboardData: DataTransfer
   ): Promise<OpenBlockInfo[]> {
-    const file = PasteExecution._getImageFile(clipboardData);
+    const file = PasteManager._getImageFile(clipboardData);
     if (file) {
       //  todo upload file to file server
       return [];
@@ -114,45 +120,44 @@ export class PasteExecution {
     return;
   }
 
+  // TODO Max 15 deeper
   private _insertBlocks(blocks: OpenBlockInfo[]) {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectInfo = this._page.selection.selectionInfo;
+    const currentSelectionInfo = this._selection.selectionInfo;
 
     if (
-      currentSelectInfo.type === 'Range' ||
-      currentSelectInfo.type === 'Caret'
+      currentSelectionInfo.type === 'Range' ||
+      currentSelectionInfo.type === 'Caret'
     ) {
       // TODO split selected block case
-      const selectedBlock = this._page.store.getBlockById(
-        currentSelectInfo.focusBlockId
+      const selectedBlock = this._editor.store.getBlockById(
+        currentSelectionInfo.focusBlockId
       );
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
-        parent = this._page.store.getParent(selectedBlock);
+        parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._page.selection.selectedBlockIds = addBlockIds;
-    } else if (currentSelectInfo.type === 'Block') {
-      const selectedBlock = this._page.store.getBlockById(
-        currentSelectInfo.selectedNodesIds[
-          currentSelectInfo.selectedNodesIds.length - 1
-        ]
+      this._selection.selectedBlockIds = addBlockIds;
+    } else if (currentSelectionInfo.type === 'Block') {
+      const selectedBlock = this._editor.store.getBlockById(
+        currentSelectionInfo.blocks[currentSelectionInfo.blocks.length - 1].id
       );
 
       let parent = selectedBlock;
       let index = -1;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
-        parent = this._page.store.getParent(selectedBlock);
+        parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._page.selection.selectedBlockIds = addBlockIds;
+      this._selection.selectedBlockIds = addBlockIds;
     }
   }
 
@@ -167,8 +172,8 @@ export class PasteExecution {
       const blockProps = {
         flavour: block.flavour as string,
       };
-      const id = this._page.store.addBlock(blockProps, parent, index + i);
-      const model = this._page.store.getBlockById(id);
+      const id = this._editor.store.addBlock(blockProps, parent, index + i);
+      const model = this._editor.store.getBlockById(id);
       block.text && model?.text?.applyDelta(block.text);
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);

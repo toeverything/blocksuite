@@ -24,5 +24,6 @@ export class ParagraphBlockModel
 
   constructor(store: Store, props: Partial<ParagraphBlockProps>) {
     super(store, props);
+    this.type = props.type ?? 'text';
   }
 }

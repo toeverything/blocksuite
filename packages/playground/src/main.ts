@@ -2,6 +2,6 @@ import '@blocksuite/blocks';
 import '@blocksuite/editor';
 
 window.onload = () => {
-  const container = document.createElement('page-container');
-  document.body.appendChild(container);
+  const editor = document.createElement('editor-container');
+  document.body.appendChild(editor);
 };

@@ -5,7 +5,7 @@ import type { Quill } from 'quill';
 import type { Store } from './store';
 
 // Removes the pending '\n's if it has no attributes
-export const normQuillDelta = (delta: any) => {
+export function normQuillDelta(delta: any) {
   if (delta.length > 0) {
     const d = delta[delta.length - 1];
     const insert = d.insert;
@@ -27,30 +27,145 @@ export const normQuillDelta = (delta: any) => {
     }
   }
   return delta;
-};
+}
 
-export class TextEntity {
-  private _textMap: WeakMap<TextEntity, Y.Text>;
-  constructor(textMap: WeakMap<TextEntity, Y.Text>, yText: Y.Text) {
-    this._textMap = textMap;
-    this._textMap.set(this, yText);
+type PrelimTextEnityType = 'splitLeft' | 'splitRight';
+
+export type TextType = PrelimTextEntity | TextEntity;
+
+const UNSUPPORTED_MSG = 'PrelimTextEntity does not support ';
+
+export class PrelimTextEntity {
+  ready = false;
+  type: PrelimTextEnityType;
+  index: number;
+  constructor(type: PrelimTextEnityType, index: number) {
+    this.type = type;
+    this.index = index;
   }
 
   clone() {
-    const clonedYText = this._textMap.get(this)?.clone();
-    return new TextEntity(this._textMap, clonedYText as Y.Text);
+    throw new Error(UNSUPPORTED_MSG + 'clone');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  insert(_content: string, _index: number) {
+    throw new Error(UNSUPPORTED_MSG + 'insert');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  split(_: number): [PrelimTextEntity, PrelimTextEntity] {
+    throw new Error(UNSUPPORTED_MSG + 'split');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  join(_: TextEntity) {
+    throw new Error(UNSUPPORTED_MSG + 'join');
+  }
+
+  clear() {
+    throw new Error(UNSUPPORTED_MSG + 'clear');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  applyDelta(_: any) {
+    throw new Error(UNSUPPORTED_MSG + 'applyDelta');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sliceToDelta(_begin: number, _end?: number) {
+    throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
+  }
+}
+
+export class TextEntity {
+  private _yText: Y.Text;
+  constructor(yText: Y.Text) {
+    this._yText = yText;
+  }
+
+  clone() {
+    return new TextEntity(this._yText.clone());
+  }
+
+  split(index: number): [PrelimTextEntity, PrelimTextEntity] {
+    return [
+      new PrelimTextEntity('splitLeft', index),
+      new PrelimTextEntity('splitRight', index),
+    ];
+  }
+
+  insert(content: string, index: number) {
+    this._yText.insert(index, content);
+    // @ts-ignore
+    this._yText.meta = { split: true };
+  }
+
+  join(other: TextEntity) {
+    const yOther = other._yText;
+    const delta = yOther.toDelta();
+
+    delta.splice(0, 0, { retain: this._yText.length });
+    this._yText.applyDelta(delta);
+    // @ts-ignore
+    this._yText.meta = { join: true };
+  }
+
+  clear() {
+    this._yText.delete(0, this._yText.length);
+    // @ts-ignore
+    this._yText.meta = { clear: true };
   }
 
   applyDelta(delta: any) {
-    this._textMap.get(this)?.applyDelta(delta);
+    this._yText.applyDelta(delta);
   }
 
   toDelta() {
-    return this._textMap.get(this)?.toDelta();
+    return this._yText.toDelta();
+  }
+
+  sliceToDelta(begin: number, end?: number) {
+    if (end && begin >= end) {
+      return [];
+    }
+
+    const delta = this.toDelta();
+    if (begin < 1 && !end) {
+      return delta;
+    }
+    const result = [];
+    if (delta && delta instanceof Array) {
+      let charNum = 0;
+      for (let i = 0; i < delta.length; i++) {
+        const content = delta[i];
+        let contentText = content.insert || '';
+        const contentLen = contentText.length;
+        if (end && charNum + contentLen > end) {
+          contentText = contentText.slice(0, end - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          contentText = contentText.slice(begin - charNum);
+        }
+        if (charNum + contentLen > begin && result.length === 0) {
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+        } else {
+          result.length > 0 && result.push(content);
+        }
+        if (end && charNum + contentLen > end) {
+          break;
+        }
+        charNum = charNum + contentLen;
+      }
+    }
+    return result;
   }
 
   toString() {
-    return this._textMap.get(this)?.toString();
+    return this._yText.toString();
   }
 }
 
@@ -84,8 +199,25 @@ export class RichTextAdapter {
   }
 
   private _yObserver = (event: Y.YTextEvent) => {
+    const isFromLocal = event.transaction.origin === this.doc.clientID;
+    const isFromRemote = !isFromLocal;
+    // @ts-ignore
+    const isControlledSplit = !!event.target?.meta?.split;
+    // @ts-ignore
+    const isControlledInsert = !!event.target?.meta?.insert;
+    // @ts-ignore
+    const isControlledJoin = !!event.target?.meta?.join;
+    // @ts-ignore
+    const isControlledClear = !!event.target?.meta?.clear;
+
     // remote update doesn't carry clientID
-    if (event.transaction.origin !== this.doc.clientID) {
+    if (
+      isFromRemote ||
+      isControlledSplit ||
+      isControlledInsert ||
+      isControlledJoin ||
+      isControlledClear
+    ) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
       // result in quill assuming that a text insertion shall inherit existing
@@ -109,6 +241,12 @@ export class RichTextAdapter {
       }
       // tell quill this is a remote update
       this.quill.updateContents(delta, this.doc.clientID as any);
+
+      // @ts-ignore
+      if (event.target?.meta) {
+        // @ts-ignore
+        delete event.target.meta;
+      }
     }
   };
 

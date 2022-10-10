@@ -1,6 +1,3 @@
-import './page-container/debug-menu';
-import './page-container/page-container';
-import './selection-rect/selection-rect';
+import './editor-container/editor-container';
 
-export * from './page-container/page-container';
-export * from './selection-rect/selection-rect';
+export * from './editor-container/editor-container';
