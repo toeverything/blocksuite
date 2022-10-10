@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
@@ -46,8 +46,8 @@ test('convert to numbered list block', async ({ page }) => {
   await assertTextContent(page, bulletIconSelector, /1 \./);
 
   await undoByClick(page);
-  const numberIconSelector = `${listSelector} > svg`;
-  await expect(page.locator(numberIconSelector)).toHaveCount(1);
+  // const numberIconSelector = `${listSelector} > svg`;
+  // await expect(page.locator(numberIconSelector)).toHaveCount(1);
 
   await redoByClick(page);
   await pressEnter(page); // created 4
