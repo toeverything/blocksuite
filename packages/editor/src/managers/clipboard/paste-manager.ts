@@ -1,8 +1,6 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
 import { EditorContainer } from '../../components';
-import { HtmlParser } from './content-parser/parse-html';
-import { TextParser } from './content-parser/parse-text';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 
@@ -80,15 +78,15 @@ export class PasteManager {
       optimalClip?.type === CLIPBOARD_MIMETYPE.HTML &&
       !shouldConvertMarkdown
     ) {
-      return HtmlParser.html2blocks(optimalClip.data);
+      return this._editor.contentParser.htmlText2Block(optimalClip.data);
     }
 
     if (shouldConvertMarkdown) {
       const md2html = marked.parse(textClipData);
-      return HtmlParser.html2blocks(md2html);
+      return this._editor.contentParser.htmlText2Block(md2html);
     }
 
-    return TextParser.text2blocks(textClipData);
+    return this._editor.contentParser.text2blocks(textClipData);
   }
 
   private async _file2Blocks(

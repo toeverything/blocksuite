@@ -1,10 +1,21 @@
 import type { SelectedBlock } from '@blocksuite/shared';
+import { Slot } from '@blocksuite/store';
 import { OpenBlockInfo, EditorContainer } from '../../..';
+import { ParserHtml } from './parse-html';
+
+type ParseHtml2BlockFunc = (...args: any[]) => OpenBlockInfo[] | null;
 
 export class ContentParser {
   private _editor: EditorContainer;
+  readonly slots = {
+    beforeHtml2Block: new Slot<Element>(),
+  };
+  private _parsers: Record<string, ParseHtml2BlockFunc> = {};
+  private _parseHtml: ParserHtml;
   constructor(editor: EditorContainer) {
     this._editor = editor;
+    this._parseHtml = new ParserHtml(this);
+    this._parseHtml.registerParsers();
   }
 
   public block2Html(blocks: SelectedBlock[]): string {
@@ -21,12 +32,30 @@ export class ContentParser {
     return text;
   }
 
-  public htmlText2Block(html: string) {
+  public htmlText2Block(html: string): OpenBlockInfo[] {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
-
+    this.slots.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
+  }
+
+  public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
+    this._parsers[name] = func;
+  }
+
+  public getParserHtmlText2Block(name: string): ParseHtml2BlockFunc {
+    return this._parsers[name] || null;
+  }
+
+  public text2blocks(text: string): OpenBlockInfo[] {
+    return text.split('\n').map((str: string) => {
+      return {
+        flavour: 'text',
+        text: [{ insert: str }],
+        children: [],
+      };
+    });
   }
 
   private _getHtmlInfoBySelectionInfo(blocks: SelectedBlock): string {
@@ -102,7 +131,26 @@ export class ContentParser {
   }
 
   private _convertHtml2Blocks(element: Element): OpenBlockInfo[] {
-    console.log(element);
-    return [];
+    let clipBlockInfos: OpenBlockInfo[] = [];
+    for (const key in this._parsers) {
+      clipBlockInfos = this.getParserHtmlText2Block(key)?.(element) || [];
+      if ((clipBlockInfos.length || 0) > 0) {
+        break;
+      }
+    }
+    if (clipBlockInfos.length > 0) {
+      return clipBlockInfos;
+    }
+    return Array.from(element.children)
+      .map(childElement => {
+        const clipBlockInfos = this._convertHtml2Blocks(childElement);
+
+        if (clipBlockInfos && clipBlockInfos.length) {
+          return clipBlockInfos;
+        }
+        return [];
+      })
+      .flat()
+      .filter(v => v);
   }
 }
