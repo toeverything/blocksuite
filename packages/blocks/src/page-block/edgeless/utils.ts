@@ -49,7 +49,7 @@ export function EdgelessBlockChild(
     transformOrigin: '0 0',
     width: w + 'px',
     minHeight: h + 'px',
-    background: '#ccc',
+    background: '#dedede',
   };
 
   return html`

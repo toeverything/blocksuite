@@ -25,6 +25,10 @@ function EdgelessBlockChildrenContainer(
   host: BlockHost,
   viewport: ViewportState
 ) {
+  const { zoom, viewportX, viewportY } = viewport;
+  const translateX = -viewportX * zoom;
+  const translateY = -viewportY * zoom;
+
   return html`
     <style>
       .affine-block-children-container.edgeless {
@@ -34,6 +38,11 @@ function EdgelessBlockChildrenContainer(
         border: 1px #ccc solid;
         /* max-width: 300px; */
         height: ${viewport.height}px;
+
+        background-image: linear-gradient(#cccccc66 0.1em, transparent 0.1em),
+          linear-gradient(90deg, #cccccc66 0.1em, transparent 0.1em);
+        background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
+        background-position: ${translateX}px ${translateY}px;
       }
     </style>
     <div class="affine-block-children-container edgeless">
@@ -131,7 +140,7 @@ export class EdgelessPageBlockComponent
     return html`
       <style>
         .affine-edgeless-page-block-container {
-          background-color: #ddd;
+          box-sizing: border-box;
         }
       </style>
       <div class="affine-edgeless-page-block-container">
