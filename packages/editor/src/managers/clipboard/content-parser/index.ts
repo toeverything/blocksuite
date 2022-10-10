@@ -3,6 +3,7 @@ import { Slot } from '@blocksuite/store';
 import { OpenBlockInfo, EditorContainer } from '../../..';
 import { ParserHtml } from './parse-html';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ParseHtml2BlockFunc = (...args: any[]) => OpenBlockInfo[] | null;
 
 export class ContentParser {

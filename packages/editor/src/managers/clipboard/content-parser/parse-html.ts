@@ -179,12 +179,6 @@ export class ParserHtml {
     return childTexts;
   }
 }
-const getSingleLabelHTMLElementContent = (htmlElement: HTMLElement) => {
-  if (htmlElement.tagName === 'IMG') {
-    return htmlElement.getAttribute('alt') || htmlElement.getAttribute('src');
-  }
-  return '';
-};
 
 const getIsLink = (htmlElement: HTMLElement) => {
   return ['A', 'IMG'].includes(htmlElement.tagName);
@@ -192,10 +186,12 @@ const getIsLink = (htmlElement: HTMLElement) => {
 
 const getTextStyle = (htmlElement: HTMLElement) => {
   const tagName = htmlElement.tagName;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const textStyle: { [key: string]: any } = {};
 
   const style = (htmlElement.getAttribute('style') || '')
     .split(';')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .reduce((style: { [key: string]: any }, styleString) => {
       const [key, value] = styleString.split(':');
       if (key && value) {
