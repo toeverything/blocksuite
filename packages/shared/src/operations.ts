@@ -243,7 +243,7 @@ export function handleKeyUp(
     if (height === 0 && top === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
       rect &&
-        selectionManager.activePreviousBlock(
+        selectionManager.activatePreviousBlock(
           model.id,
           new Point(rect.left, rect.top)
         );
@@ -255,7 +255,7 @@ export function handleKeyUp(
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      selectionManager.activePreviousBlock(model.id, new Point(left, top));
+      selectionManager.activatePreviousBlock(model.id, new Point(left, top));
       return PREVENT_DEFAULT;
     }
   }
@@ -275,7 +275,7 @@ export function handleKeyDown(
     if (height === 0 && bottom === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
       rect &&
-        selectionManager.activeNextBlock(
+        selectionManager.activateNextBlock(
           model.id,
           new Point(rect.left, rect.top)
         );
@@ -284,7 +284,7 @@ export function handleKeyDown(
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      selectionManager.activeNextBlock(model.id, new Point(left, bottom));
+      selectionManager.activateNextBlock(model.id, new Point(left, bottom));
       return PREVENT_DEFAULT;
     }
     // if cursor is at the edge of a block, it may out of the textContainer after keydown
@@ -299,7 +299,7 @@ export function handleKeyDown(
         nextBottom + height / 2
       );
       if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
-        selectionManager.activeNextBlock(
+        selectionManager.activateNextBlock(
           model.id,
           new Point(
             newRange.startContainer.parentElement?.offsetLeft || left,

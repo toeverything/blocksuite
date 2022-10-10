@@ -20,11 +20,11 @@ export interface BlockHost {
     ) => void;
     removeBlockActiveListener: (blockId: string) => void;
 
-    activePreviousBlock: (
+    activatePreviousBlock: (
       blockId: string,
       position?: SelectionPosition
     ) => void;
-    activeNextBlock: (blockId: string, position?: SelectionPosition) => void;
+    activateNextBlock: (blockId: string, position?: SelectionPosition) => void;
   };
 }
 

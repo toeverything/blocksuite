@@ -126,7 +126,7 @@ export const createKeyboardBindings = (
 
   function keyLeft(this: KeyboardEventThis, range: QuillRange) {
     if (range.index === 0) {
-      selectionManager.activePreviousBlock(model.id, 'end');
+      selectionManager.activatePreviousBlock(model.id, 'end');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
@@ -135,7 +135,7 @@ export const createKeyboardBindings = (
   function keyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + range.length + 1 === textLength) {
-      selectionManager.activeNextBlock(model.id, 'start');
+      selectionManager.activateNextBlock(model.id, 'start');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
