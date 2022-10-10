@@ -8,6 +8,7 @@ import {
   createEvent,
 } from '@blocksuite/shared';
 import { BaseBlockModel, Store } from '@blocksuite/store';
+import { GroupBlockModel } from '../group-block';
 
 const params = new URLSearchParams(location.search);
 const initType = params.get('init') || 'default';
@@ -93,12 +94,19 @@ export class DebugMenu extends LitElement {
   }
 
   private _onAddGroup() {
-    const pageId = this.store.root?.id;
-    if (!pageId) return;
+    const root = this.store.root;
+    if (!root) return;
+    const pageId = root.id;
 
     this.store.captureSync();
 
-    const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
+    const count = root.children.length;
+    const xywh = `[0,${count * 60},300,50]`;
+
+    const groupId = this.store.addBlock<GroupBlockModel>(
+      { flavour: 'group', xywh },
+      pageId
+    );
     this.store.addBlock({ flavour: 'paragraph' }, groupId);
   }
 

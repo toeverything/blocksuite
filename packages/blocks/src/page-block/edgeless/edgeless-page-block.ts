@@ -7,13 +7,14 @@ import { BlockHost, BLOCK_ID_ATTR } from '@blocksuite/shared';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../page-model';
+import type { GroupBlockModel } from '../..';
+
 import {
   MouseManager,
   SelectionManager,
   BlockElement,
 } from '../../__internal__';
 import '../../__internal__';
-import { GroupBlockModel } from '../../group-block';
 
 interface ViewportState {
   zoom: number;
@@ -37,6 +38,7 @@ function EdgelessBlockChild(
   const translateY = (y - viewportY) * zoom;
 
   const style = {
+    position: 'absolute',
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
     width: w + 'px',
