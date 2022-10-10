@@ -51,7 +51,8 @@ export class ContentParser {
   public text2blocks(text: string): OpenBlockInfo[] {
     return text.split('\n').map((str: string) => {
       return {
-        flavour: 'text',
+        flavour: 'paragraph',
+        type: 'text',
         text: [{ insert: str }],
         children: [],
       };
@@ -131,19 +132,10 @@ export class ContentParser {
   }
 
   private _convertHtml2Blocks(element: Element): OpenBlockInfo[] {
-    let clipBlockInfos: OpenBlockInfo[] = [];
-    for (const key in this._parsers) {
-      clipBlockInfos = this.getParserHtmlText2Block(key)?.(element) || [];
-      if ((clipBlockInfos.length || 0) > 0) {
-        break;
-      }
-    }
-    if (clipBlockInfos.length > 0) {
-      return clipBlockInfos;
-    }
-    return Array.from(element.children)
+    return Array.from(element.childNodes)
       .map(childElement => {
-        const clipBlockInfos = this._convertHtml2Blocks(childElement);
+        const clipBlockInfos =
+          this.getParserHtmlText2Block('nodeParser')?.(childElement) || [];
 
         if (clipBlockInfos && clipBlockInfos.length) {
           return clipBlockInfos;

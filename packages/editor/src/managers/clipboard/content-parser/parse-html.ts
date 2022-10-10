@@ -10,45 +10,79 @@ export class ParserHtml {
   public registerParsers() {
     this._contentParser.registerParserHtmlText2Block(
       'nodeParser',
-      this.nodePaser.bind(this)
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'commonParser',
-      this.textPaser.bind(this)
+      this._nodePaser.bind(this)
     );
     this._contentParser.registerParserHtmlText2Block(
       'textParser',
-      this.textPaser.bind(this)
+      this._textPaser.bind(this)
+    );
+    this._contentParser.registerParserHtmlText2Block(
+      'commonParser',
+      this._commonParser.bind(this)
     );
   }
 
-  public nodePaser(data: string) {
-    console.log(data);
-    return [];
+  private _nodePaser(node: Element): OpenBlockInfo[] | null {
+    if (node.nodeType === 3) {
+      return this._contentParser.getParserHtmlText2Block('textParser')(node);
+    }
+    if (node.nodeType !== 1) {
+      return [];
+    }
+    const tagName = node.tagName;
+    let result;
+    if (['DIV', 'P', 'B', 'A', 'EM', 'U', 'S', 'DEL'].includes(tagName)) {
+      result = this._contentParser.getParserHtmlText2Block('textParser')(node);
+    }
+    if (result && result.length > 0) {
+      return result;
+    }
+    return Array.from(node.childNodes)
+      .map(childElement => {
+        const clipBlockInfos =
+          this._contentParser.getParserHtmlText2Block('nodeParser')?.(
+            childElement
+          ) || [];
+
+        if (clipBlockInfos && clipBlockInfos.length) {
+          return clipBlockInfos;
+        }
+        return [];
+      })
+      .flat()
+      .filter(v => v);
   }
 
-  public commonParser({
+  private _commonParser({
     element,
     tagName,
+    flavour,
     type,
     ignoreEmptyElement = true,
   }: {
     element: Element;
     tagName: string | string[];
+    flavour: string;
     type: string;
     ignoreEmptyElement?: boolean;
   }): OpenBlockInfo[] | null {
     const tagNames = typeof tagName === 'string' ? [tagName] : tagName;
     if (tagNames.includes(element.tagName)) {
-      const res = this._commonHTML2Block(element, type, ignoreEmptyElement);
+      const res = this._commonHTML2Block(
+        element,
+        flavour,
+        type,
+        ignoreEmptyElement
+      );
       return res ? [res] : null;
     }
     return null;
   }
 
-  public textPaser(element: Element): OpenBlockInfo[] | null {
+  private _textPaser(element: Element): OpenBlockInfo[] | null {
     return this._contentParser.getParserHtmlText2Block('commonParser')?.({
       element,
+      flavour: 'paragraph',
       type: 'text',
       tagName: ['DIV', 'P', 'B', 'A', 'EM', 'U', 'S', 'DEL'],
     });
@@ -56,6 +90,7 @@ export class ParserHtml {
 
   private _commonHTML2Block(
     element: HTMLElement | Node,
+    flavour: string,
     type: string,
     ignoreEmptyElement = true
   ): OpenBlockInfo | null {
@@ -64,7 +99,8 @@ export class ParserHtml {
       return null;
     }
     return {
-      flavour: type,
+      flavour: flavour,
+      type: type,
       text: textValue,
       children: [],
     };

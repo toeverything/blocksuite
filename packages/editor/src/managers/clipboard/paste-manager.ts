@@ -169,6 +169,7 @@ export class PasteManager {
       const block = blocks[i];
       const blockProps = {
         flavour: block.flavour as string,
+        type: block.type as string,
       };
       const id = this._editor.store.addBlock(blockProps, parent, index + i);
       const model = this._editor.store.getBlockById(id);
