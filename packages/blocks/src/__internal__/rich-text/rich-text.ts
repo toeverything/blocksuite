@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
@@ -12,6 +12,10 @@ Quill.register('modules/cursors', QuillCursors);
 
 @customElement('rich-text')
 export class RichText extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
@@ -85,10 +89,6 @@ export class RichText extends LitElement {
 
   render() {
     return html`
-      <style>
-        ${style}
-      </style>
-
       <div class="affine-rich-text quill-container ql-container"></div>
     `;
   }

@@ -26,15 +26,11 @@
   box-sizing: border-box;
   height: 100%;
   outline: none;
-  overflow-y: auto;
   tab-size: 4;
   -moz-tab-size: 4;
   text-align: left;
   white-space: pre-wrap;
   word-wrap: break-word;
-
-  font-size: 18px;
-  line-height: 26px;
   padding: 3px 0;
 }
 .ql-editor > * {

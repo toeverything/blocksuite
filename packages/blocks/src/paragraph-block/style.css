@@ -1,6 +1,3 @@
-.affine-paragraph-block-container {
-  padding: 3px 0;
-}
 .affine-paragraph-block-container.selected {
   background-color: rgba(152, 172, 189, 0.1);
 }

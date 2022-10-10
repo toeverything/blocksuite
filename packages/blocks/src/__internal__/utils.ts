@@ -40,8 +40,8 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost) {
 export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
   return html`
     <style>
-      .affine-block-children-container .affine-block-children-container {
-        padding-left: 34px;
+      .affine-block-children-container {
+        padding-left: 26px;
       }
     </style>
     <div class="affine-block-children-container">
