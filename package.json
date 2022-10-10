@@ -11,7 +11,9 @@
     "test:headed": "playwright test --headed",
     "test:unit": "vitest --run",
     "format": "prettier --write packages tests",
-    "build:playground": "pnpm --filter @blocksuite/playground build"
+    "build": "tsc -b ./tsconfig.json",
+    "build:playground": "pnpm --filter @blocksuite/playground build",
+    "publish": "pnpm run build && npx changeset publish"
   },
   "keywords": [],
   "author": "toeverything",
