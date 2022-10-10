@@ -37,7 +37,7 @@ test('switch to numbered list block', async ({ page }) => {
 
   const listSelector = '.affine-list-rich-text-wrapper';
   const bulletIconSelector = `${listSelector} > div`;
-  await assertTextContent(page, bulletIconSelector, /1\./);
+  await assertTextContent(page, bulletIconSelector, /1 \./);
 
   await undoByClick(page);
   const numberIconSelector = `${listSelector} > svg`;

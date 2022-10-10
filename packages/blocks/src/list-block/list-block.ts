@@ -4,7 +4,7 @@ import { BlockHost, commonTextActiveHandler } from '@blocksuite/shared';
 import { BLOCK_ID_ATTR } from '@blocksuite/shared';
 import { getBlockChildrenContainer } from '../__internal__/utils';
 import type { ListBlockModel } from './list-model';
-import { getListIcon } from './utils/getListIcon';
+import { getListIcon } from './utils/get-list-icon';
 import '../__internal__/rich-text/rich-text';
 import style from './style.css';
 
