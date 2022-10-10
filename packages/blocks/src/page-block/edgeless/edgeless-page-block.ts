@@ -1,6 +1,5 @@
 import { LitElement, html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { BlockHost, BLOCK_ID_ATTR } from '@blocksuite/shared';
@@ -8,47 +7,17 @@ import type { BaseBlockModel, Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../page-model';
 import type { GroupBlockModel } from '../..';
+import { EdgelessBlockChild, applyDeltaCenter, applyDeltaZoom } from './utils';
 
-import {
-  MouseManager,
-  SelectionManager,
-  BlockElement,
-} from '../../__internal__';
+import { MouseManager, SelectionManager } from '../../__internal__';
 import '../../__internal__';
 
-interface ViewportState {
+export interface ViewportState {
   zoom: number;
   viewportX: number;
   viewportY: number;
   width: number;
   height: number;
-}
-
-type XYWH = [number, number, number, number];
-
-function EdgelessBlockChild(
-  model: GroupBlockModel,
-  host: BlockHost,
-  viewport: ViewportState
-) {
-  const { xywh } = model;
-  const { zoom, viewportX, viewportY } = viewport;
-  const [x, y, w, h] = JSON.parse(xywh) as XYWH;
-  const translateX = (x - viewportX) * zoom;
-  const translateY = (y - viewportY) * zoom;
-
-  const style = {
-    position: 'absolute',
-    transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
-    transformOrigin: '0 0',
-    width: w + 'px',
-    minHeight: h + 'px',
-    background: '#ccc',
-  };
-
-  return html`
-    <div style=${styleMap(style)}>${BlockElement(model, host)}</div>
-  `;
 }
 
 function EdgelessBlockChildrenContainer(
@@ -63,7 +32,9 @@ function EdgelessBlockChildrenContainer(
       }
       .affine-block-children-container.edgeless {
         position: relative;
-        max-width: ${viewport.width}px;
+        overflow: hidden;
+        border: 1px #ccc solid;
+        /* max-width: 300px; */
         height: ${viewport.height}px;
       }
     </style>
@@ -123,6 +94,28 @@ export class EdgelessPageBlockComponent
     super.update(changedProperties);
   }
 
+  firstUpdated() {
+    this.addEventListener('wheel', e => {
+      const { viewportState } = this;
+      e.preventDefault();
+      // pan
+      if (!e.ctrlKey) {
+        const dx = e.deltaX / viewportState.zoom;
+        const dy = e.deltaY / viewportState.zoom;
+        const newState = applyDeltaCenter(viewportState, dx, dy);
+        this.viewportState = newState;
+        this.requestUpdate();
+      }
+      // zoom
+      else {
+        const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+        const newState = applyDeltaZoom(viewportState, delta);
+        this.viewportState = newState;
+        this.requestUpdate();
+      }
+    });
+  }
+
   disconnectedCallback() {
     this.mouse.dispose();
     this.selection.dispose();
@@ -144,7 +137,7 @@ export class EdgelessPageBlockComponent
         }
       </style>
       <div class="affine-edgeless-page-block-container">
-        <p>Edgeless Container TODO</p>
+        <p>Edgeless Container</p>
         ${childrenContainer}
       </div>
     `;
