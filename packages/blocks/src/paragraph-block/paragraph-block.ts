@@ -1,7 +1,6 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
-
+import style from './style.css';
 import {
   BLOCK_ID_ATTR,
   commonTextActiveHandler,
@@ -9,11 +8,22 @@ import {
 } from '@blocksuite/shared';
 import type { ParagraphBlockModel } from './paragraph-model';
 
+// <<<<<<< HEAD
+// @customElement('paragraph-block-element')
+// export class ParagraphBlockElement extends LitElement {
+//   static styles = css`
+//     ${unsafeCSS(style)}
+//   `;
+//
+// =======
 import { BlockChildrenContainer } from '../__internal__';
 import '../__internal__';
 
 @customElement('paragraph-block')
 export class ParagraphBlockComponent extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
   @property({
     hasChanged() {
       return true;
@@ -54,19 +64,17 @@ export class ParagraphBlockComponent extends LitElement {
   }
 
   render() {
+    const { type } = this.model;
+
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
 
     return html`
       <div
-        style=${styleMap({
-          'background-color': this.selected
-            ? 'rgba(152, 172, 189, 0.1)'
-            : 'transparent',
-          margin: '5px 0',
-        })}
-        class="affine-paragraph-block-container"
+        class="affine-paragraph-block-container ${type} ${this.selected
+          ? 'selected'
+          : ''}"
       >
         <rich-text .host=${this.host} .model=${this.model}></rich-text>
         ${childrenContainer}

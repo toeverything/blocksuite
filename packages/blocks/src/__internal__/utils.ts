@@ -41,7 +41,7 @@ export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
   return html`
     <style>
       .affine-block-children-container {
-        padding-left: 1rem;
+        padding-left: 26px;
       }
     </style>
     <div class="affine-block-children-container">
