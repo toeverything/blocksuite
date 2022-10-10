@@ -27,10 +27,8 @@ function EdgelessBlockChildrenContainer(
 ) {
   return html`
     <style>
-      .affine-block-children-container {
-        padding-left: 1rem;
-      }
       .affine-block-children-container.edgeless {
+        padding-left: 0;
         position: relative;
         overflow: hidden;
         border: 1px #ccc solid;
