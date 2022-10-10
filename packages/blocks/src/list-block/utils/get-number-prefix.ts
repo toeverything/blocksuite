@@ -49,14 +49,14 @@ const numberStyle = styleMap({
 
 const getIndex = (host: BlockHost, model: ListBlockModel) => {
   const siblings = host.store.getParent(model)?.children || [];
-  return (
-    siblings.filter(v => v.flavour === model.flavour).findIndex(v => v === v) +
-    1
-  );
+
+  return siblings
+    .filter(v => v.flavour === model.flavour)
+    .findIndex(v => v === model);
 };
 
 const getPrefix = (deep: number, index: number) => {
-  const map = [() => index, number2letter, number2roman];
+  const map = [() => index + 1, number2letter, () => number2roman(index + 1)];
   return map[deep % map.length](index);
 };
 
