@@ -22,7 +22,8 @@
     "@types/quill": "^2.0.9"
   },
   "exports": {
-    "./src/*": "./src/*.ts"
+    "./src/*": "./src/*.ts",
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "main": "dist/index.js",
@@ -30,7 +31,8 @@
     "exports": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js",
-      "./src/*": "./dist/*.js"
+      "./src/*": "./dist/*.js",
+      ".": "./dist/index.js"
     }
   }
 }

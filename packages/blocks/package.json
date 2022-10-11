@@ -16,7 +16,8 @@
     "@blocksuite/store": "workspace:*"
   },
   "exports": {
-    "./src/*": "./src/*.ts"
+    "./src/*": "./src/*.ts",
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "main": "dist/index.js",
@@ -24,6 +25,7 @@
     "exports": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js",
+      ".": "./dist/index.js",
       "./src/*": "./dist/*.js"
     }
   }
