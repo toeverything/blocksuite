@@ -8,14 +8,6 @@ import {
 } from '@blocksuite/shared';
 import type { ParagraphBlockModel } from './paragraph-model';
 
-// <<<<<<< HEAD
-// @customElement('paragraph-block-element')
-// export class ParagraphBlockElement extends LitElement {
-//   static styles = css`
-//     ${unsafeCSS(style)}
-//   `;
-//
-// =======
 import { BlockChildrenContainer } from '../__internal__';
 import '../__internal__';
 
