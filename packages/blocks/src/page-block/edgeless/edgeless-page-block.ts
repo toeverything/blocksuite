@@ -11,10 +11,8 @@ import {
   EdgelessBlockChildrenContainer,
   EdgelessSelectionBox,
 } from './utils';
-import { EdgelessMouseManager } from './mouse-manager';
-
 import { SelectionManager } from '../../__internal__';
-import '../../__internal__';
+import { EdgelessMouseManager } from './mouse-manager';
 
 export interface ViewportState {
   zoom: number;

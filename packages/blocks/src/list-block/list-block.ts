@@ -2,14 +2,12 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { BlockHost, commonTextActiveHandler } from '@blocksuite/shared';
 import { BLOCK_ID_ATTR } from '@blocksuite/shared';
+
 import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils/get-list-icon';
 import { getListInfo } from './utils/get-list-info';
-
-import style from './style.css';
-
 import { BlockChildrenContainer } from '../__internal__';
-import '../__internal__';
+import style from './style.css';
 
 @customElement('list-block')
 export class ListBlockComponent extends LitElement {

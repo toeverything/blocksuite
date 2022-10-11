@@ -1,6 +1,5 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-
 import {
   asyncFocusRichText,
   BLOCK_ID_ATTR,
@@ -9,14 +8,13 @@ import {
 } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
 
-import type { PageBlockModel } from '../page-model';
+import type { PageBlockModel } from '..';
 import {
   SelectionManager,
   DefaultMouseManager,
   focusTextEnd,
   BlockChildrenContainer,
 } from '../../__internal__';
-import '../../__internal__';
 import style from './style.css';
 
 @customElement('default-page-block')
