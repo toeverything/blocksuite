@@ -9,14 +9,13 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended"
   ],
-  "ignorePatterns": ["packages/playground/dist/assets/*"],
+  "ignorePatterns": ["packages/playground/dist/assets/*", "dist/*"],
   "overrides": [
     {
       "plugins": ["react", "@typescript-eslint"],
       "files": ["*.ts", "*.tsx"],
       "rules": {
         "@typescript-eslint/ban-ts-comment": "off",
-        "@typescript-eslint/triple-slash-reference": "off",
         "react/react-in-jsx-scope": "off"
       }
     }

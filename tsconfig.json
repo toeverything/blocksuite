@@ -3,6 +3,7 @@
 {
   "compilerOptions": {
     "outDir": "./dist/",
+
     // Type Checking
     "strict": true,
     "noUnusedLocals": true,
@@ -34,23 +35,16 @@
     // Note, setting useDefineForClassFields to `false` should only be required when the target is set to esnext or greater,
     // but it's recommended to explicitly ensure this setting is false.
     // See https://lit.dev/docs/tools/publishing/#compiling-with-typescript
-    "useDefineForClassFields": true,
+    "useDefineForClassFields": false,
     "experimentalDecorators": true,
 
     // Projects
     "composite": true,
 
     // Completeness
-    "skipLibCheck": true,
+    "skipLibCheck": true
 
-    // "paths": {
-    //   "@blocksuite/blocks": ["./packages/blocks/src"],
-    //   "@blocksuite/editor": ["./packages/editor/src"],
-    //   "@blocksuite/shared": ["./packages/shared/src"],
-    //   "@blocksuite/store": ["./packages/store/src"]
-    // },
-
-    "plugins": [{ "name": "typescript-plugin-css-modules" }]
+    // "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "references": [
     { "path": "./packages/blocks" },
