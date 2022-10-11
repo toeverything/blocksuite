@@ -1,5 +1,5 @@
-import { ContentParser } from '.';
-import { OpenBlockInfo } from '../types';
+import type { ContentParser } from '.';
+import type { OpenBlockInfo } from '../types';
 
 export class ParserHtml {
   private _contentParser: ContentParser;

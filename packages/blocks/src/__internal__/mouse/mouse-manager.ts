@@ -1,4 +1,4 @@
-import { Slot, flattenDisposable, IDisposable } from '@blocksuite/store';
+import { Slot, flattenDisposable, type IDisposable } from '@blocksuite/store';
 
 export type MouseEventHandler = (e: MouseEvent) => void;
 

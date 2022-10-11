@@ -1,7 +1,7 @@
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
+import { CLIPBOARD_MIMETYPE, type OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
-import { EditorContainer } from '../../components';
-import { SelectionInfo, SelectedBlock } from '@blocksuite/shared';
+import type { EditorContainer } from '../../components';
+import type { SelectionInfo, SelectedBlock } from '@blocksuite/shared';
 
 export class CopyCutManager {
   private _editor: EditorContainer;

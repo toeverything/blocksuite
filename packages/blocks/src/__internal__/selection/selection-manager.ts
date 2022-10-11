@@ -2,11 +2,16 @@ import {
   BLOCK_ID_ATTR,
   Point,
   Rect,
-  SelectedBlock,
-  SelectionInfo,
-  SelectionPosition,
+  type SelectedBlock,
+  type SelectionInfo,
+  type SelectionPosition,
 } from '@blocksuite/shared';
-import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  type IDisposable,
+  Slot,
+  Store,
+} from '@blocksuite/store';
 
 // TODO use lodash or move to utils
 function without<T = unknown>(arr: Array<T>, ...values: Array<T>) {

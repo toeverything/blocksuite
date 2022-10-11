@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
-import { BlockHost } from '@blocksuite/shared';
-import { ListBlockModel } from '../list-model';
+import type { BlockHost } from '@blocksuite/shared';
+import type { ListBlockModel } from '../list-model';
 
 const number2letter = (n: number) => {
   const ordA = 'a'.charCodeAt(0);

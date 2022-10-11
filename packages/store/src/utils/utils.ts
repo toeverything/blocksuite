@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import type { BlockProps, PrefixedBlockProps, YBlock, YBlocks } from '../store';
-import { PrelimTextEntity, TextEntity, TextType } from '../text-adapter';
+import { PrelimTextEntity, TextEntity, type TextType } from '../text-adapter';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 

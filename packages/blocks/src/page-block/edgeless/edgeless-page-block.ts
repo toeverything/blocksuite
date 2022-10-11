@@ -2,7 +2,7 @@ import { LitElement, html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { BlockHost, BLOCK_ID_ATTR } from '@blocksuite/shared';
+import { type BlockHost, BLOCK_ID_ATTR } from '@blocksuite/shared';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../page-model';

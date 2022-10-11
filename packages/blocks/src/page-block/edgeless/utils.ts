@@ -1,10 +1,10 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BlockHost } from '@blocksuite/shared';
+import type { BlockHost } from '@blocksuite/shared';
 
 import type { ViewportState } from './edgeless-page-block';
-import { GroupBlockModel } from '../..';
+import type { GroupBlockModel } from '../..';
 import { BlockElement } from '../../__internal__';
 import '../../__internal__';
 

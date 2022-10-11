@@ -1,4 +1,4 @@
-import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Store, BaseBlockModel, type IBaseBlockProps } from '@blocksuite/store';
 
 type ListType = 'bulleted' | 'numbered' | 'todo';
 

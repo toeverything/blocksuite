@@ -1,6 +1,6 @@
 import type { SelectedBlock } from '@blocksuite/shared';
 import { Slot } from '@blocksuite/store';
-import { OpenBlockInfo, EditorContainer } from '../../..';
+import type { OpenBlockInfo, EditorContainer } from '../../..';
 import { ParserHtml } from './parse-html';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

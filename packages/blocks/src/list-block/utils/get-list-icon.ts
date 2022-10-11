@@ -1,5 +1,5 @@
-import { BlockHost } from '@blocksuite/shared';
-import { ListBlockModel } from '../list-model';
+import type { BlockHost } from '@blocksuite/shared';
+import type { ListBlockModel } from '../list-model';
 import { points } from './points';
 import { getNumberPrefix } from './get-number-prefix';
 import { html } from 'lit';

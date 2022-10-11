@@ -3,8 +3,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR, Point, Rect } from '@blocksuite/shared';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
-import { MouseManager } from '../mouse/mouse-manager';
-import { SelectionManager } from '../selection/selection-manager';
+import type { MouseManager } from '../mouse/mouse-manager';
+import type { SelectionManager } from '../selection/selection-manager';
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {

@@ -2,13 +2,13 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
-  BlockSelectionInfo,
-  CommonBlockElement,
+  type BlockSelectionInfo,
+  type CommonBlockElement,
   convertToList,
   createEvent,
 } from '@blocksuite/shared';
-import { BaseBlockModel, Store } from '@blocksuite/store';
-import { GroupBlockModel } from '../group-block';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { GroupBlockModel } from '../group-block';
 
 const params = new URLSearchParams(location.search);
 const initType = params.get('init') || 'default';

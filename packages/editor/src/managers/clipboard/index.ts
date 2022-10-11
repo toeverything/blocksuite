@@ -1,4 +1,4 @@
-import { EditorContainer } from '../../components';
+import type { EditorContainer } from '../../components';
 import { ClipEventDispatch } from './clip-event-dispatch';
 import { CopyCutManager } from './copy-cut-manager';
 import { PasteManager } from './paste-manager';

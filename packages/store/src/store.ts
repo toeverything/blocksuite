@@ -1,13 +1,14 @@
+/// <reference types="vite/client" />
 import * as Y from 'yjs';
 import { Slot } from './utils/slot';
 import {
   PrelimTextEntity,
   RichTextAdapter,
   TextEntity,
-  TextType,
+  type TextType,
 } from './text-adapter';
-import Quill from 'quill';
-import { SelectionRange, AwarenessAdapter } from './awareness';
+import type Quill from 'quill';
+import { type SelectionRange, AwarenessAdapter } from './awareness';
 import {
   assertValidChildren,
   initSysProps,
@@ -47,7 +48,9 @@ export interface StackItem {
   type: 'undo' | 'redo';
 }
 
-const IS_WEB = !import.meta.env.SSR;
+// TODO Remove vite dependency
+// Vite exposes env variables on the special `import.meta.env` object.
+const IS_WEB = import.meta.env ? !import.meta.env.SSR : false;
 
 function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));

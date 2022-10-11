@@ -2,7 +2,7 @@ import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
   ALLOW_DEFAULT,
-  BlockHost,
+  type BlockHost,
   handleBlockEndEnter,
   handleBlockSplit,
   handleIndent,

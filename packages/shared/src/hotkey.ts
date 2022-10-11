@@ -1,4 +1,4 @@
-import hotkeys, { KeyHandler } from 'hotkeys-js';
+import hotkeys, { type KeyHandler } from 'hotkeys-js';
 import { DefaultHotkeyMap } from './consts';
 
 hotkeys.filter = () => true;

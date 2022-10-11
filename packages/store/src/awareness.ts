@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
-import { Awareness } from 'y-protocols/awareness.js';
-import { RelativePosition } from 'yjs';
+import type { Awareness } from 'y-protocols/awareness.js';
+import type { RelativePosition } from 'yjs';
 import type { Store } from './store';
 import { Slot } from './utils/slot';
 

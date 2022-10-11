@@ -14,6 +14,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "noEmit": false,
+    "importsNotUsedAsValues": "error",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,

@@ -1,4 +1,4 @@
-import * as Y from 'yjs';
+import type * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 
 export class DebugProvider extends WebrtcProvider {

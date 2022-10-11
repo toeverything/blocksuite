@@ -1,4 +1,4 @@
-import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Store, BaseBlockModel, type IBaseBlockProps } from '@blocksuite/store';
 
 export interface GroupBlockProps extends IBaseBlockProps {
   flavour: 'group';

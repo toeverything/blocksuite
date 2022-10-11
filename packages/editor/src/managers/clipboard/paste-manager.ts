@@ -1,8 +1,8 @@
-import { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
-import { EditorContainer } from '../../components';
+import type { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
+import { CLIPBOARD_MIMETYPE, type OpenBlockInfo } from './types';
 
 export class PasteManager {
   private _editor: EditorContainer;

@@ -1,4 +1,4 @@
-import { IDisposable, flattenDisposable } from './disposable';
+import { type IDisposable, flattenDisposable } from './disposable';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
