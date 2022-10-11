@@ -1,6 +1,6 @@
-import { unsafeCSS } from 'lit';
+import { css } from 'lit';
 
-export const styles = unsafeCSS`
+export const styles = css`
   .affine-list-block-container {
     box-sizing: border-box;
     margin-top: 18px;

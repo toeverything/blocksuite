@@ -1,10 +1,10 @@
-import { unsafeCSS } from 'lit';
+import { css } from 'lit';
 
 /*
  * This style is most simple to reset the default styles of the quill editor
  * User should custom the styles of the block in the block itself
  */
-export const styles = unsafeCSS`
+export const styles = css`
   .ql-container {
     box-sizing: border-box;
     height: 100%;

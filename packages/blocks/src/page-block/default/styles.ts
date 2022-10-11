@@ -1,6 +1,6 @@
-import { unsafeCSS } from 'lit';
+import { css } from 'lit';
 
-export const styles = unsafeCSS`
+export const styles = css`
   .affine-default-page-block-container {
     font-family: Avenir Next, apple-system, BlinkMacSystemFont, Helvetica Neue,
       Tahoma, PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,

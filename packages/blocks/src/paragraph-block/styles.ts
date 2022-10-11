@@ -1,6 +1,6 @@
-import { unsafeCSS } from 'lit';
+import { css } from 'lit';
 
-export const styles = unsafeCSS`
+export const styles = css`
   .affine-paragraph-block-container.selected {
     background-color: rgba(152, 172, 189, 0.1);
   }
