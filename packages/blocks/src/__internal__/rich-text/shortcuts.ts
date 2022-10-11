@@ -1,6 +1,6 @@
 import Quill, { RangeStatic } from 'quill';
 
-type MarkdownMatch = {
+type Match = {
   name: string;
   pattern: RegExp;
   action: (
@@ -12,15 +12,15 @@ type MarkdownMatch = {
   ) => void;
 };
 
-export class MarkdownShortcuts {
+export class Shortcuts {
   public static match(quill: Quill) {
     const selection = quill.getSelection();
     if (!selection) return;
     const [line, offset] = quill.getLine(selection.index);
     const text = line.domNode.textContent;
     const lineStart = selection.index - offset;
-    if (MarkdownShortcuts._isValid(text, line.domNode.tagName)) {
-      for (const match of MarkdownShortcuts._matches) {
+    if (Shortcuts._isValid(text, line.domNode.tagName)) {
+      for (const match of Shortcuts._matches) {
         const matchedText = text.match(match.pattern);
         if (matchedText) {
           // We need to replace only matched text not the whole line
@@ -33,7 +33,7 @@ export class MarkdownShortcuts {
 
   private static _ignoreTags: string[] = ['PRE'];
 
-  private static _matches: MarkdownMatch[] = [
+  private static _matches: Match[] = [
     {
       name: 'bolditalic',
       pattern: /(?:\*|_){3}(.+?)(?:\*|_){3}/g,
@@ -208,7 +208,7 @@ export class MarkdownShortcuts {
     return (
       typeof text !== 'undefined' &&
       text &&
-      MarkdownShortcuts._ignoreTags.indexOf(tagName) === -1
+      Shortcuts._ignoreTags.indexOf(tagName) === -1
     );
   }
 }

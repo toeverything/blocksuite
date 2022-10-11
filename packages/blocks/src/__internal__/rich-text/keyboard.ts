@@ -14,7 +14,7 @@ import {
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '@blocksuite/shared';
-import { MarkdownShortcuts } from './markdownshortcuts';
+import { Shortcuts } from './shortcuts';
 
 interface QuillRange {
   index: number;
@@ -82,7 +82,7 @@ export const createKeyboardBindings = (
   }
 
   function markdownMatch(this: KeyboardEventThis) {
-    MarkdownShortcuts.match(this.quill);
+    Shortcuts.match(this.quill);
     return ALLOW_DEFAULT;
   }
 
