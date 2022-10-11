@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
@@ -17,9 +17,14 @@ import {
   BlockChildrenContainer,
 } from '../../__internal__';
 import '../../__internal__';
+import style from './style.css';
 
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @property()
   store!: Store;
 
@@ -123,22 +128,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const childrenContainer = BlockChildrenContainer(this.model, this);
 
     return html`
-      <style>
-        .affine-default-page-block-title {
-          box-sizing: border-box;
-          font-size: 32px;
-          font-weight: 600;
-          outline: none;
-          border: 0;
-        }
-        .affine-default-page-block-title::placeholder {
-          color: #ddd;
-        }
-        .affine-default-page-block-container
-          > .affine-block-children-container {
-          padding-left: 0;
-        }
-      </style>
       <selection-rect
         .selection=${this.selection}
         .mouse=${this.mouse}

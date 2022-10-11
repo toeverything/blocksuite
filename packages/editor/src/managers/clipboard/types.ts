@@ -19,6 +19,7 @@ export enum ClipboardAction {
 
 export type OpenBlockInfo = {
   flavour: string;
+  type: string;
   text: unknown;
   children: OpenBlockInfo[];
 };

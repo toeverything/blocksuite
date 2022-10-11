@@ -105,6 +105,7 @@ export class CopyCutManager {
 
     return {
       flavour: model.flavour,
+      type: model.type,
       text: delta,
       children: children,
     };
