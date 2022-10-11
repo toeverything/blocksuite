@@ -11,6 +11,7 @@
   "author": "toeverything",
   "license": "Apache-2.0",
   "dependencies": {
+    "@blocksuite/blocks": "workspace:*",
     "@blocksuite/shared": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "marked": "^4.1.0"
