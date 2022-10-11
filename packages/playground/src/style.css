@@ -1,0 +1,14 @@
+:root {
+  --affine-font-color: #3a4c5c;
+  --affine-font-family: Avenir Next, apple-system, BlinkMacSystemFont,
+    Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
+    Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Segoe UI Symbol, Noto Color Emoji;
+  --affine-placeholder-color: #ddd;
+  --affine-selected-color: rgba(152, 172, 189, 0.1);
+  --affine-list-prefix-color: #7389fd;
+  --affine-list-prefix-family: Roboto Mono, apple-system, BlinkMacSystemFont,
+    Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
+    Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Segoe UI Symbol, Noto Color Emoji;
+}

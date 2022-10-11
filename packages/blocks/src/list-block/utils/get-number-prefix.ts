@@ -41,8 +41,10 @@ export const number2roman = (num: number) => {
 };
 
 const numberStyle = styleMap({
-  color: '#7389FD',
-  font: '14px/26px "Roboto Mono"',
+  color: 'var(--affine-list-prefix-color)',
+  fontSize: '14px',
+  lineHeight: '26px',
+  fontFamily: 'var(--affine-list-prefix-font-family)',
 });
 
 const getPrefix = (deep: number, index: number) => {
