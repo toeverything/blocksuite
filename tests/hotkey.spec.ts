@@ -21,7 +21,7 @@ test('rich-text hotkey scope', async ({ page }) => {
   await assertSelectedBlockCount(page, 1);
 });
 
-test.only('select all block by hot key', async ({ page }) => {
+test('select all block by hot key', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
   await addGroupByClick(page);
