@@ -183,22 +183,22 @@ export class DebugMenu extends LitElement {
           𝐇𝟑
         </button>
         <button
-          aria-label="heading-3"
-          title="heading-3"
+          aria-label="heading-4"
+          title="heading-4"
           @click=${() => this._onSetParagraphType('h4')}
         >
           𝐇𝟒
         </button>
         <button
-          aria-label="heading-3"
-          title="heading-3"
+          aria-label="heading-5"
+          title="heading-5"
           @click=${() => this._onSetParagraphType('h5')}
         >
           𝐇𝟓
         </button>
         <button
-          aria-label="heading-3"
-          title="heading-3"
+          aria-label="heading-6"
+          title="heading-6"
           @click=${() => this._onSetParagraphType('h6')}
         >
           𝐇𝟔

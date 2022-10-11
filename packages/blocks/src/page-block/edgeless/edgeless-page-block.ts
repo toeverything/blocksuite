@@ -10,8 +10,9 @@ import {
   applyDeltaZoom,
   EdgelessBlockChildrenContainer,
 } from './utils';
+import { EdgelessMouseManager } from './mouse-manager';
 
-import { MouseManager, SelectionManager } from '../../__internal__';
+import { SelectionManager } from '../../__internal__';
 import '../../__internal__';
 
 export interface ViewportState {
@@ -33,8 +34,7 @@ export class EdgelessPageBlockComponent
   @state()
   selection!: SelectionManager;
 
-  @state()
-  mouse!: MouseManager;
+  mouse = new EdgelessMouseManager(this);
 
   @property()
   mouseRoot!: HTMLElement;
@@ -63,7 +63,6 @@ export class EdgelessPageBlockComponent
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this.selection = new SelectionManager(this.mouseRoot, this.store);
-      this.mouse = new MouseManager(this.mouseRoot);
     }
     super.update(changedProperties);
   }

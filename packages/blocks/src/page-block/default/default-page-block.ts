@@ -12,7 +12,7 @@ import type { Store } from '@blocksuite/store';
 import type { PageBlockModel } from '../page-model';
 import {
   SelectionManager,
-  MouseManager,
+  DefaultMouseManager,
   focusTextEnd,
   BlockChildrenContainer,
 } from '../../__internal__';
@@ -32,7 +32,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   selection!: SelectionManager;
 
   @state()
-  mouse!: MouseManager;
+  mouse!: DefaultMouseManager;
 
   @property()
   mouseRoot!: HTMLElement;
@@ -100,7 +100,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this.selection = new SelectionManager(this.mouseRoot, this.store);
-      this.mouse = new MouseManager(this.mouseRoot);
+      this.mouse = new DefaultMouseManager(this.mouseRoot);
     }
     super.update(changedProperties);
   }

@@ -2,7 +2,7 @@ import { Slot, flattenDisposable, IDisposable } from '@blocksuite/store';
 
 export type MouseEventHandler = (e: MouseEvent) => void;
 
-export class MouseManager {
+export class DefaultMouseManager {
   private _isMouseDown = false;
   private _disposables: IDisposable[] = [];
 
