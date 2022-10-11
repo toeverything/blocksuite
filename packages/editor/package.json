@@ -10,6 +10,10 @@
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
+  },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/shared": "workspace:*",
