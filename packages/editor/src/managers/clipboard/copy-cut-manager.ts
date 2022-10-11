@@ -2,6 +2,7 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
 import { SelectionInfo, SelectedBlock } from '@blocksuite/shared';
+import type { DefaultPageBlockComponent } from '@blocksuite/blocks';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -13,7 +14,8 @@ export class CopyCutManager {
   }
 
   private get _selection() {
-    const page = document.querySelector('default-page-block');
+    const page =
+      document.querySelector<DefaultPageBlockComponent>('default-page-block');
     if (!page) throw new Error('No page block');
     return page.selection;
   }

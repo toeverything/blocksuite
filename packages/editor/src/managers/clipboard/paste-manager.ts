@@ -1,3 +1,4 @@
+import type { DefaultPageBlockComponent } from '@blocksuite/blocks';
 import { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
 import { EditorContainer } from '../../components';
@@ -28,7 +29,8 @@ export class PasteManager {
   }
 
   private get _selection() {
-    const page = document.querySelector('default-page-block');
+    const page =
+      document.querySelector<DefaultPageBlockComponent>('default-page-block');
     if (!page) throw new Error('No page block');
     return page.selection;
   }
