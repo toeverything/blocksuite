@@ -1,24 +1,51 @@
+// Ported from https://github.com/DimensionDev/aot-secure-ecmascript/blob/main/tsconfig.json
+// Credits to [@Jack-works](https://github.com/Jack-Works)
 {
   "compilerOptions": {
-    "outDir": "./dist",
-    "jsx": "react",
-    "target": "ESNext",
-    "useDefineForClassFields": false,
-    "experimentalDecorators": true,
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
+    "outDir": "./dist/",
+    // Type Checking
     "strict": true,
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "noEmit": false,
-    "importsNotUsedAsValues": "error",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
+
+    // Module
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+
+    // Emit
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "importsNotUsedAsValues": "error",
+    "noEmitOnError": true,
+    "preserveValueImports": true,
+    "sourceMap": true,
+
+    // Interop Constraints
+    "isolatedModules": true,
+
+    // Language and Environment
+    "jsx": "react",
+    "lib": ["ESNext", "DOM"], // don't add "DOM", we use @types/web
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "experimentalDecorators": true,
+
+    // Projects
+    "composite": true,
+
+    // Completeness
     "skipLibCheck": true
   },
-  "include": ["packages", "tests"]
+  "references": [
+    { "path": "./packages/blocks" },
+    { "path": "./packages/editor" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/store" }
+  ],
+  "include": ["packages", "tests"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }
