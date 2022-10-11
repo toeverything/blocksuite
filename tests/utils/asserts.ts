@@ -88,7 +88,7 @@ export async function assertInlineCode(page: Page, isCode: boolean) {
   const actual = await page.evaluate(() => {
     // @ts-ignore
     const quill = document.querySelectorAll('rich-text')[0]?._quill!;
-    
+
     return quill.getFormat();
   });
   if (isCode) {

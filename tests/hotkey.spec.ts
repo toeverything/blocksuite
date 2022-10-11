@@ -35,10 +35,10 @@ test('rich-text code-inline hotkey scope', async ({ page }) => {
   await assertInlineCode(page, true);
 
   //undo
-  await undoByClick(page)
+  await undoByClick(page);
   await assertInlineCode(page, false);
   //redo
-  await redoByClick(page)
+  await redoByClick(page);
   await assertInlineCode(page, true);
 
   await inlineCode(page);

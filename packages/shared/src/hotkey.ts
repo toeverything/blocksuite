@@ -33,7 +33,7 @@ class HotkeyManager {
     this._hotkeys(hotkey, { scope }, listener);
   }
 
-  removeListener(hotkey: string | Array<string>,scope:string,) {
+  removeListener(hotkey: string | Array<string>, scope: string) {
     this._hotkeys.unbind(...(Array.isArray(hotkey) ? hotkey : [hotkey]), scope);
   }
 
