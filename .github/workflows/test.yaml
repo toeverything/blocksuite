@@ -33,7 +33,7 @@ jobs:
         run: pnpm lint
 
       - name: Run tests
-        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test
+        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
 
       # - name: Upload test results
       #   if: always()
