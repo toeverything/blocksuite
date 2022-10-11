@@ -47,6 +47,7 @@ export class RichText extends LitElement {
       },
       theme: 'snow',
     });
+    
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
     this._bindHotKey();
@@ -72,6 +73,25 @@ export class RichText extends LitElement {
       hotkeyManager.hotkeysMap.selectAll,
       this.model.id,
       this._onSelectAll
+    );
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.code,
+      this.model.id,
+      ()=>{
+       const range = this._quill?.getSelection()
+       if(range){
+         const {index, length} = range;
+        let format = this._quill?.getFormat(range);
+        if(format?.code){
+          this._quill?.removeFormat(index, length)
+        }else{
+          this._quill?.formatText(index, length, {                   // unbolds 'hello' and set its color to blue
+            'bold': false,
+            'code':'pre'
+          });
+        }
+       }   
+      }
     );
   }
 
