@@ -202,22 +202,10 @@ export class RichTextAdapter {
     const isFromLocal = event.transaction.origin === this.doc.clientID;
     const isFromRemote = !isFromLocal;
     // @ts-ignore
-    const isControlledSplit = !!event.target?.meta?.split;
-    // @ts-ignore
-    const isControlledInsert = !!event.target?.meta?.insert;
-    // @ts-ignore
-    const isControlledJoin = !!event.target?.meta?.join;
-    // @ts-ignore
-    const isControlledClear = !!event.target?.meta?.clear;
+    const isControlledOperation = !!event.target?.meta;
 
-    // remote update doesn't carry clientID
-    if (
-      isFromRemote ||
-      isControlledSplit ||
-      isControlledInsert ||
-      isControlledJoin ||
-      isControlledClear
-    ) {
+    // update quill if the change is from remote or using controlled operation
+    if (isFromRemote || isControlledOperation) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
       // result in quill assuming that a text insertion shall inherit existing
