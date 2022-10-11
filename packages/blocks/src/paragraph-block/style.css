@@ -1,41 +1,41 @@
 .affine-paragraph-block-container.selected {
-  background-color: rgba(152, 172, 189, 0.1);
+  background-color: var(--affine-selected-color);
 }
 .h1 {
   font-size: 30px;
   line-height: 40px;
   margin-top: 40px;
-  font-weight: bold;
+  font-weight: 600;
 }
 .h2 {
   font-size: 28px;
   line-height: 38px;
   margin-top: 38px;
-  font-weight: bold;
+  font-weight: 600;
 }
 .h3 {
   font-size: 26px;
   line-height: 36px;
   margin-top: 36px;
-  font-weight: bold;
+  font-weight: 600;
 }
 .h4 {
   font-size: 24px;
   line-height: 34px;
   margin-top: 34px;
-  font-weight: bold;
+  font-weight: 600;
 }
 .h5 {
   font-size: 22px;
   line-height: 30px;
   margin-top: 30px;
-  font-weight: bold;
+  font-weight: 600;
 }
 .h6 {
   font-size: 20px;
   line-height: 28px;
   margin-top: 28px;
-  font-weight: bold;
+  font-weight: 600;
 }
 .quote {
   font-size: 18px;
