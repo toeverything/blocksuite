@@ -14,6 +14,7 @@ import {
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '@blocksuite/shared';
+import { MarkdownShortcuts } from './markdownshortcuts';
 
 interface QuillRange {
   index: number;
@@ -78,6 +79,11 @@ export const createKeyboardBindings = (
   function redo() {
     store.redo();
     return PREVENT_DEFAULT;
+  }
+
+  function markdownMatch(this: KeyboardEventThis) {
+    MarkdownShortcuts.match(this.quill);
+    return ALLOW_DEFAULT;
   }
 
   function hardEnter(this: KeyboardEventThis) {
@@ -171,6 +177,14 @@ export const createKeyboardBindings = (
       shiftKey: true,
       shortKey: true,
       handler: redo,
+    },
+    enterMarkdownMatch: {
+      key: 'enter',
+      handler: markdownMatch,
+    },
+    spaceMarkdownMatch: {
+      key: ' ',
+      handler: markdownMatch,
     },
     hardEnter: {
       key: 'enter',
