@@ -3,7 +3,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import {
-  asyncFocusRichText,
   BlockHost,
   hotkeyManager,
 } from '@blocksuite/shared';
