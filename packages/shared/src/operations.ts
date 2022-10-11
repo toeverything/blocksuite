@@ -184,7 +184,7 @@ export function tryMatchSpaceHotkey(
 export function convertToList(
   store: Store,
   model: ExtendedModel,
-  listType: 'bulleted' | 'numbered'
+  listType: 'bulleted' | 'numbered' | 'todo'
 ) {
   if (model.flavour === 'paragraph') {
     const parent = store.getParent(model);
