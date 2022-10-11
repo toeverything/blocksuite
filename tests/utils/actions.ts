@@ -171,7 +171,7 @@ export async function shiftEnter(page: Page) {
 
 export async function inlineCode(page: Page) {
   await keyDownCtrlOrMeta(page);
-  await page.keyboard.press('e');
+  await page.keyboard.press('e',{ delay: 50 });
   await keyUpCtrlOrMeta(page);
 }
 

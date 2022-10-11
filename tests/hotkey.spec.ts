@@ -5,6 +5,8 @@ import {
   blurRichText,
   selectAllByKeyboard,
   inlineCode,
+  undoByClick,
+  redoByClick,
 } from './utils/actions';
 import {
   assertSelection,
@@ -24,13 +26,21 @@ test('rich-text hotkey scope', async ({ page }) => {
   await assertSelectedBlockCount(page, 1);
 });
 
-test.only('rich-text code-inline hotkey scope', async ({ page }) => {
+test('rich-text code-inline hotkey scope', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('helloWorld');
   await selectAllByKeyboard(page);
   await inlineCode(page);
   await assertInlineCode(page, true);
+
+  //undo
+  await undoByClick(page)
+  await assertInlineCode(page, false);
+  //redo
+  await redoByClick(page)
+  await assertInlineCode(page, true);
+
   await inlineCode(page);
   await assertInlineCode(page, false);
 });

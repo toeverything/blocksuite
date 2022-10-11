@@ -80,10 +80,9 @@ export class RichText extends LitElement {
       this.model.id,
       () => {
         const range = this._quill?.getSelection();
-
         if (range) {
+          _store.captureSync();
           _store.transact(() => {
-
             const { index, length } = range;
             const format = this._quill?.getFormat(range);
             if (format?.code) {

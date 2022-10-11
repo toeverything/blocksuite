@@ -86,9 +86,9 @@ export async function assertSelection(
 
 export async function assertInlineCode(page: Page, isCode: boolean) {
   const actual = await page.evaluate(() => {
-    const quill =
-      // @ts-ignore
-      document.querySelectorAll('rich-text')[0]?._quill!;
+    // @ts-ignore
+    const quill = document.querySelectorAll('rich-text')[0]?._quill!;
+    
     return quill.getFormat();
   });
   if (isCode) {
