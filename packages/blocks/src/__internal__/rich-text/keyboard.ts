@@ -1,5 +1,3 @@
-import type { Quill, RangeStatic } from 'quill';
-import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
   ALLOW_DEFAULT,
   BlockHost,
@@ -15,6 +13,9 @@ import {
   tryMatchSpaceHotkey,
 } from '@blocksuite/shared';
 import { Shortcuts } from './shortcuts';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
+import { Quill, type RangeStatic } from 'quill';
+import { SnowTooltip } from './link-node/SnowTooltip';
 
 interface QuillRange {
   index: number;
@@ -177,6 +178,61 @@ export const createKeyboardBindings = (
     return ALLOW_DEFAULT;
   }
 
+  // See https://github.com/quilljs/quill/blob/6fb1532fbdcfb2d5df4830a81e707160a72da47b/themes/snow.ts#L110-L126
+  // See https://github.com/patleeman/quill-markdown-shortcuts/blob/master/src/index.js#L216-L232
+  function createLink(
+    this: KeyboardEventThis,
+    range: QuillRange,
+    context: BindingContext
+  ) {
+    if (context.format.link) {
+      // already have a link
+      this.quill.format('link', false);
+      return PREVENT_DEFAULT;
+    }
+    if (range == null || range.length === 0) {
+      // select nothing
+      return ALLOW_DEFAULT;
+    }
+
+    let preview = this.quill.getText(range.index, range.length);
+    if (/^\S+@\S+\.\S+$/.test(preview) && preview.indexOf('mailto:') !== 0) {
+      preview = `mailto:${preview}`;
+    }
+
+    // @ts-ignore
+    const tooltip = new SnowTooltip(this.quill, document.body);
+    // @ts-ignore
+    tooltip.edit('link', preview);
+
+    // backup selection format
+    // const format = this.quill.getFormat(range.index, range.length);
+    // mock selection
+    // this.quill.formatText(
+    //   range.index,
+    //   range.length,
+    //   'background',
+    //   'rgba(35, 131, 226, 0.28)'
+    // );
+
+    // setTimeout(() => {
+    // cancel mock selection
+    // restore background
+    // this.quill.formatText(
+    //   range.index,
+    //   range.length,
+    //   'background',
+    //   format['background'] ?? false
+    // );
+    // }, 1000);
+
+    // const selection = window.getSelection();
+    // const rect = selection.getRangeAt(0).getBoundingClientRect();
+    // const container = this.quill.addContainer('ql-tooltip');
+
+    return PREVENT_DEFAULT;
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
@@ -249,6 +305,11 @@ export const createKeyboardBindings = (
       key: 'a',
       shortKey: true,
       handler: selectAll,
+    },
+    createLink: {
+      key: 'k',
+      shortKey: true,
+      handler: createLink,
     },
   };
 
