@@ -1,3 +1,5 @@
+/// <reference path="./env.d.ts" />
+
 // manual import to avoid being tree-shaked
 import './page-block';
 import './counter-block';
