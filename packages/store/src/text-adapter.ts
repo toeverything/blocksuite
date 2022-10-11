@@ -115,8 +115,6 @@ export class TextEntity {
 
   format(index: number, length: number, format: any) {
     this._yText.format(index, length, format);
-    // const delta = this.toDelta();
-    // this._yText.applyDelta(delta);
     // @ts-ignore
     this._yText.meta = { format: true };
   }
