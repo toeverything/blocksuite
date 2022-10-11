@@ -1,4 +1,3 @@
-import { BlockHost } from '@blocksuite/shared';
 import { ListBlockModel } from '../list-model';
 import { points } from './points';
 import { getNumberPrefix } from './get-number-prefix';
@@ -16,25 +15,20 @@ const listPrefixStyle = styleMap({
   justifyContent: 'flex-end',
 });
 
-const getListDeep = (host: BlockHost, model: ListBlockModel): number => {
-  let deep = 0;
-  let parent = host.store.getParent(model);
-  while (parent?.flavour === model.flavour) {
-    deep++;
-    parent = host.store.getParent(parent);
-  }
-  return deep;
-};
-
-export function getListIcon(host: BlockHost, model: ListBlockModel) {
-  const deep = getListDeep(host, model);
-
+export function getListIcon({
+  model,
+  index,
+  deep,
+}: {
+  model: ListBlockModel;
+  index: number;
+  deep: number;
+}) {
   if (model.type === 'numbered') {
     return html`<div style="${listPrefixStyle}">
       ${getNumberPrefix({
         deep,
-        host,
-        model,
+        index,
       })}
     </div>`;
   }

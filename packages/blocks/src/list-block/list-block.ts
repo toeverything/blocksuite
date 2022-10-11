@@ -4,6 +4,7 @@ import { BlockHost, commonTextActiveHandler } from '@blocksuite/shared';
 import { BLOCK_ID_ATTR } from '@blocksuite/shared';
 import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils/get-list-icon';
+import { getListInfo } from './utils/get-list-info';
 
 import style from './style.css';
 
@@ -58,14 +59,20 @@ export class ListBlockComponent extends LitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const listIcon = getListIcon(this.host, this.model);
+    const { deep, index } = getListInfo(this.host, this.model);
+    const listIcon = getListIcon({
+      model: this.model,
+      deep,
+      index,
+    });
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
-
+    // For the first list item, we need to add a margin-top to make it align with the text
+    const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <div
         class=${`affine-list-block-container ${
           this.selected ? 'selected' : ''
-        }`}
+        } ${shouldAddMarginTop ? 'affine-list-block-container--first' : ''}`}
       >
         <div class="affine-list-rich-text-wrapper">
           ${listIcon}

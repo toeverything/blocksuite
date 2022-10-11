@@ -1,7 +1,5 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
-import { BlockHost } from '@blocksuite/shared';
-import { ListBlockModel } from '../list-model';
 
 const number2letter = (n: number) => {
   const ordA = 'a'.charCodeAt(0);
@@ -47,29 +45,18 @@ const numberStyle = styleMap({
   font: '14px/26px "Roboto Mono"',
 });
 
-const getIndex = (host: BlockHost, model: ListBlockModel) => {
-  const siblings = host.store.getParent(model)?.children || [];
-
-  return siblings
-    .filter(v => v.flavour === model.flavour)
-    .findIndex(v => v === model);
-};
-
 const getPrefix = (deep: number, index: number) => {
   const map = [() => index + 1, number2letter, () => number2roman(index + 1)];
   return map[deep % map.length](index);
 };
 
 export const getNumberPrefix = ({
-  host,
-  model,
+  index,
   deep,
 }: {
-  host: BlockHost;
-  model: ListBlockModel;
+  index: number;
   deep: number;
 }) => {
-  const index = getIndex(host, model);
   const prefix = getPrefix(deep, index);
   return html`<div style="${numberStyle}">${prefix} .</div>`;
 };
