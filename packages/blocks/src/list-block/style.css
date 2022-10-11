@@ -11,6 +11,6 @@
 .affine-list-rich-text-wrapper {
   display: flex;
 }
-.affine-list-rich-text-wrapper rich-text{
+.affine-list-rich-text-wrapper rich-text {
   flex: 1;
 }

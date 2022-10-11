@@ -6,7 +6,11 @@ import {
   selectAllByKeyboard,
   inlineCode,
 } from './utils/actions';
-import { assertSelection, assertSelectedBlockCount, assertInlineCode } from './utils/asserts';
+import {
+  assertSelection,
+  assertSelectedBlockCount,
+  assertInlineCode,
+} from './utils/asserts';
 
 test('rich-text hotkey scope', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -20,15 +24,13 @@ test('rich-text hotkey scope', async ({ page }) => {
   await assertSelectedBlockCount(page, 1);
 });
 
-
 test.only('rich-text code-inline hotkey scope', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('helloWorld');
   await selectAllByKeyboard(page);
   await inlineCode(page);
-  await assertInlineCode(page,true);
+  await assertInlineCode(page, true);
   await inlineCode(page);
-  await assertInlineCode(page,false);
-
+  await assertInlineCode(page, false);
 });

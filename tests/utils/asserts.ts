@@ -84,22 +84,17 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-export async function assertInlineCode(
-  page: Page,
-  isCode: boolean,
-) {
-  const actual = await page.evaluate(
-    () => {
-      const quill =
-        // @ts-ignore
-        document.querySelectorAll('rich-text')[0]?._quill!;
-      return quill.getFormat();
-    }
-  );
-  if(isCode){
+export async function assertInlineCode(page: Page, isCode: boolean) {
+  const actual = await page.evaluate(() => {
+    const quill =
+      // @ts-ignore
+      document.querySelectorAll('rich-text')[0]?._quill!;
+    return quill.getFormat();
+  });
+  if (isCode) {
     expect(actual).toEqual({ code: isCode });
-  }else{
-    expect(actual).toEqual({  });
+  } else {
+    expect(actual).toEqual({});
   }
 }
 
