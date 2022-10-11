@@ -255,7 +255,6 @@ export async function selectAll(page: Page) {
 //TODO: improve this function
 export async function isMac(page: Page) {
   return await page.evaluate(() => {
-    console.log(navigator.userAgent);
     return window.navigator.userAgent.includes('Mac');
   });
 }
