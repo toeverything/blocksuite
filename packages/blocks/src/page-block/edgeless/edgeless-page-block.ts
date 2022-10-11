@@ -12,7 +12,7 @@ import {
   EdgelessSelectionBox,
 } from './utils';
 import { SelectionManager } from '../../__internal__';
-import { EdgelessMouseManager } from './mouse-manager';
+import { EdgelessMouseManager, getSelectionBoxBound } from './mouse-manager';
 
 export interface ViewportState {
   zoom: number;
@@ -76,6 +76,36 @@ export class EdgelessPageBlockComponent
     this.requestUpdate();
   }
 
+  private _refreshSelectionBox() {
+    this.setSelectionState({
+      selected: this._selectionState.selected,
+      box: getSelectionBoxBound(
+        this.viewport,
+        this._selectionState.selected[0]?.xywh ?? '[0,0,0,0]'
+      ),
+    });
+  }
+
+  private _handleWheel = (e: WheelEvent) => {
+    const { viewport } = this;
+    e.preventDefault();
+    // pan
+    if (!e.ctrlKey) {
+      const dx = e.deltaX / viewport.zoom;
+      const dy = e.deltaY / viewport.zoom;
+      const newState = applyDeltaCenter(viewport, dx, dy);
+      this.viewport = newState;
+      this._refreshSelectionBox();
+    }
+    // zoom
+    else {
+      const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+      const newState = applyDeltaZoom(viewport, delta);
+      this.viewport = newState;
+      this._refreshSelectionBox();
+    }
+  };
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -90,25 +120,7 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
-    this.addEventListener('wheel', e => {
-      const { viewport } = this;
-      e.preventDefault();
-      // pan
-      if (!e.ctrlKey) {
-        const dx = e.deltaX / viewport.zoom;
-        const dy = e.deltaY / viewport.zoom;
-        const newState = applyDeltaCenter(viewport, dx, dy);
-        this.viewport = newState;
-        this.requestUpdate();
-      }
-      // zoom
-      else {
-        const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-        const newState = applyDeltaZoom(viewport, delta);
-        this.viewport = newState;
-        this.requestUpdate();
-      }
-    });
+    this.addEventListener('wheel', this._handleWheel);
   }
 
   disconnectedCallback() {
@@ -132,6 +144,7 @@ export class EdgelessPageBlockComponent
         .affine-edgeless-page-block-container {
           position: relative;
           box-sizing: border-box;
+          overflow: hidden;
         }
       </style>
       <div class="affine-edgeless-page-block-container">

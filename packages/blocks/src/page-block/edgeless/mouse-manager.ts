@@ -55,7 +55,7 @@ function toViewCoord(
   return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
 }
 
-function getSelectionBoxBound(viewport: ViewportState, xywh: string) {
+export function getSelectionBoxBound(viewport: ViewportState, xywh: string) {
   const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
   const [x, y] = toViewCoord(viewport, modelX, modelY);
   return {
