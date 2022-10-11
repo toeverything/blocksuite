@@ -1,7 +1,9 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { BlockHost } from '@blocksuite/shared';
+import { BaseBlockModel } from '@blocksuite/store';
 
 import type { ViewportState } from './edgeless-page-block';
 import { GroupBlockModel } from '../..';
@@ -32,7 +34,7 @@ export function applyDeltaCenter(
 
 type XYWH = [number, number, number, number];
 
-export function EdgelessBlockChild(
+function EdgelessBlockChild(
   model: GroupBlockModel,
   host: BlockHost,
   viewport: ViewportState
@@ -49,10 +51,45 @@ export function EdgelessBlockChild(
     transformOrigin: '0 0',
     width: w + 'px',
     minHeight: h + 'px',
-    background: '#dedede',
+    background: 'white',
   };
 
   return html`
     <div style=${styleMap(style)}>${BlockElement(model, host)}</div>
+  `;
+}
+
+export function EdgelessBlockChildrenContainer(
+  model: BaseBlockModel,
+  host: BlockHost,
+  viewport: ViewportState
+) {
+  const { zoom, viewportX, viewportY } = viewport;
+  const translateX = -viewportX * zoom;
+  const translateY = -viewportY * zoom;
+
+  return html`
+    <style>
+      .affine-block-children-container.edgeless {
+        padding-left: 0;
+        position: relative;
+        overflow: hidden;
+        border: 1px #ccc solid;
+        /* max-width: 300px; */
+        height: ${viewport.height}px;
+
+        background-image: linear-gradient(#cccccc66 0.1em, transparent 0.1em),
+          linear-gradient(90deg, #cccccc66 0.1em, transparent 0.1em);
+        background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
+        background-position: ${translateX}px ${translateY}px;
+      }
+    </style>
+    <div class="affine-block-children-container edgeless">
+      ${repeat(
+        model.children,
+        child => child.id,
+        child => EdgelessBlockChild(child as GroupBlockModel, host, viewport)
+      )}
+    </div>
   `;
 }
