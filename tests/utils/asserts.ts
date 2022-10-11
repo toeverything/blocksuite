@@ -84,6 +84,20 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
+export async function assertInlineCode(page: Page, isCode: boolean) {
+  const actual = await page.evaluate(() => {
+    // @ts-ignore
+    const quill = document.querySelectorAll('rich-text')[0]?._quill!;
+
+    return quill.getFormat();
+  });
+  if (isCode) {
+    expect(actual).toEqual({ code: isCode });
+  } else {
+    expect(actual).toEqual({});
+  }
+}
+
 export async function assertSelectedBlockCount(page: Page, expected: number) {
   const actual = await page.evaluate(() => {
     const selectionInfo =
