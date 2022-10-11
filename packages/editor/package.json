@@ -1,18 +1,19 @@
 {
   "name": "@blocksuite/editor",
   "version": "0.0.0",
-  "type": "module",
   "description": "",
-  "main": "src/index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
+  "type": "module",
+  "main": "src/index.ts",
   "exports": {
     "types": "./dist/index.d.ts",
     "default": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",

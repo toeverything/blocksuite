@@ -12,7 +12,7 @@
     "test:unit": "vitest --run",
     "format": "prettier --write packages tests",
     "clean": "rm -rf dist && rm -rf packages/{blocks,editor,playground,shared,store}/dist",
-    "build": "tsc --build ./tsconfig.json",
+    "build": "pnpm run -r build",
     "build:watch": "tsc --build ./tsconfig.json --watch",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "changeset": "changeset",

@@ -12,6 +12,9 @@
     "types": "./dist/index.d.ts",
     "default": "./dist/index.js"
   },
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "@blocksuite/store": "workspace:*",
     "hotkeys-js": "^3.10.0"

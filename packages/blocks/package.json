@@ -1,19 +1,20 @@
 {
   "name": "@blocksuite/blocks",
   "version": "0.0.0",
-  "type": "module",
   "description": "",
-  "main": "src/index.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
+  },
   "scripts": {
+    "build": "tsc && vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
-  "exports": {
-    "types": "./dist/index.d.ts",
-    "default": "./dist/index.js"
-  },
   "dependencies": {
     "@blocksuite/shared": "workspace:*",
     "@blocksuite/store": "workspace:*"
