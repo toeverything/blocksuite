@@ -31,6 +31,9 @@
     "jsx": "react",
     "lib": ["ESNext", "DOM"], // don't add "DOM", we use @types/web
     "target": "ESNext",
+    // Note, setting useDefineForClassFields to `false` should only be required when the target is set to esnext or greater,
+    // but it's recommended to explicitly ensure this setting is false.
+    // See https://lit.dev/docs/tools/publishing/#compiling-with-typescript
     "useDefineForClassFields": true,
     "experimentalDecorators": true,
 
@@ -38,7 +41,16 @@
     "composite": true,
 
     // Completeness
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    // "paths": {
+    //   "@blocksuite/blocks": ["./packages/blocks/src"],
+    //   "@blocksuite/editor": ["./packages/editor/src"],
+    //   "@blocksuite/shared": ["./packages/shared/src"],
+    //   "@blocksuite/store": ["./packages/store/src"]
+    // },
+
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
   "references": [
     { "path": "./packages/blocks" },
@@ -46,6 +58,14 @@
     { "path": "./packages/shared" },
     { "path": "./packages/store" }
   ],
-  "include": ["packages", "tests"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    // Workaround for custom element declare duplicate error
+    // Subsequent property declarations must have the same type.  Property ''xxx-block-element'' must be of type 'XXXBlockElement', but here has type 'XXXBlockElement'.
+    "**/*.d.ts"
+  ]
 }
