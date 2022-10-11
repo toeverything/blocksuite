@@ -1,4 +1,4 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
@@ -17,13 +17,12 @@ import {
   BlockChildrenContainer,
 } from '../../__internal__';
 import '../../__internal__';
-import style from './style.css';
+
+import styles from './styles';
 
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
+  static styles = styles;
 
   @property()
   store!: Store;

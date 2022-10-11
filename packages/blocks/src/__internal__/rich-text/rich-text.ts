@@ -1,4 +1,4 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
@@ -6,15 +6,13 @@ import { type BlockHost, hotkeyManager } from '@blocksuite/shared';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 
-import style from './styles.css';
+import styles from './styles';
 
 Quill.register('modules/cursors', QuillCursors);
 
 @customElement('rich-text')
 export class RichText extends LitElement {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
+  static styles = styles;
 
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;

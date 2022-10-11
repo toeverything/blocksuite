@@ -1,12 +1,13 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import style from './style.css';
 import {
   BLOCK_ID_ATTR,
   commonTextActiveHandler,
   type BlockHost,
 } from '@blocksuite/shared';
 import type { ParagraphBlockModel } from './paragraph-model';
+
+import styles from './styles';
 
 // <<<<<<< HEAD
 // @customElement('paragraph-block-element')
@@ -21,9 +22,8 @@ import '../__internal__';
 
 @customElement('paragraph-block')
 export class ParagraphBlockComponent extends LitElement {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
+  static styles = styles;
+
   @property({
     hasChanged() {
       return true;

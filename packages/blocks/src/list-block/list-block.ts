@@ -1,20 +1,21 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import {
+  BLOCK_ID_ATTR,
+  commonTextActiveHandler,
+  type BlockHost,
+} from '@blocksuite/shared';
+import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { type BlockHost, commonTextActiveHandler } from '@blocksuite/shared';
-import { BLOCK_ID_ATTR } from '@blocksuite/shared';
 import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils/get-list-icon';
 
-import style from './style.css';
+import styles from './styles';
 
-import { BlockChildrenContainer } from '../__internal__';
 import '../__internal__';
+import { BlockChildrenContainer } from '../__internal__';
 
 @customElement('list-block')
 export class ListBlockComponent extends LitElement {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
+  static styles = styles;
 
   @property({
     hasChanged() {

@@ -1,16 +1,11 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
 import type { PageBlockModel } from './page-model';
 import { focusTextEnd, BlockChildrenContainer } from '../__internal__';
-import style from './style.css';
 
 @customElement('page-block-element')
 export class PageBlockElement extends LitElement {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
-
   @property()
   host!: BlockHost;
 

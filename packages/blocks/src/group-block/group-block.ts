@@ -1,4 +1,4 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
@@ -7,12 +7,12 @@ import type { GroupBlockModel } from './group-model';
 import { BlockChildrenContainer } from '../__internal__';
 import '../__internal__';
 
-import style from './style.css';
-
 @customElement('group-block')
 export class GroupBlockComponent extends LitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-group-block-container > .affine-block-children-container {
+      padding-left: 0;
+    }
   `;
 
   @property({
