@@ -169,6 +169,12 @@ export async function shiftEnter(page: Page) {
   await page.keyboard.up('Shift');
 }
 
+export async function inlineCode(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.press('e');
+  await keyUpCtrlOrMeta(page);
+}
+
 export async function clickMenuButton(page: Page, title: string) {
   await page.click(`button[aria-label="${title}"]`);
 }

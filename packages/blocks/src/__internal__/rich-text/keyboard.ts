@@ -134,7 +134,7 @@ export const createKeyboardBindings = (
 
   function keyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
-    if (range.index + range.length + 1 === textLength) {
+    if (range.index  + 1 === textLength) {
       selectionManager.activateNextBlock(model.id, 'start');
       return PREVENT_DEFAULT;
     }
