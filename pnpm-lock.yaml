@@ -57,12 +57,14 @@ importers:
 
   packages/editor:
     specifiers:
+      '@blocksuite/blocks': workspace:*
       '@blocksuite/shared': workspace:*
       '@blocksuite/store': workspace:*
       '@types/marked': ^4.0.7
       '@types/quill': ^2.0.9
       marked: ^4.1.0
     dependencies:
+      '@blocksuite/blocks': link:../blocks
       '@blocksuite/shared': link:../shared
       '@blocksuite/store': link:../store
       marked: 4.1.0
