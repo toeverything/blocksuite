@@ -1,13 +1,15 @@
 import { LitElement, html } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { BlockHost, BLOCK_ID_ATTR } from '@blocksuite/shared';
-import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../page-model';
-import type { GroupBlockModel } from '../..';
-import { EdgelessBlockChild, applyDeltaCenter, applyDeltaZoom } from './utils';
+import {
+  applyDeltaCenter,
+  applyDeltaZoom,
+  EdgelessBlockChildrenContainer,
+} from './utils';
 
 import { MouseManager, SelectionManager } from '../../__internal__';
 import '../../__internal__';
@@ -18,41 +20,6 @@ export interface ViewportState {
   viewportY: number;
   width: number;
   height: number;
-}
-
-function EdgelessBlockChildrenContainer(
-  model: BaseBlockModel,
-  host: BlockHost,
-  viewport: ViewportState
-) {
-  const { zoom, viewportX, viewportY } = viewport;
-  const translateX = -viewportX * zoom;
-  const translateY = -viewportY * zoom;
-
-  return html`
-    <style>
-      .affine-block-children-container.edgeless {
-        padding-left: 0;
-        position: relative;
-        overflow: hidden;
-        border: 1px #ccc solid;
-        /* max-width: 300px; */
-        height: ${viewport.height}px;
-
-        background-image: linear-gradient(#cccccc66 0.1em, transparent 0.1em),
-          linear-gradient(90deg, #cccccc66 0.1em, transparent 0.1em);
-        background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
-        background-position: ${translateX}px ${translateY}px;
-      }
-    </style>
-    <div class="affine-block-children-container edgeless">
-      ${repeat(
-        model.children,
-        child => child.id,
-        child => EdgelessBlockChild(child as GroupBlockModel, host, viewport)
-      )}
-    </div>
-  `;
 }
 
 @customElement('edgeless-page-block')
