@@ -52,6 +52,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const scope = 'page';
     hotkeyManager.addListener(undo, scope, (e: Event) => {
       e.preventDefault();
+      console.log(23123123);
       this.store.undo();
     });
     hotkeyManager.addListener(redo, scope, (e: Event) => {

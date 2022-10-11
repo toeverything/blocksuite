@@ -2,10 +2,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
-import {
-  BlockHost,
-  hotkeyManager,
-} from '@blocksuite/shared';
+import { BlockHost, hotkeyManager } from '@blocksuite/shared';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 
@@ -92,6 +89,25 @@ export class RichText extends LitElement {
               this.model?.text?.format(index, length, { code: false });
             } else {
               this.model?.text?.format(index, length, { code: true });
+            }
+          });
+        }
+      }
+    );
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.strikethrough,
+      this.model.id,
+      () => {
+        const range = this._quill?.getSelection();
+        if (range) {
+          _store.captureSync();
+          _store.transact(() => {
+            const { index, length } = range;
+            const format = this._quill?.getFormat(range);
+            if (format?.strike) {
+              this.model?.text?.format(index, length, { strike: false });
+            } else {
+              this.model?.text?.format(index, length, { strike: true });
             }
           });
         }
