@@ -1,4 +1,6 @@
-import { IPoint } from '@blocksuite/shared';
+import type { IPoint } from '@blocksuite/shared';
+import { GroupBlockModel } from '../../group-block';
+import { ViewportState, IEdgelessContainer, XYWH } from './edgeless-page-block';
 
 interface EdgelessSelectionEvent extends IPoint {
   start: IPoint;
@@ -12,42 +14,56 @@ interface EdgelessSelectionEvent extends IPoint {
   };
 }
 
-interface EdgelessSelectionHandlers {
-  onContainerDragStart: (e: EdgelessSelectionEvent) => void;
-  onContainerDragMove: (e: EdgelessSelectionEvent) => void;
-  onContainerDragEnd: (e: EdgelessSelectionEvent) => void;
-  onContainerClick: (e: EdgelessSelectionEvent) => void;
-  onContainerDblClick: (e: EdgelessSelectionEvent) => void;
-  onContainerMouseMove: (e: EdgelessSelectionEvent) => void;
-  onContainerMouseOut: (e: EdgelessSelectionEvent) => void;
-}
-
-const handlers: EdgelessSelectionHandlers = {
-  onContainerDragStart(e: EdgelessSelectionEvent) {
-    // console.log('drag start');
-  },
-  onContainerDragMove(e: EdgelessSelectionEvent) {
-    // console.log('drag move');
-  },
-  onContainerDragEnd(e: EdgelessSelectionEvent) {
-    // console.log('drag end');
-  },
-  onContainerClick(e: EdgelessSelectionEvent) {
-    // console.log('click', e);
-  },
-  onContainerDblClick(e: EdgelessSelectionEvent) {
-    // console.log('dbl click');
-  },
-  onContainerMouseMove(e: EdgelessSelectionEvent) {
-    // console.log('mouse move');
-  },
-  onContainerMouseOut(e: EdgelessSelectionEvent) {
-    // console.log('mouse out');
-  },
-};
-
 function isFarEnough(a: IPoint, b: IPoint, d = 2) {
   return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) > d * d;
+}
+
+function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
+  const a = JSON.parse(block.xywh) as [number, number, number, number];
+  const [ax, ay, aw, ah] = a;
+  return ax < x && x <= ax + aw && ay < y && y <= ay + ah;
+}
+
+function pick(
+  blocks: GroupBlockModel[],
+  modelX: number,
+  modelY: number
+): GroupBlockModel | null {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    if (isPointIn(blocks[i], modelX, modelY)) {
+      return blocks[i];
+    }
+  }
+  return null;
+}
+
+function toModelCoord(
+  viewport: ViewportState,
+  viewX: number,
+  viewY: number
+): [number, number] {
+  const { viewportX, viewportY, zoom } = viewport;
+  return [viewportX + viewX / zoom, viewportY + viewY / zoom];
+}
+
+function toViewCoord(
+  viewport: ViewportState,
+  modelX: number,
+  modelY: number
+): [number, number] {
+  const { viewportX, viewportY, zoom } = viewport;
+  return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
+}
+
+function getSelectionBoxBound(viewport: ViewportState, xywh: string) {
+  const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
+  const [x, y] = toViewCoord(viewport, modelX, modelY);
+  return {
+    x,
+    y,
+    w: modelW * viewport.zoom,
+    h: modelH * viewport.zoom,
+  };
 }
 
 function toSelectionEvent(
@@ -80,118 +96,160 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
-export class EdgelessMouseManager {
-  private _ctx = {
-    startX: -Infinity,
-    startY: -Infinity,
-    isDragging: false,
-    last: <EdgelessSelectionEvent | null>null,
-    rect: <DOMRect | null>null,
+export function initDomEventHandlers(
+  container: HTMLElement,
+  onContainerDragStart: (e: EdgelessSelectionEvent) => void,
+  onContainerDragMove: (e: EdgelessSelectionEvent) => void,
+  onContainerDragEnd: (e: EdgelessSelectionEvent) => void,
+  onContainerClick: (e: EdgelessSelectionEvent) => void,
+  onContainerDblClick: (e: EdgelessSelectionEvent) => void,
+  onContainerMouseMove: (e: EdgelessSelectionEvent) => void,
+  onContainerMouseOut: (e: EdgelessSelectionEvent) => void
+) {
+  let startX = -Infinity;
+  let startY = -Infinity;
+  let isDragging = false;
+  let last: EdgelessSelectionEvent | null = null;
+  let rect: DOMRect | null = null;
+
+  const mouseOutHandler = (e: MouseEvent) =>
+    onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
+
+  const mouseDownHandler = (e: MouseEvent) => {
+    rect = container.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    isDragging = false;
+    last = toSelectionEvent(e, rect, startX, startY);
+    document.addEventListener('mouseup', mouseUpHandler);
+    document.addEventListener('mouseout', mouseOutHandler);
   };
 
-  private _container: HTMLElement;
+  const mouseMoveHandler = (e: MouseEvent) => {
+    if (!rect) rect = container.getBoundingClientRect();
 
-  constructor(container: HTMLElement) {
-    this._container = container;
-    this._initMouseHandlers();
-  }
-
-  private _mouseOutHandler = (e: MouseEvent) => {
-    const { rect, startX, startY } = this._ctx;
-    handlers.onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
-  };
-
-  private _mouseDownHandler = (e: MouseEvent) => {
-    const { _ctx } = this;
-    e.preventDefault();
-    _ctx.rect = this._container.getBoundingClientRect();
-    _ctx.startX = e.clientX - _ctx.rect.left;
-    _ctx.startY = e.clientY - _ctx.rect.top;
-    _ctx.isDragging = false;
-    _ctx.last = toSelectionEvent(e, _ctx.rect, _ctx.startX, _ctx.startY);
-    document.addEventListener('mouseup', this._mouseUpHandler);
-    document.addEventListener('mouseout', this._mouseOutHandler);
-  };
-
-  private _mouseMoveHandler = (e: MouseEvent) => {
-    const { _ctx, _container } = this;
-
-    if (!_ctx.rect) {
-      _ctx.rect = _container.getBoundingClientRect();
-    }
-
-    const a = { x: _ctx.startX, y: _ctx.startY };
-    const offsetX = e.clientX - _ctx.rect.left;
-    const offsetY = e.clientY - _ctx.rect.top;
+    const a = { x: startX, y: startY };
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
     const b = { x: offsetX, y: offsetY };
 
-    if (!_ctx.last) {
-      handlers.onContainerMouseMove(
-        toSelectionEvent(e, _ctx.rect, _ctx.startX, _ctx.startY, _ctx.last)
-      );
+    if (!last) {
+      onContainerMouseMove(toSelectionEvent(e, rect, startX, startY, last));
       return;
     }
 
-    if (isFarEnough(a, b) && !_ctx.isDragging) {
-      _ctx.isDragging = true;
-      handlers.onContainerDragStart(_ctx.last);
+    if (isFarEnough(a, b) && !isDragging) {
+      isDragging = true;
+      onContainerDragStart(last);
     }
 
-    if (_ctx.isDragging) {
-      const { rect, startX, startY, last } = _ctx;
-      handlers.onContainerDragMove(
-        toSelectionEvent(e, rect, startX, startY, last)
-      );
-      handlers.onContainerMouseMove(
-        toSelectionEvent(e, rect, startX, startY, last)
-      );
-      _ctx.last = toSelectionEvent(e, rect, startX, startY);
+    if (isDragging) {
+      onContainerDragMove(toSelectionEvent(e, rect, startX, startY, last));
+      onContainerMouseMove(toSelectionEvent(e, rect, startX, startY, last));
+      last = toSelectionEvent(e, rect, startX, startY);
     }
   };
 
-  private _mouseUpHandler = (e: MouseEvent) => {
-    const { _ctx } = this;
-    if (!_ctx.isDragging)
-      handlers.onContainerClick(
-        toSelectionEvent(e, _ctx.rect, _ctx.startX, _ctx.startY)
-      );
-    else
-      handlers.onContainerDragEnd(
-        toSelectionEvent(e, _ctx.rect, _ctx.startX, _ctx.startY, _ctx.last)
-      );
+  const mouseUpHandler = (e: MouseEvent) => {
+    if (!isDragging)
+      onContainerClick(toSelectionEvent(e, rect, startX, startY));
+    else onContainerDragEnd(toSelectionEvent(e, rect, startX, startY, last));
 
-    _ctx.startX = _ctx.startY = -Infinity;
-    _ctx.isDragging = false;
-    _ctx.last = null;
+    startX = startY = -Infinity;
+    isDragging = false;
+    last = null;
 
-    document.removeEventListener('mouseup', this._mouseUpHandler);
-    document.removeEventListener('mouseout', this._mouseOutHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+    document.removeEventListener('mouseout', mouseOutHandler);
   };
 
-  private _contextMenuHandler = (e: MouseEvent) => {
+  const contextMenuHandler = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  private _dblClickHandler = (e: MouseEvent) => {
-    const { _ctx } = this;
-    const { rect, startX, startY } = _ctx;
-    handlers.onContainerDblClick(toSelectionEvent(e, rect, startX, startY));
+  const dblClickHandler = (e: MouseEvent) => {
+    onContainerDblClick(toSelectionEvent(e, rect, startX, startY));
   };
 
-  private _initMouseHandlers() {
-    const { _container } = this;
-    _container.addEventListener('mousedown', this._mouseDownHandler);
-    _container.addEventListener('mousemove', this._mouseMoveHandler);
-    _container.addEventListener('contextmenu', this._contextMenuHandler);
-    _container.addEventListener('dblclick', this._dblClickHandler);
+  container.addEventListener('mousedown', mouseDownHandler);
+  container.addEventListener('mousemove', mouseMoveHandler);
+  container.addEventListener('contextmenu', contextMenuHandler);
+  container.addEventListener('dblclick', dblClickHandler);
+
+  const dispose = () => {
+    container.removeEventListener('mousedown', mouseDownHandler);
+    container.removeEventListener('mousemove', mouseMoveHandler);
+    container.removeEventListener('contextmenu', contextMenuHandler);
+    container.removeEventListener('dblclick', dblClickHandler);
+  };
+  return dispose;
+}
+
+export class EdgelessMouseManager {
+  private _container: IEdgelessContainer;
+  private _disposeCallback: () => void;
+
+  constructor(container: IEdgelessContainer) {
+    this._container = container;
+    this._disposeCallback = initDomEventHandlers(
+      this._container,
+      this._onContainerDragStart,
+      this._onContainerDragMove,
+      this._onContainerDragEnd,
+      this._onContainerClick,
+      this._onContainerDblClick,
+      this._onContainerMouseMove,
+      this._onContainerMouseOut
+    );
   }
 
+  private get _blocks(): GroupBlockModel[] {
+    return (this._container.store.root?.children as GroupBlockModel[]) ?? [];
+  }
+
+  private _onContainerDragStart = (e: EdgelessSelectionEvent) => {
+    // console.log('drag start', e);
+  };
+
+  private _onContainerDragMove = (e: EdgelessSelectionEvent) => {
+    // console.log('drag move', e);
+  };
+
+  private _onContainerDragEnd = (e: EdgelessSelectionEvent) => {
+    // console.log('drag end', e);
+  };
+
+  private _onContainerClick = (e: EdgelessSelectionEvent) => {
+    const { viewport } = this._container;
+    const [modelX, modelY] = toModelCoord(viewport, e.x, e.y);
+    const selected = pick(this._blocks, modelX, modelY);
+    if (selected) {
+      this._container.setSelectionState({
+        selected: [selected],
+        box: getSelectionBoxBound(viewport, selected.xywh),
+      });
+    } else {
+      this._container.setSelectionState({
+        selected: [],
+        box: getSelectionBoxBound(viewport, '[0,0,0,0]'),
+      });
+    }
+  };
+
+  private _onContainerDblClick = (e: EdgelessSelectionEvent) => {
+    // console.log('dblclick', e);
+  };
+
+  private _onContainerMouseMove = (e: EdgelessSelectionEvent) => {
+    // console.log('mousemove', e);
+  };
+
+  private _onContainerMouseOut = (e: EdgelessSelectionEvent) => {
+    // console.log('mouseout', e);
+  };
+
   dispose() {
-    const { _container } = this;
-    _container.removeEventListener('mousedown', this._mouseDownHandler);
-    _container.removeEventListener('mousemove', this._mouseMoveHandler);
-    _container.removeEventListener('contextmenu', this._contextMenuHandler);
-    _container.removeEventListener('dblclick', this._dblClickHandler);
+    this._disposeCallback();
   }
 }

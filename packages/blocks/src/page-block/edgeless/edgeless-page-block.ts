@@ -1,14 +1,15 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { BlockHost, BLOCK_ID_ATTR } from '@blocksuite/shared';
+import { BlockHost, BLOCK_ID_ATTR, Bound } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
 
-import type { PageBlockModel } from '../page-model';
+import type { PageBlockModel, GroupBlockModel } from '../..';
 import {
   applyDeltaCenter,
   applyDeltaZoom,
   EdgelessBlockChildrenContainer,
+  EdgelessSelectionBox,
 } from './utils';
 import { EdgelessMouseManager } from './mouse-manager';
 
@@ -23,10 +24,23 @@ export interface ViewportState {
   height: number;
 }
 
+export interface SelectionState {
+  selected: GroupBlockModel[];
+  box: Bound | null;
+}
+
+export interface IEdgelessContainer extends HTMLElement {
+  store: Store;
+  viewport: ViewportState;
+  setSelectionState: (state: SelectionState) => void;
+}
+
+export type XYWH = [number, number, number, number];
+
 @customElement('edgeless-page-block')
 export class EdgelessPageBlockComponent
   extends LitElement
-  implements BlockHost
+  implements BlockHost, IEdgelessContainer
 {
   @property()
   store!: Store;
@@ -34,7 +48,7 @@ export class EdgelessPageBlockComponent
   @state()
   selection!: SelectionManager;
 
-  mouse = new EdgelessMouseManager(this);
+  mouse!: EdgelessMouseManager;
 
   @property()
   mouseRoot!: HTMLElement;
@@ -46,14 +60,23 @@ export class EdgelessPageBlockComponent
   })
   model!: PageBlockModel;
 
-  @state()
-  viewportState: ViewportState = {
+  viewport: ViewportState = {
     zoom: 1,
     viewportX: 0,
     viewportY: 0,
     width: 300,
     height: 300,
   };
+
+  private _selectionState: SelectionState = {
+    selected: [],
+    box: null,
+  };
+
+  setSelectionState(state: SelectionState) {
+    this._selectionState = state;
+    this.requestUpdate();
+  }
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -63,27 +86,28 @@ export class EdgelessPageBlockComponent
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this.selection = new SelectionManager(this.mouseRoot, this.store);
+      this.mouse = new EdgelessMouseManager(this);
     }
     super.update(changedProperties);
   }
 
   firstUpdated() {
     this.addEventListener('wheel', e => {
-      const { viewportState } = this;
+      const { viewport } = this;
       e.preventDefault();
       // pan
       if (!e.ctrlKey) {
-        const dx = e.deltaX / viewportState.zoom;
-        const dy = e.deltaY / viewportState.zoom;
-        const newState = applyDeltaCenter(viewportState, dx, dy);
-        this.viewportState = newState;
+        const dx = e.deltaX / viewport.zoom;
+        const dy = e.deltaY / viewport.zoom;
+        const newState = applyDeltaCenter(viewport, dx, dy);
+        this.viewport = newState;
         this.requestUpdate();
       }
       // zoom
       else {
         const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-        const newState = applyDeltaZoom(viewportState, delta);
-        this.viewportState = newState;
+        const newState = applyDeltaZoom(viewport, delta);
+        this.viewport = newState;
         this.requestUpdate();
       }
     });
@@ -100,18 +124,20 @@ export class EdgelessPageBlockComponent
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.model,
       this,
-      this.viewportState
+      this.viewport
     );
+
+    const selectionBox = EdgelessSelectionBox(this._selectionState);
 
     return html`
       <style>
         .affine-edgeless-page-block-container {
+          position: relative;
           box-sizing: border-box;
         }
       </style>
       <div class="affine-edgeless-page-block-container">
-        <p>Edgeless Container</p>
-        ${childrenContainer}
+        ${childrenContainer} ${selectionBox}
       </div>
     `;
   }
