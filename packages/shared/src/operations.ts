@@ -85,6 +85,7 @@ export function handleIndent(store: Store, model: ExtendedModel) {
     };
     store.deleteBlock(model);
     store.addBlock(blockProps, previousSibling);
+    // TODO after implement collapse feature, if previousSibling collapsed, need expand it
   }
 }
 

@@ -1,5 +1,5 @@
-import type { Store } from '@blocksuite/store';
-import { Point } from './rect';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { Point } from './rect';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
@@ -77,4 +77,4 @@ declare global {
   }
 }
 
-export type Detail<T> = WindowEventMap[T]['detail'];
+export type Detail<T> = T | any; //WindowEventMap[T]['detail'];
