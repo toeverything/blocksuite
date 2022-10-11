@@ -49,7 +49,7 @@ export class DebugMenu extends LitElement {
     }
   }
 
-  private _convertToList(listType: 'bulleted' | 'numbered') {
+  private _convertToList(listType: 'bulleted' | 'numbered' | 'todo') {
     const selection = window.getSelection();
     const element = selection?.focusNode?.parentElement as HTMLElement;
     const block = element.closest('[data-block-id]') as CommonBlockElement;
@@ -59,14 +59,6 @@ export class DebugMenu extends LitElement {
     // @ts-ignore
     const model = store.getBlockById(block.model.id) as BaseBlockModel;
     convertToList(this.store, model, listType);
-  }
-
-  private _onConvertToBulletedList() {
-    this._convertToList('bulleted');
-  }
-
-  private _onConvertToNumberedList() {
-    this._convertToList('numbered');
   }
 
   private _onDelete() {
@@ -191,23 +183,58 @@ export class DebugMenu extends LitElement {
           𝐇𝟑
         </button>
         <button
+          aria-label="heading-3"
+          title="heading-3"
+          @click=${() => this._onSetParagraphType('h4')}
+        >
+          𝐇4
+        </button>
+        <button
+          aria-label="heading-3"
+          title="heading-3"
+          @click=${() => this._onSetParagraphType('h5')}
+        >
+          𝐇5
+        </button>
+        <button
+          aria-label="heading-3"
+          title="heading-3"
+          @click=${() => this._onSetParagraphType('h6')}
+        >
+          𝐇6
+        </button>
+        <button
           aria-label="text"
           title="text"
-          @click=${() => this._onSetParagraphType('text')}
+          @click=${() => this._onSetParagraphType('paragraph')}
         >
           𝐓
         </button>
         <button
+          aria-label="text"
+          title="text"
+          @click=${() => this._onSetParagraphType('quote')}
+        >
+          Q
+        </button>
+        <button
           aria-label="convert to bulleted list"
           title="convert to bulleted list"
-          @click=${this._onConvertToBulletedList}
+          @click=${() => this._convertToList('todo')}
+        >
+          ☑
+        </button>
+        <button
+          aria-label="convert to bulleted list"
+          title="convert to bulleted list"
+          @click=${() => this._convertToList('bulleted')}
         >
           *️⃣
         </button>
         <button
           aria-label="convert to numbered list"
           title="convert to numbered list"
-          @click=${this._onConvertToNumberedList}
+          @click=${() => this._convertToList('numbered')}
         >
           1️⃣
         </button>

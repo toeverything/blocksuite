@@ -58,7 +58,6 @@ export class ListBlockComponent extends LitElement {
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
     const { deep, index } = getListInfo(this.host, this.model);
     const listIcon = getListIcon({
       model: this.model,
