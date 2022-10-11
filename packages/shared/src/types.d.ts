@@ -25,6 +25,7 @@ export interface BlockHost {
       position?: SelectionPosition
     ) => void;
     activateNextBlock: (blockId: string, position?: SelectionPosition) => void;
+    selectAllBlocks: () => void;
   };
 }
 

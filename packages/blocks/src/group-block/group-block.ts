@@ -1,5 +1,5 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
 import type { GroupBlockModel } from './group-model';
@@ -25,6 +25,9 @@ export class GroupBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
+  @state()
+  selected = false;
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -33,6 +36,9 @@ export class GroupBlockComponent extends LitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+    this.host.selection.addBlockSelectedListener(this.model.id, selected => {
+      this.selected = selected;
+    });
   }
 
   render() {
@@ -41,7 +47,11 @@ export class GroupBlockComponent extends LitElement {
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
 
     return html`
-      <div class="affine-group-block-container">${childrenContainer}</div>
+      <div
+        class="affine-group-block-container ${this.selected ? 'selected' : ''}"
+      >
+        ${childrenContainer}
+      </div>
     `;
   }
 }

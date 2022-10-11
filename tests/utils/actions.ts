@@ -243,3 +243,27 @@ export async function fillLine(page: Page, toNext = false) {
     }
   }
 }
+
+export async function selectAll(page: Page) {
+  await page.evaluate(() => {
+    return document
+      .querySelector('default-page-block')
+      ?.selection.selectAllBlocks();
+  });
+}
+
+//TODO: improve this function
+export async function isMac(page: Page) {
+  return await page.evaluate(() => {
+    console.log(navigator.userAgent);
+    return window.navigator.userAgent.includes('Mac');
+  });
+}
+
+export async function pressCtrlA(page: Page) {
+  // const isMacOS = await isMac(page);
+  // const ctrlKey = isMacOS ? 'Meta' : 'Control';
+  await page.keyboard.down('Meta');
+  await page.keyboard.press('a');
+  await page.keyboard.up('Meta');
+}

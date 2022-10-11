@@ -9,6 +9,8 @@ import {
   shiftTab,
   getCursorBlockIdAndHeight,
   fillLine,
+  addGroupByClick,
+  selectAll,
 } from './utils/actions';
 import { assertSelectedBlockCount } from './utils/asserts';
 import { expect } from '@playwright/test';
@@ -139,4 +141,12 @@ test('cursor move down at edge of the last line', async ({ page }) => {
     const [currentId] = await getCursorBlockIdAndHeight(page);
     expect(currentId).toBe(id);
   }
+});
+
+test.only('select all block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await addGroupByClick(page);
+  await addGroupByClick(page);
+  await selectAll(page);
+  assertSelectedBlockCount(page, 3);
 });

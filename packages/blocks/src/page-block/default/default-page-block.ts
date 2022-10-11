@@ -56,8 +56,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkeyManager.addListener(redo, scope, () => this.store.redo());
     hotkeyManager.addListener(selectAll, scope, (e: Event) => {
       e.preventDefault();
-      const pageChildrenBlock = this.model.children.map(block => block.id);
-      this.selection.selectedBlockIds = pageChildrenBlock;
+      this.selection.selectAllBlocks();
     });
     hotkeyManager.setScope('page');
   }

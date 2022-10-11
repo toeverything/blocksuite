@@ -51,7 +51,6 @@ export class SelectionRect extends LitElement {
       this.mouse.onDocumentMouseUpOnce(() => {
         this._handleEditorMouseup();
       });
-      e.preventDefault();
     }
   }
 
@@ -63,6 +62,7 @@ export class SelectionRect extends LitElement {
         this.rect,
         this.store.root as BaseBlockModel
       );
+      e.preventDefault();
     }
   }
 
