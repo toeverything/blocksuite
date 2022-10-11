@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import * as Y from 'yjs';
 import { Slot } from './utils/slot';
 import {
