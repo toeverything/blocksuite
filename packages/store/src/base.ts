@@ -4,6 +4,7 @@ import { Slot } from './utils/slot';
 
 export interface IBaseBlockProps {
   flavour: string;
+  type: string;
   id: string;
   children: IBaseBlockProps[];
 
@@ -18,6 +19,7 @@ export class BaseBlockModel implements IBaseBlockProps {
   childMap = new Map<string, number>();
 
   flavour!: string;
+  type!: string;
   id: string;
   children: BaseBlockModel[];
   // TODO use schema
