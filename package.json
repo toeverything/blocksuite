@@ -15,7 +15,7 @@
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist",
     "bump": "pnpm --recursive exec pnpm version minor && pnpm version minor --git-tag-version false",
-    "publish": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish"
+    "publish": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish --no-git-checks"
   },
   "keywords": [],
   "author": "toeverything",
