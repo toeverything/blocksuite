@@ -14,7 +14,8 @@
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist",
-    "bump": "pnpm version minor && pnpm -r exec pnpm version minor"
+    "bump": "pnpm version minor && pnpm -r exec pnpm version minor",
+    "publish": "pnpm clean && pnpm build && pnpm -r exec pnpm publish"
   },
   "keywords": [],
   "author": "toeverything",
