@@ -68,7 +68,8 @@ export class PrelimTextEntity {
     throw new Error(UNSUPPORTED_MSG + 'format');
   }
 
-  applyDelta() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  applyDelta(_: any) {
     throw new Error(UNSUPPORTED_MSG + 'applyDelta');
   }
 

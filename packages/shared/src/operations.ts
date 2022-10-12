@@ -163,15 +163,45 @@ export function tryMatchSpaceHotkey(
   switch (prefix.trim()) {
     case '[]':
     case '[ ]':
-      // TODO convert to unchecked list
-      return ALLOW_DEFAULT;
+      store.transact(() => model.text?.clear());
+      convertToList(store, model, 'todo', { checked: false });
+      break;
     case '[x]':
-      // TODO convert to checked list
-      return ALLOW_DEFAULT;
+      store.transact(() => model.text?.clear());
+      convertToList(store, model, 'todo', { checked: true });
+      break;
     case '-':
     case '*':
       store.transact(() => model.text?.clear());
       convertToList(store, model, 'bulleted');
+      break;
+    case '#':
+      store.transact(() => model.text?.clear());
+      convertToParagraph(store, model, 'h1');
+      break;
+    case '##':
+      store.transact(() => model.text?.clear());
+      convertToParagraph(store, model, 'h2');
+      break;
+    case '###':
+      store.transact(() => model.text?.clear());
+      convertToParagraph(store, model, 'h3');
+      break;
+    case '####':
+      store.transact(() => model.text?.clear());
+      convertToParagraph(store, model, 'h4');
+      break;
+    case '#####':
+      store.transact(() => model.text?.clear());
+      convertToParagraph(store, model, 'h5');
+      break;
+    case '######':
+      store.transact(() => model.text?.clear());
+      convertToParagraph(store, model, 'h6');
+      break;
+    case '>':
+      store.transact(() => model.text?.clear());
+      convertToParagraph(store, model, 'quote');
       break;
     default:
       store.transact(() => model.text?.clear());
@@ -184,7 +214,8 @@ export function tryMatchSpaceHotkey(
 export function convertToList(
   store: Store,
   model: ExtendedModel,
-  listType: 'bulleted' | 'numbered' | 'todo'
+  listType: 'bulleted' | 'numbered' | 'todo',
+  otherProperties?: Record<string, unknown>
 ) {
   if (model.flavour === 'paragraph') {
     const parent = store.getParent(model);
@@ -198,6 +229,7 @@ export function convertToList(
       type: listType,
       text: model?.text?.clone(),
       children: model.children,
+      ...otherProperties,
     };
     store.deleteBlock(model);
     const id = store.addBlock(blockProps, parent, index);
@@ -205,6 +237,33 @@ export function convertToList(
   } else if (model.flavour === 'list' && model['type'] !== listType) {
     store.captureSync();
     store.updateBlock(model, { type: listType });
+  }
+}
+
+export function convertToParagraph(
+  store: Store,
+  model: ExtendedModel,
+  type: 'paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+) {
+  if (model.flavour !== 'paragraph') {
+    const parent = store.getParent(model);
+    if (!parent) return;
+
+    const index = parent.children.indexOf(model);
+    store.captureSync();
+
+    const blockProps = {
+      flavour: 'paragraph',
+      type: type,
+      text: model?.text?.clone(),
+      children: model.children,
+    };
+    store.deleteBlock(model);
+    const id = store.addBlock(blockProps, parent, index);
+    asyncFocusRichText(store, id);
+  } else if (model.flavour === 'paragraph' && model['type'] !== type) {
+    store.captureSync();
+    store.updateBlock(model, { type: type });
   }
 }
 

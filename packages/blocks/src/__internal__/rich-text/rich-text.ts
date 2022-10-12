@@ -94,6 +94,25 @@ export class RichText extends LitElement {
         }
       }
     );
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.strikethrough,
+      this.model.id,
+      () => {
+        const range = this._quill?.getSelection();
+        if (range) {
+          _store.captureSync();
+          _store.transact(() => {
+            const { index, length } = range;
+            const format = this._quill?.getFormat(range);
+            if (format?.strike) {
+              this.model?.text?.format(index, length, { strike: false });
+            } else {
+              this.model?.text?.format(index, length, { strike: true });
+            }
+          });
+        }
+      }
+    );
   }
 
   private _onSelectAll() {

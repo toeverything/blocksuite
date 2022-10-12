@@ -1,6 +1,6 @@
 import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
-type ParagraphType =
+export type ParagraphType =
   | 'paragraph'
   | 'quote'
   | 'h1'

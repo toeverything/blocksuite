@@ -7,13 +7,14 @@ import {
   inlineCode,
   undoByClick,
   redoByClick,
-  addGroupByClick,
-  pressCtrlA,
+  strikethrough,
+  undoByKeyboard,
+  redoByKeyboard,
 } from './utils/actions';
 import {
   assertSelection,
   assertSelectedBlockCount,
-  assertInlineCode,
+  assertTextFormat,
 } from './utils/asserts';
 
 test('rich-text hotkey scope', async ({ page }) => {
@@ -28,34 +29,40 @@ test('rich-text hotkey scope', async ({ page }) => {
   await assertSelectedBlockCount(page, 1);
 });
 
-test('rich-text code-inline hotkey scope', async ({ page }) => {
+test('rich-text code-inline hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('helloWorld');
   await selectAllByKeyboard(page);
   await inlineCode(page);
-  await assertInlineCode(page, true);
+  await assertTextFormat(page, { code: true });
+
+  //undo
+  await undoByKeyboard(page);
+  await assertTextFormat(page, {});
+  //redo
+  await redoByKeyboard(page);
+  await assertTextFormat(page, { code: true });
+
+  await inlineCode(page);
+  await assertTextFormat(page, {});
+});
+
+test('rich-text strikethrough hotkey ', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await page.keyboard.type('helloWorld');
+  await selectAllByKeyboard(page);
+  await strikethrough(page);
+  await assertTextFormat(page, { strike: true });
 
   //undo
   await undoByClick(page);
-  await assertInlineCode(page, false);
+  await assertTextFormat(page, {});
   //redo
   await redoByClick(page);
-  await assertInlineCode(page, true);
-
-  await inlineCode(page);
-  await assertInlineCode(page, false);
-});
-
-test('select all block by hot key', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await addGroupByClick(page);
-  await addGroupByClick(page);
-  await focusRichText(page);
-  // IMP: not stable
-  await page.click('body', {
-    position: { x: 70, y: 0 },
-  });
-  await pressCtrlA(page);
-  await assertSelectedBlockCount(page, 3);
+  await assertTextFormat(page, { strike: true });
+  // twice
+  await strikethrough(page);
+  await assertTextFormat(page, {});
 });
