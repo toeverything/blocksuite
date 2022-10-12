@@ -167,6 +167,7 @@ test('delete at start of paragraph block', async ({ page }) => {
   await page.keyboard.type('a');
 
   await clickMenuButton(page, 'heading-1');
+  await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '3', 'h1');
 

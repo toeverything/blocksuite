@@ -1,6 +1,5 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-
 import {
   asyncFocusRichText,
   BLOCK_ID_ATTR,
@@ -9,14 +8,13 @@ import {
 } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
 
-import type { PageBlockModel } from '../page-model';
+import type { PageBlockModel } from '..';
 import {
   SelectionManager,
-  MouseManager,
+  DefaultMouseManager,
   focusTextEnd,
   BlockChildrenContainer,
 } from '../../__internal__';
-import '../../__internal__';
 import style from './style.css';
 
 @customElement('default-page-block')
@@ -32,7 +30,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   selection!: SelectionManager;
 
   @state()
-  mouse!: MouseManager;
+  mouse!: DefaultMouseManager;
 
   @property()
   mouseRoot!: HTMLElement;
@@ -52,7 +50,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const scope = 'page';
     hotkeyManager.addListener(undo, scope, (e: Event) => {
       e.preventDefault();
-      console.log(23123123);
       this.store.undo();
     });
     hotkeyManager.addListener(redo, scope, (e: Event) => {
@@ -61,8 +58,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkeyManager.addListener(selectAll, scope, (e: Event) => {
       e.preventDefault();
-      const pageChildrenBlock = this.model.children.map(block => block.id);
-      this.selection.selectedBlockIds = pageChildrenBlock;
+      this.selection.selectAllBlocks();
     });
     hotkeyManager.setScope('page');
   }
@@ -101,7 +97,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this.selection = new SelectionManager(this.mouseRoot, this.store);
-      this.mouse = new MouseManager(this.mouseRoot);
+      this.mouse = new DefaultMouseManager(this.mouseRoot);
     }
     super.update(changedProperties);
   }

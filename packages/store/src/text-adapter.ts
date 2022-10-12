@@ -3,6 +3,14 @@ import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
+<<<<<<< HEAD
+=======
+
+type PrelimTextEnityType = 'splitLeft' | 'splitRight';
+
+export type TextType = PrelimTextEntity | TextEntity;
+
+>>>>>>> origin
 // Removes the pending '\n's if it has no attributes
 export function normQuillDelta(delta: any) {
   if (delta.length > 0) {
@@ -28,10 +36,6 @@ export function normQuillDelta(delta: any) {
   return delta;
 }
 
-type PrelimTextEnityType = 'splitLeft' | 'splitRight';
-
-export type TextType = PrelimTextEntity | TextEntity;
-
 const UNSUPPORTED_MSG = 'PrelimTextEntity does not support ';
 
 export class PrelimTextEntity {
@@ -47,18 +51,15 @@ export class PrelimTextEntity {
     throw new Error(UNSUPPORTED_MSG + 'clone');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  insert(_content: string, _index: number) {
+  insert() {
     throw new Error(UNSUPPORTED_MSG + 'insert');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  split(_: number): [PrelimTextEntity, PrelimTextEntity] {
+  split() {
     throw new Error(UNSUPPORTED_MSG + 'split');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  join(_: TextEntity) {
+  join() {
     throw new Error(UNSUPPORTED_MSG + 'join');
   }
 
@@ -70,13 +71,16 @@ export class PrelimTextEntity {
     throw new Error(UNSUPPORTED_MSG + 'format');
   }
 
+<<<<<<< HEAD
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   applyDelta(_: any) {
+=======
+  applyDelta() {
+>>>>>>> origin
     throw new Error(UNSUPPORTED_MSG + 'applyDelta');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  sliceToDelta(_begin: number, _end?: number) {
+  sliceToDelta() {
     throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
   }
 }
@@ -115,8 +119,6 @@ export class TextEntity {
 
   format(index: number, length: number, format: any) {
     this._yText.format(index, length, format);
-    // const delta = this.toDelta();
-    // this._yText.applyDelta(delta);
     // @ts-ignore
     this._yText.meta = { format: true };
   }

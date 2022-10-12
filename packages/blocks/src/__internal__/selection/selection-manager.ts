@@ -390,6 +390,11 @@ export class SelectionManager {
     }
   }
 
+  public selectAllBlocks() {
+    this.selectedBlockIds =
+      this._store.root?.children.map(block => block.id) || [];
+  }
+
   public dispose() {
     this._disposables.forEach(disposable => disposable.dispose());
     Object.values(this._blockSelectSlotMap).forEach(slot => slot.dispose());

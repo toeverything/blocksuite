@@ -137,7 +137,7 @@ export class DebugMenu extends LitElement {
     .debug-menu > button {
       margin-left: 2px;
       margin-top: 2px;
-      width: 30px;
+      width: 32px;
       height: 24px;
     }
   `;
@@ -183,25 +183,25 @@ export class DebugMenu extends LitElement {
           𝐇𝟑
         </button>
         <button
-          aria-label="heading-3"
-          title="heading-3"
+          aria-label="heading-4"
+          title="heading-4"
           @click=${() => this._onSetParagraphType('h4')}
         >
-          𝐇4
+          𝐇𝟒
         </button>
         <button
-          aria-label="heading-3"
-          title="heading-3"
+          aria-label="heading-5"
+          title="heading-5"
           @click=${() => this._onSetParagraphType('h5')}
         >
-          𝐇5
+          𝐇𝟓
         </button>
         <button
-          aria-label="heading-3"
-          title="heading-3"
+          aria-label="heading-6"
+          title="heading-6"
           @click=${() => this._onSetParagraphType('h6')}
         >
-          𝐇6
+          𝐇𝟔
         </button>
         <button
           aria-label="text"
@@ -211,18 +211,18 @@ export class DebugMenu extends LitElement {
           𝐓
         </button>
         <button
-          aria-label="text"
-          title="text"
+          aria-label="quote"
+          title="quote"
           @click=${() => this._onSetParagraphType('quote')}
         >
-          Q
+          𝑄
         </button>
         <button
-          aria-label="convert to bulleted list"
-          title="convert to bulleted list"
+          aria-label="convert to todo list"
+          title="convert to todo list"
           @click=${() => this._convertToList('todo')}
         >
-          ☑
+          ✓
         </button>
         <button
           aria-label="convert to bulleted list"
