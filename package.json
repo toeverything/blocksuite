@@ -14,7 +14,7 @@
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist",
-    "bump": "pnpm version minor && pnpm --recursive exec pnpm version minor",
+    "bump": "pnpm --recursive exec pnpm version minor && pnpm version minor --force",
     "publish": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish"
   },
   "keywords": [],
