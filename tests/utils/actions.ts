@@ -175,6 +175,13 @@ export async function inlineCode(page: Page) {
   await keyUpCtrlOrMeta(page);
 }
 
+export async function strikethrough(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('s', { delay: 50 });
+  await keyUpCtrlOrMeta(page);
+}
+
 export async function clickMenuButton(page: Page, title: string) {
   await page.click(`button[aria-label="${title}"]`);
 }
