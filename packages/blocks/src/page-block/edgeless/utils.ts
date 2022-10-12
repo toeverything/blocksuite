@@ -7,35 +7,13 @@ import { BaseBlockModel } from '@blocksuite/store';
 import type {
   XYWH,
   ViewportState,
-  SelectionState,
+  EdgelessSelectionState,
 } from './edgeless-page-block';
 import { GroupBlockModel } from '../..';
 import { BlockElement } from '../../__internal__';
 import '../../__internal__';
 
-const MIN_ZOOM = 0.1;
-
-export function applyDeltaZoom(
-  current: ViewportState,
-  delta: number
-): ViewportState {
-  const val = (current.zoom * (100 + delta)) / 100;
-  const newZoom = Math.max(val, MIN_ZOOM);
-  // TODO ensure center stable
-  return { ...current, zoom: newZoom };
-}
-
-export function applyDeltaCenter(
-  current: ViewportState,
-  deltaX: number,
-  deltaY: number
-): ViewportState {
-  const newX = current.viewportX + deltaX;
-  const newY = current.viewportY + deltaY;
-  return { ...current, viewportX: newX, viewportY: newY };
-}
-
-export function EdgelessSelectionBox(selectionState: SelectionState) {
+export function EdgelessSelectionBox(selectionState: EdgelessSelectionState) {
   const { selected, box } = selectionState;
   if (!selected.length || !box) return html`<div></div>`;
 
