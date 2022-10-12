@@ -21,11 +21,17 @@ test('rich-text hotkey scope', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await selectAllByKeyboard(page); // first select all
+  await selectAllByKeyboard(page); // first select all in rich text
   await assertSelection(page, 0, 0, 5);
 
   await blurRichText(page);
-  await selectAllByKeyboard(page); // second select all
+  await selectAllByKeyboard(page); // second select in page scope
+  await assertSelectedBlockCount(page, 1);
+
+  await focusRichText(page);
+  await selectAllByKeyboard(page); // first select all in rich text
+  await assertSelection(page, 0, 0, 5);
+  await selectAllByKeyboard(page); // second select all in rich text
   await assertSelectedBlockCount(page, 1);
 });
 

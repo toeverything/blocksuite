@@ -166,6 +166,17 @@ export const createKeyboardBindings = (
     return ALLOW_DEFAULT;
   }
 
+  // scend selectAll should select all blocks
+  let _firstSelectAll = true;
+
+  function selectAll(this: KeyboardEventThis) {
+    if (!_firstSelectAll) {
+      selectionManager.selectAllBlocks();
+    }
+    _firstSelectAll = false;
+    return ALLOW_DEFAULT;
+  }
+
   const keyboardBindings: KeyboardBindings = {
     undo: {
       key: 'z',
@@ -233,6 +244,11 @@ export const createKeyboardBindings = (
       key: 'right',
       shiftKey: false,
       handler: keyRight,
+    },
+    selectAll: {
+      key: 'a',
+      shortKey: true,
+      handler: selectAll,
     },
   };
 
