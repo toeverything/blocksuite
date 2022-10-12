@@ -1,5 +1,6 @@
 .affine-list-block-container {
   box-sizing: border-box;
+  border-radius: 5px;
 }
 .affine-list-block-container--first {
   margin-top: 18px;

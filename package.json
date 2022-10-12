@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.0.0",
+  "version": "0.2.1",
   "description": "BlockSuite framework workspace",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
@@ -13,16 +13,14 @@
     "format": "prettier --write packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
-    "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist"
+    "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist",
+    "bump": "pnpm --recursive exec pnpm version minor && pnpm version minor --git-tag-version false",
+    "publish": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish --no-git-checks"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
-  "dependencies": {
-    "lit": "^2.3.1",
-    "quill": "^1.3.7",
-    "quill-cursors": "^4.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@playwright/test": "^1.25.2",
     "@types/node": "^18.7.16",
