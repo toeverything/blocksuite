@@ -2,7 +2,20 @@
 
 import { assert, describe, expect, it } from 'vitest';
 import { BaseBlockModel, Slot, Store } from '../';
-import { BlockSchema } from '../../editor/src/block-loader';
+
+// Use manual per-module import/export to support vitest environment on Node.js
+import { PageBlockModel } from '../../blocks/src/page-block/page-model';
+import { ParagraphBlockModel } from '../../blocks/src/paragraph-block/paragraph-model';
+import { ListBlockModel } from '../../blocks/src/list-block/list-model';
+import { GroupBlockModel } from '../../blocks/src/group-block/group-model';
+
+// Create BlockSchema manually
+export const BlockSchema = {
+  paragraph: ParagraphBlockModel,
+  page: PageBlockModel,
+  list: ListBlockModel,
+  group: GroupBlockModel,
+} as const;
 
 function serialize(store: Store) {
   return store.doc.toJSON();

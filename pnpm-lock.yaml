@@ -15,18 +15,11 @@ importers:
       eslint: ^8.23.0
       eslint-plugin-react: ^7.31.8
       eslint-plugin-react-hooks: ^4.6.0
-      lit: ^2.3.1
       prettier: ^2.7.1
       pretty-format: ^29.1.2
-      quill: ^1.3.7
-      quill-cursors: ^4.0.0
       typescript: ^4.8.3
       vite: ^3.1.0
       vitest: ^0.23.4
-    dependencies:
-      lit: 2.3.1
-      quill: 1.3.7
-      quill-cursors: 4.0.0
     devDependencies:
       '@playwright/test': 1.25.2
       '@types/node': 18.7.18
@@ -49,9 +42,15 @@ importers:
     specifiers:
       '@blocksuite/shared': workspace:*
       '@blocksuite/store': workspace:*
+      lit: ^2.3.1
+      quill: ^1.3.7
+      quill-cursors: ^4.0.0
     dependencies:
       '@blocksuite/shared': link:../shared
       '@blocksuite/store': link:../store
+      lit: 2.3.1
+      quill: 1.3.7
+      quill-cursors: 4.0.0
 
   packages/editor:
     specifiers:
@@ -60,11 +59,13 @@ importers:
       '@blocksuite/store': workspace:*
       '@types/marked': ^4.0.7
       '@types/quill': ^2.0.9
+      lit: ^2.3.1
       marked: ^4.1.0
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/shared': link:../shared
       '@blocksuite/store': link:../store
+      lit: 2.3.1
       marked: 4.1.0
     devDependencies:
       '@types/marked': 4.0.7
