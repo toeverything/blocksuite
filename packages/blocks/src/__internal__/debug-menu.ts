@@ -133,8 +133,8 @@ export class DebugMenu extends LitElement {
   static styles = css`
     .debug-menu {
       position: fixed;
-      left: 0;
       top: 0;
+      right: 0;
       width: 40px;
     }
     .debug-menu > button {
