@@ -10,8 +10,11 @@ import {
 import { BaseBlockModel, Store } from '@blocksuite/store';
 import { GroupBlockModel } from '../group-block';
 
-const params = new URLSearchParams(location.search);
-const initType = params.get('init') || 'default';
+const getInitType = () => {
+  const params = new URLSearchParams(location.search);
+  const initType = params.get('init') || 'default';
+  return initType;
+};
 
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
@@ -103,7 +106,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _handleDebugInit() {
-    if (initType === 'list') {
+    if (getInitType() === 'list') {
       const pageId = this.store.addBlock({ flavour: 'page' });
       const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
       for (let i = 0; i < 3; i++) {
