@@ -40,6 +40,7 @@ test('convert to numbered list block', async ({ page }) => {
   await focusRichText(page, 0); // created 0, 1, 2
   await convertToBulletedListByClick(page); // replaced 2 to 3
   await convertToNumberedListByClick(page);
+  await focusRichText(page, 0);
 
   const listSelector = '.affine-list-rich-text-wrapper';
   const bulletIconSelector = `${listSelector} > div`;
@@ -50,6 +51,7 @@ test('convert to numbered list block', async ({ page }) => {
   // await expect(page.locator(numberIconSelector)).toHaveCount(1);
 
   await redoByClick(page);
+  await focusRichText(page, 0);
   await pressEnter(page); // created 4
   await assertBlockType(page, '4', 'numbered');
 
