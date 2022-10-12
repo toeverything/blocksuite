@@ -143,7 +143,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test.only('select all block', async ({ page }) => {
+test('select all block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
   await addGroupByClick(page);
