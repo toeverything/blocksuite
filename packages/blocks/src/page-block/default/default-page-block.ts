@@ -67,11 +67,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
     hotkeyManager.removeListener([undo, redo, selectAll], 'page');
   }
+
   private _onKeyDown(e: KeyboardEvent) {
     const hasContent = this._blockTitle.value.length > 0;
 
     if (e.key === 'Enter' && hasContent) {
-      asyncFocusRichText(this.store, this.model.children[0].id);
+      const defaultGroup = this.model.children[0];
+      const firstParagraph = defaultGroup.children[0];
+      asyncFocusRichText(this.store, firstParagraph.id);
     }
   }
 
@@ -80,8 +83,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
-      store.addBlock({ flavour: 'page', title });
-      store.addBlock({ flavour: 'paragraph' });
+      const pageId = store.addBlock({ flavour: 'page', title });
+      const groupId = store.addBlock({ flavour: 'group' }, pageId);
+      store.addBlock({ flavour: 'paragraph' }, groupId);
       return;
     }
 
