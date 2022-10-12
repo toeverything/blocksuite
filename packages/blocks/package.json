@@ -20,10 +20,13 @@
     ".": "./src/index.ts"
   },
   "publishConfig": {
+    "access": "public",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./src/*": "./dist/*.js"
+      "./style": "./dist/style.css",
+      "./src/*": "./dist/*.js",
+      ".": "./dist/index.js"
     }
   }
 }
