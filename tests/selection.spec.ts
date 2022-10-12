@@ -148,5 +148,5 @@ test('select all block', async ({ page }) => {
   await addGroupByClick(page);
   await addGroupByClick(page);
   await selectAll(page);
-  assertSelectedBlockCount(page, 3);
+  await assertSelectedBlockCount(page, 3);
 });

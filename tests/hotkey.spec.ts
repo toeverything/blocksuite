@@ -57,5 +57,5 @@ test('select all block by hot key', async ({ page }) => {
     position: { x: 70, y: 0 },
   });
   await pressCtrlA(page);
-  assertSelectedBlockCount(page, 3);
+  await assertSelectedBlockCount(page, 3);
 });
