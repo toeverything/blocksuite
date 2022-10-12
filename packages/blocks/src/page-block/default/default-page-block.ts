@@ -1,6 +1,5 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-
 import {
   asyncFocusRichText,
   BLOCK_ID_ATTR,
@@ -9,14 +8,13 @@ import {
 } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
 
-import type { PageBlockModel } from '../page-model';
+import type { PageBlockModel } from '..';
 import {
   SelectionManager,
-  MouseManager,
+  DefaultMouseManager,
   focusTextEnd,
   BlockChildrenContainer,
 } from '../../__internal__';
-import '../../__internal__';
 import style from './style.css';
 
 @customElement('default-page-block')
@@ -32,7 +30,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   selection!: SelectionManager;
 
   @state()
-  mouse!: MouseManager;
+  mouse!: DefaultMouseManager;
 
   @property()
   mouseRoot!: HTMLElement;
@@ -50,10 +48,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _bindHotkeys() {
     const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
     const scope = 'page';
-    hotkeyManager.addListener(undo, scope, () => {
+    hotkeyManager.addListener(undo, scope, (e: Event) => {
+      e.preventDefault();
       this.store.undo();
     });
-    hotkeyManager.addListener(redo, scope, () => this.store.redo());
+    hotkeyManager.addListener(redo, scope, (e: Event) => {
+      e.preventDefault();
+      this.store.redo();
+    });
     hotkeyManager.addListener(selectAll, scope, (e: Event) => {
       e.preventDefault();
       this.selection.selectAllBlocks();
@@ -63,9 +65,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _removeHotkeys() {
     const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
-    hotkeyManager.removeListener(undo);
-    hotkeyManager.removeListener(redo);
-    hotkeyManager.removeListener(selectAll);
+    hotkeyManager.removeListener([undo, redo, selectAll], 'page');
   }
   private _onKeyDown(e: KeyboardEvent) {
     const hasContent = this._blockTitle.value.length > 0;
@@ -97,7 +97,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this.selection = new SelectionManager(this.mouseRoot, this.store);
-      this.mouse = new MouseManager(this.mouseRoot);
+      this.mouse = new DefaultMouseManager(this.mouseRoot);
     }
     super.update(changedProperties);
   }

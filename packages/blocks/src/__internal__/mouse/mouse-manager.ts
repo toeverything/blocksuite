@@ -1,8 +1,8 @@
 import { Slot, flattenDisposable, IDisposable } from '@blocksuite/store';
 
-export type MouseEventHandler = (e: MouseEvent) => void;
+export type MouseEventListener = (e: MouseEvent) => void;
 
-export class MouseManager {
+export class DefaultMouseManager {
   private _isMouseDown = false;
   private _disposables: IDisposable[] = [];
 
@@ -21,55 +21,43 @@ export class MouseManager {
       },
     ];
     this._target = target;
-    this._initMouseHandlers();
-  }
-
-  private _initMouseHandlers() {
-    const { _target } = this;
-    _target.addEventListener('mousedown', e => this._emitMouseDown(e));
-    _target.addEventListener('mouseup', e => this._emitMouseUp(e));
-    _target.addEventListener('mousemove', e => this._emitMouseMove(e));
-  }
-
-  public onMouseDown(handler: MouseEventHandler) {
-    const disposable = this._slots.mouseDown.on(handler);
-    this._disposables.push(disposable);
-    return disposable;
-  }
-
-  private _emitMouseDown(e: MouseEvent) {
-    this._slots.mouseDown.emit(e);
-  }
-
-  public onMouseUp(handler: MouseEventHandler) {
-    const disposable = this._slots.mouseUp.on(handler);
-    this._disposables.push(disposable);
-    return disposable;
-  }
-
-  private _emitMouseUp(e: MouseEvent) {
-    this._slots.mouseUp.emit(e);
-  }
-
-  public onMouseMove(handler: MouseEventHandler) {
-    const disposable = this._slots.mouseMove.on(handler);
-    this._disposables.push(disposable);
-    return disposable;
-  }
-
-  private _emitMouseMove(e: MouseEvent) {
-    this._slots.mouseMove.emit(e);
+    this._initMouseListeners();
   }
 
   get isMouseDown() {
     return this._isMouseDown;
   }
 
-  public onDocumentMouseUpOnce(handler: (e: MouseEvent) => void) {
-    this._slots.documentMouseUp.once(handler);
+  private _initMouseListeners() {
+    const { _target } = this;
+    _target.addEventListener('mousedown', e => this._slots.mouseDown.emit(e));
+    _target.addEventListener('mouseup', e => this._slots.mouseUp.emit(e));
+    _target.addEventListener('mousemove', e => this._slots.mouseMove.emit(e));
   }
 
-  public dispose() {
+  addMouseDownListener(listener: MouseEventListener) {
+    const disposable = this._slots.mouseDown.on(listener);
+    this._disposables.push(disposable);
+    return disposable;
+  }
+
+  addMouseUpListener(listener: MouseEventListener) {
+    const disposable = this._slots.mouseUp.on(listener);
+    this._disposables.push(disposable);
+    return disposable;
+  }
+
+  addMouseMoveListener(listener: MouseEventListener) {
+    const disposable = this._slots.mouseMove.on(listener);
+    this._disposables.push(disposable);
+    return disposable;
+  }
+
+  addDocumentMouseUpOnceListener(listener: (e: MouseEvent) => void) {
+    this._slots.documentMouseUp.once(listener);
+  }
+
+  dispose() {
     flattenDisposable(this._disposables);
     this._disposables = [
       {

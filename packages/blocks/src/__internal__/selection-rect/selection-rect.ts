@@ -3,19 +3,19 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR, Point, Rect } from '@blocksuite/shared';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
-import { MouseManager } from '../mouse/mouse-manager';
+import { DefaultMouseManager } from '../mouse/mouse-manager';
 import { SelectionManager } from '../selection/selection-manager';
 
 @customElement('selection-rect')
 export class SelectionRect extends LitElement {
   @state()
-  rect?: Rect;
+  rect: Rect | null = null;
 
   @state()
-  startPoint?: Point;
+  startPoint: Point | null = null;
 
   @state()
-  endPoint?: Point;
+  endPoint: Point | null = null;
 
   @state()
   isShow = false;
@@ -24,14 +24,12 @@ export class SelectionRect extends LitElement {
   store!: Store;
 
   @property()
-  mouse!: MouseManager;
+  mouse!: DefaultMouseManager;
 
   @property()
   selection!: SelectionManager;
 
   private _handleEditorMousedown(e: MouseEvent) {
-    // this.selectionManager.selectedBlockIds = [];
-
     // ensure page title can be focused
     if (e.target instanceof HTMLInputElement) {
       return;
@@ -48,8 +46,8 @@ export class SelectionRect extends LitElement {
     ) {
       this.startPoint = new Point(e.clientX, e.clientY);
       this.isShow = true;
-      this.mouse.onDocumentMouseUpOnce(() => {
-        this._handleEditorMouseup();
+      this.mouse.addDocumentMouseUpOnceListener(() => {
+        this._handleMouseUp();
       });
     }
   }
@@ -66,19 +64,19 @@ export class SelectionRect extends LitElement {
     }
   }
 
-  private _handleEditorMouseup() {
+  private _handleMouseUp() {
     this.isShow = false;
-    this.startPoint = undefined;
-    this.rect = undefined;
+    this.startPoint = null;
+    this.rect = null;
   }
 
   firstUpdated() {
     if (!this.mouse) return;
 
-    this.mouse.onMouseDown(e => {
+    this.mouse.addMouseDownListener(e => {
       this._handleEditorMousedown(e);
     });
-    this.mouse.onMouseMove(e => {
+    this.mouse.addMouseMoveListener(e => {
       if (!this.store.root) return;
       this._handleMouseMove(e);
     });

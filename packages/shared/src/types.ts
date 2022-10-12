@@ -1,4 +1,4 @@
-import type { Store } from '@blocksuite/store';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { Point } from './rect';
 
 export type SelectionPosition = 'start' | 'end' | Point;
@@ -78,4 +78,8 @@ declare global {
   }
 }
 
-export type Detail<T> = WindowEventMap[T]['detail'];
+export type Detail<T extends keyof WindowEventMap> = WindowEventMap[T] extends {
+  detail: unknown;
+}
+  ? WindowEventMap[T]['detail']
+  : unknown;

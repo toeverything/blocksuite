@@ -4,6 +4,10 @@ import { AwarenessAdapter } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
 
+type PrelimTextEnityType = 'splitLeft' | 'splitRight';
+
+export type TextType = PrelimTextEntity | TextEntity;
+
 // Removes the pending '\n's if it has no attributes
 export function normQuillDelta(delta: any) {
   if (delta.length > 0) {
@@ -29,10 +33,6 @@ export function normQuillDelta(delta: any) {
   return delta;
 }
 
-type PrelimTextEnityType = 'splitLeft' | 'splitRight';
-
-export type TextType = PrelimTextEntity | TextEntity;
-
 const UNSUPPORTED_MSG = 'PrelimTextEntity does not support ';
 
 export class PrelimTextEntity {
@@ -48,18 +48,15 @@ export class PrelimTextEntity {
     throw new Error(UNSUPPORTED_MSG + 'clone');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  insert(_content: string, _index: number) {
+  insert() {
     throw new Error(UNSUPPORTED_MSG + 'insert');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  split(_: number): [PrelimTextEntity, PrelimTextEntity] {
+  split() {
     throw new Error(UNSUPPORTED_MSG + 'split');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  join(_: TextEntity) {
+  join() {
     throw new Error(UNSUPPORTED_MSG + 'join');
   }
 
@@ -67,13 +64,15 @@ export class PrelimTextEntity {
     throw new Error(UNSUPPORTED_MSG + 'clear');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  applyDelta(_: any) {
+  format() {
+    throw new Error(UNSUPPORTED_MSG + 'format');
+  }
+
+  applyDelta() {
     throw new Error(UNSUPPORTED_MSG + 'applyDelta');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  sliceToDelta(_begin: number, _end?: number) {
+  sliceToDelta() {
     throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
   }
 }
@@ -104,11 +103,16 @@ export class TextEntity {
   join(other: TextEntity) {
     const yOther = other._yText;
     const delta = yOther.toDelta();
-
     delta.splice(0, 0, { retain: this._yText.length });
     this._yText.applyDelta(delta);
     // @ts-ignore
     this._yText.meta = { join: true };
+  }
+
+  format(index: number, length: number, format: any) {
+    this._yText.format(index, length, format);
+    // @ts-ignore
+    this._yText.meta = { format: true };
   }
 
   clear() {

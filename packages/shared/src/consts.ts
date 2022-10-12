@@ -15,6 +15,7 @@ export const DefaultHotkeyMap = {
   left: 'left',
   right: 'right',
   enter: 'enter',
+  code: 'command+e,ctrl+e',
 };
 
 export const PREVENT_DEFAULT = false;

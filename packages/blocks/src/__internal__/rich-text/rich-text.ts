@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import { BlockHost, hotkeyManager } from '@blocksuite/shared';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 
 import style from './styles.css';
@@ -48,9 +48,10 @@ export class RichText extends LitElement {
         },
       },
     });
+
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
-    this._bindHotKey();
+    this._bindHotKey(store);
     this.model.propsUpdated.on(() => this.requestUpdate());
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
@@ -68,11 +69,30 @@ export class RichText extends LitElement {
     hotkeyManager.setScope('page');
   }
 
-  private _bindHotKey() {
+  private _bindHotKey(_store: Store) {
     hotkeyManager.addListener(
       hotkeyManager.hotkeysMap.selectAll,
       this.model.id,
       this._onSelectAll
+    );
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.code,
+      this.model.id,
+      () => {
+        const range = this._quill?.getSelection();
+        if (range) {
+          _store.captureSync();
+          _store.transact(() => {
+            const { index, length } = range;
+            const format = this._quill?.getFormat(range);
+            if (format?.code) {
+              this.model?.text?.format(index, length, { code: false });
+            } else {
+              this.model?.text?.format(index, length, { code: true });
+            }
+          });
+        }
+      }
     );
   }
 

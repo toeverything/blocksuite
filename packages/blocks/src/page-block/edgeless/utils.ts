@@ -1,11 +1,14 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-
 import { BlockHost } from '@blocksuite/shared';
 import { BaseBlockModel } from '@blocksuite/store';
 
-import type { ViewportState } from './edgeless-page-block';
+import type {
+  XYWH,
+  ViewportState,
+  SelectionState,
+} from './edgeless-page-block';
 import { GroupBlockModel } from '../..';
 import { BlockElement } from '../../__internal__';
 import '../../__internal__';
@@ -32,7 +35,23 @@ export function applyDeltaCenter(
   return { ...current, viewportX: newX, viewportY: newY };
 }
 
-type XYWH = [number, number, number, number];
+export function EdgelessSelectionBox(selectionState: SelectionState) {
+  const { selected, box } = selectionState;
+  if (!selected.length || !box) return html`<div></div>`;
+
+  const style = {
+    position: 'absolute',
+    left: box.x + 'px',
+    top: box.y + 'px',
+    width: box.w + 'px',
+    height: box.h + 'px',
+    border: '2px solid #6ccfff',
+    pointerEvents: 'none',
+    boxSizing: 'border-box',
+  };
+
+  return html` <div style=${styleMap(style)}></div> `;
+}
 
 function EdgelessBlockChild(
   model: GroupBlockModel,

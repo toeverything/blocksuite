@@ -1,12 +1,9 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-
 import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
+
 import type { GroupBlockModel } from './group-model';
-
 import { BlockChildrenContainer } from '../__internal__';
-import '../__internal__';
-
 import style from './style.css';
 
 @customElement('group-block')
