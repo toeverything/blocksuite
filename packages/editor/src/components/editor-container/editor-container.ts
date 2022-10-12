@@ -1,10 +1,11 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { Store } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
+import style from './style.css';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
@@ -13,6 +14,10 @@ const room = params.get('room') || 'virgo-default';
 
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @state()
   store = new Store(room).register(BlockSchema);
 
@@ -124,12 +129,6 @@ export class EditorContainer extends LitElement {
     `;
 
     return html`
-      <style>
-        .affine-editor-container {
-          position: relative;
-          padding: 10px 70px;
-        }
-      </style>
       <div class="affine-editor-container">
         <debug-menu
           .store=${this.store}

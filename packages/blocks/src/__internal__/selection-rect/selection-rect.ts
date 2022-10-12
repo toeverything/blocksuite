@@ -98,7 +98,7 @@ export class SelectionRect extends LitElement {
     return html`
       <style>
         .affine-selection-rect {
-          background-color: rgba(62, 111, 219, 0.1);
+          background-color: rgba(104, 128, 255, 0.1);
           position: absolute;
           z-index: 99;
         }

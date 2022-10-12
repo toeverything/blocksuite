@@ -1,10 +1,10 @@
 import {
   BLOCK_ID_ATTR,
-  Point,
   Rect,
   SelectedBlock,
   SelectionInfo,
   SelectionPosition,
+  SelectOptions,
 } from '@blocksuite/shared';
 import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
@@ -23,8 +23,9 @@ export class SelectionManager {
   private _container: HTMLElement;
   private _store: Store;
   private _disposables: IDisposable[] = [];
-  private _blockSelectSlotMap: { [k in string]: Slot<boolean> } = {};
-  private _blockActiveSlotMap: { [k in string]: Slot<SelectionPosition> } = {};
+  private _blockSelectSlotMap: {
+    [k in string]: Slot<SelectOptions | undefined>;
+  } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
   private _anchorBlockPosition: number | null = null;
@@ -32,7 +33,7 @@ export class SelectionManager {
   private _slots = {
     selection: new Slot<SelectionInfo>(),
   };
-  private _lastCursorPosition: Point | null = null;
+  public lastSelectionPosition: SelectionPosition = 'start';
   private _selectionInfo: SelectionInfo = { type: 'None' };
 
   constructor(container: HTMLElement, store: Store) {
@@ -49,16 +50,15 @@ export class SelectionManager {
   set selectedBlockIds(ids: Array<string>) {
     const blocksToUnselect = without<string>(this._selectedBlockIds, ...ids);
     const blocksToSelect = without<string>(ids, ...this._selectedBlockIds);
+    this._selectedBlockIds = ids;
+    this._updateSelectionInfo();
+    this._emitSelectionChange();
     blocksToUnselect.forEach(blockId => {
-      this._emitBlockSelectionChange(blockId, false);
+      this._emitBlockSelectionChange(blockId);
     });
     blocksToSelect.forEach(blockId => {
-      this._emitBlockSelectionChange(blockId, true);
+      this._emitBlockSelectionChange(blockId);
     });
-    this._selectedBlockIds = ids;
-    this._emitSelectionChange();
-
-    this._updateSelectionInfo();
   }
 
   get type() {
@@ -179,18 +179,9 @@ export class SelectionManager {
     return slot;
   }
 
-  private _getBlockActiveSlot(blockId: string) {
-    let slot = this._blockActiveSlotMap[blockId];
-    if (!slot) {
-      slot = new Slot();
-      this._blockActiveSlotMap[blockId] = slot;
-    }
-    return slot;
-  }
-
   public addBlockSelectedListener(
     blockId: string,
-    handler: (selected: boolean) => void
+    handler: (selectOptions?: SelectOptions) => void
   ) {
     const slot = this._getBlockSelectSlot(blockId);
     const disposable = slot.on(handler);
@@ -206,10 +197,13 @@ export class SelectionManager {
     delete this._blockSelectSlotMap[blockId];
   }
 
-  private _emitBlockSelectionChange(blockId: string, selected: boolean) {
+  private _emitBlockSelectionChange(
+    blockId: string,
+    selectOptions?: SelectOptions
+  ) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
-      slot.emit(selected);
+      slot.emit(selectOptions);
     }
   }
 
@@ -328,17 +322,16 @@ export class SelectionManager {
   public activatePreviousBlock(blockId: string, position?: SelectionPosition) {
     let nextPosition = position;
     if (nextPosition) {
-      if (nextPosition instanceof Point) {
-        this._lastCursorPosition = nextPosition;
-      } else {
-        this._lastCursorPosition = null;
-      }
-    } else if (this._lastCursorPosition) {
-      nextPosition = this._lastCursorPosition;
+      this.lastSelectionPosition = nextPosition;
+    } else if (this.lastSelectionPosition) {
+      nextPosition = this.lastSelectionPosition;
     }
     const preNodeModel = this._getPreviousBlock(blockId);
     if (preNodeModel) {
-      this.activeBlockById(preNodeModel.id, nextPosition);
+      this._emitBlockSelectionChange(preNodeModel.id, {
+        needFocus: true,
+        from: 'next',
+      });
     }
   }
 
@@ -348,45 +341,16 @@ export class SelectionManager {
   ) {
     let nextPosition = position;
     if (nextPosition) {
-      if (nextPosition instanceof Point) {
-        this._lastCursorPosition = nextPosition;
-      } else {
-        this._lastCursorPosition = null;
-      }
-    } else if (this._lastCursorPosition) {
-      nextPosition = this._lastCursorPosition;
+      this.lastSelectionPosition = nextPosition;
+    } else if (this.lastSelectionPosition) {
+      nextPosition = this.lastSelectionPosition;
     }
     const nextNodeModel = this._getNextBlock(blockId);
     if (nextNodeModel) {
-      this.activeBlockById(nextNodeModel.id, nextPosition);
-    }
-  }
-
-  public addBlockActiveListener(
-    blockId: string,
-    handler: (position: SelectionPosition) => void
-  ) {
-    const slot = this._getBlockActiveSlot(blockId);
-    const disposable = slot.on(handler);
-    this._disposables.push(disposable);
-    return disposable;
-  }
-
-  public removeBlockActiveListener(blockId: string) {
-    const slot = this._blockActiveSlotMap[blockId];
-    if (slot) {
-      slot.dispose();
-    }
-    return delete this._blockActiveSlotMap[blockId];
-  }
-
-  public activeBlockById(
-    blockId: string,
-    position: SelectionPosition = 'start'
-  ) {
-    const slot = this._blockActiveSlotMap[blockId];
-    if (slot) {
-      slot.emit(position);
+      this._emitBlockSelectionChange(nextNodeModel.id, {
+        needFocus: true,
+        from: 'previous',
+      });
     }
   }
 

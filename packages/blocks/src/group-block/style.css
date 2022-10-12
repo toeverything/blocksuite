@@ -2,5 +2,5 @@
   padding-left: 0;
 }
 .affine-group-block-container.selected {
-  background-color: rgba(152, 172, 189, 0.1);
+  background-color: var(--affine-selected-color);
 }

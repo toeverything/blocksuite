@@ -8,10 +8,10 @@ const listPrefixStyle = styleMap({
   flexShrink: '0',
   minWidth: '26px',
   height: '26px',
-  padding: '3px 0',
+  marginTop: '3px',
   marginRight: '4px',
   display: 'flex',
-  alignItems: 'flex-end',
+  alignItems: 'center',
   justifyContent: 'flex-end',
 });
 

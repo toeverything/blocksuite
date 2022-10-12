@@ -1,7 +1,7 @@
 import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
 export type ParagraphType =
-  | 'paragraph'
+  | 'text'
   | 'quote'
   | 'text'
   | 'h1'
@@ -21,11 +21,11 @@ export class ParagraphBlockModel
   implements ParagraphBlockProps
 {
   flavour = 'paragraph' as const;
-  type: ParagraphType = 'paragraph';
+  type: ParagraphType = 'text';
 
   constructor(store: Store, props: Partial<ParagraphBlockProps>) {
     super(store, props);
-    this.type = props.type ?? 'paragraph';
+    this.type = props.type ?? 'text';
   }
 
   override block2html(
