@@ -287,14 +287,14 @@ export class DebugMenu extends LitElement {
           title="export html"
           @click=${this._onExportHtml}
         >
-          Html
+          📙
         </button>
         <button
-          aria-label="export html"
-          title="export html"
+          aria-label="export markdown"
+          title="export markdown"
           @click=${this._onExportMarkDown}
         >
-          MD
+          📗
         </button>
       </div>
     `;

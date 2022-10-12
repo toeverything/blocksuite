@@ -33,7 +33,7 @@ const FileExporter = {
   },
   exportHtml: (pageTitle: string, htmlContent: string) => {
     FileExporter.exportFile(
-      pageTitle || 'Undefined' + '.html',
+      (pageTitle || 'Untitled') + '.html',
       FileExporter.decorateHtml(pageTitle, htmlContent),
       'text/html'
     );
@@ -41,7 +41,7 @@ const FileExporter = {
 
   exportMarkdown: (pageTitle: string, mdContent: string) => {
     FileExporter.exportFile(
-      pageTitle || 'Undefined' + '.md',
+      (pageTitle || 'Untitled') + '.md',
       mdContent,
       'text/plain'
     );
