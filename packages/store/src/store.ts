@@ -49,7 +49,8 @@ export interface StackItem {
   type: 'undo' | 'redo';
 }
 
-const IS_WEB = !import.meta.env.SSR;
+// Workaround
+const IS_WEB = typeof window !== 'undefined';
 
 function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));

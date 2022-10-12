@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "",
   "main": "src/index.ts",
@@ -15,6 +15,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/shared": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "lit": "^2.3.1",
     "marked": "^4.1.0"
   },
   "devDependencies": {
@@ -26,6 +27,7 @@
     ".": "./src/index.ts"
   },
   "publishConfig": {
+    "access": "public",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
