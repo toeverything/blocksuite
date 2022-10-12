@@ -15,6 +15,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/shared": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "lit": "^2.3.1",
     "marked": "^4.1.0"
   },
   "devDependencies": {

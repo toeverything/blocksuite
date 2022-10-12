@@ -59,11 +59,13 @@ importers:
       '@blocksuite/store': workspace:*
       '@types/marked': ^4.0.7
       '@types/quill': ^2.0.9
+      lit: ^2.3.1
       marked: ^4.1.0
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/shared': link:../shared
       '@blocksuite/store': link:../store
+      lit: 2.3.1
       marked: 4.1.0
     devDependencies:
       '@types/marked': 4.0.7
