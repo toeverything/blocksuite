@@ -7,6 +7,8 @@ import {
   inlineCode,
   undoByClick,
   redoByClick,
+  addGroupByClick,
+  pressCtrlA,
 } from './utils/actions';
 import {
   assertSelection,
@@ -43,4 +45,17 @@ test('rich-text code-inline hotkey scope', async ({ page }) => {
 
   await inlineCode(page);
   await assertInlineCode(page, false);
+});
+
+test('select all block by hot key', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await addGroupByClick(page);
+  await addGroupByClick(page);
+  await focusRichText(page);
+  // IMP: not stable
+  await page.click('body', {
+    position: { x: 70, y: 0 },
+  });
+  await pressCtrlA(page);
+  await assertSelectedBlockCount(page, 3);
 });
