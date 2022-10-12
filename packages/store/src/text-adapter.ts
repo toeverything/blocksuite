@@ -3,6 +3,11 @@ import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { Quill } from 'quill';
 import type { Store } from './store';
+
+type PrelimTextEnityType = 'splitLeft' | 'splitRight';
+
+export type TextType = PrelimTextEntity | TextEntity;
+
 // Removes the pending '\n's if it has no attributes
 export function normQuillDelta(delta: any) {
   if (delta.length > 0) {
