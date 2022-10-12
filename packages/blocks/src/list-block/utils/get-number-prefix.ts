@@ -41,7 +41,7 @@ export const number2roman = (num: number) => {
 };
 
 const numberStyle = styleMap({
-  color: 'var(--affine-list-prefix-color)',
+  color: 'var(--affine-highlight-color)',
   fontSize: '14px',
   lineHeight: '26px',
   fontFamily: 'var(--affine-list-prefix-font-family)',

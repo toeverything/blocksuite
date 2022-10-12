@@ -111,6 +111,7 @@ export class EdgelessPageBlockComponent
           position: relative;
           box-sizing: border-box;
           overflow: hidden;
+          height: 100%;
         }
       </style>
       <div class="affine-edgeless-page-block-container">

@@ -2,8 +2,11 @@
   font-family: var(--affine-font-family);
   font-size: 18px;
   line-height: 26px;
-  color: var(--affine-font-color);
+  color: var(--affine-primary-color);
   font-weight: 400;
+  width: 720px;
+  height: 100%;
+  margin: 0 auto;
 }
 
 .affine-default-page-block-container > .affine-block-children-container {
@@ -11,6 +14,7 @@
 }
 
 .affine-default-page-block-title {
+  width: 100%;
   font-size: 40px;
   line-height: 50px;
   font-weight: 700;
