@@ -94,7 +94,6 @@ export class RichText extends LitElement {
         }
       }
     );
-<<<<<<< HEAD
     hotkeyManager.addListener(
       hotkeyManager.hotkeysMap.strikethrough,
       this.model.id,
@@ -114,8 +113,6 @@ export class RichText extends LitElement {
         }
       }
     );
-=======
->>>>>>> origin
   }
 
   private _onSelectAll() {

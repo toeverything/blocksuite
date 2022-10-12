@@ -7,23 +7,14 @@ import {
   inlineCode,
   undoByClick,
   redoByClick,
-<<<<<<< HEAD
   strikethrough,
   undoByKeyboard,
   redoByKeyboard,
-=======
-  addGroupByClick,
-  pressCtrlA,
->>>>>>> origin
 } from './utils/actions';
 import {
   assertSelection,
   assertSelectedBlockCount,
-<<<<<<< HEAD
   assertTextFormat,
-=======
-  assertInlineCode,
->>>>>>> origin
 } from './utils/asserts';
 
 test('rich-text hotkey scope', async ({ page }) => {
