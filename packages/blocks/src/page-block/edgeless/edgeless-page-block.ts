@@ -5,14 +5,9 @@ import { BlockHost, BLOCK_ID_ATTR, Bound } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
 
 import type { PageBlockModel, GroupBlockModel } from '../..';
-import {
-  applyDeltaCenter,
-  applyDeltaZoom,
-  EdgelessBlockChildrenContainer,
-  EdgelessSelectionBox,
-} from './utils';
+import { EdgelessBlockChildrenContainer, EdgelessSelectionBox } from './utils';
 import { SelectionManager } from '../../__internal__';
-import { EdgelessMouseManager, getSelectionBoxBound } from './mouse-manager';
+import { EdgelessMouseManager } from './mouse-manager';
 
 export interface ViewportState {
   zoom: number;
@@ -22,7 +17,7 @@ export interface ViewportState {
   height: number;
 }
 
-export interface SelectionState {
+export interface EdgelessSelectionState {
   selected: GroupBlockModel[];
   box: Bound | null;
 }
@@ -30,7 +25,8 @@ export interface SelectionState {
 export interface IEdgelessContainer extends HTMLElement {
   store: Store;
   viewport: ViewportState;
-  setSelectionState: (state: SelectionState) => void;
+  readonly selectionState: EdgelessSelectionState;
+  setSelectionState: (state: EdgelessSelectionState) => void;
 }
 
 export type XYWH = [number, number, number, number];
@@ -66,45 +62,19 @@ export class EdgelessPageBlockComponent
     height: 300,
   };
 
-  private _selectionState: SelectionState = {
+  private _selectionState: EdgelessSelectionState = {
     selected: [],
     box: null,
   };
 
-  setSelectionState(state: SelectionState) {
+  get selectionState() {
+    return this._selectionState;
+  }
+
+  setSelectionState(state: EdgelessSelectionState) {
     this._selectionState = state;
     this.requestUpdate();
   }
-
-  private _refreshSelectionBox() {
-    this.setSelectionState({
-      selected: this._selectionState.selected,
-      box: getSelectionBoxBound(
-        this.viewport,
-        this._selectionState.selected[0]?.xywh ?? '[0,0,0,0]'
-      ),
-    });
-  }
-
-  private _handleWheel = (e: WheelEvent) => {
-    const { viewport } = this;
-    e.preventDefault();
-    // pan
-    if (!e.ctrlKey) {
-      const dx = e.deltaX / viewport.zoom;
-      const dy = e.deltaY / viewport.zoom;
-      const newState = applyDeltaCenter(viewport, dx, dy);
-      this.viewport = newState;
-      this._refreshSelectionBox();
-    }
-    // zoom
-    else {
-      const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-      const newState = applyDeltaZoom(viewport, delta);
-      this.viewport = newState;
-      this._refreshSelectionBox();
-    }
-  };
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -117,10 +87,6 @@ export class EdgelessPageBlockComponent
       this.mouse = new EdgelessMouseManager(this);
     }
     super.update(changedProperties);
-  }
-
-  firstUpdated() {
-    this.addEventListener('wheel', this._handleWheel);
   }
 
   disconnectedCallback() {

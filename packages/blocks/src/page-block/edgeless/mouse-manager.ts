@@ -14,6 +14,25 @@ interface EdgelessSelectionEvent extends IPoint {
   };
 }
 
+const MIN_ZOOM = 0.1;
+
+function applyDeltaZoom(current: ViewportState, delta: number): ViewportState {
+  const val = (current.zoom * (100 + delta)) / 100;
+  const newZoom = Math.max(val, MIN_ZOOM);
+  // TODO ensure center stable
+  return { ...current, zoom: newZoom };
+}
+
+function applyDeltaCenter(
+  current: ViewportState,
+  deltaX: number,
+  deltaY: number
+): ViewportState {
+  const newX = current.viewportX + deltaX;
+  const newY = current.viewportY + deltaY;
+  return { ...current, viewportX: newX, viewportY: newY };
+}
+
 function isFarEnough(a: IPoint, b: IPoint, d = 2) {
   return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) > d * d;
 }
@@ -96,7 +115,7 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
-export function initDomEventHandlers(
+function initMouseEventHandlers(
   container: HTMLElement,
   onContainerDragStart: (e: EdgelessSelectionEvent) => void,
   onContainerDragMove: (e: EdgelessSelectionEvent) => void,
@@ -186,13 +205,52 @@ export function initDomEventHandlers(
   return dispose;
 }
 
+function refreshSelectionBox(container: IEdgelessContainer) {
+  container.setSelectionState({
+    selected: container.selectionState.selected,
+    box: getSelectionBoxBound(
+      container.viewport,
+      container.selectionState.selected[0]?.xywh ?? '[0,0,0,0]'
+    ),
+  });
+}
+
+function initWheelEventHandlers(container: IEdgelessContainer) {
+  const wheelHandler = (e: WheelEvent) => {
+    e.preventDefault();
+
+    const { viewport } = container;
+
+    // pan
+    if (!e.ctrlKey) {
+      const dx = e.deltaX / viewport.zoom;
+      const dy = e.deltaY / viewport.zoom;
+      const newState = applyDeltaCenter(viewport, dx, dy);
+      container.viewport = newState;
+      refreshSelectionBox(container);
+    }
+    // zoom
+    else {
+      const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+      const newState = applyDeltaZoom(viewport, delta);
+      container.viewport = newState;
+      refreshSelectionBox(container);
+    }
+  };
+
+  container.addEventListener('wheel', wheelHandler);
+  const dispose = () => container.removeEventListener('wheel', wheelHandler);
+  return dispose;
+}
+
 export class EdgelessMouseManager {
   private _container: IEdgelessContainer;
-  private _disposeCallback: () => void;
+  private _mouseDisposeCallback: () => void;
+  private _wheelDisposeCallback: () => void;
 
   constructor(container: IEdgelessContainer) {
     this._container = container;
-    this._disposeCallback = initDomEventHandlers(
+    this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
       this._onContainerDragStart,
       this._onContainerDragMove,
@@ -202,6 +260,7 @@ export class EdgelessMouseManager {
       this._onContainerMouseMove,
       this._onContainerMouseOut
     );
+    this._wheelDisposeCallback = initWheelEventHandlers(container);
   }
 
   private get _blocks(): GroupBlockModel[] {
@@ -250,6 +309,7 @@ export class EdgelessMouseManager {
   };
 
   dispose() {
-    this._disposeCallback();
+    this._mouseDisposeCallback();
+    this._wheelDisposeCallback();
   }
 }
