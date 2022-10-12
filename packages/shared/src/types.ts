@@ -3,6 +3,11 @@ import { Point } from './rect';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
+export type SelectOptions = {
+  needFocus?: boolean;
+  from?: 'previous' | 'next';
+};
+
 /** Common context interface definition for block models. */
 export interface BlockHost {
   store: Store;
@@ -10,22 +15,17 @@ export interface BlockHost {
   selection: {
     addBlockSelectedListener: (
       blockId: string,
-      handler: (selected: boolean) => void
+      handler: (selectionInfo?: SelectOptions) => void
     ) => void;
     removeBlockSelectedListener: (blockId: string) => void;
-
-    addBlockActiveListener: (
-      blockId: string,
-      handler: (position: SelectionPosition) => void
-    ) => void;
-    removeBlockActiveListener: (blockId: string) => void;
-
     activatePreviousBlock: (
       blockId: string,
       position?: SelectionPosition
     ) => void;
     activateNextBlock: (blockId: string, position?: SelectionPosition) => void;
     selectAllBlocks: () => void;
+    selectionInfo: SelectionInfo;
+    lastSelectionPosition: SelectionPosition;
   };
 }
 

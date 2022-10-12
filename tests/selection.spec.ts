@@ -143,6 +143,20 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
+test('cursor move up and down through group', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  addGroupByClick(page);
+  await focusRichText(page);
+  let currentId;
+  const [id] = await getCursorBlockIdAndHeight(page);
+  await page.keyboard.press('ArrowDown');
+  currentId = (await getCursorBlockIdAndHeight(page))[0];
+  expect(id).not.toBe(currentId);
+  await page.keyboard.press('ArrowUp');
+  currentId = (await getCursorBlockIdAndHeight(page))[0];
+  expect(id).toBe(currentId);
+});
+
 test('select all block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
