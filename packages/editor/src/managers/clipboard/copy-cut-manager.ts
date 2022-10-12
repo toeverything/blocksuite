@@ -40,24 +40,37 @@ export class CopyCutManager {
   private _getClipItems() {
     const clips: ClipItem[] = [];
     const { selectionInfo } = this._selection;
+    let selectedBlocks: SelectedBlock[] = [];
+    if (selectionInfo.type === 'Block') {
+      selectedBlocks = selectionInfo.blocks;
+    } else if (
+      selectionInfo.type === 'Range' ||
+      selectionInfo.type === 'Caret'
+    ) {
+      selectedBlocks = [
+        {
+          id: selectionInfo.anchorBlockId,
+          startPos: selectionInfo.anchorBlockPosition || undefined,
+          endPos: selectionInfo.focusBlockPosition || undefined,
+          children: [],
+        },
+      ];
+    }
 
-    const affineClip = this._getCustomClip(selectionInfo);
+    const affineClip = this._getCustomClip(selectedBlocks);
     affineClip && clips.push(affineClip);
 
-    const textClip = this._getTextClip(selectionInfo);
+    const textClip = this._getTextClip(selectedBlocks);
     textClip && clips.push(textClip);
 
-    const htmlClip = this._getHtmlClip(selectionInfo);
+    const htmlClip = this._getHtmlClip(selectedBlocks);
     htmlClip && clips.push(htmlClip);
 
     return clips;
   }
 
-  private _getCustomClip(selectionInfo: SelectionInfo): ClipItem | null {
-    if (selectionInfo.type !== 'Block') {
-      return null;
-    }
-    const clipInfos = selectionInfo.blocks.map(selectedBlock =>
+  private _getCustomClip(selectedBlocks: SelectedBlock[]): ClipItem | null {
+    const clipInfos = selectedBlocks.map(selectedBlock =>
       this._getClipInfoBySelectionInfo(selectedBlock)
     );
     return new ClipItem(
@@ -68,21 +81,13 @@ export class CopyCutManager {
     );
   }
 
-  private _getHtmlClip(selectionInfo: SelectionInfo): ClipItem | null {
-    if (selectionInfo.type !== 'Block') {
-      return null;
-    }
-    const htmlText = this._editor.contentParser.block2Html(
-      selectionInfo.blocks
-    );
+  private _getHtmlClip(selectedBlocks: SelectedBlock[]): ClipItem | null {
+    const htmlText = this._editor.contentParser.block2Html(selectedBlocks);
     return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
   }
 
-  private _getTextClip(selectionInfo: SelectionInfo): ClipItem | null {
-    if (selectionInfo.type !== 'Block') {
-      return null;
-    }
-    const text = this._editor.contentParser.block2Text(selectionInfo.blocks);
+  private _getTextClip(selectedBlocks: SelectedBlock[]): ClipItem | null {
+    const text = this._editor.contentParser.block2Text(selectedBlocks);
     return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, text);
   }
 
