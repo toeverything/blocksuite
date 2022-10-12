@@ -1,7 +1,12 @@
 import type { Quill } from 'quill';
 import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
 
-import { BlockHost, Detail, SelectionPosition, SelectOptions } from './types';
+import {
+  BlockHost,
+  Detail,
+  SelectionPosition,
+  SelectionOptions,
+} from './types';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import { Point, Rect } from './rect';
 
@@ -417,11 +422,11 @@ export function commonTextActiveHandler(
 export function commonPassCursorHandler(
   id: string,
   selection: BlockHost['selection'],
-  selectOptions?: SelectOptions
+  selectionOptions?: SelectionOptions
 ) {
-  if (selectOptions?.needFocus) {
+  if (selectionOptions?.needFocus) {
     const lastSelectionPosition = selection.lastSelectionPosition;
-    if (selectOptions?.from === 'next') {
+    if (selectionOptions?.from === 'next') {
       selection.activatePreviousBlock(id, lastSelectionPosition);
     } else {
       selection.activateNextBlock(id, lastSelectionPosition);

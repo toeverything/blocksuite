@@ -4,7 +4,7 @@ import {
   SelectedBlock,
   SelectionInfo,
   SelectionPosition,
-  SelectOptions,
+  SelectionOptions,
 } from '@blocksuite/shared';
 import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
@@ -24,7 +24,7 @@ export class SelectionManager {
   private _store: Store;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: {
-    [k in string]: Slot<SelectOptions | undefined>;
+    [k in string]: Slot<SelectionOptions | undefined>;
   } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
@@ -181,7 +181,7 @@ export class SelectionManager {
 
   public addBlockSelectedListener(
     blockId: string,
-    handler: (selectOptions?: SelectOptions) => void
+    handler: (selectionOptions?: SelectionOptions) => void
   ) {
     const slot = this._getBlockSelectSlot(blockId);
     const disposable = slot.on(handler);
@@ -199,11 +199,11 @@ export class SelectionManager {
 
   private _emitBlockSelectionChange(
     blockId: string,
-    selectOptions?: SelectOptions
+    selectionOptions?: SelectionOptions
   ) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
-      slot.emit(selectOptions);
+      slot.emit(selectionOptions);
     }
   }
 
