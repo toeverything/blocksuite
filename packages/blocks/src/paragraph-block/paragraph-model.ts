@@ -30,15 +30,15 @@ export class ParagraphBlockModel
 
   override block2html(
     childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
     const text = super.block2html(
       childText,
-      _previousSiblingId,
-      _nextSiblingId,
+      previousSiblingId,
+      nextSiblingId,
       begin,
       end
     );
@@ -54,6 +54,40 @@ export class ParagraphBlockModel
         return `<${this.type}>${text}</${this.type}>`;
       case 'quote':
         return `<blockquote>${text}</blockquote>`;
+      default:
+        return text;
+    }
+  }
+
+  override block2markdown(
+    childText: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ) {
+    const text = super.block2markdown(
+      childText,
+      previousSiblingId,
+      nextSiblingId,
+      begin,
+      end
+    );
+    switch (this.type) {
+      case 'h1':
+        return '# ' + text;
+      case 'h2':
+        return '## ' + text;
+      case 'h3':
+        return '## ' + text;
+      case 'h4':
+        return '## ' + text;
+      case 'h5':
+        return '## ' + text;
+      case 'h6':
+        return '###### ' + text;
+      case 'quote':
+        return '> ' + text;
       default:
         return text;
     }

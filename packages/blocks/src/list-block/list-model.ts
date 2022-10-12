@@ -21,20 +21,20 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
 
   override block2html(
     childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
     let text = super.block2html(
       childText,
-      _previousSiblingId,
-      _nextSiblingId,
+      previousSiblingId,
+      nextSiblingId,
       begin,
       end
     );
-    const previousSiblingBlock = this.store.getBlockById(_previousSiblingId);
-    const nextSiblingBlock = this.store.getBlockById(_nextSiblingId);
+    const previousSiblingBlock = this.store.getBlockById(previousSiblingId);
+    const nextSiblingBlock = this.store.getBlockById(nextSiblingId);
     switch (this.type) {
       case 'bulleted':
         text = `<li>${text}</li>`;
@@ -81,5 +81,30 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
       }
     }
     return text;
+  }
+  override block2markdown(
+    childText: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ) {
+    const text = super.block2markdown(
+      childText,
+      previousSiblingId,
+      nextSiblingId,
+      begin,
+      end
+    );
+    switch (this.type) {
+      case 'bulleted':
+        return '* ' + text;
+      case 'numbered':
+        return '1. ' + text;
+      case 'todo':
+        return this.checked ? '* [x] ' : '* [] ' + text;
+      default:
+        return text;
+    }
   }
 }

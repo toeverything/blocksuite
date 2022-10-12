@@ -49,8 +49,8 @@ export class BaseBlockModel implements IBaseBlockProps {
 
   block2html(
     childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
@@ -59,6 +59,20 @@ export class BaseBlockModel implements IBaseBlockProps {
       return html + this._deltaLeaf2Html(item);
     }, '');
     return `${text}${childText}`;
+  }
+
+  block2markdown(
+    childText: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ) {
+    const delta = this.text?.sliceToDelta(begin || 0, end);
+    const text = delta.reduce((html: string, item: Record<string, unknown>) => {
+      return html + this._deltaLeaf2MarkDown(item);
+    }, '');
+    return `${text}\n\n${childText}`;
   }
 
   private _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
@@ -85,6 +99,35 @@ export class BaseBlockModel implements IBaseBlockProps {
     if (attributes.strikethrough) {
       return `<s>${text}</s>`;
     }
+    // todo link format
+    return text;
+  }
+
+  private _deltaLeaf2MarkDown(deltaLeaf: Record<string, unknown>) {
+    const text = deltaLeaf.insert;
+    const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
+      string,
+      boolean
+    >;
+    if (!attributes) {
+      return text;
+    }
+    if (attributes.bold) {
+      return `**${text}**`;
+    }
+    if (attributes.italic) {
+      return `*${text}*`;
+    }
+    if (attributes.underline) {
+      return `~${text}~`;
+    }
+    if (attributes.inlinecode) {
+      return '`' + text + '`';
+    }
+    if (attributes.strikethrough) {
+      return `~~${text}~~`;
+    }
+    // todo link format
     return text;
   }
 

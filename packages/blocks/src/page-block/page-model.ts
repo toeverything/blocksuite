@@ -10,11 +10,21 @@ export class PageBlockModel extends BaseBlockModel {
 
   override block2html(
     childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
-    return `<div>${this.title}${childText}</div>`;
+    return `<h1>${this.title}</h1>${childText}`;
+  }
+
+  override block2markdown(
+    childText: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ) {
+    return `# ${this.title}\n\n${childText}`;
   }
 }

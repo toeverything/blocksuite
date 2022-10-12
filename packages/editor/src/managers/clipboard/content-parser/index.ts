@@ -64,7 +64,7 @@ export class ContentParser {
       (htmlText, block, currentIndex: number, array: SelectedBlock[]) => {
         return (
           htmlText +
-          this._getHtmlInfoBySelectionInfo(
+          this._getMarkDownInfoBySelectionInfo(
             block,
             currentIndex > 0 ? array[currentIndex - 1] : null,
             currentIndex < array.length - 1 ? array[currentIndex + 1] : null
@@ -135,6 +135,40 @@ export class ContentParser {
     );
 
     const text = model.block2html(
+      children.join(''),
+      previousSibling?.id || '',
+      nextSibling?.id || '',
+      block.startPos,
+      block.endPos
+    );
+
+    return text;
+  }
+
+  private _getMarkDownInfoBySelectionInfo(
+    block: SelectedBlock,
+    previousSibling: SelectedBlock | null,
+    nextSibling: SelectedBlock | null
+  ): string {
+    const model = this._editor.store.getBlockById(block.id);
+    if (!model) {
+      return '';
+    }
+
+    const children: string[] = block.children.reduce(
+      (children, child, currentIndex: number, array: SelectedBlock[]) => {
+        const childText = this._getMarkDownInfoBySelectionInfo(
+          child,
+          currentIndex > 0 ? array[currentIndex - 1] : null,
+          currentIndex < array.length - 1 ? array[currentIndex + 1] : null
+        );
+        childText && children.push(childText);
+        return children;
+      },
+      [] as string[]
+    );
+
+    const text = model.block2markdown(
       children.join(''),
       previousSibling?.id || '',
       nextSibling?.id || '',
