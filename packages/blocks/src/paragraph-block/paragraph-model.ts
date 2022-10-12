@@ -40,9 +40,8 @@ export class ParagraphBlockModel
       case 'h5':
       case 'h6':
         return `<${this.type}>${text}</${this.type}>`;
-      // todo
       case 'quote':
-        return `<div>${text}</div>`;
+        return `<blockquote>${text}</blockquote>`;
       default:
         return text;
     }

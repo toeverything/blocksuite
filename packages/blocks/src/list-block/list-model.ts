@@ -21,6 +21,7 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
 
   override block2html(childText: string, begin?: number, end?: number) {
     const text = super.block2html(childText, begin, end);
+    // todo
     switch (this.type) {
       case 'bulleted':
         return `<ul><li>${text}</li></ul>`;
