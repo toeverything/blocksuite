@@ -1,38 +1,35 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-
 import { BlockHost } from '@blocksuite/shared';
 import { BaseBlockModel } from '@blocksuite/store';
 
-import type { ViewportState } from './edgeless-page-block';
+import type {
+  XYWH,
+  ViewportState,
+  EdgelessSelectionState,
+} from './edgeless-page-block';
 import { GroupBlockModel } from '../..';
 import { BlockElement } from '../../__internal__';
 import '../../__internal__';
 
-const MIN_ZOOM = 0.1;
+export function EdgelessSelectionBox(selectionState: EdgelessSelectionState) {
+  const { selected, box } = selectionState;
+  if (!selected.length || !box) return html`<div></div>`;
 
-export function applyDeltaZoom(
-  current: ViewportState,
-  delta: number
-): ViewportState {
-  const val = (current.zoom * (100 + delta)) / 100;
-  const newZoom = Math.max(val, MIN_ZOOM);
-  // TODO ensure center stable
-  return { ...current, zoom: newZoom };
+  const style = {
+    position: 'absolute',
+    left: box.x + 'px',
+    top: box.y + 'px',
+    width: box.w + 'px',
+    height: box.h + 'px',
+    border: '2px solid #6ccfff',
+    pointerEvents: 'none',
+    boxSizing: 'border-box',
+  };
+
+  return html` <div style=${styleMap(style)}></div> `;
 }
-
-export function applyDeltaCenter(
-  current: ViewportState,
-  deltaX: number,
-  deltaY: number
-): ViewportState {
-  const newX = current.viewportX + deltaX;
-  const newY = current.viewportY + deltaY;
-  return { ...current, viewportX: newX, viewportY: newY };
-}
-
-type XYWH = [number, number, number, number];
 
 function EdgelessBlockChild(
   model: GroupBlockModel,

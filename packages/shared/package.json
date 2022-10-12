@@ -7,8 +7,23 @@
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "@blocksuite/store": "workspace:*",
     "hotkeys-js": "^3.10.0"
+  },
+  "exports": {
+    "./src/*": "./src/*.ts",
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      "./src/*": "./dist/*.js",
+      ".": "./dist/index.js"
+    }
   }
 }

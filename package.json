@@ -11,7 +11,9 @@
     "test:headed": "playwright test --headed",
     "test:unit": "vitest --run",
     "format": "prettier --write packages tests",
-    "build:playground": "pnpm --filter @blocksuite/playground build"
+    "build": "pnpm -r build",
+    "build:playground": "pnpm --filter @blocksuite/playground build",
+    "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist"
   },
   "keywords": [],
   "author": "toeverything",

@@ -6,6 +6,7 @@
   "main": "src/index.ts",
   "scripts": {
     "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
+    "build": "tsc",
     "test": "vitest --run"
   },
   "keywords": [],
@@ -19,5 +20,17 @@
   },
   "devDependencies": {
     "@types/quill": "^2.0.9"
+  },
+  "exports": {
+    "./src/*": "./src/*.ts",
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      "./src/*": "./dist/*.js",
+      ".": "./dist/index.js"
+    }
   }
 }

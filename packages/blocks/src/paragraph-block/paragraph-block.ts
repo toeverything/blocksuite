@@ -1,23 +1,13 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import style from './style.css';
 import {
   BLOCK_ID_ATTR,
   commonTextActiveHandler,
   type BlockHost,
 } from '@blocksuite/shared';
-import type { ParagraphBlockModel } from './paragraph-model';
-
-// <<<<<<< HEAD
-// @customElement('paragraph-block-element')
-// export class ParagraphBlockElement extends LitElement {
-//   static styles = css`
-//     ${unsafeCSS(style)}
-//   `;
-//
-// =======
 import { BlockChildrenContainer } from '../__internal__';
-import '../__internal__';
+import type { ParagraphBlockModel } from './paragraph-model';
+import style from './style.css';
 
 @customElement('paragraph-block')
 export class ParagraphBlockComponent extends LitElement {
