@@ -1,4 +1,3 @@
-import { string } from 'lib0';
 import type { Store } from './store';
 import type { TextType } from './text-adapter';
 import { Slot } from './utils/slot';
