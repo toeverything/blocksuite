@@ -206,7 +206,7 @@ export class DebugMenu extends LitElement {
         <button
           aria-label="text"
           title="text"
-          @click=${() => this._onSetParagraphType('paragraph')}
+          @click=${() => this._onSetParagraphType('text')}
         >
           𝐓
         </button>
