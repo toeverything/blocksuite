@@ -17,7 +17,9 @@ const initType = params.get('init') || 'default';
 export class DebugMenu extends LitElement {
   @property()
   store!: Store;
+
   @property()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contentParser!: any;
 
   @state()

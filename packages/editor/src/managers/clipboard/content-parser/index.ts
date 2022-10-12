@@ -36,9 +36,19 @@ export class ContentParser {
   }
 
   public block2Html(blocks: SelectedBlock[]): string {
-    const htmlText = blocks.reduce((htmlText, block) => {
-      return htmlText + this._getHtmlInfoBySelectionInfo(block);
-    }, '');
+    const htmlText = blocks.reduce(
+      (htmlText, block, currentIndex: number, array: SelectedBlock[]) => {
+        return (
+          htmlText +
+          this._getHtmlInfoBySelectionInfo(
+            block,
+            currentIndex > 0 ? array[currentIndex - 1] : null,
+            currentIndex < array.length - 1 ? array[currentIndex + 1] : null
+          )
+        );
+      },
+      ''
+    );
     return htmlText;
   }
 
@@ -50,9 +60,19 @@ export class ContentParser {
   }
 
   public block2Markdown(blocks: SelectedBlock[]): string {
-    const htmlText = blocks.reduce((htmlText, block) => {
-      return htmlText + this._getHtmlInfoBySelectionInfo(block);
-    }, '');
+    const htmlText = blocks.reduce(
+      (htmlText, block, currentIndex: number, array: SelectedBlock[]) => {
+        return (
+          htmlText +
+          this._getHtmlInfoBySelectionInfo(
+            block,
+            currentIndex > 0 ? array[currentIndex - 1] : null,
+            currentIndex < array.length - 1 ? array[currentIndex + 1] : null
+          )
+        );
+      },
+      ''
+    );
     return htmlText;
   }
 
@@ -91,22 +111,43 @@ export class ContentParser {
     return block;
   }
 
-  private _getHtmlInfoBySelectionInfo(blocks: SelectedBlock): string {
-    const model = this._editor.store.getBlockById(blocks.id);
+  private _getHtmlInfoBySelectionInfo(
+    block: SelectedBlock,
+    previousSibling: SelectedBlock | null,
+    nextSibling: SelectedBlock | null
+  ): string {
+    const model = this._editor.store.getBlockById(block.id);
     if (!model) {
       return '';
     }
 
-    const children: string[] = [];
-    blocks.children.forEach(child => {
-      const childText = this._getHtmlInfoBySelectionInfo(child);
-      childText && children.push(childText);
-    });
+    const children: string[] = block.children.reduce(
+      (children, child, currentIndex: number, array: SelectedBlock[]) => {
+        const childText = this._getHtmlInfoBySelectionInfo(
+          child,
+          currentIndex > 0 ? array[currentIndex - 1] : null,
+          currentIndex < array.length - 1 ? array[currentIndex + 1] : null
+        );
+        childText && children.push(childText);
+        return children;
+      },
+      [] as string[]
+    );
+
+    const previousSiblingBlock = previousSibling
+      ? this._editor.store.getBlockById(previousSibling.id)
+      : null;
+
+    const nextSiblingBlock = nextSibling
+      ? this._editor.store.getBlockById(nextSibling.id)
+      : null;
 
     const text = model.block2html(
       children.join(''),
-      blocks.startPos,
-      blocks.endPos
+      previousSiblingBlock,
+      nextSiblingBlock,
+      block.startPos,
+      block.endPos
     );
 
     return text;

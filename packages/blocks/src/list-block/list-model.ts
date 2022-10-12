@@ -19,18 +19,65 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
     this.checked = props.checked ?? false;
   }
 
-  override block2html(childText: string, begin?: number, end?: number) {
-    const text = super.block2html(childText, begin, end);
-    // todo
+  override block2html(
+    childText: string,
+    previousSiblingBlock: BaseBlockModel | null,
+    nextSiblingBlock: BaseBlockModel | null,
+    begin?: number,
+    end?: number
+  ) {
+    let text = super.block2html(
+      childText,
+      previousSiblingBlock,
+      nextSiblingBlock,
+      begin,
+      end
+    );
     switch (this.type) {
       case 'bulleted':
-        return `<ul><li>${text}</li></ul>`;
+        text = `<li>${text}</li>`;
+        break;
       case 'numbered':
-        return `<ol><li>${text}</li></ol>`;
+        text = `<li>${text}</li>`;
+        break;
       case 'todo':
-        return `<ul><li>[ ] ${text}</li></ul>`;
+        text = `<li>[ ] ${text}</li>`;
+        break;
       default:
-        return text;
+        break;
     }
+    if (
+      previousSiblingBlock?.flavour !== this.flavour ||
+      previousSiblingBlock.type !== this.type
+    ) {
+      switch (this.type) {
+        case 'bulleted':
+        case 'todo':
+          text = `<ul>${text}`;
+          break;
+        case 'numbered':
+          text = `<ol>${text}`;
+          break;
+        default:
+          break;
+      }
+    }
+    if (
+      nextSiblingBlock?.flavour !== this.flavour ||
+      nextSiblingBlock.type !== this.type
+    ) {
+      switch (this.type) {
+        case 'bulleted':
+        case 'todo':
+          text = `${text}</ul>`;
+          break;
+        case 'numbered':
+          text = `${text}</ol>`;
+          break;
+        default:
+          break;
+      }
+    }
+    return text;
   }
 }

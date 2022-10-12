@@ -47,7 +47,13 @@ export class BaseBlockModel implements IBaseBlockProps {
     return children[children.length - 1];
   }
 
-  block2html(childText: string, begin?: number, end?: number) {
+  block2html(
+    childText: string,
+    previousSiblingBlock: BaseBlockModel | null,
+    nextSiblingBlock: BaseBlockModel | null,
+    begin?: number,
+    end?: number
+  ) {
     const delta = this.text?.sliceToDelta(begin || 0, end);
     const text = delta.reduce((html: string, item: Record<string, unknown>) => {
       return html + this._deltaLeaf2Html(item);

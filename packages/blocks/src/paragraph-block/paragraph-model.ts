@@ -28,8 +28,20 @@ export class ParagraphBlockModel
     this.type = props.type ?? 'paragraph';
   }
 
-  override block2html(childText: string, begin?: number, end?: number) {
-    const text = super.block2html(childText, begin, end);
+  override block2html(
+    childText: string,
+    previousSiblingBlock: BaseBlockModel | null,
+    nextSiblingBlock: BaseBlockModel | null,
+    begin?: number,
+    end?: number
+  ) {
+    const text = super.block2html(
+      childText,
+      previousSiblingBlock,
+      nextSiblingBlock,
+      begin,
+      end
+    );
     switch (this.type) {
       case 'text':
         return `<div>${text}<div>`;
