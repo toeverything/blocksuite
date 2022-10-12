@@ -48,7 +48,6 @@ export class RichText extends LitElement {
         },
       },
     });
-    this._firstSelectAll = false;
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
     this._bindHotKey(store);
