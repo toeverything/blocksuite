@@ -48,7 +48,6 @@ export class RichText extends LitElement {
         },
       },
     });
-
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
     this._bindHotKey(store);
@@ -70,11 +69,6 @@ export class RichText extends LitElement {
   }
 
   private _bindHotKey(_store: Store) {
-    hotkeyManager.addListener(
-      hotkeyManager.hotkeysMap.selectAll,
-      this.model.id,
-      this._onSelectAll
-    );
     hotkeyManager.addListener(
       hotkeyManager.hotkeysMap.code,
       this.model.id,
@@ -115,15 +109,15 @@ export class RichText extends LitElement {
     );
   }
 
-  private _onSelectAll() {
-    // console.log('selectAll', e);
-  }
-
   disconnectedCallback() {
     this.host.store.detachRichText(this.model.id);
     super.disconnectedCallback();
-    this._textContainer.removeEventListener('focus', this._focus);
-    this._textContainer.removeEventListener('blur', this._blur);
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .removeEventListener('focus', this._focus);
+    this._textContainer
+      .getElementsByClassName('ql-editor')[0]
+      .removeEventListener('blur', this._blur);
   }
 
   render() {
