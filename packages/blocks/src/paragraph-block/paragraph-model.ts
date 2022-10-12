@@ -30,15 +30,15 @@ export class ParagraphBlockModel
 
   override block2html(
     childText: string,
-    previousSiblingId: string,
-    nextSiblingId: string,
+    _previousSiblingId: string,
+    _nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
     const text = super.block2html(
       childText,
-      previousSiblingId,
-      nextSiblingId,
+      _previousSiblingId,
+      _nextSiblingId,
       begin,
       end
     );

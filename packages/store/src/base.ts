@@ -50,8 +50,8 @@ export class BaseBlockModel implements IBaseBlockProps {
 
   block2html(
     childText: string,
-    previousSiblingId: string,
-    nextSiblingId: string,
+    _previousSiblingId: string,
+    _nextSiblingId: string,
     begin?: number,
     end?: number
   ) {

@@ -21,20 +21,20 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
 
   override block2html(
     childText: string,
-    previousSiblingId: string,
-    nextSiblingId: string,
+    _previousSiblingId: string,
+    _nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
     let text = super.block2html(
       childText,
-      previousSiblingId,
-      nextSiblingId,
+      _previousSiblingId,
+      _nextSiblingId,
       begin,
       end
     );
-    const previousSiblingBlock = this.store.getBlockById(previousSiblingId);
-    const nextSiblingBlock = this.store.getBlockById(nextSiblingId);
+    const previousSiblingBlock = this.store.getBlockById(_previousSiblingId);
+    const nextSiblingBlock = this.store.getBlockById(_nextSiblingId);
     switch (this.type) {
       case 'bulleted':
         text = `<li>${text}</li>`;
