@@ -18,4 +18,18 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
     this.type = props.type ?? 'bulleted';
     this.checked = props.checked ?? false;
   }
+
+  override block2html(childText: string, begin?: number, end?: number) {
+    const text = super.block2html(childText, begin, end);
+    switch (this.type) {
+      case 'bulleted':
+        return `<ul><li>${text}</li></ul>`;
+      case 'numbered':
+        return `<ol><li>${text}</li></ol>`;
+      case 'todo':
+        return `<ul><li>[ ] ${text}</li></ul>`;
+      default:
+        return text;
+    }
+  }
 }

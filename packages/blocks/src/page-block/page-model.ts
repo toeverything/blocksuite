@@ -7,4 +7,8 @@ export class PageBlockModel extends BaseBlockModel {
     super(store, props);
     this.title = props.title ?? '';
   }
+
+  override block2html(childText: string, begin?: number, end?: number) {
+    return `<div>${this.title}${childText}</div>`;
+  }
 }

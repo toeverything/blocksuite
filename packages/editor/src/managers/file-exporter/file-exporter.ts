@@ -33,14 +33,18 @@ const FileExporter = {
   },
   exportHtml: (pageTitle: string, htmlContent: string) => {
     FileExporter.exportFile(
-      pageTitle + '.html',
+      pageTitle || 'Undefined' + '.html',
       FileExporter.decorateHtml(pageTitle, htmlContent),
       'text/html'
     );
   },
 
   exportMarkdown: (pageTitle: string, mdContent: string) => {
-    FileExporter.exportFile(pageTitle + '.md', mdContent, 'text/plain');
+    FileExporter.exportFile(
+      pageTitle || 'Undefined' + '.md',
+      mdContent,
+      'text/plain'
+    );
   },
 };
 
