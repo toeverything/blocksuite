@@ -34,16 +34,29 @@ export class ParagraphBlockComponent extends LitElement {
   }
 
   firstUpdated() {
-    this.host.selection.addBlockSelectedListener(this.model.id, selected => {
-      this.selected = selected;
-    });
-
-    this.host.selection.addBlockActiveListener(this.model.id, position => {
-      const editableContainer = this.querySelector('[contenteditable]');
-      if (editableContainer) {
-        commonTextActiveHandler(position, editableContainer);
+    this.host.selection.addBlockSelectedListener(
+      this.model.id,
+      selectOptions => {
+        const selectionInfo = this.host.selection.selectionInfo;
+        if (selectionInfo.type === 'Block') {
+          this.selected = selectionInfo.blocks.some(
+            block => block.id === this.model.id
+          );
+        }
+        if (this.selected && selectionInfo.type !== 'Block') {
+          this.selected = false;
+        }
+        if (selectOptions?.needFocus) {
+          const editableContainer = this.querySelector('[contenteditable]');
+          if (editableContainer) {
+            commonTextActiveHandler(
+              this.host.selection.lastSelectionPosition,
+              editableContainer
+            );
+          }
+        }
       }
-    });
+    );
 
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -51,7 +64,6 @@ export class ParagraphBlockComponent extends LitElement {
 
   disconnectedCallback() {
     this.host.selection.removeBlockSelectedListener(this.model.id);
-    this.host.selection.removeBlockActiveListener(this.model.id);
   }
 
   render() {

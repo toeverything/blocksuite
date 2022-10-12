@@ -1,6 +1,10 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { BLOCK_ID_ATTR, type BlockHost } from '@blocksuite/shared';
+import {
+  BLOCK_ID_ATTR,
+  commonPassCursorHandler,
+  type BlockHost,
+} from '@blocksuite/shared';
 
 import type { GroupBlockModel } from './group-model';
 import { BlockChildrenContainer } from '../__internal__';
@@ -33,9 +37,25 @@ export class GroupBlockComponent extends LitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
-    this.host.selection.addBlockSelectedListener(this.model.id, selected => {
-      this.selected = selected;
-    });
+    this.host.selection.addBlockSelectedListener(
+      this.model.id,
+      selectOptions => {
+        const selectionInfo = this.host.selection.selectionInfo;
+        if (selectionInfo.type === 'Block') {
+          this.selected = selectionInfo.blocks.some(
+            block => block.id === this.model.id
+          );
+        }
+        if (this.selected && selectionInfo.type !== 'Block') {
+          this.selected = false;
+        }
+        commonPassCursorHandler(
+          this.model.id,
+          this.host.selection,
+          selectOptions
+        );
+      }
+    );
   }
 
   render() {
