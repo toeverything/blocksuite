@@ -1,3 +1,6 @@
+.affine-paragraph-block-container {
+  border-radius: 5px;
+}
 .affine-paragraph-block-container.selected {
   background-color: var(--affine-selected-color);
 }
@@ -55,7 +58,7 @@
   background: #4c6275;
   border-radius: 4px;
 }
-.paragraph {
+.text {
   margin-top: 18px;
 }
 
@@ -73,32 +76,11 @@ code {
 
 u {
   text-decoration: none;
-  position: relative;
-}
-u::after {
-  content: '';
-  width: 100%;
-  height: 1px;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  background: #4c6275;
+  border-bottom: 1px solid #4c6275;
 }
 
 del {
-  text-decoration: none;
-  position: relative;
-}
-del::after {
-  content: '';
-  width: 100%;
-  height: 1px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  background: #4c6275;
+  text-decoration: line-through;
 }
 
 em {

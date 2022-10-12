@@ -73,7 +73,8 @@ export function EdgelessBlockChildrenContainer(
         overflow: hidden;
         border: 1px #ccc solid;
         /* max-width: 300px; */
-        height: ${viewport.height}px;
+        /* height: ${viewport.height}px; */
+        height: 100%;
 
         background-image: linear-gradient(#cccccc66 0.1em, transparent 0.1em),
           linear-gradient(90deg, #cccccc66 0.1em, transparent 0.1em);
