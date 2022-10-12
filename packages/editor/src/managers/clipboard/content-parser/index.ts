@@ -134,18 +134,10 @@ export class ContentParser {
       [] as string[]
     );
 
-    const previousSiblingBlock = previousSibling
-      ? this._editor.store.getBlockById(previousSibling.id)
-      : null;
-
-    const nextSiblingBlock = nextSibling
-      ? this._editor.store.getBlockById(nextSibling.id)
-      : null;
-
     const text = model.block2html(
       children.join(''),
-      previousSiblingBlock,
-      nextSiblingBlock,
+      previousSibling?.id || '',
+      nextSibling?.id || '',
       block.startPos,
       block.endPos
     );

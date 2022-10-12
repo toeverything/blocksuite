@@ -1,3 +1,4 @@
+import { string } from 'lib0';
 import type { Store } from './store';
 import type { TextType } from './text-adapter';
 import { Slot } from './utils/slot';
@@ -49,8 +50,8 @@ export class BaseBlockModel implements IBaseBlockProps {
 
   block2html(
     childText: string,
-    previousSiblingBlock: BaseBlockModel | null,
-    nextSiblingBlock: BaseBlockModel | null,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {

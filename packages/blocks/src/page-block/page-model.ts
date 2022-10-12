@@ -10,8 +10,8 @@ export class PageBlockModel extends BaseBlockModel {
 
   override block2html(
     childText: string,
-    previousSiblingBlock: BaseBlockModel | null,
-    nextSiblingBlock: BaseBlockModel | null,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
