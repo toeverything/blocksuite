@@ -16,6 +16,7 @@ export const DefaultHotkeyMap = {
   right: 'right',
   enter: 'enter',
   code: 'command+e,ctrl+e',
+  strikethrough: 'command+shift+s,ctrl+shift+s',
 };
 
 export const PREVENT_DEFAULT = false;

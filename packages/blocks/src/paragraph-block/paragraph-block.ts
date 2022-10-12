@@ -5,8 +5,9 @@ import {
   commonTextActiveHandler,
   type BlockHost,
 } from '@blocksuite/shared';
-import { BlockChildrenContainer } from '../__internal__';
 import type { ParagraphBlockModel } from './paragraph-model';
+
+import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
 @customElement('paragraph-block')
