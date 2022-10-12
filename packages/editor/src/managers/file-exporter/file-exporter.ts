@@ -1,3 +1,5 @@
+import TurndownService from 'turndown';
+
 const FileExporter = {
   exportFile: (filename: string, text: string, format: string) => {
     const element = document.createElement('a');
@@ -39,10 +41,12 @@ const FileExporter = {
     );
   },
 
-  exportMarkdown: (pageTitle: string, mdContent: string) => {
+  exportMarkdown: (pageTitle: string, htmlContent: string) => {
+    const turndownService = new TurndownService();
+    const markdown = turndownService.turndown(htmlContent);
     FileExporter.exportFile(
-      (pageTitle || 'Untitled') + '.md',
-      mdContent,
+      (pageTitle || 'Undefined') + '.md',
+      markdown,
       'text/plain'
     );
   },

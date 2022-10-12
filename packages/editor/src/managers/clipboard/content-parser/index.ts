@@ -31,8 +31,8 @@ export class ContentParser {
   public onExportMarkdown() {
     const root = this._editor.store.root;
     if (!root) return;
-    const mdContent = this.block2Markdown([this._getSelectedBlock(root)]);
-    FileExporter.exportMarkdown((root as PageBlockModel).title, mdContent);
+    const htmlContent = this.block2Html([this._getSelectedBlock(root)]);
+    FileExporter.exportMarkdown((root as PageBlockModel).title, htmlContent);
   }
 
   public block2Html(blocks: SelectedBlock[]): string {
@@ -57,23 +57,6 @@ export class ContentParser {
       return text + this._getTextInfoBySelectionInfo(block);
     }, '');
     return text;
-  }
-
-  public block2Markdown(blocks: SelectedBlock[]): string {
-    const htmlText = blocks.reduce(
-      (htmlText, block, currentIndex: number, array: SelectedBlock[]) => {
-        return (
-          htmlText +
-          this._getHtmlInfoBySelectionInfo(
-            block,
-            currentIndex > 0 ? array[currentIndex - 1] : null,
-            currentIndex < array.length - 1 ? array[currentIndex + 1] : null
-          )
-        );
-      },
-      ''
-    );
-    return htmlText;
   }
 
   public htmlText2Block(html: string): OpenBlockInfo[] {
