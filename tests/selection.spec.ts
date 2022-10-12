@@ -145,8 +145,8 @@ test('cursor move down at edge of the last line', async ({ page }) => {
 
 test('cursor move up and down through group', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  addGroupByClick(page);
-  await focusRichText(page);
+  await addGroupByClick(page);
+  await focusRichText(page, 0);
   let currentId;
   const [id] = await getCursorBlockIdAndHeight(page);
   await page.keyboard.press('ArrowDown');
