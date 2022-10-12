@@ -1,6 +1,8 @@
+import { PageBlockModel } from '@blocksuite/blocks';
 import type { SelectedBlock } from '@blocksuite/shared';
-import { Slot } from '@blocksuite/store';
+import { BaseBlockModel, Slot } from '@blocksuite/store';
 import { OpenBlockInfo, EditorContainer } from '../../..';
+import { FileExporter } from '../../file-exporter/file-exporter';
 import { ParserHtml } from './parse-html';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +21,22 @@ export class ContentParser {
     this._parseHtml.registerParsers();
   }
 
+  public onExportHtml() {
+    const root = this._editor.store.root;
+    if (!root) return;
+    const htmlContent = this.block2Html(this._getSelectedBlock(root).children);
+    FileExporter.exportHtml((root as PageBlockModel).title, htmlContent);
+  }
+
+  public onExportMarkdown() {
+    const root = this._editor.store.root;
+    if (!root) return;
+    const mdContent = this.block2Markdown(
+      this._getSelectedBlock(root).children
+    );
+    FileExporter.exportMarkdown((root as PageBlockModel).title, mdContent);
+  }
+
   public block2Html(blocks: SelectedBlock[]): string {
     const htmlText = blocks.reduce((htmlText, block) => {
       return htmlText + this._getHtmlInfoBySelectionInfo(block);
@@ -31,6 +49,13 @@ export class ContentParser {
       return text + this._getTextInfoBySelectionInfo(block);
     }, '');
     return text;
+  }
+
+  public block2Markdown(blocks: SelectedBlock[]): string {
+    const htmlText = blocks.reduce((htmlText, block) => {
+      return htmlText + this._getHtmlInfoBySelectionInfo(block);
+    }, '');
+    return htmlText;
   }
 
   public htmlText2Block(html: string): OpenBlockInfo[] {
@@ -58,6 +83,14 @@ export class ContentParser {
         children: [],
       };
     });
+  }
+
+  private _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+    const block = {
+      id: model.id,
+      children: model.children.map(child => this._getSelectedBlock(child)),
+    };
+    return block;
   }
 
   private _getHtmlInfoBySelectionInfo(blocks: SelectedBlock): string {
