@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "BlockSuite framework workspace",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
@@ -13,7 +13,8 @@
     "format": "prettier --write packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
-    "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist"
+    "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist",
+    "bump": "pnpm version minor && pnpm -r exec pnpm version minor"
   },
   "keywords": [],
   "author": "toeverything",
