@@ -14,7 +14,7 @@ interface EdgelessSelectionEvent extends IPoint {
   };
 }
 
-const MIN_ZOOM = 0.1;
+const MIN_ZOOM = 0.3;
 
 function applyDeltaZoom(current: ViewportState, delta: number): ViewportState {
   const val = (current.zoom * (100 + delta)) / 100;
