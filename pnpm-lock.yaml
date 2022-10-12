@@ -59,17 +59,21 @@ importers:
       '@blocksuite/store': workspace:*
       '@types/marked': ^4.0.7
       '@types/quill': ^2.0.9
+      '@types/turndown': ^5.0.1
       lit: ^2.3.1
       marked: ^4.1.0
+      turndown: ^7.1.1
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/shared': link:../shared
       '@blocksuite/store': link:../store
       lit: 2.3.1
       marked: 4.1.0
+      turndown: 7.1.1
     devDependencies:
       '@types/marked': 4.0.7
       '@types/quill': 2.0.9
+      '@types/turndown': 5.0.1
 
   packages/playground:
     specifiers:
@@ -569,6 +573,10 @@ packages:
     resolution: {integrity: sha512-F5DIZ36YVLE+PN+Zwws4kJogq47hNgX3Nx6WyDJ3kcplxyke3XIzB8uK5n/Lpm1HBsbGzd6nmGehL8cPekP+Tg==}
     dev: false
 
+  /@types/turndown/5.0.1:
+    resolution: {integrity: sha512-N8Ad4e3oJxh9n9BiZx9cbe/0M3kqDpOTm2wzj13wdDUxDPjfjloWIJaquZzWE1cYTAHpjOH3rcTnXQdpEfS/SQ==}
+    dev: true
+
   /@typescript-eslint/eslint-plugin/5.37.0_22c5fnooleyfkzrkkgdmel5kmi:
     resolution: {integrity: sha512-Fde6W0IafXktz1UlnhGkrrmnnGpAo1kyX7dnyHHVrmwJOn72Oqm3eYtddrpOwwel2W8PAK9F3pIL5S+lfoM0og==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -993,6 +1001,10 @@ packages:
     dependencies:
       esutils: 2.0.3
     dev: true
+
+  /domino/2.1.6:
+    resolution: {integrity: sha512-3VdM/SXBZX2omc9JF9nOPCtDaYQ67BGp5CoLpIQlO2KCAPETs8TcDHacF26jXadGbvUteZzRTeos2fhID5+ucQ==}
+    dev: false
 
   /electron-to-chromium/1.4.253:
     resolution: {integrity: sha512-1pezJ2E1UyBTGbA7fUlHdPSXQw1k+82VhTFLG5G0AUqLGvsZqFzleOblceqegZzxYX4kC7hGEEdzIQI9RZ1Cuw==}
@@ -2499,6 +2511,12 @@ packages:
       tslib: 1.14.1
       typescript: 4.8.3
     dev: true
+
+  /turndown/7.1.1:
+    resolution: {integrity: sha512-BEkXaWH7Wh7e9bd2QumhfAXk5g34+6QUmmWx+0q6ThaVOLuLUqsnkq35HQ5SBHSaxjSfSM7US5o4lhJNH7B9MA==}
+    dependencies:
+      domino: 2.1.6
+    dev: false
 
   /type-check/0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
