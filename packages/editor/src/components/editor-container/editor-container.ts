@@ -130,11 +130,11 @@ export class EditorContainer extends LitElement {
 
     return html`
       <div class="affine-editor-container">
+        ${this.isEmptyPage ? placeholderRoot : blockRoot}
         <debug-menu
           .store=${this.store}
           .contentParser=${this.contentParser}
         ></debug-menu>
-        ${this.isEmptyPage ? placeholderRoot : blockRoot}
       </div>
     `;
   }
