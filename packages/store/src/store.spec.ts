@@ -9,9 +9,7 @@ import { ParagraphBlockModel } from '../../blocks/src/paragraph-block/paragraph-
 import { ListBlockModel } from '../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../blocks/src/group-block/group-model';
 
-export type { ParagraphBlockProps as TextBlockProps } from '../../blocks/src/paragraph-block/paragraph-model';
-
-// TODO support dynamic register
+// Create BlockSchema manually
 export const BlockSchema = {
   paragraph: ParagraphBlockModel,
   page: PageBlockModel,

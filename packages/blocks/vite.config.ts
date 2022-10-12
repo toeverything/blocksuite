@@ -6,7 +6,6 @@ export default defineConfig({
     emptyOutDir: false,
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'block',
       fileName: 'index',
       formats: ['es'],
     },
