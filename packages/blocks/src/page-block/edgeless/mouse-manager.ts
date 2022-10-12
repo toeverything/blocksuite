@@ -205,7 +205,7 @@ function initMouseEventHandlers(
   return dispose;
 }
 
-function refreshSelectionBox(container: IEdgelessContainer) {
+export function refreshSelectionBox(container: IEdgelessContainer) {
   container.setSelectionState({
     selected: container.selectionState.selected,
     box: getSelectionBoxBound(
@@ -263,8 +263,12 @@ export class EdgelessMouseManager {
     this._wheelDisposeCallback = initWheelEventHandlers(container);
   }
 
+  private get _store() {
+    return this._container.store;
+  }
+
   private get _blocks(): GroupBlockModel[] {
-    return (this._container.store.root?.children as GroupBlockModel[]) ?? [];
+    return (this._store.root?.children as GroupBlockModel[]) ?? [];
   }
 
   private _onContainerDragStart = (e: EdgelessSelectionEvent) => {
@@ -272,7 +276,19 @@ export class EdgelessMouseManager {
   };
 
   private _onContainerDragMove = (e: EdgelessSelectionEvent) => {
-    // console.log('drag move', e);
+    this._container.selectionState.selected.forEach(block => {
+      const [modelX, modelY, modelW, modelH] = JSON.parse(block.xywh) as XYWH;
+
+      this._store.updateBlock(block, {
+        xywh: JSON.stringify([
+          modelX + e.delta.x,
+          modelY + e.delta.y,
+          modelW,
+          modelH,
+        ]),
+      });
+      refreshSelectionBox(this._container);
+    });
   };
 
   private _onContainerDragEnd = (e: EdgelessSelectionEvent) => {

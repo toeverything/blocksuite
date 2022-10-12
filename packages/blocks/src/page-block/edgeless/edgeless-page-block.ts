@@ -7,7 +7,7 @@ import type { Store } from '@blocksuite/store';
 import type { PageBlockModel, GroupBlockModel } from '../..';
 import { EdgelessBlockChildrenContainer, EdgelessSelectionBox } from './utils';
 import { SelectionManager } from '../../__internal__';
-import { EdgelessMouseManager } from './mouse-manager';
+import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
 
 export interface ViewportState {
   zoom: number;
@@ -87,6 +87,13 @@ export class EdgelessPageBlockComponent
       this.mouse = new EdgelessMouseManager(this);
     }
     super.update(changedProperties);
+  }
+
+  firstUpdated() {
+    // TODO: listen to new children
+    this.model.children.forEach(group => {
+      group.propsUpdated.on(() => refreshSelectionBox(this));
+    });
   }
 
   disconnectedCallback() {
