@@ -5,7 +5,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,14 +16,13 @@
     "@blocksuite/store": "workspace:*"
   },
   "exports": {
-    "./src/*": "./src/*.ts",
+    "./style": "./dist/style.css",
     ".": "./src/index.ts"
   },
   "publishConfig": {
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      ".": "./dist/index.js",
       "./src/*": "./dist/*.js"
     }
   }
