@@ -12,6 +12,7 @@ import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
+import { StringMap } from 'quill';
 
 export const defaultStore: SerializedStore = {
   blocks: {
@@ -84,7 +85,7 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-export async function assertTextFormat(page: Page, resultObj: any) {
+export async function assertTextFormat(page: Page, resultObj: StringMap) {
   const actual = await page.evaluate(() => {
     // @ts-ignore
     const quill = document.querySelectorAll('rich-text')[0]?._quill!;
