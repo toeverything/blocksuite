@@ -21,6 +21,10 @@ export class DebugMenu extends LitElement {
   @property()
   store!: Store;
 
+  @property()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  contentParser!: any;
+
   @state()
   connected = true;
 
@@ -105,6 +109,14 @@ export class DebugMenu extends LitElement {
     this.store.addBlock({ flavour: 'paragraph' }, groupId);
   }
 
+  private _onExportHtml() {
+    this.contentParser.onExportHtml();
+  }
+
+  private _onExportMarkDown() {
+    this.contentParser.onExportMarkdown();
+  }
+
   private _handleDebugInit() {
     if (getInitType() === 'list') {
       const pageId = this.store.addBlock({ flavour: 'page' });
@@ -133,8 +145,8 @@ export class DebugMenu extends LitElement {
   static styles = css`
     .debug-menu {
       position: fixed;
-      left: 0;
       top: 0;
+      right: 0;
       width: 40px;
     }
     .debug-menu > button {
@@ -269,6 +281,20 @@ export class DebugMenu extends LitElement {
           @click=${this._onAddGroup}
         >
           🗄
+        </button>
+        <button
+          aria-label="export html"
+          title="export html"
+          @click=${this._onExportHtml}
+        >
+          📙
+        </button>
+        <button
+          aria-label="export markdown"
+          title="export markdown"
+          @click=${this._onExportMarkDown}
+        >
+          📗
         </button>
       </div>
     `;

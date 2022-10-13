@@ -127,7 +127,7 @@ export class TextEntity {
   }
 
   toDelta() {
-    return this._yText.toDelta();
+    return this._yText?.toDelta() || [];
   }
 
   sliceToDelta(begin: number, end?: number) {

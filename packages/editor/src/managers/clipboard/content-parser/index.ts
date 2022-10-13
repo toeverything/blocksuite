@@ -1,6 +1,8 @@
+import { PageBlockModel } from '@blocksuite/blocks';
 import type { SelectedBlock } from '@blocksuite/shared';
-import { Slot } from '@blocksuite/store';
+import { BaseBlockModel, Slot } from '@blocksuite/store';
 import { OpenBlockInfo, EditorContainer } from '../../..';
+import { FileExporter } from '../../file-exporter/file-exporter';
 import { ParserHtml } from './parse-html';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,10 +21,34 @@ export class ContentParser {
     this._parseHtml.registerParsers();
   }
 
+  public onExportHtml() {
+    const root = this._editor.store.root;
+    if (!root) return;
+    const htmlContent = this.block2Html([this._getSelectedBlock(root)]);
+    FileExporter.exportHtml((root as PageBlockModel).title, htmlContent);
+  }
+
+  public onExportMarkdown() {
+    const root = this._editor.store.root;
+    if (!root) return;
+    const htmlContent = this.block2Html([this._getSelectedBlock(root)]);
+    FileExporter.exportMarkdown((root as PageBlockModel).title, htmlContent);
+  }
+
   public block2Html(blocks: SelectedBlock[]): string {
-    const htmlText = blocks.reduce((htmlText, block) => {
-      return htmlText + this._getHtmlInfoBySelectionInfo(block);
-    }, '');
+    const htmlText = blocks.reduce(
+      (htmlText, block, currentIndex: number, array: SelectedBlock[]) => {
+        return (
+          htmlText +
+          this._getHtmlInfoBySelectionInfo(
+            block,
+            currentIndex > 0 ? array[currentIndex - 1] : null,
+            currentIndex < array.length - 1 ? array[currentIndex + 1] : null
+          )
+        );
+      },
+      ''
+    );
     return htmlText;
   }
 
@@ -60,55 +86,45 @@ export class ContentParser {
     });
   }
 
-  private _getHtmlInfoBySelectionInfo(blocks: SelectedBlock): string {
-    const model = this._editor.store.getBlockById(blocks.id);
+  private _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+    const block = {
+      id: model.id,
+      children: model.children.map(child => this._getSelectedBlock(child)),
+    };
+    return block;
+  }
+
+  private _getHtmlInfoBySelectionInfo(
+    block: SelectedBlock,
+    previousSibling: SelectedBlock | null,
+    nextSibling: SelectedBlock | null
+  ): string {
+    const model = this._editor.store.getBlockById(block.id);
     if (!model) {
       return '';
     }
 
-    // TODO Handling different block by extension
-    const delta = model?.text?.sliceToDelta(
-      blocks.startPos || 0,
-      blocks.endPos
+    const children: string[] = block.children.reduce(
+      (children, child, currentIndex: number, array: SelectedBlock[]) => {
+        const childText = this._getHtmlInfoBySelectionInfo(
+          child,
+          currentIndex > 0 ? array[currentIndex - 1] : null,
+          currentIndex < array.length - 1 ? array[currentIndex + 1] : null
+        );
+        childText && children.push(childText);
+        return children;
+      },
+      [] as string[]
     );
-    const text = delta.reduce((html: string, item: Record<string, unknown>) => {
-      return html + this.deltaLeaf2Html(item);
-    }, '');
 
-    const children: string[] = [];
-    blocks.children.forEach(child => {
-      const childText = this._getHtmlInfoBySelectionInfo(child);
-      childText && children.push(childText);
-    });
+    const text = model.block2html(
+      children.join(''),
+      previousSibling?.id || '',
+      nextSibling?.id || '',
+      block.startPos,
+      block.endPos
+    );
 
-    return `<div>${text}${children.join('')}</div>`;
-  }
-
-  // TODO This part of the logic needs refinement
-  private deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
-    const text = deltaLeaf.insert;
-    const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
-      string,
-      boolean
-    >;
-    if (!attributes) {
-      return text;
-    }
-    if (attributes.bold) {
-      return `<strong>${text}</strong>`;
-    }
-    if (attributes.italic) {
-      return `<em>${text}</em>`;
-    }
-    if (attributes.underline) {
-      return `<u>${text}</u>`;
-    }
-    if (attributes.inlinecode) {
-      return `<code>${text}</code>`;
-    }
-    if (attributes.strikethrough) {
-      return `<s>${text}</s>`;
-    }
     return text;
   }
 

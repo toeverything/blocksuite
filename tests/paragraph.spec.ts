@@ -6,6 +6,7 @@ import {
   assertBlockChildrenIds,
   assertClassName,
   assertBlockType,
+  assertTitle,
 } from './utils/asserts';
 import {
   clickMenuButton,
@@ -18,6 +19,15 @@ import {
   undoByClick,
   undoByKeyboard,
 } from './utils/actions';
+
+test('init paragraph by page title enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.keyboard.type('hello');
+  await pressEnter(page);
+  await page.keyboard.type('world');
+  await assertTitle(page, 'hello');
+  await assertRichTexts(page, ['world']);
+});
 
 test('append new paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);

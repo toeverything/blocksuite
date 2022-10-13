@@ -3,6 +3,7 @@ import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 export type ParagraphType =
   | 'text'
   | 'quote'
+  | 'text'
   | 'h1'
   | 'h2'
   | 'h3'
@@ -25,5 +26,36 @@ export class ParagraphBlockModel
   constructor(store: Store, props: Partial<ParagraphBlockProps>) {
     super(store, props);
     this.type = props.type ?? 'text';
+  }
+
+  override block2html(
+    childText: string,
+    _previousSiblingId: string,
+    _nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ) {
+    const text = super.block2html(
+      childText,
+      _previousSiblingId,
+      _nextSiblingId,
+      begin,
+      end
+    );
+    switch (this.type) {
+      case 'text':
+        return `<div>${text}<div>`;
+      case 'h1':
+      case 'h2':
+      case 'h3':
+      case 'h4':
+      case 'h5':
+      case 'h6':
+        return `<${this.type}>${text}</${this.type}>`;
+      case 'quote':
+        return `<blockquote>${text}</blockquote>`;
+      default:
+        return text;
+    }
   }
 }
