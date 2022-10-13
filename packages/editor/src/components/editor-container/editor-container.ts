@@ -12,6 +12,11 @@ type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
+const options = {
+  room,
+  useDebugProvider: location.href.includes('localhost'),
+};
+
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
   static styles = css`
@@ -19,7 +24,7 @@ export class EditorContainer extends LitElement {
   `;
 
   @state()
-  store = new Store(room).register(BlockSchema);
+  store = new Store(options).register(BlockSchema);
 
   @state()
   mode: 'page' | 'edgeless' = 'page';
