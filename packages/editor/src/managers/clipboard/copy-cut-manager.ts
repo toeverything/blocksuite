@@ -1,7 +1,7 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
-import { SelectionInfo, SelectedBlock } from '@blocksuite/shared';
+import { SelectedBlock } from '@blocksuite/shared';
 import type { DefaultPageBlockComponent } from '@blocksuite/blocks';
 
 export class CopyCutManager {
@@ -34,7 +34,24 @@ export class CopyCutManager {
 
   public handleCut(e: ClipboardEvent) {
     this.handleCopy(e);
-    // todo delete selected blocks
+    const { selectionInfo } = this._selection;
+    if (selectionInfo.type == 'Block') {
+      selectionInfo.blocks.forEach(({ id }) =>
+        this._editor.store.deleteBlockById(id)
+      );
+    } else if (
+      selectionInfo.type === 'Range' ||
+      selectionInfo.type === 'Caret'
+    ) {
+      // TODO the selection of  discontinuous and cross blocks are not exist yet
+      this._editor.store.richTextAdapters
+        .get(selectionInfo.anchorBlockId)
+        ?.quill.deleteText(
+          selectionInfo.anchorBlockPosition || 0,
+          (selectionInfo.focusBlockPosition || 0) -
+            (selectionInfo.anchorBlockPosition || 0)
+        );
+    }
   }
 
   private _getClipItems() {
@@ -47,6 +64,7 @@ export class CopyCutManager {
       selectionInfo.type === 'Range' ||
       selectionInfo.type === 'Caret'
     ) {
+      // TODO the selection of  discontinuous and cross blocks are not exist yet
       selectedBlocks = [
         {
           id: selectionInfo.anchorBlockId,
