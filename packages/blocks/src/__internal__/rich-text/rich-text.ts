@@ -24,7 +24,7 @@ export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
-
+  private _firstSelectAll = true;
   @property()
   host!: BlockHost;
 
@@ -55,7 +55,7 @@ export class RichText extends LitElement {
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
-    this._bindHotKey(store);
+    this._bindHotKey(store, selection);
     this.model.propsUpdated.on(() => this.requestUpdate());
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
@@ -67,13 +67,15 @@ export class RichText extends LitElement {
   }
 
   private _focus() {
+    this._firstSelectAll = true;
     hotkeyManager.setScope(this.model.id);
   }
   private _blur() {
+    this._firstSelectAll = true;
     hotkeyManager.setScope('page');
   }
 
-  private _bindHotKey(_store: Store) {
+  private _bindHotKey(_store: Store, _selection: BlockHost['selection']) {
     hotkeyManager.addListener(
       hotkeyManager.hotkeysMap.code,
       this.model.id,
@@ -110,6 +112,27 @@ export class RichText extends LitElement {
             }
           });
         }
+      }
+    );
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.selectAll,
+      this.model.id,
+      (e: Event) => {
+        e.preventDefault();
+        if (
+          !this._firstSelectAll &&
+          this._quill?.getSelection()?.length !== 0
+        ) {
+          this._quill?.blur();
+          // XXX because blur is async, we need to wait for it to finish
+          setTimeout(() => {
+            _selection.selectAllBlocks();
+          });
+        } else {
+          this._quill?.setSelection(0, this._quill.getLength());
+        }
+
+        this._firstSelectAll = false;
       }
     );
   }

@@ -62,18 +62,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkeyManager.addListener(deleteKey, scope, (e: Event) => {
       e.preventDefault();
-      // this.selection.selectAllBlocks();
       const selectAllBlocks = this.selection.selectedBlockIds;
-      selectAllBlocks.map(id=>{
-        this.store.deleteBlockById(id)
-      })
+      selectAllBlocks.map(id => {
+        this.store.deleteBlockById(id);
+      });
     });
     hotkeyManager.setScope('page');
   }
 
   private _removeHotkeys() {
     const { undo, redo, selectAll, deleteKey } = hotkeyManager.hotkeysMap;
-    hotkeyManager.removeListener([undo, redo, selectAll,deleteKey], 'page');
+    hotkeyManager.removeListener([undo, redo, selectAll, deleteKey], 'page');
   }
 
   private _onKeyDown(e: KeyboardEvent) {
