@@ -180,7 +180,7 @@ export class Text {
   }
 
   toString() {
-    return this._yText.toString();
+    return this._yText?.toString() || '';
   }
 }
 

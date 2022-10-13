@@ -109,6 +109,7 @@ export class SelectionManager {
             ?.getAttribute(BLOCK_ID_ATTR) || '';
         this._anchorBlockId = anchorBlockId;
         this._focusBlockId = focusBlockId;
+        // todo _anchorBlockPosition _focusBlockPosition when select page text
         const anchorSelection = this._store.richTextAdapters
           .get(anchorBlockId)
           ?.quill.getSelection();
