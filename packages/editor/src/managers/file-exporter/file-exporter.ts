@@ -43,6 +43,14 @@ const FileExporter = {
 
   exportMarkdown: (pageTitle: string, htmlContent: string) => {
     const turndownService = new TurndownService();
+    turndownService.addRule('input', {
+      filter: ['input'],
+      replacement: function (content, node) {
+        return (node as HTMLElement).getAttribute('checked') === null
+          ? '[ ] '
+          : '[x] ';
+      },
+    });
     const markdown = turndownService.turndown(htmlContent);
     FileExporter.exportFile(
       (pageTitle || 'Undefined') + '.md',
