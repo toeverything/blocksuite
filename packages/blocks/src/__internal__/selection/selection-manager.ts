@@ -122,7 +122,7 @@ export class SelectionManager {
       this._anchorBlockPosition = null;
       this._focusBlockPosition = null;
     }
-
+    this._updateSelectionInfo();
     this._emitSelectionChange();
   }
 
