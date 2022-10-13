@@ -139,7 +139,7 @@ export class PasteManager {
       let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
-        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+        index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
@@ -153,7 +153,7 @@ export class PasteManager {
       let index = -1;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
-        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+        index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
