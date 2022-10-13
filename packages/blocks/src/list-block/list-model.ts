@@ -43,7 +43,7 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
         text = `<li>${text}</li>`;
         break;
       case 'todo':
-        text = `<li>[ ] ${text}</li>`;
+        text = `<li>[${this.checked ? 'x' : ' '}] ${text}</li>`;
         break;
       default:
         break;

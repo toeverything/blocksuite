@@ -90,6 +90,9 @@ export class BaseBlockModel implements IBaseBlockProps {
     if (attributes.strikethrough) {
       return `<s>${text}</s>`;
     }
+    if (attributes.link) {
+      return `<a href='${attributes.link}'>${text}</a>`;
+    }
     return text;
   }
 
