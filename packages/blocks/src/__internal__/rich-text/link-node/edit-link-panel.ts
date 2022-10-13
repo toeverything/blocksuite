@@ -23,9 +23,6 @@ export class EditLinkPanel extends LitElement {
   @property()
   top = '0px';
 
-  @property()
-  mask = false;
-
   @state()
   link = '';
 
@@ -54,8 +51,11 @@ export class EditLinkPanel extends LitElement {
   }
 
   private confirm() {
-    const link = this.input?.value?.trim();
-    // TODO invalid link checking
+    const link = this.input?.value?.trim() ?? null;
+    if (!link) {
+      // TODO invalid link checking
+      return;
+    }
     const options = {
       detail: { link },
     };

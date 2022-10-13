@@ -79,7 +79,6 @@ export const createLink = async ({
   }
 };
 
-// See https://github.com/mui/material-ui/blob/v5.10.9/packages/mui-material/src/Popover/Popover.js
 const showCreateLinkTooltip = async ({
   anchorEl,
   container = document.body,
@@ -98,7 +97,6 @@ const showCreateLinkTooltip = async ({
 
   return new Promise(res => {
     ele.addEventListener('confirm', e => {
-      console.log('confirm', e);
       ele.remove();
       res(e.detail.link);
     });
