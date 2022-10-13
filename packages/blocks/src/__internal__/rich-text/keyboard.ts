@@ -82,7 +82,7 @@ export const createKeyboardBindings = (
   }
 
   function markdownMatch(this: KeyboardEventThis) {
-    Shortcuts.match(this.quill);
+    Shortcuts.match(this.quill, model);
     return ALLOW_DEFAULT;
   }
 
