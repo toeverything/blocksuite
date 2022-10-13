@@ -4,7 +4,11 @@ import {
   SelectedBlock,
   SelectionInfo,
   SelectionPosition,
-  SelectOptions,
+  SelectionOptions,
+  getParentBlockById,
+  getPreviousSiblingById,
+  getBlockById,
+  getNextSiblingById,
 } from '@blocksuite/shared';
 import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
@@ -24,7 +28,7 @@ export class SelectionManager {
   private _store: Store;
   private _disposables: IDisposable[] = [];
   private _blockSelectSlotMap: {
-    [k in string]: Slot<SelectOptions | undefined>;
+    [k in string]: Slot<SelectionOptions | undefined>;
   } = {};
   private _anchorBlockId = '';
   private _focusBlockId = '';
@@ -181,7 +185,7 @@ export class SelectionManager {
 
   public addBlockSelectedListener(
     blockId: string,
-    handler: (selectOptions?: SelectOptions) => void
+    handler: (selectionOptions?: SelectionOptions) => void
   ) {
     const slot = this._getBlockSelectSlot(blockId);
     const disposable = slot.on(handler);
@@ -199,11 +203,11 @@ export class SelectionManager {
 
   private _emitBlockSelectionChange(
     blockId: string,
-    selectOptions?: SelectOptions
+    selectionOptions?: SelectionOptions
   ) {
     const slot = this._blockSelectSlotMap[blockId];
     if (slot) {
-      slot.emit(selectOptions);
+      slot.emit(selectionOptions);
     }
   }
 
@@ -217,58 +221,48 @@ export class SelectionManager {
 
   private _getPreviousBlock(blockId: string) {
     // TODO: resolve type problem
-    const currentBlock = this._container.querySelector<'paragraph-block'>(
-      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
+    const parentBlock = getParentBlockById<'paragraph-block'>(
+      blockId,
+      this._container
     );
-    if (currentBlock) {
-      const parentBlock =
-        currentBlock.parentElement?.closest<'paragraph-block'>(
-          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block'
-        );
-      if (parentBlock) {
-        const siblings = parentBlock.model.children;
-        const index = siblings.findIndex(block => block.id === blockId);
-        if (index > 0) {
-          const previousBlock = siblings[index - 1];
-          if (previousBlock) {
-            if (previousBlock.children.length) {
-              let firstChildren =
-                previousBlock.children[previousBlock.children.length - 1];
-              while (firstChildren.children.length) {
-                firstChildren =
-                  firstChildren.children[firstChildren.children.length - 1];
-              }
-              return firstChildren;
-            }
-            return previousBlock;
+    if (parentBlock) {
+      const previousBlock = getPreviousSiblingById<'paragraph-block'>(
+        blockId,
+        this._container
+      );
+      if (previousBlock?.model) {
+        if (previousBlock.model.children.length) {
+          let firstChildren =
+            previousBlock.model.children[previousBlock.children.length - 1];
+          while (firstChildren.children.length) {
+            firstChildren =
+              firstChildren.children[firstChildren.children.length - 1];
           }
+          return firstChildren;
         }
-        return parentBlock.model;
+        return previousBlock.model;
       }
+      return parentBlock.model;
     }
     return null;
   }
 
   private _getNextBlock(blockId: string) {
     // TODO: resolve type problem
-    let currentBlock = this._container.querySelector<'paragraph-block'>(
-      `[${BLOCK_ID_ATTR}='${blockId}']` as unknown as 'paragraph-block'
-    );
+    let currentBlock = getBlockById<'paragraph-block'>(blockId);
     if (currentBlock?.model.children.length) {
       return currentBlock.model.children[0];
     }
     while (currentBlock) {
-      const parentBlock =
-        currentBlock.parentElement?.closest<'paragraph-block'>(
-          `[${BLOCK_ID_ATTR}]` as unknown as 'paragraph-block'
-        ) || null;
+      const parentBlock = getParentBlockById<'paragraph-block'>(
+        currentBlock.model.id
+      );
       if (parentBlock) {
-        const siblings = parentBlock.model.children;
-        const index = siblings.findIndex(
-          block => block.id === currentBlock?.model.id
+        const nextSiblings = getNextSiblingById<'paragraph-block'>(
+          currentBlock.model.id
         );
-        if (index < siblings.length - 1) {
-          return siblings[index + 1];
+        if (nextSiblings) {
+          return nextSiblings.model;
         }
       }
       currentBlock = parentBlock;
@@ -351,6 +345,38 @@ export class SelectionManager {
         needFocus: true,
         from: 'previous',
       });
+    }
+  }
+
+  public expandSelection(isPrevious = true) {
+    if (this.type === 'Block') {
+      let nextBlock = null;
+      if (isPrevious) {
+        nextBlock = getPreviousSiblingById<'paragraph-block'>(
+          this.selectedBlockIds[0]
+        );
+      } else {
+        nextBlock = getNextSiblingById<'paragraph-block'>(
+          this.selectedBlockIds[0]
+        );
+      }
+      if (nextBlock) {
+        if (this.selectedBlockIds.includes(nextBlock.model.id)) {
+          this.selectedBlockIds = this.selectedBlockIds.slice(1);
+        } else {
+          this.selectedBlockIds = [
+            nextBlock.model.id,
+            ...this.selectedBlockIds,
+          ];
+        }
+      } else {
+        const parentBlock = getParentBlockById<'paragraph-block'>(
+          this.selectedBlockIds[0]
+        );
+        if (parentBlock && parentBlock.model.id !== this._store.root?.id) {
+          this.selectedBlockIds = [parentBlock.model.id];
+        }
+      }
     }
   }
 
