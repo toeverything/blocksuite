@@ -10,12 +10,6 @@ import {
 import { BaseBlockModel, Store } from '@blocksuite/store';
 import { GroupBlockModel } from '../group-block';
 
-const getInitType = () => {
-  const params = new URLSearchParams(location.search);
-  const initType = params.get('init') || 'default';
-  return initType;
-};
-
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
   @property()
@@ -48,10 +42,10 @@ export class DebugMenu extends LitElement {
 
   private _onToggleConnection() {
     if (this.connected === true) {
-      this.store.provider.disconnect();
+      this.store.provider?.disconnect();
       this.connected = false;
     } else {
-      this.store.provider.connect();
+      this.store.provider?.connect();
       this.connected = true;
     }
   }
@@ -117,16 +111,6 @@ export class DebugMenu extends LitElement {
     this.contentParser.onExportMarkdown();
   }
 
-  private _handleDebugInit() {
-    if (getInitType() === 'list') {
-      const pageId = this.store.addBlock({ flavour: 'page' });
-      const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
-      for (let i = 0; i < 3; i++) {
-        this.store.addBlock({ flavour: 'list' }, groupId);
-      }
-    }
-  }
-
   firstUpdated() {
     this.store.slots.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
@@ -138,7 +122,6 @@ export class DebugMenu extends LitElement {
         this.canDelete =
           (selectionInfo as BlockSelectionInfo)?.blocks?.length !== undefined;
       });
-      this._handleDebugInit();
     });
   }
 

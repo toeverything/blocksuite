@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
-import type { Quill } from 'quill';
+import type { DeltaOperation, Quill } from 'quill';
 import type { Store } from './store';
 
-type PrelimTextEnityType = 'splitLeft' | 'splitRight';
+type PrelimTextType = 'splitLeft' | 'splitRight';
 
-export type TextType = PrelimTextEntity | TextEntity;
+export type TextType = PrelimText | Text;
 
 // Removes the pending '\n's if it has no attributes
 export function normQuillDelta(delta: any) {
@@ -33,13 +33,13 @@ export function normQuillDelta(delta: any) {
   return delta;
 }
 
-const UNSUPPORTED_MSG = 'PrelimTextEntity does not support ';
+const UNSUPPORTED_MSG = 'PrelimText does not support ';
 
-export class PrelimTextEntity {
+export class PrelimText {
   ready = false;
-  type: PrelimTextEnityType;
+  type: PrelimTextType;
   index: number;
-  constructor(type: PrelimTextEnityType, index: number) {
+  constructor(type: PrelimTextType, index: number) {
     this.type = type;
     this.index = index;
   }
@@ -78,20 +78,30 @@ export class PrelimTextEntity {
   }
 }
 
-export class TextEntity {
+export class Text {
   private _yText: Y.Text;
-  constructor(yText: Y.Text) {
-    this._yText = yText;
+  constructor(input: Y.Text | string) {
+    if (typeof input === 'string') {
+      this._yText = new Y.Text(input);
+    } else {
+      this._yText = input;
+    }
+  }
+
+  static fromDelta(delta: DeltaOperation[]) {
+    const result = new Text('');
+    result.applyDelta(delta);
+    return result;
   }
 
   clone() {
-    return new TextEntity(this._yText.clone());
+    return new Text(this._yText.clone());
   }
 
-  split(index: number): [PrelimTextEntity, PrelimTextEntity] {
+  split(index: number): [PrelimText, PrelimText] {
     return [
-      new PrelimTextEntity('splitLeft', index),
-      new PrelimTextEntity('splitRight', index),
+      new PrelimText('splitLeft', index),
+      new PrelimText('splitRight', index),
     ];
   }
 
@@ -101,7 +111,7 @@ export class TextEntity {
     this._yText.meta = { split: true };
   }
 
-  join(other: TextEntity) {
+  join(other: Text) {
     const yOther = other._yText;
     const delta = yOther.toDelta();
     delta.splice(0, 0, { retain: this._yText.length });

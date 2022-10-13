@@ -1,25 +1,27 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { Store } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
-import style from './style.css';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
+const IS_PLAYGROUND = location.href.includes('5173');
+
+const options = {
+  room,
+  useDebugProvider: IS_PLAYGROUND,
+};
+
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
-
   @state()
-  store = new Store(room).register(BlockSchema);
+  store = new Store(options).register(BlockSchema);
 
   @state()
   mode: 'page' | 'edgeless' = 'page';
@@ -77,7 +79,9 @@ export class EditorContainer extends LitElement {
     this.isEmptyPage = false;
   }
 
+  // only work in playground
   private _tryInitFromVoidState() {
+    if (!IS_PLAYGROUND) return;
     window.addEventListener('mousemove', () => this._initFromVoidState(), {
       once: true,
     });
@@ -129,6 +133,11 @@ export class EditorContainer extends LitElement {
     `;
 
     return html`
+      <style>
+        .affine-editor-container {
+          height: 100%;
+        }
+      </style>
       <div class="affine-editor-container">
         ${this.isEmptyPage ? placeholderRoot : blockRoot}
         <debug-menu

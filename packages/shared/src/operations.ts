@@ -1,5 +1,5 @@
 import type { Quill } from 'quill';
-import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
+import { BaseBlockModel, Store, Text } from '@blocksuite/store';
 
 import {
   BlockHost,
@@ -55,7 +55,7 @@ export function handleBlockSplit(
   model: ExtendedModel,
   splitIndex: number
 ) {
-  if (!(model.text instanceof TextEntity)) return;
+  if (!(model.text instanceof Text)) return;
 
   const parent = store.getParent(model);
   if (!parent) return;
@@ -125,7 +125,7 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
       if (previousSibling) {
         store.captureSync();
         store.transact(() => {
-          previousSibling.text?.join(model.text as TextEntity);
+          previousSibling.text?.join(model.text as Text);
         });
         store.deleteBlock(model);
         asyncFocusRichText(store, previousSibling.id);

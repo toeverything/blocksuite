@@ -1,11 +1,12 @@
 import { Page } from '@playwright/test';
+import type { Store } from '../../packages/store';
 
 export const IS_MAC = process.platform === 'darwin';
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
 const NEXT_FRAME_TIMEOUT = 50;
-const DEFAULT_PLAYGROUNT = 'http://localhost:5173/';
+const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 
 function generateRandomRoomId() {
@@ -16,7 +17,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
     room = generateRandomRoomId();
   }
-  await page.goto(`${DEFAULT_PLAYGROUNT}?room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
   return room;
 }
 
@@ -34,8 +35,16 @@ export async function clearLog(page: Page) {
 
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUNT}?init=list&room=${room}`);
-  await waitNextFrame(page);
+  await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}`);
+  await page.evaluate(() => {
+    // @ts-ignore
+    const store = window['store'] as Store;
+    const pageId = store.addBlock({ flavour: 'page' });
+    const groupId = store.addBlock({ flavour: 'group' }, pageId);
+    for (let i = 0; i < 3; i++) {
+      store.addBlock({ flavour: 'list' }, groupId);
+    }
+  });
 }
 
 export async function focusRichText(page: Page, i = 0) {
