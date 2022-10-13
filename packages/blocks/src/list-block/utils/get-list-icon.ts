@@ -6,13 +6,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 const listPrefixStyle = styleMap({
   flexShrink: '0',
-  minWidth: '26px',
+  maxWidth: '26px',
   height: '26px',
   marginTop: '3px',
   marginRight: '4px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
+  color: 'var(--affine-highlight-color)',
 });
 
 export function getListIcon({
