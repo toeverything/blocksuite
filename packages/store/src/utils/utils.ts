@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import type { BlockProps, PrefixedBlockProps, YBlock, YBlocks } from '../store';
-import { PrelimTextEntity, TextEntity, TextType } from '../text-adapter';
+import { PrelimText, Text, TextType } from '../text-adapter';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -76,28 +76,28 @@ export function syncBlockProps(
 }
 
 export function trySyncTextProp(
-  splitSet: Set<TextEntity | PrelimTextEntity>,
+  splitSet: Set<Text | PrelimText>,
   yBlock: YBlock,
   text?: TextType | void
 ) {
   if (!text) return;
 
   // update by clone
-  if (text instanceof TextEntity) {
+  if (text instanceof Text) {
     // @ts-ignore
     yBlock.set('prop:text', text._yText);
     return;
   }
 
   // update by split
-  if (text instanceof PrelimTextEntity) {
+  if (text instanceof PrelimText) {
     const iter = splitSet.values();
-    const base = iter.next().value as TextEntity;
-    const left = iter.next().value as PrelimTextEntity;
-    const right = iter.next().value as PrelimTextEntity;
+    const base = iter.next().value as Text;
+    const left = iter.next().value as PrelimText;
+    const right = iter.next().value as PrelimText;
 
     if (!left.ready) {
-      throw new Error('PrelimTextEntity left is not ready');
+      throw new Error('PrelimText left is not ready');
     }
     if (
       left.type !== 'splitLeft' ||

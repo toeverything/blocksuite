@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from '@playwright/test';
+import type { Store } from '../packages/store';
 import {
   enterPlaygroundRoom,
   disconnectByClick,
@@ -29,6 +31,33 @@ test('basic input', async ({ page }) => {
   await expect(page).toHaveTitle(/BlockSuite/);
   await assertStore(page, defaultStore);
   await assertText(page, 'hello');
+});
+
+test('basic init with external text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  await page.evaluate(() => {
+    // @ts-ignore
+    const store = window['store'] as Store;
+
+    const pageId = store.addBlock({ flavour: 'page', title: 'hello' });
+    const groupId = store.addBlock({ flavour: 'group' }, pageId);
+
+    const text = new store.Text('world');
+    store.addBlock({ flavour: 'paragraph', text }, groupId);
+
+    const delta = [
+      { insert: 'foo ' },
+      { insert: 'bar', attributes: { bold: true } },
+    ];
+    store.addBlock(
+      { flavour: 'paragraph', text: store.Text.fromDelta(delta) },
+      groupId
+    );
+  });
+
+  await assertTitle(page, 'hello');
+  await assertRichTexts(page, ['world', 'foo bar']);
 });
 
 test('basic multi user state', async ({ browser, page: pageA }) => {

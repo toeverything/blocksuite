@@ -39,7 +39,7 @@ export class GroupBlockComponent extends LitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
     this.host.selection.addBlockSelectedListener(
       this.model.id,
-      selectOptions => {
+      selectionOptions => {
         const selectionInfo = this.host.selection.selectionInfo;
         if (selectionInfo.type === 'Block') {
           this.selected = selectionInfo.blocks.some(
@@ -52,7 +52,7 @@ export class GroupBlockComponent extends LitElement {
         commonPassCursorHandler(
           this.model.id,
           this.host.selection,
-          selectOptions
+          selectionOptions
         );
       }
     );

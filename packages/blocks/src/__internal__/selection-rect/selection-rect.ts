@@ -83,12 +83,16 @@ export class SelectionRect extends LitElement {
   }
 
   render() {
+    const container = this.closest(`.affine-editor-container`);
+    const scrollerTop = container?.scrollTop || 0;
+    const containerTop = container?.getBoundingClientRect().top || 0;
+    const containerLeft = container?.getBoundingClientRect().left || 0;
     const rectStyle =
       this.isShow && this.rect
         ? {
             display: 'block',
-            left: `${this.rect.left}px`,
-            top: `${this.rect.top}px`,
+            left: `${this.rect.left - containerLeft}px`,
+            top: `${this.rect.top + scrollerTop - containerTop}px`,
             height: `${this.rect.height}px`,
             width: `${this.rect.width}px`,
           }
