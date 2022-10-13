@@ -61,6 +61,11 @@ export class BaseBlockModel implements IBaseBlockProps {
     return `${text}${childText}`;
   }
 
+  block2Text(childText: string, begin?: number, end?: number) {
+    const text = (this.text?.toString() || '').slice(begin || 0, end);
+    return `${text}${childText}`;
+  }
+
   private _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
     const text = deltaLeaf.insert;
     const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<

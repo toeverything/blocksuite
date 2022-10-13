@@ -170,7 +170,7 @@ export class TextEntity {
   }
 
   toString() {
-    return this._yText.toString();
+    return this._yText?.toString() || '';
   }
 }
 

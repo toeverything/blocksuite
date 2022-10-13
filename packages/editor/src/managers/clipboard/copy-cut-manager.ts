@@ -128,6 +128,24 @@ export class CopyCutManager {
       childInfo && children.push(childInfo);
     });
 
+    if (model.flavour === 'page') {
+      const text = model.block2Text(
+        '',
+        selectedBlock?.startPos,
+        selectedBlock?.endPos
+      );
+      return {
+        flavour: 'paragraph',
+        type: 'text',
+        text: [
+          {
+            insert: text,
+          },
+        ],
+        children: children,
+      };
+    }
+
     return {
       flavour: model.flavour,
       type: model.type,
