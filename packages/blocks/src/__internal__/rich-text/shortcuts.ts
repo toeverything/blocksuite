@@ -157,8 +157,8 @@ export class Shortcuts {
       pattern: /(?:~~)(.+?)(?:~~)/g,
       action: (
         quill: Quill,
-        text: string,
         model: BaseBlockModel,
+        text: string,
         selection: RangeStatic,
         pattern: RegExp,
         lineStart: number
