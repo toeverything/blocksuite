@@ -11,6 +11,7 @@ import {
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
+  hotkeyManager,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '@blocksuite/shared';
@@ -131,7 +132,8 @@ export const createKeyboardBindings = (
   }
 
   function keyLeft(this: KeyboardEventThis, range: QuillRange) {
-    if (range.index === 0) {
+    // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
+    if (range.index === 0 && range.length===0) {
       selectionManager.activatePreviousBlock(model.id, 'end');
       return PREVENT_DEFAULT;
     }
@@ -172,6 +174,7 @@ export const createKeyboardBindings = (
   function selectAll(this: KeyboardEventThis) {
     if (!_firstSelectAll) {
       selectionManager.selectAllBlocks();
+      this.quill.focus()
     }
     _firstSelectAll = false;
     return ALLOW_DEFAULT;
