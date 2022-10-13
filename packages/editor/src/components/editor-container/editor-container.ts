@@ -136,6 +136,8 @@ export class EditorContainer extends LitElement {
       <style>
         .affine-editor-container {
           height: 100%;
+          overflow-y: scroll;
+          position: relative;
         }
       </style>
       <div class="affine-editor-container">

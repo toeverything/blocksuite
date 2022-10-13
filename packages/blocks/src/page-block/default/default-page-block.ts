@@ -46,7 +46,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   _blockTitle!: HTMLInputElement;
 
   private _bindHotkeys() {
-    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
+    const { undo, redo, selectAll, preExpendSelect, nextExpendSelect } =
+      hotkeyManager.hotkeysMap;
     const scope = 'page';
     hotkeyManager.addListener(undo, scope, (e: Event) => {
       e.preventDefault();
@@ -60,6 +61,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       e.preventDefault();
       this.selection.selectAllBlocks();
     });
+    hotkeyManager.addListener(preExpendSelect, scope, (e: Event) => {
+      this.selection.expandSelection();
+    });
+    hotkeyManager.addListener(nextExpendSelect, scope, (e: Event) => {
+      this.selection.expandSelection(false);
+    });
+    hotkeyManager.setScope('page');
   }
 
   private _removeHotkeys() {
@@ -120,10 +128,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     // fix hotkey error when focus on title
     this._blockTitle.addEventListener('blur', () => {
       hotkeyManager.setScope('page');
-    })
+    });
     this._blockTitle.addEventListener('focus', () => {
       hotkeyManager.setScope('all');
-    })
+    });
   }
 
   disconnectedCallback() {
