@@ -36,7 +36,7 @@ export class ListBlockComponent extends LitElement {
   firstUpdated() {
     this.host.selection.addBlockSelectedListener(
       this.model.id,
-      selectOptions => {
+      selectionOptions => {
         const selectionInfo = this.host.selection.selectionInfo;
         if (selectionInfo.type === 'Block') {
           this.selected = selectionInfo.blocks.some(
@@ -46,7 +46,7 @@ export class ListBlockComponent extends LitElement {
         if (this.selected && selectionInfo.type !== 'Block') {
           this.selected = false;
         }
-        if (selectOptions?.needFocus) {
+        if (selectionOptions?.needFocus) {
           const editableContainer = this.querySelector('[contenteditable]');
           if (editableContainer) {
             commonTextActiveHandler(
@@ -84,7 +84,17 @@ export class ListBlockComponent extends LitElement {
         } ${shouldAddMarginTop ? 'affine-list-block-container--first' : ''}`}
       >
         <div class="affine-list-rich-text-wrapper">
-          ${listIcon}
+          <div
+            style="cursor: pointer"
+            @click="${() => {
+              this.host.store.captureSync();
+              this.host.store.updateBlock(this.model, {
+                checked: !this.model.checked,
+              });
+            }}"
+          >
+            ${listIcon}
+          </div>
           <rich-text .host=${this.host} .model=${this.model}></rich-text>
         </div>
         ${childrenContainer}

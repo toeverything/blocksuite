@@ -235,8 +235,8 @@ export const createKeyboardBindings = (
       shiftKey: false,
       handler: keyDown,
     },
-    left: {
-      key: 'left',
+    'embed left': {
+      key: 37,
       shiftKey: false,
       handler: keyLeft,
     },

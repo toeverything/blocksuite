@@ -1,19 +1,7 @@
 import { ListBlockModel } from '../list-model';
-import { points } from './points';
+import { points, checkboxChecked, checkboxUnchecked } from './icons';
 import { getNumberPrefix } from './get-number-prefix';
 import { html } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
-
-const listPrefixStyle = styleMap({
-  flexShrink: '0',
-  minWidth: '26px',
-  height: '26px',
-  marginTop: '3px',
-  marginRight: '4px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-});
 
 export function getListIcon({
   model,
@@ -24,16 +12,21 @@ export function getListIcon({
   index: number;
   deep: number;
 }) {
-  if (model.type === 'numbered') {
-    return html`<div style="${listPrefixStyle}">
-      ${getNumberPrefix({
-        deep,
-        index,
-      })}
-    </div>`;
-  }
-
-  return html`<div style="${listPrefixStyle}">
-    ${points[deep % points.length]}
+  return html`<div class="affine-list-block__prefix">
+    ${(() => {
+      switch (model.type) {
+        case 'bulleted':
+          return points[deep % points.length];
+        case 'numbered':
+          return getNumberPrefix({
+            deep,
+            index,
+          });
+        case 'todo':
+          return model.checked ? checkboxChecked() : checkboxUnchecked();
+        default:
+          return '';
+      }
+    })()}
   </div>`;
 }
