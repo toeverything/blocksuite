@@ -11,9 +11,11 @@ type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 const params = new URLSearchParams(location.search);
 const room = params.get('room') || 'virgo-default';
 
+const IS_PLAYGROUND = location.href.includes('5173');
+
 const options = {
   room,
-  useDebugProvider: location.href.includes('5173'),
+  useDebugProvider: IS_PLAYGROUND,
 };
 
 @customElement('editor-container')
@@ -77,7 +79,9 @@ export class EditorContainer extends LitElement {
     this.isEmptyPage = false;
   }
 
+  // only work in playground
   private _tryInitFromVoidState() {
+    if (!IS_PLAYGROUND) return;
     window.addEventListener('mousemove', () => this._initFromVoidState(), {
       once: true,
     });

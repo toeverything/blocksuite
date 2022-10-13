@@ -2,12 +2,7 @@
 
 import * as Y from 'yjs';
 import { Slot } from './utils/slot';
-import {
-  PrelimTextEntity,
-  RichTextAdapter,
-  TextEntity,
-  TextType,
-} from './text-adapter';
+import { PrelimText, RichTextAdapter, Text, TextType } from './text-adapter';
 import Quill from 'quill';
 import { Awareness } from 'y-protocols/awareness.js';
 import { SelectionRange, AwarenessAdapter } from './awareness';
@@ -81,7 +76,7 @@ export class Store {
   private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _splitSet = new Set<TextEntity | PrelimTextEntity>();
+  private _splitSet = new Set<Text | PrelimText>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -248,8 +243,12 @@ export class Store {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
     this.transact(() => {
-      if (props.text instanceof PrelimTextEntity) {
+      if (props.text instanceof PrelimText) {
         props.text.ready = true;
+      } else if (props.text instanceof Text) {
+        model.text = props.text;
+        // @ts-ignore
+        yBlock.set('prop:text', props.text._yText);
       }
 
       syncBlockProps(yBlock, props, this._ignoredKeys);
@@ -283,6 +282,10 @@ export class Store {
     });
   }
 
+  get Text() {
+    return Text;
+  }
+
   /** Connect a rich text editor instance with a YText instance. */
   attachRichText(id: string, quill: Quill) {
     const yBlock = this._getYBlock(id);
@@ -310,11 +313,7 @@ export class Store {
     this.richTextAdapters.delete(id);
   }
 
-  markTextSplit(
-    base: TextEntity,
-    left: PrelimTextEntity,
-    right: PrelimTextEntity
-  ) {
+  markTextSplit(base: Text, left: PrelimText, right: PrelimText) {
     this._splitSet.add(base).add(left).add(right);
   }
 
@@ -382,8 +381,8 @@ export class Store {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const textEntity = new TextEntity(yText);
-    model.text = textEntity;
+    const text = new Text(yText);
+    model.text = text;
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
