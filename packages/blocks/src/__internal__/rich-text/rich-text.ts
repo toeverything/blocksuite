@@ -5,6 +5,7 @@ import QuillCursors from 'quill-cursors';
 import { BlockHost, hotkeyManager } from '@blocksuite/shared';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
+import { createLink } from './link-node';
 
 import style from './styles.css';
 
@@ -110,6 +111,16 @@ export class RichText extends LitElement {
             }
           });
         }
+      }
+    );
+    hotkeyManager.addListener(
+      hotkeyManager.hotkeysMap.link,
+      this.model.id,
+      () => {
+        if (!this._quill) {
+          return;
+        }
+        createLink({ quill: this._quill, store: _store, model: this.model });
       }
     );
   }
