@@ -9,6 +9,7 @@ import {
   TextType,
 } from './text-adapter';
 import Quill from 'quill';
+import { Awareness } from 'y-protocols/awareness.js';
 import { SelectionRange, AwarenessAdapter } from './awareness';
 import {
   assertValidChildren,
@@ -56,9 +57,14 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
+interface StoreOptions {
+  room: string;
+  useDebugProvider: boolean;
+}
+
 export class Store {
   readonly doc = new Y.Doc();
-  readonly provider!: DebugProvider;
+  readonly provider?: DebugProvider;
   readonly awareness!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
@@ -82,11 +88,15 @@ export class Store {
     Object.keys(new BaseBlockModel(this, {}))
   );
 
-  constructor(room = '') {
-    if (IS_WEB) {
-      this.provider = new DebugProvider(room, this.doc);
-      this.awareness = new AwarenessAdapter(this);
+  constructor(options: StoreOptions) {
+    if (IS_WEB && options.useDebugProvider) {
+      this.provider = new DebugProvider(options.room, this.doc);
     }
+
+    const awareness = this.provider
+      ? this.provider.awareness
+      : new Awareness(this.doc);
+    this.awareness = new AwarenessAdapter(this, awareness);
 
     this._yBlocks.observeDeep(this._yBlocksObserver);
 

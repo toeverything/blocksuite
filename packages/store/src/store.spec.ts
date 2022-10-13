@@ -9,6 +9,11 @@ import { ParagraphBlockModel } from '../../blocks/src/paragraph-block/paragraph-
 import { ListBlockModel } from '../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../blocks/src/group-block/group-model';
 
+const options = {
+  room: '',
+  useDebugProvider: false,
+};
+
 // Create BlockSchema manually
 export const BlockSchema = {
   paragraph: ParagraphBlockModel,
@@ -27,7 +32,7 @@ function waitOnce<T>(slot: Slot<T>) {
 
 describe.concurrent('basic', () => {
   it('can init store', () => {
-    const store = new Store();
+    const store = new Store(options);
 
     assert.deepEqual(serialize(store), {
       blocks: {},
@@ -37,7 +42,7 @@ describe.concurrent('basic', () => {
 
 describe.concurrent('addBlock', () => {
   it('can add single model', () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
 
     store.addBlock({ flavour: 'page' });
 
@@ -51,7 +56,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add model with props', () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
 
     store.addBlock({ flavour: 'page', title: 'hello' });
 
@@ -66,7 +71,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add multi models', () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
     store.addBlock({ flavour: 'page' });
     store.addBlock({ flavour: 'paragraph' });
 
@@ -87,7 +92,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can observe slot events', async () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
     const block = await waitOnce(store.slots.rootAdded);
@@ -95,7 +100,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add block to root', async () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
     const root = await waitOnce(store.slots.rootAdded);
@@ -119,7 +124,7 @@ async function initWithRoot(store: Store) {
 
 describe.concurrent('deleteBlock', () => {
   it('can delete single model', () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
 
     store.addBlock({ flavour: 'page' });
     assert.deepEqual(serialize(store).blocks, {
@@ -135,7 +140,7 @@ describe.concurrent('deleteBlock', () => {
   });
 
   it('can delete model with parent', async () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
@@ -172,7 +177,7 @@ describe.concurrent('deleteBlock', () => {
 
 describe.concurrent('getBlock', () => {
   it('can get block by id', async () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
@@ -187,7 +192,7 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get parent', async () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
@@ -201,7 +206,7 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get previous sibling', async () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
     store.addBlock({ flavour: 'paragraph' });
@@ -217,7 +222,7 @@ describe.concurrent('getBlock', () => {
 
 describe('store.toJSXElement works', async () => {
   it('store match snapshot', () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
 
     store.addBlock({ flavour: 'page', title: 'hello' });
 
@@ -229,12 +234,12 @@ describe('store.toJSXElement works', async () => {
   });
 
   it('empty store match snapshot', () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
     expect(store.toJSXElement()).toMatchInlineSnapshot('null');
   });
 
   it('store with multiple blocks children match snapshot', () => {
-    const store = new Store().register(BlockSchema);
+    const store = new Store(options).register(BlockSchema);
 
     store.addBlock({ flavour: 'page' });
     store.addBlock({ flavour: 'paragraph' });
