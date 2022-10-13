@@ -17,3 +17,25 @@
 .affine-list-rich-text-wrapper rich-text {
   flex: 1;
 }
+
+.affine-list-block__prefix {
+  flex-shrink: 0;
+  min-width: 26px;
+  height: 26px;
+  margin-top: 3px;
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--affine-highlight-color);
+}
+
+.affine-list-block__todo {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #a6abb7;
+}
+.affine-list-block__todo.affine-list-block__todo--active {
+  background: #a6abb7;
+}

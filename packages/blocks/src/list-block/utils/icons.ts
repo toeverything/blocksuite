@@ -42,5 +42,42 @@ export const point4 = () => {
     </svg>
   `;
 };
+export const checkboxChecked = () => {
+  return html`
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M7 4C5.34315 4 4 5.34315 4 7V17C4 18.6569 5.34315 20 7 20H17C18.6569 20 20 18.6569 20 17V7C20 5.34315 18.6569 4 17 4H7ZM17.5665 9.56473C17.8785 9.25181 17.8776 8.74528 17.5647 8.43336C17.2518 8.12144 16.7453 8.12225 16.4334 8.43517L10.3547 14.5333L7.56666 11.7352C7.2548 11.4222 6.74827 11.4213 6.43529 11.7331C6.1223 12.045 6.12139 12.5515 6.43325 12.8645L9.64626 16.0891C10.037 16.4813 10.672 16.4814 11.0629 16.0893L17.5665 9.56473Z"
+        fill="#A6ABB7"
+      />
+    </svg>
+  `;
+};
+
+export const checkboxUnchecked = () => {
+  return html`
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M17 5.6H7C6.2268 5.6 5.6 6.2268 5.6 7V17C5.6 17.7732 6.2268 18.4 7 18.4H17C17.7732 18.4 18.4 17.7732 18.4 17V7C18.4 6.2268 17.7732 5.6 17 5.6ZM7 4C5.34315 4 4 5.34315 4 7V17C4 18.6569 5.34315 20 7 20H17C18.6569 20 20 18.6569 20 17V7C20 5.34315 18.6569 4 17 4H7Z"
+        fill="#A6ABB7"
+      />
+    </svg>
+  `;
+};
 
 export const points = [point1(), point2(), point3(), point4()];
