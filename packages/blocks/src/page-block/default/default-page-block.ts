@@ -60,7 +60,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       e.preventDefault();
       this.selection.selectAllBlocks();
     });
-    hotkeyManager.setScope('page');
   }
 
   private _removeHotkeys() {
@@ -117,6 +116,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     focusTextEnd(this._blockTitle);
+
+    // fix hotkey error when focus on title
+    this._blockTitle.addEventListener('blur', () => {
+      hotkeyManager.setScope('page');
+    })
+    this._blockTitle.addEventListener('focus', () => {
+      hotkeyManager.setScope('all');
+    })
   }
 
   disconnectedCallback() {
