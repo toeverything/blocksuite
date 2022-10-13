@@ -85,13 +85,9 @@ test('delete before select-all in page ', async ({ page }) => {
   // second select all in rich text
   await selectAllByKeyboard(page);
   await assertBlockCount(page, 'group', 1);
-
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'group', 0);
-  //undo
   await undoByClick(page);
-  await assertBlockCount(page, 'group', 1);
-  //redo
   await redoByClick(page);
   await assertBlockCount(page, 'group', 0);
 });

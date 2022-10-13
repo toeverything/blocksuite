@@ -89,7 +89,7 @@ export class SelectionManager {
 
   private _handlerBrowserChange() {
     const selection = window.getSelection();
-    this.selectedBlockIds = [];
+
     if (selection) {
       const { type, anchorNode, focusNode } = selection;
       if (
@@ -99,6 +99,7 @@ export class SelectionManager {
         this._container.contains(anchorNode) &&
         this._container.contains(focusNode)
       ) {
+        this.selectedBlockIds = [];
         const anchorBlockId =
           anchorNode.parentElement
             ?.closest(`[${BLOCK_ID_ATTR}]`)

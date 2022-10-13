@@ -124,10 +124,7 @@ export class RichText extends LitElement {
           this._quill?.getSelection()?.length !== 0
         ) {
           this._quill?.blur();
-          // XXX because blur is async, we need to wait for it to finish
-          setTimeout(() => {
-            _selection.selectAllBlocks();
-          });
+          _selection.selectAllBlocks();
         } else {
           this._quill?.setSelection(0, this._quill.getLength());
         }
