@@ -3,7 +3,7 @@ import { Point } from './rect';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
-export type SelectOptions = {
+export type SelectionOptions = {
   needFocus?: boolean;
   from?: 'previous' | 'next';
 };
@@ -15,7 +15,7 @@ export interface BlockHost {
   selection: {
     addBlockSelectedListener: (
       blockId: string,
-      handler: (selectionInfo?: SelectOptions) => void
+      handler: (selectionInfo?: SelectionOptions) => void
     ) => void;
     removeBlockSelectedListener: (blockId: string) => void;
     activatePreviousBlock: (
