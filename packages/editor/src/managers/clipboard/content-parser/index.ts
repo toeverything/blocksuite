@@ -150,7 +150,7 @@ export class ContentParser {
   }
 
   private _convertHtml2Blocks(element: Element): OpenBlockInfo[] {
-    return Array.from(element.childNodes)
+    return Array.from(element.children)
       .map(childElement => {
         const clipBlockInfos =
           this.getParserHtmlText2Block('nodeParser')?.(childElement) || [];

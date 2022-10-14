@@ -23,6 +23,14 @@ export class ParserHtml {
   }
   // TODO parse children block
   private _nodePaser(node: Element): OpenBlockInfo[] | null {
+    let result;
+    // custom parser
+    result =
+      this._contentParser.getParserHtmlText2Block('customNodeParser')?.(node);
+    if (result && result.length > 0) {
+      return result;
+    }
+
     if (node.nodeType === 3) {
       return this._contentParser.getParserHtmlText2Block('commonParser')?.({
         element: node,
@@ -34,7 +42,7 @@ export class ParserHtml {
       return [];
     }
     const tagName = node.tagName;
-    let result;
+
     switch (tagName) {
       case 'H1':
       case 'H2':
@@ -112,27 +120,64 @@ export class ParserHtml {
   }
 
   private _commonHTML2Block(
-    element: HTMLElement | Node,
+    element: Element,
     flavour: string,
     type: string,
     checked?: boolean,
     ignoreEmptyElement = true
   ): OpenBlockInfo | null {
-    const textValue = this._commonHTML2Text(element, {}, ignoreEmptyElement);
-    if (!textValue.length && ignoreEmptyElement) {
-      return null;
+    const childNodes = element.children;
+    let isChildNode = false;
+    const textValues = [];
+    const children = [];
+    for (let i = 0; i < childNodes.length; i++) {
+      const node = childNodes.item(i);
+      if (!node) continue;
+      if (!isChildNode) {
+        if (node instanceof Text) {
+          textValues.push(
+            ...this._commonHTML2Text(node, {}, ignoreEmptyElement)
+          );
+          continue;
+        }
+        const htmlElement = node as HTMLElement;
+        if (
+          [
+            'DEL',
+            'STRONG',
+            'B',
+            'EM',
+            'I',
+            'U',
+            'S',
+            'P',
+            'SPAN',
+            'A',
+            'INPUT',
+          ].includes(htmlElement.tagName)
+        ) {
+          textValues.push(
+            ...this._commonHTML2Text(node, {}, ignoreEmptyElement)
+          );
+          continue;
+        }
+      }
+      const childNode = this._nodePaser(node as Element);
+      childNode && children.push(...childNode);
+      isChildNode = true;
     }
+
     return {
       flavour: flavour,
       type: type,
       checked: checked,
-      text: textValue,
-      children: [],
+      text: textValues,
+      children: children,
     };
   }
 
   private _commonHTML2Text(
-    element: HTMLElement | Node,
+    element: Element | Node,
     textStyle: { [key: string]: unknown } = {},
     ignoreEmptyText = true
   ) {
