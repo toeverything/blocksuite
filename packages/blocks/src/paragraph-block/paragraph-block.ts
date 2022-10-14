@@ -4,7 +4,7 @@ import {
   BLOCK_ID_ATTR,
   commonTextActiveHandler,
   type BlockHost,
-} from '@blocksuite/shared';
+} from '../__internal__';
 import type { ParagraphBlockModel } from './paragraph-model';
 
 import { BlockChildrenContainer } from '../__internal__';

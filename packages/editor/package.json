@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "type": "module",
   "description": "",
   "main": "src/index.ts",
@@ -13,7 +13,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
-    "@blocksuite/shared": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "lit": "^2.3.1",
     "marked": "^4.1.0",

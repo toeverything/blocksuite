@@ -1,11 +1,11 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost } from '@blocksuite/shared';
+import type { BlockHost } from '../utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { ListBlockModel } from '../list-block/list-model';
-import type { ParagraphBlockModel } from '../paragraph-block/paragraph-model';
-import type { GroupBlockModel } from '../group-block/group-model';
+import type { ListBlockModel } from '../../list-block/list-model';
+import type { ParagraphBlockModel } from '../../paragraph-block/paragraph-model';
+import type { GroupBlockModel } from '../../group-block/group-model';
 
 // TODO support dynamic block types
 export function BlockElement(model: BaseBlockModel, host: BlockHost) {
@@ -52,12 +52,4 @@ export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
       )}
     </div>
   `;
-}
-
-// https://stackoverflow.com/a/2345915
-export function focusTextEnd(input: HTMLInputElement) {
-  const current = input.value;
-  input.focus();
-  input.value = '';
-  input.value = current;
 }

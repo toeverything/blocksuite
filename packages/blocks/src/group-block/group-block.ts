@@ -1,13 +1,13 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
+import type { GroupBlockModel } from './group-model';
 import {
+  BlockChildrenContainer,
   BLOCK_ID_ATTR,
   commonPassCursorHandler,
   type BlockHost,
-} from '@blocksuite/shared';
-
-import type { GroupBlockModel } from './group-model';
-import { BlockChildrenContainer } from '../__internal__';
+} from '../__internal__';
 import style from './style.css';
 
 @customElement('group-block')

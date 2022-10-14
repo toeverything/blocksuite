@@ -34,13 +34,6 @@ export interface CommonBlockElement extends HTMLElement {
   model: BaseBlockModel;
 }
 
-export interface SelectedBlock {
-  id: string;
-  startPos?: number;
-  endPos?: number;
-  children: SelectedBlock[];
-}
-
 interface NoneSelectionInfo {
   type: 'None';
 }
@@ -59,6 +52,13 @@ interface RangeSelectionInfo {
   focusBlockId: string;
   anchorBlockPosition: number | null;
   focusBlockPosition: number | null;
+}
+
+export interface SelectedBlock {
+  id: string;
+  startPos?: number;
+  endPos?: number;
+  children: SelectedBlock[];
 }
 
 export interface BlockSelectionInfo {

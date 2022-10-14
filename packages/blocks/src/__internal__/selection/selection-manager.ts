@@ -1,7 +1,6 @@
 import {
   BLOCK_ID_ATTR,
   Rect,
-  SelectedBlock,
   SelectionInfo,
   SelectionPosition,
   SelectionOptions,
@@ -9,7 +8,8 @@ import {
   getPreviousSiblingById,
   getBlockById,
   getNextSiblingById,
-} from '@blocksuite/shared';
+  SelectedBlock,
+} from '../';
 import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
 // TODO use lodash or move to utils

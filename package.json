@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "BlockSuite framework workspace",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
@@ -13,7 +13,7 @@
     "format": "prettier --write packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
-    "clean": "rm -rf dist packages/{blocks,editor,playground,shared,store}/dist",
+    "clean": "rm -rf dist packages/{blocks,editor,playground,store}/dist",
     "bump": "pnpm --recursive exec pnpm version patch && pnpm version patch --git-tag-version false",
     "publish": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish --no-git-checks"
   },
