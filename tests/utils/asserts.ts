@@ -169,7 +169,7 @@ export async function assertTextContent(
 
 export async function assertBlockType(
   page: Page,
-  id: string | number,
+  id: string | number | null,
   type: string
 ) {
   const actual = await page.evaluate(

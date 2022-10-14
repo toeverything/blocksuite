@@ -227,7 +227,9 @@ export async function getQuillSelectionText(page: Page) {
   });
 }
 
-export async function getCursorBlockIdAndHeight(page: Page) {
+export async function getCursorBlockIdAndHeight(
+  page: Page
+): Promise<[string | null, number | null]> {
   return await page.evaluate(() => {
     const selection = document.getSelection();
     if (selection) {
