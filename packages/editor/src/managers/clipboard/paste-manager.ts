@@ -72,7 +72,7 @@ export class PasteManager {
       return clipInfo.data;
     }
 
-    const textClipData = escape(clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT));
+    const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
 
     const shouldConvertMarkdown =
       MarkdownUtils.checkIfTextContainsMd(textClipData);
@@ -84,6 +84,7 @@ export class PasteManager {
     }
 
     if (shouldConvertMarkdown) {
+      // TODO the method of parse need deal underline
       const md2html = marked.parse(textClipData);
       return this._editor.contentParser.htmlText2Block(md2html);
     }
