@@ -13,7 +13,7 @@ import {
   handleUnindent,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
-} from '@blocksuite/shared';
+} from '../utils';
 import { Shortcuts } from './shortcuts';
 
 interface QuillRange {

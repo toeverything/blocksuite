@@ -1,12 +1,16 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { BlockHost, BLOCK_ID_ATTR, Bound } from '@blocksuite/shared';
 import type { Store } from '@blocksuite/store';
 
 import type { PageBlockModel, GroupBlockModel } from '../..';
 import { EdgelessBlockChildrenContainer, EdgelessSelectionBox } from './utils';
-import { SelectionManager } from '../../__internal__';
+import {
+  SelectionManager,
+  BlockHost,
+  BLOCK_ID_ATTR,
+  Bound,
+} from '../../__internal__';
 import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
 
 export interface ViewportState {

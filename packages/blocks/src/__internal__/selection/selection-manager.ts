@@ -9,7 +9,7 @@ import {
   getBlockById,
   getNextSiblingById,
   SelectedBlock,
-} from '@blocksuite/shared';
+} from '../';
 import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
 // TODO use lodash or move to utils

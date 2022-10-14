@@ -6,7 +6,7 @@ import {
   CommonBlockElement,
   convertToList,
   createEvent,
-} from '@blocksuite/shared';
+} from '../__internal__';
 import { BaseBlockModel, Store } from '@blocksuite/store';
 import { GroupBlockModel } from '../group-block';
 

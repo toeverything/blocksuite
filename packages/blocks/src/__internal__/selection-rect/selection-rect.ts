@@ -1,7 +1,7 @@
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { BLOCK_ID_ATTR, Point, Rect } from '@blocksuite/shared';
+import { BLOCK_ID_ATTR, Point, Rect } from '../utils';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { DefaultMouseManager } from '../mouse/mouse-manager';
 import { SelectionManager } from '../selection/selection-manager';

@@ -1,21 +1,26 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import type { Store } from '@blocksuite/store';
+
+import type { PageBlockModel } from '..';
 import {
   asyncFocusRichText,
   BLOCK_ID_ATTR,
   hotkeyManager,
   type BlockHost,
-} from '@blocksuite/shared';
-import type { Store } from '@blocksuite/store';
-
-import type { PageBlockModel } from '..';
-import {
   SelectionManager,
   DefaultMouseManager,
-  focusTextEnd,
   BlockChildrenContainer,
 } from '../../__internal__';
 import style from './style.css';
+
+// https://stackoverflow.com/a/2345915
+export function focusTextEnd(input: HTMLInputElement) {
+  const current = input.value;
+  input.focus();
+  input.value = '';
+  input.value = current;
+}
 
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {

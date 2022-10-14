@@ -1,4 +1,4 @@
-import type { IPoint } from '@blocksuite/shared';
+import type { IPoint } from '../../__internal__';
 import { GroupBlockModel } from '../../group-block';
 import { ViewportState, IEdgelessContainer, XYWH } from './edgeless-page-block';
 

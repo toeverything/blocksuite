@@ -2,7 +2,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
-import { BlockHost, hotkeyManager } from '@blocksuite/shared';
+import { BlockHost, hotkeyManager } from '../utils';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 

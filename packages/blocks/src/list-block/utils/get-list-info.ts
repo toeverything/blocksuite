@@ -1,4 +1,4 @@
-import { BlockHost } from '@blocksuite/shared';
+import { BlockHost } from '../../__internal__';
 import { ListBlockModel } from '../list-model';
 
 const getIndex = (host: BlockHost, model: ListBlockModel) => {
