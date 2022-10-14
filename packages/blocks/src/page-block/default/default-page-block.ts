@@ -46,8 +46,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   _blockTitle!: HTMLInputElement;
 
   private _bindHotkeys() {
-    const { undo, redo, selectAll, preExpendSelect, nextExpendSelect } =
-      hotkeyManager.hotkeysMap;
+    const {
+      undo,
+      redo,
+      selectAll,
+      deleteKey,
+      preExpendSelect,
+      nextExpendSelect,
+    } = hotkeyManager.hotkeysMap;
     const scope = 'page';
     hotkeyManager.addListener(undo, scope, (e: Event) => {
       e.preventDefault();
@@ -61,6 +67,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       e.preventDefault();
       this.selection.selectAllBlocks();
     });
+    hotkeyManager.addListener(deleteKey, scope, (e: Event) => {
+      e.preventDefault();
+      const selectAllBlocks = this.selection.selectedBlockIds;
+      selectAllBlocks.map(id => {
+        this.store.deleteBlockById(id);
+      });
+    });
     hotkeyManager.addListener(preExpendSelect, scope, (e: Event) => {
       this.selection.expandSelection();
     });
@@ -71,8 +84,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _removeHotkeys() {
-    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
-    hotkeyManager.removeListener([undo, redo, selectAll], 'page');
+    const { undo, redo, selectAll, deleteKey } = hotkeyManager.hotkeysMap;
+    hotkeyManager.removeListener([undo, redo, selectAll, deleteKey], 'page');
   }
 
   private _onKeyDown(e: KeyboardEvent) {
