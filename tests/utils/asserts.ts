@@ -167,7 +167,11 @@ export async function assertTextContent(
   await expect(locator).toHaveText(text);
 }
 
-export async function assertBlockType(page: Page, id: string, type: string) {
+export async function assertBlockType(
+  page: Page,
+  id: string | number,
+  type: string
+) {
   const actual = await page.evaluate(
     ({ id }) => {
       const element = document.querySelector(`[data-block-id="${id}"]`);
