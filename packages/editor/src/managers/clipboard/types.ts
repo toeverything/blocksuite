@@ -17,6 +17,13 @@ export enum ClipboardAction {
   paste = 'paste',
 }
 
+export interface SelectedBlock {
+  id: string;
+  startPos?: number;
+  endPos?: number;
+  children: SelectedBlock[];
+}
+
 export type OpenBlockInfo = {
   flavour: string;
   type: string;

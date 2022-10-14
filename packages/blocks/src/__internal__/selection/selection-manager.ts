@@ -1,7 +1,6 @@
 import {
   BLOCK_ID_ATTR,
   Rect,
-  SelectedBlock,
   SelectionInfo,
   SelectionPosition,
   SelectionOptions,
@@ -9,6 +8,7 @@ import {
   getPreviousSiblingById,
   getBlockById,
   getNextSiblingById,
+  SelectedBlock,
 } from '@blocksuite/shared';
 import { BaseBlockModel, IDisposable, Slot, Store } from '@blocksuite/store';
 
