@@ -381,7 +381,18 @@ export function commonTextActiveHandler(
   position: SelectionPosition,
   editableContainer: Element
 ) {
-  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
+  let { top, left, bottom, right } = Rect.fromDom(editableContainer);
+  const [oldTop, oldBottom] = [top, bottom];
+  const { clientHeight } = document.documentElement;
+  // TODO: improve the logic
+  if (top + 20 > clientHeight || bottom < 20) {
+    editableContainer.scrollIntoView();
+    const newRect = Rect.fromDom(editableContainer);
+    top = newRect.top;
+    left = newRect.left;
+    bottom = newRect.bottom;
+    right = newRect.right;
+  }
   const lineHeight =
     Number(
       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
@@ -391,10 +402,10 @@ export function commonTextActiveHandler(
     const { x, y } = position;
     let newTop = y;
     let newLeft = x;
-    if (bottom <= y) {
+    if (oldBottom <= y) {
       newTop = bottom - lineHeight / 2;
     }
-    if (top >= y) {
+    if (oldTop >= y) {
       newTop = top + lineHeight / 2;
     }
     if (x < left) {
