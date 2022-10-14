@@ -134,18 +134,19 @@ export class ContentParser {
       return '';
     }
 
-    // TODO Handling different block by extension
-    let text = model?.text?.toString() || '';
-    const end = selectedBlock.endPos ? selectedBlock.endPos : text.length;
-    text = text.slice(selectedBlock.startPos || 0, end);
-
     const children: string[] = [];
     selectedBlock.children.forEach(child => {
       const childText = this._getTextInfoBySelectionInfo(child);
       childText && children.push(childText);
     });
 
-    return `${text}${children.join('')}`;
+    const text = model.block2Text(
+      children.join(''),
+      selectedBlock.startPos,
+      selectedBlock.endPos
+    );
+
+    return text;
   }
 
   private _convertHtml2Blocks(element: Element): OpenBlockInfo[] {

@@ -21,5 +21,6 @@ export type OpenBlockInfo = {
   flavour: string;
   type: string;
   text: unknown;
+  checked?: boolean;
   children: OpenBlockInfo[];
 };

@@ -2,7 +2,7 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
 import { SelectedBlock } from '@blocksuite/shared';
-import type { DefaultPageBlockComponent } from '@blocksuite/blocks';
+import { DefaultPageBlockComponent, ListBlockModel } from '@blocksuite/blocks';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -116,11 +116,28 @@ export class CopyCutManager {
     if (!model) {
       return null;
     }
-    // TODO Handling different block by extension
-    const delta = model?.text?.sliceToDelta(
-      selectedBlock?.startPos || 0,
-      selectedBlock?.endPos
-    );
+
+    let { flavour, type } = model;
+    let delta = [];
+    if (model.flavour === 'page') {
+      flavour = 'paragraph';
+      type = 'text';
+      const text = model.block2Text(
+        '',
+        selectedBlock?.startPos,
+        selectedBlock?.endPos
+      );
+      delta = [
+        {
+          insert: text,
+        },
+      ];
+    } else {
+      delta = model?.text?.sliceToDelta(
+        selectedBlock?.startPos || 0,
+        selectedBlock?.endPos
+      );
+    }
 
     const children: OpenBlockInfo[] = [];
     selectedBlock.children.forEach(child => {
@@ -129,9 +146,10 @@ export class CopyCutManager {
     });
 
     return {
-      flavour: model.flavour,
-      type: model.type,
+      flavour: flavour,
+      type: type,
       text: delta,
+      checked: model instanceof ListBlockModel ? model.checked : undefined,
       children: children,
     };
   }

@@ -89,7 +89,7 @@ export class SelectionManager {
 
   private _handlerBrowserChange() {
     const selection = window.getSelection();
-    this.selectedBlockIds = [];
+
     if (selection) {
       const { type, anchorNode, focusNode } = selection;
       if (
@@ -99,6 +99,7 @@ export class SelectionManager {
         this._container.contains(anchorNode) &&
         this._container.contains(focusNode)
       ) {
+        this.selectedBlockIds = [];
         const anchorBlockId =
           anchorNode.parentElement
             ?.closest(`[${BLOCK_ID_ATTR}]`)
@@ -109,6 +110,7 @@ export class SelectionManager {
             ?.getAttribute(BLOCK_ID_ATTR) || '';
         this._anchorBlockId = anchorBlockId;
         this._focusBlockId = focusBlockId;
+        // todo _anchorBlockPosition _focusBlockPosition when select page text
         const anchorSelection = this._store.richTextAdapters
           .get(anchorBlockId)
           ?.quill.getSelection();

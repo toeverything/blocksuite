@@ -1,3 +1,4 @@
+import { BaseBlockModel } from '@blocksuite/store';
 import Quill, { RangeStatic } from 'quill';
 
 type Match = {
@@ -5,6 +6,7 @@ type Match = {
   pattern: RegExp;
   action: (
     quill: Quill,
+    model: BaseBlockModel,
     text: string,
     selection: RangeStatic,
     pattern: RegExp,
@@ -13,7 +15,7 @@ type Match = {
 };
 
 export class Shortcuts {
-  public static match(quill: Quill) {
+  public static match(quill: Quill, model: BaseBlockModel) {
     const selection = quill.getSelection();
     if (!selection) return;
     const [line, offset] = quill.getLine(selection.index);
@@ -24,7 +26,7 @@ export class Shortcuts {
         const matchedText = text.match(match.pattern);
         if (matchedText) {
           // We need to replace only matched text not the whole line
-          match.action(quill, text, selection, match.pattern, lineStart);
+          match.action(quill, model, text, selection, match.pattern, lineStart);
           return;
         }
       }
@@ -39,6 +41,7 @@ export class Shortcuts {
       pattern: /(?:\*|_){3}(.+?)(?:\*|_){3}/g,
       action: (
         quill: Quill,
+        model: BaseBlockModel,
         text: string,
         selection: RangeStatic,
         pattern: RegExp,
@@ -70,6 +73,7 @@ export class Shortcuts {
       pattern: /(?:\*|_){2}(.+?)(?:\*|_){2}/g,
       action: (
         quill: Quill,
+        model: BaseBlockModel,
         text: string,
         selection: RangeStatic,
         pattern: RegExp,
@@ -97,6 +101,7 @@ export class Shortcuts {
       pattern: /(?:\*|_){1}(.+?)(?:\*|_){1}/g,
       action: (
         quill: Quill,
+        model: BaseBlockModel,
         text: string,
         selection: RangeStatic,
         pattern: RegExp,
@@ -124,6 +129,7 @@ export class Shortcuts {
       pattern: /(?:~)(.+?)(?:~)/g,
       action: (
         quill: Quill,
+        model: BaseBlockModel,
         text: string,
         selection: RangeStatic,
         pattern: RegExp,
@@ -151,6 +157,7 @@ export class Shortcuts {
       pattern: /(?:~~)(.+?)(?:~~)/g,
       action: (
         quill: Quill,
+        model: BaseBlockModel,
         text: string,
         selection: RangeStatic,
         pattern: RegExp,
@@ -173,33 +180,27 @@ export class Shortcuts {
         quill.format('strike', false);
       },
     },
-    // todo
     {
       name: 'link',
-      pattern: /(?:\[(.+?)\])(?:\((.+?)\))/g,
+      pattern:
+        /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g,
       action: (
         quill: Quill,
+        model: BaseBlockModel,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp
+        pattern: RegExp,
+        lineStart: number
       ) => {
-        const startIndex = text.search(pattern);
-        const matchedText = text.match(pattern)?.[0];
-        const hrefText = text.match(/(?:\[(.*?)\])/g)?.[0];
-        const hrefLink = text.match(/(?:\((.*?)\))/g)?.[0];
-        if (!matchedText || !hrefText || !hrefLink) {
+        const match = pattern.exec(text);
+        if (!match) {
           return;
         }
-        const start = selection.index - matchedText.length - 1;
-        if (startIndex !== -1) {
-          quill.deleteText(start, matchedText.length);
-          quill.insertText(
-            start,
-            hrefText.slice(1, hrefText.length - 1),
-            'link',
-            hrefLink.slice(1, hrefLink.length - 1)
-          );
-        }
+        const annotatedText = match[0];
+        const startIndex = lineStart + match.index;
+        model.text?.format(startIndex, annotatedText.length, {
+          link: annotatedText,
+        });
       },
     },
   ];

@@ -72,7 +72,7 @@ export class PasteManager {
       return clipInfo.data;
     }
 
-    const textClipData = escape(clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT));
+    const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
 
     const shouldConvertMarkdown =
       MarkdownUtils.checkIfTextContainsMd(textClipData);
@@ -84,6 +84,7 @@ export class PasteManager {
     }
 
     if (shouldConvertMarkdown) {
+      // TODO the method of parse need deal underline
       const md2html = marked.parse(textClipData);
       return this._editor.contentParser.htmlText2Block(md2html);
     }
@@ -139,7 +140,7 @@ export class PasteManager {
       let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
-        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+        index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
@@ -153,7 +154,7 @@ export class PasteManager {
       let index = -1;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
-        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+        index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
@@ -172,6 +173,7 @@ export class PasteManager {
       const blockProps = {
         flavour: block.flavour as string,
         type: block.type as string,
+        checked: block.checked,
       };
       const id = this._editor.store.addBlock(blockProps, parent, index + i);
       const model = this._editor.store.getBlockById(id);

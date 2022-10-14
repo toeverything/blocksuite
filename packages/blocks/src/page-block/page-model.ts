@@ -17,4 +17,9 @@ export class PageBlockModel extends BaseBlockModel {
   ) {
     return `<div>${this.title}${childText}</div>`;
   }
+
+  override block2Text(childText: string, begin?: number, end?: number) {
+    const text = (this.title || '').slice(begin || 0, end);
+    return `${text}${childText}`;
+  }
 }
