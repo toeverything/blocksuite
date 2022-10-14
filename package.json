@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "BlockSuite framework workspace",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
