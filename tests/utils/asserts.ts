@@ -94,6 +94,7 @@ export async function assertTextFormat(page: Page, resultObj: unknown) {
   expect(actual).toEqual(resultObj);
 }
 
+/*
 export async function assertSelectedBlockCount(page: Page, expected: number) {
   const actual = await page.evaluate(() => {
     const selectionInfo =
@@ -106,6 +107,7 @@ export async function assertSelectedBlockCount(page: Page, expected: number) {
   });
   expect(actual).toBe(expected);
 }
+*/
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>

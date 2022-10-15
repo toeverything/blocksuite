@@ -76,6 +76,8 @@ export function initMouseEventHandlers(
     onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
 
   const mouseDownHandler = (e: MouseEvent) => {
+    e.preventDefault();
+
     rect = container.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
@@ -86,6 +88,8 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
+    e.preventDefault();
+
     if (!rect) rect = container.getBoundingClientRect();
 
     const a = { x: startX, y: startY };
@@ -111,6 +115,8 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
+    e.preventDefault();
+
     if (!isDragging)
       onContainerClick(toSelectionEvent(e, rect, startX, startY));
     else onContainerDragEnd(toSelectionEvent(e, rect, startX, startY, last));

@@ -10,9 +10,7 @@ import {
   getCursorBlockIdAndHeight,
   fillLine,
   addGroupByClick,
-  selectAll,
 } from './utils/actions';
-import { assertSelectedBlockCount } from './utils/asserts';
 import { expect } from '@playwright/test';
 
 test.skip('drag to select blocks', async ({ page }) => {
@@ -35,7 +33,7 @@ test.skip('drag to select blocks', async ({ page }) => {
   });
 
   await mouseDragFromTo(page, fromTo[0], fromTo[1]);
-  await assertSelectedBlockCount(page, 3);
+  // await assertSelectedBlockCount(page, 3);
 });
 
 test('cursor move up and down', async ({ page }) => {
@@ -161,6 +159,6 @@ test.skip('select all block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
   await addGroupByClick(page);
-  await selectAll(page);
-  await assertSelectedBlockCount(page, 3);
+  // await selectAll(page);
+  // await assertSelectedBlockCount(page, 3);
 });

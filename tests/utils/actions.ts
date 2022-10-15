@@ -267,6 +267,7 @@ export async function fillLine(page: Page, toNext = false) {
   }
 }
 
+/*
 export async function selectAll(page: Page) {
   await page.evaluate(() => {
     return document
@@ -274,6 +275,7 @@ export async function selectAll(page: Page) {
       ?.selection.selectAllBlocks();
   });
 }
+*/
 
 //TODO: improve this function
 export async function isMac(page: Page) {
