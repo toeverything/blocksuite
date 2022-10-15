@@ -1,16 +1,9 @@
 import { LitElement, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-
+import { customElement, property } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
-
 import type { PageBlockModel, GroupBlockModel } from '../..';
 import { EdgelessBlockChildrenContainer, EdgelessSelectionBox } from './utils';
-import {
-  SelectionManager,
-  BlockHost,
-  BLOCK_ID_ATTR,
-  Bound,
-} from '../../__internal__';
+import { BlockHost, BLOCK_ID_ATTR, Bound } from '../../__internal__';
 import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
 
 export interface ViewportState {
@@ -42,9 +35,6 @@ export class EdgelessPageBlockComponent
 {
   @property()
   store!: Store;
-
-  @state()
-  selection!: SelectionManager;
 
   mouse!: EdgelessMouseManager;
 
@@ -87,7 +77,6 @@ export class EdgelessPageBlockComponent
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.selection = new SelectionManager(this.mouseRoot, this.store);
       this.mouse = new EdgelessMouseManager(this);
     }
     super.update(changedProperties);
@@ -102,7 +91,6 @@ export class EdgelessPageBlockComponent
 
   disconnectedCallback() {
     this.mouse.dispose();
-    this.selection.dispose();
   }
 
   render() {

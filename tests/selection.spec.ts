@@ -10,12 +10,43 @@ import {
   getCursorBlockIdAndHeight,
   fillLine,
   addGroupByClick,
-  selectAll,
 } from './utils/actions';
-import { assertSelectedBlockCount } from './utils/asserts';
 import { expect } from '@playwright/test';
+import { assertRichTexts, assertSelection } from './utils/asserts';
 
-test('drag to select blocks', async ({ page }) => {
+test('click on blank area', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.type('456');
+  await pressEnter(page);
+  await page.keyboard.type('789');
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const above456 = await page.evaluate(() => {
+    const paragraph = document.querySelector(
+      '[data-block-id="3"] p'
+    ) as HTMLParagraphElement;
+    const bbox = paragraph.getBoundingClientRect();
+    return { x: bbox.left, y: bbox.top - 5 };
+  });
+  await page.mouse.click(above456.x, above456.y);
+  await assertSelection(page, 1, 0, 0);
+
+  const below789 = await page.evaluate(() => {
+    const paragraph = document.querySelector(
+      '[data-block-id="4"] p'
+    ) as HTMLParagraphElement;
+    const bbox = paragraph.getBoundingClientRect();
+    return { x: bbox.left, y: bbox.top + 5 };
+  });
+  await page.mouse.click(below789.x, below789.y);
+  await assertSelection(page, 2, 0, 0);
+});
+
+test.skip('drag to select blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await focusRichText(page);
@@ -35,7 +66,7 @@ test('drag to select blocks', async ({ page }) => {
   });
 
   await mouseDragFromTo(page, fromTo[0], fromTo[1]);
-  await assertSelectedBlockCount(page, 3);
+  // await assertSelectedBlockCount(page, 3);
 });
 
 test('cursor move up and down', async ({ page }) => {
@@ -143,7 +174,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test('cursor move up and down through group', async ({ page }) => {
+test.skip('cursor move up and down through group', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
   await focusRichText(page, 0);
@@ -157,10 +188,10 @@ test('cursor move up and down through group', async ({ page }) => {
   expect(id).toBe(currentId);
 });
 
-test('select all block', async ({ page }) => {
+test.skip('select all block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
   await addGroupByClick(page);
-  await selectAll(page);
-  await assertSelectedBlockCount(page, 3);
+  // await selectAll(page);
+  // await assertSelectedBlockCount(page, 3);
 });

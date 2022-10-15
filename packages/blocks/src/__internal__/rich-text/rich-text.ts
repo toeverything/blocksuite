@@ -38,8 +38,8 @@ export class RichText extends LitElement {
 
   firstUpdated() {
     const { host, model, _textContainer } = this;
-    const { store, selection } = host;
-    const keyboardBindings = createKeyboardBindings(store, model, selection);
+    const { store } = host;
+    const keyboardBindings = createKeyboardBindings(store, model);
     this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,
@@ -55,7 +55,7 @@ export class RichText extends LitElement {
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
-    this._bindHotKey(store, selection);
+    this._bindHotKey(store);
     this.model.propsUpdated.on(() => this.requestUpdate());
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
@@ -75,7 +75,7 @@ export class RichText extends LitElement {
     hotkeyManager.setScope('page');
   }
 
-  private _bindHotKey(_store: Store, _selection: BlockHost['selection']) {
+  private _bindHotKey(_store: Store) {
     hotkeyManager.addListener(
       hotkeyManager.hotkeysMap.code,
       this.model.id,
@@ -124,7 +124,7 @@ export class RichText extends LitElement {
           this._quill?.getSelection()?.length !== 0
         ) {
           this._quill?.blur();
-          _selection.selectAllBlocks();
+          // TODO select all blocks
         } else {
           this._quill?.setSelection(0, this._quill.getLength());
         }

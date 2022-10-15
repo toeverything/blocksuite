@@ -39,12 +39,11 @@ export class BaseBlockModel implements IBaseBlockProps {
     return children[0];
   }
 
-  lastChild() {
-    const children = this.children;
-    if (!children?.length) {
-      return null;
+  lastChild(): BaseBlockModel | null {
+    if (!this.children.length) {
+      return this;
     }
-    return children[children.length - 1];
+    return this.children[this.children.length - 1].lastChild();
   }
 
   block2html(
