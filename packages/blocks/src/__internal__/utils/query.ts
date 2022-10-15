@@ -138,5 +138,5 @@ export function getBlockElementByModel(model: BaseBlockModel) {
 
   const element = page.querySelector(`[data-block-id="${model.id}"]`);
   assertExists(element);
-  return element;
+  return element as HTMLElement;
 }

@@ -76,7 +76,10 @@ export function initMouseEventHandlers(
     onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
 
   const mouseDownHandler = (e: MouseEvent) => {
-    e.preventDefault();
+    // workaround page title click
+    if (!(e.target instanceof HTMLInputElement)) {
+      e.preventDefault();
+    }
 
     rect = container.getBoundingClientRect();
     startX = e.clientX - rect.left;

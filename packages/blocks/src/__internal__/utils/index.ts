@@ -6,3 +6,4 @@ export * from './hotkey';
 export * from './query';
 export * from './components';
 export * from './gesture';
+export * from './selection';

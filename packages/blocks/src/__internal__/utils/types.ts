@@ -45,6 +45,9 @@ export interface SelectedBlock {
   children: SelectedBlock[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ExtendedModel = BaseBlockModel & Record<string, any>;
+
 export interface BlockSelectionInfo {
   type: 'Block';
   blocks: SelectedBlock[];

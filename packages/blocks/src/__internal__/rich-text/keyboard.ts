@@ -5,8 +5,6 @@ import {
   handleBlockEndEnter,
   handleBlockSplit,
   handleIndent,
-  handleKeyDown,
-  handleKeyUp,
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
@@ -14,7 +12,12 @@ import {
   tryMatchSpaceHotkey,
 } from '../utils';
 import { Shortcuts } from './shortcuts';
-import { activateNextBlock, activatePreviousBlock } from '../utils/selection';
+import {
+  focusNextBlock,
+  focusPreviousBlock,
+  handleKeyDown,
+  handleKeyUp,
+} from '../utils/selection';
 
 interface QuillRange {
   index: number;
@@ -129,7 +132,7 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   function keyLeft(this: KeyboardEventThis, range: QuillRange) {
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
     if (range.index === 0 && range.length === 0) {
-      activatePreviousBlock(model, 'end');
+      focusPreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
@@ -138,7 +141,7 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   function keyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + 1 === textLength) {
-      activateNextBlock(model, 'start');
+      focusNextBlock(model, 'start');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;

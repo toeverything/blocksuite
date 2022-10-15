@@ -1,10 +1,13 @@
 import { Store } from '@blocksuite/store';
 import { GroupBlockModel } from '../../group-block';
-import { initMouseEventHandlers, SelectionEvent } from '../../__internal__';
-
-function caretRangeFromPoint(x: number, y: number) {
-  return document.caretRangeFromPoint(x, y);
-}
+import {
+  getBlockElementByModel,
+  initMouseEventHandlers,
+  SelectionEvent,
+  caretRangeFromPoint,
+  focusRichTextByOffset,
+  resetSeletion,
+} from '../../__internal__';
 
 export class DefaultMouseManager {
   store: Store;
@@ -44,12 +47,30 @@ export class DefaultMouseManager {
 
   private _onContainerClick = (e: SelectionEvent) => {
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+    if (e.raw.target instanceof HTMLInputElement) return;
 
-    const pointRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    if (pointRange?.startContainer instanceof Node) {
-      const selection = document.getSelection() as Selection;
-      selection.removeAllRanges();
-      selection.addRange(pointRange);
+    const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+    const startContainer = range?.startContainer;
+
+    // click on rich text
+    if (startContainer instanceof Node) {
+      resetSeletion(range);
+    }
+
+    if (!(startContainer instanceof HTMLElement)) return;
+
+    // click on blank area between blocks
+    if (startContainer.className.includes('affine-paragraph-block-container')) {
+      focusRichTextByOffset(startContainer, e.raw.clientX);
+    }
+    // click on blank area after last block
+    else if (startContainer.tagName === 'GROUP-BLOCK') {
+      const { root } = this.store;
+      const lastChild = root?.lastChild();
+      if (lastChild?.flavour === 'paragraph' || lastChild?.flavour === 'list') {
+        const block = getBlockElementByModel(lastChild);
+        focusRichTextByOffset(block, e.raw.clientX);
+      }
     }
   };
 
