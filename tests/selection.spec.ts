@@ -15,7 +15,7 @@ import {
 import { assertSelectedBlockCount } from './utils/asserts';
 import { expect } from '@playwright/test';
 
-test('drag to select blocks', async ({ page }) => {
+test.skip('drag to select blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await focusRichText(page);
@@ -157,7 +157,7 @@ test.skip('cursor move up and down through group', async ({ page }) => {
   expect(id).toBe(currentId);
 });
 
-test('select all block', async ({ page }) => {
+test.skip('select all block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
   await addGroupByClick(page);

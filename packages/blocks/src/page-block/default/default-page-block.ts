@@ -1,5 +1,5 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from '..';
@@ -8,9 +8,8 @@ import {
   BLOCK_ID_ATTR,
   hotkeyManager,
   type BlockHost,
-  SelectionManager,
-  DefaultMouseManager,
   BlockChildrenContainer,
+  SelectionPosition,
 } from '../../__internal__';
 import style from './style.css';
 
@@ -22,6 +21,10 @@ export function focusTextEnd(input: HTMLInputElement) {
   input.value = current;
 }
 
+export class SelectionManager {
+  lastSelectionPosition: SelectionPosition = 'start';
+}
+
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -31,11 +34,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
-  @state()
-  selection!: SelectionManager;
-
-  @state()
-  mouse!: DefaultMouseManager;
+  selection = new SelectionManager();
 
   @property()
   mouseRoot!: HTMLElement;
@@ -56,8 +55,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       redo,
       selectAll,
       deleteKey,
-      preExpendSelect,
-      nextExpendSelect,
+      expandSelectionUp,
+      expandSelectionDown,
     } = hotkeyManager.hotkeysMap;
     const scope = 'page';
     hotkeyManager.addListener(undo, scope, (e: Event) => {
@@ -70,20 +69,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkeyManager.addListener(selectAll, scope, (e: Event) => {
       e.preventDefault();
-      this.selection.selectAllBlocks();
+      // TODO select all blocks
     });
     hotkeyManager.addListener(deleteKey, scope, (e: Event) => {
       e.preventDefault();
-      const selectAllBlocks = this.selection.selectedBlockIds;
-      selectAllBlocks.map(id => {
-        this.store.deleteBlockById(id);
-      });
+      // TODO delte selected blocks
     });
-    hotkeyManager.addListener(preExpendSelect, scope, (e: Event) => {
-      this.selection.expandSelection();
+    hotkeyManager.addListener(expandSelectionUp, scope, (e: Event) => {
+      // TODO expand selection up
     });
-    hotkeyManager.addListener(nextExpendSelect, scope, (e: Event) => {
-      this.selection.expandSelection(false);
+    hotkeyManager.addListener(expandSelectionDown, scope, (e: Event) => {
+      // TODO expand selection down
     });
     hotkeyManager.setScope('page');
   }
@@ -123,14 +119,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     return this;
   }
 
-  update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.selection = new SelectionManager(this.mouseRoot, this.store);
-      this.mouse = new DefaultMouseManager(this.mouseRoot);
-    }
-    super.update(changedProperties);
-  }
-
   firstUpdated() {
     this._bindHotkeys();
 
@@ -153,8 +141,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   disconnectedCallback() {
-    this.mouse.dispose();
-    this.selection.dispose();
     this._removeHotkeys();
   }
 
@@ -164,11 +150,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const childrenContainer = BlockChildrenContainer(this.model, this);
 
     return html`
-      <selection-rect
-        .selection=${this.selection}
-        .mouse=${this.mouse}
-        .store=${this.store}
-      ></selection-rect>
       <div class="affine-default-page-block-container">
         <div class="affine-default-page-block-title-container">
           <input

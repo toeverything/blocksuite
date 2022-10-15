@@ -1,5 +1,4 @@
 import { BaseBlockModel } from '@blocksuite/store';
-import type { SelectionManager } from '../selection/selection-manager';
 import { commonTextActiveHandler } from './operations';
 import {
   getBlockElementByModel,
@@ -9,6 +8,7 @@ import {
   getNextBlock,
 } from './query';
 import { SelectionPosition } from './types';
+import type { SelectionManager } from '../..';
 
 function activateRichText(selection: SelectionManager, model: BaseBlockModel) {
   const element = getBlockElementByModel(model);
