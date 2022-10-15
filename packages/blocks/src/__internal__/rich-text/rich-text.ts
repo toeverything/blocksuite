@@ -2,7 +2,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
-import { BlockHost, hotkeyManager } from '../utils';
+import { BlockHost, hotkeyManager, HOTKEYS } from '../utils';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 
@@ -25,6 +25,7 @@ export class RichText extends LitElement {
   private _textContainer!: HTMLDivElement;
   private _quill?: Quill;
   private _firstSelectAll = true;
+
   @property()
   host!: BlockHost;
 
@@ -40,6 +41,7 @@ export class RichText extends LitElement {
     const { host, model, _textContainer } = this;
     const { store } = host;
     const keyboardBindings = createKeyboardBindings(store, model);
+
     this._quill = new Quill(_textContainer, {
       modules: {
         cursors: true,
@@ -55,7 +57,7 @@ export class RichText extends LitElement {
     });
     store.attachRichText(model.id, this._quill);
     store.awareness.updateLocalCursor();
-    this._bindHotKey(store);
+
     this.model.propsUpdated.on(() => this.requestUpdate());
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
@@ -63,6 +65,8 @@ export class RichText extends LitElement {
     this._textContainer
       .getElementsByClassName('ql-editor')[0]
       .addEventListener('blur', this._blur.bind(this));
+
+    this._bindHotKey(store);
     hotkeyManager.setScope(this.model.id);
   }
 
@@ -70,68 +74,55 @@ export class RichText extends LitElement {
     this._firstSelectAll = true;
     hotkeyManager.setScope(this.model.id);
   }
+
   private _blur() {
     this._firstSelectAll = true;
     hotkeyManager.setScope('page');
   }
 
-  private _bindHotKey(_store: Store) {
-    hotkeyManager.addListener(
-      hotkeyManager.hotkeysMap.code,
-      this.model.id,
-      () => {
-        const range = this._quill?.getSelection();
-        if (range) {
-          _store.captureSync();
-          _store.transact(() => {
-            const { index, length } = range;
-            const format = this._quill?.getFormat(range);
-            if (format?.code) {
-              this.model?.text?.format(index, length, { code: false });
-            } else {
-              this.model?.text?.format(index, length, { code: true });
-            }
-          });
-        }
+  private _bindHotKey(store: Store) {
+    hotkeyManager.addListener(HOTKEYS.INLINE_CODE, this.model.id, () => {
+      const range = this._quill?.getSelection();
+      if (range) {
+        store.captureSync();
+        store.transact(() => {
+          const { index, length } = range;
+          const format = this._quill?.getFormat(range);
+          if (format?.code) {
+            this.model?.text?.format(index, length, { code: false });
+          } else {
+            this.model?.text?.format(index, length, { code: true });
+          }
+        });
       }
-    );
-    hotkeyManager.addListener(
-      hotkeyManager.hotkeysMap.strikethrough,
-      this.model.id,
-      () => {
-        const range = this._quill?.getSelection();
-        if (range) {
-          _store.captureSync();
-          _store.transact(() => {
-            const { index, length } = range;
-            const format = this._quill?.getFormat(range);
-            if (format?.strike) {
-              this.model?.text?.format(index, length, { strike: false });
-            } else {
-              this.model?.text?.format(index, length, { strike: true });
-            }
-          });
-        }
-      }
-    );
-    hotkeyManager.addListener(
-      hotkeyManager.hotkeysMap.selectAll,
-      this.model.id,
-      (e: Event) => {
-        e.preventDefault();
-        if (
-          !this._firstSelectAll &&
-          this._quill?.getSelection()?.length !== 0
-        ) {
-          this._quill?.blur();
-          // TODO select all blocks
-        } else {
-          this._quill?.setSelection(0, this._quill.getLength());
-        }
+    });
 
-        this._firstSelectAll = false;
+    hotkeyManager.addListener(HOTKEYS.STRIKETHROUGH, this.model.id, () => {
+      const range = this._quill?.getSelection();
+      if (range) {
+        store.captureSync();
+        store.transact(() => {
+          const { index, length } = range;
+          const format = this._quill?.getFormat(range);
+          if (format?.strike) {
+            this.model?.text?.format(index, length, { strike: false });
+          } else {
+            this.model?.text?.format(index, length, { strike: true });
+          }
+        });
       }
-    );
+    });
+
+    hotkeyManager.addListener(HOTKEYS.SELECT_ALL, this.model.id, (e: Event) => {
+      e.preventDefault();
+      if (!this._firstSelectAll && this._quill?.getSelection()?.length !== 0) {
+        this._quill?.blur();
+        // TODO select all blocks
+      } else {
+        this._quill?.setSelection(0, this._quill.getLength());
+      }
+      this._firstSelectAll = false;
+    });
   }
 
   disconnectedCallback() {

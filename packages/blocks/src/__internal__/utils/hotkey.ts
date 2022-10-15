@@ -1,5 +1,4 @@
 import hotkeys, { KeyHandler } from 'hotkeys-js';
-import { DefaultHotkeyMap } from './consts';
 
 hotkeys.filter = () => true;
 
@@ -16,13 +15,10 @@ type HotkeyOptions = {
 class HotkeyManager {
   private _hotkeys: typeof hotkeys;
   public hotkeyScope: HotkeyOptions['scope'];
-  public hotkeysMap: typeof DefaultHotkeyMap;
 
   constructor() {
     this._hotkeys = hotkeys;
     this.hotkeyScope = 'all';
-    // TODO add more platform hotkeys
-    this.hotkeysMap = DefaultHotkeyMap;
   }
 
   addListener(

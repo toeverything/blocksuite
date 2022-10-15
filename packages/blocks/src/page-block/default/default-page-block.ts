@@ -10,9 +10,10 @@ import {
   type BlockHost,
   BlockChildrenContainer,
   SelectionPosition,
+  HOTKEYS,
 } from '../../__internal__';
-import style from './style.css';
 import { DefaultMouseManager } from './mouse-manager';
+import style from './style.css';
 
 // https://stackoverflow.com/a/2345915
 function focusTextEnd(input: HTMLInputElement) {
@@ -21,6 +22,7 @@ function focusTextEnd(input: HTMLInputElement) {
   input.value = '';
   input.value = current;
 }
+
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -48,43 +50,39 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   _blockTitle!: HTMLInputElement;
 
   private _bindHotkeys() {
-    const {
-      undo,
-      redo,
-      selectAll,
-      deleteKey,
-      expandSelectionUp,
-      expandSelectionDown,
-    } = hotkeyManager.hotkeysMap;
     const scope = 'page';
-    hotkeyManager.addListener(undo, scope, (e: Event) => {
+
+    hotkeyManager.addListener(HOTKEYS.UNDO, scope, (e: Event) => {
       e.preventDefault();
       this.store.undo();
     });
-    hotkeyManager.addListener(redo, scope, (e: Event) => {
+    hotkeyManager.addListener(HOTKEYS.REDO, scope, (e: Event) => {
       e.preventDefault();
       this.store.redo();
     });
-    hotkeyManager.addListener(selectAll, scope, (e: Event) => {
+    hotkeyManager.addListener(HOTKEYS.SELECT_ALL, scope, (e: Event) => {
       e.preventDefault();
       // TODO select all blocks
     });
-    hotkeyManager.addListener(deleteKey, scope, (e: Event) => {
+    hotkeyManager.addListener(HOTKEYS.BACKSPACE, scope, (e: Event) => {
       e.preventDefault();
       // TODO delte selected blocks
     });
-    hotkeyManager.addListener(expandSelectionUp, scope, (e: Event) => {
+    hotkeyManager.addListener(HOTKEYS.SHIFT_UP, scope, (e: Event) => {
       // TODO expand selection up
     });
-    hotkeyManager.addListener(expandSelectionDown, scope, (e: Event) => {
+    hotkeyManager.addListener(HOTKEYS.SHIFT_DOWN, scope, (e: Event) => {
       // TODO expand selection down
     });
+
     hotkeyManager.setScope('page');
   }
 
   private _removeHotkeys() {
-    const { undo, redo, selectAll, deleteKey } = hotkeyManager.hotkeysMap;
-    hotkeyManager.removeListener([undo, redo, selectAll, deleteKey], 'page');
+    hotkeyManager.removeListener(
+      [HOTKEYS.UNDO, HOTKEYS.REDO, HOTKEYS.SELECT_ALL, HOTKEYS.BACKSPACE],
+      'page'
+    );
   }
 
   private _onKeyDown(e: KeyboardEvent) {

@@ -14,6 +14,8 @@ export class DefaultMouseManager {
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
 
+  private _startRange: Range | null = null;
+
   constructor(store: Store, container: HTMLElement) {
     this.store = store;
     this._container = container;
@@ -34,20 +36,27 @@ export class DefaultMouseManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    // console.log('drag start', e);
+    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    // console.log('drag move', e);
+    if (!this._startRange) return;
+    const { startContainer, startOffset } = this._startRange;
+    const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+    currentRange?.setStart(startContainer, startOffset);
+    // currentRange?.setEnd(startContainer, startOffset);
+    resetSeletion(currentRange);
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    // console.log('drag end', e);
+    this._startRange = null;
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;
+    // TODO handle shift + click
+    if (e.keys.shift) return;
 
     const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
     const startContainer = range?.startContainer;

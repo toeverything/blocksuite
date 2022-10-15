@@ -1,24 +1,14 @@
 export const BLOCK_ID_ATTR = 'data-block-id' as const;
-
-/** default hot keys for macOS */
-export const DefaultHotkeyMap = {
-  selectAll: 'command+a,ctrl+a',
-  newPage: 'command+n',
-  undo: 'command+z,ctrl+z',
-  redo: 'command+shift+z,ctrl+shift+z',
-  remove: 'backspace',
-  checkUncheck: 'esc',
-  expandSelectionUp: 'shift+up',
-  expandSelectionDown: 'shift+down',
-  up: 'up',
-  down: 'down',
-  left: 'left',
-  right: 'right',
-  enter: 'enter',
-  code: 'command+e,ctrl+e',
-  strikethrough: 'command+shift+s,ctrl+shift+s',
-  deleteKey: 'backspace',
-};
-
 export const PREVENT_DEFAULT = false;
 export const ALLOW_DEFAULT = true;
+
+export const HOTKEYS = {
+  UNDO: 'command+z,ctrl+z',
+  REDO: 'command+shift+z,ctrl+shift+z',
+  BACKSPACE: 'backspace',
+  SELECT_ALL: 'command+a,ctrl+a',
+  SHIFT_UP: 'shift+up',
+  SHIFT_DOWN: 'shift+down',
+  INLINE_CODE: 'command+e,ctrl+e',
+  STRIKETHROUGH: 'command+shift+s,ctrl+shift+s',
+};

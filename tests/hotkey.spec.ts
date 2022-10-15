@@ -15,7 +15,6 @@ import {
   assertSelection,
   assertTextFormat,
   assertBlockCount,
-  assertSelectedBlockCount,
 } from './utils/asserts';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
@@ -35,14 +34,14 @@ test.skip('rich-text hotkey scope on double press', async ({ page }) => {
 
   await blurRichText(page);
   await selectAllByKeyboard(page); // second select in page scope
-  await assertSelectedBlockCount(page, 1);
+  // await assertSelectedBlockCount(page, 1);
 
   await focusRichText(page);
   await selectAllByKeyboard(page); // first select all in rich text
   await assertSelection(page, 0, 0, 5);
 
   await selectAllByKeyboard(page); // second select all in rich text
-  await assertSelectedBlockCount(page, 1);
+  // await assertSelectedBlockCount(page, 1);
 });
 
 test('rich-text code-inline hotkey', async ({ page }) => {
