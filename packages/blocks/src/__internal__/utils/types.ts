@@ -11,22 +11,6 @@ export type SelectionOptions = {
 /** Common context interface definition for block models. */
 export interface BlockHost {
   store: Store;
-
-  selection: {
-    addBlockSelectedListener: (
-      blockId: string,
-      handler: (selectionInfo?: SelectionOptions) => void
-    ) => void;
-    removeBlockSelectedListener: (blockId: string) => void;
-    activatePreviousBlock: (
-      blockId: string,
-      position?: SelectionPosition
-    ) => void;
-    activateNextBlock: (blockId: string, position?: SelectionPosition) => void;
-    selectAllBlocks: () => void;
-    selectionInfo: SelectionInfo;
-    lastSelectionPosition: SelectionPosition;
-  };
 }
 
 export interface CommonBlockElement extends HTMLElement {

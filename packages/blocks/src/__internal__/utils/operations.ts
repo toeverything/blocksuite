@@ -1,14 +1,10 @@
 import type { Quill } from 'quill';
 import { BaseBlockModel, Store, Text } from '@blocksuite/store';
 
-import {
-  BlockHost,
-  Detail,
-  SelectionPosition,
-  SelectionOptions,
-} from './types';
+import { Detail, SelectionPosition } from './types';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import { Point, Rect } from './rect';
+import { activateNextBlock, activatePreviousBlock } from './selection';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExtendedModel = BaseBlockModel & Record<string, any>;
@@ -294,11 +290,7 @@ function isAtLineEdge(range: Range) {
   return false;
 }
 
-export function handleKeyUp(
-  model: ExtendedModel,
-  selectionManager: BlockHost['selection'],
-  editableContainer: Element
-) {
+export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
   const selection = window.getSelection();
   if (selection) {
     const range = selection.getRangeAt(0);
@@ -306,11 +298,7 @@ export function handleKeyUp(
     // if cursor is on the first line and has no text, height is 0
     if (height === 0 && top === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      rect &&
-        selectionManager.activatePreviousBlock(
-          model.id,
-          new Point(rect.left, rect.top)
-        );
+      rect && activatePreviousBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
     }
     // TODO resolve compatible problem
@@ -319,7 +307,7 @@ export function handleKeyUp(
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      selectionManager.activatePreviousBlock(model.id, new Point(left, top));
+      activatePreviousBlock(model, new Point(left, top));
       return PREVENT_DEFAULT;
     }
   }
@@ -328,7 +316,6 @@ export function handleKeyUp(
 
 export function handleKeyDown(
   model: ExtendedModel,
-  selectionManager: BlockHost['selection'],
   textContainer: HTMLElement
 ) {
   const selection = window.getSelection();
@@ -338,17 +325,13 @@ export function handleKeyDown(
     // if cursor is on the last line and has no text, height is 0
     if (height === 0 && bottom === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      rect &&
-        selectionManager.activateNextBlock(
-          model.id,
-          new Point(rect.left, rect.top)
-        );
+      rect && activateNextBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
     }
     // TODO resolve compatible problem
     const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      selectionManager.activateNextBlock(model.id, new Point(left, bottom));
+      activateNextBlock(model, new Point(left, bottom));
       return PREVENT_DEFAULT;
     }
     // if cursor is at the edge of a block, it may out of the textContainer after keydown
@@ -363,8 +346,8 @@ export function handleKeyDown(
         nextBottom + height / 2
       );
       if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
-        selectionManager.activateNextBlock(
-          model.id,
+        activateNextBlock(
+          model,
           new Point(
             newRange.startContainer.parentElement?.offsetLeft || left,
             bottom
@@ -428,19 +411,4 @@ export function commonTextActiveHandler(
   const selection = window.getSelection();
   selection?.removeAllRanges();
   range && selection?.addRange(range);
-}
-
-export function commonPassCursorHandler(
-  id: string,
-  selection: BlockHost['selection'],
-  selectionOptions?: SelectionOptions
-) {
-  if (selectionOptions?.needFocus) {
-    const lastSelectionPosition = selection.lastSelectionPosition;
-    if (selectionOptions?.from === 'next') {
-      selection.activatePreviousBlock(id, lastSelectionPosition);
-    } else {
-      selection.activateNextBlock(id, lastSelectionPosition);
-    }
-  }
 }

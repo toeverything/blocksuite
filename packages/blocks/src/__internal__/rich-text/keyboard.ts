@@ -2,7 +2,6 @@ import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import {
   ALLOW_DEFAULT,
-  BlockHost,
   handleBlockEndEnter,
   handleBlockSplit,
   handleIndent,
@@ -15,6 +14,7 @@ import {
   tryMatchSpaceHotkey,
 } from '../utils';
 import { Shortcuts } from './shortcuts';
+import { activateNextBlock, activatePreviousBlock } from '../utils/selection';
 
 interface QuillRange {
   index: number;
@@ -66,11 +66,7 @@ function isAtBlockStart(quill: Quill) {
   return quill.getSelection(true)?.index === 0;
 }
 
-export const createKeyboardBindings = (
-  store: Store,
-  model: BaseBlockModel,
-  selectionManager: BlockHost['selection']
-) => {
+export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   function undo() {
     store.undo();
     return PREVENT_DEFAULT;
@@ -118,14 +114,14 @@ export const createKeyboardBindings = (
 
   function keyUp(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
-      return handleKeyUp(model, selectionManager, this.quill.root);
+      return handleKeyUp(model, this.quill.root);
     }
     return ALLOW_DEFAULT;
   }
 
   function keyDown(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
-      return handleKeyDown(model, selectionManager, this.quill.root);
+      return handleKeyDown(model, this.quill.root);
     }
     return ALLOW_DEFAULT;
   }
@@ -133,7 +129,7 @@ export const createKeyboardBindings = (
   function keyLeft(this: KeyboardEventThis, range: QuillRange) {
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
     if (range.index === 0 && range.length === 0) {
-      selectionManager.activatePreviousBlock(model.id, 'end');
+      activatePreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
@@ -142,7 +138,7 @@ export const createKeyboardBindings = (
   function keyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + 1 === textLength) {
-      selectionManager.activateNextBlock(model.id, 'start');
+      activateNextBlock(model, 'start');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
@@ -237,4 +233,4 @@ export const createKeyboardBindings = (
   };
 
   return keyboardBindings;
-};
+}
