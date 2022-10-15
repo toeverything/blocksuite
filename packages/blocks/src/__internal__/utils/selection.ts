@@ -2,19 +2,18 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { commonTextActiveHandler } from './operations';
 import {
   getBlockElementByModel,
-  getSelectionByModel,
+  getDefaultPageBlock,
   getContainerByModel,
   getPreviousBlock,
   getNextBlock,
 } from './query';
 import { SelectionPosition } from './types';
-import type { SelectionManager } from '../..';
 
-function activateRichText(selection: SelectionManager, model: BaseBlockModel) {
+function activateRichText(position: SelectionPosition, model: BaseBlockModel) {
   const element = getBlockElementByModel(model);
   const editableContainer = element.querySelector('[contenteditable]');
   if (editableContainer) {
-    commonTextActiveHandler(selection.lastSelectionPosition, editableContainer);
+    commonTextActiveHandler(position, editableContainer);
   }
 }
 
@@ -22,18 +21,19 @@ export function activatePreviousBlock(
   model: BaseBlockModel,
   position?: SelectionPosition
 ) {
-  const selection = getSelectionByModel(model);
+  const page = getDefaultPageBlock(model);
   const container = getContainerByModel(model);
 
   let nextPosition = position;
   if (nextPosition) {
-    selection.lastSelectionPosition = nextPosition;
-  } else if (selection.lastSelectionPosition) {
-    nextPosition = selection.lastSelectionPosition;
+    page.lastSelectionPosition = nextPosition;
+  } else if (page.lastSelectionPosition) {
+    nextPosition = page.lastSelectionPosition;
   }
+
   const preNodeModel = getPreviousBlock(container, model.id);
-  if (preNodeModel) {
-    activateRichText(selection, preNodeModel);
+  if (preNodeModel && nextPosition) {
+    activateRichText(nextPosition, preNodeModel);
   }
 }
 
@@ -41,17 +41,17 @@ export function activateNextBlock(
   model: BaseBlockModel,
   position: SelectionPosition = 'start'
 ) {
-  const selection = getSelectionByModel(model);
+  const page = getDefaultPageBlock(model);
   // const container = getContainerByModel(model);
 
   let nextPosition = position;
   if (nextPosition) {
-    selection.lastSelectionPosition = nextPosition;
-  } else if (selection.lastSelectionPosition) {
-    nextPosition = selection.lastSelectionPosition;
+    page.lastSelectionPosition = nextPosition;
+  } else if (page.lastSelectionPosition) {
+    nextPosition = page.lastSelectionPosition;
   }
   const nextNodeModel = getNextBlock(model.id);
   if (nextNodeModel) {
-    activateRichText(selection, nextNodeModel);
+    activateRichText(nextPosition, nextNodeModel);
   }
 }

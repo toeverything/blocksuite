@@ -12,19 +12,15 @@ import {
   SelectionPosition,
 } from '../../__internal__';
 import style from './style.css';
+import { DefaultMouseManager } from './mouse-manager';
 
 // https://stackoverflow.com/a/2345915
-export function focusTextEnd(input: HTMLInputElement) {
+function focusTextEnd(input: HTMLInputElement) {
   const current = input.value;
   input.focus();
   input.value = '';
   input.value = current;
 }
-
-export class SelectionManager {
-  lastSelectionPosition: SelectionPosition = 'start';
-}
-
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -34,7 +30,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
-  selection = new SelectionManager();
+  mouse!: DefaultMouseManager;
+
+  lastSelectionPosition: SelectionPosition = 'start';
 
   @property()
   mouseRoot!: HTMLElement;
@@ -119,6 +117,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     return this;
   }
 
+  update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
+      this.mouse = new DefaultMouseManager(this.store, this.mouseRoot);
+    }
+    super.update(changedProperties);
+  }
+
   firstUpdated() {
     this._bindHotkeys();
 
@@ -142,6 +147,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   disconnectedCallback() {
     this._removeHotkeys();
+    this.mouse.dispose();
   }
 
   render() {

@@ -5,3 +5,4 @@ export * from './rect';
 export * from './hotkey';
 export * from './query';
 export * from './components';
+export * from './gesture';

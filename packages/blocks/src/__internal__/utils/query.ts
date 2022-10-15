@@ -112,12 +112,12 @@ export function getPreviousBlock(container: Element, blockId: string) {
   return null;
 }
 
-export function getSelectionByModel(model: BaseBlockModel) {
+export function getDefaultPageBlock(model: BaseBlockModel) {
   assertExists(model.store.root);
   const page = document.querySelector(
     `[data-block-id="${model.store.root.id}"]`
   ) as DefaultPageBlockComponent;
-  return page.selection;
+  return page;
 }
 
 export function getContainerByModel(model: BaseBlockModel) {
