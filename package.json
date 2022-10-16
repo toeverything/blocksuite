@@ -15,7 +15,7 @@
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,playground,store}/dist",
     "changeset": "changeset",
-    "publish": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish --no-git-checks"
+    "release": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish --no-git-checks"
   },
   "keywords": [],
   "author": "toeverything",
