@@ -44,7 +44,8 @@
   font-size: 18px;
   line-height: 26px;
   padding-left: 12px;
-  margin-top: 18px;
+  margin-top: 9px;
+  margin-bottom: 9px;
   color: #4c6275;
   position: relative;
 }
@@ -59,7 +60,8 @@
   border-radius: 4px;
 }
 .text {
-  margin-top: 18px;
+  margin-top: 9px;
+  margin-bottom: 9px;
 }
 
 strong {
