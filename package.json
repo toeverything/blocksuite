@@ -20,8 +20,8 @@
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
-  "dependencies": {},
   "devDependencies": {
+    "@changesets/cli": "^2.25.0",
     "@playwright/test": "^1.25.2",
     "@types/node": "^18.7.16",
     "@types/quill": "^2.0.9",
