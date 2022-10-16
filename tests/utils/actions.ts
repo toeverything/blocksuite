@@ -79,12 +79,6 @@ export async function focusLine(page: Page, line = 0, end = true) {
   }
 }
 
-export async function blurRichText(page: Page) {
-  await page.mouse.move(0, 0);
-  const locator = page.locator('.affine-editor-container');
-  await locator.click();
-}
-
 async function keyDownCtrlOrMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Meta');

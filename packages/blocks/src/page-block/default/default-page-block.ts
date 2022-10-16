@@ -54,47 +54,36 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _bindHotkeys() {
     const { store } = this;
 
-    hotkey.addListener(HOTKEYS.UNDO, 'all', () => store.undo());
-    hotkey.addListener(HOTKEYS.REDO, 'all', () => store.redo());
+    hotkey.addListener(HOTKEYS.UNDO, () => store.undo());
+    hotkey.addListener(HOTKEYS.REDO, () => store.redo());
 
-    hotkey.addListener(HOTKEYS.BACKSPACE, 'all', e => {
+    hotkey.addListener(HOTKEYS.BACKSPACE, e => {
       handleBackspace(store, e);
     });
-    hotkey.addListener(HOTKEYS.INLINE_CODE, 'all', e => {
+    hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
       handleFormat(store, e, 'code');
     });
-    hotkey.addListener(HOTKEYS.STRIKE, 'all', e => {
+    hotkey.addListener(HOTKEYS.STRIKE, e => {
       handleFormat(store, e, 'strike');
     });
-    hotkey.addListener(HOTKEYS.SHIFT_UP, 'all', e => {
+    hotkey.addListener(HOTKEYS.SHIFT_UP, e => {
       // TODO expand selection up
     });
-    hotkey.addListener(HOTKEYS.SHIFT_DOWN, 'all', e => {
+    hotkey.addListener(HOTKEYS.SHIFT_DOWN, e => {
       // TODO expand selection down
     });
-
-    hotkey.addListener(HOTKEYS.SELECT_ALL, 'page', e => {
-      e.preventDefault();
-      // TODO select all blocks
-    });
-
-    hotkey.setScope('page');
   }
 
   private _removeHotkeys() {
-    hotkey.removeListener(
-      [
-        HOTKEYS.UNDO,
-        HOTKEYS.REDO,
-        HOTKEYS.BACKSPACE,
-        HOTKEYS.INLINE_CODE,
-        HOTKEYS.STRIKE,
-        HOTKEYS.SHIFT_UP,
-        HOTKEYS.SHIFT_DOWN,
-      ],
-      'all'
-    );
-    hotkey.removeListener([HOTKEYS.SELECT_ALL], 'page');
+    hotkey.removeListener([
+      HOTKEYS.UNDO,
+      HOTKEYS.REDO,
+      HOTKEYS.BACKSPACE,
+      HOTKEYS.INLINE_CODE,
+      HOTKEYS.STRIKE,
+      HOTKEYS.SHIFT_UP,
+      HOTKEYS.SHIFT_DOWN,
+    ]);
   }
 
   private _onKeyDown(e: KeyboardEvent) {
@@ -145,10 +134,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     focusTextEnd(this._blockTitle);
-
-    // fix hotkey error when focus on title
-    this._blockTitle.addEventListener('blur', () => hotkey.setScope('page'));
-    this._blockTitle.addEventListener('focus', () => hotkey.setScope('all'));
   }
 
   disconnectedCallback() {
