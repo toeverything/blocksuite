@@ -60,8 +60,7 @@ test('rich-text code-inline hotkey', async ({ page }) => {
   await assertTextFormat(page, { code: true });
 
   await inlineCode(page);
-  // FIXME
-  // await assertTextFormat(page, {});
+  await assertTextFormat(page, {});
 });
 
 test('rich-text strikethrough hotkey', async ({ page }) => {

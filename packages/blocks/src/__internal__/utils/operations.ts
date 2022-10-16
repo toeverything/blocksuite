@@ -156,11 +156,7 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
 
         const { index, length } = range;
         const format = quill?.getFormat(range);
-        if (format?.strike) {
-          startModel?.text?.format(index, length, { [key]: false });
-        } else {
-          startModel?.text?.format(index, length, { [key]: true });
-        }
+        startModel?.text?.format(index, length, { [key]: !format[key] });
       });
     }
   }
