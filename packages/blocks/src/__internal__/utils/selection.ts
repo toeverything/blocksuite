@@ -1,20 +1,16 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
 import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
+import { assertExists, caretRangeFromPoint } from './std';
+import { ExtendedModel, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
   getDefaultPageBlock,
   getContainerByModel,
   getPreviousBlock,
   getNextBlock,
-  assertExists,
 } from './query';
 import { Point, Rect } from './rect';
-import { ExtendedModel, SelectionPosition } from './types';
-
-export function caretRangeFromPoint(x: number, y: number) {
-  return document.caretRangeFromPoint(x, y);
-}
 
 export function focusRichText(
   position: SelectionPosition,

@@ -9,7 +9,6 @@ import {
   handleSoftEnter,
   handleUnindent,
   isCollapsedAtBlockStart,
-  noop,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '../utils';
@@ -21,7 +20,8 @@ import {
   handleKeyDown,
   handleKeyUp,
   isMultiBlockRange,
-} from '../utils/selection';
+  noop,
+} from '../utils';
 
 interface QuillRange {
   index: number;

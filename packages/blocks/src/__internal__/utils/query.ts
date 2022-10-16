@@ -2,15 +2,12 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { DefaultPageBlockComponent } from '../..';
 import { RichText } from '../rich-text/rich-text';
 import { BLOCK_ID_ATTR as ATTR } from './consts';
+import { assertExists } from './std';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
 interface ContainerBlock {
   model?: BaseBlockModel;
-}
-
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (!val) throw new Error('val does not exist');
 }
 
 export function getBlockById<T extends ElementTagName>(
@@ -171,4 +168,38 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     return range.intersectsNode(blockElement);
   });
   return intersectedModels;
+}
+
+function mergeRect(a: DOMRect, b: DOMRect) {
+  return new DOMRect(
+    Math.min(a.left, b.left),
+    Math.min(a.top, b.top),
+    Math.max(a.right, b.right) - Math.min(a.left, b.left),
+    Math.max(a.bottom, b.bottom) - Math.min(a.top, b.top)
+  );
+}
+
+export function getDOMRectByLine(
+  rectList: DOMRectList,
+  lineType: 'first' | 'last'
+) {
+  const list = Array.from(rectList);
+
+  if (lineType === 'first') {
+    let flag = 0;
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].left < 0 && list[i].right < 0 && list[i].height === 1) break;
+      flag = i;
+    }
+    const subList = list.slice(0, flag + 1);
+    return subList.reduce(mergeRect);
+  } else {
+    let flag = list.length - 1;
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (list[i].height === 0) break;
+      flag = i;
+    }
+    const subList = list.slice(flag);
+    return subList.reduce(mergeRect);
+  }
 }
