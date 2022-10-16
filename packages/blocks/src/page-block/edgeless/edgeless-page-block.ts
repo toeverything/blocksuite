@@ -3,7 +3,13 @@ import { customElement, property } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
 import type { PageBlockModel, GroupBlockModel } from '../..';
 import { EdgelessBlockChildrenContainer, EdgelessSelectionBox } from './utils';
-import { BlockHost, BLOCK_ID_ATTR, Bound } from '../../__internal__';
+import {
+  BlockHost,
+  BLOCK_ID_ATTR,
+  Bound,
+  hotkey,
+  HOTKEYS,
+} from '../../__internal__';
 import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
 
 export interface ViewportState {
@@ -65,6 +71,16 @@ export class EdgelessPageBlockComponent
     return this._selectionState;
   }
 
+  private _bindHotkeys() {
+    const { store } = this;
+    hotkey.addListener(HOTKEYS.UNDO, () => store.undo());
+    hotkey.addListener(HOTKEYS.REDO, () => store.redo());
+  }
+
+  private _removeHotkeys() {
+    hotkey.removeListener([HOTKEYS.UNDO, HOTKEYS.REDO]);
+  }
+
   setSelectionState(state: EdgelessSelectionState) {
     this._selectionState = state;
     this.requestUpdate();
@@ -87,10 +103,13 @@ export class EdgelessPageBlockComponent
     this.model.children.forEach(group => {
       group.propsUpdated.on(() => refreshSelectionBox(this));
     });
+
+    this._bindHotkeys();
   }
 
   disconnectedCallback() {
     this.mouse.dispose();
+    this._removeHotkeys();
   }
 
   render() {
