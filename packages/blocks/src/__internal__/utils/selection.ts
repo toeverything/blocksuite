@@ -223,3 +223,12 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
     resetSeletion(range);
   }
 }
+
+export function getCurrentRange() {
+  const selection = window.getSelection() as Selection;
+  return selection.getRangeAt(0);
+}
+
+export function isMultiBlockRange(range: Range) {
+  return range.commonAncestorContainer.nodeType !== Node.TEXT_NODE;
+}

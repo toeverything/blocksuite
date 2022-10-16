@@ -9,6 +9,7 @@ import {
   handleSoftEnter,
   handleUnindent,
   isCollapsedAtBlockStart,
+  noop,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '../utils';
@@ -16,8 +17,10 @@ import { Shortcuts } from './shortcuts';
 import {
   focusNextBlock,
   focusPreviousBlock,
+  getCurrentRange,
   handleKeyDown,
   handleKeyUp,
+  isMultiBlockRange,
 } from '../utils/selection';
 
 interface QuillRange {
@@ -150,6 +153,9 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     if (isCollapsedAtBlockStart(this.quill)) {
       handleLineStartBackspace(store, model);
       return PREVENT_DEFAULT;
+    } else if (isMultiBlockRange(getCurrentRange())) {
+      // return PREVENT_DEFAULT;
+      noop();
     }
     return ALLOW_DEFAULT;
   }

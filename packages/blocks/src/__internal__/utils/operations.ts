@@ -10,6 +10,7 @@ import {
   isRangeSelection,
   assertExists,
 } from './query';
+import { getCurrentRange, isMultiBlockRange } from './selection';
 
 export function createEvent<T extends keyof WindowEventMap>(
   type: T,
@@ -135,6 +136,11 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
         // use quill handler
         noop();
       }
+    }
+  } else if (isRangeSelection()) {
+    const range = getCurrentRange();
+    if (isMultiBlockRange(range)) {
+      e.preventDefault();
     }
   }
 }
