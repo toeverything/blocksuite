@@ -46,4 +46,4 @@ class HotkeyManager {
   }
 }
 
-export const hotkeyManager = new HotkeyManager();
+export const hotkey = new HotkeyManager();

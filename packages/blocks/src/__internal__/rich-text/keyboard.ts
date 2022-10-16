@@ -67,16 +67,6 @@ function isAtBlockEnd(quill: Quill) {
 }
 
 export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
-  function undo() {
-    store.undo();
-    return PREVENT_DEFAULT;
-  }
-
-  function redo() {
-    store.redo();
-    return PREVENT_DEFAULT;
-  }
-
   function markdownMatch(this: KeyboardEventThis) {
     Shortcuts.match(this.quill, model);
     return ALLOW_DEFAULT;
@@ -165,17 +155,6 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   }
 
   const keyboardBindings: KeyboardBindings = {
-    undo: {
-      key: 'z',
-      shortKey: true,
-      handler: undo,
-    },
-    redo: {
-      key: 'z',
-      shiftKey: true,
-      shortKey: true,
-      handler: redo,
-    },
     enterMarkdownMatch: {
       key: 'enter',
       handler: markdownMatch,

@@ -2,7 +2,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
-import { BlockHost, hotkeyManager, HOTKEYS } from '../utils';
+import { BlockHost, hotkey, HOTKEYS } from '../utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
 
@@ -68,21 +68,21 @@ export class RichText extends LitElement {
       .addEventListener('blur', this._onRichTextBlur.bind(this));
 
     this._bindHotKey();
-    hotkeyManager.setScope(this.model.id);
+    hotkey.setScope(this.model.id);
   }
 
   private _onRichTextFocus() {
     this._firstSelectAll = true;
-    hotkeyManager.setScope(this.model.id);
+    hotkey.setScope(this.model.id);
   }
 
   private _onRichTextBlur() {
     this._firstSelectAll = true;
-    hotkeyManager.setScope('page');
+    hotkey.setScope('page');
   }
 
   private _bindHotKey() {
-    hotkeyManager.addListener(HOTKEYS.SELECT_ALL, this.model.id, (e: Event) => {
+    hotkey.addListener(HOTKEYS.SELECT_ALL, this.model.id, (e: Event) => {
       e.preventDefault();
       if (!this._firstSelectAll && this.quill?.getSelection()?.length !== 0) {
         this.quill?.blur();
