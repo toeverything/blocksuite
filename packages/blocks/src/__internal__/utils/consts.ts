@@ -10,5 +10,5 @@ export const HOTKEYS = {
   SHIFT_UP: 'shift+up',
   SHIFT_DOWN: 'shift+down',
   INLINE_CODE: 'command+e,ctrl+e',
-  STRIKETHROUGH: 'command+shift+s,ctrl+shift+s',
+  STRIKE: 'command+shift+s,ctrl+shift+s',
 };

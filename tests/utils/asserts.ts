@@ -76,7 +76,7 @@ export async function assertSelection(
     ({ richTextIndex }) => {
       const quill =
         // @ts-ignore
-        document.querySelectorAll('rich-text')[richTextIndex]?._quill!;
+        document.querySelectorAll('rich-text')[richTextIndex]?.quill!;
       return quill.getSelection();
     },
     { richTextIndex }
@@ -84,11 +84,10 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-// @ts-ignore
 export async function assertTextFormat(page: Page, resultObj: unknown) {
   const actual = await page.evaluate(() => {
     // @ts-ignore
-    const quill = document.querySelectorAll('rich-text')[0]?._quill!;
+    const quill = document.querySelectorAll('rich-text')[0]?.quill!;
     return quill.getFormat();
   });
   expect(actual).toEqual(resultObj);

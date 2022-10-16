@@ -8,6 +8,7 @@ import {
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
+  isCollapsedAtBlockStart,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '../utils';
@@ -63,10 +64,6 @@ type KeyboardBindingHandler = (
 
 function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
-}
-
-function isAtBlockStart(quill: Quill) {
-  return quill.getSelection(true)?.index === 0;
 }
 
 export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
@@ -158,7 +155,9 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   }
 
   function backspace(this: KeyboardEventThis) {
-    if (isAtBlockStart(this.quill) && this.quill.getSelection()?.length === 0) {
+    // To workaround uncontrolled behavior when deleting character at block start,
+    // in this case backspace should be handled in quill.
+    if (isCollapsedAtBlockStart(this.quill)) {
       handleLineStartBackspace(store, model);
       return PREVENT_DEFAULT;
     }

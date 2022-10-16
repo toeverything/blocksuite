@@ -3,12 +3,23 @@ import { Store, Text } from '@blocksuite/store';
 
 import { Detail, ExtendedModel } from './types';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
+import {
+  getStartModelBySelection,
+  isCollapsedSelection,
+  getRichTextByModel,
+  isRangeSelection,
+  assertExists,
+} from './query';
 
 export function createEvent<T extends keyof WindowEventMap>(
   type: T,
   detail: Detail<T>
 ) {
   return new CustomEvent<Detail<T>>(type, { detail });
+}
+
+export function noop() {
+  return;
 }
 
 // XXX: workaround quill lifecycle issue
@@ -102,6 +113,57 @@ export function handleUnindent(store: Store, model: ExtendedModel) {
   };
   store.deleteBlock(model);
   store.addBlock(blockProps, grandParent, index + 1);
+}
+
+export function isCollapsedAtBlockStart(quill: Quill) {
+  return (
+    quill.getSelection(true)?.index === 0 && quill.getSelection()?.length === 0
+  );
+}
+
+export function handleBackspace(store: Store, e: KeyboardEvent) {
+  // workaround page title
+  if (e.target instanceof HTMLInputElement) return;
+
+  if (isCollapsedSelection()) {
+    const startModel = getStartModelBySelection();
+    const richText = getRichTextByModel(startModel);
+
+    if (richText) {
+      const { quill } = richText;
+      if (isCollapsedAtBlockStart(quill)) {
+        // use quill handler
+        noop();
+      }
+    }
+  }
+}
+
+export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
+  // workaround page title
+  if (e.target instanceof HTMLInputElement) return;
+
+  if (isRangeSelection()) {
+    const startModel = getStartModelBySelection();
+    const richText = getRichTextByModel(startModel);
+
+    if (richText) {
+      const { quill } = richText;
+      store.captureSync();
+      store.transact(() => {
+        const range = quill?.getSelection();
+        assertExists(range);
+
+        const { index, length } = range;
+        const format = quill?.getFormat(range);
+        if (format?.strike) {
+          startModel?.text?.format(index, length, { [key]: false });
+        } else {
+          startModel?.text?.format(index, length, { [key]: true });
+        }
+      });
+    }
+  }
 }
 
 export function handleLineStartBackspace(store: Store, model: ExtendedModel) {

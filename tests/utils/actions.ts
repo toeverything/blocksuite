@@ -206,7 +206,7 @@ export async function getQuillSelectionIndex(page: Page) {
       const component =
         range.startContainer.parentElement?.closest('rich-text');
       // @ts-ignore
-      const index = component._quill?.getSelection()?.index;
+      const index = component.quill?.getSelection()?.index;
       return index !== undefined ? index : -1;
     }
     return -1;
@@ -221,7 +221,7 @@ export async function getQuillSelectionText(page: Page) {
       const component =
         range.startContainer.parentElement?.closest('rich-text');
       // @ts-ignore
-      return component._quill?.getText() || '';
+      return component.quill?.getText() || '';
     }
     return '';
   });

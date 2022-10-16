@@ -4,13 +4,15 @@ import type { Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from '..';
 import {
+  type BlockHost,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
   hotkeyManager,
-  type BlockHost,
   BlockChildrenContainer,
   SelectionPosition,
   HOTKEYS,
+  handleBackspace,
+  handleFormat,
 } from '../../__internal__';
 import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
@@ -52,26 +54,38 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _bindHotkeys() {
     const scope = 'page';
 
-    hotkeyManager.addListener(HOTKEYS.UNDO, scope, (e: Event) => {
+    hotkeyManager.addListener(HOTKEYS.UNDO, scope, e => {
       e.preventDefault();
       this.store.undo();
     });
-    hotkeyManager.addListener(HOTKEYS.REDO, scope, (e: Event) => {
+
+    hotkeyManager.addListener(HOTKEYS.REDO, scope, e => {
       e.preventDefault();
       this.store.redo();
     });
-    hotkeyManager.addListener(HOTKEYS.SELECT_ALL, scope, (e: Event) => {
+
+    hotkeyManager.addListener(HOTKEYS.SELECT_ALL, scope, e => {
       e.preventDefault();
       // TODO select all blocks
     });
-    hotkeyManager.addListener(HOTKEYS.BACKSPACE, scope, (e: Event) => {
-      e.preventDefault();
-      // TODO delte selected blocks
+
+    hotkeyManager.addListener(HOTKEYS.BACKSPACE, 'all', e => {
+      handleBackspace(this.store, e);
     });
-    hotkeyManager.addListener(HOTKEYS.SHIFT_UP, scope, (e: Event) => {
+
+    hotkeyManager.addListener(HOTKEYS.INLINE_CODE, 'all', e => {
+      handleFormat(this.store, e, 'code');
+    });
+
+    hotkeyManager.addListener(HOTKEYS.STRIKE, 'all', e => {
+      handleFormat(this.store, e, 'strike');
+    });
+
+    hotkeyManager.addListener(HOTKEYS.SHIFT_UP, scope, e => {
       // TODO expand selection up
     });
-    hotkeyManager.addListener(HOTKEYS.SHIFT_DOWN, scope, (e: Event) => {
+
+    hotkeyManager.addListener(HOTKEYS.SHIFT_DOWN, scope, e => {
       // TODO expand selection down
     });
 
@@ -80,8 +94,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _removeHotkeys() {
     hotkeyManager.removeListener(
-      [HOTKEYS.UNDO, HOTKEYS.REDO, HOTKEYS.SELECT_ALL, HOTKEYS.BACKSPACE],
+      [HOTKEYS.UNDO, HOTKEYS.REDO, HOTKEYS.SELECT_ALL],
       'page'
+    );
+    hotkeyManager.removeListener(
+      [HOTKEYS.BACKSPACE, HOTKEYS.INLINE_CODE, HOTKEYS.STRIKE],
+      'all'
     );
   }
 

@@ -1,5 +1,6 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import { DefaultPageBlockComponent } from '../..';
+import { RichText } from '../rich-text/rich-text';
 import { BLOCK_ID_ATTR } from './consts';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
@@ -139,4 +140,39 @@ export function getBlockElementByModel(model: BaseBlockModel) {
   const element = page.querySelector(`[data-block-id="${model.id}"]`);
   assertExists(element);
   return element as HTMLElement;
+}
+
+export function isCollapsedSelection() {
+  const selection = window.getSelection();
+  if (!selection) return false;
+  return selection.isCollapsed;
+}
+
+export function isRangeSelection() {
+  const selection = window.getSelection();
+  if (!selection) return false;
+  return !selection.isCollapsed;
+}
+
+export function getStartModelBySelection() {
+  const selection = window.getSelection() as Selection;
+
+  const range = selection.getRangeAt(0);
+  const startContainer =
+    range.startContainer instanceof Text
+      ? (range.startContainer.parentElement as HTMLElement)
+      : (range.startContainer as HTMLElement);
+
+  const startComponent = startContainer.closest('[data-block-id]') as {
+    model?: BaseBlockModel;
+  };
+  const startModel = startComponent.model as BaseBlockModel;
+  return startModel;
+}
+
+export function getRichTextByModel(model: BaseBlockModel) {
+  const blockElement = getBlockElementByModel(model);
+  const richText = blockElement.querySelector('rich-text') as RichText;
+  if (!richText) return null;
+  return richText;
 }
