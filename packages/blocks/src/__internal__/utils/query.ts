@@ -1,9 +1,13 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import { DefaultPageBlockComponent } from '../..';
 import { RichText } from '../rich-text/rich-text';
-import { BLOCK_ID_ATTR } from './consts';
+import { BLOCK_ID_ATTR as ATTR } from './consts';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
+
+interface ContainerBlock {
+  model?: BaseBlockModel;
+}
 
 export function assertExists<T>(val: T | null | undefined): asserts val is T {
   if (!val) throw new Error('val does not exist');
@@ -13,7 +17,7 @@ export function getBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
 ) {
-  return ele.querySelector<T>(`[${BLOCK_ID_ATTR}="${id}"]` as T);
+  return ele.querySelector<T>(`[${ATTR}="${id}"]` as T);
 }
 
 export function getParentBlockById<T extends ElementTagName>(
@@ -21,21 +25,15 @@ export function getParentBlockById<T extends ElementTagName>(
   ele: Element = document.body
 ) {
   const currentBlock = getBlockById<T>(id, ele);
-  return (
-    currentBlock?.parentElement?.closest<T>(`[${BLOCK_ID_ATTR}]` as T) || null
-  );
+  return currentBlock?.parentElement?.closest<T>(`[${ATTR}]` as T) || null;
 }
 
 export function getSiblingsById(id: string, ele: Element = document.body) {
   // TODO : resolve BaseBlockModel type relay
-  const parentBlock = getParentBlockById(id, ele) as {
-    model?: BaseBlockModel;
-  };
+  const parentBlock = getParentBlockById(id, ele) as ContainerBlock;
   const children = parentBlock?.model?.children;
   if (children?.length) {
-    const queryStr = children
-      .map(child => `[${BLOCK_ID_ATTR}='${child.id}']`)
-      .join(',');
+    const queryStr = children.map(child => `[${ATTR}='${child.id}']`).join(',');
     return Array.from(ele.querySelectorAll(queryStr));
   }
   return [];
@@ -116,7 +114,7 @@ export function getPreviousBlock(container: Element, blockId: string) {
 export function getDefaultPageBlock(model: BaseBlockModel) {
   assertExists(model.store.root);
   const page = document.querySelector(
-    `[data-block-id="${model.store.root.id}"]`
+    `[${ATTR}="${model.store.root.id}"]`
   ) as DefaultPageBlockComponent;
   return page;
 }
@@ -124,7 +122,7 @@ export function getDefaultPageBlock(model: BaseBlockModel) {
 export function getContainerByModel(model: BaseBlockModel) {
   assertExists(model.store.root);
   const page = document.querySelector(
-    `[data-block-id="${model.store.root.id}"]`
+    `[${ATTR}="${model.store.root.id}"]`
   ) as DefaultPageBlockComponent;
   const container = page.closest('editor-container');
   assertExists(container);
@@ -134,24 +132,12 @@ export function getContainerByModel(model: BaseBlockModel) {
 export function getBlockElementByModel(model: BaseBlockModel) {
   assertExists(model.store.root);
   const page = document.querySelector(
-    `[data-block-id="${model.store.root.id}"]`
+    `[${ATTR}="${model.store.root.id}"]`
   ) as DefaultPageBlockComponent;
 
-  const element = page.querySelector(`[data-block-id="${model.id}"]`);
+  const element = page.querySelector(`[${ATTR}="${model.id}"]`);
   assertExists(element);
   return element as HTMLElement;
-}
-
-export function isCollapsedSelection() {
-  const selection = window.getSelection();
-  if (!selection) return false;
-  return selection.isCollapsed;
-}
-
-export function isRangeSelection() {
-  const selection = window.getSelection();
-  if (!selection) return false;
-  return !selection.isCollapsed;
 }
 
 export function getStartModelBySelection() {
@@ -163,9 +149,7 @@ export function getStartModelBySelection() {
       ? (range.startContainer.parentElement as HTMLElement)
       : (range.startContainer as HTMLElement);
 
-  const startComponent = startContainer.closest('[data-block-id]') as {
-    model?: BaseBlockModel;
-  };
+  const startComponent = startContainer.closest(`[${ATTR}]`) as ContainerBlock;
   const startModel = startComponent.model as BaseBlockModel;
   return startModel;
 }
@@ -175,4 +159,16 @@ export function getRichTextByModel(model: BaseBlockModel) {
   const richText = blockElement.querySelector('rich-text') as RichText;
   if (!richText) return null;
   return richText;
+}
+
+export function getModelsByRange(range: Range): BaseBlockModel[] {
+  const commonAncestor = range.commonAncestorContainer as HTMLElement;
+  const containerBlock = commonAncestor.closest(`[${ATTR}]`) as ContainerBlock;
+  assertExists(containerBlock.model);
+
+  const intersectedModels = containerBlock.model.children.filter(child => {
+    const blockElement = getBlockElementByModel(child);
+    return range.intersectsNode(blockElement);
+  });
+  return intersectedModels;
 }

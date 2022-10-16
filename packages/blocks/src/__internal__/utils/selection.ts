@@ -1,4 +1,5 @@
 import { BaseBlockModel } from '@blocksuite/store';
+import { RichText } from '../rich-text/rich-text';
 import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
 import {
   getBlockElementByModel,
@@ -53,9 +54,7 @@ export function focusRichText(
       newLeft = right - 1;
     }
     range = caretRangeFromPoint(newLeft, newTop);
-    const selection = window.getSelection();
-    selection?.removeAllRanges();
-    range && selection?.addRange(range);
+    resetSeletion(range);
   }
   if (position === 'start') {
     range = caretRangeFromPoint(left, top + lineHeight / 2);
@@ -63,9 +62,7 @@ export function focusRichText(
   if (position === 'end') {
     range = caretRangeFromPoint(right - 1, bottom - lineHeight / 2);
   }
-  const selection = window.getSelection();
-  selection?.removeAllRanges();
-  range && selection?.addRange(range);
+  resetSeletion(range);
 }
 
 function focusRichTextByModel(
@@ -224,9 +221,28 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   }
 }
 
+export function focusRichTextStart(richText: RichText) {
+  const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
+  const range = document.createRange();
+  range.setStart(start, 0);
+  resetSeletion(range);
+}
+
 export function getCurrentRange() {
   const selection = window.getSelection() as Selection;
   return selection.getRangeAt(0);
+}
+
+export function isCollapsedSelection() {
+  const selection = window.getSelection();
+  if (!selection) return false;
+  return selection.isCollapsed;
+}
+
+export function isRangeSelection() {
+  const selection = window.getSelection();
+  if (!selection) return false;
+  return !selection.isCollapsed;
 }
 
 export function isMultiBlockRange(range: Range) {

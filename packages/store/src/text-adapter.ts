@@ -44,6 +44,10 @@ export class PrelimText {
     this.index = index;
   }
 
+  get length() {
+    return 0;
+  }
+
   clone() {
     throw new Error(UNSUPPORTED_MSG + 'clone');
   }
@@ -64,12 +68,15 @@ export class PrelimText {
     throw new Error(UNSUPPORTED_MSG + 'clear');
   }
 
+  delete() {
+    throw new Error(UNSUPPORTED_MSG + 'delete');
+  }
+
   format() {
     throw new Error(UNSUPPORTED_MSG + 'format');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  applyDelta(_: any) {
+  applyDelta() {
     throw new Error(UNSUPPORTED_MSG + 'applyDelta');
   }
 
@@ -92,6 +99,10 @@ export class Text {
     const result = new Text('');
     result.applyDelta(delta);
     return result;
+  }
+
+  get length() {
+    return this._yText.length;
   }
 
   clone() {
@@ -124,6 +135,12 @@ export class Text {
     this._yText.format(index, length, format);
     // @ts-ignore
     this._yText.meta = { format: true };
+  }
+
+  delete(index: number, length: number) {
+    this._yText.delete(index, length);
+    // @ts-ignore
+    this._yText.meta = { delete: true };
   }
 
   clear() {

@@ -1,16 +1,22 @@
 import type { Quill } from 'quill';
-import { Store, Text } from '@blocksuite/store';
+import { BaseBlockModel, Store, Text } from '@blocksuite/store';
 
 import { Detail, ExtendedModel } from './types';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import {
-  getStartModelBySelection,
-  isCollapsedSelection,
-  getRichTextByModel,
-  isRangeSelection,
   assertExists,
+  getStartModelBySelection,
+  getRichTextByModel,
+  getModelsByRange,
 } from './query';
-import { getCurrentRange, isMultiBlockRange } from './selection';
+import {
+  focusRichTextStart,
+  getCurrentRange,
+  isCollapsedSelection,
+  isMultiBlockRange,
+  isRangeSelection,
+} from './selection';
+import type { RichText } from '../rich-text/rich-text';
 
 export function createEvent<T extends keyof WindowEventMap>(
   type: T,
@@ -25,7 +31,10 @@ export function noop() {
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {
-  setTimeout(() => store.richTextAdapters.get(id)?.quill.focus());
+  setTimeout(() => {
+    const adapter = store.richTextAdapters.get(id);
+    adapter?.quill.focus();
+  });
 }
 
 export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
@@ -122,6 +131,105 @@ export function isCollapsedAtBlockStart(quill: Quill) {
   );
 }
 
+function mergeRect(a: DOMRect, b: DOMRect) {
+  return new DOMRect(
+    Math.min(a.left, b.left),
+    Math.min(a.top, b.top),
+    Math.max(a.right, b.right) - Math.min(a.left, b.left),
+    Math.max(a.bottom, b.bottom) - Math.min(a.top, b.top)
+  );
+}
+
+function getDOMRectByLine(rectList: DOMRectList, lineType: 'first' | 'last') {
+  const list = Array.from(rectList);
+
+  if (lineType === 'first') {
+    let flag = 0;
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].left < 0 && list[i].right < 0 && list[i].height === 1) break;
+      flag = i;
+    }
+    const subList = list.slice(0, flag + 1);
+    return subList.reduce(mergeRect);
+  } else {
+    let flag = list.length - 1;
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (list[i].height === 0) break;
+      flag = i;
+    }
+    const subList = list.slice(flag);
+    return subList.reduce(mergeRect);
+  }
+}
+
+function binarySearch(
+  quill: Quill,
+  target: DOMRect,
+  key: 'left' | 'right',
+  start: number,
+  end: number
+): number {
+  if (start === end) return start;
+
+  const mid = Math.floor((start + end) / 2);
+  if (target[key] < quill.getBounds(mid)[key]) {
+    return binarySearch(quill, target, key, start, mid);
+  }
+  if (target[key] > quill.getBounds(mid)[key]) {
+    return binarySearch(quill, target, key, mid + 1, end);
+  }
+  return mid;
+}
+
+function partialDeleteRichTextByRange(
+  richText: RichText,
+  range: Range,
+  lineType: 'first' | 'last'
+) {
+  const { quill } = richText;
+  const length = quill.getLength();
+  const rangeRects = range.getClientRects();
+  const target = getDOMRectByLine(rangeRects, lineType);
+
+  const key = lineType === 'first' ? 'left' : 'right';
+  const index = binarySearch(quill, target, key, 0, length - 1);
+  // quill length = model text length + 1
+  const modelIndex = index - 1;
+  const text = richText.model.text;
+  assertExists(text);
+
+  if (lineType === 'first') {
+    text.delete(modelIndex, text.length - modelIndex);
+  } else if (lineType === 'last') {
+    text.delete(0, modelIndex);
+  }
+}
+
+function deleteModelsByRange(
+  store: Store,
+  models: BaseBlockModel[],
+  range: Range
+) {
+  const first = models[0];
+  const last = models[models.length - 1];
+  const firstRichText = getRichTextByModel(first);
+  const lastRichText = getRichTextByModel(last);
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+
+  store.transact(() => {
+    partialDeleteRichTextByRange(firstRichText, range, 'first');
+    partialDeleteRichTextByRange(lastRichText, range, 'last');
+  });
+
+  // delete models in between
+  for (let i = 1; i < models.length - 1; i++) {
+    store.deleteBlock(models[i]);
+  }
+
+  focusRichTextStart(lastRichText);
+}
+
 export function handleBackspace(store: Store, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
@@ -141,6 +249,8 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
     const range = getCurrentRange();
     if (isMultiBlockRange(range)) {
       e.preventDefault();
+      const intersectedModels = getModelsByRange(range);
+      deleteModelsByRange(store, intersectedModels, range);
     }
   }
 }
@@ -155,14 +265,14 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
 
     if (richText) {
       const { quill } = richText;
+      const range = quill.getSelection();
+      assertExists(range);
+
       store.captureSync();
       store.transact(() => {
-        const range = quill?.getSelection();
-        assertExists(range);
-
         const { index, length } = range;
-        const format = quill?.getFormat(range);
-        startModel?.text?.format(index, length, { [key]: !format[key] });
+        const format = quill.getFormat(range);
+        startModel.text?.format(index, length, { [key]: !format[key] });
       });
     }
   }

@@ -12,7 +12,11 @@ import {
   addGroupByClick,
 } from './utils/actions';
 import { expect } from '@playwright/test';
-import { assertRichTexts, assertSelection } from './utils/asserts';
+import {
+  assertBlockCount,
+  assertRichTexts,
+  assertSelection,
+} from './utils/asserts';
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -26,47 +30,49 @@ test('click on blank area', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const above456 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="3"] p'
-    ) as HTMLParagraphElement;
-    const bbox = paragraph.getBoundingClientRect();
+    const paragraph = document.querySelector('[data-block-id="3"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.left, y: bbox.top - 5 };
   });
   await page.mouse.click(above456.x, above456.y);
   await assertSelection(page, 1, 0, 0);
 
   const below789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="4"] p'
-    ) as HTMLParagraphElement;
-    const bbox = paragraph.getBoundingClientRect();
-    return { x: bbox.left, y: bbox.top + 5 };
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left, y: bbox.bottom + 5 };
   });
   await page.mouse.click(below789.x, below789.y);
   await assertSelection(page, 2, 0, 0);
 });
 
-test.skip('drag to select blocks', async ({ page }) => {
+test('range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await focusRichText(page);
+  await page.keyboard.type('123');
   await pressEnter(page);
+  await page.keyboard.type('456');
   await pressEnter(page);
+  await page.keyboard.type('789');
+  await assertRichTexts(page, ['123', '456', '789']);
 
-  const fromTo = await page.evaluate(() => {
-    const textBoxes = document.querySelectorAll('rich-text');
-    const firstTextBox = textBoxes[0];
-    const lastTextBox = textBoxes[textBoxes.length - 1];
-    const { left: x1, top: y1 } = firstTextBox.getBoundingClientRect();
-    const { left: x2, bottom: y2 } = lastTextBox.getBoundingClientRect();
-    return [
-      { x: Math.floor(x1) - 5, y: Math.floor(y1) - 5 },
-      { x: Math.floor(x2) + 40, y: Math.floor(y2) - 10 },
-    ];
+  const above123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left, y: bbox.top };
   });
 
-  await mouseDragFromTo(page, fromTo[0], fromTo[1]);
-  // await assertSelectedBlockCount(page, 3);
+  const below789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right, y: bbox.bottom + 5 };
+  });
+
+  await mouseDragFromTo(page, above123, below789);
+  await page.keyboard.press('Backspace');
+  await assertBlockCount(page, 'paragraph', 2);
+  await assertRichTexts(page, ['12', '9']); // FIXME
 });
 
 test('cursor move up and down', async ({ page }) => {
@@ -186,12 +192,4 @@ test.skip('cursor move up and down through group', async ({ page }) => {
   await page.keyboard.press('ArrowUp');
   currentId = (await getCursorBlockIdAndHeight(page))[0];
   expect(id).toBe(currentId);
-});
-
-test.skip('select all block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await addGroupByClick(page);
-  await addGroupByClick(page);
-  // await selectAll(page);
-  // await assertSelectedBlockCount(page, 3);
 });
