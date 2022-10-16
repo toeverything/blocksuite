@@ -17,7 +17,7 @@ test('markdown shortcut', async ({ page }) => {
   await assertBlockType(page, id, 'todo');
 
   await undoByClick(page);
-  await page.keyboard.type('[ ] ');
+  await page.keyboard.type('[ ] ', { delay: 50 });
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'todo');
 
