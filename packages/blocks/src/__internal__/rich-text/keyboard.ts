@@ -190,7 +190,7 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
     'list autofill': {
       key: ' ',
-      prefix: /^\s*?(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6})|>$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
       handler: space,
     },
     backspace: {

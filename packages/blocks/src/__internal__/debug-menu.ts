@@ -49,7 +49,7 @@ export class DebugMenu extends LitElement {
     const store = block.host.store as Store;
     // @ts-ignore
     const model = store.getBlockById(block.model.id) as BaseBlockModel;
-    convertToList(this.store, model, listType);
+    convertToList(this.store, model, listType, '');
   }
 
   private _onDelete() {
