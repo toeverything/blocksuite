@@ -1,6 +1,8 @@
 # BlockSuite
 
-BlockSuite provides local-first blocks for collaborative applications.
+BlockSuite is a collaborative editor framework designed to reliably embed any Web content.
+
+> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
 
 ## Introduction
 
@@ -32,4 +34,4 @@ In headed mode, `await page.pause()` can be used in test cases to suspend the te
 
 ## License
 
-[Apache 2.0](./LICENSE)
+[MPL 2.0](./LICENSE)
