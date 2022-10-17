@@ -203,6 +203,32 @@ export class Shortcuts {
         });
       },
     },
+    {
+      name: 'code',
+      pattern: /(?:`)(.+?)(?:`)/g,
+      action: (
+        quill: Quill,
+        model: BaseBlockModel,
+        text: string,
+        selection: RangeStatic,
+        pattern: RegExp,
+        lineStart: number
+      ) => {
+        const match = pattern.exec(text);
+        if (!match) {
+          return;
+        }
+        const annotatedText = match[0];
+        const matchedText = match[1];
+        const startIndex = lineStart + match.index;
+
+        if (text.match(/^([*_ \n]+)$/g)) return;
+
+        quill.deleteText(startIndex, annotatedText.length);
+        quill.insertText(startIndex, matchedText, { code: true });
+        quill.format('code', false);
+      },
+    },
   ];
 
   private static _isValid(text: string, tagName: string) {
