@@ -348,9 +348,10 @@ export function convertToList(
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
     store.transact(() => {
-      model.text?.delete(0, prefix.length);
+      model.text?.delete(0, prefix.length + 1);
       const blockProps = {
         flavour: 'list',
         type: listType,
@@ -363,9 +364,10 @@ export function convertToList(
       asyncFocusRichText(store, id);
     });
   } else if (model.flavour === 'list' && model['type'] !== listType) {
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
     store.transact(() => {
-      model.text?.delete(0, prefix.length);
+      model.text?.delete(0, prefix.length + 1);
       store.updateBlock(model, { type: listType });
     });
   }
@@ -386,9 +388,10 @@ export function convertToParagraph(
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
     store.transact(() => {
-      model.text?.delete(0, prefix.length);
+      model.text?.delete(0, prefix.length + 1);
       const blockProps = {
         flavour: 'paragraph',
         type: type,
@@ -400,9 +403,10 @@ export function convertToParagraph(
       asyncFocusRichText(store, id);
     });
   } else if (model.flavour === 'paragraph' && model['type'] !== type) {
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
     store.transact(() => {
-      model.text?.delete(0, prefix.length);
+      model.text?.delete(0, prefix.length + 1);
       store.updateBlock(model, { type: type });
     });
   }
