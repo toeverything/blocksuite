@@ -15,6 +15,7 @@ import {
   getCurrentRange,
   isCollapsedSelection,
   isMultiBlockRange,
+  isNoneSelection,
   isRangeSelection,
 } from './selection';
 import type { RichText } from '../rich-text/rich-text';
@@ -194,6 +195,7 @@ function deleteModelsByRange(
 export function handleBackspace(store: Store, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
+  if (isNoneSelection()) return;
 
   if (isCollapsedSelection()) {
     const startModel = getStartModelBySelection();
@@ -219,6 +221,7 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
+  if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
     const startModel = getStartModelBySelection();
@@ -333,6 +336,14 @@ export function tryMatchSpaceHotkey(
   }
 
   return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
+}
+
+// TODO deep delete
+export function batchDelete(store: Store, models: ExtendedModel[]) {
+  store.captureSync();
+  for (const model of models) {
+    store.deleteBlock(model);
+  }
 }
 
 export function convertToList(

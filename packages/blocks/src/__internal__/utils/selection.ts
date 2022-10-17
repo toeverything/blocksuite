@@ -229,6 +229,12 @@ export function getCurrentRange() {
   return selection.getRangeAt(0);
 }
 
+export function isNoneSelection() {
+  const selection = window.getSelection();
+  if (!selection) return true;
+  return selection.type === 'None';
+}
+
 export function isCollapsedSelection() {
   const selection = window.getSelection();
   if (!selection) return false;

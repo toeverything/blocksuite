@@ -9,6 +9,7 @@ import {
   assertExists,
   noop,
 } from '../../__internal__';
+import { RichText } from '../../__internal__/rich-text/rich-text';
 import type { DefaultPageBlockSlots } from './default-page-block';
 
 function isBlankAreaBetweenBlocks(startContainer: Node) {
@@ -30,7 +31,25 @@ function isBlankArea(e: SelectionEvent) {
   return cursor === 'default';
 }
 
-type PageSelectionType = 'native' | 'block' | 'none';
+function intersects(rect: DOMRect, selectionRect: DOMRect) {
+  return (
+    rect.left < selectionRect.right &&
+    rect.right > selectionRect.left &&
+    rect.top < selectionRect.bottom &&
+    rect.bottom > selectionRect.top
+  );
+}
+
+function filterSelectedRichText(
+  richTextCache: Map<RichText, DOMRect>,
+  selectionRect: DOMRect
+): RichText[] {
+  const richTexts = Array.from(richTextCache.keys());
+  return richTexts.filter(richText => {
+    const rect = richText.getBoundingClientRect();
+    return intersects(rect, selectionRect);
+  });
+}
 
 function createSelectionRect(
   current: { x: number; y: number },
@@ -43,10 +62,15 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
+type PageSelectionType = 'native' | 'block' | 'none';
+
 class PageSelection {
   type: PageSelectionType;
+  selectedRichTexts: RichText[] = [];
+
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
+  private _richTextCache = new Map<RichText, DOMRect>();
 
   constructor(type: PageSelectionType) {
     this.type = type;
@@ -60,22 +84,40 @@ class PageSelection {
     return this._startPoint;
   }
 
+  get richTextCache() {
+    return this._richTextCache;
+  }
+
   resetStartRange(e: SelectionEvent) {
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
     this._startPoint = { x: e.raw.clientX, y: e.raw.clientY };
   }
 
+  refreshRichTextBoundsCache(container: HTMLElement) {
+    const richTexts = Array.from(container.querySelectorAll('rich-text'));
+    richTexts.forEach(richText => {
+      // const rect = (
+      //   richText.closest(`[${BLOCK_ID_ATTR}]`) as HTMLElement
+      // ).getBoundingClientRect();
+      const rect = richText.getBoundingClientRect();
+      this._richTextCache.set(richText, rect);
+    });
+  }
+
   clear() {
+    this.type = 'none';
+    this._richTextCache.clear();
     this._startRange = null;
     this._startPoint = null;
+    this.selectedRichTexts = [];
   }
 }
 
 export class DefaultMouseManager {
   store: Store;
+  selection = new PageSelection('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
-  private _selection = new PageSelection('none');
   private _slots: DefaultPageBlockSlots;
 
   constructor(
@@ -98,73 +140,84 @@ export class DefaultMouseManager {
     );
   }
 
-  private _onBlockDragStart(e: SelectionEvent) {
-    this._selection.type = 'block';
-    this._selection.resetStartRange(e);
+  private _onBlockSelectionDragStart(e: SelectionEvent) {
+    this.selection.type = 'block';
+    this.selection.resetStartRange(e);
+    this.selection.refreshRichTextBoundsCache(this._container);
     resetNativeSeletion(null);
   }
 
-  private _onBlockDragMove(e: SelectionEvent) {
-    assertExists(this._selection.startPoint);
+  private _onBlockSelectionDragMove(e: SelectionEvent) {
+    assertExists(this.selection.startPoint);
     const current = { x: e.raw.clientX, y: e.raw.clientY };
-    const { startPoint: start } = this._selection;
+    const { startPoint: start } = this.selection;
 
     const selectionRect = createSelectionRect(current, start);
+    const { richTextCache } = this.selection;
+    const selectedRichTexts = filterSelectedRichText(
+      richTextCache,
+      selectionRect
+    );
+    this.selection.selectedRichTexts = selectedRichTexts;
+
+    const selectedBounds = selectedRichTexts.map(richText => {
+      return richTextCache.get(richText) as DOMRect;
+    });
+    this._slots.updateSelectedRects.emit(selectedBounds);
     this._slots.updateSelectionRect.emit(selectionRect);
   }
 
-  private _onBlockDragEnd(e: SelectionEvent) {
-    this._selection.clear();
+  private _onBlockSelectionDragEnd(e: SelectionEvent) {
     this._slots.updateSelectionRect.emit(null);
+    // do not clear selected rects here
   }
 
-  private _onNativeDragStart(e: SelectionEvent) {
-    this._selection.type = 'native';
+  private _onNativeSelectionDragStart(e: SelectionEvent) {
+    this.selection.type = 'native';
   }
 
-  private _onNativeDragMove(e: SelectionEvent) {
-    assertExists(this._selection.startRange);
-    const { startContainer, startOffset } = this._selection.startRange;
+  private _onNativeSelectionDragMove(e: SelectionEvent) {
+    assertExists(this.selection.startRange);
+    const { startContainer, startOffset } = this.selection.startRange;
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
     currentRange?.setStart(startContainer, startOffset);
     // currentRange?.setEnd(startContainer, startOffset);
     resetNativeSeletion(currentRange);
   }
 
-  private _onNativeDragEnd(e: SelectionEvent) {
+  private _onNativeSelectionDragEnd(e: SelectionEvent) {
     noop();
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this._selection.resetStartRange(e);
+    this.selection.resetStartRange(e);
 
     if (isBlankArea(e)) {
-      this._onBlockDragStart(e);
+      this._onBlockSelectionDragStart(e);
     } else {
-      this._onNativeDragStart(e);
+      this._onNativeSelectionDragStart(e);
     }
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    if (this._selection.type === 'native') {
-      this._onNativeDragMove(e);
-    } else if (this._selection.type === 'block') {
-      this._onBlockDragMove(e);
+    if (this.selection.type === 'native') {
+      this._onNativeSelectionDragMove(e);
+    } else if (this.selection.type === 'block') {
+      this._onBlockSelectionDragMove(e);
     }
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this._selection.type === 'native') {
-      this._onNativeDragEnd(e);
-    } else if (this._selection.type === 'block') {
-      this._onBlockDragEnd(e);
+    if (this.selection.type === 'native') {
+      this._onNativeSelectionDragEnd(e);
+    } else if (this.selection.type === 'block') {
+      this._onBlockSelectionDragEnd(e);
     }
-    this._selection.type = 'none';
-    this._selection.clear();
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
-    this._selection.type = 'none';
+    this.selection.clear();
+    this._slots.updateSelectedRects.emit([]);
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;
