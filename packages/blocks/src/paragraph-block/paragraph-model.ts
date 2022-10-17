@@ -44,7 +44,7 @@ export class ParagraphBlockModel
     );
     switch (this.type) {
       case 'text':
-        return `<div>${text}<div>`;
+        return `<div>${text}</div>`;
       case 'h1':
       case 'h2':
       case 'h3':
