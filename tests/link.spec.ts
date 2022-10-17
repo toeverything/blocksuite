@@ -15,7 +15,7 @@ const pressCreateLinkShortCut = async (page: Page) => {
   });
 };
 
-test('basic link', async ({ page }) => {
+test.skip('basic link', async ({ page }) => {
   const linkText = 'linkText';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
