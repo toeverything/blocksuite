@@ -41,6 +41,7 @@ export class EditLinkPanel extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    // Restore body scroll style
     document.body.style.overflow = this.bodyOverflowStyle;
   }
 
