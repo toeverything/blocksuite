@@ -5,7 +5,7 @@ import {
   SelectionEvent,
   caretRangeFromPoint,
   focusRichTextByOffset,
-  resetSeletion,
+  resetNativeSeletion,
   assertExists,
   noop,
 } from '../../__internal__';
@@ -27,7 +27,7 @@ function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
 
 function isBlankArea(e: SelectionEvent) {
   const { cursor } = window.getComputedStyle(e.raw.target as Element);
-  return cursor === 'crosshair';
+  return cursor === 'default';
 }
 
 type PageSelectionType = 'native' | 'block' | 'none';
@@ -101,6 +101,7 @@ export class DefaultMouseManager {
   private _onBlockDragStart(e: SelectionEvent) {
     this._selection.type = 'block';
     this._selection.resetStartRange(e);
+    resetNativeSeletion(null);
   }
 
   private _onBlockDragMove(e: SelectionEvent) {
@@ -127,7 +128,7 @@ export class DefaultMouseManager {
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
     currentRange?.setStart(startContainer, startOffset);
     // currentRange?.setEnd(startContainer, startOffset);
-    resetSeletion(currentRange);
+    resetNativeSeletion(currentRange);
   }
 
   private _onNativeDragEnd(e: SelectionEvent) {
@@ -175,7 +176,7 @@ export class DefaultMouseManager {
 
     // click on rich text
     if (startContainer instanceof Node) {
-      resetSeletion(range);
+      resetNativeSeletion(range);
     }
 
     if (!(startContainer instanceof HTMLElement)) return;
