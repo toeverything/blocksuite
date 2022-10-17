@@ -2,9 +2,19 @@ import TurndownService from 'turndown';
 
 const FileExporter = {
   injectHtmlCss: () => {
+    //TODO why not use css file?
     return `
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <style>
+    :root {
+      --affine-primary-color: #3a4c5c;
+      --affine-font-family: Avenir Next, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+      --affine-font-family2: Roboto Mono, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  }
+    body {
+      font-family: var(--affine-font-family);
+      color: var(--affine-primary-color);
+    }
     </style>
     `;
   },
