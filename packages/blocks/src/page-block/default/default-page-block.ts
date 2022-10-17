@@ -17,6 +17,7 @@ import {
 } from '../../__internal__';
 import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
+import { createLink } from '../../__internal__/rich-text/link-node';
 
 export interface DefaultPageBlockSlots {
   updateSelectionRect: Slot<DOMRect | null>;
@@ -148,6 +149,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkey.addListener(HOTKEYS.SHIFT_DOWN, e => {
       // TODO expand selection down
+    });
+    hotkey.addListener(HOTKEYS.LINK, e => {
+      createLink(store, e);
     });
   }
 

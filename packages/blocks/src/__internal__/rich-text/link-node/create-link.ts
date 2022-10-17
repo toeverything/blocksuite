@@ -1,8 +1,13 @@
+import { Store } from '@blocksuite/store';
 import Quill, { RangeStatic } from 'quill';
-import { MockSelectNode } from './mock-select-node';
-
+import {
+  assertExists,
+  getRichTextByModel,
+  getStartModelBySelection,
+  isRangeSelection,
+} from '../../utils';
 import './link-node';
-import { BaseBlockModel, Store } from '@blocksuite/store';
+import { MockSelectNode } from './mock-select-node';
 
 const getBlotNode = <T>(
   type: T,
@@ -25,27 +30,30 @@ const getBlotNode = <T>(
   return [node, offset];
 };
 
-export const createLink = async ({
-  quill,
-  store,
-  model,
-}: {
-  quill: Quill;
-  store: Store;
-  model: BaseBlockModel;
-}) => {
-  const range = quill.getSelection();
-  if (!range || range.length === 0) {
+export const createLink = async (store: Store, e: KeyboardEvent) => {
+  if (!isRangeSelection()) {
     // TODO maybe allow user creating a link with text
     return;
   }
 
+  // TODO maybe user can cancel link by pressing shortcut again
   // const format = quill.getFormat(range);
   // if (format?.link) {
   //   quill.format('link', false);
   //   return;
   // }
 
+  const startModel = getStartModelBySelection();
+  const richText = getRichTextByModel(startModel);
+  if (!richText) {
+    return;
+  }
+  const { quill } = richText;
+  const range = quill.getSelection();
+  // TODO fix selection with multiple lines
+  assertExists(range);
+
+  // Note: Just mock a selection style, this operation should not be recorded to store
   quill.format('mock-select', true);
 
   const [mockSelectNode] = getBlotNode(MockSelectNode, quill, range);
@@ -68,7 +76,7 @@ export const createLink = async ({
 
   store.captureSync();
   store.transact(() => {
-    model.text?.format(range.index, range.length, { link });
+    startModel.text?.format(range.index, range.length, { link });
   });
 
   const LinkBlot = Quill.import('formats/link');
