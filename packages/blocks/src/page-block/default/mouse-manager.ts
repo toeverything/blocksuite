@@ -9,6 +9,7 @@ import {
   assertExists,
   noop,
 } from '../../__internal__';
+import type { DefaultPageBlockSlots } from './default-page-block';
 
 function isBlankAreaBetweenBlocks(startContainer: Node) {
   if (!(startContainer instanceof HTMLElement)) return false;
@@ -31,9 +32,21 @@ function isBlankArea(e: SelectionEvent) {
 
 type PageSelectionType = 'native' | 'block' | 'none';
 
+function createSelectionRect(
+  current: { x: number; y: number },
+  start: { x: number; y: number }
+) {
+  const width = Math.abs(current.x - start.x);
+  const height = Math.abs(current.y - start.y);
+  const left = Math.min(current.x, start.x);
+  const top = Math.min(current.y, start.y);
+  return new DOMRect(left, top, width, height);
+}
+
 class PageSelection {
   type: PageSelectionType;
   private _startRange: Range | null = null;
+  private _startPoint: { x: number; y: number } | null = null;
 
   constructor(type: PageSelectionType) {
     this.type = type;
@@ -43,12 +56,18 @@ class PageSelection {
     return this._startRange;
   }
 
+  get startPoint() {
+    return this._startPoint;
+  }
+
   resetStartRange(e: SelectionEvent) {
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+    this._startPoint = { x: e.raw.clientX, y: e.raw.clientY };
   }
 
   clear() {
     this._startRange = null;
+    this._startPoint = null;
   }
 }
 
@@ -57,9 +76,15 @@ export class DefaultMouseManager {
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
   private _selection = new PageSelection('none');
+  private _slots: DefaultPageBlockSlots;
 
-  constructor(store: Store, container: HTMLElement) {
+  constructor(
+    store: Store,
+    container: HTMLElement,
+    slots: DefaultPageBlockSlots
+  ) {
     this.store = store;
+    this._slots = slots;
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -75,15 +100,21 @@ export class DefaultMouseManager {
 
   private _onBlockDragStart(e: SelectionEvent) {
     this._selection.type = 'block';
-    this._selection.clear();
+    this._selection.resetStartRange(e);
   }
 
   private _onBlockDragMove(e: SelectionEvent) {
-    // TODO handle block drag move
+    assertExists(this._selection.startPoint);
+    const current = { x: e.raw.clientX, y: e.raw.clientY };
+    const { startPoint: start } = this._selection;
+
+    const selectionRect = createSelectionRect(current, start);
+    this._slots.updateSelectionRect.emit(selectionRect);
   }
 
   private _onBlockDragEnd(e: SelectionEvent) {
-    // TODO handle block drag end
+    this._selection.clear();
+    this._slots.updateSelectionRect.emit(null);
   }
 
   private _onNativeDragStart(e: SelectionEvent) {
