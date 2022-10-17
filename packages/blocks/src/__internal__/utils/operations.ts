@@ -36,7 +36,9 @@ export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
 
     const blockProps = {
       flavour: model.flavour,
-      type: model.type,
+      type: !['bulleted', 'numbered', 'todo'].includes(model.type)
+        ? 'text'
+        : model.type,
     };
     const id = store.addBlock(blockProps, parent, index + 1);
     asyncFocusRichText(store, id);
