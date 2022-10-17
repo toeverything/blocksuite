@@ -1,16 +1,4 @@
-export interface IPoint {
-  x: number;
-  y: number;
-}
-
-export interface Bound {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-export class Point implements IPoint {
+export class Point {
   public x: number;
   public y: number;
 

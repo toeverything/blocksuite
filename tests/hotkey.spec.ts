@@ -2,7 +2,6 @@ import { test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
-  blurRichText,
   selectAllByKeyboard,
   inlineCode,
   undoByClick,
@@ -10,43 +9,41 @@ import {
   strikethrough,
   undoByKeyboard,
   redoByKeyboard,
+  pressEnter,
 } from './utils/actions';
 import {
+  assertRichTexts,
   assertSelection,
-  assertSelectedBlockCount,
   assertTextFormat,
 } from './utils/asserts';
 
-test('rich-text hotkey scope', async ({ page }) => {
+test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await selectAllByKeyboard(page); // first select all in rich text
-  await assertSelection(page, 0, 0, 5);
+  await pressEnter(page);
+  await page.keyboard.type('world');
+  await assertRichTexts(page, ['hello', 'world']);
 
-  await blurRichText(page);
-  await selectAllByKeyboard(page); // second select in page scope
-  await assertSelectedBlockCount(page, 1);
-
-  await focusRichText(page);
   await selectAllByKeyboard(page); // first select all in rich text
-  await assertSelection(page, 0, 0, 5);
-  await selectAllByKeyboard(page); // second select all in rich text
-  await assertSelectedBlockCount(page, 1);
+  await assertSelection(page, 1, 0, 5);
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['hello', '\n']);
 });
 
 test('rich-text code-inline hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
-  await page.keyboard.type('helloWorld');
+  await page.keyboard.type('hello');
   await selectAllByKeyboard(page);
   await inlineCode(page);
   await assertTextFormat(page, { code: true });
 
-  //undo
+  // undo
   await undoByKeyboard(page);
   await assertTextFormat(page, {});
-  //redo
+  // redo
   await redoByKeyboard(page);
   await assertTextFormat(page, { code: true });
 
@@ -54,18 +51,18 @@ test('rich-text code-inline hotkey', async ({ page }) => {
   await assertTextFormat(page, {});
 });
 
-test('rich-text strikethrough hotkey ', async ({ page }) => {
+test('rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
-  await page.keyboard.type('helloWorld');
+  await page.keyboard.type('hello');
   await selectAllByKeyboard(page);
   await strikethrough(page);
   await assertTextFormat(page, { strike: true });
 
-  //undo
+  // undo
   await undoByClick(page);
   await assertTextFormat(page, {});
-  //redo
+  // redo
   await redoByClick(page);
   await assertTextFormat(page, { strike: true });
   // twice

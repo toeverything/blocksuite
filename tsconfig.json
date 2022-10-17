@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "target": "ESNext",
+    "target": "ES2020",
     "useDefineForClassFields": false,
     "experimentalDecorators": true,
     "module": "ESNext",

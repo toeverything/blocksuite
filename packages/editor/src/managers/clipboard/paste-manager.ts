@@ -1,9 +1,8 @@
-import type { DefaultPageBlockComponent } from '@blocksuite/blocks';
 import { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
 import { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
+import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -28,12 +27,14 @@ export class PasteManager {
     this._insertBlocks(blocks);
   }
 
+  /* FIXME
   private get _selection() {
     const page =
       document.querySelector<DefaultPageBlockComponent>('default-page-block');
     if (!page) throw new Error('No page block');
     return page.selection;
   }
+  */
 
   private async _clipboardEvent2Blocks(e: ClipboardEvent) {
     const clipboardData = e.clipboardData;
@@ -72,7 +73,7 @@ export class PasteManager {
       return clipInfo.data;
     }
 
-    const textClipData = escape(clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT));
+    const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
 
     const shouldConvertMarkdown =
       MarkdownUtils.checkIfTextContainsMd(textClipData);
@@ -84,6 +85,7 @@ export class PasteManager {
     }
 
     if (shouldConvertMarkdown) {
+      // TODO the method of parse need deal underline
       const md2html = marked.parse(textClipData);
       return this._editor.contentParser.htmlText2Block(md2html);
     }
@@ -125,7 +127,16 @@ export class PasteManager {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectionInfo = this._selection.selectionInfo;
+    // const currentSelectionInfo = this._selection.selectionInfo;
+    // FIXME
+    const currentSelectionInfo = {
+      type: '',
+      blocks: <SelectedBlock[]>[],
+      anchorBlockId: '',
+      anchorBlockPosition: 0,
+      focusBlockId: '',
+      focusBlockPosition: 0,
+    };
 
     if (
       currentSelectionInfo.type === 'Range' ||
@@ -139,11 +150,12 @@ export class PasteManager {
       let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
-        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+        index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._selection.selectedBlockIds = addBlockIds;
+      // FIXME
+      // this._selection.selectedBlockIds = addBlockIds;
     } else if (currentSelectionInfo.type === 'Block') {
       const selectedBlock = this._editor.store.getBlockById(
         currentSelectionInfo.blocks[currentSelectionInfo.blocks.length - 1].id
@@ -153,11 +165,12 @@ export class PasteManager {
       let index = -1;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
-        index = (parent?.children.indexOf(selectedBlock) || -1) + 1;
+        index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
       const addBlockIds: string[] = [];
       parent && this._addBlocks(blocks, parent, index, addBlockIds);
-      this._selection.selectedBlockIds = addBlockIds;
+      // FIXME
+      // this._selection.selectedBlockIds = addBlockIds;
     }
   }
 
@@ -172,6 +185,7 @@ export class PasteManager {
       const blockProps = {
         flavour: block.flavour as string,
         type: block.type as string,
+        checked: block.checked,
       };
       const id = this._editor.store.addBlock(blockProps, parent, index + i);
       const model = this._editor.store.getBlockById(id);

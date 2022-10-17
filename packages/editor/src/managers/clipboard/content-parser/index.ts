@@ -1,7 +1,6 @@
 import { PageBlockModel } from '@blocksuite/blocks';
-import type { SelectedBlock } from '@blocksuite/shared';
 import { BaseBlockModel, Slot } from '@blocksuite/store';
-import { OpenBlockInfo, EditorContainer } from '../../..';
+import type { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
 import { FileExporter } from '../../file-exporter/file-exporter';
 import { ParserHtml } from './parse-html';
 
@@ -134,22 +133,23 @@ export class ContentParser {
       return '';
     }
 
-    // TODO Handling different block by extension
-    let text = model?.text?.toString() || '';
-    const end = selectedBlock.endPos ? selectedBlock.endPos : text.length;
-    text = text.slice(selectedBlock.startPos || 0, end);
-
     const children: string[] = [];
     selectedBlock.children.forEach(child => {
       const childText = this._getTextInfoBySelectionInfo(child);
       childText && children.push(childText);
     });
 
-    return `${text}${children.join('')}`;
+    const text = model.block2Text(
+      children.join(''),
+      selectedBlock.startPos,
+      selectedBlock.endPos
+    );
+
+    return text;
   }
 
   private _convertHtml2Blocks(element: Element): OpenBlockInfo[] {
-    return Array.from(element.childNodes)
+    return Array.from(element.children)
       .map(childElement => {
         const clipBlockInfos =
           this.getParserHtmlText2Block('nodeParser')?.(childElement) || [];

@@ -1,21 +1,29 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import {
-  asyncFocusRichText,
-  BLOCK_ID_ATTR,
-  hotkeyManager,
-  type BlockHost,
-} from '@blocksuite/shared';
+import { customElement, property, query } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
 
 import type { PageBlockModel } from '..';
 import {
-  SelectionManager,
-  DefaultMouseManager,
-  focusTextEnd,
+  type BlockHost,
+  asyncFocusRichText,
+  BLOCK_ID_ATTR,
+  hotkey,
   BlockChildrenContainer,
+  SelectionPosition,
+  HOTKEYS,
+  handleBackspace,
+  handleFormat,
 } from '../../__internal__';
+import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
+
+// https://stackoverflow.com/a/2345915
+function focusTextEnd(input: HTMLInputElement) {
+  const current = input.value;
+  input.focus();
+  input.value = '';
+  input.value = current;
+}
 
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
@@ -26,11 +34,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
-  @state()
-  selection!: SelectionManager;
-
-  @state()
   mouse!: DefaultMouseManager;
+
+  lastSelectionPosition: SelectionPosition = 'start';
 
   @property()
   mouseRoot!: HTMLElement;
@@ -46,26 +52,38 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   _blockTitle!: HTMLInputElement;
 
   private _bindHotkeys() {
-    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
-    const scope = 'page';
-    hotkeyManager.addListener(undo, scope, (e: Event) => {
-      e.preventDefault();
-      this.store.undo();
+    const { store } = this;
+
+    hotkey.addListener(HOTKEYS.UNDO, () => store.undo());
+    hotkey.addListener(HOTKEYS.REDO, () => store.redo());
+
+    hotkey.addListener(HOTKEYS.BACKSPACE, e => {
+      handleBackspace(store, e);
     });
-    hotkeyManager.addListener(redo, scope, (e: Event) => {
-      e.preventDefault();
-      this.store.redo();
+    hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
+      handleFormat(store, e, 'code');
     });
-    hotkeyManager.addListener(selectAll, scope, (e: Event) => {
-      e.preventDefault();
-      this.selection.selectAllBlocks();
+    hotkey.addListener(HOTKEYS.STRIKE, e => {
+      handleFormat(store, e, 'strike');
     });
-    hotkeyManager.setScope('page');
+    hotkey.addListener(HOTKEYS.SHIFT_UP, e => {
+      // TODO expand selection up
+    });
+    hotkey.addListener(HOTKEYS.SHIFT_DOWN, e => {
+      // TODO expand selection down
+    });
   }
 
   private _removeHotkeys() {
-    const { undo, redo, selectAll } = hotkeyManager.hotkeysMap;
-    hotkeyManager.removeListener([undo, redo, selectAll], 'page');
+    hotkey.removeListener([
+      HOTKEYS.UNDO,
+      HOTKEYS.REDO,
+      HOTKEYS.BACKSPACE,
+      HOTKEYS.INLINE_CODE,
+      HOTKEYS.STRIKE,
+      HOTKEYS.SHIFT_UP,
+      HOTKEYS.SHIFT_DOWN,
+    ]);
   }
 
   private _onKeyDown(e: KeyboardEvent) {
@@ -100,8 +118,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.selection = new SelectionManager(this.mouseRoot, this.store);
-      this.mouse = new DefaultMouseManager(this.mouseRoot);
+      this.mouse = new DefaultMouseManager(this.store, this.mouseRoot);
     }
     super.update(changedProperties);
   }
@@ -120,9 +137,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   disconnectedCallback() {
-    this.mouse.dispose();
-    this.selection.dispose();
     this._removeHotkeys();
+    this.mouse.dispose();
   }
 
   render() {
@@ -131,11 +147,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const childrenContainer = BlockChildrenContainer(this.model, this);
 
     return html`
-      <selection-rect
-        .selection=${this.selection}
-        .mouse=${this.mouse}
-        .store=${this.store}
-      ></selection-rect>
       <div class="affine-default-page-block-container">
         <div class="affine-default-page-block-title-container">
           <input

@@ -1,8 +1,7 @@
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
+import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
-import { SelectedBlock } from '@blocksuite/shared';
-import type { DefaultPageBlockComponent } from '@blocksuite/blocks';
+import { ListBlockModel } from '@blocksuite/blocks';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -13,12 +12,14 @@ export class CopyCutManager {
     this.handleCut = this.handleCut.bind(this);
   }
 
+  /* FIXME
   private get _selection() {
     const page =
       document.querySelector<DefaultPageBlockComponent>('default-page-block');
     if (!page) throw new Error('No page block');
     return page.selection;
   }
+  */
 
   public handleCopy(e: ClipboardEvent) {
     e.preventDefault();
@@ -34,6 +35,8 @@ export class CopyCutManager {
 
   public handleCut(e: ClipboardEvent) {
     this.handleCopy(e);
+    // FIXME
+    /*
     const { selectionInfo } = this._selection;
     if (selectionInfo.type == 'Block') {
       selectionInfo.blocks.forEach(({ id }) =>
@@ -52,11 +55,22 @@ export class CopyCutManager {
             (selectionInfo.anchorBlockPosition || 0)
         );
     }
+    */
   }
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const { selectionInfo } = this._selection;
+    // const { selectionInfo } = this._selection;
+    // FIXME
+    const selectionInfo = {
+      type: '',
+      blocks: <SelectedBlock[]>[],
+      anchorBlockId: '',
+      anchorBlockPosition: 0,
+      focusBlockId: '',
+      focusBlockPosition: 0,
+    };
+
     let selectedBlocks: SelectedBlock[] = [];
     if (selectionInfo.type === 'Block') {
       selectedBlocks = selectionInfo.blocks;
@@ -116,11 +130,28 @@ export class CopyCutManager {
     if (!model) {
       return null;
     }
-    // TODO Handling different block by extension
-    const delta = model?.text?.sliceToDelta(
-      selectedBlock?.startPos || 0,
-      selectedBlock?.endPos
-    );
+
+    let { flavour, type } = model;
+    let delta = [];
+    if (model.flavour === 'page') {
+      flavour = 'paragraph';
+      type = 'text';
+      const text = model.block2Text(
+        '',
+        selectedBlock?.startPos,
+        selectedBlock?.endPos
+      );
+      delta = [
+        {
+          insert: text,
+        },
+      ];
+    } else {
+      delta = model?.text?.sliceToDelta(
+        selectedBlock?.startPos || 0,
+        selectedBlock?.endPos
+      );
+    }
 
     const children: OpenBlockInfo[] = [];
     selectedBlock.children.forEach(child => {
@@ -129,9 +160,10 @@ export class CopyCutManager {
     });
 
     return {
-      flavour: model.flavour,
-      type: model.type,
+      flavour: flavour,
+      type: type,
       text: delta,
+      checked: model instanceof ListBlockModel ? model.checked : undefined,
       children: children,
     };
   }

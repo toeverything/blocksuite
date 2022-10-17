@@ -39,12 +39,11 @@ export class BaseBlockModel implements IBaseBlockProps {
     return children[0];
   }
 
-  lastChild() {
-    const children = this.children;
-    if (!children?.length) {
-      return null;
+  lastChild(): BaseBlockModel | null {
+    if (!this.children.length) {
+      return this;
     }
-    return children[children.length - 1];
+    return this.children[this.children.length - 1].lastChild();
   }
 
   block2html(
@@ -58,6 +57,11 @@ export class BaseBlockModel implements IBaseBlockProps {
     const text = delta.reduce((html: string, item: Record<string, unknown>) => {
       return html + this._deltaLeaf2Html(item);
     }, '');
+    return `${text}${childText}`;
+  }
+
+  block2Text(childText: string, begin?: number, end?: number) {
+    const text = (this.text?.toString() || '').slice(begin || 0, end);
     return `${text}${childText}`;
   }
 
@@ -84,6 +88,9 @@ export class BaseBlockModel implements IBaseBlockProps {
     }
     if (attributes.strikethrough) {
       return `<s>${text}</s>`;
+    }
+    if (attributes.link) {
+      return `<a href='${attributes.link}'>${text}</a>`;
     }
     return text;
   }

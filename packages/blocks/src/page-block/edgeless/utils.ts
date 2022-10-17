@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { BlockHost } from '@blocksuite/shared';
+import { BlockHost } from '../../__internal__';
 import { BaseBlockModel } from '@blocksuite/store';
 
 import type {

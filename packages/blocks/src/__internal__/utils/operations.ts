@@ -1,23 +1,30 @@
 import type { Quill } from 'quill';
-import { BaseBlockModel, Store, TextEntity } from '@blocksuite/store';
+import { BaseBlockModel, Store, Text } from '@blocksuite/store';
 
-import { BlockHost, Detail, SelectionPosition, SelectOptions } from './types';
+import { ExtendedModel } from './types';
+import { assertExists, noop } from './std';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
-import { Point, Rect } from './rect';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ExtendedModel = BaseBlockModel & Record<string, any>;
-
-export function createEvent<T extends keyof WindowEventMap>(
-  type: T,
-  detail: Detail<T>
-) {
-  return new CustomEvent<Detail<T>>(type, { detail });
-}
+import {
+  getStartModelBySelection,
+  getRichTextByModel,
+  getModelsByRange,
+  getDOMRectByLine,
+} from './query';
+import {
+  focusRichTextStart,
+  getCurrentRange,
+  isCollapsedSelection,
+  isMultiBlockRange,
+  isRangeSelection,
+} from './selection';
+import type { RichText } from '../rich-text/rich-text';
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {
-  setTimeout(() => store.richTextAdapters.get(id)?.quill.focus());
+  setTimeout(() => {
+    const adapter = store.richTextAdapters.get(id);
+    adapter?.quill.focus();
+  });
 }
 
 export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
@@ -50,7 +57,7 @@ export function handleBlockSplit(
   model: ExtendedModel,
   splitIndex: number
 ) {
-  if (!(model.text instanceof TextEntity)) return;
+  if (!(model.text instanceof Text)) return;
 
   const parent = store.getParent(model);
   if (!parent) return;
@@ -108,6 +115,128 @@ export function handleUnindent(store: Store, model: ExtendedModel) {
   store.addBlock(blockProps, grandParent, index + 1);
 }
 
+export function isCollapsedAtBlockStart(quill: Quill) {
+  return (
+    quill.getSelection(true)?.index === 0 && quill.getSelection()?.length === 0
+  );
+}
+
+function binarySearch(
+  quill: Quill,
+  target: DOMRect,
+  key: 'left' | 'right',
+  start: number,
+  end: number
+): number {
+  if (start === end) return start;
+
+  const mid = Math.floor((start + end) / 2);
+  if (target[key] < quill.getBounds(mid)[key]) {
+    return binarySearch(quill, target, key, start, mid);
+  }
+  if (target[key] > quill.getBounds(mid)[key]) {
+    return binarySearch(quill, target, key, mid + 1, end);
+  }
+  return mid;
+}
+
+function partialDeleteRichTextByRange(
+  richText: RichText,
+  range: Range,
+  lineType: 'first' | 'last'
+) {
+  const { quill } = richText;
+  const length = quill.getLength();
+  const rangeRects = range.getClientRects();
+  const target = getDOMRectByLine(rangeRects, lineType);
+
+  const key = lineType === 'first' ? 'left' : 'right';
+  const index = binarySearch(quill, target, key, 0, length - 1);
+  // quill length = model text length + 1
+  const modelIndex = index - 1;
+  const text = richText.model.text;
+  assertExists(text);
+
+  if (lineType === 'first') {
+    text.delete(modelIndex, text.length - modelIndex);
+  } else if (lineType === 'last') {
+    text.delete(0, modelIndex);
+  }
+}
+
+function deleteModelsByRange(
+  store: Store,
+  models: BaseBlockModel[],
+  range: Range
+) {
+  const first = models[0];
+  const last = models[models.length - 1];
+  const firstRichText = getRichTextByModel(first);
+  const lastRichText = getRichTextByModel(last);
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+
+  store.transact(() => {
+    partialDeleteRichTextByRange(firstRichText, range, 'first');
+    partialDeleteRichTextByRange(lastRichText, range, 'last');
+  });
+
+  // delete models in between
+  for (let i = 1; i < models.length - 1; i++) {
+    store.deleteBlock(models[i]);
+  }
+
+  focusRichTextStart(lastRichText);
+}
+
+export function handleBackspace(store: Store, e: KeyboardEvent) {
+  // workaround page title
+  if (e.target instanceof HTMLInputElement) return;
+
+  if (isCollapsedSelection()) {
+    const startModel = getStartModelBySelection();
+    const richText = getRichTextByModel(startModel);
+
+    if (richText) {
+      const { quill } = richText;
+      if (isCollapsedAtBlockStart(quill)) {
+        // use quill handler
+        noop();
+      }
+    }
+  } else if (isRangeSelection()) {
+    const range = getCurrentRange();
+    if (isMultiBlockRange(range)) {
+      e.preventDefault();
+      const intersectedModels = getModelsByRange(range);
+      deleteModelsByRange(store, intersectedModels, range);
+    }
+  }
+}
+
+export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
+  // workaround page title
+  if (e.target instanceof HTMLInputElement) return;
+
+  if (isRangeSelection()) {
+    const startModel = getStartModelBySelection();
+    const richText = getRichTextByModel(startModel);
+
+    if (richText) {
+      const { quill } = richText;
+      const range = quill.getSelection();
+      assertExists(range);
+
+      store.captureSync();
+      store.transact(() => {
+        const { index, length } = range;
+        const format = quill.getFormat(range);
+        startModel.text?.format(index, length, { [key]: !format[key] });
+      });
+    }
+  }
+}
+
 export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
@@ -120,7 +249,7 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
       if (previousSibling) {
         store.captureSync();
         store.transact(() => {
-          previousSibling.text?.join(model.text as TextEntity);
+          previousSibling.text?.join(model.text as Text);
         });
         store.deleteBlock(model);
         asyncFocusRichText(store, previousSibling.id);
@@ -264,167 +393,5 @@ export function convertToParagraph(
   } else if (model.flavour === 'paragraph' && model['type'] !== type) {
     store.captureSync();
     store.updateBlock(model, { type: type });
-  }
-}
-
-// We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
-// but only one bounding rect.
-// If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
-function isAtLineEdge(range: Range) {
-  if (
-    range.startOffset > 0 &&
-    Number(range.startContainer.textContent?.length) - range.startOffset > 0
-  ) {
-    const prevRange = range.cloneRange();
-    prevRange.setStart(range.startContainer, range.startOffset - 1);
-    prevRange.setEnd(range.startContainer, range.startOffset - 1);
-    const nextRange = range.cloneRange();
-    nextRange.setStart(range.endContainer, range.endOffset + 1);
-    nextRange.setEnd(range.endContainer, range.endOffset + 1);
-    return (
-      prevRange.getBoundingClientRect().top !==
-      nextRange.getBoundingClientRect().top
-    );
-  }
-  return false;
-}
-
-export function handleKeyUp(
-  model: ExtendedModel,
-  selectionManager: BlockHost['selection'],
-  editableContainer: Element
-) {
-  const selection = window.getSelection();
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { height, left, top } = range.getBoundingClientRect();
-    // if cursor is on the first line and has no text, height is 0
-    if (height === 0 && top === 0) {
-      const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      rect &&
-        selectionManager.activatePreviousBlock(
-          model.id,
-          new Point(rect.left, rect.top)
-        );
-      return PREVENT_DEFAULT;
-    }
-    // TODO resolve compatible problem
-    const newRange = document.caretRangeFromPoint(left, top - height / 2);
-    if (
-      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
-      selectionManager.activatePreviousBlock(model.id, new Point(left, top));
-      return PREVENT_DEFAULT;
-    }
-  }
-  return ALLOW_DEFAULT;
-}
-
-export function handleKeyDown(
-  model: ExtendedModel,
-  selectionManager: BlockHost['selection'],
-  textContainer: HTMLElement
-) {
-  const selection = window.getSelection();
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { bottom, left, height } = range.getBoundingClientRect();
-    // if cursor is on the last line and has no text, height is 0
-    if (height === 0 && bottom === 0) {
-      const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      rect &&
-        selectionManager.activateNextBlock(
-          model.id,
-          new Point(rect.left, rect.top)
-        );
-      return PREVENT_DEFAULT;
-    }
-    // TODO resolve compatible problem
-    const newRange = document.caretRangeFromPoint(left, bottom + height / 2);
-    if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      selectionManager.activateNextBlock(model.id, new Point(left, bottom));
-      return PREVENT_DEFAULT;
-    }
-    // if cursor is at the edge of a block, it may out of the textContainer after keydown
-    if (isAtLineEdge(range)) {
-      const {
-        height,
-        left,
-        bottom: nextBottom,
-      } = newRange.getBoundingClientRect();
-      const nextRange = document.caretRangeFromPoint(
-        left,
-        nextBottom + height / 2
-      );
-      if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
-        selectionManager.activateNextBlock(
-          model.id,
-          new Point(
-            newRange.startContainer.parentElement?.offsetLeft || left,
-            bottom
-          )
-        );
-        return PREVENT_DEFAULT;
-      }
-    }
-  }
-  return ALLOW_DEFAULT;
-}
-
-export function commonTextActiveHandler(
-  position: SelectionPosition,
-  editableContainer: Element
-) {
-  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
-  const lineHeight =
-    Number(
-      window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
-    ) || 16;
-  let range: Range | null = null;
-  if (position instanceof Point) {
-    const { x, y } = position;
-    let newTop = y;
-    let newLeft = x;
-    if (bottom <= y) {
-      newTop = bottom - lineHeight / 2;
-    }
-    if (top >= y) {
-      newTop = top + lineHeight / 2;
-    }
-    if (x < left) {
-      newLeft = left + 1;
-    }
-    if (x > right) {
-      newLeft = right - 1;
-    }
-    range = document.caretRangeFromPoint(newLeft, newTop);
-    const selection = window.getSelection();
-    selection?.removeAllRanges();
-    range && selection?.addRange(range);
-  }
-  if (position === 'start') {
-    range = document.caretRangeFromPoint(left, top + lineHeight / 2);
-  }
-  if (position === 'end') {
-    range = document.caretRangeFromPoint(right - 1, bottom - lineHeight / 2);
-  }
-  const selection = window.getSelection();
-  selection?.removeAllRanges();
-  range && selection?.addRange(range);
-}
-
-export function commonPassCursorHandler(
-  id: string,
-  selection: BlockHost['selection'],
-  selectOptions?: SelectOptions
-) {
-  if (selectOptions?.needFocus) {
-    const lastSelectionPosition = selection.lastSelectionPosition;
-    if (selectOptions?.from === 'next') {
-      selection.activatePreviousBlock(id, lastSelectionPosition);
-    } else {
-      selection.activateNextBlock(id, lastSelectionPosition);
-    }
   }
 }

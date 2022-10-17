@@ -2,19 +2,12 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
-  BlockSelectionInfo,
   CommonBlockElement,
   convertToList,
   createEvent,
-} from '@blocksuite/shared';
+} from '../__internal__';
 import { BaseBlockModel, Store } from '@blocksuite/store';
 import { GroupBlockModel } from '../group-block';
-
-const getInitType = () => {
-  const params = new URLSearchParams(location.search);
-  const initType = params.get('init') || 'default';
-  return initType;
-};
 
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
@@ -35,23 +28,14 @@ export class DebugMenu extends LitElement {
   canRedo = false;
 
   @state()
-  canDelete = false;
-
-  @state()
   _mode: 'page' | 'edgeless' = 'page';
-
-  private get _selection() {
-    const page = document.querySelector('default-page-block');
-    if (!page) throw new Error('No page block');
-    return page.selection;
-  }
 
   private _onToggleConnection() {
     if (this.connected === true) {
-      this.store.provider.disconnect();
+      this.store.provider?.disconnect();
       this.connected = false;
     } else {
-      this.store.provider.connect();
+      this.store.provider?.connect();
       this.connected = true;
     }
   }
@@ -69,10 +53,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _onDelete() {
-    const selectionInfo = this._selection.selectionInfo;
-    if (selectionInfo.type !== 'Block') return;
-
-    selectionInfo.blocks.forEach(({ id }) => this.store.deleteBlockById(id));
+    // TODO delete selected block from menu
   }
 
   private _onSetParagraphType(type: string) {
@@ -117,28 +98,10 @@ export class DebugMenu extends LitElement {
     this.contentParser.onExportMarkdown();
   }
 
-  private _handleDebugInit() {
-    if (getInitType() === 'list') {
-      const pageId = this.store.addBlock({ flavour: 'page' });
-      const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
-      for (let i = 0; i < 3; i++) {
-        this.store.addBlock({ flavour: 'list' }, groupId);
-      }
-    }
-  }
-
   firstUpdated() {
     this.store.slots.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
       this.canRedo = this.store.canRedo;
-    });
-
-    requestAnimationFrame(() => {
-      this._selection.onSelectionChange(selectionInfo => {
-        this.canDelete =
-          (selectionInfo as BlockSelectionInfo)?.blocks?.length !== undefined;
-      });
-      this._handleDebugInit();
     });
   }
 
@@ -253,14 +216,16 @@ export class DebugMenu extends LitElement {
         >
           1️⃣
         </button>
+        <!--
         <button
           aria-label="delete"
           title="delete"
-          .disabled=${!this.canDelete}
+          disabled
           @click=${this._onDelete}
         >
           ❌
         </button>
+        -->
         <button
           aria-label=${this.connected ? 'disconnect' : 'connect'}
           title=${this.connected ? 'disconnect' : 'connect'}

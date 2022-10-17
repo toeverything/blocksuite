@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { Awareness } from 'y-protocols/awareness.js';
+import type { Awareness } from 'y-protocols/awareness.js';
 import { RelativePosition } from 'yjs';
 import type { Store } from './store';
 import { Slot } from './utils/slot';
@@ -35,9 +35,9 @@ export class AwarenessAdapter {
     update: new Slot<AwarenessMessage>(),
   };
 
-  constructor(store: Store) {
+  constructor(store: Store, awareness: Awareness) {
     this.store = store;
-    this.awareness = store.provider.awareness;
+    this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
     this.slots.update.on(this._onAwarenessMessage);
   }

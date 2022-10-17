@@ -11,7 +11,7 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {},
-      external: 'yjs',
+      external: ['yjs', '@blocksuite/store'],
     },
   },
 });

@@ -1,11 +1,12 @@
 import { Page } from '@playwright/test';
+import type { Store } from '../../packages/store';
 
 export const IS_MAC = process.platform === 'darwin';
 export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
 const NEXT_FRAME_TIMEOUT = 50;
-const DEFAULT_PLAYGROUNT = 'http://localhost:5173/';
+const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 
 function generateRandomRoomId() {
@@ -16,7 +17,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
     room = generateRandomRoomId();
   }
-  await page.goto(`${DEFAULT_PLAYGROUNT}?room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
   return room;
 }
 
@@ -34,8 +35,16 @@ export async function clearLog(page: Page) {
 
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUNT}?init=list&room=${room}`);
-  await waitNextFrame(page);
+  await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}`);
+  await page.evaluate(() => {
+    // @ts-ignore
+    const store = window['store'] as Store;
+    const pageId = store.addBlock({ flavour: 'page' });
+    const groupId = store.addBlock({ flavour: 'group' }, pageId);
+    for (let i = 0; i < 3; i++) {
+      store.addBlock({ flavour: 'list' }, groupId);
+    }
+  });
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -68,12 +77,6 @@ export async function focusLine(page: Page, line = 0, end = true) {
   if (end) {
     await page.keyboard.press('End');
   }
-}
-
-export async function blurRichText(page: Page) {
-  await page.mouse.move(0, 0);
-  const locator = page.locator('.affine-editor-container');
-  await locator.click();
 }
 
 async function keyDownCtrlOrMeta(page: Page) {
@@ -109,8 +112,7 @@ export async function redoByKeyboard(page: Page) {
 export async function selectAllByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('a');
-  await page.keyboard.up('a');
-  await keyDownCtrlOrMeta(page);
+  await keyUpCtrlOrMeta(page);
 }
 export async function pressEnter(page: Page) {
   // avoid flaky test by simulate real user input
@@ -192,48 +194,42 @@ export async function switchMode(page: Page) {
 
 export async function getQuillSelectionIndex(page: Page) {
   return await page.evaluate(() => {
-    const selection = document.getSelection();
-    if (selection) {
-      const range = selection.getRangeAt(0);
-      const component =
-        range.startContainer.parentElement?.closest('rich-text');
-      // @ts-ignore
-      const index = component._quill?.getSelection()?.index;
-      return index !== undefined ? index : -1;
-    }
-    return -1;
+    const selection = window.getSelection() as Selection;
+
+    const range = selection.getRangeAt(0);
+    const component = range.startContainer.parentElement?.closest('rich-text');
+    // @ts-ignore
+    const index = component.quill?.getSelection()?.index;
+    return index !== undefined ? index : -1;
   });
 }
 
 export async function getQuillSelectionText(page: Page) {
   return await page.evaluate(() => {
-    const selection = document.getSelection();
-    if (selection) {
-      const range = selection.getRangeAt(0);
-      const component =
-        range.startContainer.parentElement?.closest('rich-text');
-      // @ts-ignore
-      return component._quill?.getText() || '';
-    }
-    return '';
+    const selection = window.getSelection() as Selection;
+    const range = selection.getRangeAt(0);
+    const component = range.startContainer.parentElement?.closest('rich-text');
+    // @ts-ignore
+    return component.quill?.getText() || '';
   });
 }
 
-export async function getCursorBlockIdAndHeight(page: Page) {
+export async function getCursorBlockIdAndHeight(
+  page: Page
+): Promise<[string | null, number | null]> {
   return await page.evaluate(() => {
-    const selection = document.getSelection();
-    if (selection) {
-      const block =
-        selection.anchorNode?.parentElement?.closest(`[data-block-id]`);
-      if (block) {
-        const id = block?.getAttribute('data-block-id');
-        const height = block.getBoundingClientRect().height;
-        if (id) {
-          return [id, height];
-        }
-      }
-    }
-    return [null, null];
+    const selection = window.getSelection() as Selection;
+
+    const range = selection.getRangeAt(0);
+    const startContainer =
+      range.startContainer instanceof Text
+        ? (range.startContainer.parentElement as HTMLElement)
+        : (range.startContainer as HTMLElement);
+
+    const startComponent = startContainer.closest(`[data-block-id]`);
+    const { height } = (startComponent as HTMLElement).getBoundingClientRect();
+    const id = (startComponent as HTMLElement).getAttribute('data-block-id');
+    return [id, height];
   });
 }
 
@@ -257,6 +253,7 @@ export async function fillLine(page: Page, toNext = false) {
   }
 }
 
+/*
 export async function selectAll(page: Page) {
   await page.evaluate(() => {
     return document
@@ -264,6 +261,7 @@ export async function selectAll(page: Page) {
       ?.selection.selectAllBlocks();
   });
 }
+*/
 
 //TODO: improve this function
 export async function isMac(page: Page) {
