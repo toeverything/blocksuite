@@ -15,7 +15,8 @@ export class PageBlockModel extends BaseBlockModel {
     begin?: number,
     end?: number
   ) {
-    return `<div>${this.title}${childText}</div>`;
+    // When the page is exported, the title is not necessary exported
+    return `${childText}`;
   }
 
   override block2Text(childText: string, begin?: number, end?: number) {
