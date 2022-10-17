@@ -68,9 +68,25 @@ function isAtBlockEnd(quill: Quill) {
 }
 
 export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
-  function markdownMatch(this: KeyboardEventThis) {
-    Shortcuts.match(this.quill, model);
+  function enterMarkdownMatch(
+    this: KeyboardEventThis,
+    range: QuillRange,
+    context: BindingContext
+  ) {
+    const { prefix } = context;
+    Shortcuts.match(this.quill, model, prefix);
     return ALLOW_DEFAULT;
+  }
+
+  function spaceMarkdownMatch(
+    this: KeyboardEventThis,
+    range: QuillRange,
+    context: BindingContext
+  ) {
+    const { prefix } = context;
+    return Shortcuts.match(this.quill, model, prefix)
+      ? PREVENT_DEFAULT
+      : ALLOW_DEFAULT;
   }
 
   function hardEnter(this: KeyboardEventThis) {
@@ -161,11 +177,11 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   const keyboardBindings: KeyboardBindings = {
     enterMarkdownMatch: {
       key: 'enter',
-      handler: markdownMatch,
+      handler: enterMarkdownMatch,
     },
     spaceMarkdownMatch: {
       key: ' ',
-      handler: markdownMatch,
+      handler: spaceMarkdownMatch,
     },
     hardEnter: {
       key: 'enter',
