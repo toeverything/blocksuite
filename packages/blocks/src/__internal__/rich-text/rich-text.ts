@@ -5,7 +5,6 @@ import QuillCursors from 'quill-cursors';
 import { BlockHost } from '../utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { createKeyboardBindings } from './keyboard';
-import { createLink } from './link-node';
 
 import style from './styles.css';
 
