@@ -1,6 +1,13 @@
 import TurndownService from 'turndown';
 
 const FileExporter = {
+  injectHtmlCss: () => {
+    return `
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
+    </style>
+    `;
+  },
   exportFile: (filename: string, text: string, format: string) => {
     const element = document.createElement('a');
     element.setAttribute(
@@ -17,18 +24,17 @@ const FileExporter = {
     document.body.removeChild(element);
   },
   decorateHtml: (pageTitle: string, htmlContent: string) => {
+    const htmlCss = FileExporter.injectHtmlCss();
     return `<!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset="UTF-8">
           <title>${pageTitle}</title>
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+          ${htmlCss}
         </head>
         <body>
-            <div style="margin:20px auto;width:800px" >
-               <div style="background-color: #fff;box-shadow: 0px 0px 5px #ccc;padding: 10px;">
+            <div style="margin:0 auto;width:720px" >
                  ${htmlContent}
-               </div>
             </div>
         </body>
         </html>`;
