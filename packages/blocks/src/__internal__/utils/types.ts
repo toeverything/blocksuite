@@ -11,34 +11,11 @@ export type SelectionOptions = {
 /** Common context interface definition for block models. */
 export interface BlockHost {
   store: Store;
-
-  selection: {
-    addBlockSelectedListener: (
-      blockId: string,
-      handler: (selectionInfo?: SelectionOptions) => void
-    ) => void;
-    removeBlockSelectedListener: (blockId: string) => void;
-    activatePreviousBlock: (
-      blockId: string,
-      position?: SelectionPosition
-    ) => void;
-    activateNextBlock: (blockId: string, position?: SelectionPosition) => void;
-    selectAllBlocks: () => void;
-    selectionInfo: SelectionInfo;
-    lastSelectionPosition: SelectionPosition;
-  };
 }
 
 export interface CommonBlockElement extends HTMLElement {
   host: BlockHost;
   model: BaseBlockModel;
-}
-
-export interface SelectedBlock {
-  id: string;
-  startPos?: number;
-  endPos?: number;
-  children: SelectedBlock[];
 }
 
 interface NoneSelectionInfo {
@@ -60,6 +37,16 @@ interface RangeSelectionInfo {
   anchorBlockPosition: number | null;
   focusBlockPosition: number | null;
 }
+
+export interface SelectedBlock {
+  id: string;
+  startPos?: number;
+  endPos?: number;
+  children: SelectedBlock[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ExtendedModel = BaseBlockModel & Record<string, any>;
 
 export interface BlockSelectionInfo {
   type: 'Block';

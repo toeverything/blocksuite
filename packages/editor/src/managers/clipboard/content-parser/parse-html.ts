@@ -13,31 +13,74 @@ export class ParserHtml {
       this._nodePaser.bind(this)
     );
     this._contentParser.registerParserHtmlText2Block(
-      'textParser',
-      this._textPaser.bind(this)
-    );
-    this._contentParser.registerParserHtmlText2Block(
       'commonParser',
       this._commonParser.bind(this)
     );
+    this._contentParser.registerParserHtmlText2Block(
+      'listItemParser',
+      this._listItemParser.bind(this)
+    );
   }
-
+  // TODO parse children block
   private _nodePaser(node: Element): OpenBlockInfo[] | null {
+    let result;
+    // custom parser
+    result =
+      this._contentParser.getParserHtmlText2Block('customNodeParser')?.(node);
+    if (result && result.length > 0) {
+      return result;
+    }
+
     if (node.nodeType === 3) {
-      return this._contentParser.getParserHtmlText2Block('textParser')(node);
+      return this._contentParser.getParserHtmlText2Block('commonParser')?.({
+        element: node,
+        flavour: 'paragraph',
+        type: 'text',
+      });
     }
     if (node.nodeType !== 1) {
       return [];
     }
     const tagName = node.tagName;
-    let result;
-    if (['DIV', 'P', 'B', 'A', 'EM', 'U', 'S', 'DEL'].includes(tagName)) {
-      result = this._contentParser.getParserHtmlText2Block('textParser')(node);
+
+    switch (tagName) {
+      case 'H1':
+      case 'H2':
+      case 'H3':
+      case 'H4':
+      case 'H5':
+      case 'H6':
+        result = this._contentParser.getParserHtmlText2Block('commonParser')?.({
+          element: node,
+          flavour: 'paragraph',
+          type: tagName.toLowerCase(),
+        });
+        break;
+      case 'DIV':
+      case 'P':
+      case 'B':
+      case 'A':
+      case 'EM':
+      case 'U':
+      case 'S':
+      case 'DEL':
+        result = this._contentParser.getParserHtmlText2Block('commonParser')?.({
+          element: node,
+          flavour: 'paragraph',
+          type: 'text',
+        });
+        break;
+      case 'LI':
+        result =
+          this._contentParser.getParserHtmlText2Block('listItemParser')?.(node);
+        break;
+      default:
+        break;
     }
     if (result && result.length > 0) {
       return result;
     }
-    return Array.from(node.childNodes)
+    return Array.from(node.children)
       .map(childElement => {
         const clipBlockInfos =
           this._contentParser.getParserHtmlText2Block('nodeParser')?.(
@@ -55,59 +98,86 @@ export class ParserHtml {
 
   private _commonParser({
     element,
-    tagName,
     flavour,
     type,
+    checked,
     ignoreEmptyElement = true,
   }: {
     element: Element;
-    tagName: string | string[];
     flavour: string;
     type: string;
+    checked?: boolean;
     ignoreEmptyElement?: boolean;
   }): OpenBlockInfo[] | null {
-    const tagNames = typeof tagName === 'string' ? [tagName] : tagName;
-    if (tagNames.includes(element.tagName)) {
-      const res = this._commonHTML2Block(
-        element,
-        flavour,
-        type,
-        ignoreEmptyElement
-      );
-      return res ? [res] : null;
-    }
-    return null;
-  }
-
-  private _textPaser(element: Element): OpenBlockInfo[] | null {
-    return this._contentParser.getParserHtmlText2Block('commonParser')?.({
+    const res = this._commonHTML2Block(
       element,
-      flavour: 'paragraph',
-      type: 'text',
-      tagName: ['DIV', 'P', 'B', 'A', 'EM', 'U', 'S', 'DEL'],
-    });
+      flavour,
+      type,
+      checked,
+      ignoreEmptyElement
+    );
+    return res ? [res] : null;
   }
 
   private _commonHTML2Block(
-    element: HTMLElement | Node,
+    element: Element,
     flavour: string,
     type: string,
+    checked?: boolean,
     ignoreEmptyElement = true
   ): OpenBlockInfo | null {
-    const textValue = this._commonHTML2Text(element, {}, ignoreEmptyElement);
-    if (!textValue.length && ignoreEmptyElement) {
-      return null;
+    const childNodes = element.children;
+    let isChildNode = false;
+    const textValues = [];
+    const children = [];
+    for (let i = 0; i < childNodes.length; i++) {
+      const node = childNodes.item(i);
+      if (!node) continue;
+      if (!isChildNode) {
+        if (node instanceof Text) {
+          textValues.push(
+            ...this._commonHTML2Text(node, {}, ignoreEmptyElement)
+          );
+          continue;
+        }
+        const htmlElement = node as HTMLElement;
+        if (
+          [
+            'DEL',
+            'STRONG',
+            'B',
+            'EM',
+            'I',
+            'U',
+            'S',
+            'P',
+            'SPAN',
+            'A',
+            'INPUT',
+          ].includes(htmlElement.tagName)
+        ) {
+          textValues.push(
+            ...this._commonHTML2Text(node, {}, ignoreEmptyElement)
+          );
+          continue;
+        }
+      }
+      const childNode = this._nodePaser(node as Element);
+      childNode && children.push(...childNode);
+      isChildNode = true;
     }
+
     return {
       flavour: flavour,
       type: type,
-      text: textValue,
-      children: [],
+      checked: checked,
+      text: textValues,
+      children: children,
     };
   }
 
   private _commonHTML2Text(
-    element: HTMLElement | Node,
+    element: Element | Node,
     textStyle: { [key: string]: unknown } = {},
     ignoreEmptyText = true
   ) {
@@ -178,6 +248,30 @@ export class ParserHtml {
     // }
     return childTexts;
   }
+
+  private _listItemParser(element: HTMLElement): OpenBlockInfo[] | null {
+    const tagName = element.parentElement?.tagName;
+    let type = tagName === 'OL' ? 'numbered' : 'bulleted';
+    let checked;
+    let inputEl;
+    if (
+      (inputEl = element.firstElementChild)?.tagName === 'INPUT' ||
+      (inputEl = element.firstElementChild?.firstElementChild)?.tagName ===
+        'INPUT'
+    ) {
+      type = 'todo';
+      checked = inputEl?.getAttribute('checked') !== null;
+    }
+    const result = this._contentParser.getParserHtmlText2Block(
+      'commonParser'
+    )?.({
+      element: element,
+      flavour: 'list',
+      type: type,
+      checked: checked,
+    });
+    return result;
+  }
 }
 
 const getIsLink = (htmlElement: HTMLElement) => {
@@ -237,7 +331,7 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     (style['text-decoration'] &&
       style['text-decoration'].indexOf('line-through') !== -1)
   ) {
-    textStyle['strikethrough'] = true;
+    textStyle['strike'] = true;
   }
 
   return textStyle;

@@ -4,3 +4,7 @@ export * from './operations';
 export * from './rect';
 export * from './hotkey';
 export * from './query';
+export * from './components';
+export * from './gesture';
+export * from './selection';
+export * from './std';

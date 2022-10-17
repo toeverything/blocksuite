@@ -76,7 +76,7 @@ export async function assertSelection(
     ({ richTextIndex }) => {
       const quill =
         // @ts-ignore
-        document.querySelectorAll('rich-text')[richTextIndex]?._quill!;
+        document.querySelectorAll('rich-text')[richTextIndex]?.quill!;
       return quill.getSelection();
     },
     { richTextIndex }
@@ -84,16 +84,16 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-// @ts-ignore
 export async function assertTextFormat(page: Page, resultObj: unknown) {
   const actual = await page.evaluate(() => {
     // @ts-ignore
-    const quill = document.querySelectorAll('rich-text')[0]?._quill!;
+    const quill = document.querySelectorAll('rich-text')[0]?.quill!;
     return quill.getFormat();
   });
   expect(actual).toEqual(resultObj);
 }
 
+/*
 export async function assertSelectedBlockCount(page: Page, expected: number) {
   const actual = await page.evaluate(() => {
     const selectionInfo =
@@ -106,6 +106,7 @@ export async function assertSelectedBlockCount(page: Page, expected: number) {
   });
   expect(actual).toBe(expected);
 }
+*/
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>
@@ -167,7 +168,11 @@ export async function assertTextContent(
   await expect(locator).toHaveText(text);
 }
 
-export async function assertBlockType(page: Page, id: string, type: string) {
+export async function assertBlockType(
+  page: Page,
+  id: string | number | null,
+  type: string
+) {
   const actual = await page.evaluate(
     ({ id }) => {
       const element = document.querySelector(`[data-block-id="${id}"]`);

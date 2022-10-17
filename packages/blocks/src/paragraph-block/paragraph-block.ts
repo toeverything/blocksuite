@@ -1,10 +1,6 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import {
-  BLOCK_ID_ATTR,
-  commonTextActiveHandler,
-  type BlockHost,
-} from '@blocksuite/shared';
+import { customElement, property } from 'lit/decorators.js';
+import { BLOCK_ID_ATTR, type BlockHost } from '../__internal__';
 import type { ParagraphBlockModel } from './paragraph-model';
 
 import { BlockChildrenContainer } from '../__internal__';
@@ -25,60 +21,24 @@ export class ParagraphBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
-  @state()
-  selected = false;
-
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }
 
   firstUpdated() {
-    this.host.selection.addBlockSelectedListener(
-      this.model.id,
-      selectionOptions => {
-        const selectionInfo = this.host.selection.selectionInfo;
-        if (selectionInfo.type === 'Block') {
-          this.selected = selectionInfo.blocks.some(
-            block => block.id === this.model.id
-          );
-        }
-        if (this.selected && selectionInfo.type !== 'Block') {
-          this.selected = false;
-        }
-        if (selectionOptions?.needFocus) {
-          const editableContainer = this.querySelector('[contenteditable]');
-          if (editableContainer) {
-            commonTextActiveHandler(
-              this.host.selection.lastSelectionPosition,
-              editableContainer
-            );
-          }
-        }
-      }
-    );
-
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  disconnectedCallback() {
-    this.host.selection.removeBlockSelectedListener(this.model.id);
-  }
-
   render() {
-    const { type } = this.model;
-
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
+    const { type } = this.model;
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
 
     return html`
-      <div
-        class="affine-paragraph-block-container ${type} ${this.selected
-          ? 'selected'
-          : ''}"
-      >
+      <div class="affine-paragraph-block-container ${type}">
         <rich-text .host=${this.host} .model=${this.model}></rich-text>
         ${childrenContainer}
       </div>

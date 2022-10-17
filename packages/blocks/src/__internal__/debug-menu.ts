@@ -2,11 +2,10 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
-  BlockSelectionInfo,
   CommonBlockElement,
   convertToList,
   createEvent,
-} from '@blocksuite/shared';
+} from '../__internal__';
 import { BaseBlockModel, Store } from '@blocksuite/store';
 import { GroupBlockModel } from '../group-block';
 
@@ -29,16 +28,7 @@ export class DebugMenu extends LitElement {
   canRedo = false;
 
   @state()
-  canDelete = false;
-
-  @state()
   _mode: 'page' | 'edgeless' = 'page';
-
-  private get _selection() {
-    const page = document.querySelector('default-page-block');
-    if (!page) throw new Error('No page block');
-    return page.selection;
-  }
 
   private _onToggleConnection() {
     if (this.connected === true) {
@@ -59,14 +49,11 @@ export class DebugMenu extends LitElement {
     const store = block.host.store as Store;
     // @ts-ignore
     const model = store.getBlockById(block.model.id) as BaseBlockModel;
-    convertToList(this.store, model, listType);
+    convertToList(this.store, model, listType, '');
   }
 
   private _onDelete() {
-    const selectionInfo = this._selection.selectionInfo;
-    if (selectionInfo.type !== 'Block') return;
-
-    selectionInfo.blocks.forEach(({ id }) => this.store.deleteBlockById(id));
+    // TODO delete selected block from menu
   }
 
   private _onSetParagraphType(type: string) {
@@ -115,13 +102,6 @@ export class DebugMenu extends LitElement {
     this.store.slots.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
       this.canRedo = this.store.canRedo;
-    });
-
-    requestAnimationFrame(() => {
-      this._selection.onSelectionChange(selectionInfo => {
-        this.canDelete =
-          (selectionInfo as BlockSelectionInfo)?.blocks?.length !== undefined;
-      });
     });
   }
 
@@ -236,14 +216,16 @@ export class DebugMenu extends LitElement {
         >
           1️⃣
         </button>
+        <!--
         <button
           aria-label="delete"
           title="delete"
-          .disabled=${!this.canDelete}
+          disabled
           @click=${this._onDelete}
         >
           ❌
         </button>
+        -->
         <button
           aria-label=${this.connected ? 'disconnect' : 'connect'}
           title=${this.connected ? 'disconnect' : 'connect'}

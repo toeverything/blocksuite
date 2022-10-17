@@ -1,6 +1,10 @@
+import type { BaseBlockModel, Store } from '@blocksuite/store';
+import { Quill, type RangeStatic } from 'quill';
 import {
   ALLOW_DEFAULT,
-  BlockHost,
+  focusNextBlock,
+  focusPreviousBlock,
+  getCurrentRange,
   handleBlockEndEnter,
   handleBlockSplit,
   handleIndent,
@@ -9,12 +13,13 @@ import {
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
+  isCollapsedAtBlockStart,
+  isMultiBlockRange,
+  noop,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
-} from '@blocksuite/shared';
+} from '../utils';
 import { Shortcuts } from './shortcuts';
-import type { BaseBlockModel, Store } from '@blocksuite/store';
-import { Quill, type RangeStatic } from 'quill';
 
 interface QuillRange {
   index: number;
@@ -62,25 +67,7 @@ function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
 }
 
-function isAtBlockStart(quill: Quill) {
-  return quill.getSelection(true)?.index === 0;
-}
-
-export const createKeyboardBindings = (
-  store: Store,
-  model: BaseBlockModel,
-  selectionManager: BlockHost['selection']
-) => {
-  function undo() {
-    store.undo();
-    return PREVENT_DEFAULT;
-  }
-
-  function redo() {
-    store.redo();
-    return PREVENT_DEFAULT;
-  }
-
+export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   function markdownMatch(this: KeyboardEventThis) {
     Shortcuts.match(this.quill, model);
     return ALLOW_DEFAULT;
@@ -118,21 +105,22 @@ export const createKeyboardBindings = (
 
   function keyUp(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
-      return handleKeyUp(model, selectionManager, this.quill.root);
+      return handleKeyUp(model, this.quill.root);
     }
     return ALLOW_DEFAULT;
   }
 
   function keyDown(this: KeyboardEventThis, range: QuillRange) {
     if (range.index >= 0) {
-      return handleKeyDown(model, selectionManager, this.quill.root);
+      return handleKeyDown(model, this.quill.root);
     }
     return ALLOW_DEFAULT;
   }
 
   function keyLeft(this: KeyboardEventThis, range: QuillRange) {
-    if (range.index === 0) {
-      selectionManager.activatePreviousBlock(model.id, 'end');
+    // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
+    if (range.index === 0 && range.length === 0) {
+      focusPreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
@@ -141,7 +129,7 @@ export const createKeyboardBindings = (
   function keyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + 1 === textLength) {
-      selectionManager.activateNextBlock(model.id, 'start');
+      focusNextBlock(model, 'start');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
@@ -158,37 +146,19 @@ export const createKeyboardBindings = (
   }
 
   function backspace(this: KeyboardEventThis) {
-    if (isAtBlockStart(this.quill)) {
+    // To workaround uncontrolled behavior when deleting character at block start,
+    // in this case backspace should be handled in quill.
+    if (isCollapsedAtBlockStart(this.quill)) {
       handleLineStartBackspace(store, model);
       return PREVENT_DEFAULT;
+    } else if (isMultiBlockRange(getCurrentRange())) {
+      // return PREVENT_DEFAULT;
+      noop();
     }
-
-    return ALLOW_DEFAULT;
-  }
-
-  // scend selectAll should select all blocks
-  let _firstSelectAll = true;
-
-  function selectAll(this: KeyboardEventThis) {
-    if (!_firstSelectAll) {
-      selectionManager.selectAllBlocks();
-    }
-    _firstSelectAll = false;
     return ALLOW_DEFAULT;
   }
 
   const keyboardBindings: KeyboardBindings = {
-    undo: {
-      key: 'z',
-      shortKey: true,
-      handler: undo,
-    },
-    redo: {
-      key: 'z',
-      shiftKey: true,
-      shortKey: true,
-      handler: redo,
-    },
     enterMarkdownMatch: {
       key: 'enter',
       handler: markdownMatch,
@@ -218,7 +188,7 @@ export const createKeyboardBindings = (
     // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
     'list autofill': {
       key: ' ',
-      prefix: /^\s*?(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6})|>$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
       handler: space,
     },
     backspace: {
@@ -245,12 +215,7 @@ export const createKeyboardBindings = (
       shiftKey: false,
       handler: keyRight,
     },
-    selectAll: {
-      key: 'a',
-      shortKey: true,
-      handler: selectAll,
-    },
   };
 
   return keyboardBindings;
-};
+}
