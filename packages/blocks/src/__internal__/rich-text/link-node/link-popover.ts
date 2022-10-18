@@ -1,110 +1,128 @@
-const createEditLinkElement = (
-  anchorEl: HTMLElement,
-  container: HTMLElement,
-  { showMask, preview }: { showMask: boolean; preview: string }
-) => {
-  const rect = anchorEl.getBoundingClientRect();
-  const bodyRect = document.body.getBoundingClientRect();
-  const offset = rect.top - bodyRect.top + rect.height;
+import { css, html, LitElement } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
-  const ele = document.createElement('edit-link-panel');
-  ele.left = `${(rect.left + rect.right) / 2}px`;
-  ele.top = `${offset}px`;
-  ele.showMask = showMask;
-  ele.preview = preview;
-  container.appendChild(ele);
-  return ele;
-};
+@customElement('edit-link-panel')
+export class LinkPopover extends LitElement {
+  static styles = css`
+    .overlay-mask {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
 
-const bindHoverState = (
-  target: HTMLElement,
-  popover: HTMLElement,
-  controller: AbortController
-) => {
-  // TODO export as options
-  const hoverCloseDelay = 300;
-  let timer: number | undefined;
+    .edit-link-panel {
+      display: flex;
+    }
+  `;
 
-  const handleMouseEnter = (e: MouseEvent) => {
-    clearTimeout(timer);
-  };
+  @property()
+  left = '0px';
 
-  const handleMouseLeave = (e: MouseEvent) => {
-    // we want to leave the popover open
-    // if the mouse entered the popover immediately
-    // after leaving the target (or vice versa).
-    timer = window.setTimeout(() => {
-      controller.abort();
-    }, hoverCloseDelay);
-  };
+  @property()
+  top = '0px';
 
-  target.addEventListener('mouseover', handleMouseEnter);
-  target.addEventListener('mouseout', handleMouseLeave);
+  @property()
+  showMask = true;
 
-  popover.addEventListener('mouseover', handleMouseEnter);
-  popover.addEventListener('mouseout', handleMouseLeave);
-};
+  @property()
+  preview = '';
 
-type LinkState =
-  | { type: 'cancel' }
-  | { type: 'confirm'; link: string }
-  | { type: 'remove' };
+  @state()
+  link = '';
 
-export const showLinkPopover = async ({
-  anchorEl,
-  container = document.body,
-  preview = '',
-  showMask = true,
-  interactionKind = 'always',
-  signal = new AbortController(),
-}: {
-  anchorEl: HTMLElement;
-  container?: HTMLElement;
-  preview?: string;
-  /**
-   * Whether to show a mask behind the popover.
-   */
-  showMask?: boolean;
-  /**
-   * Whether to show the popover on hover or always.
-   */
-  interactionKind?: 'always' | 'hover';
-  signal?: AbortController;
-}): Promise<LinkState> => {
-  if (!anchorEl) {
-    throw new Error("Can't show tooltip without anchor element!");
-  }
-  if (signal.signal.aborted) {
-    return Promise.resolve({ type: 'cancel' });
+  @state()
+  bodyOverflowStyle = '';
+
+  @query('input')
+  input: HTMLInputElement | undefined;
+
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.showMask) {
+      // Disable body scroll
+      this.bodyOverflowStyle = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
   }
 
-  const editLinkEle = createEditLinkElement(anchorEl, container, {
-    showMask,
-    preview,
-  });
-
-  if (interactionKind === 'hover') {
-    bindHoverState(anchorEl, editLinkEle, signal);
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.showMask) {
+      // Restore body scroll style
+      document.body.style.overflow = this.bodyOverflowStyle;
+    }
   }
 
-  return new Promise(res => {
-    signal.signal.addEventListener('abort', () => {
-      editLinkEle.remove();
-      res({ type: 'cancel' });
-    });
+  private hide() {
+    this.dispatchEvent(
+      new CustomEvent<ConfirmDetail>('confirm', { detail: { link: null } })
+    );
+  }
 
-    editLinkEle.addEventListener('confirm', e => {
-      if (signal.signal.aborted) {
-        return;
-      }
+  private confirm() {
+    const link = this.input?.value?.trim() ?? null;
+    if (!link) {
+      // TODO invalid link checking
+      return;
+    }
+    const options = {
+      detail: { link },
+    };
+    this.dispatchEvent(new CustomEvent<ConfirmDetail>('confirm', options));
+    return;
+  }
 
-      editLinkEle.remove();
-      const link = e.detail.link;
-      if (!link) {
-        res({ type: 'cancel' });
-        return;
-      }
-      res({ type: 'confirm', link });
-    });
-  });
-};
+  private onKeyup(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      this.confirm();
+    }
+    this.link = (e.target as HTMLInputElement).value;
+    return;
+  }
+
+  render() {
+    const mask = this.showMask
+      ? html`<div class="overlay-mask" @click="${this.hide}"></div>`
+      : html``;
+    return html`
+      <div class="overlay-root">
+        ${mask}
+        <div
+          class="overlay-container"
+          style="position: absolute; left: ${this.left}; top: ${this.top};"
+        >
+          <div class="edit-link-panel">
+            <input
+              class="edit-link-panel-input"
+              autofocus
+              type="text"
+              spellcheck="false"
+              placeholder="Paste or type a link"
+              value="${this.preview}"
+              @keyup="${this.onKeyup}"
+            />
+            <div class="edit-link-panel-btn-container">
+              <button @click="${this.confirm}">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edit-link-panel': LinkPopover;
+  }
+}
+
+type ConfirmDetail = { link: string | null };
+
+declare global {
+  interface HTMLElementEventMap {
+    confirm: CustomEvent<ConfirmDetail>;
+  }
+}
