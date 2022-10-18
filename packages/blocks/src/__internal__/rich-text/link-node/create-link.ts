@@ -35,14 +35,6 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
     // TODO maybe allow user creating a link with text
     return;
   }
-
-  // TODO maybe user can cancel link by pressing shortcut again
-  // const format = quill.getFormat(range);
-  // if (format?.link) {
-  //   quill.format('link', false);
-  //   return;
-  // }
-
   const startModel = getStartModelBySelection();
   const richText = getRichTextByModel(startModel);
   if (!richText) {
@@ -52,6 +44,17 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   const range = quill.getSelection();
   // TODO fix selection with multiple lines
   assertExists(range);
+
+  // User can cancel link by pressing shortcut again
+  const format = quill.getFormat(range);
+  if (format?.link) {
+    store.captureSync();
+    store.transact(() => {
+      const { index, length } = range;
+      startModel.text?.format(index, length, { link: false });
+    });
+    return;
+  }
 
   // Note: Just mock a selection style, this operation should not be recorded to store
   quill.format('mock-select', true);
@@ -87,24 +90,45 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   }
 };
 
-const showCreateLinkTooltip = async ({
+export const showCreateLinkTooltip = async ({
   anchorEl,
   container = document.body,
+  signal = new AbortSignal(),
+  showMask = true,
 }: {
   anchorEl: HTMLElement;
   container?: HTMLElement;
+  signal?: AbortSignal;
+  showMask?: boolean;
 }) => {
-  const ele = document.createElement('edit-link-panel');
+  if (!anchorEl) {
+    throw new Error("Can't show tooltip without anchor element!");
+  }
+  if (signal.aborted) {
+    return;
+  }
+
   const rect = anchorEl.getBoundingClientRect();
   const bodyRect = document.body.getBoundingClientRect();
   const offset = rect.top - bodyRect.top + rect.height;
 
-  ele.setAttribute('left', `${(rect.left + rect.right) / 2}px`);
-  ele.setAttribute('top', `${offset}px`);
+  const ele = document.createElement('edit-link-panel');
+  ele.left = `${(rect.left + rect.right) / 2}px`;
+  ele.top = `${offset}px`;
+  ele.showMask = showMask;
   container.appendChild(ele);
 
   return new Promise(res => {
+    signal.addEventListener('abort', () => {
+      ele.remove();
+      res(null);
+    });
+
     ele.addEventListener('confirm', e => {
+      if (signal.aborted) {
+        return;
+      }
+
       ele.remove();
       res(e.detail.link);
     });
