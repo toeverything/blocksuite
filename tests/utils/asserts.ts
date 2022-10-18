@@ -91,34 +91,19 @@ export async function assertSelection(
 
 export async function assertTextFormat(
   page: Page,
-  resultObj: unknown,
-  index = 0
+  richTextIndex: number,
+  quillIndex: number,
+  resultObj: unknown
 ) {
   const actual = await page.evaluate(
-    ({ index }) => {
-      // @ts-ignore
-      const quill = document.querySelectorAll('rich-text')[0]?.quill!;
-      return quill.getFormat(index);
+    ({ richTextIndex, quillIndex }) => {
+      const quill = document.querySelectorAll('rich-text')[richTextIndex].quill;
+      return quill.getFormat(quillIndex);
     },
-    { index }
+    { richTextIndex, quillIndex }
   );
   expect(actual).toEqual(resultObj);
 }
-
-/*
-export async function assertSelectedBlockCount(page: Page, expected: number) {
-  const actual = await page.evaluate(() => {
-    const selectionInfo =
-      document.querySelector('default-page-block')?.selection.selectionInfo;
-    if (selectionInfo?.type === 'Block') {
-      return selectionInfo.blocks.length;
-    }
-
-    return 0;
-  });
-  expect(actual).toBe(expected);
-}
-*/
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>

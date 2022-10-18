@@ -3,10 +3,8 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCursorBlockIdAndHeight,
-  pressEnter,
   undoByClick,
   undoByKeyboard,
-  waitNextFrame,
 } from './utils/actions';
 import {
   assertBlockType,
@@ -151,9 +149,9 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('***test*** ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { bold: true, italic: true });
+  await assertTextFormat(page, 0, 0, { bold: true, italic: true });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 6);
+  await assertTextFormat(page, 0, 6, {});
   await undoByKeyboard(page);
   await assertRichTexts(page, ['***test*** ']);
   await undoByKeyboard(page);
@@ -161,9 +159,9 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('**test** ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { bold: true });
+  await assertTextFormat(page, 0, 0, { bold: true });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 6);
+  await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['**test** ']);
   await undoByClick(page);
@@ -171,9 +169,9 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('*test* ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { italic: true });
+  await assertTextFormat(page, 0, 0, { italic: true });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 6);
+  await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['*test* ']);
   await undoByClick(page);
@@ -181,9 +179,9 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('~~test~~ ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { strike: true });
+  await assertTextFormat(page, 0, 0, { strike: true });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 6);
+  await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['~~test~~ ']);
   await undoByClick(page);
@@ -191,9 +189,9 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('~test~ ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { underline: true });
+  await assertTextFormat(page, 0, 0, { underline: true });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 6);
+  await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['~test~ ']);
   await undoByClick(page);
@@ -201,9 +199,9 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('`test` ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { code: true });
+  await assertTextFormat(page, 0, 0, { code: true });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 6);
+  await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['`test` ']);
   await undoByClick(page);
@@ -211,9 +209,9 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('[test](www.test.com) ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { link: 'www.test.com' });
+  await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 6);
+  await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['[test](www.test.com) ']);
   await undoByClick(page);
@@ -221,12 +219,12 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('www.test.com ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { link: 'www.test.com' });
+  await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
   await page.keyboard.type('test');
-  await assertTextFormat(page, {}, 13);
+  await assertTextFormat(page, 0, 13, {});
   await undoByClick(page);
   await assertTextContain(page, 'www.test.com ');
   await undoByClick(page);
-  // todo
+  // TODO
   // await assertRichTexts(page, ['\n']);
 });

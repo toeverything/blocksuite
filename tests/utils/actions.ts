@@ -52,6 +52,16 @@ export async function focusRichText(page: Page, i = 0) {
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
   await locator.click();
 }
+
+export async function initThreeParagraphs(page: Page) {
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.type('456');
+  await pressEnter(page);
+  await page.keyboard.type('789');
+}
+
 /**
  * Focus on the specified line, the title is line 0 and so on.
  * If line is not specified, focus on the title
@@ -154,7 +164,7 @@ export async function addGroupByClick(page: Page) {
   await page.click('button[aria-label="add group"]');
 }
 
-export async function mouseDragFromTo(
+export async function dragBetweenCoords(
   page: Page,
   from: { x: number; y: number },
   to: { x: number; y: number }
@@ -164,6 +174,42 @@ export async function mouseDragFromTo(
   await page.mouse.move(x1, y1);
   await page.mouse.down();
   await page.mouse.move(x2, y2);
+  await page.mouse.up();
+}
+
+export async function dragBetweenIndices(
+  page: Page,
+  [startRichTextIndex, startQuillIndex]: [number, number],
+  [endRichTextIndex, endQuillIndex]: [number, number]
+) {
+  const startCoord = await page.evaluate(
+    ({ startRichTextIndex, startQuillIndex }) => {
+      const richText =
+        document.querySelectorAll('rich-text')[startRichTextIndex];
+      const quillBound = richText.quill.getBounds(startQuillIndex);
+      const richTextBound = richText.getBoundingClientRect();
+      return {
+        x: richTextBound.left + quillBound.left,
+        y: richTextBound.top + quillBound.top + quillBound.height / 2,
+      };
+    },
+    { startRichTextIndex, startQuillIndex }
+  );
+
+  const endCoord = await page.evaluate(
+    ({ endRichTextIndex, endQuillIndex }) => {
+      const richText = document.querySelectorAll('rich-text')[endRichTextIndex];
+      const quillBound = richText.quill.getBounds(endQuillIndex);
+      const richTextBound = richText.getBoundingClientRect();
+      return {
+        x: richTextBound.left + quillBound.left,
+        y: richTextBound.top + quillBound.top + quillBound.height / 2,
+      };
+    },
+    { endRichTextIndex, endQuillIndex }
+  );
+
+  await dragBetweenCoords(page, startCoord, endCoord);
 }
 
 export async function shiftTab(page: Page) {
@@ -258,29 +304,4 @@ export async function fillLine(page: Page, toNext = false) {
       page.keyboard.press('Backspace');
     }
   }
-}
-
-/*
-export async function selectAll(page: Page) {
-  await page.evaluate(() => {
-    return document
-      .querySelector('default-page-block')
-      ?.selection.selectAllBlocks();
-  });
-}
-*/
-
-//TODO: improve this function
-export async function isMac(page: Page) {
-  return await page.evaluate(() => {
-    return window.navigator.userAgent.includes('Mac');
-  });
-}
-
-export async function pressCtrlA(page: Page) {
-  // const isMacOS = await isMac(page);
-  // const ctrlKey = isMacOS ? 'Meta' : 'Control';
-  await page.keyboard.down('Meta');
-  await page.keyboard.press('a');
-  await page.keyboard.up('Meta');
 }

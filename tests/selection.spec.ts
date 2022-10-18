@@ -4,12 +4,13 @@ import {
   focusRichText,
   getQuillSelectionIndex,
   getQuillSelectionText,
-  mouseDragFromTo,
+  dragBetweenCoords,
   pressEnter,
   shiftTab,
   getCursorBlockIdAndHeight,
   fillLine,
   addGroupByClick,
+  initThreeParagraphs,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -21,12 +22,7 @@ import {
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
-  await focusRichText(page);
-  await page.keyboard.type('123');
-  await pressEnter(page);
-  await page.keyboard.type('456');
-  await pressEnter(page);
-  await page.keyboard.type('789');
+  await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
   const above123 = await page.evaluate(() => {
@@ -77,7 +73,7 @@ test('native range delete', async ({ page }) => {
     return { x: bbox.right, y: bbox.bottom + 5 };
   });
 
-  await mouseDragFromTo(page, above123, below789);
+  await dragBetweenCoords(page, above123, below789);
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 2);
   await assertRichTexts(page, ['12', '9']); // FIXME
@@ -86,12 +82,7 @@ test('native range delete', async ({ page }) => {
 test('block level range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
-  await focusRichText(page);
-  await page.keyboard.type('123');
-  await pressEnter(page);
-  await page.keyboard.type('456');
-  await pressEnter(page);
-  await page.keyboard.type('789');
+  await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
   const above123 = await page.evaluate(() => {
@@ -106,7 +97,7 @@ test('block level range delete', async ({ page }) => {
     return { x: bbox.right, y: bbox.bottom + 5 };
   });
 
-  await mouseDragFromTo(page, above123, below789);
+  await dragBetweenCoords(page, above123, below789);
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 0);
   await assertRichTexts(page, []);
