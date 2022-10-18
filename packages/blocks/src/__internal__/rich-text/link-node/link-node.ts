@@ -17,14 +17,15 @@ export class LinkNodeComponent extends LitElement {
   popoverTimer = 0;
 
   static styles = css`
-    :host {
-      color: var(--affine-highlight-color);
-    }
-
     a {
-      color: inherit;
+      color: var(--affine-link-color);
       text-decoration: none;
     }
+
+    a:visited {
+      color: var(--affine-link-visited-color);
+    }
+
     a:hover {
       text-decoration: underline;
     }
@@ -77,10 +78,9 @@ export class LinkNodeComponent extends LitElement {
   }
 
   render() {
-    return html`<span
-      ><a href=${this.href} rel="noopener noreferrer" target="_blank"
-        >${LinkIcon}<slot></slot></a
-    ></span>`;
+    return html`<a href=${this.href} rel="noopener noreferrer" target="_blank"
+      >${LinkIcon}<slot></slot
+    ></a>`;
   }
 }
 const Link = Quill.import('formats/link');

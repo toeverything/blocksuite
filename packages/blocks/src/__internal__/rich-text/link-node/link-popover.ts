@@ -30,9 +30,9 @@ const bindHoverState = (
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
-    // wait until the event queue is flushed, because we want to leave the
-    // popover open if the mouse entered the popover immediately after
-    // leaving the target (or vice versa).
+    // we want to leave the popover open
+    // if the mouse entered the popover immediately
+    // after leaving the target (or vice versa).
     timer = window.setTimeout(() => {
       controller.abort();
     }, hoverCloseDelay);

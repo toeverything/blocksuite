@@ -48,8 +48,6 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   }
 
   const mockSelectBlot: MockSelectNode = node;
-  console.log(mockSelectBlot);
-
   const mockSelectDom = mockSelectBlot?.domNode as HTMLElement | undefined;
   if (!mockSelectDom) {
     console.error('Error on createLink', mockSelectBlot, quill, range);
