@@ -192,7 +192,6 @@ function deleteModelsByRange(
 export function handleBackspace(store: Store, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
-
   if (isCollapsedSelection()) {
     const startModel = getStartModelBySelection();
     const richText = getRichTextByModel(startModel);
@@ -214,14 +213,83 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
   }
 }
 
+function formatModelsByRange(models: BaseBlockModel[], range: Range) {
+  const first = models[0];
+  const last = models[models.length - 1];
+  const firstRichText = getRichTextByModel(first);
+  const lastRichText = getRichTextByModel(last);
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+  const selection = window.getSelection();
+  const firstIndex = getQuillIndexByNativeSelection(
+    selection?.anchorNode,
+    selection?.anchorOffset as number
+  );
+  const endIndex = getQuillIndexByNativeSelection(
+    selection?.focusNode,
+    selection?.focusOffset as number
+  );
+  const firstQuill = firstRichText.quill;
+  debugger;
+  firstRichText.model.text?.format(
+    firstIndex,
+    firstQuill.getLength() - firstIndex - 1,
+    { code: true }
+  );
+  lastRichText.model.text?.format(0, endIndex, { code: true });
+  for (let i = 1; i < models.length - 1; i++) {
+    let richText = getRichTextByModel(models[i]);
+    assertExists(richText);
+    richText.model.text?.format(0, richText.quill.getLength() - 1, {
+      code: true,
+    });
+  }
+}
+
+function getQuillIndexByNativeSelection(
+  ele: Node | null | undefined,
+  nodeOffset: number
+) {
+  let offset = 0;
+  let lastNode = ele;
+  let selfAdded = false;
+  // @ts-ignore
+  while (
+    !lastNode?.getAttributeNode ||
+    !lastNode.getAttributeNode('contenteditable')
+  ) {
+    if (!selfAdded) {
+      selfAdded = true;
+      offset += nodeOffset;
+    } else {
+      offset += textWithoutNode(ele, lastNode).length;
+    }
+    lastNode = ele;
+    ele = ele?.parentNode;
+  }
+  return offset;
+}
+
+function textWithoutNode(parentNode: any, currentNode: any) {
+  let text = '';
+  for (let i = 0; i < parentNode.childNodes.length; i++) {
+    const node = parentNode.childNodes[i];
+
+    if (node !== currentNode || !currentNode.contains(node)) {
+      text += node.textContent || node.innerText || '';
+    } else {
+      return text;
+    }
+  }
+  return text;
+}
+
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
-
   if (isRangeSelection()) {
     const startModel = getStartModelBySelection();
     const richText = getRichTextByModel(startModel);
-
     if (richText) {
       const { quill } = richText;
       const range = quill.getSelection();
