@@ -160,6 +160,10 @@ export function getRichTextByModel(model: BaseBlockModel) {
 
 export function getModelsByRange(range: Range): BaseBlockModel[] {
   const commonAncestor = range.commonAncestorContainer as HTMLElement;
+
+  if (commonAncestor instanceof Text) {
+    return [getStartModelBySelection()];
+  }
   const containerBlock = commonAncestor.closest(`[${ATTR}]`) as ContainerBlock;
   assertExists(containerBlock.model);
 
