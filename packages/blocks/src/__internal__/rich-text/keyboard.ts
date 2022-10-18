@@ -1,27 +1,25 @@
-import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
+import { Quill, type RangeStatic } from 'quill';
 import {
   ALLOW_DEFAULT,
+  focusNextBlock,
+  focusPreviousBlock,
+  getCurrentRange,
   handleBlockEndEnter,
   handleBlockSplit,
   handleIndent,
+  handleKeyDown,
+  handleKeyUp,
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
   isCollapsedAtBlockStart,
+  isMultiBlockRange,
+  noop,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '../utils';
 import { Shortcuts } from './shortcuts';
-import {
-  focusNextBlock,
-  focusPreviousBlock,
-  getCurrentRange,
-  handleKeyDown,
-  handleKeyUp,
-  isMultiBlockRange,
-  noop,
-} from '../utils';
 
 interface QuillRange {
   index: number;
@@ -70,9 +68,25 @@ function isAtBlockEnd(quill: Quill) {
 }
 
 export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
-  function markdownMatch(this: KeyboardEventThis) {
-    Shortcuts.match(this.quill, model);
+  function enterMarkdownMatch(
+    this: KeyboardEventThis,
+    range: QuillRange,
+    context: BindingContext
+  ) {
+    const { prefix } = context;
+    Shortcuts.match(this.quill, model, prefix);
     return ALLOW_DEFAULT;
+  }
+
+  function spaceMarkdownMatch(
+    this: KeyboardEventThis,
+    range: QuillRange,
+    context: BindingContext
+  ) {
+    const { prefix } = context;
+    return Shortcuts.match(this.quill, model, prefix)
+      ? PREVENT_DEFAULT
+      : ALLOW_DEFAULT;
   }
 
   function hardEnter(this: KeyboardEventThis) {
@@ -163,11 +177,11 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   const keyboardBindings: KeyboardBindings = {
     enterMarkdownMatch: {
       key: 'enter',
-      handler: markdownMatch,
+      handler: enterMarkdownMatch,
     },
     spaceMarkdownMatch: {
       key: ' ',
-      handler: markdownMatch,
+      handler: spaceMarkdownMatch,
     },
     hardEnter: {
       key: 'enter',
@@ -190,7 +204,14 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
     'list autofill': {
       key: ' ',
-      prefix: /^\s*?(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6})|>$/,
+      shiftKey: false,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
+      handler: space,
+    },
+    'list autofill shift': {
+      key: ' ',
+      shiftKey: true,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
       handler: space,
     },
     backspace: {

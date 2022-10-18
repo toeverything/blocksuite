@@ -95,6 +95,12 @@ async function keyUpCtrlOrMeta(page: Page) {
   }
 }
 
+export const withCtrlOrMeta = async (page: Page, fn: () => Promise<void>) => {
+  await keyDownCtrlOrMeta(page);
+  await fn();
+  await keyUpCtrlOrMeta(page);
+};
+
 export async function undoByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('z');
@@ -106,12 +112,13 @@ export async function redoByKeyboard(page: Page) {
   await page.keyboard.down('Shift');
   await page.keyboard.press('z');
   await page.keyboard.up('Shift');
-  await keyDownCtrlOrMeta(page);
+  await keyUpCtrlOrMeta(page);
 }
 
 export async function selectAllByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('a');
+  await page.keyboard.up('a');
   await keyUpCtrlOrMeta(page);
 }
 export async function pressEnter(page: Page) {

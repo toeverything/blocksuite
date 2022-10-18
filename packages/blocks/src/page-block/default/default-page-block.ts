@@ -1,7 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import type { Store } from '@blocksuite/store';
-
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { Slot, Store } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -13,9 +13,15 @@ import {
   HOTKEYS,
   handleBackspace,
   handleFormat,
+  batchDelete,
 } from '../../__internal__';
 import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
+
+export interface DefaultPageBlockSlots {
+  updateSelectionRect: Slot<DOMRect | null>;
+  updateSelectedRects: Slot<DOMRect[]>;
+}
 
 // https://stackoverflow.com/a/2345915
 function focusTextEnd(input: HTMLInputElement) {
@@ -23,6 +29,54 @@ function focusTextEnd(input: HTMLInputElement) {
   input.focus();
   input.value = '';
   input.value = current;
+}
+
+function SelectionRect(rect: DOMRect | null) {
+  if (rect === null) return html``;
+
+  const style = {
+    left: rect.left + 'px',
+    top: rect.top + 'px',
+    width: rect.width + 'px',
+    height: rect.height + 'px',
+  };
+  return html`
+    <style>
+      .affine-page-selection-rect {
+        position: fixed;
+        background: rgba(104, 128, 255, 0.1);
+        z-index: 1;
+        pointer-events: none;
+      }
+    </style>
+    <div class="affine-page-selection-rect" style=${styleMap(style)}></div>
+  `;
+}
+
+function SelectedRectsContainer(rects: DOMRect[]) {
+  return html`
+    <style>
+      .affine-page-selected-rects-container > div {
+        position: fixed;
+        background: rgba(104, 128, 255, 0.1);
+        z-index: 1;
+        pointer-events: none;
+        border-radius: 5px;
+      }
+    </style>
+    <div class="affine-page-selected-rects-container">
+      ${rects.map(rect => {
+        const style = {
+          display: 'block',
+          left: rect.left + 'px',
+          top: rect.top + 'px',
+          width: rect.width + 'px',
+          height: rect.height + 'px',
+        };
+        return html`<div style=${styleMap(style)}></div>`;
+      })}
+    </div>
+  `;
 }
 
 @customElement('default-page-block')
@@ -41,6 +95,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   mouseRoot!: HTMLElement;
 
+  @state()
+  selectionRect: DOMRect | null = null;
+
+  @state()
+  selectedRects: DOMRect[] = [];
+
+  slots: DefaultPageBlockSlots = {
+    updateSelectionRect: new Slot<DOMRect | null>(),
+    updateSelectedRects: new Slot<DOMRect[]>(),
+  };
+
   @property({
     hasChanged() {
       return true;
@@ -58,7 +123,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkey.addListener(HOTKEYS.REDO, () => store.redo());
 
     hotkey.addListener(HOTKEYS.BACKSPACE, e => {
-      handleBackspace(store, e);
+      const { selection } = this.mouse;
+      if (selection.type === 'native') {
+        handleBackspace(store, e);
+      } else if (selection.type === 'block') {
+        const { selectedRichTexts } = selection;
+        batchDelete(
+          store,
+          selectedRichTexts.map(richText => richText.model)
+        );
+
+        selection.clear();
+        this.slots.updateSelectedRects.emit([]);
+      }
     });
     hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
       handleFormat(store, e, 'code');
@@ -86,7 +163,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     ]);
   }
 
-  private _onKeyDown(e: KeyboardEvent) {
+  private _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = this._blockTitle.value.length > 0;
 
     if (e.key === 'Enter' && hasContent) {
@@ -118,7 +195,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.mouse = new DefaultMouseManager(this.store, this.mouseRoot);
+      this.mouse = new DefaultMouseManager(
+        this.store,
+        this.mouseRoot,
+        this.slots
+      );
     }
     super.update(changedProperties);
   }
@@ -133,6 +214,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       }
     });
 
+    this.slots.updateSelectionRect.on(rect => {
+      this.selectionRect = rect;
+      this.requestUpdate();
+    });
+    this.slots.updateSelectedRects.on(rects => {
+      this.selectedRects = rects;
+      this.requestUpdate();
+    });
+
     focusTextEnd(this._blockTitle);
   }
 
@@ -145,6 +235,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const childrenContainer = BlockChildrenContainer(this.model, this);
+    const selectionRect = SelectionRect(this.selectionRect);
+    const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
 
     return html`
       <div class="affine-default-page-block-container">
@@ -153,11 +245,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
             placeholder="Title"
             class="affine-default-page-block-title"
             value=${this.model.title}
-            @keydown=${this._onKeyDown}
+            @keydown=${this._onTitleKeyDown}
             @input=${this._onTitleInput}
           />
         </div>
-        ${childrenContainer}
+        ${childrenContainer} ${selectedRectsContainer} ${selectionRect}
       </div>
     `;
   }

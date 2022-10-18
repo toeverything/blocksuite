@@ -154,25 +154,6 @@ test('nested list blocks', async ({ page }) => {
   await assertBlockChildrenIds(page, '3', ['4']);
 });
 
-test('list autofill hotkey', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-
-  await focusRichText(page, 0);
-  await assertBlockType(page, '2', 'text');
-
-  await page.keyboard.type('1. ');
-  await assertBlockType(page, '3', 'numbered'); // id updated
-  await assertRichTexts(page, ['\n']);
-
-  await undoByClick(page);
-  await assertBlockType(page, '2', 'text');
-  await assertRichTexts(page, ['\n']);
-
-  await page.keyboard.type('* ');
-  await assertBlockType(page, '4', 'bulleted'); // id updated
-  await assertRichTexts(page, ['\n']);
-});
-
 test('basic indent and unindent', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);

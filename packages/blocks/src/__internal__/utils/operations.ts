@@ -15,6 +15,7 @@ import {
   getCurrentRange,
   isCollapsedSelection,
   isMultiBlockRange,
+  isNoneSelection,
   isRangeSelection,
 } from './selection';
 import type { RichText } from '../rich-text/rich-text';
@@ -36,7 +37,9 @@ export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
 
     const blockProps = {
       flavour: model.flavour,
-      type: model.type,
+      type: !['bulleted', 'numbered', 'todo'].includes(model.type)
+        ? 'text'
+        : model.type,
     };
     const id = store.addBlock(blockProps, parent, index + 1);
     asyncFocusRichText(store, id);
@@ -192,6 +195,7 @@ function deleteModelsByRange(
 export function handleBackspace(store: Store, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
+  if (isNoneSelection()) return;
 
   if (isCollapsedSelection()) {
     const startModel = getStartModelBySelection();
@@ -214,25 +218,115 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
   }
 }
 
+function formatModelsByRange(
+  models: BaseBlockModel[],
+  store: Store,
+  key: string
+) {
+  const first = models[0];
+  const last = models[models.length - 1];
+  const firstRichText = getRichTextByModel(first);
+  const lastRichText = getRichTextByModel(last);
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+  const selection = window.getSelection();
+  const firstIndex = getQuillIndexByNativeSelection(
+    selection?.anchorNode,
+    selection?.anchorOffset as number
+  );
+  const endIndex = getQuillIndexByNativeSelection(
+    selection?.focusNode,
+    selection?.focusOffset as number
+  );
+  const formatArr = [];
+  const firstFormat = firstRichText.quill.getFormat(
+    firstIndex,
+    firstRichText.quill.getLength() - firstIndex - 1
+  );
+  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
+  formatArr.push(firstFormat, lastFormat);
+  for (let i = 1; i < models.length - 1; i++) {
+    const richText = getRichTextByModel(models[i]);
+    assertExists(richText);
+    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
+    formatArr.push(format);
+  }
+  const allFormat = formatArr.every(item => item[key]);
+  store.captureSync();
+  store.transact(() => {
+    firstRichText.model.text?.format(
+      firstIndex,
+      firstRichText.quill.getLength() - firstIndex - 1,
+      { [key]: !allFormat }
+    );
+    lastRichText.model.text?.format(0, endIndex, { [key]: !allFormat });
+    for (let i = 1; i < models.length - 1; i++) {
+      const richText = getRichTextByModel(models[i]);
+      assertExists(richText);
+      richText.model.text?.format(0, richText.quill.getLength() - 1, {
+        [key]: !allFormat,
+      });
+    }
+  });
+}
+
+function getQuillIndexByNativeSelection(
+  ele: Node | null | undefined,
+  nodeOffset: number
+) {
+  let offset = 0;
+  let lastNode = ele;
+  let selfAdded = false;
+  // @ts-ignore
+  while ( !lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
+    if (!selfAdded) {
+      selfAdded = true;
+      offset += nodeOffset;
+    } else {
+      offset += textWithoutNode(ele as Node, lastNode as Node).length;
+    }
+    lastNode = ele;
+    ele = ele?.parentNode;
+  }
+  return offset;
+}
+
+function textWithoutNode(parentNode: Node, currentNode: Node) {
+  let text = '';
+  for (let i = 0; i < parentNode.childNodes.length; i++) {
+    const node = parentNode.childNodes[i];
+
+    if (node !== currentNode || !currentNode.contains(node)) {
+      // @ts-ignore
+      text += node.textContent || node.innerText || '';
+    } else {
+      return text;
+    }
+  }
+  return text;
+}
+
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
+  if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
-    const startModel = getStartModelBySelection();
-    const richText = getRichTextByModel(startModel);
-
-    if (richText) {
+    const models = getModelsByRange(getCurrentRange());
+    if (models.length === 1) {
+      const richText = getRichTextByModel(models[0]);
+      assertExists(richText);
       const { quill } = richText;
       const range = quill.getSelection();
       assertExists(range);
-
       store.captureSync();
       store.transact(() => {
         const { index, length } = range;
         const format = quill.getFormat(range);
-        startModel.text?.format(index, length, { [key]: !format[key] });
+        models[0].text?.format(index, length, { [key]: !format[key] });
       });
+    } else {
+      formatModelsByRange(models, store, key);
     }
   }
 }
@@ -288,110 +382,135 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-
+  let isConverted = false;
   switch (prefix.trim()) {
     case '[]':
     case '[ ]':
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'todo', { checked: false });
+      isConverted = convertToList(store, model, 'todo', prefix, {
+        checked: false,
+      });
       break;
     case '[x]':
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'todo', { checked: true });
+      isConverted = convertToList(store, model, 'todo', prefix, {
+        checked: true,
+      });
       break;
     case '-':
     case '*':
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'bulleted');
+      isConverted = convertToList(store, model, 'bulleted', prefix);
       break;
     case '#':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h1');
+      isConverted = convertToParagraph(store, model, 'h1', prefix);
       break;
     case '##':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h2');
+      isConverted = convertToParagraph(store, model, 'h2', prefix);
       break;
     case '###':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h3');
+      isConverted = convertToParagraph(store, model, 'h3', prefix);
       break;
     case '####':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h4');
+      isConverted = convertToParagraph(store, model, 'h4', prefix);
       break;
     case '#####':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h5');
+      isConverted = convertToParagraph(store, model, 'h5', prefix);
       break;
     case '######':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h6');
+      isConverted = convertToParagraph(store, model, 'h6', prefix);
       break;
     case '>':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'quote');
+      isConverted = convertToParagraph(store, model, 'quote', prefix);
       break;
     default:
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'numbered');
+      isConverted = convertToList(store, model, 'numbered', prefix);
   }
 
-  return PREVENT_DEFAULT;
+  return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
+}
+
+// TODO deep delete
+export function batchDelete(store: Store, models: ExtendedModel[]) {
+  store.captureSync();
+  for (const model of models) {
+    store.deleteBlock(model);
+  }
 }
 
 export function convertToList(
   store: Store,
   model: ExtendedModel,
   listType: 'bulleted' | 'numbered' | 'todo',
+  prefix: string,
   otherProperties?: Record<string, unknown>
-) {
+): boolean {
+  if (model.flavour === 'list' && model['type'] === listType) {
+    return false;
+  }
   if (model.flavour === 'paragraph') {
     const parent = store.getParent(model);
-    if (!parent) return;
+    if (!parent) return false;
 
     const index = parent.children.indexOf(model);
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-
-    const blockProps = {
-      flavour: 'list',
-      type: listType,
-      text: model?.text?.clone(),
-      children: model.children,
-      ...otherProperties,
-    };
-    store.deleteBlock(model);
-    const id = store.addBlock(blockProps, parent, index);
-    asyncFocusRichText(store, id);
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      const blockProps = {
+        flavour: 'list',
+        type: listType,
+        text: model?.text?.clone(),
+        children: model.children,
+        ...otherProperties,
+      };
+      store.deleteBlock(model);
+      const id = store.addBlock(blockProps, parent, index);
+      asyncFocusRichText(store, id);
+    });
   } else if (model.flavour === 'list' && model['type'] !== listType) {
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.updateBlock(model, { type: listType });
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      store.updateBlock(model, { type: listType });
+    });
   }
+  return true;
 }
 
 export function convertToParagraph(
   store: Store,
   model: ExtendedModel,
-  type: 'paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-) {
+  type: 'paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  prefix: string
+): boolean {
+  if (model.flavour === 'paragraph' && model['type'] === type) {
+    return false;
+  }
   if (model.flavour !== 'paragraph') {
     const parent = store.getParent(model);
-    if (!parent) return;
+    if (!parent) return false;
 
     const index = parent.children.indexOf(model);
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-
-    const blockProps = {
-      flavour: 'paragraph',
-      type: type,
-      text: model?.text?.clone(),
-      children: model.children,
-    };
-    store.deleteBlock(model);
-    const id = store.addBlock(blockProps, parent, index);
-    asyncFocusRichText(store, id);
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      const blockProps = {
+        flavour: 'paragraph',
+        type: type,
+        text: model?.text?.clone(),
+        children: model.children,
+      };
+      store.deleteBlock(model);
+      const id = store.addBlock(blockProps, parent, index);
+      asyncFocusRichText(store, id);
+    });
   } else if (model.flavour === 'paragraph' && model['type'] !== type) {
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.updateBlock(model, { type: type });
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      store.updateBlock(model, { type: type });
+    });
   }
+  return true;
 }
