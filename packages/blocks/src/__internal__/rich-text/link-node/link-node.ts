@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import Quill from 'quill';
+import { assertExists, getModelByElement } from '../../utils';
 import { LinkIcon } from './link-icon';
 import { showLinkPopover } from './link-popover';
 
@@ -41,17 +42,36 @@ export class LinkNodeComponent extends LitElement {
   //   return this;
   // }
 
-  async onHover(e: Event) {
+  onHover(e: MouseEvent) {
     this.popoverTimer = window.setTimeout(async () => {
-      const link = await showLinkPopover({
-        anchorEl: e.target as HTMLElement,
-        preview: this.href,
-        showMask: false,
-        interactionKind: 'hover',
-      });
-      console.log('link', link);
+      this.onDelayHover(e);
     }, this.popoverHoverOpenDelay);
   }
+
+  async onDelayHover(e: MouseEvent) {
+    const linkState = await showLinkPopover({
+      anchorEl: e.target as HTMLElement,
+      preview: this.href,
+      showMask: false,
+      interactionKind: 'hover',
+    });
+    if (linkState.type !== 'confirm') {
+      return;
+    }
+    const link = linkState.link;
+
+    // TODO fix Blot types
+    const blot = Quill.find(this);
+    assertExists(blot);
+    const model = getModelByElement(this);
+    const store = model.store;
+
+    store.captureSync();
+    store.transact(() => {
+      model.text?.format(blot.offset(), blot.length(), { link });
+    });
+  }
+
   async onHoverEnd(e: Event) {
     clearTimeout(this.popoverTimer);
   }

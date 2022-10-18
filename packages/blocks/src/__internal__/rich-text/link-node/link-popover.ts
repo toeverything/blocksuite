@@ -45,6 +45,11 @@ const bindHoverState = (
   popover.addEventListener('mouseout', handleMouseLeave);
 };
 
+type LinkState =
+  | { type: 'cancel' }
+  | { type: 'confirm'; link: string }
+  | { type: 'remove' };
+
 export const showLinkPopover = async ({
   anchorEl,
   container = document.body,
@@ -65,12 +70,12 @@ export const showLinkPopover = async ({
    */
   interactionKind?: 'always' | 'hover';
   signal?: AbortController;
-}) => {
+}): Promise<LinkState> => {
   if (!anchorEl) {
     throw new Error("Can't show tooltip without anchor element!");
   }
   if (signal.signal.aborted) {
-    return;
+    return Promise.resolve({ type: 'cancel' });
   }
 
   const editLinkEle = createEditLinkElement(anchorEl, container, {
@@ -85,7 +90,7 @@ export const showLinkPopover = async ({
   return new Promise(res => {
     signal.signal.addEventListener('abort', () => {
       editLinkEle.remove();
-      res(null);
+      res({ type: 'cancel' });
     });
 
     editLinkEle.addEventListener('confirm', e => {
@@ -94,7 +99,12 @@ export const showLinkPopover = async ({
       }
 
       editLinkEle.remove();
-      res(e.detail.link);
+      const link = e.detail.link;
+      if (!link) {
+        res({ type: 'cancel' });
+        return;
+      }
+      res({ type: 'confirm', link });
     });
   });
 };
