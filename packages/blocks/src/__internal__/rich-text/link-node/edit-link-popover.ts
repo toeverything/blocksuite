@@ -26,6 +26,9 @@ export class EditLinkPanel extends LitElement {
   @property()
   showMask = true;
 
+  @property()
+  preview = '';
+
   @state()
   link = '';
 
@@ -37,15 +40,19 @@ export class EditLinkPanel extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    // Disable body scroll
-    this.bodyOverflowStyle = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (this.showMask) {
+      // Disable body scroll
+      this.bodyOverflowStyle = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    // Restore body scroll style
-    document.body.style.overflow = this.bodyOverflowStyle;
+    if (this.showMask) {
+      // Restore body scroll style
+      document.body.style.overflow = this.bodyOverflowStyle;
+    }
   }
 
   private hide() {
@@ -93,6 +100,7 @@ export class EditLinkPanel extends LitElement {
               type="text"
               spellcheck="false"
               placeholder="Paste or type a link"
+              value="${this.preview}"
               @keyup="${this.onKeyup}"
             />
             <div class="edit-link-panel-btn-container">

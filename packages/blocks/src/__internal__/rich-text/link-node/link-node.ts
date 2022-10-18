@@ -1,16 +1,19 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import Quill from 'quill';
-import { showCreateLinkTooltip } from './create-link';
 import { LinkIcon } from './link-icon';
+import { showLinkPopover } from './link-popover';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {
   @property()
   href!: string;
 
+  @property()
+  popoverHoverOpenDelay = 150;
+
   @state()
-  private controller = new AbortController();
+  popoverTimer = 0;
 
   static styles = css`
     :host {
@@ -39,21 +42,18 @@ export class LinkNodeComponent extends LitElement {
   // }
 
   async onHover(e: Event) {
-    this.controller.abort();
-    this.controller = new AbortController();
-    const signal = this.controller.signal;
-
-    const link = await showCreateLinkTooltip({
-      anchorEl: e.target as HTMLElement,
-      signal,
-      showMask: false,
-    });
-    return;
+    this.popoverTimer = window.setTimeout(async () => {
+      const link = await showLinkPopover({
+        anchorEl: e.target as HTMLElement,
+        preview: this.href,
+        showMask: false,
+        interactionKind: 'hover',
+      });
+      console.log('link', link);
+    }, this.popoverHoverOpenDelay);
   }
-
-  private onHoverEnd(e: Event) {
-    this.controller.abort();
-    return;
+  async onHoverEnd(e: Event) {
+    clearTimeout(this.popoverTimer);
   }
 
   render() {

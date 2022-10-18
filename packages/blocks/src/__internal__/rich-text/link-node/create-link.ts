@@ -7,6 +7,7 @@ import {
   isRangeSelection,
 } from '../../utils';
 import './link-node';
+import { showLinkPopover } from './link-popover';
 import { MockSelectNode } from './mock-select-node';
 
 const getBlotNode = <T>(
@@ -70,7 +71,7 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   // Autofocus processing was blocked because a document already has a focused element.
   quill.blur();
 
-  const link = await showCreateLinkTooltip({ anchorEl: mockSelectDom });
+  const link = await showLinkPopover({ anchorEl: mockSelectDom });
 
   quill.formatText(range, { 'mock-select': false });
   if (!link) {
@@ -88,49 +89,4 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   if (!linkDom) {
     throw new Error('Failed to create link, mockSelectDom not found!');
   }
-};
-
-export const showCreateLinkTooltip = async ({
-  anchorEl,
-  container = document.body,
-  signal = new AbortSignal(),
-  showMask = true,
-}: {
-  anchorEl: HTMLElement;
-  container?: HTMLElement;
-  signal?: AbortSignal;
-  showMask?: boolean;
-}) => {
-  if (!anchorEl) {
-    throw new Error("Can't show tooltip without anchor element!");
-  }
-  if (signal.aborted) {
-    return;
-  }
-
-  const rect = anchorEl.getBoundingClientRect();
-  const bodyRect = document.body.getBoundingClientRect();
-  const offset = rect.top - bodyRect.top + rect.height;
-
-  const ele = document.createElement('edit-link-panel');
-  ele.left = `${(rect.left + rect.right) / 2}px`;
-  ele.top = `${offset}px`;
-  ele.showMask = showMask;
-  container.appendChild(ele);
-
-  return new Promise(res => {
-    signal.addEventListener('abort', () => {
-      ele.remove();
-      res(null);
-    });
-
-    ele.addEventListener('confirm', e => {
-      if (signal.aborted) {
-        return;
-      }
-
-      ele.remove();
-      res(e.detail.link);
-    });
-  });
 };
