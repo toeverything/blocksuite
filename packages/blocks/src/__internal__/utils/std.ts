@@ -18,3 +18,10 @@ export function createEvent<T extends keyof WindowEventMap>(
 export function noop() {
   return;
 }
+
+/**
+ * Sleep is not a good practice.
+ * Please use it sparingly!
+ */
+export const sleep = (ms = 0) =>
+  new Promise(resolve => setTimeout(resolve, ms));

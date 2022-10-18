@@ -153,6 +153,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkey.addListener(HOTKEYS.LINK, e => {
       createLink(store, e);
     });
+
+    // !!!
+    // Don't forget to remove hotkeys at `_removeHotkeys`
   }
 
   private _removeHotkeys() {
@@ -164,6 +167,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.STRIKE,
       HOTKEYS.SHIFT_UP,
       HOTKEYS.SHIFT_DOWN,
+      HOTKEYS.LINK,
     ]);
   }
 

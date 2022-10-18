@@ -23,6 +23,9 @@ export class EditLinkPanel extends LitElement {
   @property()
   top = '0px';
 
+  @property()
+  showMask = true;
+
   @state()
   link = '';
 
@@ -73,9 +76,12 @@ export class EditLinkPanel extends LitElement {
   }
 
   render() {
+    const mask = this.showMask
+      ? html`<div class="overlay-mask" @click="${this.hide}"></div>`
+      : html``;
     return html`
       <div class="overlay-root">
-        <div class="overlay-mask" @click="${this.hide}"></div>
+        ${mask}
         <div
           class="overlay-container"
           style="position: absolute; left: ${this.left}; top: ${this.top};"
