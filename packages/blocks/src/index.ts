@@ -4,6 +4,7 @@ import './counter-block';
 import './paragraph-block';
 import './list-block';
 import './group-block';
+import './__internal__/rich-text/link-node';
 
 export * from './counter-block';
 export * from './paragraph-block';

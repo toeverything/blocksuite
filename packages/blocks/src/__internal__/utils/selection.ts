@@ -50,7 +50,7 @@ export function focusRichText(
       newLeft = right - 1;
     }
     range = caretRangeFromPoint(newLeft, newTop);
-    resetSeletion(range);
+    resetNativeSeletion(range);
   }
   if (position === 'start') {
     range = caretRangeFromPoint(left, top + lineHeight / 2);
@@ -58,7 +58,7 @@ export function focusRichText(
   if (position === 'end') {
     range = caretRangeFromPoint(right - 1, bottom - lineHeight / 2);
   }
-  resetSeletion(range);
+  resetNativeSeletion(range);
 }
 
 function focusRichTextByModel(
@@ -200,7 +200,7 @@ export function handleKeyDown(
   return ALLOW_DEFAULT;
 }
 
-export function resetSeletion(range: Range | null) {
+export function resetNativeSeletion(range: Range | null) {
   const selection = window.getSelection();
   selection?.removeAllRanges();
   range && selection?.addRange(range);
@@ -213,7 +213,7 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   const y = bbox.y + bbox.height / 2;
   const range = caretRangeFromPoint(x, y);
   if (range?.startContainer instanceof Node) {
-    resetSeletion(range);
+    resetNativeSeletion(range);
   }
 }
 
@@ -221,12 +221,18 @@ export function focusRichTextStart(richText: RichText) {
   const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
   const range = document.createRange();
   range.setStart(start, 0);
-  resetSeletion(range);
+  resetNativeSeletion(range);
 }
 
 export function getCurrentRange() {
   const selection = window.getSelection() as Selection;
   return selection.getRangeAt(0);
+}
+
+export function isNoneSelection() {
+  const selection = window.getSelection();
+  if (!selection) return true;
+  return selection.type === 'None';
 }
 
 export function isCollapsedSelection() {

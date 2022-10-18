@@ -29,6 +29,14 @@ test('click on blank area', async ({ page }) => {
   await page.keyboard.type('789');
   await assertRichTexts(page, ['123', '456', '789']);
 
+  const above123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left, y: bbox.top - 5 };
+  });
+  await page.mouse.click(above123.x, above123.y);
+  await assertSelection(page, 0, 0, 0);
+
   const above456 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="3"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
@@ -46,7 +54,7 @@ test('click on blank area', async ({ page }) => {
   await assertSelection(page, 2, 0, 0);
 });
 
-test('range delete', async ({ page }) => {
+test('native range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await focusRichText(page);
@@ -73,6 +81,35 @@ test('range delete', async ({ page }) => {
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 2);
   await assertRichTexts(page, ['12', '9']); // FIXME
+});
+
+test('block level range delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.type('456');
+  await pressEnter(page);
+  await page.keyboard.type('789');
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const above123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left, y: bbox.top - 10 };
+  });
+
+  const below789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right, y: bbox.bottom + 5 };
+  });
+
+  await mouseDragFromTo(page, above123, below789);
+  await page.keyboard.press('Backspace');
+  await assertBlockCount(page, 'paragraph', 0);
+  await assertRichTexts(page, []);
 });
 
 test('cursor move up and down', async ({ page }) => {

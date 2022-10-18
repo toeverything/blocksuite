@@ -1,27 +1,25 @@
-import type { Quill, RangeStatic } from 'quill';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
+import { Quill, type RangeStatic } from 'quill';
 import {
   ALLOW_DEFAULT,
+  focusNextBlock,
+  focusPreviousBlock,
+  getCurrentRange,
   handleBlockEndEnter,
   handleBlockSplit,
   handleIndent,
+  handleKeyDown,
+  handleKeyUp,
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
   isCollapsedAtBlockStart,
+  isMultiBlockRange,
+  noop,
   PREVENT_DEFAULT,
   tryMatchSpaceHotkey,
 } from '../utils';
 import { Shortcuts } from './shortcuts';
-import {
-  focusNextBlock,
-  focusPreviousBlock,
-  getCurrentRange,
-  handleKeyDown,
-  handleKeyUp,
-  isMultiBlockRange,
-  noop,
-} from '../utils';
 
 interface QuillRange {
   index: number;
@@ -190,7 +188,7 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
     'list autofill': {
       key: ' ',
-      prefix: /^\s*?(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6})|>$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
       handler: space,
     },
     backspace: {

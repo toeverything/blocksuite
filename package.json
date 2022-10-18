@@ -14,14 +14,14 @@
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,playground,store}/dist",
-    "bump": "pnpm --recursive exec pnpm version patch && pnpm version patch --git-tag-version false",
-    "publish": "pnpm --recursive --filter=!@blocksuite/playground exec pnpm publish --no-git-checks"
+    "changeset": "changeset",
+    "release": "pnpm build && changeset publish"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "Apache-2.0",
-  "dependencies": {},
   "devDependencies": {
+    "@changesets/cli": "^2.25.0",
     "@playwright/test": "^1.25.2",
     "@types/node": "^18.7.16",
     "@types/quill": "^2.0.9",

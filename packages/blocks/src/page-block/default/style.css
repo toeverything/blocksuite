@@ -7,6 +7,8 @@
   width: 720px;
   height: 100%;
   margin: 0 auto;
+  /* cursor: crosshair; */
+  cursor: default;
 }
 
 .affine-default-page-block-container > .affine-block-children-container {

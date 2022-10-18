@@ -1,0 +1,44 @@
+# This workflow will create release pull request with all of the package versions updated and changelogs updated
+# and when there are new changesets on your configured baseBranch, the PR will be updated.
+# When you're ready, you can merge the pull request and you can either publish the packages to npm manually or setup the action to do it for you.
+# For more information see: https://github.com/changesets/action
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+# Pending until other workflows done
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

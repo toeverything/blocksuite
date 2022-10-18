@@ -15,6 +15,7 @@ import {
   getCurrentRange,
   isCollapsedSelection,
   isMultiBlockRange,
+  isNoneSelection,
   isRangeSelection,
 } from './selection';
 import type { RichText } from '../rich-text/rich-text';
@@ -36,7 +37,9 @@ export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
 
     const blockProps = {
       flavour: model.flavour,
-      type: model.type,
+      type: !['bulleted', 'numbered', 'todo'].includes(model.type)
+        ? 'text'
+        : model.type,
     };
     const id = store.addBlock(blockProps, parent, index + 1);
     asyncFocusRichText(store, id);
@@ -192,6 +195,8 @@ function deleteModelsByRange(
 export function handleBackspace(store: Store, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
+  if (isNoneSelection()) return;
+
   if (isCollapsedSelection()) {
     const startModel = getStartModelBySelection();
     const richText = getRichTextByModel(startModel);
@@ -254,9 +259,7 @@ function getQuillIndexByNativeSelection(
   let lastNode = ele;
   let selfAdded = false;
   // @ts-ignore
-  while (
-    !lastNode?.getAttributeNode ||
-    !lastNode.getAttributeNode('contenteditable')
+  while (!lastNode?.getAttributeNode || !lastNode.getAttributeNode('contenteditable')
   ) {
     if (!selfAdded) {
       selfAdded = true;
@@ -287,6 +290,8 @@ function textWithoutNode(parentNode: any, currentNode: any) {
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
+  if (isNoneSelection()) return;
+
   if (isRangeSelection()) {
     const startModel = getStartModelBySelection();
     const richText = getRichTextByModel(startModel);
@@ -356,110 +361,135 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-
+  let isConverted = false;
   switch (prefix.trim()) {
     case '[]':
     case '[ ]':
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'todo', { checked: false });
+      isConverted = convertToList(store, model, 'todo', prefix, {
+        checked: false,
+      });
       break;
     case '[x]':
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'todo', { checked: true });
+      isConverted = convertToList(store, model, 'todo', prefix, {
+        checked: true,
+      });
       break;
     case '-':
     case '*':
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'bulleted');
+      isConverted = convertToList(store, model, 'bulleted', prefix);
       break;
     case '#':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h1');
+      isConverted = convertToParagraph(store, model, 'h1', prefix);
       break;
     case '##':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h2');
+      isConverted = convertToParagraph(store, model, 'h2', prefix);
       break;
     case '###':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h3');
+      isConverted = convertToParagraph(store, model, 'h3', prefix);
       break;
     case '####':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h4');
+      isConverted = convertToParagraph(store, model, 'h4', prefix);
       break;
     case '#####':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h5');
+      isConverted = convertToParagraph(store, model, 'h5', prefix);
       break;
     case '######':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'h6');
+      isConverted = convertToParagraph(store, model, 'h6', prefix);
       break;
     case '>':
-      store.transact(() => model.text?.clear());
-      convertToParagraph(store, model, 'quote');
+      isConverted = convertToParagraph(store, model, 'quote', prefix);
       break;
     default:
-      store.transact(() => model.text?.clear());
-      convertToList(store, model, 'numbered');
+      isConverted = convertToList(store, model, 'numbered', prefix);
   }
 
-  return PREVENT_DEFAULT;
+  return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
+}
+
+// TODO deep delete
+export function batchDelete(store: Store, models: ExtendedModel[]) {
+  store.captureSync();
+  for (const model of models) {
+    store.deleteBlock(model);
+  }
 }
 
 export function convertToList(
   store: Store,
   model: ExtendedModel,
   listType: 'bulleted' | 'numbered' | 'todo',
+  prefix: string,
   otherProperties?: Record<string, unknown>
-) {
+): boolean {
+  if (model.flavour === 'list' && model['type'] === listType) {
+    return false;
+  }
   if (model.flavour === 'paragraph') {
     const parent = store.getParent(model);
-    if (!parent) return;
+    if (!parent) return false;
 
     const index = parent.children.indexOf(model);
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-
-    const blockProps = {
-      flavour: 'list',
-      type: listType,
-      text: model?.text?.clone(),
-      children: model.children,
-      ...otherProperties,
-    };
-    store.deleteBlock(model);
-    const id = store.addBlock(blockProps, parent, index);
-    asyncFocusRichText(store, id);
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      const blockProps = {
+        flavour: 'list',
+        type: listType,
+        text: model?.text?.clone(),
+        children: model.children,
+        ...otherProperties,
+      };
+      store.deleteBlock(model);
+      const id = store.addBlock(blockProps, parent, index);
+      asyncFocusRichText(store, id);
+    });
   } else if (model.flavour === 'list' && model['type'] !== listType) {
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.updateBlock(model, { type: listType });
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      store.updateBlock(model, { type: listType });
+    });
   }
+  return true;
 }
 
 export function convertToParagraph(
   store: Store,
   model: ExtendedModel,
-  type: 'paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-) {
+  type: 'paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  prefix: string
+): boolean {
+  if (model.flavour === 'paragraph' && model['type'] === type) {
+    return false;
+  }
   if (model.flavour !== 'paragraph') {
     const parent = store.getParent(model);
-    if (!parent) return;
+    if (!parent) return false;
 
     const index = parent.children.indexOf(model);
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-
-    const blockProps = {
-      flavour: 'paragraph',
-      type: type,
-      text: model?.text?.clone(),
-      children: model.children,
-    };
-    store.deleteBlock(model);
-    const id = store.addBlock(blockProps, parent, index);
-    asyncFocusRichText(store, id);
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      const blockProps = {
+        flavour: 'paragraph',
+        type: type,
+        text: model?.text?.clone(),
+        children: model.children,
+      };
+      store.deleteBlock(model);
+      const id = store.addBlock(blockProps, parent, index);
+      asyncFocusRichText(store, id);
+    });
   } else if (model.flavour === 'paragraph' && model['type'] !== type) {
+    model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.updateBlock(model, { type: type });
+    store.transact(() => {
+      model.text?.delete(0, prefix.length + 1);
+      store.updateBlock(model, { type: type });
+    });
   }
+  return true;
 }
