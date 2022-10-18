@@ -218,26 +218,115 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
   }
 }
 
+function formatModelsByRange(
+  models: BaseBlockModel[],
+  store: Store,
+  key: string
+) {
+  const first = models[0];
+  const last = models[models.length - 1];
+  const firstRichText = getRichTextByModel(first);
+  const lastRichText = getRichTextByModel(last);
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+  const selection = window.getSelection();
+  const firstIndex = getQuillIndexByNativeSelection(
+    selection?.anchorNode,
+    selection?.anchorOffset as number
+  );
+  const endIndex = getQuillIndexByNativeSelection(
+    selection?.focusNode,
+    selection?.focusOffset as number
+  );
+  const formatArr = [];
+  const firstFormat = firstRichText.quill.getFormat(
+    firstIndex,
+    firstRichText.quill.getLength() - firstIndex - 1
+  );
+  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
+  formatArr.push(firstFormat, lastFormat);
+  for (let i = 1; i < models.length - 1; i++) {
+    const richText = getRichTextByModel(models[i]);
+    assertExists(richText);
+    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
+    formatArr.push(format);
+  }
+  const allFormat = formatArr.every(item => item[key]);
+  store.captureSync();
+  store.transact(() => {
+    firstRichText.model.text?.format(
+      firstIndex,
+      firstRichText.quill.getLength() - firstIndex - 1,
+      { [key]: !allFormat }
+    );
+    lastRichText.model.text?.format(0, endIndex, { [key]: !allFormat });
+    for (let i = 1; i < models.length - 1; i++) {
+      const richText = getRichTextByModel(models[i]);
+      assertExists(richText);
+      richText.model.text?.format(0, richText.quill.getLength() - 1, {
+        [key]: !allFormat,
+      });
+    }
+  });
+}
+
+function getQuillIndexByNativeSelection(
+  ele: Node | null | undefined,
+  nodeOffset: number
+) {
+  let offset = 0;
+  let lastNode = ele;
+  let selfAdded = false;
+  // @ts-ignore
+  while ( !lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
+    if (!selfAdded) {
+      selfAdded = true;
+      offset += nodeOffset;
+    } else {
+      offset += textWithoutNode(ele as Node, lastNode as Node).length;
+    }
+    lastNode = ele;
+    ele = ele?.parentNode;
+  }
+  return offset;
+}
+
+function textWithoutNode(parentNode: Node, currentNode: Node) {
+  let text = '';
+  for (let i = 0; i < parentNode.childNodes.length; i++) {
+    const node = parentNode.childNodes[i];
+
+    if (node !== currentNode || !currentNode.contains(node)) {
+      // @ts-ignore
+      text += node.textContent || node.innerText || '';
+    } else {
+      return text;
+    }
+  }
+  return text;
+}
+
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
   if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
-    const startModel = getStartModelBySelection();
-    const richText = getRichTextByModel(startModel);
-
-    if (richText) {
+    const models = getModelsByRange(getCurrentRange());
+    if (models.length === 1) {
+      const richText = getRichTextByModel(models[0]);
+      assertExists(richText);
       const { quill } = richText;
       const range = quill.getSelection();
       assertExists(range);
-
       store.captureSync();
       store.transact(() => {
         const { index, length } = range;
         const format = quill.getFormat(range);
-        startModel.text?.format(index, length, { [key]: !format[key] });
+        models[0].text?.format(index, length, { [key]: !format[key] });
       });
+    } else {
+      formatModelsByRange(models, store, key);
     }
   }
 }
