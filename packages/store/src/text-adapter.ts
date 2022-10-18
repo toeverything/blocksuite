@@ -116,8 +116,8 @@ export class Text {
     ];
   }
 
-  insert(content: string, index: number) {
-    this._yText.insert(index, content);
+  insert(content: string, index: number, attributes?: any) {
+    this._yText.insert(index, content, attributes);
     // @ts-ignore
     this._yText.meta = { split: true };
   }

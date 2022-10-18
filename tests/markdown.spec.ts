@@ -150,7 +150,7 @@ test('markdown inline-text', async ({ page }) => {
 
   await page.keyboard.type('***test*** ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { bold: true, italic: true });
+  await assertTextFormat(page, { bold: true, italic: true }, 0);
   await undoByKeyboard(page);
   await assertRichTexts(page, ['***test*** ']);
   await undoByKeyboard(page);

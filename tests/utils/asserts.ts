@@ -88,7 +88,7 @@ export async function assertTextFormat(page: Page, resultObj: unknown) {
   const actual = await page.evaluate(() => {
     // @ts-ignore
     const quill = document.querySelectorAll('rich-text')[0]?.quill!;
-    return quill.getFormat();
+    return quill.getFormat(0);
   });
   expect(actual).toEqual(resultObj);
 }

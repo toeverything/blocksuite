@@ -29,13 +29,16 @@ export class Shortcuts {
       for (const match of Shortcuts._matches) {
         const matchedText = prefix.match(match.pattern);
         if (matchedText) {
-          return match.action(
+          const index = quill.getSelection()?.index || 0;
+          const result = match.action(
             model,
             prefix,
             selection,
             match.pattern,
             lineStart
           );
+          quill.setSelection(index + 1, 0);
+          return result;
         }
       }
     }
@@ -67,10 +70,11 @@ export class Shortcuts {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             bold: true,
             italic: true,
@@ -102,10 +106,11 @@ export class Shortcuts {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             bold: true,
           });
@@ -136,10 +141,11 @@ export class Shortcuts {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             italic: true,
           });
@@ -170,10 +176,11 @@ export class Shortcuts {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             strike: true,
           });
@@ -204,10 +211,11 @@ export class Shortcuts {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             underline: true,
           });
@@ -238,10 +246,11 @@ export class Shortcuts {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             code: true,
           });
@@ -269,10 +278,11 @@ export class Shortcuts {
 
         const annotatedText = match[0];
         const startIndex = lineStart + match.index;
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             link: annotatedText,
           });
@@ -299,10 +309,11 @@ export class Shortcuts {
         }
         const start = selection.index - matchedText.length;
 
-        model.text?.insert(' ', selection.index);
+        model.store.transact(() => {
+          model.text?.insert(' ', selection.index);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(selection.index, 1);
           model.text?.delete(
             selection.index - hrefLink.length - 1,
             hrefLink.length + 1
