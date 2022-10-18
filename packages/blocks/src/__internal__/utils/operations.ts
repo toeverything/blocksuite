@@ -235,7 +235,6 @@ function formatModelsByRange(models: BaseBlockModel[], range: Range) {
     selection?.focusOffset as number
   );
   const firstQuill = firstRichText.quill;
-  debugger;
   firstRichText.model.text?.format(
     firstIndex,
     firstQuill.getLength() - firstIndex - 1,
