@@ -52,6 +52,11 @@ export async function assertText(page: Page, text: string) {
   expect(actual).toBe(text);
 }
 
+export async function assertTextContain(page: Page, text: string) {
+  const actual = await page.innerText('.ql-editor');
+  expect(actual).toContain(text);
+}
+
 export async function assertRichTexts(page: Page, texts: string[]) {
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
@@ -84,12 +89,19 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-export async function assertTextFormat(page: Page, resultObj: unknown) {
-  const actual = await page.evaluate(() => {
-    // @ts-ignore
-    const quill = document.querySelectorAll('rich-text')[0]?.quill!;
-    return quill.getFormat();
-  });
+export async function assertTextFormat(
+  page: Page,
+  resultObj: unknown,
+  index = 0
+) {
+  const actual = await page.evaluate(
+    ({ index }) => {
+      // @ts-ignore
+      const quill = document.querySelectorAll('rich-text')[0]?.quill!;
+      return quill.getFormat(index);
+    },
+    { index }
+  );
   expect(actual).toEqual(resultObj);
 }
 
