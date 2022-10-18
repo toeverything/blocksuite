@@ -3,7 +3,6 @@ import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 export type ParagraphType =
   | 'text'
   | 'quote'
-  | 'text'
   | 'h1'
   | 'h2'
   | 'h3'

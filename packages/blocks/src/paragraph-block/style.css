@@ -44,9 +44,8 @@
   font-size: 18px;
   line-height: 26px;
   padding-left: 12px;
-  margin-top: 9px;
-  margin-bottom: 9px;
-  color: #4c6275;
+  margin-top: 18px;
+  color: var(--affine-quote-color);
   position: relative;
 }
 .quote::after {
@@ -56,12 +55,24 @@
   position: absolute;
   left: 0;
   top: 0;
-  background: #4c6275;
+  background: var(--affine-quote-color);
   border-radius: 4px;
 }
 .text {
-  margin-top: 9px;
-  margin-bottom: 9px;
+  margin-top: 18px;
+}
+
+.text a {
+  color: var(--affine-link-color2);
+}
+
+a {
+  color: var(--affine-link-color);
+  text-decoration: none;
+}
+a:visited {
+  color: var(--affine-link-visited-color);
+  text-decoration: none;
 }
 
 strong {
@@ -69,16 +80,16 @@ strong {
 }
 
 code {
-  background: #f2f5f9;
-  color: #517ea6;
-  font-family: Roboto Mono;
+  background: var(--affine-code-background);
+  color: var(--affine-code-color);
+  font-family: var(--affine-font-family2);
   padding: 0 5px;
   border-radius: 2px;
 }
 
 u {
   text-decoration: none;
-  border-bottom: 1px solid #4c6275;
+  border-bottom: 1px solid var(--affine-text-color);
 }
 
 del {
