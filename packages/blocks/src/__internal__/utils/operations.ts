@@ -124,10 +124,9 @@ export function isCollapsedAtBlockStart(quill: Quill) {
   );
 }
 
-function deleteModelsByRange(
+function deleteModels(
   store: Store,
-  models: BaseBlockModel[],
-  range: Range
+  models: BaseBlockModel[]
 ) {
   const first = models[0];
   const last = models[models.length - 1];
@@ -136,6 +135,7 @@ function deleteModelsByRange(
   assertExists(firstRichText);
   assertExists(lastRichText);
   const selection = window.getSelection()
+  console.log('selection: ', selection);
   const firstTextIndex = getQuillIndexByNativeSelection(selection?.anchorNode, selection?.anchorOffset as number);
   const endTextIndex = getQuillIndexByNativeSelection(selection?.focusNode, selection?.focusOffset as number);
   store.transact(() => {
@@ -171,7 +171,7 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
     if (isMultiBlockRange(range)) {
       e.preventDefault();
       const intersectedModels = getModelsByRange(range);
-      deleteModelsByRange(store, intersectedModels, range);
+      deleteModels(store, intersectedModels);
     }
   }
 }

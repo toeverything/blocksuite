@@ -159,19 +159,27 @@ export function getRichTextByModel(model: BaseBlockModel) {
 }
 
 export function getModelsByRange(range: Range): BaseBlockModel[] {
-  const commonAncestor = range.commonAncestorContainer as HTMLElement;
-
-  if (commonAncestor instanceof Text) {
-    return [getStartModelBySelection()];
+  let commonAncestor = range.commonAncestorContainer as HTMLElement;
+  if(!commonAncestor.attributes.getNamedItem(ATTR)) {
+    commonAncestor = commonAncestor.closest(`[${ATTR}]`)?.parentElement as HTMLElement;
   }
-  const containerBlock = commonAncestor.closest(`[${ATTR}]`) as ContainerBlock;
-  assertExists(containerBlock.model);
-
-  const intersectedModels = containerBlock.model.children.filter(child => {
-    const blockElement = getBlockElementByModel(child);
-    return range.intersectsNode(blockElement);
-  });
-  return intersectedModels;
+  const intersectedModels:BaseBlockModel[] = []
+  let blockElementArray = commonAncestor.querySelectorAll(`[${ATTR}]`)
+  console.log('blockElementArray: ', blockElementArray);
+  if (blockElementArray.length > 1) {
+    blockElementArray.forEach(ele => {
+      const block = ele as ContainerBlock;
+      assertExists(block.model);
+      // @ts-ignore
+       const blockElement = getBlockElementByModel(block.model);
+         if(range.intersectsNode(blockElement)){
+          // @ts-ignore
+        intersectedModels.push(block.model);
+      }
+    })
+    return intersectedModels;
+  }
+  return [getStartModelBySelection()];
 }
 
 function mergeRect(a: DOMRect, b: DOMRect) {
