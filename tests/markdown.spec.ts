@@ -196,12 +196,20 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('www.a.com ');
+  await page.keyboard.type('[test](www.test.com) ');
   [id] = await getCursorBlockIdAndHeight(page);
-  await assertTextFormat(page, { link: 'www.a.com' });
+  await assertTextFormat(page, { link: 'www.test.com' });
   await undoByClick(page);
-  await assertRichTexts(page, ['www.a.com ']);
+  await assertRichTexts(page, ['[test](www.test.com) ']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+
+  await page.keyboard.type('www.test.com ');
+  [id] = await getCursorBlockIdAndHeight(page);
+  await assertTextFormat(page, { link: 'www.test.com' });
+  await undoByClick(page);
+  await assertRichTexts(page, ['www.test.com ']);
   await undoByClick(page);
   // todo
-  await assertRichTexts(page, ['\n']);
+  // await assertRichTexts(page, ['\n']);
 });

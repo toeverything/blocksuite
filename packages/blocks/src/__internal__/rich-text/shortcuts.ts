@@ -218,35 +218,6 @@ export class Shortcuts {
       },
     },
     {
-      name: 'link',
-      pattern:
-        /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
-      action: (
-        model: BaseBlockModel,
-        text: string,
-        selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
-      ) => {
-        const match = pattern.exec(text);
-        if (!match) {
-          return false;
-        }
-
-        const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
-        model.text?.insert(' ', startIndex + annotatedText.length);
-        model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          model.text?.format(startIndex, annotatedText.length, {
-            link: annotatedText,
-          });
-        });
-        return true;
-      },
-    },
-    {
       name: 'code',
       pattern: /(?:`)(.+?)(?:`)$/g,
       action: (
@@ -276,6 +247,70 @@ export class Shortcuts {
           });
           model.text?.delete(startIndex + annotatedText.length - 1, 1);
           model.text?.delete(startIndex, 1);
+        });
+        return true;
+      },
+    },
+    {
+      name: 'link',
+      pattern:
+        /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
+      action: (
+        model: BaseBlockModel,
+        text: string,
+        selection: RangeStatic,
+        pattern: RegExp,
+        lineStart: number
+      ) => {
+        const match = pattern.exec(text);
+        if (!match) {
+          return false;
+        }
+
+        const annotatedText = match[0];
+        const startIndex = lineStart + match.index;
+        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.captureSync();
+        model.store.transact(() => {
+          model.text?.delete(startIndex + annotatedText.length, 1);
+          model.text?.format(startIndex, annotatedText.length, {
+            link: annotatedText,
+          });
+        });
+        return true;
+      },
+    },
+    {
+      name: 'link',
+      pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
+      action: (
+        model: BaseBlockModel,
+        text: string,
+        selection: RangeStatic,
+        pattern: RegExp,
+        lineStart: number
+      ) => {
+        const startIndex = text.search(pattern);
+        const matchedText = text.match(pattern)?.[0];
+        const hrefText = text.match(/(?:\[(.*?)\])/g)?.[0];
+        const hrefLink = text.match(/(?:\((.*?)\))/g)?.[0];
+        if (startIndex === -1 || !matchedText || !hrefText || !hrefLink) {
+          return false;
+        }
+        const start = selection.index - matchedText.length;
+
+        model.text?.insert(' ', selection.index);
+        model.store.captureSync();
+        model.store.transact(() => {
+          model.text?.delete(selection.index, 1);
+          model.text?.delete(
+            selection.index - hrefLink.length - 1,
+            hrefLink.length + 1
+          );
+          model.text?.delete(start, 1);
+          model.text?.format(start, hrefText.length - 2, {
+            link: hrefLink.slice(1, hrefLink.length - 1),
+          });
         });
         return true;
       },
