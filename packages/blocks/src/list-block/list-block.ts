@@ -52,7 +52,11 @@ export class ListBlockComponent extends LitElement {
           shouldAddMarginTop ? 'affine-list-block-container--first' : ''
         }`}
       >
-        <div class="affine-list-rich-text-wrapper">
+        <div
+          class=${`affine-list-rich-text-wrapper ${
+            this.model.checked ? 'affine-list--checked' : ''
+          }`}
+        >
           <div
             style="cursor: pointer"
             @click="${() => {
