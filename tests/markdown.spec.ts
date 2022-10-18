@@ -141,14 +141,10 @@ test('markdown inline-text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await focusRichText(page);
 
-  await page.evaluate(() => {
-    // @ts-ignore
-    window.store.captureSync();
-  });
-  let id: string | null = null;
+  // @ts-ignore
+  await page.evaluate(() => window.store.captureSync());
 
   await page.keyboard.type('***test*** ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { bold: true, italic: true });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 6, {});
@@ -158,7 +154,6 @@ test('markdown inline-text', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 
   await page.keyboard.type('**test** ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { bold: true });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 6, {});
@@ -168,7 +163,6 @@ test('markdown inline-text', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 
   await page.keyboard.type('*test* ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { italic: true });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 6, {});
@@ -178,7 +172,6 @@ test('markdown inline-text', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 
   await page.keyboard.type('~~test~~ ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { strike: true });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 6, {});
@@ -188,7 +181,6 @@ test('markdown inline-text', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 
   await page.keyboard.type('~test~ ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { underline: true });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 6, {});
@@ -198,7 +190,6 @@ test('markdown inline-text', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 
   await page.keyboard.type('`test` ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { code: true });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 6, {});
@@ -208,7 +199,6 @@ test('markdown inline-text', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 
   await page.keyboard.type('[test](www.test.com) ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 6, {});
@@ -218,7 +208,6 @@ test('markdown inline-text', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 
   await page.keyboard.type('www.test.com ');
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
   await page.keyboard.type('test');
   await assertTextFormat(page, 0, 13, {});
