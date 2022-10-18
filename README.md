@@ -1,6 +1,10 @@
 # BlockSuite
 
-BlockSuite is a collaborative editor framework designed to reliably embed any Web content.
+<a href="./package.json">
+  <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300"/>
+</a>
+
+BlockSuite is a collaborative editing framework designed to reliably reconcile any Web content.
 
 > ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
 
