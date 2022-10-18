@@ -130,6 +130,11 @@ export class EdgelessPageBlockComponent
           box-sizing: border-box;
           overflow: hidden;
           height: 100%;
+          font-family: var(--affine-font-family);
+          font-size: 18px;
+          line-height: 26px;
+          color: var(--affine-text-color);
+          font-weight: 400;
         }
       </style>
       <div class="affine-edgeless-page-block-container">
