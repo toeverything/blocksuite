@@ -1,10 +1,77 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { createEvent } from '../../../utils';
 import { ConfirmIcon, CopyIcon, EditIcon } from './button';
+
+const editLinkStyle = css`
+  .affine-link-edit-popover {
+    box-sizing: border-box;
+    width: 382px;
+    height: 128px;
+    padding: 24px;
+    box-shadow: var(--affine-popover-shadow);
+    border-radius: 0px 10px 10px 10px;
+
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: repeat(2, 1fr);
+    gap: 12px;
+    grid-template-areas:
+      'text text-input .'
+      'link link-input btn';
+    justify-items: center;
+    align-items: center;
+  }
+
+  input {
+    box-sizing: border-box;
+    padding: 6px 12px;
+    width: 260px;
+    height: 34px;
+    color: inherit;
+
+    border: 1px solid #e0e6eb;
+    border-radius: 10px;
+    outline-color: var(--affine-primary-color);
+  }
+
+  input::placeholder {
+    color: var(--affine-placeholder-color);
+  }
+
+  .affine-edit-text-text {
+    grid-area: text;
+  }
+
+  .affine-edit-text-input {
+    grid-area: text-input;
+  }
+
+  .affine-edit-link-text {
+    grid-area: link;
+  }
+
+  .affine-edit-link-input {
+    grid-area: link-input;
+  }
+
+  .affine-confirm-button {
+    grid-area: btn;
+  }
+`;
 
 @customElement('edit-link-panel')
 export class LinkPopover extends LitElement {
   static styles = css`
+    .overlay-container {
+      font-family: var(--affine-font-family);
+      font-style: normal;
+      line-height: 24px;
+      font-size: var(--affine-font-sm);
+      color: var(--affine-popover-color);
+      z-index: var(--affine-z-index-popover);
+    }
+
     .overlay-mask {
       position: fixed;
       top: 0;
@@ -21,20 +88,16 @@ export class LinkPopover extends LitElement {
       padding: 0 12px;
 
       background: var(--affine-popover-background);
-      box-shadow: var(--affine-box-shadow);
+      box-shadow: var(--affine-popover-shadow);
       border-radius: 0px 10px 10px 10px;
     }
 
     .affine-link-popover-input {
       flex: 1;
-      font-family: var(--affine-font-family);
-      font-style: normal;
-      line-height: 24px;
-      font-size: var(--affine-font-sm);
-      color: var(--affine-popover-color);
       border: 0;
       outline-width: 0;
     }
+
     .affine-link-popover-input:disabled {
       background-color: transparent;
     }
@@ -50,9 +113,7 @@ export class LinkPopover extends LitElement {
       background-color: #e0e6eb;
     }
 
-    .affine-link-popover-btn-container {
-      display: flex;
-    }
+    ${editLinkStyle}
   `;
 
   @property()
@@ -62,10 +123,16 @@ export class LinkPopover extends LitElement {
   top = '0px';
 
   @property()
+  type: 'create' | 'edit' = 'create';
+
+  @property()
   showMask = true;
 
   @property()
-  preview = '';
+  text = '';
+
+  @property()
+  previewLink = '';
 
   @state()
   link = '';
@@ -73,8 +140,11 @@ export class LinkPopover extends LitElement {
   @state()
   bodyOverflowStyle = '';
 
-  @query('input')
-  input: HTMLInputElement | undefined;
+  @query('#text-input')
+  textInput: HTMLInputElement | undefined;
+
+  @query('#link-input')
+  linkInput: HTMLInputElement | undefined;
 
   connectedCallback() {
     super.connectedCallback();
@@ -95,32 +165,39 @@ export class LinkPopover extends LitElement {
 
   private hide() {
     this.dispatchEvent(
-      new CustomEvent<ConfirmDetail>('confirmLink', { detail: { link: null } })
+      new CustomEvent<LinkDetail>('updateLink', {
+        detail: { type: 'cancel' },
+      })
     );
   }
 
   private onConfirm() {
-    const link = this.input?.value?.trim() ?? null;
+    const link = this.linkInput?.value?.trim() ?? null;
+    const text = this.textInput?.value ?? undefined;
     if (!link) {
       // TODO invalid link checking
       return;
     }
-    const options = {
-      detail: { link },
-    };
-    this.dispatchEvent(new CustomEvent<ConfirmDetail>('confirmLink', options));
+
+    this.dispatchEvent(
+      createEvent('updateLink', {
+        type: 'confirm',
+        link,
+        text,
+      })
+    );
     return;
   }
 
   private onCopy(e: MouseEvent) {
-    navigator.clipboard.writeText(this.preview);
+    navigator.clipboard.writeText(this.previewLink);
     // TODO show toast
     // Toast.show('Copied link to clipboard');
     console.log('Copied link to clipboard');
   }
 
   private onEdit(e: MouseEvent) {
-    this.dispatchEvent(new CustomEvent('editLink'));
+    this.dispatchEvent(createEvent('editLink', null));
   }
 
   private onKeyup(e: KeyboardEvent) {
@@ -131,23 +208,78 @@ export class LinkPopover extends LitElement {
     return;
   }
 
-  render() {
-    const mask = this.showMask
-      ? html`<div class="overlay-mask" @click="${this.hide}"></div>`
-      : html``;
+  confirmBtnTemplate() {
+    return html`<icon-button
+      class="affine-confirm-button"
+      @click=${this.onConfirm}
+      >${ConfirmIcon({
+        width: '11px',
+        height: '8px',
+      })}</icon-button
+    >`;
+  }
 
-    const buttons = this.preview
+  createTemplate() {
+    const buttons = this.previewLink
       ? html`<icon-button @click=${this.onCopy}
             >${CopyIcon({ width: '10px', height: '11px' })}</icon-button
           ><icon-button @click=${this.onEdit}
             >${EditIcon({ width: '11px', height: '11px' })}</icon-button
           >`
-      : html`<icon-button @click=${this.onConfirm}
-          >${ConfirmIcon({
-            width: '11px',
-            height: '8px',
-          })}</icon-button
-        >`;
+      : this.confirmBtnTemplate();
+    return html`<div class="affine-link-popover" style=${this.style.cssText}>
+      <input
+        class="affine-link-popover-input"
+        ?disabled=${this.previewLink}
+        ?autofocus=${!this.previewLink}
+        id="link-input"
+        type="text"
+        spellcheck="false"
+        placeholder="Paste or type a link"
+        value=${this.previewLink}
+        @keyup=${this.onKeyup}
+      />
+      <span class="affine-link-popover-dividing-line"></span>
+      ${buttons}
+    </div>`;
+  }
+
+  editTemplate() {
+    return html`<div
+      class="affine-link-edit-popover"
+      style=${this.style.cssText}
+    >
+      <label class="affine-edit-text-text" for="text-input">Text</label>
+      <input
+        class="affine-edit-text-input"
+        id="text-input"
+        type="text"
+        placeholder="Enter text"
+        value=${this.text}
+        @keyup=${this.onKeyup}
+      />
+      <label class="affine-edit-link-text" for="link-input">Link</label>
+      <input
+        class="affine-edit-link-input"
+        id="link-input"
+        type="text"
+        autofocus="true"
+        spellcheck="false"
+        placeholder="Paste or type a link"
+        value=${this.previewLink}
+        @keyup=${this.onKeyup}
+      />
+      ${this.confirmBtnTemplate()}
+    </div>`;
+  }
+
+  render() {
+    const mask = this.showMask
+      ? html`<div class="overlay-mask" @click="${this.hide}"></div>`
+      : html``;
+
+    const popover =
+      this.type === 'create' ? this.createTemplate() : this.editTemplate();
 
     return html`
       <div class="overlay-root">
@@ -156,20 +288,7 @@ export class LinkPopover extends LitElement {
           class="overlay-container"
           style="position: absolute; left: ${this.left}; top: ${this.top};"
         >
-          <div class="affine-link-popover">
-            <input
-              class="affine-link-popover-input"
-              disabled=${this.preview ? true : false}
-              autofocus=${this.preview ? false : true}
-              type="text"
-              spellcheck="false"
-              placeholder="Paste or type a link"
-              value=${this.preview}
-              @keyup=${this.onKeyup}
-            />
-            <span class="affine-link-popover-dividing-line"></span>
-            <div class="affine-link-popover-btn-container">${buttons}</div>
-          </div>
+          ${popover}
         </div>
       </div>
     `;
@@ -182,11 +301,14 @@ declare global {
   }
 }
 
-type ConfirmDetail = { link: string | null };
+export type LinkDetail =
+  | { type: 'cancel' }
+  | { type: 'confirm'; link: string; text?: string }
+  | { type: 'remove' };
 
 declare global {
   interface HTMLElementEventMap {
-    confirmLink: CustomEvent<ConfirmDetail>;
+    updateLink: CustomEvent<LinkDetail>;
     editLink: CustomEvent<null>;
   }
 }

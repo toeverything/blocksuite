@@ -1,9 +1,10 @@
 import { noop } from '../../../utils';
+import { LinkDetail } from './link-popover';
 
 const createEditLinkElement = (
   anchorEl: HTMLElement,
   container: HTMLElement,
-  { showMask, preview }: { showMask: boolean; preview: string }
+  { showMask, previewLink }: { showMask: boolean; previewLink: string }
 ) => {
   const rect = anchorEl.getBoundingClientRect();
   const bodyRect = document.body.getBoundingClientRect();
@@ -11,10 +12,11 @@ const createEditLinkElement = (
   const offsetY = 5;
 
   const ele = document.createElement('edit-link-panel');
-  ele.left = `${rect.left}px`;
+  ele.left = `${(rect.left + rect.right) / 2}px`;
   ele.top = `${offset + offsetY}px`;
   ele.showMask = showMask;
-  ele.preview = preview;
+  ele.previewLink = previewLink;
+  ele.style.transform = `translateX(-50%)`;
   container.appendChild(ele);
   return ele;
 };
@@ -37,7 +39,6 @@ const bindHoverState = (
     // if the mouse entered the popover immediately
     // after leaving the target (or vice versa).
     timer = window.setTimeout(() => {
-      // DEBUG
       controller.abort();
     }, hoverCloseDelay);
   };
@@ -57,22 +58,19 @@ const bindHoverState = (
   };
 };
 
-type LinkState =
-  | { type: 'cancel' }
-  | { type: 'confirm'; link: string }
-  | { type: 'remove' };
-
 export const showLinkPopover = async ({
   anchorEl,
   container = document.body,
-  preview = '',
+  text = '',
+  link = '',
   showMask = true,
   interactionKind = 'always',
   signal = new AbortController(),
 }: {
   anchorEl: HTMLElement;
   container?: HTMLElement;
-  preview?: string;
+  text?: string;
+  link?: string;
   /**
    * Whether to show a mask behind the popover.
    */
@@ -82,7 +80,7 @@ export const showLinkPopover = async ({
    */
   interactionKind?: 'always' | 'hover';
   signal?: AbortController;
-}): Promise<LinkState> => {
+}): Promise<LinkDetail> => {
   if (!anchorEl) {
     throw new Error("Can't show tooltip without anchor element!");
   }
@@ -92,7 +90,7 @@ export const showLinkPopover = async ({
 
   const editLinkEle = createEditLinkElement(anchorEl, container, {
     showMask,
-    preview,
+    previewLink: link,
   });
 
   const unsubscribeHoverAbort =
@@ -111,22 +109,18 @@ export const showLinkPopover = async ({
         return;
       }
 
+      editLinkEle.type = 'edit';
       editLinkEle.showMask = true;
+      editLinkEle.text = text;
       unsubscribeHoverAbort();
     });
 
-    editLinkEle.addEventListener('confirmLink', e => {
+    editLinkEle.addEventListener('updateLink', e => {
       if (signal.signal.aborted) {
         return;
       }
-
       editLinkEle.remove();
-      const link = e.detail.link;
-      if (!link) {
-        res({ type: 'cancel' });
-        return;
-      }
-      res({ type: 'confirm', link });
+      res(e.detail);
     });
   });
 };

@@ -91,6 +91,10 @@ export class IconButton extends LitElement {
       background: transparent;
       fill: var(--affine-primary-color);
     }
+
+    :host(:disabled) {
+      cursor: not-allowed;
+    }
   `;
 
   render() {
