@@ -159,19 +159,36 @@ export function getRichTextByModel(model: BaseBlockModel) {
 }
 
 export function getModelsByRange(range: Range): BaseBlockModel[] {
-  const commonAncestor = range.commonAncestorContainer as HTMLElement;
-
-  if (commonAncestor instanceof Text) {
+  let commonAncestor = range.commonAncestorContainer as HTMLElement;
+  if (commonAncestor.nodeType === Node.TEXT_NODE) {
     return [getStartModelBySelection()];
   }
-  const containerBlock = commonAncestor.closest(`[${ATTR}]`) as ContainerBlock;
-  assertExists(containerBlock.model);
-
-  const intersectedModels = containerBlock.model.children.filter(child => {
-    const blockElement = getBlockElementByModel(child);
-    return range.intersectsNode(blockElement);
-  });
-  return intersectedModels;
+  if (
+    commonAncestor.attributes &&
+    !commonAncestor.attributes.getNamedItem(ATTR)
+  ) {
+    commonAncestor = commonAncestor.closest(`[${ATTR}]`)
+      ?.parentElement as HTMLElement;
+  }
+  const intersectedModels: BaseBlockModel[] = [];
+  const blockElementArray = commonAncestor.querySelectorAll(`[${ATTR}]`);
+  if (blockElementArray.length > 1) {
+    blockElementArray.forEach(ele => {
+      const block = ele as ContainerBlock;
+      assertExists(block.model);
+      // @ts-ignore
+      const blockElement = getBlockElementByModel(block.model);
+      if (
+        range.intersectsNode(blockElement) &&
+        blockElement.tagName !== 'GROUP-BLOCK'
+      ) {
+        // @ts-ignore
+        intersectedModels.push(block.model);
+      }
+    });
+    return intersectedModels;
+  }
+  return [getStartModelBySelection()];
 }
 
 export function getModelByElement(element: Element): BaseBlockModel {

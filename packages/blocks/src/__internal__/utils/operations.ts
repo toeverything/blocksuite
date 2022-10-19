@@ -8,17 +8,14 @@ import {
   getStartModelBySelection,
   getRichTextByModel,
   getModelsByRange,
-  getDOMRectByLine,
 } from './query';
 import {
-  focusRichTextStart,
   getCurrentRange,
   isCollapsedSelection,
   isMultiBlockRange,
   isNoneSelection,
   isRangeSelection,
 } from './selection';
-import type { RichText } from '../rich-text/rich-text';
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {
@@ -124,72 +121,36 @@ export function isCollapsedAtBlockStart(quill: Quill) {
   );
 }
 
-function binarySearch(
-  quill: Quill,
-  target: DOMRect,
-  key: 'left' | 'right',
-  start: number,
-  end: number
-): number {
-  if (start === end) return start;
-
-  const mid = Math.floor((start + end) / 2);
-  if (target[key] < quill.getBounds(mid)[key]) {
-    return binarySearch(quill, target, key, start, mid);
-  }
-  if (target[key] > quill.getBounds(mid)[key]) {
-    return binarySearch(quill, target, key, mid + 1, end);
-  }
-  return mid;
-}
-
-function partialDeleteRichTextByRange(
-  richText: RichText,
-  range: Range,
-  lineType: 'first' | 'last'
-) {
-  const { quill } = richText;
-  const length = quill.getLength();
-  const rangeRects = range.getClientRects();
-  const target = getDOMRectByLine(rangeRects, lineType);
-
-  const key = lineType === 'first' ? 'left' : 'right';
-  const index = binarySearch(quill, target, key, 0, length - 1);
-  // quill length = model text length + 1
-  const modelIndex = index - 1;
-  const text = richText.model.text;
-  assertExists(text);
-
-  if (lineType === 'first') {
-    text.delete(modelIndex, text.length - modelIndex);
-  } else if (lineType === 'last') {
-    text.delete(0, modelIndex);
-  }
-}
-
-function deleteModelsByRange(
-  store: Store,
-  models: BaseBlockModel[],
-  range: Range
-) {
+function deleteModels(store: Store, models: BaseBlockModel[]) {
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
-
+  const selection = window.getSelection();
+  console.log('selection: ', selection);
+  const firstTextIndex = getQuillIndexByNativeSelection(
+    selection?.anchorNode,
+    selection?.anchorOffset as number
+  );
+  const endTextIndex = getQuillIndexByNativeSelection(
+    selection?.focusNode,
+    selection?.focusOffset as number
+  );
   store.transact(() => {
-    partialDeleteRichTextByRange(firstRichText, range, 'first');
-    partialDeleteRichTextByRange(lastRichText, range, 'last');
+    firstRichText.model.text?.delete(
+      firstTextIndex,
+      firstRichText.model.text.length - firstTextIndex
+    );
+    lastRichText.model.text?.delete(0, endTextIndex);
+    firstRichText.model.text?.join(lastRichText.model.text as Text);
+    // delete models in between
+    for (let i = 1; i <= models.length - 1; i++) {
+      store.deleteBlock(models[i]);
+    }
   });
-
-  // delete models in between
-  for (let i = 1; i < models.length - 1; i++) {
-    store.deleteBlock(models[i]);
-  }
-
-  focusRichTextStart(lastRichText);
+  firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
 export function handleBackspace(store: Store, e: KeyboardEvent) {
@@ -213,7 +174,7 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
     if (isMultiBlockRange(range)) {
       e.preventDefault();
       const intersectedModels = getModelsByRange(range);
-      deleteModelsByRange(store, intersectedModels, range);
+      deleteModels(store, intersectedModels);
     }
   }
 }
@@ -268,6 +229,7 @@ function formatModelsByRange(
       });
     }
   });
+  lastRichText.quill.setSelection(endIndex, 0);
 }
 
 function getQuillIndexByNativeSelection(
@@ -278,7 +240,7 @@ function getQuillIndexByNativeSelection(
   let lastNode = ele;
   let selfAdded = false;
   // @ts-ignore
-  while ( !lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
+  while (!lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
     if (!selfAdded) {
       selfAdded = true;
       offset += nodeOffset;
