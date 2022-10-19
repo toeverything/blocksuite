@@ -2,7 +2,7 @@
 import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { DeltaOperation, Quill } from 'quill';
-import type { Store } from './store';
+import { Store } from './store';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';
 
@@ -86,8 +86,14 @@ export class PrelimText {
 }
 
 export class Text {
+  private _store: Store;
   private _yText: Y.Text;
-  constructor(input: Y.Text | string) {
+
+  // TODO toggle transact by options
+  private _shouldTransact = true;
+
+  constructor(store: Store, input: Y.Text | string) {
+    this._store = store;
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
     } else {
@@ -95,8 +101,8 @@ export class Text {
     }
   }
 
-  static fromDelta(delta: DeltaOperation[]) {
-    const result = new Text('');
+  static fromDelta(store: Store, delta: DeltaOperation[]) {
+    const result = new Text(store, '');
     result.applyDelta(delta);
     return result;
   }
@@ -105,8 +111,13 @@ export class Text {
     return this._yText.length;
   }
 
+  private _transact(callback: () => void) {
+    const { _store, _shouldTransact: _shouldTransact } = this;
+    _shouldTransact ? _store.transact(callback) : callback();
+  }
+
   clone() {
-    return new Text(this._yText.clone());
+    return new Text(this._store, this._yText.clone());
   }
 
   split(index: number): [PrelimText, PrelimText] {
@@ -118,40 +129,52 @@ export class Text {
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   insert(content: string, index: number, attributes?: Object) {
-    this._yText.insert(index, content, attributes);
-    // @ts-ignore
-    this._yText.meta = { split: true };
+    this._transact(() => {
+      this._yText.insert(index, content, attributes);
+      // @ts-ignore
+      this._yText.meta = { split: true };
+    });
   }
 
   join(other: Text) {
-    const yOther = other._yText;
-    const delta = yOther.toDelta();
-    delta.splice(0, 0, { retain: this._yText.length });
-    this._yText.applyDelta(delta);
-    // @ts-ignore
-    this._yText.meta = { join: true };
+    this._transact(() => {
+      const yOther = other._yText;
+      const delta = yOther.toDelta();
+      delta.splice(0, 0, { retain: this._yText.length });
+      this._yText.applyDelta(delta);
+      // @ts-ignore
+      this._yText.meta = { join: true };
+    });
   }
 
   format(index: number, length: number, format: any) {
-    this._yText.format(index, length, format);
-    // @ts-ignore
-    this._yText.meta = { format: true };
+    this._transact(() => {
+      this._yText.format(index, length, format);
+      // @ts-ignore
+      this._yText.meta = { format: true };
+    });
   }
 
   delete(index: number, length: number) {
-    this._yText.delete(index, length);
-    // @ts-ignore
-    this._yText.meta = { delete: true };
+    this._transact(() => {
+      this._yText.delete(index, length);
+      // @ts-ignore
+      this._yText.meta = { delete: true };
+    });
   }
 
   clear() {
-    this._yText.delete(0, this._yText.length);
-    // @ts-ignore
-    this._yText.meta = { clear: true };
+    this._transact(() => {
+      this._yText.delete(0, this._yText.length);
+      // @ts-ignore
+      this._yText.meta = { clear: true };
+    });
   }
 
   applyDelta(delta: any) {
-    this._yText.applyDelta(delta);
+    this._transact(() => {
+      this._yText.applyDelta(delta);
+    });
   }
 
   toDelta() {

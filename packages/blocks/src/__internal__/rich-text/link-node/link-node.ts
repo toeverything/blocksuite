@@ -68,9 +68,7 @@ export class LinkNodeComponent extends LitElement {
     const store = model.store;
 
     store.captureSync();
-    store.transact(() => {
-      model.text?.format(blot.offset(), blot.length(), { link });
-    });
+    model.text?.format(blot.offset(), blot.length(), { link });
   }
 
   async onHoverEnd(e: Event) {

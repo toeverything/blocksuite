@@ -170,12 +170,20 @@ export function handleKeyDown(
     // if cursor is on the last line and has no text, height is 0
     if (height === 0 && bottom === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
+      const nextBlock = getNextBlock(model.id);
+      if (!nextBlock) {
+        return ALLOW_DEFAULT;
+      }
       rect && focusNextBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
     }
     // TODO resolve compatible problem
     const newRange = caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
+      const nextBlock = getNextBlock(model.id);
+      if (!nextBlock) {
+        return ALLOW_DEFAULT;
+      }
       focusNextBlock(model, new Point(left, bottom));
       return PREVENT_DEFAULT;
     }

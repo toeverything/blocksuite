@@ -60,22 +60,20 @@ export class Shortcuts {
           return false;
         }
 
-        model.store.transact(() => {
-          model.text?.insert(' ', startIndex + annotatedText.length);
-        });
+        model.text?.insert(' ', startIndex + annotatedText.length);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(startIndex, annotatedText.length, {
-            bold: true,
-            italic: true,
-          });
-          quill.setSelection(startIndex + annotatedText.length + 1, 0);
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          model.text?.delete(startIndex + annotatedText.length - 3, 3);
-          model.text?.delete(startIndex, 3);
-          quill.format('bold', false);
-          quill.format('italic', false);
+        model.text?.format(startIndex, annotatedText.length, {
+          bold: true,
+          italic: true,
         });
+        quill.setSelection(startIndex + annotatedText.length + 1, 0);
+
+        model.text?.delete(startIndex + annotatedText.length, 1);
+        model.text?.delete(startIndex + annotatedText.length - 3, 3);
+        model.text?.delete(startIndex, 3);
+        quill.format('bold', false);
+        quill.format('italic', false);
+
         return true;
       },
     },
@@ -99,20 +97,18 @@ export class Shortcuts {
         if (text.match(/^([* \n]+)$/g)) {
           return false;
         }
-        model.store.transact(() => {
-          model.text?.insert(' ', startIndex + annotatedText.length);
-        });
+        model.text?.insert(' ', startIndex + annotatedText.length);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(startIndex, annotatedText.length, {
-            bold: true,
-          });
-          quill.setSelection(startIndex + annotatedText.length + 1, 0);
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          model.text?.delete(startIndex + annotatedText.length - 2, 2);
-          model.text?.delete(startIndex, 2);
-          quill.format('bold', false);
+        model.text?.format(startIndex, annotatedText.length, {
+          bold: true,
         });
+        quill.setSelection(startIndex + annotatedText.length + 1, 0);
+
+        model.text?.delete(startIndex + annotatedText.length, 1);
+        model.text?.delete(startIndex + annotatedText.length - 2, 2);
+        model.text?.delete(startIndex, 2);
+        quill.format('bold', false);
+
         return true;
       },
     },
@@ -137,20 +133,17 @@ export class Shortcuts {
           return false;
         }
 
-        model.store.transact(() => {
-          model.text?.insert(' ', startIndex + annotatedText.length);
-        });
+        model.text?.insert(' ', startIndex + annotatedText.length);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(startIndex, annotatedText.length, {
-            italic: true,
-          });
-          quill.setSelection(startIndex + annotatedText.length + 1, 0);
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          model.text?.delete(startIndex + annotatedText.length - 1, 1);
-          model.text?.delete(startIndex, 1);
-          quill.format('italic', false);
+        model.text?.format(startIndex, annotatedText.length, {
+          italic: true,
         });
+        quill.setSelection(startIndex + annotatedText.length + 1, 0);
+
+        model.text?.delete(startIndex + annotatedText.length, 1);
+        model.text?.delete(startIndex + annotatedText.length - 1, 1);
+        model.text?.delete(startIndex, 1);
+        quill.format('italic', false);
         return true;
       },
     },
@@ -175,20 +168,18 @@ export class Shortcuts {
           return false;
         }
 
-        model.store.transact(() => {
-          model.text?.insert(' ', startIndex + annotatedText.length);
-        });
+        model.text?.insert(' ', startIndex + annotatedText.length);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(startIndex, annotatedText.length, {
-            strike: true,
-          });
-          quill.setSelection(startIndex + annotatedText.length + 1, 0);
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          model.text?.delete(startIndex + annotatedText.length - 2, 2);
-          model.text?.delete(startIndex, 2);
-          quill.format('strike', false);
+        model.text?.format(startIndex, annotatedText.length, {
+          strike: true,
         });
+        quill.setSelection(startIndex + annotatedText.length + 1, 0);
+
+        model.text?.delete(startIndex + annotatedText.length, 1);
+        model.text?.delete(startIndex + annotatedText.length - 2, 2);
+        model.text?.delete(startIndex, 2);
+        quill.format('strike', false);
+
         return true;
       },
     },
@@ -213,21 +204,19 @@ export class Shortcuts {
           return false;
         }
 
-        model.store.transact(() => {
-          model.text?.insert(' ', selection.index);
-        });
+        model.text?.insert(' ', selection.index);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(startIndex, annotatedText.length, {
-            underline: true,
-          });
-          quill.setSelection(startIndex + annotatedText.length + 1, 0);
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          model.text?.delete(selection.index, 1);
-          model.text?.delete(selection.index - 1, 1);
-          model.text?.delete(startIndex, 1);
-          quill.format('underline', false);
+        model.text?.format(startIndex, annotatedText.length, {
+          underline: true,
         });
+        quill.setSelection(startIndex + annotatedText.length + 1, 0);
+
+        model.text?.delete(startIndex + annotatedText.length, 1);
+        model.text?.delete(selection.index, 1);
+        model.text?.delete(selection.index - 1, 1);
+        model.text?.delete(startIndex, 1);
+        quill.format('underline', false);
+
         return true;
       },
     },
@@ -252,20 +241,18 @@ export class Shortcuts {
           return false;
         }
 
-        model.store.transact(() => {
-          model.text?.insert(' ', startIndex + annotatedText.length);
-        });
+        model.text?.insert(' ', startIndex + annotatedText.length);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(startIndex, annotatedText.length, {
-            code: true,
-          });
-          quill.setSelection(startIndex + annotatedText.length + 1, 0);
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          model.text?.delete(startIndex + annotatedText.length - 1, 1);
-          model.text?.delete(startIndex, 1);
-          quill.format('code', false);
+        model.text?.format(startIndex, annotatedText.length, {
+          code: true,
         });
+
+        quill.setSelection(startIndex + annotatedText.length + 1, 0);
+        model.text?.delete(startIndex + annotatedText.length, 1);
+        model.text?.delete(startIndex + annotatedText.length - 1, 1);
+        model.text?.delete(startIndex, 1);
+        quill.format('code', false);
+
         return true;
       },
     },
@@ -287,18 +274,17 @@ export class Shortcuts {
 
         const annotatedText = match[0];
         const startIndex = selection.index - annotatedText.length;
-        model.store.transact(() => {
-          model.text?.insert(' ', startIndex + annotatedText.length);
-        });
+
+        model.text?.insert(' ', startIndex + annotatedText.length);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(startIndex, annotatedText.length, {
-            link: annotatedText,
-          });
-          quill.setSelection(startIndex + annotatedText.length + 1, 0);
-          model.text?.delete(startIndex + annotatedText.length, 1);
-          quill.format('link', false);
+        model.text?.format(startIndex, annotatedText.length, {
+          link: annotatedText,
         });
+        quill.setSelection(startIndex + annotatedText.length + 1, 0);
+
+        model.text?.delete(startIndex + annotatedText.length, 1);
+        quill.format('link', false);
+
         return true;
       },
     },
@@ -321,23 +307,21 @@ export class Shortcuts {
         }
         const start = selection.index - matchedText.length;
 
-        model.store.transact(() => {
-          model.text?.insert(' ', selection.index);
-        });
+        model.text?.insert(' ', selection.index);
         model.store.captureSync();
-        model.store.transact(() => {
-          model.text?.format(start, hrefText.length, {
-            link: hrefLink.slice(1, hrefLink.length - 1),
-          });
-          quill.setSelection(startIndex + matchedText.length + 1, 0);
-          model.text?.delete(startIndex + matchedText.length, 1);
-          model.text?.delete(
-            selection.index - hrefLink.length - 1,
-            hrefLink.length + 1
-          );
-          model.text?.delete(start, 1);
-          quill.format('link', false);
+        model.text?.format(start, hrefText.length, {
+          link: hrefLink.slice(1, hrefLink.length - 1),
         });
+        quill.setSelection(startIndex + matchedText.length + 1, 0);
+
+        model.text?.delete(startIndex + matchedText.length, 1);
+        model.text?.delete(
+          selection.index - hrefLink.length - 1,
+          hrefLink.length + 1
+        );
+        model.text?.delete(start, 1);
+        quill.format('link', false);
+
         return true;
       },
     },
