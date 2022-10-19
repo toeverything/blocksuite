@@ -81,7 +81,7 @@ export class DebugMenu extends LitElement {
     this.store.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},300,50]`;
+    const xywh = `[0,${count * 60},300,200]`;
 
     const groupId = this.store.addBlock<GroupBlockModel>(
       { flavour: 'group', xywh },
