@@ -8,17 +8,14 @@ import {
   getStartModelBySelection,
   getRichTextByModel,
   getModelsByRange,
-  getDOMRectByLine,
 } from './query';
 import {
-  focusRichTextStart,
   getCurrentRange,
   isCollapsedSelection,
   isMultiBlockRange,
   isNoneSelection,
   isRangeSelection,
 } from './selection';
-import type { RichText } from '../rich-text/rich-text';
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {
