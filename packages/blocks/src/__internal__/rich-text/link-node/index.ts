@@ -1,5 +1,5 @@
 import './link-node';
-import './edit-link-popover';
+import './link-popover';
 
 export { LinkNodeComponent } from './link-node';
 export { createLink } from './create-link';

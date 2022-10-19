@@ -65,8 +65,17 @@ declare global {
   }
 }
 
-export type Detail<T extends keyof WindowEventMap> = WindowEventMap[T] extends {
-  detail: unknown;
-}
-  ? WindowEventMap[T]['detail']
-  : unknown;
+export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
+  T extends keyof WindowEventMap
+    ? WindowEventMap[T] extends {
+        detail: unknown;
+      }
+      ? WindowEventMap[T]['detail']
+      : unknown
+    : T extends keyof HTMLElementEventMap
+    ? HTMLElementEventMap[T] extends {
+        detail: unknown;
+      }
+      ? HTMLElementEventMap[T]['detail']
+      : unknown
+    : unknown;
