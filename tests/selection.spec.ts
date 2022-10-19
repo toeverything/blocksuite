@@ -11,6 +11,7 @@ import {
   fillLine,
   addGroupByClick,
   initThreeParagraphs,
+  undoByKeyboard,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -21,7 +22,6 @@ import {
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
-
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -49,39 +49,36 @@ test('click on blank area', async ({ page }) => {
   await page.mouse.click(below789.x, below789.y);
   await assertSelection(page, 2, 0, 0);
 });
-// TODO: test click on blank area with selection
-test.skip('native range delete', async ({ page }) => {
-  await enterPlaygroundRoom(page);
 
-  await focusRichText(page);
-  await page.keyboard.type('123');
-  await pressEnter(page);
-  await page.keyboard.type('456');
-  await pressEnter(page);
-  await page.keyboard.type('789');
+test('native range delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const above123 = await page.evaluate(() => {
+  const topLeft123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top };
+    return { x: bbox.left, y: bbox.top - 2 };
   });
 
-  const below789 = await page.evaluate(() => {
+  const bottomRight789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right, y: bbox.bottom + 5 };
+    return { x: bbox.right, y: bbox.bottom };
   });
 
-  await dragBetweenCoords(page, above123, below789);
+  await dragBetweenCoords(page, topLeft123, bottomRight789);
   await page.keyboard.press('Backspace');
-  await assertBlockCount(page, 'paragraph', 2);
-  await assertRichTexts(page, ['12', '9']); // FIXME
+  await assertBlockCount(page, 'paragraph', 0);
+  await assertRichTexts(page, []);
+
+  // FIXME
+  // await undoByKeyboard(page);
+  // await assertRichTexts(page, ['123', '456', '789']);
 });
-// TODO: native with selection change
+
 test('block level range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
-
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -94,13 +91,17 @@ test('block level range delete', async ({ page }) => {
   const below789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right, y: bbox.bottom + 5 };
+    return { x: bbox.right - 10, y: bbox.bottom + 10 };
   });
 
-  await dragBetweenCoords(page, above123, below789);
+  await dragBetweenCoords(page, below789, above123);
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 0);
   await assertRichTexts(page, []);
+
+  // FIXME
+  // await undoByKeyboard(page);
+  // await assertRichTexts(page, ['123', '456', '789']);
 });
 
 test('cursor move up and down', async ({ page }) => {
