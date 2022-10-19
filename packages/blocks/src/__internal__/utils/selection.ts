@@ -169,8 +169,8 @@ export function handleKeyDown(
     if (height === 0 && bottom === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
       const nextBlock = getNextBlock(model.id);
-      if(!nextBlock) {
-        return ALLOW_DEFAULT
+      if (!nextBlock) {
+        return ALLOW_DEFAULT;
       }
       rect && focusNextBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
@@ -179,8 +179,8 @@ export function handleKeyDown(
     const newRange = caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
       const nextBlock = getNextBlock(model.id);
-      if(!nextBlock) {
-        return ALLOW_DEFAULT
+      if (!nextBlock) {
+        return ALLOW_DEFAULT;
       }
       focusNextBlock(model, new Point(left, bottom));
       return PREVENT_DEFAULT;

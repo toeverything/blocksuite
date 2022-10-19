@@ -78,8 +78,8 @@ test('native range delete', async ({ page }) => {
   });
 
   await mouseDragFromTo(page, above123, below789);
-  await page.keyboard.press('Backspace',{delay: 50});
-  await assertBlockCount(page, 'paragraph', 1);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertBlockCount(page, 'paragraph', 0);
   await assertRichTexts(page, ['']); // FIXME
 });
 
@@ -107,8 +107,8 @@ test('block level range delete', async ({ page }) => {
   });
 
   await mouseDragFromTo(page, above123, below789);
-  await page.keyboard.press('Backspace');
-  await assertBlockCount(page, 'paragraph', 1);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertBlockCount(page, 'paragraph', 0);
   await assertRichTexts(page, []);
 });
 

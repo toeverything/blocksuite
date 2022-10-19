@@ -124,22 +124,28 @@ export function isCollapsedAtBlockStart(quill: Quill) {
   );
 }
 
-function deleteModels(
-  store: Store,
-  models: BaseBlockModel[]
-) {
+function deleteModels(store: Store, models: BaseBlockModel[]) {
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
-  const selection = window.getSelection()
+  const selection = window.getSelection();
   console.log('selection: ', selection);
-  const firstTextIndex = getQuillIndexByNativeSelection(selection?.anchorNode, selection?.anchorOffset as number);
-  const endTextIndex = getQuillIndexByNativeSelection(selection?.focusNode, selection?.focusOffset as number);
+  const firstTextIndex = getQuillIndexByNativeSelection(
+    selection?.anchorNode,
+    selection?.anchorOffset as number
+  );
+  const endTextIndex = getQuillIndexByNativeSelection(
+    selection?.focusNode,
+    selection?.focusOffset as number
+  );
   store.transact(() => {
-    firstRichText.model.text?.delete(firstTextIndex, firstRichText.model.text.length - firstTextIndex);
+    firstRichText.model.text?.delete(
+      firstTextIndex,
+      firstRichText.model.text.length - firstTextIndex
+    );
     lastRichText.model.text?.delete(0, endTextIndex);
     firstRichText.model.text?.join(lastRichText.model.text as Text);
     // delete models in between
@@ -237,7 +243,7 @@ function getQuillIndexByNativeSelection(
   let lastNode = ele;
   let selfAdded = false;
   // @ts-ignore
-  while ( !lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
+  while (!lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
     if (!selfAdded) {
       selfAdded = true;
       offset += nodeOffset;

@@ -179,9 +179,18 @@ export class DefaultMouseManager {
   private _onNativeSelectionDragMove(e: SelectionEvent) {
     assertExists(this.selection.startRange);
     const { startContainer, startOffset } = this.selection.startRange;
+    let rangStartContainer = startContainer
+    if( !(startContainer instanceof Text)) {
+      rangStartContainer = (startContainer as HTMLElement)?.querySelector(`.ql-editor`) as Node
+    }
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    currentRange?.setStart(startContainer, startOffset);
-    // currentRange?.setEnd(startContainer, startOffset);
+    // let rangeEndContainer = currentRange?.endContainer
+    // if(!(currentRange?.endContainer instanceof Text)){
+    //   rangeEndContainer = (rangeEndContainer as HTMLElement)?.querySelector(`.ql-editor`) as Node
+    //   currentRange?.setEnd(rangeEndContainer as Node, currentRange.endOffset);
+    // }
+    currentRange?.setStart(rangStartContainer, startOffset);
+    
     resetNativeSeletion(currentRange);
   }
 
