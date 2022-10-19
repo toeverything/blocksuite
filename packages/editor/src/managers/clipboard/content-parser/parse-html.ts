@@ -126,7 +126,7 @@ export class ParserHtml {
     checked?: boolean,
     ignoreEmptyElement = true
   ): OpenBlockInfo | null {
-    const childNodes = element.children;
+    const childNodes = element.childNodes;
     let isChildNode = false;
     const textValues: Record<string, unknown>[] = [];
     const children = [];
@@ -154,6 +154,7 @@ export class ParserHtml {
             'SPAN',
             'A',
             'INPUT',
+            'MARK',
           ].includes(htmlElement.tagName)
         ) {
           textValues.push(

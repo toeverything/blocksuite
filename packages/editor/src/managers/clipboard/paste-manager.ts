@@ -167,7 +167,7 @@ export class PasteManager {
       }
       const addBlockIds: string[] = [];
       selectedBlock &&
-        this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
+        this._addBlocks(blocks[0].children, selectedBlock, -1, addBlockIds);
       parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
       // FIXME
       // this._selection.selectedBlockIds = addBlockIds;
