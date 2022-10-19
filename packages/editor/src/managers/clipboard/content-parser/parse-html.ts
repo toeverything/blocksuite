@@ -128,7 +128,7 @@ export class ParserHtml {
   ): OpenBlockInfo | null {
     const childNodes = element.children;
     let isChildNode = false;
-    const textValues = [];
+    const textValues: Record<string, unknown>[] = [];
     const children = [];
     for (let i = 0; i < childNodes.length; i++) {
       const node = childNodes.item(i);
@@ -180,7 +180,7 @@ export class ParserHtml {
     element: Element | Node,
     textStyle: { [key: string]: unknown } = {},
     ignoreEmptyText = true
-  ) {
+  ): Record<string, unknown>[] {
     if (element instanceof Text) {
       return (element.textContent || '').split('\n').map(text => {
         return {
@@ -234,7 +234,7 @@ export class ParserHtml {
         );
         result.push(...textBlocks);
         return result;
-      }, [] as unknown[])
+      }, [] as Record<string, unknown>[])
       .filter(v => v);
 
     // todo

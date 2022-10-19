@@ -1,5 +1,3 @@
-import { ServerResponse } from 'http';
-
 export enum CLIPBOARD_MIMETYPE {
   BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
