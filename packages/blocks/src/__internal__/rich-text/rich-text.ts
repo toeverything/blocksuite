@@ -9,6 +9,13 @@ import { createKeyboardBindings } from './keyboard';
 import style from './styles.css';
 
 Quill.register('modules/cursors', QuillCursors);
+const Clipboard = Quill.import('modules/clipboard');
+class EmptyClipboard extends Clipboard {
+  onPaste() {
+    // No need to execute
+  }
+}
+Quill.register('modules/clipboard', EmptyClipboard);
 
 const Strike = Quill.import('formats/strike');
 // Quill uses <s> by default，but <s> is not supported by HTML5

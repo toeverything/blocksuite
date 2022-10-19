@@ -270,15 +270,20 @@ function formatModelsByRange(
   });
 }
 
-function getQuillIndexByNativeSelection(
+export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number
 ) {
   let offset = 0;
   let lastNode = ele;
   let selfAdded = false;
-  // @ts-ignore
-  while ( !lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
+
+  while (
+    // @ts-ignore
+    !lastNode?.getAttributeNode ||
+    // @ts-ignore
+    !lastNode.getAttributeNode('contenteditable')
+  ) {
     if (!selfAdded) {
       selfAdded = true;
       offset += nodeOffset;

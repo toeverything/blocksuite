@@ -2,7 +2,8 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { marked } from 'marked';
 import { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
+import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
+import { getSelectInfo } from '@blocksuite/blocks';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -127,24 +128,16 @@ export class PasteManager {
     if (blocks.length === 0) {
       return;
     }
-    // const currentSelectionInfo = this._selection.selectionInfo;
-    // FIXME
-    const currentSelectionInfo = {
-      type: '',
-      blocks: <SelectedBlock[]>[],
-      anchorBlockId: '',
-      anchorBlockPosition: 0,
-      focusBlockId: '',
-      focusBlockPosition: 0,
-    };
-
+    const currentSelectionInfo = getSelectInfo();
     if (
       currentSelectionInfo.type === 'Range' ||
       currentSelectionInfo.type === 'Caret'
     ) {
       // TODO split selected block case
       const selectedBlock = this._editor.store.getBlockById(
-        currentSelectionInfo.focusBlockId
+        currentSelectionInfo.selectedBlocks[
+          currentSelectionInfo.selectedBlocks.length - 1
+        ].id
       );
       let parent = selectedBlock;
       let index = 0;
@@ -158,7 +151,9 @@ export class PasteManager {
       // this._selection.selectedBlockIds = addBlockIds;
     } else if (currentSelectionInfo.type === 'Block') {
       const selectedBlock = this._editor.store.getBlockById(
-        currentSelectionInfo.blocks[currentSelectionInfo.blocks.length - 1].id
+        currentSelectionInfo.selectedBlocks[
+          currentSelectionInfo.selectedBlocks.length - 1
+        ].id
       );
 
       let parent = selectedBlock;
