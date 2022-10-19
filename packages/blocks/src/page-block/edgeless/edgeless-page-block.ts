@@ -2,7 +2,7 @@ import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
 import type { PageBlockModel, GroupBlockModel } from '../..';
-import { EdgelessBlockChildrenContainer, EdgelessSelectionBox } from './utils';
+import { EdgelessBlockChildrenContainer, EdgelessSelectedRect } from './utils';
 import {
   BlockHost,
   BLOCK_ID_ATTR,
@@ -121,7 +121,7 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const selectionBox = EdgelessSelectionBox(this._selectionState);
+    const selectedRect = EdgelessSelectedRect(this._selectionState);
 
     return html`
       <style>
@@ -138,7 +138,7 @@ export class EdgelessPageBlockComponent
         }
       </style>
       <div class="affine-edgeless-page-block-container">
-        ${childrenContainer} ${selectionBox}
+        ${childrenContainer} ${selectedRect}
       </div>
     `;
   }

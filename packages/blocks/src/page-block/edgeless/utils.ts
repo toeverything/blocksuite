@@ -13,7 +13,7 @@ import { GroupBlockModel } from '../..';
 import { BlockElement } from '../../__internal__';
 import '../../__internal__';
 
-export function EdgelessSelectionBox(selectionState: EdgelessSelectionState) {
+export function EdgelessSelectedRect(selectionState: EdgelessSelectionState) {
   const { selected, box } = selectionState;
   if (!selected.length || !box) return html`<div></div>`;
 
@@ -28,7 +28,9 @@ export function EdgelessSelectionBox(selectionState: EdgelessSelectionState) {
     boxSizing: 'border-box',
   };
 
-  return html` <div style=${styleMap(style)}></div> `;
+  return html`
+    <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
+  `;
 }
 
 function EdgelessBlockChild(
@@ -48,11 +50,14 @@ function EdgelessBlockChild(
     transformOrigin: '0 0',
     width: w + 'px',
     minHeight: h + 'px',
+    paddingBottom: '18px',
     background: 'white',
   };
 
   return html`
-    <div style=${styleMap(style)}>${BlockElement(model, host)}</div>
+    <div class="affine-edgeless-block-child" style=${styleMap(style)}>
+      ${BlockElement(model, host)}
+    </div>
   `;
 }
 
