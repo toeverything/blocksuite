@@ -95,7 +95,7 @@ export class LinkPopover extends LitElement {
 
   private hide() {
     this.dispatchEvent(
-      new CustomEvent<ConfirmDetail>('confirm', { detail: { link: null } })
+      new CustomEvent<ConfirmDetail>('confirmLink', { detail: { link: null } })
     );
   }
 
@@ -108,7 +108,7 @@ export class LinkPopover extends LitElement {
     const options = {
       detail: { link },
     };
-    this.dispatchEvent(new CustomEvent<ConfirmDetail>('confirm', options));
+    this.dispatchEvent(new CustomEvent<ConfirmDetail>('confirmLink', options));
     return;
   }
 
@@ -120,7 +120,7 @@ export class LinkPopover extends LitElement {
   }
 
   private onEdit(e: MouseEvent) {
-    console.log('onclick', e);
+    this.dispatchEvent(new CustomEvent('editLink'));
   }
 
   private onKeyup(e: KeyboardEvent) {
@@ -186,6 +186,7 @@ type ConfirmDetail = { link: string | null };
 
 declare global {
   interface HTMLElementEventMap {
-    confirm: CustomEvent<ConfirmDetail>;
+    confirmLink: CustomEvent<ConfirmDetail>;
+    editLink: CustomEvent<null>;
   }
 }

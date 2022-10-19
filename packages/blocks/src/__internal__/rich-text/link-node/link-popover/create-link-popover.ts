@@ -1,3 +1,5 @@
+import { noop } from '../../../utils';
+
 const createEditLinkElement = (
   anchorEl: HTMLElement,
   container: HTMLElement,
@@ -35,6 +37,7 @@ const bindHoverState = (
     // if the mouse entered the popover immediately
     // after leaving the target (or vice versa).
     timer = window.setTimeout(() => {
+      // DEBUG
       controller.abort();
     }, hoverCloseDelay);
   };
@@ -92,9 +95,10 @@ export const showLinkPopover = async ({
     preview,
   });
 
-  if (interactionKind === 'hover') {
-    bindHoverState(anchorEl, editLinkEle, signal);
-  }
+  const unsubscribeHoverAbort =
+    interactionKind === 'hover'
+      ? bindHoverState(anchorEl, editLinkEle, signal)
+      : noop;
 
   return new Promise(res => {
     signal.signal.addEventListener('abort', () => {
@@ -102,7 +106,16 @@ export const showLinkPopover = async ({
       res({ type: 'cancel' });
     });
 
-    editLinkEle.addEventListener('confirm', e => {
+    editLinkEle.addEventListener('editLink', e => {
+      if (signal.signal.aborted) {
+        return;
+      }
+
+      editLinkEle.showMask = true;
+      unsubscribeHoverAbort();
+    });
+
+    editLinkEle.addEventListener('confirmLink', e => {
       if (signal.signal.aborted) {
         return;
       }
