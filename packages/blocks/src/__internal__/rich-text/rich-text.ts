@@ -15,7 +15,7 @@ class EmptyClipboard extends Clipboard {
     // No need to execute
   }
 }
-Quill.register('modules/clipboard', EmptyClipboard);
+Quill.register('modules/clipboard', EmptyClipboard, true);
 
 const Strike = Quill.import('formats/strike');
 // Quill uses <s> by default，but <s> is not supported by HTML5
