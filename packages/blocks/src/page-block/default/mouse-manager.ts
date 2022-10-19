@@ -28,7 +28,7 @@ function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
 
 function isBlankArea(e: SelectionEvent) {
   const { cursor } = window.getComputedStyle(e.raw.target as Element);
-  return cursor === 'default';
+  return cursor !== 'text';
 }
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -178,9 +178,14 @@ export class DefaultMouseManager {
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
     assertExists(this.selection.startRange);
-    const { startContainer, startOffset } = this.selection.startRange;
+    const { startContainer, startOffset, endContainer, endOffset } =
+      this.selection.startRange;
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    currentRange?.setStart(startContainer, startOffset);
+    if(currentRange?.comparePoint(endContainer, endOffset) === 1){
+      currentRange?.setEnd(endContainer, endOffset);
+    }else{
+      currentRange?.setStart(startContainer, startOffset);
+    }
     resetNativeSeletion(currentRange);
   }
 
