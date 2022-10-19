@@ -1,5 +1,6 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import Quill, { RangeStatic } from 'quill';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '..';
 
 type Match = {
   name: string;
@@ -21,7 +22,7 @@ export class Shortcuts {
   ): boolean {
     const selection = quill.getSelection();
     if (!selection) {
-      return false;
+      return PREVENT_DEFAULT;
     }
     const [line] = quill.getLine(selection.index);
     if (Shortcuts._isValid(prefix, line.domNode.tagName)) {
@@ -32,7 +33,7 @@ export class Shortcuts {
         }
       }
     }
-    return false;
+    return PREVENT_DEFAULT;
   }
 
   private static _ignoreTags: string[] = ['PRE'];
@@ -50,14 +51,14 @@ export class Shortcuts {
       ) => {
         const match = pattern.exec(text);
         if (!match) {
-          return false;
+          return PREVENT_DEFAULT;
         }
 
         const annotatedText = match[0];
         const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
-          return false;
+          return PREVENT_DEFAULT;
         }
 
         model.text?.insert(' ', startIndex + annotatedText.length);
@@ -74,7 +75,7 @@ export class Shortcuts {
         quill.format('bold', false);
         quill.format('italic', false);
 
-        return true;
+        return ALLOW_DEFAULT;
       },
     },
     {
@@ -89,13 +90,13 @@ export class Shortcuts {
       ) => {
         const match = pattern.exec(text);
         if (!match) {
-          return false;
+          return PREVENT_DEFAULT;
         }
         const annotatedText = match[0];
         const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
-          return false;
+          return PREVENT_DEFAULT;
         }
         model.text?.insert(' ', startIndex + annotatedText.length);
         model.store.captureSync();
@@ -109,7 +110,7 @@ export class Shortcuts {
         model.text?.delete(startIndex, 2);
         quill.format('bold', false);
 
-        return true;
+        return ALLOW_DEFAULT;
       },
     },
     {
@@ -124,13 +125,13 @@ export class Shortcuts {
       ) => {
         const match = pattern.exec(text);
         if (!match) {
-          return false;
+          return PREVENT_DEFAULT;
         }
         const annotatedText = match[0];
         const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
-          return false;
+          return PREVENT_DEFAULT;
         }
 
         model.text?.insert(' ', startIndex + annotatedText.length);
@@ -144,7 +145,8 @@ export class Shortcuts {
         model.text?.delete(startIndex + annotatedText.length - 1, 1);
         model.text?.delete(startIndex, 1);
         quill.format('italic', false);
-        return true;
+
+        return ALLOW_DEFAULT;
       },
     },
     {
@@ -159,13 +161,13 @@ export class Shortcuts {
       ) => {
         const match = pattern.exec(text);
         if (!match) {
-          return false;
+          return PREVENT_DEFAULT;
         }
         const annotatedText = match[0];
         const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
-          return false;
+          return PREVENT_DEFAULT;
         }
 
         model.text?.insert(' ', startIndex + annotatedText.length);
@@ -180,7 +182,7 @@ export class Shortcuts {
         model.text?.delete(startIndex, 2);
         quill.format('strike', false);
 
-        return true;
+        return ALLOW_DEFAULT;
       },
     },
     {
@@ -195,13 +197,13 @@ export class Shortcuts {
       ) => {
         const match = pattern.exec(text);
         if (!match) {
-          return false;
+          return PREVENT_DEFAULT;
         }
         const annotatedText = match[0];
         const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
-          return false;
+          return PREVENT_DEFAULT;
         }
 
         model.text?.insert(' ', selection.index);
@@ -217,7 +219,7 @@ export class Shortcuts {
         model.text?.delete(startIndex, 1);
         quill.format('underline', false);
 
-        return true;
+        return ALLOW_DEFAULT;
       },
     },
     {
@@ -232,13 +234,13 @@ export class Shortcuts {
       ) => {
         const match = pattern.exec(text);
         if (!match) {
-          return false;
+          return PREVENT_DEFAULT;
         }
         const annotatedText = match[0];
         const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
-          return false;
+          return PREVENT_DEFAULT;
         }
 
         model.text?.insert(' ', startIndex + annotatedText.length);
@@ -253,7 +255,7 @@ export class Shortcuts {
         model.text?.delete(startIndex, 1);
         quill.format('code', false);
 
-        return true;
+        return ALLOW_DEFAULT;
       },
     },
     {
@@ -269,7 +271,7 @@ export class Shortcuts {
       ) => {
         const match = pattern.exec(text);
         if (!match) {
-          return false;
+          return PREVENT_DEFAULT;
         }
 
         const annotatedText = match[0];
@@ -285,7 +287,7 @@ export class Shortcuts {
         model.text?.delete(startIndex + annotatedText.length, 1);
         quill.format('link', false);
 
-        return true;
+        return ALLOW_DEFAULT;
       },
     },
     {
@@ -303,7 +305,7 @@ export class Shortcuts {
         const hrefText = text.match(/(?:\[(.*?)\])/g)?.[0];
         const hrefLink = text.match(/(?:\((.*?)\))/g)?.[0];
         if (startIndex === -1 || !matchedText || !hrefText || !hrefLink) {
-          return false;
+          return PREVENT_DEFAULT;
         }
         const start = selection.index - matchedText.length;
 
@@ -322,7 +324,7 @@ export class Shortcuts {
         model.text?.delete(start, 1);
         quill.format('link', false);
 
-        return true;
+        return ALLOW_DEFAULT;
       },
     },
   ];
