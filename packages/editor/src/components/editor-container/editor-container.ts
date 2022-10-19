@@ -1,5 +1,5 @@
 import { LitElement, html } from 'lit';
-import { customElement, state, query } from 'lit/decorators.js';
+import { customElement, state, property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { Store } from '@blocksuite/store';
@@ -8,19 +8,18 @@ import { BlockSchema } from '../../block-loader';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
-const params = new URLSearchParams(location.search);
-const room = params.get('room') || 'virgo-default';
-
 const IS_PLAYGROUND = location.href.includes('5173');
 
+const doc = Store.createDoc();
+
 const options = {
-  room,
-  useDebugProvider: IS_PLAYGROUND,
+  doc,
+  providers: [],
 };
 
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
-  @state()
+  @property()
   store = new Store(options).register(BlockSchema);
 
   @state()
@@ -47,7 +46,13 @@ export class EditorContainer extends LitElement {
 
   constructor() {
     super();
+    this._init();
+  }
 
+  private _init() {
+    if (!this.store) {
+      return;
+    }
     this._subscribeStore();
     this._tryInitFromVoidState();
 
@@ -101,7 +106,14 @@ export class EditorContainer extends LitElement {
     this._placeholderInput?.focus();
   }
 
+  updated() {
+    this._init();
+  }
+
   render() {
+    if (!this.store) {
+      return;
+    }
     const placeholderRoot = html`
       <default-page-block
         .mouseRoot=${this as HTMLElement}

@@ -5,6 +5,7 @@ export * from './text-adapter';
 export * from './utils/slot';
 export * from './utils/disposable';
 export * from './utils/utils';
+export { DebugProvider } from './providers';
 
 const env =
   typeof globalThis !== 'undefined'

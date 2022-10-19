@@ -15,6 +15,7 @@ import {
 } from './utils/utils';
 import { BaseBlockModel } from './base';
 import { DebugProvider } from './providers';
+import type { Provider } from './providers';
 import { blockRecordToJSXNode } from './utils/jsx';
 
 export type YBlock = Y.Map<unknown>;
@@ -53,14 +54,16 @@ function createChildMap(yChildIds: Y.Array<string>) {
 }
 
 interface StoreOptions {
-  room: string;
-  useDebugProvider: boolean;
+  // room: string;
+  // useDebugProvider: boolean;
+  doc?: Y.Doc;
+  providers?: Array<Provider | undefined>;
 }
 
 export class Store {
-  readonly doc = new Y.Doc();
-  readonly provider?: DebugProvider;
-  readonly awareness!: AwarenessAdapter;
+  readonly doc: Y.Doc;
+  readonly providers?: Provider[];
+  readonly awarenessAdapter!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
   readonly slots = {
@@ -84,14 +87,22 @@ export class Store {
   );
 
   constructor(options: StoreOptions) {
-    if (IS_WEB && options.useDebugProvider) {
-      this.provider = new DebugProvider(options.room, this.doc);
+    if (options.providers?.length && !options.doc) {
+      throw new Error(
+        'If options.providers presents, options.doc must present. Or options.providers may not work like you think.'
+      );
     }
 
-    const awareness = this.provider
-      ? this.provider.awareness
-      : new Awareness(this.doc);
-    this.awareness = new AwarenessAdapter(this, awareness);
+    this.doc = options.doc || new Y.Doc();
+
+    this.providers = (options.providers || []).filter(
+      provider => !!provider
+    ) as Provider[];
+
+    const awarenessList = (this.providers || [])
+      .map(provider => provider.awareness)
+      .filter(a => !!a) as Awareness[];
+    this.awarenessAdapter = new AwarenessAdapter(this, awarenessList);
 
     this._yBlocks.observeDeep(this._yBlocksObserver);
 
@@ -302,7 +313,7 @@ export class Store {
       const cursor = adapter.getCursor();
       if (!cursor) return;
 
-      this.awareness.setLocalCursor({ ...cursor, id });
+      this.awarenessAdapter.setLocalCursor({ ...cursor, id });
     });
   }
 
@@ -333,7 +344,7 @@ export class Store {
     if (IS_WEB) {
       event.stackItem.meta.set(
         'cursor-location',
-        this.awareness.getLocalCursor()
+        this.awarenessAdapter.getLocalCursor()
       );
     }
 
@@ -346,7 +357,7 @@ export class Store {
       return;
     }
 
-    this.awareness.setLocalCursor(cursor);
+    this.awarenessAdapter.setLocalCursor(cursor);
     this._historyObserver();
   };
 
@@ -508,6 +519,10 @@ export class Store {
     }
     this.slots.updated.emit();
   };
+
+  static createDoc() {
+    return new Y.Doc();
+  }
 
   /**
    * @internal Only for testing

@@ -63,7 +63,7 @@ export class RichText extends LitElement {
       },
     });
     store.attachRichText(model.id, this.quill);
-    store.awareness.updateLocalCursor();
+    store.awarenessAdapter.updateLocalCursor();
 
     this.model.propsUpdated.on(() => this.requestUpdate());
   }

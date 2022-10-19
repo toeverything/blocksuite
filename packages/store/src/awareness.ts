@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import type { Awareness } from 'y-protocols/awareness.js';
+import { Awareness } from 'y-protocols/awareness.js';
 import { RelativePosition } from 'yjs';
 import type { Store } from './store';
 import { Slot } from './utils/slot';
@@ -29,41 +29,62 @@ interface AwarenessMessage {
 
 export class AwarenessAdapter {
   readonly store: Store;
-  readonly awareness: Awareness;
+  readonly awarenessList: Awareness[];
+  readonly localAwareness: Awareness;
 
   readonly slots = {
     update: new Slot<AwarenessMessage>(),
   };
 
-  constructor(store: Store, awareness: Awareness) {
+  private _listenerHandlers: Array<{ destroy: () => void }> = [];
+
+  constructor(store: Store, awarenessList?: Awareness[]) {
     this.store = store;
-    this.awareness = awareness;
-    this.awareness.on('change', this._onAwarenessChange);
+    this.localAwareness = new Awareness(store.doc);
+    this.awarenessList = [this.localAwareness].concat(awarenessList || []);
+
+    this._each(awareness => {
+      const listenerCallback = this._onAwarenessChange.bind(this, awareness);
+      awareness.on('change', listenerCallback);
+      this._listenerHandlers.push({
+        destroy: () => {
+          awareness.off('change', listenerCallback);
+        },
+      });
+    });
+
     this.slots.update.on(this._onAwarenessMessage);
   }
 
   public setLocalCursor(range: SelectionRange) {
-    this.awareness.setLocalStateField('cursor', range);
+    this._each(awareness => awareness.setLocalStateField('cursor', range));
   }
 
   public getLocalCursor(): SelectionRange | undefined {
-    const states = this.awareness.getStates();
-    const awarenessState = states.get(this.awareness.clientID);
+    const states = this.localAwareness.getStates();
+    const awarenessState = states.get(this.localAwareness.clientID);
     return awarenessState?.cursor;
   }
 
   public getStates(): Map<number, AwarenessState> {
-    return this.awareness.getStates() as Map<number, AwarenessState>;
+    return this.localAwareness.getStates() as Map<number, AwarenessState>;
   }
 
-  private _onAwarenessChange = (diff: {
-    added: number[];
-    removed: number[];
-    updated: number[];
-  }) => {
+  private _each(callback: (awareness: Awareness) => void) {
+    this.awarenessList.forEach(awareness => callback(awareness));
+  }
+
+  private _onAwarenessChange = (
+    awareness: Awareness,
+    diff: {
+      added: number[];
+      removed: number[];
+      updated: number[];
+    }
+  ) => {
     const { added, removed, updated } = diff;
 
-    const states = this.awareness.getStates();
+    const states = awareness.getStates();
     added.forEach(id => {
       this.slots.update.emit({
         id,
@@ -87,7 +108,7 @@ export class AwarenessAdapter {
   };
 
   private _onAwarenessMessage = (awMsg: AwarenessMessage) => {
-    if (awMsg.id === this.awareness.clientID) {
+    if (awMsg.id === this.localAwareness.clientID) {
       this.updateLocalCursor();
     } else {
       this._resetRemoteCursor();
@@ -99,7 +120,7 @@ export class AwarenessAdapter {
       textAdapter.quillCursors.clearCursors()
     );
     this.getStates().forEach((awState, clientId) => {
-      if (clientId !== this.awareness.clientID && awState.cursor) {
+      if (clientId !== this.localAwareness.clientID && awState.cursor) {
         const anchor = Y.createAbsolutePositionFromRelativePosition(
           awState.cursor.anchor,
           this.store.doc
@@ -130,7 +151,7 @@ export class AwarenessAdapter {
   }
 
   public updateLocalCursor() {
-    const localCursor = this.store.awareness.getLocalCursor();
+    const localCursor = this.getLocalCursor();
     if (!localCursor) {
       return;
     }
@@ -149,9 +170,7 @@ export class AwarenessAdapter {
   }
 
   destroy() {
-    if (this.awareness) {
-      this.awareness.off('change', this._onAwarenessChange);
-      this.slots.update.dispose();
-    }
+    this._listenerHandlers.forEach(handler => handler.destroy());
+    this.slots.update.dispose();
   }
 }

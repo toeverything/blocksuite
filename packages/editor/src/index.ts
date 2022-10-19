@@ -1,5 +1,6 @@
 export * from './components';
 export * from './managers';
+export { BlockSchema } from './block-loader';
 
 const env =
   typeof globalThis !== 'undefined'
