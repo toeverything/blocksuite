@@ -56,8 +56,28 @@ export class ParserHtml {
           type: tagName.toLowerCase(),
         });
         break;
-      case 'DIV':
       case 'P':
+        if (
+          node.firstChild instanceof Text &&
+          (node.firstChild.textContent?.startsWith('[] ') ||
+            node.firstChild.textContent?.startsWith('[ ] ') ||
+            node.firstChild.textContent?.startsWith('[x] '))
+        ) {
+          result =
+            this._contentParser.getParserHtmlText2Block('listItemParser')?.(
+              node
+            );
+        } else {
+          result = this._contentParser.getParserHtmlText2Block(
+            'commonParser'
+          )?.({
+            element: node,
+            flavour: 'paragraph',
+            type: 'text',
+          });
+        }
+        break;
+      case 'DIV':
       case 'B':
       case 'A':
       case 'EM':
@@ -126,7 +146,7 @@ export class ParserHtml {
     checked?: boolean,
     ignoreEmptyElement = true
   ): OpenBlockInfo | null {
-    const childNodes = element.children;
+    const childNodes = element.childNodes;
     let isChildNode = false;
     const textValues: Record<string, unknown>[] = [];
     const children = [];
@@ -154,6 +174,7 @@ export class ParserHtml {
             'SPAN',
             'A',
             'INPUT',
+            'MARK',
           ].includes(htmlElement.tagName)
         ) {
           textValues.push(
@@ -262,6 +283,24 @@ export class ParserHtml {
       type = 'todo';
       checked = inputEl?.getAttribute('checked') !== null;
     }
+    if (element.firstChild instanceof Text) {
+      if (element.firstChild.textContent?.startsWith('[] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(3);
+        type = 'todo';
+        checked = false;
+      } else if (element.firstChild.textContent?.startsWith('[ ] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(4);
+        type = 'todo';
+        checked = false;
+      } else if (element.firstChild.textContent?.startsWith('[x] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(4);
+        type = 'todo';
+        checked = true;
+      }
+    }
     const result = this._contentParser.getParserHtmlText2Block(
       'commonParser'
     )?.({
@@ -332,6 +371,9 @@ const getTextStyle = (htmlElement: HTMLElement) => {
       style['text-decoration'].indexOf('line-through') !== -1)
   ) {
     textStyle['strike'] = true;
+  }
+  if (tagName === 'MARK') {
+    textStyle['background'] = 'yellow';
   }
 
   return textStyle;
