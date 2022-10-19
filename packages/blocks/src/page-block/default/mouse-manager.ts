@@ -119,7 +119,6 @@ export class DefaultMouseManager {
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
   private _slots: DefaultPageBlockSlots;
-  private _mouseClickPoint = { x: 0, y: 0 };
 
   constructor(
     store: Store,
@@ -175,7 +174,6 @@ export class DefaultMouseManager {
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
     this.selection.type = 'native';
-    this._mouseClickPoint = { x: e.raw.clientX, y: e.raw.clientY };
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
@@ -183,12 +181,11 @@ export class DefaultMouseManager {
     const { startContainer, startOffset, endContainer, endOffset } =
       this.selection.startRange;
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    if (this._mouseClickPoint.y > e.raw.clientY) {
+    if(currentRange?.comparePoint(endContainer, endOffset) === 1){
       currentRange?.setEnd(endContainer, endOffset);
-    } else {
+    }else{
       currentRange?.setStart(startContainer, startOffset);
     }
-
     resetNativeSeletion(currentRange);
   }
 
