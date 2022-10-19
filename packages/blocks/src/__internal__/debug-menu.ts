@@ -98,6 +98,13 @@ export class DebugMenu extends LitElement {
     this.contentParser.onExportMarkdown();
   }
 
+  private async _onClearData() {
+    // FIXME: after clearData, there should be update page state.
+    await Promise.all(
+      (this.store.providers || []).map(provider => provider.clearData())
+    );
+  }
+
   firstUpdated() {
     this.store.slots.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
@@ -260,6 +267,13 @@ export class DebugMenu extends LitElement {
           @click=${this._onExportMarkDown}
         >
           📗
+        </button>
+        <button
+          aria-label="clear data"
+          title="clear data"
+          @click=${this._onClearData}
+        >
+          🗑
         </button>
       </div>
     `;
