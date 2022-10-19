@@ -181,9 +181,9 @@ export class DefaultMouseManager {
     const { startContainer, startOffset, endContainer, endOffset } =
       this.selection.startRange;
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    if(currentRange?.comparePoint(endContainer, endOffset) === 1){
+    if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
       currentRange?.setEnd(endContainer, endOffset);
-    }else{
+    } else {
       currentRange?.setStart(startContainer, startOffset);
     }
     resetNativeSeletion(currentRange);
