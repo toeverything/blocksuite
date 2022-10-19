@@ -1,22 +1,23 @@
 import * as Y from 'yjs';
-import { WebrtcProvider } from 'y-webrtc';
 import { Awareness } from 'y-protocols/awareness.js';
+import { WebrtcProvider } from 'y-webrtc';
+import { IndexeddbPersistence } from 'y-indexeddb';
 
 export interface Provider {
   awareness?: Awareness;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
+  connect: () => void;
+  disconnect: () => void;
   clearData: () => Promise<void>;
-  destroy: () => Promise<void>;
+  destroy: () => void;
 }
 
 export class DebugProvider implements Provider {
   private webrtc: WebrtcProvider;
 
   public awareness: Awareness;
-  public connect: () => Promise<void>;
-  public disconnect: () => Promise<void>;
-  public destroy: () => Promise<void>;
+  public connect: () => void;
+  public disconnect: () => void;
+  public destroy: () => void;
 
   constructor(room: string, doc: Y.Doc) {
     this.webrtc = new WebrtcProvider(room, doc, {
@@ -36,5 +37,31 @@ export class DebugProvider implements Provider {
 
   public clearData() {
     return Promise.resolve();
+  }
+}
+
+export class IndexedDBProvider implements Provider {
+  private idb: IndexeddbPersistence;
+
+  awareness?: Awareness | undefined;
+
+  constructor(name: string, doc: Y.Doc) {
+    this.idb = new IndexeddbPersistence(name, doc);
+  }
+
+  connect() {
+    return;
+  }
+
+  disconnect() {
+    return;
+  }
+
+  destroy() {
+    return this.idb.destroy();
+  }
+
+  clearData() {
+    return this.idb.clearData();
   }
 }

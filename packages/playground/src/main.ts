@@ -1,6 +1,6 @@
 import '@blocksuite/blocks';
 import { BlockSchema } from '@blocksuite/editor';
-import { Store, DebugProvider } from '@blocksuite/store';
+import { Store, DebugProvider, IndexedDBProvider } from '@blocksuite/store';
 import './style.css';
 
 // Workaround
@@ -16,7 +16,11 @@ window.onload = () => {
     doc,
     providers: [
       IS_PLAYGROUND && IS_WEB ? new DebugProvider(room, doc) : undefined,
+      new IndexedDBProvider(room, doc),
     ],
+    createId: count => {
+      return `${Date.now()}-${count}`;
+    },
   }).register(BlockSchema);
 
   const editor = document.createElement('editor-container');

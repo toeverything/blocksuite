@@ -32,10 +32,10 @@ export class DebugMenu extends LitElement {
 
   private _onToggleConnection() {
     if (this.connected === true) {
-      this.store.provider?.disconnect();
+      this.store.providers?.forEach(provider => provider?.disconnect());
       this.connected = false;
     } else {
-      this.store.provider?.connect();
+      this.store.providers?.forEach(provider => provider?.connect());
       this.connected = true;
     }
   }

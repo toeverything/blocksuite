@@ -58,7 +58,7 @@ interface StoreOptions {
   // useDebugProvider: boolean;
   doc?: Y.Doc;
   providers?: Array<Provider | undefined>;
-  createId?: () => string;
+  createId?: (innerCount: number) => string;
 }
 
 export class Store {
@@ -95,7 +95,10 @@ export class Store {
     }
 
     if (typeof options.createId === 'function') {
-      this._createId = options.createId;
+      const _createId = options.createId;
+      this._createId = () => {
+        return _createId(this._i++);
+      };
     }
 
     this.doc = options.doc || new Y.Doc();
