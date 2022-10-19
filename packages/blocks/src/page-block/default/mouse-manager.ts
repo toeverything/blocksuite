@@ -28,7 +28,7 @@ function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
 
 function isBlankArea(e: SelectionEvent) {
   const { cursor } = window.getComputedStyle(e.raw.target as Element);
-  return cursor === 'default';
+  return cursor !== 'text';
 }
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
