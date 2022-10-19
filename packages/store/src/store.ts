@@ -381,7 +381,7 @@ export class Store {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const text = new Text(yText);
+    const text = new Text(this, yText);
     model.text = text;
 
     const yChildren = yBlock.get('sys:children');

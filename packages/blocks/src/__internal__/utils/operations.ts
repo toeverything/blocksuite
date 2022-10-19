@@ -49,7 +49,7 @@ export function handleSoftEnter(
   index: number
 ) {
   store.captureSync();
-  store.transact(() => model.text?.insert('\n', index));
+  model.text?.insert('\n', index);
 }
 
 export function handleBlockSplit(
@@ -129,7 +129,7 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
   assertExists(firstRichText);
   assertExists(lastRichText);
   const selection = window.getSelection();
-  console.log('selection: ', selection);
+
   const firstTextIndex = getQuillIndexByNativeSelection(
     selection?.anchorNode,
     selection?.anchorOffset as number
@@ -138,18 +138,18 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
     selection?.focusNode,
     selection?.focusOffset as number
   );
-  store.transact(() => {
-    firstRichText.model.text?.delete(
-      firstTextIndex,
-      firstRichText.model.text.length - firstTextIndex
-    );
-    lastRichText.model.text?.delete(0, endTextIndex);
-    firstRichText.model.text?.join(lastRichText.model.text as Text);
-    // delete models in between
-    for (let i = 1; i <= models.length - 1; i++) {
-      store.deleteBlock(models[i]);
-    }
-  });
+
+  firstRichText.model.text?.delete(
+    firstTextIndex,
+    firstRichText.model.text.length - firstTextIndex
+  );
+  lastRichText.model.text?.delete(0, endTextIndex);
+  firstRichText.model.text?.join(lastRichText.model.text as Text);
+  // delete models in between
+  for (let i = 1; i <= models.length - 1; i++) {
+    store.deleteBlock(models[i]);
+  }
+
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
@@ -214,21 +214,21 @@ function formatModelsByRange(
   }
   const allFormat = formatArr.every(item => item[key]);
   store.captureSync();
-  store.transact(() => {
-    firstRichText.model.text?.format(
-      firstIndex,
-      firstRichText.quill.getLength() - firstIndex - 1,
-      { [key]: !allFormat }
-    );
-    lastRichText.model.text?.format(0, endIndex, { [key]: !allFormat });
-    for (let i = 1; i < models.length - 1; i++) {
-      const richText = getRichTextByModel(models[i]);
-      assertExists(richText);
-      richText.model.text?.format(0, richText.quill.getLength() - 1, {
-        [key]: !allFormat,
-      });
-    }
-  });
+
+  firstRichText.model.text?.format(
+    firstIndex,
+    firstRichText.quill.getLength() - firstIndex - 1,
+    { [key]: !allFormat }
+  );
+  lastRichText.model.text?.format(0, endIndex, { [key]: !allFormat });
+  for (let i = 1; i < models.length - 1; i++) {
+    const richText = getRichTextByModel(models[i]);
+    assertExists(richText);
+    richText.model.text?.format(0, richText.quill.getLength() - 1, {
+      [key]: !allFormat,
+    });
+  }
+
   lastRichText.quill.setSelection(endIndex, 0);
 }
 
@@ -239,8 +239,12 @@ function getQuillIndexByNativeSelection(
   let offset = 0;
   let lastNode = ele;
   let selfAdded = false;
-  // @ts-ignore
-  while (!lastNode?.getAttributeNode ||!lastNode.getAttributeNode('contenteditable')) {
+  while (
+    // @ts-ignore
+    !lastNode?.getAttributeNode ||
+    // @ts-ignore
+    !lastNode.getAttributeNode('contenteditable')
+  ) {
     if (!selfAdded) {
       selfAdded = true;
       offset += nodeOffset;
@@ -282,11 +286,10 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
       const range = quill.getSelection();
       assertExists(range);
       store.captureSync();
-      store.transact(() => {
-        const { index, length } = range;
-        const format = quill.getFormat(range);
-        models[0].text?.format(index, length, { [key]: !format[key] });
-      });
+
+      const { index, length } = range;
+      const format = quill.getFormat(range);
+      models[0].text?.format(index, length, { [key]: !format[key] });
     } else {
       formatModelsByRange(models, store, key);
     }
@@ -304,9 +307,7 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
       const previousSibling = store.getPreviousSibling(model);
       if (previousSibling) {
         store.captureSync();
-        store.transact(() => {
-          previousSibling.text?.join(model.text as Text);
-        });
+        previousSibling.text?.join(model.text as Text);
         store.deleteBlock(model);
         asyncFocusRichText(store, previousSibling.id);
       }
@@ -414,26 +415,25 @@ export function convertToList(
     const index = parent.children.indexOf(model);
     model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.transact(() => {
-      model.text?.delete(0, prefix.length + 1);
-      const blockProps = {
-        flavour: 'list',
-        type: listType,
-        text: model?.text?.clone(),
-        children: model.children,
-        ...otherProperties,
-      };
-      store.deleteBlock(model);
-      const id = store.addBlock(blockProps, parent, index);
-      asyncFocusRichText(store, id);
-    });
+
+    model.text?.delete(0, prefix.length + 1);
+    const blockProps = {
+      flavour: 'list',
+      type: listType,
+      text: model?.text?.clone(),
+      children: model.children,
+      ...otherProperties,
+    };
+    store.deleteBlock(model);
+
+    const id = store.addBlock(blockProps, parent, index);
+    asyncFocusRichText(store, id);
   } else if (model.flavour === 'list' && model['type'] !== listType) {
     model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.transact(() => {
-      model.text?.delete(0, prefix.length + 1);
-      store.updateBlock(model, { type: listType });
-    });
+
+    model.text?.delete(0, prefix.length + 1);
+    store.updateBlock(model, { type: listType });
   }
   return true;
 }
@@ -454,25 +454,24 @@ export function convertToParagraph(
     const index = parent.children.indexOf(model);
     model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.transact(() => {
-      model.text?.delete(0, prefix.length + 1);
-      const blockProps = {
-        flavour: 'paragraph',
-        type: type,
-        text: model?.text?.clone(),
-        children: model.children,
-      };
-      store.deleteBlock(model);
-      const id = store.addBlock(blockProps, parent, index);
-      asyncFocusRichText(store, id);
-    });
+
+    model.text?.delete(0, prefix.length + 1);
+    const blockProps = {
+      flavour: 'paragraph',
+      type: type,
+      text: model?.text?.clone(),
+      children: model.children,
+    };
+    store.deleteBlock(model);
+
+    const id = store.addBlock(blockProps, parent, index);
+    asyncFocusRichText(store, id);
   } else if (model.flavour === 'paragraph' && model['type'] !== type) {
     model.text?.insert(' ', prefix.length);
     store.captureSync();
-    store.transact(() => {
-      model.text?.delete(0, prefix.length + 1);
-      store.updateBlock(model, { type: type });
-    });
+
+    model.text?.delete(0, prefix.length + 1);
+    store.updateBlock(model, { type: type });
   }
   return true;
 }

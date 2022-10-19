@@ -28,10 +28,8 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   const format = quill.getFormat(range);
   if (format?.link) {
     store.captureSync();
-    store.transact(() => {
-      const { index, length } = range;
-      startModel.text?.format(index, length, { link: false });
-    });
+    const { index, length } = range;
+    startModel.text?.format(index, length, { link: false });
     return;
   }
 
@@ -67,7 +65,5 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   const link = linkState.link;
 
   store.captureSync();
-  store.transact(() => {
-    startModel.text?.format(range.index, range.length, { link });
-  });
+  startModel.text?.format(range.index, range.length, { link });
 };
