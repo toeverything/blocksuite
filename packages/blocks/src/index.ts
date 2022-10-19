@@ -11,7 +11,7 @@ export * from './paragraph-block';
 export * from './page-block';
 export * from './list-block';
 export * from './group-block';
-export * from './__internal__/utils/selection';
+export * as SelectionUtils from './__internal__/utils/selection';
 
 const env =
   typeof globalThis !== 'undefined'

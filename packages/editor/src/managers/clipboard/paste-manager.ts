@@ -3,7 +3,7 @@ import { marked } from 'marked';
 import { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
-import { getSelectInfo } from '@blocksuite/blocks';
+import { SelectionUtils } from '@blocksuite/blocks';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -128,7 +128,7 @@ export class PasteManager {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectionInfo = getSelectInfo();
+    const currentSelectionInfo = SelectionUtils.getSelectInfo();
     if (
       currentSelectionInfo.type === 'Range' ||
       currentSelectionInfo.type === 'Caret'
