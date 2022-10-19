@@ -2,7 +2,7 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
 import { ListBlockModel } from '@blocksuite/blocks';
-import { getSelectInfo } from '@blocksuite/blocks';
+import { SelectionUtils } from '@blocksuite/blocks';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -61,7 +61,7 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const selectionInfo = getSelectInfo();
+    const selectionInfo = SelectionUtils.getSelectInfo();
     const selectedBlocks = selectionInfo.selectedBlocks;
 
     const affineClip = this._getCustomClip(selectedBlocks);
