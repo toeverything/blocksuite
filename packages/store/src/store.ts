@@ -58,6 +58,7 @@ interface StoreOptions {
   // useDebugProvider: boolean;
   doc?: Y.Doc;
   providers?: Array<Provider | undefined>;
+  createId?: () => string;
 }
 
 export class Store {
@@ -91,6 +92,10 @@ export class Store {
       throw new Error(
         'If options.providers presents, options.doc must present. Or options.providers may not work like you think.'
       );
+    }
+
+    if (typeof options.createId === 'function') {
+      this._createId = options.createId;
     }
 
     this.doc = options.doc || new Y.Doc();
@@ -328,6 +333,7 @@ export class Store {
     this._splitSet.add(base).add(left).add(right);
   }
 
+  // _createId may override by property: options.createId
   private _createId(): string {
     return (this._i++).toString();
   }
