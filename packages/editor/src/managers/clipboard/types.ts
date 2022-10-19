@@ -1,3 +1,5 @@
+import { ServerResponse } from 'http';
+
 export enum CLIPBOARD_MIMETYPE {
   BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
@@ -27,7 +29,7 @@ export interface SelectedBlock {
 export type OpenBlockInfo = {
   flavour: string;
   type: string;
-  text: unknown;
+  text: Record<string, unknown>[];
   checked?: boolean;
   children: OpenBlockInfo[];
 };

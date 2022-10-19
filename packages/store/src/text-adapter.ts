@@ -116,8 +116,9 @@ export class Text {
     ];
   }
 
-  insert(content: string, index: number) {
-    this._yText.insert(index, content);
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  insert(content: string, index: number, attributes?: Object) {
+    this._yText.insert(index, content, attributes);
     // @ts-ignore
     this._yText.meta = { split: true };
   }
