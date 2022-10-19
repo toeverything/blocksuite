@@ -3,7 +3,7 @@
   border-radius: 5px;
 }
 .affine-list-block-container--first {
-  margin-top: 9px;
+  margin-top: 18px;
 }
 .affine-list-block-container .affine-list-block-container {
   margin-top: 0;
@@ -27,15 +27,19 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  color: var(--affine-highlight-color);
+  color: var(--affine-code-color);
 }
 
 .affine-list-block__todo {
   width: 16px;
   height: 16px;
   border-radius: 4px;
-  border: 1px solid #a6abb7;
+  border: 1px solid var(--affine-icon-color);
 }
 .affine-list-block__todo.affine-list-block__todo--active {
-  background: #a6abb7;
+  background: var(--affine-icon-color);
+}
+
+.affine-list--checked {
+  color: var(--affine-icon-color);
 }

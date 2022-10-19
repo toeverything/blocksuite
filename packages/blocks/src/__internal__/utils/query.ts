@@ -191,6 +191,12 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
   return [getStartModelBySelection()];
 }
 
+export function getModelByElement(element: Element): BaseBlockModel {
+  const containerBlock = element.closest(`[${ATTR}]`) as ContainerBlock;
+  assertExists(containerBlock.model);
+  return containerBlock.model;
+}
+
 function mergeRect(a: DOMRect, b: DOMRect) {
   return new DOMRect(
     Math.min(a.left, b.left),

@@ -6,10 +6,10 @@ type Match = {
   pattern: RegExp;
   action: (
     model: BaseBlockModel,
+    quill: Quill,
     text: string,
     selection: RangeStatic,
-    pattern: RegExp,
-    lineStart: number
+    pattern: RegExp
   ) => boolean;
 };
 
@@ -23,19 +23,12 @@ export class Shortcuts {
     if (!selection) {
       return false;
     }
-    const [line, offset] = quill.getLine(selection.index);
-    const lineStart = selection.index - offset;
+    const [line] = quill.getLine(selection.index);
     if (Shortcuts._isValid(prefix, line.domNode.tagName)) {
       for (const match of Shortcuts._matches) {
         const matchedText = prefix.match(match.pattern);
         if (matchedText) {
-          return match.action(
-            model,
-            prefix,
-            selection,
-            match.pattern,
-            lineStart
-          );
+          return match.action(model, quill, prefix, selection, match.pattern);
         }
       }
     }
@@ -50,10 +43,10 @@ export class Shortcuts {
       pattern: /(?:\*){3}(.+?)(?:\*){3}$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const match = pattern.exec(text);
         if (!match) {
@@ -61,22 +54,27 @@ export class Shortcuts {
         }
 
         const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
+        const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             bold: true,
             italic: true,
           });
+          quill.setSelection(startIndex + annotatedText.length + 1, 0);
+          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.delete(startIndex + annotatedText.length - 3, 3);
           model.text?.delete(startIndex, 3);
+          quill.format('bold', false);
+          quill.format('italic', false);
         });
         return true;
       },
@@ -86,31 +84,34 @@ export class Shortcuts {
       pattern: /(?:\*){2}(.+?)(?:\*){2}$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const match = pattern.exec(text);
         if (!match) {
           return false;
         }
         const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
+        const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
           return false;
         }
-
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             bold: true,
           });
+          quill.setSelection(startIndex + annotatedText.length + 1, 0);
+          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.delete(startIndex + annotatedText.length - 2, 2);
           model.text?.delete(startIndex, 2);
+          quill.format('bold', false);
         });
         return true;
       },
@@ -120,31 +121,35 @@ export class Shortcuts {
       pattern: /(?:\*){1}(.+?)(?:\*){1}$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const match = pattern.exec(text);
         if (!match) {
           return false;
         }
         const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
+        const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             italic: true,
           });
+          quill.setSelection(startIndex + annotatedText.length + 1, 0);
+          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.delete(startIndex + annotatedText.length - 1, 1);
           model.text?.delete(startIndex, 1);
+          quill.format('italic', false);
         });
         return true;
       },
@@ -154,31 +159,35 @@ export class Shortcuts {
       pattern: /(?:~~)(.+?)(?:~~)$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const match = pattern.exec(text);
         if (!match) {
           return false;
         }
         const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
+        const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             strike: true,
           });
+          quill.setSelection(startIndex + annotatedText.length + 1, 0);
+          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.delete(startIndex + annotatedText.length - 2, 2);
           model.text?.delete(startIndex, 2);
+          quill.format('strike', false);
         });
         return true;
       },
@@ -188,31 +197,36 @@ export class Shortcuts {
       pattern: /(?:~)(.+?)(?:~)$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const match = pattern.exec(text);
         if (!match) {
           return false;
         }
         const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
+        const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', selection.index);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             underline: true,
           });
-          model.text?.delete(startIndex + annotatedText.length - 1, 1);
+          quill.setSelection(startIndex + annotatedText.length + 1, 0);
+          model.text?.delete(startIndex + annotatedText.length, 1);
+          model.text?.delete(selection.index, 1);
+          model.text?.delete(selection.index - 1, 1);
           model.text?.delete(startIndex, 1);
+          quill.format('underline', false);
         });
         return true;
       },
@@ -222,31 +236,35 @@ export class Shortcuts {
       pattern: /(?:`)(.+?)(?:`)$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const match = pattern.exec(text);
         if (!match) {
           return false;
         }
         const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
+        const startIndex = selection.index - annotatedText.length;
 
         if (text.match(/^([* \n]+)$/g)) {
           return false;
         }
 
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             code: true,
           });
+          quill.setSelection(startIndex + annotatedText.length + 1, 0);
+          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.delete(startIndex + annotatedText.length - 1, 1);
           model.text?.delete(startIndex, 1);
+          quill.format('code', false);
         });
         return true;
       },
@@ -257,10 +275,10 @@ export class Shortcuts {
         /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const match = pattern.exec(text);
         if (!match) {
@@ -268,14 +286,18 @@ export class Shortcuts {
         }
 
         const annotatedText = match[0];
-        const startIndex = lineStart + match.index;
-        model.text?.insert(' ', startIndex + annotatedText.length);
+        const startIndex = selection.index - annotatedText.length;
+        model.store.transact(() => {
+          model.text?.insert(' ', startIndex + annotatedText.length);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(startIndex + annotatedText.length, 1);
           model.text?.format(startIndex, annotatedText.length, {
             link: annotatedText,
           });
+          quill.setSelection(startIndex + annotatedText.length + 1, 0);
+          model.text?.delete(startIndex + annotatedText.length, 1);
+          quill.format('link', false);
         });
         return true;
       },
@@ -285,10 +307,10 @@ export class Shortcuts {
       pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
       action: (
         model: BaseBlockModel,
+        quill: Quill,
         text: string,
         selection: RangeStatic,
-        pattern: RegExp,
-        lineStart: number
+        pattern: RegExp
       ) => {
         const startIndex = text.search(pattern);
         const matchedText = text.match(pattern)?.[0];
@@ -299,18 +321,22 @@ export class Shortcuts {
         }
         const start = selection.index - matchedText.length;
 
-        model.text?.insert(' ', selection.index);
+        model.store.transact(() => {
+          model.text?.insert(' ', selection.index);
+        });
         model.store.captureSync();
         model.store.transact(() => {
-          model.text?.delete(selection.index, 1);
+          model.text?.format(start, hrefText.length, {
+            link: hrefLink.slice(1, hrefLink.length - 1),
+          });
+          quill.setSelection(startIndex + matchedText.length + 1, 0);
+          model.text?.delete(startIndex + matchedText.length, 1);
           model.text?.delete(
             selection.index - hrefLink.length - 1,
             hrefLink.length + 1
           );
           model.text?.delete(start, 1);
-          model.text?.format(start, hrefText.length - 2, {
-            link: hrefLink.slice(1, hrefLink.length - 1),
-          });
+          quill.format('link', false);
         });
         return true;
       },

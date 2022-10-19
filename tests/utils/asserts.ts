@@ -52,6 +52,11 @@ export async function assertText(page: Page, text: string) {
   expect(actual).toBe(text);
 }
 
+export async function assertTextContain(page: Page, text: string) {
+  const actual = await page.innerText('.ql-editor');
+  expect(actual).toContain(text);
+}
+
 export async function assertRichTexts(page: Page, texts: string[]) {
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
@@ -84,29 +89,21 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
-export async function assertTextFormat(page: Page, resultObj: unknown) {
-  const actual = await page.evaluate(() => {
-    // @ts-ignore
-    const quill = document.querySelectorAll('rich-text')[0]?.quill!;
-    return quill.getFormat();
-  });
+export async function assertTextFormat(
+  page: Page,
+  richTextIndex: number,
+  quillIndex: number,
+  resultObj: unknown
+) {
+  const actual = await page.evaluate(
+    ({ richTextIndex, quillIndex }) => {
+      const quill = document.querySelectorAll('rich-text')[richTextIndex].quill;
+      return quill.getFormat(quillIndex);
+    },
+    { richTextIndex, quillIndex }
+  );
   expect(actual).toEqual(resultObj);
 }
-
-/*
-export async function assertSelectedBlockCount(page: Page, expected: number) {
-  const actual = await page.evaluate(() => {
-    const selectionInfo =
-      document.querySelector('default-page-block')?.selection.selectionInfo;
-    if (selectionInfo?.type === 'Block') {
-      return selectionInfo.blocks.length;
-    }
-
-    return 0;
-  });
-  expect(actual).toBe(expected);
-}
-*/
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>
