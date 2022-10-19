@@ -29,6 +29,7 @@ export class EditorContainer extends LitElement {
   @state()
   model!: PageBlockModel;
 
+  // TODO only select block
   @state()
   clipboard = new ClipboardManager(this, this);
 
