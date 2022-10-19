@@ -2,15 +2,17 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
 import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
 import { assertExists, caretRangeFromPoint } from './std';
-import { ExtendedModel, SelectionPosition } from './types';
+import { ExtendedModel, SelectedBlock, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
   getDefaultPageBlock,
   getContainerByModel,
   getPreviousBlock,
   getNextBlock,
+  getModelsByRange,
 } from './query';
 import { Point, Rect } from './rect';
+import { getQuillIndexByNativeSelection } from './operations';
 
 export function focusRichText(
   position: SelectionPosition,
@@ -257,4 +259,38 @@ export function isRangeSelection() {
 
 export function isMultiBlockRange(range: Range) {
   return range.commonAncestorContainer.nodeType !== Node.TEXT_NODE;
+}
+
+export function getSelectInfo() {
+  const selection = window.getSelection();
+  let selectedBlocks: SelectedBlock[] = [];
+  if (selection && selection.type !== 'None') {
+    const range = selection.getRangeAt(0);
+    const models = getModelsByRange(getCurrentRange());
+    selectedBlocks = models.map(model => _getSelectedBlock(model));
+    if (selectedBlocks.length > 0) {
+      const firstIndex = getQuillIndexByNativeSelection(
+        range.startContainer,
+        range.startOffset as number
+      );
+      const endIndex = getQuillIndexByNativeSelection(
+        range.endContainer,
+        range.endOffset as number
+      );
+      selectedBlocks[0].startPos = firstIndex;
+      selectedBlocks[selectedBlocks.length - 1].endPos = endIndex;
+    }
+  }
+  return {
+    type: selection?.type || 'None',
+    selectedBlocks,
+  };
+}
+
+function _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+  const block = {
+    id: model.id,
+    children: model.children.map(child => _getSelectedBlock(child)),
+  };
+  return block;
 }

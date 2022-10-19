@@ -232,7 +232,7 @@ function formatModelsByRange(
   lastRichText.quill.setSelection(endIndex, 0);
 }
 
-function getQuillIndexByNativeSelection(
+export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number
 ) {

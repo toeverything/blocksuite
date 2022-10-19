@@ -268,6 +268,25 @@ export async function getQuillSelectionText(page: Page) {
   });
 }
 
+export async function setQuillSelection(
+  page: Page,
+  index: number,
+  length: number
+) {
+  return await page.evaluate(
+    ({ index, length }) => {
+      const selection = window.getSelection() as Selection;
+
+      const range = selection.getRangeAt(0);
+      const component =
+        range.startContainer.parentElement?.closest('rich-text');
+      // @ts-ignore
+      component.quill?.setSelection(index, length);
+    },
+    { index, length }
+  );
+}
+
 export async function getCursorBlockIdAndHeight(
   page: Page
 ): Promise<[string | null, number | null]> {
@@ -305,4 +324,22 @@ export async function fillLine(page: Page, toNext = false) {
       page.keyboard.press('Backspace');
     }
   }
+}
+
+export async function copyKeyboard(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.press('c', { delay: 50 });
+  await keyUpCtrlOrMeta(page);
+}
+
+export async function cutKeyboard(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.press('x', { delay: 50 });
+  await keyUpCtrlOrMeta(page);
+}
+
+export async function pasteKeyboard(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.press('v', { delay: 50 });
+  await keyUpCtrlOrMeta(page);
 }

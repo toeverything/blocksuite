@@ -2,6 +2,7 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 import { ClipItem } from './clip-item';
 import { EditorContainer } from '../../components';
 import { ListBlockModel } from '@blocksuite/blocks';
+import { SelectionUtils } from '@blocksuite/blocks';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -60,34 +61,8 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    // const { selectionInfo } = this._selection;
-    // FIXME
-    const selectionInfo = {
-      type: '',
-      blocks: <SelectedBlock[]>[],
-      anchorBlockId: '',
-      anchorBlockPosition: 0,
-      focusBlockId: '',
-      focusBlockPosition: 0,
-    };
-
-    let selectedBlocks: SelectedBlock[] = [];
-    if (selectionInfo.type === 'Block') {
-      selectedBlocks = selectionInfo.blocks;
-    } else if (
-      selectionInfo.type === 'Range' ||
-      selectionInfo.type === 'Caret'
-    ) {
-      // TODO the selection of  discontinuous and cross blocks are not exist yet
-      selectedBlocks = [
-        {
-          id: selectionInfo.anchorBlockId,
-          startPos: selectionInfo.anchorBlockPosition || undefined,
-          endPos: selectionInfo.focusBlockPosition || undefined,
-          children: [],
-        },
-      ];
-    }
+    const selectionInfo = SelectionUtils.getSelectInfo();
+    const selectedBlocks = selectionInfo.selectedBlocks;
 
     const affineClip = this._getCustomClip(selectedBlocks);
     affineClip && clips.push(affineClip);
