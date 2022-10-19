@@ -97,6 +97,16 @@ export class IconButton extends LitElement {
     }
   `;
 
+  constructor() {
+    super();
+    this.tabIndex = 0;
+    this.addEventListener('keypress', function onEvent(event) {
+      if (event.key === 'Enter') {
+        this.click();
+      }
+    });
+  }
+
   render() {
     return html`<slot></slot>`;
   }

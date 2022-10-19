@@ -12,11 +12,10 @@ const createEditLinkElement = (
   const offsetY = 5;
 
   const ele = document.createElement('edit-link-panel');
-  ele.left = `${(rect.left + rect.right) / 2}px`;
+  ele.left = `${rect.left}px`;
   ele.top = `${offset + offsetY}px`;
   ele.showMask = showMask;
   ele.previewLink = previewLink;
-  ele.style.transform = `translateX(-50%)`;
   container.appendChild(ele);
   return ele;
 };
