@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { ConfirmIcon, CopyIcon, EditIcon } from './button';
 
 @customElement('edit-link-panel')
 export class LinkPopover extends LitElement {
@@ -34,6 +35,9 @@ export class LinkPopover extends LitElement {
       border: 0;
       outline-width: 0;
     }
+    .affine-link-popover-input:disabled {
+      background-color: transparent;
+    }
 
     .affine-link-popover-input::placeholder {
       color: var(--affine-placeholder-color);
@@ -44,6 +48,10 @@ export class LinkPopover extends LitElement {
       width: 1px;
       height: 20px;
       background-color: #e0e6eb;
+    }
+
+    .affine-link-popover-btn-container {
+      display: flex;
     }
   `;
 
@@ -91,7 +99,7 @@ export class LinkPopover extends LitElement {
     );
   }
 
-  private confirm() {
+  private onConfirm() {
     const link = this.input?.value?.trim() ?? null;
     if (!link) {
       // TODO invalid link checking
@@ -104,9 +112,20 @@ export class LinkPopover extends LitElement {
     return;
   }
 
+  private onCopy(e: MouseEvent) {
+    navigator.clipboard.writeText(this.preview);
+    // TODO show toast
+    // Toast.show('Copied link to clipboard');
+    console.log('Copied link to clipboard');
+  }
+
+  private onEdit(e: MouseEvent) {
+    console.log('onclick', e);
+  }
+
   private onKeyup(e: KeyboardEvent) {
     if (e.key === 'Enter') {
-      this.confirm();
+      this.onConfirm();
     }
     this.link = (e.target as HTMLInputElement).value;
     return;
@@ -116,6 +135,19 @@ export class LinkPopover extends LitElement {
     const mask = this.showMask
       ? html`<div class="overlay-mask" @click="${this.hide}"></div>`
       : html``;
+
+    const buttons = this.preview
+      ? html`<icon-button @click=${this.onCopy}
+            >${CopyIcon({ width: '10px', height: '11px' })}</icon-button
+          ><icon-button @click=${this.onEdit}
+            >${EditIcon({ width: '11px', height: '11px' })}</icon-button
+          >`
+      : html`<icon-button @click=${this.onConfirm}
+          >${ConfirmIcon({
+            width: '11px',
+            height: '8px',
+          })}</icon-button
+        >`;
 
     return html`
       <div class="overlay-root">
@@ -127,17 +159,16 @@ export class LinkPopover extends LitElement {
           <div class="affine-link-popover">
             <input
               class="affine-link-popover-input"
-              autofocus
+              disabled=${this.preview ? true : false}
+              autofocus=${this.preview ? false : true}
               type="text"
               spellcheck="false"
               placeholder="Paste or type a link"
-              value="${this.preview}"
-              @keyup="${this.onKeyup}"
+              value=${this.preview}
+              @keyup=${this.onKeyup}
             />
             <span class="affine-link-popover-dividing-line"></span>
-            <div class="affine-link-popover-btn-container">
-              <button @click="${this.confirm}">Confirm</button>
-            </div>
+            <div class="affine-link-popover-btn-container">${buttons}</div>
           </div>
         </div>
       </div>

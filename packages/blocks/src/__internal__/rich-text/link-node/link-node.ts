@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import Quill from 'quill';
 import { assertExists, getModelByElement } from '../../utils';
 import { LinkIcon } from './link-icon';
-import { showLinkPopover } from './create-link-popover';
+import { showLinkPopover } from './link-popover/create-link-popover';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {
