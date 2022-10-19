@@ -22,7 +22,6 @@ import {
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
-
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -53,13 +52,7 @@ test('click on blank area', async ({ page }) => {
 
 test('native range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
-
-  await focusRichText(page);
-  await page.keyboard.type('123');
-  await pressEnter(page);
-  await page.keyboard.type('456');
-  await pressEnter(page);
-  await page.keyboard.type('789');
+  await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
   const topLeft123 = await page.evaluate(() => {
@@ -86,7 +79,6 @@ test('native range delete', async ({ page }) => {
 
 test('block level range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
-
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
