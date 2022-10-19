@@ -56,8 +56,28 @@ export class ParserHtml {
           type: tagName.toLowerCase(),
         });
         break;
-      case 'DIV':
       case 'P':
+        if (
+          node.firstChild instanceof Text &&
+          (node.firstChild.textContent?.startsWith('[] ') ||
+            node.firstChild.textContent?.startsWith('[ ] ') ||
+            node.firstChild.textContent?.startsWith('[x] '))
+        ) {
+          result =
+            this._contentParser.getParserHtmlText2Block('listItemParser')?.(
+              node
+            );
+        } else {
+          result = this._contentParser.getParserHtmlText2Block(
+            'commonParser'
+          )?.({
+            element: node,
+            flavour: 'paragraph',
+            type: 'text',
+          });
+        }
+        break;
+      case 'DIV':
       case 'B':
       case 'A':
       case 'EM':
@@ -126,7 +146,7 @@ export class ParserHtml {
     checked?: boolean,
     ignoreEmptyElement = true
   ): OpenBlockInfo | null {
-    const childNodes = element.children;
+    const childNodes = element.childNodes;
     let isChildNode = false;
     const textValues: Record<string, unknown>[] = [];
     const children = [];
@@ -154,6 +174,8 @@ export class ParserHtml {
             'SPAN',
             'A',
             'INPUT',
+            'MARK',
+            'CODE',
           ].includes(htmlElement.tagName)
         ) {
           textValues.push(
@@ -162,8 +184,10 @@ export class ParserHtml {
           continue;
         }
       }
-      const childNode = this._nodePaser(node as Element);
-      childNode && children.push(...childNode);
+      if (node instanceof Element) {
+        const childNode = this._nodePaser(node);
+        childNode && children.push(...childNode);
+      }
       isChildNode = true;
     }
 
@@ -191,25 +215,9 @@ export class ParserHtml {
     }
     const htmlElement = element as HTMLElement;
     const childNodes = Array.from(htmlElement.childNodes);
-
-    const isLink = getIsLink(htmlElement);
     const currentTextStyle = getTextStyle(htmlElement);
 
     if (!childNodes.length) {
-      // todo
-      // const singleLabelContent = getSingleLabelHTMLElementContent(htmlElement);
-      // if (isLink && singleLabelContent) {
-      //   return [
-      //     {
-      //       children: [
-      //         {
-      //           text: singleLabelContent,
-      //         },
-      //       ],
-      //       ...currentTextStyle,
-      //     },
-      //   ];
-      // }
       return ignoreEmptyText
         ? []
         : [
@@ -224,28 +232,16 @@ export class ParserHtml {
       .reduce((result, childNode) => {
         const textBlocks = this._commonHTML2Text(
           childNode,
-          isLink
-            ? textStyle
-            : {
-                ...textStyle,
-                ...currentTextStyle,
-              },
+          {
+            ...textStyle,
+            ...currentTextStyle,
+          },
           ignoreEmptyText
         );
         result.push(...textBlocks);
         return result;
       }, [] as Record<string, unknown>[])
       .filter(v => v);
-
-    // todo
-    // if (isLink && childTexts.length) {
-    //   return [
-    //     {
-    //       children: childTexts,
-    //       ...currentTextStyle,
-    //     },
-    //   ];
-    // }
     return childTexts;
   }
 
@@ -262,6 +258,24 @@ export class ParserHtml {
       type = 'todo';
       checked = inputEl?.getAttribute('checked') !== null;
     }
+    if (element.firstChild instanceof Text) {
+      if (element.firstChild.textContent?.startsWith('[] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(3);
+        type = 'todo';
+        checked = false;
+      } else if (element.firstChild.textContent?.startsWith('[ ] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(4);
+        type = 'todo';
+        checked = false;
+      } else if (element.firstChild.textContent?.startsWith('[x] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(4);
+        type = 'todo';
+        checked = true;
+      }
+    }
     const result = this._contentParser.getParserHtmlText2Block(
       'commonParser'
     )?.({
@@ -275,7 +289,7 @@ export class ParserHtml {
 }
 
 const getIsLink = (htmlElement: HTMLElement) => {
-  return ['A', 'IMG'].includes(htmlElement.tagName);
+  return ['A'].includes(htmlElement.tagName);
 };
 
 const getTextStyle = (htmlElement: HTMLElement) => {
@@ -304,11 +318,8 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['bold'] = true;
   }
   if (getIsLink(htmlElement)) {
-    textStyle['type'] = 'link';
-    textStyle['url'] =
+    textStyle['link'] =
       htmlElement.getAttribute('href') || htmlElement.getAttribute('src');
-    // todo
-    // textStyle['id'] = getRandomString('link');
   }
 
   if (tagName === 'EM' || style['fontStyle'] === 'italic') {
@@ -323,7 +334,7 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['underline'] = true;
   }
   if (tagName === 'CODE') {
-    textStyle['inlinecode'] = true;
+    textStyle['code'] = true;
   }
   if (
     tagName === 'S' ||
@@ -332,6 +343,9 @@ const getTextStyle = (htmlElement: HTMLElement) => {
       style['text-decoration'].indexOf('line-through') !== -1)
   ) {
     textStyle['strike'] = true;
+  }
+  if (tagName === 'MARK') {
+    textStyle['background'] = 'yellow';
   }
 
   return textStyle;
