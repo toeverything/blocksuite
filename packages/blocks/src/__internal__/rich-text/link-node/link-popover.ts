@@ -12,8 +12,38 @@ export class LinkPopover extends LitElement {
       right: 0;
     }
 
-    .edit-link-panel {
+    .affine-link-popover {
       display: flex;
+      align-items: center;
+      width: 316px;
+      height: 34px;
+      padding: 0 12px;
+
+      background: var(--affine-popover-background);
+      box-shadow: var(--affine-box-shadow);
+      border-radius: 0px 10px 10px 10px;
+    }
+
+    .affine-link-popover-input {
+      flex: 1;
+      font-family: var(--affine-font-family);
+      font-style: normal;
+      line-height: 24px;
+      font-size: var(--affine-font-sm);
+      color: var(--affine-popover-color);
+      border: 0;
+      outline-width: 0;
+    }
+
+    .affine-link-popover-input::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-link-popover-dividing-line {
+      margin: 0 6px;
+      width: 1px;
+      height: 20px;
+      background-color: #e0e6eb;
     }
   `;
 
@@ -86,6 +116,7 @@ export class LinkPopover extends LitElement {
     const mask = this.showMask
       ? html`<div class="overlay-mask" @click="${this.hide}"></div>`
       : html``;
+
     return html`
       <div class="overlay-root">
         ${mask}
@@ -93,9 +124,9 @@ export class LinkPopover extends LitElement {
           class="overlay-container"
           style="position: absolute; left: ${this.left}; top: ${this.top};"
         >
-          <div class="edit-link-panel">
+          <div class="affine-link-popover">
             <input
-              class="edit-link-panel-input"
+              class="affine-link-popover-input"
               autofocus
               type="text"
               spellcheck="false"
@@ -103,7 +134,8 @@ export class LinkPopover extends LitElement {
               value="${this.preview}"
               @keyup="${this.onKeyup}"
             />
-            <div class="edit-link-panel-btn-container">
+            <span class="affine-link-popover-dividing-line"></span>
+            <div class="affine-link-popover-btn-container">
               <button @click="${this.confirm}">Confirm</button>
             </div>
           </div>

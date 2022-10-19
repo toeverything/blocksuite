@@ -6,10 +6,11 @@ const createEditLinkElement = (
   const rect = anchorEl.getBoundingClientRect();
   const bodyRect = document.body.getBoundingClientRect();
   const offset = rect.top - bodyRect.top + rect.height;
+  const offsetY = 5;
 
   const ele = document.createElement('edit-link-panel');
-  ele.left = `${(rect.left + rect.right) / 2}px`;
-  ele.top = `${offset}px`;
+  ele.left = `${rect.left}px`;
+  ele.top = `${offset + offsetY}px`;
   ele.showMask = showMask;
   ele.preview = preview;
   container.appendChild(ele);
