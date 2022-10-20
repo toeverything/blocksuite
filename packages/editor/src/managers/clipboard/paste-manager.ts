@@ -147,27 +147,26 @@ export class PasteManager {
         index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
 
-      const endtext = selectedBlock?.text?.sliceToDelta(
-        lastBlock.endPos || selectedBlock?.text?.length
-      );
-      // todo the last block
-      blocks[blocks.length - 1].text.push(...endtext);
-      selectedBlock?.text?.delete(
-        lastBlock.endPos || selectedBlock?.text?.length,
-        selectedBlock?.text?.length
-      );
-      const insertTexts = blocks[0].text;
-      for (let i = insertTexts.length - 1; i >= 0; i--) {
-        selectedBlock?.text?.insert(
-          (insertTexts[i].insert as string) || '',
-          lastBlock.endPos || selectedBlock?.text?.length,
-          // eslint-disable-next-line @typescript-eslint/ban-types
-          insertTexts[i].attributes as Object | undefined
-        );
-      }
       const addBlockIds: string[] = [];
-      selectedBlock &&
-        this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
+      if (selectedBlock?.flavour !== 'page') {
+        const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
+        const endtext = selectedBlock?.text?.sliceToDelta(endIndex);
+        // todo the last block
+        blocks[blocks.length - 1].text.push(...endtext);
+        selectedBlock?.text?.delete(endIndex, selectedBlock?.text?.length);
+        const insertTexts = blocks[0].text;
+        for (let i = insertTexts.length - 1; i >= 0; i--) {
+          selectedBlock?.text?.insert(
+            (insertTexts[i].insert as string) || '',
+            endIndex,
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            insertTexts[i].attributes as Object | undefined
+          );
+        }
+        selectedBlock &&
+          this._addBlocks(blocks[0].children, selectedBlock, -1, addBlockIds);
+      }
+
       parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
       // FIXME
       // this._selection.selectedBlockIds = addBlockIds;
