@@ -64,7 +64,7 @@ function createSelectionRect(
 
 type PageSelectionType = 'native' | 'block' | 'none';
 
-class PageSelection {
+class PageSelectionState {
   type: PageSelectionType;
   selectedRichTexts: RichText[] = [];
 
@@ -113,9 +113,9 @@ class PageSelection {
   }
 }
 
-export class DefaultMouseManager {
+export class DefaultSelectionManager {
   store: Store;
-  selection = new PageSelection('none');
+  state = new PageSelectionState('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
@@ -141,24 +141,24 @@ export class DefaultMouseManager {
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
-    this.selection.type = 'block';
-    this.selection.resetStartRange(e);
-    this.selection.refreshRichTextBoundsCache(this._container);
+    this.state.type = 'block';
+    this.state.resetStartRange(e);
+    this.state.refreshRichTextBoundsCache(this._container);
     resetNativeSeletion(null);
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
-    assertExists(this.selection.startPoint);
+    assertExists(this.state.startPoint);
     const current = { x: e.raw.clientX, y: e.raw.clientY };
-    const { startPoint: start } = this.selection;
+    const { startPoint: start } = this.state;
 
     const selectionRect = createSelectionRect(current, start);
-    const { richTextCache } = this.selection;
+    const { richTextCache } = this.state;
     const selectedRichTexts = filterSelectedRichText(
       richTextCache,
       selectionRect
     );
-    this.selection.selectedRichTexts = selectedRichTexts;
+    this.state.selectedRichTexts = selectedRichTexts;
 
     const selectedBounds = selectedRichTexts.map(richText => {
       return richTextCache.get(richText) as DOMRect;
@@ -173,13 +173,13 @@ export class DefaultMouseManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
-    this.selection.type = 'native';
+    this.state.type = 'native';
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
-    assertExists(this.selection.startRange);
+    assertExists(this.state.startRange);
     const { startContainer, startOffset, endContainer, endOffset } =
-      this.selection.startRange;
+      this.state.startRange;
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
     if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
       currentRange?.setEnd(endContainer, endOffset);
@@ -194,7 +194,7 @@ export class DefaultMouseManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this.selection.resetStartRange(e);
+    this.state.resetStartRange(e);
 
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
@@ -204,23 +204,23 @@ export class DefaultMouseManager {
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    if (this.selection.type === 'native') {
+    if (this.state.type === 'native') {
       this._onNativeSelectionDragMove(e);
-    } else if (this.selection.type === 'block') {
+    } else if (this.state.type === 'block') {
       this._onBlockSelectionDragMove(e);
     }
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this.selection.type === 'native') {
+    if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
-    } else if (this.selection.type === 'block') {
+    } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     }
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
-    this.selection.clear();
+    this.state.clear();
     this._signals.updateSelectedRects.emit([]);
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;

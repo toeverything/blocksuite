@@ -18,7 +18,7 @@ import {
   handleSelectAll,
   batchUpdateTextType,
 } from '../../__internal__';
-import { DefaultMouseManager } from './mouse-manager';
+import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
 import { createLink } from '../../__internal__/rich-text/link-node';
 
@@ -94,7 +94,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   flavour = 'page' as const;
 
-  mouse!: DefaultMouseManager;
+  selection!: DefaultSelectionManager;
 
   lastSelectionPosition: SelectionPosition = 'start';
 
@@ -146,16 +146,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkey.addListener(REDO, () => store.redo());
 
     hotkey.addListener(BACKSPACE, e => {
-      const { selection } = this.mouse;
-      if (selection.type === 'native') {
+      const { state } = this.selection;
+
+      if (state.type === 'native') {
         handleBackspace(store, e);
-      } else if (selection.type === 'block') {
-        const { selectedRichTexts } = selection;
+      } else if (state.type === 'block') {
+        const { selectedRichTexts } = state;
         batchDelete(
           store,
           selectedRichTexts.map(richText => richText.model)
         );
-        selection.clear();
+        state.clear();
         this.signals.updateSelectedRects.emit([]);
       }
     });
@@ -163,7 +164,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkey.addListener(SELECT_ALL, e => {
       e.preventDefault();
       handleSelectAll();
-      this.mouse.selection.type = 'native';
+      this.selection.state.type = 'native';
     });
 
     hotkey.addListener(INLINE_CODE, e => handleFormat(store, e, 'code'));
@@ -235,11 +236,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _updateType(type: string, store: Store) {
-    const { selection } = this.mouse;
-    if (selection.selectedRichTexts.length > 0) {
+    const { state } = this.selection;
+    if (state.selectedRichTexts.length > 0) {
       batchUpdateTextType(
         store,
-        selection.selectedRichTexts.map(richText => richText.model),
+        state.selectedRichTexts.map(richText => richText.model),
         type
       );
     } else {
@@ -254,7 +255,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.mouse = new DefaultMouseManager(
+      this.selection = new DefaultSelectionManager(
         this.store,
         this.mouseRoot,
         this.signals
@@ -287,7 +288,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   disconnectedCallback() {
     this._removeHotkeys();
-    this.mouse.dispose();
+    this.selection.dispose();
   }
 
   render() {
