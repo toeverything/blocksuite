@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 import * as Y from 'yjs';
-import { Slot } from './utils/slot';
+import { Signal } from './utils/signal';
 import { PrelimText, RichTextAdapter, Text, TextType } from './text-adapter';
 import Quill from 'quill';
 import { Awareness } from 'y-protocols/awareness.js';
@@ -63,12 +63,12 @@ export class Store {
   readonly awareness!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
-  readonly slots = {
-    historyUpdated: new Slot(),
-    rootAdded: new Slot<BaseBlockModel>(),
-    rootDeleted: new Slot<string>(),
-    textUpdated: new Slot<Y.YTextEvent>(),
-    updated: new Slot(),
+  readonly signals = {
+    historyUpdated: new Signal(),
+    rootAdded: new Signal<BaseBlockModel>(),
+    rootDeleted: new Signal<string>(),
+    textUpdated: new Signal<Y.YTextEvent>(),
+    updated: new Signal(),
   };
 
   private _i = 0;
@@ -351,7 +351,7 @@ export class Store {
   };
 
   private _historyObserver = () => {
-    this.slots.historyUpdated.emit();
+    this.signals.historyUpdated.emit();
   };
 
   private _createBlockModel(props: Omit<BlockProps, 'children'>) {
@@ -406,7 +406,7 @@ export class Store {
 
     if (isRoot) {
       this._root = model;
-      this.slots.rootAdded.emit(model);
+      this.signals.rootAdded.emit(model);
     } else {
       const parent = this.getParent(model);
       const index = parent?.childMap.get(model.id);
@@ -420,7 +420,7 @@ export class Store {
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
     if (model === this._root) {
-      this.slots.rootDeleted.emit(id);
+      this.signals.rootDeleted.emit(id);
     } else {
       // TODO dispatch model delete event
     }
@@ -472,7 +472,7 @@ export class Store {
     // event on single block
     else if (event.target.parent === this._yBlocks) {
       if (event instanceof Y.YTextEvent) {
-        this.slots.textUpdated.emit(event);
+        this.signals.textUpdated.emit(event);
       } else if (event instanceof Y.YMapEvent) {
         this._handleYBlockUpdate(event);
       }
@@ -506,7 +506,7 @@ export class Store {
     for (const event of events) {
       this._handleYEvent(event);
     }
-    this.slots.updated.emit();
+    this.signals.updated.emit();
   };
 
   /**

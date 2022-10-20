@@ -1,7 +1,7 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { assert, describe, expect, it } from 'vitest';
-import { BaseBlockModel, Slot, Store } from '../';
+import { BaseBlockModel, Signal, Store } from '../';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModel } from '../../blocks/src/page-block/page-model';
@@ -26,8 +26,8 @@ function serialize(store: Store) {
   return store.doc.toJSON();
 }
 
-function waitOnce<T>(slot: Slot<T>) {
-  return new Promise<T>(resolve => slot.once(val => resolve(val)));
+function waitOnce<T>(signal: Signal<T>) {
+  return new Promise<T>(resolve => signal.once(val => resolve(val)));
 }
 
 describe.concurrent('basic', () => {
@@ -91,11 +91,11 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('can observe slot events', async () => {
+  it('can observe signal events', async () => {
     const store = new Store(options).register(BlockSchema);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    const block = await waitOnce(store.slots.rootAdded);
+    const block = await waitOnce(store.signals.rootAdded);
     assert.ok(block instanceof BlockSchema.page);
   });
 
@@ -103,7 +103,7 @@ describe.concurrent('addBlock', () => {
     const store = new Store(options).register(BlockSchema);
 
     queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-    const root = await waitOnce(store.slots.rootAdded);
+    const root = await waitOnce(store.signals.rootAdded);
     assert.ok(root instanceof BlockSchema.page);
 
     store.addBlock({ flavour: 'paragraph' });
@@ -118,7 +118,7 @@ describe.concurrent('addBlock', () => {
 
 async function initWithRoot(store: Store) {
   queueMicrotask(() => store.addBlock({ flavour: 'page' }));
-  const root = await waitOnce(store.slots.rootAdded);
+  const root = await waitOnce(store.signals.rootAdded);
   return root;
 }
 
