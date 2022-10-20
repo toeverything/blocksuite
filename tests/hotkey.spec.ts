@@ -28,10 +28,8 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 
   await selectAllByKeyboard(page); // first select all in rich text
-  await assertSelection(page, 1, 0, 5);
-
   await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['hello', '\n']);
+  await assertRichTexts(page, ['\n']);
 });
 
 test('single line rich-text inline code hotkey', async ({ page }) => {
