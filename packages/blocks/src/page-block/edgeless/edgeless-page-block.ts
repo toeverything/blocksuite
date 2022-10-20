@@ -2,7 +2,10 @@ import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
 import type { PageBlockModel, GroupBlockModel } from '../..';
-import { EdgelessBlockChildrenContainer, EdgelessSelectedRect } from './utils';
+import {
+  EdgelessBlockChildrenContainer,
+  EdgelessSelectedRect,
+} from './components';
 import {
   BlockHost,
   BLOCK_ID_ATTR,

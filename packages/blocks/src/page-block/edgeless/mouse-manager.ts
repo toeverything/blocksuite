@@ -1,6 +1,10 @@
 import { GroupBlockModel } from '../../group-block';
 import { ViewportState, IEdgelessContainer, XYWH } from './edgeless-page-block';
-import { SelectionEvent, initMouseEventHandlers } from '../../__internal__';
+import {
+  SelectionEvent,
+  initMouseEventHandlers,
+  resetNativeSeletion,
+} from '../../__internal__';
 
 const MIN_ZOOM = 0.3;
 
@@ -173,11 +177,12 @@ export class EdgelessMouseManager {
         selected: [],
         box: getSelectionBoxBound(viewport, '[0,0,0,0]'),
       });
+      resetNativeSeletion(null);
     }
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
-    // console.log('dblclick', e);
+    console.log('dblclick', e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {

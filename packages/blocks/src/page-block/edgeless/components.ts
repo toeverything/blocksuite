@@ -22,7 +22,8 @@ export function EdgelessSelectedRect(selectionState: EdgelessSelectionState) {
     top: box.y + 'px',
     width: box.w + 'px',
     height: box.h + 'px',
-    border: '1px solid #6ccfff',
+    border: '1px solid #ccc',
+    // border: '1px solid #6ccfff',
     pointerEvents: 'none',
     boxSizing: 'border-box',
   };
