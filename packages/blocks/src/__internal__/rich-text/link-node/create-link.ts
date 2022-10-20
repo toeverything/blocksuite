@@ -6,7 +6,7 @@ import {
   isRangeSelection,
 } from '../../utils';
 import './link-node';
-import { showLinkPopover } from './link-popover';
+import { showLinkPopover } from './link-popover/create-link-popover';
 import { MockSelectNode } from './mock-select-node';
 
 export const createLink = async (store: Store, e: KeyboardEvent) => {

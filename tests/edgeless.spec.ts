@@ -3,8 +3,13 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   switchMode,
+  waitNextFrame,
 } from './utils/actions';
-import { assertRichTexts, assertSelection } from './utils/asserts';
+import {
+  assertNativeSelectionRangeCount,
+  assertRichTexts,
+  assertSelection,
+} from './utils/asserts';
 
 test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -17,5 +22,7 @@ test('switch to edgeless mode', async ({ page }) => {
   const locator = page.locator('.affine-edgeless-page-block-container');
   await expect(locator).toHaveCount(1);
   await assertRichTexts(page, ['hello']);
-  await assertSelection(page, 0, 5, 0);
+
+  await waitNextFrame(page);
+  await assertNativeSelectionRangeCount(page, 0);
 });

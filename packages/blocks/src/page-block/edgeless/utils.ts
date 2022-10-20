@@ -1,19 +1,18 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { BlockHost } from '../../__internal__';
 import { BaseBlockModel } from '@blocksuite/store';
 
+import { GroupBlockModel } from '../..';
 import type {
   XYWH,
   ViewportState,
   EdgelessSelectionState,
 } from './edgeless-page-block';
-import { GroupBlockModel } from '../..';
-import { BlockElement } from '../../__internal__';
+import { BlockElement, BlockHost } from '../../__internal__';
 import '../../__internal__';
 
-export function EdgelessSelectionBox(selectionState: EdgelessSelectionState) {
+export function EdgelessSelectedRect(selectionState: EdgelessSelectionState) {
   const { selected, box } = selectionState;
   if (!selected.length || !box) return html`<div></div>`;
 
@@ -28,7 +27,9 @@ export function EdgelessSelectionBox(selectionState: EdgelessSelectionState) {
     boxSizing: 'border-box',
   };
 
-  return html` <div style=${styleMap(style)}></div> `;
+  return html`
+    <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
+  `;
 }
 
 function EdgelessBlockChild(
@@ -48,11 +49,17 @@ function EdgelessBlockChild(
     transformOrigin: '0 0',
     width: w + 'px',
     minHeight: h + 'px',
+    paddingLeft: '9px',
+    paddingRight: '9px',
+    paddingBottom: '18px',
     background: 'white',
+    boxShadow: '0 0 7px #ddd',
   };
 
   return html`
-    <div style=${styleMap(style)}>${BlockElement(model, host)}</div>
+    <div class="affine-edgeless-block-child" style=${styleMap(style)}>
+      ${BlockElement(model, host)}
+    </div>
   `;
 }
 
@@ -71,13 +78,12 @@ export function EdgelessBlockChildrenContainer(
         padding-left: 0;
         position: relative;
         overflow: hidden;
-        border: 1px #ccc solid;
         /* max-width: 300px; */
         /* height: ${viewport.height}px; */
         height: 100%;
 
-        background-image: linear-gradient(#cccccc66 0.1em, transparent 0.1em),
-          linear-gradient(90deg, #cccccc66 0.1em, transparent 0.1em);
+        background-image: linear-gradient(#cccccc66 1px, transparent 1px),
+          linear-gradient(90deg, #cccccc66 1px, transparent 1px);
         background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
         background-position: ${translateX}px ${translateY}px;
       }
