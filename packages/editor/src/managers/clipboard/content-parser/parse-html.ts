@@ -183,6 +183,7 @@ export class ParserHtml {
             'SPAN',
             'A',
             'INPUT',
+            'CODE',
           ].includes(htmlElement.tagName)
         ) {
           textValues.push(
@@ -394,7 +395,7 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['underline'] = true;
   }
   if (tagName === 'CODE') {
-    textStyle['inlinecode'] = true;
+    textStyle['code'] = true;
   }
   if (
     tagName === 'S' ||
