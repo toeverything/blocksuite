@@ -78,7 +78,11 @@ export function handleBlockSplit(
   asyncFocusRichText(store, id);
 }
 
-export function handleIndent(store: Store, model: ExtendedModel) {
+export function handleIndent(
+  store: Store,
+  model: ExtendedModel,
+  offset: number
+) {
   const previousSibling = store.getPreviousSibling(model);
   if (previousSibling) {
     store.captureSync();
@@ -91,11 +95,22 @@ export function handleIndent(store: Store, model: ExtendedModel) {
       children: model.children,
     };
     store.deleteBlock(model);
-    store.addBlock(blockProps, previousSibling);
+    const id = store.addBlock(blockProps, previousSibling);
+    // FIXME: after quill onload
+    requestAnimationFrame(() => {
+      const block = store.getBlockById(id);
+      assertExists(block);
+      const richText = getRichTextByModel(block);
+      richText?.quill.setSelection(offset, 0);
+    });
   }
 }
 
-export function handleUnindent(store: Store, model: ExtendedModel) {
+export async function handleUnindent(
+  store: Store,
+  model: ExtendedModel,
+  offset: number
+) {
   const parent = store.getParent(model);
   if (!parent || parent?.flavour === 'group') return;
 
@@ -112,7 +127,14 @@ export function handleUnindent(store: Store, model: ExtendedModel) {
     children: model.children,
   };
   store.deleteBlock(model);
-  store.addBlock(blockProps, grandParent, index + 1);
+  const id = store.addBlock(blockProps, grandParent, index + 1);
+  // FIXME: after quill onload
+  requestAnimationFrame(() => {
+    const block = store.getBlockById(id);
+    assertExists(block);
+    const richText = getRichTextByModel(block);
+    richText?.quill.setSelection(offset, 0);
+  });
 }
 
 export function isCollapsedAtBlockStart(quill: Quill) {
