@@ -343,3 +343,33 @@ export async function pasteKeyboard(page: Page) {
   await page.keyboard.press('v', { delay: 50 });
   await keyUpCtrlOrMeta(page);
 }
+
+export async function pasteContent(
+  page: Page,
+  clipData: Record<string, unknown>
+) {
+  await page.evaluate(
+    ({ clipData }) => {
+      const e = {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        preventDefault: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        stopPropagation: () => {},
+        clipboardData: {
+          types: Object.keys(clipData),
+          getData: (mime: string) => {
+            return clipData[mime];
+          },
+        },
+      };
+      console.log('ss');
+      document
+        .getElementsByTagName('editor-container')[0]
+        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
+          e as unknown as ClipboardEvent
+        );
+    },
+    { clipData }
+  );
+  const sd = 10;
+}

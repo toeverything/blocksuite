@@ -116,6 +116,14 @@ export async function assertTextFormat(
   expect(actual).toEqual(resultObj);
 }
 
+export async function assertTextFormats(page: Page, resultObj: unknown[]) {
+  const actual = await page.evaluate(() => {
+    const elements = document.querySelectorAll('rich-text');
+    return Array.from(elements).map(el => el.quill.getFormat());
+  });
+  expect(actual).toEqual(resultObj);
+}
+
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>
     // @ts-ignore
@@ -192,6 +200,19 @@ export async function assertBlockType(
     { id }
   );
   expect(actual).toBe(type);
+}
+
+export async function assertBlockTypes(page: Page, blockTypes: string[]) {
+  const actual = await page.evaluate(() => {
+    const elements = document.querySelectorAll('[data-block-id]');
+    return (
+      Array.from(elements)
+        .slice(2)
+        // @ts-ignore
+        .map(el => el.model.type)
+    );
+  });
+  expect(actual).toEqual(blockTypes);
 }
 
 /**
