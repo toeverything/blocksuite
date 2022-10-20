@@ -15,7 +15,6 @@ import {
 } from './utils/actions';
 import {
   assertRichTexts,
-  assertSelection,
   assertTextFormat,
 } from './utils/asserts';
 
