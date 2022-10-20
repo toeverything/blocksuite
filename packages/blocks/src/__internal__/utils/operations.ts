@@ -175,13 +175,18 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 export function handleChangeType(type: string, store: Store) {
-  const range = window.getSelection()?.getRangeAt(0);
-  console.log();
-  if (range) {
+  const range = window.getSelection()?.getRangeAt(0);;
+    assertExists(range);
     const intersectedModels = getModelsByRange(range);
     intersectedModels.forEach(item => {
       store.updateBlock(item, { type });
     });
+  
+}
+export function batchChangeType(store: Store, models: ExtendedModel[],type:string) {
+  store.captureSync();
+  for (const model of models) {
+    store.updateBlock(model, { type });
   }
 }
 export function handleBackspace(store: Store, e: KeyboardEvent) {
@@ -325,6 +330,36 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
       formatModelsByRange(models, store, key);
     }
   }
+}
+export function handleSelectAll(){
+  let blocks = document.querySelectorAll('.ql-editor')
+  const firstRichText = blocks[0];
+  const lastRichText = blocks[blocks.length - 1];
+  const range = document.createRange();
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+  let lastNode = findLastNode(lastRichText)
+  let firstNode = findFirstNode(firstRichText)
+  range?.setStart(firstNode, 0);
+  // @ts-ignore
+  range?.setEnd(lastNode, lastNode.length);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  assertExists(range);
+  selection?.addRange(range);
+}
+
+function findLastNode(ele: Element | Node):Node {
+  if (ele.lastChild) {
+    return findLastNode(ele.lastChild);
+  }
+  return ele;
+}
+function findFirstNode(ele: Element | Node):Node {
+  if (ele.firstChild) {
+    return findFirstNode(ele.firstChild);
+  }
+  return ele;
 }
 
 export function handleLineStartBackspace(store: Store, model: ExtendedModel) {

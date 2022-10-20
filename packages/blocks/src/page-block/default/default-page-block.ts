@@ -15,6 +15,8 @@ import {
   handleFormat,
   batchDelete,
   handleChangeType,
+  handleSelectAll,
+  batchChangeType,
 } from '../../__internal__';
 import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
@@ -136,10 +138,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           store,
           selectedRichTexts.map(richText => richText.model)
         );
-
         selection.clear();
         this.signals.updateSelectedRects.emit([]);
       }
+    });
+    hotkey.addListener(HOTKEYS.SELECT_ALL, e => {
+      e.preventDefault();
+      const { selection } = this.mouse;
+      handleSelectAll();
+      selection.type = 'native'
     });
     hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
       handleFormat(store, e, 'code');
@@ -149,33 +156,32 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkey.addListener(HOTKEYS.H1, e => {
       // handleFormat(store, e, 'header');
-
-      handleChangeType('h1', store);
+      this._changeType('h1', store,);
     });
     hotkey.addListener(HOTKEYS.H1, e => {
       // handleFormat(store, e, 'header');
 
-      handleChangeType('h2', store);
+      this._changeType('h2', store);
     });
     hotkey.addListener(HOTKEYS.H2, e => {
       // handleFormat(store, e, 'header');
 
-      handleChangeType('h3', store);
+      this._changeType('h3', store);
     });
     hotkey.addListener(HOTKEYS.H4, e => {
       // handleFormat(store, e, 'header');
 
-      handleChangeType('h4', store);
+      this._changeType('h4', store);
     });
     hotkey.addListener(HOTKEYS.H5, e => {
       // handleFormat(store, e, 'header');
 
-      handleChangeType('h5', store);
+      this._changeType('h5', store);
     });
     hotkey.addListener(HOTKEYS.H6, e => {
       // handleFormat(store, e, 'header');
 
-      handleChangeType('h6', store);
+      this._changeType('h6', store);
     });
     hotkey.addListener(HOTKEYS.SHIFT_UP, e => {
       // TODO expand selection up
@@ -233,6 +239,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     const title = (e.target as HTMLInputElement).value;
     store.updateBlock(this.model, { title });
+  }
+  private _changeType(type: string,store:Store) {
+    const { selection } = this.mouse;
+      if (selection.selectedRichTexts.length > 0) {
+        batchChangeType(store, selection.selectedRichTexts.map(richText => richText.model), type);
+      }else{
+        handleChangeType(type, store);
+      }
   }
 
   // disable shadow DOM to workaround quill
