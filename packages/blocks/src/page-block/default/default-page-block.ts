@@ -158,12 +158,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       // handleFormat(store, e, 'header');
       this._changeType('h1', store,);
     });
-    hotkey.addListener(HOTKEYS.H1, e => {
+    hotkey.addListener(HOTKEYS.H2, e => {
       // handleFormat(store, e, 'header');
 
       this._changeType('h2', store);
     });
-    hotkey.addListener(HOTKEYS.H2, e => {
+    hotkey.addListener(HOTKEYS.H3, e => {
       // handleFormat(store, e, 'header');
 
       this._changeType('h3', store);
@@ -213,6 +213,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.H4,
       HOTKEYS.H5,
       HOTKEYS.H6,
+      HOTKEYS.SELECT_ALL,
     ]);
   }
 
