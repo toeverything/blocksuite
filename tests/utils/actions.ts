@@ -45,6 +45,7 @@ export async function enterPlaygroundWithList(page: Page) {
       store.addBlock({ flavour: 'list' }, groupId);
     }
   });
+  await waitNextFrame(page);
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -213,15 +214,19 @@ export async function dragBetweenIndices(
   await dragBetweenCoords(page, startCoord, endCoord);
 }
 
-export async function shiftTab(page: Page) {
+export async function pressTab(page: Page) {
+  await page.keyboard.press('Tab', { delay: 50 });
+}
+
+export async function pressShiftTab(page: Page) {
   await page.keyboard.down('Shift');
   await page.keyboard.press('Tab', { delay: 50 });
   await page.keyboard.up('Shift');
 }
 
-export async function shiftEnter(page: Page) {
+export async function pressShiftEnter(page: Page) {
   await page.keyboard.down('Shift');
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.up('Shift');
 }
 

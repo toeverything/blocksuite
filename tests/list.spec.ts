@@ -17,9 +17,10 @@ import {
   focusRichText,
   pressEnter,
   redoByClick,
-  shiftTab,
+  pressShiftTab,
   undoByClick,
   undoByKeyboard,
+  pressTab,
 } from './utils/actions';
 
 test('add new bulleted list', async ({ page }) => {
@@ -87,10 +88,10 @@ test('unindent list block', async ({ page }) => {
   await assertBlockChildrenIds(page, '1', ['2', '4']);
   await assertBlockChildrenIds(page, '2', ['3']);
 
-  await shiftTab(page); // 0(1(2,3,4))
+  await pressShiftTab(page); // 0(1(2,3,4))
   await assertBlockChildrenIds(page, '1', ['2', '3', '4']);
 
-  await shiftTab(page);
+  await pressShiftTab(page);
   await assertBlockChildrenIds(page, '1', ['2', '3', '4']);
 });
 
@@ -132,12 +133,12 @@ test('nested list blocks', async ({ page }) => {
   await page.keyboard.type('123');
 
   await focusRichText(page, 1);
-  await page.keyboard.press('Tab');
+  await pressTab(page);
   await page.keyboard.type('456');
 
   await focusRichText(page, 2);
-  await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
+  await pressTab(page);
+  await pressTab(page);
   await page.keyboard.type('789');
 
   await assertRichTexts(page, ['123', '456', '789']);
@@ -147,7 +148,7 @@ test('nested list blocks', async ({ page }) => {
   await assertBlockChildrenIds(page, '3', ['4']);
 
   await focusRichText(page, 1);
-  await shiftTab(page);
+  await pressShiftTab(page);
 
   await assertRichTexts(page, ['123', '456', '789']);
   await assertBlockChildrenIds(page, '1', ['2', '3']);
@@ -198,7 +199,7 @@ test('basic indent and unindent', async ({ page }) => {
   </group>
 </page>`
   );
-  await shiftTab(page);
+  await pressShiftTab(page);
   await assertStoreMatchJSX(
     page,
     `<page>

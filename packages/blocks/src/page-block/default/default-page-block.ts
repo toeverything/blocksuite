@@ -22,7 +22,7 @@ import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
 import { createLink } from '../../__internal__/rich-text/link-node';
 
-export interface DefaultPageBlockSignals {
+export interface DefaultPageSignals {
   updateSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
 }
@@ -107,7 +107,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   selectedRects: DOMRect[] = [];
 
-  signals: DefaultPageBlockSignals = {
+  signals: DefaultPageSignals = {
     updateSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
   };

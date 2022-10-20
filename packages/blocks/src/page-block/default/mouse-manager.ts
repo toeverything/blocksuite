@@ -10,7 +10,7 @@ import {
   noop,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
-import type { DefaultPageBlockSignals } from './default-page-block';
+import type { DefaultPageSignals } from './default-page-block';
 
 function isBlankAreaBetweenBlocks(startContainer: Node) {
   if (!(startContainer instanceof HTMLElement)) return false;
@@ -118,12 +118,12 @@ export class DefaultMouseManager {
   selection = new PageSelection('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
-  private _signals: DefaultPageBlockSignals;
+  private _signals: DefaultPageSignals;
 
   constructor(
     store: Store,
     container: HTMLElement,
-    signals: DefaultPageBlockSignals
+    signals: DefaultPageSignals
   ) {
     this.store = store;
     this._signals = signals;
@@ -266,6 +266,8 @@ export class DefaultMouseManager {
   };
 
   dispose() {
+    this._signals.updateSelectedRects.dispose();
+    this._signals.updateSelectionRect.dispose();
     this._mouseDisposeCallback();
   }
 }
