@@ -1,5 +1,11 @@
 # @blocksuite/blocks
 
+## 0.2.11
+
+### Patch Changes
+
+- 7042a59: Implement edit link feature
+
 ## 0.2.9
 
 ### Patch Changes
