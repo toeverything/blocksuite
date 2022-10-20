@@ -2,8 +2,8 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
-import { BlockHost } from '../utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { BlockHost } from '../utils';
 import { createKeyboardBindings } from './keyboard';
 
 import style from './styles.css';
@@ -69,8 +69,8 @@ export class RichText extends LitElement {
   }
 
   disconnectedCallback() {
-    this.host.store.detachRichText(this.model.id);
     super.disconnectedCallback();
+    this.host.store.detachRichText(this.model.id);
   }
 
   render() {

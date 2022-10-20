@@ -71,7 +71,7 @@ export function syncBlockProps(
     yBlock.set('prop:checked', props.checked ?? false);
   }
   if (props.flavour === 'group' && !yBlock.has('prop:xywh')) {
-    yBlock.set('prop:xywh', props.xywh ?? '[0,0,300,200]');
+    yBlock.set('prop:xywh', props.xywh ?? '[50,50,300,200]');
   }
 }
 

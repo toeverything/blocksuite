@@ -89,6 +89,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
+  flavour = 'page' as const;
+
   mouse!: DefaultMouseManager;
 
   lastSelectionPosition: SelectionPosition = 'start';

@@ -9,6 +9,7 @@ import {
   Bound,
   hotkey,
   HOTKEYS,
+  resetNativeSeletion,
 } from '../../__internal__';
 import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
 
@@ -41,6 +42,8 @@ export class EdgelessPageBlockComponent
 {
   @property()
   store!: Store;
+
+  flavour = 'edgeless' as const;
 
   mouse!: EdgelessMouseManager;
 
@@ -104,6 +107,8 @@ export class EdgelessPageBlockComponent
       group.propsUpdated.on(() => refreshSelectionBox(this));
     });
 
+    // XXX: should be called after rich text components are mounted
+    requestAnimationFrame(() => resetNativeSeletion(null));
     this._bindHotkeys();
   }
 
