@@ -175,7 +175,7 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 export function handleChangeType(type: string, store: Store) {
-  const range = window.getSelection()?.getRangeAt(0);;
+  const range = window.getSelection()?.getRangeAt(0);
     assertExists(range);
     const intersectedModels = getModelsByRange(range);
     intersectedModels.forEach(item => {
@@ -332,14 +332,14 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   }
 }
 export function handleSelectAll(){
-  let blocks = document.querySelectorAll('.ql-editor')
+  const blocks = document.querySelectorAll('.ql-editor')
   const firstRichText = blocks[0];
   const lastRichText = blocks[blocks.length - 1];
   const range = document.createRange();
   assertExists(firstRichText);
   assertExists(lastRichText);
-  let lastNode = findLastNode(lastRichText)
-  let firstNode = findFirstNode(firstRichText)
+  const lastNode = findLastNode(lastRichText)
+  const firstNode = findFirstNode(firstRichText)
   range?.setStart(firstNode, 0);
   // @ts-ignore
   range?.setEnd(lastNode, lastNode.length);
