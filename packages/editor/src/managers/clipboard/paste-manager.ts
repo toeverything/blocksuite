@@ -102,13 +102,14 @@ export class PasteManager {
               text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
             };
           }
+          return;
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         renderer(token: any) {
           return `<u>${token.text}</u>`;
         },
       };
       marked.use({ extensions: [underline] });
-      // TODO the method of parse need deal underline
       const md2html = marked.parse(textClipData);
       return this._editor.contentParser.htmlText2Block(md2html);
     }
