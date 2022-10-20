@@ -2,7 +2,7 @@ import * as Y from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
 import { RelativePosition } from 'yjs';
 import type { Store } from './store';
-import { Slot } from './utils/slot';
+import { Signal } from './utils/signal';
 
 export interface SelectionRange {
   id: string;
@@ -31,15 +31,15 @@ export class AwarenessAdapter {
   readonly store: Store;
   readonly awareness: Awareness;
 
-  readonly slots = {
-    update: new Slot<AwarenessMessage>(),
+  readonly signals = {
+    update: new Signal<AwarenessMessage>(),
   };
 
   constructor(store: Store, awareness: Awareness) {
     this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
-    this.slots.update.on(this._onAwarenessMessage);
+    this.signals.update.on(this._onAwarenessMessage);
   }
 
   public setLocalCursor(range: SelectionRange) {
@@ -65,21 +65,21 @@ export class AwarenessAdapter {
 
     const states = this.awareness.getStates();
     added.forEach(id => {
-      this.slots.update.emit({
+      this.signals.update.emit({
         id,
         type: 'add',
         state: states.get(id) as AwarenessState,
       });
     });
     updated.forEach(id => {
-      this.slots.update.emit({
+      this.signals.update.emit({
         id,
         type: 'update',
         state: states.get(id) as AwarenessState,
       });
     });
     removed.forEach(id => {
-      this.slots.update.emit({
+      this.signals.update.emit({
         id,
         type: 'remove',
       });
@@ -151,7 +151,7 @@ export class AwarenessAdapter {
   destroy() {
     if (this.awareness) {
       this.awareness.off('change', this._onAwarenessChange);
-      this.slots.update.dispose();
+      this.signals.update.dispose();
     }
   }
 }

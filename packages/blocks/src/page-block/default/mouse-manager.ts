@@ -10,7 +10,7 @@ import {
   noop,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
-import type { DefaultPageBlockSlots } from './default-page-block';
+import type { DefaultPageBlockSignals } from './default-page-block';
 
 function isBlankAreaBetweenBlocks(startContainer: Node) {
   if (!(startContainer instanceof HTMLElement)) return false;
@@ -28,7 +28,7 @@ function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
 
 function isBlankArea(e: SelectionEvent) {
   const { cursor } = window.getComputedStyle(e.raw.target as Element);
-  return cursor === 'default';
+  return cursor !== 'text';
 }
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -118,15 +118,15 @@ export class DefaultMouseManager {
   selection = new PageSelection('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
-  private _slots: DefaultPageBlockSlots;
+  private _signals: DefaultPageBlockSignals;
 
   constructor(
     store: Store,
     container: HTMLElement,
-    slots: DefaultPageBlockSlots
+    signals: DefaultPageBlockSignals
   ) {
     this.store = store;
-    this._slots = slots;
+    this._signals = signals;
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -163,12 +163,12 @@ export class DefaultMouseManager {
     const selectedBounds = selectedRichTexts.map(richText => {
       return richTextCache.get(richText) as DOMRect;
     });
-    this._slots.updateSelectedRects.emit(selectedBounds);
-    this._slots.updateSelectionRect.emit(selectionRect);
+    this._signals.updateSelectedRects.emit(selectedBounds);
+    this._signals.updateSelectionRect.emit(selectionRect);
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
-    this._slots.updateSelectionRect.emit(null);
+    this._signals.updateSelectionRect.emit(null);
     // do not clear selected rects here
   }
 
@@ -178,9 +178,14 @@ export class DefaultMouseManager {
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
     assertExists(this.selection.startRange);
-    const { startContainer, startOffset } = this.selection.startRange;
+    const { startContainer, startOffset, endContainer, endOffset } =
+      this.selection.startRange;
     const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    currentRange?.setStart(startContainer, startOffset);
+    if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
+      currentRange?.setEnd(endContainer, endOffset);
+    } else {
+      currentRange?.setStart(startContainer, startOffset);
+    }
     resetNativeSeletion(currentRange);
   }
 
@@ -216,7 +221,7 @@ export class DefaultMouseManager {
 
   private _onContainerClick = (e: SelectionEvent) => {
     this.selection.clear();
-    this._slots.updateSelectedRects.emit([]);
+    this._signals.updateSelectedRects.emit([]);
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;

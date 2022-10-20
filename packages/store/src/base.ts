@@ -1,6 +1,6 @@
 import type { Store } from './store';
 import type { TextType } from './text-adapter';
-import { Slot } from './utils/slot';
+import { Signal } from './utils/signal';
 
 export interface IBaseBlockProps {
   flavour: string;
@@ -14,8 +14,8 @@ export interface IBaseBlockProps {
 
 export class BaseBlockModel implements IBaseBlockProps {
   store: Store;
-  propsUpdated = new Slot();
-  childrenUpdated = new Slot();
+  propsUpdated = new Signal();
+  childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
   flavour!: string;
@@ -83,7 +83,7 @@ export class BaseBlockModel implements IBaseBlockProps {
     if (attributes.underline) {
       return `<u>${text}</u>`;
     }
-    if (attributes.inlinecode) {
+    if (attributes.code) {
       return `<code>${text}</code>`;
     }
     if (attributes.strikethrough) {

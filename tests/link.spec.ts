@@ -26,28 +26,40 @@ test('basic link', async ({ page }) => {
   await selectAllByKeyboard(page);
   await pressCreateLinkShortCut(page);
 
-  const editLinkPopoverLocator = page.locator('.edit-link-panel-input');
-  expect(await editLinkPopoverLocator.isVisible()).toBe(true);
-  await editLinkPopoverLocator.fill(link);
+  const linkPopoverLocator = page.locator('.affine-link-popover-input');
+  expect(await linkPopoverLocator.isVisible()).toBe(true);
+  await linkPopoverLocator.fill(link);
   // await page.keyboard.type(link);
   // await page.locator(`text="Confirm"`).click();
   await pressEnter(page);
-  expect(await editLinkPopoverLocator.isVisible()).toBe(false);
+  expect(await linkPopoverLocator.isVisible()).toBe(false);
 
   const linkLocator = page.locator(`text="${linkText}"`);
   await expect(linkLocator).toHaveAttribute('href', link);
 
   // Hover link
-  expect(await editLinkPopoverLocator.isVisible()).toBe(false);
+  expect(await linkPopoverLocator.isVisible()).toBe(false);
   await linkLocator.hover();
   // wait for popover delay open
   await page.waitForTimeout(200);
-  expect(await editLinkPopoverLocator.isVisible()).toBe(true);
+  expect(await linkPopoverLocator.isVisible()).toBe(true);
 
-  // TODO this action will changed
   // Edit link
-  const link2 = 'http://example2.com';
-  await editLinkPopoverLocator.fill(link2);
+  const text2 = 'link2';
+  const link2 = 'https://github.com';
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
   await pressEnter(page);
-  await expect(linkLocator).toHaveAttribute('href', link2);
+
+  const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
+  expect(await editLinkPopoverLocator.isVisible()).toBe(true);
+  await page.keyboard.press('Tab');
+  await page.keyboard.type(text2);
+  await page.keyboard.press('Tab');
+  await page.keyboard.type(link2);
+  await page.keyboard.press('Tab');
+  await pressEnter(page);
+  const link2Locator = page.locator(`text="${text2}"`);
+
+  await expect(link2Locator).toHaveAttribute('href', link2);
 });

@@ -1,7 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Slot, Store } from '@blocksuite/store';
+import { Signal, Store } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -19,9 +19,9 @@ import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
 import { createLink } from '../../__internal__/rich-text/link-node';
 
-export interface DefaultPageBlockSlots {
-  updateSelectionRect: Slot<DOMRect | null>;
-  updateSelectedRects: Slot<DOMRect[]>;
+export interface DefaultPageBlockSignals {
+  updateSelectionRect: Signal<DOMRect | null>;
+  updateSelectedRects: Signal<DOMRect[]>;
 }
 
 // https://stackoverflow.com/a/2345915
@@ -89,6 +89,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
+  flavour = 'page' as const;
+
   mouse!: DefaultMouseManager;
 
   lastSelectionPosition: SelectionPosition = 'start';
@@ -102,9 +104,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   selectedRects: DOMRect[] = [];
 
-  slots: DefaultPageBlockSlots = {
-    updateSelectionRect: new Slot<DOMRect | null>(),
-    updateSelectedRects: new Slot<DOMRect[]>(),
+  signals: DefaultPageBlockSignals = {
+    updateSelectionRect: new Signal<DOMRect | null>(),
+    updateSelectedRects: new Signal<DOMRect[]>(),
   };
 
   @property({
@@ -135,7 +137,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         );
 
         selection.clear();
-        this.slots.updateSelectedRects.emit([]);
+        this.signals.updateSelectedRects.emit([]);
       }
     });
     hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
@@ -206,7 +208,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.mouse = new DefaultMouseManager(
         this.store,
         this.mouseRoot,
-        this.slots
+        this.signals
       );
     }
     super.update(changedProperties);
@@ -222,11 +224,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       }
     });
 
-    this.slots.updateSelectionRect.on(rect => {
+    this.signals.updateSelectionRect.on(rect => {
       this.selectionRect = rect;
       this.requestUpdate();
     });
-    this.slots.updateSelectedRects.on(rects => {
+    this.signals.updateSelectedRects.on(rects => {
       this.selectedRects = rects;
       this.requestUpdate();
     });

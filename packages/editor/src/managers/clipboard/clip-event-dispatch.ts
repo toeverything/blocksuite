@@ -1,11 +1,11 @@
-import { Slot } from '@blocksuite/store';
+import { Signal } from '@blocksuite/store';
 import { ClipboardAction } from './types';
 
 export class ClipEventDispatch {
-  readonly slots = {
-    [ClipboardAction.copy]: new Slot<ClipboardEvent>(),
-    [ClipboardAction.cut]: new Slot<ClipboardEvent>(),
-    [ClipboardAction.paste]: new Slot<ClipboardEvent>(),
+  readonly signals = {
+    [ClipboardAction.copy]: new Signal<ClipboardEvent>(),
+    [ClipboardAction.cut]: new Signal<ClipboardEvent>(),
+    [ClipboardAction.paste]: new Signal<ClipboardEvent>(),
   };
 
   constructor(clipboardTarget: HTMLElement) {
@@ -44,20 +44,20 @@ export class ClipEventDispatch {
   }
 
   private _copyHandler(e: ClipboardEvent) {
-    this.slots.copy.emit(e);
+    this.signals.copy.emit(e);
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    this.slots.cut.emit(e);
+    this.signals.cut.emit(e);
   }
   private _pasteHandler(e: ClipboardEvent) {
-    this.slots.paste.emit(e);
+    this.signals.paste.emit(e);
   }
 
   dispose(clipboardTarget: HTMLElement) {
-    this.slots.copy.dispose();
-    this.slots.cut.dispose();
-    this.slots.paste.dispose();
+    this.signals.copy.dispose();
+    this.signals.cut.dispose();
+    this.signals.paste.dispose();
     this.disposeClipboardTargetEvent(clipboardTarget);
   }
 }
