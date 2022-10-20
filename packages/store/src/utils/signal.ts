@@ -2,7 +2,7 @@ import { IDisposable, flattenDisposable } from './disposable';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
-export class Slot<T = void> implements IDisposable {
+export class Signal<T = void> implements IDisposable {
   private emitting = false;
   private callbacks: ((v: T) => unknown)[] = [];
   private disposables: IDisposable[] = [];
@@ -11,22 +11,22 @@ export class Slot<T = void> implements IDisposable {
     element: HTMLElement | Window,
     eventName: N,
     eventOptions?: boolean | AddEventListenerOptions
-  ): Slot<HTMLElementEventMap[N]> {
-    const slot = new Slot<HTMLElementEventMap[N]>();
+  ): Signal<HTMLElementEventMap[N]> {
+    const signal = new Signal<HTMLElementEventMap[N]>();
     const handler = (ev: HTMLElementEventMap[N]) => {
-      slot.emit(ev);
+      signal.emit(ev);
     };
     (element as HTMLElement).addEventListener(eventName, handler, eventOptions);
-    slot.disposables.push({
+    signal.disposables.push({
       dispose: () => {
         (element as HTMLElement).removeEventListener(eventName, handler);
       },
     });
-    return slot;
+    return signal;
   }
 
-  filter(testFun: (v: T) => boolean): Slot<T> {
-    const result = new Slot<T>();
+  filter(testFun: (v: T) => boolean): Signal<T> {
+    const result = new Signal<T>();
     // if result is disposed, dispose this too
     result.disposables.push({ dispose: () => this.dispose() });
 
@@ -105,7 +105,7 @@ export class Slot<T = void> implements IDisposable {
     this.emitting = prevEmitting;
   }
 
-  pipe(that: Slot<T>): Slot<T> {
+  pipe(that: Signal<T>): Signal<T> {
     this.callbacks.push(v => that.emit(v));
     return this;
   }
@@ -115,7 +115,7 @@ export class Slot<T = void> implements IDisposable {
     this.callbacks.length = 0;
   }
 
-  toDispose(disposables: IDisposable[]): Slot<T> {
+  toDispose(disposables: IDisposable[]): Signal<T> {
     disposables.push(this);
     return this;
   }

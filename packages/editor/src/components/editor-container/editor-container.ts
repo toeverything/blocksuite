@@ -59,11 +59,11 @@ export class EditorContainer extends LitElement {
 
   private _subscribeStore() {
     // if undo to empty page, reset to empty placeholder
-    this.store.slots.updated.on(() => {
+    this.store.signals.updated.on(() => {
       this.isEmptyPage = this.store.isEmpty;
     });
 
-    this.store.slots.rootAdded.on(block => {
+    this.store.signals.rootAdded.on(block => {
       this.model = block as PageBlockModel;
       this.model.childrenUpdated.on(() => this.requestUpdate());
       this.requestUpdate();
