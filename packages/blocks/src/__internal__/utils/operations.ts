@@ -174,7 +174,16 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
 
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
-
+export function handleChangeType(type: string, store: Store) {
+  const range = window.getSelection()?.getRangeAt(0);
+  console.log();
+  if (range) {
+    const intersectedModels = getModelsByRange(range);
+    intersectedModels.forEach(item => {
+      store.updateBlock(item, { type });
+    });
+  }
+}
 export function handleBackspace(store: Store, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;

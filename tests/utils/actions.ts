@@ -215,7 +215,7 @@ export async function dragBetweenIndices(
 
 export async function shiftTab(page: Page) {
   await page.keyboard.down('Shift');
-  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab', { delay: 50 });
   await page.keyboard.up('Shift');
 }
 

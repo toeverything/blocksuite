@@ -176,7 +176,7 @@ test('cursor move to up and down with children block', async ({ page }) => {
   const indexOne = await getQuillSelectionIndex(page);
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('arrow down test 2\n');
-  expect(indexOne).toBe(0);
+  expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
