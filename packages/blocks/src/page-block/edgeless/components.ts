@@ -87,6 +87,7 @@ export function EdgelessBlockChildrenContainer(
           linear-gradient(90deg, #cccccc66 1px, transparent 1px);
         background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
         background-position: ${translateX}px ${translateY}px;
+        background-color: #fff;
       }
     </style>
     <div class="affine-block-children-container edgeless">
