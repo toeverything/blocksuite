@@ -8,10 +8,9 @@ export function caretRangeFromPoint(x: number, y: number) {
   return document.caretRangeFromPoint(x, y);
 }
 
-export function createEvent<T extends keyof WindowEventMap>(
-  type: T,
-  detail: Detail<T>
-) {
+export function createEvent<
+  T extends keyof WindowEventMap | keyof HTMLElementEventMap
+>(type: T, detail: Detail<T>) {
   return new CustomEvent<Detail<T>>(type, { detail });
 }
 

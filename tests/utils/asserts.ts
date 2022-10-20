@@ -24,7 +24,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'group',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,300,50]',
+      'prop:xywh': '[50,50,300,200]',
     },
     '2': {
       'sys:flavour': 'paragraph',
@@ -87,6 +87,17 @@ export async function assertSelection(
     { richTextIndex }
   );
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
+}
+
+export async function assertNativeSelectionRangeCount(
+  page: Page,
+  count: number
+) {
+  const actual = await page.evaluate(() => {
+    const selection = window.getSelection();
+    return selection?.rangeCount;
+  });
+  expect(actual).toEqual(count);
 }
 
 export async function assertTextFormat(

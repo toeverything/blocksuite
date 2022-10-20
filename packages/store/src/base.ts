@@ -83,7 +83,7 @@ export class BaseBlockModel implements IBaseBlockProps {
     if (attributes.underline) {
       return `<u>${text}</u>`;
     }
-    if (attributes.inlinecode) {
+    if (attributes.code) {
       return `<code>${text}</code>`;
     }
     if (attributes.strikethrough) {

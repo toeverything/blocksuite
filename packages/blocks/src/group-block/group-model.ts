@@ -12,6 +12,6 @@ export class GroupBlockModel extends BaseBlockModel implements GroupBlockProps {
 
   constructor(store: Store, props: Partial<GroupBlockModel>) {
     super(store, props);
-    this.xywh = props.xywh ?? '[0,0,300,50]';
+    this.xywh = props.xywh ?? '[50,50,300,200]';
   }
 }

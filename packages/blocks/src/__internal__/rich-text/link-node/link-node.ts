@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import Quill from 'quill';
 import { assertExists, getModelByElement } from '../../utils';
 import { LinkIcon } from './link-icon';
-import { showLinkPopover } from './link-popover';
+import { showLinkPopover } from './link-popover/create-link-popover';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {
@@ -50,9 +50,15 @@ export class LinkNodeComponent extends LitElement {
   }
 
   async onDelayHover(e: MouseEvent) {
+    // TODO fix Blot types
+    const blot = Quill.find(this);
+    assertExists(blot);
+    const text = blot.domNode.textContent;
+
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
-      preview: this.href,
+      text,
+      link: this.href,
       showMask: false,
       interactionKind: 'hover',
     });
@@ -60,17 +66,23 @@ export class LinkNodeComponent extends LitElement {
       return;
     }
     const link = linkState.link;
+    const newText = linkState.text;
 
-    // TODO fix Blot types
-    const blot = Quill.find(this);
     assertExists(blot);
     const model = getModelByElement(this);
     const store = model.store;
 
-    store.captureSync();
-    store.transact(() => {
+    if (newText && newText !== text) {
+      // Replace the text
+      // Save the blot's index otherwise it will be lost after the blot is removed
+      const offset = blot.offset();
+      store.captureSync();
+      model.text?.delete(offset, blot.length());
+      model.text?.insert(newText, offset, { link });
+    } else {
+      store.captureSync();
       model.text?.format(blot.offset(), blot.length(), { link });
-    });
+    }
   }
 
   async onHoverEnd(e: Event) {

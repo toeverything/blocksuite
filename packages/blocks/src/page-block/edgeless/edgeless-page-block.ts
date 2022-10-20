@@ -2,13 +2,17 @@ import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
 import type { PageBlockModel, GroupBlockModel } from '../..';
-import { EdgelessBlockChildrenContainer, EdgelessSelectionBox } from './utils';
+import {
+  EdgelessBlockChildrenContainer,
+  EdgelessSelectedRect,
+} from './components';
 import {
   BlockHost,
   BLOCK_ID_ATTR,
   Bound,
   hotkey,
   HOTKEYS,
+  resetNativeSeletion,
 } from '../../__internal__';
 import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
 
@@ -41,6 +45,8 @@ export class EdgelessPageBlockComponent
 {
   @property()
   store!: Store;
+
+  flavour = 'edgeless' as const;
 
   mouse!: EdgelessMouseManager;
 
@@ -104,6 +110,8 @@ export class EdgelessPageBlockComponent
       group.propsUpdated.on(() => refreshSelectionBox(this));
     });
 
+    // XXX: should be called after rich text components are mounted
+    requestAnimationFrame(() => resetNativeSeletion(null));
     this._bindHotkeys();
   }
 
@@ -121,7 +129,7 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const selectionBox = EdgelessSelectionBox(this._selectionState);
+    const selectedRect = EdgelessSelectedRect(this._selectionState);
 
     return html`
       <style>
@@ -138,7 +146,7 @@ export class EdgelessPageBlockComponent
         }
       </style>
       <div class="affine-edgeless-page-block-container">
-        ${childrenContainer} ${selectionBox}
+        ${childrenContainer} ${selectedRect}
       </div>
     `;
   }

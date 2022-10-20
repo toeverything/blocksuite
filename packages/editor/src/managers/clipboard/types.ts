@@ -27,7 +27,7 @@ export interface SelectedBlock {
 export type OpenBlockInfo = {
   flavour: string;
   type: string;
-  text: unknown;
+  text: Record<string, unknown>[];
   checked?: boolean;
   children: OpenBlockInfo[];
 };
