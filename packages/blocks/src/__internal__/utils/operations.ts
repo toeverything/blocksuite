@@ -119,13 +119,12 @@ export async function handleUnindent(
 
   const index = grandParent.children.indexOf(parent);
   store.captureSync();
-  console.log(model.type)
   const blockProps = {
     id: model.id,
     flavour: model.flavour,
     text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,
-    type:model.type
+    type: model.type
   };
   store.deleteBlock(model);
   const id = store.addBlock(blockProps, grandParent, index + 1);

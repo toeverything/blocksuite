@@ -117,7 +117,6 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
 
   function unindent(this: KeyboardEventThis) {
     const index = this.quill.getSelection()?.index || 0;
-    console.log('index: ', index);
     handleUnindent(store, model, index);
     return PREVENT_DEFAULT;
   }
