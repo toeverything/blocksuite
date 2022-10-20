@@ -14,9 +14,9 @@ import {
   handleBackspace,
   handleFormat,
   batchDelete,
-  handleChangeType,
+  updateTextType,
   handleSelectAll,
-  batchChangeType,
+  batchUpdateTextType,
 } from '../../__internal__';
 import { DefaultMouseManager } from './mouse-manager';
 import style from './style.css';
@@ -124,11 +124,28 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _bindHotkeys() {
     const { store } = this;
+    const {
+      UNDO,
+      REDO,
+      BACKSPACE,
+      SELECT_ALL,
+      INLINE_CODE,
+      STRIKE,
+      H1,
+      H2,
+      H3,
+      H4,
+      H5,
+      H6,
+      SHIFT_UP,
+      SHIFT_DOWN,
+      LINK,
+    } = HOTKEYS;
 
-    hotkey.addListener(HOTKEYS.UNDO, () => store.undo());
-    hotkey.addListener(HOTKEYS.REDO, () => store.redo());
+    hotkey.addListener(UNDO, () => store.undo());
+    hotkey.addListener(REDO, () => store.redo());
 
-    hotkey.addListener(HOTKEYS.BACKSPACE, e => {
+    hotkey.addListener(BACKSPACE, e => {
       const { selection } = this.mouse;
       if (selection.type === 'native') {
         handleBackspace(store, e);
@@ -142,54 +159,29 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         this.signals.updateSelectedRects.emit([]);
       }
     });
-    hotkey.addListener(HOTKEYS.SELECT_ALL, e => {
+
+    hotkey.addListener(SELECT_ALL, e => {
       e.preventDefault();
-      const { selection } = this.mouse;
       handleSelectAll();
-      selection.type = 'native'
+      this.mouse.selection.type = 'native';
     });
-    hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
-      handleFormat(store, e, 'code');
-    });
-    hotkey.addListener(HOTKEYS.STRIKE, e => {
-      handleFormat(store, e, 'strike');
-    });
-    hotkey.addListener(HOTKEYS.H1, e => {
-      // handleFormat(store, e, 'header');
-      this._changeType('h1', store,);
-    });
-    hotkey.addListener(HOTKEYS.H2, e => {
-      // handleFormat(store, e, 'header');
 
-      this._changeType('h2', store);
-    });
-    hotkey.addListener(HOTKEYS.H3, e => {
-      // handleFormat(store, e, 'header');
+    hotkey.addListener(INLINE_CODE, e => handleFormat(store, e, 'code'));
+    hotkey.addListener(STRIKE, e => handleFormat(store, e, 'strike'));
+    hotkey.addListener(H1, () => this._updateType('h1', store));
+    hotkey.addListener(H2, () => this._updateType('h2', store));
+    hotkey.addListener(H3, () => this._updateType('h3', store));
+    hotkey.addListener(H4, () => this._updateType('h4', store));
+    hotkey.addListener(H5, () => this._updateType('h5', store));
+    hotkey.addListener(H6, () => this._updateType('h6', store));
 
-      this._changeType('h3', store);
-    });
-    hotkey.addListener(HOTKEYS.H4, e => {
-      // handleFormat(store, e, 'header');
-
-      this._changeType('h4', store);
-    });
-    hotkey.addListener(HOTKEYS.H5, e => {
-      // handleFormat(store, e, 'header');
-
-      this._changeType('h5', store);
-    });
-    hotkey.addListener(HOTKEYS.H6, e => {
-      // handleFormat(store, e, 'header');
-
-      this._changeType('h6', store);
-    });
-    hotkey.addListener(HOTKEYS.SHIFT_UP, e => {
+    hotkey.addListener(SHIFT_UP, e => {
       // TODO expand selection up
     });
-    hotkey.addListener(HOTKEYS.SHIFT_DOWN, e => {
+    hotkey.addListener(SHIFT_DOWN, e => {
       // TODO expand selection down
     });
-    hotkey.addListener(HOTKEYS.LINK, e => {
+    hotkey.addListener(LINK, e => {
       createLink(store, e);
     });
 
@@ -202,18 +194,18 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.UNDO,
       HOTKEYS.REDO,
       HOTKEYS.BACKSPACE,
+      HOTKEYS.SELECT_ALL,
       HOTKEYS.INLINE_CODE,
       HOTKEYS.STRIKE,
-      HOTKEYS.SHIFT_UP,
-      HOTKEYS.SHIFT_DOWN,
-      HOTKEYS.LINK,
       HOTKEYS.H1,
       HOTKEYS.H2,
       HOTKEYS.H3,
       HOTKEYS.H4,
       HOTKEYS.H5,
       HOTKEYS.H6,
-      HOTKEYS.SELECT_ALL,
+      HOTKEYS.SHIFT_UP,
+      HOTKEYS.SHIFT_DOWN,
+      HOTKEYS.LINK,
     ]);
   }
 
@@ -241,13 +233,18 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const title = (e.target as HTMLInputElement).value;
     store.updateBlock(this.model, { title });
   }
-  private _changeType(type: string,store:Store) {
+
+  private _updateType(type: string, store: Store) {
     const { selection } = this.mouse;
-      if (selection.selectedRichTexts.length > 0) {
-        batchChangeType(store, selection.selectedRichTexts.map(richText => richText.model), type);
-      }else{
-        handleChangeType(type, store);
-      }
+    if (selection.selectedRichTexts.length > 0) {
+      batchUpdateTextType(
+        store,
+        selection.selectedRichTexts.map(richText => richText.model),
+        type
+      );
+    } else {
+      updateTextType(type, store);
+    }
   }
 
   // disable shadow DOM to workaround quill

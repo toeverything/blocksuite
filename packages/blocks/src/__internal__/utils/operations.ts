@@ -2,7 +2,7 @@ import type { Quill } from 'quill';
 import { BaseBlockModel, Store, Text } from '@blocksuite/store';
 
 import { ExtendedModel } from './types';
-import { assertExists, noop } from './std';
+import { assertExists, assertFlavours, noop } from './std';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import {
   getStartModelBySelection,
@@ -15,6 +15,7 @@ import {
   isMultiBlockRange,
   isNoneSelection,
   isRangeSelection,
+  resetNativeSeletion,
 } from './selection';
 
 // XXX: workaround quill lifecycle issue
@@ -62,19 +63,17 @@ export function handleBlockSplit(
   const parent = store.getParent(model);
   if (!parent) return;
 
-  const newBlockIndex = parent.children.indexOf(model) + 1;
-
   const [left, right] = model.text.split(splitIndex);
   store.captureSync();
-
   store.markTextSplit(model.text, left, right);
   store.updateBlock(model, { text: left });
+
+  const newBlockIndex = parent.children.indexOf(model) + 1;
   const id = store.addBlock(
     { flavour: model.flavour, text: right },
     parent,
     newBlockIndex
   );
-
   asyncFocusRichText(store, id);
 }
 
@@ -118,20 +117,23 @@ export async function handleUnindent(
   if (!grandParent) return;
 
   const index = grandParent.children.indexOf(parent);
-  store.captureSync();
   const blockProps = {
     id: model.id,
     flavour: model.flavour,
     text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,
-    type: model.type
+    type: model.type,
   };
+
+  store.captureSync();
   store.deleteBlock(model);
   const id = store.addBlock(blockProps, grandParent, index + 1);
+
   // FIXME: after quill onload
   requestAnimationFrame(() => {
     const block = store.getBlockById(id);
     assertExists(block);
+
     const richText = getRichTextByModel(block);
     richText?.quill.setSelection(offset, 0);
   });
@@ -144,21 +146,22 @@ export function isCollapsedAtBlockStart(quill: Quill) {
 }
 
 function deleteModels(store: Store, models: BaseBlockModel[]) {
+  const selection = window.getSelection();
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
-  const selection = window.getSelection();
+  assertExists(selection);
 
   const firstTextIndex = getQuillIndexByNativeSelection(
-    selection?.anchorNode,
-    selection?.anchorOffset as number
+    selection.anchorNode,
+    selection.anchorOffset as number
   );
   const endTextIndex = getQuillIndexByNativeSelection(
-    selection?.focusNode,
-    selection?.focusOffset as number
+    selection.focusNode,
+    selection.focusOffset as number
   );
 
   firstRichText.model.text?.delete(
@@ -167,6 +170,7 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
   );
   lastRichText.model.text?.delete(0, endTextIndex);
   firstRichText.model.text?.join(lastRichText.model.text as Text);
+
   // delete models in between
   for (let i = 1; i <= models.length - 1; i++) {
     store.deleteBlock(models[i]);
@@ -174,21 +178,30 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
 
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
-export function handleChangeType(type: string, store: Store) {
+
+export function updateTextType(type: string, store: Store) {
   const range = window.getSelection()?.getRangeAt(0);
-    assertExists(range);
-    const intersectedModels = getModelsByRange(range);
-    intersectedModels.forEach(item => {
-      store.updateBlock(item, { type });
-    });
-  
+  assertExists(range);
+
+  const modelsInRange = getModelsByRange(range);
+  modelsInRange.forEach(model => {
+    assertFlavours(model, ['paragraph', 'list']);
+    store.updateBlock(model, { type });
+  });
 }
-export function batchChangeType(store: Store, models: ExtendedModel[],type:string) {
+
+export function batchUpdateTextType(
+  store: Store,
+  models: ExtendedModel[],
+  type: string
+) {
   store.captureSync();
   for (const model of models) {
+    assertFlavours(model, ['paragraph', 'list']);
     store.updateBlock(model, { type });
   }
 }
+
 export function handleBackspace(store: Store, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
@@ -220,20 +233,22 @@ function formatModelsByRange(
   store: Store,
   key: string
 ) {
+  const selection = window.getSelection();
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
-  const selection = window.getSelection();
+  assertExists(selection);
+
   const firstIndex = getQuillIndexByNativeSelection(
-    selection?.anchorNode,
-    selection?.anchorOffset as number
+    selection.anchorNode,
+    selection.anchorOffset as number
   );
   const endIndex = getQuillIndexByNativeSelection(
-    selection?.focusNode,
-    selection?.focusOffset as number
+    selection.focusNode,
+    selection.focusOffset as number
   );
   const formatArr = [];
   const firstFormat = firstRichText.quill.getFormat(
@@ -241,6 +256,7 @@ function formatModelsByRange(
     firstRichText.quill.getLength() - firstIndex - 1
   );
   const lastFormat = lastRichText.quill.getFormat(0, endIndex);
+
   formatArr.push(firstFormat, lastFormat);
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
@@ -249,14 +265,15 @@ function formatModelsByRange(
     formatArr.push(format);
   }
   const allFormat = formatArr.every(item => item[key]);
-  store.captureSync();
 
+  store.captureSync();
   firstRichText.model.text?.format(
     firstIndex,
     firstRichText.quill.getLength() - firstIndex - 1,
     { [key]: !allFormat }
   );
   lastRichText.model.text?.format(0, endIndex, { [key]: !allFormat });
+
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
     assertExists(richText);
@@ -331,31 +348,33 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
     }
   }
 }
-export function handleSelectAll(){
-  const blocks = document.querySelectorAll('.ql-editor')
+
+export function handleSelectAll() {
+  const blocks = document.querySelectorAll('.ql-editor');
   const firstRichText = blocks[0];
   const lastRichText = blocks[blocks.length - 1];
   const range = document.createRange();
   assertExists(firstRichText);
   assertExists(lastRichText);
-  const lastNode = findLastNode(lastRichText)
-  const firstNode = findFirstNode(firstRichText)
-  range?.setStart(firstNode, 0);
-  // @ts-ignore
-  range?.setEnd(lastNode, lastNode.length);
-  const selection = window.getSelection();
-  selection?.removeAllRanges();
   assertExists(range);
-  selection?.addRange(range);
+
+  const lastNode = findLastNode(lastRichText);
+  const firstNode = findFirstNode(firstRichText);
+  range.setStart(firstNode, 0);
+  // @ts-ignore
+  range.setEnd(lastNode, lastNode.length);
+
+  resetNativeSeletion(range);
 }
 
-function findLastNode(ele: Element | Node):Node {
+function findLastNode(ele: Element | Node): Node {
   if (ele.lastChild) {
     return findLastNode(ele.lastChild);
   }
   return ele;
 }
-function findFirstNode(ele: Element | Node):Node {
+
+function findFirstNode(ele: Element | Node): Node {
   if (ele.firstChild) {
     return findFirstNode(ele.firstChild);
   }

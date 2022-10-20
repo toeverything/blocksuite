@@ -13,10 +13,7 @@ import {
   initThreeParagraphs,
   dragBetweenIndices,
 } from './utils/actions';
-import {
-  assertRichTexts,
-  assertTextFormat,
-} from './utils/asserts';
+import { assertRichTexts, assertTextFormat } from './utils/asserts';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
