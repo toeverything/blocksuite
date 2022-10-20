@@ -1,5 +1,5 @@
 import { PageBlockModel } from '@blocksuite/blocks';
-import { BaseBlockModel, Slot } from '@blocksuite/store';
+import { BaseBlockModel, Signal } from '@blocksuite/store';
 import type { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
 import { FileExporter } from '../../file-exporter/file-exporter';
 import { ParserHtml } from './parse-html';
@@ -9,8 +9,8 @@ type ParseHtml2BlockFunc = (...args: any[]) => OpenBlockInfo[] | null;
 
 export class ContentParser {
   private _editor: EditorContainer;
-  readonly slots = {
-    beforeHtml2Block: new Slot<Element>(),
+  readonly signals = {
+    beforeHtml2Block: new Signal<Element>(),
   };
   private _parsers: Record<string, ParseHtml2BlockFunc> = {};
   private _parseHtml: ParserHtml;
@@ -62,7 +62,7 @@ export class ContentParser {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
-    this.slots.beforeHtml2Block.emit(htmlEl);
+    this.signals.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
   }
 

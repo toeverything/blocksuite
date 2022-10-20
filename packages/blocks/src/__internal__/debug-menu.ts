@@ -99,7 +99,7 @@ export class DebugMenu extends LitElement {
   }
 
   firstUpdated() {
-    this.store.slots.historyUpdated.on(() => {
+    this.store.signals.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
       this.canRedo = this.store.canRedo;
     });
