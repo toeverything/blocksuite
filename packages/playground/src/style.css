@@ -14,6 +14,7 @@
   --affine-quote-color: #4c6275;
   --affine-selected-color: rgba(104, 128, 255, 0.1);
   --affine-placeholder-color: #c7c7c7;
+  --affine-border-color: #d0d7e3;
   --affine-modal-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
     -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   --affine-popover-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
@@ -21,6 +22,7 @@
   --affine-font-xs: 12px;
   --affine-font-sm: 16px;
   --affine-font-base: 18px;
+  --affine-line-height-base: 26px;
   --affine-z-index-modal: 1000;
   --affine-z-index-popover: 100;
   --affine-font-family: Avenir Next, apple-system, BlinkMacSystemFont,
@@ -31,6 +33,7 @@
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
     Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
+  --affine-paragraph-space: 18px;
 }
 
 html,
