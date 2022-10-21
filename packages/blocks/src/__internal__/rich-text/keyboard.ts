@@ -110,12 +110,14 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
   }
 
   function indent(this: KeyboardEventThis) {
-    handleIndent(store, model);
+    const index = this.quill.getSelection()?.index || 0;
+    handleIndent(store, model, index);
     return PREVENT_DEFAULT;
   }
 
   function unindent(this: KeyboardEventThis) {
-    handleUnindent(store, model);
+    const index = this.quill.getSelection()?.index || 0;
+    handleUnindent(store, model, index);
     return PREVENT_DEFAULT;
   }
 

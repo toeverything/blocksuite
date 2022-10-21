@@ -45,6 +45,7 @@ export async function enterPlaygroundWithList(page: Page) {
       store.addBlock({ flavour: 'list' }, groupId);
     }
   });
+  await waitNextFrame(page);
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -213,15 +214,19 @@ export async function dragBetweenIndices(
   await dragBetweenCoords(page, startCoord, endCoord);
 }
 
-export async function shiftTab(page: Page) {
+export async function pressTab(page: Page) {
+  await page.keyboard.press('Tab', { delay: 50 });
+}
+
+export async function pressShiftTab(page: Page) {
   await page.keyboard.down('Shift');
-  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab', { delay: 50 });
   await page.keyboard.up('Shift');
 }
 
-export async function shiftEnter(page: Page) {
+export async function pressShiftEnter(page: Page) {
   await page.keyboard.down('Shift');
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.up('Shift');
 }
 
@@ -342,4 +347,47 @@ export async function pasteKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('v', { delay: 50 });
   await keyUpCtrlOrMeta(page);
+}
+
+export async function pasteContent(
+  page: Page,
+  clipData: Record<string, unknown>
+) {
+  await page.evaluate(
+    ({ clipData }) => {
+      const e = {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        preventDefault: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        stopPropagation: () => {},
+        clipboardData: {
+          types: Object.keys(clipData),
+          getData: (mime: string) => {
+            return clipData[mime];
+          },
+        },
+      };
+      document
+        .getElementsByTagName('editor-container')[0]
+        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
+          e as unknown as ClipboardEvent
+        );
+    },
+    { clipData }
+  );
+}
+
+export async function importMarkdown(
+  page: Page,
+  data: string,
+  insertPositionId: string
+) {
+  await page.evaluate(
+    ({ data, insertPositionId }) => {
+      document
+        .getElementsByTagName('editor-container')[0]
+        .clipboard.importMarkdown(data, insertPositionId);
+    },
+    { data, insertPositionId }
+  );
 }

@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import type { Store } from '@blocksuite/store';
-import type { PageBlockModel, GroupBlockModel } from '../..';
+import { customElement, property, state } from 'lit/decorators.js';
+import { Signal, Store } from '@blocksuite/store';
+import type { PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
   EdgelessSelectedRect,
@@ -9,12 +9,14 @@ import {
 import {
   BlockHost,
   BLOCK_ID_ATTR,
-  Bound,
   hotkey,
   HOTKEYS,
   resetNativeSeletion,
 } from '../../__internal__';
-import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
+import {
+  EdgelessSelectionManager,
+  EdgelessSelectionState,
+} from './selection-manager';
 
 export interface ViewportState {
   zoom: number;
@@ -24,31 +26,24 @@ export interface ViewportState {
   height: number;
 }
 
-export interface EdgelessSelectionState {
-  selected: GroupBlockModel[];
-  box: Bound | null;
+export interface EdgelessContainer extends HTMLElement {
+  readonly store: Store;
+  readonly viewport: ViewportState;
+  readonly signals: {
+    updateViewport: Signal<ViewportState>;
+    updateSelection: Signal<EdgelessSelectionState>;
+  };
 }
-
-export interface IEdgelessContainer extends HTMLElement {
-  store: Store;
-  viewport: ViewportState;
-  readonly selectionState: EdgelessSelectionState;
-  setSelectionState: (state: EdgelessSelectionState) => void;
-}
-
-export type XYWH = [number, number, number, number];
 
 @customElement('edgeless-page-block')
 export class EdgelessPageBlockComponent
   extends LitElement
-  implements BlockHost, IEdgelessContainer
+  implements EdgelessContainer, BlockHost
 {
   @property()
   store!: Store;
 
   flavour = 'edgeless' as const;
-
-  mouse!: EdgelessMouseManager;
 
   @property()
   mouseRoot!: HTMLElement;
@@ -60,22 +55,24 @@ export class EdgelessPageBlockComponent
   })
   model!: PageBlockModel;
 
+  @state()
   viewport: ViewportState = {
     zoom: 1,
     viewportX: 0,
     viewportY: 0,
-    width: 300,
-    height: 300,
+    width: 0, // FIXME
+    height: 0, // FIXME
   };
 
-  private _selectionState: EdgelessSelectionState = {
-    selected: [],
-    box: null,
+  @state()
+  selectedRect: DOMRect | null = null;
+
+  signals = {
+    updateViewport: new Signal<ViewportState>(),
+    updateSelection: new Signal<EdgelessSelectionState>(),
   };
 
-  get selectionState() {
-    return this._selectionState;
-  }
+  private _selection!: EdgelessSelectionManager;
 
   private _bindHotkeys() {
     const { store } = this;
@@ -87,11 +84,6 @@ export class EdgelessPageBlockComponent
     hotkey.removeListener([HOTKEYS.UNDO, HOTKEYS.REDO]);
   }
 
-  setSelectionState(state: EdgelessSelectionState) {
-    this._selectionState = state;
-    this.requestUpdate();
-  }
-
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -99,7 +91,7 @@ export class EdgelessPageBlockComponent
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.mouse = new EdgelessMouseManager(this);
+      this._selection = new EdgelessSelectionManager(this);
     }
     super.update(changedProperties);
   }
@@ -107,16 +99,33 @@ export class EdgelessPageBlockComponent
   firstUpdated() {
     // TODO: listen to new children
     this.model.children.forEach(group => {
-      group.propsUpdated.on(() => refreshSelectionBox(this));
+      group.propsUpdated.on(() => this._selection.syncSelectionBox());
     });
+
+    this.store.signals.historyUpdated.on(() => {
+      requestAnimationFrame(() => {
+        if (!this._selection.isActive) {
+          resetNativeSeletion(null);
+        }
+      });
+    });
+
+    this.signals.updateViewport.on(state => {
+      this.viewport = state;
+      this._selection.syncSelectionBox();
+    });
+    this.signals.updateSelection.on(() => this.requestUpdate());
+
+    this._bindHotkeys();
 
     // XXX: should be called after rich text components are mounted
     requestAnimationFrame(() => resetNativeSeletion(null));
-    this._bindHotkeys();
   }
 
   disconnectedCallback() {
-    this.mouse.dispose();
+    this.signals.updateSelection.dispose();
+    this.signals.updateViewport.dispose();
+    this._selection.dispose();
     this._removeHotkeys();
   }
 
@@ -129,7 +138,7 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const selectedRect = EdgelessSelectedRect(this._selectionState);
+    const selectedRect = EdgelessSelectedRect(this._selection.state);
 
     return html`
       <style>
