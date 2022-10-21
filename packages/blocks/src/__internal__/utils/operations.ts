@@ -282,8 +282,8 @@ function formatModelsByRange(
     });
   }
   lastRichText.quill.setSelection(endIndex, 0);
-  if(key === 'code' || key === 'link'){
-    lastRichText.quill.format(key,false)
+  if (key === 'code' || key === 'link') {
+    lastRichText.quill.format(key, false);
   }
 }
 
@@ -345,11 +345,10 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
       const { index, length } = range;
       const format = quill.getFormat(range);
       models[0].text?.format(index, length, { [key]: !format[key] });
-      quill.setSelection(index+length, 0);
-      if(key === 'code' || key === 'link'){
-        quill.format(key,false)
+      quill.setSelection(index + length, 0);
+      if (key === 'code' || key === 'link') {
+        quill.format(key, false);
       }
-      
     } else {
       formatModelsByRange(models, store, key);
     }
