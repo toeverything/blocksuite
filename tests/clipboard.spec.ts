@@ -13,6 +13,7 @@ import {
   assertBlockType,
   assertBlockTypes,
   assertRichTexts,
+  assertSelection,
   assertText,
   assertTextFormats,
 } from './utils/asserts';
@@ -148,7 +149,8 @@ test('splic block when paste', async ({ page }) => {
   await page.keyboard.type('abc');
   await setQuillSelection(page, 1, 1);
   await pasteContent(page, clipData);
-  await assertRichTexts(page, ['abtext', 'h1b']);
+  await assertRichTexts(page, ['abtext', 'h1c']);
+  await assertSelection(page, 1, 2, 0);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 });

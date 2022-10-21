@@ -181,19 +181,27 @@ export class PasteManager {
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, -1, addBlockIds);
         parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
+        let lastId = selectedBlock?.id;
+        let position = endIndex + insertLen;
         if (addBlockIds.length > 0) {
           const endtexts = selectedBlock?.text?.sliceToDelta(
             endIndex + insertLen
           );
-          const lastBlock = this._editor.store.getBlockById(
-            addBlockIds[addBlockIds.length - 1]
-          );
+          lastId = addBlockIds[addBlockIds.length - 1];
+          const lastBlock = this._editor.store.getBlockById(lastId);
           selectedBlock?.text?.delete(
             endIndex + insertLen,
             selectedBlock?.text?.length
           );
+          position = lastBlock?.text?.length || 0;
           lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
         }
+        setTimeout(() => {
+          lastId &&
+            this._editor.store.richTextAdapters
+              .get(lastId)
+              ?.quill.setSelection(position, 0);
+        });
       } else {
         parent && this._addBlocks(blocks, parent, index, addBlockIds);
       }
