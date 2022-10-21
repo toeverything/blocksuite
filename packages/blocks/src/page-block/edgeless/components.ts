@@ -4,26 +4,25 @@ import { repeat } from 'lit/directives/repeat.js';
 import { BaseBlockModel } from '@blocksuite/store';
 
 import { GroupBlockModel } from '../..';
-import type {
-  XYWH,
-  ViewportState,
-  EdgelessSelectionState,
-} from './edgeless-page-block';
+import type { ViewportState } from './edgeless-page-block';
+import type { EdgelessSelectionState, XYWH } from './selection-manager';
 import { BlockElement, BlockHost } from '../../__internal__';
 import '../../__internal__';
 
-export function EdgelessSelectedRect(selectionState: EdgelessSelectionState) {
-  const { selected, box } = selectionState;
-  if (!selected.length || !box) return html`<div></div>`;
+export function EdgelessSelectedRect(state: EdgelessSelectionState) {
+  const { type } = state;
+  if (type === 'none') return html`<div></div>`;
+
+  const { box } = state;
+  const color = state.active ? '#6ccfff' : '#ccc';
 
   const style = {
     position: 'absolute',
     left: box.x + 'px',
     top: box.y + 'px',
-    width: box.w + 'px',
-    height: box.h + 'px',
-    border: '1px solid #ccc',
-    // border: '1px solid #6ccfff',
+    width: box.width + 'px',
+    height: box.height + 'px',
+    border: `1px solid ${color}`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
   };

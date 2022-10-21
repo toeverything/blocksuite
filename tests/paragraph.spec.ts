@@ -14,8 +14,8 @@ import {
   focusRichText,
   pressEnter,
   redoByKeyboard,
-  shiftEnter,
-  shiftTab,
+  pressShiftEnter,
+  pressShiftTab,
   undoByClick,
   undoByKeyboard,
 } from './utils/actions';
@@ -106,7 +106,7 @@ test('add multi line by soft enter', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await assertSelection(page, 0, 2, 0);
 
-  await shiftEnter(page);
+  await pressShiftEnter(page);
   await assertRichTexts(page, ['he\n\nllo']);
   await assertSelection(page, 0, 3, 0);
 
@@ -134,7 +134,7 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await assertBlockChildrenIds(page, '2', ['3']);
 
   // unindent
-  await shiftTab(page);
+  await pressShiftTab(page);
   await assertRichTexts(page, ['hello', 'world']);
   await assertBlockChildrenIds(page, '1', ['2', '3']);
 

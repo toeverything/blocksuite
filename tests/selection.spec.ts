@@ -6,7 +6,7 @@ import {
   getQuillSelectionText,
   dragBetweenCoords,
   pressEnter,
-  shiftTab,
+  pressShiftTab,
   getCursorBlockIdAndHeight,
   fillLine,
   addGroupByClick,
@@ -168,7 +168,7 @@ test('cursor move to up and down with children block', async ({ page }) => {
   }
   await pressEnter(page);
   await page.keyboard.type('arrow down test 3');
-  await shiftTab(page);
+  await pressShiftTab(page);
   for (let i = 0; i < 2; i++) {
     await page.keyboard.press('ArrowRight');
   }
@@ -176,7 +176,7 @@ test('cursor move to up and down with children block', async ({ page }) => {
   const indexOne = await getQuillSelectionIndex(page);
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('arrow down test 2\n');
-  expect(indexOne).toBe(0);
+  expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
