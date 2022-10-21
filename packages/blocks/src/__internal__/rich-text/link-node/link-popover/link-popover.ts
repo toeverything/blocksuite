@@ -104,20 +104,14 @@ export class LinkPopover extends LitElement {
     return html`<icon-button
       class="affine-confirm-button"
       @click=${this.onConfirm}
-      >${ConfirmIcon({
-        width: '11px',
-        height: '8px',
-      })}</icon-button
+      >${ConfirmIcon()}</icon-button
     >`;
   }
 
   createTemplate() {
     const buttons = this.previewLink
-      ? html`<icon-button @click=${this.onCopy}
-            >${CopyIcon({ width: '10px', height: '11px' })}</icon-button
-          ><icon-button @click=${this.onEdit}
-            >${EditIcon({ width: '11px', height: '11px' })}</icon-button
-          >`
+      ? html`<icon-button @click=${this.onCopy}>${CopyIcon()}</icon-button
+          ><icon-button @click=${this.onEdit}>${EditIcon()}</icon-button>`
       : this.confirmBtnTemplate();
     return html`<div class="affine-link-popover" style=${this.style.cssText}>
       <input
