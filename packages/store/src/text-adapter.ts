@@ -3,7 +3,6 @@ import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { DeltaOperation, Quill } from 'quill';
 import { Store } from './store';
-import { string } from 'lib0';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';
 
