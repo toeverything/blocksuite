@@ -1,7 +1,11 @@
 import { BaseBlockModel } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
 import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
-import { assertExists, caretRangeFromPoint } from './std';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  fixCurrentRangeToText,
+} from './std';
 import {
   ExtendedModel,
   SelectedBlock,
@@ -305,13 +309,23 @@ export function handleRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
+  let isForward = true;
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
+    isForward = false;
     currentRange?.setEnd(endContainer, endOffset);
   } else {
     currentRange?.setStart(startContainer, startOffset);
+  }
+  if (currentRange) {
+    currentRange = fixCurrentRangeToText(
+      e.raw.clientX,
+      e.raw.clientY,
+      currentRange,
+      isForward
+    );
   }
   resetNativeSeletion(currentRange);
 }
