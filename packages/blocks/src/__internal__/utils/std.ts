@@ -11,6 +11,10 @@ export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
   }
 }
 
+export function matchFlavours(model: BaseBlockModel, expected: string[]) {
+  return expected.includes(model.flavour);
+}
+
 export function caretRangeFromPoint(x: number, y: number) {
   return document.caretRangeFromPoint(x, y);
 }
@@ -39,7 +43,7 @@ export function fixCurrentRangeToText(
         if (text) {
           const rect = text.getBoundingClientRect();
           const y = rect.bottom - 6;
-          newRange = document.caretRangeFromPoint(x, y);
+          newRange = caretRangeFromPoint(x, y);
           if (newRange) {
             range.setEnd(newRange.endContainer, newRange.endOffset);
           }
@@ -52,7 +56,7 @@ export function fixCurrentRangeToText(
         if (text) {
           const rect = text.getBoundingClientRect();
           const y = rect.top + 6;
-          newRange = document.caretRangeFromPoint(x, y);
+          newRange = caretRangeFromPoint(x, y);
           if (newRange) {
             range.setStart(newRange.endContainer, newRange.endOffset);
           }

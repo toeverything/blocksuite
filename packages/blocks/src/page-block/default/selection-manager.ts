@@ -1,36 +1,17 @@
 import { Store } from '@blocksuite/store';
 import {
-  getBlockElementByModel,
   initMouseEventHandlers,
   SelectionEvent,
   caretRangeFromPoint,
-  focusRichTextByOffset,
   resetNativeSeletion,
   assertExists,
   noop,
-  handleRangeDragMove,
+  handleNativeRangeDragMove,
+  isBlankArea,
+  handleNativeRangeClick,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
 import type { DefaultPageSignals } from './default-page-block';
-
-function isBlankAreaBetweenBlocks(startContainer: Node) {
-  if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-paragraph-block-container');
-}
-
-function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
-  return startContainer.tagName === 'GROUP-BLOCK';
-}
-
-function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
-  if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-group-block-container');
-}
-
-function isBlankArea(e: SelectionEvent) {
-  const { cursor } = window.getComputedStyle(e.raw.target as Element);
-  return cursor !== 'text';
-}
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
   return (
@@ -178,7 +159,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
-    handleRangeDragMove(this.state.startRange, e);
+    handleNativeRangeDragMove(this.state.startRange, e);
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
@@ -220,29 +201,7 @@ export class DefaultSelectionManager {
     // TODO handle shift + click
     if (e.keys.shift) return;
 
-    const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    const startContainer = range?.startContainer;
-
-    // click on rich text
-    if (startContainer instanceof Node) {
-      resetNativeSeletion(range);
-    }
-
-    if (!(startContainer instanceof HTMLElement)) return;
-
-    if (
-      isBlankAreaBetweenBlocks(startContainer) ||
-      isBlankAreaBeforeFirstBlock(startContainer)
-    ) {
-      focusRichTextByOffset(startContainer, e.raw.clientX);
-    } else if (isBlankAreaAfterLastBlock(startContainer)) {
-      const { root } = this.store;
-      const lastChild = root?.lastChild();
-      if (lastChild?.flavour === 'paragraph' || lastChild?.flavour === 'list') {
-        const block = getBlockElementByModel(lastChild);
-        focusRichTextByOffset(block, e.raw.clientX);
-      }
-    }
+    handleNativeRangeClick(this.store, e);
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {

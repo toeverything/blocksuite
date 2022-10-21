@@ -72,6 +72,14 @@ export function EdgelessBlockChildrenContainer(
   const translateX = -viewportX * zoom;
   const translateY = -viewportY * zoom;
 
+  const gridStyle = {
+    backgroundImage:
+      'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
+  };
+  const defaultStyle = {};
+  const USE_GRID = location.href.includes('grid');
+  const style = USE_GRID ? gridStyle : defaultStyle;
+
   return html`
     <style>
       .affine-block-children-container.edgeless {
@@ -89,7 +97,10 @@ export function EdgelessBlockChildrenContainer(
         background-color: #fff;
       }
     </style>
-    <div class="affine-block-children-container edgeless">
+    <div
+      class="affine-block-children-container edgeless"
+      style=${styleMap(style)}
+    >
       ${repeat(
         model.children,
         child => child.id,
