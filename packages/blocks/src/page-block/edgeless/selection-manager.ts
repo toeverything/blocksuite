@@ -6,7 +6,8 @@ import {
   resetNativeSeletion,
   noop,
   caretRangeFromPoint,
-  handleRangeDragMove,
+  handleNativeRangeDragMove,
+  handleNativeRangeClick,
 } from '../../__internal__';
 import {
   getSelectionBoxBound,
@@ -68,7 +69,31 @@ export class EdgelessSelectionManager {
     return (this._store.root?.children as GroupBlockModel[]) ?? [];
   }
 
+  private get _isActive() {
+    return this._state.type === 'single' && this._state.active;
+  }
+
+  private _resetState(e: SelectionEvent) {
+    const { viewport } = this._container;
+    const [modelX, modelY] = toModelCoord(viewport, e.x, e.y);
+    const selected = pick(this._blocks, modelX, modelY);
+    if (selected) {
+      this._state = {
+        type: 'single',
+        active: this._state.type === 'single' && this._state.active,
+        selected,
+        box: getSelectionBoxBound(viewport, selected.xywh),
+      };
+      this._container.signals.updateSelection.emit(this.state);
+    } else {
+      this._state = { type: 'none' };
+      this._container.signals.updateSelection.emit(this.state);
+      resetNativeSeletion(null);
+    }
+  }
+
   private _onContainerDragStart = (e: SelectionEvent) => {
+    this._resetState(e);
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
     // this._startPoint = { x: e.raw.clientX, y: e.raw.clientY };
   };
@@ -80,7 +105,7 @@ export class EdgelessSelectionManager {
       case 'single':
         if (this.state.active) {
           // TODO reset if drag out of group
-          handleRangeDragMove(this._startRange, e);
+          handleNativeRangeDragMove(this._startRange, e);
         }
         // for inactive selection, drag move selected group
         else {
@@ -108,21 +133,9 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
-    const { viewport } = this._container;
-    const [modelX, modelY] = toModelCoord(viewport, e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
-    if (selected) {
-      this._state = {
-        type: 'single',
-        active: this._state.type === 'single' && this._state.active,
-        selected,
-        box: getSelectionBoxBound(viewport, selected.xywh),
-      };
-      this._container.signals.updateSelection.emit(this.state);
-    } else {
-      this._state = { type: 'none' };
-      this._container.signals.updateSelection.emit(this.state);
-      resetNativeSeletion(null);
+    this._resetState(e);
+    if (this._isActive) {
+      handleNativeRangeClick(this._store, e);
     }
   };
 
@@ -140,6 +153,7 @@ export class EdgelessSelectionManager {
     if (this.state.type === 'single') {
       this.state.active = true;
       this._container.signals.updateSelection.emit(this.state);
+      handleNativeRangeClick(this._store, e);
     }
   };
 

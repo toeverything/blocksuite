@@ -11,6 +11,10 @@ export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
   }
 }
 
+export function matchFlavours(model: BaseBlockModel, expected: string[]) {
+  return expected.includes(model.flavour);
+}
+
 export function caretRangeFromPoint(x: number, y: number) {
   return document.caretRangeFromPoint(x, y);
 }
