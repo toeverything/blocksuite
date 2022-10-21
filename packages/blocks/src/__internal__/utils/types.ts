@@ -19,6 +19,10 @@ export interface CommonBlockElement extends HTMLElement {
   model: BaseBlockModel;
 }
 
+export interface SelectionInfo {
+  type: string;
+  selectedBlocks: SelectedBlock[];
+}
 export interface SelectedBlock {
   id: string;
   startPos?: number;

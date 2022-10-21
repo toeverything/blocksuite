@@ -1,9 +1,9 @@
 import { BaseBlockModel } from '@blocksuite/store';
-import { marked } from 'marked';
 import { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
 import { SelectionUtils } from '@blocksuite/blocks';
+import { SelectionInfo } from '@blocksuite/blocks/src/__internal__';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -25,7 +25,7 @@ export class PasteManager {
     e.stopPropagation();
 
     const blocks = await this._clipboardEvent2Blocks(e);
-    this._insertBlocks(blocks);
+    this.insertBlocks(blocks);
   }
 
   /* FIXME
@@ -86,32 +86,7 @@ export class PasteManager {
     }
 
     if (shouldConvertMarkdown) {
-      const underline = {
-        name: 'underline',
-        level: 'inline',
-        start(src: string) {
-          return src.indexOf('~');
-        },
-        tokenizer(src: string) {
-          const rule = /^~([^~]+)~/;
-          const match = rule.exec(src);
-          if (match) {
-            return {
-              type: 'underline',
-              raw: match[0], // This is the text that you want your token to consume from the source
-              text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-            };
-          }
-          return;
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        renderer(token: any) {
-          return `<u>${token.text}</u>`;
-        },
-      };
-      marked.use({ extensions: [underline] });
-      const md2html = marked.parse(textClipData);
-      return this._editor.contentParser.htmlText2Block(md2html);
+      return this._editor.contentParser.markdown2Block(textClipData);
     }
 
     return this._editor.contentParser.text2blocks(textClipData);
@@ -147,11 +122,11 @@ export class PasteManager {
   }
 
   // TODO Max 15 deeper
-  private _insertBlocks(blocks: OpenBlockInfo[]) {
+  public insertBlocks(blocks: OpenBlockInfo[], selectInfo?: SelectionInfo) {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectionInfo = SelectionUtils.getSelectInfo();
+    const currentSelectionInfo = selectInfo || SelectionUtils.getSelectInfo();
     if (
       currentSelectionInfo.type === 'Range' ||
       currentSelectionInfo.type === 'Caret'
@@ -213,7 +188,7 @@ export class PasteManager {
       );
 
       let parent = selectedBlock;
-      let index = -1;
+      let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || 0) + 1;

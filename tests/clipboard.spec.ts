@@ -6,11 +6,10 @@ import {
   pasteKeyboard,
   setQuillSelection,
   pasteContent,
-  getCursorBlockIdAndHeight,
   undoByClick,
+  importMarkdown,
 } from './utils/actions';
 import {
-  assertBlockType,
   assertBlockTypes,
   assertRichTexts,
   assertSelection,
@@ -151,6 +150,24 @@ test('splic block when paste', async ({ page }) => {
   await pasteContent(page, clipData);
   await assertRichTexts(page, ['abtext', 'h1c']);
   await assertSelection(page, 1, 2, 0);
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+});
+
+test('import markdown', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await page.evaluate(() => {
+    // @ts-ignore
+    window.store.captureSync();
+  });
+
+  const clipData = `# text
+# h1
+`;
+  await setQuillSelection(page, 1, 1);
+  await importMarkdown(page, clipData, '0');
+  await assertRichTexts(page, ['text', 'h1', '\n']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 });
