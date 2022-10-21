@@ -188,7 +188,7 @@ export class PasteManager {
       );
 
       let parent = selectedBlock;
-      let index = -1;
+      let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
