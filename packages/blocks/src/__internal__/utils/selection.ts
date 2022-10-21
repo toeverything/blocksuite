@@ -267,12 +267,32 @@ export function isMultiBlockRange(range: Range) {
   return range.commonAncestorContainer.nodeType !== Node.TEXT_NODE;
 }
 
-function getSelectedBlock(model: BaseBlockModel): SelectedBlock {
-  const block = {
-    id: model.id,
-    children: model.children.map(child => getSelectedBlock(child)),
-  };
-  return block;
+function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {
+  const result = [];
+  const parentMap = new Map<string, SelectedBlock>();
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
+    const parent = model.store.getParent(model);
+    const block = { id: model.id, children: [] };
+    if (!parent || !parentMap.has(parent.id)) {
+      result.push(block);
+    } else {
+      parentMap.get(parent.id)?.children.push(block);
+    }
+    parentMap.set(model.id, block);
+  }
+  return result;
+}
+
+function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
+  if (blocks.length === 0) {
+    return null;
+  }
+  const last = blocks[blocks.length - 1];
+  if (last.children.length === 0) {
+    return last;
+  }
+  return getLastSelectBlock(last.children);
 }
 
 export function getSelectInfo(): SelectionInfo {
@@ -281,7 +301,7 @@ export function getSelectInfo(): SelectionInfo {
   if (selection && selection.type !== 'None') {
     const range = selection.getRangeAt(0);
     const models = getModelsByRange(getCurrentRange());
-    selectedBlocks = models.map(model => getSelectedBlock(model));
+    selectedBlocks = getSelectedBlock(models);
     if (selectedBlocks.length > 0) {
       const firstIndex = getQuillIndexByNativeSelection(
         range.startContainer,
@@ -292,7 +312,10 @@ export function getSelectInfo(): SelectionInfo {
         range.endOffset as number
       );
       selectedBlocks[0].startPos = firstIndex;
-      selectedBlocks[selectedBlocks.length - 1].endPos = endIndex;
+      const lastBlock = getLastSelectBlock(selectedBlocks);
+      if (lastBlock) {
+        lastBlock.endPos = endIndex;
+      }
     }
   }
   return {
