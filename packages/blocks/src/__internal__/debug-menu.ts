@@ -81,7 +81,7 @@ export class DebugMenu extends LitElement {
     this.store.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},300,50]`;
+    const xywh = `[0,${count * 60},720,480]`;
 
     const groupId = this.store.addBlock<GroupBlockModel>(
       { flavour: 'group', xywh },
@@ -106,7 +106,7 @@ export class DebugMenu extends LitElement {
   }
 
   firstUpdated() {
-    this.store.slots.historyUpdated.on(() => {
+    this.store.signals.historyUpdated.on(() => {
       this.canUndo = this.store.canUndo;
       this.canRedo = this.store.canRedo;
     });

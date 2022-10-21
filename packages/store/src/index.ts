@@ -2,7 +2,7 @@ export * from './store';
 export * from './base';
 export * from './awareness';
 export * from './text-adapter';
-export * from './utils/slot';
+export * from './utils/signal';
 export * from './utils/disposable';
 export * from './utils/utils';
 export { DebugProvider, IndexedDBProvider } from './providers';

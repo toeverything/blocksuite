@@ -11,6 +11,7 @@ export type SelectionOptions = {
 /** Common context interface definition for block models. */
 export interface BlockHost {
   store: Store;
+  flavour: string;
 }
 
 export interface CommonBlockElement extends HTMLElement {
@@ -18,26 +19,10 @@ export interface CommonBlockElement extends HTMLElement {
   model: BaseBlockModel;
 }
 
-interface NoneSelectionInfo {
-  type: 'None';
+export interface SelectionInfo {
+  type: string;
+  selectedBlocks: SelectedBlock[];
 }
-
-interface CaretSelectionInfo {
-  type: 'Caret';
-  anchorBlockId: string;
-  focusBlockId: string;
-  anchorBlockPosition: number | null;
-  focusBlockPosition: number | null;
-}
-
-interface RangeSelectionInfo {
-  type: 'Range';
-  anchorBlockId: string;
-  focusBlockId: string;
-  anchorBlockPosition: number | null;
-  focusBlockPosition: number | null;
-}
-
 export interface SelectedBlock {
   id: string;
   startPos?: number;
@@ -53,20 +38,29 @@ export interface BlockSelectionInfo {
   blocks: SelectedBlock[];
 }
 
-export type SelectionInfo =
-  | NoneSelectionInfo
-  | CaretSelectionInfo
-  | RangeSelectionInfo
-  | BlockSelectionInfo;
-
 declare global {
   interface WindowEventMap {
     'affine.switch-mode': CustomEvent<'page' | 'edgeless'>;
   }
 }
 
-export type Detail<T extends keyof WindowEventMap> = WindowEventMap[T] extends {
-  detail: unknown;
-}
-  ? WindowEventMap[T]['detail']
-  : unknown;
+type WindowEventDetail<T extends keyof WindowEventMap> =
+  WindowEventMap[T] extends {
+    detail: unknown;
+  }
+    ? WindowEventMap[T]['detail']
+    : unknown;
+
+type HTMLElementEventDetail<T extends keyof HTMLElementEventMap> =
+  HTMLElementEventMap[T] extends {
+    detail: unknown;
+  }
+    ? HTMLElementEventMap[T]['detail']
+    : unknown;
+
+export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
+  T extends keyof WindowEventMap
+    ? WindowEventDetail<T>
+    : T extends keyof HTMLElementEventMap
+    ? HTMLElementEventDetail<T>
+    : never;

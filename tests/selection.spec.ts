@@ -6,12 +6,11 @@ import {
   getQuillSelectionText,
   dragBetweenCoords,
   pressEnter,
-  shiftTab,
+  pressShiftTab,
   getCursorBlockIdAndHeight,
   fillLine,
   addGroupByClick,
   initThreeParagraphs,
-  undoByKeyboard,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -67,7 +66,36 @@ test('native range delete', async ({ page }) => {
     return { x: bbox.right, y: bbox.bottom };
   });
 
+  // from top to bottom
   await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await page.keyboard.press('Backspace');
+  await assertBlockCount(page, 'paragraph', 0);
+  await assertRichTexts(page, []);
+
+  // FIXME
+  // await undoByKeyboard(page);
+  // await assertRichTexts(page, ['123', '456', '789']);
+});
+
+test('native range selection backwards', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const topLeft123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left, y: bbox.top - 2 };
+  });
+
+  const bottomRight789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right, y: bbox.bottom };
+  });
+
+  // from bottom to top
+  await dragBetweenCoords(page, bottomRight789, topLeft123);
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 0);
   await assertRichTexts(page, []);
@@ -140,7 +168,7 @@ test('cursor move to up and down with children block', async ({ page }) => {
   }
   await pressEnter(page);
   await page.keyboard.type('arrow down test 3');
-  await shiftTab(page);
+  await pressShiftTab(page);
   for (let i = 0; i < 2; i++) {
     await page.keyboard.press('ArrowRight');
   }
@@ -148,7 +176,7 @@ test('cursor move to up and down with children block', async ({ page }) => {
   const indexOne = await getQuillSelectionIndex(page);
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('arrow down test 2\n');
-  expect(indexOne).toBe(0);
+  expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
@@ -213,7 +241,7 @@ test.skip('cursor move up and down through group', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await addGroupByClick(page);
   await focusRichText(page, 0);
-  let currentId;
+  let currentId: string | null = null;
   const [id] = await getCursorBlockIdAndHeight(page);
   await page.keyboard.press('ArrowDown');
   currentId = (await getCursorBlockIdAndHeight(page))[0];

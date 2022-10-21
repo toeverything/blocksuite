@@ -24,7 +24,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'group',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,300,50]',
+      'prop:xywh': '[50,50,720,480]',
     },
     '2': {
       'sys:flavour': 'paragraph',
@@ -89,6 +89,17 @@ export async function assertSelection(
   expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }
 
+export async function assertNativeSelectionRangeCount(
+  page: Page,
+  count: number
+) {
+  const actual = await page.evaluate(() => {
+    const selection = window.getSelection();
+    return selection?.rangeCount;
+  });
+  expect(actual).toEqual(count);
+}
+
 export async function assertTextFormat(
   page: Page,
   richTextIndex: number,
@@ -102,6 +113,14 @@ export async function assertTextFormat(
     },
     { richTextIndex, quillIndex }
   );
+  expect(actual).toEqual(resultObj);
+}
+
+export async function assertTextFormats(page: Page, resultObj: unknown[]) {
+  const actual = await page.evaluate(() => {
+    const elements = document.querySelectorAll('rich-text');
+    return Array.from(elements).map(el => el.quill.getFormat());
+  });
   expect(actual).toEqual(resultObj);
 }
 
@@ -181,6 +200,19 @@ export async function assertBlockType(
     { id }
   );
   expect(actual).toBe(type);
+}
+
+export async function assertBlockTypes(page: Page, blockTypes: string[]) {
+  const actual = await page.evaluate(() => {
+    const elements = document.querySelectorAll('[data-block-id]');
+    return (
+      Array.from(elements)
+        .slice(2)
+        // @ts-ignore
+        .map(el => el.model.type)
+    );
+  });
+  expect(actual).toEqual(blockTypes);
 }
 
 /**

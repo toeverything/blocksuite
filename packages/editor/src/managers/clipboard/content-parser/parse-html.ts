@@ -20,6 +20,10 @@ export class ParserHtml {
       'listItemParser',
       this._listItemParser.bind(this)
     );
+    this._contentParser.registerParserHtmlText2Block(
+      'blockQuoteParser',
+      this._blockQuoteParser.bind(this)
+    );
   }
   // TODO parse children block
   private _nodePaser(node: Element): OpenBlockInfo[] | null {
@@ -56,8 +60,34 @@ export class ParserHtml {
           type: tagName.toLowerCase(),
         });
         break;
-      case 'DIV':
+      case 'BLOCKQUOTE':
+        result =
+          this._contentParser.getParserHtmlText2Block('blockQuoteParser')?.(
+            node
+          );
+        break;
       case 'P':
+        if (
+          node.firstChild instanceof Text &&
+          (node.firstChild.textContent?.startsWith('[] ') ||
+            node.firstChild.textContent?.startsWith('[ ] ') ||
+            node.firstChild.textContent?.startsWith('[x] '))
+        ) {
+          result =
+            this._contentParser.getParserHtmlText2Block('listItemParser')?.(
+              node
+            );
+        } else {
+          result = this._contentParser.getParserHtmlText2Block(
+            'commonParser'
+          )?.({
+            element: node,
+            flavour: 'paragraph',
+            type: 'text',
+          });
+        }
+        break;
+      case 'DIV':
       case 'B':
       case 'A':
       case 'EM':
@@ -126,7 +156,7 @@ export class ParserHtml {
     checked?: boolean,
     ignoreEmptyElement = true
   ): OpenBlockInfo | null {
-    const childNodes = element.children;
+    const childNodes = element.childNodes;
     let isChildNode = false;
     const textValues: Record<string, unknown>[] = [];
     const children = [];
@@ -150,10 +180,11 @@ export class ParserHtml {
             'I',
             'U',
             'S',
-            'P',
             'SPAN',
             'A',
             'INPUT',
+            'MARK',
+            'CODE',
           ].includes(htmlElement.tagName)
         ) {
           textValues.push(
@@ -162,8 +193,10 @@ export class ParserHtml {
           continue;
         }
       }
-      const childNode = this._nodePaser(node as Element);
-      childNode && children.push(...childNode);
+      if (node instanceof Element) {
+        const childNode = this._nodePaser(node);
+        childNode && children.push(...childNode);
+      }
       isChildNode = true;
     }
 
@@ -191,25 +224,9 @@ export class ParserHtml {
     }
     const htmlElement = element as HTMLElement;
     const childNodes = Array.from(htmlElement.childNodes);
-
-    const isLink = getIsLink(htmlElement);
     const currentTextStyle = getTextStyle(htmlElement);
 
     if (!childNodes.length) {
-      // todo
-      // const singleLabelContent = getSingleLabelHTMLElementContent(htmlElement);
-      // if (isLink && singleLabelContent) {
-      //   return [
-      //     {
-      //       children: [
-      //         {
-      //           text: singleLabelContent,
-      //         },
-      //       ],
-      //       ...currentTextStyle,
-      //     },
-      //   ];
-      // }
       return ignoreEmptyText
         ? []
         : [
@@ -224,32 +241,20 @@ export class ParserHtml {
       .reduce((result, childNode) => {
         const textBlocks = this._commonHTML2Text(
           childNode,
-          isLink
-            ? textStyle
-            : {
-                ...textStyle,
-                ...currentTextStyle,
-              },
+          {
+            ...textStyle,
+            ...currentTextStyle,
+          },
           ignoreEmptyText
         );
         result.push(...textBlocks);
         return result;
       }, [] as Record<string, unknown>[])
       .filter(v => v);
-
-    // todo
-    // if (isLink && childTexts.length) {
-    //   return [
-    //     {
-    //       children: childTexts,
-    //       ...currentTextStyle,
-    //     },
-    //   ];
-    // }
     return childTexts;
   }
 
-  private _listItemParser(element: HTMLElement): OpenBlockInfo[] | null {
+  private _listItemParser(element: Element): OpenBlockInfo[] | null {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
     let checked;
@@ -262,6 +267,24 @@ export class ParserHtml {
       type = 'todo';
       checked = inputEl?.getAttribute('checked') !== null;
     }
+    if (element.firstChild instanceof Text) {
+      if (element.firstChild.textContent?.startsWith('[] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(3);
+        type = 'todo';
+        checked = false;
+      } else if (element.firstChild.textContent?.startsWith('[ ] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(4);
+        type = 'todo';
+        checked = false;
+      } else if (element.firstChild.textContent?.startsWith('[x] ')) {
+        element.firstChild.textContent =
+          element.firstChild.textContent.slice(4);
+        type = 'todo';
+        checked = true;
+      }
+    }
     const result = this._contentParser.getParserHtmlText2Block(
       'commonParser'
     )?.({
@@ -272,10 +295,52 @@ export class ParserHtml {
     });
     return result;
   }
+
+  private _blockQuoteParser(element: Element): OpenBlockInfo[] | null {
+    const getText = (list: OpenBlockInfo[]): Record<string, unknown>[] => {
+      const result: Record<string, unknown>[] = [];
+      list.forEach(item => {
+        const texts: Record<string, unknown>[] = item.text.filter(
+          textItem => textItem.insert
+        );
+        if (result.length > 0 && texts.length > 0) {
+          result.push({ insert: '\n' });
+        }
+        result.push(...texts);
+
+        const childTexts = getText(item.children);
+        if (result.length > 0 && childTexts.length > 0) {
+          result.push({ insert: '\n' });
+        }
+        result.push(...childTexts);
+      });
+      return result;
+    };
+
+    const commonResult = this._contentParser.getParserHtmlText2Block(
+      'commonParser'
+    )?.({
+      element: element,
+      flavour: 'paragraph',
+      type: 'text',
+    });
+    if (!commonResult) {
+      return null;
+    }
+
+    return [
+      {
+        flavour: 'paragraph',
+        type: 'quote',
+        text: getText(commonResult),
+        children: [],
+      },
+    ];
+  }
 }
 
 const getIsLink = (htmlElement: HTMLElement) => {
-  return ['A', 'IMG'].includes(htmlElement.tagName);
+  return ['A'].includes(htmlElement.tagName);
 };
 
 const getTextStyle = (htmlElement: HTMLElement) => {
@@ -304,11 +369,8 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['bold'] = true;
   }
   if (getIsLink(htmlElement)) {
-    textStyle['type'] = 'link';
-    textStyle['url'] =
+    textStyle['link'] =
       htmlElement.getAttribute('href') || htmlElement.getAttribute('src');
-    // todo
-    // textStyle['id'] = getRandomString('link');
   }
 
   if (tagName === 'EM' || style['fontStyle'] === 'italic') {
@@ -323,7 +385,7 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['underline'] = true;
   }
   if (tagName === 'CODE') {
-    textStyle['inlinecode'] = true;
+    textStyle['code'] = true;
   }
   if (
     tagName === 'S' ||
@@ -332,6 +394,9 @@ const getTextStyle = (htmlElement: HTMLElement) => {
       style['text-decoration'].indexOf('line-through') !== -1)
   ) {
     textStyle['strike'] = true;
+  }
+  if (tagName === 'MARK') {
+    textStyle['background'] = 'yellow';
   }
 
   return textStyle;

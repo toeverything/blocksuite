@@ -1,93 +1,94 @@
-import { html } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { BlockHost } from '../../__internal__';
-import { BaseBlockModel } from '@blocksuite/store';
+import { GroupBlockModel } from '../../group-block';
+import { ViewportState, EdgelessContainer } from './edgeless-page-block';
+import type { XYWH } from './selection-manager';
 
-import type {
-  XYWH,
-  ViewportState,
-  EdgelessSelectionState,
-} from './edgeless-page-block';
-import { GroupBlockModel } from '../..';
-import { BlockElement } from '../../__internal__';
-import '../../__internal__';
+const MIN_ZOOM = 0.3;
 
-export function EdgelessSelectionBox(selectionState: EdgelessSelectionState) {
-  const { selected, box } = selectionState;
-  if (!selected.length || !box) return html`<div></div>`;
-
-  const style = {
-    position: 'absolute',
-    left: box.x + 'px',
-    top: box.y + 'px',
-    width: box.w + 'px',
-    height: box.h + 'px',
-    border: '1px solid #6ccfff',
-    pointerEvents: 'none',
-    boxSizing: 'border-box',
-  };
-
-  return html` <div style=${styleMap(style)}></div> `;
+export function applyDeltaZoom(
+  current: ViewportState,
+  delta: number
+): ViewportState {
+  const val = (current.zoom * (100 + delta)) / 100;
+  const newZoom = Math.max(val, MIN_ZOOM);
+  // TODO ensure center stable
+  return { ...current, zoom: newZoom };
 }
 
-function EdgelessBlockChild(
-  model: GroupBlockModel,
-  host: BlockHost,
-  viewport: ViewportState
-) {
-  const { xywh } = model;
-  const { zoom, viewportX, viewportY } = viewport;
-  const [x, y, w, h] = JSON.parse(xywh) as XYWH;
-  const translateX = (x - viewportX) * zoom;
-  const translateY = (y - viewportY) * zoom;
-
-  const style = {
-    position: 'absolute',
-    transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
-    transformOrigin: '0 0',
-    width: w + 'px',
-    minHeight: h + 'px',
-    background: 'white',
-  };
-
-  return html`
-    <div style=${styleMap(style)}>${BlockElement(model, host)}</div>
-  `;
+export function applyDeltaCenter(
+  current: ViewportState,
+  deltaX: number,
+  deltaY: number
+): ViewportState {
+  const newX = current.viewportX + deltaX;
+  const newY = current.viewportY + deltaY;
+  return { ...current, viewportX: newX, viewportY: newY };
 }
 
-export function EdgelessBlockChildrenContainer(
-  model: BaseBlockModel,
-  host: BlockHost,
-  viewport: ViewportState
-) {
-  const { zoom, viewportX, viewportY } = viewport;
-  const translateX = -viewportX * zoom;
-  const translateY = -viewportY * zoom;
+function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
+  const a = JSON.parse(block.xywh) as [number, number, number, number];
+  const [ax, ay, aw, ah] = a;
+  return ax < x && x <= ax + aw && ay < y && y <= ay + ah;
+}
 
-  return html`
-    <style>
-      .affine-block-children-container.edgeless {
-        padding-left: 0;
-        position: relative;
-        overflow: hidden;
-        border: 1px #ccc solid;
-        /* max-width: 300px; */
-        /* height: ${viewport.height}px; */
-        height: 100%;
+export function pick(
+  blocks: GroupBlockModel[],
+  modelX: number,
+  modelY: number
+): GroupBlockModel | null {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    if (isPointIn(blocks[i], modelX, modelY)) {
+      return blocks[i];
+    }
+  }
+  return null;
+}
 
-        background-image: linear-gradient(#cccccc66 0.1em, transparent 0.1em),
-          linear-gradient(90deg, #cccccc66 0.1em, transparent 0.1em);
-        background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
-        background-position: ${translateX}px ${translateY}px;
-      }
-    </style>
-    <div class="affine-block-children-container edgeless">
-      ${repeat(
-        model.children,
-        child => child.id,
-        child => EdgelessBlockChild(child as GroupBlockModel, host, viewport)
-      )}
-    </div>
-  `;
+export function toModelCoord(
+  viewport: ViewportState,
+  viewX: number,
+  viewY: number
+): [number, number] {
+  const { viewportX, viewportY, zoom } = viewport;
+  return [viewportX + viewX / zoom, viewportY + viewY / zoom];
+}
+
+export function toViewCoord(
+  viewport: ViewportState,
+  modelX: number,
+  modelY: number
+): [number, number] {
+  const { viewportX, viewportY, zoom } = viewport;
+  return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
+}
+
+export function getSelectionBoxBound(viewport: ViewportState, xywh: string) {
+  const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
+  const [x, y] = toViewCoord(viewport, modelX, modelY);
+  return new DOMRect(x, y, modelW * viewport.zoom, modelH * viewport.zoom);
+}
+
+export function initWheelEventHandlers(container: EdgelessContainer) {
+  const wheelHandler = (e: WheelEvent) => {
+    e.preventDefault();
+
+    const { viewport } = container;
+
+    // pan
+    if (!e.ctrlKey) {
+      const dx = e.deltaX / viewport.zoom;
+      const dy = e.deltaY / viewport.zoom;
+      const newState = applyDeltaCenter(viewport, dx, dy);
+      container.signals.updateViewport.emit(newState);
+    }
+    // zoom
+    else {
+      const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+      const newState = applyDeltaZoom(viewport, delta);
+      container.signals.updateViewport.emit(newState);
+    }
+  };
+
+  container.addEventListener('wheel', wheelHandler);
+  const dispose = () => container.removeEventListener('wheel', wheelHandler);
+  return dispose;
 }

@@ -1,7 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Slot, Store } from '@blocksuite/store';
+import { Signal, Store, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -14,14 +14,18 @@ import {
   handleBackspace,
   handleFormat,
   batchDelete,
+  updateTextType,
+  handleSelectAll,
+  batchUpdateTextType,
+  assertExists,
 } from '../../__internal__';
-import { DefaultMouseManager } from './mouse-manager';
+import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
 import { createLink } from '../../__internal__/rich-text/link-node';
 
-export interface DefaultPageBlockSlots {
-  updateSelectionRect: Slot<DOMRect | null>;
-  updateSelectedRects: Slot<DOMRect[]>;
+export interface DefaultPageSignals {
+  updateSelectionRect: Signal<DOMRect | null>;
+  updateSelectedRects: Signal<DOMRect[]>;
 }
 
 // https://stackoverflow.com/a/2345915
@@ -89,7 +93,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
-  mouse!: DefaultMouseManager;
+  flavour = 'page' as const;
+
+  selection!: DefaultSelectionManager;
 
   lastSelectionPosition: SelectionPosition = 'start';
 
@@ -102,9 +108,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   selectedRects: DOMRect[] = [];
 
-  slots: DefaultPageBlockSlots = {
-    updateSelectionRect: new Slot<DOMRect | null>(),
-    updateSelectedRects: new Slot<DOMRect[]>(),
+  signals: DefaultPageSignals = {
+    updateSelectionRect: new Signal<DOMRect | null>(),
+    updateSelectedRects: new Signal<DOMRect[]>(),
   };
 
   @property({
@@ -119,38 +125,65 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _bindHotkeys() {
     const { store } = this;
+    const {
+      UNDO,
+      REDO,
+      BACKSPACE,
+      SELECT_ALL,
+      INLINE_CODE,
+      STRIKE,
+      H1,
+      H2,
+      H3,
+      H4,
+      H5,
+      H6,
+      SHIFT_UP,
+      SHIFT_DOWN,
+      LINK,
+    } = HOTKEYS;
 
-    hotkey.addListener(HOTKEYS.UNDO, () => store.undo());
-    hotkey.addListener(HOTKEYS.REDO, () => store.redo());
+    hotkey.addListener(UNDO, () => store.undo());
+    hotkey.addListener(REDO, () => store.redo());
 
-    hotkey.addListener(HOTKEYS.BACKSPACE, e => {
-      const { selection } = this.mouse;
-      if (selection.type === 'native') {
+    hotkey.addListener(BACKSPACE, e => {
+      const { state } = this.selection;
+
+      if (state.type === 'native') {
         handleBackspace(store, e);
-      } else if (selection.type === 'block') {
-        const { selectedRichTexts } = selection;
+      } else if (state.type === 'block') {
+        const { selectedRichTexts } = state;
         batchDelete(
           store,
           selectedRichTexts.map(richText => richText.model)
         );
-
-        selection.clear();
-        this.slots.updateSelectedRects.emit([]);
+        state.clear();
+        this.signals.updateSelectedRects.emit([]);
       }
     });
-    hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
-      handleFormat(store, e, 'code');
+
+    hotkey.addListener(SELECT_ALL, e => {
+      e.preventDefault();
+      handleSelectAll();
+      this.selection.state.type = 'native';
     });
-    hotkey.addListener(HOTKEYS.STRIKE, e => {
-      handleFormat(store, e, 'strike');
-    });
-    hotkey.addListener(HOTKEYS.SHIFT_UP, e => {
+
+    hotkey.addListener(INLINE_CODE, e => handleFormat(store, e, 'code'));
+    hotkey.addListener(STRIKE, e => handleFormat(store, e, 'strike'));
+    hotkey.addListener(H1, () => this._updateType('h1', store));
+    hotkey.addListener(H2, () => this._updateType('h2', store));
+    hotkey.addListener(H3, () => this._updateType('h3', store));
+    hotkey.addListener(H4, () => this._updateType('h4', store));
+    hotkey.addListener(H5, () => this._updateType('h5', store));
+    hotkey.addListener(H6, () => this._updateType('h6', store));
+
+    hotkey.addListener(SHIFT_UP, e => {
       // TODO expand selection up
     });
-    hotkey.addListener(HOTKEYS.SHIFT_DOWN, e => {
+    hotkey.addListener(SHIFT_DOWN, e => {
       // TODO expand selection down
     });
-    hotkey.addListener(HOTKEYS.LINK, e => {
+    hotkey.addListener(LINK, e => {
       createLink(store, e);
     });
 
@@ -163,8 +196,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.UNDO,
       HOTKEYS.REDO,
       HOTKEYS.BACKSPACE,
+      HOTKEYS.SELECT_ALL,
       HOTKEYS.INLINE_CODE,
       HOTKEYS.STRIKE,
+      HOTKEYS.H1,
+      HOTKEYS.H2,
+      HOTKEYS.H3,
+      HOTKEYS.H4,
+      HOTKEYS.H5,
+      HOTKEYS.H6,
       HOTKEYS.SHIFT_UP,
       HOTKEYS.SHIFT_DOWN,
       HOTKEYS.LINK,
@@ -175,9 +215,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const hasContent = this._blockTitle.value.length > 0;
 
     if (e.key === 'Enter' && hasContent) {
+      assertExists(this._blockTitle.selectionStart);
+      const titleCursorIndex = this._blockTitle.selectionStart;
+      const contentLeft = this._blockTitle.value.slice(0, titleCursorIndex);
+      const contentRight = this._blockTitle.value.slice(titleCursorIndex);
+
       const defaultGroup = this.model.children[0];
-      const firstParagraph = defaultGroup.children[0];
-      asyncFocusRichText(this.store, firstParagraph.id);
+      const props = {
+        flavour: 'paragraph',
+        text: new Text(this.store, contentRight),
+      };
+      const newFirstParagraphId = this.store.addBlock(props, defaultGroup, 0);
+      this.store.updateBlock(this.model, { title: contentLeft });
+      asyncFocusRichText(this.store, newFirstParagraphId);
     }
   }
 
@@ -196,6 +246,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     store.updateBlock(this.model, { title });
   }
 
+  private _updateType(type: string, store: Store) {
+    const { state } = this.selection;
+    if (state.selectedRichTexts.length > 0) {
+      batchUpdateTextType(
+        store,
+        state.selectedRichTexts.map(richText => richText.model),
+        type
+      );
+    } else {
+      updateTextType(type, store);
+    }
+  }
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -203,10 +266,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.mouse = new DefaultMouseManager(
+      this.selection = new DefaultSelectionManager(
         this.store,
         this.mouseRoot,
-        this.slots
+        this.signals
       );
     }
     super.update(changedProperties);
@@ -222,11 +285,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       }
     });
 
-    this.slots.updateSelectionRect.on(rect => {
+    this.signals.updateSelectionRect.on(rect => {
       this.selectionRect = rect;
       this.requestUpdate();
     });
-    this.slots.updateSelectedRects.on(rects => {
+    this.signals.updateSelectedRects.on(rects => {
       this.selectedRects = rects;
       this.requestUpdate();
     });
@@ -236,7 +299,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   disconnectedCallback() {
     this._removeHotkeys();
-    this.mouse.dispose();
+    this.selection.dispose();
   }
 
   render() {

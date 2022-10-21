@@ -56,6 +56,10 @@ export class PrelimText {
     throw new Error(UNSUPPORTED_MSG + 'insert');
   }
 
+  insertList() {
+    throw new Error(UNSUPPORTED_MSG + 'insertList');
+  }
+
   split() {
     throw new Error(UNSUPPORTED_MSG + 'split');
   }
@@ -131,6 +135,21 @@ export class Text {
   insert(content: string, index: number, attributes?: Object) {
     this._transact(() => {
       this._yText.insert(index, content, attributes);
+      // @ts-ignore
+      this._yText.meta = { split: true };
+    });
+  }
+
+  insertList(insertTexts: Record<string, unknown>[], index: number) {
+    this._transact(() => {
+      for (let i = insertTexts.length - 1; i >= 0; i--) {
+        this._yText.insert(
+          index,
+          (insertTexts[i].insert as string) || '',
+          // eslint-disable-next-line @typescript-eslint/ban-types
+          insertTexts[i].attributes as Object | undefined
+        );
+      }
       // @ts-ignore
       this._yText.meta = { split: true };
     });
@@ -240,13 +259,13 @@ export class RichTextAdapter {
     this.doc = store.doc;
     this.quill = quill;
 
-    this.awareness = store.awareness;
     const quillCursors = quill.getModule('cursors') || null;
     this.quillCursors = quillCursors;
     // This object contains all attributes used in the quill instance
     this._negatedUsedFormats = {};
 
     this.yText.observe(this._yObserver);
+    this.awareness = store.awarenessAdapter;
 
     // This indirectly initializes _negatedUsedFormats.
     // Make sure this calls after the _quillObserver is set.

@@ -18,9 +18,7 @@ window.onload = () => {
       IS_PLAYGROUND && IS_WEB ? new DebugProvider(room, doc) : undefined,
       new IndexedDBProvider(room, doc),
     ],
-    createId: count => {
-      return `${Date.now()}-${count}`;
-    },
+    createId: count => `${count}`,
   }).register(BlockSchema);
 
   const editor = document.createElement('editor-container');

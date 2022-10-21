@@ -2,7 +2,7 @@ import * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness.js';
 import { RelativePosition } from 'yjs';
 import type { Store } from './store';
-import { Slot } from './utils/slot';
+import { Signal } from './utils/signal';
 
 export interface SelectionRange {
   id: string;
@@ -27,37 +27,41 @@ interface AwarenessMessage {
   state?: AwarenessState;
 }
 
+interface AwarenessDiff {
+  added: number[];
+  removed: number[];
+  updated: number[];
+}
+
 export class AwarenessAdapter {
   readonly store: Store;
   readonly awarenessList: Awareness[];
   readonly localAwareness: Awareness;
 
-  readonly slots = {
-    update: new Slot<AwarenessMessage>(),
+  readonly signals = {
+    update: new Signal<AwarenessMessage>(),
   };
 
-  private _listenerHandlers: Array<{ destroy: () => void }> = [];
+  private _listeners: Array<(diff: AwarenessDiff) => void> = [];
 
-  constructor(store: Store, awarenessList?: Awareness[]) {
+  constructor(store: Store, awarenessList: Awareness[] = []) {
     this.store = store;
     this.localAwareness = new Awareness(store.doc);
-    this.awarenessList = [this.localAwareness].concat(awarenessList || []);
+    this.awarenessList = [this.localAwareness, ...awarenessList];
 
-    this._each(awareness => {
+    this.awarenessList.forEach(awareness => {
       const listenerCallback = this._onAwarenessChange.bind(this, awareness);
+      this._listeners.push(listenerCallback);
       awareness.on('change', listenerCallback);
-      this._listenerHandlers.push({
-        destroy: () => {
-          awareness.off('change', listenerCallback);
-        },
-      });
     });
 
-    this.slots.update.on(this._onAwarenessMessage);
+    this.signals.update.on(this._onAwarenessMessage);
   }
 
   public setLocalCursor(range: SelectionRange) {
-    this._each(awareness => awareness.setLocalStateField('cursor', range));
+    this.awarenessList.forEach(awareness => {
+      awareness.setLocalStateField('cursor', range);
+    });
   }
 
   public getLocalCursor(): SelectionRange | undefined {
@@ -70,37 +74,26 @@ export class AwarenessAdapter {
     return this.localAwareness.getStates() as Map<number, AwarenessState>;
   }
 
-  private _each(callback: (awareness: Awareness) => void) {
-    this.awarenessList.forEach(awareness => callback(awareness));
-  }
-
-  private _onAwarenessChange = (
-    awareness: Awareness,
-    diff: {
-      added: number[];
-      removed: number[];
-      updated: number[];
-    }
-  ) => {
+  private _onAwarenessChange = (awareness: Awareness, diff: AwarenessDiff) => {
     const { added, removed, updated } = diff;
 
     const states = awareness.getStates();
     added.forEach(id => {
-      this.slots.update.emit({
+      this.signals.update.emit({
         id,
         type: 'add',
         state: states.get(id) as AwarenessState,
       });
     });
     updated.forEach(id => {
-      this.slots.update.emit({
+      this.signals.update.emit({
         id,
         type: 'update',
         state: states.get(id) as AwarenessState,
       });
     });
     removed.forEach(id => {
-      this.slots.update.emit({
+      this.signals.update.emit({
         id,
         type: 'remove',
       });
@@ -170,7 +163,9 @@ export class AwarenessAdapter {
   }
 
   destroy() {
-    this._listenerHandlers.forEach(handler => handler.destroy());
-    this.slots.update.dispose();
+    this._listeners.forEach((listener, i) => {
+      this.awarenessList[i].off('change', listener);
+    });
+    this.signals.update.dispose();
   }
 }
