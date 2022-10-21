@@ -69,7 +69,7 @@ export class EdgelessSelectionManager {
     return (this._store.root?.children as GroupBlockModel[]) ?? [];
   }
 
-  private get _isActive() {
+  get isActive() {
     return this._state.type === 'single' && this._state.active;
   }
 
@@ -134,7 +134,7 @@ export class EdgelessSelectionManager {
 
   private _onContainerClick = (e: SelectionEvent) => {
     this._resetState(e);
-    if (this._isActive) {
+    if (this.isActive) {
       handleNativeRangeClick(this._store, e);
     }
   };

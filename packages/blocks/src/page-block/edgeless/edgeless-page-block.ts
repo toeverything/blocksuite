@@ -102,6 +102,14 @@ export class EdgelessPageBlockComponent
       group.propsUpdated.on(() => this._selection.syncSelectionBox());
     });
 
+    this.store.signals.historyUpdated.on(() => {
+      requestAnimationFrame(() => {
+        if (!this._selection.isActive) {
+          resetNativeSeletion(null);
+        }
+      });
+    });
+
     this.signals.updateViewport.on(state => {
       this.viewport = state;
       this._selection.syncSelectionBox();
