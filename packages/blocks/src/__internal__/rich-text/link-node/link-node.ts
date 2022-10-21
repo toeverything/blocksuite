@@ -22,9 +22,11 @@ export class LinkNodeComponent extends LitElement {
       text-decoration: none;
     }
 
+    /*
     a:visited {
       color: var(--affine-link-visited-color);
     }
+    */
 
     a:hover {
       text-decoration: underline;
