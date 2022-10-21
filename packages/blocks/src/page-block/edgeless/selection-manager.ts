@@ -5,6 +5,8 @@ import {
   initMouseEventHandlers,
   resetNativeSeletion,
   noop,
+  caretRangeFromPoint,
+  handleRangeDragMove,
 } from '../../__internal__';
 import {
   getSelectionBoxBound,
@@ -36,6 +38,8 @@ export class EdgelessSelectionManager {
   private _state: EdgelessSelectionState = {
     type: 'none',
   };
+  private _startRange: Range | null = null;
+  // private _startPoint: { x: number; y: number } | null = null;
 
   get state() {
     return this._state;
@@ -65,7 +69,8 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    noop();
+    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+    // this._startPoint = { x: e.raw.clientX, y: e.raw.clientY };
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
@@ -74,8 +79,8 @@ export class EdgelessSelectionManager {
         return;
       case 'single':
         if (this.state.active) {
-          // TODO reuse page mode drag move
-          noop();
+          // TODO reset if drag out of group
+          handleRangeDragMove(this._startRange, e);
         }
         // for inactive selection, drag move selected group
         else {
@@ -108,7 +113,7 @@ export class EdgelessSelectionManager {
     if (selected) {
       this._state = {
         type: 'single',
-        active: false,
+        active: this._state.type === 'single' && this._state.active,
         selected,
         box: getSelectionBoxBound(viewport, selected.xywh),
       };
@@ -120,7 +125,7 @@ export class EdgelessSelectionManager {
     }
   };
 
-  syncBox() {
+  syncSelectionBox() {
     if (this.state.type === 'single') {
       this.state.box = getSelectionBoxBound(
         this._container.viewport,
@@ -131,7 +136,10 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {
-    noop();
+    if (this.state.type === 'single') {
+      this.state.active = true;
+      this._container.signals.updateSelection.emit(this.state);
+    }
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {

@@ -13,6 +13,7 @@ import {
 } from './query';
 import { Point, Rect } from './rect';
 import { getQuillIndexByNativeSelection } from './operations';
+import type { SelectionEvent } from './gesture';
 
 export function focusRichText(
   position: SelectionPosition,
@@ -261,13 +262,21 @@ export function isMultiBlockRange(range: Range) {
   return range.commonAncestorContainer.nodeType !== Node.TEXT_NODE;
 }
 
+function getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+  const block = {
+    id: model.id,
+    children: model.children.map(child => getSelectedBlock(child)),
+  };
+  return block;
+}
+
 export function getSelectInfo() {
   const selection = window.getSelection();
   let selectedBlocks: SelectedBlock[] = [];
   if (selection && selection.type !== 'None') {
     const range = selection.getRangeAt(0);
     const models = getModelsByRange(getCurrentRange());
-    selectedBlocks = models.map(model => _getSelectedBlock(model));
+    selectedBlocks = models.map(model => getSelectedBlock(model));
     if (selectedBlocks.length > 0) {
       const firstIndex = getQuillIndexByNativeSelection(
         range.startContainer,
@@ -287,10 +296,17 @@ export function getSelectInfo() {
   };
 }
 
-function _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
-  const block = {
-    id: model.id,
-    children: model.children.map(child => _getSelectedBlock(child)),
-  };
-  return block;
+export function handleRangeDragMove(
+  startRange: Range | null,
+  e: SelectionEvent
+) {
+  assertExists(startRange);
+  const { startContainer, startOffset, endContainer, endOffset } = startRange;
+  const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
+    currentRange?.setEnd(endContainer, endOffset);
+  } else {
+    currentRange?.setStart(startContainer, startOffset);
+  }
+  resetNativeSeletion(currentRange);
 }

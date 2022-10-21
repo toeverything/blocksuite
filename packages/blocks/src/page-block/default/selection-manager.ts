@@ -8,6 +8,7 @@ import {
   resetNativeSeletion,
   assertExists,
   noop,
+  handleRangeDragMove,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
 import type { DefaultPageSignals } from './default-page-block';
@@ -177,16 +178,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
-    assertExists(this.state.startRange);
-    const { startContainer, startOffset, endContainer, endOffset } =
-      this.state.startRange;
-    const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
-      currentRange?.setEnd(endContainer, endOffset);
-    } else {
-      currentRange?.setStart(startContainer, startOffset);
-    }
-    resetNativeSeletion(currentRange);
+    handleRangeDragMove(this.state.startRange, e);
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {

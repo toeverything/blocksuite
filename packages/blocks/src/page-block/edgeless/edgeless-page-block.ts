@@ -99,7 +99,7 @@ export class EdgelessPageBlockComponent
   firstUpdated() {
     // TODO: listen to new children
     this.model.children.forEach(group => {
-      group.propsUpdated.on(() => this._selection.syncBox());
+      group.propsUpdated.on(() => this._selection.syncSelectionBox());
     });
 
     this.signals.updateViewport.on(state => {
