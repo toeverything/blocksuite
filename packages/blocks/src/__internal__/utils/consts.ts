@@ -12,4 +12,10 @@ export const HOTKEYS = {
   INLINE_CODE: 'command+e,ctrl+e',
   STRIKE: 'command+shift+s,ctrl+shift+s',
   LINK: 'command+k,ctrl+k',
+  H1: 'command+option+1',
+  H2: 'command+option+2',
+  H3: 'command+option+3',
+  H4: 'command+option+4',
+  H5: 'command+option+5',
+  H6: 'command+option+6',
 };

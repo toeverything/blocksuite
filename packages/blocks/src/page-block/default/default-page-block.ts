@@ -14,12 +14,15 @@ import {
   handleBackspace,
   handleFormat,
   batchDelete,
+  updateTextType,
+  handleSelectAll,
+  batchUpdateTextType,
 } from '../../__internal__';
-import { DefaultMouseManager } from './mouse-manager';
+import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
 import { createLink } from '../../__internal__/rich-text/link-node';
 
-export interface DefaultPageBlockSignals {
+export interface DefaultPageSignals {
   updateSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
 }
@@ -91,7 +94,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   flavour = 'page' as const;
 
-  mouse!: DefaultMouseManager;
+  selection!: DefaultSelectionManager;
 
   lastSelectionPosition: SelectionPosition = 'start';
 
@@ -104,7 +107,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   selectedRects: DOMRect[] = [];
 
-  signals: DefaultPageBlockSignals = {
+  signals: DefaultPageSignals = {
     updateSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
   };
@@ -121,38 +124,65 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _bindHotkeys() {
     const { store } = this;
+    const {
+      UNDO,
+      REDO,
+      BACKSPACE,
+      SELECT_ALL,
+      INLINE_CODE,
+      STRIKE,
+      H1,
+      H2,
+      H3,
+      H4,
+      H5,
+      H6,
+      SHIFT_UP,
+      SHIFT_DOWN,
+      LINK,
+    } = HOTKEYS;
 
-    hotkey.addListener(HOTKEYS.UNDO, () => store.undo());
-    hotkey.addListener(HOTKEYS.REDO, () => store.redo());
+    hotkey.addListener(UNDO, () => store.undo());
+    hotkey.addListener(REDO, () => store.redo());
 
-    hotkey.addListener(HOTKEYS.BACKSPACE, e => {
-      const { selection } = this.mouse;
-      if (selection.type === 'native') {
+    hotkey.addListener(BACKSPACE, e => {
+      const { state } = this.selection;
+
+      if (state.type === 'native') {
         handleBackspace(store, e);
-      } else if (selection.type === 'block') {
-        const { selectedRichTexts } = selection;
+      } else if (state.type === 'block') {
+        const { selectedRichTexts } = state;
         batchDelete(
           store,
           selectedRichTexts.map(richText => richText.model)
         );
-
-        selection.clear();
+        state.clear();
         this.signals.updateSelectedRects.emit([]);
       }
     });
-    hotkey.addListener(HOTKEYS.INLINE_CODE, e => {
-      handleFormat(store, e, 'code');
+
+    hotkey.addListener(SELECT_ALL, e => {
+      e.preventDefault();
+      handleSelectAll();
+      this.selection.state.type = 'native';
     });
-    hotkey.addListener(HOTKEYS.STRIKE, e => {
-      handleFormat(store, e, 'strike');
-    });
-    hotkey.addListener(HOTKEYS.SHIFT_UP, e => {
+
+    hotkey.addListener(INLINE_CODE, e => handleFormat(store, e, 'code'));
+    hotkey.addListener(STRIKE, e => handleFormat(store, e, 'strike'));
+    hotkey.addListener(H1, () => this._updateType('h1', store));
+    hotkey.addListener(H2, () => this._updateType('h2', store));
+    hotkey.addListener(H3, () => this._updateType('h3', store));
+    hotkey.addListener(H4, () => this._updateType('h4', store));
+    hotkey.addListener(H5, () => this._updateType('h5', store));
+    hotkey.addListener(H6, () => this._updateType('h6', store));
+
+    hotkey.addListener(SHIFT_UP, e => {
       // TODO expand selection up
     });
-    hotkey.addListener(HOTKEYS.SHIFT_DOWN, e => {
+    hotkey.addListener(SHIFT_DOWN, e => {
       // TODO expand selection down
     });
-    hotkey.addListener(HOTKEYS.LINK, e => {
+    hotkey.addListener(LINK, e => {
       createLink(store, e);
     });
 
@@ -165,8 +195,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.UNDO,
       HOTKEYS.REDO,
       HOTKEYS.BACKSPACE,
+      HOTKEYS.SELECT_ALL,
       HOTKEYS.INLINE_CODE,
       HOTKEYS.STRIKE,
+      HOTKEYS.H1,
+      HOTKEYS.H2,
+      HOTKEYS.H3,
+      HOTKEYS.H4,
+      HOTKEYS.H5,
+      HOTKEYS.H6,
       HOTKEYS.SHIFT_UP,
       HOTKEYS.SHIFT_DOWN,
       HOTKEYS.LINK,
@@ -198,6 +235,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     store.updateBlock(this.model, { title });
   }
 
+  private _updateType(type: string, store: Store) {
+    const { state } = this.selection;
+    if (state.selectedRichTexts.length > 0) {
+      batchUpdateTextType(
+        store,
+        state.selectedRichTexts.map(richText => richText.model),
+        type
+      );
+    } else {
+      updateTextType(type, store);
+    }
+  }
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -205,7 +255,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
-      this.mouse = new DefaultMouseManager(
+      this.selection = new DefaultSelectionManager(
         this.store,
         this.mouseRoot,
         this.signals
@@ -238,7 +288,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   disconnectedCallback() {
     this._removeHotkeys();
-    this.mouse.dispose();
+    this.selection.dispose();
   }
 
   render() {

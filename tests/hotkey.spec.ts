@@ -13,11 +13,7 @@ import {
   initThreeParagraphs,
   dragBetweenIndices,
 } from './utils/actions';
-import {
-  assertRichTexts,
-  assertSelection,
-  assertTextFormat,
-} from './utils/asserts';
+import { assertRichTexts, assertTextFormat } from './utils/asserts';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -28,10 +24,8 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 
   await selectAllByKeyboard(page); // first select all in rich text
-  await assertSelection(page, 1, 0, 5);
-
   await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['hello', '\n']);
+  await assertRichTexts(page, ['\n']);
 });
 
 test('single line rich-text inline code hotkey', async ({ page }) => {
@@ -50,7 +44,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, { code: true });
 
   await inlineCode(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 0, { code: true });
 });
 
 test('multi line rich-text inline code hotkey', async ({ page }) => {
@@ -68,7 +62,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 2, { code: true });
 
   // split at 2,2
-  await assertTextFormat(page, 2, 2, { code: true });
+  await assertTextFormat(page, 2, 2, {});
   await assertTextFormat(page, 2, 3, {});
 
   await undoByClick(page);
@@ -100,5 +94,5 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
 
   // trigger hotkey twice
   await strikethrough(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 0, { strike: true });
 });
