@@ -40,6 +40,16 @@ export class ClipboardManager {
     return this._clipboardTarget;
   }
 
+  public importMarkdown(text: string) {
+    const blocks = this._editor.contentParser.markdown2Block(text);
+    const pageId = this._editor.store.root?.id;
+    pageId &&
+      this._paste.insertBlocks(blocks, {
+        type: 'Block',
+        selectedBlocks: [{ id: pageId, children: [] }],
+      });
+  }
+
   dispose() {
     this._clipboardEventDispatcher.dispose(this.clipboardTarget);
   }

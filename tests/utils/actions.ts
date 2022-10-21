@@ -367,7 +367,6 @@ export async function pasteContent(
           },
         },
       };
-      console.log('ss');
       document
         .getElementsByTagName('editor-container')[0]
         .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
@@ -376,5 +375,4 @@ export async function pasteContent(
     },
     { clipData }
   );
-  const sd = 10;
 }
