@@ -67,9 +67,7 @@ export const linkPopoverStyle = css`
     height: 34px;
     color: inherit;
 
-    // TODO dark mode
-    /* background-color: #4d4c53; */
-    border: 1px solid #e0e6eb;
+    border: 1px solid var(--affine-border-color);
     outline: none;
     border-radius: 10px;
     background: transparent;
@@ -108,9 +106,7 @@ export const linkPopoverStyle = css`
     margin: 0 6px;
     width: 1px;
     height: 20px;
-    // TODO dark mode
-    /* background-color: #4d4c53; */
-    background-color: #e0e6eb;
+    background-color: var(--affine-border-color);
   }
 
   ${editLinkStyle}
