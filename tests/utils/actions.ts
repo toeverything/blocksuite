@@ -367,7 +367,6 @@ export async function pasteContent(
           },
         },
       };
-      console.log('ss');
       document
         .getElementsByTagName('editor-container')[0]
         .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
@@ -376,5 +375,19 @@ export async function pasteContent(
     },
     { clipData }
   );
-  const sd = 10;
+}
+
+export async function importMarkdown(
+  page: Page,
+  data: string,
+  insertPositionId: string
+) {
+  await page.evaluate(
+    ({ data, insertPositionId }) => {
+      document
+        .getElementsByTagName('editor-container')[0]
+        .clipboard.importMarkdown(data, insertPositionId);
+    },
+    { data, insertPositionId }
+  );
 }

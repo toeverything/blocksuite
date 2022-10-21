@@ -2,7 +2,12 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
 import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
 import { assertExists, caretRangeFromPoint } from './std';
-import { ExtendedModel, SelectedBlock, SelectionPosition } from './types';
+import {
+  ExtendedModel,
+  SelectedBlock,
+  SelectionInfo,
+  SelectionPosition,
+} from './types';
 import {
   getBlockElementByModel,
   getDefaultPageBlock,
@@ -270,7 +275,7 @@ function getSelectedBlock(model: BaseBlockModel): SelectedBlock {
   return block;
 }
 
-export function getSelectInfo() {
+export function getSelectInfo(): SelectionInfo {
   const selection = window.getSelection();
   let selectedBlocks: SelectedBlock[] = [];
   if (selection && selection.type !== 'None') {

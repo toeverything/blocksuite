@@ -1,3 +1,4 @@
+import { marked } from 'marked';
 import { PageBlockModel } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
 import type { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
@@ -64,6 +65,35 @@ export class ContentParser {
     htmlEl.querySelector('head')?.remove();
     this.signals.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
+  }
+
+  public markdown2Block(text: string): OpenBlockInfo[] {
+    const underline = {
+      name: 'underline',
+      level: 'inline',
+      start(src: string) {
+        return src.indexOf('~');
+      },
+      tokenizer(src: string) {
+        const rule = /^~([^~]+)~/;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'underline',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderer(token: any) {
+        return `<u>${token.text}</u>`;
+      },
+    };
+    marked.use({ extensions: [underline] });
+    const md2html = marked.parse(text);
+    return this.htmlText2Block(md2html);
   }
 
   public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
