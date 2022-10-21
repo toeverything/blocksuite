@@ -8,9 +8,12 @@ import {
   pasteContent,
   undoByClick,
   importMarkdown,
+  dragBetweenCoords,
+  setSelection,
 } from './utils/actions';
 import {
   assertBlockTypes,
+  assertClipItems,
   assertRichTexts,
   assertSelection,
   assertText,
@@ -168,6 +171,33 @@ test('import markdown', async ({ page }) => {
   await setQuillSelection(page, 1, 1);
   await importMarkdown(page, clipData, '0');
   await assertRichTexts(page, ['text', 'h1', '\n']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+});
+
+test('copy clipItems format', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await page.evaluate(() => {
+    // @ts-ignore
+    window.store.captureSync();
+  });
+
+  const clipData = `
+- aa
+  - bb
+    - cc
+      - dd
+`;
+
+  await importMarkdown(page, clipData, '0');
+  await setSelection(page, 4, 1, 5, 1);
+  await assertClipItems(page, 'text/plain', 'bc');
+  await assertClipItems(
+    page,
+    'text/html',
+    '<ul><li>b<ul><li>c</li></ul></li></ul>'
+  );
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 });

@@ -391,3 +391,31 @@ export async function importMarkdown(
     { data, insertPositionId }
   );
 }
+
+export async function setSelection(
+  page: Page,
+  anchorBlockId: number,
+  anchorOffset: number,
+  focusBlockId: number,
+  focusOffset: number
+) {
+  await page.evaluate(
+    ({ anchorBlockId, anchorOffset, focusBlockId, focusOffset }) => {
+      const begin = document.querySelector(
+        `[data-block-id="${anchorBlockId}"] p`
+      );
+      const paragraph = document.querySelector(
+        `[data-block-id="${focusBlockId}"] p`
+      );
+      begin &&
+        paragraph &&
+        getSelection()?.setBaseAndExtent(
+          begin,
+          anchorOffset,
+          paragraph,
+          focusOffset
+        );
+    },
+    { anchorBlockId, anchorOffset, focusBlockId, focusOffset }
+  );
+}
