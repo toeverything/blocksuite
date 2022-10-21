@@ -44,7 +44,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, { code: true });
 
   await inlineCode(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 0, { code:true });
 });
 
 test('multi line rich-text inline code hotkey', async ({ page }) => {
@@ -62,7 +62,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 2, { code: true });
 
   // split at 2,2
-  await assertTextFormat(page, 2, 2, { code: true });
+  await assertTextFormat(page, 2, 2, {});
   await assertTextFormat(page, 2, 3, {});
 
   await undoByClick(page);
@@ -94,5 +94,5 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
 
   // trigger hotkey twice
   await strikethrough(page);
-  await assertTextFormat(page, 0, 0, {});
+  await assertTextFormat(page, 0, 0, { strike:true });
 });
