@@ -167,7 +167,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     `<page>
   <group
-    prop:xywh="[50,50,300,200]"
+    prop:xywh="[50,50,720,480]"
   >
     <paragraph
       prop:text="text1"
@@ -185,7 +185,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     `<page>
   <group
-    prop:xywh="[50,50,300,200]"
+    prop:xywh="[50,50,720,480]"
   >
     <paragraph
       prop:text="text1"
@@ -204,7 +204,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     `<page>
   <group
-    prop:xywh="[50,50,300,200]"
+    prop:xywh="[50,50,720,480]"
   >
     <paragraph
       prop:text="text1"

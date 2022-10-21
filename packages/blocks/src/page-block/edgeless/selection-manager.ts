@@ -88,11 +88,12 @@ export class EdgelessSelectionManager {
           const [modelX, modelY, modelW, modelH] = JSON.parse(
             block.xywh
           ) as XYWH;
+          const { zoom } = this._container.viewport;
 
           this._store.updateBlock(block, {
             xywh: JSON.stringify([
-              modelX + e.delta.x,
-              modelY + e.delta.y,
+              modelX + e.delta.x / zoom,
+              modelY + e.delta.y / zoom,
               modelW,
               modelH,
             ]),
