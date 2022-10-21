@@ -86,7 +86,30 @@ export class PasteManager {
     }
 
     if (shouldConvertMarkdown) {
-      // TODO the method of parse need deal underline
+      const underline = {
+        name: 'underline',
+        level: 'inline',
+        start(src: string) {
+          return src.indexOf('~');
+        },
+        tokenizer(src: string) {
+          const rule = /^~([^~]+)~/;
+          const match = rule.exec(src);
+          if (match) {
+            return {
+              type: 'underline',
+              raw: match[0], // This is the text that you want your token to consume from the source
+              text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+            };
+          }
+          return;
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        renderer(token: any) {
+          return `<u>${token.text}</u>`;
+        },
+      };
+      marked.use({ extensions: [underline] });
       const md2html = marked.parse(textClipData);
       return this._editor.contentParser.htmlText2Block(md2html);
     }
@@ -137,39 +160,51 @@ export class PasteManager {
         currentSelectionInfo.selectedBlocks[
           currentSelectionInfo.selectedBlocks.length - 1
         ];
-      // TODO split selected block case
       const selectedBlock = this._editor.store.getBlockById(lastBlock.id);
-
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
-
       const addBlockIds: string[] = [];
       if (selectedBlock?.flavour !== 'page') {
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
-        const endtext = selectedBlock?.text?.sliceToDelta(endIndex);
-        // todo the last block
-        blocks[blocks.length - 1].text.push(...endtext);
-        selectedBlock?.text?.delete(endIndex, selectedBlock?.text?.length);
         const insertTexts = blocks[0].text;
-        for (let i = insertTexts.length - 1; i >= 0; i--) {
-          selectedBlock?.text?.insert(
-            (insertTexts[i].insert as string) || '',
-            endIndex,
-            // eslint-disable-next-line @typescript-eslint/ban-types
-            insertTexts[i].attributes as Object | undefined
-          );
-        }
+        const insertLen = insertTexts.reduce(
+          (len: number, value: Record<string, unknown>) => {
+            return len + ((value.insert as string) || '').length;
+          },
+          0
+        );
+        selectedBlock?.text?.insertList(insertTexts, endIndex);
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, -1, addBlockIds);
+        parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
+        let lastId = selectedBlock?.id;
+        let position = endIndex + insertLen;
+        if (addBlockIds.length > 0) {
+          const endtexts = selectedBlock?.text?.sliceToDelta(
+            endIndex + insertLen
+          );
+          lastId = addBlockIds[addBlockIds.length - 1];
+          const lastBlock = this._editor.store.getBlockById(lastId);
+          selectedBlock?.text?.delete(
+            endIndex + insertLen,
+            selectedBlock?.text?.length
+          );
+          position = lastBlock?.text?.length || 0;
+          lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
+        }
+        setTimeout(() => {
+          lastId &&
+            this._editor.store.richTextAdapters
+              .get(lastId)
+              ?.quill.setSelection(position, 0);
+        });
+      } else {
+        parent && this._addBlocks(blocks, parent, index, addBlockIds);
       }
-
-      parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
-      // FIXME
-      // this._selection.selectedBlockIds = addBlockIds;
     } else if (currentSelectionInfo.type === 'Block') {
       const selectedBlock = this._editor.store.getBlockById(
         currentSelectionInfo.selectedBlocks[

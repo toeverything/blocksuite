@@ -20,6 +20,10 @@ export class ParserHtml {
       'listItemParser',
       this._listItemParser.bind(this)
     );
+    this._contentParser.registerParserHtmlText2Block(
+      'blockQuoteParser',
+      this._blockQuoteParser.bind(this)
+    );
   }
   // TODO parse children block
   private _nodePaser(node: Element): OpenBlockInfo[] | null {
@@ -55,6 +59,12 @@ export class ParserHtml {
           flavour: 'paragraph',
           type: tagName.toLowerCase(),
         });
+        break;
+      case 'BLOCKQUOTE':
+        result =
+          this._contentParser.getParserHtmlText2Block('blockQuoteParser')?.(
+            node
+          );
         break;
       case 'P':
         if (
@@ -170,7 +180,6 @@ export class ParserHtml {
             'I',
             'U',
             'S',
-            'P',
             'SPAN',
             'A',
             'INPUT',
@@ -245,7 +254,7 @@ export class ParserHtml {
     return childTexts;
   }
 
-  private _listItemParser(element: HTMLElement): OpenBlockInfo[] | null {
+  private _listItemParser(element: Element): OpenBlockInfo[] | null {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
     let checked;
@@ -285,6 +294,48 @@ export class ParserHtml {
       checked: checked,
     });
     return result;
+  }
+
+  private _blockQuoteParser(element: Element): OpenBlockInfo[] | null {
+    const getText = (list: OpenBlockInfo[]): Record<string, unknown>[] => {
+      const result: Record<string, unknown>[] = [];
+      list.forEach(item => {
+        const texts: Record<string, unknown>[] = item.text.filter(
+          textItem => textItem.insert
+        );
+        if (result.length > 0 && texts.length > 0) {
+          result.push({ insert: '\n' });
+        }
+        result.push(...texts);
+
+        const childTexts = getText(item.children);
+        if (result.length > 0 && childTexts.length > 0) {
+          result.push({ insert: '\n' });
+        }
+        result.push(...childTexts);
+      });
+      return result;
+    };
+
+    const commonResult = this._contentParser.getParserHtmlText2Block(
+      'commonParser'
+    )?.({
+      element: element,
+      flavour: 'paragraph',
+      type: 'text',
+    });
+    if (!commonResult) {
+      return null;
+    }
+
+    return [
+      {
+        flavour: 'paragraph',
+        type: 'quote',
+        text: getText(commonResult),
+        children: [],
+      },
+    ];
   }
 }
 
