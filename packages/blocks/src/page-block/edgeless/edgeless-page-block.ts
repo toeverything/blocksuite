@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Store } from '@blocksuite/store';
 import type { PageBlockModel, GroupBlockModel } from '../..';
@@ -15,6 +15,7 @@ import {
   resetNativeSeletion,
 } from '../../__internal__';
 import { EdgelessMouseManager, refreshSelectionBox } from './mouse-manager';
+import style from './style.css';
 
 export interface ViewportState {
   zoom: number;
@@ -43,6 +44,10 @@ export class EdgelessPageBlockComponent
   extends LitElement
   implements BlockHost, IEdgelessContainer
 {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @property()
   store!: Store;
 
@@ -132,19 +137,7 @@ export class EdgelessPageBlockComponent
     const selectedRect = EdgelessSelectedRect(this._selectionState);
 
     return html`
-      <style>
-        .affine-edgeless-page-block-container {
-          position: relative;
-          box-sizing: border-box;
-          overflow: hidden;
-          height: 100%;
-          font-family: var(--affine-font-family);
-          font-size: 18px;
-          line-height: 26px;
-          color: var(--affine-text-color);
-          font-weight: 400;
-        }
-      </style>
+      <style></style>
       <div class="affine-edgeless-page-block-container">
         ${childrenContainer} ${selectedRect}
       </div>
