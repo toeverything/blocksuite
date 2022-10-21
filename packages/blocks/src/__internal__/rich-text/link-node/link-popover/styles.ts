@@ -82,7 +82,6 @@ export const linkPopoverStyle = css`
   .affine-link-popover {
     display: flex;
     align-items: center;
-    width: 316px;
     height: 34px;
     padding: 0 12px;
 
@@ -92,7 +91,6 @@ export const linkPopoverStyle = css`
   }
 
   .affine-link-popover-input {
-    flex: 1;
     border: none;
   }
   .affine-link-popover-input::placeholder {
