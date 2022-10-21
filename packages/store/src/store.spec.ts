@@ -11,7 +11,7 @@ import { GroupBlockModel } from '../../blocks/src/group-block/group-model';
 
 const options = {
   room: '',
-  useDebugProvider: false,
+  providers: [],
 };
 
 // Create BlockSchema manually

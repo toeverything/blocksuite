@@ -10,17 +10,10 @@ type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
 const IS_PLAYGROUND = location.href.includes('5173');
 
-const doc = Store.createDoc();
-
-const options = {
-  doc,
-  providers: [],
-};
-
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
   @property()
-  store = new Store(options).register(BlockSchema);
+  store!: Store;
 
   @state()
   mode: 'page' | 'edgeless' = 'page';

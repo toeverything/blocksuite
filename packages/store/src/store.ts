@@ -52,16 +52,23 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-interface StoreOptions {
-  // room: string;
-  // useDebugProvider: boolean;
-  doc?: Y.Doc;
-  providers?: Array<Provider | undefined>;
-  createId?: (innerCount: number) => string;
+interface ProviderConstructor {
+  new (room: string, doc: Y.Doc): Provider;
 }
 
+interface StoreOptions {
+  room: string;
+  providers: Array<ProviderConstructor>;
+  id?: () => string;
+}
+
+const defaultOptions: StoreOptions = {
+  room: '',
+  providers: [],
+};
+
 export class Store {
-  readonly doc: Y.Doc;
+  readonly doc: Y.Doc = new Y.Doc();
   readonly providers?: Provider[];
   readonly awarenessAdapter!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
@@ -86,29 +93,18 @@ export class Store {
     Object.keys(new BaseBlockModel(this, {}))
   );
 
-  constructor(options: StoreOptions) {
-    if (options.providers?.length && !options.doc) {
-      throw new Error(
-        'If options.providers presents, options.doc must present. Or options.providers may not work like you think.'
-      );
+  constructor(options: StoreOptions = defaultOptions) {
+    if (options.id) {
+      this._createId = options.id;
     }
 
-    if (typeof options.createId === 'function') {
-      const _createId = options.createId;
-      this._createId = () => {
-        return _createId(this._i++);
-      };
-    }
+    this.providers = options.providers.map(
+      ProviderCtor => new ProviderCtor(options.room, this.doc)
+    );
 
-    this.doc = options.doc || new Y.Doc();
-
-    this.providers = (options.providers || []).filter(
-      provider => !!provider
-    ) as Provider[];
-
-    const awarenessList = (this.providers || [])
-      .map(provider => provider.awareness)
-      .filter(a => !!a) as Awareness[];
+    const awarenessList = this.providers.map(
+      provider => provider.awareness as Awareness
+    );
     this.awarenessAdapter = new AwarenessAdapter(this, awarenessList);
 
     this._yBlocks.observeDeep(this._yBlocksObserver);
@@ -335,7 +331,6 @@ export class Store {
     this._splitSet.add(base).add(left).add(right);
   }
 
-  // _createId may override by property: options.createId
   private _createId(): string {
     return (this._i++).toString();
   }
@@ -527,10 +522,6 @@ export class Store {
     }
     this.signals.updated.emit();
   };
-
-  static createDoc() {
-    return new Y.Doc();
-  }
 
   /**
    * @internal Only for testing
