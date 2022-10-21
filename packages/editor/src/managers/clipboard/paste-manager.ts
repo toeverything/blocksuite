@@ -160,39 +160,43 @@ export class PasteManager {
         currentSelectionInfo.selectedBlocks[
           currentSelectionInfo.selectedBlocks.length - 1
         ];
-      // TODO split selected block case
       const selectedBlock = this._editor.store.getBlockById(lastBlock.id);
-
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock && selectedBlock.flavour !== 'page') {
         parent = this._editor.store.getParent(selectedBlock);
         index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
       }
-
       const addBlockIds: string[] = [];
       if (selectedBlock?.flavour !== 'page') {
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
-        const endtext = selectedBlock?.text?.sliceToDelta(endIndex);
-        // todo the last block
-        blocks[blocks.length - 1].text.push(...endtext);
-        selectedBlock?.text?.delete(endIndex, selectedBlock?.text?.length);
         const insertTexts = blocks[0].text;
-        for (let i = insertTexts.length - 1; i >= 0; i--) {
-          selectedBlock?.text?.insert(
-            (insertTexts[i].insert as string) || '',
-            endIndex,
-            // eslint-disable-next-line @typescript-eslint/ban-types
-            insertTexts[i].attributes as Object | undefined
-          );
-        }
+        const insertLen = insertTexts.reduce(
+          (len: number, value: Record<string, unknown>) => {
+            return len + ((value.insert as string) || '').length;
+          },
+          0
+        );
+        selectedBlock?.text?.insertList(insertTexts, endIndex);
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, -1, addBlockIds);
+        parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
+        if (addBlockIds.length > 0) {
+          const endtexts = selectedBlock?.text?.sliceToDelta(
+            endIndex + insertLen
+          );
+          const lastBlock = this._editor.store.getBlockById(
+            addBlockIds[addBlockIds.length - 1]
+          );
+          selectedBlock?.text?.delete(
+            endIndex + insertLen,
+            selectedBlock?.text?.length
+          );
+          lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
+        }
+      } else {
+        parent && this._addBlocks(blocks, parent, index, addBlockIds);
       }
-
-      parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
-      // FIXME
-      // this._selection.selectedBlockIds = addBlockIds;
     } else if (currentSelectionInfo.type === 'Block') {
       const selectedBlock = this._editor.store.getBlockById(
         currentSelectionInfo.selectedBlocks[

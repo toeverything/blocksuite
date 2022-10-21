@@ -37,7 +37,6 @@ test('markdown format parse', async ({ page }) => {
     // @ts-ignore
     window.store.captureSync();
   });
-  let id: string | null = null;
 
   let clipData = {
     'text/plain': `# text
@@ -69,7 +68,6 @@ test('markdown format parse', async ({ page }) => {
 `,
   };
   await pasteContent(page, clipData);
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockTypes(page, [
     'text',
     'h1',
@@ -121,7 +119,6 @@ test('markdown format parse', async ({ page }) => {
 `,
   };
   await pasteContent(page, clipData);
-  [id] = await getCursorBlockIdAndHeight(page);
   await assertTextFormats(page, [
     { bold: true, italic: true },
     { bold: true },
@@ -131,6 +128,27 @@ test('markdown format parse', async ({ page }) => {
     { link: 'linktest' },
     { code: true },
   ]);
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+});
+
+test('splic block when paste', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await focusRichText(page);
+  await page.evaluate(() => {
+    // @ts-ignore
+    window.store.captureSync();
+  });
+
+  const clipData = {
+    'text/plain': `# text
+# h1
+`,
+  };
+  await page.keyboard.type('abc');
+  await setQuillSelection(page, 1, 1);
+  await pasteContent(page, clipData);
+  await assertRichTexts(page, ['abtext', 'h1b']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 });

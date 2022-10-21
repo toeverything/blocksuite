@@ -3,6 +3,7 @@ import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { DeltaOperation, Quill } from 'quill';
 import { Store } from './store';
+import { string } from 'lib0';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';
 
@@ -54,6 +55,10 @@ export class PrelimText {
 
   insert() {
     throw new Error(UNSUPPORTED_MSG + 'insert');
+  }
+
+  insertList() {
+    throw new Error(UNSUPPORTED_MSG + 'insertList');
   }
 
   split() {
@@ -131,6 +136,21 @@ export class Text {
   insert(content: string, index: number, attributes?: Object) {
     this._transact(() => {
       this._yText.insert(index, content, attributes);
+      // @ts-ignore
+      this._yText.meta = { split: true };
+    });
+  }
+
+  insertList(insertTexts: Record<string, unknown>[], index: number) {
+    this._transact(() => {
+      for (let i = insertTexts.length - 1; i >= 0; i--) {
+        this._yText.insert(
+          index,
+          (insertTexts[i].insert as string) || '',
+          // eslint-disable-next-line @typescript-eslint/ban-types
+          insertTexts[i].attributes as Object | undefined
+        );
+      }
       // @ts-ignore
       this._yText.meta = { split: true };
     });
