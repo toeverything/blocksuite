@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Signal, Store } from '@blocksuite/store';
 import type { PageBlockModel } from '../..';
@@ -17,6 +17,7 @@ import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
 } from './selection-manager';
+import style from './style.css';
 
 export interface ViewportState {
   zoom: number;
@@ -40,6 +41,10 @@ export class EdgelessPageBlockComponent
   extends LitElement
   implements EdgelessContainer, BlockHost
 {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @property()
   store!: Store;
 
@@ -60,8 +65,8 @@ export class EdgelessPageBlockComponent
     zoom: 1,
     viewportX: 0,
     viewportY: 0,
-    width: 300,
-    height: 300,
+    width: 0, // FIXME
+    height: 0, // FIXME
   };
 
   @state()
@@ -102,9 +107,17 @@ export class EdgelessPageBlockComponent
       group.propsUpdated.on(() => this._selection.syncSelectionBox());
     });
 
+    this.store.signals.historyUpdated.on(() => {
+      requestAnimationFrame(() => {
+        if (!this._selection.isActive) {
+          resetNativeSeletion(null);
+        }
+      });
+    });
+
     this.signals.updateViewport.on(state => {
       this.viewport = state;
-      this.requestUpdate();
+      this._selection.syncSelectionBox();
     });
     this.signals.updateSelection.on(() => this.requestUpdate());
 
@@ -133,19 +146,7 @@ export class EdgelessPageBlockComponent
     const selectedRect = EdgelessSelectedRect(this._selection.state);
 
     return html`
-      <style>
-        .affine-edgeless-page-block-container {
-          position: relative;
-          box-sizing: border-box;
-          overflow: hidden;
-          height: 100%;
-          font-family: var(--affine-font-family);
-          font-size: 18px;
-          line-height: 26px;
-          color: var(--affine-text-color);
-          font-weight: 400;
-        }
-      </style>
+      <style></style>
       <div class="affine-edgeless-page-block-container">
         ${childrenContainer} ${selectedRect}
       </div>

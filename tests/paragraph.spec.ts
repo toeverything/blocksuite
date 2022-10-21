@@ -20,13 +20,26 @@ import {
   undoByKeyboard,
 } from './utils/actions';
 
-test('init paragraph by page title enter', async ({ page }) => {
+test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
   await page.keyboard.type('world');
+
   await assertTitle(page, 'hello');
-  await assertRichTexts(page, ['world']);
+  await assertRichTexts(page, ['world', '\n']);
+});
+
+test('init paragraph by page title enter in middle', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.keyboard.type('hello');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await pressEnter(page);
+
+  await assertTitle(page, 'he');
+  await assertRichTexts(page, ['llo', '\n']);
 });
 
 test('append new paragraph block by enter', async ({ page }) => {
@@ -221,5 +234,5 @@ test('get focus from page title enter', async ({ page }) => {
 
   await pressEnter(page);
   await page.keyboard.type('world');
-  await assertRichTexts(page, ['world']);
+  await assertRichTexts(page, ['world', '\n']);
 });
