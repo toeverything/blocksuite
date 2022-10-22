@@ -20,7 +20,7 @@ import {
   undoByKeyboard,
   initEmptyState,
   dragOverTitle,
-  captureSync,
+  resetHistory,
 } from './utils/actions';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -51,7 +51,7 @@ test('drag over paragraph title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.keyboard.type('hello');
   await assertTitle(page, 'hello');
-  await captureSync(page);
+  await resetHistory(page);
 
   await dragOverTitle(page);
   await page.keyboard.press('Backspace', { delay: 50 });

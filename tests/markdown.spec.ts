@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 import {
-  captureSync,
+  resetHistory,
   enterPlaygroundRoom,
   focusRichText,
   getCursorBlockIdAndHeight,
@@ -20,7 +20,7 @@ test('markdown shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
   await focusRichText(page);
-  await captureSync(page);
+  await resetHistory(page);
 
   let id: string | null = null;
 
@@ -141,7 +141,7 @@ test('markdown inline-text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
   await focusRichText(page);
-  await captureSync(page);
+  await resetHistory(page);
 
   await page.keyboard.type('***test*** ');
   await assertTextFormat(page, 0, 0, { bold: true, italic: true });

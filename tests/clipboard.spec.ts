@@ -9,7 +9,7 @@ import {
   undoByClick,
   importMarkdown,
   initEmptyState,
-  captureSync,
+  resetHistory,
 } from './utils/actions';
 import {
   assertBlockTypes,
@@ -37,7 +37,7 @@ test('markdown format parse', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
   await focusRichText(page);
-  await captureSync(page);
+  await resetHistory(page);
 
   let clipData = {
     'text/plain': `# text
@@ -137,7 +137,7 @@ test('splic block when paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
   await focusRichText(page);
-  await captureSync(page);
+  await resetHistory(page);
 
   const clipData = {
     'text/plain': `# text
@@ -157,7 +157,7 @@ test('import markdown', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
   await focusRichText(page);
-  await captureSync(page);
+  await resetHistory(page);
 
   const clipData = `# text
 # h1

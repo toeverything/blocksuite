@@ -33,10 +33,11 @@ export async function clearLog(page: Page) {
   await page.evaluate(() => console.clear());
 }
 
-export async function captureSync(page: Page) {
+export async function resetHistory(page: Page) {
   await page.evaluate(() => {
     // @ts-ignore
-    window.store.captureSync();
+    const store = window.store as Store;
+    store.resetHistory();
   });
 }
 
