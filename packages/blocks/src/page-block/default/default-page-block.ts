@@ -18,6 +18,8 @@ import {
   handleSelectAll,
   batchUpdateTextType,
   assertExists,
+  isPageTitle,
+  getSplicedTitle,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
@@ -148,6 +150,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
+
+      if (isPageTitle(e)) {
+        e.preventDefault();
+        const title = getSplicedTitle(e.target as HTMLInputElement);
+        store.updateBlock(this.model, { title });
+        return;
+      }
 
       if (state.type === 'native') {
         handleBackspace(store, e);

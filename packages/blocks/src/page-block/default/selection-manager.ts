@@ -9,6 +9,7 @@ import {
   handleNativeRangeDragMove,
   isBlankArea,
   handleNativeRangeClick,
+  isPageTitle,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
 import type { DefaultPageSignals } from './default-page-block';
@@ -168,6 +169,8 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
+
+    if (isPageTitle(e.raw)) return;
 
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);

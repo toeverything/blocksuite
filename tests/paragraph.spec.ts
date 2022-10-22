@@ -19,6 +19,8 @@ import {
   undoByClick,
   undoByKeyboard,
   initEmptyState,
+  dragOverTitle,
+  captureSync,
 } from './utils/actions';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -43,6 +45,20 @@ test('init paragraph by page title enter in middle', async ({ page }) => {
 
   await assertTitle(page, 'he');
   await assertRichTexts(page, ['llo', '\n']);
+});
+
+test('drag over paragraph title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.keyboard.type('hello');
+  await assertTitle(page, 'hello');
+  await captureSync(page);
+
+  await dragOverTitle(page);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, '');
+
+  await undoByKeyboard(page);
+  await assertTitle(page, 'hello');
 });
 
 test('append new paragraph block by enter', async ({ page }) => {

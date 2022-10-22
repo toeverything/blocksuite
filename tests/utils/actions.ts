@@ -33,6 +33,13 @@ export async function clearLog(page: Page) {
   await page.evaluate(() => console.clear());
 }
 
+export async function captureSync(page: Page) {
+  await page.evaluate(() => {
+    // @ts-ignore
+    window.store.captureSync();
+  });
+}
+
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}`);
@@ -179,13 +186,14 @@ export async function addGroupByClick(page: Page) {
 export async function dragBetweenCoords(
   page: Page,
   from: { x: number; y: number },
-  to: { x: number; y: number }
+  to: { x: number; y: number },
+  steps = 1
 ) {
   const { x: x1, y: y1 } = from;
   const { x: x2, y: y2 } = to;
   await page.mouse.move(x1, y1);
   await page.mouse.down();
-  await page.mouse.move(x2, y2);
+  await page.mouse.move(x2, y2, { steps });
   await page.mouse.up();
 }
 
@@ -222,6 +230,26 @@ export async function dragBetweenIndices(
   );
 
   await dragBetweenCoords(page, startCoord, endCoord);
+}
+
+export async function dragOverTitle(page: Page) {
+  const { from, to } = await page.evaluate(() => {
+    const titleInput = document.querySelector(
+      'input.affine-default-page-block-title'
+    ) as HTMLInputElement;
+    const titleBound = titleInput.getBoundingClientRect();
+    const y = titleBound.top + titleBound.height / 2;
+    console.log({
+      from: { x: titleBound.left, y },
+      to: { x: titleBound.right, y },
+    });
+
+    return {
+      from: { x: titleBound.left, y },
+      to: { x: titleBound.right, y },
+    };
+  });
+  await dragBetweenCoords(page, from, to, 5);
 }
 
 export async function pressTab(page: Page) {

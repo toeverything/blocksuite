@@ -56,6 +56,17 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
+export function isPageTitle(e: Event) {
+  return e.target instanceof HTMLInputElement;
+}
+
+function tryPreventDefault(e: MouseEvent) {
+  // workaround page title click
+  if (!isPageTitle(e)) {
+    e.preventDefault();
+  }
+}
+
 export function initMouseEventHandlers(
   container: HTMLElement,
   onContainerDragStart: (e: SelectionEvent) => void,
@@ -76,10 +87,7 @@ export function initMouseEventHandlers(
     onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
 
   const mouseDownHandler = (e: MouseEvent) => {
-    // workaround page title click
-    if (!(e.target instanceof HTMLInputElement)) {
-      e.preventDefault();
-    }
+    tryPreventDefault(e);
 
     rect = container.getBoundingClientRect();
     startX = e.clientX - rect.left;
@@ -91,7 +99,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
-    e.preventDefault();
+    tryPreventDefault(e);
 
     if (!rect) rect = container.getBoundingClientRect();
 
@@ -118,7 +126,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    e.preventDefault();
+    tryPreventDefault(e);
 
     if (!isDragging)
       onContainerClick(toSelectionEvent(e, rect, startX, startY));
