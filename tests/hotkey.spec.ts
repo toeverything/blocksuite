@@ -12,11 +12,13 @@ import {
   pressEnter,
   initThreeParagraphs,
   dragBetweenIndices,
+  initEmptyState,
 } from './utils/actions';
 import { assertRichTexts, assertTextFormat } from './utils/asserts';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
@@ -30,6 +32,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
 
 test('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await selectAllByKeyboard(page);
@@ -49,6 +52,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
 
 test('multi line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -80,6 +84,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
 
 test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await selectAllByKeyboard(page);

@@ -47,7 +47,6 @@ export class EditorContainer extends LitElement {
       return;
     }
     this._subscribeStore();
-    this._tryInitFromVoidState();
 
     // @ts-ignore
     window.store = this.store;
@@ -65,24 +64,6 @@ export class EditorContainer extends LitElement {
       this.model = block as PageBlockModel;
       this.model.childrenUpdated.on(() => this.requestUpdate());
       this.requestUpdate();
-    });
-  }
-
-  private _initFromVoidState() {
-    if (!this.isEmptyPage) return;
-
-    const pageId = this.store.addBlock({ flavour: 'page' });
-    const groupId = this.store.addBlock({ flavour: 'group' }, pageId);
-    this.store.addBlock({ flavour: 'paragraph' }, groupId);
-
-    this.isEmptyPage = false;
-  }
-
-  // only work in playground
-  private _tryInitFromVoidState() {
-    if (!IS_PLAYGROUND) return;
-    window.addEventListener('mousemove', () => this._initFromVoidState(), {
-      once: true,
     });
   }
 

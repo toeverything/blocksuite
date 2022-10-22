@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
+  initEmptyState,
   pressEnter,
   redoByClick,
   switchMode,
@@ -16,6 +17,7 @@ import {
 
 test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await assertRichTexts(page, ['hello']);
@@ -32,6 +34,7 @@ test('switch to edgeless mode', async ({ page }) => {
 
 test('cursor for active and inactive state', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await pressEnter(page);

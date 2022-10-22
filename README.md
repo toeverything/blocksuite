@@ -1,7 +1,7 @@
 # BlockSuite
 
 <a href="./package.json">
-  <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300"/>
+  <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff"/>
 </a>
 
 BlockSuite is a collaborative editing framework designed to reliably reconcile any Web content.

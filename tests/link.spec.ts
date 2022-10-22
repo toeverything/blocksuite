@@ -3,6 +3,7 @@ import { expect, Page, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
+  initEmptyState,
   pressEnter,
   selectAllByKeyboard,
   withCtrlOrMeta,
@@ -19,6 +20,7 @@ test('basic link', async ({ page }) => {
   const linkText = 'linkText';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type(linkText);
 
