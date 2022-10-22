@@ -8,8 +8,6 @@ import { BlockSchema } from '../../block-loader';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
-const IS_PLAYGROUND = location.href.includes('5173');
-
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
   @property()
