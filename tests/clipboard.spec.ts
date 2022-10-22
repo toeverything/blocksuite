@@ -8,6 +8,7 @@ import {
   pasteContent,
   undoByClick,
   importMarkdown,
+  initEmptyState,
 } from './utils/actions';
 import {
   assertBlockTypes,
@@ -20,6 +21,7 @@ import {
 // TODO fix CI
 test.skip('clipboard copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
 
   await page.keyboard.type('test');
@@ -32,6 +34,7 @@ test.skip('clipboard copy paste', async ({ page }) => {
 
 test('markdown format parse', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.evaluate(() => {
     // @ts-ignore
@@ -134,6 +137,7 @@ test('markdown format parse', async ({ page }) => {
 
 test('splic block when paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.evaluate(() => {
     // @ts-ignore
@@ -156,6 +160,7 @@ test('splic block when paste', async ({ page }) => {
 
 test('import markdown', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.evaluate(() => {
     // @ts-ignore

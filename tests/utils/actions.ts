@@ -48,6 +48,16 @@ export async function enterPlaygroundWithList(page: Page) {
   await waitNextFrame(page);
 }
 
+export async function initEmptyState(page: Page) {
+  await page.evaluate(() => {
+    // @ts-ignore
+    const store = window['store'] as Store;
+    const pageId = store.addBlock({ flavour: 'page' });
+    const groupId = store.addBlock({ flavour: 'group' }, pageId);
+    store.addBlock({ flavour: 'paragraph' }, groupId);
+  });
+}
+
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);

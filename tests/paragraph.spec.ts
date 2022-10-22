@@ -18,10 +18,12 @@ import {
   pressShiftTab,
   undoByClick,
   undoByKeyboard,
+  initEmptyState,
 } from './utils/actions';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
   await page.keyboard.type('world');
@@ -32,6 +34,7 @@ test('init paragraph by page title enter at last', async ({ page }) => {
 
 test('init paragraph by page title enter in middle', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await page.keyboard.type('hello');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
@@ -44,6 +47,7 @@ test('init paragraph by page title enter in middle', async ({ page }) => {
 
 test('append new paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await assertSelection(page, 0, 5, 0);
@@ -63,6 +67,7 @@ test('append new paragraph block by enter', async ({ page }) => {
 
 test('insert new paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await pressEnter(page);
   await pressEnter(page);
@@ -85,6 +90,7 @@ test('insert new paragraph block by enter', async ({ page }) => {
 
 test('split paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
 
   await page.keyboard.type('hello');
@@ -109,6 +115,7 @@ test('split paragraph block by enter', async ({ page }) => {
 
 test('add multi line by soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
 
   await page.keyboard.type('hello');
@@ -132,6 +139,7 @@ test('add multi line by soft enter', async ({ page }) => {
 
 test('indent and unindent existing paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
 
@@ -160,6 +168,7 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
 
 test('switch between paragraph types', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
 
@@ -183,6 +192,7 @@ test('switch between paragraph types', async ({ page }) => {
 
 test('delete at start of paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
 
@@ -208,6 +218,7 @@ test('delete at start of paragraph block', async ({ page }) => {
 
 test('delete at start of paragraph with content', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('123');
 
@@ -229,6 +240,7 @@ test('delete at start of paragraph with content', async ({ page }) => {
 
 test('get focus from page title enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await page.keyboard.type('hello');
   await assertRichTexts(page, ['\n']);
 

@@ -11,6 +11,7 @@ import {
   fillLine,
   addGroupByClick,
   initThreeParagraphs,
+  initEmptyState,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -21,6 +22,7 @@ import {
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -51,6 +53,7 @@ test('click on blank area', async ({ page }) => {
 
 test('native range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -79,6 +82,7 @@ test('native range delete', async ({ page }) => {
 
 test('native range selection backwards', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -107,6 +111,7 @@ test('native range selection backwards', async ({ page }) => {
 
 test('block level range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -134,6 +139,7 @@ test('block level range delete', async ({ page }) => {
 
 test('cursor move up and down', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('arrow down test 1');
   await pressEnter(page);
@@ -158,6 +164,7 @@ test('cursor move up and down', async ({ page }) => {
 
 test('cursor move to up and down with children block', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('arrow down test 1');
   await pressEnter(page);
@@ -193,6 +200,7 @@ test('cursor move to up and down with children block', async ({ page }) => {
 
 test('cursor move left and right', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await page.keyboard.type('arrow down test 1');
   await pressEnter(page);
@@ -209,6 +217,7 @@ test('cursor move left and right', async ({ page }) => {
 
 test('cursor move up at edge of the second line', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await pressEnter(page);
   const [id, height] = await getCursorBlockIdAndHeight(page);
@@ -223,6 +232,7 @@ test('cursor move up at edge of the second line', async ({ page }) => {
 
 test('cursor move down at edge of the last line', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
   await pressEnter(page);
   const [id] = await getCursorBlockIdAndHeight(page);
@@ -239,6 +249,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
 
 test.skip('cursor move up and down through group', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await addGroupByClick(page);
   await focusRichText(page, 0);
   let currentId: string | null = null;
