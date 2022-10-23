@@ -1,6 +1,28 @@
 import { ContentParser } from '.';
 import { OpenBlockInfo } from '../types';
 
+// There are these uncommon in-line tags that have not been added
+// tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
+const INLINE_TAGS = [
+  'DEL',
+  'STRONG',
+  'B',
+  'EM',
+  'I',
+  'U',
+  'S',
+  'SPAN',
+  'A',
+  'INPUT',
+  'MARK',
+  'CODE',
+  'LABEL',
+  'BIG',
+  'SMALL',
+  'ABBR',
+  'CITE',
+];
+
 export class ParserHtml {
   private _contentParser: ContentParser;
   constructor(contentParser: ContentParser) {
@@ -35,49 +57,57 @@ export class ParserHtml {
       return result;
     }
 
-    if (node.nodeType === 3) {
-      return this._contentParser.getParserHtmlText2Block('commonParser')?.({
+    const tagName = node.tagName;
+    if (node instanceof Text || INLINE_TAGS.includes(tagName)) {
+      result = this._contentParser.getParserHtmlText2Block('commonParser')?.({
         element: node,
         flavour: 'paragraph',
         type: 'text',
       });
-    }
-    if (node.nodeType !== 1) {
-      return [];
-    }
-    const tagName = node.tagName;
-
-    switch (tagName) {
-      case 'H1':
-      case 'H2':
-      case 'H3':
-      case 'H4':
-      case 'H5':
-      case 'H6':
-        result = this._contentParser.getParserHtmlText2Block('commonParser')?.({
-          element: node,
-          flavour: 'paragraph',
-          type: tagName.toLowerCase(),
-        });
-        break;
-      case 'BLOCKQUOTE':
-        result =
-          this._contentParser.getParserHtmlText2Block('blockQuoteParser')?.(
-            node
-          );
-        break;
-      case 'P':
-        if (
-          node.firstChild instanceof Text &&
-          (node.firstChild.textContent?.startsWith('[] ') ||
-            node.firstChild.textContent?.startsWith('[ ] ') ||
-            node.firstChild.textContent?.startsWith('[x] '))
-        ) {
+    } else {
+      switch (tagName) {
+        case 'H1':
+        case 'H2':
+        case 'H3':
+        case 'H4':
+        case 'H5':
+        case 'H6':
+          result = this._contentParser.getParserHtmlText2Block(
+            'commonParser'
+          )?.({
+            element: node,
+            flavour: 'paragraph',
+            type: tagName.toLowerCase(),
+          });
+          break;
+        case 'BLOCKQUOTE':
           result =
-            this._contentParser.getParserHtmlText2Block('listItemParser')?.(
+            this._contentParser.getParserHtmlText2Block('blockQuoteParser')?.(
               node
             );
-        } else {
+          break;
+        case 'P':
+          if (
+            node.firstChild instanceof Text &&
+            (node.firstChild.textContent?.startsWith('[] ') ||
+              node.firstChild.textContent?.startsWith('[ ] ') ||
+              node.firstChild.textContent?.startsWith('[x] '))
+          ) {
+            result =
+              this._contentParser.getParserHtmlText2Block('listItemParser')?.(
+                node
+              );
+          } else {
+            result = this._contentParser.getParserHtmlText2Block(
+              'commonParser'
+            )?.({
+              element: node,
+              flavour: 'paragraph',
+              type: 'text',
+            });
+          }
+          break;
+        case 'DIV':
           result = this._contentParser.getParserHtmlText2Block(
             'commonParser'
           )?.({
@@ -85,28 +115,18 @@ export class ParserHtml {
             flavour: 'paragraph',
             type: 'text',
           });
-        }
-        break;
-      case 'DIV':
-      case 'B':
-      case 'A':
-      case 'EM':
-      case 'U':
-      case 'S':
-      case 'DEL':
-        result = this._contentParser.getParserHtmlText2Block('commonParser')?.({
-          element: node,
-          flavour: 'paragraph',
-          type: 'text',
-        });
-        break;
-      case 'LI':
-        result =
-          this._contentParser.getParserHtmlText2Block('listItemParser')?.(node);
-        break;
-      default:
-        break;
+          break;
+        case 'LI':
+          result =
+            this._contentParser.getParserHtmlText2Block('listItemParser')?.(
+              node
+            );
+          break;
+        default:
+          break;
+      }
     }
+
     if (result && result.length > 0) {
       return result;
     }
@@ -171,22 +191,7 @@ export class ParserHtml {
           continue;
         }
         const htmlElement = node as HTMLElement;
-        if (
-          [
-            'DEL',
-            'STRONG',
-            'B',
-            'EM',
-            'I',
-            'U',
-            'S',
-            'SPAN',
-            'A',
-            'INPUT',
-            'MARK',
-            'CODE',
-          ].includes(htmlElement.tagName)
-        ) {
+        if (INLINE_TAGS.includes(htmlElement.tagName)) {
           textValues.push(
             ...this._commonHTML2Text(node, {}, ignoreEmptyElement)
           );
