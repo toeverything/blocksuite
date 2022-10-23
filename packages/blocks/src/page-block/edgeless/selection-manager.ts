@@ -215,8 +215,8 @@ export class EdgelessSelectionManager {
         this._container.viewport,
         this.state.selected.xywh
       );
-      this._container.signals.updateSelection.emit(this.state);
     }
+    this._container.signals.updateSelection.emit(this.state);
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {
