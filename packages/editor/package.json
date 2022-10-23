@@ -2,7 +2,7 @@
   "name": "@blocksuite/editor",
   "version": "0.2.14",
   "type": "module",
-  "description": "Default BlockSuite-based editor built for AFFiNE",
+  "description": "Default BlockSuite-based editor built for AFFiNE.",
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",

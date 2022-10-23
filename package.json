@@ -1,6 +1,5 @@
 {
   "name": "blocksuite",
-  "version": "0.0.0",
   "private": true,
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
