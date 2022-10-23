@@ -35,8 +35,11 @@ export class EditorContainer extends LitElement {
   @state()
   placeholderModel = new BlockSchema.page(this.store, {});
 
-  constructor() {
-    super();
+  @state()
+  unsubscribe = [] as (() => void)[];
+
+  connectedCallback() {
+    super.connectedCallback();
     this.init();
   }
 
@@ -46,9 +49,10 @@ export class EditorContainer extends LitElement {
 
   private init() {
     if (!this.store) {
-      return;
+      throw new Error("EditorContainer's store is not set");
     }
 
+    this.unsubscribe.forEach(fn => fn());
     this.subscribeStore();
 
     // @ts-ignore
@@ -59,15 +63,17 @@ export class EditorContainer extends LitElement {
 
   private subscribeStore() {
     // if undo to empty page, reset to empty placeholder
-    this.store.signals.updated.on(() => {
+    const unsubscribeUpdate = this.store.signals.updated.on(() => {
       this.isEmptyPage = this.store.isEmpty;
     });
+    this.unsubscribe.push(unsubscribeUpdate.dispose);
 
-    this.store.signals.rootAdded.on(block => {
+    const unsubscribeRootAdd = this.store.signals.rootAdded.on(block => {
       this.model = block as PageBlockModel;
       this.model.childrenUpdated.on(() => this.requestUpdate());
       this.requestUpdate();
     });
+    this.unsubscribe.push(unsubscribeRootAdd.dispose);
   }
 
   // disable shadow DOM to workaround quill
