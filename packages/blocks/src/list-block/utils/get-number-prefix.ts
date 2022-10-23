@@ -1,5 +1,4 @@
 import { html } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
 
 const number2letter = (n: number) => {
   const ordA = 'a'.charCodeAt(0);
@@ -40,13 +39,6 @@ export const number2roman = (num: number) => {
   return romanStr;
 };
 
-const numberStyle = styleMap({
-  color: 'var(--affine-highlight-color)',
-  fontSize: '14px',
-  lineHeight: '26px',
-  fontFamily: 'var(--affine-list-prefix-font-family)',
-});
-
 const getPrefix = (deep: number, index: number) => {
   const map = [() => index + 1, number2letter, () => number2roman(index + 1)];
   return map[deep % map.length](index);
@@ -60,5 +52,5 @@ export const getNumberPrefix = ({
   deep: number;
 }) => {
   const prefix = getPrefix(deep, index);
-  return html`<div style="${numberStyle}">${prefix} .</div>`;
+  return html`<div>${prefix} .</div>`;
 };

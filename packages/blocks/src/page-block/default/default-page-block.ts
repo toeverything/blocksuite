@@ -1,7 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Signal, Store } from '@blocksuite/store';
+import { Signal, Store, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -17,6 +17,7 @@ import {
   updateTextType,
   handleSelectAll,
   batchUpdateTextType,
+  assertExists,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
@@ -214,9 +215,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const hasContent = this._blockTitle.value.length > 0;
 
     if (e.key === 'Enter' && hasContent) {
+      assertExists(this._blockTitle.selectionStart);
+      const titleCursorIndex = this._blockTitle.selectionStart;
+      const contentLeft = this._blockTitle.value.slice(0, titleCursorIndex);
+      const contentRight = this._blockTitle.value.slice(titleCursorIndex);
+
       const defaultGroup = this.model.children[0];
-      const firstParagraph = defaultGroup.children[0];
-      asyncFocusRichText(this.store, firstParagraph.id);
+      const props = {
+        flavour: 'paragraph',
+        text: new Text(this.store, contentRight),
+      };
+      const newFirstParagraphId = this.store.addBlock(props, defaultGroup, 0);
+      this.store.updateBlock(this.model, { title: contentLeft });
+      asyncFocusRichText(this.store, newFirstParagraphId);
     }
   }
 

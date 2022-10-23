@@ -1,7 +1,12 @@
-import { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
 import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
-import { assertExists, caretRangeFromPoint } from './std';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  fixCurrentRangeToText,
+  matchFlavours,
+} from './std';
 import {
   ExtendedModel,
   SelectedBlock,
@@ -324,17 +329,73 @@ export function getSelectInfo(): SelectionInfo {
   };
 }
 
-export function handleRangeDragMove(
+export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
+  let isForward = true;
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
+    isForward = false;
     currentRange?.setEnd(endContainer, endOffset);
   } else {
     currentRange?.setStart(startContainer, startOffset);
   }
+  if (currentRange) {
+    currentRange = fixCurrentRangeToText(
+      e.raw.clientX,
+      e.raw.clientY,
+      currentRange,
+      isForward
+    );
+  }
   resetNativeSeletion(currentRange);
+}
+
+function isBlankAreaBetweenBlocks(startContainer: Node) {
+  if (!(startContainer instanceof HTMLElement)) return false;
+  return startContainer.className.includes('affine-paragraph-block-container');
+}
+
+function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
+  return startContainer.tagName === 'GROUP-BLOCK';
+}
+
+function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
+  if (!(startContainer instanceof HTMLElement)) return false;
+  return startContainer.className.includes('affine-group-block-container');
+}
+
+export function isBlankArea(e: SelectionEvent) {
+  const { cursor } = window.getComputedStyle(e.raw.target as Element);
+  return cursor !== 'text';
+}
+
+export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
+  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  const startContainer = range?.startContainer;
+
+  // click on rich text
+  if (startContainer instanceof Node) {
+    resetNativeSeletion(range);
+  }
+
+  if (!(startContainer instanceof HTMLElement)) return;
+
+  if (
+    isBlankAreaBetweenBlocks(startContainer) ||
+    isBlankAreaBeforeFirstBlock(startContainer)
+  ) {
+    focusRichTextByOffset(startContainer, e.raw.clientX);
+  } else if (isBlankAreaAfterLastBlock(startContainer)) {
+    const { root } = store;
+    const lastChild = root?.lastChild();
+    assertExists(lastChild);
+    if (matchFlavours(lastChild, ['paragraph', 'list'])) {
+      const block = getBlockElementByModel(lastChild);
+      focusRichTextByOffset(block, e.raw.clientX);
+    }
+  }
 }
