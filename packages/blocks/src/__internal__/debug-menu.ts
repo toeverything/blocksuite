@@ -422,15 +422,12 @@ export class DebugMenu extends LitElement {
         >
           ${icons.html}
         </button>
-        <button aria-label="clear data" title="clear data" disabled>
-          ${icons.trash}
-        </button>
         <button
           aria-label="clear data"
           title="clear data"
           @click=${this._onClearData}
         >
-          🗑
+          ${icons.trash}
         </button>
       </div>
     `;
