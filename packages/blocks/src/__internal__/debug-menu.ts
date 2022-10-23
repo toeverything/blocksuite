@@ -425,6 +425,7 @@ export class DebugMenu extends LitElement {
         <button
           aria-label="clear data"
           title="clear data"
+          tabindex="-1"
           @click=${this._onClearData}
         >
           ${icons.trash}
