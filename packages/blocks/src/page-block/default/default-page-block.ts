@@ -123,7 +123,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
-  _blockTitle!: HTMLInputElement;
+  private _title!: HTMLInputElement;
 
   private _bindHotkeys() {
     const { store } = this;
@@ -221,13 +221,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _onTitleKeyDown(e: KeyboardEvent) {
-    const hasContent = this._blockTitle.value.length > 0;
+    const hasContent = this._title.value.length > 0;
 
     if (e.key === 'Enter' && hasContent) {
-      assertExists(this._blockTitle.selectionStart);
-      const titleCursorIndex = this._blockTitle.selectionStart;
-      const contentLeft = this._blockTitle.value.slice(0, titleCursorIndex);
-      const contentRight = this._blockTitle.value.slice(titleCursorIndex);
+      assertExists(this._title.selectionStart);
+      const titleCursorIndex = this._title.selectionStart;
+      const contentLeft = this._title.value.slice(0, titleCursorIndex);
+      const contentRight = this._title.value.slice(titleCursorIndex);
 
       const defaultGroup = this.model.children[0];
       const props = {
@@ -288,8 +288,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this._bindHotkeys();
 
     this.model.propsUpdated.on(() => {
-      if (this.model.title !== this._blockTitle.value) {
-        this._blockTitle.value = this.model.title || '';
+      if (this.model.title !== this._title.value) {
+        this._title.value = this.model.title || '';
         this.requestUpdate();
       }
     });
@@ -303,7 +303,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.requestUpdate();
     });
 
-    focusTextEnd(this._blockTitle);
+    focusTextEnd(this._title);
   }
 
   disconnectedCallback() {
