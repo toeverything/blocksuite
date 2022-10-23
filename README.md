@@ -1,6 +1,6 @@
 # BlockSuite
 
-<a href="./package.json">
+<a href="./packages/store/package.json">
   <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff"/>
 </a>
 
