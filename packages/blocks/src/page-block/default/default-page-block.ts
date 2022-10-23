@@ -13,7 +13,7 @@ import {
   HOTKEYS,
   handleBackspace,
   handleFormat,
-  batchDelete,
+  handleBlockSelectionBatchDelete,
   updateTextType,
   handleSelectAll,
   batchUpdateTextType,
@@ -162,7 +162,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         handleBackspace(store, e);
       } else if (state.type === 'block') {
         const { selectedRichTexts } = state;
-        batchDelete(
+        handleBlockSelectionBatchDelete(
           store,
           selectedRichTexts.map(richText => richText.model)
         );

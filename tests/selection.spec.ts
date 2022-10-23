@@ -12,6 +12,9 @@ import {
   addGroupByClick,
   initThreeParagraphs,
   initEmptyState,
+  undoByKeyboard,
+  resetHistory,
+  redoByKeyboard,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -72,12 +75,15 @@ test('native range delete', async ({ page }) => {
   // from top to bottom
   await dragBetweenCoords(page, topLeft123, bottomRight789);
   await page.keyboard.press('Backspace');
-  await assertBlockCount(page, 'paragraph', 0);
-  await assertRichTexts(page, []);
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertRichTexts(page, ['\n']);
 
+  await undoByKeyboard(page);
   // FIXME
-  // await undoByKeyboard(page);
   // await assertRichTexts(page, ['123', '456', '789']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['\n']);
 });
 
 test('native range selection backwards', async ({ page }) => {
@@ -101,12 +107,15 @@ test('native range selection backwards', async ({ page }) => {
   // from bottom to top
   await dragBetweenCoords(page, bottomRight789, topLeft123);
   await page.keyboard.press('Backspace');
-  await assertBlockCount(page, 'paragraph', 0);
-  await assertRichTexts(page, []);
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertRichTexts(page, ['\n']);
 
+  await undoByKeyboard(page);
   // FIXME
-  // await undoByKeyboard(page);
   // await assertRichTexts(page, ['123', '456', '789']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['\n']);
 });
 
 test('block level range delete', async ({ page }) => {
@@ -114,6 +123,7 @@ test('block level range delete', async ({ page }) => {
   await initEmptyState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
+  await resetHistory(page);
 
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
@@ -129,12 +139,15 @@ test('block level range delete', async ({ page }) => {
 
   await dragBetweenCoords(page, below789, above123);
   await page.keyboard.press('Backspace');
-  await assertBlockCount(page, 'paragraph', 0);
-  await assertRichTexts(page, []);
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertRichTexts(page, ['\n']);
 
+  await undoByKeyboard(page);
   // FIXME
-  // await undoByKeyboard(page);
   // await assertRichTexts(page, ['123', '456', '789']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['\n']);
 });
 
 test('cursor move up and down', async ({ page }) => {

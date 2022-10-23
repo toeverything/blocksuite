@@ -481,11 +481,16 @@ export function tryMatchSpaceHotkey(
   return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
 }
 
-// TODO deep delete
-export function batchDelete(store: Store, models: ExtendedModel[]) {
+export function handleBlockSelectionBatchDelete(
+  store: Store,
+  models: ExtendedModel[]
+) {
   store.captureSync();
-  for (const model of models) {
-    store.deleteBlock(model);
+  assertExists(models[0].text);
+
+  models[0].text.delete(0, models[0].text.length);
+  for (let i = 1; i < models.length; i++) {
+    store.deleteBlock(models[i]);
   }
 }
 
