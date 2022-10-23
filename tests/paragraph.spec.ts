@@ -61,6 +61,30 @@ test('drag over paragraph title', async ({ page }) => {
   await assertTitle(page, 'hello');
 });
 
+test('backspace and arrow on title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.keyboard.type('hello');
+  await assertTitle(page, 'hello');
+  await resetHistory(page);
+
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, 'hell');
+
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, 'hll');
+
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 0, 0, 0);
+
+  await undoByKeyboard(page);
+  await assertTitle(page, 'hello');
+
+  await redoByKeyboard(page);
+  await assertTitle(page, 'hll');
+});
+
 test('append new paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);

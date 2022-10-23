@@ -20,6 +20,7 @@ import {
   assertExists,
   isPageTitle,
   getSplicedTitle,
+  noop,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
@@ -152,9 +153,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       const { state } = this.selection;
 
       if (isPageTitle(e)) {
-        e.preventDefault();
-        const title = getSplicedTitle(e.target as HTMLInputElement);
-        store.updateBlock(this.model, { title });
+        const target = e.target as HTMLInputElement;
+        // range delete
+        if (target.selectionStart !== target.selectionEnd) {
+          e.preventDefault();
+          const title = getSplicedTitle(target);
+          store.updateBlock(this.model, { title });
+        }
+        // collapsed delete
+        else {
+          noop();
+        }
         return;
       }
 
@@ -237,6 +246,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       const newFirstParagraphId = this.store.addBlock(props, defaultGroup, 0);
       this.store.updateBlock(this.model, { title: contentLeft });
       asyncFocusRichText(this.store, newFirstParagraphId);
+    } else if (e.key === 'ArrowDown' && hasContent) {
+      e.preventDefault();
+      asyncFocusRichText(this.store, this.model.children[0].children[0].id);
     }
   }
 
