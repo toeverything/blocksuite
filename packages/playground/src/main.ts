@@ -13,15 +13,4 @@ window.onload = () => {
     providers: [DebugProvider],
   });
   document.body.appendChild(editor);
-
-  // const store = editor.store;
-  // const pageId = store.addBlock({
-  //   flavour: 'page',
-  //   title: `BlockSuite live demo`,
-  // });
-  // const groupId = store.addBlock({ flavour: 'group' }, pageId);
-
-  // const text = new Text(store, 'Legend from here...');
-  // text?.format(6, 6, { link: 'http://localhost:5174/' });
-  // store.addBlock({ flavour: 'paragraph', text }, groupId);
 };
