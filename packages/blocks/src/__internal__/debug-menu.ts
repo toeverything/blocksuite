@@ -143,10 +143,10 @@ export class DebugMenu extends LitElement {
 
   private _onToggleConnection() {
     if (this.connected === true) {
-      this.store.provider?.disconnect();
+      this.store.providers.forEach(provide => provide.disconnect());
       this.connected = false;
     } else {
-      this.store.provider?.connect();
+      this.store.providers.forEach(provide => provide.connect());
       this.connected = true;
     }
   }
