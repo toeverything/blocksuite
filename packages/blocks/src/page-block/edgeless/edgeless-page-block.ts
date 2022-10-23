@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Signal, Store } from '@blocksuite/store';
+import { Disposable, Signal, Store } from '@blocksuite/store';
 import type { GroupBlockModel, PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
@@ -66,6 +66,8 @@ export class EdgelessPageBlockComponent
     updateSelection: new Signal<EdgelessSelectionState>(),
   };
 
+  _historyDisposble!: Disposable;
+
   private _selection!: EdgelessSelectionManager;
 
   private _bindHotkeys() {
@@ -87,6 +89,14 @@ export class EdgelessPageBlockComponent
     this.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
 
+  private _clearSelection() {
+    requestAnimationFrame(() => {
+      if (!this._selection.isActive) {
+        resetNativeSeletion(null);
+      }
+    });
+  }
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -106,26 +116,22 @@ export class EdgelessPageBlockComponent
       group.propsUpdated.on(() => this._selection.syncSelectionBox());
     });
 
-    this.store.signals.historyUpdated.on(() => {
-      requestAnimationFrame(() => {
-        if (!this._selection.isActive) {
-          resetNativeSeletion(null);
-        }
-      });
-    });
-
     this.signals.viewportUpdated.on(() => this._selection.syncSelectionBox());
     this.signals.updateSelection.on(() => this.requestUpdate());
+    this._historyDisposble = this.store.signals.historyUpdated.on(() => {
+      this._clearSelection();
+    });
 
     this._bindHotkeys();
 
     // XXX: should be called after rich text components are mounted
-    requestAnimationFrame(() => resetNativeSeletion(null));
+    this._clearSelection();
   }
 
   disconnectedCallback() {
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
+    this._historyDisposble.dispose();
     this._selection.dispose();
     this._removeHotkeys();
   }
