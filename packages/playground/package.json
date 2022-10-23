@@ -15,5 +15,5 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "license": "Apache-2.0"
+  "license": "MPL-2.0"
 }
