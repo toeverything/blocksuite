@@ -9,12 +9,7 @@ import {
   handleNativeRangeDragMove,
   handleNativeRangeClick,
 } from '../../__internal__';
-import {
-  getSelectionBoxBound,
-  initWheelEventHandlers,
-  pick,
-  toModelCoord,
-} from './utils';
+import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
 
 interface NoneSelectionState {
   type: 'none';
@@ -31,6 +26,83 @@ export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
 
 export type XYWH = [number, number, number, number];
 
+const MIN_ZOOM = 0.3;
+
+export class ViewportState {
+  private _width = 0;
+  private _height = 0;
+  private _zoom = 1.0;
+  private _centerX = 0.0;
+  private _centerY = 0.0;
+
+  get zoom() {
+    return this._zoom;
+  }
+
+  get centerX() {
+    return this._centerX;
+  }
+
+  get centerY() {
+    return this._centerY;
+  }
+
+  get viewportX() {
+    return this._centerX - this._width / 2 / this._zoom;
+  }
+
+  get viewportY() {
+    return this._centerY - this._height / 2 / this._zoom;
+  }
+
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
+  }
+
+  toModelCoord(viewX: number, viewY: number): [number, number] {
+    return [
+      this.viewportX + viewX / this._zoom,
+      this.viewportY + viewY / this._zoom,
+    ];
+  }
+
+  toViewCoord(modelX: number, modelY: number): [number, number] {
+    return [
+      (modelX - this.viewportX) * this._zoom,
+      (modelY - this.viewportY) * this._zoom,
+    ];
+  }
+
+  setSize(width: number, height: number) {
+    this._width = width;
+    this._height = height;
+  }
+
+  setZoom(val: number) {
+    this._zoom = val;
+  }
+
+  applyDeltaZoom(delta: number) {
+    const val = (this.zoom * (100 + delta)) / 100;
+    const newZoom = Math.max(val, MIN_ZOOM);
+    this.setZoom(newZoom);
+  }
+
+  applyDeltaCenter(deltaX: number, deltaY: number) {
+    this._centerX += deltaX;
+    this._centerY += deltaY;
+  }
+
+  setCenter(centerX: number, centerY: number) {
+    this._centerX = centerX;
+    this._centerY = centerY;
+  }
+}
+
 export class EdgelessSelectionManager {
   private _container: EdgelessContainer;
   private _mouseDisposeCallback: () => void;
@@ -40,7 +112,6 @@ export class EdgelessSelectionManager {
     type: 'none',
   };
   private _startRange: Range | null = null;
-  // private _startPoint: { x: number; y: number } | null = null;
 
   get state() {
     return this._state;
@@ -75,7 +146,7 @@ export class EdgelessSelectionManager {
 
   private _resetState(e: SelectionEvent) {
     const { viewport } = this._container;
-    const [modelX, modelY] = toModelCoord(viewport, e.x, e.y);
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const selected = pick(this._blocks, modelX, modelY);
     if (selected) {
       this._state = {
@@ -95,7 +166,6 @@ export class EdgelessSelectionManager {
   private _onContainerDragStart = (e: SelectionEvent) => {
     this._resetState(e);
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    // this._startPoint = { x: e.raw.clientX, y: e.raw.clientY };
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
@@ -145,8 +215,8 @@ export class EdgelessSelectionManager {
         this._container.viewport,
         this.state.selected.xywh
       );
-      this._container.signals.updateSelection.emit(this.state);
     }
+    this._container.signals.updateSelection.emit(this.state);
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {

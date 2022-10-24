@@ -2,7 +2,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { Detail } from './types';
 
 export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (!val) throw new Error('val does not exist');
+  if (val === null || val === undefined) throw new Error('val does not exist');
 }
 
 export function assertFlavours(model: BaseBlockModel, allowed: string[]) {

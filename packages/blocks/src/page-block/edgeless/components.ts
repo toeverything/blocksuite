@@ -4,8 +4,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { BaseBlockModel } from '@blocksuite/store';
 
 import { GroupBlockModel } from '../..';
-import type { ViewportState } from './edgeless-page-block';
-import type { EdgelessSelectionState, XYWH } from './selection-manager';
+import type {
+  EdgelessSelectionState,
+  ViewportState,
+  XYWH,
+} from './selection-manager';
 import { BlockElement, BlockHost } from '../../__internal__';
 import '../../__internal__';
 

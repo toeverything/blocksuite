@@ -1,8 +1,10 @@
 import { test } from '@playwright/test';
 import {
+  resetHistory,
   enterPlaygroundRoom,
   focusRichText,
   getCursorBlockIdAndHeight,
+  initEmptyState,
   undoByClick,
   undoByKeyboard,
 } from './utils/actions';
@@ -16,12 +18,10 @@ import {
 
 test('markdown shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
+  await resetHistory(page);
 
-  await page.evaluate(() => {
-    // @ts-ignore
-    window.store.captureSync();
-  });
   let id: string | null = null;
 
   await page.keyboard.type('[] ');
@@ -139,10 +139,9 @@ test('markdown shortcut', async ({ page }) => {
 
 test('markdown inline-text', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await focusRichText(page);
-
-  // @ts-ignore
-  await page.evaluate(() => window.store.captureSync());
+  await resetHistory(page);
 
   await page.keyboard.type('***test*** ');
   await assertTextFormat(page, 0, 0, { bold: true, italic: true });

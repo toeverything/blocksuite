@@ -1,8 +1,8 @@
-export interface IDisposable {
+export interface Disposable {
   dispose(): void;
 }
 
-export function flattenDisposable(a: IDisposable[]): IDisposable {
+export function flattenDisposable(a: Disposable[]): Disposable {
   return {
     dispose: () => {
       a.forEach(d => {

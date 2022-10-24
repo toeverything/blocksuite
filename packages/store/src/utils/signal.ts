@@ -1,11 +1,11 @@
-import { IDisposable, flattenDisposable } from './disposable';
+import { Disposable, flattenDisposable } from './disposable';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
-export class Signal<T = void> implements IDisposable {
+export class Signal<T = void> implements Disposable {
   private emitting = false;
   private callbacks: ((v: T) => unknown)[] = [];
-  private disposables: IDisposable[] = [];
+  private disposables: Disposable[] = [];
 
   static fromEvent<N extends keyof HTMLElementEventMap>(
     element: HTMLElement | Window,
@@ -39,7 +39,7 @@ export class Signal<T = void> implements IDisposable {
     return result;
   }
 
-  on(callback: (v: T) => unknown): IDisposable {
+  on(callback: (v: T) => unknown): Disposable {
     if (this.emitting) {
       const newCallback = [...this.callbacks, callback];
       this.callbacks = newCallback;
@@ -61,7 +61,7 @@ export class Signal<T = void> implements IDisposable {
   }
 
   once(callback: (v: T) => unknown): void {
-    let dispose: IDisposable['dispose'] | undefined = undefined;
+    let dispose: Disposable['dispose'] | undefined = undefined;
     const handler = (v: T) => {
       callback(v);
       if (dispose) {
@@ -71,7 +71,7 @@ export class Signal<T = void> implements IDisposable {
     dispose = this.on(handler).dispose;
   }
 
-  unshift(callback: (v: T) => unknown): IDisposable {
+  unshift(callback: (v: T) => unknown): Disposable {
     if (this.emitting) {
       const newCallback = [callback, ...this.callbacks];
       this.callbacks = newCallback;
@@ -115,7 +115,7 @@ export class Signal<T = void> implements IDisposable {
     this.callbacks.length = 0;
   }
 
-  toDispose(disposables: IDisposable[]): Signal<T> {
+  toDispose(disposables: Disposable[]): Signal<T> {
     disposables.push(this);
     return this;
   }

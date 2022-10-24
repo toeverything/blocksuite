@@ -1,8 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.0.0",
   "private": true,
-  "description": "BlockSuite framework workspace",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
     "dev": "pnpm serve & pnpm --filter @blocksuite/playground dev",
@@ -20,7 +18,7 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "Apache-2.0",
+  "license": "MPL-2.0",
   "devDependencies": {
     "@changesets/cli": "^2.25.0",
     "@playwright/test": "^1.25.2",

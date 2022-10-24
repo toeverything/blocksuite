@@ -418,3 +418,11 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
     }
   }
 }
+
+export function getSplicedTitle(title: HTMLInputElement) {
+  const text = [...title.value];
+  assertExists(title.selectionStart);
+  assertExists(title.selectionEnd);
+  text.splice(title.selectionStart, title.selectionEnd - title.selectionStart);
+  return text.join('');
+}

@@ -13,11 +13,14 @@ import {
   HOTKEYS,
   handleBackspace,
   handleFormat,
-  batchDelete,
+  handleBlockSelectionBatchDelete,
   updateTextType,
   handleSelectAll,
   batchUpdateTextType,
   assertExists,
+  isPageTitle,
+  getSplicedTitle,
+  noop,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
@@ -121,7 +124,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
-  _blockTitle!: HTMLInputElement;
+  private _title!: HTMLInputElement;
 
   private _bindHotkeys() {
     const { store } = this;
@@ -149,11 +152,26 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
 
+      if (isPageTitle(e)) {
+        const target = e.target as HTMLInputElement;
+        // range delete
+        if (target.selectionStart !== target.selectionEnd) {
+          e.preventDefault();
+          const title = getSplicedTitle(target);
+          store.updateBlock(this.model, { title });
+        }
+        // collapsed delete
+        else {
+          noop();
+        }
+        return;
+      }
+
       if (state.type === 'native') {
         handleBackspace(store, e);
       } else if (state.type === 'block') {
         const { selectedRichTexts } = state;
-        batchDelete(
+        handleBlockSelectionBatchDelete(
           store,
           selectedRichTexts.map(richText => richText.model)
         );
@@ -212,13 +230,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _onTitleKeyDown(e: KeyboardEvent) {
-    const hasContent = this._blockTitle.value.length > 0;
+    const hasContent = this._title.value.length > 0;
 
     if (e.key === 'Enter' && hasContent) {
-      assertExists(this._blockTitle.selectionStart);
-      const titleCursorIndex = this._blockTitle.selectionStart;
-      const contentLeft = this._blockTitle.value.slice(0, titleCursorIndex);
-      const contentRight = this._blockTitle.value.slice(titleCursorIndex);
+      assertExists(this._title.selectionStart);
+      const titleCursorIndex = this._title.selectionStart;
+      const contentLeft = this._title.value.slice(0, titleCursorIndex);
+      const contentRight = this._title.value.slice(titleCursorIndex);
 
       const defaultGroup = this.model.children[0];
       const props = {
@@ -228,6 +246,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       const newFirstParagraphId = this.store.addBlock(props, defaultGroup, 0);
       this.store.updateBlock(this.model, { title: contentLeft });
       asyncFocusRichText(this.store, newFirstParagraphId);
+    } else if (e.key === 'ArrowDown' && hasContent) {
+      e.preventDefault();
+      asyncFocusRichText(this.store, this.model.children[0].children[0].id);
     }
   }
 
@@ -279,8 +300,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this._bindHotkeys();
 
     this.model.propsUpdated.on(() => {
-      if (this.model.title !== this._blockTitle.value) {
-        this._blockTitle.value = this.model.title || '';
+      if (this.model.title !== this._title.value) {
+        this._title.value = this.model.title || '';
         this.requestUpdate();
       }
     });
@@ -294,7 +315,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.requestUpdate();
     });
 
-    focusTextEnd(this._blockTitle);
+    focusTextEnd(this._title);
   }
 
   disconnectedCallback() {

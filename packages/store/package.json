@@ -2,7 +2,7 @@
   "name": "@blocksuite/store",
   "version": "0.2.14",
   "type": "module",
-  "description": "",
+  "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "scripts": {
     "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
@@ -11,7 +11,7 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "Apache-2.0",
+  "license": "MPL-2.0",
   "dependencies": {
     "lib0": "^0.2.52",
     "y-protocols": "^1.0.5",
