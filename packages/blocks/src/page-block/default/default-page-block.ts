@@ -230,7 +230,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _onTitleKeyDown(e: KeyboardEvent) {
-    const hasContent = this._title.value.length > 0;
+    const hasContent = !this.store.isEmpty;
 
     if (e.key === 'Enter' && hasContent) {
       assertExists(this._title.selectionStart);
