@@ -1,7 +1,7 @@
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { createEvent } from '../../../utils';
-import { ConfirmIcon, CopyIcon, EditIcon } from './button';
+import { ConfirmIcon, EditIcon, UnlinkIcon } from './button';
 import { linkPopoverStyle } from './styles';
 
 @customElement('edit-link-panel')
@@ -88,6 +88,10 @@ export class LinkPopover extends LitElement {
     console.log('Copied link to clipboard');
   }
 
+  private onUnlink(e: MouseEvent) {
+    this.dispatchEvent(createEvent('updateLink', { type: 'remove' }));
+  }
+
   private onEdit(e: MouseEvent) {
     this.dispatchEvent(createEvent('editLink', null));
   }
@@ -109,25 +113,35 @@ export class LinkPopover extends LitElement {
   }
 
   createTemplate() {
-    const buttons = this.previewLink
-      ? html`<icon-button @click=${this.onCopy}>${CopyIcon()}</icon-button
-          ><icon-button @click=${this.onEdit}>${EditIcon()}</icon-button>`
-      : this.confirmBtnTemplate();
-    return html`<div class="affine-link-popover" style=${this.style.cssText}>
-      <input
-        class="affine-link-popover-input"
-        ?disabled=${this.previewLink}
-        ?autofocus=${!this.previewLink}
-        id="link-input"
-        type="text"
-        spellcheck="false"
-        placeholder="Paste or type a link"
-        value=${this.previewLink}
-        @keyup=${this.onKeyup}
-      />
-      <span class="affine-link-popover-dividing-line"></span>
-      ${buttons}
-    </div>`;
+    const isCreateLink = !this.previewLink;
+
+    const buttons = html`<icon-button @click=${this.onUnlink}
+        >${UnlinkIcon()}</icon-button
+      ><icon-button @click=${this.onEdit}>${EditIcon()}</icon-button>`;
+
+    return isCreateLink
+      ? html`<div class="affine-link-popover" style=${this.style.cssText}>
+          <input
+            class="affine-link-popover-input"
+            autofocus
+            id="link-input"
+            type="text"
+            spellcheck="false"
+            placeholder="Paste or type a link"
+            value=${this.previewLink}
+            @keyup=${this.onKeyup}
+            @click=${this.onCopy}
+          />
+          <span class="affine-link-popover-dividing-line"></span>
+          ${this.confirmBtnTemplate()}
+        </div>`
+      : html`<div class="affine-link-popover" style=${this.style.cssText}>
+          <div class="affine-link-preview" @click=${this.onCopy}>
+            ${this.previewLink}
+          </div>
+          <span class="affine-link-popover-dividing-line"></span>
+          ${buttons}
+        </div>`;
   }
 
   editTemplate() {
