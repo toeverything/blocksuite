@@ -100,6 +100,12 @@ export const linkPopoverStyle = css`
     border: none;
   }
 
+  .affine-link-preview {
+    width: 260px;
+    user-select: none;
+    cursor: pointer;
+  }
+
   .affine-link-popover-dividing-line {
     margin: 0 6px;
     width: 1px;
