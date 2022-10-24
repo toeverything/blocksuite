@@ -1,5 +1,14 @@
 # @blocksuite/editor
 
+## 0.2.16
+
+### Patch Changes
+
+- 8ca8550:
+- Updated dependencies [8ca8550]
+  - @blocksuite/store@0.2.16
+  - @blocksuite/blocks@0.2.16
+
 ## 0.2.14
 
 ### Patch Changes

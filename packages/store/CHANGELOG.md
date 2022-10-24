@@ -1,5 +1,11 @@
 # @blocksuite/store
 
+## 0.2.16
+
+### Patch Changes
+
+- 8ca8550:
+
 ## 0.2.14
 
 ### Patch Changes
