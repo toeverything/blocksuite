@@ -66,10 +66,28 @@ export function focusRichText(
     resetNativeSeletion(range);
   }
   if (position === 'start') {
-    range = caretRangeFromPoint(left, top + lineHeight / 2);
+    const newRange = document.createRange();
+    let firstNode = editableContainer.firstChild;
+    while (firstNode?.firstChild) {
+      firstNode = firstNode.firstChild;
+    }
+    if (firstNode) {
+      newRange.setStart(firstNode, 0);
+      newRange.setEnd(firstNode, 0);
+    }
+    range = newRange;
   }
   if (position === 'end') {
-    range = caretRangeFromPoint(right - 1, bottom - lineHeight / 2);
+    const newRange = document.createRange();
+    let lastNode = editableContainer.lastChild;
+    while (lastNode?.lastChild) {
+      lastNode = lastNode.lastChild;
+    }
+    if (lastNode) {
+      newRange.setStart(lastNode, lastNode.textContent?.length || 0);
+      newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
+    }
+    range = newRange;
   }
   resetNativeSeletion(range);
 }
