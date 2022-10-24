@@ -4,7 +4,7 @@ export const ALLOW_DEFAULT = true;
 
 export const HOTKEYS = {
   UNDO: 'command+z,ctrl+z',
-  REDO: 'command+shift+z,ctrl+shift+y',
+  REDO: 'command+shift+z,ctrl+shift+z',
   BACKSPACE: 'backspace',
   SELECT_ALL: 'command+a,ctrl+a',
   SHIFT_UP: 'shift+up',
