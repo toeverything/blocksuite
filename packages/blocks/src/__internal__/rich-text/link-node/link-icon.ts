@@ -1,12 +1,23 @@
-import { svg } from 'lit';
+import { css, svg } from 'lit';
 
-// TODO svg size with text format
+const iconStyle = css`
+  width: 0.8em;
+  height: 0.8em;
+  vertical-align: middle;
+  font-size: inherit;
+  margin-bottom: 0.1em;
+`;
+
+// Control Icons with Font Size
+// Set the width and height to be 1em, which will be the font-size of its parent element
+// See https://css-tricks.com/control-icons-with-font-size/
 export const LinkIcon = svg`<svg
   width="14"
   height="14"
   viewBox="0 0 14 14"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
+  style="${iconStyle}"
 >
   <path
     fill-rule="evenodd"
