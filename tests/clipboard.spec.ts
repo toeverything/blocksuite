@@ -10,6 +10,7 @@ import {
   importMarkdown,
   dragBetweenCoords,
   setSelection,
+  pressEnter,
 } from './utils/actions';
 import {
   assertBlockTypes,
@@ -155,6 +156,23 @@ test('splic block when paste', async ({ page }) => {
   await assertSelection(page, 1, 2, 0);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
+
+  await page.keyboard.type('aa');
+  await pressEnter(page);
+  await page.keyboard.type('bb');
+  const topLeft123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left, y: bbox.top - 2 };
+  });
+  const bottomRight789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right, y: bbox.bottom };
+  });
+  await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await pasteContent(page, clipData);
+  await assertRichTexts(page, ['aa', 'bb', 'text', 'h1']);
 });
 
 test('import markdown', async ({ page }) => {
