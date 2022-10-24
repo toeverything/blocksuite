@@ -329,11 +329,13 @@ export function getSelectInfo(store: Store): SelectionInfo {
       const range = nativeSelection.getRangeAt(0);
       const firstIndex = getQuillIndexByNativeSelection(
         range.startContainer,
-        range.startOffset as number
+        range.startOffset as number,
+        true
       );
       const endIndex = getQuillIndexByNativeSelection(
         range.endContainer,
-        range.endOffset as number
+        range.endOffset as number,
+        false
       );
       selectedBlocks[0].startPos = firstIndex;
       const lastBlock = getLastSelectBlock(selectedBlocks);

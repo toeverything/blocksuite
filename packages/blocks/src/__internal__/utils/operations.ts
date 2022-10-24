@@ -157,11 +157,13 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
 
   const firstTextIndex = getQuillIndexByNativeSelection(
     selection.anchorNode,
-    selection.anchorOffset as number
+    selection.anchorOffset as number,
+    true
   );
   const endTextIndex = getQuillIndexByNativeSelection(
     selection.focusNode,
-    selection.focusOffset as number
+    selection.focusOffset as number,
+    false
   );
 
   firstRichText.model.text?.delete(
@@ -244,11 +246,13 @@ function formatModelsByRange(
 
   const firstIndex = getQuillIndexByNativeSelection(
     selection.anchorNode,
-    selection.anchorOffset as number
+    selection.anchorOffset as number,
+    true
   );
   const endIndex = getQuillIndexByNativeSelection(
     selection.focusNode,
-    selection.focusOffset as number
+    selection.focusOffset as number,
+    false
   );
   const formatArr = [];
   const firstFormat = firstRichText.quill.getFormat(
@@ -289,17 +293,34 @@ function formatModelsByRange(
 
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
-  nodeOffset: number
+  nodeOffset: number,
+  isStart: boolean
 ) {
+  if (
+    ele instanceof Element &&
+    ele.classList.contains('affine-default-page-block-title-container')
+  ) {
+    return (
+      (isStart
+        ? ele.querySelector('input')?.selectionStart
+        : ele.querySelector('input')?.selectionEnd) || 0
+    );
+  }
+
   let offset = 0;
   let lastNode = ele;
   let selfAdded = false;
   while (
+    ele &&
     // @ts-ignore
-    !lastNode?.getAttributeNode ||
-    // @ts-ignore
-    !lastNode.getAttributeNode('contenteditable')
+    (!lastNode?.getAttributeNode ||
+      // @ts-ignore
+      !lastNode.getAttributeNode('contenteditable'))
   ) {
+    if (ele instanceof Element && ele.hasAttribute('data-block-id')) {
+      offset = 0;
+      break;
+    }
     if (!selfAdded) {
       selfAdded = true;
       offset += nodeOffset;
