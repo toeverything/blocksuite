@@ -150,7 +150,7 @@ export class PasteManager {
             );
             parent = this._editor.store.getBlockById(id);
           }
-        } else {
+        } else if (selectedBlock.flavour !== 'group') {
           parent = this._editor.store.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
@@ -213,7 +213,7 @@ export class PasteManager {
             );
             parent = this._editor.store.getBlockById(id);
           }
-        } else {
+        } else if (selectedBlock.flavour !== 'group') {
           parent = this._editor.store.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
