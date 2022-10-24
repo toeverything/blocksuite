@@ -316,3 +316,13 @@ export async function assertStoreMatchJSX(page: Page, snapshot: string) {
   });
   expect(snapshot, formattedJSX).toEqual(formattedJSX);
 }
+
+export async function assertClipItems(page: Page, key: string, value: unknown) {
+  const clipItems = await page.evaluate(() => {
+    return document
+      .getElementsByTagName('editor-container')[0]
+      .clipboard['_copy']['_getClipItems']();
+  });
+  const actual = clipItems.find(item => item.mimeType === key)?.data;
+  expect(actual).toEqual(value);
+}

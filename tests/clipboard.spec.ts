@@ -8,11 +8,15 @@ import {
   pasteContent,
   undoByClick,
   importMarkdown,
+  dragBetweenCoords,
+  setSelection,
+  pressEnter,
   initEmptyState,
   resetHistory,
 } from './utils/actions';
 import {
   assertBlockTypes,
+  assertClipItems,
   assertRichTexts,
   assertSelection,
   assertText,
@@ -151,6 +155,23 @@ test('splic block when paste', async ({ page }) => {
   await assertSelection(page, 1, 2, 0);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
+
+  await page.keyboard.type('aa');
+  await pressEnter(page);
+  await page.keyboard.type('bb');
+  const topLeft123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left, y: bbox.top - 2 };
+  });
+  const bottomRight789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right, y: bbox.bottom };
+  });
+  await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await pasteContent(page, clipData);
+  await assertRichTexts(page, ['aa', 'bb', 'text', 'h1']);
 });
 
 test('import markdown', async ({ page }) => {
@@ -165,6 +186,34 @@ test('import markdown', async ({ page }) => {
   await setQuillSelection(page, 1, 1);
   await importMarkdown(page, clipData, '0');
   await assertRichTexts(page, ['text', 'h1', '\n']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+});
+
+test('copy clipItems format', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await focusRichText(page);
+  await page.evaluate(() => {
+    // @ts-ignore
+    window.store.captureSync();
+  });
+
+  const clipData = `
+- aa
+  - bb
+    - cc
+      - dd
+`;
+
+  await importMarkdown(page, clipData, '0');
+  await setSelection(page, 4, 1, 5, 1);
+  await assertClipItems(page, 'text/plain', 'bc');
+  await assertClipItems(
+    page,
+    'text/html',
+    '<ul><li>b<ul><li>c</li></ul></li></ul>'
+  );
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 });

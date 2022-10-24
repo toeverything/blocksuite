@@ -132,6 +132,10 @@ export function getBlockElementByModel(model: BaseBlockModel) {
     `[${ATTR}="${model.store.root.id}"]`
   ) as DefaultPageBlockComponent;
 
+  if (model.id === model.store.root.id) {
+    return page as HTMLElement;
+  }
+
   const element = page.querySelector(`[${ATTR}="${model.id}"]`);
   assertExists(element);
   return element as HTMLElement;
