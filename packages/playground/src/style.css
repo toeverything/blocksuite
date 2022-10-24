@@ -5,6 +5,7 @@
   --affine-hover-background: #f1f3ff;
   --affine-code-background: #f2f5f9;
   --affine-text-color: #3a4c5c;
+  --affine-edgeless-text-color: #3a4c5c;
   --affine-link-color: #6880ff;
   --affine-link-color2: #6880ff;
   --affine-link-visited-color: #abb8fe;
@@ -29,11 +30,11 @@
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
     Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
-  --affine-font-family2: Roboto Mono, apple-system, BlinkMacSystemFont,
+  --affine-font-family2: Space Mono, apple-system, BlinkMacSystemFont,
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
     Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
-  --affine-paragraph-space: 18px;
+  --affine-paragraph-space: 8px;
 }
 
 html,
