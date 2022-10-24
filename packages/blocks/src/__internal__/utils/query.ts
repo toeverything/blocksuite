@@ -182,8 +182,15 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       assertExists(block.model);
       // @ts-ignore
       const blockElement = getBlockElementByModel(block.model);
+      const mainElelment =
+        block.model.flavour === 'page'
+          ? blockElement.querySelector(
+              '.affine-default-page-block-title-container'
+            )
+          : blockElement.querySelector('rich-text');
       if (
-        range.intersectsNode(blockElement) &&
+        mainElelment &&
+        range.intersectsNode(mainElelment) &&
         blockElement.tagName !== 'GROUP-BLOCK'
       ) {
         // @ts-ignore
