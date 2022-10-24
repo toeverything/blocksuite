@@ -201,6 +201,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       // TODO expand selection down
     });
     hotkey.addListener(LINK, e => {
+      e.preventDefault();
       createLink(store, e);
     });
 
