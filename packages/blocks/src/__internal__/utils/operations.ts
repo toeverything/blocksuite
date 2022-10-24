@@ -8,6 +8,8 @@ import {
   getStartModelBySelection,
   getRichTextByModel,
   getModelsByRange,
+  getPreviousBlock,
+  getContainerByModel,
 } from './query';
 import {
   getCurrentRange,
@@ -157,11 +159,13 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
 
   const firstTextIndex = getQuillIndexByNativeSelection(
     selection.anchorNode,
-    selection.anchorOffset as number
+    selection.anchorOffset as number,
+    true
   );
   const endTextIndex = getQuillIndexByNativeSelection(
     selection.focusNode,
-    selection.focusOffset as number
+    selection.focusOffset as number,
+    false
   );
 
   firstRichText.model.text?.delete(
@@ -244,11 +248,13 @@ function formatModelsByRange(
 
   const firstIndex = getQuillIndexByNativeSelection(
     selection.anchorNode,
-    selection.anchorOffset as number
+    selection.anchorOffset as number,
+    true
   );
   const endIndex = getQuillIndexByNativeSelection(
     selection.focusNode,
-    selection.focusOffset as number
+    selection.focusOffset as number,
+    false
   );
   const formatArr = [];
   const firstFormat = firstRichText.quill.getFormat(
@@ -289,17 +295,34 @@ function formatModelsByRange(
 
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
-  nodeOffset: number
+  nodeOffset: number,
+  isStart: boolean
 ) {
+  if (
+    ele instanceof Element &&
+    ele.classList.contains('affine-default-page-block-title-container')
+  ) {
+    return (
+      (isStart
+        ? ele.querySelector('input')?.selectionStart
+        : ele.querySelector('input')?.selectionEnd) || 0
+    );
+  }
+
   let offset = 0;
   let lastNode = ele;
   let selfAdded = false;
   while (
+    ele &&
     // @ts-ignore
-    !lastNode?.getAttributeNode ||
-    // @ts-ignore
-    !lastNode.getAttributeNode('contenteditable')
+    (!lastNode?.getAttributeNode ||
+      // @ts-ignore
+      !lastNode.getAttributeNode('contenteditable'))
   ) {
+    if (ele instanceof Element && ele.hasAttribute('data-block-id')) {
+      offset = 0;
+      break;
+    }
     if (!selfAdded) {
       selfAdded = true;
       offset += nodeOffset;
@@ -330,7 +353,10 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
-  if (isNoneSelection()) return;
+  if (isNoneSelection()) {
+    e.preventDefault();
+    return;
+  }
 
   if (isRangeSelection()) {
     const models = getModelsByRange(getCurrentRange());
@@ -395,12 +421,31 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
       store.captureSync();
       store.updateBlock(model, { type: 'text' });
     } else {
-      const previousSibling = store.getPreviousSibling(model);
-      if (previousSibling) {
+      const parent = store.getParent(model);
+      if (!parent || parent?.flavour === 'group') {
+        const container = getContainerByModel(model);
+        const previousSibling = getPreviousBlock(container, model.id);
+        if (previousSibling) {
+          store.captureSync();
+          previousSibling.text?.join(model.text as Text);
+          store.deleteBlock(model);
+          asyncFocusRichText(store, previousSibling.id);
+        }
+      } else {
+        const grandParent = store.getParent(parent);
+        if (!grandParent) return;
+        const index = grandParent.children.indexOf(parent);
+        const blockProps = {
+          id: model.id,
+          flavour: model.flavour,
+          text: model?.text?.clone(), // should clone before `deleteBlock`
+          children: model.children,
+          type: model.type,
+        };
+
         store.captureSync();
-        previousSibling.text?.join(model.text as Text);
         store.deleteBlock(model);
-        asyncFocusRichText(store, previousSibling.id);
+        store.addBlock(blockProps, grandParent, index + 1);
       }
     }
   }

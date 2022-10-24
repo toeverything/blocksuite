@@ -12,6 +12,7 @@ import { MockSelectNode } from './mock-select-node';
 export const createLink = async (store: Store, e: KeyboardEvent) => {
   if (!isRangeSelection()) {
     // TODO maybe allow user creating a link with text
+    e.preventDefault();
     return;
   }
   const startModel = getStartModelBySelection();

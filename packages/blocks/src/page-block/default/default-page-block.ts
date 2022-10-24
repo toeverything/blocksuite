@@ -1,7 +1,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Signal, Store, Text } from '@blocksuite/store';
+import { Disposable, Signal, Store, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -23,8 +23,8 @@ import {
   noop,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
-import style from './style.css';
 import { createLink } from '../../__internal__/rich-text/link-node';
+import style from './style.css';
 
 export interface DefaultPageSignals {
   updateSelectionRect: Signal<DOMRect | null>;
@@ -116,6 +116,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     updateSelectedRects: new Signal<DOMRect[]>(),
   };
 
+  private _scrollDisposable!: Disposable;
+
   @property({
     hasChanged() {
       return true;
@@ -151,7 +153,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
-
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
         // range delete
@@ -202,6 +203,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       // TODO expand selection down
     });
     hotkey.addListener(LINK, e => {
+      e.preventDefault();
       createLink(store, e);
     });
 
@@ -230,7 +232,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _onTitleKeyDown(e: KeyboardEvent) {
-    const hasContent = this._title.value.length > 0;
+    const hasContent = !this.store.isEmpty;
 
     if (e.key === 'Enter' && hasContent) {
       assertExists(this._title.selectionStart);
@@ -280,6 +282,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     }
   }
 
+  private _clearSelection() {
+    this.selection.state.clear();
+    this.signals.updateSelectedRects.emit([]);
+  }
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -315,11 +322,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.requestUpdate();
     });
 
+    // TMP: clear selected rects on scroll
+    const scrollContainer = this.mouseRoot.querySelector(
+      '.affine-editor-container'
+    ) as HTMLDivElement;
+    const scrollSignal = Signal.fromEvent(scrollContainer, 'scroll');
+    this._scrollDisposable = scrollSignal.on(() => this._clearSelection());
+
     focusTextEnd(this._title);
   }
 
   disconnectedCallback() {
     this._removeHotkeys();
+    this._scrollDisposable.dispose();
     this.selection.dispose();
   }
 
