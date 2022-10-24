@@ -151,7 +151,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
-
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
         // range delete
@@ -202,6 +201,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       // TODO expand selection down
     });
     hotkey.addListener(LINK, e => {
+      e.preventDefault();
       createLink(store, e);
     });
 
