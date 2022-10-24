@@ -28,9 +28,11 @@ test('basic link', async ({ page }) => {
   await selectAllByKeyboard(page);
   await pressCreateLinkShortCut(page);
 
-  const linkPopoverLocator = page.locator('.affine-link-popover-input');
+  const linkPopoverLocator = page.locator('.overlay-container');
   expect(await linkPopoverLocator.isVisible()).toBe(true);
-  await linkPopoverLocator.fill(link);
+  const linkPopoverInput = page.locator('.affine-link-popover-input');
+  expect(await linkPopoverInput.isVisible()).toBe(true);
+  await linkPopoverInput.fill(link);
   // await page.keyboard.type(link);
   // await page.locator(`text="Confirm"`).click();
   await pressEnter(page);
