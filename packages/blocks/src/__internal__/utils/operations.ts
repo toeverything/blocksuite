@@ -402,8 +402,8 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
     } else {
       const parent = store.getParent(model);
       if (!parent || parent?.flavour === 'group') {
-       const container = getContainerByModel(model)
-        const previousSibling = getPreviousBlock(container,model.id);
+        const container = getContainerByModel(model);
+        const previousSibling = getPreviousBlock(container, model.id);
         if (previousSibling) {
           store.captureSync();
           previousSibling.text?.join(model.text as Text);

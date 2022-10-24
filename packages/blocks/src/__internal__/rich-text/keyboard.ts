@@ -165,7 +165,7 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
 
   function backspace(this: KeyboardEventThis) {
     // To workaround uncontrolled behavior when deleting character at block start,
-    // in this case backspace should be handled in quill.    
+    // in this case backspace should be handled in quill.
     if (isCollapsedAtBlockStart(this.quill)) {
       handleLineStartBackspace(store, model);
       return PREVENT_DEFAULT;
