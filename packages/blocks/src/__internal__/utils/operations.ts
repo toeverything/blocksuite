@@ -8,6 +8,8 @@ import {
   getStartModelBySelection,
   getRichTextByModel,
   getModelsByRange,
+  getPreviousBlock,
+  getContainerByModel,
 } from './query';
 import {
   getCurrentRange,
@@ -330,7 +332,10 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
-  if (isNoneSelection()) return;
+  if (isNoneSelection()) {
+    e.preventDefault();
+    return;
+  }
 
   if (isRangeSelection()) {
     const models = getModelsByRange(getCurrentRange());
@@ -395,12 +400,31 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
       store.captureSync();
       store.updateBlock(model, { type: 'text' });
     } else {
-      const previousSibling = store.getPreviousSibling(model);
-      if (previousSibling) {
+      const parent = store.getParent(model);
+      if (!parent || parent?.flavour === 'group') {
+        const container = getContainerByModel(model);
+        const previousSibling = getPreviousBlock(container, model.id);
+        if (previousSibling) {
+          store.captureSync();
+          previousSibling.text?.join(model.text as Text);
+          store.deleteBlock(model);
+          asyncFocusRichText(store, previousSibling.id);
+        }
+      } else {
+        const grandParent = store.getParent(parent);
+        if (!grandParent) return;
+        const index = grandParent.children.indexOf(parent);
+        const blockProps = {
+          id: model.id,
+          flavour: model.flavour,
+          text: model?.text?.clone(), // should clone before `deleteBlock`
+          children: model.children,
+          type: model.type,
+        };
+
         store.captureSync();
-        previousSibling.text?.join(model.text as Text);
         store.deleteBlock(model);
-        asyncFocusRichText(store, previousSibling.id);
+        store.addBlock(blockProps, grandParent, index + 1);
       }
     }
   }
