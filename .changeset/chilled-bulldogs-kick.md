@@ -1,5 +1,5 @@
 ---
+'@blocksuite/store': patch
 '@blocksuite/blocks': patch
+'@blocksuite/editor': patch
 ---
-
-feat: support unlink a link
