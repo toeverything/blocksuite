@@ -300,14 +300,33 @@ function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
   return getLastSelectBlock(last.children);
 }
 
-export function getSelectInfo(): SelectionInfo {
-  const selection = window.getSelection();
+export function getSelectInfo(store: Store): SelectionInfo {
+  if (!store.root) {
+    return {
+      type: 'None',
+      selectedBlocks: [],
+    };
+  }
+
+  let type = 'None';
   let selectedBlocks: SelectedBlock[] = [];
-  if (selection && selection.type !== 'None') {
-    const range = selection.getRangeAt(0);
-    const models = getModelsByRange(getCurrentRange());
-    selectedBlocks = getSelectedBlock(models);
-    if (selectedBlocks.length > 0) {
+  let selectedModels: BaseBlockModel[] = [];
+  const page = getDefaultPageBlock(store.root);
+  const { state } = page.selection;
+  const nativeSelection = window.getSelection();
+  if (state.type === 'block') {
+    type = 'Block';
+    const { selectedRichTexts } = state;
+    selectedModels = selectedRichTexts.map(richText => richText.model);
+  } else if (nativeSelection && nativeSelection.type !== 'None') {
+    type = nativeSelection.type;
+    selectedModels = getModelsByRange(getCurrentRange());
+  }
+
+  if (type !== 'None') {
+    selectedBlocks = getSelectedBlock(selectedModels);
+    if (type !== 'Block' && nativeSelection && selectedBlocks.length > 0) {
+      const range = nativeSelection.getRangeAt(0);
       const firstIndex = getQuillIndexByNativeSelection(
         range.startContainer,
         range.startOffset as number
@@ -324,7 +343,7 @@ export function getSelectInfo(): SelectionInfo {
     }
   }
   return {
-    type: selection?.type || 'None',
+    type: type,
     selectedBlocks,
   };
 }

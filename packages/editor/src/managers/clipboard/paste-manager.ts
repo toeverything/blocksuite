@@ -126,7 +126,8 @@ export class PasteManager {
     if (blocks.length === 0) {
       return;
     }
-    const currentSelectionInfo = selectInfo || SelectionUtils.getSelectInfo();
+    const currentSelectionInfo =
+      selectInfo || SelectionUtils.getSelectInfo(this._editor.store);
     if (
       currentSelectionInfo.type === 'Range' ||
       currentSelectionInfo.type === 'Caret'

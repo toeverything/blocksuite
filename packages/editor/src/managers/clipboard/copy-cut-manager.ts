@@ -61,7 +61,7 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const selectionInfo = SelectionUtils.getSelectInfo();
+    const selectionInfo = SelectionUtils.getSelectInfo(this._editor.store);
     const selectedBlocks = selectionInfo.selectedBlocks;
 
     const affineClip = this._getCustomClip(selectedBlocks);
