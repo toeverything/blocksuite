@@ -94,7 +94,11 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     const parent = store.getParent(model);
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList = model.flavour === 'list' && model.text?.length === 0;
-    if (isEmptyList && parent?.flavour === 'group') {
+    if (
+      isEmptyList &&
+      parent?.flavour === 'group' &&
+      model.children.length === 0
+    ) {
       handleLineStartBackspace(store, model);
     } else if (isEmptyList && isLastChild) {
       const index = this.quill.getSelection()?.index || 0;
