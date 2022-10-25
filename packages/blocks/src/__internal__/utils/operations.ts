@@ -72,7 +72,7 @@ export function handleBlockSplit(
 
   const newBlockIndex = parent.children.indexOf(model) + 1;
   const id = store.addBlock(
-    { flavour: model.flavour, text: right },
+    { flavour: model.flavour, text: right, type: model.type },
     parent,
     newBlockIndex
   );
