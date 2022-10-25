@@ -25,6 +25,9 @@ import { Point, Rect } from './rect';
 import { getQuillIndexByNativeSelection } from './operations';
 import type { SelectionEvent } from './gesture';
 
+// /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
+const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
+
 export function focusRichText(
   position: SelectionPosition,
   editableContainer: Element
@@ -437,6 +440,97 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
       focusRichTextByOffset(block, e.raw.clientX);
     }
   }
+}
+
+export function handleNativeRangeDblClick(store: Store, e: SelectionEvent) {
+  const selection = window.getSelection();
+  if (selection && selection.isCollapsed && selection.anchorNode) {
+    const editableContainer =
+      selection.anchorNode.parentElement?.closest('[contenteditable]');
+    if (editableContainer) {
+      const leafNodes = leftFirstSearchLeafNodes(editableContainer);
+      let startNode = leafNodes[0];
+      let startOffset = 0;
+      let endNode = leafNodes[leafNodes.length - 1];
+      let endOffset = endNode.textContent?.length || 0;
+      // if anchorNode is Element, it always has only one child
+      const currentTextNode =
+        selection.anchorNode instanceof Element
+          ? selection.anchorNode.firstChild
+          : selection.anchorNode;
+      const currentNodeIndex = leafNodes.findIndex(
+        node => node === currentTextNode
+      );
+      // get startNode and startOffset
+      for (let i = currentNodeIndex; i >= 0; i--) {
+        const node = leafNodes[i];
+        if (node instanceof Text) {
+          const text = node.textContent?.slice(
+            0,
+            i === currentNodeIndex ? selection.anchorOffset : undefined
+          );
+          if (text) {
+            const reverseText = Array.from(text).reverse().join('');
+            const index = reverseText.search(notStrictCharacterReg);
+            if (index !== -1) {
+              startNode = node;
+              startOffset = reverseText.length - index;
+              break;
+            }
+          }
+        }
+      }
+      // get endNode and endOffset
+      for (let j = currentNodeIndex; j < leafNodes.length; j++) {
+        const node = leafNodes[j];
+        if (node instanceof Text) {
+          const text = node.textContent?.slice(
+            j === currentNodeIndex ? selection.anchorOffset : undefined
+          );
+          if (text) {
+            const index = text.search(notStrictCharacterReg);
+            if (index !== -1) {
+              endNode = node;
+              endOffset =
+                j === currentNodeIndex ? selection.anchorOffset + index : index;
+              break;
+            }
+          }
+        }
+      }
+      // fix double click on not text area
+      if (
+        startNode === endNode &&
+        startOffset === endOffset &&
+        startOffset > 0
+      ) {
+        startOffset = startOffset - 1;
+      }
+      const newRange = document.createRange();
+      newRange.setStart(startNode, startOffset);
+      newRange.setEnd(endNode, endOffset);
+      // TODO: add Segmenter if possible
+      resetNativeSelection(newRange);
+    }
+  }
+}
+
+/**
+ * left first search all leaf text nodes
+ * @example
+ *  <div><p>he<em>ll</em>o</p><p>world</p></div>
+ *  => [he, ll, o, world]
+ **/
+export function leftFirstSearchLeafNodes(node: Node, leafNodes: Node[] = []) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    leafNodes.push(node);
+  } else {
+    const children = node.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      leftFirstSearchLeafNodes(children[i], leafNodes);
+    }
+  }
+  return leafNodes;
 }
 
 export function getSplicedTitle(title: HTMLInputElement) {
