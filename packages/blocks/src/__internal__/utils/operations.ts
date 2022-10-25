@@ -35,14 +35,25 @@ export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
     // make adding text block by enter a standalone operation
     store.captureSync();
 
-    const blockProps = {
-      flavour: model.flavour,
-      type: !['bulleted', 'numbered', 'todo'].includes(model.type)
-        ? 'text'
-        : model.type,
-    };
-    const id = store.addBlock(blockProps, parent, index + 1);
-    asyncFocusRichText(store, id);
+    let id = '';
+    if (model.flavour === 'list') {
+      const blockProps = {
+        flavour: model.flavour,
+        type: model.type,
+      };
+      if (model.children.length === 0) {
+        id = store.addBlock(blockProps, parent, index + 1);
+      } else {
+        id = store.addBlock(blockProps, model, 0);
+      }
+    } else {
+      const blockProps = {
+        flavour: model.flavour,
+        type: 'text',
+      };
+      id = store.addBlock(blockProps, parent, index + 1);
+    }
+    id && asyncFocusRichText(store, id);
   }
 }
 
@@ -70,10 +81,15 @@ export function handleBlockSplit(
   store.markTextSplit(model.text, left, right);
   store.updateBlock(model, { text: left });
 
-  const newBlockIndex = parent.children.indexOf(model) + 1;
+  let newParent = parent;
+  let newBlockIndex = newParent.children.indexOf(model) + 1;
+  if (model.flavour === 'list' && model.children.length > 0) {
+    newParent = model;
+    newBlockIndex = 0;
+  }
   const id = store.addBlock(
     { flavour: model.flavour, text: right, type: model.type },
-    parent,
+    newParent,
     newBlockIndex
   );
   asyncFocusRichText(store, id);
