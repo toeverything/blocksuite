@@ -9,11 +9,9 @@ import {
 import {
   BlockHost,
   BLOCK_ID_ATTR,
-  handleBackspace,
   hotkey,
   HOTKEYS,
   resetNativeSelection,
-  tryUpdateGroupSize,
 } from '../../__internal__';
 import {
   EdgelessSelectionManager,
@@ -22,7 +20,12 @@ import {
   XYWH,
 } from './selection-manager';
 import style from './style.css';
-import { bindCommonHotkey, removeCommonHotKey } from '../util';
+import {
+  bindCommonHotkey,
+  handleBackspace,
+  removeCommonHotKey,
+  tryUpdateGroupSize,
+} from '../utils';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly store: Store;

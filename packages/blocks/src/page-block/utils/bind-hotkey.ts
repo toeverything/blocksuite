@@ -1,6 +1,7 @@
 import { Store } from '@blocksuite/store';
-import { hotkey, HOTKEYS, handleFormat } from '../../__internal__';
+import { hotkey, HOTKEYS } from '../../__internal__';
 import { createLink } from '../../__internal__/rich-text/link-node';
+import { handleFormat } from './container-operations';
 const { UNDO, REDO, INLINE_CODE, STRIKE, LINK } = HOTKEYS;
 
 export function bindCommonHotkey(store: Store) {

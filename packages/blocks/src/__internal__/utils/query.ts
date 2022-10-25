@@ -241,3 +241,65 @@ export function getDOMRectByLine(
     return subList.reduce(mergeRect);
   }
 }
+
+export function getCurrentRange() {
+  const selection = window.getSelection() as Selection;
+  return selection.getRangeAt(0);
+}
+
+function textWithoutNode(parentNode: Node, currentNode: Node) {
+  let text = '';
+  for (let i = 0; i < parentNode.childNodes.length; i++) {
+    const node = parentNode.childNodes[i];
+
+    if (node !== currentNode || !currentNode.contains(node)) {
+      // @ts-ignore
+      text += node.textContent || node.innerText || '';
+    } else {
+      return text;
+    }
+  }
+  return text;
+}
+
+export function getQuillIndexByNativeSelection(
+  ele: Node | null | undefined,
+  nodeOffset: number,
+  isStart: boolean
+) {
+  if (
+    ele instanceof Element &&
+    ele.classList.contains('affine-default-page-block-title-container')
+  ) {
+    return (
+      (isStart
+        ? ele.querySelector('input')?.selectionStart
+        : ele.querySelector('input')?.selectionEnd) || 0
+    );
+  }
+
+  let offset = 0;
+  let lastNode = ele;
+  let selfAdded = false;
+  while (
+    ele &&
+    // @ts-ignore
+    (!lastNode?.getAttributeNode ||
+      // @ts-ignore
+      !lastNode.getAttributeNode('contenteditable'))
+  ) {
+    if (ele instanceof Element && ele.hasAttribute('data-block-id')) {
+      offset = 0;
+      break;
+    }
+    if (!selfAdded) {
+      selfAdded = true;
+      offset += nodeOffset;
+    } else {
+      offset += textWithoutNode(ele as Node, lastNode as Node).length;
+    }
+    lastNode = ele;
+    ele = ele?.parentNode;
+  }
+  return offset;
+}

@@ -11,20 +11,23 @@ import {
   BlockChildrenContainer,
   SelectionPosition,
   HOTKEYS,
-  handleBackspace,
-  handleBlockSelectionBatchDelete,
-  updateTextType,
-  handleSelectAll,
-  batchUpdateTextType,
   assertExists,
   isPageTitle,
   getSplicedTitle,
   noop,
-  tryUpdateGroupSize,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
-import { bindCommonHotkey, removeCommonHotKey } from '../util';
+import {
+  batchUpdateTextType,
+  bindCommonHotkey,
+  handleBackspace,
+  handleBlockSelectionBatchDelete,
+  handleSelectAll,
+  removeCommonHotKey,
+  tryUpdateGroupSize,
+  updateTextType,
+} from '../utils';
 
 export interface DefaultPageSignals {
   updateSelectionRect: Signal<DOMRect | null>;

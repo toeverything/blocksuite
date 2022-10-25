@@ -5,20 +5,22 @@ import {
   focusNextBlock,
   focusPreviousBlock,
   getCurrentRange,
-  handleBlockEndEnter,
-  handleBlockSplit,
-  handleIndent,
-  handleKeyDown,
-  handleKeyUp,
-  handleLineStartBackspace,
-  handleSoftEnter,
-  handleUnindent,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   noop,
   PREVENT_DEFAULT,
-  tryMatchSpaceHotkey,
 } from '../utils';
+import {
+  handleLineStartBackspace,
+  handleUnindent,
+  handleBlockEndEnter,
+  handleBlockSplit,
+  handleSoftEnter,
+  handleIndent,
+  handleKeyDown,
+  handleKeyUp,
+  tryMatchSpaceHotkey,
+} from './rich-text-operations';
 import { Shortcuts } from './shortcuts';
 
 interface QuillRange {
