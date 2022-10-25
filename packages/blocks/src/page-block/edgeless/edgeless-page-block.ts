@@ -134,7 +134,7 @@ export class EdgelessPageBlockComponent
 
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.store, 1);
+      tryUpdateGroupSize(this.store, this.viewport.zoom);
     });
 
     // XXX: should be called after rich text components are mounted
