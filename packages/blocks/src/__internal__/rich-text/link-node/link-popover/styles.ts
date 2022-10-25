@@ -45,11 +45,23 @@ export const editLinkStyle = css`
 export const linkPopoverStyle = css`
   .overlay-container {
     font-family: var(--affine-font-family);
+    font-size: var(--affine-font-base);
     font-style: normal;
     line-height: 24px;
-    font-size: var(--affine-font-sm);
     color: var(--affine-popover-color);
     z-index: var(--affine-z-index-popover);
+    animation: affine-popover-fade-in 0.2s ease;
+  }
+
+  @keyframes affine-popover-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .overlay-mask {
@@ -61,6 +73,8 @@ export const linkPopoverStyle = css`
   }
 
   input {
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-base);
     box-sizing: border-box;
     padding: 6px 12px;
     width: 260px;

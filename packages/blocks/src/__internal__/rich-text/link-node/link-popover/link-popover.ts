@@ -112,43 +112,41 @@ export class LinkPopover extends LitElement {
     >`;
   }
 
-  createTemplate() {
+  createLinkTemplate() {
+    return html`<div class="affine-link-popover">
+      <input
+        class="affine-link-popover-input"
+        autofocus
+        id="link-input"
+        type="text"
+        spellcheck="false"
+        placeholder="Paste or type a link"
+        value=${this.previewLink}
+        @keyup=${this.onKeyup}
+      />
+      <span class="affine-link-popover-dividing-line"></span>
+      ${this.confirmBtnTemplate()}
+    </div>`;
+  }
+
+  previewTemplate() {
+    return html`<div class="affine-link-popover">
+      <div class="affine-link-preview" @click=${this.onCopy}>
+        ${this.previewLink}
+      </div>
+      <span class="affine-link-popover-dividing-line"></span>
+      <icon-button @click=${this.onUnlink}>${UnlinkIcon()}</icon-button
+      ><icon-button @click=${this.onEdit}>${EditIcon()}</icon-button>
+    </div>`;
+  }
+
+  simpleTemplate() {
     const isCreateLink = !this.previewLink;
-
-    const buttons = html`<icon-button @click=${this.onUnlink}
-        >${UnlinkIcon()}</icon-button
-      ><icon-button @click=${this.onEdit}>${EditIcon()}</icon-button>`;
-
-    return isCreateLink
-      ? html`<div class="affine-link-popover" style=${this.style.cssText}>
-          <input
-            class="affine-link-popover-input"
-            autofocus
-            id="link-input"
-            type="text"
-            spellcheck="false"
-            placeholder="Paste or type a link"
-            value=${this.previewLink}
-            @keyup=${this.onKeyup}
-            @click=${this.onCopy}
-          />
-          <span class="affine-link-popover-dividing-line"></span>
-          ${this.confirmBtnTemplate()}
-        </div>`
-      : html`<div class="affine-link-popover" style=${this.style.cssText}>
-          <div class="affine-link-preview" @click=${this.onCopy}>
-            ${this.previewLink}
-          </div>
-          <span class="affine-link-popover-dividing-line"></span>
-          ${buttons}
-        </div>`;
+    return isCreateLink ? this.createLinkTemplate() : this.previewTemplate();
   }
 
   editTemplate() {
-    return html`<div
-      class="affine-link-edit-popover"
-      style=${this.style.cssText}
-    >
+    return html`<div class="affine-link-edit-popover">
       <label class="affine-edit-text-text" for="text-input">Text</label>
       <input
         class="affine-edit-text-input"
@@ -179,14 +177,15 @@ export class LinkPopover extends LitElement {
       : html``;
 
     const popover =
-      this.type === 'create' ? this.createTemplate() : this.editTemplate();
+      this.type === 'create' ? this.simpleTemplate() : this.editTemplate();
 
     return html`
       <div class="overlay-root">
         ${mask}
         <div
           class="overlay-container"
-          style="position: absolute; left: ${this.left}; top: ${this.top};"
+          style="position: absolute; left: ${this.left}; top: ${this.top};${this
+            .style.cssText}"
         >
           ${popover}
         </div>
