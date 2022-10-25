@@ -26,7 +26,7 @@ import { getQuillIndexByNativeSelection } from './operations';
 import type { SelectionEvent } from './gesture';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
-const strictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
+const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 
 export function focusRichText(
   position: SelectionPosition,
@@ -471,7 +471,7 @@ export function handleNativeRangeDblClick(store: Store, e: SelectionEvent) {
           );
           if (text) {
             const reverseText = Array.from(text).reverse().join('');
-            const index = reverseText.search(strictCharacterReg);
+            const index = reverseText.search(notStrictCharacterReg);
             if (index !== -1) {
               startNode = node;
               startOffset = reverseText.length - index;
@@ -488,7 +488,7 @@ export function handleNativeRangeDblClick(store: Store, e: SelectionEvent) {
             j === currentNodeIndex ? selection.anchorOffset : undefined
           );
           if (text) {
-            const index = text.search(strictCharacterReg);
+            const index = text.search(notStrictCharacterReg);
             if (index !== -1) {
               endNode = node;
               endOffset =
