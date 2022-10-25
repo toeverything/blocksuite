@@ -17,7 +17,7 @@ import {
   isMultiBlockRange,
   isNoneSelection,
   isRangeSelection,
-  resetNativeSeletion,
+  resetNativeSelection,
 } from './selection';
 
 // XXX: workaround quill lifecycle issue
@@ -412,7 +412,7 @@ export function handleSelectAll() {
   // @ts-ignore
   range.setEnd(lastNode, lastNode.length);
 
-  resetNativeSeletion(range);
+  resetNativeSelection(range);
 }
 
 function findLastNode(ele: Element | Node): Node {

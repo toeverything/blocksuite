@@ -1,11 +1,14 @@
 /// <reference types="vite/client" />
 
-import * as Y from 'yjs';
-import { Signal } from './utils/signal';
-import { PrelimText, RichTextAdapter, Text, TextType } from './text-adapter';
 import Quill from 'quill';
 import { Awareness } from 'y-protocols/awareness.js';
-import { SelectionRange, AwarenessAdapter } from './awareness';
+import * as Y from 'yjs';
+import { AwarenessAdapter, SelectionRange } from './awareness';
+import { BaseBlockModel } from './base';
+import { Provider, ProviderFactory } from './providers';
+import { PrelimText, RichTextAdapter, Text, TextType } from './text-adapter';
+import { blockRecordToJSXNode } from './utils/jsx';
+import { Signal } from './utils/signal';
 import {
   assertValidChildren,
   initSysProps,
@@ -13,9 +16,6 @@ import {
   toBlockProps,
   trySyncTextProp,
 } from './utils/utils';
-import { BaseBlockModel } from './base';
-import { DebugProvider } from './providers';
-import { blockRecordToJSXNode } from './utils/jsx';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -52,14 +52,17 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-interface StoreOptions {
-  room: string;
-  useDebugProvider: boolean;
+export interface StoreOptions {
+  room?: string;
+  providers?: ProviderFactory[];
+  awareness?: Awareness;
 }
+
+const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
   readonly doc = new Y.Doc();
-  readonly provider?: DebugProvider;
+  readonly providers: Provider[] = [];
   readonly awareness!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
@@ -83,16 +86,19 @@ export class Store {
     Object.keys(new BaseBlockModel(this, {}))
   );
 
-  constructor(options: StoreOptions) {
-    if (IS_WEB && options.useDebugProvider) {
-      this.provider = new DebugProvider(options.room, this.doc);
-    }
+  constructor({
+    room = DEFAULT_ROOM,
+    providers = [],
+    awareness,
+  }: StoreOptions = {}) {
+    const aware = awareness ?? new Awareness(this.doc);
 
-    const awareness = this.provider
-      ? this.provider.awareness
-      : new Awareness(this.doc);
-    this.awareness = new AwarenessAdapter(this, awareness);
+    this.providers =
+      providers.map(
+        Provider => new Provider(room, this.doc, { awareness: aware })
+      ) ?? [];
 
+    this.awareness = new AwarenessAdapter(this, aware);
     this._yBlocks.observeDeep(this._yBlocksObserver);
 
     this._history = new Y.UndoManager([this._yBlocks], {
