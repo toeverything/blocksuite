@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "type": "module",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
