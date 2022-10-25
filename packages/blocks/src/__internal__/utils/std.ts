@@ -15,7 +15,16 @@ export function matchFlavours(model: BaseBlockModel, expected: string[]) {
   return expected.includes(model.flavour);
 }
 
-export function caretRangeFromPoint(x: number, y: number) {
+const IS_FIREFOX = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+export function caretRangeFromPoint(x: number, y: number): Range | null {
+  if (IS_FIREFOX) {
+    // @ts-ignore
+    const caret = document.caretPositionFromPoint(x, y);
+    const range = document.createRange();
+    range.setStart(caret.offsetNode, caret.offset);
+    return range;
+  }
   return document.caretRangeFromPoint(x, y);
 }
 
