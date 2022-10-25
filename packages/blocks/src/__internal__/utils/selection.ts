@@ -100,7 +100,7 @@ function focusRichTextByModel(
   model: BaseBlockModel
 ) {
   const element = getBlockElementByModel(model);
-  const editableContainer = element.querySelector('[contenteditable]');
+  const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
     focusRichText(position, editableContainer);
   }
@@ -437,6 +437,7 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
     assertExists(lastChild);
     if (matchFlavours(lastChild, ['paragraph', 'list'])) {
       const block = getBlockElementByModel(lastChild);
+      if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
     }
   }

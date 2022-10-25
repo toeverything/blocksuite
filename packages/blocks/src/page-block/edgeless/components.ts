@@ -12,7 +12,10 @@ import type {
 import { BlockElement, BlockHost } from '../../__internal__';
 import '../../__internal__';
 
-export function EdgelessSelectedRect(state: EdgelessSelectionState) {
+export function EdgelessSelectedRect(
+  state: EdgelessSelectionState,
+  zoom: number
+) {
   const { type } = state;
   if (type === 'none') return html`<div></div>`;
 
@@ -23,8 +26,8 @@ export function EdgelessSelectedRect(state: EdgelessSelectionState) {
     position: 'absolute',
     left: box.x + 'px',
     top: box.y + 'px',
-    width: box.width + 'px',
-    height: box.height + 'px',
+    width: box.width + 18 * zoom + 'px', // FIXME
+    height: box.height + 27 * zoom + 'px', // FIXME
     border: `1px solid ${color}`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
@@ -50,8 +53,8 @@ function EdgelessBlockChild(
     position: 'absolute',
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
-    width: w + 'px',
-    minHeight: h + 'px',
+    width: w + 18 + 'px',
+    minHeight: h + 18 + 'px',
     paddingLeft: '9px',
     paddingRight: '9px',
     paddingBottom: '18px',

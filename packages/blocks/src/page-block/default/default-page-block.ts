@@ -20,6 +20,7 @@ import {
   isPageTitle,
   getSplicedTitle,
   noop,
+  tryUpdateGroupSize,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
@@ -306,6 +307,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.signals.updateSelectedRects.on(rects => {
       this.selectedRects = rects;
       this.requestUpdate();
+    });
+
+    tryUpdateGroupSize(this.store, 1);
+    this.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+      tryUpdateGroupSize(this.store, 1);
     });
 
     // TMP: clear selected rects on scroll

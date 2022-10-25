@@ -24,7 +24,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'group',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,480]',
+      'prop:xywh': '[0,0,720,32]',
     },
     '2': {
       'sys:flavour': 'paragraph',
@@ -323,6 +323,7 @@ export async function assertClipItems(page: Page, key: string, value: unknown) {
       .getElementsByTagName('editor-container')[0]
       .clipboard['_copy']['_getClipItems']();
   });
+  // @ts-ignore
   const actual = clipItems.find(item => item.mimeType === key)?.data;
   expect(actual).toEqual(value);
 }

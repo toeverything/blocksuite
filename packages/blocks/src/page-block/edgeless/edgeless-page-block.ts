@@ -13,6 +13,7 @@ import {
   hotkey,
   HOTKEYS,
   resetNativeSelection,
+  tryUpdateGroupSize,
 } from '../../__internal__';
 import {
   EdgelessSelectionManager,
@@ -131,6 +132,11 @@ export class EdgelessPageBlockComponent
 
     this._bindHotkeys();
 
+    this.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+      tryUpdateGroupSize(this.store, 1);
+    });
+
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
   }
@@ -152,7 +158,8 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const selectedRect = EdgelessSelectedRect(this._selection.state);
+    const { zoom } = this.viewport;
+    const selectedRect = EdgelessSelectedRect(this._selection.state, zoom);
 
     return html`
       <style></style>

@@ -2,7 +2,7 @@ import type { Quill } from 'quill';
 import { BaseBlockModel, Store, Text } from '@blocksuite/store';
 
 import { ExtendedModel } from './types';
-import { assertExists, assertFlavours, noop } from './std';
+import { almostEqual, assertExists, assertFlavours, noop } from './std';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from './consts';
 import {
   getStartModelBySelection,
@@ -10,6 +10,7 @@ import {
   getModelsByRange,
   getPreviousBlock,
   getContainerByModel,
+  getBlockElementByModel,
 } from './query';
 import {
   getCurrentRange,
@@ -19,6 +20,7 @@ import {
   isRangeSelection,
   resetNativeSelection,
 } from './selection';
+import { GroupBlockModel } from '../../group-block';
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(store: Store, id: string) {
@@ -631,4 +633,32 @@ export function convertToParagraph(
     store.updateBlock(model, { type: type });
   }
   return true;
+}
+
+export function tryUpdateGroupSize(store: Store, zoom: number) {
+  requestAnimationFrame(() => {
+    if (!store.root) return;
+    const groups = store.root.children as GroupBlockModel[];
+    groups.forEach(model => {
+      const blockElement = getBlockElementByModel(model);
+      if (!blockElement) return;
+      const bound = blockElement.getBoundingClientRect();
+      if (!bound) return;
+
+      const [x, y, w, h] = JSON.parse(model.xywh) as [
+        number,
+        number,
+        number,
+        number
+      ];
+      const newModelWidth = bound.width / zoom;
+      const newModelHeight = bound.height / zoom;
+
+      if (!almostEqual(newModelWidth, w) || !almostEqual(newModelHeight, h)) {
+        store.updateBlock(model, {
+          xywh: JSON.stringify([x, y, newModelWidth, newModelHeight]),
+        });
+      }
+    });
+  });
 }
