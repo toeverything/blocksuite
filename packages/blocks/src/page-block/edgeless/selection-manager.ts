@@ -3,7 +3,7 @@ import { EdgelessContainer } from './edgeless-page-block';
 import {
   SelectionEvent,
   initMouseEventHandlers,
-  resetNativeSeletion,
+  resetNativeSelection,
   noop,
   caretRangeFromPoint,
   handleNativeRangeDragMove,
@@ -159,7 +159,7 @@ export class EdgelessSelectionManager {
     } else {
       this._state = { type: 'none' };
       this._container.signals.updateSelection.emit(this.state);
-      resetNativeSeletion(null);
+      resetNativeSelection(null);
     }
   }
 

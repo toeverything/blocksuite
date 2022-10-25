@@ -63,7 +63,7 @@ export function focusRichText(
       newLeft = right - 1;
     }
     range = caretRangeFromPoint(newLeft, newTop);
-    resetNativeSeletion(range);
+    resetNativeSelection(range);
   }
   if (position === 'start') {
     const newRange = document.createRange();
@@ -89,7 +89,7 @@ export function focusRichText(
     }
     range = newRange;
   }
-  resetNativeSeletion(range);
+  resetNativeSelection(range);
 }
 
 function focusRichTextByModel(
@@ -239,7 +239,7 @@ export function handleKeyDown(
   return ALLOW_DEFAULT;
 }
 
-export function resetNativeSeletion(range: Range | null) {
+export function resetNativeSelection(range: Range | null) {
   const selection = window.getSelection();
   selection?.removeAllRanges();
   range && selection?.addRange(range);
@@ -252,7 +252,7 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   const y = bbox.y + bbox.height / 2;
   const range = caretRangeFromPoint(x, y);
   if (range?.startContainer instanceof Node) {
-    resetNativeSeletion(range);
+    resetNativeSelection(range);
   }
 }
 
@@ -260,7 +260,7 @@ export function focusRichTextStart(richText: RichText) {
   const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
   const range = document.createRange();
   range.setStart(start, 0);
-  resetNativeSeletion(range);
+  resetNativeSelection(range);
 }
 
 export function getCurrentRange() {
@@ -390,7 +390,7 @@ export function handleNativeRangeDragMove(
       isForward
     );
   }
-  resetNativeSeletion(currentRange);
+  resetNativeSelection(currentRange);
 }
 
 function isBlankAreaBetweenBlocks(startContainer: Node) {
@@ -418,7 +418,7 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
 
   // click on rich text
   if (startContainer instanceof Node) {
-    resetNativeSeletion(range);
+    resetNativeSelection(range);
   }
 
   if (!(startContainer instanceof HTMLElement)) return;
