@@ -65,7 +65,7 @@ function SelectedRectsContainer(rects: DOMRect[]) {
     <style>
       .affine-page-selected-rects-container > div {
         position: fixed;
-        background: rgba(104, 128, 255, 0.1);
+        background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
         border-radius: 5px;

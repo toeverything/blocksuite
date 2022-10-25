@@ -11,12 +11,18 @@
   font-weight: 600;
   --affine-link-color: var(--affine-link-color2);
 }
+.h1 code {
+  font-size: calc(var(--affine-font-base) + 8px);
+}
 .h2 {
   font-size: calc(var(--affine-font-base) + 10px);
   line-height: calc(var(--affine-line-height-base) + 12px);
   margin-top: calc(var(--affine-paragraph-space) + 18px);
   font-weight: 600;
   --affine-link-color: var(--affine-link-color2);
+}
+.h2 code {
+  font-size: calc(var(--affine-font-base) + 6px);
 }
 .h3 {
   font-size: calc(var(--affine-font-base) + 8px);
@@ -25,12 +31,18 @@
   font-weight: 600;
   --affine-link-color: var(--affine-link-color2);
 }
+.h3 code {
+  font-size: calc(var(--affine-font-base) + 4px);
+}
 .h4 {
   font-size: calc(var(--affine-font-base) + 6px);
   line-height: calc(var(--affine-line-height-base) + 8px);
   margin-top: calc(var(--affine-paragraph-space) + 14px);
   font-weight: 600;
   --affine-link-color: var(--affine-link-color2);
+}
+.h4 code {
+  font-size: calc(var(--affine-font-base) + 2px);
 }
 .h5 {
   font-size: calc(var(--affine-font-base) + 4px);
@@ -39,12 +51,18 @@
   font-weight: 600;
   --affine-link-color: var(--affine-link-color2);
 }
+.h5 code {
+  font-size: calc(var(--affine-font-base));
+}
 .h6 {
   font-size: calc(var(--affine-font-base) + 2px);
   line-height: calc(var(--affine-line-height-base) + 2px);
   margin-top: calc(var(--affine-paragraph-space) + 10px);
   font-weight: 600;
   --affine-link-color: var(--affine-link-color2);
+}
+.h6 code {
+  font-size: calc(var(--affine-font-base) - 2px);
 }
 .quote {
   font-size: 18px;
@@ -67,6 +85,9 @@
   margin-top: var(--affine-paragraph-space);
   font-size: var(--affine-font-base);
 }
+.text code {
+  font-size: calc(var(--affine-font-base) - 4px);
+}
 
 strong {
   font-weight: 600;
@@ -77,7 +98,7 @@ code {
   color: var(--affine-code-color);
   font-family: var(--affine-font-family2);
   padding: 0 5px;
-  border-radius: 2px;
+  border-radius: 5px;
 }
 
 u {
