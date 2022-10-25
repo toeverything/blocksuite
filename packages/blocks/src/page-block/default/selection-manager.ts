@@ -10,6 +10,7 @@ import {
   isBlankArea,
   handleNativeRangeClick,
   isPageTitle,
+  handleNativeRangeDblClick,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
 import type { DefaultPageSignals } from './default-page-block';
@@ -208,7 +209,11 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
-    // console.log('dblclick', e);
+    this.state.clear();
+    this._signals.updateSelectedRects.emit([]);
+    if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+    if (e.raw.target instanceof HTMLInputElement) return;
+    handleNativeRangeDblClick(this.store, e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
