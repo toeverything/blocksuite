@@ -3,7 +3,7 @@ import {
   initMouseEventHandlers,
   SelectionEvent,
   caretRangeFromPoint,
-  resetNativeSeletion,
+  resetNativeSelection,
   assertExists,
   noop,
   handleNativeRangeDragMove,
@@ -127,7 +127,7 @@ export class DefaultSelectionManager {
     this.state.type = 'block';
     this.state.resetStartRange(e);
     this.state.refreshRichTextBoundsCache(this._container);
-    resetNativeSeletion(null);
+    resetNativeSelection(null);
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {

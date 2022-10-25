@@ -9,9 +9,10 @@ import {
 import {
   BlockHost,
   BLOCK_ID_ATTR,
+  handleBackspace,
   hotkey,
   HOTKEYS,
-  resetNativeSeletion,
+  resetNativeSelection,
 } from '../../__internal__';
 import {
   EdgelessSelectionManager,
@@ -20,6 +21,7 @@ import {
   XYWH,
 } from './selection-manager';
 import style from './style.css';
+import { bindCommonHotkey, removeCommonHotKey } from '../util';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly store: Store;
@@ -72,14 +74,19 @@ export class EdgelessPageBlockComponent
 
   private _bindHotkeys() {
     const { store } = this;
-    hotkey.addListener(HOTKEYS.UNDO, () => store.undo());
-    hotkey.addListener(HOTKEYS.REDO, () => store.redo());
+    hotkey.addListener(HOTKEYS.BACKSPACE, this._backspace.bind(this));
+    bindCommonHotkey(store);
   }
 
   private _removeHotkeys() {
-    hotkey.removeListener([HOTKEYS.UNDO, HOTKEYS.REDO]);
+    hotkey.removeListener([HOTKEYS.BACKSPACE]);
+    removeCommonHotKey();
   }
-
+  _backspace(e: KeyboardEvent) {
+    if (this._selection.state.type === 'single') {
+      handleBackspace(this.store, e);
+    }
+  }
   private _initViewport() {
     const bound = this.mouseRoot.getBoundingClientRect();
     this.viewport.setSize(bound.width, bound.height);
@@ -92,7 +99,7 @@ export class EdgelessPageBlockComponent
   private _clearSelection() {
     requestAnimationFrame(() => {
       if (!this._selection.isActive) {
-        resetNativeSeletion(null);
+        resetNativeSelection(null);
       }
     });
   }
