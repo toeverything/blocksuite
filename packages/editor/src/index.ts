@@ -1,5 +1,6 @@
 import { Store, StoreOptions } from '@blocksuite/store';
 import { BlockSchema } from './block-loader';
+import type { EditorContainer } from './components';
 
 export * from './components';
 export * from './managers';
@@ -31,7 +32,7 @@ export type EditorOptions =
     }
   | Partial<StoreOptions>;
 
-export const createEditor = (options: EditorOptions = {}) => {
+export const createEditor = (options: EditorOptions = {}): EditorContainer => {
   const editor = document.createElement('editor-container');
   if ('store' in options) {
     // 1. Use custom store
@@ -40,7 +41,7 @@ export const createEditor = (options: EditorOptions = {}) => {
   }
   if (Object.keys(options).length > 0) {
     // 2. Use custom room or providers
-    const store: Store = new Store({
+    const store = new Store({
       room: options.room,
       providers: options.providers,
       awareness: options.awareness,
@@ -49,5 +50,7 @@ export const createEditor = (options: EditorOptions = {}) => {
     return editor;
   }
   // 3. Use default store
+  const store = new Store().register(BlockSchema);
+  editor.store = store;
   return editor;
 };
