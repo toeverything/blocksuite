@@ -1,12 +1,7 @@
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
 import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  fixCurrentRangeToText,
-  matchFlavours,
-} from './std';
+import { assertExists, caretRangeFromPoint, matchFlavours } from './std';
 import {
   ExtendedModel,
   SelectedBlock,
@@ -27,6 +22,54 @@ import type { SelectionEvent } from './gesture';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
+
+function fixCurrentRangeToText(
+  x: number,
+  y: number,
+  range: Range,
+  isForward: boolean
+) {
+  const endContainer = isForward ? range.endContainer : range.startContainer;
+  let newRange: Range | null = range;
+  if (endContainer.nodeType !== Node.TEXT_NODE) {
+    const texts = Array.from(
+      (range.commonAncestorContainer as HTMLElement).querySelectorAll(
+        '.ql-editor'
+      )
+    );
+    if (texts.length) {
+      let text: Element | undefined = undefined;
+      if (isForward) {
+        text = texts.reverse().find(t => {
+          const rect = t.getBoundingClientRect();
+          return y >= rect.bottom;
+        });
+        if (text) {
+          const rect = text.getBoundingClientRect();
+          const y = rect.bottom - 6;
+          newRange = caretRangeFromPoint(x, y);
+          if (newRange) {
+            range.setEnd(newRange.endContainer, newRange.endOffset);
+          }
+        }
+      } else {
+        text = texts.find(t => {
+          const rect = t.getBoundingClientRect();
+          return y <= rect.top;
+        });
+        if (text) {
+          const rect = text.getBoundingClientRect();
+          const y = rect.top + 6;
+          newRange = caretRangeFromPoint(x, y);
+          if (newRange) {
+            range.setStart(newRange.endContainer, newRange.endOffset);
+          }
+        }
+      }
+    }
+  }
+  return range;
+}
 
 export function focusRichText(
   position: SelectionPosition,
