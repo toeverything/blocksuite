@@ -1,5 +1,5 @@
-import { LitElement, html } from 'lit';
-import { customElement, state, query } from 'lit/decorators.js';
+import { html, LitElement } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { Store } from '@blocksuite/store';
@@ -8,20 +8,10 @@ import { BlockSchema } from '../../block-loader';
 
 type PageBlockModel = InstanceType<typeof BlockSchema.page>;
 
-const params = new URLSearchParams(location.search);
-const room = params.get('room') || 'virgo-default';
-
-const IS_PLAYGROUND = location.href.includes('5173');
-
-const options = {
-  room,
-  useDebugProvider: IS_PLAYGROUND,
-};
-
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
-  @state()
-  store = new Store(options).register(BlockSchema);
+  @property()
+  store!: Store;
 
   @state()
   mode: 'page' | 'edgeless' = 'page';
@@ -45,10 +35,25 @@ export class EditorContainer extends LitElement {
   @state()
   placeholderModel = new BlockSchema.page(this.store, {});
 
-  constructor() {
-    super();
+  @state()
+  unsubscribe = [] as (() => void)[];
 
-    this._subscribeStore();
+  connectedCallback() {
+    super.connectedCallback();
+    this.init();
+  }
+
+  updated() {
+    this.init();
+  }
+
+  private init() {
+    if (!this.store) {
+      throw new Error("EditorContainer's store is not set");
+    }
+
+    this.unsubscribe.forEach(fn => fn());
+    this.subscribeStore();
 
     // @ts-ignore
     window.store = this.store;
@@ -56,17 +61,19 @@ export class EditorContainer extends LitElement {
     window.editor = this;
   }
 
-  private _subscribeStore() {
+  private subscribeStore() {
     // if undo to empty page, reset to empty placeholder
-    this.store.signals.updated.on(() => {
+    const unsubscribeUpdate = this.store.signals.updated.on(() => {
       this.isEmptyPage = this.store.isEmpty;
     });
+    this.unsubscribe.push(unsubscribeUpdate.dispose);
 
-    this.store.signals.rootAdded.on(block => {
+    const unsubscribeRootAdd = this.store.signals.rootAdded.on(block => {
       this.model = block as PageBlockModel;
       this.model.childrenUpdated.on(() => this.requestUpdate());
       this.requestUpdate();
     });
+    this.unsubscribe.push(unsubscribeRootAdd.dispose);
   }
 
   // disable shadow DOM to workaround quill
