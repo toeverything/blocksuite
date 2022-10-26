@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "scripts": {
