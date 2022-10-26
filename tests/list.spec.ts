@@ -30,10 +30,12 @@ test('add new bulleted list', async ({ page }) => {
 
   await focusRichText(page, 0);
   await convertToBulletedListByClick(page);
+  await page.keyboard.type('aa');
   await pressEnter(page);
+  await page.keyboard.type('aa');
   await pressEnter(page);
 
-  await assertRichTexts(page, ['\n', '\n', '\n']);
+  await assertRichTexts(page, ['aa', 'aa', '\n']);
   await assertBlockCount(page, 'list', 3);
 });
 
@@ -56,9 +58,11 @@ test('convert to numbered list block', async ({ page }) => {
 
   await redoByClick(page);
   await focusRichText(page, 0);
+  await page.keyboard.type('aa');
   await pressEnter(page); // created 4
   await assertBlockType(page, '4', 'numbered');
 
+  await page.keyboard.type('aa');
   await pressEnter(page); // created 5
   await assertBlockType(page, '5', 'numbered');
 
@@ -171,7 +175,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     `<page>
   <group
-    prop:xywh="[0,0,720,480]"
+    prop:xywh="[0,0,720,72]"
   >
     <paragraph
       prop:text="text1"
@@ -189,7 +193,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     `<page>
   <group
-    prop:xywh="[0,0,720,480]"
+    prop:xywh="[0,0,720,72]"
   >
     <paragraph
       prop:text="text1"
@@ -208,7 +212,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     `<page>
   <group
-    prop:xywh="[0,0,720,480]"
+    prop:xywh="[0,0,720,72]"
   >
     <paragraph
       prop:text="text1"
@@ -221,4 +225,62 @@ test('basic indent and unindent', async ({ page }) => {
   </group>
 </page>`
   );
+});
+
+test('enter list block with empty text', async ({ page }) => {
+  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+
+  await focusRichText(page, 1);
+  await pressTab(page);
+  await focusRichText(page, 2);
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
+
+  await focusRichText(page, 2);
+  await pressEnter(page);
+  await assertBlockChildrenIds(page, '2', ['3']);
+  await assertBlockType(page, '4', 'bulleted');
+  await pressEnter(page);
+  await assertBlockType(page, '5', 'text');
+  await undoByClick(page);
+  await undoByClick(page);
+  await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
+
+  await focusRichText(page, 1);
+  await pressEnter(page);
+  await assertBlockChildrenIds(page, '2', ['3', '6', '4']);
+  await undoByClick(page);
+  await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
+
+  await focusRichText(page, 0);
+  await pressEnter(page);
+  await assertBlockChildrenIds(page, '2', ['7', '3', '4']);
+  await undoByClick(page);
+  await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
+});
+
+test('enter list block with non-empty text', async ({ page }) => {
+  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+
+  await focusRichText(page, 0);
+  await page.keyboard.type('aa');
+  await focusRichText(page, 1);
+  await page.keyboard.type('bb');
+  await pressTab(page);
+  await focusRichText(page, 2);
+  await page.keyboard.type('cc');
+  await pressTab(page);
+  await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
+
+  await focusRichText(page, 1);
+  await pressEnter(page);
+  await assertBlockChildrenIds(page, '2', ['3', '5', '4']);
+  await undoByClick(page);
+  await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
+
+  await focusRichText(page, 0);
+  await pressEnter(page);
+  await assertBlockChildrenIds(page, '2', ['6', '3', '4']);
+  await undoByClick(page);
+  await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
 });

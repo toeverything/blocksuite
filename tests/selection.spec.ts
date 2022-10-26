@@ -15,6 +15,10 @@ import {
   undoByKeyboard,
   resetHistory,
   redoByKeyboard,
+  undoByClick,
+  redoByClick,
+  clearLog,
+  waitNextFrame,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -78,6 +82,7 @@ test('native range delete', async ({ page }) => {
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['\n']);
 
+  await waitNextFrame(page);
   await undoByKeyboard(page);
   // FIXME
   // await assertRichTexts(page, ['123', '456', '789']);
@@ -110,6 +115,7 @@ test('native range selection backwards', async ({ page }) => {
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['\n']);
 
+  await waitNextFrame(page);
   await undoByKeyboard(page);
   // FIXME
   // await assertRichTexts(page, ['123', '456', '789']);
@@ -142,6 +148,7 @@ test('block level range delete', async ({ page }) => {
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['\n']);
 
+  await waitNextFrame(page);
   await undoByKeyboard(page);
   // FIXME
   // await assertRichTexts(page, ['123', '456', '789']);

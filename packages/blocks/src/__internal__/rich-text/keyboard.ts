@@ -5,20 +5,22 @@ import {
   focusNextBlock,
   focusPreviousBlock,
   getCurrentRange,
-  handleBlockEndEnter,
-  handleBlockSplit,
-  handleIndent,
-  handleKeyDown,
-  handleKeyUp,
-  handleLineStartBackspace,
-  handleSoftEnter,
-  handleUnindent,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   noop,
   PREVENT_DEFAULT,
-  tryMatchSpaceHotkey,
 } from '../utils';
+import {
+  handleLineStartBackspace,
+  handleUnindent,
+  handleBlockEndEnter,
+  handleBlockSplit,
+  handleSoftEnter,
+  handleIndent,
+  handleKeyDown,
+  handleKeyUp,
+  tryMatchSpaceHotkey,
+} from './rich-text-operations';
 import { Shortcuts } from './shortcuts';
 
 interface QuillRange {
@@ -91,7 +93,19 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
 
   function hardEnter(this: KeyboardEventThis) {
     const isEnd = isAtBlockEnd(this.quill);
-    if (isEnd) {
+    const parent = store.getParent(model);
+    const isLastChild = parent?.lastChild() === model;
+    const isEmptyList = model.flavour === 'list' && model.text?.length === 0;
+    if (
+      isEmptyList &&
+      parent?.flavour === 'group' &&
+      model.children.length === 0
+    ) {
+      handleLineStartBackspace(store, model);
+    } else if (isEmptyList && isLastChild) {
+      const index = this.quill.getSelection()?.index || 0;
+      handleUnindent(store, model, index);
+    } else if (isEnd) {
       handleBlockEndEnter(store, model);
     } else {
       const index = this.quill.getSelection()?.index || 0;

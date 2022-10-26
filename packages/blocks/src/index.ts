@@ -12,6 +12,7 @@ export * from './page-block';
 export * from './list-block';
 export * from './group-block';
 export * as SelectionUtils from './__internal__/utils/selection';
+export * from './__internal__/utils/types';
 
 const env =
   typeof globalThis !== 'undefined'

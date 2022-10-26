@@ -1,5 +1,11 @@
 # @blocksuite/store
 
+## 0.2.19
+
+### Patch Changes
+
+- d8c1df4: refactor: redesign create editor API
+
 ## 0.2.16
 
 ### Patch Changes

@@ -131,14 +131,14 @@ export function getBlockElementByModel(model: BaseBlockModel) {
   const page = document.querySelector(
     `[${ATTR}="${model.store.root.id}"]`
   ) as DefaultPageBlockComponent;
+  if (!page) return null;
 
   if (model.id === model.store.root.id) {
     return page as HTMLElement;
   }
 
   const element = page.querySelector(`[${ATTR}="${model.id}"]`);
-  assertExists(element);
-  return element as HTMLElement;
+  return element as HTMLElement | null;
 }
 
 export function getStartModelBySelection() {
@@ -157,7 +157,7 @@ export function getStartModelBySelection() {
 
 export function getRichTextByModel(model: BaseBlockModel) {
   const blockElement = getBlockElementByModel(model);
-  const richText = blockElement.querySelector('rich-text') as RichText;
+  const richText = blockElement?.querySelector('rich-text') as RichText;
   if (!richText) return null;
   return richText;
 }
@@ -184,14 +184,14 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       const blockElement = getBlockElementByModel(block.model);
       const mainElelment =
         block.model.flavour === 'page'
-          ? blockElement.querySelector(
+          ? blockElement?.querySelector(
               '.affine-default-page-block-title-container'
             )
-          : blockElement.querySelector('rich-text');
+          : blockElement?.querySelector('rich-text');
       if (
         mainElelment &&
         range.intersectsNode(mainElelment) &&
-        blockElement.tagName !== 'GROUP-BLOCK'
+        blockElement?.tagName !== 'GROUP-BLOCK'
       ) {
         // @ts-ignore
         intersectedModels.push(block.model);
@@ -240,4 +240,66 @@ export function getDOMRectByLine(
     const subList = list.slice(flag);
     return subList.reduce(mergeRect);
   }
+}
+
+export function getCurrentRange() {
+  const selection = window.getSelection() as Selection;
+  return selection.getRangeAt(0);
+}
+
+function textWithoutNode(parentNode: Node, currentNode: Node) {
+  let text = '';
+  for (let i = 0; i < parentNode.childNodes.length; i++) {
+    const node = parentNode.childNodes[i];
+
+    if (node !== currentNode || !currentNode.contains(node)) {
+      // @ts-ignore
+      text += node.textContent || node.innerText || '';
+    } else {
+      return text;
+    }
+  }
+  return text;
+}
+
+export function getQuillIndexByNativeSelection(
+  ele: Node | null | undefined,
+  nodeOffset: number,
+  isStart: boolean
+) {
+  if (
+    ele instanceof Element &&
+    ele.classList.contains('affine-default-page-block-title-container')
+  ) {
+    return (
+      (isStart
+        ? ele.querySelector('input')?.selectionStart
+        : ele.querySelector('input')?.selectionEnd) || 0
+    );
+  }
+
+  let offset = 0;
+  let lastNode = ele;
+  let selfAdded = false;
+  while (
+    ele &&
+    // @ts-ignore
+    (!lastNode?.getAttributeNode ||
+      // @ts-ignore
+      !lastNode.getAttributeNode('contenteditable'))
+  ) {
+    if (ele instanceof Element && ele.hasAttribute('data-block-id')) {
+      offset = 0;
+      break;
+    }
+    if (!selfAdded) {
+      selfAdded = true;
+      offset += nodeOffset;
+    } else {
+      offset += textWithoutNode(ele as Node, lastNode as Node).length;
+    }
+    lastNode = ele;
+    ele = ele?.parentNode;
+  }
+  return offset;
 }

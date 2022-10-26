@@ -2,8 +2,6 @@ import { test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
-  copyKeyboard,
-  pasteKeyboard,
   setQuillSelection,
   pasteContent,
   undoByClick,
@@ -13,6 +11,8 @@ import {
   pressEnter,
   initEmptyState,
   resetHistory,
+  copyByKeyboard,
+  pasteByKeyboard,
 } from './utils/actions';
 import {
   assertBlockTypes,
@@ -31,9 +31,9 @@ test.skip('clipboard copy paste', async ({ page }) => {
 
   await page.keyboard.type('test');
   await setQuillSelection(page, 0, 3);
-  await copyKeyboard(page);
+  await copyByKeyboard(page);
   await focusRichText(page);
-  await pasteKeyboard(page);
+  await pasteByKeyboard(page);
   await assertText(page, 'testest');
 });
 

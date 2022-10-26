@@ -9,7 +9,6 @@ import {
 import {
   BlockHost,
   BLOCK_ID_ATTR,
-  handleBackspace,
   hotkey,
   HOTKEYS,
   resetNativeSelection,
@@ -21,7 +20,12 @@ import {
   XYWH,
 } from './selection-manager';
 import style from './style.css';
-import { bindCommonHotkey, removeCommonHotKey } from '../util';
+import {
+  bindCommonHotkey,
+  handleBackspace,
+  removeCommonHotKey,
+  tryUpdateGroupSize,
+} from '../utils';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly store: Store;
@@ -112,7 +116,6 @@ export class EdgelessPageBlockComponent
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this._selection = new EdgelessSelectionManager(this);
-      this._initViewport();
     }
     super.update(changedProperties);
   }
@@ -131,6 +134,15 @@ export class EdgelessPageBlockComponent
 
     this._bindHotkeys();
 
+    this.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+      tryUpdateGroupSize(this.store, this.viewport.zoom);
+    });
+
+    requestAnimationFrame(() => {
+      this._initViewport();
+      this.requestUpdate();
+    });
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
   }
@@ -152,7 +164,8 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const selectedRect = EdgelessSelectedRect(this._selection.state);
+    const { zoom } = this.viewport;
+    const selectedRect = EdgelessSelectedRect(this._selection.state, zoom);
 
     return html`
       <style></style>

@@ -11,11 +11,6 @@ import {
   BlockChildrenContainer,
   SelectionPosition,
   HOTKEYS,
-  handleBackspace,
-  handleBlockSelectionBatchDelete,
-  updateTextType,
-  handleSelectAll,
-  batchUpdateTextType,
   assertExists,
   isPageTitle,
   getSplicedTitle,
@@ -23,7 +18,16 @@ import {
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import style from './style.css';
-import { bindCommonHotkey, removeCommonHotKey } from '../util';
+import {
+  batchUpdateTextType,
+  bindCommonHotkey,
+  handleBackspace,
+  handleBlockSelectionBatchDelete,
+  handleSelectAll,
+  removeCommonHotKey,
+  tryUpdateGroupSize,
+  updateTextType,
+} from '../utils';
 
 export interface DefaultPageSignals {
   updateSelectionRect: Signal<DOMRect | null>;
@@ -306,6 +310,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.signals.updateSelectedRects.on(rects => {
       this.selectedRects = rects;
       this.requestUpdate();
+    });
+
+    tryUpdateGroupSize(this.store, 1);
+    this.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+      tryUpdateGroupSize(this.store, 1);
     });
 
     // TMP: clear selected rects on scroll

@@ -11,8 +11,12 @@ import type {
 } from './selection-manager';
 import { BlockElement, BlockHost } from '../../__internal__';
 import '../../__internal__';
+import { PADDING_X, PADDING_Y } from './utils';
 
-export function EdgelessSelectedRect(state: EdgelessSelectionState) {
+export function EdgelessSelectedRect(
+  state: EdgelessSelectionState,
+  zoom: number
+) {
   const { type } = state;
   if (type === 'none') return html`<div></div>`;
 
@@ -23,8 +27,8 @@ export function EdgelessSelectedRect(state: EdgelessSelectionState) {
     position: 'absolute',
     left: box.x + 'px',
     top: box.y + 'px',
-    width: box.width + 'px',
-    height: box.height + 'px',
+    width: box.width + PADDING_X * zoom + 'px',
+    height: box.height + PADDING_Y * zoom + 'px',
     border: `1px solid ${color}`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
@@ -42,16 +46,16 @@ function EdgelessBlockChild(
 ) {
   const { xywh } = model;
   const { zoom, viewportX, viewportY } = viewport;
-  const [x, y, w, h] = JSON.parse(xywh) as XYWH;
-  const translateX = (x - viewportX) * zoom;
-  const translateY = (y - viewportY) * zoom;
+  const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
+  const translateX = (modelX - viewportX) * zoom;
+  const translateY = (modelY - viewportY) * zoom;
 
   const style = {
     position: 'absolute',
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
-    width: w + 'px',
-    minHeight: h + 'px',
+    width: modelW + PADDING_X + 'px',
+    minHeight: modelH + PADDING_Y + 'px',
     paddingLeft: '9px',
     paddingRight: '9px',
     paddingBottom: '18px',
