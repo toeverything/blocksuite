@@ -116,7 +116,6 @@ export class EdgelessPageBlockComponent
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this._selection = new EdgelessSelectionManager(this);
-      this._initViewport();
     }
     super.update(changedProperties);
   }
@@ -140,6 +139,7 @@ export class EdgelessPageBlockComponent
       tryUpdateGroupSize(this.store, this.viewport.zoom);
     });
 
+    this._initViewport();
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
   }
