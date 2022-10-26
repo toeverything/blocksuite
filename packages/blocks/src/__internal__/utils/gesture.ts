@@ -141,8 +141,8 @@ export function initMouseEventHandlers(
   };
 
   const contextMenuHandler = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
   };
 
   const dblClickHandler = (e: MouseEvent) => {

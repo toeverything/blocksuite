@@ -33,36 +33,19 @@ export class EditorContainer extends LitElement {
   private _placeholderInput!: HTMLInputElement;
 
   @state()
-  placeholderModel: PageBlockModel | undefined;
+  placeholderModel!: PageBlockModel;
 
   @state()
   unsubscribe = [] as (() => void)[];
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.init();
-  }
-
-  updated() {
-    this.init();
-  }
-
-  private init() {
-    if (!this.store) {
-      this.store = new Store().register(BlockSchema);
+  update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('store')) {
+      this.placeholderModel = new BlockSchema.page(this.store, {});
     }
-    this.placeholderModel = new BlockSchema.page(this.store, {});
-
-    this.unsubscribe.forEach(fn => fn());
-    this.subscribeStore();
-
-    // @ts-ignore
-    window.store = this.store;
-    // @ts-ignore
-    window.editor = this;
+    super.update(changedProperties);
   }
 
-  private subscribeStore() {
+  private _subscribeStore() {
     // if undo to empty page, reset to empty placeholder
     const unsubscribeUpdate = this.store.signals.updated.on(() => {
       this.isEmptyPage = this.store.isEmpty;
@@ -87,7 +70,17 @@ export class EditorContainer extends LitElement {
       this.mode = detail;
     });
 
+    this._subscribeStore();
+
     this._placeholderInput?.focus();
+    // @ts-ignore
+    window.store = this.store;
+    // @ts-ignore
+    window.editor = this;
+  }
+
+  disconnectedCallback() {
+    this.unsubscribe.forEach(fn => fn());
   }
 
   render() {
