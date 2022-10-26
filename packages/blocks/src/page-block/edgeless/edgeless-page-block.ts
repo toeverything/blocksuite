@@ -139,7 +139,10 @@ export class EdgelessPageBlockComponent
       tryUpdateGroupSize(this.store, this.viewport.zoom);
     });
 
-    this._initViewport();
+    requestAnimationFrame(() => {
+      this._initViewport();
+      this.requestUpdate();
+    });
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
   }
