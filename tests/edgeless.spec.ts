@@ -52,7 +52,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await assertNativeSelectionRangeCount(page, 0);
 
   // active
-  await page.mouse.dblclick(200, 200);
+  await page.mouse.dblclick(450, 300);
   await waitNextFrame(page);
   await assertNativeSelectionRangeCount(page, 1);
 

@@ -3,13 +3,14 @@ import {
   initMouseEventHandlers,
   SelectionEvent,
   caretRangeFromPoint,
-  resetNativeSeletion,
+  resetNativeSelection,
   assertExists,
   noop,
   handleNativeRangeDragMove,
   isBlankArea,
   handleNativeRangeClick,
   isPageTitle,
+  handleNativeRangeDblClick,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
 import type { DefaultPageSignals } from './default-page-block';
@@ -127,7 +128,7 @@ export class DefaultSelectionManager {
     this.state.type = 'block';
     this.state.resetStartRange(e);
     this.state.refreshRichTextBoundsCache(this._container);
-    resetNativeSeletion(null);
+    resetNativeSelection(null);
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
@@ -208,7 +209,11 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
-    // console.log('dblclick', e);
+    this.state.clear();
+    this._signals.updateSelectedRects.emit([]);
+    if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+    if (e.raw.target instanceof HTMLInputElement) return;
+    handleNativeRangeDblClick(this.store, e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {

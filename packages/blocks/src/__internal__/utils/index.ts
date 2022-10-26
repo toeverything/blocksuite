@@ -1,6 +1,6 @@
 export * from './consts';
 export * from './types';
-export * from './operations';
+export * from './common-operations';
 export * from './rect';
 export * from './hotkey';
 export * from './query';

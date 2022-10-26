@@ -5,6 +5,7 @@ export * from './text-adapter';
 export * from './utils/signal';
 export * from './utils/disposable';
 export * from './utils/utils';
+export * from './providers';
 
 const env =
   typeof globalThis !== 'undefined'

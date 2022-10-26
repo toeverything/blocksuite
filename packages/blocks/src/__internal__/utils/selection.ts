@@ -1,18 +1,7 @@
 import type { BaseBlockModel, Store } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
-import { PREVENT_DEFAULT, ALLOW_DEFAULT } from './consts';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  fixCurrentRangeToText,
-  matchFlavours,
-} from './std';
-import {
-  ExtendedModel,
-  SelectedBlock,
-  SelectionInfo,
-  SelectionPosition,
-} from './types';
+import { assertExists, caretRangeFromPoint, matchFlavours } from './std';
+import { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
   getDefaultPageBlock,
@@ -20,10 +9,62 @@ import {
   getPreviousBlock,
   getNextBlock,
   getModelsByRange,
+  getCurrentRange,
+  getQuillIndexByNativeSelection,
 } from './query';
 import { Point, Rect } from './rect';
-import { getQuillIndexByNativeSelection } from './operations';
 import type { SelectionEvent } from './gesture';
+
+// /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
+const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
+
+function fixCurrentRangeToText(
+  x: number,
+  y: number,
+  range: Range,
+  isForward: boolean
+) {
+  const endContainer = isForward ? range.endContainer : range.startContainer;
+  let newRange: Range | null = range;
+  if (endContainer.nodeType !== Node.TEXT_NODE) {
+    const texts = Array.from(
+      (range.commonAncestorContainer as HTMLElement).querySelectorAll(
+        '.ql-editor'
+      )
+    );
+    if (texts.length) {
+      let text: Element | undefined = undefined;
+      if (isForward) {
+        text = texts.reverse().find(t => {
+          const rect = t.getBoundingClientRect();
+          return y >= rect.bottom;
+        });
+        if (text) {
+          const rect = text.getBoundingClientRect();
+          const y = rect.bottom - 6;
+          newRange = caretRangeFromPoint(x, y);
+          if (newRange) {
+            range.setEnd(newRange.endContainer, newRange.endOffset);
+          }
+        }
+      } else {
+        text = texts.find(t => {
+          const rect = t.getBoundingClientRect();
+          return y <= rect.top;
+        });
+        if (text) {
+          const rect = text.getBoundingClientRect();
+          const y = rect.top + 6;
+          newRange = caretRangeFromPoint(x, y);
+          if (newRange) {
+            range.setStart(newRange.endContainer, newRange.endOffset);
+          }
+        }
+      }
+    }
+  }
+  return range;
+}
 
 export function focusRichText(
   position: SelectionPosition,
@@ -63,7 +104,7 @@ export function focusRichText(
       newLeft = right - 1;
     }
     range = caretRangeFromPoint(newLeft, newTop);
-    resetNativeSeletion(range);
+    resetNativeSelection(range);
   }
   if (position === 'start') {
     const newRange = document.createRange();
@@ -89,7 +130,7 @@ export function focusRichText(
     }
     range = newRange;
   }
-  resetNativeSeletion(range);
+  resetNativeSelection(range);
 }
 
 function focusRichTextByModel(
@@ -97,7 +138,7 @@ function focusRichTextByModel(
   model: BaseBlockModel
 ) {
   const element = getBlockElementByModel(model);
-  const editableContainer = element.querySelector('[contenteditable]');
+  const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
     focusRichText(position, editableContainer);
   }
@@ -142,104 +183,7 @@ export function focusNextBlock(
   }
 }
 
-// We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
-// but only one bounding rect.
-// If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
-function isAtLineEdge(range: Range) {
-  if (
-    range.startOffset > 0 &&
-    Number(range.startContainer.textContent?.length) - range.startOffset > 0
-  ) {
-    const prevRange = range.cloneRange();
-    prevRange.setStart(range.startContainer, range.startOffset - 1);
-    prevRange.setEnd(range.startContainer, range.startOffset - 1);
-    const nextRange = range.cloneRange();
-    nextRange.setStart(range.endContainer, range.endOffset + 1);
-    nextRange.setEnd(range.endContainer, range.endOffset + 1);
-    return (
-      prevRange.getBoundingClientRect().top !==
-      nextRange.getBoundingClientRect().top
-    );
-  }
-  return false;
-}
-
-export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
-  const selection = window.getSelection();
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { height, left, top } = range.getBoundingClientRect();
-    // if cursor is on the first line and has no text, height is 0
-    if (height === 0 && top === 0) {
-      const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
-      return PREVENT_DEFAULT;
-    }
-    // TODO resolve compatible problem
-    const newRange = caretRangeFromPoint(left, top - height / 2);
-    if (
-      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
-      focusPreviousBlock(model, new Point(left, top));
-      return PREVENT_DEFAULT;
-    }
-  }
-  return ALLOW_DEFAULT;
-}
-
-export function handleKeyDown(
-  model: ExtendedModel,
-  textContainer: HTMLElement
-) {
-  const selection = window.getSelection();
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { bottom, left, height } = range.getBoundingClientRect();
-    // if cursor is on the last line and has no text, height is 0
-    if (height === 0 && bottom === 0) {
-      const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      const nextBlock = getNextBlock(model.id);
-      if (!nextBlock) {
-        return ALLOW_DEFAULT;
-      }
-      rect && focusNextBlock(model, new Point(rect.left, rect.top));
-      return PREVENT_DEFAULT;
-    }
-    // TODO resolve compatible problem
-    const newRange = caretRangeFromPoint(left, bottom + height / 2);
-    if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      const nextBlock = getNextBlock(model.id);
-      if (!nextBlock) {
-        return ALLOW_DEFAULT;
-      }
-      focusNextBlock(model, new Point(left, bottom));
-      return PREVENT_DEFAULT;
-    }
-    // if cursor is at the edge of a block, it may out of the textContainer after keydown
-    if (isAtLineEdge(range)) {
-      const {
-        height,
-        left,
-        bottom: nextBottom,
-      } = newRange.getBoundingClientRect();
-      const nextRange = caretRangeFromPoint(left, nextBottom + height / 2);
-      if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
-        focusNextBlock(
-          model,
-          new Point(
-            newRange.startContainer.parentElement?.offsetLeft || left,
-            bottom
-          )
-        );
-        return PREVENT_DEFAULT;
-      }
-    }
-  }
-  return ALLOW_DEFAULT;
-}
-
-export function resetNativeSeletion(range: Range | null) {
+export function resetNativeSelection(range: Range | null) {
   const selection = window.getSelection();
   selection?.removeAllRanges();
   range && selection?.addRange(range);
@@ -252,7 +196,7 @@ export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
   const y = bbox.y + bbox.height / 2;
   const range = caretRangeFromPoint(x, y);
   if (range?.startContainer instanceof Node) {
-    resetNativeSeletion(range);
+    resetNativeSelection(range);
   }
 }
 
@@ -260,12 +204,7 @@ export function focusRichTextStart(richText: RichText) {
   const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
   const range = document.createRange();
   range.setStart(start, 0);
-  resetNativeSeletion(range);
-}
-
-export function getCurrentRange() {
-  const selection = window.getSelection() as Selection;
-  return selection.getRangeAt(0);
+  resetNativeSelection(range);
 }
 
 export function isNoneSelection() {
@@ -390,7 +329,7 @@ export function handleNativeRangeDragMove(
       isForward
     );
   }
-  resetNativeSeletion(currentRange);
+  resetNativeSelection(currentRange);
 }
 
 function isBlankAreaBetweenBlocks(startContainer: Node) {
@@ -418,7 +357,7 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
 
   // click on rich text
   if (startContainer instanceof Node) {
-    resetNativeSeletion(range);
+    resetNativeSelection(range);
   }
 
   if (!(startContainer instanceof HTMLElement)) return;
@@ -434,9 +373,101 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
     assertExists(lastChild);
     if (matchFlavours(lastChild, ['paragraph', 'list'])) {
       const block = getBlockElementByModel(lastChild);
+      if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
     }
   }
+}
+
+export function handleNativeRangeDblClick(store: Store, e: SelectionEvent) {
+  const selection = window.getSelection();
+  if (selection && selection.isCollapsed && selection.anchorNode) {
+    const editableContainer =
+      selection.anchorNode.parentElement?.closest('[contenteditable]');
+    if (editableContainer) {
+      const leafNodes = leftFirstSearchLeafNodes(editableContainer);
+      let startNode = leafNodes[0];
+      let startOffset = 0;
+      let endNode = leafNodes[leafNodes.length - 1];
+      let endOffset = endNode.textContent?.length || 0;
+      // if anchorNode is Element, it always has only one child
+      const currentTextNode =
+        selection.anchorNode instanceof Element
+          ? selection.anchorNode.firstChild
+          : selection.anchorNode;
+      const currentNodeIndex = leafNodes.findIndex(
+        node => node === currentTextNode
+      );
+      // get startNode and startOffset
+      for (let i = currentNodeIndex; i >= 0; i--) {
+        const node = leafNodes[i];
+        if (node instanceof Text) {
+          const text = node.textContent?.slice(
+            0,
+            i === currentNodeIndex ? selection.anchorOffset : undefined
+          );
+          if (text) {
+            const reverseText = Array.from(text).reverse().join('');
+            const index = reverseText.search(notStrictCharacterReg);
+            if (index !== -1) {
+              startNode = node;
+              startOffset = reverseText.length - index;
+              break;
+            }
+          }
+        }
+      }
+      // get endNode and endOffset
+      for (let j = currentNodeIndex; j < leafNodes.length; j++) {
+        const node = leafNodes[j];
+        if (node instanceof Text) {
+          const text = node.textContent?.slice(
+            j === currentNodeIndex ? selection.anchorOffset : undefined
+          );
+          if (text) {
+            const index = text.search(notStrictCharacterReg);
+            if (index !== -1) {
+              endNode = node;
+              endOffset =
+                j === currentNodeIndex ? selection.anchorOffset + index : index;
+              break;
+            }
+          }
+        }
+      }
+      // fix double click on not text area
+      if (
+        startNode === endNode &&
+        startOffset === endOffset &&
+        startOffset > 0
+      ) {
+        startOffset = startOffset - 1;
+      }
+      const newRange = document.createRange();
+      newRange.setStart(startNode, startOffset);
+      newRange.setEnd(endNode, endOffset);
+      // TODO: add Segmenter if possible
+      resetNativeSelection(newRange);
+    }
+  }
+}
+
+/**
+ * left first search all leaf text nodes
+ * @example
+ *  <div><p>he<em>ll</em>o</p><p>world</p></div>
+ *  => [he, ll, o, world]
+ **/
+export function leftFirstSearchLeafNodes(node: Node, leafNodes: Node[] = []) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    leafNodes.push(node);
+  } else {
+    const children = node.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      leftFirstSearchLeafNodes(children[i], leafNodes);
+    }
+  }
+  return leafNodes;
 }
 
 export function getSplicedTitle(title: HTMLInputElement) {

@@ -11,20 +11,23 @@ import {
   BlockChildrenContainer,
   SelectionPosition,
   HOTKEYS,
-  handleBackspace,
-  handleFormat,
-  handleBlockSelectionBatchDelete,
-  updateTextType,
-  handleSelectAll,
-  batchUpdateTextType,
   assertExists,
   isPageTitle,
   getSplicedTitle,
   noop,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
-import { createLink } from '../../__internal__/rich-text/link-node';
 import style from './style.css';
+import {
+  batchUpdateTextType,
+  bindCommonHotkey,
+  handleBackspace,
+  handleBlockSelectionBatchDelete,
+  handleSelectAll,
+  removeCommonHotKey,
+  tryUpdateGroupSize,
+  updateTextType,
+} from '../utils';
 
 export interface DefaultPageSignals {
   updateSelectionRect: Signal<DOMRect | null>;
@@ -131,12 +134,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _bindHotkeys() {
     const { store } = this;
     const {
-      UNDO,
-      REDO,
       BACKSPACE,
       SELECT_ALL,
-      INLINE_CODE,
-      STRIKE,
       H1,
       H2,
       H3,
@@ -145,12 +144,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       H6,
       SHIFT_UP,
       SHIFT_DOWN,
-      LINK,
     } = HOTKEYS;
-
-    hotkey.addListener(UNDO, () => store.undo());
-    hotkey.addListener(REDO, () => store.redo());
-
+    bindCommonHotkey(store);
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
       if (isPageTitle(e)) {
@@ -187,8 +182,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selection.state.type = 'native';
     });
 
-    hotkey.addListener(INLINE_CODE, e => handleFormat(store, e, 'code'));
-    hotkey.addListener(STRIKE, e => handleFormat(store, e, 'strike'));
     hotkey.addListener(H1, () => this._updateType('h1', store));
     hotkey.addListener(H2, () => this._updateType('h2', store));
     hotkey.addListener(H3, () => this._updateType('h3', store));
@@ -202,16 +195,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkey.addListener(SHIFT_DOWN, e => {
       // TODO expand selection down
     });
-    hotkey.addListener(LINK, e => {
-      e.preventDefault();
-      createLink(store, e);
-    });
 
     // !!!
     // Don't forget to remove hotkeys at `_removeHotkeys`
   }
 
   private _removeHotkeys() {
+    removeCommonHotKey();
     hotkey.removeListener([
       HOTKEYS.UNDO,
       HOTKEYS.REDO,
@@ -320,6 +310,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.signals.updateSelectedRects.on(rects => {
       this.selectedRects = rects;
       this.requestUpdate();
+    });
+
+    tryUpdateGroupSize(this.store, 1);
+    this.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+      tryUpdateGroupSize(this.store, 1);
     });
 
     // TMP: clear selected rects on scroll
