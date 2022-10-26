@@ -8,6 +8,7 @@ import {
   almostEqual,
   isCollapsedAtBlockStart,
 } from '../../__internal__';
+import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
   getStartModelBySelection,
   getRichTextByModel,
@@ -63,8 +64,8 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
 export function updateTextType(flavour: string, type: string, store: Store) {
   const range = window.getSelection()?.getRangeAt(0);
   assertExists(range);
-
   const modelsInRange = getModelsByRange(range);
+  store.captureSync();
   modelsInRange.forEach(model => {
     assertFlavours(model, ['paragraph', 'list']);
     if (model.flavour === flavour) {
@@ -83,7 +84,6 @@ export function transformBlock(
   const parent = store.getParent(model);
   assertExists(parent);
   const blockProps = {
-    id: model.id,
     flavour,
     type,
     text: model?.text?.clone(), // should clone before `deleteBlock`
@@ -91,8 +91,10 @@ export function transformBlock(
   };
   const index = parent.children.indexOf(model);
   store.deleteBlock(model);
-  store.addBlock(blockProps, parent, index);
+  const id = store.addBlock(blockProps, parent, index);
+  asyncFocusRichText(store, id);
 }
+
 export function batchUpdateTextType(
   flavour: string,
   store: Store,

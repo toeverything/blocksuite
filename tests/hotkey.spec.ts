@@ -118,4 +118,8 @@ test('format list to h1', async ({ page }) => {
   await focusRichText(page, 0);
   await formatType(page);
   await assertTypeFormat(page, 'h1');
+  await undoByKeyboard(page);
+  await assertTypeFormat(page, 'bulleted');
+  await redoByKeyboard(page);
+  await assertTypeFormat(page, 'h1');
 });
