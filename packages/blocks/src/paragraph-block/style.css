@@ -85,9 +85,6 @@
   margin-top: var(--affine-paragraph-space);
   font-size: var(--affine-font-base);
 }
-.text code {
-  font-size: calc(var(--affine-font-base) - 4px);
-}
 
 strong {
   font-weight: 600;
@@ -99,6 +96,7 @@ code {
   font-family: var(--affine-font-family2);
   padding: 0 5px;
   border-radius: 5px;
+  font-size: calc(var(--affine-font-base) - 4px);
 }
 
 u {
