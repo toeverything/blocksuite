@@ -1,5 +1,14 @@
 # @blocksuite/editor
 
+## 0.2.22
+
+### Patch Changes
+
+- 9927578: fix hotkey on windows
+- Updated dependencies [9927578]
+  - @blocksuite/blocks@0.2.22
+  - @blocksuite/store@0.2.22
+
 ## 0.2.19
 
 ### Patch Changes
