@@ -116,6 +116,16 @@ export async function assertTextFormat(
   expect(actual).toEqual(resultObj);
 }
 
+export async function assertTypeFormat(page:Page,type:string){
+  const actual = await page.evaluate(
+    () => {
+      const richText = document.querySelectorAll('rich-text')[0];
+      return richText.model.type;
+    }
+  );
+  expect(actual).toEqual(type);
+}
+
 export async function assertTextFormats(page: Page, resultObj: unknown[]) {
   const actual = await page.evaluate(() => {
     const elements = document.querySelectorAll('rich-text');
