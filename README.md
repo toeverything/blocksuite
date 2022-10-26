@@ -4,6 +4,9 @@
   <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff"/>
 </a>
 
+<a href="https://join.slack.com/t/blocksuitedev/shared_invite/zt-1h0zz3b8z-nFpWSu6a6~yId7PxiMcBHA"><img src="https://img.shields.io/badge/-Slack-grey?logo=slack" height=22></a>
+<a href="https://twitter.com/BlockSuiteDev"><img src="https://img.shields.io/badge/-Twitter-grey?logo=twitter" height=22></a>
+
 BlockSuite is a collaborative editing framework designed to reliably reconcile any Web content.
 
 [Try BlockSuite-based AFFiNE alpha editor](https://pathfinder.affine.pro/)
