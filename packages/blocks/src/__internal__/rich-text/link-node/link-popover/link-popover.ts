@@ -131,12 +131,19 @@ export class LinkPopover extends LitElement {
 
   previewTemplate() {
     return html`<div class="affine-link-popover">
-      <div class="affine-link-preview" @click=${this.onCopy}>
+      <div class="affine-link-preview has-tool-tip" @click=${this.onCopy}>
+        <tool-tip inert role="tooltip">Click to copy link</tool-tip>
         ${this.previewLink}
       </div>
       <span class="affine-link-popover-dividing-line"></span>
-      <icon-button @click=${this.onUnlink}>${UnlinkIcon()}</icon-button
-      ><icon-button @click=${this.onEdit}>${EditIcon()}</icon-button>
+      <icon-button class="has-tool-tip" @click=${this.onUnlink}>
+        ${UnlinkIcon()}
+        <tool-tip inert role="tooltip">Remove</tool-tip>
+      </icon-button>
+      <icon-button class="has-tool-tip" @click=${this.onEdit}>
+        ${EditIcon()}
+        <tool-tip inert role="tooltip">Edit link</tool-tip>
+      </icon-button>
     </div>`;
   }
 
