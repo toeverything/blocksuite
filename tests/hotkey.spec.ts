@@ -108,7 +108,7 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, { strike: true });
 });
 
-test('add new bulleted list', async ({ page }) => {
+test('format list to h1', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
 

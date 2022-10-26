@@ -23,7 +23,7 @@ async function keyDownOptionMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Alt');
   } else {
-    await page.keyboard.down('shift');
+    await page.keyboard.down('Shift');
   }
 }
 
@@ -31,7 +31,7 @@ async function keyUpOptionMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.up('Alt');
   } else {
-    await page.keyboard.up('shift');
+    await page.keyboard.up('Shift');
   }
 }
 
