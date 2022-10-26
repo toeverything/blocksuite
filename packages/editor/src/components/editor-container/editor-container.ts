@@ -65,7 +65,13 @@ export class EditorContainer extends LitElement {
     return this;
   }
 
-  firstUpdated() {
+  connectedCallback() {
+    super.connectedCallback();
+
+    if (!this.store) {
+      throw new Error("EditorContainer's store is not set!");
+    }
+
     window.addEventListener('affine.switch-mode', ({ detail }) => {
       this.mode = detail;
     });
