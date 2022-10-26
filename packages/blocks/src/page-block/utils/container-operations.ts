@@ -60,17 +60,17 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-export function updateTextType(type: string, store: Store) {
+export function updateTextType(flavour: string, type: string, store: Store) {
   const range = window.getSelection()?.getRangeAt(0);
   assertExists(range);
 
   const modelsInRange = getModelsByRange(range);
   modelsInRange.forEach(model => {
     assertFlavours(model, ['paragraph', 'list']);
-    if (model.flavour === 'paragraph') {
+    if (model.flavour === flavour) {
       store.updateBlock(model, { type });
     } else {
-      transformBlock(store, model, 'paragraph', type);
+      transformBlock(store, model, flavour, type);
     }
   });
 }
@@ -94,6 +94,7 @@ export function transformBlock(
   store.addBlock(blockProps, parent, index);
 }
 export function batchUpdateTextType(
+  flavour: string,
   store: Store,
   models: ExtendedModel[],
   type: string
@@ -101,7 +102,7 @@ export function batchUpdateTextType(
   store.captureSync();
   for (const model of models) {
     assertFlavours(model, ['paragraph', 'list']);
-    if (model.flavour === 'paragraph') {
+    if (model.flavour === flavour) {
       store.updateBlock(model, { type });
     } else {
       transformBlock(store, model, 'paragraph', type);
