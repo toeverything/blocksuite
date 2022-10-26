@@ -6,6 +6,7 @@
   --affine-popover-background: #fff;
   --affine-hover-background: #f1f3ff;
   --affine-code-background: #f2f5f9;
+  --affine-tooltip-background: #6880ff;
   --affine-text-color: #3a4c5c;
   --affine-edgeless-text-color: #3a4c5c;
   --affine-link-color: #6880ff;
@@ -30,7 +31,7 @@
   --affine-line-height-base: 26px;
   --affine-z-index-modal: 1000;
   --affine-z-index-popover: 100;
-  --affine-font-family: Avenir Next, apple-system, BlinkMacSystemFont,
+  --affine-font-family: Avenir Next, Poppins, apple-system, BlinkMacSystemFont,
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
     Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
