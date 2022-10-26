@@ -33,7 +33,7 @@ export class EditorContainer extends LitElement {
   private _placeholderInput!: HTMLInputElement;
 
   @state()
-  placeholderModel = new BlockSchema.page(this.store, {});
+  placeholderModel: PageBlockModel | undefined;
 
   @state()
   unsubscribe = [] as (() => void)[];
@@ -49,8 +49,9 @@ export class EditorContainer extends LitElement {
 
   private init() {
     if (!this.store) {
-      throw new Error("EditorContainer's store is not set");
+      this.store = new Store().register(BlockSchema);
     }
+    this.placeholderModel = new BlockSchema.page(this.store, {});
 
     this.unsubscribe.forEach(fn => fn());
     this.subscribeStore();
