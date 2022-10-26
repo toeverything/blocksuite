@@ -9,7 +9,7 @@
 
 BlockSuite is a collaborative editing framework designed to reliably reconcile any Web content.
 
-[Try BlockSuite-based AFFiNE alpha editor](https://pathfinder.affine.pro/)
+[Try BlockSuite-based AFFiNE Alpha editor](https://pathfinder.affine.pro/)
 
 > ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
 
