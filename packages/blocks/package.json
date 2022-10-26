@@ -3,6 +3,7 @@
   "version": "0.2.20",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc && vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
