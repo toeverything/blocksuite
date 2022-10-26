@@ -17,6 +17,8 @@ import type { SelectionEvent } from './gesture';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
+const notStrictCharacterAndSpaceReg =
+  /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
 function fixCurrentRangeToText(
   x: number,
@@ -385,69 +387,182 @@ export function handleNativeRangeDblClick(store: Store, e: SelectionEvent) {
     const editableContainer =
       selection.anchorNode.parentElement?.closest('[contenteditable]');
     if (editableContainer) {
-      const leafNodes = leftFirstSearchLeafNodes(editableContainer);
-      let startNode = leafNodes[0];
-      let startOffset = 0;
-      let endNode = leafNodes[leafNodes.length - 1];
-      let endOffset = endNode.textContent?.length || 0;
-      // if anchorNode is Element, it always has only one child
-      const currentTextNode =
-        selection.anchorNode instanceof Element
-          ? selection.anchorNode.firstChild
-          : selection.anchorNode;
-      const currentNodeIndex = leafNodes.findIndex(
-        node => node === currentTextNode
-      );
-      // get startNode and startOffset
-      for (let i = currentNodeIndex; i >= 0; i--) {
-        const node = leafNodes[i];
-        if (node instanceof Text) {
-          const text = node.textContent?.slice(
-            0,
-            i === currentNodeIndex ? selection.anchorOffset : undefined
-          );
-          if (text) {
-            const reverseText = Array.from(text).reverse().join('');
-            const index = reverseText.search(notStrictCharacterReg);
-            if (index !== -1) {
-              startNode = node;
-              startOffset = reverseText.length - index;
-              break;
-            }
+      expandRangesByCharacter(selection, editableContainer);
+    }
+  }
+}
+
+function expandRangesByCharacter(
+  selection: Selection,
+  editableContainer: Node
+) {
+  const leafNodes = leftFirstSearchLeafNodes(editableContainer);
+  let startNode = leafNodes[0];
+  let startOffset = 0;
+  let endNode = leafNodes[leafNodes.length - 1];
+  let endOffset = endNode.textContent?.length || 0;
+  // if anchorNode is Element, it always has only one child
+  const currentTextNode =
+    selection.anchorNode instanceof Element
+      ? selection.anchorNode.firstChild
+      : selection.anchorNode;
+  const currentChar =
+    currentTextNode?.textContent?.[selection.anchorOffset] || '';
+  const currentNodeIndex = leafNodes.findIndex(
+    node => node === currentTextNode
+  );
+  // if current char is not character or blank, select this char
+  if (
+    currentChar &&
+    notStrictCharacterAndSpaceReg.test(currentChar) &&
+    currentTextNode
+  ) {
+    startNode = currentTextNode;
+    endNode = currentTextNode;
+    startOffset = selection.anchorOffset;
+    endOffset = selection.anchorOffset + 1;
+  } else {
+    // expand selection to blank
+    let checkReg = notStrictCharacterReg;
+    // space only spend one char
+    if (/\s/.test(currentChar)) {
+      checkReg = /\S/;
+    }
+    // English character only expand English
+    if (/\w/.test(currentChar)) {
+      checkReg = /\W/;
+    }
+    // get startNode and startOffset
+    for (let i = currentNodeIndex; i >= 0; i--) {
+      const node = leafNodes[i];
+      if (node instanceof Text) {
+        const text = node.textContent?.slice(
+          0,
+          i === currentNodeIndex ? selection.anchorOffset : undefined
+        );
+        if (text) {
+          const reverseText = Array.from(text).reverse().join('');
+          const index = reverseText.search(checkReg);
+          if (index !== -1) {
+            startNode = node;
+            startOffset = reverseText.length - index;
+            break;
           }
         }
       }
-      // get endNode and endOffset
-      for (let j = currentNodeIndex; j < leafNodes.length; j++) {
-        const node = leafNodes[j];
-        if (node instanceof Text) {
-          const text = node.textContent?.slice(
-            j === currentNodeIndex ? selection.anchorOffset : undefined
-          );
-          if (text) {
-            const index = text.search(notStrictCharacterReg);
-            if (index !== -1) {
-              endNode = node;
-              endOffset =
-                j === currentNodeIndex ? selection.anchorOffset + index : index;
-              break;
-            }
+    }
+    // get endNode and endOffset
+    for (let j = currentNodeIndex; j < leafNodes.length; j++) {
+      const node = leafNodes[j];
+      if (node instanceof Text) {
+        const text = node.textContent?.slice(
+          j === currentNodeIndex ? selection.anchorOffset : undefined
+        );
+        if (text) {
+          const index = text.search(checkReg);
+          if (index !== -1) {
+            endNode = node;
+            endOffset =
+              j === currentNodeIndex ? selection.anchorOffset + index : index;
+            break;
           }
         }
       }
-      // fix double click on not text area
-      if (
-        startNode === endNode &&
-        startOffset === endOffset &&
-        startOffset > 0
-      ) {
-        startOffset = startOffset - 1;
+    }
+  }
+  const newRange = document.createRange();
+  newRange.setStart(startNode, startOffset);
+  newRange.setEnd(endNode, endOffset);
+  // try select range by segmenter
+  trySelectBySegmenter(
+    selection,
+    newRange,
+    currentChar,
+    leafNodes,
+    currentNodeIndex
+  );
+  resetNativeSelection(newRange);
+}
+
+function trySelectBySegmenter(
+  selection: Selection,
+  newRange: Range,
+  currentChar: string,
+  leafNodes: Array<Node>,
+  currentNodeIndex: number
+) {
+  if (
+    Intl.Segmenter &&
+    !notStrictCharacterAndSpaceReg.test(currentChar) &&
+    !/\w/.test(currentChar)
+  ) {
+    const rangeString = newRange.toString();
+    // check all languages words
+    const segmenter = new Intl.Segmenter([], { granularity: 'word' });
+    const wordsIterator = segmenter.segment(rangeString)[Symbol.iterator]();
+    const words = Array.from(wordsIterator);
+    let absoluteOffset = 0;
+    let started = false;
+    // get absolute offset of current cursor
+    for (let i = 0; i < leafNodes.length; i++) {
+      const leafNode = leafNodes[i];
+      if (started || leafNode === newRange.startContainer) {
+        started = true;
+        if (leafNode !== selection.anchorNode) {
+          absoluteOffset = absoluteOffset + (leafNode.textContent?.length || 0);
+        } else {
+          absoluteOffset =
+            absoluteOffset + selection.anchorOffset - newRange.startOffset;
+          break;
+        }
       }
-      const newRange = document.createRange();
-      newRange.setStart(startNode, startOffset);
-      newRange.setEnd(endNode, endOffset);
-      // TODO: add Segmenter if possible
-      resetNativeSelection(newRange);
+    }
+    let wordText = words[words.length - 1].segment;
+    // get word text of current cursor
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      if (absoluteOffset === word.index) {
+        wordText = word.segment;
+        break;
+      }
+      if (absoluteOffset < word.index) {
+        wordText = words[i - 1].segment;
+        break;
+      }
+    }
+    const currentCharIndex = wordText.indexOf(currentChar);
+    // length for expand left
+    let leftLength = currentCharIndex;
+    // length for expand right
+    let rightLength = wordText.length - currentCharIndex;
+    // get and set new start node and offset
+    for (let i = currentNodeIndex; i >= 0; i--) {
+      const leafNode = leafNodes[i];
+      const allTextLength =
+        i === currentNodeIndex
+          ? selection.anchorOffset
+          : leafNode.textContent?.length || 0;
+      if (leftLength <= allTextLength) {
+        newRange.setStart(leafNode, allTextLength - leftLength);
+        break;
+      } else {
+        leftLength = leftLength - allTextLength;
+      }
+    }
+    // get and set new end node and offset
+    for (let i = currentNodeIndex; i < leafNodes.length; i++) {
+      const leafNode = leafNodes[i];
+      const textLength = leafNode.textContent?.length || 0;
+      const allTextLength =
+        i === currentNodeIndex
+          ? textLength - selection.anchorOffset
+          : textLength;
+      if (rightLength <= allTextLength) {
+        newRange.setEnd(leafNode, textLength - allTextLength + rightLength);
+        break;
+      } else {
+        rightLength = rightLength - allTextLength;
+      }
     }
   }
 }
