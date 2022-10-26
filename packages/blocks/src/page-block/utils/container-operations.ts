@@ -67,26 +67,31 @@ export function updateTextType(type: string, store: Store) {
   const modelsInRange = getModelsByRange(range);
   modelsInRange.forEach(model => {
     assertFlavours(model, ['paragraph', 'list']);
-    if(model.flavour === 'paragraph'){
+    if (model.flavour === 'paragraph') {
       store.updateBlock(model, { type });
-    }else{
-      transformBlock(store,model,'paragraph',type)
+    } else {
+      transformBlock(store, model, 'paragraph', type);
     }
   });
 }
-export function transformBlock(store:Store,model:BaseBlockModel,flavour:string,type:string){
+export function transformBlock(
+  store: Store,
+  model: BaseBlockModel,
+  flavour: string,
+  type: string
+) {
   const parent = store.getParent(model);
-      assertExists(parent)
-      const blockProps = {
-        id: model.id,
-        flavour,
-        type,
-        text: model?.text?.clone(), // should clone before `deleteBlock`
-        children: model.children,
-      };
-      const index = parent.children.indexOf(model);
-      store.deleteBlock(model);
-      store.addBlock(blockProps, parent, index);
+  assertExists(parent);
+  const blockProps = {
+    id: model.id,
+    flavour,
+    type,
+    text: model?.text?.clone(), // should clone before `deleteBlock`
+    children: model.children,
+  };
+  const index = parent.children.indexOf(model);
+  store.deleteBlock(model);
+  store.addBlock(blockProps, parent, index);
 }
 export function batchUpdateTextType(
   store: Store,
@@ -96,10 +101,10 @@ export function batchUpdateTextType(
   store.captureSync();
   for (const model of models) {
     assertFlavours(model, ['paragraph', 'list']);
-    if(model.flavour === 'paragraph'){
+    if (model.flavour === 'paragraph') {
       store.updateBlock(model, { type });
-    }else{
-      transformBlock(store,model,'paragraph',type)
+    } else {
+      transformBlock(store, model, 'paragraph', type);
     }
   }
 }
@@ -193,10 +198,9 @@ function formatModelsByRange(
 
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
-  e.preventDefault()
+  e.preventDefault();
   if (e.target instanceof HTMLInputElement) return;
   if (isNoneSelection()) return;
-  
 
   if (isRangeSelection()) {
     const models = getModelsByRange(getCurrentRange());

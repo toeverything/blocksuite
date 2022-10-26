@@ -16,7 +16,11 @@ import {
   convertToBulletedListByClick,
   formatType,
 } from './utils/actions';
-import { assertBlockCount, assertRichTexts, assertTextFormat, assertTypeFormat } from './utils/asserts';
+import {
+  assertRichTexts,
+  assertTextFormat,
+  assertTypeFormat,
+} from './utils/asserts';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -112,6 +116,6 @@ test('add new bulleted list', async ({ page }) => {
   await convertToBulletedListByClick(page);
   await page.keyboard.type('aa');
   await focusRichText(page, 0);
-  await formatType(page)
+  await formatType(page);
   await assertTypeFormat(page, 'h1');
 });

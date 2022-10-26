@@ -53,11 +53,11 @@ export async function undoByKeyboard(page: Page) {
   await keyUpCtrlOrMeta(page);
 }
 
-export async function formatType(page:Page) {
+export async function formatType(page: Page) {
   await keyDownCtrlOrMeta(page);
-  await keyDownOptionMeta(page)
+  await keyDownOptionMeta(page);
   await page.keyboard.press('1');
-  await keyUpOptionMeta(page)
+  await keyUpOptionMeta(page);
   await keyUpCtrlOrMeta(page);
 }
 
