@@ -1,5 +1,11 @@
 # @blocksuite/store
 
+## 0.2.22
+
+### Patch Changes
+
+- 9927578: fix hotkey on windows
+
 ## 0.2.19
 
 ### Patch Changes

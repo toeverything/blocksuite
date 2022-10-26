@@ -60,18 +60,41 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-export function updateTextType(type: string, store: Store) {
+export function updateTextType(flavour: string, type: string, store: Store) {
   const range = window.getSelection()?.getRangeAt(0);
   assertExists(range);
 
   const modelsInRange = getModelsByRange(range);
   modelsInRange.forEach(model => {
     assertFlavours(model, ['paragraph', 'list']);
-    store.updateBlock(model, { type });
+    if (model.flavour === flavour) {
+      store.updateBlock(model, { type });
+    } else {
+      transformBlock(store, model, flavour, type);
+    }
   });
 }
-
+export function transformBlock(
+  store: Store,
+  model: BaseBlockModel,
+  flavour: string,
+  type: string
+) {
+  const parent = store.getParent(model);
+  assertExists(parent);
+  const blockProps = {
+    id: model.id,
+    flavour,
+    type,
+    text: model?.text?.clone(), // should clone before `deleteBlock`
+    children: model.children,
+  };
+  const index = parent.children.indexOf(model);
+  store.deleteBlock(model);
+  store.addBlock(blockProps, parent, index);
+}
 export function batchUpdateTextType(
+  flavour: string,
   store: Store,
   models: ExtendedModel[],
   type: string
@@ -79,7 +102,11 @@ export function batchUpdateTextType(
   store.captureSync();
   for (const model of models) {
     assertFlavours(model, ['paragraph', 'list']);
-    store.updateBlock(model, { type });
+    if (model.flavour === flavour) {
+      store.updateBlock(model, { type });
+    } else {
+      transformBlock(store, model, 'paragraph', type);
+    }
   }
 }
 
@@ -172,11 +199,9 @@ function formatModelsByRange(
 
 export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
   // workaround page title
+  e.preventDefault();
   if (e.target instanceof HTMLInputElement) return;
-  if (isNoneSelection()) {
-    e.preventDefault();
-    return;
-  }
+  if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
     const models = getModelsByRange(getCurrentRange());

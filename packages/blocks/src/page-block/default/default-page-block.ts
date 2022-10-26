@@ -144,6 +144,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       H6,
       SHIFT_UP,
       SHIFT_DOWN,
+      NUMBERED_LIST,
+      BULLETED,
+      TEXT,
     } = HOTKEYS;
     bindCommonHotkey(store);
     hotkey.addListener(BACKSPACE, e => {
@@ -182,13 +185,21 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selection.state.type = 'native';
     });
 
-    hotkey.addListener(H1, () => this._updateType('h1', store));
-    hotkey.addListener(H2, () => this._updateType('h2', store));
-    hotkey.addListener(H3, () => this._updateType('h3', store));
-    hotkey.addListener(H4, () => this._updateType('h4', store));
-    hotkey.addListener(H5, () => this._updateType('h5', store));
-    hotkey.addListener(H6, () => this._updateType('h6', store));
-
+    hotkey.addListener(H1, () => this._updateType('paragraph', 'h1', store));
+    hotkey.addListener(H2, () => this._updateType('paragraph', 'h2', store));
+    hotkey.addListener(H3, () => this._updateType('paragraph', 'h3', store));
+    hotkey.addListener(H4, () => this._updateType('paragraph', 'h4', store));
+    hotkey.addListener(H5, () => this._updateType('paragraph', 'h5', store));
+    hotkey.addListener(H6, () => this._updateType('paragraph', 'h6', store));
+    hotkey.addListener(NUMBERED_LIST, () =>
+      this._updateType('list', 'numbered', store)
+    );
+    hotkey.addListener(BULLETED, () =>
+      this._updateType('list', 'bulleted', store)
+    );
+    hotkey.addListener(TEXT, () =>
+      this._updateType('paragraph', 'text', store)
+    );
     hotkey.addListener(SHIFT_UP, e => {
       // TODO expand selection up
     });
@@ -218,6 +229,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.SHIFT_UP,
       HOTKEYS.SHIFT_DOWN,
       HOTKEYS.LINK,
+      HOTKEYS.BULLETED,
+      HOTKEYS.NUMBERED_LIST,
+      HOTKEYS.TEXT,
     ]);
   }
 
@@ -259,16 +273,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     store.updateBlock(this.model, { title });
   }
 
-  private _updateType(type: string, store: Store) {
+  private _updateType(flavour: string, type: string, store: Store) {
     const { state } = this.selection;
     if (state.selectedRichTexts.length > 0) {
       batchUpdateTextType(
+        flavour,
         store,
         state.selectedRichTexts.map(richText => richText.model),
         type
       );
     } else {
-      updateTextType(type, store);
+      updateTextType(flavour, type, store);
     }
   }
 
