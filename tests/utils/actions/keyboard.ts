@@ -19,6 +19,21 @@ async function keyUpCtrlOrMeta(page: Page) {
     await page.keyboard.up('Control');
   }
 }
+async function keyDownOptionMeta(page: Page) {
+  if (IS_MAC) {
+    await page.keyboard.down('Alt');
+  } else {
+    await page.keyboard.down('Shift');
+  }
+}
+
+async function keyUpOptionMeta(page: Page) {
+  if (IS_MAC) {
+    await page.keyboard.up('Alt');
+  } else {
+    await page.keyboard.up('Shift');
+  }
+}
 
 // It's not good enough, but better than calling keyDownCtrlOrMeta and keyUpCtrlOrMeta separately
 export const withCtrlOrMeta = async (page: Page, fn: () => Promise<void>) => {
@@ -35,6 +50,14 @@ export async function pressEnter(page: Page) {
 export async function undoByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('z');
+  await keyUpCtrlOrMeta(page);
+}
+
+export async function formatType(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await keyDownOptionMeta(page);
+  await page.keyboard.press('1');
+  await keyUpOptionMeta(page);
   await keyUpCtrlOrMeta(page);
 }
 

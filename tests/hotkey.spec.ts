@@ -13,8 +13,14 @@ import {
   initThreeParagraphs,
   dragBetweenIndices,
   initEmptyState,
+  convertToBulletedListByClick,
+  formatType,
 } from './utils/actions';
-import { assertRichTexts, assertTextFormat } from './utils/asserts';
+import {
+  assertRichTexts,
+  assertTextFormat,
+  assertTypeFormat,
+} from './utils/asserts';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -100,4 +106,16 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   // trigger hotkey twice
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, { strike: true });
+});
+
+test('format list to h1', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+
+  await focusRichText(page, 0);
+  await convertToBulletedListByClick(page);
+  await page.keyboard.type('aa');
+  await focusRichText(page, 0);
+  await formatType(page);
+  await assertTypeFormat(page, 'h1');
 });
