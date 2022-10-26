@@ -50,5 +50,7 @@ export const createEditor = (options: EditorOptions = {}): EditorContainer => {
     return editor;
   }
   // 3. Use default store
+  const store = new Store().register(BlockSchema);
+  editor.store = store;
   return editor;
 };

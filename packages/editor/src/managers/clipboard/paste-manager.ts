@@ -2,8 +2,7 @@ import { BaseBlockModel } from '@blocksuite/store';
 import { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
-import { SelectionUtils } from '@blocksuite/blocks';
-import { SelectionInfo } from '@blocksuite/blocks/src/__internal__';
+import { SelectionUtils, SelectionInfo } from '@blocksuite/blocks';
 
 export class PasteManager {
   private _editor: EditorContainer;
