@@ -149,141 +149,92 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       TEXT,
     } = HOTKEYS;
 
-    bindCommonHotkey(store, this.flavour);
-    hotkey.addListener(
-      BACKSPACE,
-      e => {
-        const { state } = this.selection;
-        if (isPageTitle(e)) {
-          const target = e.target as HTMLInputElement;
-          // range delete
-          if (target.selectionStart !== target.selectionEnd) {
-            e.preventDefault();
-            const title = getSplicedTitle(target);
-            store.updateBlock(this.model, { title });
-          }
-          // collapsed delete
-          else {
-            noop();
-          }
-          return;
+    bindCommonHotkey(store);
+    hotkey.addListener(BACKSPACE, e => {
+      const { state } = this.selection;
+      if (isPageTitle(e)) {
+        const target = e.target as HTMLInputElement;
+        // range delete
+        if (target.selectionStart !== target.selectionEnd) {
+          e.preventDefault();
+          const title = getSplicedTitle(target);
+          store.updateBlock(this.model, { title });
         }
-
-        if (state.type === 'native') {
-          handleBackspace(store, e);
-        } else if (state.type === 'block') {
-          const { selectedRichTexts } = state;
-          handleBlockSelectionBatchDelete(
-            store,
-            selectedRichTexts.map(richText => richText.model)
-          );
-          state.clear();
-          this.signals.updateSelectedRects.emit([]);
+        // collapsed delete
+        else {
+          noop();
         }
-      },
-      this.flavour
-    );
+        return;
+      }
 
-    hotkey.addListener(
-      SELECT_ALL,
-      e => {
-        // console.log('e: ', e);
-        e.preventDefault();
-        handleSelectAll();
-        this.selection.state.type = 'native';
-      },
-      'page'
-    );
+      if (state.type === 'native') {
+        handleBackspace(store, e);
+      } else if (state.type === 'block') {
+        const { selectedRichTexts } = state;
+        handleBlockSelectionBatchDelete(
+          store,
+          selectedRichTexts.map(richText => richText.model)
+        );
+        state.clear();
+        this.signals.updateSelectedRects.emit([]);
+      }
+    });
 
-    hotkey.addListener(
-      H1,
-      () => this._updateType('paragraph', 'h1', store),
-      this.flavour
+    hotkey.addListener(SELECT_ALL, e => {
+      // console.log('e: ', e);
+      e.preventDefault();
+      handleSelectAll();
+      this.selection.state.type = 'native';
+    });
+
+    hotkey.addListener(H1, () => this._updateType('paragraph', 'h1', store));
+    hotkey.addListener(H2, () => this._updateType('paragraph', 'h2', store));
+    hotkey.addListener(H3, () => this._updateType('paragraph', 'h3', store));
+    hotkey.addListener(H4, () => this._updateType('paragraph', 'h4', store));
+    hotkey.addListener(H5, () => this._updateType('paragraph', 'h5', store));
+    hotkey.addListener(H6, () => this._updateType('paragraph', 'h6', store));
+    hotkey.addListener(NUMBERED_LIST, () =>
+      this._updateType('list', 'numbered', store)
     );
-    hotkey.addListener(
-      H2,
-      () => this._updateType('paragraph', 'h2', store),
-      this.flavour
+    hotkey.addListener(BULLETED, () =>
+      this._updateType('list', 'bulleted', store)
     );
-    hotkey.addListener(
-      H3,
-      () => this._updateType('paragraph', 'h3', store),
-      this.flavour
+    hotkey.addListener(TEXT, () =>
+      this._updateType('paragraph', 'text', store)
     );
-    hotkey.addListener(
-      H4,
-      () => this._updateType('paragraph', 'h4', store),
-      this.flavour
-    );
-    hotkey.addListener(
-      H5,
-      () => this._updateType('paragraph', 'h5', store),
-      this.flavour
-    );
-    hotkey.addListener(
-      H6,
-      () => this._updateType('paragraph', 'h6', store),
-      this.flavour
-    );
-    hotkey.addListener(
-      NUMBERED_LIST,
-      () => this._updateType('list', 'numbered', store),
-      this.flavour
-    );
-    hotkey.addListener(
-      BULLETED,
-      () => this._updateType('list', 'bulleted', store),
-      this.flavour
-    );
-    hotkey.addListener(
-      TEXT,
-      () => this._updateType('paragraph', 'text', store),
-      this.flavour
-    );
-    hotkey.addListener(
-      SHIFT_UP,
-      e => {
-        // TODO expand selection up
-      },
-      this.flavour
-    );
-    hotkey.addListener(
-      SHIFT_DOWN,
-      e => {
-        // TODO expand selection down
-      },
-      this.flavour
-    );
+    hotkey.addListener(SHIFT_UP, e => {
+      // TODO expand selection up
+    });
+    hotkey.addListener(SHIFT_DOWN, e => {
+      // TODO expand selection down
+    });
 
     // !!!
     // Don't forget to remove hotkeys at `_removeHotkeys`
   }
 
   private _removeHotkeys() {
-    removeCommonHotKey(this.flavour);
-    hotkey.removeListener(
-      [
-        HOTKEYS.UNDO,
-        HOTKEYS.REDO,
-        HOTKEYS.BACKSPACE,
-        HOTKEYS.SELECT_ALL,
-        HOTKEYS.INLINE_CODE,
-        HOTKEYS.STRIKE,
-        HOTKEYS.H1,
-        HOTKEYS.H2,
-        HOTKEYS.H3,
-        HOTKEYS.H4,
-        HOTKEYS.H5,
-        HOTKEYS.H6,
-        HOTKEYS.SHIFT_UP,
-        HOTKEYS.SHIFT_DOWN,
-        HOTKEYS.LINK,
-        HOTKEYS.BULLETED,
-        HOTKEYS.NUMBERED_LIST,
-        HOTKEYS.TEXT,
-      ],
-      this.flavour
-    );
+    removeCommonHotKey();
+    hotkey.removeListener([
+      HOTKEYS.UNDO,
+      HOTKEYS.REDO,
+      HOTKEYS.BACKSPACE,
+      HOTKEYS.SELECT_ALL,
+      HOTKEYS.INLINE_CODE,
+      HOTKEYS.STRIKE,
+      HOTKEYS.H1,
+      HOTKEYS.H2,
+      HOTKEYS.H3,
+      HOTKEYS.H4,
+      HOTKEYS.H5,
+      HOTKEYS.H6,
+      HOTKEYS.SHIFT_UP,
+      HOTKEYS.SHIFT_DOWN,
+      HOTKEYS.LINK,
+      HOTKEYS.BULLETED,
+      HOTKEYS.NUMBERED_LIST,
+      HOTKEYS.TEXT,
+    ]);
   }
 
   private _onTitleKeyDown(e: KeyboardEvent) {

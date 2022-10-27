@@ -72,7 +72,7 @@ export class EdgelessPageBlockComponent
     updateSelection: new Signal<EdgelessSelectionState>(),
   };
 
-  _historyDisposble!: Disposable;
+  _historyDisposable!: Disposable;
 
   private _selection!: EdgelessSelectionManager;
 
@@ -83,12 +83,12 @@ export class EdgelessPageBlockComponent
       this._backspace.bind(this),
       this.flavour
     );
-    bindCommonHotkey(store, this.flavour);
+    bindCommonHotkey(store);
   }
 
   private _removeHotkeys() {
     hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
-    removeCommonHotKey(this.flavour);
+    removeCommonHotKey();
   }
   _backspace(e: KeyboardEvent) {
     if (this._selection.state.type === 'single') {
@@ -132,7 +132,7 @@ export class EdgelessPageBlockComponent
 
     this.signals.viewportUpdated.on(() => this._selection.syncSelectionBox());
     this.signals.updateSelection.on(() => this.requestUpdate());
-    this._historyDisposble = this.store.signals.historyUpdated.on(() => {
+    this._historyDisposable = this.store.signals.historyUpdated.on(() => {
       this._clearSelection();
     });
 
@@ -154,7 +154,7 @@ export class EdgelessPageBlockComponent
   disconnectedCallback() {
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
-    this._historyDisposble.dispose();
+    this._historyDisposable.dispose();
     this._selection.dispose();
     this._removeHotkeys();
   }
