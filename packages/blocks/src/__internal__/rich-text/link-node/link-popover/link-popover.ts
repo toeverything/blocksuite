@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, type PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { toast } from '../../../../toast';
 import { createEvent } from '../../../utils';
@@ -45,6 +45,16 @@ export class LinkPopover extends LitElement {
       // Disable body scroll
       this.bodyOverflowStyle = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+    }
+  }
+
+  protected firstUpdated(
+    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
+  ): void {
+    super.firstUpdated(_changedProperties);
+
+    if (this.linkInput) {
+      this.linkInput.focus();
     }
   }
 
@@ -114,9 +124,8 @@ export class LinkPopover extends LitElement {
   createLinkTemplate() {
     return html`<div class="affine-link-popover">
       <input
-        class="affine-link-popover-input"
-        autofocus
         id="link-input"
+        class="affine-link-popover-input"
         type="text"
         spellcheck="false"
         placeholder="Paste or type a link"
@@ -164,10 +173,10 @@ export class LinkPopover extends LitElement {
       />
       <label class="affine-edit-link-text" for="link-input">Link</label>
       <input
-        class="affine-edit-link-input"
         id="link-input"
+        class="affine-edit-link-input"
         type="text"
-        autofocus="true"
+        autofocus
         spellcheck="false"
         placeholder="Paste or type a link"
         value=${this.previewLink}

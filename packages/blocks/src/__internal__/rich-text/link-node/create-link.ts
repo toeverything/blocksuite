@@ -53,10 +53,6 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
     throw new Error('Failed to create link, mockSelectDom not found!');
   }
 
-  // XXX Prevent autofocus warn
-  // Autofocus processing was blocked because a document already has a focused element.
-  quill.blur();
-
   const linkState = await showLinkPopover({ anchorEl: mockSelectDom });
 
   quill.formatText(range, { 'mock-select': false });
