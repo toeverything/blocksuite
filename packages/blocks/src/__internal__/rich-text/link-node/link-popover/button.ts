@@ -1,5 +1,5 @@
 import { css, html, LitElement, svg } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 /**
  * ✅
@@ -127,15 +127,27 @@ export class IconButton extends LitElement {
       fill: var(--affine-primary-color);
     }
 
+    :host([disabled]),
     :host(:disabled) {
+      background: transparent;
+      fill: var(--affine-icon-color);
       cursor: not-allowed;
     }
   `;
 
+  @property()
+  inert = true;
+
+  @property({ type: Boolean })
+  disabled = true;
+
   constructor() {
     super();
     this.tabIndex = 0;
-    this.addEventListener('keypress', function onEvent(event) {
+    this.addEventListener('keypress', event => {
+      if (this.disabled) {
+        return;
+      }
       if (event.key === 'Enter') {
         this.click();
       }
