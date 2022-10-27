@@ -81,7 +81,7 @@ export class LinkPopover extends LitElement {
   bodyOverflowStyle = '';
 
   @state()
-  disableConfirm = true;
+  disableConfirm = false;
 
   @query('#text-input')
   textInput: HTMLInputElement | undefined;
@@ -105,6 +105,7 @@ export class LinkPopover extends LitElement {
 
     if (this.linkInput) {
       this.linkInput.focus();
+      this.updateConfirmState();
     }
   }
 
@@ -164,9 +165,16 @@ export class LinkPopover extends LitElement {
     if (e.key === 'Enter') {
       this.onConfirm();
     }
-    const isValid = isValidLink((e.target as HTMLInputElement).value);
-    this.disableConfirm = isValid ? false : true;
+    this.updateConfirmState();
+    return;
+  }
 
+  private updateConfirmState() {
+    if (!this.linkInput) {
+      return;
+    }
+    const isValid = isValidLink(this.linkInput.value);
+    this.disableConfirm = isValid ? false : true;
     return;
   }
 
