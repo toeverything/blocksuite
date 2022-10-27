@@ -81,7 +81,7 @@ export class LinkPopover extends LitElement {
   bodyOverflowStyle = '';
 
   @state()
-  disableConfirm = false;
+  disableConfirm = true;
 
   @query('#text-input')
   textInput: HTMLInputElement | undefined;
@@ -103,7 +103,6 @@ export class LinkPopover extends LitElement {
 
     if (this.linkInput) {
       this.linkInput.focus();
-      this.updateConfirmState();
     }
   }
 
@@ -157,6 +156,7 @@ export class LinkPopover extends LitElement {
 
   private onEdit(e: MouseEvent) {
     this.dispatchEvent(createEvent('editLink', null));
+    this.disableConfirm = false;
   }
 
   private onKeyup(e: KeyboardEvent) {
@@ -252,7 +252,6 @@ export class LinkPopover extends LitElement {
         id="link-input"
         class="affine-edit-link-input"
         type="text"
-        autofocus
         spellcheck="false"
         placeholder="Paste or type a link"
         value=${this.previewLink}

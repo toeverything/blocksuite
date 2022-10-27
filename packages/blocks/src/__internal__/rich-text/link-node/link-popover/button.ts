@@ -138,7 +138,7 @@ export class IconButton extends LitElement {
   inert = true;
 
   @property({ type: Boolean })
-  disabled = true;
+  disabled = false;
 
   constructor() {
     super();
