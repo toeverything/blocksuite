@@ -8,7 +8,7 @@ export function bindCommonHotkey(store: Store) {
   hotkey.addListener(INLINE_CODE, e => handleFormat(store, e, 'code'));
   hotkey.addListener(STRIKE, e => handleFormat(store, e, 'strike'));
   hotkey.addListener(LINK, e => {
-    hotkey.disabledHotkey();
+    hotkey.disableHotkey();
     e.preventDefault();
     createLink(store, e).then(() => {
       hotkey.enableHotkey();

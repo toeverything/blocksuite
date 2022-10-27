@@ -21,7 +21,7 @@ class HotkeyManager {
       scope ?? 'page'
     );
   }
-  disabledHotkey() {
+  disableHotkey() {
     this._hotkeys.setScope('other');
   }
   enableHotkey() {
