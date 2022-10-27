@@ -1,4 +1,4 @@
-import { html, LitElement, type PropertyValueMap } from 'lit';
+import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { toast } from '../../../../toast';
 import { createEvent } from '../../../utils';
@@ -98,9 +98,7 @@ export class LinkPopover extends LitElement {
     }
   }
 
-  protected override firstUpdated(
-    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
-  ): void {
+  protected override firstUpdated(_changedProperties: PropertyValues): void {
     super.firstUpdated(_changedProperties);
 
     if (this.linkInput) {
