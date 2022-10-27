@@ -58,7 +58,7 @@ export class ListBlockComponent extends LitElement {
           }`}
         >
           <div
-            style="cursor: pointer"
+            style="cursor: pointer;user-select:none"
             @click="${() => {
               if (this.model.type !== 'todo') return;
               this.host.store.captureSync();
