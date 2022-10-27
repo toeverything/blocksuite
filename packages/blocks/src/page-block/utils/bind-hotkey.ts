@@ -10,7 +10,9 @@ export function bindCommonHotkey(store: Store) {
   hotkey.addListener(LINK, e => {
     hotkey.disabledHotkey();
     e.preventDefault();
-    createLink(store, e);
+    createLink(store, e).then(() => {
+      hotkey.enableHotkey();
+    });
   });
   hotkey.addListener(UNDO, () => store.undo());
   hotkey.addListener(REDO, () => store.redo());

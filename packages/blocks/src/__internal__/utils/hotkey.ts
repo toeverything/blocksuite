@@ -22,7 +22,7 @@ class HotkeyManager {
     );
   }
   disabledHotkey() {
-    this._hotkeys.deleteScope('page');
+    this._hotkeys.setScope('other');
   }
   enableHotkey() {
     this._setScope('page');
