@@ -27,6 +27,19 @@ class HotkeyManager {
   enableHotkey() {
     this._setScope('page');
   }
+
+  /**
+   * Create a context to shielding against global hotkey
+   */
+  async withHotkeyShield(fn: () => void | Promise<unknown>) {
+    this.disableHotkey();
+    try {
+      const ret = await fn();
+      return ret;
+    } finally {
+      this.enableHotkey();
+    }
+  }
 }
 
 export const hotkey = new HotkeyManager();
