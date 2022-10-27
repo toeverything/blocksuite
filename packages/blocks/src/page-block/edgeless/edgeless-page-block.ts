@@ -78,13 +78,17 @@ export class EdgelessPageBlockComponent
 
   private _bindHotkeys() {
     const { store } = this;
-    hotkey.addListener(HOTKEYS.BACKSPACE, this._backspace.bind(this));
-    bindCommonHotkey(store);
+    hotkey.addListener(
+      HOTKEYS.BACKSPACE,
+      this._backspace.bind(this),
+      this.flavour
+    );
+    bindCommonHotkey(store, this.flavour);
   }
 
   private _removeHotkeys() {
-    hotkey.removeListener([HOTKEYS.BACKSPACE]);
-    removeCommonHotKey();
+    hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
+    removeCommonHotKey(this.flavour);
   }
   _backspace(e: KeyboardEvent) {
     if (this._selection.state.type === 'single') {
