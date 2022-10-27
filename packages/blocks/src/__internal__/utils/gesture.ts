@@ -20,6 +20,7 @@ export interface SelectionEvent extends IPoint {
     cmd: boolean;
     alt: boolean;
   };
+  button?: number;
 }
 
 function isFarEnough(a: IPoint, b: IPoint, d = 2) {
@@ -48,6 +49,7 @@ function toSelectionEvent(
       cmd: e.metaKey || e.ctrlKey,
       alt: e.altKey,
     },
+    button: e.button,
   };
   if (last) {
     delta.x = offsetX - last.x;
@@ -75,7 +77,8 @@ export function initMouseEventHandlers(
   onContainerClick: (e: SelectionEvent) => void,
   onContainerDblClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
-  onContainerMouseOut: (e: SelectionEvent) => void
+  onContainerMouseOut: (e: SelectionEvent) => void,
+  onContainerContextMenu: (e: SelectionEvent) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
@@ -93,7 +96,10 @@ export function initMouseEventHandlers(
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
     isDragging = false;
-    last = toSelectionEvent(e, rect, startX, startY);
+    // e.button is 0 means left button
+    if (!e.button) {
+      last = toSelectionEvent(e, rect, startX, startY);
+    }
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
   };
@@ -143,6 +149,7 @@ export function initMouseEventHandlers(
   const contextMenuHandler = (e: MouseEvent) => {
     // e.preventDefault();
     // e.stopPropagation();
+    onContainerContextMenu(toSelectionEvent(e, rect, startX, startY));
   };
 
   const dblClickHandler = (e: MouseEvent) => {
