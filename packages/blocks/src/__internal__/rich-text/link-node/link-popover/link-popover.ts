@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { toast } from '../../../../toast';
 import { createEvent } from '../../../utils';
 import { ConfirmIcon, EditIcon, UnlinkIcon } from './button';
 import { linkPopoverStyle } from './styles';
@@ -83,9 +84,7 @@ export class LinkPopover extends LitElement {
 
   private onCopy(e: MouseEvent) {
     navigator.clipboard.writeText(this.previewLink);
-    // TODO show toast
-    // Toast.show('Copied link to clipboard');
-    console.log('Copied link to clipboard');
+    toast('Copied link to clipboard');
   }
 
   private onUnlink(e: MouseEvent) {
