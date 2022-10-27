@@ -97,7 +97,6 @@ export function handleIndent(
     store.captureSync();
 
     const blockProps = {
-      id: model.id,
       flavour: model.flavour,
       type: model.type,
       text: model?.text?.clone(), // should clone before `deleteBlock`
@@ -128,7 +127,6 @@ export async function handleUnindent(
 
   const index = grandParent.children.indexOf(parent);
   const blockProps = {
-    id: model.id,
     flavour: model.flavour,
     text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,
@@ -172,7 +170,6 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
         if (!grandParent) return;
         const index = grandParent.children.indexOf(parent);
         const blockProps = {
-          id: model.id,
           flavour: model.flavour,
           text: model?.text?.clone(), // should clone before `deleteBlock`
           children: model.children,

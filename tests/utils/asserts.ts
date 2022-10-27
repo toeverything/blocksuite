@@ -322,7 +322,7 @@ export async function assertStoreMatchJSX(page: Page, snapshot: string) {
     plugins: [prettyFormatPlugins.ReactTestComponent],
     printFunctionName: false,
   });
-  expect(snapshot, formattedJSX).toEqual(formattedJSX);
+  expect(snapshot.trimStart(), formattedJSX).toEqual(formattedJSX);
 }
 
 export async function assertClipItems(page: Page, key: string, value: unknown) {
