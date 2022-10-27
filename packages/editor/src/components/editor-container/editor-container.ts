@@ -126,8 +126,6 @@ export class EditorContainer extends LitElement {
         .affine-editor-container {
           height: 100%;
           position: relative;
-          background: var(--affine-page-background);
-          transition: background-color 0.5s;
           overflow-y: auto;
           overflow-x: hidden;
         }
