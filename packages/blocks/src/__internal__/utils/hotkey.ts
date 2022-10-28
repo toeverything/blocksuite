@@ -31,7 +31,7 @@ class HotkeyManager {
   /**
    * Create a context to shielding against global hotkey
    */
-  async withHotkeyShield(fn: () => void | Promise<unknown>) {
+  async withDisableHotkey(fn: () => void | Promise<unknown>) {
     this.disableHotkey();
     try {
       const ret = await fn();

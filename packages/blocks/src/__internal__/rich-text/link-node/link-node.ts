@@ -64,7 +64,7 @@ export class LinkNodeComponent extends LitElement {
     assertExists(blot);
     const text = blot.domNode.textContent ?? undefined;
 
-    hotkey.withHotkeyShield(async () => {
+    hotkey.withDisableHotkey(async () => {
       const linkState = await showLinkPopover({
         anchorEl: e.target as HTMLElement,
         text,

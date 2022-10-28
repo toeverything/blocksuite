@@ -163,13 +163,8 @@ export class LinkPopover extends LitElement {
     if (e.key === 'Enter') {
       this.onConfirm();
     }
-    this.updateConfirmState();
-    return;
-  }
-
-  private updateConfirmState() {
     if (!this.linkInput) {
-      return;
+      throw new Error('Failed to update link! Link input not found!');
     }
     const isValid = isValidLink(this.linkInput.value);
     this.disableConfirm = isValid ? false : true;
