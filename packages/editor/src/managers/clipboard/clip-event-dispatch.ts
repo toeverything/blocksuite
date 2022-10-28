@@ -25,10 +25,10 @@ export class ClipEventDispatch {
     clipboardTarget.addEventListener(ClipboardAction.copy, this._copyHandler);
     clipboardTarget.addEventListener(ClipboardAction.cut, this._cutHandler);
     clipboardTarget.addEventListener(ClipboardAction.paste, this._pasteHandler);
-    // Will break popover input
-    // document.addEventListener(ClipboardAction.copy, this._copyHandler);
-    // document.addEventListener(ClipboardAction.cut, this._cutHandler);
-    // document.addEventListener(ClipboardAction.paste, this._pasteHandler);
+    // TODO fix break popover input
+    document.addEventListener(ClipboardAction.copy, this._copyHandler);
+    document.addEventListener(ClipboardAction.cut, this._cutHandler);
+    document.addEventListener(ClipboardAction.paste, this._pasteHandler);
   }
 
   disposeClipboardTargetEvent(clipboardTarget: HTMLElement) {
