@@ -1,5 +1,12 @@
 # @blocksuite/store
 
+## 0.2.23
+
+### Patch Changes
+
+- 6b2da60: Add hover tips on link popover
+- 6f3d8c3: Send toast when copy link
+
 ## 0.2.22
 
 ### Patch Changes

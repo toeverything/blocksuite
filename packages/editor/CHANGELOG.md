@@ -1,5 +1,15 @@
 # @blocksuite/editor
 
+## 0.2.23
+
+### Patch Changes
+
+- 6b2da60: Add hover tips on link popover
+- Updated dependencies [6b2da60]
+- Updated dependencies [6f3d8c3]
+  - @blocksuite/blocks@0.2.23
+  - @blocksuite/store@0.2.23
+
 ## 0.2.22
 
 ### Patch Changes
