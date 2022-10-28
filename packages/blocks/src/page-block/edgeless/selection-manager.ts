@@ -127,7 +127,8 @@ export class EdgelessSelectionManager {
       this._onContainerClick,
       this._onContainerDblClick,
       this._onContainerMouseMove,
-      this._onContainerMouseOut
+      this._onContainerMouseOut,
+      this._onContainerContextMenu
     );
     this._wheelDisposeCallback = initWheelEventHandlers(container);
   }
@@ -233,6 +234,25 @@ export class EdgelessSelectionManager {
 
   private _onContainerMouseOut = (e: SelectionEvent) => {
     noop();
+  };
+
+  private _onContainerContextMenu = (e: SelectionEvent) => {
+    const currentRange = window.getSelection()?.getRangeAt(0);
+    const pointRange = caretRangeFromPoint(e.x, e.y);
+    // repair browser context menu change selection can not go through blocks
+    if (
+      currentRange &&
+      pointRange &&
+      currentRange.isPointInRange(
+        pointRange.startContainer,
+        pointRange.startOffset
+      ) &&
+      currentRange.isPointInRange(pointRange.endContainer, pointRange.endOffset)
+    ) {
+      requestAnimationFrame(() => {
+        resetNativeSelection(currentRange);
+      });
+    }
   };
 
   dispose() {
