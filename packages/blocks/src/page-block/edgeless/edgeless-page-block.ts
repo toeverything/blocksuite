@@ -25,6 +25,7 @@ import {
   handleBackspace,
   removeCommonHotKey,
   tryUpdateGroupSize,
+  updateTextType,
 } from '../utils';
 
 export interface EdgelessContainer extends HTMLElement {
@@ -83,7 +84,37 @@ export class EdgelessPageBlockComponent
       this._backspace.bind(this),
       this.flavour
     );
+    hotkey.addListener(HOTKEYS.H1, () =>
+      this._updateType('paragraph', 'h1', store)
+    );
+    hotkey.addListener(HOTKEYS.H2, () =>
+      this._updateType('paragraph', 'h2', store)
+    );
+    hotkey.addListener(HOTKEYS.H3, () =>
+      this._updateType('paragraph', 'h3', store)
+    );
+    hotkey.addListener(HOTKEYS.H4, () =>
+      this._updateType('paragraph', 'h4', store)
+    );
+    hotkey.addListener(HOTKEYS.H5, () =>
+      this._updateType('paragraph', 'h5', store)
+    );
+    hotkey.addListener(HOTKEYS.H6, () =>
+      this._updateType('paragraph', 'h6', store)
+    );
+    hotkey.addListener(HOTKEYS.NUMBERED_LIST, () =>
+      this._updateType('list', 'numbered', store)
+    );
+    hotkey.addListener(HOTKEYS.BULLETED, () =>
+      this._updateType('list', 'bulleted', store)
+    );
+    hotkey.addListener(HOTKEYS.TEXT, () =>
+      this._updateType('paragraph', 'text', store)
+    );
     bindCommonHotkey(store);
+  }
+  private _updateType(flavour: string, type: string, store: Store): void {
+    updateTextType(flavour, type, store);
   }
 
   private _removeHotkeys() {
