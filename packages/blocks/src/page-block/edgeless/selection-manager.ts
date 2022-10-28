@@ -10,6 +10,7 @@ import {
   handleNativeRangeClick,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
+import { repairerContextMenuRange } from '../utils/cursor';
 
 interface NoneSelectionState {
   type: 'none';
@@ -237,22 +238,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    const currentRange = window.getSelection()?.getRangeAt(0);
-    const pointRange = caretRangeFromPoint(e.x, e.y);
-    // repair browser context menu change selection can not go through blocks
-    if (
-      currentRange &&
-      pointRange &&
-      currentRange.isPointInRange(
-        pointRange.startContainer,
-        pointRange.startOffset
-      ) &&
-      currentRange.isPointInRange(pointRange.endContainer, pointRange.endOffset)
-    ) {
-      requestAnimationFrame(() => {
-        resetNativeSelection(currentRange);
-      });
-    }
+    repairerContextMenuRange(e);
   };
 
   dispose() {

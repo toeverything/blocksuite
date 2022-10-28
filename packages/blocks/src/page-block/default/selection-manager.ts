@@ -13,6 +13,7 @@ import {
   handleNativeRangeDblClick,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
+import { repairerContextMenuRange } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -218,22 +219,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    const currentRange = window.getSelection()?.getRangeAt(0);
-    const pointRange = caretRangeFromPoint(e.x, e.y);
-    // repair browser context menu change selection can not go through blocks
-    if (
-      currentRange &&
-      pointRange &&
-      currentRange.isPointInRange(
-        pointRange.startContainer,
-        pointRange.startOffset
-      ) &&
-      currentRange.isPointInRange(pointRange.endContainer, pointRange.endOffset)
-    ) {
-      requestAnimationFrame(() => {
-        resetNativeSelection(currentRange);
-      });
-    }
+    repairerContextMenuRange(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
