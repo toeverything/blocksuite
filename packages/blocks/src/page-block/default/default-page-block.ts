@@ -148,6 +148,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       BULLETED,
       TEXT,
     } = HOTKEYS;
+
     bindCommonHotkey(store);
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
@@ -180,6 +181,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(SELECT_ALL, e => {
+      // console.log('e: ', e);
       e.preventDefault();
       handleSelectAll();
       this.selection.state.type = 'native';
@@ -310,7 +312,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   firstUpdated() {
     this._bindHotkeys();
-
+    hotkey.enableHotkey();
     this.model.propsUpdated.on(() => {
       if (this.model.title !== this._title.value) {
         this._title.value = this.model.title || '';
