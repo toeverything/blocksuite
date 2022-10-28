@@ -1,9 +1,10 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import Quill from 'quill';
-import { assertExists, getModelByElement } from '../../utils';
+import { assertExists, getModelByElement, hotkey } from '../../utils';
 import { LinkIcon } from './link-icon';
 import { showLinkPopover } from './link-popover/create-link-popover';
+import { ALLOWED_SCHEMES } from './link-popover/link-popover';
 
 // TODO fix Blot types
 type Blot = {
@@ -63,26 +64,28 @@ export class LinkNodeComponent extends LitElement {
     assertExists(blot);
     const text = blot.domNode.textContent ?? undefined;
 
-    const linkState = await showLinkPopover({
-      anchorEl: e.target as HTMLElement,
-      text,
-      link: this.href,
-      showMask: false,
-      interactionKind: 'hover',
+    hotkey.withDisableHotkey(async () => {
+      const linkState = await showLinkPopover({
+        anchorEl: e.target as HTMLElement,
+        text,
+        link: this.href,
+        showMask: false,
+        interactionKind: 'hover',
+      });
+      if (linkState.type === 'confirm') {
+        const link = linkState.link;
+        const newText = linkState.text;
+        const isUpdateText = newText !== text;
+        assertExists(blot);
+        this.updateLink(blot, link, isUpdateText ? newText : undefined);
+        return;
+      }
+      if (linkState.type === 'remove') {
+        assertExists(blot);
+        this.updateLink(blot, false);
+        return;
+      }
     });
-    if (linkState.type === 'confirm') {
-      const link = linkState.link;
-      const newText = linkState.text;
-      const isUpdateText = newText !== text;
-      assertExists(blot);
-      this.updateLink(blot, link, isUpdateText ? newText : undefined);
-      return;
-    }
-    if (linkState.type === 'remove') {
-      assertExists(blot);
-      this.updateLink(blot, false);
-      return;
-    }
   }
 
   /**
@@ -117,6 +120,7 @@ export class LinkNodeComponent extends LitElement {
 }
 const Link = Quill.import('formats/link');
 Link.tagName = 'link-node'; // Quill uses <a> by default
+Link.PROTOCOL_WHITELIST = ALLOWED_SCHEMES;
 Quill.register(Link, true);
 
 declare global {

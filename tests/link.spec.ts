@@ -32,9 +32,7 @@ test('basic link', async ({ page }) => {
   expect(await linkPopoverLocator.isVisible()).toBe(true);
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   expect(await linkPopoverInput.isVisible()).toBe(true);
-  await linkPopoverInput.fill(link);
-  // await page.keyboard.type(link);
-  // await page.locator(`text="Confirm"`).click();
+  await page.keyboard.type(link);
   await pressEnter(page);
   expect(await linkPopoverLocator.isVisible()).toBe(false);
 
