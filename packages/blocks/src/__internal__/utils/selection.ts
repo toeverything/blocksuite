@@ -139,10 +139,18 @@ function focusRichTextByModel(
   position: SelectionPosition,
   model: BaseBlockModel
 ) {
-  const element = getBlockElementByModel(model);
-  const editableContainer = element?.querySelector('[contenteditable]');
-  if (editableContainer) {
-    focusRichText(position, editableContainer);
+  if (model.flavour === 'group') {
+    (
+      document.querySelector(
+        '.affine-default-page-block-title'
+      ) as HTMLInputElement
+    ).focus();
+  } else {
+    const element = getBlockElementByModel(model);
+    const editableContainer = element?.querySelector('[contenteditable]');
+    if (editableContainer) {
+      focusRichText(position, editableContainer);
+    }
   }
 }
 
