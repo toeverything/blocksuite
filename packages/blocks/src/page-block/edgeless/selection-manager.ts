@@ -19,7 +19,7 @@ interface NoneSelectionState {
 interface SingleSelectionState {
   type: 'single';
   selected: GroupBlockModel;
-  box: DOMRect;
+  rect: DOMRect;
   active: boolean;
 }
 
@@ -113,9 +113,14 @@ export class EdgelessSelectionManager {
     type: 'none',
   };
   private _startRange: Range | null = null;
+  private _hoverRect: DOMRect | null = null;
 
   get state() {
     return this._state;
+  }
+
+  get hoverRect() {
+    return this._hoverRect;
   }
 
   constructor(container: EdgelessContainer) {
@@ -155,7 +160,7 @@ export class EdgelessSelectionManager {
         type: 'single',
         active: this._state.type === 'single' && this._state.active,
         selected,
-        box: getSelectionBoxBound(viewport, selected.xywh),
+        rect: getSelectionBoxBound(viewport, selected.xywh),
       };
       this._container.signals.updateSelection.emit(this.state);
     } else {
@@ -213,10 +218,15 @@ export class EdgelessSelectionManager {
 
   syncSelectionBox() {
     if (this.state.type === 'single') {
-      this.state.box = getSelectionBoxBound(
+      const rect = getSelectionBoxBound(
         this._container.viewport,
         this.state.selected.xywh
       );
+
+      this.state.rect = rect;
+      if (this._hoverRect) {
+        this._hoverRect = rect;
+      }
     }
     this._container.signals.updateSelection.emit(this.state);
   }
@@ -230,7 +240,15 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    noop();
+    const { viewport } = this._container;
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
+    const selected = pick(this._blocks, modelX, modelY);
+    if (selected) {
+      this._hoverRect = getSelectionBoxBound(viewport, selected.xywh);
+    } else {
+      this._hoverRect = null;
+    }
+    this._container.signals.hoverUpdated.emit();
   };
 
   private _onContainerMouseOut = (e: SelectionEvent) => {

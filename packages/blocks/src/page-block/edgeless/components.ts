@@ -13,6 +13,32 @@ import { BlockElement, BlockHost } from '../../__internal__';
 import '../../__internal__';
 import { PADDING_X, PADDING_Y } from './utils';
 
+function getCommonRectStyle(rect: DOMRect, zoom: number) {
+  return {
+    position: 'absolute',
+    left: rect.x + 'px',
+    top: rect.y + 'px',
+    width: rect.width + PADDING_X * zoom + 'px',
+    height: rect.height + PADDING_Y * zoom + 'px',
+    borderRadius: `${10 * zoom}px`,
+    pointerEvents: 'none',
+    boxSizing: 'border-box',
+  };
+}
+
+export function EdgelessHoverRect(rect: DOMRect | null, zoom: number) {
+  if (!rect) return html`<div></div>`;
+
+  const style = {
+    ...getCommonRectStyle(rect, zoom),
+    border: `${1 * zoom}px solid var(--affine-primary-color)`,
+  };
+
+  return html`
+    <div class="affine-edgeless-hover-rect" style=${styleMap(style)}></div>
+  `;
+}
+
 export function EdgelessSelectedRect(
   state: EdgelessSelectionState,
   zoom: number
@@ -20,18 +46,12 @@ export function EdgelessSelectedRect(
   const { type } = state;
   if (type === 'none') return html`<div></div>`;
 
-  const { box } = state;
+  const { rect } = state;
   const color = state.active ? '#6ccfff' : '#ccc';
 
   const style = {
-    position: 'absolute',
-    left: box.x + 'px',
-    top: box.y + 'px',
-    width: box.width + PADDING_X * zoom + 'px',
-    height: box.height + PADDING_Y * zoom + 'px',
-    border: `1px solid ${color}`,
-    pointerEvents: 'none',
-    boxSizing: 'border-box',
+    border: `${state.active ? 2 : 1 * zoom}px solid ${color}`,
+    ...getCommonRectStyle(rect, zoom),
   };
 
   return html`
@@ -55,12 +75,9 @@ function EdgelessBlockChild(
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
     width: modelW + PADDING_X + 'px',
-    minHeight: modelH + PADDING_Y + 'px',
-    paddingLeft: '9px',
-    paddingRight: '9px',
-    paddingBottom: '18px',
+    height: modelH + PADDING_Y + 'px',
+    padding: `${PADDING_X / 2}px`,
     background: 'white',
-    boxShadow: '0 0 7px #ddd',
   };
 
   return html`
