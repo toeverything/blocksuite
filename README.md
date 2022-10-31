@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/-Twitter-grey?logo=twitter">
 </a>
 
-BlockSuite is a framework providing building blocks for collaborative applications. With BlockSuite, you can build complex application with fine-grained collaborative features, without going down the rabbit hole of rich text editors or conflict resolution algorithms.
+BlockSuite is a framework providing building blocks for collaborative applications. With BlockSuite, you can build complex applications with fine-grained collaborative features, without going down the rabbit hole of rich text editors and conflict resolution algorithms.
 
 [Try BlockSuite-based AFFiNE Alpha editor](https://pathfinder.affine.pro/)
 
@@ -18,7 +18,7 @@ BlockSuite is a framework providing building blocks for collaborative applicatio
 
 ## Introduction
 
-BlockSuite was created initially for [AFFiNE](https://github.com/toeverything/AFFiNE), an open source knowledge base that attempts to combine the best of Notion and Miro altogether. In reaching such a challenging goal, we found that based on recent tech breakthroughs, we actually don't have to manage all editable content inside a monolith `contenteditable` container as in traditional rich text editors. **Instead, based on BlockSuite, regardless of a TodoMVC, a dashboard, or a block-based knowledge base that supports multi-user collaboration, they can all be modeled into regular UI components and rendered to standard DOM, sharing the same object model and mental model**.
+BlockSuite was created initially for [AFFiNE](https://github.com/toeverything/AFFiNE), an open source knowledge base that attempts to combine the best of Notion and Miro altogether. In reaching such a challenging goal, we found that based on recent tech breakthroughs, we actually don't have to manage all editable content inside a monolith `contenteditable` container like traditional rich text editors. **Instead, based on BlockSuite, regardless of a TodoMVC, a dashboard, or a block-based knowledge base that supports multi-user collaboration, they can all be modeled into regular UI components and rendered to standard DOM, sharing the same object model and mental model**.
 
 BlockSuite provides a toolset for assembling collaborative applications:
 
@@ -26,9 +26,9 @@ BlockSuite provides a toolset for assembling collaborative applications:
 - 🚧 **A set of block UI components** based on [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components). They are framework agnostic and can be reused or extended on demand.
 - 🚧 **A collaborative editor** built on top of the above blocks and store. It's also a Web Component and can be embedded directly into any Web application.
 
-To support smooth rich-text editing experience, BlockSuite also provides RichText component. Each RichText instance uses a flat data structure and can be placed as a leaf component in a complex nesting UI. This ensures the stability of rich-text editing (currently based on [Quill](https://quilljs.com/)), but also enables the modeling of complex application states. Since **BlockSuite can reconcile the state of multiple rich text instances**, this eliminates the need for collaborative applications being tied into a single `contenteditable`.
+To support a smooth rich-text editing experience, BlockSuite also provides a RichText component. Each RichText instance uses a flat data structure and can be placed as a leaf component in a complex nesting UI. This ensures the stability of rich-text editing (currently based on [Quill](https://quilljs.com/)), but also enables the modeling of complex application states. Since **BlockSuite can reconcile the state of multiple rich text instances**, this eliminates the need for collaborative applications being tied into a single `contenteditable`.
 
-As an example, in the BlockSuite based [AFFiNE Alpha](https://pathfinder.affine.pro/) editor, you may not feel that this editor is actually a composition of multiple RichText components (checkout DevTools 👀). This demonstrates the flexibility and extensibility of BlockSuite.
+As an example, in the BlockSuite based [AFFiNE Alpha](https://pathfinder.affine.pro/) editor, you may not feel that this editor is actually a composition of multiple RichText components (check out DevTools 👀). This demonstrates the flexibility and extensibility of BlockSuite.
 
 ## Getting Started
 
