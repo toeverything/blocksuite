@@ -6,6 +6,7 @@ import {
   EdgelessBlockChildrenContainer,
   EdgelessHoverRect,
   EdgelessSelectedRect,
+  EdgelessFrameSelectionRect,
 } from './components';
 import {
   BlockHost,
@@ -16,7 +17,7 @@ import {
 } from '../../__internal__';
 import {
   EdgelessSelectionManager,
-  EdgelessSelectionState,
+  BlockSelectionState,
   ViewportState,
   XYWH,
 } from './selection-manager';
@@ -36,7 +37,7 @@ export interface EdgelessContainer extends HTMLElement {
   readonly signals: {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
-    updateSelection: Signal<EdgelessSelectionState>;
+    updateSelection: Signal<BlockSelectionState>;
   };
 }
 
@@ -67,12 +68,9 @@ export class EdgelessPageBlockComponent
   @state()
   viewport = new ViewportState();
 
-  @state()
-  selectedRect: DOMRect | null = null;
-
   signals = {
     viewportUpdated: new Signal(),
-    updateSelection: new Signal<EdgelessSelectionState>(),
+    updateSelection: new Signal<BlockSelectionState>(),
     hoverUpdated: new Signal(),
   };
 
@@ -128,7 +126,7 @@ export class EdgelessPageBlockComponent
   }
 
   private _handleBackspace(e: KeyboardEvent) {
-    if (this._selection.state.type === 'single') {
+    if (this._selection.blockSelectionState.type === 'single') {
       handleBackspace(this.store, e);
     }
   }
@@ -165,10 +163,12 @@ export class EdgelessPageBlockComponent
   firstUpdated() {
     // TODO: listen to new children
     this.model.children.forEach(group => {
-      group.propsUpdated.on(() => this._selection.syncSelectionBox());
+      group.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
     });
 
-    this.signals.viewportUpdated.on(() => this._selection.syncSelectionBox());
+    this.signals.viewportUpdated.on(() =>
+      this._selection.syncBlockSelectionRect()
+    );
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
     this._historyDisposable = this.store.signals.historyUpdated.on(() => {
@@ -209,14 +209,17 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
+    const { _selection } = this;
+    const { frameSelectionRect } = _selection;
     const { zoom } = this.viewport;
-    const selectedRect = EdgelessSelectedRect(this._selection, zoom);
-    const hoverRect = EdgelessHoverRect(this._selection.hoverRect, zoom);
+    const selectedRect = EdgelessSelectedRect(_selection, zoom);
+    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
+    const hoverRect = EdgelessHoverRect(_selection.hoverRect, zoom);
 
     return html`
       <style></style>
       <div class="affine-edgeless-page-block-container">
-        ${childrenContainer} ${hoverRect} ${selectedRect}
+        ${childrenContainer} ${hoverRect} ${selectionRect} ${selectedRect}
       </div>
     `;
   }

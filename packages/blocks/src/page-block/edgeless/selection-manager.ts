@@ -12,18 +12,30 @@ import {
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
 import { repairerContextMenuRange } from '../utils/cursor';
 
-interface NoneSelectionState {
+interface NoneBlockSelectionState {
   type: 'none';
 }
 
-interface SingleSelectionState {
+interface SingleBlockSelectionState {
   type: 'single';
   selected: GroupBlockModel;
   rect: DOMRect;
   active: boolean;
 }
 
-export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
+export type BlockSelectionState =
+  | NoneBlockSelectionState
+  | SingleBlockSelectionState;
+
+interface HoverState {
+  rect: DOMRect;
+  block: GroupBlockModel;
+}
+
+interface FrameSelectionState {
+  start: DOMPoint;
+  end: DOMPoint;
+}
 
 export type XYWH = [number, number, number, number];
 
@@ -109,19 +121,31 @@ export class EdgelessSelectionManager {
   private _mouseDisposeCallback: () => void;
   private _wheelDisposeCallback: () => void;
 
-  private _state: EdgelessSelectionState = {
+  private _blockSelectionState: BlockSelectionState = {
     type: 'none',
   };
   private _startRange: Range | null = null;
-  private _hoverRect: DOMRect | null = null;
-  private _hoverBlock: GroupBlockModel | null = null;
+  private _hoverState: HoverState | null = null;
+  private _frameSelectionState: FrameSelectionState | null = null;
 
-  get state() {
-    return this._state;
+  get blockSelectionState() {
+    return this._blockSelectionState;
   }
 
   get hoverRect() {
-    return this._hoverRect;
+    if (!this._hoverState) return null;
+    return this._hoverState.rect;
+  }
+
+  get frameSelectionRect() {
+    if (!this._frameSelectionState) return null;
+
+    const { start, end } = this._frameSelectionState;
+    const minX = Math.min(start.x, end.x);
+    const minY = Math.min(start.y, end.y);
+    const maxX = Math.max(start.x, end.x);
+    const maxY = Math.max(start.y, end.y);
+    return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
 
   constructor(container: EdgelessContainer) {
@@ -149,47 +173,66 @@ export class EdgelessSelectionManager {
   }
 
   get isActive() {
-    return this._state.type === 'single' && this._state.active;
+    return (
+      this._blockSelectionState.type === 'single' &&
+      this._blockSelectionState.active
+    );
+  }
+
+  private _updateFrameSelectionState(x: number, y: number) {
+    if (this._frameSelectionState) {
+      this._frameSelectionState.end = new DOMPoint(x, y);
+    }
+    if (this._hoverState) {
+      this._blockSelectionState = {
+        type: 'single',
+        selected: this._hoverState.block,
+        rect: this._hoverState.rect,
+        active: false,
+      };
+    }
   }
 
   private _updateHoverState(hoverBlock: GroupBlockModel | null) {
     if (hoverBlock) {
-      this._hoverRect = getSelectionBoxBound(
-        this._container.viewport,
-        hoverBlock.xywh
-      );
-      this._hoverBlock = hoverBlock;
+      this._hoverState = {
+        rect: getSelectionBoxBound(this._container.viewport, hoverBlock.xywh),
+        block: hoverBlock,
+      };
     } else {
-      this._hoverRect = null;
-      this._hoverBlock = null;
+      this._hoverState = null;
     }
   }
 
   private _handleClickOnSelected(selected: GroupBlockModel, e: SelectionEvent) {
     const { viewport } = this._container;
 
-    switch (this.state.type) {
+    switch (this.blockSelectionState.type) {
       case 'none':
-        this._state = {
+        this._blockSelectionState = {
           type: 'single',
           active: false,
           selected,
           rect: getSelectionBoxBound(viewport, selected.xywh),
         };
-        this._container.signals.updateSelection.emit(this.state);
+        this._container.signals.updateSelection.emit(this.blockSelectionState);
         break;
       case 'single':
-        if (this.state.selected === selected) {
-          this.state.active = true;
-          this._container.signals.updateSelection.emit(this.state);
+        if (this.blockSelectionState.selected === selected) {
+          this.blockSelectionState.active = true;
+          this._container.signals.updateSelection.emit(
+            this.blockSelectionState
+          );
         } else {
-          this._state = {
+          this._blockSelectionState = {
             type: 'single',
             active: false,
             selected,
             rect: getSelectionBoxBound(viewport, selected.xywh),
           };
-          this._container.signals.updateSelection.emit(this.state);
+          this._container.signals.updateSelection.emit(
+            this.blockSelectionState
+          );
         }
         handleNativeRangeClick(this._store, e);
         break;
@@ -204,9 +247,13 @@ export class EdgelessSelectionManager {
     if (selected) {
       this._handleClickOnSelected(selected, e);
     } else {
-      // TODO update selection rect
-      this._state = { type: 'none' };
-      this._container.signals.updateSelection.emit(this.state);
+      this._blockSelectionState = { type: 'none' };
+      this._frameSelectionState = {
+        start: new DOMPoint(e.raw.x, e.raw.y),
+        end: new DOMPoint(e.raw.x, e.raw.y),
+      };
+
+      this._container.signals.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
 
@@ -214,17 +261,17 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    switch (this.state.type) {
+    switch (this.blockSelectionState.type) {
       case 'none':
-        return;
+        break;
       case 'single':
-        if (this.state.active) {
+        if (this.blockSelectionState.active) {
           // TODO reset if drag out of group
           handleNativeRangeDragMove(this._startRange, e);
         }
         // for inactive selection, drag move selected group
-        else {
-          const block = this.state.selected;
+        else if (!this._frameSelectionState) {
+          const block = this.blockSelectionState.selected;
           const [modelX, modelY, modelW, modelH] = JSON.parse(
             block.xywh
           ) as XYWH;
@@ -238,13 +285,20 @@ export class EdgelessSelectionManager {
               modelH,
             ]),
           });
-          this._container.signals.updateSelection.emit(this.state);
+          this._container.signals.updateSelection.emit(
+            this.blockSelectionState
+          );
         }
+        break;
+    }
+
+    if (this._frameSelectionState) {
+      this._updateFrameSelectionState(e.raw.x, e.raw.y);
     }
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    noop();
+    this._frameSelectionState = null;
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
@@ -255,23 +309,23 @@ export class EdgelessSelectionManager {
     if (selected) {
       this._handleClickOnSelected(selected, e);
     } else {
-      this._state = { type: 'none' };
-      this._container.signals.updateSelection.emit(this.state);
+      this._blockSelectionState = { type: 'none' };
+      this._container.signals.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
   };
 
-  syncSelectionBox() {
-    if (this.state.type === 'single') {
+  syncBlockSelectionRect() {
+    if (this.blockSelectionState.type === 'single') {
       const rect = getSelectionBoxBound(
         this._container.viewport,
-        this.state.selected.xywh
+        this.blockSelectionState.selected.xywh
       );
-      this.state.rect = rect;
+      this.blockSelectionState.rect = rect;
     }
 
-    this._updateHoverState(this._hoverBlock);
-    this._container.signals.updateSelection.emit(this.state);
+    this._updateHoverState(this._hoverState?.block || null);
+    this._container.signals.updateSelection.emit(this.blockSelectionState);
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {

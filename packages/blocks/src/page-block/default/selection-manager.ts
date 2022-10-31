@@ -150,11 +150,11 @@ export class DefaultSelectionManager {
       return richTextCache.get(richText) as DOMRect;
     });
     this._signals.updateSelectedRects.emit(selectedBounds);
-    this._signals.updateSelectionRect.emit(selectionRect);
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
-    this._signals.updateSelectionRect.emit(null);
+    this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
 
@@ -232,7 +232,7 @@ export class DefaultSelectionManager {
 
   dispose() {
     this._signals.updateSelectedRects.dispose();
-    this._signals.updateSelectionRect.dispose();
+    this._signals.updateFrameSelectionRect.dispose();
     this._mouseDisposeCallback();
   }
 }

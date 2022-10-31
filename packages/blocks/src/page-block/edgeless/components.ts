@@ -39,7 +39,7 @@ export function EdgelessHoverRect(rect: DOMRect | null, zoom: number) {
   `;
 }
 
-function HandleRect(centerX: number, centerY: number) {
+function Handle(centerX: number, centerY: number) {
   const style = {
     position: 'absolute',
     left: centerX - 6 + 'px',
@@ -60,7 +60,7 @@ export function EdgelessSelectedRect(
   selection: EdgelessSelectionManager,
   zoom: number
 ) {
-  const { state } = selection;
+  const state = selection.blockSelectionState;
   const { type } = state;
   if (type === 'none') return html``;
 
@@ -80,14 +80,39 @@ export function EdgelessSelectedRect(
       rect.x + rect.width + PADDING_X * zoom,
       rect.y + rect.height / 2 + (PADDING_Y * zoom) / 2,
     ];
-    const handleLeft = HandleRect(leftCenter[0], leftCenter[1]);
-    const handleRight = HandleRect(rightCenter[0], rightCenter[1]);
+    const handleLeft = Handle(leftCenter[0], leftCenter[1]);
+    const handleRight = Handle(rightCenter[0], rightCenter[1]);
     handles = html` ${handleLeft}${handleRight} `;
   }
 
   return html`
     ${handles}
     <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
+  `;
+}
+
+export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
+  if (rect === null) return html``;
+
+  const style = {
+    left: rect.left + 'px',
+    top: rect.top + 'px',
+    width: rect.width + 'px',
+    height: rect.height + 'px',
+  };
+  return html`
+    <style>
+      .affine-edgeless-frame-selection-rect {
+        position: absolute;
+        background: var(--affine-selected-color);
+        z-index: 1;
+        pointer-events: none;
+      }
+    </style>
+    <div
+      class="affine-edgeless-frame-selection-rect"
+      style=${styleMap(style)}
+    ></div>
   `;
 }
 
