@@ -139,6 +139,7 @@ function focusRichTextByModel(
   position: SelectionPosition,
   model: BaseBlockModel
 ) {
+   // FIXME: Then it will turn the input into the div
   if (model.flavour === 'group') {
     (
       document.querySelector(
