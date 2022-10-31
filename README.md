@@ -3,11 +3,10 @@
 <a href="./packages/store/package.json">
   <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff"/>
 </a>
+<a href="https://join.slack.com/t/blocksuitedev/shared_invite/zt-1h0zz3b8z-nFpWSu6a6~yId7PxiMcBHA"><img src="https://img.shields.io/badge/-Slack-grey?logo=slack"></a>
+<a href="https://twitter.com/BlockSuiteDev"><img src="https://img.shields.io/badge/-Twitter-grey?logo=twitter"></a>
 
-<a href="https://join.slack.com/t/blocksuitedev/shared_invite/zt-1h0zz3b8z-nFpWSu6a6~yId7PxiMcBHA"><img src="https://img.shields.io/badge/-Slack-grey?logo=slack" height=22></a>
-<a href="https://twitter.com/BlockSuiteDev"><img src="https://img.shields.io/badge/-Twitter-grey?logo=twitter" height=22></a>
-
-BlockSuite is a collaborative editing framework designed to reliably reconcile any Web content.
+BlockSuite is a framework providing building blocks for collaborative applications. With BlockSuite, you can build complex application with fine-grained collaborative features, without going down the rabbit hole of rich text editors or conflict resolution algorithms.
 
 [Try BlockSuite-based AFFiNE Alpha editor](https://pathfinder.affine.pro/)
 
@@ -25,7 +24,7 @@ To overcome these limitations, we created a new editor architecture. And that's 
 
 ## The BlockSuite Approach
 
-BlockSuite tries to blur the boundary between an editor and a regular Web app by following some principles:
+BlockSuite works as a collaborative editing framework that is designed to reliably reconcile any Web content. It tries to blur the boundary between an editor and a regular Web app by following some principles:
 
 - **Nested data, flat `contenteditable`s.** BlockSuite supports modeling complex structured data as nested blocks, all of which are rendered to plain standard DOM by default. However each rich text field inside these blocks are rendered into a separate `contenteditable` instance. This means that you can model a document with _N_ paragraphs as _N_ `ParagraphBlock`s, each of which can hold a separate rich-text editing component within it! This eliminates the need for BlockSuite to render everything in a single `contenteditable` element. Instead in BlockSuite, with just a simple rich text editing component based on a flat data structure (we use [Quill](https://quilljs.com/) for now), we can manage an editable UI with complex nested structure.
 - **One store, multi editable instances.** To schedule state between different block instances, BlockSuite implements a centralized data store based on [Yjs](https://github.com/yjs/yjs), a state-of-the-art library for shared editing. The content in the editor can be split into multiple independent containers on the page, and as long as they all subscribe to the same store, all their historical states can be managed smoothly. Such an integration with Yjs also makes BlockSuite collaboration-ready by design and by default.
