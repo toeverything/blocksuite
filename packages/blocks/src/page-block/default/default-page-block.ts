@@ -121,6 +121,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _scrollDisposable!: Disposable;
 
+  public isCompositionStart = false;
+
   @property({
     hasChanged() {
       return true;
@@ -310,6 +312,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     super.update(changedProperties);
   }
 
+  private _handleCompositionStart = () => {
+    this.isCompositionStart = true;
+  };
+
+  private _handleCompositionEnd = () => {
+    this.isCompositionStart = false;
+  };
+
   firstUpdated() {
     this._bindHotkeys();
     hotkey.enableHotkey();
@@ -341,6 +351,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     ) as HTMLDivElement;
     const scrollSignal = Signal.fromEvent(scrollContainer, 'scroll');
     this._scrollDisposable = scrollSignal.on(() => this._clearSelection());
+    window.addEventListener('compositionstart', this._handleCompositionStart);
+    window.addEventListener('compositionend', this._handleCompositionEnd);
 
     focusTextEnd(this._title);
   }
@@ -349,6 +361,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this._removeHotkeys();
     this._scrollDisposable.dispose();
     this.selection.dispose();
+    window.removeEventListener(
+      'compositionstart',
+      this._handleCompositionStart
+    );
+    window.removeEventListener('compositionend', this._handleCompositionEnd);
   }
 
   render() {
