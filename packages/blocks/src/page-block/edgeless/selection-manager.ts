@@ -114,6 +114,7 @@ export class EdgelessSelectionManager {
   };
   private _startRange: Range | null = null;
   private _hoverRect: DOMRect | null = null;
+  private _hoverBlock: GroupBlockModel | null = null;
 
   get state() {
     return this._state;
@@ -151,27 +152,64 @@ export class EdgelessSelectionManager {
     return this._state.type === 'single' && this._state.active;
   }
 
-  private _resetState(e: SelectionEvent) {
-    const { viewport } = this._container;
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
-    if (selected) {
-      this._state = {
-        type: 'single',
-        active: this._state.type === 'single' && this._state.active,
-        selected,
-        rect: getSelectionBoxBound(viewport, selected.xywh),
-      };
-      this._container.signals.updateSelection.emit(this.state);
+  private _updateHoverState(hoverBlock: GroupBlockModel | null) {
+    if (hoverBlock) {
+      this._hoverRect = getSelectionBoxBound(
+        this._container.viewport,
+        hoverBlock.xywh
+      );
+      this._hoverBlock = hoverBlock;
     } else {
-      this._state = { type: 'none' };
-      this._container.signals.updateSelection.emit(this.state);
-      resetNativeSelection(null);
+      this._hoverRect = null;
+      this._hoverBlock = null;
+    }
+  }
+
+  private _handleClickOnSelected(selected: GroupBlockModel, e: SelectionEvent) {
+    const { viewport } = this._container;
+
+    switch (this.state.type) {
+      case 'none':
+        this._state = {
+          type: 'single',
+          active: false,
+          selected,
+          rect: getSelectionBoxBound(viewport, selected.xywh),
+        };
+        this._container.signals.updateSelection.emit(this.state);
+        break;
+      case 'single':
+        if (this.state.selected === selected) {
+          this.state.active = true;
+          this._container.signals.updateSelection.emit(this.state);
+        } else {
+          this._state = {
+            type: 'single',
+            active: false,
+            selected,
+            rect: getSelectionBoxBound(viewport, selected.xywh),
+          };
+          this._container.signals.updateSelection.emit(this.state);
+        }
+        handleNativeRangeClick(this._store, e);
+        break;
     }
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this._resetState(e);
+    const { viewport } = this._container;
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
+    const selected = pick(this._blocks, modelX, modelY);
+
+    if (selected) {
+      this._handleClickOnSelected(selected, e);
+    } else {
+      // TODO update selection rect
+      this._state = { type: 'none' };
+      this._container.signals.updateSelection.emit(this.state);
+      resetNativeSelection(null);
+    }
+
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   };
 
@@ -210,9 +248,16 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
-    this._resetState(e);
-    if (this.isActive) {
-      handleNativeRangeClick(this._store, e);
+    const { viewport } = this._container;
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
+    const selected = pick(this._blocks, modelX, modelY);
+
+    if (selected) {
+      this._handleClickOnSelected(selected, e);
+    } else {
+      this._state = { type: 'none' };
+      this._container.signals.updateSelection.emit(this.state);
+      resetNativeSelection(null);
     }
   };
 
@@ -222,32 +267,23 @@ export class EdgelessSelectionManager {
         this._container.viewport,
         this.state.selected.xywh
       );
-
       this.state.rect = rect;
-      if (this._hoverRect) {
-        this._hoverRect = rect;
-      }
     }
+
+    this._updateHoverState(this._hoverBlock);
     this._container.signals.updateSelection.emit(this.state);
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {
-    if (this.state.type === 'single') {
-      this.state.active = true;
-      this._container.signals.updateSelection.emit(this.state);
-      handleNativeRangeClick(this._store, e);
-    }
+    noop();
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
     const { viewport } = this._container;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
-    if (selected) {
-      this._hoverRect = getSelectionBoxBound(viewport, selected.xywh);
-    } else {
-      this._hoverRect = null;
-    }
+    const hovered = pick(this._blocks, modelX, modelY);
+
+    this._updateHoverState(hovered);
     this._container.signals.hoverUpdated.emit();
   };
 

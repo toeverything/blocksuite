@@ -210,7 +210,7 @@ export class EdgelessPageBlockComponent
     );
 
     const { zoom } = this.viewport;
-    const selectedRect = EdgelessSelectedRect(this._selection.state, zoom);
+    const selectedRect = EdgelessSelectedRect(this._selection, zoom);
     const hoverRect = EdgelessHoverRect(this._selection.hoverRect, zoom);
 
     return html`
