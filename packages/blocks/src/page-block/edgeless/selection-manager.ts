@@ -10,7 +10,7 @@ import {
   handleNativeRangeClick,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
-import { repairerContextMenuRange } from '../utils/cursor';
+import { repairContextMenuRange } from '../utils/cursor';
 
 interface NoneSelectionState {
   type: 'none';
@@ -256,7 +256,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    repairerContextMenuRange(e);
+    repairContextMenuRange(e);
   };
 
   dispose() {

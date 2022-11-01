@@ -13,7 +13,7 @@ import {
   handleNativeRangeDblClick,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
-import { repairerContextMenuRange } from '../utils/cursor';
+import { repairContextMenuRange } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -219,7 +219,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    repairerContextMenuRange(e);
+    repairContextMenuRange(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
