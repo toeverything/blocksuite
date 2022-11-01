@@ -94,7 +94,7 @@ export function getPreviousBlock(container: Element, blockId: string) {
     if (previousBlock?.model) {
       if (previousBlock.model.children.length) {
         let firstChildren =
-          previousBlock.model.children[previousBlock.children.length - 1];
+          previousBlock.model.children[previousBlock.model.children.length - 1];
         while (firstChildren.children.length) {
           firstChildren =
             firstChildren.children[firstChildren.children.length - 1];

@@ -68,22 +68,22 @@ function fixCurrentRangeToText(
   return range;
 }
 
-export function focusRichText(
+async function awaitUntilNextTick() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(null);
+    }, 0);
+  });
+}
+
+export async function focusRichText(
   position: SelectionPosition,
   editableContainer: Element
 ) {
-  let { top, left, bottom, right } = Rect.fromDom(editableContainer);
-  const [oldTop, oldBottom] = [top, bottom];
+  // TODO optimize how get scroll container
+  const scrollContainer = editableContainer.closest('.affine-editor-container');
+  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
   const { clientHeight } = document.documentElement;
-  // TODO: improve the logic
-  if (top + 20 > clientHeight || bottom < 20) {
-    editableContainer.scrollIntoView();
-    const newRect = Rect.fromDom(editableContainer);
-    top = newRect.top;
-    left = newRect.left;
-    bottom = newRect.bottom;
-    right = newRect.right;
-  }
   const lineHeight =
     Number(
       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
@@ -93,16 +93,31 @@ export function focusRichText(
     const { x, y } = position;
     let newTop = y;
     let newLeft = x;
-    if (oldBottom <= y) {
-      newTop = bottom - lineHeight / 2;
+    if (bottom <= y) {
+      let finalBottom = bottom;
+      if (bottom < 100 && scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollTop - 100 + bottom;
+        // set scroll may has a animation, wait for over
+        await awaitUntilNextTick();
+        finalBottom = editableContainer.getBoundingClientRect().bottom;
+      }
+      newTop = finalBottom - lineHeight / 2;
     }
-    if (oldTop >= y) {
-      newTop = top + lineHeight / 2;
+    if (bottom >= y) {
+      let finalTop = top;
+      if (scrollContainer && top > clientHeight - 100) {
+        scrollContainer.scrollTop =
+          scrollContainer.scrollTop + (top + 100 - clientHeight);
+        // set scroll may has a animation, wait for over
+        await awaitUntilNextTick();
+        finalTop = editableContainer.getBoundingClientRect().top;
+      }
+      newTop = finalTop + lineHeight / 2;
     }
-    if (x < left) {
+    if (x <= left) {
       newLeft = left + 1;
     }
-    if (x > right) {
+    if (x >= right) {
       newLeft = right - 1;
     }
     range = caretRangeFromPoint(newLeft, newTop);

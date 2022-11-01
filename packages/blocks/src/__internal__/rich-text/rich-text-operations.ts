@@ -299,10 +299,7 @@ export function handleKeyDown(
       if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
         focusNextBlock(
           model,
-          new Point(
-            newRange.startContainer.parentElement?.offsetLeft || left,
-            bottom
-          )
+          new Point(textContainer.getBoundingClientRect().left || left, bottom)
         );
         return PREVENT_DEFAULT;
       }
