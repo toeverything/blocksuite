@@ -7,7 +7,7 @@ import { AwarenessAdapter, SelectionRange } from './awareness';
 import { BaseBlockModel } from './base';
 import { Provider, ProviderFactory } from './providers';
 import { PrelimText, RichTextAdapter, Text, TextType } from './text-adapter';
-import { blockRecordToJSXNode } from './utils/jsx';
+import { yDocToJSXNode, serializeYDoc } from './utils/jsx';
 import { Signal } from './utils/signal';
 import {
   assertValidChildren,
@@ -516,16 +516,23 @@ export class Store {
   };
 
   /**
-   * @internal Only for testing
+   * @internal Only for testing at now
+   */
+  serializeDoc() {
+    return serializeYDoc(this.doc) as unknown as SerializedStore;
+  }
+
+  /**
+   * @internal Only for testing at now
    */
   toJSXElement(id = '0') {
-    const json = this.doc.toJSON();
+    const json = this.serializeDoc();
     if (!('blocks' in json)) {
       throw new Error("Failed to convert to JSX: 'blocks' not found");
     }
     if (!json.blocks[id]) {
       return null;
     }
-    return blockRecordToJSXNode(json.blocks, id);
+    return yDocToJSXNode(json.blocks, id);
   }
 }

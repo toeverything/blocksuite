@@ -15,6 +15,17 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
     room = generateRandomRoomId();
   }
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
+
+  // See https://github.com/microsoft/playwright/issues/5546
+  // See https://github.com/microsoft/playwright/discussions/17813
+  page.on('console', message => {
+    if (message.type() === 'warning') {
+      console.warn(message.text());
+    }
+    if (message.type() === 'error') {
+      throw new Error('Unexpected console error: ' + message.text());
+    }
+  });
   return room;
 }
 
