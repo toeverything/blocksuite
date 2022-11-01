@@ -62,6 +62,11 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   expect(actual).toEqual(texts);
 }
 
+export async function assertPageTitleFocus(page: Page) {
+  const locator = await page.locator('input').nth(0);
+  await expect(locator).toBeFocused();
+}
+
 export async function assertBlockCount(
   page: Page,
   flavour: string,

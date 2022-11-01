@@ -96,6 +96,20 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     const parent = store.getParent(model);
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList = model.flavour === 'list' && model.text?.length === 0;
+    const index = this.quill.getSelection()?.index || 0;
+
+    // Some block should treat Enter as soft enter
+    // Logic is：
+    // 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
+    // 2. In the middle and start of block, press Enter will insert a \n to break the line
+    // TODO: These block list may should be configurable in the block self
+    const shouldSoftEnterFirstBlocks = [
+      {
+        flavour: 'paragraph',
+        type: 'quote',
+      },
+    ];
+
     if (
       isEmptyList &&
       parent?.flavour === 'group' &&
@@ -103,13 +117,36 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     ) {
       handleLineStartBackspace(store, model);
     } else if (isEmptyList && isLastChild) {
-      const index = this.quill.getSelection()?.index || 0;
       handleUnindent(store, model, index);
     } else if (isEnd) {
-      handleBlockEndEnter(store, model);
+      const isSoftEnterBlock =
+        shouldSoftEnterFirstBlocks.findIndex(({ flavour, type }) => {
+          return model.flavour === flavour && model.type === type;
+        }) !== -1;
+
+      const isNewLine = /\n\n$/.test(this.quill.getText());
+      const shouldSoftEnter = isSoftEnterBlock && !isNewLine;
+
+      if (shouldSoftEnter) {
+        softEnter.bind(this)();
+      } else {
+        // delete the \n at the end of block
+        if (isSoftEnterBlock) {
+          this.quill.deleteText(index, 1);
+        }
+        handleBlockEndEnter(store, model);
+      }
     } else {
-      const index = this.quill.getSelection()?.index || 0;
-      handleBlockSplit(store, model, index);
+      const isSoftEnterBlock =
+        shouldSoftEnterFirstBlocks.findIndex(({ flavour, type }) => {
+          return model.flavour === flavour && model.type === type;
+        }) !== -1;
+
+      if (isSoftEnterBlock) {
+        softEnter.bind(this)();
+      } else {
+        handleBlockSplit(store, model, index);
+      }
     }
 
     return PREVENT_DEFAULT;
