@@ -312,8 +312,9 @@ export async function assertStoreMatchJSX(page: Page, snapshot: string) {
     if (!node.children) {
       return;
     }
-    if (node.props['prop:text']) {
-      markSymbol(node.props['prop:text']);
+    const propText = node.props['prop:text'];
+    if (propText && typeof propText === 'object') {
+      markSymbol(propText);
     }
     node.children.forEach(child => {
       if (!(typeof child === 'object')) {
