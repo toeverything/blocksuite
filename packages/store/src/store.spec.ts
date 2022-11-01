@@ -246,16 +246,14 @@ describe('store.toJSXElement works', async () => {
     store.addBlock({ flavour: 'paragraph' });
 
     expect(store.toJSXElement()).toMatchInlineSnapshot(`
-        <page>
-          <paragraph
-            prop:text=""
-            prop:type="text"
-          />
-          <paragraph
-            prop:text=""
-            prop:type="text"
-          />
-        </page>
-      `);
+      <page>
+        <paragraph
+          prop:type="text"
+        />
+        <paragraph
+          prop:type="text"
+        />
+      </page>
+    `);
   });
 });

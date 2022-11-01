@@ -308,10 +308,14 @@ export async function assertStoreMatchJSX(page: Page, snapshot: string) {
   // See https://playwright.dev/docs/api/class-page#page-evaluate
   const testSymbol = Symbol.for('react.test.json');
   const markSymbol = (node: JSXElement) => {
+    node.$$typeof = testSymbol;
     if (!node.children) {
       return;
     }
-    node.$$typeof = testSymbol;
+    const propText = node.props['prop:text'];
+    if (propText && typeof propText === 'object') {
+      markSymbol(propText);
+    }
     node.children.forEach(child => {
       if (!(typeof child === 'object')) {
         return;
