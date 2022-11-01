@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "description": "Default BlockSuite-based editor built for AFFiNE.",
   "main": "src/index.ts",
   "scripts": {
