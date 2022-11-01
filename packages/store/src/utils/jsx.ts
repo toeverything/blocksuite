@@ -109,6 +109,10 @@ const parseDelta = (text: DeltaText) => {
     return undefined;
   }
   return {
+    // The `Symbol.for('react.fragment')` will render as `<React.Fragment>`
+    // so we use a empty string to render it as `<>`.
+    // But it will empty children ad `< />`
+    // so we return `undefined` directly if not delta text.
     $$typeof: testSymbol, // Symbol.for('react.element'),
     type: '', // Symbol.for('react.fragment'),
     props: {},
