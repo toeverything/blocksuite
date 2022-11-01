@@ -32,6 +32,38 @@ describe('basic', () => {
     `);
   });
 
+  it('block with plain text should match snapshot', () => {
+    expect(
+      yDocToJSXNode(
+        {
+          '0': {
+            'sys:id': '0',
+            'sys:flavour': 'page',
+            'sys:children': ['1'],
+            'prop:title': 'this is title',
+          },
+          '1': {
+            'sys:id': '2',
+            'sys:flavour': 'paragraph',
+            'sys:children': [],
+            'prop:type': 'text',
+            'prop:text': [{ insert: 'just plain text' }],
+          },
+        },
+        '0'
+      )
+    ).toMatchInlineSnapshot(`
+      <page
+        prop:title="this is title"
+      >
+        <paragraph
+          prop:text="just plain text"
+          prop:type="text"
+        />
+      </page>
+    `);
+  });
+
   it('doc record match snapshot', () => {
     expect(
       yDocToJSXNode(
@@ -43,12 +75,6 @@ describe('basic', () => {
             'prop:title': 'this is title',
           },
           '1': {
-            'sys:id': '1',
-            'sys:flavour': 'group',
-            'sys:children': ['2'],
-            'prop:xywh': '[0,0,720,32]',
-          },
-          '2': {
             'sys:id': '2',
             'sys:flavour': 'paragraph',
             'sys:children': [],
@@ -74,36 +100,32 @@ describe('basic', () => {
       <page
         prop:title="this is title"
       >
-        <group
-          prop:xywh="[0,0,720,32]"
-        >
-          <paragraph
-            prop:text={
-              <>
-                <text
-                  insert="this is "
-                />
-                <text
-                  insert="a "
-                  link="http://www.example.com"
-                />
-                <text
-                  bold={true}
-                  insert="link"
-                  link="http://www.example.com"
-                />
-                <text
-                  bold={true}
-                  insert=" with"
-                />
-                <text
-                  insert=" bold"
-                />
-              </>
-            }
-            prop:type="text"
-          />
-        </group>
+        <paragraph
+          prop:text={
+            <>
+              <text
+                insert="this is "
+              />
+              <text
+                insert="a "
+                link="http://www.example.com"
+              />
+              <text
+                bold={true}
+                insert="link"
+                link="http://www.example.com"
+              />
+              <text
+                bold={true}
+                insert=" with"
+              />
+              <text
+                insert=" bold"
+              />
+            </>
+          }
+          prop:type="text"
+        />
       </page>
     `);
   });

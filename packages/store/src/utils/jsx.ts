@@ -13,7 +13,7 @@ export interface JSXElement {
   // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L78-L79
   $$typeof: symbol | 0xea71357;
   type: string;
-  props: { 'prop:text'?: JSXElement } & Record<string, unknown>;
+  props: { 'prop:text'?: string | JSXElement } & Record<string, unknown>;
   children?: null | (JSXElement | string | number)[];
 }
 
@@ -107,6 +107,10 @@ const serializeYText = (text: Text): DeltaText => {
 const parseDelta = (text: DeltaText) => {
   if (!text.length) {
     return undefined;
+  }
+  if (text.length === 1 && !text[0].attributes) {
+    // just plain text
+    return text[0].insert;
   }
   return {
     // The `Symbol.for('react.fragment')` will render as `<React.Fragment>`
