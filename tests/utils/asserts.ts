@@ -61,10 +61,12 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
 }
+
 export async function assertPageTitleFocus(page: Page) {
   const locator = await page.locator('input').nth(0);
   await expect(locator).toBeFocused();
 }
+
 export async function assertBlockCount(
   page: Page,
   flavour: string,
@@ -132,7 +134,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
     const elements = document.querySelectorAll('rich-text');
     return Array.from(elements).map(el => el.quill.getFormat());
   });
-  await expect(actual).toEqual(resultObj);
+  expect(actual).toEqual(resultObj);
 }
 
 export async function assertStore(page: Page, expected: SerializedStore) {
