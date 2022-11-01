@@ -95,9 +95,16 @@ export class PasteManager {
     clipboardData: DataTransfer
   ): Promise<OpenBlockInfo[]> {
     const file = PasteManager._getImageFile(clipboardData);
+    // assertExists(file)
     if (file) {
-      //  todo upload file to file server
-      return [];
+      if (file.type.includes('image')) {
+        //  todo upload file to file server
+        // console.log(file);
+        // blob()
+        // let url = URL.createObjectURL(file);
+        // console.log('url: ', url);
+        return [];
+      }
     }
     return [];
   }
