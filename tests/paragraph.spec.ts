@@ -7,6 +7,7 @@ import {
   assertClassName,
   assertBlockType,
   assertTitle,
+  assertPageTitleFocus,
 } from './utils/asserts';
 import {
   clickMenuButton,
@@ -287,4 +288,19 @@ test('get focus from page title enter', async ({ page }) => {
   await pressEnter(page);
   await page.keyboard.type('world');
   await assertRichTexts(page, ['world', '\n']);
+});
+
+test('The key "Up" respond when the cursor located in first paragraph  ', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['\n']);
+
+  await pressEnter(page);
+  await page.keyboard.type('world');
+  await assertRichTexts(page, ['world', '\n']);
+  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await assertPageTitleFocus(page);
 });
