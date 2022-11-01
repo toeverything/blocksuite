@@ -281,3 +281,26 @@ test.skip('cursor move up and down through group', async ({ page }) => {
   currentId = (await getCursorBlockIdAndHeight(page))[0];
   expect(id).toBe(currentId);
 });
+
+test('double click choose words', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello block suite');
+  await assertRichTexts(page, ['hello block suite']);
+  const helloPosition = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const rect = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: rect.left + 2, y: rect.top + 8 };
+  });
+  await page.mouse.dblclick(helloPosition.x, helloPosition.y);
+  const text = await page.evaluate(() => {
+    let text = '';
+    const selection = window.getSelection();
+    if (selection) {
+      text = selection.toString();
+    }
+    return text;
+  });
+  expect(text).toBe('hello');
+});

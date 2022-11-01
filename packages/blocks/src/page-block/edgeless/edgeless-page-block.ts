@@ -4,7 +4,9 @@ import { Disposable, Signal, Store } from '@blocksuite/store';
 import type { GroupBlockModel, PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
+  EdgelessHoverRect,
   EdgelessSelectedRect,
+  EdgelessFrameSelectionRect,
 } from './components';
 import {
   BlockHost,
@@ -15,7 +17,7 @@ import {
 } from '../../__internal__';
 import {
   EdgelessSelectionManager,
-  EdgelessSelectionState,
+  BlockSelectionState,
   ViewportState,
   XYWH,
 } from './selection-manager';
@@ -25,6 +27,7 @@ import {
   handleBackspace,
   removeCommonHotKey,
   tryUpdateGroupSize,
+  updateTextType,
 } from '../utils';
 
 export interface EdgelessContainer extends HTMLElement {
@@ -32,8 +35,9 @@ export interface EdgelessContainer extends HTMLElement {
   readonly viewport: ViewportState;
   readonly mouseRoot: HTMLElement;
   readonly signals: {
+    hoverUpdated: Signal;
     viewportUpdated: Signal;
-    updateSelection: Signal<EdgelessSelectionState>;
+    updateSelection: Signal<BlockSelectionState>;
   };
 }
 
@@ -64,33 +68,69 @@ export class EdgelessPageBlockComponent
   @state()
   viewport = new ViewportState();
 
-  @state()
-  selectedRect: DOMRect | null = null;
-
   signals = {
     viewportUpdated: new Signal(),
-    updateSelection: new Signal<EdgelessSelectionState>(),
+    updateSelection: new Signal<BlockSelectionState>(),
+    hoverUpdated: new Signal(),
   };
 
-  _historyDisposble!: Disposable;
-
+  private _historyDisposable!: Disposable;
   private _selection!: EdgelessSelectionManager;
 
   private _bindHotkeys() {
     const { store } = this;
-    hotkey.addListener(HOTKEYS.BACKSPACE, this._backspace.bind(this));
+
+    hotkey.addListener(
+      HOTKEYS.BACKSPACE,
+      this._handleBackspace.bind(this),
+      this.flavour
+    );
+    hotkey.addListener(HOTKEYS.H1, () =>
+      this._updateType('paragraph', 'h1', store)
+    );
+    hotkey.addListener(HOTKEYS.H2, () =>
+      this._updateType('paragraph', 'h2', store)
+    );
+    hotkey.addListener(HOTKEYS.H3, () =>
+      this._updateType('paragraph', 'h3', store)
+    );
+    hotkey.addListener(HOTKEYS.H4, () =>
+      this._updateType('paragraph', 'h4', store)
+    );
+    hotkey.addListener(HOTKEYS.H5, () =>
+      this._updateType('paragraph', 'h5', store)
+    );
+    hotkey.addListener(HOTKEYS.H6, () =>
+      this._updateType('paragraph', 'h6', store)
+    );
+    hotkey.addListener(HOTKEYS.NUMBERED_LIST, () =>
+      this._updateType('list', 'numbered', store)
+    );
+    hotkey.addListener(HOTKEYS.BULLETED, () =>
+      this._updateType('list', 'bulleted', store)
+    );
+    hotkey.addListener(HOTKEYS.TEXT, () =>
+      this._updateType('paragraph', 'text', store)
+    );
+
     bindCommonHotkey(store);
   }
 
+  private _updateType(flavour: string, type: string, store: Store): void {
+    updateTextType(flavour, type, store);
+  }
+
   private _removeHotkeys() {
-    hotkey.removeListener([HOTKEYS.BACKSPACE]);
+    hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
     removeCommonHotKey();
   }
-  _backspace(e: KeyboardEvent) {
-    if (this._selection.state.type === 'single') {
+
+  private _handleBackspace(e: KeyboardEvent) {
+    if (this._selection.blockSelectionState.type === 'single') {
       handleBackspace(this.store, e);
     }
   }
+
   private _initViewport() {
     const bound = this.mouseRoot.getBoundingClientRect();
     this.viewport.setSize(bound.width, bound.height);
@@ -123,12 +163,15 @@ export class EdgelessPageBlockComponent
   firstUpdated() {
     // TODO: listen to new children
     this.model.children.forEach(group => {
-      group.propsUpdated.on(() => this._selection.syncSelectionBox());
+      group.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
     });
 
-    this.signals.viewportUpdated.on(() => this._selection.syncSelectionBox());
+    this.signals.viewportUpdated.on(() =>
+      this._selection.syncBlockSelectionRect()
+    );
+    this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
-    this._historyDisposble = this.store.signals.historyUpdated.on(() => {
+    this._historyDisposable = this.store.signals.historyUpdated.on(() => {
       this._clearSelection();
     });
 
@@ -143,6 +186,7 @@ export class EdgelessPageBlockComponent
       this._initViewport();
       this.requestUpdate();
     });
+
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
   }
@@ -150,7 +194,8 @@ export class EdgelessPageBlockComponent
   disconnectedCallback() {
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
-    this._historyDisposble.dispose();
+    this.signals.hoverUpdated.dispose();
+    this._historyDisposable.dispose();
     this._selection.dispose();
     this._removeHotkeys();
   }
@@ -164,13 +209,17 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
+    const { _selection } = this;
+    const { frameSelectionRect } = _selection;
     const { zoom } = this.viewport;
-    const selectedRect = EdgelessSelectedRect(this._selection.state, zoom);
+    const selectedRect = EdgelessSelectedRect(_selection, zoom);
+    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
+    const hoverRect = EdgelessHoverRect(_selection.hoverRect, zoom);
 
     return html`
       <style></style>
       <div class="affine-edgeless-page-block-container">
-        ${childrenContainer} ${selectedRect}
+        ${childrenContainer} ${hoverRect} ${selectionRect} ${selectedRect}
       </div>
     `;
   }

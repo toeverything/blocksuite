@@ -24,7 +24,6 @@
     -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   --affine-popover-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
     -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
-  --affine-tooltip-shadow: 1px 1px 4px rgba(0, 0, 0, 0.14);
   --affine-font-xs: 12px;
   --affine-font-sm: 16px;
   --affine-font-base: 18px;
@@ -41,6 +40,10 @@
     Segoe UI Symbol, Noto Color Emoji;
   --affine-paragraph-space: 8px;
   --affine-popover-radius: 10px;
+
+  --affine-tooltip-color: #fff;
+  --affine-tooltip-background: var(--affine-primary-color);
+  --affine-tooltip-shadow: 1px 1px 4px rgba(0, 0, 0, 0.14);
 }
 
 html,

@@ -1,11 +1,11 @@
-import { html } from 'lit';
+import { html, type TemplateResult } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { BaseBlockModel } from '@blocksuite/store';
 
 import { GroupBlockModel } from '../..';
 import type {
-  EdgelessSelectionState,
+  EdgelessSelectionManager,
   ViewportState,
   XYWH,
 } from './selection-manager';
@@ -13,29 +13,106 @@ import { BlockElement, BlockHost } from '../../__internal__';
 import '../../__internal__';
 import { PADDING_X, PADDING_Y } from './utils';
 
-export function EdgelessSelectedRect(
-  state: EdgelessSelectionState,
-  zoom: number
-) {
-  const { type } = state;
-  if (type === 'none') return html`<div></div>`;
-
-  const { box } = state;
-  const color = state.active ? '#6ccfff' : '#ccc';
-
-  const style = {
+function getCommonRectStyle(rect: DOMRect, zoom: number) {
+  return {
     position: 'absolute',
-    left: box.x + 'px',
-    top: box.y + 'px',
-    width: box.width + PADDING_X * zoom + 'px',
-    height: box.height + PADDING_Y * zoom + 'px',
-    border: `1px solid ${color}`,
+    left: rect.x + 'px',
+    top: rect.y + 'px',
+    width: rect.width + PADDING_X * zoom + 'px',
+    height: rect.height + PADDING_Y * zoom + 'px',
+    borderRadius: `${10 * zoom}px`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
   };
+}
+
+export function EdgelessHoverRect(rect: DOMRect | null, zoom: number) {
+  if (!rect) return html`<div></div>`;
+
+  const style = {
+    ...getCommonRectStyle(rect, zoom),
+    border: '1px solid var(--affine-primary-color)',
+  };
 
   return html`
+    <div class="affine-edgeless-hover-rect" style=${styleMap(style)}></div>
+  `;
+}
+
+function Handle(centerX: number, centerY: number) {
+  const style = {
+    position: 'absolute',
+    left: centerX - 6 + 'px',
+    top: centerY - 6 + 'px',
+    width: '12px',
+    height: '12px',
+    borderRadius: '6px',
+    zIndex: '10',
+    border: '2px var(--affine-primary-color) solid',
+    background: 'white',
+    cursor: 'not-allowed',
+  };
+
+  return html` <div style=${styleMap(style)}></div> `;
+}
+
+export function EdgelessSelectedRect(
+  selection: EdgelessSelectionManager,
+  zoom: number
+) {
+  const state = selection.blockSelectionState;
+  const { type } = state;
+  if (type === 'none') return html``;
+
+  const { rect } = state;
+  const style = {
+    border: `${state.active ? 2 : 1}px solid var(--affine-primary-color)`,
+    ...getCommonRectStyle(rect, zoom),
+  };
+
+  let handles: TemplateResult | null = null;
+  if (!state.active) {
+    const leftCenter = [
+      rect.x,
+      rect.y + rect.height / 2 + (PADDING_Y * zoom) / 2,
+    ];
+    const rightCenter = [
+      rect.x + rect.width + PADDING_X * zoom,
+      rect.y + rect.height / 2 + (PADDING_Y * zoom) / 2,
+    ];
+    const handleLeft = Handle(leftCenter[0], leftCenter[1]);
+    const handleRight = Handle(rightCenter[0], rightCenter[1]);
+    handles = html` ${handleLeft}${handleRight} `;
+  }
+
+  return html`
+    ${handles}
     <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
+  `;
+}
+
+export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
+  if (rect === null) return html``;
+
+  const style = {
+    left: rect.left + 'px',
+    top: rect.top + 'px',
+    width: rect.width + 'px',
+    height: rect.height + 'px',
+  };
+  return html`
+    <style>
+      .affine-edgeless-frame-selection-rect {
+        position: absolute;
+        background: var(--affine-selected-color);
+        z-index: 1;
+        pointer-events: none;
+      }
+    </style>
+    <div
+      class="affine-edgeless-frame-selection-rect"
+      style=${styleMap(style)}
+    ></div>
   `;
 }
 
@@ -55,12 +132,9 @@ function EdgelessBlockChild(
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
     width: modelW + PADDING_X + 'px',
-    minHeight: modelH + PADDING_Y + 'px',
-    paddingLeft: '9px',
-    paddingRight: '9px',
-    paddingBottom: '18px',
+    height: modelH + PADDING_Y + 'px',
+    padding: `${PADDING_X / 2}px`,
     background: 'white',
-    boxShadow: '0 0 7px #ddd',
   };
 
   return html`
@@ -93,8 +167,6 @@ export function EdgelessBlockChildrenContainer(
         padding-left: 0;
         position: relative;
         overflow: hidden;
-        /* max-width: 300px; */
-        /* height: ${viewport.height}px; */
         height: 100%;
 
         /* background-image: linear-gradient(#cccccc66 1px, transparent 1px),

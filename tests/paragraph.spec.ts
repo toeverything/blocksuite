@@ -192,18 +192,18 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await page.keyboard.press('Tab');
   await assertRichTexts(page, ['hello', 'world']);
   await assertBlockChildrenIds(page, '1', ['2']);
-  await assertBlockChildrenIds(page, '2', ['3']);
+  await assertBlockChildrenIds(page, '2', ['4']);
 
   // unindent
   await pressShiftTab(page);
   await assertRichTexts(page, ['hello', 'world']);
-  await assertBlockChildrenIds(page, '1', ['2', '3']);
+  await assertBlockChildrenIds(page, '1', ['2', '5']);
 
   await undoByKeyboard(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await redoByKeyboard(page);
-  await assertBlockChildrenIds(page, '1', ['2', '3']);
+  await assertBlockChildrenIds(page, '1', ['2', '5']);
 });
 
 test('switch between paragraph types', async ({ page }) => {

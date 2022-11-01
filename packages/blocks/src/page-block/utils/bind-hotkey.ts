@@ -9,7 +9,9 @@ export function bindCommonHotkey(store: Store) {
   hotkey.addListener(STRIKE, e => handleFormat(store, e, 'strike'));
   hotkey.addListener(LINK, e => {
     e.preventDefault();
-    createLink(store, e);
+    hotkey.withDisableHotkey(async () => {
+      await createLink(store, e);
+    });
   });
   hotkey.addListener(UNDO, () => store.undo());
   hotkey.addListener(REDO, () => store.redo());

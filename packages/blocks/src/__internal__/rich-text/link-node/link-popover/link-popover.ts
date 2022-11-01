@@ -1,8 +1,56 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { toast } from '../../../../toast';
 import { createEvent } from '../../../utils';
 import { ConfirmIcon, EditIcon, UnlinkIcon } from './button';
 import { linkPopoverStyle } from './styles';
+
+export const ALLOWED_SCHEMES = [
+  'http',
+  'https',
+  'ftp',
+  'sftp',
+  'mailto',
+  'tel',
+  // may need support other schemes
+];
+// I guess you don't want to use the regex base the RFC 5322 Official Standard
+// For more detail see https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression/1917982#1917982
+const MAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+// For more detail see https://stackoverflow.com/questions/8667070/javascript-regular-expression-to-validate-url
+const URL_REGEX =
+  /^(?:(?:(?:https?|s?ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i;
+
+function normalizeUrl(url: string) {
+  const hasScheme = ALLOWED_SCHEMES.some(scheme =>
+    url.startsWith(scheme + ':')
+  );
+  if (hasScheme) {
+    return url;
+  }
+  const isEmail = MAIL_REGEX.test(url);
+  if (isEmail) {
+    return 'mailto:' + url;
+  }
+  return 'http://' + url;
+}
+
+/**
+ * For more detail see https://www.ietf.org/rfc/rfc1738.txt
+ */
+const isValidLink = (str: string) => {
+  if (!str) {
+    return false;
+  }
+  const url = normalizeUrl(str);
+  if (url === str) {
+    // Skip check if user input scheme manually
+    return true;
+  }
+  return URL_REGEX.test(url);
+};
 
 @customElement('edit-link-panel')
 export class LinkPopover extends LitElement {
@@ -32,13 +80,16 @@ export class LinkPopover extends LitElement {
   @state()
   bodyOverflowStyle = '';
 
+  @state()
+  disableConfirm = true;
+
   @query('#text-input')
   textInput: HTMLInputElement | undefined;
 
   @query('#link-input')
   linkInput: HTMLInputElement | undefined;
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     if (this.showMask) {
       // Disable body scroll
@@ -47,7 +98,15 @@ export class LinkPopover extends LitElement {
     }
   }
 
-  disconnectedCallback() {
+  protected override firstUpdated(_changedProperties: PropertyValues): void {
+    super.firstUpdated(_changedProperties);
+
+    if (this.linkInput) {
+      this.linkInput.focus();
+    }
+  }
+
+  override disconnectedCallback() {
     super.disconnectedCallback();
     if (this.showMask) {
       // Restore body scroll style
@@ -64,10 +123,15 @@ export class LinkPopover extends LitElement {
   }
 
   private onConfirm() {
-    const link = this.linkInput?.value?.trim() ?? null;
+    if (this.disableConfirm) {
+      return;
+    }
+    if (!this.linkInput) {
+      throw new Error('Failed to update link! Link input not found!');
+    }
+    const link = normalizeUrl(this.linkInput.value);
     const text = this.textInput?.value ?? undefined;
     if (!link) {
-      // TODO invalid link checking
       return;
     }
 
@@ -83,9 +147,7 @@ export class LinkPopover extends LitElement {
 
   private onCopy(e: MouseEvent) {
     navigator.clipboard.writeText(this.previewLink);
-    // TODO show toast
-    // Toast.show('Copied link to clipboard');
-    console.log('Copied link to clipboard');
+    toast('Copied link to clipboard');
   }
 
   private onUnlink(e: MouseEvent) {
@@ -94,61 +156,83 @@ export class LinkPopover extends LitElement {
 
   private onEdit(e: MouseEvent) {
     this.dispatchEvent(createEvent('editLink', null));
+    this.disableConfirm = false;
   }
 
   private onKeyup(e: KeyboardEvent) {
     if (e.key === 'Enter') {
       this.onConfirm();
     }
-    this.link = (e.target as HTMLInputElement).value;
+    if (!this.linkInput) {
+      throw new Error('Failed to update link! Link input not found!');
+    }
+    const isValid = isValidLink(this.linkInput.value);
+    this.disableConfirm = isValid ? false : true;
     return;
   }
 
   confirmBtnTemplate() {
     return html`<icon-button
       class="affine-confirm-button"
+      ?disabled=${this.disableConfirm}
       @click=${this.onConfirm}
       >${ConfirmIcon()}</icon-button
     >`;
   }
 
-  createTemplate() {
-    const isCreateLink = !this.previewLink;
-
-    const buttons = html`<icon-button @click=${this.onUnlink}
-        >${UnlinkIcon()}</icon-button
-      ><icon-button @click=${this.onEdit}>${EditIcon()}</icon-button>`;
-
-    return isCreateLink
-      ? html`<div class="affine-link-popover" style=${this.style.cssText}>
-          <input
-            class="affine-link-popover-input"
-            autofocus
-            id="link-input"
-            type="text"
-            spellcheck="false"
-            placeholder="Paste or type a link"
-            value=${this.previewLink}
-            @keyup=${this.onKeyup}
-            @click=${this.onCopy}
-          />
-          <span class="affine-link-popover-dividing-line"></span>
-          ${this.confirmBtnTemplate()}
-        </div>`
-      : html`<div class="affine-link-popover" style=${this.style.cssText}>
-          <div class="affine-link-preview" @click=${this.onCopy}>
-            ${this.previewLink}
-          </div>
-          <span class="affine-link-popover-dividing-line"></span>
-          ${buttons}
-        </div>`;
+  createLinkTemplate() {
+    return html`<div class="affine-link-popover">
+      <input
+        id="link-input"
+        class="affine-link-popover-input"
+        type="text"
+        spellcheck="false"
+        placeholder="Paste or type a link"
+        value=${this.previewLink}
+        @keyup=${this.onKeyup}
+      />
+      <span class="affine-link-popover-dividing-line"></span>
+      ${this.confirmBtnTemplate()}
+    </div>`;
   }
 
+  previewTemplate() {
+    return html`<div class="affine-link-popover">
+      <div class="affine-link-preview has-tool-tip" @click=${this.onCopy}>
+        <tool-tip inert role="tooltip">Click to copy link</tool-tip>
+        ${this.previewLink}
+      </div>
+      <span class="affine-link-popover-dividing-line"></span>
+      <icon-button class="has-tool-tip" @click=${this.onUnlink}>
+        ${UnlinkIcon()}
+        <tool-tip inert role="tooltip">Remove</tool-tip>
+      </icon-button>
+      <icon-button class="has-tool-tip" @click=${this.onEdit}>
+        ${EditIcon()}
+        <tool-tip inert role="tooltip">Edit link</tool-tip>
+      </icon-button>
+    </div>`;
+  }
+
+  simpleTemplate() {
+    const isCreateLink = !this.previewLink;
+    return isCreateLink ? this.createLinkTemplate() : this.previewTemplate();
+  }
+
+  /**
+   * ```
+   * ┌─────────────────┐
+   * │ ┌──────────┐    │
+   * │ │Text      │    │
+   * │ └──────────┘    │
+   * │ ┌──────────┐    │
+   * │ │Link      │ X  │
+   * │ └──────────┘    │
+   * └─────────────────┘
+   * ```
+   */
   editTemplate() {
-    return html`<div
-      class="affine-link-edit-popover"
-      style=${this.style.cssText}
-    >
+    return html`<div class="affine-link-edit-popover">
       <label class="affine-edit-text-text" for="text-input">Text</label>
       <input
         class="affine-edit-text-input"
@@ -160,10 +244,9 @@ export class LinkPopover extends LitElement {
       />
       <label class="affine-edit-link-text" for="link-input">Link</label>
       <input
-        class="affine-edit-link-input"
         id="link-input"
+        class="affine-edit-link-input"
         type="text"
-        autofocus="true"
         spellcheck="false"
         placeholder="Paste or type a link"
         value=${this.previewLink}
@@ -179,14 +262,15 @@ export class LinkPopover extends LitElement {
       : html``;
 
     const popover =
-      this.type === 'create' ? this.createTemplate() : this.editTemplate();
+      this.type === 'create' ? this.simpleTemplate() : this.editTemplate();
 
     return html`
       <div class="overlay-root">
         ${mask}
         <div
           class="overlay-container"
-          style="position: absolute; left: ${this.left}; top: ${this.top};"
+          style="position: absolute; left: ${this.left}; top: ${this.top};${this
+            .style.cssText}"
         >
           ${popover}
         </div>

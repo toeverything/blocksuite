@@ -356,7 +356,10 @@ export function isBlankArea(e: SelectionEvent) {
 export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
   const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   const startContainer = range?.startContainer;
-
+  // if not left click
+  if (e.button) {
+    return;
+  }
   // click on rich text
   if (startContainer instanceof Node) {
     resetNativeSelection(range);

@@ -13,6 +13,7 @@ import {
   handleNativeRangeDblClick,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
+import { repairerContextMenuRange } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -120,7 +121,8 @@ export class DefaultSelectionManager {
       this._onContainerClick,
       this._onContainerDblClick,
       this._onContainerMouseMove,
-      this._onContainerMouseOut
+      this._onContainerMouseOut,
+      this._onContainerContextMenu
     );
   }
 
@@ -148,11 +150,11 @@ export class DefaultSelectionManager {
       return richTextCache.get(richText) as DOMRect;
     });
     this._signals.updateSelectedRects.emit(selectedBounds);
-    this._signals.updateSelectionRect.emit(selectionRect);
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
-    this._signals.updateSelectionRect.emit(null);
+    this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
 
@@ -216,6 +218,10 @@ export class DefaultSelectionManager {
     handleNativeRangeDblClick(this.store, e);
   };
 
+  private _onContainerContextMenu = (e: SelectionEvent) => {
+    repairerContextMenuRange(e);
+  };
+
   private _onContainerMouseMove = (e: SelectionEvent) => {
     // console.log('mousemove', e);
   };
@@ -226,7 +232,7 @@ export class DefaultSelectionManager {
 
   dispose() {
     this._signals.updateSelectedRects.dispose();
-    this._signals.updateSelectionRect.dispose();
+    this._signals.updateFrameSelectionRect.dispose();
     this._mouseDisposeCallback();
   }
 }

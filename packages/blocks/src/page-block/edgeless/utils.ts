@@ -3,8 +3,8 @@ import { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
 
 // XXX: edgeless group container padding
-export const PADDING_X = 18;
-export const PADDING_Y = 27;
+export const PADDING_X = 48;
+export const PADDING_Y = 48;
 
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
   const a = JSON.parse(block.xywh) as [number, number, number, number];
