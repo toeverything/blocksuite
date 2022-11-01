@@ -139,19 +139,10 @@ function focusRichTextByModel(
   position: SelectionPosition,
   model: BaseBlockModel
 ) {
-   // FIXME: Then it will turn the input into the div
-  if (model.flavour === 'group') {
-    (
-      document.querySelector(
-        '.affine-default-page-block-title'
-      ) as HTMLInputElement
-    ).focus();
-  } else {
-    const element = getBlockElementByModel(model);
-    const editableContainer = element?.querySelector('[contenteditable]');
-    if (editableContainer) {
-      focusRichText(position, editableContainer);
-    }
+  const element = getBlockElementByModel(model);
+  const editableContainer = element?.querySelector('[contenteditable]');
+  if (editableContainer) {
+    focusRichText(position, editableContainer);
   }
 }
 

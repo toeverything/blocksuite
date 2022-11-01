@@ -220,7 +220,18 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      focusPreviousBlock(model, new Point(left, top));
+      const container = getContainerByModel(model);
+      const preNodeModel = getPreviousBlock(container, model.id);
+      // FIXME: Then it will turn the input into the div
+      if (preNodeModel?.flavour === 'group') {
+        (
+          document.querySelector(
+            '.affine-default-page-block-title'
+          ) as HTMLInputElement
+        ).focus();
+      } else {
+        focusPreviousBlock(model, new Point(left, top));
+      }
       return PREVENT_DEFAULT;
     }
   }
