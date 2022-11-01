@@ -157,17 +157,35 @@ test('nested list blocks', async ({ page }) => {
   >
     <list
       prop:checked={false}
-      prop:text="123"
+      prop:text={
+        <>
+          <text
+            insert="123"
+          />
+        </>
+      }
       prop:type="bulleted"
     >
       <list
         prop:checked={false}
-        prop:text="456"
+        prop:text={
+          <>
+            <text
+              insert="456"
+            />
+          </>
+        }
         prop:type="bulleted"
       >
         <list
           prop:checked={false}
-          prop:text="789"
+          prop:text={
+            <>
+              <text
+                insert="789"
+              />
+            </>
+          }
           prop:type="bulleted"
         />
       </list>
@@ -188,17 +206,35 @@ test('nested list blocks', async ({ page }) => {
   >
     <list
       prop:checked={false}
-      prop:text="123"
+      prop:text={
+        <>
+          <text
+            insert="123"
+          />
+        </>
+      }
       prop:type="bulleted"
     />
     <list
       prop:checked={false}
-      prop:text="456"
+      prop:text={
+        <>
+          <text
+            insert="456"
+          />
+        </>
+      }
       prop:type="bulleted"
     >
       <list
         prop:checked={false}
-        prop:text="789"
+        prop:text={
+          <>
+            <text
+              insert="789"
+            />
+          </>
+        }
         prop:type="bulleted"
       />
     </list>
@@ -224,11 +260,23 @@ test('basic indent and unindent', async ({ page }) => {
     prop:xywh="[0,0,720,72]"
   >
     <paragraph
-      prop:text="text1"
+      prop:text={
+        <>
+          <text
+            insert="text1"
+          />
+        </>
+      }
       prop:type="text"
     />
     <paragraph
-      prop:text="text2"
+      prop:text={
+        <>
+          <text
+            insert="text2"
+          />
+        </>
+      }
       prop:type="text"
     />
   </group>
@@ -243,11 +291,23 @@ test('basic indent and unindent', async ({ page }) => {
     prop:xywh="[0,0,720,72]"
   >
     <paragraph
-      prop:text="text1"
+      prop:text={
+        <>
+          <text
+            insert="text1"
+          />
+        </>
+      }
       prop:type="text"
     >
       <paragraph
-        prop:text="text2"
+        prop:text={
+          <>
+            <text
+              insert="text2"
+            />
+          </>
+        }
         prop:type="text"
       />
     </paragraph>
@@ -263,11 +323,23 @@ test('basic indent and unindent', async ({ page }) => {
     prop:xywh="[0,0,720,72]"
   >
     <paragraph
-      prop:text="text1"
+      prop:text={
+        <>
+          <text
+            insert="text1"
+          />
+        </>
+      }
       prop:type="text"
     />
     <paragraph
-      prop:text="text2"
+      prop:text={
+        <>
+          <text
+            insert="text2"
+          />
+        </>
+      }
       prop:type="text"
     />
   </group>
