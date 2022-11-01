@@ -41,6 +41,13 @@ export class ListBlockComponent extends LitElement {
       model: this.model,
       deep,
       index,
+      onClick: () => {
+        if (this.model.type !== 'todo') return;
+        this.host.store.captureSync();
+        this.host.store.updateBlock(this.model, {
+          checked: !this.model.checked,
+        });
+      },
     });
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
     // For the first list item, we need to add a margin-top to make it align with the text
@@ -57,18 +64,7 @@ export class ListBlockComponent extends LitElement {
             this.model.checked ? 'affine-list--checked' : ''
           }`}
         >
-          <div
-            style="cursor: pointer;user-select:none"
-            @click="${() => {
-              if (this.model.type !== 'todo') return;
-              this.host.store.captureSync();
-              this.host.store.updateBlock(this.model, {
-                checked: !this.model.checked,
-              });
-            }}"
-          >
-            ${listIcon}
-          </div>
+          ${listIcon}
           <rich-text .host=${this.host} .model=${this.model}></rich-text>
         </div>
         ${childrenContainer}

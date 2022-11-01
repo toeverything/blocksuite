@@ -1,5 +1,3 @@
-import { html } from 'lit';
-
 const number2letter = (n: number) => {
   const ordA = 'a'.charCodeAt(0);
   const ordZ = 'z'.charCodeAt(0);
@@ -52,5 +50,5 @@ export const getNumberPrefix = ({
   deep: number;
 }) => {
   const prefix = getPrefix(deep, index);
-  return html`<div>${prefix} .</div>`;
+  return `${prefix} .`;
 };

@@ -30,6 +30,10 @@
   color: var(--affine-code-color);
   font-size: 14px;
   line-height: var(--affine-line-height-base);
+  user-select: none;
+}
+.affine-list-block__todo-prefix {
+  cursor: pointer;
 }
 .affine-list-block__todo {
   width: 16px;
