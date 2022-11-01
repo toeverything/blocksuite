@@ -8,6 +8,7 @@ import {
   selectAllByKeyboard,
   withCtrlOrMeta,
 } from './utils/actions';
+import { assertStoreMatchJSX } from './utils/asserts';
 
 const pressCreateLinkShortCut = async (page: Page) => {
   await withCtrlOrMeta(page, async () => {
@@ -64,4 +65,25 @@ test('basic link', async ({ page }) => {
   const link2Locator = page.locator(`text="${text2}"`);
 
   await expect(link2Locator).toHaveAttribute('href', link2);
+  await assertStoreMatchJSX(
+    page,
+    `
+<page>
+  <group
+    prop:xywh="[0,0,720,32]"
+  >
+    <paragraph
+      prop:text={
+        <>
+          <text
+            insert="link2"
+            link="https://github.com"
+          />
+        </>
+      }
+      prop:type="text"
+    />
+  </group>
+</page>`
+  );
 });
