@@ -13,7 +13,7 @@ export interface JSXElement {
   // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L78-L79
   $$typeof: symbol | 0xea71357;
   type: string;
-  props?: { 'prop:text'?: JSXElement } & Record<string, unknown>;
+  props: { 'prop:text'?: JSXElement } & Record<string, unknown>;
   children?: null | (JSXElement | string | number)[];
 }
 
@@ -104,13 +104,22 @@ const serializeYText = (text: Text): DeltaText => {
   return delta;
 };
 
-function parseDelta(text: DeltaText) {
-  return text?.map(({ insert, attributes }) => ({
-    $$typeof: testSymbol,
-    type: 'text',
-    props: {
-      insert,
-      ...attributes,
-    },
-  }));
-}
+const parseDelta = (text: DeltaText) => {
+  if (!text.length) {
+    return undefined;
+  }
+  return {
+    $$typeof: testSymbol, // Symbol.for('react.element'),
+    type: '', // Symbol.for('react.fragment'),
+    props: {},
+    children: text?.map(({ insert, attributes }) => ({
+      $$typeof: testSymbol,
+      type: 'text',
+      props: {
+        // Not place at `children` to avoid the trailing whitespace be trim by formatter.
+        insert,
+        ...attributes,
+      },
+    })),
+  };
+};
