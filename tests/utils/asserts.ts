@@ -14,7 +14,7 @@ import {
 } from 'pretty-format';
 
 export const defaultStore: SerializedStore = {
-  blocks: {
+  page0: {
     '0': {
       'sys:id': '0',
       'sys:flavour': 'affine:page',
@@ -245,7 +245,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
     // @ts-expect-error
     window.store.doc.toJSON()
   )) as SerializedStore;
-  const titleNode = jsonDoc.blocks['0'];
+  const titleNode = jsonDoc.page0['0'];
 
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
@@ -275,7 +275,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
       // return visitor(node);
     }
 
-    const children = node['sys:children'].map(id => jsonDoc.blocks[id]);
+    const children = node['sys:children'].map(id => jsonDoc.page0[id]);
     return [
       visitor(node),
       ...children.flatMap(child =>

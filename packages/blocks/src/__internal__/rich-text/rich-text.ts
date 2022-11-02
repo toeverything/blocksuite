@@ -46,8 +46,8 @@ export class RichText extends LitElement {
 
   firstUpdated() {
     const { host, model, _textContainer } = this;
-    const { store } = host;
-    const keyboardBindings = createKeyboardBindings(store, model);
+    const { space } = host;
+    const keyboardBindings = createKeyboardBindings(space, model);
 
     this.quill = new Quill(_textContainer, {
       modules: {
@@ -129,15 +129,15 @@ export class RichText extends LitElement {
       }
       // });
     });
-    store.attachRichText(model.id, this.quill);
-    store.awareness.updateLocalCursor();
+    space.attachRichText(model.id, this.quill);
+    space.awareness.updateLocalCursor();
 
     this.model.propsUpdated.on(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.host.store.detachRichText(this.model.id);
+    this.host.space.detachRichText(this.model.id);
   }
 
   render() {

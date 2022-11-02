@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { BaseBlockModel, Space } from '@blocksuite/store';
 import { RichText } from '../rich-text/rich-text';
 import { assertExists, caretRangeFromPoint, matchFlavours } from './std';
 import { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
@@ -253,7 +253,7 @@ function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {
   const parentMap = new Map<string, SelectedBlock>();
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
-    const parent = model.store.getParent(model);
+    const parent = model.space.getParent(model);
     const block = { id: model.id, children: [] };
     if (!parent || !parentMap.has(parent.id)) {
       result.push(block);
@@ -276,8 +276,8 @@ function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
   return getLastSelectBlock(last.children);
 }
 
-export function getSelectInfo(store: Store): SelectionInfo {
-  if (!store.root) {
+export function getSelectInfo(space: Space): SelectionInfo {
+  if (!space.root) {
     return {
       type: 'None',
       selectedBlocks: [],
@@ -287,7 +287,7 @@ export function getSelectInfo(store: Store): SelectionInfo {
   let type = 'None';
   let selectedBlocks: SelectedBlock[] = [];
   let selectedModels: BaseBlockModel[] = [];
-  const page = getDefaultPageBlock(store.root);
+  const page = getDefaultPageBlock(space.root);
   const { state } = page.selection;
   const nativeSelection = window.getSelection();
   if (state.type === 'block') {
@@ -370,7 +370,7 @@ export function isBlankArea(e: SelectionEvent) {
   return cursor !== 'text';
 }
 
-export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
+export function handleNativeRangeClick(space: Space, e: SelectionEvent) {
   const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   const startContainer = range?.startContainer;
   // if not left click
@@ -390,7 +390,7 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
   ) {
     focusRichTextByOffset(startContainer, e.raw.clientX);
   } else if (isBlankAreaAfterLastBlock(startContainer)) {
-    const { root } = store;
+    const { root } = space;
     const lastChild = root?.lastChild();
     assertExists(lastChild);
     if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
@@ -401,7 +401,7 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
   }
 }
 
-export function handleNativeRangeDblClick(store: Store, e: SelectionEvent) {
+export function handleNativeRangeDblClick(space: Space, e: SelectionEvent) {
   const selection = window.getSelection();
   if (selection && selection.isCollapsed && selection.anchorNode) {
     const editableContainer =

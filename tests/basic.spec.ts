@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from '@playwright/test';
-import type { Store } from '../packages/store';
+import type { Space } from '../packages/store';
 import {
   enterPlaygroundRoom,
   disconnectByClick,
@@ -40,20 +40,20 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     // @ts-ignore
-    const store = window['store'] as Store;
+    const space = window.store.space as Spage;
 
-    const pageId = store.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const groupId = store.addBlock({ flavour: 'affine:group' }, pageId);
+    const pageId = space.addBlock({ flavour: 'affine:page', title: 'hello' });
+    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
 
-    const text = new store.Text(store, 'world');
-    store.addBlock({ flavour: 'affine:paragraph', text }, groupId);
+    const text = new space.Text(space, 'world');
+    space.addBlock({ flavour: 'affine:paragraph', text }, groupId);
 
     const delta = [
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    store.addBlock(
-      { flavour: 'affine:paragraph', text: store.Text.fromDelta(store, delta) },
+    space.addBlock(
+      { flavour: 'affine:paragraph', text: space.Text.fromDelta(space, delta) },
       groupId
     );
   });

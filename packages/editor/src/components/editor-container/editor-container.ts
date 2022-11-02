@@ -13,6 +13,10 @@ export class EditorContainer extends LitElement {
   @property()
   store!: Store;
 
+  get space() {
+    return this.store.space;
+  }
+
   @state()
   mode: 'page' | 'edgeless' = 'page';
 
@@ -40,19 +44,19 @@ export class EditorContainer extends LitElement {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('store')) {
-      this.placeholderModel = new BlockSchema['affine:page'](this.store, {});
+      this.placeholderModel = new BlockSchema['affine:page'](this.space, {});
     }
     super.update(changedProperties);
   }
 
   private _subscribeStore() {
     // if undo to empty page, reset to empty placeholder
-    const unsubscribeUpdate = this.store.signals.updated.on(() => {
-      this.isEmptyPage = this.store.isEmpty;
+    const unsubscribeUpdate = this.space.signals.updated.on(() => {
+      this.isEmptyPage = this.space.isEmpty;
     });
     this.unsubscribe.push(unsubscribeUpdate.dispose);
 
-    const unsubscribeRootAdd = this.store.signals.rootAdded.on(block => {
+    const unsubscribeRootAdd = this.space.signals.rootAdded.on(block => {
       this.model = block as PageBlockModel;
       this.model.childrenUpdated.on(() => this.requestUpdate());
       this.requestUpdate();

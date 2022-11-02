@@ -2,7 +2,7 @@ import { BlockHost } from '../../__internal__';
 import { ListBlockModel } from '../list-model';
 
 const getIndex = (host: BlockHost, model: ListBlockModel) => {
-  const siblings = host.store.getParent(model)?.children || [];
+  const siblings = host.space.getParent(model)?.children || [];
   const fakeIndex = siblings.findIndex(v => v === model);
 
   // fakeIndex is the index of the model in the parent's children array
@@ -24,10 +24,10 @@ const getIndex = (host: BlockHost, model: ListBlockModel) => {
 
 const getListDeep = (host: BlockHost, model: ListBlockModel): number => {
   let deep = 0;
-  let parent = host.store.getParent(model);
+  let parent = host.space.getParent(model);
   while (parent?.flavour === model.flavour) {
     deep++;
-    parent = host.store.getParent(parent);
+    parent = host.space.getParent(parent);
   }
   return deep;
 };

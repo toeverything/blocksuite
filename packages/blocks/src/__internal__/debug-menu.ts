@@ -141,6 +141,10 @@ export class DebugMenu extends LitElement {
   @state()
   _mode: 'page' | 'edgeless' = 'page';
 
+  get space() {
+    return this.store.space;
+  }
+
   private _onToggleConnection() {
     if (this.connected === true) {
       this.store.providers.forEach(provide => provide.disconnect());
@@ -157,10 +161,9 @@ export class DebugMenu extends LitElement {
     const block = element.closest('[data-block-id]') as CommonBlockElement;
     if (!block) return;
 
-    const store = block.host.store as Store;
-    // @ts-ignore
-    const model = store.getBlockById(block.model.id) as BaseBlockModel;
-    convertToList(this.store, model, listType, '');
+    const { space } = block.host;
+    const model = space.getBlockById(block.model.id) as BaseBlockModel;
+    convertToList(this.space, model, listType, '');
   }
 
   private _onDelete() {
@@ -173,8 +176,8 @@ export class DebugMenu extends LitElement {
     const block = element.closest('paragraph-block')?.model;
     if (!block) return;
 
-    this.store.captureSync();
-    this.store.updateBlock(block, { type });
+    this.space.captureSync();
+    this.space.updateBlock(block, { type });
   }
 
   private _onSwitchMode() {
@@ -185,20 +188,20 @@ export class DebugMenu extends LitElement {
   }
 
   private _onAddGroup() {
-    const root = this.store.root;
+    const root = this.space.root;
     if (!root) return;
     const pageId = root.id;
 
-    this.store.captureSync();
+    this.space.captureSync();
 
     const count = root.children.length;
     const xywh = `[0,${count * 60},720,480]`;
 
-    const groupId = this.store.addBlock<GroupBlockModel>(
+    const groupId = this.space.addBlock<GroupBlockModel>(
       { flavour: 'affine:group', xywh },
       pageId
     );
-    this.store.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    this.space.addBlock({ flavour: 'affine:paragraph' }, groupId);
   }
 
   private _onExportHtml() {
@@ -210,9 +213,9 @@ export class DebugMenu extends LitElement {
   }
 
   firstUpdated() {
-    this.store.signals.historyUpdated.on(() => {
-      this.canUndo = this.store.canUndo;
-      this.canRedo = this.store.canRedo;
+    this.space.signals.historyUpdated.on(() => {
+      this.canUndo = this.space.canUndo;
+      this.canRedo = this.space.canRedo;
     });
   }
 
@@ -263,7 +266,7 @@ export class DebugMenu extends LitElement {
           title="undo"
           .disabled=${!this.canUndo}
           tabindex="-1"
-          @click=${() => this.store.undo()}
+          @click=${() => this.space.undo()}
         >
           ${icons.undo}
         </button>
@@ -272,7 +275,7 @@ export class DebugMenu extends LitElement {
           title="redo"
           .disabled=${!this.canRedo}
           tabindex="-1"
-          @click=${() => this.store.redo()}
+          @click=${() => this.space.redo()}
         >
           ${icons.redo}
         </button>

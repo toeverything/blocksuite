@@ -1,3 +1,4 @@
+export * from './space';
 export * from './store';
 export * from './base';
 export * from './awareness';

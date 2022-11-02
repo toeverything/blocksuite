@@ -1,10 +1,10 @@
-import { BaseBlockModel, Store } from '@blocksuite/store';
+import { BaseBlockModel, Space } from '@blocksuite/store';
 
 export class PageBlockModel extends BaseBlockModel {
   flavour = 'affine:page' as const;
   title = '';
-  constructor(store: Store, props: Partial<PageBlockModel>) {
-    super(store, props);
+  constructor(space: Space, props: Partial<PageBlockModel>) {
+    super(space, props);
     this.title = props.title ?? '';
   }
 

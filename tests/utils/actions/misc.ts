@@ -1,5 +1,5 @@
 import { Page } from '@playwright/test';
-import type { Store } from '../../../packages/store';
+import type { Space } from '../../../packages/store';
 import { pressEnter } from './keyboard';
 
 const NEXT_FRAME_TIMEOUT = 50;
@@ -44,8 +44,8 @@ export async function clearLog(page: Page) {
 export async function resetHistory(page: Page) {
   await page.evaluate(() => {
     // @ts-ignore
-    const store = window.store as Store;
-    store.resetHistory();
+    const space = window.store.space as Space;
+    space.resetHistory();
   });
 }
 
@@ -54,11 +54,11 @@ export async function enterPlaygroundWithList(page: Page) {
   await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}`);
   await page.evaluate(() => {
     // @ts-ignore
-    const store = window['store'] as Store;
-    const pageId = store.addBlock({ flavour: 'affine:page' });
-    const groupId = store.addBlock({ flavour: 'affine:group' }, pageId);
+    const space = window.store.space as Space;
+    const pageId = space.addBlock({ flavour: 'affine:page' });
+    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
     for (let i = 0; i < 3; i++) {
-      store.addBlock({ flavour: 'affine:list' }, groupId);
+      space.addBlock({ flavour: 'affine:list' }, groupId);
     }
   });
   await waitNextFrame(page);
@@ -67,10 +67,10 @@ export async function enterPlaygroundWithList(page: Page) {
 export async function initEmptyState(page: Page) {
   await page.evaluate(() => {
     // @ts-ignore
-    const store = window['store'] as Store;
-    const pageId = store.addBlock({ flavour: 'affine:page' });
-    const groupId = store.addBlock({ flavour: 'affine:group' }, pageId);
-    store.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    const space = window.store.space as Space;
+    const pageId = space.addBlock({ flavour: 'affine:page' });
+    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
+    space.addBlock({ flavour: 'affine:paragraph' }, groupId);
   });
 }
 
