@@ -107,7 +107,7 @@ export class ContentParser {
   public text2blocks(text: string): OpenBlockInfo[] {
     return text.split('\n').map((str: string) => {
       return {
-        flavour: 'paragraph',
+        flavour: 'affine:paragraph',
         type: 'text',
         text: [{ insert: str }],
         children: [],

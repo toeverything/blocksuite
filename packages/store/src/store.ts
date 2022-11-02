@@ -12,6 +12,7 @@ import { Signal } from './utils/signal';
 import {
   assertValidChildren,
   initSysProps,
+  matchFlavours,
   syncBlockProps,
   toBlockProps,
   trySyncTextProp,
@@ -211,7 +212,7 @@ export class Store {
     }
 
     const clonedProps = { ...blockProps };
-    const id = clonedProps.id ? clonedProps.id : this._createId();
+    const id = this._createId();
     clonedProps.id = id;
 
     this.transact(() => {
@@ -380,7 +381,7 @@ export class Store {
 
     if (
       // TODO use schema
-      (model.flavour === 'paragraph' || model.flavour === 'list') &&
+      matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
       !yBlock.get('prop:text')
     ) {
       this.transact(() => yBlock.set('prop:text', new Y.Text()));

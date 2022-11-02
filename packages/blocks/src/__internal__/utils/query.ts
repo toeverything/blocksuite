@@ -182,7 +182,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       // @ts-ignore
       const blockElement = getBlockElementByModel(block.model);
       const mainElelment =
-        block.model.flavour === 'page'
+        block.model.flavour === 'affine:page'
           ? blockElement?.querySelector(
               '.affine-default-page-block-title-container'
             )

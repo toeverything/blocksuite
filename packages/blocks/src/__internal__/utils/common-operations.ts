@@ -23,10 +23,10 @@ export function convertToList(
   prefix: string,
   otherProperties?: Record<string, unknown>
 ): boolean {
-  if (model.flavour === 'list' && model['type'] === listType) {
+  if (model.flavour === 'affine:list' && model['type'] === listType) {
     return false;
   }
-  if (model.flavour === 'paragraph') {
+  if (model.flavour === 'affine:paragraph') {
     const parent = store.getParent(model);
     if (!parent) return false;
 
@@ -36,7 +36,7 @@ export function convertToList(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'list',
+      flavour: 'affine:list',
       type: listType,
       text: model?.text?.clone(),
       children: model.children,
@@ -46,7 +46,7 @@ export function convertToList(
 
     const id = store.addBlock(blockProps, parent, index);
     asyncFocusRichText(store, id);
-  } else if (model.flavour === 'list' && model['type'] !== listType) {
+  } else if (model.flavour === 'affine:list' && model['type'] !== listType) {
     model.text?.insert(' ', prefix.length);
     store.captureSync();
 
@@ -59,13 +59,13 @@ export function convertToList(
 export function convertToParagraph(
   store: Store,
   model: ExtendedModel,
-  type: 'paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  type: 'affine:paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
 ): boolean {
-  if (model.flavour === 'paragraph' && model['type'] === type) {
+  if (model.flavour === 'affine:paragraph' && model['type'] === type) {
     return false;
   }
-  if (model.flavour !== 'paragraph') {
+  if (model.flavour !== 'affine:paragraph') {
     const parent = store.getParent(model);
     if (!parent) return false;
 
@@ -75,7 +75,7 @@ export function convertToParagraph(
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'paragraph',
+      flavour: 'affine:paragraph',
       type: type,
       text: model?.text?.clone(),
       children: model.children,
@@ -84,7 +84,7 @@ export function convertToParagraph(
 
     const id = store.addBlock(blockProps, parent, index);
     asyncFocusRichText(store, id);
-  } else if (model.flavour === 'paragraph' && model['type'] !== type) {
+  } else if (model.flavour === 'affine:paragraph' && model['type'] !== type) {
     model.text?.insert(' ', prefix.length);
     store.captureSync();
 

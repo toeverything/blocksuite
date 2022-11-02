@@ -11,12 +11,12 @@ describe('basic', () => {
           '0': {
             'sys:id': '0',
             'sys:children': ['1'],
-            'sys:flavour': 'page',
+            'sys:flavour': 'affine:page',
           },
           '1': {
             'sys:id': '1',
             'sys:children': [],
-            'sys:flavour': 'paragraph',
+            'sys:flavour': 'affine:paragraph',
             'prop:text': [],
             'prop:type': 'text',
           },
@@ -24,11 +24,11 @@ describe('basic', () => {
         '0'
       )
     ).toMatchInlineSnapshot(`
-      <page>
-        <paragraph
+      <affine:page>
+        <affine:paragraph
           prop:type="text"
         />
-      </page>
+      </affine:page>
     `);
   });
 
@@ -38,13 +38,13 @@ describe('basic', () => {
         {
           '0': {
             'sys:id': '0',
-            'sys:flavour': 'page',
+            'sys:flavour': 'affine:page',
             'sys:children': ['1'],
             'prop:title': 'this is title',
           },
           '1': {
             'sys:id': '2',
-            'sys:flavour': 'paragraph',
+            'sys:flavour': 'affine:paragraph',
             'sys:children': [],
             'prop:type': 'text',
             'prop:text': [{ insert: 'just plain text' }],
@@ -53,14 +53,14 @@ describe('basic', () => {
         '0'
       )
     ).toMatchInlineSnapshot(`
-      <page
+      <affine:page
         prop:title="this is title"
       >
-        <paragraph
+        <affine:paragraph
           prop:text="just plain text"
           prop:type="text"
         />
-      </page>
+      </affine:page>
     `);
   });
 
@@ -70,13 +70,13 @@ describe('basic', () => {
         {
           '0': {
             'sys:id': '0',
-            'sys:flavour': 'page',
+            'sys:flavour': 'affine:page',
             'sys:children': ['1'],
             'prop:title': 'this is title',
           },
           '1': {
             'sys:id': '2',
-            'sys:flavour': 'paragraph',
+            'sys:flavour': 'affine:paragraph',
             'sys:children': [],
             'prop:type': 'text',
             'prop:text': [
@@ -97,10 +97,10 @@ describe('basic', () => {
         '0'
       )
     ).toMatchInlineSnapshot(`
-      <page
+      <affine:page
         prop:title="this is title"
       >
-        <paragraph
+        <affine:paragraph
           prop:text={
             <>
               <text
@@ -126,7 +126,7 @@ describe('basic', () => {
           }
           prop:type="text"
         />
-      </page>
+      </affine:page>
     `);
   });
 });

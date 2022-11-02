@@ -195,10 +195,10 @@ export class DebugMenu extends LitElement {
     const xywh = `[0,${count * 60},720,480]`;
 
     const groupId = this.store.addBlock<GroupBlockModel>(
-      { flavour: 'group', xywh },
+      { flavour: 'affine:group', xywh },
       pageId
     );
-    this.store.addBlock({ flavour: 'paragraph' }, groupId);
+    this.store.addBlock({ flavour: 'affine:paragraph' }, groupId);
   }
 
   private _onExportHtml() {

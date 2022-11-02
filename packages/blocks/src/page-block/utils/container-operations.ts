@@ -67,7 +67,7 @@ export function updateTextType(flavour: string, type: string, store: Store) {
   const modelsInRange = getModelsByRange(range);
   store.captureSync();
   modelsInRange.forEach(model => {
-    assertFlavours(model, ['paragraph', 'list']);
+    assertFlavours(model, ['affine:paragraph', 'affine:list']);
     if (model.flavour === flavour) {
       store.updateBlock(model, { type });
     } else {
@@ -103,11 +103,11 @@ export function batchUpdateTextType(
 ) {
   store.captureSync();
   for (const model of models) {
-    assertFlavours(model, ['paragraph', 'list']);
+    assertFlavours(model, ['affine:paragraph', 'affine:list']);
     if (model.flavour === flavour) {
       store.updateBlock(model, { type });
     } else {
-      transformBlock(store, model, 'paragraph', type);
+      transformBlock(store, model, 'affine:paragraph', type);
     }
   }
 }

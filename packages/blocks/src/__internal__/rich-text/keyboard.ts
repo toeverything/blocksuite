@@ -95,7 +95,8 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     const isEnd = isAtBlockEnd(this.quill);
     const parent = store.getParent(model);
     const isLastChild = parent?.lastChild() === model;
-    const isEmptyList = model.flavour === 'list' && model.text?.length === 0;
+    const isEmptyList =
+      model.flavour === 'affine:list' && model.text?.length === 0;
     const index = this.quill.getSelection()?.index || 0;
 
     // Some block should treat Enter as soft enter
@@ -105,14 +106,14 @@ export function createKeyboardBindings(store: Store, model: BaseBlockModel) {
     // TODO: These block list may should be configurable in the block self
     const shouldSoftEnterFirstBlocks = [
       {
-        flavour: 'paragraph',
+        flavour: 'affine:paragraph',
         type: 'quote',
       },
     ];
 
     if (
       isEmptyList &&
-      parent?.flavour === 'group' &&
+      parent?.flavour === 'affine:group' &&
       model.children.length === 0
     ) {
       handleLineStartBackspace(store, model);

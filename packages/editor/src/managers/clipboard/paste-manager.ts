@@ -139,23 +139,23 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'page') {
-          if (selectedBlock.children[0]?.flavour === 'group') {
+        if (selectedBlock.flavour === 'affine:page') {
+          if (selectedBlock.children[0]?.flavour === 'affine:group') {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.store.addBlock(
-              { flavour: 'group' },
+              { flavour: 'affine:group' },
               selectedBlock.id
             );
             parent = this._editor.store.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'group') {
+        } else if (selectedBlock.flavour !== 'affine:group') {
           parent = this._editor.store.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
       const addBlockIds: string[] = [];
-      if (selectedBlock?.flavour !== 'page') {
+      if (selectedBlock?.flavour !== 'affine:page') {
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
@@ -202,17 +202,17 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'page') {
-          if (selectedBlock.children[0]?.flavour === 'group') {
+        if (selectedBlock.flavour === 'affine:page') {
+          if (selectedBlock.children[0]?.flavour === 'affine:group') {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.store.addBlock(
-              { flavour: 'group' },
+              { flavour: 'affine:group' },
               selectedBlock.id
             );
             parent = this._editor.store.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'group') {
+        } else if (selectedBlock.flavour !== 'affine:group') {
           parent = this._editor.store.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }

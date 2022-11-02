@@ -17,17 +17,17 @@ export const defaultStore: SerializedStore = {
   blocks: {
     '0': {
       'sys:id': '0',
-      'sys:flavour': 'page',
+      'sys:flavour': 'affine:page',
       'sys:children': ['1'],
     },
     '1': {
-      'sys:flavour': 'group',
+      'sys:flavour': 'affine:group',
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,32]',
     },
     '2': {
-      'sys:flavour': 'paragraph',
+      'sys:flavour': 'affine:paragraph',
       'sys:id': '2',
       'sys:children': [],
       'prop:text': 'hello',
@@ -249,7 +249,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
 
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
-    if (node['sys:flavour'] === 'page') {
+    if (node['sys:flavour'] === 'affine:page') {
       return (node['prop:title'] as string) ?? '';
     }
     if (!('prop:type' in node)) {
@@ -280,7 +280,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
       visitor(node),
       ...children.flatMap(child =>
         visitNodes(child, visitor).map(line => {
-          if (node['sys:flavour'] === 'page') {
+          if (node['sys:flavour'] === 'affine:page') {
             // Ad hoc way to remove the title indent
             return line;
           }

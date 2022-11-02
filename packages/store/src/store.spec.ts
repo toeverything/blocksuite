@@ -11,15 +11,14 @@ import { GroupBlockModel } from '../../blocks/src/group-block/group-model';
 
 const options = {
   room: '',
-  useDebugProvider: false,
 };
 
 // Create BlockSchema manually
 export const BlockSchema = {
-  paragraph: ParagraphBlockModel,
-  page: PageBlockModel,
-  list: ListBlockModel,
-  group: GroupBlockModel,
+  'affine:paragraph': ParagraphBlockModel,
+  'affine:page': PageBlockModel,
+  'affine:list': ListBlockModel,
+  'affine:group': GroupBlockModel,
 } as const;
 
 function serialize(store: Store) {
@@ -44,12 +43,12 @@ describe.concurrent('addBlock', () => {
   it('can add single model', () => {
     const store = new Store(options).register(BlockSchema);
 
-    store.addBlock({ flavour: 'page' });
+    store.addBlock({ flavour: 'affine:page' });
 
     assert.deepEqual(serialize(store).blocks, {
       '0': {
         'sys:children': [],
-        'sys:flavour': 'page',
+        'sys:flavour': 'affine:page',
         'sys:id': '0',
       },
     });
@@ -58,12 +57,12 @@ describe.concurrent('addBlock', () => {
   it('can add model with props', () => {
     const store = new Store(options).register(BlockSchema);
 
-    store.addBlock({ flavour: 'page', title: 'hello' });
+    store.addBlock({ flavour: 'affine:page', title: 'hello' });
 
     assert.deepEqual(serialize(store).blocks, {
       '0': {
         'sys:children': [],
-        'sys:flavour': 'page',
+        'sys:flavour': 'affine:page',
         'sys:id': '0',
         'prop:title': 'hello',
       },
@@ -72,18 +71,18 @@ describe.concurrent('addBlock', () => {
 
   it('can add multi models', () => {
     const store = new Store(options).register(BlockSchema);
-    store.addBlock({ flavour: 'page' });
-    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'affine:page' });
+    store.addBlock({ flavour: 'affine:paragraph' });
 
     assert.deepEqual(serialize(store).blocks, {
       '0': {
         'sys:children': ['1'],
-        'sys:flavour': 'page',
+        'sys:flavour': 'affine:page',
         'sys:id': '0',
       },
       '1': {
         'sys:children': [],
-        'sys:flavour': 'paragraph',
+        'sys:flavour': 'affine:paragraph',
         'sys:id': '1',
         'prop:text': '',
         'prop:type': 'text',
@@ -94,20 +93,20 @@ describe.concurrent('addBlock', () => {
   it('can observe signal events', async () => {
     const store = new Store(options).register(BlockSchema);
 
-    queueMicrotask(() => store.addBlock({ flavour: 'page' }));
+    queueMicrotask(() => store.addBlock({ flavour: 'affine:page' }));
     const block = await waitOnce(store.signals.rootAdded);
-    assert.ok(block instanceof BlockSchema.page);
+    assert.ok(block instanceof BlockSchema['affine:page']);
   });
 
   it('can add block to root', async () => {
     const store = new Store(options).register(BlockSchema);
 
-    queueMicrotask(() => store.addBlock({ flavour: 'page' }));
+    queueMicrotask(() => store.addBlock({ flavour: 'affine:page' }));
     const root = await waitOnce(store.signals.rootAdded);
-    assert.ok(root instanceof BlockSchema.page);
+    assert.ok(root instanceof BlockSchema['affine:page']);
 
-    store.addBlock({ flavour: 'paragraph' });
-    assert.ok(root.children[0] instanceof BlockSchema.paragraph);
+    store.addBlock({ flavour: 'affine:paragraph' });
+    assert.ok(root.children[0] instanceof BlockSchema['affine:paragraph']);
     assert.equal(root.childMap.get('1'), 0);
 
     const serializedChildren = serialize(store).blocks['0']['sys:children'];
@@ -117,7 +116,7 @@ describe.concurrent('addBlock', () => {
 });
 
 async function initWithRoot(store: Store) {
-  queueMicrotask(() => store.addBlock({ flavour: 'page' }));
+  queueMicrotask(() => store.addBlock({ flavour: 'affine:page' }));
   const root = await waitOnce(store.signals.rootAdded);
   return root;
 }
@@ -126,11 +125,11 @@ describe.concurrent('deleteBlock', () => {
   it('can delete single model', () => {
     const store = new Store(options).register(BlockSchema);
 
-    store.addBlock({ flavour: 'page' });
+    store.addBlock({ flavour: 'affine:page' });
     assert.deepEqual(serialize(store).blocks, {
       '0': {
         'sys:children': [],
-        'sys:flavour': 'page',
+        'sys:flavour': 'affine:page',
         'sys:id': '0',
       },
     });
@@ -143,18 +142,18 @@ describe.concurrent('deleteBlock', () => {
     const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
 
     // before delete
     assert.deepEqual(serialize(store).blocks, {
       '0': {
         'sys:children': ['1'],
-        'sys:flavour': 'page',
+        'sys:flavour': 'affine:page',
         'sys:id': '0',
       },
       '1': {
         'sys:children': [],
-        'sys:flavour': 'paragraph',
+        'sys:flavour': 'affine:paragraph',
         'sys:id': '1',
         'prop:text': '',
         'prop:type': 'text',
@@ -167,7 +166,7 @@ describe.concurrent('deleteBlock', () => {
     assert.deepEqual(serialize(store).blocks, {
       '0': {
         'sys:children': [],
-        'sys:flavour': 'page',
+        'sys:flavour': 'affine:page',
         'sys:id': '0',
       },
     });
@@ -180,11 +179,11 @@ describe.concurrent('getBlock', () => {
     const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'paragraph' });
-    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
 
     const text = store.getBlockById('2') as BaseBlockModel;
-    assert.ok(text instanceof BlockSchema.paragraph);
+    assert.ok(text instanceof BlockSchema['affine:paragraph']);
     assert.equal(root.children.indexOf(text), 1);
 
     const invalid = store.getBlockById('😅');
@@ -195,8 +194,8 @@ describe.concurrent('getBlock', () => {
     const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'paragraph' });
-    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
 
     const result = store.getParent(root.children[1]) as BaseBlockModel;
     assert.equal(result, root);
@@ -209,8 +208,8 @@ describe.concurrent('getBlock', () => {
     const store = new Store(options).register(BlockSchema);
     const root = await initWithRoot(store);
 
-    store.addBlock({ flavour: 'paragraph' });
-    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
 
     const result = store.getPreviousSibling(root.children[1]) as BaseBlockModel;
     assert.equal(result, root.children[0]);
@@ -224,10 +223,10 @@ describe('store.toJSXElement works', async () => {
   it('store match snapshot', () => {
     const store = new Store(options).register(BlockSchema);
 
-    store.addBlock({ flavour: 'page', title: 'hello' });
+    store.addBlock({ flavour: 'affine:page', title: 'hello' });
 
     expect(store.toJSXElement()).toMatchInlineSnapshot(`
-      <page
+      <affine:page
         prop:title="hello"
       />
     `);
@@ -241,19 +240,19 @@ describe('store.toJSXElement works', async () => {
   it('store with multiple blocks children match snapshot', () => {
     const store = new Store(options).register(BlockSchema);
 
-    store.addBlock({ flavour: 'page' });
-    store.addBlock({ flavour: 'paragraph' });
-    store.addBlock({ flavour: 'paragraph' });
+    store.addBlock({ flavour: 'affine:page' });
+    store.addBlock({ flavour: 'affine:paragraph' });
+    store.addBlock({ flavour: 'affine:paragraph' });
 
-    expect(store.toJSXElement()).toMatchInlineSnapshot(`
-      <page>
-        <paragraph
+    expect(store.toJSXElement()).toMatchInlineSnapshot(/* xml */ `
+      <affine:page>
+        <affine:paragraph
           prop:type="text"
         />
-        <paragraph
+        <affine:paragraph
           prop:type="text"
         />
-      </page>
+      </affine:page>
     `);
   });
 });

@@ -3,13 +3,13 @@ import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 type ListType = 'bulleted' | 'numbered' | 'todo';
 
 export interface ListBlockProps extends IBaseBlockProps {
-  flavour: 'list';
+  flavour: 'affine:list';
   type: ListType;
   checked: boolean;
 }
 
 export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
-  flavour = 'list' as const;
+  flavour = 'affine:list' as const;
   type: ListType;
   checked: boolean;
 

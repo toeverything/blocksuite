@@ -28,7 +28,7 @@ export function handleBlockEndEnter(store: Store, model: ExtendedModel) {
     store.captureSync();
 
     let id = '';
-    if (model.flavour === 'list') {
+    if (model.flavour === 'affine:list') {
       const blockProps = {
         flavour: model.flavour,
         type: model.type,
@@ -75,7 +75,7 @@ export function handleBlockSplit(
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (model.flavour === 'list' && model.children.length > 0) {
+  if (model.flavour === 'affine:list' && model.children.length > 0) {
     newParent = model;
     newBlockIndex = 0;
   }
@@ -120,7 +120,7 @@ export async function handleUnindent(
   offset: number
 ) {
   const parent = store.getParent(model);
-  if (!parent || parent?.flavour === 'group') return;
+  if (!parent || parent?.flavour === 'affine:group') return;
 
   const grandParent = store.getParent(parent);
   if (!grandParent) return;
@@ -150,13 +150,13 @@ export async function handleUnindent(
 export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
-  if (model.flavour === 'paragraph') {
+  if (model.flavour === 'affine:paragraph') {
     if (model.type !== 'text') {
       store.captureSync();
       store.updateBlock(model, { type: 'text' });
     } else {
       const parent = store.getParent(model);
-      if (!parent || parent?.flavour === 'group') {
+      if (!parent || parent?.flavour === 'affine:group') {
         const container = getContainerByModel(model);
         const previousSibling = getPreviousBlock(container, model.id);
         if (previousSibling) {
@@ -184,7 +184,7 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
   }
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
-  else if (model.flavour === 'list') {
+  else if (model.flavour === 'affine:list') {
     const parent = store.getParent(model);
     if (!parent) return;
 
@@ -192,7 +192,7 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
     store.captureSync();
 
     const blockProps = {
-      flavour: 'paragraph',
+      flavour: 'affine:paragraph',
       type: 'text',
       text: model?.text?.clone(),
       children: model.children,
@@ -223,7 +223,7 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       const container = getContainerByModel(model);
       const preNodeModel = getPreviousBlock(container, model.id);
       // FIXME: Then it will turn the input into the div
-      if (preNodeModel?.flavour === 'group') {
+      if (preNodeModel?.flavour === 'affine:group') {
         (
           document.querySelector(
             '.affine-default-page-block-title'

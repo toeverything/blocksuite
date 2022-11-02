@@ -4,8 +4,8 @@ export * from './awareness';
 export * from './text-adapter';
 export * from './utils/signal';
 export * from './utils/disposable';
-export * from './utils/utils';
 export * from './providers';
+export * as Utils from './utils/utils';
 
 const env =
   typeof globalThis !== 'undefined'

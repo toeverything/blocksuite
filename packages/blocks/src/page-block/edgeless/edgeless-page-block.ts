@@ -86,31 +86,31 @@ export class EdgelessPageBlockComponent
       this.flavour
     );
     hotkey.addListener(HOTKEYS.H1, () =>
-      this._updateType('paragraph', 'h1', store)
+      this._updateType('affine:paragraph', 'h1', store)
     );
     hotkey.addListener(HOTKEYS.H2, () =>
-      this._updateType('paragraph', 'h2', store)
+      this._updateType('affine:paragraph', 'h2', store)
     );
     hotkey.addListener(HOTKEYS.H3, () =>
-      this._updateType('paragraph', 'h3', store)
+      this._updateType('affine:paragraph', 'h3', store)
     );
     hotkey.addListener(HOTKEYS.H4, () =>
-      this._updateType('paragraph', 'h4', store)
+      this._updateType('affine:paragraph', 'h4', store)
     );
     hotkey.addListener(HOTKEYS.H5, () =>
-      this._updateType('paragraph', 'h5', store)
+      this._updateType('affine:paragraph', 'h5', store)
     );
     hotkey.addListener(HOTKEYS.H6, () =>
-      this._updateType('paragraph', 'h6', store)
+      this._updateType('affine:paragraph', 'h6', store)
     );
     hotkey.addListener(HOTKEYS.NUMBERED_LIST, () =>
-      this._updateType('list', 'numbered', store)
+      this._updateType('affine:list', 'numbered', store)
     );
     hotkey.addListener(HOTKEYS.BULLETED, () =>
-      this._updateType('list', 'bulleted', store)
+      this._updateType('affine:list', 'bulleted', store)
     );
     hotkey.addListener(HOTKEYS.TEXT, () =>
-      this._updateType('paragraph', 'text', store)
+      this._updateType('affine:paragraph', 'text', store)
     );
 
     bindCommonHotkey(store);

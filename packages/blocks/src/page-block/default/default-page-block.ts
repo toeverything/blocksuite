@@ -102,7 +102,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
-  flavour = 'page' as const;
+  flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
 
@@ -192,20 +192,32 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selection.state.type = 'native';
     });
 
-    hotkey.addListener(H1, () => this._updateType('paragraph', 'h1', store));
-    hotkey.addListener(H2, () => this._updateType('paragraph', 'h2', store));
-    hotkey.addListener(H3, () => this._updateType('paragraph', 'h3', store));
-    hotkey.addListener(H4, () => this._updateType('paragraph', 'h4', store));
-    hotkey.addListener(H5, () => this._updateType('paragraph', 'h5', store));
-    hotkey.addListener(H6, () => this._updateType('paragraph', 'h6', store));
+    hotkey.addListener(H1, () =>
+      this._updateType('affine:paragraph', 'h1', store)
+    );
+    hotkey.addListener(H2, () =>
+      this._updateType('affine:paragraph', 'h2', store)
+    );
+    hotkey.addListener(H3, () =>
+      this._updateType('affine:paragraph', 'h3', store)
+    );
+    hotkey.addListener(H4, () =>
+      this._updateType('affine:paragraph', 'h4', store)
+    );
+    hotkey.addListener(H5, () =>
+      this._updateType('affine:paragraph', 'h5', store)
+    );
+    hotkey.addListener(H6, () =>
+      this._updateType('affine:paragraph', 'h6', store)
+    );
     hotkey.addListener(NUMBERED_LIST, () =>
-      this._updateType('list', 'numbered', store)
+      this._updateType('affine:list', 'numbered', store)
     );
     hotkey.addListener(BULLETED, () =>
-      this._updateType('list', 'bulleted', store)
+      this._updateType('affine:list', 'bulleted', store)
     );
     hotkey.addListener(TEXT, () =>
-      this._updateType('paragraph', 'text', store)
+      this._updateType('affine:paragraph', 'text', store)
     );
     hotkey.addListener(SHIFT_UP, e => {
       // TODO expand selection up
@@ -253,7 +265,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
       const defaultGroup = this.model.children[0];
       const props = {
-        flavour: 'paragraph',
+        flavour: 'affine:paragraph',
         text: new Text(this.store, contentRight),
       };
       const newFirstParagraphId = this.store.addBlock(props, defaultGroup, 0);
@@ -270,9 +282,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
-      const pageId = store.addBlock({ flavour: 'page', title });
-      const groupId = store.addBlock({ flavour: 'group' }, pageId);
-      store.addBlock({ flavour: 'paragraph' }, groupId);
+      const pageId = store.addBlock({ flavour: 'affine:page', title });
+      const groupId = store.addBlock({ flavour: 'affine:group' }, pageId);
+      store.addBlock({ flavour: 'affine:paragraph' }, groupId);
       return;
     }
 

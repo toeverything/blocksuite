@@ -55,10 +55,10 @@ export async function enterPlaygroundWithList(page: Page) {
   await page.evaluate(() => {
     // @ts-ignore
     const store = window['store'] as Store;
-    const pageId = store.addBlock({ flavour: 'page' });
-    const groupId = store.addBlock({ flavour: 'group' }, pageId);
+    const pageId = store.addBlock({ flavour: 'affine:page' });
+    const groupId = store.addBlock({ flavour: 'affine:group' }, pageId);
     for (let i = 0; i < 3; i++) {
-      store.addBlock({ flavour: 'list' }, groupId);
+      store.addBlock({ flavour: 'affine:list' }, groupId);
     }
   });
   await waitNextFrame(page);
@@ -68,9 +68,9 @@ export async function initEmptyState(page: Page) {
   await page.evaluate(() => {
     // @ts-ignore
     const store = window['store'] as Store;
-    const pageId = store.addBlock({ flavour: 'page' });
-    const groupId = store.addBlock({ flavour: 'group' }, pageId);
-    store.addBlock({ flavour: 'paragraph' }, groupId);
+    const pageId = store.addBlock({ flavour: 'affine:page' });
+    const groupId = store.addBlock({ flavour: 'affine:group' }, pageId);
+    store.addBlock({ flavour: 'affine:paragraph' }, groupId);
   });
 }
 

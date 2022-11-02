@@ -108,8 +108,8 @@ export class CopyCutManager {
 
     let { flavour, type } = model;
     let delta = [];
-    if (model.flavour === 'page') {
-      flavour = 'paragraph';
+    if (model.flavour === 'affine:page') {
+      flavour = 'affine:paragraph';
       type = 'text';
       const text = model.block2Text(
         '',

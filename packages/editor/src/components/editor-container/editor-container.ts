@@ -6,7 +6,7 @@ import { Store } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
 
-type PageBlockModel = InstanceType<typeof BlockSchema.page>;
+type PageBlockModel = InstanceType<typeof BlockSchema['affine:page']>;
 
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
@@ -40,7 +40,7 @@ export class EditorContainer extends LitElement {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('store')) {
-      this.placeholderModel = new BlockSchema.page(this.store, {});
+      this.placeholderModel = new BlockSchema['affine:page'](this.store, {});
     }
     super.update(changedProperties);
   }

@@ -42,18 +42,18 @@ test('basic init with external text', async ({ page }) => {
     // @ts-ignore
     const store = window['store'] as Store;
 
-    const pageId = store.addBlock({ flavour: 'page', title: 'hello' });
-    const groupId = store.addBlock({ flavour: 'group' }, pageId);
+    const pageId = store.addBlock({ flavour: 'affine:page', title: 'hello' });
+    const groupId = store.addBlock({ flavour: 'affine:group' }, pageId);
 
     const text = new store.Text(store, 'world');
-    store.addBlock({ flavour: 'paragraph', text }, groupId);
+    store.addBlock({ flavour: 'affine:paragraph', text }, groupId);
 
     const delta = [
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
     store.addBlock(
-      { flavour: 'paragraph', text: store.Text.fromDelta(store, delta) },
+      { flavour: 'affine:paragraph', text: store.Text.fromDelta(store, delta) },
       groupId
     );
   });

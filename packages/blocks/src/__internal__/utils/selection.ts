@@ -393,7 +393,7 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
     const { root } = store;
     const lastChild = root?.lastChild();
     assertExists(lastChild);
-    if (matchFlavours(lastChild, ['paragraph', 'list'])) {
+    if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
