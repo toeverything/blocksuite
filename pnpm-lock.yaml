@@ -79,6 +79,7 @@ importers:
     specifiers:
       '@blocksuite/blocks': workspace:*
       '@blocksuite/editor': workspace:*
+      '@blocksuite/react': workspace:*
       '@blocksuite/store': workspace:*
       '@lit-labs/react': ^1.0.8
       react: ^18.2.0
@@ -86,10 +87,19 @@ importers:
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/editor': link:../editor
+      '@blocksuite/react': link:../react
       '@blocksuite/store': link:../store
       '@lit-labs/react': 1.0.8
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+
+  packages/react:
+    specifiers:
+      '@blocksuite/editor': workspace:*
+      '@lit-labs/react': ^1.0.8
+    dependencies:
+      '@blocksuite/editor': link:../editor
+      '@lit-labs/react': 1.0.8
 
   packages/store:
     specifiers:
