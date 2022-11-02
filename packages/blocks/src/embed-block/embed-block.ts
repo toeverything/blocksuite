@@ -2,7 +2,7 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
 
-import type { ImageBlockModel } from './image-model';
+import type { ImageBlockModel } from './embed-model';
 import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
@@ -53,6 +53,6 @@ export class ImageBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'image-block': ImageBlockComponent;
+    'image-block': ImageBlockComponent
   }
 }

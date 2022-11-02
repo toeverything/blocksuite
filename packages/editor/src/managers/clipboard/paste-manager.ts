@@ -103,7 +103,11 @@ export class PasteManager {
         // blob()
         // let url = URL.createObjectURL(file);
         // console.log('url: ', url);
-        return [];
+        return [{
+          flavour: 'image',
+          type: 'image',
+          children: [],
+        }];
       }
     }
     return [];
