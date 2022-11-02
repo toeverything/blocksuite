@@ -14,6 +14,7 @@ import {
 } from './query';
 import { Point, Rect } from './rect';
 import type { SelectionEvent } from './gesture';
+const SCROLL_THRESHOLD = 100;
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -68,22 +69,22 @@ function fixCurrentRangeToText(
   return range;
 }
 
-export function focusRichText(
+async function sleep(delay = 0) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(null);
+    }, delay);
+  });
+}
+
+export async function focusRichText(
   position: SelectionPosition,
   editableContainer: Element
 ) {
-  let { top, left, bottom, right } = Rect.fromDom(editableContainer);
-  const [oldTop, oldBottom] = [top, bottom];
+  // TODO optimize how get scroll container
+  const scrollContainer = editableContainer.closest('.affine-editor-container');
+  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
   const { clientHeight } = document.documentElement;
-  // TODO: improve the logic
-  if (top + 20 > clientHeight || bottom < 20) {
-    editableContainer.scrollIntoView();
-    const newRect = Rect.fromDom(editableContainer);
-    top = newRect.top;
-    left = newRect.left;
-    bottom = newRect.bottom;
-    right = newRect.right;
-  }
   const lineHeight =
     Number(
       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
@@ -93,16 +94,32 @@ export function focusRichText(
     const { x, y } = position;
     let newTop = y;
     let newLeft = x;
-    if (oldBottom <= y) {
-      newTop = bottom - lineHeight / 2;
+    if (bottom <= y) {
+      let finalBottom = bottom;
+      if (bottom < SCROLL_THRESHOLD && scrollContainer) {
+        scrollContainer.scrollTop =
+          scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
+        // set scroll may has a animation, wait for over
+        await sleep();
+        finalBottom = editableContainer.getBoundingClientRect().bottom;
+      }
+      newTop = finalBottom - lineHeight / 2;
     }
-    if (oldTop >= y) {
-      newTop = top + lineHeight / 2;
+    if (bottom >= y) {
+      let finalTop = top;
+      if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
+        scrollContainer.scrollTop =
+          scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
+        // set scroll may has a animation, wait for over
+        await sleep();
+        finalTop = editableContainer.getBoundingClientRect().top;
+      }
+      newTop = finalTop + lineHeight / 2;
     }
-    if (x < left) {
+    if (x <= left) {
       newLeft = left + 1;
     }
-    if (x > right) {
+    if (x >= right) {
       newLeft = right - 1;
     }
     range = caretRangeFromPoint(newLeft, newTop);
