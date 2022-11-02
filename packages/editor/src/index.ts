@@ -32,12 +32,13 @@ export type EditorOptions =
     }
   | Partial<StoreOptions>;
 
-export const createEditor = (options: EditorOptions = {}): EditorContainer => {
-  const editor = document.createElement('editor-container');
+/**
+ * @internal
+ */
+export const parseEditorOptions = (options: EditorOptions = {}) => {
   if ('store' in options) {
     // 1. Use custom store
-    editor.store = options.store;
-    return editor;
+    return { store: options.store };
   }
   if (Object.keys(options).length > 0) {
     // 2. Use custom room or providers
@@ -47,12 +48,17 @@ export const createEditor = (options: EditorOptions = {}): EditorContainer => {
       awareness: options.awareness,
     });
     store.space.register(BlockSchema);
-    editor.store = store;
-    return editor;
+    return { store };
   }
   // 3. Use default store
   const store = new Store();
   store.space.register(BlockSchema);
+  return { store };
+};
+
+export const createEditor = (options: EditorOptions = {}): EditorContainer => {
+  const editor = document.createElement('editor-container');
+  const { store } = parseEditorOptions(options);
   editor.store = store;
   return editor;
 };
