@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
@@ -69,8 +69,8 @@ export class EditorContainer extends LitElement {
     return this;
   }
 
-  connectedCallback() {
-    super.connectedCallback();
+  protected override firstUpdated(_changedProperties: PropertyValues): void {
+    super.firstUpdated(_changedProperties);
 
     if (!this.store) {
       throw new Error("EditorContainer's store is not set!");
