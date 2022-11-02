@@ -19,6 +19,8 @@ import {
   redoByClick,
   clearLog,
   waitNextFrame,
+  selectAllByKeyboard,
+  dragBetweenIndices,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -303,4 +305,45 @@ test('double click choose words', async ({ page }) => {
     return text;
   });
   await expect(text).toBe('hello');
+});
+
+test('select all text with hotkey and delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await selectAllByKeyboard(page);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});
+
+test('select all text with dragging and delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});
+
+test('select text leaving a few words in the last line and delete', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 0], [2, 1]);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc89\n');
 });

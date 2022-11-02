@@ -50,8 +50,11 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
     firstTextIndex,
     firstRichText.model.text.length - firstTextIndex
   );
-  lastRichText.model.text?.delete(0, endTextIndex);
-  firstRichText.model.text?.join(lastRichText.model.text as Text);
+  const isLastRichTextFullSelected: boolean = lastRichText.model.text?.length === endTextIndex;
+  if (!isLastRichTextFullSelected) {
+    lastRichText.model.text?.delete(0, endTextIndex);
+    firstRichText.model.text?.join(lastRichText.model.text as Text);
+  }
 
   // delete models in between
   for (let i = 1; i <= models.length - 1; i++) {
