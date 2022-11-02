@@ -66,7 +66,7 @@ export class RichText extends LitElement {
       },
       placeholder,
     });
-    this.quill.on('text-change', delta => {
+    this.quill.on('text-change', (delta, oldDelta, source) => {
       // only length is 2 need to be handled
       let selector = '';
       // only length is 2 need to be handled
@@ -91,35 +91,29 @@ export class RichText extends LitElement {
           const nextEmbedElement = nextParentElement?.closest(selector);
           const insertedString = delta.ops[1]?.insert.toString();
           if (nextEmbedElement && nextEmbedElement !== currentEmbedElement) {
-            this.quill.deleteText(
-              retain,
-              delta.ops[1]?.insert.toString().length
-            );
+            model.text?.delete(retain, delta.ops[1]?.insert.toString().length);
             // @ts-ignore
             if (!this.host.isCompositionStart) {
-              this.quill.insertText(
-                retain,
-                delta.ops[1]?.insert.toString() || ''
-              );
+              model.text?.insert(delta.ops[1]?.insert.toString() || '', retain);
             } else {
               // FIXME we must add a noon width space to fix cursor
-              this.quill.insertEmbed(retain, 'text', ' ');
+              model.text?.insert(' ', retain);
               this.quill.setSelection(retain + 1, 0, 'api');
             }
           }
-          if (!nextEmbedElement && insertedString) {
-            this.quill.deleteText(
-              retain,
-              delta.ops[1]?.insert.toString().length
-            );
-            this.quill.insertEmbed(
-              retain,
-              'text',
+          if (
+            !nextEmbedElement &&
+            insertedString &&
+            source === Quill.sources.USER
+          ) {
+            model.text?.delete(retain, delta.ops[1]?.insert.toString().length);
+            model.text?.insert(
               // @ts-ignore
               !this.host.isCompositionStart
                 ? delta.ops[1]?.insert.toString() || ''
                 : // FIXME we must add a noon width space to fix cursor
-                  ' '
+                  ' ',
+              retain
             );
             this.quill.setSelection(
               retain +
