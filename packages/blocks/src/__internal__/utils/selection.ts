@@ -14,6 +14,7 @@ import {
 } from './query';
 import { Point, Rect } from './rect';
 import type { SelectionEvent } from './gesture';
+const SCROLL_THRESHOLD = 100;
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -68,11 +69,11 @@ function fixCurrentRangeToText(
   return range;
 }
 
-async function awaitUntilNextTick() {
+async function sleep(delay = 0) {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve(null);
-    }, 0);
+    }, delay);
   });
 }
 
@@ -95,21 +96,22 @@ export async function focusRichText(
     let newLeft = x;
     if (bottom <= y) {
       let finalBottom = bottom;
-      if (bottom < 100 && scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollTop - 100 + bottom;
+      if (bottom < SCROLL_THRESHOLD && scrollContainer) {
+        scrollContainer.scrollTop =
+          scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
         // set scroll may has a animation, wait for over
-        await awaitUntilNextTick();
+        await sleep();
         finalBottom = editableContainer.getBoundingClientRect().bottom;
       }
       newTop = finalBottom - lineHeight / 2;
     }
     if (bottom >= y) {
       let finalTop = top;
-      if (scrollContainer && top > clientHeight - 100) {
+      if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
         scrollContainer.scrollTop =
-          scrollContainer.scrollTop + (top + 100 - clientHeight);
+          scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
         // set scroll may has a animation, wait for over
-        await awaitUntilNextTick();
+        await sleep();
         finalTop = editableContainer.getBoundingClientRect().top;
       }
       newTop = finalTop + lineHeight / 2;

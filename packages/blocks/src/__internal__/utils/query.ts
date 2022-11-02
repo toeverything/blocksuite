@@ -93,13 +93,12 @@ export function getPreviousBlock(container: Element, blockId: string) {
     );
     if (previousBlock?.model) {
       if (previousBlock.model.children.length) {
-        let firstChildren =
+        let firstChild =
           previousBlock.model.children[previousBlock.model.children.length - 1];
-        while (firstChildren.children.length) {
-          firstChildren =
-            firstChildren.children[firstChildren.children.length - 1];
+        while (firstChild.children.length) {
+          firstChild = firstChild.children[firstChild.children.length - 1];
         }
-        return firstChildren;
+        return firstChild;
       }
       return previousBlock.model;
     }
