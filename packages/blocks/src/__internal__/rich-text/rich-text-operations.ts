@@ -161,9 +161,12 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
         const previousSibling = getPreviousBlock(container, model.id);
         if (previousSibling) {
           store.captureSync();
+          let preTextLength = model.text?.length || 0;
           previousSibling.text?.join(model.text as Text);
           store.deleteBlock(model);
           asyncFocusRichText(store, previousSibling.id);
+          const richText = getRichTextByModel(previousSibling);
+          richText?.quill?.setSelection(preTextLength, 0);
         }
       } else {
         const grandParent = store.getParent(parent);
