@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:react": "vite examples/react",
     "build": "tsc --project ./tsconfig.json && vite build",
     "preview": "vite preview"
   },
@@ -11,6 +12,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/react": "workspace:*",
     "@lit-labs/react": "^1.0.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
