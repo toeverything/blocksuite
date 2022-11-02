@@ -159,7 +159,7 @@ export function handleLineStartBackspace(store: Store, model: ExtendedModel) {
       if (!parent || parent?.flavour === 'group') {
         const container = getContainerByModel(model);
         const previousSibling = getPreviousBlock(container, model.id);
-        if (previousSibling) {
+        if (previousSibling && previousSibling.flavour === 'paragraph') {
           store.captureSync();
           let preTextLength = model.text?.length || 0;
           previousSibling.text?.join(model.text as Text);
