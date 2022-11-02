@@ -47,6 +47,20 @@ function fixCurrentRangeToText(
           const y = rect.bottom - 6;
           newRange = caretRangeFromPoint(x, y);
           if (newRange) {
+            if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
+              const lastTextNode = getLastTextNode(newRange.endContainer);
+              if (lastTextNode) {
+                newRange = document.createRange();
+                newRange.setStart(
+                  lastTextNode,
+                  lastTextNode.textContent?.length || 0
+                );
+                newRange.setEnd(
+                  lastTextNode,
+                  lastTextNode.textContent?.length || 0
+                );
+              }
+            }
             range.setEnd(newRange.endContainer, newRange.endOffset);
           }
         }
@@ -60,6 +74,14 @@ function fixCurrentRangeToText(
           const y = rect.top + 6;
           newRange = caretRangeFromPoint(x, y);
           if (newRange) {
+            if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
+              const firstTextNode = getFirstTextNode(newRange.startContainer);
+              if (firstTextNode) {
+                newRange = document.createRange();
+                newRange.setStart(firstTextNode, 0);
+                newRange.setEnd(firstTextNode, 0);
+              }
+            }
             range.setStart(newRange.endContainer, newRange.endOffset);
           }
         }
@@ -602,7 +624,15 @@ export function leftFirstSearchLeafNodes(node: Node, leafNodes: Node[] = []) {
       leftFirstSearchLeafNodes(children[i], leafNodes);
     }
   }
-  return leafNodes;
+  return leafNodes as Text[];
+}
+
+export function getLastTextNode(node: Node) {
+  return leftFirstSearchLeafNodes(node).pop();
+}
+
+export function getFirstTextNode(node: Node) {
+  return leftFirstSearchLeafNodes(node)[0];
 }
 
 export function getSplicedTitle(title: HTMLInputElement) {

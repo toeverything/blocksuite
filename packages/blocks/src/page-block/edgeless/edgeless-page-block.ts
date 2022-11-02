@@ -80,11 +80,7 @@ export class EdgelessPageBlockComponent
   private _bindHotkeys() {
     const { store } = this;
 
-    hotkey.addListener(
-      HOTKEYS.BACKSPACE,
-      this._handleBackspace.bind(this),
-      this.flavour
-    );
+    hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace.bind(this));
     hotkey.addListener(HOTKEYS.H1, () =>
       this._updateType('paragraph', 'h1', store)
     );
