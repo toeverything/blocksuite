@@ -23,8 +23,8 @@ if (process.env.CI) {
     command: 'pnpm dev',
     port: 5173,
   };
-  config.retries = 2;
-  // config.workers = 2;
+  config.retries = 3;
+  config.workers = 16;
 }
 
 export default config;
