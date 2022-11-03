@@ -135,7 +135,7 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    const { _space, _shouldTransact: _shouldTransact } = this;
+    const { _space, _shouldTransact } = this;
     _shouldTransact ? _space.transact(callback) : callback();
   }
 
