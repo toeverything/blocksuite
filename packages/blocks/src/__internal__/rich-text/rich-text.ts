@@ -67,17 +67,22 @@ export class RichText extends LitElement {
       placeholder,
     });
     this.quill.on('text-change', delta => {
+      const selectorMap = {
+        code: 'code',
+        link: 'link-code',
+      } as const;
       // only length is 2 need to be handled
-      let selector = '';
+      let attr = '';
       // only length is 2 need to be handled
       if (delta.ops[1]?.attributes?.code) {
-        selector = 'code';
+        attr = 'code';
       }
       if (delta.ops[1]?.attributes?.link) {
-        selector = 'link-node';
+        attr = 'link';
       }
-      if (delta.ops.length === 2 && delta.ops[1]?.insert && selector) {
+      if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
         const retain = delta.ops[0].retain;
+        const selector = selectorMap[attr as keyof typeof selectorMap];
         if (retain !== undefined) {
           const currentLeaf = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length)
@@ -101,7 +106,7 @@ export class RichText extends LitElement {
               !this.host.isCompositionStart
                 ? delta.ops[1]?.insert.toString() || ''
                 : ' ',
-              { [selector]: false }
+              { [attr]: false }
             );
           }
         }
