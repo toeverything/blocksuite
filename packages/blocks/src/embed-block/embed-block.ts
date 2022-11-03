@@ -2,12 +2,12 @@ import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
 
-import type { ImageBlockModel } from './embed-model';
+import type { EmbedBlockModel } from './embed-model';
 import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
-@customElement('image-block')
-export class ImageBlockComponent extends LitElement {
+@customElement('embed-block')
+export class EmbedBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -17,7 +17,7 @@ export class ImageBlockComponent extends LitElement {
       return true;
     },
   })
-  model!: ImageBlockModel;
+  model!: EmbedBlockModel;
 
   @property()
   host!: BlockHost;
@@ -41,9 +41,9 @@ export class ImageBlockComponent extends LitElement {
     // const shouldAddMarginTop = index === 0 && deep === 0;
 
     return html`
-      <div class=${`affine-list-block-container`}>
+      <div class=${`affine-embed-block-container`}>
         <div class=${`affine-list-rich-text-wrapper`}>
-          <img src=${this.model.url} />
+          <img src=${this.model.source} />
         </div>
         ${childrenContainer}
       </div>
@@ -53,6 +53,6 @@ export class ImageBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'image-block': ImageBlockComponent
+    'embed-block': EmbedBlockComponent;
   }
 }

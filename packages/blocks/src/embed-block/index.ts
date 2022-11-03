@@ -1,2 +1,2 @@
-export * from './image-block';
+export * from './embed-block';
 export * from './embed-model';

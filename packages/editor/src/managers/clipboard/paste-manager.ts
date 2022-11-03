@@ -99,15 +99,23 @@ export class PasteManager {
     if (file) {
       if (file.type.includes('image')) {
         //  todo upload file to file server
-        // console.log(file);
-        // blob()
-        // let url = URL.createObjectURL(file);
-        // console.log('url: ', url);
-        return [{
-          flavour: 'image',
-          type: 'image',
-          children: [],
-        }];
+        let url = URL.createObjectURL(file);
+        return [
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            source: url,
+            children: [],
+            text: [{ insert: '' }],
+          },
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            source: url,
+            children: [],
+            text: [{ insert: '' }],
+          },
+        ];
       }
     }
     return [];
@@ -176,6 +184,7 @@ export class PasteManager {
           0
         );
         selectedBlock?.text?.insertList(insertTexts, endIndex);
+
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
         parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
@@ -247,6 +256,7 @@ export class PasteManager {
         flavour: block.flavour as string,
         type: block.type as string,
         checked: block.checked,
+        source: block.source,
       };
       const id = this._editor.space.addBlock(blockProps, parent, index + i);
       const model = this._editor.space.getBlockById(id);

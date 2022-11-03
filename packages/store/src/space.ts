@@ -129,6 +129,7 @@ export class Space {
   }
 
   register(blockSchema: Record<string, typeof BaseBlockModel>) {
+    console.log('blockSchema: ', blockSchema);
     Object.keys(blockSchema).forEach(key => {
       this._flavourMap.set(key, blockSchema[key]);
     });

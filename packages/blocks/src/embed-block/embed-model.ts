@@ -1,28 +1,30 @@
-import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { BaseBlockModel, IBaseBlockProps, Space } from '@blocksuite/store';
 
+type EmbedType = 'image' | 'video' | 'audio' | 'file';
 export interface EmbedBlockProps extends IBaseBlockProps {
   flavour: string;
-  type: string;
-  url: string;
+  type: EmbedType;
+  source: string;
   width: number;
   height: number;
   visitWidth: number;
   visitHeight: number;
 }
-export class ImageBlockModel extends BaseBlockModel implements EmbedBlockProps {
-  public url: string;
-
+export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
+  flavour = 'affine:embed' as const;
   public width: number;
   public height: number;
-  visitWidth: number;
-  visitHeight: number;
-  constructor(store: Store, props: Partial<EmbedBlockProps>) {
-    super(store, props);
-    this.url = props.url ?? '';
+  public type: EmbedType;
+  public visitWidth: number;
+  public visitHeight: number;
+  public source: string;
+  constructor(space: Space, props: Partial<EmbedBlockProps>) {
+    super(space, props);
+    this.type = props.type ?? 'image';
+    this.source = props.source ?? '';
     this.width = props.width ?? 0;
     this.height = props.height ?? 0;
     this.visitWidth = props.visitWidth ?? 0;
     this.visitHeight = props.visitHeight ?? 0;
-  
   }
 }

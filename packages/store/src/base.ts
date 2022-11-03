@@ -24,6 +24,7 @@ export class BaseBlockModel implements IBaseBlockProps {
   children: BaseBlockModel[];
   // TODO use schema
   text?: TextType;
+  source?: string;
 
   constructor(space: Space, props: Partial<IBaseBlockProps>) {
     this.space = space;

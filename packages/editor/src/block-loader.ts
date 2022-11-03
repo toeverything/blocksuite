@@ -3,6 +3,7 @@ import { PageBlockModel } from '@blocksuite/blocks';
 import { ParagraphBlockModel } from '@blocksuite/blocks';
 import { ListBlockModel } from '@blocksuite/blocks';
 import { GroupBlockModel } from '@blocksuite/blocks';
+import { EmbedBlockModel } from '@blocksuite/blocks';
 
 export type { ParagraphBlockProps as TextBlockProps } from '@blocksuite/blocks';
 
@@ -12,4 +13,5 @@ export const BlockSchema = {
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
   'affine:group': GroupBlockModel,
+  'affine:embed': EmbedBlockModel,
 } as const;
