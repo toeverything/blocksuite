@@ -100,6 +100,7 @@ export class LinkNodeComponent extends LitElement {
       // Save the blot's index otherwise it will be lost after the blot is removed
       const offset = blot.offset();
       space.captureSync();
+      // TODO save the format of the original text
       model.text?.delete(offset, blot.length());
       model.text?.insert(text, offset, { link });
     } else {
