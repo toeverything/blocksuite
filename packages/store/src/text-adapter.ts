@@ -76,7 +76,7 @@ export class PrelimText {
     throw new Error(UNSUPPORTED_MSG + 'delete');
   }
 
-  cover() {
+  replace() {
     throw new Error(UNSUPPORTED_MSG + 'cover');
   }
 
@@ -154,8 +154,7 @@ export class Text {
     ];
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  insert(content: string, index: number, attributes?: Object) {
+  insert(content: string, index: number, attributes?: Record<string, unknown>) {
     this._transact(() => {
       this._yText.insert(index, content, attributes);
       this._yText.meta = { split: true };
@@ -199,13 +198,17 @@ export class Text {
       this._yText.meta = { delete: true };
     });
   }
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  cover(index: number, length: number, content: string, attributes?: Object) {
+  replace(
+    index: number,
+    length: number,
+    content: string,
+    attributes?: Record<string, unknown>
+  ) {
     this._transact(() => {
       this._yText.delete(index, length);
       this._yText.insert(index, content, attributes);
       // @ts-ignore
-      this._yText.meta = { cover: true };
+      this._yText.meta = { replace: true };
     });
   }
 
