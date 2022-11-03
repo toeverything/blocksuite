@@ -1,5 +1,5 @@
-import { GroupBlockModel } from '../../group-block';
-import { EdgelessContainer } from './edgeless-page-block';
+import type { GroupBlockModel } from '../../group-block';
+import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
 
 // XXX: edgeless group container padding

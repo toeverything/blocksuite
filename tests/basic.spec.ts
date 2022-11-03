@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { test, expect } from '@playwright/test';
+import './utils/declare-test-window';
+import { test } from '@playwright/test';
 import type { Space } from '../packages/store';
 import {
   enterPlaygroundRoom,
@@ -30,7 +31,7 @@ test('basic input', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('hello');
 
-  await expect(page).toHaveTitle(/BlockSuite/);
+  await test.expect(page).toHaveTitle(/BlockSuite/);
   await assertStore(page, defaultStore);
   await assertText(page, 'hello');
 });
@@ -39,8 +40,7 @@ test('basic init with external text', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await page.evaluate(() => {
-    // @ts-ignore
-    const space = window.store.space as Spage;
+    const space = window.store.space as Space;
 
     const pageId = space.addBlock({ flavour: 'affine:page', title: 'hello' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);

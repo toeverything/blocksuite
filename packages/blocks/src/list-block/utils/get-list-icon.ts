@@ -1,4 +1,4 @@
-import { ListBlockModel } from '../list-model';
+import type { ListBlockModel } from '../list-model';
 import { points, checkboxChecked, checkboxUnchecked } from './icons';
 import { getNumberPrefix } from './get-number-prefix';
 import { html } from 'lit';

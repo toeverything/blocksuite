@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { RelativePosition } from 'yjs';
+import type { RelativePosition } from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
 import type { Space } from './space';
 import { Signal } from './utils/signal';

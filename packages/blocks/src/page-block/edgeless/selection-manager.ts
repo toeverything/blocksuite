@@ -1,5 +1,5 @@
-import { GroupBlockModel } from '../../group-block';
-import { EdgelessContainer } from './edgeless-page-block';
+import type { GroupBlockModel } from '../../group-block';
+import type { EdgelessContainer } from './edgeless-page-block';
 import {
   SelectionEvent,
   initMouseEventHandlers,

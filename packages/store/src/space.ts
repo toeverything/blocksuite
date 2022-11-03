@@ -1,4 +1,4 @@
-import Quill from 'quill';
+import type Quill from 'quill';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 import { AwarenessAdapter, SelectionRange } from './awareness';
@@ -73,7 +73,27 @@ export class Space {
 
     const aware = awareness ?? new Awareness(this.doc);
     this.awareness = new AwarenessAdapter(this, aware);
-    this._yBlocks.observeDeep(this._yBlocksObserver);
+
+    // all the events that happen at _any_ level (potentially deep inside the structure).
+    // So, we apply a listener at the top level for the flat structure of the current
+    // page/space container.
+    const handleYEventsAndSignalUpdate = (
+      events: Y.YEvent<YBlock | Y.Text>[]
+    ) => {
+      for (const event of events) {
+        this._handleYEvent(event);
+      }
+      this.signals.updated.emit();
+    };
+
+    // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
+    // "unobserve" is potentially necessary to make sure we don't  create
+    // an infinite loop when sync to remote then back to client.
+    // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
+    // We could unobserve in order to short circuit by ignoring the sync of remote
+    // events we actually generated locally.
+    // this._yBlocks.unobserveDeep(handleYEventsAndSignalUpdate);
+    this._yBlocks.observeDeep(handleYEventsAndSignalUpdate);
 
     this._history = new Y.UndoManager([this._yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
@@ -481,11 +501,4 @@ export class Space {
       }
     }
   }
-
-  private _yBlocksObserver = (events: Y.YEvent<YBlock | Y.Text>[]) => {
-    for (const event of events) {
-      this._handleYEvent(event);
-    }
-    this.signals.updated.emit();
-  };
 }

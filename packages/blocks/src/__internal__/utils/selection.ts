@@ -1,7 +1,7 @@
 import type { BaseBlockModel, Space } from '@blocksuite/store';
-import { RichText } from '../rich-text/rich-text';
+import type { RichText } from '../rich-text/rich-text';
 import { assertExists, caretRangeFromPoint, matchFlavours } from './std';
-import { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
+import type { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
   getDefaultPageBlock,

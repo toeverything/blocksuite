@@ -1,5 +1,6 @@
-import { BaseBlockModel } from '@blocksuite/store';
-import Quill, { RangeStatic } from 'quill';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type Quill from 'quill';
+import type { RangeStatic } from 'quill';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '..';
 
 type Match = {

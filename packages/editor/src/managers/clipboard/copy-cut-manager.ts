@@ -1,6 +1,6 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 import { ClipItem } from './clip-item';
-import { EditorContainer } from '../../components';
+import type { EditorContainer } from '../../components';
 import { ListBlockModel } from '@blocksuite/blocks';
 import { SelectionUtils } from '@blocksuite/blocks';
 

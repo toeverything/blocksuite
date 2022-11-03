@@ -1,6 +1,6 @@
-import { BaseBlockModel } from '@blocksuite/store';
-import { DefaultPageBlockComponent } from '../..';
-import { RichText } from '../rich-text/rich-text';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { DefaultPageBlockComponent } from '../..';
+import type { RichText } from '../rich-text/rich-text';
 import { BLOCK_ID_ATTR as ATTR } from './consts';
 import { assertExists } from './std';
 
