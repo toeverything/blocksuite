@@ -1,5 +1,6 @@
 import * as Y from 'yjs';
-import type { BlockProps, PrefixedBlockProps, YBlock, YBlocks } from '../store';
+import type { BaseBlockModel } from '../base';
+import type { BlockProps, PrefixedBlockProps, YBlock, YBlocks } from '../space';
 import { PrelimText, Text, TextType } from '../text-adapter';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
@@ -9,6 +10,22 @@ function isPrimitive(
   a: unknown
 ): a is null | undefined | boolean | number | string {
   return a !== Object(a);
+}
+
+export function assertExists<T>(val: T | null | undefined): asserts val is T {
+  if (val === null || val === undefined) {
+    throw new Error('val does not exist');
+  }
+}
+
+export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
+  if (!allowed.includes(model.flavour)) {
+    throw new Error(`model flavour ${model.flavour} is not allowed`);
+  }
+}
+
+export function matchFlavours(model: BaseBlockModel, expected: string[]) {
+  return expected.includes(model.flavour);
 }
 
 export function assertValidChildren(
@@ -58,19 +75,19 @@ export function syncBlockProps(
 
   // TODO use schema
   if (
-    props.flavour === 'paragraph' &&
+    props.flavour === 'affine:paragraph' &&
     !props.type &&
     !yBlock.has('prop:type')
   ) {
     yBlock.set('prop:type', 'text');
   }
-  if (props.flavour === 'list' && !yBlock.has('prop:type')) {
+  if (props.flavour === 'affine:list' && !yBlock.has('prop:type')) {
     yBlock.set('prop:type', props.type ?? 'bulleted');
   }
-  if (props.flavour === 'list' && !yBlock.has('prop:checked')) {
+  if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
     yBlock.set('prop:checked', props.checked ?? false);
   }
-  if (props.flavour === 'group' && !yBlock.has('prop:xywh')) {
+  if (props.flavour === 'affine:group' && !yBlock.has('prop:xywh')) {
     yBlock.set('prop:xywh', props.xywh ?? '[0,0,720,480]');
   }
 }

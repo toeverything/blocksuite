@@ -1,20 +1,20 @@
-import { Store, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Space, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
 type ListType = 'bulleted' | 'numbered' | 'todo';
 
 export interface ListBlockProps extends IBaseBlockProps {
-  flavour: 'list';
+  flavour: 'affine:list';
   type: ListType;
   checked: boolean;
 }
 
 export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
-  flavour = 'list' as const;
+  flavour = 'affine:list' as const;
   type: ListType;
   checked: boolean;
 
-  constructor(store: Store, props: Partial<ListBlockProps>) {
-    super(store, props);
+  constructor(space: Space, props: Partial<ListBlockProps>) {
+    super(space, props);
     this.type = props.type ?? 'bulleted';
     this.checked = props.checked ?? false;
   }
@@ -33,8 +33,8 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
       begin,
       end
     );
-    const previousSiblingBlock = this.store.getBlockById(_previousSiblingId);
-    const nextSiblingBlock = this.store.getBlockById(_nextSiblingId);
+    const previousSiblingBlock = this.space.getBlockById(_previousSiblingId);
+    const nextSiblingBlock = this.space.getBlockById(_nextSiblingId);
     switch (this.type) {
       case 'bulleted':
         text = `<li>${text}</li>`;

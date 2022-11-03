@@ -1,11 +1,11 @@
-import { Store } from '@blocksuite/store';
+import { Space } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import { ExtendedModel } from './types';
 
 // XXX: workaround quill lifecycle issue
-export function asyncFocusRichText(store: Store, id: string) {
+export function asyncFocusRichText(space: Space, id: string) {
   setTimeout(() => {
-    const adapter = store.richTextAdapters.get(id);
+    const adapter = space.richTextAdapters.get(id);
     adapter?.quill.focus();
   });
 }
@@ -17,79 +17,79 @@ export function isCollapsedAtBlockStart(quill: Quill) {
 }
 
 export function convertToList(
-  store: Store,
+  space: Space,
   model: ExtendedModel,
   listType: 'bulleted' | 'numbered' | 'todo',
   prefix: string,
   otherProperties?: Record<string, unknown>
 ): boolean {
-  if (model.flavour === 'list' && model['type'] === listType) {
+  if (model.flavour === 'affine:list' && model['type'] === listType) {
     return false;
   }
-  if (model.flavour === 'paragraph') {
-    const parent = store.getParent(model);
+  if (model.flavour === 'affine:paragraph') {
+    const parent = space.getParent(model);
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
     model.text?.insert(' ', prefix.length);
-    store.captureSync();
+    space.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'list',
+      flavour: 'affine:list',
       type: listType,
       text: model?.text?.clone(),
       children: model.children,
       ...otherProperties,
     };
-    store.deleteBlock(model);
+    space.deleteBlock(model);
 
-    const id = store.addBlock(blockProps, parent, index);
-    asyncFocusRichText(store, id);
-  } else if (model.flavour === 'list' && model['type'] !== listType) {
+    const id = space.addBlock(blockProps, parent, index);
+    asyncFocusRichText(space, id);
+  } else if (model.flavour === 'affine:list' && model['type'] !== listType) {
     model.text?.insert(' ', prefix.length);
-    store.captureSync();
+    space.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
-    store.updateBlock(model, { type: listType });
+    space.updateBlock(model, { type: listType });
   }
   return true;
 }
 
 export function convertToParagraph(
-  store: Store,
+  space: Space,
   model: ExtendedModel,
-  type: 'paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  type: 'affine:paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
 ): boolean {
-  if (model.flavour === 'paragraph' && model['type'] === type) {
+  if (model.flavour === 'affine:paragraph' && model['type'] === type) {
     return false;
   }
-  if (model.flavour !== 'paragraph') {
-    const parent = store.getParent(model);
+  if (model.flavour !== 'affine:paragraph') {
+    const parent = space.getParent(model);
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
     model.text?.insert(' ', prefix.length);
-    store.captureSync();
+    space.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
-      flavour: 'paragraph',
+      flavour: 'affine:paragraph',
       type: type,
       text: model?.text?.clone(),
       children: model.children,
     };
-    store.deleteBlock(model);
+    space.deleteBlock(model);
 
-    const id = store.addBlock(blockProps, parent, index);
-    asyncFocusRichText(store, id);
-  } else if (model.flavour === 'paragraph' && model['type'] !== type) {
+    const id = space.addBlock(blockProps, parent, index);
+    asyncFocusRichText(space, id);
+  } else if (model.flavour === 'affine:paragraph' && model['type'] !== type) {
     model.text?.insert(' ', prefix.length);
-    store.captureSync();
+    space.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
-    store.updateBlock(model, { type: type });
+    space.updateBlock(model, { type: type });
   }
   return true;
 }

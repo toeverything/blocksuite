@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { BaseBlockModel, Store, Space } from '@blocksuite/store';
 import { Point } from './rect';
 
 export type SelectionPosition = 'start' | 'end' | Point;
@@ -11,6 +11,7 @@ export type SelectionOptions = {
 /** Common context interface definition for block models. */
 export interface BlockHost {
   store: Store;
+  space: Space;
   flavour: string;
 }
 

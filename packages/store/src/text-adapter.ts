@@ -2,7 +2,7 @@
 import * as Y from 'yjs';
 import { AwarenessAdapter } from './awareness';
 import type { DeltaOperation, Quill } from 'quill';
-import { Store } from './store';
+import type { Space } from './space';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';
 
@@ -90,14 +90,14 @@ export class PrelimText {
 }
 
 export class Text {
-  private _store: Store;
+  private _space: Space;
   private _yText: Y.Text;
 
   // TODO toggle transact by options
   private _shouldTransact = true;
 
-  constructor(store: Store, input: Y.Text | string) {
-    this._store = store;
+  constructor(space: Space, input: Y.Text | string) {
+    this._space = space;
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
     } else {
@@ -105,8 +105,8 @@ export class Text {
     }
   }
 
-  static fromDelta(store: Store, delta: DeltaOperation[]) {
-    const result = new Text(store, '');
+  static fromDelta(space: Space, delta: DeltaOperation[]) {
+    const result = new Text(space, '');
     result.applyDelta(delta);
     return result;
   }
@@ -116,12 +116,12 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    const { _store, _shouldTransact: _shouldTransact } = this;
-    _shouldTransact ? _store.transact(callback) : callback();
+    const { _space, _shouldTransact: _shouldTransact } = this;
+    _shouldTransact ? _space.transact(callback) : callback();
   }
 
   clone() {
-    return new Text(this._store, this._yText.clone());
+    return new Text(this._space, this._yText.clone());
   }
 
   split(index: number): [PrelimText, PrelimText] {
@@ -245,7 +245,7 @@ export class Text {
 }
 
 export class RichTextAdapter {
-  readonly store: Store;
+  readonly space: Space;
   readonly doc: Y.Doc;
   readonly yText: Y.Text;
   readonly quill: Quill;
@@ -253,13 +253,13 @@ export class RichTextAdapter {
   readonly awareness: AwarenessAdapter;
   private _negatedUsedFormats: Record<string, any>;
 
-  constructor(store: Store, yText: Y.Text, quill: Quill) {
-    this.store = store;
+  constructor(space: Space, yText: Y.Text, quill: Quill) {
+    this.space = space;
     this.yText = yText;
-    this.doc = store.doc;
+    this.doc = space.doc;
     this.quill = quill;
 
-    this.awareness = store.awareness;
+    this.awareness = space.awareness;
     const quillCursors = quill.getModule('cursors') || null;
     this.quillCursors = quillCursors;
     // This object contains all attributes used in the quill instance
@@ -334,7 +334,7 @@ export class RichTextAdapter {
         }
       });
       if (origin === 'user') {
-        this.store.transact(() => {
+        this.space.transact(() => {
           yText.applyDelta(ops);
         });
       }

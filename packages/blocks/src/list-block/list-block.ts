@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
@@ -43,8 +44,8 @@ export class ListBlockComponent extends LitElement {
       index,
       onClick: () => {
         if (this.model.type !== 'todo') return;
-        this.host.store.captureSync();
-        this.host.store.updateBlock(this.model, {
+        this.host.space.captureSync();
+        this.host.space.updateBlock(this.model, {
           checked: !this.model.checked,
         });
       },

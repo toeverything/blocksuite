@@ -126,7 +126,7 @@ export class PasteManager {
       return;
     }
     const currentSelectionInfo =
-      selectInfo || SelectionUtils.getSelectInfo(this._editor.store);
+      selectInfo || SelectionUtils.getSelectInfo(this._editor.space);
     if (
       currentSelectionInfo.type === 'Range' ||
       currentSelectionInfo.type === 'Caret'
@@ -135,27 +135,27 @@ export class PasteManager {
         currentSelectionInfo.selectedBlocks[
           currentSelectionInfo.selectedBlocks.length - 1
         ];
-      const selectedBlock = this._editor.store.getBlockById(lastBlock.id);
+      const selectedBlock = this._editor.space.getBlockById(lastBlock.id);
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'page') {
-          if (selectedBlock.children[0]?.flavour === 'group') {
+        if (selectedBlock.flavour === 'affine:page') {
+          if (selectedBlock.children[0]?.flavour === 'affine:group') {
             parent = selectedBlock.children[0];
           } else {
-            const id = this._editor.store.addBlock(
-              { flavour: 'group' },
+            const id = this._editor.space.addBlock(
+              { flavour: 'affine:group' },
               selectedBlock.id
             );
-            parent = this._editor.store.getBlockById(id);
+            parent = this._editor.space.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'group') {
-          parent = this._editor.store.getParent(selectedBlock);
+        } else if (selectedBlock.flavour !== 'affine:group') {
+          parent = this._editor.space.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
       const addBlockIds: string[] = [];
-      if (selectedBlock?.flavour !== 'page') {
+      if (selectedBlock?.flavour !== 'affine:page') {
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
@@ -175,7 +175,7 @@ export class PasteManager {
             endIndex + insertLen
           );
           lastId = addBlockIds[addBlockIds.length - 1];
-          const lastBlock = this._editor.store.getBlockById(lastId);
+          const lastBlock = this._editor.space.getBlockById(lastId);
           selectedBlock?.text?.delete(
             endIndex + insertLen,
             selectedBlock?.text?.length
@@ -185,7 +185,7 @@ export class PasteManager {
         }
         setTimeout(() => {
           lastId &&
-            this._editor.store.richTextAdapters
+            this._editor.space.richTextAdapters
               .get(lastId)
               ?.quill.setSelection(position, 0);
         });
@@ -193,7 +193,7 @@ export class PasteManager {
         parent && this._addBlocks(blocks, parent, index, addBlockIds);
       }
     } else if (currentSelectionInfo.type === 'Block') {
-      const selectedBlock = this._editor.store.getBlockById(
+      const selectedBlock = this._editor.space.getBlockById(
         currentSelectionInfo.selectedBlocks[
           currentSelectionInfo.selectedBlocks.length - 1
         ].id
@@ -202,18 +202,18 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'page') {
-          if (selectedBlock.children[0]?.flavour === 'group') {
+        if (selectedBlock.flavour === 'affine:page') {
+          if (selectedBlock.children[0]?.flavour === 'affine:group') {
             parent = selectedBlock.children[0];
           } else {
-            const id = this._editor.store.addBlock(
-              { flavour: 'group' },
+            const id = this._editor.space.addBlock(
+              { flavour: 'affine:group' },
               selectedBlock.id
             );
-            parent = this._editor.store.getBlockById(id);
+            parent = this._editor.space.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'group') {
-          parent = this._editor.store.getParent(selectedBlock);
+        } else if (selectedBlock.flavour !== 'affine:group') {
+          parent = this._editor.space.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
@@ -237,8 +237,8 @@ export class PasteManager {
         type: block.type as string,
         checked: block.checked,
       };
-      const id = this._editor.store.addBlock(blockProps, parent, index + i);
-      const model = this._editor.store.getBlockById(id);
+      const id = this._editor.space.addBlock(blockProps, parent, index + i);
+      const model = this._editor.space.getBlockById(id);
       block.text && model?.text?.applyDelta(block.text);
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);

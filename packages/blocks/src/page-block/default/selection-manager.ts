@@ -1,4 +1,4 @@
-import { Store } from '@blocksuite/store';
+import { Space } from '@blocksuite/store';
 import {
   initMouseEventHandlers,
   SelectionEvent,
@@ -99,18 +99,18 @@ class PageSelectionState {
 }
 
 export class DefaultSelectionManager {
-  store: Store;
+  space: Space;
   state = new PageSelectionState('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
 
   constructor(
-    store: Store,
+    space: Space,
     container: HTMLElement,
     signals: DefaultPageSignals
   ) {
-    this.store = store;
+    this.space = space;
     this._signals = signals;
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
@@ -207,7 +207,7 @@ export class DefaultSelectionManager {
     // TODO handle shift + click
     if (e.keys.shift) return;
 
-    handleNativeRangeClick(this.store, e);
+    handleNativeRangeClick(this.space, e);
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
@@ -215,7 +215,7 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;
-    handleNativeRangeDblClick(this.store, e);
+    handleNativeRangeDblClick(this.space, e);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

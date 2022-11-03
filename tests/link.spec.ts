@@ -68,11 +68,11 @@ test('basic link', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<page>
-  <group
+<affine:page>
+  <affine:group
     prop:xywh="[0,0,720,32]"
   >
-    <paragraph
+    <affine:paragraph
       prop:text={
         <>
           <text
@@ -83,7 +83,7 @@ test('basic link', async ({ page }) => {
       }
       prop:type="text"
     />
-  </group>
-</page>`
+  </affine:group>
+</affine:page>`
   );
 });

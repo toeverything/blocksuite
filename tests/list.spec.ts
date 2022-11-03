@@ -114,10 +114,10 @@ test('insert new list block by enter', async ({ page }) => {
   await page.keyboard.type('world');
   await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
   await assertBlockChildrenFlavours(page, '1', [
-    'list',
-    'list',
-    'list',
-    'list',
+    'affine:list',
+    'affine:list',
+    'affine:list',
+    'affine:list',
   ]);
 });
 
@@ -125,11 +125,19 @@ test('delete at start of list block', async ({ page }) => {
   await enterPlaygroundWithList(page);
   await focusRichText(page, 1);
   await page.keyboard.press('Backspace');
-  await assertBlockChildrenFlavours(page, '1', ['list', 'paragraph', 'list']);
+  await assertBlockChildrenFlavours(page, '1', [
+    'affine:list',
+    'affine:paragraph',
+    'affine:list',
+  ]);
   await assertSelection(page, 1, 0, 0);
 
   await undoByClick(page);
-  await assertBlockChildrenFlavours(page, '1', ['list', 'list', 'list']);
+  await assertBlockChildrenFlavours(page, '1', [
+    'affine:list',
+    'affine:list',
+    'affine:list',
+  ]);
   await assertSelection(page, 1, 0, 0);
 });
 
@@ -151,29 +159,29 @@ test('nested list blocks', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<page>
-  <group
+<affine:page>
+  <affine:group
     prop:xywh="[0,0,720,96]"
   >
-    <list
+    <affine:list
       prop:checked={false}
       prop:text="123"
       prop:type="bulleted"
     >
-      <list
+      <affine:list
         prop:checked={false}
         prop:text="456"
         prop:type="bulleted"
       >
-        <list
+        <affine:list
           prop:checked={false}
           prop:text="789"
           prop:type="bulleted"
         />
-      </list>
-    </list>
-  </group>
-</page>`
+      </affine:list>
+    </affine:list>
+  </affine:group>
+</affine:page>`
   );
 
   await focusRichText(page, 1);
@@ -182,28 +190,28 @@ test('nested list blocks', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<page>
-  <group
+<affine:page>
+  <affine:group
     prop:xywh="[0,0,720,96]"
   >
-    <list
+    <affine:list
       prop:checked={false}
       prop:text="123"
       prop:type="bulleted"
     />
-    <list
+    <affine:list
       prop:checked={false}
       prop:text="456"
       prop:type="bulleted"
     >
-      <list
+      <affine:list
         prop:checked={false}
         prop:text="789"
         prop:type="bulleted"
       />
-    </list>
-  </group>
-</page>`
+    </affine:list>
+  </affine:group>
+</affine:page>`
   );
 });
 
@@ -219,59 +227,61 @@ test('basic indent and unindent', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<page>
-  <group
+<affine:page>
+  <affine:group
     prop:xywh="[0,0,720,72]"
   >
-    <paragraph
+    <affine:paragraph
       prop:text="text1"
       prop:type="text"
     />
-    <paragraph
+    <affine:paragraph
       prop:text="text2"
       prop:type="text"
     />
-  </group>
-</page>`
+  </affine:group>
+</affine:page>`
   );
+
   await page.keyboard.press('Tab');
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<page>
-  <group
+<affine:page>
+  <affine:group
     prop:xywh="[0,0,720,72]"
   >
-    <paragraph
+    <affine:paragraph
       prop:text="text1"
       prop:type="text"
     >
-      <paragraph
+      <affine:paragraph
         prop:text="text2"
         prop:type="text"
       />
-    </paragraph>
-  </group>
-</page>`
+    </affine:paragraph>
+  </affine:group>
+</affine:page>`
   );
+
   await pressShiftTab(page);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<page>
-  <group
+<affine:page>
+  <affine:group
     prop:xywh="[0,0,720,72]"
   >
-    <paragraph
+    <affine:paragraph
       prop:text="text1"
       prop:type="text"
     />
-    <paragraph
+    <affine:paragraph
       prop:text="text2"
       prop:type="text"
     />
-  </group>
-</page>`
+  </affine:group>
+</affine:page>`
   );
 });
 
