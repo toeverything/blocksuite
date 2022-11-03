@@ -66,7 +66,7 @@ export class RichText extends LitElement {
       },
       placeholder,
     });
-    this.quill.on('text-change', (delta, oldDelta, source) => {
+    this.quill.on('text-change', delta => {
       // only length is 2 need to be handled
       let selector = '';
       // only length is 2 need to be handled
@@ -109,7 +109,6 @@ export class RichText extends LitElement {
     });
     space.attachRichText(model.id, this.quill);
     space.awareness.updateLocalCursor();
-
     this.model.propsUpdated.on(() => this.requestUpdate());
   }
   updated() {
