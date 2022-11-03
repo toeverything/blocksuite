@@ -1,5 +1,5 @@
 import { marked } from 'marked';
-import { PageBlockModel } from '@blocksuite/blocks';
+import type { PageBlockModel } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
 import type { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
 import { FileExporter } from '../../file-exporter/file-exporter';

@@ -1,4 +1,4 @@
-import { Space } from '@blocksuite/store';
+import type { Space } from '@blocksuite/store';
 import {
   assertExists,
   getRichTextByModel,

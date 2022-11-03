@@ -1,5 +1,5 @@
-import { ContentParser } from '.';
-import { OpenBlockInfo } from '../types';
+import type { ContentParser } from '.';
+import type { OpenBlockInfo } from '../types';
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA

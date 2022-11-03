@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { BlockHost } from '../utils';
+import type { BlockHost } from '../utils';
 import { createKeyboardBindings } from './keyboard';
 
 import style from './styles.css';

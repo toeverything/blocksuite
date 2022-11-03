@@ -1,4 +1,4 @@
-import Quill from 'quill';
+import type Quill from 'quill';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 import { AwarenessAdapter, SelectionRange } from './awareness';

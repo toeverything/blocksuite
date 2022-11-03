@@ -1,4 +1,4 @@
-import { Space } from '@blocksuite/store';
+import type { Space } from '@blocksuite/store';
 import {
   initMouseEventHandlers,
   SelectionEvent,
@@ -12,7 +12,7 @@ import {
   isPageTitle,
   handleNativeRangeDblClick,
 } from '../../__internal__';
-import { RichText } from '../../__internal__/rich-text/rich-text';
+import type { RichText } from '../../__internal__/rich-text/rich-text';
 import { repairContextMenuRange } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 

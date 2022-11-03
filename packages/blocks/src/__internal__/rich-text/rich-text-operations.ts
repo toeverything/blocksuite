@@ -1,7 +1,7 @@
 // operations used in rich-text level
 
 import { Space, Text } from '@blocksuite/store';
-import Quill from 'quill';
+import type Quill from 'quill';
 import {
   ExtendedModel,
   assertExists,

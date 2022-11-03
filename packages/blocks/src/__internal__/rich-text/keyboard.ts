@@ -1,5 +1,5 @@
 import type { BaseBlockModel, Space } from '@blocksuite/store';
-import { Quill, type RangeStatic } from 'quill';
+import type { Quill, RangeStatic } from 'quill';
 import {
   ALLOW_DEFAULT,
   focusNextBlock,

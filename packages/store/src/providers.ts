@@ -1,8 +1,8 @@
-import * as Y from 'yjs';
+import type * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 // In the future, consider making y-indexdb a separate package sync provider.
 import { IndexeddbPersistence } from 'y-indexeddb';
-import { Awareness } from 'y-protocols/awareness';
+import type { Awareness } from 'y-protocols/awareness';
 
 /**
  * Different examples of providers could include webrtc sync,
