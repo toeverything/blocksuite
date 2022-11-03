@@ -1,5 +1,5 @@
-import { Space, Text, BaseBlockModel } from '@blocksuite/store';
-import { GroupBlockModel } from '../../group-block';
+import type { Space, Text, BaseBlockModel } from '@blocksuite/store';
+import type { GroupBlockModel } from '../../group-block';
 import {
   assertExists,
   assertFlavours,
@@ -50,7 +50,8 @@ function deleteModels(space: Space, models: BaseBlockModel[]) {
     firstTextIndex,
     firstRichText.model.text.length - firstTextIndex
   );
-  const isLastRichTextFullSelected: boolean = lastRichText.model.text?.length === endTextIndex;
+  const isLastRichTextFullSelected: boolean =
+    lastRichText.model.text?.length === endTextIndex;
   if (!isLastRichTextFullSelected) {
     lastRichText.model.text?.delete(0, endTextIndex);
     firstRichText.model.text?.join(lastRichText.model.text as Text);

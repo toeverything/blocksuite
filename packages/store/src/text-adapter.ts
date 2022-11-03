@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { AwarenessAdapter } from './awareness';
+import type { AwarenessAdapter } from './awareness';
 import type { DeltaOperation, Quill } from 'quill';
 import type { Space } from './space';
 

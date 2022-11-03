@@ -1,4 +1,4 @@
-import { Space } from '@blocksuite/store';
+import type { Space } from '@blocksuite/store';
 import { hotkey, HOTKEYS } from '../../__internal__';
 import { createLink } from '../../__internal__/rich-text/link-node';
 import { handleFormat } from './container-operations';

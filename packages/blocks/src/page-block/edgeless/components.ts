@@ -1,9 +1,9 @@
 import { html, type TemplateResult } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
-import { GroupBlockModel } from '../..';
+import type { GroupBlockModel } from '../..';
 import type {
   EdgelessSelectionManager,
   ViewportState,
