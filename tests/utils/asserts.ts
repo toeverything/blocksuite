@@ -14,20 +14,20 @@ import {
 } from 'pretty-format';
 
 export const defaultStore: SerializedStore = {
-  blocks: {
+  page0: {
     '0': {
       'sys:id': '0',
-      'sys:flavour': 'page',
+      'sys:flavour': 'affine:page',
       'sys:children': ['1'],
     },
     '1': {
-      'sys:flavour': 'group',
+      'sys:flavour': 'affine:group',
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,32]',
     },
     '2': {
-      'sys:flavour': 'paragraph',
+      'sys:flavour': 'affine:paragraph',
       'sys:id': '2',
       'sys:children': [],
       'prop:text': 'hello',
@@ -245,11 +245,11 @@ export async function assertMatchMarkdown(page: Page, text: string) {
     // @ts-expect-error
     window.store.doc.toJSON()
   )) as SerializedStore;
-  const titleNode = jsonDoc.blocks['0'];
+  const titleNode = jsonDoc.page0['0'];
 
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
-    if (node['sys:flavour'] === 'page') {
+    if (node['sys:flavour'] === 'affine:page') {
       return (node['prop:title'] as string) ?? '';
     }
     if (!('prop:type' in node)) {
@@ -275,12 +275,12 @@ export async function assertMatchMarkdown(page: Page, text: string) {
       // return visitor(node);
     }
 
-    const children = node['sys:children'].map(id => jsonDoc.blocks[id]);
+    const children = node['sys:children'].map(id => jsonDoc.page0[id]);
     return [
       visitor(node),
       ...children.flatMap(child =>
         visitNodes(child, visitor).map(line => {
-          if (node['sys:flavour'] === 'page') {
+          if (node['sys:flavour'] === 'affine:page') {
             // Ad hoc way to remove the title indent
             return line;
           }
@@ -308,10 +308,14 @@ export async function assertStoreMatchJSX(page: Page, snapshot: string) {
   // See https://playwright.dev/docs/api/class-page#page-evaluate
   const testSymbol = Symbol.for('react.test.json');
   const markSymbol = (node: JSXElement) => {
+    node.$$typeof = testSymbol;
     if (!node.children) {
       return;
     }
-    node.$$typeof = testSymbol;
+    const propText = node.props['prop:text'];
+    if (propText && typeof propText === 'object') {
+      markSymbol(propText);
+    }
     node.children.forEach(child => {
       if (!(typeof child === 'object')) {
         return;

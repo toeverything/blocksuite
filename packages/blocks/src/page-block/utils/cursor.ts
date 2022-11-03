@@ -4,7 +4,7 @@ import {
   SelectionEvent,
 } from '../../__internal__';
 
-export function repairerContextMenuRange(e: SelectionEvent) {
+export function repairContextMenuRange(e: SelectionEvent) {
   const currentRange = window.getSelection()?.getRangeAt(0);
   const pointRange = caretRangeFromPoint(e.x, e.y);
   // repair browser context menu change selection can not go through blocks

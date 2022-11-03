@@ -10,7 +10,7 @@ import {
   handleNativeRangeClick,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
-import { repairerContextMenuRange } from '../utils/cursor';
+import { repairContextMenuRange } from '../utils/cursor';
 
 interface NoneBlockSelectionState {
   type: 'none';
@@ -164,12 +164,12 @@ export class EdgelessSelectionManager {
     this._wheelDisposeCallback = initWheelEventHandlers(container);
   }
 
-  private get _store() {
-    return this._container.store;
+  private get _space() {
+    return this._container.space;
   }
 
   private get _blocks(): GroupBlockModel[] {
-    return (this._store.root?.children as GroupBlockModel[]) ?? [];
+    return (this._space.root?.children as GroupBlockModel[]) ?? [];
   }
 
   get isActive() {
@@ -234,7 +234,7 @@ export class EdgelessSelectionManager {
             this.blockSelectionState
           );
         }
-        handleNativeRangeClick(this._store, e);
+        handleNativeRangeClick(this._space, e);
         break;
     }
   }
@@ -277,7 +277,7 @@ export class EdgelessSelectionManager {
           ) as XYWH;
           const { zoom } = this._container.viewport;
 
-          this._store.updateBlock(block, {
+          this._space.updateBlock(block, {
             xywh: JSON.stringify([
               modelX + e.delta.x / zoom,
               modelY + e.delta.y / zoom,
@@ -346,7 +346,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    repairerContextMenuRange(e);
+    repairContextMenuRange(e);
   };
 
   dispose() {

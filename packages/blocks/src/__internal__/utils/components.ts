@@ -10,21 +10,21 @@ import type { GroupBlockModel } from '../../group-block/group-model';
 // TODO support dynamic block types
 export function BlockElement(model: BaseBlockModel, host: BlockHost) {
   switch (model.flavour) {
-    case 'paragraph':
+    case 'affine:paragraph':
       return html`
         <paragraph-block
           .model=${model as ParagraphBlockModel}
           .host=${host}
         ></paragraph-block>
       `;
-    case 'list':
+    case 'affine:list':
       return html`
         <list-block
           .model=${model as ListBlockModel}
           .host=${host}
         ></list-block>
       `;
-    case 'group':
+    case 'affine:group':
       return html`
         <group-block
           .model=${model as GroupBlockModel}

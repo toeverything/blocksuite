@@ -122,10 +122,10 @@ test('insert new paragraph block by enter', async ({ page }) => {
   await page.keyboard.type('world');
   await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
   await assertBlockChildrenFlavours(page, '1', [
-    'paragraph',
-    'paragraph',
-    'paragraph',
-    'paragraph',
+    'affine:paragraph',
+    'affine:paragraph',
+    'affine:paragraph',
+    'affine:paragraph',
   ]);
 });
 
@@ -144,7 +144,10 @@ test('split paragraph block by enter', async ({ page }) => {
 
   await pressEnter(page);
   await assertRichTexts(page, ['he', 'llo']);
-  await assertBlockChildrenFlavours(page, '1', ['paragraph', 'paragraph']);
+  await assertBlockChildrenFlavours(page, '1', [
+    'affine:paragraph',
+    'affine:paragraph',
+  ]);
   await assertSelection(page, 1, 0, 0);
 
   await undoByKeyboard(page);

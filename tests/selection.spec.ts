@@ -19,6 +19,8 @@ import {
   redoByClick,
   clearLog,
   waitNextFrame,
+  selectAllByKeyboard,
+  dragBetweenIndices,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -202,20 +204,20 @@ test('cursor move to up and down with children block', async ({ page }) => {
   await page.keyboard.press('ArrowUp');
   const indexOne = await getQuillSelectionIndex(page);
   const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('arrow down test 2\n');
-  expect(indexOne).toBe(13);
+  await expect(textOne).toBe('arrow down test 2\n');
+  await expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
   await page.keyboard.press('ArrowUp');
   const indexTwo = await getQuillSelectionIndex(page);
   const textTwo = await getQuillSelectionText(page);
-  expect(textTwo).toBe('arrow down test 1\n');
-  expect(indexTwo).toBeGreaterThanOrEqual(12);
-  expect(indexTwo).toBeLessThanOrEqual(17);
+  await expect(textTwo).toBe('arrow down test 1\n');
+  await expect(indexTwo).toBeGreaterThanOrEqual(12);
+  await expect(indexTwo).toBeLessThanOrEqual(17);
   await page.keyboard.press('ArrowDown');
   const textThree = await getQuillSelectionText(page);
-  expect(textThree).toBe('arrow down test 2\n');
+  await expect(textThree).toBe('arrow down test 2\n');
 });
 
 test('cursor move left and right', async ({ page }) => {
@@ -229,10 +231,10 @@ test('cursor move left and right', async ({ page }) => {
     await page.keyboard.press('ArrowLeft');
   }
   const indexOne = await getQuillSelectionIndex(page);
-  expect(indexOne).toBe(17);
+  await expect(indexOne).toBe(17);
   await page.keyboard.press('ArrowRight');
   const indexTwo = await getQuillSelectionIndex(page);
-  expect(indexTwo).toBe(0);
+  await expect(indexTwo).toBe(0);
 });
 
 test('cursor move up at edge of the second line', async ({ page }) => {
@@ -246,7 +248,7 @@ test('cursor move up at edge of the second line', async ({ page }) => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowUp');
     const [currentId] = await getCursorBlockIdAndHeight(page);
-    expect(currentId).toBe(id);
+    await expect(currentId).toBe(id);
   }
 });
 
@@ -263,7 +265,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowDown');
     const [currentId] = await getCursorBlockIdAndHeight(page);
-    expect(currentId).toBe(id);
+    await expect(currentId).toBe(id);
   }
 });
 
@@ -276,10 +278,10 @@ test.skip('cursor move up and down through group', async ({ page }) => {
   const [id] = await getCursorBlockIdAndHeight(page);
   await page.keyboard.press('ArrowDown');
   currentId = (await getCursorBlockIdAndHeight(page))[0];
-  expect(id).not.toBe(currentId);
+  await expect(id).not.toBe(currentId);
   await page.keyboard.press('ArrowUp');
   currentId = (await getCursorBlockIdAndHeight(page))[0];
-  expect(id).toBe(currentId);
+  await expect(id).toBe(currentId);
 });
 
 test('double click choose words', async ({ page }) => {
@@ -302,5 +304,46 @@ test('double click choose words', async ({ page }) => {
     }
     return text;
   });
-  expect(text).toBe('hello');
+  await expect(text).toBe('hello');
+});
+
+test('select all text with hotkey and delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await selectAllByKeyboard(page);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});
+
+test('select all text with dragging and delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});
+
+test('select text leaving a few words in the last line and delete', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 0], [2, 1]);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc89\n');
 });

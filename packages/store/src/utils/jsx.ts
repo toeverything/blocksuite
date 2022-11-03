@@ -1,4 +1,5 @@
-import type { PrefixedBlockProps } from '../store';
+import { AbstractType, Doc, Map, Text, Array } from 'yjs';
+import type { PrefixedBlockProps } from '../space';
 
 type DocRecord = {
   [id: string]: PrefixedBlockProps & {
@@ -12,9 +13,13 @@ export interface JSXElement {
   // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L78-L79
   $$typeof: symbol | 0xea71357;
   type: string;
-  props?: Record<string, unknown>;
+  props: { 'prop:text'?: string | JSXElement } & Record<string, unknown>;
   children?: null | (JSXElement | string | number)[];
 }
+
+// Ad-hoc for `ReactTestComponent` identify.
+// See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L26-L29
+const testSymbol = Symbol.for('react.test.json');
 
 const isValidRecord = (data: unknown): data is DocRecord => {
   if (typeof data !== 'object' || data === null) {
@@ -26,14 +31,14 @@ const isValidRecord = (data: unknown): data is DocRecord => {
 
 const IGNORE_PROPS = ['sys:id', 'sys:flavour', 'sys:children'];
 
-export const blockRecordToJSXNode = (
-  docRecord: Record<string, unknown>,
+export const yDocToJSXNode = (
+  serializedDoc: Record<string, unknown>,
   nodeId: string
 ): JSXElement => {
-  if (!isValidRecord(docRecord)) {
+  if (!isValidRecord(serializedDoc)) {
     throw new Error('Failed to parse doc record! Invalid data.');
   }
-  const node = docRecord[nodeId];
+  const node = serializedDoc[nodeId];
   if (!node) {
     throw new Error(
       `Failed to parse doc record! Node not found! id: ${nodeId}.`
@@ -47,12 +52,82 @@ export const blockRecordToJSXNode = (
     Object.entries(node).filter(([key]) => !IGNORE_PROPS.includes(key))
   );
 
+  if ('prop:text' in props) {
+    props['prop:text'] = parseDelta(props['prop:text'] as DeltaText);
+  }
+
   return {
-    // Ad-hoc for `ReactTestComponent` identify.
-    // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L26-L29
-    $$typeof: Symbol.for('react.test.json'),
+    $$typeof: testSymbol,
     type: flavour,
     props,
-    children: children?.map(id => blockRecordToJSXNode(docRecord, id)) ?? [],
+    children: children?.map(id => yDocToJSXNode(serializedDoc, id)) ?? [],
+  };
+};
+
+export const serializeYDoc = (doc: Doc) => {
+  const json: Record<string, unknown> = {};
+  doc.share.forEach((value, key) => {
+    if (value instanceof Map) {
+      json[key] = serializeYMap(value);
+    } else {
+      json[key] = value.toJSON();
+    }
+  });
+  return json;
+};
+
+const serializeYMap = (map: Map<unknown>): unknown => {
+  const json: Record<string, unknown> = {};
+  map.forEach((value, key) => {
+    if (value instanceof Map) {
+      json[key] = serializeYMap(value);
+    } else if (value instanceof Text) {
+      json[key] = serializeYText(value);
+    } else if (value instanceof Array) {
+      json[key] = value.toJSON();
+    } else if (value instanceof AbstractType) {
+      json[key] = value.toJSON();
+    } else {
+      json[key] = value;
+    }
+  });
+  return json;
+};
+
+type DeltaText = {
+  insert: string;
+  attributes?: { [format: string]: unknown };
+}[];
+
+const serializeYText = (text: Text): DeltaText => {
+  const delta = text.toDelta();
+  return delta;
+};
+
+const parseDelta = (text: DeltaText) => {
+  if (!text.length) {
+    return undefined;
+  }
+  if (text.length === 1 && !text[0].attributes) {
+    // just plain text
+    return text[0].insert;
+  }
+  return {
+    // The `Symbol.for('react.fragment')` will render as `<React.Fragment>`
+    // so we use a empty string to render it as `<>`.
+    // But it will empty children ad `< />`
+    // so we return `undefined` directly if not delta text.
+    $$typeof: testSymbol, // Symbol.for('react.element'),
+    type: '', // Symbol.for('react.fragment'),
+    props: {},
+    children: text?.map(({ insert, attributes }) => ({
+      $$typeof: testSymbol,
+      type: 'text',
+      props: {
+        // Not place at `children` to avoid the trailing whitespace be trim by formatter.
+        insert,
+        ...attributes,
+      },
+    })),
   };
 };

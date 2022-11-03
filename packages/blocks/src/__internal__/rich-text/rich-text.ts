@@ -46,8 +46,8 @@ export class RichText extends LitElement {
 
   firstUpdated() {
     const { host, model, _textContainer } = this;
-    const { store } = host;
-    const keyboardBindings = createKeyboardBindings(store, model);
+    const { space } = host;
+    const keyboardBindings = createKeyboardBindings(space, model);
 
     this.quill = new Quill(_textContainer, {
       modules: {
@@ -75,12 +75,18 @@ export class RichText extends LitElement {
       if (delta.ops.length === 2 && delta.ops[1]?.insert && selector) {
         const retain = delta.ops[0].retain;
         if (retain !== undefined) {
-          const nextTextLeaf = this.quill.getLeaf(
+          const currentLeaf = this.quill.getLeaf(
+            retain + Number(delta.ops[1]?.insert.toString().length)
+          );
+          const nextLeaf = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length) + 1
           );
-          const parentElement = nextTextLeaf[0]?.domNode?.parentElement;
+          const currentParentElement = currentLeaf[0]?.domNode?.parentElement;
+          const currentEmbedElement = currentParentElement?.closest(selector);
+          const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
+          const nextEmbedElement = nextParentElement?.closest(selector);
           const insertedString = delta.ops[1]?.insert.toString();
-          if (parentElement && !parentElement.closest(selector)) {
+          if (nextEmbedElement && nextEmbedElement !== currentEmbedElement) {
             this.quill.deleteText(
               retain,
               delta.ops[1]?.insert.toString().length
@@ -97,7 +103,7 @@ export class RichText extends LitElement {
               this.quill.setSelection(retain + 1, 0, 'api');
             }
           }
-          if (!nextTextLeaf[0] && insertedString) {
+          if (!nextEmbedElement && insertedString) {
             this.quill.deleteText(
               retain,
               delta.ops[1]?.insert.toString().length
@@ -123,15 +129,15 @@ export class RichText extends LitElement {
       }
       // });
     });
-    store.attachRichText(model.id, this.quill);
-    store.awareness.updateLocalCursor();
+    space.attachRichText(model.id, this.quill);
+    space.awareness.updateLocalCursor();
 
     this.model.propsUpdated.on(() => this.requestUpdate());
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.host.store.detachRichText(this.model.id);
+    this.host.space.detachRichText(this.model.id);
   }
 
   render() {

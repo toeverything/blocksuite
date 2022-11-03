@@ -1,4 +1,4 @@
-import { Store } from '@blocksuite/store';
+import { Space } from '@blocksuite/store';
 import {
   initMouseEventHandlers,
   SelectionEvent,
@@ -13,7 +13,7 @@ import {
   handleNativeRangeDblClick,
 } from '../../__internal__';
 import { RichText } from '../../__internal__/rich-text/rich-text';
-import { repairerContextMenuRange } from '../utils/cursor';
+import { repairContextMenuRange } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -99,18 +99,18 @@ class PageSelectionState {
 }
 
 export class DefaultSelectionManager {
-  store: Store;
+  space: Space;
   state = new PageSelectionState('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
 
   constructor(
-    store: Store,
+    space: Space,
     container: HTMLElement,
     signals: DefaultPageSignals
   ) {
-    this.store = store;
+    this.space = space;
     this._signals = signals;
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
@@ -207,7 +207,7 @@ export class DefaultSelectionManager {
     // TODO handle shift + click
     if (e.keys.shift) return;
 
-    handleNativeRangeClick(this.store, e);
+    handleNativeRangeClick(this.space, e);
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
@@ -215,11 +215,11 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;
-    handleNativeRangeDblClick(this.store, e);
+    handleNativeRangeDblClick(this.space, e);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    repairerContextMenuRange(e);
+    repairContextMenuRange(e);
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {

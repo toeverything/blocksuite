@@ -1,6 +1,7 @@
+/// <reference types="vite/client" />
 import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Disposable, Signal, Store } from '@blocksuite/store';
+import { Disposable, Signal, Space, Store } from '@blocksuite/store';
 import type { GroupBlockModel, PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
@@ -21,7 +22,6 @@ import {
   ViewportState,
   XYWH,
 } from './selection-manager';
-import style from './style.css';
 import {
   bindCommonHotkey,
   handleBackspace,
@@ -29,9 +29,10 @@ import {
   tryUpdateGroupSize,
   updateTextType,
 } from '../utils';
+import style from './style.css';
 
 export interface EdgelessContainer extends HTMLElement {
-  readonly store: Store;
+  readonly space: Space;
   readonly viewport: ViewportState;
   readonly mouseRoot: HTMLElement;
   readonly signals: {
@@ -52,6 +53,10 @@ export class EdgelessPageBlockComponent
 
   @property()
   store!: Store;
+
+  get space() {
+    return this.store.space;
+  }
 
   flavour = 'edgeless' as const;
 
@@ -78,7 +83,7 @@ export class EdgelessPageBlockComponent
   private _selection!: EdgelessSelectionManager;
 
   private _bindHotkeys() {
-    const { store } = this;
+    const { space } = this;
 
     hotkey.addListener(
       HOTKEYS.BACKSPACE,
@@ -86,38 +91,38 @@ export class EdgelessPageBlockComponent
       this.flavour
     );
     hotkey.addListener(HOTKEYS.H1, () =>
-      this._updateType('paragraph', 'h1', store)
+      this._updateType('affine:paragraph', 'h1', space)
     );
     hotkey.addListener(HOTKEYS.H2, () =>
-      this._updateType('paragraph', 'h2', store)
+      this._updateType('affine:paragraph', 'h2', space)
     );
     hotkey.addListener(HOTKEYS.H3, () =>
-      this._updateType('paragraph', 'h3', store)
+      this._updateType('affine:paragraph', 'h3', space)
     );
     hotkey.addListener(HOTKEYS.H4, () =>
-      this._updateType('paragraph', 'h4', store)
+      this._updateType('affine:paragraph', 'h4', space)
     );
     hotkey.addListener(HOTKEYS.H5, () =>
-      this._updateType('paragraph', 'h5', store)
+      this._updateType('affine:paragraph', 'h5', space)
     );
     hotkey.addListener(HOTKEYS.H6, () =>
-      this._updateType('paragraph', 'h6', store)
+      this._updateType('affine:paragraph', 'h6', space)
     );
     hotkey.addListener(HOTKEYS.NUMBERED_LIST, () =>
-      this._updateType('list', 'numbered', store)
+      this._updateType('affine:list', 'numbered', space)
     );
     hotkey.addListener(HOTKEYS.BULLETED, () =>
-      this._updateType('list', 'bulleted', store)
+      this._updateType('affine:list', 'bulleted', space)
     );
     hotkey.addListener(HOTKEYS.TEXT, () =>
-      this._updateType('paragraph', 'text', store)
+      this._updateType('affine:paragraph', 'text', space)
     );
 
-    bindCommonHotkey(store);
+    bindCommonHotkey(space);
   }
 
-  private _updateType(flavour: string, type: string, store: Store): void {
-    updateTextType(flavour, type, store);
+  private _updateType(flavour: string, type: string, space: Space): void {
+    updateTextType(flavour, type, space);
   }
 
   private _removeHotkeys() {
@@ -127,7 +132,7 @@ export class EdgelessPageBlockComponent
 
   private _handleBackspace(e: KeyboardEvent) {
     if (this._selection.blockSelectionState.type === 'single') {
-      handleBackspace(this.store, e);
+      handleBackspace(this.space, e);
     }
   }
 
@@ -171,7 +176,7 @@ export class EdgelessPageBlockComponent
     );
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
-    this._historyDisposable = this.store.signals.historyUpdated.on(() => {
+    this._historyDisposable = this.space.signals.historyUpdated.on(() => {
       this._clearSelection();
     });
 
@@ -179,7 +184,7 @@ export class EdgelessPageBlockComponent
 
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.store, this.viewport.zoom);
+      tryUpdateGroupSize(this.space, this.viewport.zoom);
     });
 
     requestAnimationFrame(() => {

@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
-import type { Awareness } from 'y-protocols/awareness.js';
 import { RelativePosition } from 'yjs';
-import type { Store } from './store';
+import type { Awareness } from 'y-protocols/awareness.js';
+import type { Space } from './space';
 import { Signal } from './utils/signal';
 
 export interface SelectionRange {
@@ -28,15 +28,15 @@ interface AwarenessMessage {
 }
 
 export class AwarenessAdapter {
-  readonly store: Store;
+  readonly space: Space;
   readonly awareness: Awareness;
 
   readonly signals = {
     update: new Signal<AwarenessMessage>(),
   };
 
-  constructor(store: Store, awareness: Awareness) {
-    this.store = store;
+  constructor(space: Space, awareness: Awareness) {
+    this.space = space;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
     this.signals.update.on(this._onAwarenessMessage);
@@ -95,20 +95,20 @@ export class AwarenessAdapter {
   };
 
   private _resetRemoteCursor() {
-    this.store.richTextAdapters.forEach(textAdapter =>
+    this.space.richTextAdapters.forEach(textAdapter =>
       textAdapter.quillCursors.clearCursors()
     );
     this.getStates().forEach((awState, clientId) => {
       if (clientId !== this.awareness.clientID && awState.cursor) {
         const anchor = Y.createAbsolutePositionFromRelativePosition(
           awState.cursor.anchor,
-          this.store.doc
+          this.space.doc
         );
         const focus = Y.createAbsolutePositionFromRelativePosition(
           awState.cursor.focus,
-          this.store.doc
+          this.space.doc
         );
-        const textAdapter = this.store.richTextAdapters.get(
+        const textAdapter = this.space.richTextAdapters.get(
           awState.cursor.id || ''
         );
         if (anchor && focus && textAdapter) {
@@ -130,20 +130,20 @@ export class AwarenessAdapter {
   }
 
   public updateLocalCursor() {
-    const localCursor = this.store.awareness.getLocalCursor();
+    const localCursor = this.space.awareness.getLocalCursor();
     if (!localCursor) {
       return;
     }
     const anchor = Y.createAbsolutePositionFromRelativePosition(
       localCursor.anchor,
-      this.store.doc
+      this.space.doc
     );
     const focus = Y.createAbsolutePositionFromRelativePosition(
       localCursor.focus,
-      this.store.doc
+      this.space.doc
     );
     if (anchor && focus) {
-      const textAdapter = this.store.richTextAdapters.get(localCursor.id || '');
+      const textAdapter = this.space.richTextAdapters.get(localCursor.id || '');
       textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
     }
   }

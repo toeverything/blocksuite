@@ -1,21 +1,14 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import { Utils } from '@blocksuite/store';
 import type { Detail } from './types';
 
+// workaround ts(2775)
 export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
+  Utils.assertExists(val);
 }
 
-export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
-  if (!allowed.includes(model.flavour)) {
-    throw new Error(`model flavour ${model.flavour} is not allowed`);
-  }
-}
+export const assertFlavours = Utils.assertFlavours;
 
-export function matchFlavours(model: BaseBlockModel, expected: string[]) {
-  return expected.includes(model.flavour);
-}
+export const matchFlavours = Utils.matchFlavours;
 
 const IS_FIREFOX = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
