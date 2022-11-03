@@ -76,6 +76,10 @@ export class PrelimText {
     throw new Error(UNSUPPORTED_MSG + 'delete');
   }
 
+  cover() {
+    throw new Error(UNSUPPORTED_MSG + 'cover');
+  }
+
   format() {
     throw new Error(UNSUPPORTED_MSG + 'format');
   }
@@ -193,6 +197,15 @@ export class Text {
     this._transact(() => {
       this._yText.delete(index, length);
       this._yText.meta = { delete: true };
+    });
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  cover(index: number, length: number, content: string, attributes?: Object) {
+    this._transact(() => {
+      this._yText.delete(index, length);
+      this._yText.insert(index, content, attributes);
+      // @ts-ignore
+      this._yText.meta = { cover: true };
     });
   }
 

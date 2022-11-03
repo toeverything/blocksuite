@@ -90,42 +90,22 @@ export class RichText extends LitElement {
           const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
           const nextEmbedElement = nextParentElement?.closest(selector);
           const insertedString = delta.ops[1]?.insert.toString();
-          if (nextEmbedElement && nextEmbedElement !== currentEmbedElement) {
-            model.text?.delete(retain, delta.ops[1]?.insert.toString().length);
-            // @ts-ignore
-            if (!this.host.isCompositionStart) {
-              model.text?.insert(delta.ops[1]?.insert.toString() || '', retain);
-            } else {
-              // FIXME we must add a noon width space to fix cursor
-              model.text?.insert(' ', retain);
-              this.quill.setSelection(retain + 1, 0, 'api');
-            }
-          }
           if (
-            !nextEmbedElement &&
-            insertedString &&
-            source === Quill.sources.USER
+            (nextEmbedElement && nextEmbedElement !== currentEmbedElement) ||
+            !nextEmbedElement
           ) {
-            model.text?.delete(retain, delta.ops[1]?.insert.toString().length);
-            model.text?.insert(
+            model.text?.cover(
+              retain,
+              insertedString.length,
               // @ts-ignore
               !this.host.isCompositionStart
                 ? delta.ops[1]?.insert.toString() || ''
-                : // FIXME we must add a noon width space to fix cursor
-                  ' ',
-              retain
-            );
-            this.quill.setSelection(
-              retain +
-                // @ts-ignore
-                (!this.host.isCompositionStart ? insertedString.length : 1),
-              0,
-              'api'
+                : ' ',
+              { [selector]: false }
             );
           }
         }
       }
-      // });
     });
     space.attachRichText(model.id, this.quill);
     space.awareness.updateLocalCursor();
