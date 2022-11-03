@@ -459,8 +459,8 @@ function expandRangesByCharacter(
     notStrictCharacterAndSpaceReg.test(currentChar) &&
     currentTextNode
   ) {
-    startNode = currentTextNode;
-    endNode = currentTextNode;
+    startNode = currentTextNode as Text;
+    endNode = currentTextNode as Text;
     startOffset = selection.anchorOffset;
     endOffset = selection.anchorOffset + 1;
   } else {
