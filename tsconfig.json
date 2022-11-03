@@ -12,6 +12,8 @@
     "declaration": true,
     "declarationMap": true,
     "resolveJsonModule": true,
+    // For later, ensure TypeScript prefers import as type
+    // "importsNotUsedAsValues": "error",
     "isolatedModules": true,
     "esModuleInterop": true,
     "noEmit": true,
