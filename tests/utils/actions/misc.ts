@@ -63,12 +63,17 @@ export async function enterPlaygroundWithList(page: Page) {
 }
 
 export async function initEmptyState(page: Page) {
-  await page.evaluate(() => {
+  const id = await page.evaluate(() => {
     const space = window.store.space;
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
-    space.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    const paragraphId = space.addBlock(
+      { flavour: 'affine:paragraph' },
+      groupId
+    );
+    return { pageId, groupId, paragraphId };
   });
+  return id;
 }
 
 export async function focusRichText(page: Page, i = 0) {
