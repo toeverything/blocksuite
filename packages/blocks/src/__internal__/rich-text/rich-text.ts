@@ -39,13 +39,16 @@ export class RichText extends LitElement {
   @property()
   model!: BaseBlockModel;
 
+  @property()
+  placeholder?: string;
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }
 
   firstUpdated() {
-    const { host, model, _textContainer } = this;
+    const { host, model, placeholder, _textContainer } = this;
     const { space } = host;
     const keyboardBindings = createKeyboardBindings(space, model);
 
@@ -61,6 +64,7 @@ export class RichText extends LitElement {
           bindings: keyboardBindings,
         },
       },
+      placeholder,
     });
     this.quill.on('text-change', delta => {
       // only length is 2 need to be handled
@@ -133,6 +137,10 @@ export class RichText extends LitElement {
     space.awareness.updateLocalCursor();
 
     this.model.propsUpdated.on(() => this.requestUpdate());
+  }
+  updated() {
+    // Update placeholder if block`s type changed
+    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
   }
 
   disconnectedCallback() {
