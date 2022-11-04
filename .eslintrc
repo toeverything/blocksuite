@@ -13,7 +13,8 @@
     "packages/store/dist/*",
     "packages/blocks/dist/*",
     "packages/editor/dist/*",
-    "packages/playground/dist/assets/*"
+    "packages/playground/dist/assets/*",
+    "*.config.js"
   ],
   "overrides": [
     {
