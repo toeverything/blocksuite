@@ -66,18 +66,32 @@ export class RichText extends LitElement {
       },
       placeholder,
     });
+
+    space.attachRichText(model.id, this.quill);
+    space.awareness.updateLocalCursor();
+    this.model.propsUpdated.on(() => this.requestUpdate());
+
+    // If you type a character after the code or link node,
+    // the character should not be inserted into the code or link node.
+    // So we check and remove the corresponding format manually.
     this.quill.on('text-change', delta => {
+      const selectorMap = {
+        code: 'code',
+        link: 'link-code',
+      } as const;
       // only length is 2 need to be handled
-      let selector = '';
+      let attr = '';
       // only length is 2 need to be handled
       if (delta.ops[1]?.attributes?.code) {
-        selector = 'code';
+        attr = 'code';
       }
       if (delta.ops[1]?.attributes?.link) {
-        selector = 'link-node';
+        attr = 'link';
       }
-      if (delta.ops.length === 2 && delta.ops[1]?.insert && selector) {
+      // Edit link operation need be excluded
+      if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
         const retain = delta.ops[0].retain;
+        const selector = selectorMap[attr as keyof typeof selectorMap];
         if (retain !== undefined) {
           const currentLeaf = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length)
@@ -90,62 +104,33 @@ export class RichText extends LitElement {
           const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
           const nextEmbedElement = nextParentElement?.closest(selector);
           const insertedString = delta.ops[1]?.insert.toString();
-          if (nextEmbedElement && nextEmbedElement !== currentEmbedElement) {
-            this.quill.deleteText(
+          if (
+            (nextEmbedElement && nextEmbedElement !== currentEmbedElement) ||
+            !nextEmbedElement
+          ) {
+            model.text?.replace(
               retain,
-              delta.ops[1]?.insert.toString().length
-            );
-            // @ts-ignore
-            if (!this.host.isCompositionStart) {
-              this.quill.insertText(
-                retain,
-                delta.ops[1]?.insert.toString() || ''
-              );
-            } else {
-              // FIXME we must add a noon width space to fix cursor
-              this.quill.insertEmbed(retain, 'text', ' ');
-              this.quill.setSelection(retain + 1, 0, 'api');
-            }
-          }
-          if (!nextEmbedElement && insertedString) {
-            this.quill.deleteText(
-              retain,
-              delta.ops[1]?.insert.toString().length
-            );
-            this.quill.insertEmbed(
-              retain,
-              'text',
-              // @ts-ignore
+              insertedString.length,
+              // @ts-expect-error
               !this.host.isCompositionStart
                 ? delta.ops[1]?.insert.toString() || ''
-                : // FIXME we must add a noon width space to fix cursor
-                  ' '
-            );
-            this.quill.setSelection(
-              retain +
-                // @ts-ignore
-                (!this.host.isCompositionStart ? insertedString.length : 1),
-              0,
-              'api'
+                : ' ',
+              { [attr]: false }
             );
           }
         }
       }
-      // });
     });
-    space.attachRichText(model.id, this.quill);
-    space.awareness.updateLocalCursor();
-
-    this.model.propsUpdated.on(() => this.requestUpdate());
-  }
-  updated() {
-    // Update placeholder if block`s type changed
-    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.host.space.detachRichText(this.model.id);
+  }
+
+  updated() {
+    // Update placeholder if block`s type changed
+    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
   }
 
   render() {
