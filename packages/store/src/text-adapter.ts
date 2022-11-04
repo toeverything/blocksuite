@@ -77,7 +77,7 @@ export class PrelimText {
   }
 
   replace() {
-    throw new Error(UNSUPPORTED_MSG + 'cover');
+    throw new Error(UNSUPPORTED_MSG + 'replace');
   }
 
   format() {
@@ -108,7 +108,8 @@ declare module 'yjs' {
       | { join: true }
       | { format: true }
       | { delete: true }
-      | { clear: true };
+      | { clear: true }
+      | { replace: true };
   }
 }
 
@@ -198,6 +199,7 @@ export class Text {
       this._yText.meta = { delete: true };
     });
   }
+
   replace(
     index: number,
     length: number,
@@ -207,7 +209,6 @@ export class Text {
     this._transact(() => {
       this._yText.delete(index, length);
       this._yText.insert(index, content, attributes);
-      // @ts-ignore
       this._yText.meta = { replace: true };
     });
   }

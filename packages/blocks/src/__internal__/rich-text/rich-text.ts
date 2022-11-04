@@ -66,6 +66,14 @@ export class RichText extends LitElement {
       },
       placeholder,
     });
+
+    space.attachRichText(model.id, this.quill);
+    space.awareness.updateLocalCursor();
+    this.model.propsUpdated.on(() => this.requestUpdate());
+
+    // If you type a character after the code or link node,
+    // the character should not be inserted into the code or link node.
+    // So we check and remove the corresponding format manually.
     this.quill.on('text-change', delta => {
       const selectorMap = {
         code: 'code',
@@ -80,6 +88,7 @@ export class RichText extends LitElement {
       if (delta.ops[1]?.attributes?.link) {
         attr = 'link';
       }
+      // Edit link operation need be excluded
       if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
         const retain = delta.ops[0].retain;
         const selector = selectorMap[attr as keyof typeof selectorMap];
@@ -99,10 +108,10 @@ export class RichText extends LitElement {
             (nextEmbedElement && nextEmbedElement !== currentEmbedElement) ||
             !nextEmbedElement
           ) {
-            model.text?.cover(
+            model.text?.replace(
               retain,
               insertedString.length,
-              // @ts-ignore
+              // @ts-expect-error
               !this.host.isCompositionStart
                 ? delta.ops[1]?.insert.toString() || ''
                 : ' ',
@@ -112,18 +121,16 @@ export class RichText extends LitElement {
         }
       }
     });
-    space.attachRichText(model.id, this.quill);
-    space.awareness.updateLocalCursor();
-    this.model.propsUpdated.on(() => this.requestUpdate());
-  }
-  updated() {
-    // Update placeholder if block`s type changed
-    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.host.space.detachRichText(this.model.id);
+  }
+
+  updated() {
+    // Update placeholder if block`s type changed
+    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
   }
 
   render() {
