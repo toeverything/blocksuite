@@ -295,9 +295,14 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   expect(actual).toEqual(text);
 }
 
-export async function assertStoreMatchJSX(page: Page, snapshot: string) {
-  const element = (await page.evaluate(() =>
-    window.store.toJSXElement()
+export async function assertStoreMatchJSX(
+  page: Page,
+  snapshot: string,
+  id?: string
+) {
+  const element = (await page.evaluate(
+    id => window.store.toJSXElement(id),
+    id
   )) as JSXElement;
 
   // Fix symbol can not be serialized, we need to set $$typeof manually
