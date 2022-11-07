@@ -1,4 +1,4 @@
-import { noop } from '../../../utils';
+import { noop } from '../../__internal__/utils';
 import type { LinkDetail } from './link-popover';
 
 const createEditLinkElement = (

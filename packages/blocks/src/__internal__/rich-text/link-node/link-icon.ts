@@ -1,5 +1,8 @@
 import { css, svg } from 'lit';
 
+// Control Icons with Font Size
+// Set the width and height to be 1em, which will be the font-size of its parent element
+// See https://css-tricks.com/control-icons-with-font-size/
 const iconStyle = css`
   width: 0.8em;
   height: 0.8em;
@@ -8,9 +11,6 @@ const iconStyle = css`
   margin-bottom: 0.1em;
 `;
 
-// Control Icons with Font Size
-// Set the width and height to be 1em, which will be the font-size of its parent element
-// See https://css-tricks.com/control-icons-with-font-size/
 export const LinkIcon = svg`<svg
   width="14"
   height="14"
