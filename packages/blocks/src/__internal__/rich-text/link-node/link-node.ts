@@ -1,10 +1,12 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import Quill from 'quill';
+import {
+  ALLOWED_SCHEMES,
+  showLinkPopover,
+} from '../../../components/link-popover';
 import { assertExists, getModelByElement, hotkey } from '../../utils';
 import { LinkIcon } from './link-icon';
-import { showLinkPopover } from './link-popover/create-link-popover';
-import { ALLOWED_SCHEMES } from './link-popover/link-popover';
 
 // TODO fix Blot types
 type Blot = {

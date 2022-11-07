@@ -1,4 +1,5 @@
 import type { Space } from '@blocksuite/store';
+import { showLinkPopover } from '../../../components/link-popover';
 import {
   assertExists,
   getRichTextByModel,
@@ -6,7 +7,6 @@ import {
   isRangeSelection,
 } from '../../utils';
 import './link-node';
-import { showLinkPopover } from './link-popover/create-link-popover';
 import { MockSelectNode } from './mock-select-node';
 
 export const createLink = async (space: Space, e: KeyboardEvent) => {
