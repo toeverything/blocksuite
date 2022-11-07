@@ -26,7 +26,7 @@ export class EmbedBlockComponent extends LitElement {
   @query('.resizable')
   resizable!: HTMLElement;
 
-  block:any;
+  block: any;
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -35,18 +35,18 @@ export class EmbedBlockComponent extends LitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
-    makeResizableDiv(this.resizable)
+    makeResizableDiv(this.resizable);
   }
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     // const { deep, index } = getListInfo(this.host, this.model);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
-    
+
     const { type, source } = this.model;
     switch (type) {
       case 'image':
-        this.block = getImageBlock({source:source})
+        this.block = getImageBlock({ source: source });
         break;
     }
 
@@ -54,9 +54,7 @@ export class EmbedBlockComponent extends LitElement {
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <div class=${`affine-embed-block-container`}>
-        <div class=${`affine-embed-wrapper`}>
-          ${this.block}
-        </div>
+        <div class=${`affine-embed-wrapper`}>${this.block}</div>
         ${childrenContainer}
       </div>
     `;

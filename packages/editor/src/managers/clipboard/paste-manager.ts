@@ -107,7 +107,6 @@ export class PasteManager {
             source: url,
             children: [],
             text: [{ insert: '' }],
-            
           },
           {
             flavour: 'affine:embed',

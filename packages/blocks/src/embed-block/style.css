@@ -1,7 +1,7 @@
-.affine-embed-rich-text-wrapper {
+.affine-embed-wrapper {
   padding: 10px;
 }
-.affine-embed-rich-text-wrapper img {
+.affine-embed-wrapper img {
   max-width: 100%;
   margin: auto;
 }
@@ -14,7 +14,7 @@
 .resizable .resizes {
   /* width: 100%; */
   height: 100%;
-
+  border: 3px solid #fff;
   box-sizing: border-box;
   line-height: 0;
 }
@@ -33,6 +33,9 @@
   position: absolute;
 }
 
+.resizable .resizes:hover .resize {
+  display: block;
+}
 .resizable .resizes .resize.top-left {
   left: -5px;
   top: -5px;

@@ -6,10 +6,11 @@ import { assertExists } from '../../__internal__';
 
 export function makeResizableDiv(element: HTMLElement) {
   // const element = document.querySelector(className) as Element;
-  const resizes = element.querySelectorAll( '.resize');
+  const resizes = element.querySelectorAll('.resize');
   const minimumSize = 20;
-  assertExists(element)
-  const maximumSize = (element.closest('.affine-embed-block-container')?.clientWidth??600) - 30;
+  assertExists(element);
+  const maximumSize =
+    (element.closest('.affine-embed-block-container')?.clientWidth ?? 600) - 30;
   let originalWidth = 0;
   let originalMouseX = 0;
   for (let i = 0; i < resizes.length; i++) {
@@ -66,14 +67,14 @@ export function makeResizableDiv(element: HTMLElement) {
 export const getImageBlock = (props: any) => {
   const { source } = props;
   return html`
-    <div  class="resizable">
+    <div class="resizable">
       <div class="resizes">
-        <div class="resize top-left" ></div>
+        <div class="resize top-left"></div>
         <div class="resize top-right"></div>
         <div class="resize bottom-left"></div>
         <div class="resize bottom-right"></div>
         <!-- <div > -->
-          <img src=${source} />
+        <img src=${source} />
         <!-- </div> -->
       </div>
     </div>
