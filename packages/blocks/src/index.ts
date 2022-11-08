@@ -6,13 +6,14 @@ import './list-block';
 import './group-block';
 import './__internal__/rich-text/link-node';
 import './embed-block';
-
+import './image-block';
 export * from './counter-block';
+export * from './embed-block';
 export * from './paragraph-block';
 export * from './page-block';
 export * from './list-block';
 export * from './group-block';
-export * from './embed-block';
+export * from './image-block';
 export * as SelectionUtils from './__internal__/utils/selection';
 export * from './__internal__/utils/types';
 

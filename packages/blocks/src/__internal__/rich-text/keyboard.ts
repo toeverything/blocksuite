@@ -91,7 +91,7 @@ export function createKeyboardBindings(space: Space, model: BaseBlockModel) {
       : ALLOW_DEFAULT;
   }
 
-  function hardEnter(this: KeyboardEventThis) {
+  function hardEnter(this:KeyboardEventThis) {
     const isEnd = isAtBlockEnd(this.quill);
     const parent = space.getParent(model);
     const isLastChild = parent?.lastChild() === model;

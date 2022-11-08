@@ -1,9 +1,10 @@
-.affine-embed-wrapper {
+.affine-image-wrapper {
   padding: 10px;
 }
-.affine-embed-wrapper img {
+.affine-image-wrapper img {
   max-width: 100%;
   margin: auto;
+  width: 100%;
 }
 
 .resizable {

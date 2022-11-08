@@ -33,14 +33,23 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost) {
         ></group-block>
       `;
     case 'affine:embed':
-      return html`
-        <embed-block
-          .model=${model as EmbedBlockModel}
-          .host=${host}
-        ></embed-block>
-      `;
+      return getEmbedBlockByType(model as EmbedBlockModel, host);
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
+}
+
+function getEmbedBlockByType(model: EmbedBlockModel, host: BlockHost) {
+  switch (model.type) {
+    case 'image':
+      return html`
+        <img-block
+          .model=${model as EmbedBlockModel}
+          .host=${host}
+        ></img-block>
+      `;
+    default:
+      return html`<div>Unknown embed type: "${model.type}"</div>`;
+  }
 }
 
 // Naming convention borrowed from

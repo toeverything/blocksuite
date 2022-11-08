@@ -3,9 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
 
 import type { EmbedBlockModel } from './embed-model';
-import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
-import { getImageBlock, makeResizableDiv } from './utils/image-block';
 
 @customElement('embed-block')
 export class EmbedBlockComponent extends LitElement {
@@ -23,6 +21,9 @@ export class EmbedBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
+  @property()
+  childrenContainer: LitElement | undefined;
+
   @query('.resizable')
   resizable!: HTMLElement;
 
@@ -35,27 +36,22 @@ export class EmbedBlockComponent extends LitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
-    makeResizableDiv(this.resizable);
   }
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    // const { deep, index } = getListInfo(this.host, this.model);
-    const childrenContainer = BlockChildrenContainer(this.model, this.host);
+    // const childrenContainer = BlockChildrenContainer(this.model, this.host);
 
-    const { type, source } = this.model;
-    switch (type) {
-      case 'image':
-        this.block = getImageBlock({ source: source });
-        break;
-    }
+    // const { type, source } = this.model;
 
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <div class=${`affine-embed-block-container`}>
-        <div class=${`affine-embed-wrapper`}>${this.block}</div>
-        ${childrenContainer}
+        <div class=${`affine-embed-wrapper`}>
+          <div class="">123123123123</div>
+        </div>
+        ${this.childrenContainer}
       </div>
     `;
   }

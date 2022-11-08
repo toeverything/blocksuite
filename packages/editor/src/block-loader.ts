@@ -4,7 +4,6 @@ import { ParagraphBlockModel } from '@blocksuite/blocks';
 import { ListBlockModel } from '@blocksuite/blocks';
 import { GroupBlockModel } from '@blocksuite/blocks';
 import { EmbedBlockModel } from '@blocksuite/blocks';
-
 export type { ParagraphBlockProps as TextBlockProps } from '@blocksuite/blocks';
 
 // TODO support dynamic register
