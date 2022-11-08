@@ -11,6 +11,7 @@ export interface EmbedBlockProps extends IBaseBlockProps {
   visitHeight?: number;
   caption?: string;
 }
+
 export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
   flavour = 'affine:embed' as const;
   public width: number;

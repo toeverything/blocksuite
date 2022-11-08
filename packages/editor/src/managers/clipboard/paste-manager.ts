@@ -101,6 +101,7 @@ export class PasteManager {
         //  todo upload file to file server
         let url = URL.createObjectURL(file);
         return [
+          // FIXME: Add two img blocks I should only add one
           {
             flavour: 'affine:embed',
             type: 'image',
@@ -187,6 +188,7 @@ export class PasteManager {
 
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
+
         parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
         let lastId = selectedBlock?.id;
         let position = endIndex + insertLen;

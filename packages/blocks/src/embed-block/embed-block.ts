@@ -1,5 +1,6 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { EmbedBlockModel } from './embed-model';
 
 import style from './style.css';
 
@@ -8,33 +9,35 @@ export class EmbedBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
-
   @property()
+  model!: EmbedBlockModel;
+
   @query('input')
-  _container!: HTMLElement;
-  // disable shadow DOM to workaround quill
+  _input!: HTMLInputElement;
   createRenderRoot() {
     return this;
   }
-  // firstUpdated() {
-  //   this.model.propsUpdated.on(() => this.requestUpdate());
-  //   this.model.childrenUpdated.on(() => this.requestUpdate());
-  // }
+  @state()
+  _caption!: string;
 
-  private _inputChange(e: any) {}
+  override firstUpdated() {
+    this._caption = this.model.caption;
+  }
+  private _inputChange() {
+    this._caption = this._input.value;
+    this.model.space.updateBlock(this.model, { caption: this._caption });
+  }
   render() {
-    // this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    // const childrenContainer = BlockChildrenContainer(this.model, this.host);
-
-    // const { type, source } = this.model;
-
-    // For the first list item, we need to add a margin-top to make it align with the text
-    // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <div class=${`affine-embed-block-container`}>
-        < class=${`affine-embed-wrapper`}>
+        <div class=${`affine-embed-wrapper`}>
           <slot></slot>
-          <input value=${123123}>
+          <input
+            placeholder="write a caption"
+            class="affine-embed-wrapper-caption"
+            value=${this._caption}
+            @input=${this._inputChange}
+          />
         </div>
       </div>
     `;

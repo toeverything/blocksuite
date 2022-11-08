@@ -33,12 +33,12 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost) {
         ></group-block>
       `;
     case 'affine:embed':
-      return getEmbedBlockByType(model as EmbedBlockModel, host);
+      return EmbedBlock(model as EmbedBlockModel, host);
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
 }
 
-function getEmbedBlockByType(model: EmbedBlockModel, host: BlockHost) {
+function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
   switch (model.type) {
     case 'image':
       return html`
