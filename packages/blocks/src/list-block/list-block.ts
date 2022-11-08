@@ -14,11 +14,16 @@ import { getListInfo } from './utils/get-list-info';
 import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
-function getListSelection(model: ListBlockModel) {
+function selectList(model: ListBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;
+
   const blockElement = getBlockElementByModel(model);
-  const selectionRect = blockElement?.getBoundingClientRect();
-  selectionManager.blockSelected(selectionRect as DOMRect);
+  if (!blockElement) {
+    console.error('list block model:', model, 'blockElement:', blockElement);
+    throw new Error('Failed to select list! blockElement not found!');
+  }
+  const selectionRect = blockElement.getBoundingClientRect();
+  selectionManager.selectBlockByRect(selectionRect);
 }
 @customElement('list-block')
 export class ListBlockComponent extends LitElement {
@@ -54,8 +59,10 @@ export class ListBlockComponent extends LitElement {
       deep,
       index,
       onClick: () => {
-        getListSelection(this.model);
-        if (this.model.type !== 'todo') return;
+        if (this.model.type !== 'todo') {
+          selectList(this.model);
+          return;
+        }
         this.host.space.captureSync();
         this.host.space.updateBlock(this.model, {
           checked: !this.model.checked,

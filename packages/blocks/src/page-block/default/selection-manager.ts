@@ -234,7 +234,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.dispose();
     this._mouseDisposeCallback();
   }
-  blockSelected(selectionRect: DOMRect) {
+  selectBlockByRect(selectionRect: DOMRect) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);
     const { richTextCache } = this.state;
