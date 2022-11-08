@@ -42,10 +42,7 @@ function getEmbedBlockByType(model: EmbedBlockModel, host: BlockHost) {
   switch (model.type) {
     case 'image':
       return html`
-        <img-block
-          .model=${model as EmbedBlockModel}
-          .host=${host}
-        ></img-block>
+        <img-block .model=${model as EmbedBlockModel} .host=${host}></img-block>
       `;
     default:
       return html`<div>Unknown embed type: "${model.type}"</div>`;

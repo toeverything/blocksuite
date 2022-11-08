@@ -24,9 +24,6 @@ export class ImageBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
-  @query('.resizable')
-  resizable!: HTMLElement;
-
   @query('.top-left')
   topLeft!: HTMLElement;
 
@@ -40,7 +37,7 @@ export class ImageBlockComponent extends LitElement {
   bottomRight!: HTMLElement;
 
   @query('.resizable')
-  container!: HTMLElement;
+  _container!: HTMLElement;
 
   block: any;
   // disable shadow DOM to workaround quill
@@ -53,43 +50,39 @@ export class ImageBlockComponent extends LitElement {
   private minimumSize: number = 20;
   private width: number = 0;
 
-  private handLeft = (e: MouseEvent) => {
+  private _handLeft = (e: MouseEvent) => {
     e.stopPropagation();
     this.originalMouseX = e.pageX;
-    window.addEventListener('mousemove', this.resizeLeft);
-    window.addEventListener('mouseup', this.stopResize);
+    window.addEventListener('mousemove', this._resizeLeft);
+    window.addEventListener('mouseup', this._stopResize);
   };
 
-  private handRight = (e: MouseEvent) => {
+  private _handRight = (e: MouseEvent) => {
     this.originalMouseX = e.pageX;
     e.stopPropagation();
-    window.addEventListener('mousemove', this.resizeRight);
-    window.addEventListener('mouseup', this.stopResize);
+    window.addEventListener('mousemove', this._resizeRight);
+    window.addEventListener('mouseup', this._stopResize);
   };
-  private stopResize = () => {
-    this.originalMouseX = this.width;
-    window.removeEventListener('mousemove', this.resizeLeft);
-    window.removeEventListener('mousemove', this.resizeRight);
+  private _stopResize = () => {
+    this.originalWidth = this.width;
+    window.removeEventListener('mousemove', this._resizeLeft);
+    window.removeEventListener('mousemove', this._resizeRight);
   };
 
-  private resizeLeft = (e: MouseEvent) => {
+  private _resizeLeft = (e: MouseEvent) => {
     const width = this.originalWidth - (e.pageX - this.originalMouseX);
-    console.log(' this.originalWidth: ', this.originalWidth);
     if (width > this.minimumSize && width < this.maximumSize) {
       this.width = width;
       // @ts-ignore
-      this.container.style.width = `${width}px`;
-      // this.originalWidth = width;
+      this._container.style.width = `${width}px`;
     }
   };
-  private resizeRight = (e: MouseEvent) => {
+  private _resizeRight = (e: MouseEvent) => {
     const width = this.originalWidth + (e.pageX - this.originalMouseX);
     if (width > this.minimumSize && width < this.maximumSize) {
       this.width = width;
       // @ts-ignore
-      this.container.style.width = `${width}px`;
-
-      // ;
+      this._container.style.width = `${width}px`;
     }
   };
 
@@ -102,55 +95,54 @@ export class ImageBlockComponent extends LitElement {
     img.onload = () => {
       this.originalWidth = img.width > 720 ? 720 : img.width;
       this.maximumSize = this.originalWidth;
-      this.container.style.width = img.width + 'px';
-      this.topLeft.addEventListener('mousedown', this.handLeft);
-      this.topRight.addEventListener('mousedown', this.handRight);
-      this.bottomLeft.addEventListener('mousedown', this.handLeft);
-      this.bottomRight.addEventListener('mousedown', this.handRight);
+      this._container.style.width = img.width + 'px';
+      this.topLeft.addEventListener('mousedown', this._handLeft);
+      this.topRight.addEventListener('mousedown', this._handRight);
+      this.bottomLeft.addEventListener('mousedown', this._handLeft);
+      this.bottomRight.addEventListener('mousedown', this._handRight);
     };
   }
 
   disconnectedCallback() {
-    this.stopResize();
-    this.topLeft.removeEventListener('mousedown', this.handLeft);
-    this.topRight.removeEventListener('mousedown', this.handRight);
-    this.bottomLeft.removeEventListener('mousedown', this.handLeft);
-    this.bottomRight.removeEventListener('mousedown', this.handRight);
+    this._stopResize();
+    this.topLeft.removeEventListener('mousedown', this._handLeft);
+    this.topRight.removeEventListener('mousedown', this._handRight);
+    this.bottomLeft.removeEventListener('mousedown', this._handLeft);
+    this.bottomRight.removeEventListener('mousedown', this._handRight);
   }
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     // const { deep, index } = getListInfo(this.host, this.model);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
-
-    const { source } = this.model;
-
+    const { source, caption } = this.model;
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <div class="affine-image-wrapper">
-        <div class="resizable">
-          <div class="image-option-container">
-            <ul class="image-option">
-              <li>1</li>
-              <li>2</li>
-              <li>3</li>
-              <li>4</li>
-            </ul>
+      <embed-block caption=${caption}>
+        <div class="affine-image-wrapper">
+          <div class="resizable">
+            <div class="image-option-container">
+              <ul class="image-option">
+                <li>1</li>
+                <li>2</li>
+                <li>3</li>
+                <li>4</li>
+              </ul>
+            </div>
+            <div class="resizes">
+              <div class="resize top-left"></div>
+              <div class="resize top-right"></div>
+              <div class="resize bottom-left"></div>
+              <div class="resize bottom-right"></div>
+              <!-- <div > -->
+              <img src=${source} />
+              <!-- </div> -->
+            </div>
           </div>
-
-          <div class="resizes">
-            <div class="resize top-left"></div>
-            <div class="resize top-right"></div>
-            <div class="resize bottom-left"></div>
-            <div class="resize bottom-right"></div>
-            <!-- <div > -->
-            <img src=${source} />
-            <!-- </div> -->
-          </div>
+          ${childrenContainer}
         </div>
-        ${childrenContainer}
-      </div>
+      </embed-block>
     `;
   }
 }
