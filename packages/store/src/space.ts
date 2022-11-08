@@ -14,6 +14,7 @@ import {
   trySyncTextProp,
 } from './utils/utils';
 import { uuidv4 } from './utils/id-generator';
+import type { IdGenerator } from './utils/id-generator';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -36,8 +37,6 @@ export interface StackItem {
   meta: Map<'cursor-location', SelectionRange | undefined>;
   type: 'undo' | 'redo';
 }
-
-export type IdGenerator = () => string;
 
 // Workaround
 const IS_WEB = typeof window !== 'undefined';
