@@ -1,7 +1,12 @@
 /// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
+import {
+  BLOCK_ID_ATTR,
+  BlockHost,
+  getBlockElementByModel,
+  getDefaultPageBlock,
+} from '../__internal__';
 
 import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils/get-list-icon';
@@ -9,6 +14,12 @@ import { getListInfo } from './utils/get-list-info';
 import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
+function getListSelection(model: ListBlockModel) {
+  const selectionManager = getDefaultPageBlock(model).selection;
+  const blockElement = getBlockElementByModel(model);
+  const selectionRect = blockElement?.getBoundingClientRect();
+  selectionManager.blockSelected(selectionRect as DOMRect);
+}
 @customElement('list-block')
 export class ListBlockComponent extends LitElement {
   static styles = css`
@@ -43,6 +54,7 @@ export class ListBlockComponent extends LitElement {
       deep,
       index,
       onClick: () => {
+        getListSelection(this.model);
         if (this.model.type !== 'todo') return;
         this.host.space.captureSync();
         this.host.space.updateBlock(this.model, {
