@@ -79,16 +79,14 @@ export class RichText extends LitElement {
         code: 'code',
         link: 'link-code',
       } as const;
-      // only length is 2 need to be handled
       let attr = '';
-      // only length is 2 need to be handled
       if (delta.ops[1]?.attributes?.code) {
         attr = 'code';
       }
       if (delta.ops[1]?.attributes?.link) {
         attr = 'link';
       }
-      // Edit link operation need be excluded
+      // only length is 2 need to be handled
       if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
         const retain = delta.ops[0].retain;
         const selector = selectorMap[attr as keyof typeof selectorMap];

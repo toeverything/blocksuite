@@ -439,91 +439,93 @@ function expandRangesByCharacter(
   editableContainer: Node
 ) {
   const leafNodes = leftFirstSearchLeafNodes(editableContainer);
-  let startNode = leafNodes[0];
-  let startOffset = 0;
-  let endNode = leafNodes[leafNodes.length - 1];
-  let endOffset = endNode.textContent?.length || 0;
-  // if anchorNode is Element, it always has only one child
-  const currentTextNode =
-    selection.anchorNode instanceof Element
-      ? selection.anchorNode.firstChild
-      : selection.anchorNode;
-  const currentChar =
-    currentTextNode?.textContent?.[selection.anchorOffset] || '';
-  const currentNodeIndex = leafNodes.findIndex(
-    node => node === currentTextNode
-  );
-  // if current char is not character or blank, select this char
-  if (
-    currentChar &&
-    notStrictCharacterAndSpaceReg.test(currentChar) &&
-    currentTextNode
-  ) {
-    startNode = currentTextNode as Text;
-    endNode = currentTextNode as Text;
-    startOffset = selection.anchorOffset;
-    endOffset = selection.anchorOffset + 1;
-  } else {
-    // expand selection to blank
-    let checkReg = notStrictCharacterReg;
-    // space only spend one char
-    if (/\s/.test(currentChar)) {
-      checkReg = /\S/;
-    }
-    // English character only expand English
-    if (/\w/.test(currentChar)) {
-      checkReg = /\W/;
-    }
-    // get startNode and startOffset
-    for (let i = currentNodeIndex; i >= 0; i--) {
-      const node = leafNodes[i];
-      if (node instanceof Text) {
-        const text = node.textContent?.slice(
-          0,
-          i === currentNodeIndex ? selection.anchorOffset : undefined
-        );
-        if (text) {
-          const reverseText = Array.from(text).reverse().join('');
-          const index = reverseText.search(checkReg);
-          if (index !== -1) {
-            startNode = node;
-            startOffset = reverseText.length - index;
-            break;
+  if (leafNodes.length) {
+    let startNode = leafNodes[0];
+    let startOffset = 0;
+    let endNode = leafNodes[leafNodes.length - 1];
+    let endOffset = endNode.textContent?.length || 0;
+    // if anchorNode is Element, it always has only one child
+    const currentTextNode =
+      selection.anchorNode instanceof Element
+        ? selection.anchorNode.firstChild
+        : selection.anchorNode;
+    const currentChar =
+      currentTextNode?.textContent?.[selection.anchorOffset] || '';
+    const currentNodeIndex = leafNodes.findIndex(
+      node => node === currentTextNode
+    );
+    // if current char is not character or blank, select this char
+    if (
+      currentChar &&
+      notStrictCharacterAndSpaceReg.test(currentChar) &&
+      currentTextNode
+    ) {
+      startNode = currentTextNode as Text;
+      endNode = currentTextNode as Text;
+      startOffset = selection.anchorOffset;
+      endOffset = selection.anchorOffset + 1;
+    } else {
+      // expand selection to blank
+      let checkReg = notStrictCharacterReg;
+      // space only spend one char
+      if (/\s/.test(currentChar)) {
+        checkReg = /\S/;
+      }
+      // English character only expand English
+      if (/\w/.test(currentChar)) {
+        checkReg = /\W/;
+      }
+      // get startNode and startOffset
+      for (let i = currentNodeIndex; i >= 0; i--) {
+        const node = leafNodes[i];
+        if (node instanceof Text) {
+          const text = node.textContent?.slice(
+            0,
+            i === currentNodeIndex ? selection.anchorOffset : undefined
+          );
+          if (text) {
+            const reverseText = Array.from(text).reverse().join('');
+            const index = reverseText.search(checkReg);
+            if (index !== -1) {
+              startNode = node;
+              startOffset = reverseText.length - index;
+              break;
+            }
+          }
+        }
+      }
+      // get endNode and endOffset
+      for (let j = currentNodeIndex; j < leafNodes.length; j++) {
+        const node = leafNodes[j];
+        if (node instanceof Text) {
+          const text = node.textContent?.slice(
+            j === currentNodeIndex ? selection.anchorOffset : undefined
+          );
+          if (text) {
+            const index = text.search(checkReg);
+            if (index !== -1) {
+              endNode = node;
+              endOffset =
+                j === currentNodeIndex ? selection.anchorOffset + index : index;
+              break;
+            }
           }
         }
       }
     }
-    // get endNode and endOffset
-    for (let j = currentNodeIndex; j < leafNodes.length; j++) {
-      const node = leafNodes[j];
-      if (node instanceof Text) {
-        const text = node.textContent?.slice(
-          j === currentNodeIndex ? selection.anchorOffset : undefined
-        );
-        if (text) {
-          const index = text.search(checkReg);
-          if (index !== -1) {
-            endNode = node;
-            endOffset =
-              j === currentNodeIndex ? selection.anchorOffset + index : index;
-            break;
-          }
-        }
-      }
-    }
+    const newRange = document.createRange();
+    newRange.setStart(startNode, startOffset);
+    newRange.setEnd(endNode, endOffset);
+    // try select range by segmenter
+    trySelectBySegmenter(
+      selection,
+      newRange,
+      currentChar,
+      leafNodes,
+      currentNodeIndex
+    );
+    resetNativeSelection(newRange);
   }
-  const newRange = document.createRange();
-  newRange.setStart(startNode, startOffset);
-  newRange.setEnd(endNode, endOffset);
-  // try select range by segmenter
-  trySelectBySegmenter(
-    selection,
-    newRange,
-    currentChar,
-    leafNodes,
-    currentNodeIndex
-  );
-  resetNativeSelection(newRange);
 }
 
 function trySelectBySegmenter(
