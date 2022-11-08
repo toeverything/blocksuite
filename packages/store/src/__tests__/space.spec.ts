@@ -55,6 +55,44 @@ describe.concurrent('addBlock', () => {
     });
   });
 
+  it('use custom idGenerator', () => {
+    const options = {
+      ...getStoreOptions(),
+      idGenerator: (() => {
+        const keys = ['7', '100', '2'];
+        let i = 0;
+        return () => keys[i++];
+      })(),
+    };
+    const space = new Store(options).space.register(BlockSchema);
+
+    space.addBlock({ flavour: 'affine:page' });
+    space.addBlock({ flavour: 'affine:paragraph' });
+    space.addBlock({ flavour: 'affine:paragraph' });
+
+    assert.deepEqual(serialize(space).page0, {
+      '7': {
+        'sys:children': ['100', '2'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '7',
+      },
+      '100': {
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '100',
+        'prop:text': '',
+        'prop:type': 'text',
+      },
+      '2': {
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+        'prop:text': '',
+        'prop:type': 'text',
+      },
+    });
+  });
+
   it('can add model with props', () => {
     const space = new Store(getStoreOptions()).space.register(BlockSchema);
 
