@@ -13,6 +13,7 @@ import {
   toBlockProps,
   trySyncTextProp,
 } from './utils/utils';
+import { uuidv4 } from './utils/id-generator';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -36,6 +37,8 @@ export interface StackItem {
   type: 'undo' | 'redo';
 }
 
+export type IdGenerator = () => string;
+
 // Workaround
 const IS_WEB = typeof window !== 'undefined';
 
@@ -56,7 +59,7 @@ export class Space {
     updated: new Signal(),
   };
 
-  private _i = 0;
+  private _idGenerator: IdGenerator;
   private _history: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
@@ -68,8 +71,14 @@ export class Space {
     Object.keys(new BaseBlockModel(this, {}))
   );
 
-  constructor(doc: Y.Doc, awareness: Awareness) {
+  constructor(
+    doc: Y.Doc,
+    awareness: Awareness,
+    idGenerator: IdGenerator = uuidv4
+  ) {
     this.doc = doc;
+
+    this._idGenerator = idGenerator;
 
     const aware = awareness ?? new Awareness(this.doc);
     this.awareness = new AwarenessAdapter(this, aware);
@@ -205,7 +214,7 @@ export class Space {
     }
 
     const clonedProps = { ...blockProps };
-    const id = this._createId();
+    const id = this._idGenerator();
     clonedProps.id = id;
 
     this.transact(() => {
@@ -315,10 +324,6 @@ export class Space {
 
   markTextSplit(base: Text, left: PrelimText, right: PrelimText) {
     this._splitSet.add(base).add(left).add(right);
-  }
-
-  private _createId(): string {
-    return (this._i++).toString();
   }
 
   private _getYBlock(id: string): YBlock {

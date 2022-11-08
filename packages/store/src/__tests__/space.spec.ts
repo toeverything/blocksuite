@@ -1,7 +1,7 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { assert, describe, expect, it } from 'vitest';
-import { BaseBlockModel, Signal, Store, Space } from '..';
+import { BaseBlockModel, Signal, Store, Space, createAutoIncrement } from '..';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModel } from '../../../blocks/src/page-block/page-model';
@@ -9,9 +9,10 @@ import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragra
 import { ListBlockModel } from '../../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../../blocks/src/group-block/group-model';
 
-const options = {
+const getStoreOptions = () => ({
   room: '',
-};
+  idGenerator: createAutoIncrement(),
+});
 
 // Create BlockSchema manually
 export const BlockSchema = {
@@ -31,7 +32,7 @@ function waitOnce<T>(signal: Signal<T>) {
 
 describe.concurrent('basic', () => {
   it('can init store', () => {
-    const store = new Store(options);
+    const store = new Store(getStoreOptions());
 
     assert.deepEqual(serialize(store.space), {
       page0: {},
@@ -41,7 +42,7 @@ describe.concurrent('basic', () => {
 
 describe.concurrent('addBlock', () => {
   it('can add single model', () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
 
     space.addBlock({ flavour: 'affine:page' });
 
@@ -55,7 +56,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add model with props', () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
 
     space.addBlock({ flavour: 'affine:page', title: 'hello' });
 
@@ -70,7 +71,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add multi models', () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
     space.addBlock({ flavour: 'affine:page' });
     space.addBlock({ flavour: 'affine:paragraph' });
 
@@ -91,7 +92,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can observe signal events', async () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
 
     queueMicrotask(() => space.addBlock({ flavour: 'affine:page' }));
     const block = await waitOnce(space.signals.rootAdded);
@@ -99,7 +100,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add block to root', async () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
 
     queueMicrotask(() => space.addBlock({ flavour: 'affine:page' }));
     const root = await waitOnce(space.signals.rootAdded);
@@ -123,7 +124,7 @@ async function initWithRoot(space: Space) {
 
 describe.concurrent('deleteBlock', () => {
   it('can delete single model', () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
 
     space.addBlock({ flavour: 'affine:page' });
     assert.deepEqual(serialize(space).page0, {
@@ -139,7 +140,7 @@ describe.concurrent('deleteBlock', () => {
   });
 
   it('can delete model with parent', async () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
     const root = await initWithRoot(space);
 
     space.addBlock({ flavour: 'affine:paragraph' });
@@ -176,7 +177,7 @@ describe.concurrent('deleteBlock', () => {
 
 describe.concurrent('getBlock', () => {
   it('can get block by id', async () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
     const root = await initWithRoot(space);
 
     space.addBlock({ flavour: 'affine:paragraph' });
@@ -191,7 +192,7 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get parent', async () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
     const root = await initWithRoot(space);
 
     space.addBlock({ flavour: 'affine:paragraph' });
@@ -205,7 +206,7 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get previous sibling', async () => {
-    const space = new Store(options).space.register(BlockSchema);
+    const space = new Store(getStoreOptions()).space.register(BlockSchema);
     const root = await initWithRoot(space);
 
     space.addBlock({ flavour: 'affine:paragraph' });
@@ -221,7 +222,7 @@ describe.concurrent('getBlock', () => {
 
 describe('store.toJSXElement works', async () => {
   it('store match snapshot', () => {
-    const store = new Store(options);
+    const store = new Store(getStoreOptions());
     const space = store.space.register(BlockSchema);
 
     space.addBlock({ flavour: 'affine:page', title: 'hello' });
@@ -234,14 +235,14 @@ describe('store.toJSXElement works', async () => {
   });
 
   it('empty store match snapshot', () => {
-    const store = new Store(options);
+    const store = new Store(getStoreOptions());
     store.space.register(BlockSchema);
 
     expect(store.toJSXElement()).toMatchInlineSnapshot('null');
   });
 
   it('store with multiple blocks children match snapshot', () => {
-    const store = new Store(options);
+    const store = new Store(getStoreOptions());
     const space = store.space.register(BlockSchema);
 
     space.addBlock({ flavour: 'affine:page' });
