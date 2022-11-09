@@ -1,4 +1,4 @@
-import { html, LitElement, PropertyValueMap, type TemplateResult } from 'lit';
+import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -244,7 +244,7 @@ export class EdgelessSelectedRect extends LitElement {
         selected,
         selected: { space, xywh },
       } = this.state;
-      const [x, y, w, h] = JSON.parse(xywh) as XYWH;
+      const [x, y, w] = JSON.parse(xywh) as XYWH;
       const minus = this._dragStartInfo.startMouseLeft - e.clientX;
       if (this._dragStartInfo.direction === 'left') {
         newX = this._dragStartInfo.absoluteLeft - minus / this.zoom;
