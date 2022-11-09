@@ -1,6 +1,6 @@
-import { BaseBlockModel } from '@blocksuite/store';
-import { DefaultPageBlockComponent } from '../..';
-import { RichText } from '../rich-text/rich-text';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { DefaultPageBlockComponent } from '../..';
+import type { RichText } from '../rich-text/rich-text';
 import { BLOCK_ID_ATTR as ATTR } from './consts';
 import { assertExists } from './std';
 
@@ -93,13 +93,12 @@ export function getPreviousBlock(container: Element, blockId: string) {
     );
     if (previousBlock?.model) {
       if (previousBlock.model.children.length) {
-        let firstChildren =
-          previousBlock.model.children[previousBlock.children.length - 1];
-        while (firstChildren.children.length) {
-          firstChildren =
-            firstChildren.children[firstChildren.children.length - 1];
+        let firstChild =
+          previousBlock.model.children[previousBlock.model.children.length - 1];
+        while (firstChild.children.length) {
+          firstChild = firstChild.children[firstChild.children.length - 1];
         }
-        return firstChildren;
+        return firstChild;
       }
       return previousBlock.model;
     }
@@ -109,17 +108,17 @@ export function getPreviousBlock(container: Element, blockId: string) {
 }
 
 export function getDefaultPageBlock(model: BaseBlockModel) {
-  assertExists(model.store.root);
+  assertExists(model.space.root);
   const page = document.querySelector(
-    `[${ATTR}="${model.store.root.id}"]`
+    `[${ATTR}="${model.space.root.id}"]`
   ) as DefaultPageBlockComponent;
   return page;
 }
 
 export function getContainerByModel(model: BaseBlockModel) {
-  assertExists(model.store.root);
+  assertExists(model.space.root);
   const page = document.querySelector(
-    `[${ATTR}="${model.store.root.id}"]`
+    `[${ATTR}="${model.space.root.id}"]`
   ) as DefaultPageBlockComponent;
   const container = page.closest('editor-container');
   assertExists(container);
@@ -127,13 +126,13 @@ export function getContainerByModel(model: BaseBlockModel) {
 }
 
 export function getBlockElementByModel(model: BaseBlockModel) {
-  assertExists(model.store.root);
+  assertExists(model.space.root);
   const page = document.querySelector(
-    `[${ATTR}="${model.store.root.id}"]`
+    `[${ATTR}="${model.space.root.id}"]`
   ) as DefaultPageBlockComponent;
   if (!page) return null;
 
-  if (model.id === model.store.root.id) {
+  if (model.id === model.space.root.id) {
     return page as HTMLElement;
   }
 
@@ -183,7 +182,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       // @ts-ignore
       const blockElement = getBlockElementByModel(block.model);
       const mainElelment =
-        block.model.flavour === 'page'
+        block.model.flavour === 'affine:page'
           ? blockElement?.querySelector(
               '.affine-default-page-block-title-container'
             )

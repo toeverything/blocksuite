@@ -1,7 +1,8 @@
+/// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Disposable, Signal, Store, Text } from '@blocksuite/store';
+import { Disposable, Signal, Space, Store, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -17,7 +18,6 @@ import {
   noop,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
-import style from './style.css';
 import {
   batchUpdateTextType,
   bindCommonHotkey,
@@ -28,6 +28,7 @@ import {
   tryUpdateGroupSize,
   updateTextType,
 } from '../utils';
+import style from './style.css';
 
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
@@ -102,7 +103,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   store!: Store;
 
-  flavour = 'page' as const;
+  get space() {
+    return this.store.space;
+  }
+
+  flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
 
@@ -137,7 +142,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _title!: HTMLInputElement;
 
   private _bindHotkeys() {
-    const { store } = this;
+    const { space } = this;
     const {
       BACKSPACE,
       SELECT_ALL,
@@ -154,7 +159,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       TEXT,
     } = HOTKEYS;
 
-    bindCommonHotkey(store);
+    bindCommonHotkey(space);
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
       if (isPageTitle(e)) {
@@ -163,7 +168,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         if (target.selectionStart !== target.selectionEnd) {
           e.preventDefault();
           const title = getSplicedTitle(target);
-          store.updateBlock(this.model, { title });
+          space.updateBlock(this.model, { title });
         }
         // collapsed delete
         else {
@@ -173,11 +178,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       }
 
       if (state.type === 'native') {
-        handleBackspace(store, e);
+        handleBackspace(space, e);
       } else if (state.type === 'block') {
         const { selectedRichTexts } = state;
         handleBlockSelectionBatchDelete(
-          store,
+          space,
           selectedRichTexts.map(richText => richText.model)
         );
         state.clear();
@@ -192,20 +197,32 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selection.state.type = 'native';
     });
 
-    hotkey.addListener(H1, () => this._updateType('paragraph', 'h1', store));
-    hotkey.addListener(H2, () => this._updateType('paragraph', 'h2', store));
-    hotkey.addListener(H3, () => this._updateType('paragraph', 'h3', store));
-    hotkey.addListener(H4, () => this._updateType('paragraph', 'h4', store));
-    hotkey.addListener(H5, () => this._updateType('paragraph', 'h5', store));
-    hotkey.addListener(H6, () => this._updateType('paragraph', 'h6', store));
+    hotkey.addListener(H1, () =>
+      this._updateType('affine:paragraph', 'h1', space)
+    );
+    hotkey.addListener(H2, () =>
+      this._updateType('affine:paragraph', 'h2', space)
+    );
+    hotkey.addListener(H3, () =>
+      this._updateType('affine:paragraph', 'h3', space)
+    );
+    hotkey.addListener(H4, () =>
+      this._updateType('affine:paragraph', 'h4', space)
+    );
+    hotkey.addListener(H5, () =>
+      this._updateType('affine:paragraph', 'h5', space)
+    );
+    hotkey.addListener(H6, () =>
+      this._updateType('affine:paragraph', 'h6', space)
+    );
     hotkey.addListener(NUMBERED_LIST, () =>
-      this._updateType('list', 'numbered', store)
+      this._updateType('affine:list', 'numbered', space)
     );
     hotkey.addListener(BULLETED, () =>
-      this._updateType('list', 'bulleted', store)
+      this._updateType('affine:list', 'bulleted', space)
     );
     hotkey.addListener(TEXT, () =>
-      this._updateType('paragraph', 'text', store)
+      this._updateType('affine:paragraph', 'text', space)
     );
     hotkey.addListener(SHIFT_UP, e => {
       // TODO expand selection up
@@ -243,7 +260,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _onTitleKeyDown(e: KeyboardEvent) {
-    const hasContent = !this.store.isEmpty;
+    const hasContent = !this.space.isEmpty;
 
     if (e.key === 'Enter' && hasContent) {
       assertExists(this._title.selectionStart);
@@ -253,44 +270,44 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
       const defaultGroup = this.model.children[0];
       const props = {
-        flavour: 'paragraph',
-        text: new Text(this.store, contentRight),
+        flavour: 'affine:paragraph',
+        text: new Text(this.space, contentRight),
       };
-      const newFirstParagraphId = this.store.addBlock(props, defaultGroup, 0);
-      this.store.updateBlock(this.model, { title: contentLeft });
-      asyncFocusRichText(this.store, newFirstParagraphId);
+      const newFirstParagraphId = this.space.addBlock(props, defaultGroup, 0);
+      this.space.updateBlock(this.model, { title: contentLeft });
+      asyncFocusRichText(this.space, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      asyncFocusRichText(this.store, this.model.children[0].children[0].id);
+      asyncFocusRichText(this.space, this.model.children[0].children[0].id);
     }
   }
 
   private _onTitleInput(e: InputEvent) {
-    const { store } = this;
+    const { space } = this;
 
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
-      const pageId = store.addBlock({ flavour: 'page', title });
-      const groupId = store.addBlock({ flavour: 'group' }, pageId);
-      store.addBlock({ flavour: 'paragraph' }, groupId);
+      const pageId = space.addBlock({ flavour: 'affine:page', title });
+      const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
+      space.addBlock({ flavour: 'affine:paragraph' }, groupId);
       return;
     }
 
     const title = (e.target as HTMLInputElement).value;
-    store.updateBlock(this.model, { title });
+    space.updateBlock(this.model, { title });
   }
 
-  private _updateType(flavour: string, type: string, store: Store) {
+  private _updateType(flavour: string, type: string, space: Space) {
     const { state } = this.selection;
     if (state.selectedRichTexts.length > 0) {
       batchUpdateTextType(
         flavour,
-        store,
+        space,
         state.selectedRichTexts.map(richText => richText.model),
         type
       );
     } else {
-      updateTextType(flavour, type, store);
+      updateTextType(flavour, type, space);
     }
   }
 
@@ -307,7 +324,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
       this.selection = new DefaultSelectionManager(
-        this.store,
+        this.space,
         this.mouseRoot,
         this.signals
       );
@@ -342,10 +359,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.requestUpdate();
     });
 
-    tryUpdateGroupSize(this.store, 1);
+    tryUpdateGroupSize(this.space, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.store, 1);
+      tryUpdateGroupSize(this.space, 1);
     });
 
     // TMP: clear selected rects on scroll

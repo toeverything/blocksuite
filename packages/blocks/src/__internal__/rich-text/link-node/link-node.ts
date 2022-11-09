@@ -1,10 +1,12 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import Quill from 'quill';
+import {
+  ALLOWED_SCHEMES,
+  showLinkPopover,
+} from '../../../components/link-popover';
 import { assertExists, getModelByElement, hotkey } from '../../utils';
 import { LinkIcon } from './link-icon';
-import { showLinkPopover } from './link-popover/create-link-popover';
-import { ALLOWED_SCHEMES } from './link-popover/link-popover';
 
 // TODO fix Blot types
 type Blot = {
@@ -93,17 +95,20 @@ export class LinkNodeComponent extends LitElement {
    */
   private async updateLink(blot: Blot, link: string | false, text?: string) {
     const model = getModelByElement(this);
-    const store = model.store;
+    const { space } = model;
 
     if (text) {
       // Replace the text
       // Save the blot's index otherwise it will be lost after the blot is removed
       const offset = blot.offset();
-      store.captureSync();
+      space.captureSync();
+      // TODO save the format of the original text
+      // for make a distinction between user type in and set
       model.text?.delete(offset, blot.length());
-      model.text?.insert(text, offset, { link });
+      model.text?.insert(text, offset);
+      model.text?.format(offset, text.length, { link });
     } else {
-      store.captureSync();
+      space.captureSync();
       model.text?.format(blot.offset(), blot.length(), { link });
     }
   }

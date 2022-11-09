@@ -1,4 +1,4 @@
-import type { Store } from './store';
+import type { Space } from './space';
 import type { TextType } from './text-adapter';
 import { Signal } from './utils/signal';
 
@@ -13,7 +13,7 @@ export interface IBaseBlockProps {
 }
 
 export class BaseBlockModel implements IBaseBlockProps {
-  store: Store;
+  space: Space;
   propsUpdated = new Signal();
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
@@ -25,8 +25,8 @@ export class BaseBlockModel implements IBaseBlockProps {
   // TODO use schema
   text?: TextType;
 
-  constructor(store: Store, props: Partial<IBaseBlockProps>) {
-    this.store = store;
+  constructor(space: Space, props: Partial<IBaseBlockProps>) {
+    this.space = space;
     this.id = props.id as string;
     this.children = [];
   }
@@ -66,7 +66,7 @@ export class BaseBlockModel implements IBaseBlockProps {
   }
 
   private _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
-    const text = deltaLeaf.insert;
+    let text = deltaLeaf.insert;
     const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
       string,
       boolean
@@ -74,23 +74,23 @@ export class BaseBlockModel implements IBaseBlockProps {
     if (!attributes) {
       return text;
     }
+    if (attributes.code) {
+      text = `<code>${text}</code>`;
+    }
     if (attributes.bold) {
-      return `<strong>${text}</strong>`;
+      text = `<strong>${text}</strong>`;
     }
     if (attributes.italic) {
-      return `<em>${text}</em>`;
+      text = `<em>${text}</em>`;
     }
     if (attributes.underline) {
-      return `<u>${text}</u>`;
-    }
-    if (attributes.code) {
-      return `<code>${text}</code>`;
+      text = `<u>${text}</u>`;
     }
     if (attributes.strikethrough) {
-      return `<s>${text}</s>`;
+      text = `<s>${text}</s>`;
     }
     if (attributes.link) {
-      return `<a href='${attributes.link}'>${text}</a>`;
+      text = `<a href='${attributes.link}'>${text}</a>`;
     }
     return text;
   }

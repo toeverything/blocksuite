@@ -8,8 +8,8 @@ export type { ParagraphBlockProps as TextBlockProps } from '@blocksuite/blocks';
 
 // TODO support dynamic register
 export const BlockSchema = {
-  paragraph: ParagraphBlockModel,
-  page: PageBlockModel,
-  list: ListBlockModel,
-  group: GroupBlockModel,
+  'affine:paragraph': ParagraphBlockModel,
+  'affine:page': PageBlockModel,
+  'affine:list': ListBlockModel,
+  'affine:group': GroupBlockModel,
 } as const;

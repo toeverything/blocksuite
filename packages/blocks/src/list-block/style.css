@@ -1,6 +1,7 @@
 .affine-list-block-container {
   box-sizing: border-box;
   border-radius: 5px;
+  margin-top: 2px;
 }
 .affine-list-block-container--first {
   margin-top: var(--affine-paragraph-space);

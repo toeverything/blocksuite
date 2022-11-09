@@ -1,11 +1,13 @@
+export * from './space';
 export * from './store';
 export * from './base';
 export * from './awareness';
 export * from './text-adapter';
 export * from './utils/signal';
 export * from './utils/disposable';
-export * from './utils/utils';
 export * from './providers';
+export * as Utils from './utils/utils';
+export * from './utils/id-generator';
 
 const env =
   typeof globalThis !== 'undefined'

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { test, expect } from '@playwright/test';
-import type { Store } from '../packages/store';
+import './utils/declare-test-window';
+import { test } from '@playwright/test';
+import type { Space } from '../packages/store';
 import {
   enterPlaygroundRoom,
   disconnectByClick,
@@ -30,7 +31,7 @@ test('basic input', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('hello');
 
-  await expect(page).toHaveTitle(/BlockSuite/);
+  await test.expect(page).toHaveTitle(/BlockSuite/);
   await assertStore(page, defaultStore);
   await assertText(page, 'hello');
 });
@@ -39,21 +40,20 @@ test('basic init with external text', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await page.evaluate(() => {
-    // @ts-ignore
-    const store = window['store'] as Store;
+    const space = window.store.space as Space;
 
-    const pageId = store.addBlock({ flavour: 'page', title: 'hello' });
-    const groupId = store.addBlock({ flavour: 'group' }, pageId);
+    const pageId = space.addBlock({ flavour: 'affine:page', title: 'hello' });
+    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
 
-    const text = new store.Text(store, 'world');
-    store.addBlock({ flavour: 'paragraph', text }, groupId);
+    const text = new space.Text(space, 'world');
+    space.addBlock({ flavour: 'affine:paragraph', text }, groupId);
 
     const delta = [
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    store.addBlock(
-      { flavour: 'paragraph', text: store.Text.fromDelta(store, delta) },
+    space.addBlock(
+      { flavour: 'affine:paragraph', text: space.Text.fromDelta(space, delta) },
       groupId
     );
   });

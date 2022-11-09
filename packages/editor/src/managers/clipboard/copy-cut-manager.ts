@@ -1,6 +1,6 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 import { ClipItem } from './clip-item';
-import { EditorContainer } from '../../components';
+import type { EditorContainer } from '../../components';
 import { ListBlockModel } from '@blocksuite/blocks';
 import { SelectionUtils } from '@blocksuite/blocks';
 
@@ -41,14 +41,14 @@ export class CopyCutManager {
     const { selectionInfo } = this._selection;
     if (selectionInfo.type == 'Block') {
       selectionInfo.blocks.forEach(({ id }) =>
-        this._editor.store.deleteBlockById(id)
+        this._editor.space.deleteBlockById(id)
       );
     } else if (
       selectionInfo.type === 'Range' ||
       selectionInfo.type === 'Caret'
     ) {
       // TODO the selection of  discontinuous and cross blocks are not exist yet
-      this._editor.store.richTextAdapters
+      this._editor.space.richTextAdapters
         .get(selectionInfo.anchorBlockId)
         ?.quill.deleteText(
           selectionInfo.anchorBlockPosition || 0,
@@ -61,7 +61,7 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const selectionInfo = SelectionUtils.getSelectInfo(this._editor.store);
+    const selectionInfo = SelectionUtils.getSelectInfo(this._editor.space);
     const selectedBlocks = selectionInfo.selectedBlocks;
 
     const affineClip = this._getCustomClip(selectedBlocks);
@@ -101,15 +101,15 @@ export class CopyCutManager {
   private _getClipInfoBySelectionInfo(
     selectedBlock: SelectedBlock
   ): OpenBlockInfo | null {
-    const model = this._editor.store.getBlockById(selectedBlock.id);
+    const model = this._editor.space.getBlockById(selectedBlock.id);
     if (!model) {
       return null;
     }
 
     let { flavour, type } = model;
     let delta = [];
-    if (model.flavour === 'page') {
-      flavour = 'paragraph';
+    if (model.flavour === 'affine:page') {
+      flavour = 'affine:paragraph';
       type = 'text';
       const text = model.block2Text(
         '',

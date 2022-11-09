@@ -1,6 +1,12 @@
+/// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
+import {
+  BLOCK_ID_ATTR,
+  BlockHost,
+  getBlockElementByModel,
+  getDefaultPageBlock,
+} from '../__internal__';
 
 import type { ListBlockModel } from './list-model';
 import { getListIcon } from './utils/get-list-icon';
@@ -8,6 +14,17 @@ import { getListInfo } from './utils/get-list-info';
 import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
+function selectList(model: ListBlockModel) {
+  const selectionManager = getDefaultPageBlock(model).selection;
+
+  const blockElement = getBlockElementByModel(model);
+  if (!blockElement) {
+    console.error('list block model:', model, 'blockElement:', blockElement);
+    throw new Error('Failed to select list! blockElement not found!');
+  }
+  const selectionRect = blockElement.getBoundingClientRect();
+  selectionManager.selectBlockByRect(selectionRect);
+}
 @customElement('list-block')
 export class ListBlockComponent extends LitElement {
   static styles = css`
@@ -42,9 +59,12 @@ export class ListBlockComponent extends LitElement {
       deep,
       index,
       onClick: () => {
-        if (this.model.type !== 'todo') return;
-        this.host.store.captureSync();
-        this.host.store.updateBlock(this.model, {
+        if (this.model.type !== 'todo') {
+          selectList(this.model);
+          return;
+        }
+        this.host.space.captureSync();
+        this.host.space.updateBlock(this.model, {
           checked: !this.model.checked,
         });
       },

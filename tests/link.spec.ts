@@ -68,11 +68,11 @@ test('basic link', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<page>
-  <group
+<affine:page>
+  <affine:group
     prop:xywh="[0,0,720,32]"
   >
-    <paragraph
+    <affine:paragraph
       prop:text={
         <>
           <text
@@ -83,7 +83,70 @@ test('basic link', async ({ page }) => {
       }
       prop:type="text"
     />
-  </group>
-</page>`
+  </affine:group>
+</affine:page>`
+  );
+});
+
+const createLinkBlock = async (page: Page, str: string, link: string) => {
+  const id = await page.evaluate(
+    ([str, link]) => {
+      const { space } = window.store;
+      const pageId = space.addBlock({
+        flavour: 'affine:page',
+        title: 'title',
+      });
+      const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
+
+      const text = space.Text.fromDelta(space, [
+        { insert: 'Hello' },
+        { insert: str, attributes: { link } },
+      ]);
+      const id = space.addBlock(
+        { flavour: 'affine:paragraph', type: 'text', text: text },
+        groupId
+      );
+      return id;
+    },
+    [str, link]
+  );
+  return id;
+};
+
+test('text added after a link should not have link formatting', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  // await initEmptyState(page);
+  const id = await createLinkBlock(page, 'link text', 'http://example.com');
+  await focusRichText(page, 0);
+  await page.keyboard.type('after link');
+  await assertStoreMatchJSX(
+    page,
+    // XXX This snapshot is not exactly correct, but it's close enough for now.
+    // The first text after the link should not have the link formatting.
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert="Hello"
+      />
+      <text
+        insert="link text"
+        link="http://example.com"
+      />
+      <text
+        insert="a"
+        link={false}
+      />
+      <text
+        insert="fter link"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    id
   );
 });

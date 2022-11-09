@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
+import './declare-test-window';
 import { expect, type Page } from '@playwright/test';
 import type {
   BaseBlockModel,
@@ -14,20 +15,20 @@ import {
 } from 'pretty-format';
 
 export const defaultStore: SerializedStore = {
-  blocks: {
+  page0: {
     '0': {
       'sys:id': '0',
-      'sys:flavour': 'page',
+      'sys:flavour': 'affine:page',
       'sys:children': ['1'],
     },
     '1': {
-      'sys:flavour': 'group',
+      'sys:flavour': 'affine:group',
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,32]',
     },
     '2': {
-      'sys:flavour': 'paragraph',
+      'sys:flavour': 'affine:paragraph',
       'sys:id': '2',
       'sys:children': [],
       'prop:text': 'hello',
@@ -139,7 +140,6 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>
-    // @ts-ignore
     window.store.doc.toJSON()
   )) as SerializedStore;
   expect(actual).toEqual(expected);
@@ -242,14 +242,13 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
  */
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
-    // @ts-expect-error
     window.store.doc.toJSON()
   )) as SerializedStore;
-  const titleNode = jsonDoc.blocks['0'];
+  const titleNode = jsonDoc.page0['0'];
 
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
-    if (node['sys:flavour'] === 'page') {
+    if (node['sys:flavour'] === 'affine:page') {
       return (node['prop:title'] as string) ?? '';
     }
     if (!('prop:type' in node)) {
@@ -275,12 +274,12 @@ export async function assertMatchMarkdown(page: Page, text: string) {
       // return visitor(node);
     }
 
-    const children = node['sys:children'].map(id => jsonDoc.blocks[id]);
+    const children = node['sys:children'].map(id => jsonDoc.page0[id]);
     return [
       visitor(node),
       ...children.flatMap(child =>
         visitNodes(child, visitor).map(line => {
-          if (node['sys:flavour'] === 'page') {
+          if (node['sys:flavour'] === 'affine:page') {
             // Ad hoc way to remove the title indent
             return line;
           }
@@ -296,10 +295,14 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   expect(actual).toEqual(text);
 }
 
-export async function assertStoreMatchJSX(page: Page, snapshot: string) {
-  const element = (await page.evaluate(() =>
-    // @ts-expect-error
-    window.store.toJSXElement()
+export async function assertStoreMatchJSX(
+  page: Page,
+  snapshot: string,
+  id?: string
+) {
+  const element = (await page.evaluate(
+    id => window.store.toJSXElement(id),
+    id
   )) as JSXElement;
 
   // Fix symbol can not be serialized, we need to set $$typeof manually

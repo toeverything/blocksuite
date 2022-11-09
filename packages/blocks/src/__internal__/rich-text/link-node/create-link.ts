@@ -1,4 +1,5 @@
-import { Store } from '@blocksuite/store';
+import type { Space } from '@blocksuite/store';
+import { showLinkPopover } from '../../../components/link-popover';
 import {
   assertExists,
   getRichTextByModel,
@@ -6,10 +7,9 @@ import {
   isRangeSelection,
 } from '../../utils';
 import './link-node';
-import { showLinkPopover } from './link-popover/create-link-popover';
 import { MockSelectNode } from './mock-select-node';
 
-export const createLink = async (store: Store, e: KeyboardEvent) => {
+export const createLink = async (space: Space, e: KeyboardEvent) => {
   if (!isRangeSelection()) {
     // TODO maybe allow user creating a link with text
     e.preventDefault();
@@ -28,7 +28,7 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   // User can cancel link by pressing shortcut again
   const format = quill.getFormat(range);
   if (format?.link) {
-    store.captureSync();
+    space.captureSync();
     const { index, length } = range;
     startModel.text?.format(index, length, { link: false });
     return;
@@ -61,6 +61,6 @@ export const createLink = async (store: Store, e: KeyboardEvent) => {
   }
   const link = linkState.link;
 
-  store.captureSync();
+  space.captureSync();
   startModel.text?.format(range.index, range.length, { link });
 };

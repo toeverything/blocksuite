@@ -45,12 +45,15 @@ export const createEditor = (options: EditorOptions = {}): EditorContainer => {
       room: options.room,
       providers: options.providers,
       awareness: options.awareness,
-    }).register(BlockSchema);
+      idGenerator: options.idGenerator,
+    });
+    store.space.register(BlockSchema);
     editor.store = store;
     return editor;
   }
   // 3. Use default store
-  const store = new Store().register(BlockSchema);
+  const store = new Store();
+  store.space.register(BlockSchema);
   editor.store = store;
   return editor;
 };

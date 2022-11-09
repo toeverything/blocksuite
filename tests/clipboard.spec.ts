@@ -1,3 +1,4 @@
+import './utils/declare-test-window';
 import { test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
@@ -195,8 +196,7 @@ test('copy clipItems format', async ({ page }) => {
   await initEmptyState(page);
   await focusRichText(page);
   await page.evaluate(() => {
-    // @ts-ignore
-    window.store.captureSync();
+    window.store.space.captureSync();
   });
 
   const clipData = `

@@ -1,7 +1,7 @@
-import type { BaseBlockModel, Store } from '@blocksuite/store';
-import { RichText } from '../rich-text/rich-text';
+import type { BaseBlockModel, Space } from '@blocksuite/store';
+import type { RichText } from '../rich-text/rich-text';
 import { assertExists, caretRangeFromPoint, matchFlavours } from './std';
-import { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
+import type { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
   getDefaultPageBlock,
@@ -14,6 +14,7 @@ import {
 } from './query';
 import { Point, Rect } from './rect';
 import type { SelectionEvent } from './gesture';
+const SCROLL_THRESHOLD = 100;
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -46,6 +47,20 @@ function fixCurrentRangeToText(
           const y = rect.bottom - 6;
           newRange = caretRangeFromPoint(x, y);
           if (newRange) {
+            if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
+              const lastTextNode = getLastTextNode(newRange.endContainer);
+              if (lastTextNode) {
+                newRange = document.createRange();
+                newRange.setStart(
+                  lastTextNode,
+                  lastTextNode.textContent?.length || 0
+                );
+                newRange.setEnd(
+                  lastTextNode,
+                  lastTextNode.textContent?.length || 0
+                );
+              }
+            }
             range.setEnd(newRange.endContainer, newRange.endOffset);
           }
         }
@@ -59,6 +74,14 @@ function fixCurrentRangeToText(
           const y = rect.top + 6;
           newRange = caretRangeFromPoint(x, y);
           if (newRange) {
+            if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
+              const firstTextNode = getFirstTextNode(newRange.startContainer);
+              if (firstTextNode) {
+                newRange = document.createRange();
+                newRange.setStart(firstTextNode, 0);
+                newRange.setEnd(firstTextNode, 0);
+              }
+            }
             range.setStart(newRange.endContainer, newRange.endOffset);
           }
         }
@@ -68,22 +91,22 @@ function fixCurrentRangeToText(
   return range;
 }
 
-export function focusRichText(
+async function sleep(delay = 0) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(null);
+    }, delay);
+  });
+}
+
+export async function focusRichText(
   position: SelectionPosition,
   editableContainer: Element
 ) {
-  let { top, left, bottom, right } = Rect.fromDom(editableContainer);
-  const [oldTop, oldBottom] = [top, bottom];
+  // TODO optimize how get scroll container
+  const scrollContainer = editableContainer.closest('.affine-editor-container');
+  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
   const { clientHeight } = document.documentElement;
-  // TODO: improve the logic
-  if (top + 20 > clientHeight || bottom < 20) {
-    editableContainer.scrollIntoView();
-    const newRect = Rect.fromDom(editableContainer);
-    top = newRect.top;
-    left = newRect.left;
-    bottom = newRect.bottom;
-    right = newRect.right;
-  }
   const lineHeight =
     Number(
       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
@@ -93,16 +116,32 @@ export function focusRichText(
     const { x, y } = position;
     let newTop = y;
     let newLeft = x;
-    if (oldBottom <= y) {
-      newTop = bottom - lineHeight / 2;
+    if (bottom <= y) {
+      let finalBottom = bottom;
+      if (bottom < SCROLL_THRESHOLD && scrollContainer) {
+        scrollContainer.scrollTop =
+          scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
+        // set scroll may has a animation, wait for over
+        await sleep();
+        finalBottom = editableContainer.getBoundingClientRect().bottom;
+      }
+      newTop = finalBottom - lineHeight / 2;
     }
-    if (oldTop >= y) {
-      newTop = top + lineHeight / 2;
+    if (bottom >= y) {
+      let finalTop = top;
+      if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
+        scrollContainer.scrollTop =
+          scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
+        // set scroll may has a animation, wait for over
+        await sleep();
+        finalTop = editableContainer.getBoundingClientRect().top;
+      }
+      newTop = finalTop + lineHeight / 2;
     }
-    if (x < left) {
+    if (x <= left) {
       newLeft = left + 1;
     }
-    if (x > right) {
+    if (x >= right) {
       newLeft = right - 1;
     }
     range = caretRangeFromPoint(newLeft, newTop);
@@ -236,7 +275,7 @@ function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {
   const parentMap = new Map<string, SelectedBlock>();
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
-    const parent = model.store.getParent(model);
+    const parent = model.space.getParent(model);
     const block = { id: model.id, children: [] };
     if (!parent || !parentMap.has(parent.id)) {
       result.push(block);
@@ -259,8 +298,8 @@ function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
   return getLastSelectBlock(last.children);
 }
 
-export function getSelectInfo(store: Store): SelectionInfo {
-  if (!store.root) {
+export function getSelectInfo(space: Space): SelectionInfo {
+  if (!space.root) {
     return {
       type: 'None',
       selectedBlocks: [],
@@ -270,7 +309,7 @@ export function getSelectInfo(store: Store): SelectionInfo {
   let type = 'None';
   let selectedBlocks: SelectedBlock[] = [];
   let selectedModels: BaseBlockModel[] = [];
-  const page = getDefaultPageBlock(store.root);
+  const page = getDefaultPageBlock(space.root);
   const { state } = page.selection;
   const nativeSelection = window.getSelection();
   if (state.type === 'block') {
@@ -353,7 +392,7 @@ export function isBlankArea(e: SelectionEvent) {
   return cursor !== 'text';
 }
 
-export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
+export function handleNativeRangeClick(space: Space, e: SelectionEvent) {
   const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   const startContainer = range?.startContainer;
   // if not left click
@@ -373,10 +412,10 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
   ) {
     focusRichTextByOffset(startContainer, e.raw.clientX);
   } else if (isBlankAreaAfterLastBlock(startContainer)) {
-    const { root } = store;
+    const { root } = space;
     const lastChild = root?.lastChild();
     assertExists(lastChild);
-    if (matchFlavours(lastChild, ['paragraph', 'list'])) {
+    if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
@@ -384,7 +423,7 @@ export function handleNativeRangeClick(store: Store, e: SelectionEvent) {
   }
 }
 
-export function handleNativeRangeDblClick(store: Store, e: SelectionEvent) {
+export function handleNativeRangeDblClick(space: Space, e: SelectionEvent) {
   const selection = window.getSelection();
   if (selection && selection.isCollapsed && selection.anchorNode) {
     const editableContainer =
@@ -400,6 +439,9 @@ function expandRangesByCharacter(
   editableContainer: Node
 ) {
   const leafNodes = leftFirstSearchLeafNodes(editableContainer);
+  if (!leafNodes.length) {
+    return;
+  }
   let startNode = leafNodes[0];
   let startOffset = 0;
   let endNode = leafNodes[leafNodes.length - 1];
@@ -420,8 +462,8 @@ function expandRangesByCharacter(
     notStrictCharacterAndSpaceReg.test(currentChar) &&
     currentTextNode
   ) {
-    startNode = currentTextNode;
-    endNode = currentTextNode;
+    startNode = currentTextNode as Text;
+    endNode = currentTextNode as Text;
     startOffset = selection.anchorOffset;
     endOffset = selection.anchorOffset + 1;
   } else {
@@ -585,7 +627,15 @@ export function leftFirstSearchLeafNodes(node: Node, leafNodes: Node[] = []) {
       leftFirstSearchLeafNodes(children[i], leafNodes);
     }
   }
-  return leafNodes;
+  return leafNodes as Text[];
+}
+
+export function getLastTextNode(node: Node) {
+  return leftFirstSearchLeafNodes(node).pop();
+}
+
+export function getFirstTextNode(node: Node) {
+  return leftFirstSearchLeafNodes(node)[0];
 }
 
 export function getSplicedTitle(title: HTMLInputElement) {

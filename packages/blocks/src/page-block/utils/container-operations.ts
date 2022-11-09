@@ -1,5 +1,5 @@
-import { Store, Text, BaseBlockModel } from '@blocksuite/store';
-import { GroupBlockModel } from '../../group-block';
+import type { Space, Text, BaseBlockModel } from '@blocksuite/store';
+import type { GroupBlockModel } from '../../group-block';
 import {
   assertExists,
   assertFlavours,
@@ -25,7 +25,7 @@ import {
   resetNativeSelection,
 } from '../../__internal__/utils/selection';
 
-function deleteModels(store: Store, models: BaseBlockModel[]) {
+function deleteModels(space: Space, models: BaseBlockModel[]) {
   const selection = window.getSelection();
   const first = models[0];
   const last = models[models.length - 1];
@@ -50,38 +50,42 @@ function deleteModels(store: Store, models: BaseBlockModel[]) {
     firstTextIndex,
     firstRichText.model.text.length - firstTextIndex
   );
-  lastRichText.model.text?.delete(0, endTextIndex);
-  firstRichText.model.text?.join(lastRichText.model.text as Text);
+  const isLastRichTextFullSelected: boolean =
+    lastRichText.model.text?.length === endTextIndex;
+  if (!isLastRichTextFullSelected) {
+    lastRichText.model.text?.delete(0, endTextIndex);
+    firstRichText.model.text?.join(lastRichText.model.text as Text);
+  }
 
   // delete models in between
   for (let i = 1; i <= models.length - 1; i++) {
-    store.deleteBlock(models[i]);
+    space.deleteBlock(models[i]);
   }
 
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-export function updateTextType(flavour: string, type: string, store: Store) {
+export function updateTextType(flavour: string, type: string, space: Space) {
   const range = window.getSelection()?.getRangeAt(0);
   assertExists(range);
   const modelsInRange = getModelsByRange(range);
-  store.captureSync();
+  space.captureSync();
   modelsInRange.forEach(model => {
-    assertFlavours(model, ['paragraph', 'list']);
+    assertFlavours(model, ['affine:paragraph', 'affine:list']);
     if (model.flavour === flavour) {
-      store.updateBlock(model, { type });
+      space.updateBlock(model, { type });
     } else {
-      transformBlock(store, model, flavour, type);
+      transformBlock(space, model, flavour, type);
     }
   });
 }
 export function transformBlock(
-  store: Store,
+  space: Space,
   model: BaseBlockModel,
   flavour: string,
   type: string
 ) {
-  const parent = store.getParent(model);
+  const parent = space.getParent(model);
   assertExists(parent);
   const blockProps = {
     flavour,
@@ -90,29 +94,29 @@ export function transformBlock(
     children: model.children,
   };
   const index = parent.children.indexOf(model);
-  store.deleteBlock(model);
-  const id = store.addBlock(blockProps, parent, index);
-  asyncFocusRichText(store, id);
+  space.deleteBlock(model);
+  const id = space.addBlock(blockProps, parent, index);
+  asyncFocusRichText(space, id);
 }
 
 export function batchUpdateTextType(
   flavour: string,
-  store: Store,
+  space: Space,
   models: ExtendedModel[],
   type: string
 ) {
-  store.captureSync();
+  space.captureSync();
   for (const model of models) {
-    assertFlavours(model, ['paragraph', 'list']);
+    assertFlavours(model, ['affine:paragraph', 'affine:list']);
     if (model.flavour === flavour) {
-      store.updateBlock(model, { type });
+      space.updateBlock(model, { type });
     } else {
-      transformBlock(store, model, 'paragraph', type);
+      transformBlock(space, model, 'affine:paragraph', type);
     }
   }
 }
 
-export function handleBackspace(store: Store, e: KeyboardEvent) {
+export function handleBackspace(space: Space, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
   if (isNoneSelection()) return;
@@ -133,14 +137,14 @@ export function handleBackspace(store: Store, e: KeyboardEvent) {
     if (isMultiBlockRange(range)) {
       e.preventDefault();
       const intersectedModels = getModelsByRange(range);
-      deleteModels(store, intersectedModels);
+      deleteModels(space, intersectedModels);
     }
   }
 }
 
 function formatModelsByRange(
   models: BaseBlockModel[],
-  store: Store,
+  space: Space,
   key: string
 ) {
   const selection = window.getSelection();
@@ -178,7 +182,7 @@ function formatModelsByRange(
   }
   const allFormat = formatArr.every(item => item[key]);
 
-  store.captureSync();
+  space.captureSync();
   firstRichText.model.text?.format(
     firstIndex,
     firstRichText.quill.getLength() - firstIndex - 1,
@@ -199,7 +203,7 @@ function formatModelsByRange(
   }
 }
 
-export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
+export function handleFormat(space: Space, e: KeyboardEvent, key: string) {
   // workaround page title
   e.preventDefault();
   if (e.target instanceof HTMLInputElement) return;
@@ -213,7 +217,7 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
       const { quill } = richText;
       const range = quill.getSelection();
       assertExists(range);
-      store.captureSync();
+      space.captureSync();
 
       const { index, length } = range;
       const format = quill.getFormat(range);
@@ -223,7 +227,7 @@ export function handleFormat(store: Store, e: KeyboardEvent, key: string) {
         quill.format(key, false);
       }
     } else {
-      formatModelsByRange(models, store, key);
+      formatModelsByRange(models, space, key);
     }
   }
 }
@@ -261,22 +265,22 @@ function findFirstNode(ele: Element | Node): Node {
 }
 
 export function handleBlockSelectionBatchDelete(
-  store: Store,
+  space: Space,
   models: ExtendedModel[]
 ) {
-  store.captureSync();
+  space.captureSync();
   assertExists(models[0].text);
 
   models[0].text.delete(0, models[0].text.length);
   for (let i = 1; i < models.length; i++) {
-    store.deleteBlock(models[i]);
+    space.deleteBlock(models[i]);
   }
 }
 
-export function tryUpdateGroupSize(store: Store, zoom: number) {
+export function tryUpdateGroupSize(space: Space, zoom: number) {
   requestAnimationFrame(() => {
-    if (!store.root) return;
-    const groups = store.root.children as GroupBlockModel[];
+    if (!space.root) return;
+    const groups = space.root.children as GroupBlockModel[];
     groups.forEach(model => {
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
@@ -293,7 +297,7 @@ export function tryUpdateGroupSize(store: Store, zoom: number) {
       const newModelHeight = bound.height / zoom;
 
       if (!almostEqual(newModelWidth, w) || !almostEqual(newModelHeight, h)) {
-        store.updateBlock(model, {
+        space.updateBlock(model, {
           xywh: JSON.stringify([x, y, newModelWidth, newModelHeight]),
         });
       }

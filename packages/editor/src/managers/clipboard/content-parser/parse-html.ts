@@ -1,5 +1,5 @@
-import { ContentParser } from '.';
-import { OpenBlockInfo } from '../types';
+import type { ContentParser } from '.';
+import type { OpenBlockInfo } from '../types';
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -61,7 +61,7 @@ export class ParserHtml {
     if (node instanceof Text || INLINE_TAGS.includes(tagName)) {
       result = this._contentParser.getParserHtmlText2Block('commonParser')?.({
         element: node,
-        flavour: 'paragraph',
+        flavour: 'affine:paragraph',
         type: 'text',
       });
     } else {
@@ -76,7 +76,7 @@ export class ParserHtml {
             'commonParser'
           )?.({
             element: node,
-            flavour: 'paragraph',
+            flavour: 'affine:paragraph',
             type: tagName.toLowerCase(),
           });
           break;
@@ -102,7 +102,7 @@ export class ParserHtml {
               'commonParser'
             )?.({
               element: node,
-              flavour: 'paragraph',
+              flavour: 'affine:paragraph',
               type: 'text',
             });
           }
@@ -112,7 +112,7 @@ export class ParserHtml {
             'commonParser'
           )?.({
             element: node,
-            flavour: 'paragraph',
+            flavour: 'affine:paragraph',
             type: 'text',
           });
           break;
@@ -294,7 +294,7 @@ export class ParserHtml {
       'commonParser'
     )?.({
       element: element,
-      flavour: 'list',
+      flavour: 'affine:list',
       type: type,
       checked: checked,
     });
@@ -326,7 +326,7 @@ export class ParserHtml {
       'commonParser'
     )?.({
       element: element,
-      flavour: 'paragraph',
+      flavour: 'affine:paragraph',
       type: 'text',
     });
     if (!commonResult) {
@@ -335,7 +335,7 @@ export class ParserHtml {
 
     return [
       {
-        flavour: 'paragraph',
+        flavour: 'affine:paragraph',
         type: 'quote',
         text: getText(commonResult),
         children: [],
