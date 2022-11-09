@@ -10,7 +10,10 @@ import {
   handleNativeRangeClick,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
-import { repairContextMenuRange } from '../utils/cursor';
+import {
+  getNativeSelectionMouseDragInfo,
+  repairContextMenuRange,
+} from '../utils/cursor';
 
 interface NoneBlockSelectionState {
   type: 'none';
@@ -32,7 +35,7 @@ interface HoverState {
   block: GroupBlockModel;
 }
 
-interface FrameSelectionState {
+export interface FrameSelectionState {
   start: DOMPoint;
   end: DOMPoint;
 }
@@ -298,6 +301,9 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
+    if ( this.blockSelectionState.type === 'single' && this.blockSelectionState.active ) {
+      getNativeSelectionMouseDragInfo(e);
+    }
     this._frameSelectionState = null;
   };
 
