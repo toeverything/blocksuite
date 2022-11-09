@@ -1,11 +1,11 @@
 import type { Space } from '@blocksuite/store';
+import { showFormatQuickBar } from '../../components/format-quick-bar';
 import {
   initMouseEventHandlers,
   SelectionEvent,
   caretRangeFromPoint,
   resetNativeSelection,
   assertExists,
-  noop,
   handleNativeRangeDragMove,
   isBlankArea,
   handleNativeRangeClick,
@@ -171,7 +171,7 @@ export class DefaultSelectionManager {
     // do not clear selected rects here
     const { selectedRichTexts } = this._getSelectedBlockInfo(e);
     const selectedBlocks = selectedRichTexts.map(richText => {
-      return getBlockById(richText.model.id) as unknown as Element;
+      return getBlockById(richText.model.id) as unknown as HTMLElement;
     });
     const selectedType: SelectedBlockType = selectedBlocks.every(block => {
       return /paragraph-block/i.test(block.tagName);
@@ -184,7 +184,7 @@ export class DefaultSelectionManager {
     const anchor = ['rightDown', 'leftDown'].includes(direction)
       ? selectedBlocks[selectedBlocks.length - 1]
       : selectedBlocks[0];
-    console.log(anchor);
+    showFormatQuickBar({ anchorEl: anchor });
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
@@ -196,8 +196,11 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
-    getNativeSelectionMouseDragInfo(e);
-    noop();
+    const { anchor } = getNativeSelectionMouseDragInfo(e);
+    if (!anchor) {
+      return;
+    }
+    showFormatQuickBar({ anchorEl: anchor });
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
