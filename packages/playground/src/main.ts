@@ -1,7 +1,11 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import { createEditor } from '@blocksuite/editor';
-import { DebugProvider, IndexedDBProvider } from '@blocksuite/store';
+import {
+  DebugProvider,
+  IndexedDBProvider,
+  createAutoIncrement,
+} from '@blocksuite/store';
 import './style.css';
 
 const params = new URLSearchParams(location.search);
@@ -29,6 +33,7 @@ window.onload = () => {
   const editor = createEditor({
     room,
     providers: providersFromParam,
+    idGenerator: createAutoIncrement(),
   });
   document.body.appendChild(editor);
 };

@@ -7,6 +7,7 @@ export * from './utils/signal';
 export * from './utils/disposable';
 export * from './providers';
 export * as Utils from './utils/utils';
+export * from './utils/id-generator';
 
 const env =
   typeof globalThis !== 'undefined'
