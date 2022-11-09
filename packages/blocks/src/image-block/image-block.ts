@@ -7,6 +7,7 @@ import {
   BlockChildrenContainer,
 } from '../__internal__';
 import style from './style.css';
+import { DeleteIcon, DownloadIcon, CaptionIcon, CopyIcon } from './icons';
 
 @customElement('img-block')
 export class ImageBlockComponent extends LitElement {
@@ -38,6 +39,9 @@ export class ImageBlockComponent extends LitElement {
 
   @query('.resizable')
   _container!: HTMLElement;
+
+  @query('.affine-embed-wrapper-caption')
+  _captionDom!: HTMLInputElement;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -113,6 +117,27 @@ export class ImageBlockComponent extends LitElement {
       this._container.style.width = `${width}px`;
     }
   }
+  private _deleteBlock() {
+    this.model.space.deleteBlock(this.model);
+  }
+
+  private _copyBlock() {
+    console.log('copy');
+  }
+
+  private _downloadImage() {
+    const link = document.createElement('a');
+    link.href = this.model.source;
+    document.body.appendChild(link);
+    link.download = 'test';
+    link.click();
+    document.body.removeChild(link);
+    link.remove();
+  }
+
+  private _editorImageCaption() {
+    this._captionDom.focus();
+  }
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -153,10 +178,10 @@ export class ImageBlockComponent extends LitElement {
           <div class="resizable">
             <div class="image-option-container">
               <ul class="image-option">
-                <li>1</li>
-                <li>2</li>
-                <li>3</li>
-                <li>4</li>
+                <li @click=${this._editorImageCaption}>${CaptionIcon}</li>
+                <li @click=${this._downloadImage}>${DownloadIcon}</li>
+                <li @click=${this._copyBlock}>${CopyIcon}</li>
+                <li @click=${this._deleteBlock}>${DeleteIcon}</li>
               </ul>
             </div>
             <div class="resizes">

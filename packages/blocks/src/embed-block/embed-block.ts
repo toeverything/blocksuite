@@ -21,7 +21,7 @@ export class EmbedBlockComponent extends LitElement {
   _caption!: string;
 
   override firstUpdated() {
-    this._caption = this.model.caption;
+    this._caption = this.model?.caption ?? '';
   }
   private _inputChange() {
     this._caption = this._input.value;
