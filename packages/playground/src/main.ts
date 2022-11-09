@@ -5,35 +5,60 @@ import {
   DebugProvider,
   IndexedDBProvider,
   createAutoIncrement,
+  uuidv4,
 } from '@blocksuite/store';
+import type { SyncProviderConstructor, StoreOptions } from '@blocksuite/store';
 import './style.css';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? '';
+
 /**
- * Specified by `?providers=debug` or `?providers=indexeddb,debug`
+ * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
  * Default is debug (using webrtc)
  */
-const providersFromParam = (params.get('providers') ?? 'debug')
-  .split(',')
-  .map(providerName => {
-    switch (providerName) {
+function editorOptionsFromParam(): Pick<
+  StoreOptions,
+  'providers' | 'idGenerator'
+> {
+  const providers: SyncProviderConstructor[] = [];
+
+  const modes = (params.get('syncModes') ?? 'debug').split(',');
+
+  modes.forEach(mode => {
+    switch (mode) {
       case 'debug':
-        return DebugProvider;
+        providers.push(DebugProvider);
+        break;
       case 'indexeddb':
-        return IndexedDBProvider;
+        providers.push(IndexedDBProvider);
+        break;
       default:
         throw new TypeError(
-          `Unknown provider ("${providerName}") supplied in search param ?providers=... (for example "debug" and "indexeddb")`
+          `Unknown provider ("${mode}") supplied in search param ?syncModes=... (for example "debug" and "indexeddb")`
         );
     }
   });
 
+  /**
+   * Specified using "uuidv4" when providers have indexeddb.
+   * Because when persistent data applied to ydoc, we need generator different id for block.
+   * Otherwise, the block id will conflict.
+   */
+  const idGenerator = modes.includes('indexeddb')
+    ? uuidv4
+    : createAutoIncrement();
+
+  return {
+    providers,
+    idGenerator,
+  };
+}
+
 window.onload = () => {
   const editor = createEditor({
     room,
-    providers: providersFromParam,
-    idGenerator: createAutoIncrement(),
+    ...editorOptionsFromParam(),
   });
   document.body.appendChild(editor);
 };
