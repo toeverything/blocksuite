@@ -439,6 +439,9 @@ function expandRangesByCharacter(
   editableContainer: Node
 ) {
   const leafNodes = leftFirstSearchLeafNodes(editableContainer);
+  if (!leafNodes.length) {
+    return;
+  }
   let startNode = leafNodes[0];
   let startOffset = 0;
   let endNode = leafNodes[leafNodes.length - 1];
