@@ -45,7 +45,7 @@ function editorOptionsFromParam(): Pick<
    * Because when persistent data applied to ydoc, we need generator different id for block.
    * Otherwise, the block id will conflict.
    */
-  const idGenerator = modes.includes('indexeddb')
+  const idGenerator = providers.includes(IndexedDBProvider)
     ? uuidv4
     : createAutoIncrement();
 
