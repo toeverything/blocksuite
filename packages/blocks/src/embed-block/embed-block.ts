@@ -1,6 +1,6 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { EmbedBlockModel } from './embed-model';
+import type { EmbedBlockModel } from './embed-model';
 
 import style from './style.css';
 
