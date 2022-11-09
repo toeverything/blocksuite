@@ -6,6 +6,7 @@ const config: PlaywrightTestConfig = {
   use: {
     browserName: 'chromium',
     viewport: { width: 900, height: 600 },
+    actionTimeout: 5 * 1000,
   },
 };
 

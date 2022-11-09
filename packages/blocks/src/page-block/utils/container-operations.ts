@@ -1,5 +1,5 @@
-import { Space, Text, BaseBlockModel } from '@blocksuite/store';
-import { GroupBlockModel } from '../../group-block';
+import type { Space, Text, BaseBlockModel } from '@blocksuite/store';
+import type { GroupBlockModel } from '../../group-block';
 import {
   assertExists,
   assertFlavours,

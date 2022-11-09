@@ -1,5 +1,5 @@
-import { noop } from '../../../utils';
-import { LinkDetail } from './link-popover';
+import { noop } from '../../__internal__/utils';
+import type { LinkDetail } from './link-popover';
 
 const createEditLinkElement = (
   anchorEl: HTMLElement,

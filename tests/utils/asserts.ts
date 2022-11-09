@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
+import './declare-test-window';
 import { expect, type Page } from '@playwright/test';
 import type {
   BaseBlockModel,
@@ -139,7 +140,6 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>
-    // @ts-ignore
     window.store.doc.toJSON()
   )) as SerializedStore;
   expect(actual).toEqual(expected);
@@ -242,7 +242,6 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
  */
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
-    // @ts-expect-error
     window.store.doc.toJSON()
   )) as SerializedStore;
   const titleNode = jsonDoc.page0['0'];
@@ -296,10 +295,14 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   expect(actual).toEqual(text);
 }
 
-export async function assertStoreMatchJSX(page: Page, snapshot: string) {
-  const element = (await page.evaluate(() =>
-    // @ts-expect-error
-    window.store.toJSXElement()
+export async function assertStoreMatchJSX(
+  page: Page,
+  snapshot: string,
+  id?: string
+) {
+  const element = (await page.evaluate(
+    id => window.store.toJSXElement(id),
+    id
   )) as JSXElement;
 
   // Fix symbol can not be serialized, we need to set $$typeof manually

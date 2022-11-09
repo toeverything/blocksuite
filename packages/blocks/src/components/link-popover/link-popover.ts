@@ -1,8 +1,8 @@
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { toast } from '../../../../toast';
-import { createEvent } from '../../../utils';
-import { ConfirmIcon, EditIcon, UnlinkIcon } from './button';
+import { createEvent } from '../../__internal__/utils';
+import { toast } from '../toast';
+import { ConfirmIcon, EditIcon, UnlinkIcon } from '../button';
 import { linkPopoverStyle } from './styles';
 
 export const ALLOWED_SCHEMES = [

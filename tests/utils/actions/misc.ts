@@ -1,5 +1,5 @@
+import '../declare-test-window';
 import { Page } from '@playwright/test';
-import type { Space } from '../../../packages/store';
 import { pressEnter } from './keyboard';
 
 const NEXT_FRAME_TIMEOUT = 50;
@@ -43,8 +43,7 @@ export async function clearLog(page: Page) {
 
 export async function resetHistory(page: Page) {
   await page.evaluate(() => {
-    // @ts-ignore
-    const space = window.store.space as Space;
+    const space = window.store.space;
     space.resetHistory();
   });
 }
@@ -53,8 +52,7 @@ export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}`);
   await page.evaluate(() => {
-    // @ts-ignore
-    const space = window.store.space as Space;
+    const space = window.store.space;
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
     for (let i = 0; i < 3; i++) {
@@ -65,13 +63,17 @@ export async function enterPlaygroundWithList(page: Page) {
 }
 
 export async function initEmptyState(page: Page) {
-  await page.evaluate(() => {
-    // @ts-ignore
-    const space = window.store.space as Space;
+  const id = await page.evaluate(() => {
+    const space = window.store.space;
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
-    space.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    const paragraphId = space.addBlock(
+      { flavour: 'affine:paragraph' },
+      groupId
+    );
+    return { pageId, groupId, paragraphId };
   });
+  return id;
 }
 
 export async function focusRichText(page: Page, i = 0) {

@@ -2,12 +2,12 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
-  CommonBlockElement,
+  type CommonBlockElement,
   convertToList,
   createEvent,
 } from '../__internal__';
-import { BaseBlockModel, Store } from '@blocksuite/store';
-import { GroupBlockModel } from '../group-block';
+import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { GroupBlockModel } from '../group-block';
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {
@@ -255,6 +255,9 @@ export class DebugMenu extends LitElement {
     }
     .debug-menu > button path {
       fill: var(--affine-text-color);
+    }
+    .debug-menu > button > * {
+      flex: 1;
     }
   `;
 

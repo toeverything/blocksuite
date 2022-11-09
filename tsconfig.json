@@ -12,6 +12,7 @@
     "declaration": true,
     "declarationMap": true,
     "resolveJsonModule": true,
+    "importsNotUsedAsValues": "error",
     "isolatedModules": true,
     "esModuleInterop": true,
     "noEmit": true,

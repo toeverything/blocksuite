@@ -1,7 +1,8 @@
 import { PrefixedBlockProps, Space } from './space';
+import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
-import type { Provider, ProviderFactory } from './providers';
+import type { SyncProvider, SyncProviderConstructor } from './providers';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
 
 export interface SerializedStore {
@@ -12,29 +13,32 @@ export interface SerializedStore {
 
 export interface StoreOptions {
   room?: string;
-  providers?: ProviderFactory[];
+  providers?: SyncProviderConstructor[];
   awareness?: Awareness;
+  idGenerator?: IdGenerator;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
   readonly doc = new Y.Doc();
-  readonly providers: Provider[] = [];
+  readonly providers: SyncProvider[] = [];
   readonly spaces = new Map<string, Space>();
 
   constructor({
     room = DEFAULT_ROOM,
     providers = [],
     awareness,
+    idGenerator,
   }: StoreOptions = {}) {
     const aware = awareness ?? new Awareness(this.doc);
     this.providers = providers.map(
-      Provider => new Provider(room, this.doc, { awareness: aware })
+      ProviderConstructor =>
+        new ProviderConstructor(room, this.doc, { awareness: aware })
     );
 
     // FIXME
-    this.spaces.set('page0', new Space(this.doc, aware));
+    this.spaces.set('page0', new Space(this.doc, aware, idGenerator));
   }
 
   // FIXME

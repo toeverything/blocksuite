@@ -1,5 +1,5 @@
 import type { BaseBlockModel, Store, Space } from '@blocksuite/store';
-import { Point } from './rect';
+import type { Point } from './rect';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 

@@ -1,5 +1,5 @@
-import { BlockHost } from '../../__internal__';
-import { ListBlockModel } from '../list-model';
+import type { BlockHost } from '../../__internal__';
+import type { ListBlockModel } from '../list-model';
 
 const getIndex = (host: BlockHost, model: ListBlockModel) => {
   const siblings = host.space.getParent(model)?.children || [];

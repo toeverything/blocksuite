@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import { AwarenessAdapter } from './awareness';
+import type { AwarenessAdapter } from './awareness';
 import type { DeltaOperation, Quill } from 'quill';
 import type { Space } from './space';
 
@@ -76,6 +76,10 @@ export class PrelimText {
     throw new Error(UNSUPPORTED_MSG + 'delete');
   }
 
+  replace() {
+    throw new Error(UNSUPPORTED_MSG + 'replace');
+  }
+
   format() {
     throw new Error(UNSUPPORTED_MSG + 'format');
   }
@@ -86,6 +90,26 @@ export class PrelimText {
 
   sliceToDelta() {
     throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
+  }
+}
+
+declare module 'yjs' {
+  interface Text {
+    /**
+     * Specific addition used by @blocksuite/store
+     * When set, we know it hasn't been applied to quill.
+     * When specified, we call this a "controlled operation".
+     *
+     * Consider renaming this to closer indicate this is simply a "controlled operation",
+     * since we may not actually use this information.
+     */
+    meta?:
+      | { split: true }
+      | { join: true }
+      | { format: true }
+      | { delete: true }
+      | { clear: true }
+      | { replace: true };
   }
 }
 
@@ -116,7 +140,7 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    const { _space, _shouldTransact: _shouldTransact } = this;
+    const { _space, _shouldTransact } = this;
     _shouldTransact ? _space.transact(callback) : callback();
   }
 
@@ -131,11 +155,9 @@ export class Text {
     ];
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  insert(content: string, index: number, attributes?: Object) {
+  insert(content: string, index: number, attributes?: Record<string, unknown>) {
     this._transact(() => {
       this._yText.insert(index, content, attributes);
-      // @ts-ignore
       this._yText.meta = { split: true };
     });
   }
@@ -150,7 +172,6 @@ export class Text {
           insertTexts[i].attributes as Object | undefined
         );
       }
-      // @ts-ignore
       this._yText.meta = { split: true };
     });
   }
@@ -161,7 +182,6 @@ export class Text {
       const delta = yOther.toDelta();
       delta.splice(0, 0, { retain: this._yText.length });
       this._yText.applyDelta(delta);
-      // @ts-ignore
       this._yText.meta = { join: true };
     });
   }
@@ -169,7 +189,6 @@ export class Text {
   format(index: number, length: number, format: any) {
     this._transact(() => {
       this._yText.format(index, length, format);
-      // @ts-ignore
       this._yText.meta = { format: true };
     });
   }
@@ -177,15 +196,26 @@ export class Text {
   delete(index: number, length: number) {
     this._transact(() => {
       this._yText.delete(index, length);
-      // @ts-ignore
       this._yText.meta = { delete: true };
+    });
+  }
+
+  replace(
+    index: number,
+    length: number,
+    content: string,
+    attributes?: Record<string, unknown>
+  ) {
+    this._transact(() => {
+      this._yText.delete(index, length);
+      this._yText.insert(index, content, attributes);
+      this._yText.meta = { replace: true };
     });
   }
 
   clear() {
     this._transact(() => {
       this._yText.delete(0, this._yText.length);
-      // @ts-ignore
       this._yText.meta = { clear: true };
     });
   }
@@ -276,11 +306,12 @@ export class RichTextAdapter {
   private _yObserver = (event: Y.YTextEvent) => {
     const isFromLocal = event.transaction.origin === this.doc.clientID;
     const isFromRemote = !isFromLocal;
-    // @ts-ignore
     const isControlledOperation = !!event.target?.meta;
 
     // update quill if the change is from remote or using controlled operation
-    if (isFromRemote || isControlledOperation) {
+    const quillMustApplyUpdate = isFromRemote || isControlledOperation;
+
+    if (quillMustApplyUpdate) {
       const eventDelta = event.delta;
       // We always explicitly set attributes, otherwise concurrent edits may
       // result in quill assuming that a text insertion shall inherit existing

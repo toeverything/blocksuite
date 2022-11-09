@@ -1,5 +1,5 @@
 import { css, html, TemplateResult } from 'lit';
-import { sleep } from './__internal__';
+import { sleep } from '../__internal__/utils';
 
 let ToastContainer: HTMLDivElement | null = null;
 
@@ -40,6 +40,12 @@ const createToastContainer = () => {
   return element;
 };
 
+/**
+ * @example
+ * ```ts
+ * toast('Hello World');
+ * ```
+ */
 export const toast = (message: string, duration = 2500) => {
   if (!ToastContainer) {
     ToastContainer = createToastContainer();

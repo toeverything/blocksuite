@@ -2,7 +2,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { Store } from '@blocksuite/store';
+import type { Store } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
 

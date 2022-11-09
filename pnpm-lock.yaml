@@ -95,11 +95,13 @@ importers:
     specifiers:
       '@types/quill': ^2.0.9
       lib0: ^0.2.52
+      y-indexeddb: ^9.0.9
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
       yjs: ^13.5.41
     dependencies:
       lib0: 0.2.52
+      y-indexeddb: 9.0.9_yjs@13.5.41
       y-protocols: 1.0.5
       y-webrtc: 10.2.3
       yjs: 13.5.41
@@ -3633,6 +3635,15 @@ packages:
         optional: true
     dev: false
     optional: true
+
+  /y-indexeddb/9.0.9_yjs@13.5.41:
+    resolution: {integrity: sha512-GcJbiJa2eD5hankj46Hea9z4hbDnDjvh1fT62E5SpZRsv8GcEemw34l1hwI2eknGcv5Ih9JfusT37JLx9q3LFg==}
+    peerDependencies:
+      yjs: ^13.0.0
+    dependencies:
+      lib0: 0.2.52
+      yjs: 13.5.41
+    dev: false
 
   /y-protocols/1.0.5:
     resolution: {integrity: sha512-Wil92b7cGk712lRHDqS4T90IczF6RkcvCwAD0A2OPg+adKmOe+nOiT/N2hvpQIWS3zfjmtL4CPaH5sIW1Hkm/A==}
