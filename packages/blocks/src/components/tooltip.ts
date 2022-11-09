@@ -12,6 +12,7 @@ import { css } from 'lit';
  */
 export const toolTipStyle = css`
   tool-tip {
+    font-family: var(--affine-font-family);
     position: absolute;
     left: 0;
     top: 0;

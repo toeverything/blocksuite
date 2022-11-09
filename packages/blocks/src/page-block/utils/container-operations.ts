@@ -203,10 +203,7 @@ function formatModelsByRange(
   }
 }
 
-export function handleFormat(space: Space, e: KeyboardEvent, key: string) {
-  // workaround page title
-  e.preventDefault();
-  if (e.target instanceof HTMLInputElement) return;
+export function handleFormat(space: Space, key: string) {
   if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
