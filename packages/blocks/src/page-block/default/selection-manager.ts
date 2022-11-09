@@ -145,7 +145,6 @@ export class DefaultSelectionManager {
       selectionRect
     );
     this.state.selectedRichTexts = selectedRichTexts;
-
     const selectedBounds = selectedRichTexts.map(richText => {
       return richTextCache.get(richText) as DOMRect;
     });
@@ -234,5 +233,17 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
     this._mouseDisposeCallback();
+  }
+  selectBlockByRect(selectionRect: DOMRect) {
+    this.state.type = 'block';
+    this.state.refreshRichTextBoundsCache(this._container);
+    const { richTextCache } = this.state;
+    const selectedRichTexts = filterSelectedRichText(
+      richTextCache,
+      selectionRect
+    );
+    this.state.selectedRichTexts = selectedRichTexts;
+    const selectedBounds: DOMRect[] = [selectionRect];
+    this._signals.updateSelectedRects.emit(selectedBounds);
   }
 }

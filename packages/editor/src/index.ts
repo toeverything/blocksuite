@@ -45,6 +45,7 @@ export const createEditor = (options: EditorOptions = {}): EditorContainer => {
       room: options.room,
       providers: options.providers,
       awareness: options.awareness,
+      idGenerator: options.idGenerator,
     });
     store.space.register(BlockSchema);
     editor.store = store;

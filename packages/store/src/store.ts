@@ -1,4 +1,5 @@
 import { PrefixedBlockProps, Space } from './space';
+import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 import type { SyncProvider, SyncProviderConstructor } from './providers';
@@ -14,6 +15,7 @@ export interface StoreOptions {
   room?: string;
   providers?: SyncProviderConstructor[];
   awareness?: Awareness;
+  idGenerator?: IdGenerator;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
@@ -27,6 +29,7 @@ export class Store {
     room = DEFAULT_ROOM,
     providers = [],
     awareness,
+    idGenerator,
   }: StoreOptions = {}) {
     const aware = awareness ?? new Awareness(this.doc);
     this.providers = providers.map(
@@ -35,7 +38,7 @@ export class Store {
     );
 
     // FIXME
-    this.spaces.set('page0', new Space(this.doc, aware));
+    this.spaces.set('page0', new Space(this.doc, aware, idGenerator));
   }
 
   // FIXME

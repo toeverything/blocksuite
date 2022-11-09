@@ -256,6 +256,9 @@ export class DebugMenu extends LitElement {
     .debug-menu > button path {
       fill: var(--affine-text-color);
     }
+    .debug-menu > button > * {
+      flex: 1;
+    }
   `;
 
   render() {
