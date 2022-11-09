@@ -4,15 +4,16 @@ import {
   assertExists,
   getRichTextByModel,
   getStartModelBySelection,
+  hotkey,
   isRangeSelection,
 } from '../../utils';
 import './link-node';
 import { MockSelectNode } from './mock-select-node';
 
-export const createLink = async (space: Space, e: KeyboardEvent) => {
+// Disable hotkey to fix common hotkey(ctrl+c, ctrl+v, etc) not working at edit link popover
+export const createLink = hotkey.withDisabledHotkeyFn(async (space: Space) => {
   if (!isRangeSelection()) {
     // TODO maybe allow user creating a link with text
-    e.preventDefault();
     return;
   }
   const startModel = getStartModelBySelection();
@@ -63,4 +64,4 @@ export const createLink = async (space: Space, e: KeyboardEvent) => {
 
   space.captureSync();
   startModel.text?.format(range.index, range.length, { link });
-};
+});
