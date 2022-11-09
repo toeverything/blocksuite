@@ -14,6 +14,7 @@ import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../utils/cursor';
+import { showFormatQuickBar } from '../../components/format-quick-bar';
 
 interface NoneBlockSelectionState {
   type: 'none';
@@ -301,8 +302,14 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if ( this.blockSelectionState.type === 'single' && this.blockSelectionState.active ) {
-      getNativeSelectionMouseDragInfo(e);
+    if (
+      this.blockSelectionState.type === 'single' &&
+      this.blockSelectionState.active
+    ) {
+      const { anchor } = getNativeSelectionMouseDragInfo(e);
+      if (anchor) {
+        showFormatQuickBar({ anchorEl: anchor });
+      }
     }
     this._frameSelectionState = null;
   };
