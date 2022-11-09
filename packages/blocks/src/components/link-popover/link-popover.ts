@@ -2,7 +2,7 @@ import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { createEvent } from '../../__internal__/utils';
 import { toast } from '../toast';
-import { ConfirmIcon, EditIcon, UnlinkIcon } from '../button';
+import { ConfirmIcon, EditIcon, UnlinkIcon } from './icons';
 import { linkPopoverStyle } from './styles';
 
 export const ALLOWED_SCHEMES = [
@@ -176,7 +176,7 @@ export class LinkPopover extends LitElement {
       class="affine-confirm-button"
       ?disabled=${this.disableConfirm}
       @click=${this.onConfirm}
-      >${ConfirmIcon()}</icon-button
+      >${ConfirmIcon}</icon-button
     >`;
   }
 
@@ -204,11 +204,11 @@ export class LinkPopover extends LitElement {
       </div>
       <span class="affine-link-popover-dividing-line"></span>
       <icon-button class="has-tool-tip" @click=${this.onUnlink}>
-        ${UnlinkIcon()}
+        ${UnlinkIcon}
         <tool-tip inert role="tooltip">Remove</tool-tip>
       </icon-button>
       <icon-button class="has-tool-tip" @click=${this.onEdit}>
-        ${EditIcon()}
+        ${EditIcon}
         <tool-tip inert role="tooltip">Edit link</tool-tip>
       </icon-button>
     </div>`;
