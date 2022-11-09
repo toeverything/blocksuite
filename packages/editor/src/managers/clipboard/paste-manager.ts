@@ -99,7 +99,7 @@ export class PasteManager {
     if (file) {
       if (file.type.includes('image')) {
         //  todo upload file to file server
-        let url = URL.createObjectURL(file);
+        const url = URL.createObjectURL(file);
         return [
           // FIXME: Add two img blocks I should only add one
           {

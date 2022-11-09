@@ -39,18 +39,22 @@ export class ImageBlockComponent extends LitElement {
   @query('.resizable')
   _container!: HTMLElement;
 
-  block: any;
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }
-  private maximumSize: number = 720;
-  /** This is the initial mouse position before event resize is applied. */
-  private originalMouseX: number = 0;
-  /** This is the initial width before event resize is applied */
-  private originalWidth: number = 0;
-  private minimumSize: number = 20;
-  private width: number = 0;
+
+  private maximumSize = 720;
+
+  // This is the initial mouse position before event resize is applied.
+  private originalMouseX = 0;
+
+  // This is the initial width before event resize is applied
+  private originalWidth = 0;
+
+  private minimumSize = 20;
+
+  private width = 0;
 
   private _startResizingLeft = (e: MouseEvent) => {
     // Prevent propagation of mousedown event that could lead to click / select of block).
@@ -76,13 +80,13 @@ export class ImageBlockComponent extends LitElement {
     window.removeEventListener('mousemove', this._handleResizeRightMove);
   };
 
-  /** cancel resizing and revert to width before starting resize */
+  // cancel resizing and revert to width before starting resize
   private _cancelResize = () => {
     this._setContainerWidthFromResizingEvent(this.originalWidth);
     this._removeResizeListeners();
   };
 
-  /** apply current width from resizing and update block */
+  // apply current width from resizing and update block
   private _commitResize = () => {
     this.originalWidth = this.width;
     this.model.space.updateBlock(this.model, { width: this.width });
@@ -114,7 +118,7 @@ export class ImageBlockComponent extends LitElement {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     const { source } = this.model;
-    let img = new Image();
+    const img = new Image();
     img.src = source;
     img.onload = () => {
       this.originalWidth = img.width > 720 ? 720 : img.width;
