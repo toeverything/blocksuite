@@ -21,6 +21,7 @@ export interface StoreOptions {
 const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
+  readonly version = [0, 1];
   readonly doc = new Y.Doc();
   readonly providers: SyncProvider[] = [];
   readonly spaces = new Map<string, Space>();
