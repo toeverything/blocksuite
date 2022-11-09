@@ -1,9 +1,9 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { EmbedBlockModel } from '../embed-block';
+import type { EmbedBlockModel } from '../embed-block';
 import {
   BLOCK_ID_ATTR,
-  BlockHost,
+  type BlockHost,
   BlockChildrenContainer,
 } from '../__internal__';
 import style from './style.css';
