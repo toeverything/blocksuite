@@ -11,9 +11,16 @@ import {
   handleNativeRangeClick,
   isPageTitle,
   handleNativeRangeDblClick,
+  getBlockById,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
-import { repairContextMenuRange } from '../utils/cursor';
+import {
+  DragDirection,
+  getDragDirection,
+  getNativeSelectionMouseDragInfo,
+  repairContextMenuRange,
+  SelectedBlockType,
+} from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -135,6 +142,18 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
+    const { selectionRect, richTextCache, selectedRichTexts } =
+      this._getSelectedBlockInfo(e);
+    this.state.selectedRichTexts = selectedRichTexts;
+    const selectedBounds = selectedRichTexts.map(richText => {
+      return richTextCache.get(richText) as DOMRect;
+    });
+    this._signals.updateSelectedRects.emit(selectedBounds);
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
+  }
+
+  private _getSelectedBlockInfo(e: SelectionEvent) {
+    assertExists(this.state.startPoint);
     const current = { x: e.raw.clientX, y: e.raw.clientY };
     const { startPoint: start } = this.state;
 
@@ -144,17 +163,28 @@ export class DefaultSelectionManager {
       richTextCache,
       selectionRect
     );
-    this.state.selectedRichTexts = selectedRichTexts;
-    const selectedBounds = selectedRichTexts.map(richText => {
-      return richTextCache.get(richText) as DOMRect;
-    });
-    this._signals.updateSelectedRects.emit(selectedBounds);
-    this._signals.updateFrameSelectionRect.emit(selectionRect);
+    return { selectionRect, richTextCache, selectedRichTexts };
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
+    const { selectedRichTexts } = this._getSelectedBlockInfo(e);
+    const selectedBlocks = selectedRichTexts.map(richText => {
+      return getBlockById(richText.model.id) as unknown as Element;
+    });
+    const selectedType: SelectedBlockType = selectedBlocks.every(block => {
+      return /paragraph-block/i.test(block.tagName);
+    })
+      ? 'text'
+      : 'other';
+    console.log(`selectedType: ${selectedType}`);
+    const direction: DragDirection = getDragDirection(e);
+    console.log(`direction: ${direction}`);
+    const anchor = ['rightDown', 'leftDown'].includes(direction)
+      ? selectedBlocks[selectedBlocks.length - 1]
+      : selectedBlocks[0];
+    console.log(anchor);
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
@@ -166,6 +196,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
+    getNativeSelectionMouseDragInfo(e);
     noop();
   }
 
@@ -234,6 +265,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.dispose();
     this._mouseDisposeCallback();
   }
+
   selectBlockByRect(selectionRect: DOMRect) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);

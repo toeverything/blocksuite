@@ -79,6 +79,7 @@ export function updateTextType(flavour: string, type: string, space: Space) {
     }
   });
 }
+
 export function transformBlock(
   space: Space,
   model: BaseBlockModel,
@@ -244,7 +245,25 @@ export function handleSelectAll() {
   // @ts-ignore
   range.setEnd(lastNode, lastNode.length);
 
+  const nearestCommonAncestor = findNearestCommonAncestor(
+    firstRichText,
+    lastRichText,
+    document.querySelector('body') as Node
+  );
+  initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
   resetNativeSelection(range);
+}
+
+function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
+  nearestCommonAncestor.addEventListener(
+    'mousemove',
+    e => {
+      e.stopPropagation();
+      // SelectedBlockType 总是 text, DragDirection 总是 never
+      console.log(nearestCommonAncestor);
+    },
+    { once: true }
+  );
 }
 
 function findLastNode(ele: Element | Node): Node {
@@ -259,6 +278,29 @@ function findFirstNode(ele: Element | Node): Node {
     return findFirstNode(ele.firstChild);
   }
   return ele;
+}
+
+function findNearestCommonAncestor(
+  node1: Node,
+  node2: Node,
+  root: Node = document.querySelector('body') as Node
+): Node {
+  const ancestors: Node[][] = new Array(2).fill(0).map(() => []);
+  [node1, node2].forEach((node, index) => {
+    while (node !== root && node.parentElement) {
+      node = node.parentElement;
+      ancestors[index].push(node);
+    }
+  });
+
+  for (let i = 0; i < ancestors[0].length; i++) {
+    for (let j = 0; j < ancestors[1].length; j++) {
+      if (ancestors[0][i] === ancestors[1][j]) {
+        return ancestors[0][i];
+      }
+    }
+  }
+  return root;
 }
 
 export function handleBlockSelectionBatchDelete(
