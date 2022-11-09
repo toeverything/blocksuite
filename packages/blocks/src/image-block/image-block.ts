@@ -1,5 +1,5 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from '../embed-block';
 import {
   BLOCK_ID_ATTR,
@@ -42,6 +42,9 @@ export class ImageBlockComponent extends LitElement {
 
   @query('.affine-embed-wrapper-caption')
   _captionDom!: HTMLInputElement;
+
+  @state()
+  _canEditor!: boolean;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -98,12 +101,14 @@ export class ImageBlockComponent extends LitElement {
   };
 
   private _handleResizeLeftMove = (mouseMoveEvent: MouseEvent) => {
+    mouseMoveEvent.preventDefault();
     const width =
       this.originalWidth - (mouseMoveEvent.pageX - this.originalMouseX);
     this._setContainerWidthFromResizingEvent(width);
   };
 
   private _handleResizeRightMove = (mouseMoveEvent: MouseEvent) => {
+    mouseMoveEvent.preventDefault();
     const width =
       this.originalWidth + (mouseMoveEvent.pageX - this.originalMouseX);
     this._setContainerWidthFromResizingEvent(width);
@@ -139,6 +144,10 @@ export class ImageBlockComponent extends LitElement {
     this._captionDom.focus();
   }
 
+  private _selectImage() {
+    this._canEditor = true;
+  }
+
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -146,9 +155,10 @@ export class ImageBlockComponent extends LitElement {
     const img = new Image();
     img.src = source;
     img.onload = () => {
-      this.originalWidth = img.width > 720 ? 720 : img.width;
+      this.originalWidth = img.width > 680 ? 680 : img.width;
       this.maximumSize = this.originalWidth;
       this._container.style.width = img.width + 'px';
+      this._canEditor = true;
       this.topLeft.addEventListener('mousedown', this._startResizingLeft);
       this.topRight.addEventListener('mousedown', this._startResizingRight);
       this.bottomLeft.addEventListener('mousedown', this._startResizingLeft);
@@ -169,12 +179,15 @@ export class ImageBlockComponent extends LitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     // const { deep, index } = getListInfo(this.host, this.model);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
-    const { source, caption } = this.model;
+    const { source } = this.model;
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <embed-block caption=${caption}>
-        <div class="affine-image-wrapper">
+      <embed-block .model=${this.model}>
+        <div
+          class="affine-image-wrapper ${this._canEditor ? 'active' : ''}"
+          @click=${this._selectImage}
+        >
           <div class="resizable">
             <div class="image-option-container">
               <ul class="image-option">

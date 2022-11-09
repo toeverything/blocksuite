@@ -16,7 +16,9 @@
 .resizable:hover {
   border: 2px solid #4286f4;
 }
-
+.active .resizable {
+  border: 2px solid #4286f4 !important;
+}
 .resizable .image-option-container {
   display: none;
   position: absolute;
@@ -28,6 +30,9 @@
 
 .resizable:hover .image-option-container {
   display: block;
+}
+.active .image-option-container {
+  display: block !important;
 }
 
 .resizable .image-option-container .image-option {
@@ -74,6 +79,9 @@
 
 .resizable:hover .resize {
   display: block;
+}
+.active .resize {
+  display: block !important;
 }
 .resizable .resizes .resize.top-left {
   left: -5px;
