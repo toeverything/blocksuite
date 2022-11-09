@@ -269,14 +269,17 @@ export class EdgelessSelectedRect extends LitElement {
         groupContainer.style.width = newW + 'px';
         groupContainer.style.translate = `translate(${newX}px, ${y}px) scale(${this.zoom})`;
       }
-      // refresh xywh by model
-      space.updateBlock(selected, {
-        xywh: JSON.stringify([
-          newX,
-          y,
-          newW,
-          (groupBlock?.getBoundingClientRect().height || 0) / this.zoom,
-        ]),
+      // reset the width of the container may trigger animation
+      requestAnimationFrame(() => {
+        // refresh xywh by model
+        space.updateBlock(selected, {
+          xywh: JSON.stringify([
+            newX,
+            y,
+            newW,
+            (groupBlock?.getBoundingClientRect().height || 0) / this.zoom,
+          ]),
+        });
       });
     }
   };
