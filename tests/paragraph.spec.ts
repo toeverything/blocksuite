@@ -22,6 +22,7 @@ import {
   initEmptyState,
   dragOverTitle,
   resetHistory,
+  focusTitle,
 } from './utils/actions';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -50,12 +51,13 @@ test('init paragraph by page title enter in middle', async ({ page }) => {
 
 test('drag over paragraph title', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await page.keyboard.type('hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
 
   await dragOverTitle(page);
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.press('Backspace', { delay: 100 });
   await assertTitle(page, '');
 
   await undoByKeyboard(page);
@@ -64,6 +66,7 @@ test('drag over paragraph title', async ({ page }) => {
 
 test('backspace and arrow on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyState(page);
   await page.keyboard.type('hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);

@@ -6,7 +6,7 @@ import {
   convertToList,
   createEvent,
 } from '../__internal__';
-import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { BaseBlockModel, Space } from '@blocksuite/store';
 import type { GroupBlockModel } from '../group-block';
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
@@ -123,7 +123,7 @@ const icons = {
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
   @property()
-  store!: Store;
+  space!: Space;
 
   @property()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,18 +141,18 @@ export class DebugMenu extends LitElement {
   @state()
   _mode: 'page' | 'edgeless' = 'page';
 
-  get space() {
-    return this.store.space;
-  }
+  // get space() {
+  //   return this.store.space;
+  // }
 
   private _onToggleConnection() {
-    if (this.connected === true) {
-      this.store.providers.forEach(provide => provide.disconnect());
-      this.connected = false;
-    } else {
-      this.store.providers.forEach(provide => provide.connect());
-      this.connected = true;
-    }
+    // if (this.connected === true) {
+    //   this.store.providers.forEach(provide => provide.disconnect());
+    //   this.connected = false;
+    // } else {
+    //   this.store.providers.forEach(provide => provide.connect());
+    //   this.connected = true;
+    // }
   }
 
   private _convertToList(listType: 'bulleted' | 'numbered' | 'todo') {

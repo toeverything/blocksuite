@@ -2,7 +2,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import type { Store } from '@blocksuite/store';
+import type { Space } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
 
@@ -11,11 +11,7 @@ type PageBlockModel = InstanceType<typeof BlockSchema['affine:page']>;
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
   @property()
-  store!: Store;
-
-  get space() {
-    return this.store.space;
-  }
+  space!: Space;
 
   @state()
   mode: 'page' | 'edgeless' = 'page';
@@ -43,7 +39,7 @@ export class EditorContainer extends LitElement {
   unsubscribe = [] as (() => void)[];
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('store')) {
+    if (changedProperties.has('space')) {
       this.placeholderModel = new BlockSchema['affine:page'](this.space, {});
     }
     super.update(changedProperties);
@@ -72,9 +68,10 @@ export class EditorContainer extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    if (!this.store) {
+    if (!this.space) {
       throw new Error("EditorContainer's store is not set!");
     }
+    this.placeholderModel = new BlockSchema['affine:page'](this.space, {});
 
     window.addEventListener('affine.switch-mode', ({ detail }) => {
       this.mode = detail;
@@ -83,10 +80,6 @@ export class EditorContainer extends LitElement {
     this._subscribeStore();
 
     this._placeholderInput?.focus();
-    // @ts-ignore
-    window.store = this.store;
-    // @ts-ignore
-    window.editor = this;
   }
 
   disconnectedCallback() {
@@ -97,7 +90,7 @@ export class EditorContainer extends LitElement {
     const placeholderRoot = html`
       <default-page-block
         .mouseRoot=${this as HTMLElement}
-        .store=${this.store}
+        .space=${this.space}
         .model=${this.placeholderModel}
       ></default-page-block>
     `;
@@ -105,7 +98,7 @@ export class EditorContainer extends LitElement {
     const pageContainer = html`
       <default-page-block
         .mouseRoot=${this as HTMLElement}
-        .store=${this.store}
+        .space=${this.space}
         .model=${this.model}
       ></default-page-block>
     `;
@@ -113,7 +106,7 @@ export class EditorContainer extends LitElement {
     const edgelessContainer = html`
       <edgeless-page-block
         .mouseRoot=${this as HTMLElement}
-        .store=${this.store}
+        .space=${this.space}
         .model=${this.model}
       ></edgeless-page-block>
     `;
@@ -137,7 +130,7 @@ export class EditorContainer extends LitElement {
       <div class="affine-editor-container">
         ${this.isEmptyPage ? placeholderRoot : blockRoot}
         <debug-menu
-          .store=${this.store}
+          .space=${this.space}
           .contentParser=${this.contentParser}
         ></debug-menu>
       </div>
