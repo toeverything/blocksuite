@@ -2,7 +2,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Disposable, Signal, Space, Store, Text } from '@blocksuite/store';
+import { Disposable, Signal, Space, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -101,11 +101,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   `;
 
   @property()
-  store!: Store;
-
-  get space() {
-    return this.store.space;
-  }
+  space!: Space;
 
   flavour = 'affine:page' as const;
 
@@ -322,7 +318,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('space')) {
       this.selection = new DefaultSelectionManager(
         this.space,
         this.mouseRoot,

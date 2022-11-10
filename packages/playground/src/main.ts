@@ -6,12 +6,16 @@ import {
   IndexedDBProvider,
   createAutoIncrement,
   uuidv4,
+  Store,
 } from '@blocksuite/store';
 import type { SyncProviderConstructor, StoreOptions } from '@blocksuite/store';
+import { BlockSchema } from '@blocksuite/editor';
+
 import './style.css';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? '';
+const isTest = params.get('isTest') === 'true';
 
 /**
  * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
@@ -56,9 +60,22 @@ function editorOptionsFromParam(): Pick<
 }
 
 window.onload = () => {
-  const editor = createEditor({
-    room,
+  const store = new Store({
+    room: room,
     ...editorOptionsFromParam(),
   });
-  document.body.appendChild(editor);
+  // @ts-ignore
+  window.store = store;
+  // @ts-ignore
+  window.blockSchema = BlockSchema;
+
+  // In dev environment, init editor by default, but in test environment, init editor by the test page
+  if (!isTest) {
+    const space = store
+      .createSpace('page0')
+      // @ts-ignore
+      .register(window.blockSchema);
+    const editor = createEditor(space);
+    document.body.appendChild(editor);
+  }
 };
