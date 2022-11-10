@@ -262,7 +262,9 @@ export class PasteManager {
       };
       const id = this._editor.space.addBlock(blockProps, parent, index + i);
       const model = this._editor.space.getBlockById(id);
-      block.text && model?.text?.applyDelta(block.text);
+      if (model?.type !== 'affine:embed') {
+        block.text && model?.text?.applyDelta(block.text);
+      }
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);
     }

@@ -26,19 +26,22 @@ export class ImageBlockComponent extends LitElement {
   host!: BlockHost;
 
   @query('.top-left')
-  topLeft!: HTMLElement;
+  _topLeft!: HTMLElement;
+
+  @query('.affine-image-wrapper')
+  _container!: HTMLElement;
 
   @query('.top-right')
-  topRight!: HTMLElement;
+  _topRight!: HTMLElement;
 
   @query('.bottom-left')
-  bottomLeft!: HTMLElement;
+  _bottomLeft!: HTMLElement;
 
   @query('.bottom-right')
-  bottomRight!: HTMLElement;
+  _bottomRight!: HTMLElement;
 
   @query('.resizable')
-  _container!: HTMLElement;
+  _resizable!: HTMLElement;
 
   @query('.affine-embed-wrapper-caption')
   _captionDom!: HTMLInputElement;
@@ -46,12 +49,16 @@ export class ImageBlockComponent extends LitElement {
   @state()
   _canEditor!: boolean;
 
+  @state()
+  _optionLocation!: boolean;
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }
 
   private maximumSize = 720;
+
+  private containerWidth = 0;
 
   // This is the initial mouse position before event resize is applied.
   private originalMouseX = 0;
@@ -119,15 +126,34 @@ export class ImageBlockComponent extends LitElement {
       width > this.minimumSize && width < this.maximumSize;
     if (isWidthWithinBounds) {
       this.width = width;
-      this._container.style.width = `${width}px`;
+      this._resizable.style.width = `${width}px`;
+      this._optionLocation = width > this.containerWidth - 100;
     }
   }
   private _deleteBlock() {
     this.model.space.deleteBlock(this.model);
   }
 
-  private _copyBlock() {
-    console.log('copy');
+  private async _copyBlock() {
+    this._writeClipImg(this.model.source);
+  }
+
+  private async _writeClipImg(imgURL: string) {
+    try {
+      const data = await fetch(imgURL);
+      const blob = await data.blob();
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob,
+        }),
+      ]);
+      console.log('Fetched image copied.');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.name, err.message);
+      }
+    }
   }
 
   private _downloadImage() {
@@ -151,28 +177,35 @@ export class ImageBlockComponent extends LitElement {
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+    // exclude padding and border width
+    this.containerWidth = this._container.clientWidth - 100;
     const { source } = this.model;
     const img = new Image();
     img.src = source;
     img.onload = () => {
-      this.originalWidth = img.width > 680 ? 680 : img.width;
+      this.originalWidth =
+        img.width > this.containerWidth ? this.containerWidth : img.width;
+      this._optionLocation = img.width > this.containerWidth;
       this.maximumSize = this.originalWidth;
-      this._container.style.width = img.width + 'px';
+      this._resizable.style.width = img.width + 'px';
       this._canEditor = true;
-      this.topLeft.addEventListener('mousedown', this._startResizingLeft);
-      this.topRight.addEventListener('mousedown', this._startResizingRight);
-      this.bottomLeft.addEventListener('mousedown', this._startResizingLeft);
-      this.bottomRight.addEventListener('mousedown', this._startResizingRight);
+      this._topLeft.addEventListener('mousedown', this._startResizingLeft);
+      this._topRight.addEventListener('mousedown', this._startResizingRight);
+      this._bottomLeft.addEventListener('mousedown', this._startResizingLeft);
+      this._bottomRight.addEventListener('mousedown', this._startResizingRight);
     };
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._cancelResize();
-    this.topLeft.removeEventListener('mousedown', this._startResizingLeft);
-    this.topRight.removeEventListener('mousedown', this._startResizingRight);
-    this.bottomLeft.removeEventListener('mousedown', this._startResizingLeft);
-    this.bottomRight.removeEventListener('mousedown', this._startResizingRight);
+    this._topLeft.removeEventListener('mousedown', this._startResizingLeft);
+    this._topRight.removeEventListener('mousedown', this._startResizingRight);
+    this._bottomLeft.removeEventListener('mousedown', this._startResizingLeft);
+    this._bottomRight.removeEventListener(
+      'mousedown',
+      this._startResizingRight
+    );
   }
 
   render() {
@@ -188,7 +221,11 @@ export class ImageBlockComponent extends LitElement {
           class="affine-image-wrapper ${this._canEditor ? 'active' : ''}"
           @click=${this._selectImage}
         >
-          <div class="resizable">
+          <div
+            class="resizable ${this._optionLocation
+              ? 'image-option-inside'
+              : ''}"
+          >
             <div class="image-option-container">
               <ul class="image-option">
                 <li @click=${this._editorImageCaption}>${CaptionIcon}</li>

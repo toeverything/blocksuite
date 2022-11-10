@@ -1,5 +1,6 @@
 .affine-image-wrapper {
   padding: 8px;
+  width: 100%;
 }
 .affine-image-wrapper img {
   max-width: 100%;
@@ -27,6 +28,9 @@
   margin: 0;
   padding-left: 12px;
 }
+.image-option-inside .image-option-container {
+  right: 10px !important;
+}
 
 .resizable:hover .image-option-container {
   display: block;
@@ -43,8 +47,10 @@
   overflow: hidden;
   padding: 4px;
   width: 40px;
+  background-color: var(--affine-page-background);
   margin: 0;
 }
+
 .resizable .image-option-container .image-option li {
   cursor: pointer;
   text-align: center;
