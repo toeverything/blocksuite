@@ -3,13 +3,36 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { Space } from '@blocksuite/store';
+import { DisposableGroup, Signal } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
 import { BlockSchema } from '../../block-loader';
 
 type PageBlockModel = InstanceType<typeof BlockSchema['affine:page']>;
 
+declare global {
+  interface HTMLElementTagNameMap {
+    'editor-container': EditorContainer;
+  }
+}
+
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
+  /**
+   * @internal
+   * Resolve the readiness of the editor, on {@link EditorContainer.editorReady}
+   *
+   * TODO: rootAdded signal doesn't seem to trigger for completely empty documents...
+   * So, in cases where we stat on a blank page, we won't know the editor is ready...
+   */
+  #resolveReady: undefined | (() => void) = undefined;
+  /**
+   * Wait for the editor to be ready.
+   * Once the editor is ready, we can safely access the {@link EditorContainer.model}.
+   */
+  editorReady = new Promise<void>(res => {
+    this.#resolveReady = () => ((this.#resolveReady = undefined), res());
+  });
+
   @property()
   space!: Space;
 
@@ -35,8 +58,7 @@ export class EditorContainer extends LitElement {
   @state()
   placeholderModel!: PageBlockModel;
 
-  @state()
-  unsubscribe = [] as (() => void)[];
+  disposables = new DisposableGroup();
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('space')) {
@@ -47,17 +69,32 @@ export class EditorContainer extends LitElement {
 
   private _subscribeStore() {
     // if undo to empty page, reset to empty placeholder
-    const unsubscribeUpdate = this.space.signals.updated.on(() => {
-      this.isEmptyPage = this.space.isEmpty;
-    });
-    this.unsubscribe.push(unsubscribeUpdate.dispose);
+    this.disposables.add(
+      this.space.signals.updated.on(() => {
+        this.isEmptyPage = this.space.isEmpty;
+      })
+    );
 
-    const unsubscribeRootAdd = this.space.signals.rootAdded.on(block => {
-      this.model = block as PageBlockModel;
-      this.model.childrenUpdated.on(() => this.requestUpdate());
-      this.requestUpdate();
-    });
-    this.unsubscribe.push(unsubscribeRootAdd.dispose);
+    // keep track of disposeables that should be disposed on each model replacement
+    let currentRootDisposable: DisposableGroup | undefined;
+    this.disposables.add(() => currentRootDisposable?.dispose());
+    this.disposables.add(
+      this.space.signals.rootAdded.on(block => {
+        currentRootDisposable?.dispose();
+        currentRootDisposable = new DisposableGroup();
+        // Question: Should we destroy the block on disposal?
+        // maybe not if we have multiple editors?
+        // currentRootDisposable.add(block);
+
+        this.model = block as PageBlockModel;
+        currentRootDisposable.add(
+          this.model.childrenUpdated.on(() => this.requestUpdate())
+        );
+        this.requestUpdate();
+
+        this.#resolveReady?.();
+      })
+    );
   }
 
   // disable shadow DOM to workaround quill
@@ -73,9 +110,11 @@ export class EditorContainer extends LitElement {
     }
     this.placeholderModel = new BlockSchema['affine:page'](this.space, {});
 
-    window.addEventListener('affine.switch-mode', ({ detail }) => {
-      this.mode = detail;
-    });
+    this.disposables.add(
+      Signal.fromEvent(window, 'affine.switch-mode').on(({ detail }) => {
+        this.mode = detail;
+      })
+    );
 
     this._subscribeStore();
 
@@ -83,7 +122,8 @@ export class EditorContainer extends LitElement {
   }
 
   disconnectedCallback() {
-    this.unsubscribe.forEach(fn => fn());
+    this.disposables.dispose();
+    this.disposables = new DisposableGroup();
   }
 
   render() {
@@ -135,11 +175,5 @@ export class EditorContainer extends LitElement {
         ></debug-menu>
       </div>
     `;
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'editor-container': EditorContainer;
   }
 }
