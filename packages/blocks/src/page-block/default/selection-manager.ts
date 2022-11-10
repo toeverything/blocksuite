@@ -170,6 +170,9 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
     const { selectedRichTexts } = this._getSelectedBlockInfo(e);
+    if (selectedRichTexts.length === 0) {
+      return;
+    }
     const selectedBlocks = selectedRichTexts.map(richText => {
       return getBlockById(richText.model.id) as unknown as HTMLElement;
     });
