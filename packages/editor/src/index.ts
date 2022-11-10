@@ -1,4 +1,4 @@
-import type { Space } from '@blocksuite/store';
+import type { Space, Store } from '@blocksuite/store';
 import type { EditorContainer } from './components';
 
 export * from './components';
@@ -28,4 +28,11 @@ export const createEditor = (space: Space): EditorContainer => {
   const editor = document.createElement('editor-container');
   editor.space = space;
   return editor;
+};
+
+export const createDebugMenu = (store: Store, editor: EditorContainer) => {
+  const debugMenu = document.createElement('debug-menu');
+  debugMenu.store = store;
+  debugMenu.editor = editor;
+  return debugMenu;
 };

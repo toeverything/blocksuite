@@ -58,7 +58,12 @@ export async function enterPlaygroundWithList(page: Page) {
     window.space = space;
     const editor = document.createElement('editor-container');
     editor.space = space;
+
+    const debugMenu = document.createElement('debug-menu');
+    debugMenu.store = window.store;
+    debugMenu.editor = editor;
     document.body.appendChild(editor);
+    document.body.appendChild(debugMenu);
 
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
@@ -76,9 +81,13 @@ export async function initEmptyState(page: Page) {
       .register(window.blockSchema);
     window.space = space;
     const editor = document.createElement('editor-container');
-
     editor.space = space;
+
+    const debugMenu = document.createElement('debug-menu');
+    debugMenu.store = window.store;
+    debugMenu.editor = editor;
     document.body.appendChild(editor);
+    document.body.appendChild(debugMenu);
 
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
