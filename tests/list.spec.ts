@@ -13,7 +13,6 @@ import {
   convertToBulletedListByClick,
   convertToNumberedListByClick,
   enterPlaygroundRoom,
-  enterPlaygroundWithList,
   focusRichText,
   pressEnter,
   redoByClick,
@@ -71,7 +70,7 @@ test('convert to numbered list block', async ({ page }) => {
 });
 
 test('indent list block', async ({ page }) => {
-  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+  await enterPlaygroundRoom(page, { init: 'list' }); // 0(1(2,3,4))
 
   await focusRichText(page, 1);
   await page.keyboard.type('hello');
@@ -87,7 +86,7 @@ test('indent list block', async ({ page }) => {
 });
 
 test('unindent list block', async ({ page }) => {
-  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+  await enterPlaygroundRoom(page, { init: 'list' }); // 0(1(2,3,4))
 
   await focusRichText(page, 1);
   await page.keyboard.press('Tab'); // 0(1(2(5)4))
@@ -103,7 +102,7 @@ test('unindent list block', async ({ page }) => {
 });
 
 test('insert new list block by enter', async ({ page }) => {
-  await enterPlaygroundWithList(page);
+  await enterPlaygroundRoom(page, { init: 'list' });
   await assertRichTexts(page, ['\n', '\n', '\n']);
 
   await focusRichText(page, 1);
@@ -122,7 +121,7 @@ test('insert new list block by enter', async ({ page }) => {
 });
 
 test('delete at start of list block', async ({ page }) => {
-  await enterPlaygroundWithList(page);
+  await enterPlaygroundRoom(page, { init: 'list' });
   await focusRichText(page, 1);
   await page.keyboard.press('Backspace');
   await assertBlockChildrenFlavours(page, '1', [
@@ -142,7 +141,7 @@ test('delete at start of list block', async ({ page }) => {
 });
 
 test('nested list blocks', async ({ page }) => {
-  await enterPlaygroundWithList(page);
+  await enterPlaygroundRoom(page, { init: 'list' });
 
   await focusRichText(page, 0);
   await page.keyboard.type('123');
@@ -286,7 +285,7 @@ test('basic indent and unindent', async ({ page }) => {
 });
 
 test('enter list block with empty text', async ({ page }) => {
-  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+  await enterPlaygroundRoom(page, { init: 'list' }); // 0(1(2,3,4))
 
   await focusRichText(page, 1);
   await pressTab(page);
@@ -319,7 +318,7 @@ test('enter list block with empty text', async ({ page }) => {
 });
 
 test('enter list block with non-empty text', async ({ page }) => {
-  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+  await enterPlaygroundRoom(page, { init: 'list' }); // 0(1(2,3,4))
 
   await focusRichText(page, 0);
   await page.keyboard.type('aa');

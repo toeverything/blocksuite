@@ -1,7 +1,11 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import { BlockSchema, createEditor } from '@blocksuite/editor';
-import type { StoreOptions, SyncProviderConstructor } from '@blocksuite/store';
+import type {
+  Space,
+  StoreOptions,
+  SyncProviderConstructor,
+} from '@blocksuite/store';
 import {
   createAutoIncrement,
   DebugProvider,
@@ -9,13 +13,18 @@ import {
   Store,
   uuidv4,
 } from '@blocksuite/store';
+import { inits } from './inits';
 
 import './style.css';
 
 const searchParams = (() => {
   const params = new URLSearchParams(location.search);
   return {
-    isTest: params.get('isTest') === 'true',
+    /**
+     * In test environments and locally, you can set `?init=` to get a page with a specific configuration ready to go.
+     * These are listed in {@link inits}
+     */
+    init: params.get('init') || null,
     room: params.get('room') ?? '',
     syncModes: (params.get('syncModes') ?? 'debug').split(','),
   };
@@ -64,23 +73,44 @@ function editorOptionsFromParam(): Pick<
   };
 }
 
+// Add @deprecated to indicate that no one should depend on these existing
+declare global {
+  interface Window {
+    /** @deprecated Added by BlockSuite playground (for easy access from dev console) */
+    store: Store;
+    /** @deprecated Added by BlockSuite playground (for easy access from dev console) */
+    space: Space;
+  }
+}
+
 window.onload = () => {
   const store = new Store({
     room: searchParams.room,
     ...editorOptionsFromParam(),
   });
-  // @ts-ignore
-  window.store = store;
-  // @ts-ignore
-  window.blockSchema = BlockSchema;
 
-  // In dev environment, init editor by default, but in test environment, init editor by the test page
-  if (!searchParams.isTest) {
-    const space = store
-      .createSpace('page0')
-      // @ts-ignore
-      .register(window.blockSchema);
+  window.store = store;
+
+  if (!searchParams.init) {
+    // default init
+    const space = store.createSpace('page0').register(BlockSchema);
     const editor = createEditor(space);
     document.body.appendChild(editor);
+    window.space = space;
+  } else {
+    const foundInitSetup =
+      inits[searchParams.init as BlockSuitePlaygroundInitKey];
+    if (!foundInitSetup) {
+      throw new Error(
+        `Unknown init id (${JSON.stringify(
+          searchParams.init
+        )}) did not match any known ids in (${Object.keys(inits).join(', ')}).`
+      );
+    }
+
+    window.space = foundInitSetup.setup({
+      blockSchema: BlockSchema,
+      store,
+    });
   }
 };

@@ -10,11 +10,17 @@ function generateRandomRoomId() {
   return `virgo-${Math.random().toFixed(8).substring(2)}`;
 }
 
-export async function enterPlaygroundRoom(page: Page, room?: string) {
-  if (!room) {
-    room = generateRandomRoomId();
-  }
-  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&isTest=true`);
+export async function enterPlaygroundRoom(
+  page: Page,
+  {
+    room = generateRandomRoomId(),
+    init = 'page-test',
+  }: {
+    room?: string | undefined;
+    init?: BlockSuitePlaygroundInitKey | undefined;
+  } = {}
+) {
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&init=${init}`);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -48,38 +54,10 @@ export async function resetHistory(page: Page) {
   });
 }
 
-export async function enterPlaygroundWithList(page: Page) {
-  const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}&isTest=true`);
-  await page.evaluate(() => {
-    const space = window.store
-      .createSpace('page-test')
-      .register(window.blockSchema);
-    window.space = space;
-    const editor = document.createElement('editor-container');
-    editor.space = space;
-    document.body.appendChild(editor);
-
-    const pageId = space.addBlock({ flavour: 'affine:page' });
-    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
-    for (let i = 0; i < 3; i++) {
-      space.addBlock({ flavour: 'affine:list' }, groupId);
-    }
-  });
-  await waitNextFrame(page);
-}
-
+/** Create some initial basic blocks, returning their ids. */
 export async function initEmptyState(page: Page) {
-  const id = await page.evaluate(() => {
-    const space = window.store
-      .createSpace('page-test')
-      .register(window.blockSchema);
-    window.space = space;
-    const editor = document.createElement('editor-container');
-
-    editor.space = space;
-    document.body.appendChild(editor);
-
+  const ids = await page.evaluate(() => {
+    const space = window.space;
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
     const paragraphId = space.addBlock(
@@ -88,7 +66,7 @@ export async function initEmptyState(page: Page) {
     );
     return { pageId, groupId, paragraphId };
   });
-  return id;
+  return ids;
 }
 
 export async function focusRichText(page: Page, i = 0) {
