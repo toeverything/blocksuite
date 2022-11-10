@@ -38,7 +38,7 @@ test('click on blank area', async ({ page }) => {
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 5 };
+    return { x: bbox.left, y: bbox.top + 5 };
   });
   await page.mouse.click(above123.x, above123.y);
   await assertSelection(page, 0, 0, 0);
@@ -46,7 +46,7 @@ test('click on blank area', async ({ page }) => {
   const above456 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="3"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 5 };
+    return { x: bbox.left, y: bbox.top + 5 };
   });
   await page.mouse.click(above456.x, above456.y);
   await assertSelection(page, 1, 0, 0);
@@ -54,7 +54,7 @@ test('click on blank area', async ({ page }) => {
   const below789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.bottom + 5 };
+    return { x: bbox.left, y: bbox.bottom - 5 };
   });
   await page.mouse.click(below789.x, below789.y);
   await assertSelection(page, 2, 0, 0);
