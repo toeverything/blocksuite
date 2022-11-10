@@ -36,8 +36,9 @@ const searchParams = (() => {
  */
 function editorOptionsFromParam(): Pick<
   StoreOptions,
-  'providers' | 'idGenerator'
+  'providers' | 'idGenerator' | 'room'
 > {
+  const room = searchParams.room;
   const providers: SyncProviderConstructor[] = [];
 
   searchParams.syncModes.forEach(mode => {
@@ -68,6 +69,7 @@ function editorOptionsFromParam(): Pick<
     : createAutoIncrement();
 
   return {
+    room,
     providers,
     idGenerator,
   };
@@ -84,11 +86,9 @@ declare global {
 }
 
 window.onload = () => {
-  const store = new Store({
-    room: searchParams.room,
-    ...editorOptionsFromParam(),
-  });
+  const store = new Store(editorOptionsFromParam());
 
+  // Make store accessible to dev console & to evaluate scripts in e2e
   window.store = store;
 
   if (!searchParams.init) {
