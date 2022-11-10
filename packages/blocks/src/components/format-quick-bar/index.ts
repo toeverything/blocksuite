@@ -1,5 +1,14 @@
-import { html, css, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import type { Space } from '@blocksuite/store';
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { handleFormat } from '../../page-block/utils';
+import { createLink } from '../../__internal__/rich-text/link-node';
+import {
+  getSelectInfo,
+  getStartModelBySelection,
+} from '../../__internal__/utils';
+import { toolTipStyle } from '../tooltip';
+import './button';
 import {
   BoldIcon,
   CodeIcon,
@@ -9,11 +18,6 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from './icons';
-import './button';
-import { toolTipStyle } from '../tooltip';
-import { createLink } from '../../__internal__/rich-text/link-node';
-import { getStartModelBySelection, sleep } from '../../__internal__/utils';
-import { handleFormat } from '../../page-block/utils';
 
 const saveSelection = () => {
   const sel = window.getSelection();
@@ -36,6 +40,7 @@ const restoreSelection = (range: Range) => {
 
 const formatQuickBarStyle = css`
   .format-quick-bar {
+    z-index: var(--affine-z-index-popover);
     box-sizing: border-box;
     position: absolute;
     display: flex;
@@ -63,55 +68,48 @@ const formatButtons = [
   {
     name: 'Bold',
     icon: BoldIcon,
-    action: () => {
-      const { space } = getStartModelBySelection();
+    action: (space: Space) => {
       handleFormat(space, 'bold');
     },
   },
   {
     name: 'Italic',
     icon: ItalicIcon,
-    action: () => {
-      const { space } = getStartModelBySelection();
+    action: (space: Space) => {
       handleFormat(space, 'italic');
     },
   },
   {
     name: 'Underline',
     icon: UnderlineIcon,
-    action: () => {
-      const { space } = getStartModelBySelection();
+    action: (space: Space) => {
       handleFormat(space, 'underline');
     },
   },
   {
     name: 'Strikethrough',
     icon: StrikethroughIcon,
-    action: () => {
-      const { space } = getStartModelBySelection();
+    action: (space: Space) => {
       handleFormat(space, 'strike');
     },
   },
   {
     name: 'Code',
     icon: CodeIcon,
-    action: () => {
-      const { space } = getStartModelBySelection();
+    action: (space: Space) => {
       handleFormat(space, 'code');
     },
   },
   {
     name: 'Link',
     icon: LinkIcon,
-    action: () => {
-      // TODO fix multiple selection
-      const { space } = getStartModelBySelection();
+    action: (space: Space) => {
       createLink(space);
     },
   },
 ];
 
-const onCopy = () => {
+const onCopy = (space: Space) => {
   console.log('copy');
 };
 
@@ -125,14 +123,30 @@ export class FormatQuickBar extends LitElement {
   @property()
   top = '0px';
 
+  // TODO fix multiple selection
+  @property()
+  space: Space | null = null;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    const model = getStartModelBySelection();
+    this.space = model.space;
+  }
+
   override render() {
+    const space = this.space;
+
+    if (!space) {
+      console.error('Failed to render format-quick-bar! space not found!');
+      return html``;
+    }
     const paragraphItems = html``;
 
     const formatItems = html`
       ${formatButtons.map(
         ({ name, icon, action }) => html`<format-bar-button
           class="has-tool-tip"
-          @click=${action}
+          @click=${() => action(space)}
         >
           ${icon}
           <tool-tip inert role="tooltip">${name}</tool-tip>
@@ -142,13 +156,12 @@ export class FormatQuickBar extends LitElement {
 
     const actionItems = html`<format-bar-button
       class="has-tool-tip"
-      @click=${onCopy}
+      @click=${() => onCopy(space)}
     >
       ${CopyIcon}
       <tool-tip inert role="tooltip">Copy</tool-tip>
     </format-bar-button>`;
 
-    // TODO add click away listener
     return html`<div class="format-quick-bar-container">
       <div
         class="format-quick-bar"
