@@ -186,8 +186,18 @@ export const showFormatQuickBar = async ({
   formatQuickBar.top = `${offset + offsetY}px`;
   container.appendChild(formatQuickBar);
 
+  const clickAwayListener = (e: MouseEvent) => {
+    if (e.target === formatQuickBar) {
+      return;
+    }
+    abortController.abort();
+    window.removeEventListener('mousedown', clickAwayListener);
+  };
+  window.addEventListener('mousedown', clickAwayListener);
+
   return new Promise<void>(res => {
     abortController.signal.addEventListener('abort', () => {
+      // TODO add transition
       formatQuickBar.remove();
       res();
     });
