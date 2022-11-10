@@ -1,21 +1,25 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
-import { createEditor } from '@blocksuite/editor';
+import { BlockSchema, createEditor } from '@blocksuite/editor';
+import type { StoreOptions, SyncProviderConstructor } from '@blocksuite/store';
 import {
+  createAutoIncrement,
   DebugProvider,
   IndexedDBProvider,
-  createAutoIncrement,
-  uuidv4,
   Store,
+  uuidv4,
 } from '@blocksuite/store';
-import type { SyncProviderConstructor, StoreOptions } from '@blocksuite/store';
-import { BlockSchema } from '@blocksuite/editor';
 
 import './style.css';
 
-const params = new URLSearchParams(location.search);
-const room = params.get('room') ?? '';
-const isTest = params.get('isTest') === 'true';
+const searchParams = (() => {
+  const params = new URLSearchParams(location.search);
+  return {
+    isTest: params.get('isTest') === 'true',
+    room: params.get('room') ?? '',
+    syncModes: (params.get('syncModes') ?? 'debug').split(','),
+  };
+})();
 
 /**
  * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
@@ -27,9 +31,7 @@ function editorOptionsFromParam(): Pick<
 > {
   const providers: SyncProviderConstructor[] = [];
 
-  const modes = (params.get('syncModes') ?? 'debug').split(',');
-
-  modes.forEach(mode => {
+  searchParams.syncModes.forEach(mode => {
     switch (mode) {
       case 'debug':
         providers.push(DebugProvider);
@@ -48,6 +50,9 @@ function editorOptionsFromParam(): Pick<
    * Specified using "uuidv4" when providers have indexeddb.
    * Because when persistent data applied to ydoc, we need generator different id for block.
    * Otherwise, the block id will conflict.
+   *
+   * Question: Wouldn't these ids potentially conflict any time there is any existing document, though?
+   * Or if there is a collaborative document?
    */
   const idGenerator = providers.includes(IndexedDBProvider)
     ? uuidv4
@@ -61,7 +66,7 @@ function editorOptionsFromParam(): Pick<
 
 window.onload = () => {
   const store = new Store({
-    room: room,
+    room: searchParams.room,
     ...editorOptionsFromParam(),
   });
   // @ts-ignore
@@ -70,7 +75,7 @@ window.onload = () => {
   window.blockSchema = BlockSchema;
 
   // In dev environment, init editor by default, but in test environment, init editor by the test page
-  if (!isTest) {
+  if (!searchParams.isTest) {
     const space = store
       .createSpace('page0')
       // @ts-ignore
