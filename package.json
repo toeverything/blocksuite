@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
-    "dev": "pnpm serve & pnpm --filter @blocksuite/playground dev",
+    "dev": "concurrently \"pnpm serve \" \"pnpm --filter @blocksuite/playground dev\"",
     "lint": "eslint ./ --max-warnings=0",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e",
@@ -30,6 +30,7 @@
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
     "@vitejs/plugin-react": "^2.1.0",
+    "concurrently": "^7.5.0",
     "eslint": "^8.23.0",
     "eslint-plugin-react": "^7.31.8",
     "eslint-plugin-react-hooks": "^4.6.0",
