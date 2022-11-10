@@ -2,7 +2,8 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import type { Page, Disposable } from '@blocksuite/store';
+import { Page, Signal } from '@blocksuite/store';
+import { DisposableGroup } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../../index.js';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
 
@@ -36,55 +37,50 @@ export class EditorContainer extends LitElement {
   @query('.affine-block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
-  private _disposables: Disposable[] = [];
-
-  private _subscribeStore() {
-    const rootAddedDisposable = this.page.signals.rootAdded.on(() => {
-      this.requestUpdate();
-    });
-    this._disposables.push(rootAddedDisposable);
-  }
+  private _disposables = new DisposableGroup();
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
   }
 
-  private _handleSwitchMouseMode = ({ detail }: CustomEvent<MouseMode>) => {
-    this.mouseMode = detail;
-  };
-
   override connectedCallback() {
     super.connectedCallback();
 
-    window.addEventListener('keydown', e => {
-      if (e.altKey && e.metaKey && e.code === 'KeyC') {
-        e.preventDefault();
-      }
-    });
+    // Question: Why do we prevent this?
+    this._disposables.add(
+      Signal.fromEvent(window, 'keydown').on(e => {
+        if (e.altKey && e.metaKey && e.code === 'KeyC') {
+          e.preventDefault();
+        }
+      })
+    );
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
     }
 
-    window.addEventListener(
-      'affine.switch-mouse-mode',
-      this._handleSwitchMouseMode
+    // connect mouse mode event changes
+    this._disposables.add(
+      Signal.fromEvent(window, 'affine.switch-mouse-mode').on(({ detail }) => {
+        this.mouseMode = detail;
+      })
     );
 
-    this._subscribeStore();
+    // subscribe store
+    this._disposables.add(
+      this.page.signals.rootAdded.on(() => {
+        this.requestUpdate();
+      })
+    );
 
     this._placeholderInput?.focus();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-
-    window.removeEventListener(
-      'affine.switch-mouse-mode',
-      this._handleSwitchMouseMode
-    );
-    this._disposables.forEach(disposable => disposable.dispose());
+    this._disposables.dispose();
+    this._disposables = new DisposableGroup();
   }
 
   render() {
