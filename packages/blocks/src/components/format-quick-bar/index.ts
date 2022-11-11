@@ -1,23 +1,33 @@
-import type { Space } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import type { BaseBlockModel, Space } from '@blocksuite/store';
+import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { handleFormat } from '../../page-block/utils';
 import { createLink } from '../../__internal__/rich-text/link-node';
-import {
-  getSelectInfo,
-  getStartModelBySelection,
-} from '../../__internal__/utils';
-import { toolTipStyle } from '../tooltip';
+import { getCurrentRange, getModelsByRange } from '../../__internal__/utils';
+import { toast } from '../toast';
 import './button';
 import {
   BoldIcon,
+  BulletedListIcon,
+  CalloutIcon,
   CodeIcon,
   CopyIcon,
+  H1Icon,
+  H2Icon,
+  H3Icon,
+  H4Icon,
+  H5Icon,
+  H6Icon,
+  InlineCodeIcon,
   ItalicIcon,
   LinkIcon,
+  NumberedIcon,
+  QuoteIcon,
   StrikethroughIcon,
+  TodoIcon,
   UnderlineIcon,
 } from './icons';
+import { formatQuickBarStyle } from './styles';
 
 const saveSelection = () => {
   const sel = window.getSelection();
@@ -27,6 +37,7 @@ const saveSelection = () => {
   if (sel.getRangeAt && sel.rangeCount) {
     return sel.getRangeAt(0);
   }
+  return;
 };
 
 const restoreSelection = (range: Range) => {
@@ -38,36 +49,26 @@ const restoreSelection = (range: Range) => {
   sel.addRange(range);
 };
 
-const formatQuickBarStyle = css`
-  .format-quick-bar {
-    z-index: var(--affine-z-index-popover);
-    box-sizing: border-box;
-    position: absolute;
-    display: flex;
-    align-items: center;
-    padding: 4px 8px;
-    gap: 4px;
-    height: 40px;
-
-    background: var(--affine-popover-background);
-    box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
-      0px 3px 16px -6px rgba(24, 39, 75, 0.04);
-    border-radius: 10px 10px 10px 0px;
-  }
-
-  .divider {
-    width: 1px;
-    height: 100%;
-    background-color: #e0e6eb;
-  }
-
-  ${toolTipStyle}
-`;
+const paragraphButtons = [
+  { key: 'H1', name: 'Heading 1', icon: H1Icon },
+  { key: 'H2', name: 'Heading 2', icon: H2Icon },
+  { key: 'H3', name: 'Heading 3', icon: H3Icon },
+  { key: 'H4', name: 'Heading 4', icon: H4Icon },
+  { key: 'H5', name: 'Heading 5', icon: H5Icon },
+  { key: 'H6', name: 'Heading 6', icon: H6Icon },
+  { key: 'BulletedList', name: 'Bulleted List', icon: BulletedListIcon },
+  { key: 'Numbered', name: 'Numbered List', icon: NumberedIcon },
+  { key: 'Todo', name: 'To-do List', icon: TodoIcon },
+  { key: 'Code', name: 'Code Block', icon: CodeIcon },
+  { key: 'Quote', name: 'Quote', icon: QuoteIcon },
+  { key: 'Callout', name: 'Callout', icon: CalloutIcon },
+];
 
 const formatButtons = [
   {
     name: 'Bold',
     icon: BoldIcon,
+    activeWhen: (models: BaseBlockModel[]) => false,
     action: (space: Space) => {
       handleFormat(space, 'bold');
     },
@@ -95,7 +96,7 @@ const formatButtons = [
   },
   {
     name: 'Code',
-    icon: CodeIcon,
+    icon: InlineCodeIcon,
     action: (space: Space) => {
       handleFormat(space, 'code');
     },
@@ -103,6 +104,8 @@ const formatButtons = [
   {
     name: 'Link',
     icon: LinkIcon,
+    // Only can show link button when selection is in one line paragraph
+    showWhen: (models: BaseBlockModel[]) => models.length === 1,
     action: (space: Space) => {
       createLink(space);
     },
@@ -111,6 +114,7 @@ const formatButtons = [
 
 const onCopy = (space: Space) => {
   document.dispatchEvent(new ClipboardEvent('copy'));
+  toast('Copied to clipboard');
 };
 
 @customElement('format-quick-bar')
@@ -123,35 +127,67 @@ export class FormatQuickBar extends LitElement {
   @property()
   top = '0px';
 
-  // TODO fix multiple selection
+  @property()
+  models: BaseBlockModel[] = [];
+
   @property()
   space: Space | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
-    const model = getStartModelBySelection();
-    this.space = model.space;
+    // TODO handle multiple selection
+    const models = getModelsByRange(getCurrentRange());
+    this.models = models;
+    if (!models.length) {
+      return;
+    }
+    const startModel = models[0];
+    this.space = startModel.space;
+    if (models.length > 1) {
+      // Select multiple models
+    }
+  }
+
+  private paragraphPanelTemplate() {
+    const PARAGRAPH_PANEL_OFFSET = /* format bar height */ 40 + /* margin */ 4;
+    return html`<div
+      class="paragraph-panel"
+      style="left: 0; top: calc(100% + 4px)"
+    >
+      ${paragraphButtons.map(
+        ({ name, icon }) => html`<format-bar-button
+          width="100%"
+          style="padding-left: 12px; justify-content: flex-start;"
+          text="${name}"
+        >
+          ${icon}
+        </format-bar-button>`
+      )}
+    </div>`;
   }
 
   override render() {
     const space = this.space;
 
-    if (!space) {
+    if (!this.models.length || !space) {
       console.error('Failed to render format-quick-bar! space not found!');
       return html``;
     }
     const paragraphItems = html``;
+    const paragraphPanel = this.paragraphPanelTemplate();
 
     const formatItems = html`
-      ${formatButtons.map(
-        ({ name, icon, action }) => html`<format-bar-button
-          class="has-tool-tip"
-          @click=${() => action(space)}
-        >
-          ${icon}
-          <tool-tip inert role="tooltip">${name}</tool-tip>
-        </format-bar-button>`
-      )}
+      ${formatButtons
+        .filter(({ showWhen = () => true }) => showWhen(this.models))
+        .map(
+          ({ name, icon, action }) => html`<format-bar-button
+            class="has-tool-tip"
+            @click=${() => action(space)}
+          >
+            ${icon}
+            <tool-tip inert role="tooltip">${name}</tool-tip>
+          </format-bar-button>`
+        )}
     `;
 
     const actionItems = html`<format-bar-button
@@ -171,7 +207,7 @@ export class FormatQuickBar extends LitElement {
         <div class="divider"></div>
         ${formatItems}
         <div class="divider"></div>
-        ${actionItems}
+        ${actionItems} ${paragraphPanel}
       </div>
     </div>`;
   }
@@ -199,6 +235,7 @@ export const showFormatQuickBar = async ({
   formatQuickBar.top = `${offset + offsetY}px`;
   container.appendChild(formatQuickBar);
 
+  // TODO add MutationObserver/ResizeObserver to update position
   const clickAwayListener = (e: MouseEvent) => {
     if (e.target === formatQuickBar) {
       return;
