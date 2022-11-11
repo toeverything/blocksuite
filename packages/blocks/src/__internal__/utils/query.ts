@@ -142,6 +142,9 @@ export function getBlockElementByModel(model: BaseBlockModel) {
 
 export function getStartModelBySelection() {
   const selection = window.getSelection() as Selection;
+  if (selection.rangeCount === 0) {
+    throw new Error("Can't get start model by selection, rangeCount is 0");
+  }
 
   const range = selection.getRangeAt(0);
   const startContainer =
