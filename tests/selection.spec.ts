@@ -347,3 +347,45 @@ test('select text leaving a few words in the last line and delete', async ({
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc89\n');
 });
+
+test('select text in the same line with dragging leftward and move outside the editor-container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [1, 3],
+    [1, 0],
+    { x: 0, y: 0 },
+    { x: -50, y: 0 }
+  );
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});
+
+test('select text in the same line with dragging rightward and move outside the editor-container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [1, 0],
+    [1, 3],
+    { x: 0, y: 0 },
+    { x: 50, y: 0 }
+  );
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});

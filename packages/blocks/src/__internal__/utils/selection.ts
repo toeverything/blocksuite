@@ -14,6 +14,7 @@ import {
 } from './query';
 import { Point, Rect } from './rect';
 import type { SelectionEvent } from './gesture';
+
 const SCROLL_THRESHOLD = 100;
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
@@ -36,54 +37,53 @@ function fixCurrentRangeToText(
       )
     );
     if (texts.length) {
-      let text: Element | undefined = undefined;
+      const text = isForward
+        ? texts.reverse().find(t => {
+            const rect = t.getBoundingClientRect();
+            return y >= rect.top; // handle both drag downward, and rightward
+          })
+        : texts.find(t => {
+            const rect = t.getBoundingClientRect();
+            return y <= rect.bottom; // handle both drag upwards and leftward
+          });
+      if (!text) {
+        throw new Error('Failed to focus text node!');
+      }
       if (isForward) {
-        text = texts.reverse().find(t => {
-          const rect = t.getBoundingClientRect();
-          return y >= rect.bottom;
-        });
-        if (text) {
-          const rect = text.getBoundingClientRect();
-          const y = rect.bottom - 6;
-          newRange = caretRangeFromPoint(x, y);
-          if (newRange) {
-            if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
-              const lastTextNode = getLastTextNode(newRange.endContainer);
-              if (lastTextNode) {
-                newRange = document.createRange();
-                newRange.setStart(
-                  lastTextNode,
-                  lastTextNode.textContent?.length || 0
-                );
-                newRange.setEnd(
-                  lastTextNode,
-                  lastTextNode.textContent?.length || 0
-                );
-              }
+        const rect = text.getBoundingClientRect();
+        const y = rect.bottom - 6;
+        newRange = caretRangeFromPoint(x, y);
+        if (newRange) {
+          if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
+            const lastTextNode = getLastTextNode(newRange.endContainer);
+            if (lastTextNode) {
+              newRange = document.createRange();
+              newRange.setStart(
+                lastTextNode,
+                lastTextNode.textContent?.length || 0
+              );
+              newRange.setEnd(
+                lastTextNode,
+                lastTextNode.textContent?.length || 0
+              );
             }
-            range.setEnd(newRange.endContainer, newRange.endOffset);
           }
+          range.setEnd(newRange.endContainer, newRange.endOffset);
         }
       } else {
-        text = texts.find(t => {
-          const rect = t.getBoundingClientRect();
-          return y <= rect.top;
-        });
-        if (text) {
-          const rect = text.getBoundingClientRect();
-          const y = rect.top + 6;
-          newRange = caretRangeFromPoint(x, y);
-          if (newRange) {
-            if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
-              const firstTextNode = getFirstTextNode(newRange.startContainer);
-              if (firstTextNode) {
-                newRange = document.createRange();
-                newRange.setStart(firstTextNode, 0);
-                newRange.setEnd(firstTextNode, 0);
-              }
+        const rect = text.getBoundingClientRect();
+        const y = rect.top + 6;
+        newRange = caretRangeFromPoint(x, y);
+        if (newRange) {
+          if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
+            const firstTextNode = getFirstTextNode(newRange.startContainer);
+            if (firstTextNode) {
+              newRange = document.createRange();
+              newRange.setStart(firstTextNode, 0);
+              newRange.setEnd(firstTextNode, 0);
             }
-            range.setStart(newRange.endContainer, newRange.endOffset);
           }
+          range.setStart(newRange.endContainer, newRange.endOffset);
         }
       }
     }
