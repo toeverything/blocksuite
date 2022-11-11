@@ -3,15 +3,23 @@ import { WebrtcProvider } from 'y-webrtc';
 // In the future, consider making y-indexdb a separate package sync provider.
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { Awareness } from 'y-protocols/awareness';
+import type { BlobStorage } from './blob-storage/blob-storage-types';
+import { IndexedDBBlobStorage } from './blob-storage/indexeddb-blob-storage';
 
 /**
  * Different examples of providers could include webrtc sync,
- * database sync like SQLite / LevelDB, or even web IndexDB.
+ * database sync like SQLite / LevelDB, or even web IndexedDB.
  *
  * Usually a class will also implement {@link SyncProviderConstructor}.
  */
 export interface SyncProvider {
   awareness?: Awareness;
+  /**
+   * Each {@link SyncProvider} is essentially used as a mirror in practice, so for now,
+   * the easiest approach is to simply enable every sync provider to provide their own
+   * separate blob storage option.
+   */
+  blobStorage?: BlobStorage;
   connect: () => void;
   disconnect: () => void;
   clearData: () => Promise<void>;
@@ -61,21 +69,32 @@ export class IndexedDBProvider
   extends IndexeddbPersistence
   implements SyncProvider
 {
+  blobStorage: BlobStorage;
   constructor(room: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
     super(room, doc);
+    console.log({ name: this.name });
+    this.blobStorage = new IndexedDBBlobStorage({
+      objectName: 'blobs',
+      databaseName: this.name,
+    });
   }
 
   // Consider whether "connect" and "disconnect" are good to put on the SyncProvider
+  // Or: At least document what these mean to us, as opposed to us just simply calling
+  // the interface `YJSProvider`.
   connect() {
     // not necessary as it will be set up in indexdb persistence
+    // Question: I don't understand, why wouldn't we want to call super.connect()?
   }
 
   disconnect() {
     // not necessary as it will be set up in indexdb persistence
+    // Question: I don't understand, why wouldn't we want to call super.disconnect()?
   }
 
   public clearData() {
     // Do nothing for now
+    // Question: I don't understand, why wouldn't we want to call super.clearData()?
     return Promise.resolve();
   }
 }

@@ -39,6 +39,16 @@ export class Signal<T = void> implements Disposable {
     return result;
   }
 
+  map<R>(mapFun: (v: T) => R): Signal<R> {
+    const result = new Signal<R>();
+    // if result is disposed, dispose this too
+    result.disposables.push({ dispose: () => this.dispose() });
+
+    this.on(v => result.emit(mapFun(v)));
+
+    return result;
+  }
+
   on(callback: (v: T) => unknown): Disposable {
     if (this.emitting) {
       const newCallback = [...this.callbacks, callback];
@@ -60,7 +70,7 @@ export class Signal<T = void> implements Disposable {
     };
   }
 
-  once(callback: (v: T) => unknown): void {
+  once(callback: (v: T) => unknown): Disposable {
     let dispose: Disposable['dispose'] | undefined = undefined;
     const handler = (v: T) => {
       callback(v);
@@ -69,6 +79,9 @@ export class Signal<T = void> implements Disposable {
       }
     };
     dispose = this.on(handler).dispose;
+    return {
+      dispose,
+    };
   }
 
   unshift(callback: (v: T) => unknown): Disposable {

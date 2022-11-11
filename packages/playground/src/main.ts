@@ -12,6 +12,7 @@ import type { SyncProviderConstructor, StoreOptions } from '@blocksuite/store';
 import { BlockSchema } from '@blocksuite/editor';
 
 import './style.css';
+import { playgroundUploaderUI } from './playground-uploader-ui';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? '';
@@ -60,10 +61,17 @@ function editorOptionsFromParam(): Pick<
 }
 
 window.onload = () => {
+  // applications code ("playground" at this time)
+  const handleUploadRequest = playgroundUploaderUI({
+    mountContainer: document.body,
+  });
+
   const store = new Store({
-    room: room,
+    room,
+    handleUploadRequest,
     ...editorOptionsFromParam(),
   });
+
   // @ts-ignore
   window.store = store;
   // @ts-ignore

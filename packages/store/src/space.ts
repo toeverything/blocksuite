@@ -15,6 +15,9 @@ import {
 } from './utils/utils';
 import { uuidv4 } from './utils/id-generator';
 import type { IdGenerator } from './utils/id-generator';
+import type { StoreUploadAbility } from './store';
+import type { Ability } from './ability-type';
+import type { BlobRef, BlobStorage } from './blob-storage/blob-storage-types';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -45,10 +48,40 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
+type BlobHostConfig = {
+  storage: BlobStorage;
+  uploads: StoreUploadAbility;
+};
+
+export class BlobHost {
+  readonly uploads: Ability<{
+    prompt(promptText: string): Promise<null | BlobRef>;
+  }>;
+
+  async getWebURL(blobRef: BlobRef): Promise<URL> {
+    return this.storage.getWebURL(blobRef);
+  }
+
+  private storage: BlobStorage;
+  constructor(config: BlobHostConfig) {
+    this.storage = config.storage;
+    this.uploads = config.uploads.enabled
+      ? {
+          enabled: true,
+          // Consider adding context to the message to discuss which space is being uploaded to?
+          // Maybe this is even a necessary expansion to the upload API (to enable supplying a namespace)
+          prompt: config.uploads.prompt,
+        }
+      : config.uploads;
+  }
+}
+
 export class Space {
   readonly doc: Y.Doc;
   readonly awareness!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
+  // TODO: Move out of Store
+  readonly mvpBlobHost: BlobHost;
 
   readonly signals = {
     historyUpdated: new Signal(),
@@ -70,16 +103,18 @@ export class Space {
     Object.keys(new BaseBlockModel(this, {}))
   );
 
-  constructor(
-    doc: Y.Doc,
-    awareness: Awareness,
-    idGenerator: IdGenerator = uuidv4
-  ) {
-    this.doc = doc;
+  constructor(config: {
+    doc: Y.Doc;
+    blobs: BlobHostConfig;
+    awareness?: Awareness | undefined;
+    idGenerator?: IdGenerator;
+  }) {
+    this.doc = config.doc;
+    this.mvpBlobHost = new BlobHost(config.blobs);
 
-    this._idGenerator = idGenerator;
+    this._idGenerator = config.idGenerator ?? uuidv4;
 
-    const aware = awareness ?? new Awareness(this.doc);
+    const aware = config.awareness ?? new Awareness(this.doc);
     this.awareness = new AwarenessAdapter(this, aware);
 
     // all the events that happen at _any_ level (potentially deep inside the structure).

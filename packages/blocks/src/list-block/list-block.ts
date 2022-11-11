@@ -63,6 +63,40 @@ export class ListBlockComponent extends LitElement {
           selectList(this.model);
           return;
         }
+
+        if (this.host.space.mvpBlobHost.uploads.enabled) {
+          this.host.space.mvpBlobHost.uploads
+            .prompt('Choose an image')
+            .then(got => {
+              if (got == null) {
+                // person dismissed
+              } else {
+                // person uploaded to store
+                // here's the blob ref we can use in our attributes
+                got.blobId;
+              }
+
+              console.log('debug uploads', { got });
+
+              if (got) {
+                this.host.space.mvpBlobHost.getWebURL(got).then(url => {
+                  const img = document.createElement('img');
+                  img.src = url.toString();
+                  document.body.appendChild(img);
+                });
+              }
+            })
+            .catch(err => {
+              console.log('debug upload rejection', { err });
+              console.error(err);
+            });
+          return;
+        } else {
+          alert(this.host.space.mvpBlobHost.uploads.userMessage);
+          return;
+        }
+
+        // Question: How do we know that we needed to call this in this case?
         this.host.space.captureSync();
         this.host.space.updateBlock(this.model, {
           checked: !this.model.checked,
