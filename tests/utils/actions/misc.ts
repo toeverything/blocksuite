@@ -116,7 +116,7 @@ export async function initThreeList(page: Page) {
   await page.keyboard.press('Tab', { delay: 50 });
   await page.keyboard.type('789');
 }
-export async function getListIcon(page: Page, i = 0) {
+export async function clickListIcon(page: Page, i = 0) {
   const locator = page.locator('.affine-list-block__prefix').nth(i);
   await locator.click();
 }

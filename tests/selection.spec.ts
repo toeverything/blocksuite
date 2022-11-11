@@ -18,7 +18,7 @@ import {
   undoByClick,
   redoByClick,
   clearLog,
-  getListIcon,
+  clickListIcon,
   waitNextFrame,
   selectAllByKeyboard,
   dragBetweenIndices,
@@ -357,18 +357,18 @@ test('Click the list icon to select', async ({ page }) => {
   await initEmptyState(page);
   await initThreeList(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  await getListIcon(page, 0);
+  await clickListIcon(page, 0);
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['123', '123', '456', '789']);
-  await getListIcon(page, 2);
+  await clickListIcon(page, 2);
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['123', '123', '456', '789', '456', '789']);
-  await getListIcon(page, 4);
+  await clickListIcon(page, 4);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['123', '123', '456', '789', '\n']);
-  await getListIcon(page, 1);
+  await clickListIcon(page, 1);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['123', '\n', '456', '789', '\n']);
 });
