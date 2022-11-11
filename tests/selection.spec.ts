@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { Page, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -18,7 +18,6 @@ import {
   undoByClick,
   redoByClick,
   clearLog,
-  clickListIcon,
   waitNextFrame,
   selectAllByKeyboard,
   dragBetweenIndices,
@@ -351,6 +350,11 @@ test('select text leaving a few words in the last line and delete', async ({
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc89\n');
 });
+
+async function clickListIcon(page: Page, i = 0) {
+  const locator = page.locator('.affine-list-block__prefix').nth(i);
+  await locator.click();
+}
 
 test('Click the list icon to select', async ({ page }) => {
   await enterPlaygroundRoom(page);
