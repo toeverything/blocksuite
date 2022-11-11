@@ -372,7 +372,9 @@ test('Click the list icon to select', async ({ page }) => {
   await clickListIcon(page, 4);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['123', '123', '456', '789', '\n']);
+  //This should be ['123', '123', '456', '789'],but there is another bug affecting it
   await clickListIcon(page, 1);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['123', '\n', '456', '789', '\n']);
+  //This should be ['123','456','789'],but there is another bug affecting it
 });
