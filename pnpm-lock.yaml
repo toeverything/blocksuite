@@ -14,6 +14,7 @@ importers:
       '@typescript-eslint/parser': ^5.36.2
       '@vitejs/plugin-react': ^2.1.0
       eslint: ^8.23.0
+      eslint-plugin-only-warn: ^1.0.3
       eslint-plugin-react: ^7.31.8
       eslint-plugin-react-hooks: ^4.6.0
       npm-run-all: ^4.1.5
@@ -33,6 +34,7 @@ importers:
       '@typescript-eslint/parser': 5.37.0_irgkl5vooow2ydyo6aokmferha
       '@vitejs/plugin-react': 2.1.0_vite@3.1.1
       eslint: 8.23.1
+      eslint-plugin-only-warn: 1.0.3
       eslint-plugin-react: 7.31.8_eslint@8.23.1
       eslint-plugin-react-hooks: 4.6.0_eslint@8.23.1
       npm-run-all: 4.1.5
@@ -1715,6 +1717,11 @@ packages:
   /escape-string-regexp/4.0.0:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
     engines: {node: '>=10'}
+    dev: true
+
+  /eslint-plugin-only-warn/1.0.3:
+    resolution: {integrity: sha512-XQOX/TfLoLw6h8ky51d29uUjXRTQHqBGXPylDEmy5fe/w7LIOnp8MA24b1OSMEn9BQoKow1q3g1kLe5/9uBTvw==}
+    engines: {node: '>=6'}
     dev: true
 
   /eslint-plugin-react-hooks/4.6.0_eslint@8.23.1:
