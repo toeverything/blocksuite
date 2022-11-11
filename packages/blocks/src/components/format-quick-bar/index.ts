@@ -110,7 +110,7 @@ const formatButtons = [
 ];
 
 const onCopy = (space: Space) => {
-  console.log('copy');
+  document.dispatchEvent(new ClipboardEvent('copy'));
 };
 
 @customElement('format-quick-bar')
