@@ -1,25 +1,22 @@
 import type { Space } from '@blocksuite/store';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
 import {
-  initMouseEventHandlers,
-  SelectionEvent,
-  caretRangeFromPoint,
-  resetNativeSelection,
   assertExists,
-  handleNativeRangeDragMove,
-  isBlankArea,
+  caretRangeFromPoint,
   handleNativeRangeClick,
-  isPageTitle,
   handleNativeRangeDblClick,
-  getBlockById,
+  handleNativeRangeDragMove,
+  initMouseEventHandlers,
+  isBlankArea,
+  isPageTitle,
+  noop,
+  resetNativeSelection,
+  SelectionEvent,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
-  DragDirection,
-  getDragDirection,
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-  SelectedBlockType,
 } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 
@@ -169,25 +166,6 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
-    const { selectedRichTexts } = this._getSelectedBlockInfo(e);
-    if (selectedRichTexts.length === 0) {
-      return;
-    }
-    const selectedBlocks = selectedRichTexts.map(richText => {
-      return getBlockById(richText.model.id) as unknown as HTMLElement;
-    });
-    const selectedType: SelectedBlockType = selectedBlocks.every(block => {
-      return /paragraph-block/i.test(block.tagName);
-    })
-      ? 'text'
-      : 'other';
-    console.log(`selectedType: ${selectedType}`);
-    const direction: DragDirection = getDragDirection(e);
-    console.log(`direction: ${direction}`);
-    const anchor = ['rightDown', 'leftDown'].includes(direction)
-      ? selectedBlocks[selectedBlocks.length - 1]
-      : selectedBlocks[0];
-    showFormatQuickBar({ anchorEl: anchor });
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
@@ -199,11 +177,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
-    const { anchor } = getNativeSelectionMouseDragInfo(e);
-    if (!anchor) {
-      return;
-    }
-    showFormatQuickBar({ anchorEl: anchor });
+    noop();
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
@@ -232,7 +206,36 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     }
+    this._showFormatQuickBar(e);
   };
+
+  private _showFormatQuickBar(e: SelectionEvent) {
+    if (this.state.type === 'native') {
+      const { anchor } = getNativeSelectionMouseDragInfo(e);
+      showFormatQuickBar({ anchorEl: anchor });
+    } else if (this.state.type === 'block') {
+      // TODO handle block selection
+      // const direction = getDragDirection(e);
+      // const { selectedRichTexts } = this._getSelectedBlockInfo(e);
+      // if (selectedRichTexts.length === 0) {
+      //   // Selecting nothing
+      //   return;
+      // }
+      // const selectedBlocks = selectedRichTexts.map(richText => {
+      //   return getBlockById(richText.model.id) as unknown as HTMLElement;
+      // });
+      // const selectedType: SelectedBlockType = selectedBlocks.every(block => {
+      //   return /paragraph-block/i.test(block.tagName);
+      // })
+      //   ? 'text'
+      //   : 'other';
+      // console.log(`selectedType: ${selectedType}`, this.state.type);
+      // const anchor = ['rightDown', 'leftDown'].includes(direction)
+      //   ? selectedBlocks[selectedBlocks.length - 1]
+      //   : selectedBlocks[0];
+      // showFormatQuickBar({ anchorEl: anchor });
+    }
+  }
 
   private _onContainerClick = (e: SelectionEvent) => {
     this.state.clear();

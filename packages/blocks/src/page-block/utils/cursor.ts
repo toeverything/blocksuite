@@ -29,7 +29,8 @@ export type DragDirection =
   | 'rightUp'
   | 'leftDown'
   | 'leftUp'
-  | never;
+  // no select direction, for example select all by `ctrl + a`
+  | 'none';
 
 // text can be applied both text and paragraph formatting actions, while others can only be applied paragraph actions
 export type SelectedBlockType = 'text' | 'other';
@@ -65,10 +66,12 @@ export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
   console.log(`direction: ${direction}`);
   const selection = window.getSelection();
   let anchor = selection?.focusNode;
-  if (anchor) {
-    while (anchor && !(anchor instanceof HTMLElement)) {
-      anchor = anchor.parentElement;
-    }
+  // Ensure that the anchor has `getBoundingClientRect` method
+  while (anchor && !(anchor instanceof Element)) {
+    anchor = anchor.parentElement;
+  }
+  if (!anchor) {
+    throw new Error('Cannot get anchor element from native selection');
   }
   console.log(anchor);
 
