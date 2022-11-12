@@ -17,33 +17,35 @@ export async function dragBetweenCoords(
 export async function dragBetweenIndices(
   page: Page,
   [startRichTextIndex, startQuillIndex]: [number, number],
-  [endRichTextIndex, endQuillIndex]: [number, number]
+  [endRichTextIndex, endQuillIndex]: [number, number],
+  startCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
+  endCoordOffSet: { x: number; y: number } = { x: 0, y: 0 }
 ) {
   const startCoord = await page.evaluate(
-    ({ startRichTextIndex, startQuillIndex }) => {
+    ({ startRichTextIndex, startQuillIndex, startCoordOffSet }) => {
       const richText =
         document.querySelectorAll('rich-text')[startRichTextIndex];
       const quillBound = richText.quill.getBounds(startQuillIndex);
       const richTextBound = richText.getBoundingClientRect();
       return {
-        x: richTextBound.left + quillBound.left,
-        y: richTextBound.top + quillBound.top + quillBound.height / 2,
+        x: richTextBound.left + quillBound.left + startCoordOffSet.x,
+        y: richTextBound.top + quillBound.top + quillBound.height / 2 + startCoordOffSet.y,
       };
     },
-    { startRichTextIndex, startQuillIndex }
+    { startRichTextIndex, startQuillIndex, startCoordOffSet }
   );
 
   const endCoord = await page.evaluate(
-    ({ endRichTextIndex, endQuillIndex }) => {
+    ({ endRichTextIndex, endQuillIndex, endCoordOffSet }) => {
       const richText = document.querySelectorAll('rich-text')[endRichTextIndex];
       const quillBound = richText.quill.getBounds(endQuillIndex);
       const richTextBound = richText.getBoundingClientRect();
       return {
-        x: richTextBound.left + quillBound.left,
-        y: richTextBound.top + quillBound.top + quillBound.height / 2,
+        x: richTextBound.left + quillBound.left + endCoordOffSet.x,
+        y: richTextBound.top + quillBound.top + quillBound.height / 2 + endCoordOffSet.y,
       };
     },
-    { endRichTextIndex, endQuillIndex }
+    { endRichTextIndex, endQuillIndex, endCoordOffSet }
   );
 
   await dragBetweenCoords(page, startCoord, endCoord);
