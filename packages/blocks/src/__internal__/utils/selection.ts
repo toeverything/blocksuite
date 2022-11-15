@@ -22,6 +22,99 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
+// function fixCurrentRangeToText(
+//   x: number,
+//   y: number,
+//   range: Range,
+//   isForward: boolean
+// ) {
+//   const endContainer = isForward ? range.endContainer : range.startContainer;
+//   let newRange: Range | null = range;
+//   if (endContainer.nodeType !== Node.TEXT_NODE) {
+//     const texts = Array.from(
+//       (range.commonAncestorContainer as HTMLElement).querySelectorAll(
+//         '.ql-editor'
+//       )
+//     );
+//     if (texts.length) {
+//       const text = isForward
+//         ? texts.reverse().find(t => {
+//             const rect = t.getBoundingClientRect();
+//             return y >= rect.top; // handle both drag downward, and rightward
+//           })
+//         : texts.find(t => {
+//             const rect = t.getBoundingClientRect();
+//             return y <= rect.bottom; // handle both drag upwards and leftward
+//           });
+//       if (!text) {
+//         throw new Error('Failed to focus text node!');
+//       }
+//       if (isForward) {
+//         const rect = text.getBoundingClientRect();
+//         const y = rect.bottom - 6;
+//         newRange = caretRangeFromPoint(x, y);
+//         if (newRange) {
+//           if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
+//             const lastTextNode = getLastTextNode(newRange.endContainer);
+//             if (lastTextNode) {
+//               newRange = document.createRange();
+//               newRange.setStart(
+//                 lastTextNode,
+//                 lastTextNode.textContent?.length || 0
+//               );
+//               newRange.setEnd(
+//                 lastTextNode,
+//                 lastTextNode.textContent?.length || 0
+//               );
+//             }
+//           }
+//           range.setEnd(newRange.endContainer, newRange.endOffset);
+//         }
+//       } else {
+//         const rect = text.getBoundingClientRect();
+//         const y = rect.top + 6;
+//         newRange = caretRangeFromPoint(x, y);
+//         if (newRange) {
+//           if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
+//             const firstTextNode = getFirstTextNode(newRange.startContainer);
+//             if (firstTextNode) {
+//               newRange = document.createRange();
+//               newRange.setStart(firstTextNode, 0);
+//               newRange.setEnd(firstTextNode, 0);
+//             }
+//           }
+//           range.setStart(newRange.endContainer, newRange.endOffset);
+//         }
+//       }
+//     }
+//   }
+//   return range;
+// }
+
+function forwardSelect(newRange: Range, range: Range) {
+  if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
+    const lastTextNode = getLastTextNode(newRange.endContainer);
+    if (lastTextNode) {
+      newRange = document.createRange();
+      newRange.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
+      newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
+    }
+  }
+  range.setEnd(newRange.endContainer, newRange.endOffset);
+}
+
+function backwardSelect(newRange: Range, range: Range) {
+  if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
+    const firstTextNode = getFirstTextNode(newRange.startContainer);
+    if (firstTextNode) {
+      newRange = document.createRange();
+      newRange.setStart(firstTextNode, 0);
+      newRange.setEnd(firstTextNode, 0);
+    }
+  }
+  range.setStart(newRange.endContainer, newRange.endOffset);
+}
+
 function fixCurrentRangeToText(
   x: number,
   y: number,
@@ -49,43 +142,16 @@ function fixCurrentRangeToText(
       if (!text) {
         throw new Error('Failed to focus text node!');
       }
-      if (isForward) {
-        const rect = text.getBoundingClientRect();
-        const y = rect.bottom - 6;
-        newRange = caretRangeFromPoint(x, y);
-        if (newRange) {
-          if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
-            const lastTextNode = getLastTextNode(newRange.endContainer);
-            if (lastTextNode) {
-              newRange = document.createRange();
-              newRange.setStart(
-                lastTextNode,
-                lastTextNode.textContent?.length || 0
-              );
-              newRange.setEnd(
-                lastTextNode,
-                lastTextNode.textContent?.length || 0
-              );
-            }
-          }
-          range.setEnd(newRange.endContainer, newRange.endOffset);
-        }
-      } else {
-        const rect = text.getBoundingClientRect();
-        const y = rect.top + 6;
-        newRange = caretRangeFromPoint(x, y);
-        if (newRange) {
-          if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
-            const firstTextNode = getFirstTextNode(newRange.startContainer);
-            if (firstTextNode) {
-              newRange = document.createRange();
-              newRange.setStart(firstTextNode, 0);
-              newRange.setEnd(firstTextNode, 0);
-            }
-          }
-          range.setStart(newRange.endContainer, newRange.endOffset);
-        }
-      }
+      const rect = text.getBoundingClientRect();
+      const NewY = isForward ? rect.bottom - 6 : rect.top + 6;
+      newRange = caretRangeFromPoint(x, NewY);
+      isForward
+        ? newRange
+          ? forwardSelect(newRange, range)
+          : null
+        : newRange
+        ? backwardSelect(newRange, range)
+        : null;
     }
   }
   return range;
