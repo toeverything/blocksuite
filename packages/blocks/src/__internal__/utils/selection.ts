@@ -12,7 +12,7 @@ import {
   getCurrentRange,
   getQuillIndexByNativeSelection,
 } from './query';
-import { Point, Rect } from './rect';
+import { Rect } from './rect';
 import type { SelectionEvent } from './gesture';
 
 const SCROLL_THRESHOLD = 100;
