@@ -165,24 +165,118 @@ async function sleep(delay = 0) {
   });
 }
 
-export async function focusRichText(
-  position: SelectionPosition,
-  editableContainer: Element
-) {
-  // TODO optimize how get scroll container
+// export async function focusRichText(
+//   position: SelectionPosition,
+//   editableContainer: Element
+// ) {
+//   // TODO optimize how get scroll container
+//   const scrollContainer = editableContainer.closest('.affine-editor-container');
+//   const { top, left, bottom, right } = Rect.fromDom(editableContainer);
+//   const { clientHeight } = document.documentElement;
+//   const lineHeight =
+//     Number(
+//       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
+//     ) || 16;
+//   let range: Range | null = null;
+//   if (position instanceof Point) {
+//     const { x, y } = position;
+//     let newTop = y;
+//     let newLeft = x;
+//     if (bottom <= y) {
+//       let finalBottom = bottom;
+//       if (bottom < SCROLL_THRESHOLD && scrollContainer) {
+//         scrollContainer.scrollTop =
+//           scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
+//         // set scroll may has a animation, wait for over
+//         await sleep();
+//         finalBottom = editableContainer.getBoundingClientRect().bottom;
+//       }
+//       newTop = finalBottom - lineHeight / 2;
+//     }
+//     if (bottom >= y) {
+//       let finalTop = top;
+//       if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
+//         scrollContainer.scrollTop =
+//           scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
+//         // set scroll may has a animation, wait for over
+//         await sleep();
+//         finalTop = editableContainer.getBoundingClientRect().top;
+//       }
+//       newTop = finalTop + lineHeight / 2;
+//     }
+//     if (x <= left) {
+//       newLeft = left + 1;
+//     }
+//     if (x >= right) {
+//       newLeft = right - 1;
+//     }
+//     range = caretRangeFromPoint(newLeft, newTop);
+//     resetNativeSelection(range);
+//   }
+//   if (position === 'start') {
+//     const newRange = document.createRange();
+//     let firstNode = editableContainer.firstChild;
+//     while (firstNode?.firstChild) {
+//       firstNode = firstNode.firstChild;
+//     }
+//     if (firstNode) {
+//       newRange.setStart(firstNode, 0);
+//       newRange.setEnd(firstNode, 0);
+//     }
+//     range = newRange;
+//   }
+//   if (position === 'end') {
+//     const newRange = document.createRange();
+//     let lastNode = editableContainer.lastChild;
+//     while (lastNode?.lastChild) {
+//       lastNode = lastNode.lastChild;
+//     }
+//     if (lastNode) {
+//       newRange.setStart(lastNode, lastNode.textContent?.length || 0);
+//       newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
+//     }
+//     range = newRange;
+//   }
+//   resetNativeSelection(range);
+// }
+
+function setStartRange(editableContainer: Element, range: Range | null) {
+  const newRange = document.createRange();
+  let firstNode = editableContainer.firstChild;
+  while (firstNode?.firstChild) {
+    firstNode = firstNode.firstChild;
+  }
+  if (firstNode) {
+    newRange.setStart(firstNode, 0);
+    newRange.setEnd(firstNode, 0);
+  }
+  return newRange;
+}
+
+function setEndRange(editableContainer: Element, range: Range | null) {
+  const newRange = document.createRange();
+  let lastNode = editableContainer.lastChild;
+  while (lastNode?.lastChild) {
+    lastNode = lastNode.lastChild;
+  }
+  if (lastNode) {
+    newRange.setStart(lastNode, lastNode.textContent?.length || 0);
+    newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
+  }
+  return newRange;
+}
+
+async function setNewTop(y: number, editableContainer: Element) {
   const scrollContainer = editableContainer.closest('.affine-editor-container');
-  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
+  const { top, bottom } = Rect.fromDom(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
     Number(
       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
     ) || 16;
-  let range: Range | null = null;
-  if (position instanceof Point) {
-    const { x, y } = position;
-    let newTop = y;
-    let newLeft = x;
-    if (bottom <= y) {
+  const compare = bottom < y;
+  switch (compare) {
+    case true: {
       let finalBottom = bottom;
       if (bottom < SCROLL_THRESHOLD && scrollContainer) {
         scrollContainer.scrollTop =
@@ -191,9 +285,9 @@ export async function focusRichText(
         await sleep();
         finalBottom = editableContainer.getBoundingClientRect().bottom;
       }
-      newTop = finalBottom - lineHeight / 2;
+      return finalBottom - lineHeight / 2;
     }
-    if (bottom >= y) {
+    case false: {
       let finalTop = top;
       if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
         scrollContainer.scrollTop =
@@ -202,40 +296,39 @@ export async function focusRichText(
         await sleep();
         finalTop = editableContainer.getBoundingClientRect().top;
       }
-      newTop = finalTop + lineHeight / 2;
+      return finalTop + lineHeight / 2;
     }
-    if (x <= left) {
-      newLeft = left + 1;
-    }
-    if (x >= right) {
-      newLeft = right - 1;
-    }
-    range = caretRangeFromPoint(newLeft, newTop);
-    resetNativeSelection(range);
   }
-  if (position === 'start') {
-    const newRange = document.createRange();
-    let firstNode = editableContainer.firstChild;
-    while (firstNode?.firstChild) {
-      firstNode = firstNode.firstChild;
+}
+
+export async function focusRichText(
+  position: SelectionPosition,
+  editableContainer: Element
+) {
+  // TODO optimize how get scroll container
+  const { left, right } = Rect.fromDom(editableContainer);
+  let range: Range | null = null;
+  switch (position) {
+    case 'start':
+      range = setStartRange(editableContainer, range);
+      break;
+    case 'end':
+      range = setEndRange(editableContainer, range);
+      break;
+    default: {
+      const { x, y } = position;
+      let newLeft = x;
+      const newTop = await setNewTop(y, editableContainer);
+      if (x <= left) {
+        newLeft = left + 1;
+      }
+      if (x >= right) {
+        newLeft = right - 1;
+      }
+      range = caretRangeFromPoint(newLeft, newTop);
+      resetNativeSelection(range);
+      break;
     }
-    if (firstNode) {
-      newRange.setStart(firstNode, 0);
-      newRange.setEnd(firstNode, 0);
-    }
-    range = newRange;
-  }
-  if (position === 'end') {
-    const newRange = document.createRange();
-    let lastNode = editableContainer.lastChild;
-    while (lastNode?.lastChild) {
-      lastNode = lastNode.lastChild;
-    }
-    if (lastNode) {
-      newRange.setStart(lastNode, lastNode.textContent?.length || 0);
-      newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
-    }
-    range = newRange;
   }
   resetNativeSelection(range);
 }
