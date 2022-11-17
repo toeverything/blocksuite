@@ -616,7 +616,7 @@ function expandRangesByCharacter(
   resetNativeSelection(newRange);
 }
 
-function getNewStartAndEndOfNode(
+function getNewStartAndEndForDblClick(
   currentNodeIndex: number,
   leafNodes: Text[],
   selection: Selection,
@@ -703,7 +703,12 @@ function getNewRangeForDblClick(leafNodes: Text[], selection: Selection) {
       checkReg = /\W/;
     }
     const [newStartNode, newStartOffset, newEndNode, newEndOffset] =
-      getNewStartAndEndOfNode(currentNodeIndex, leafNodes, selection, checkReg);
+      getNewStartAndEndForDblClick(
+        currentNodeIndex,
+        leafNodes,
+        selection,
+        checkReg
+      );
     startNode = newStartNode;
     startOffset = newStartOffset;
     endNode = newEndNode;
@@ -727,41 +732,12 @@ function trySelectBySegmenter(
     !notStrictCharacterAndSpaceReg.test(currentChar) &&
     !/\w/.test(currentChar)
   ) {
-    const rangeString = newRange.toString();
-    // check all languages words
-    const segmenter = new Intl.Segmenter([], { granularity: 'word' });
-    const wordsIterator = segmenter.segment(rangeString)[Symbol.iterator]();
-    const words = Array.from(wordsIterator);
-    let absoluteOffset = 0;
-    let started = false;
-    // get absolute offset of current cursor
-    for (let i = 0; i < leafNodes.length; i++) {
-      const leafNode = leafNodes[i];
-      if (started || leafNode === newRange.startContainer) {
-        started = true;
-        if (leafNode !== selection.anchorNode) {
-          absoluteOffset = absoluteOffset + (leafNode.textContent?.length || 0);
-        } else {
-          absoluteOffset =
-            absoluteOffset + selection.anchorOffset - newRange.startOffset;
-          break;
-        }
-      }
-    }
-    let wordText = words[words.length - 1].segment;
-    // get word text of current cursor
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      if (absoluteOffset === word.index) {
-        wordText = word.segment;
-        break;
-      }
-      if (absoluteOffset < word.index) {
-        wordText = words[i - 1].segment;
-        break;
-      }
-    }
-    const currentCharIndex = wordText.indexOf(currentChar);
+    const [currentCharIndex, wordText] = getCurrentCharIndex(
+      newRange,
+      leafNodes,
+      selection,
+      currentChar
+    );
     // length for expand left
     let leftLength = currentCharIndex;
     // length for expand right
@@ -798,6 +774,49 @@ function trySelectBySegmenter(
   }
 }
 
+function getCurrentCharIndex(
+  newRange: Range,
+  leafNodes: Array<Node>,
+  selection: Selection,
+  currentChar: string
+) {
+  const rangeString = newRange.toString();
+  // check all languages words
+  const segmenter = new Intl.Segmenter([], { granularity: 'word' });
+  const wordsIterator = segmenter.segment(rangeString)[Symbol.iterator]();
+  const words = Array.from(wordsIterator);
+  let absoluteOffset = 0;
+  let started = false;
+  // get absolute offset of current cursor
+  for (let i = 0; i < leafNodes.length; i++) {
+    const leafNode = leafNodes[i];
+    if (started || leafNode === newRange.startContainer) {
+      started = true;
+      if (leafNode !== selection.anchorNode) {
+        absoluteOffset = absoluteOffset + (leafNode.textContent?.length || 0);
+      } else {
+        absoluteOffset =
+          absoluteOffset + selection.anchorOffset - newRange.startOffset;
+        break;
+      }
+    }
+  }
+  let wordText = words[words.length - 1].segment;
+  // get word text of current cursor
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (absoluteOffset === word.index) {
+      wordText = word.segment;
+      break;
+    }
+    if (absoluteOffset < word.index) {
+      wordText = words[i - 1].segment;
+      break;
+    }
+  }
+  const currentCharIndex = wordText.indexOf(currentChar);
+  return [currentCharIndex, wordText] as const;
+}
 /**
  * left first search all leaf text nodes
  * @example
