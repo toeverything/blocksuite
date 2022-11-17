@@ -601,6 +601,72 @@ function expandRangesByCharacter(
   if (!leafNodes.length) {
     return;
   }
+  const [newRange, currentChar, currentNodeIndex] = getNewRangeForDblClick(
+    leafNodes,
+    selection
+  );
+  // try select range by segmenter
+  trySelectBySegmenter(
+    selection,
+    newRange,
+    currentChar,
+    leafNodes,
+    currentNodeIndex
+  );
+  resetNativeSelection(newRange);
+}
+
+function getNewStartAndEndOfNode(
+  currentNodeIndex: number,
+  leafNodes: Text[],
+  selection: Selection,
+  checkReg: RegExp
+) {
+  let newStartNode = leafNodes[0];
+  let newStartOffset = 0;
+  let newEndNode = leafNodes[leafNodes.length - 1];
+  let newEndOffset = newEndNode.textContent?.length || 0;
+  // get startNode and startOffset
+  for (let i = currentNodeIndex; i >= 0; i--) {
+    const node = leafNodes[i];
+    if (node instanceof Text) {
+      const text = node.textContent?.slice(
+        0,
+        i === currentNodeIndex ? selection.anchorOffset : undefined
+      );
+      if (text) {
+        const reverseText = Array.from(text).reverse().join('');
+        const index = reverseText.search(checkReg);
+        if (index !== -1) {
+          newStartNode = node;
+          newStartOffset = reverseText.length - index;
+          break;
+        }
+      }
+    }
+  }
+  // get endNode and endOffset
+  for (let j = currentNodeIndex; j < leafNodes.length; j++) {
+    const node = leafNodes[j];
+    if (node instanceof Text) {
+      const text = node.textContent?.slice(
+        j === currentNodeIndex ? selection.anchorOffset : undefined
+      );
+      if (text) {
+        const index = text.search(checkReg);
+        if (index !== -1) {
+          newEndNode = node;
+          newEndOffset =
+            j === currentNodeIndex ? selection.anchorOffset + index : index;
+          break;
+        }
+      }
+    }
+  }
+  return [newStartNode, newStartOffset, newEndNode, newEndOffset] as const;
+}
+
+function getNewRangeForDblClick(leafNodes: Text[], selection: Selection) {
   let startNode = leafNodes[0];
   let startOffset = 0;
   let endNode = leafNodes[leafNodes.length - 1];
@@ -636,56 +702,17 @@ function expandRangesByCharacter(
     if (/\w/.test(currentChar)) {
       checkReg = /\W/;
     }
-    // get startNode and startOffset
-    for (let i = currentNodeIndex; i >= 0; i--) {
-      const node = leafNodes[i];
-      if (node instanceof Text) {
-        const text = node.textContent?.slice(
-          0,
-          i === currentNodeIndex ? selection.anchorOffset : undefined
-        );
-        if (text) {
-          const reverseText = Array.from(text).reverse().join('');
-          const index = reverseText.search(checkReg);
-          if (index !== -1) {
-            startNode = node;
-            startOffset = reverseText.length - index;
-            break;
-          }
-        }
-      }
-    }
-    // get endNode and endOffset
-    for (let j = currentNodeIndex; j < leafNodes.length; j++) {
-      const node = leafNodes[j];
-      if (node instanceof Text) {
-        const text = node.textContent?.slice(
-          j === currentNodeIndex ? selection.anchorOffset : undefined
-        );
-        if (text) {
-          const index = text.search(checkReg);
-          if (index !== -1) {
-            endNode = node;
-            endOffset =
-              j === currentNodeIndex ? selection.anchorOffset + index : index;
-            break;
-          }
-        }
-      }
-    }
+    const [newStartNode, newStartOffset, newEndNode, newEndOffset] =
+      getNewStartAndEndOfNode(currentNodeIndex, leafNodes, selection, checkReg);
+    startNode = newStartNode;
+    startOffset = newStartOffset;
+    endNode = newEndNode;
+    endOffset = newEndOffset;
   }
   const newRange = document.createRange();
   newRange.setStart(startNode, startOffset);
   newRange.setEnd(endNode, endOffset);
-  // try select range by segmenter
-  trySelectBySegmenter(
-    selection,
-    newRange,
-    currentChar,
-    leafNodes,
-    currentNodeIndex
-  );
-  resetNativeSelection(newRange);
+  return [newRange, currentChar, currentNodeIndex] as const;
 }
 
 function trySelectBySegmenter(
