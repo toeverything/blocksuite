@@ -65,7 +65,7 @@ export class EditorContainer extends LitElement {
     return this;
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
 
     if (!this.space) {
@@ -82,7 +82,9 @@ export class EditorContainer extends LitElement {
     this._placeholderInput?.focus();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
     this.unsubscribe.forEach(fn => fn());
   }
 

@@ -121,8 +121,9 @@ export class RichText extends LitElement {
     });
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
+
     this.host.space.detachRichText(this.model.id);
   }
 
