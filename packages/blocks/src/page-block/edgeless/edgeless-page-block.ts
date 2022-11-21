@@ -188,7 +188,9 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
