@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 export async function dragBetweenCoords(
   page: Page,
@@ -29,7 +29,11 @@ export async function dragBetweenIndices(
       const richTextBound = richText.getBoundingClientRect();
       return {
         x: richTextBound.left + quillBound.left + startCoordOffSet.x,
-        y: richTextBound.top + quillBound.top + quillBound.height / 2 + startCoordOffSet.y,
+        y:
+          richTextBound.top +
+          quillBound.top +
+          quillBound.height / 2 +
+          startCoordOffSet.y,
       };
     },
     { startRichTextIndex, startQuillIndex, startCoordOffSet }
@@ -42,7 +46,11 @@ export async function dragBetweenIndices(
       const richTextBound = richText.getBoundingClientRect();
       return {
         x: richTextBound.left + quillBound.left + endCoordOffSet.x,
-        y: richTextBound.top + quillBound.top + quillBound.height / 2 + endCoordOffSet.y,
+        y:
+          richTextBound.top +
+          quillBound.top +
+          quillBound.height / 2 +
+          endCoordOffSet.y,
       };
     },
     { endRichTextIndex, endQuillIndex, endCoordOffSet }

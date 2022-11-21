@@ -85,9 +85,7 @@ export class Space {
     // all the events that happen at _any_ level (potentially deep inside the structure).
     // So, we apply a listener at the top level for the flat structure of the current
     // page/space container.
-    const handleYEventsAndSignalUpdate = (
-      events: Y.YEvent<YBlock | Y.Text>[]
-    ) => {
+    const handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
       for (const event of events) {
         this._handleYEvent(event);
       }
@@ -101,7 +99,7 @@ export class Space {
     // We could unobserve in order to short circuit by ignoring the sync of remote
     // events we actually generated locally.
     // this._yBlocks.unobserveDeep(handleYEventsAndSignalUpdate);
-    this._yBlocks.observeDeep(handleYEventsAndSignalUpdate);
+    this._yBlocks.observeDeep(handleYEvents);
 
     this._history = new Y.UndoManager([this._yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
