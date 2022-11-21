@@ -91,6 +91,7 @@ export class LinkPopover extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
+
     if (this.showMask) {
       // Disable body scroll
       this.bodyOverflowStyle = document.body.style.overflow;
@@ -108,6 +109,7 @@ export class LinkPopover extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+
     if (this.showMask) {
       // Restore body scroll style
       document.body.style.overflow = this.bodyOverflowStyle;

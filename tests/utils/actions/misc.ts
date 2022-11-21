@@ -57,6 +57,7 @@ export async function enterPlaygroundWithList(page: Page) {
       .register(window.blockSchema);
     window.space = space;
     const editor = document.createElement('editor-container');
+    // @ts-ignore
     editor.space = space;
     document.body.appendChild(editor);
 
@@ -76,7 +77,7 @@ export async function initEmptyState(page: Page) {
       .register(window.blockSchema);
     window.space = space;
     const editor = document.createElement('editor-container');
-
+    // @ts-ignore
     editor.space = space;
     document.body.appendChild(editor);
 

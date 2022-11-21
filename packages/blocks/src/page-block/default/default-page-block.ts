@@ -373,7 +373,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     focusTextEnd(this._title);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
     this._removeHotkeys();
     this._scrollDisposable.dispose();
     this.selection.dispose();

@@ -149,10 +149,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   ]);
 });
 
-test('does not sync when disconnected', async ({
-  browser,
-  page: pageA,
-}) => {
+test('does not sync when disconnected', async ({ browser, page: pageA }) => {
   test.fail();
 
   const room = await enterPlaygroundRoom(pageA);
