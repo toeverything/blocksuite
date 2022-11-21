@@ -67,3 +67,5 @@ In headed mode, `await page.pause()` can be used in test cases to suspend the te
 ## License
 
 [MPL 2.0](./LICENSE)
+
+Copyright (c) Toeverything Technology (Hangzhou) Co., Ltd. and its affiliates.
