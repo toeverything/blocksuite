@@ -363,7 +363,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     // TMP: clear selected rects on scroll
     const scrollContainer = this.mouseRoot.querySelector(
-      '.affine-editor-container'
+      '.affine-default-viewport'
     ) as HTMLDivElement;
     const scrollSignal = Signal.fromEvent(scrollContainer, 'scroll');
     this._scrollDisposable = scrollSignal.on(() => this._clearSelection());
@@ -394,17 +394,20 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
 
     return html`
-      <div class="affine-default-page-block-container">
-        <div class="affine-default-page-block-title-container">
-          <input
-            placeholder="Title"
-            class="affine-default-page-block-title"
-            value=${this.model.title}
-            @keydown=${this._onTitleKeyDown}
-            @input=${this._onTitleInput}
-          />
+      <div class="affine-default-viewport">
+        <div class="affine-default-page-block-container">
+          <div class="affine-default-page-block-title-container">
+            <input
+              placeholder="Title"
+              class="affine-default-page-block-title"
+              value=${this.model.title}
+              @keydown=${this._onTitleKeyDown}
+              @input=${this._onTitleInput}
+            />
+          </div>
+          ${childrenContainer}
         </div>
-        ${childrenContainer} ${selectedRectsContainer} ${selectionRect}
+        ${selectionRect} ${selectedRectsContainer}
       </div>
     `;
   }
