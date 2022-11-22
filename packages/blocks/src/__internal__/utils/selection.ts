@@ -22,75 +22,6 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-// function fixCurrentRangeToText(
-//   x: number,
-//   y: number,
-//   range: Range,
-//   isForward: boolean
-// ) {
-//   const endContainer = isForward ? range.endContainer : range.startContainer;
-//   let newRange: Range | null = range;
-//   if (endContainer.nodeType !== Node.TEXT_NODE) {
-//     const texts = Array.from(
-//       (range.commonAncestorContainer as HTMLElement).querySelectorAll(
-//         '.ql-editor'
-//       )
-//     );
-//     if (texts.length) {
-//       const text = isForward
-//         ? texts.reverse().find(t => {
-//             const rect = t.getBoundingClientRect();
-//             return y >= rect.top; // handle both drag downward, and rightward
-//           })
-//         : texts.find(t => {
-//             const rect = t.getBoundingClientRect();
-//             return y <= rect.bottom; // handle both drag upwards and leftward
-//           });
-//       if (!text) {
-//         throw new Error('Failed to focus text node!');
-//       }
-//       if (isForward) {
-//         const rect = text.getBoundingClientRect();
-//         const y = rect.bottom - 6;
-//         newRange = caretRangeFromPoint(x, y);
-//         if (newRange) {
-//           if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
-//             const lastTextNode = getLastTextNode(newRange.endContainer);
-//             if (lastTextNode) {
-//               newRange = document.createRange();
-//               newRange.setStart(
-//                 lastTextNode,
-//                 lastTextNode.textContent?.length || 0
-//               );
-//               newRange.setEnd(
-//                 lastTextNode,
-//                 lastTextNode.textContent?.length || 0
-//               );
-//             }
-//           }
-//           range.setEnd(newRange.endContainer, newRange.endOffset);
-//         }
-//       } else {
-//         const rect = text.getBoundingClientRect();
-//         const y = rect.top + 6;
-//         newRange = caretRangeFromPoint(x, y);
-//         if (newRange) {
-//           if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
-//             const firstTextNode = getFirstTextNode(newRange.startContainer);
-//             if (firstTextNode) {
-//               newRange = document.createRange();
-//               newRange.setStart(firstTextNode, 0);
-//               newRange.setEnd(firstTextNode, 0);
-//             }
-//           }
-//           range.setStart(newRange.endContainer, newRange.endOffset);
-//         }
-//       }
-//     }
-//   }
-//   return range;
-// }
-
 function forwardSelect(newRange: Range, range: Range) {
   if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
     const lastTextNode = getLastTextNode(newRange.endContainer);
@@ -143,15 +74,13 @@ function fixCurrentRangeToText(
         throw new Error('Failed to focus text node!');
       }
       const rect = text.getBoundingClientRect();
-      const NewY = isForward ? rect.bottom - 6 : rect.top + 6;
-      newRange = caretRangeFromPoint(x, NewY);
-      isForward
-        ? newRange
-          ? forwardSelect(newRange, range)
-          : null
-        : newRange
-        ? backwardSelect(newRange, range)
-        : null;
+      const newY = isForward ? rect.bottom - 6 : rect.top + 6;
+      newRange = caretRangeFromPoint(x, newY);
+      if (isForward && newRange) {
+        forwardSelect(newRange, range);
+      } else if (!isForward && newRange) {
+        backwardSelect(newRange, range);
+      }
     }
   }
   return range;
@@ -165,82 +94,7 @@ async function sleep(delay = 0) {
   });
 }
 
-// export async function focusRichText(
-//   position: SelectionPosition,
-//   editableContainer: Element
-// ) {
-//   // TODO optimize how get scroll container
-//   const scrollContainer = editableContainer.closest('.affine-editor-container');
-//   const { top, left, bottom, right } = Rect.fromDom(editableContainer);
-//   const { clientHeight } = document.documentElement;
-//   const lineHeight =
-//     Number(
-//       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
-//     ) || 16;
-//   let range: Range | null = null;
-//   if (position instanceof Point) {
-//     const { x, y } = position;
-//     let newTop = y;
-//     let newLeft = x;
-//     if (bottom <= y) {
-//       let finalBottom = bottom;
-//       if (bottom < SCROLL_THRESHOLD && scrollContainer) {
-//         scrollContainer.scrollTop =
-//           scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
-//         // set scroll may has a animation, wait for over
-//         await sleep();
-//         finalBottom = editableContainer.getBoundingClientRect().bottom;
-//       }
-//       newTop = finalBottom - lineHeight / 2;
-//     }
-//     if (bottom >= y) {
-//       let finalTop = top;
-//       if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
-//         scrollContainer.scrollTop =
-//           scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
-//         // set scroll may has a animation, wait for over
-//         await sleep();
-//         finalTop = editableContainer.getBoundingClientRect().top;
-//       }
-//       newTop = finalTop + lineHeight / 2;
-//     }
-//     if (x <= left) {
-//       newLeft = left + 1;
-//     }
-//     if (x >= right) {
-//       newLeft = right - 1;
-//     }
-//     range = caretRangeFromPoint(newLeft, newTop);
-//     resetNativeSelection(range);
-//   }
-//   if (position === 'start') {
-//     const newRange = document.createRange();
-//     let firstNode = editableContainer.firstChild;
-//     while (firstNode?.firstChild) {
-//       firstNode = firstNode.firstChild;
-//     }
-//     if (firstNode) {
-//       newRange.setStart(firstNode, 0);
-//       newRange.setEnd(firstNode, 0);
-//     }
-//     range = newRange;
-//   }
-//   if (position === 'end') {
-//     const newRange = document.createRange();
-//     let lastNode = editableContainer.lastChild;
-//     while (lastNode?.lastChild) {
-//       lastNode = lastNode.lastChild;
-//     }
-//     if (lastNode) {
-//       newRange.setStart(lastNode, lastNode.textContent?.length || 0);
-//       newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
-//     }
-//     range = newRange;
-//   }
-//   resetNativeSelection(range);
-// }
-
-function setStartRange(editableContainer: Element, range: Range | null) {
+function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
   let firstNode = editableContainer.firstChild;
   while (firstNode?.firstChild) {
@@ -253,7 +107,7 @@ function setStartRange(editableContainer: Element, range: Range | null) {
   return newRange;
 }
 
-function setEndRange(editableContainer: Element, range: Range | null) {
+function setEndRange(editableContainer: Element) {
   const newRange = document.createRange();
   let lastNode = editableContainer.lastChild;
   while (lastNode?.lastChild) {
@@ -310,10 +164,10 @@ export async function focusRichText(
   let range: Range | null = null;
   switch (position) {
     case 'start':
-      range = setStartRange(editableContainer, range);
+      range = setStartRange(editableContainer);
       break;
     case 'end':
-      range = setEndRange(editableContainer, range);
+      range = setEndRange(editableContainer);
       break;
     default: {
       const { x, y } = position;
