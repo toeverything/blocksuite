@@ -1,10 +1,9 @@
-import { Store, StoreOptions } from '@blocksuite/store';
-import { BlockSchema } from './block-loader';
+import type { Space } from '@blocksuite/store';
 import type { EditorContainer } from './components';
 
 export * from './components';
 export * from './managers';
-
+export * from './block-loader';
 const env =
   typeof globalThis !== 'undefined'
     ? globalThis
@@ -25,35 +24,8 @@ if (env[importIdentifier] === true) {
 // @ts-ignore
 env[importIdentifier] = true;
 
-// TODO support custom BlockSchema
-export type EditorOptions =
-  | {
-      store: Store;
-    }
-  | Partial<StoreOptions>;
-
-export const createEditor = (options: EditorOptions = {}): EditorContainer => {
+export const createEditor = (space: Space): EditorContainer => {
   const editor = document.createElement('editor-container');
-  if ('store' in options) {
-    // 1. Use custom store
-    editor.store = options.store;
-    return editor;
-  }
-  if (Object.keys(options).length > 0) {
-    // 2. Use custom room or providers
-    const store = new Store({
-      room: options.room,
-      providers: options.providers,
-      awareness: options.awareness,
-      idGenerator: options.idGenerator,
-    });
-    store.space.register(BlockSchema);
-    editor.store = store;
-    return editor;
-  }
-  // 3. Use default store
-  const store = new Store();
-  store.space.register(BlockSchema);
-  editor.store = store;
+  editor.space = space;
   return editor;
 };

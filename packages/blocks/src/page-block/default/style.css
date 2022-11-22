@@ -1,3 +1,8 @@
+.affine-default-viewport {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+}
 .affine-default-page-block-container {
   font-family: var(--affine-font-family);
   font-size: var(--affine-font-base);

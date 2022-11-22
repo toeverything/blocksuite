@@ -1,5 +1,5 @@
 import '../declare-test-window';
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { pressEnter } from './keyboard';
 
 const NEXT_FRAME_TIMEOUT = 50;
@@ -14,7 +14,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
     room = generateRandomRoomId();
   }
-  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&isTest=true`);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -43,16 +43,24 @@ export async function clearLog(page: Page) {
 
 export async function resetHistory(page: Page) {
   await page.evaluate(() => {
-    const space = window.store.space;
+    const space = window.space;
     space.resetHistory();
   });
 }
 
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}&isTest=true`);
   await page.evaluate(() => {
-    const space = window.store.space;
+    const space = window.store
+      .createSpace('page-test')
+      .register(window.blockSchema);
+    window.space = space;
+    const editor = document.createElement('editor-container');
+    // @ts-ignore
+    editor.space = space;
+    document.body.appendChild(editor);
+
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
     for (let i = 0; i < 3; i++) {
@@ -64,7 +72,15 @@ export async function enterPlaygroundWithList(page: Page) {
 
 export async function initEmptyState(page: Page) {
   const id = await page.evaluate(() => {
-    const space = window.store.space;
+    const space = window.store
+      .createSpace('page-test')
+      .register(window.blockSchema);
+    window.space = space;
+    const editor = document.createElement('editor-container');
+    // @ts-ignore
+    editor.space = space;
+    document.body.appendChild(editor);
+
     const pageId = space.addBlock({ flavour: 'affine:page' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
     const paragraphId = space.addBlock(
@@ -81,13 +97,24 @@ export async function focusRichText(page: Page, i = 0) {
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
   await locator.click();
 }
-
 export async function initThreeParagraphs(page: Page) {
   await focusRichText(page);
   await page.keyboard.type('123');
   await pressEnter(page);
   await page.keyboard.type('456');
   await pressEnter(page);
+  await page.keyboard.type('789');
+}
+
+export async function initThreeList(page: Page) {
+  await focusRichText(page);
+  await page.keyboard.type('-');
+  await page.keyboard.press('Space', { delay: 50 });
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.type('456');
+  await pressEnter(page);
+  await page.keyboard.press('Tab', { delay: 50 });
   await page.keyboard.type('789');
 }
 
