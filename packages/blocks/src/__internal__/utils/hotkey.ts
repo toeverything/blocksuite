@@ -2,40 +2,49 @@ import hotkeys, { KeyHandler } from 'hotkeys-js';
 
 hotkeys.filter = () => true;
 
+const SCOPE = {
+  AFFINE_PAGE: 'affine:page',
+  OTHER: 'other',
+}
+
 // Singleton
 class HotkeyManager {
-  private _hotkeys: typeof hotkeys;
+  private readonly hotkeys: typeof hotkeys;
+
   constructor() {
-    this._hotkeys = hotkeys;
-  }
-  private _setScope(scope: string) {
-    this._hotkeys.setScope(scope);
-  }
-  addListener(hotkey: string, listener: KeyHandler, scope?: string) {
-    this._hotkeys(hotkey, { scope: scope ?? 'affine:page' }, listener);
+    this.hotkeys = hotkeys;
   }
 
-  removeListener(hotkey: string | Array<string>, scope?: string) {
-    this._hotkeys.unbind(
+  private setScope(scope: string): void {
+    this.hotkeys.setScope(scope);
+  }
+
+  addListener(hotkey: string, listener: KeyHandler, scope: string = SCOPE.AFFINE_PAGE): void {
+    this.hotkeys(hotkey, { scope }, listener);
+  }
+
+  removeListener(hotkey: string | Array<string>, scope: string = SCOPE.AFFINE_PAGE): void {
+    this.hotkeys.unbind(
       (Array.isArray(hotkey) ? hotkey : [hotkey]).join(','),
-      scope ?? 'affine:page'
+      scope
     );
   }
-  disableHotkey() {
-    this._hotkeys.setScope('other');
+
+  disableHotkey(): void {
+    this.hotkeys.setScope(SCOPE.OTHER);
   }
-  enableHotkey() {
-    this._setScope('affine:page');
+
+  enableHotkey(): void {
+    this.setScope(SCOPE.AFFINE_PAGE);
   }
 
   /**
    * Create a context to shielding against global hotkey
    */
-  async withDisableHotkey(fn: () => void | Promise<unknown>) {
+  async withDisableHotkey(fn: () => void | Promise<unknown>): Promise<void | unknown> {
     this.disableHotkey();
     try {
-      const ret = await fn();
-      return ret;
+      return await fn();
     } finally {
       this.enableHotkey();
     }
