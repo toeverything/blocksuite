@@ -12,7 +12,7 @@ import {
   getCurrentRange,
   getQuillIndexByNativeSelection,
 } from './query';
-import { Point, Rect } from './rect';
+import { Rect } from './rect';
 import type { SelectionEvent } from './gesture';
 
 const SCROLL_THRESHOLD = 100;
@@ -21,6 +21,30 @@ const SCROLL_THRESHOLD = 100;
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
+
+function forwardSelect(newRange: Range, range: Range) {
+  if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
+    const lastTextNode = getLastTextNode(newRange.endContainer);
+    if (lastTextNode) {
+      newRange = document.createRange();
+      newRange.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
+      newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
+    }
+  }
+  range.setEnd(newRange.endContainer, newRange.endOffset);
+}
+
+function backwardSelect(newRange: Range, range: Range) {
+  if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
+    const firstTextNode = getFirstTextNode(newRange.startContainer);
+    if (firstTextNode) {
+      newRange = document.createRange();
+      newRange.setStart(firstTextNode, 0);
+      newRange.setEnd(firstTextNode, 0);
+    }
+  }
+  range.setStart(newRange.endContainer, newRange.endOffset);
+}
 
 function fixCurrentRangeToText(
   x: number,
@@ -49,42 +73,13 @@ function fixCurrentRangeToText(
       if (!text) {
         throw new Error('Failed to focus text node!');
       }
-      if (isForward) {
-        const rect = text.getBoundingClientRect();
-        const y = rect.bottom - 6;
-        newRange = caretRangeFromPoint(x, y);
-        if (newRange) {
-          if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
-            const lastTextNode = getLastTextNode(newRange.endContainer);
-            if (lastTextNode) {
-              newRange = document.createRange();
-              newRange.setStart(
-                lastTextNode,
-                lastTextNode.textContent?.length || 0
-              );
-              newRange.setEnd(
-                lastTextNode,
-                lastTextNode.textContent?.length || 0
-              );
-            }
-          }
-          range.setEnd(newRange.endContainer, newRange.endOffset);
-        }
-      } else {
-        const rect = text.getBoundingClientRect();
-        const y = rect.top + 6;
-        newRange = caretRangeFromPoint(x, y);
-        if (newRange) {
-          if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
-            const firstTextNode = getFirstTextNode(newRange.startContainer);
-            if (firstTextNode) {
-              newRange = document.createRange();
-              newRange.setStart(firstTextNode, 0);
-              newRange.setEnd(firstTextNode, 0);
-            }
-          }
-          range.setStart(newRange.endContainer, newRange.endOffset);
-        }
+      const rect = text.getBoundingClientRect();
+      const newY = isForward ? rect.bottom - 6 : rect.top + 6;
+      newRange = caretRangeFromPoint(x, newY);
+      if (isForward && newRange) {
+        forwardSelect(newRange, range);
+      } else if (!isForward && newRange) {
+        backwardSelect(newRange, range);
       }
     }
   }
@@ -99,24 +94,43 @@ async function sleep(delay = 0) {
   });
 }
 
-export async function focusRichText(
-  position: SelectionPosition,
-  editableContainer: Element
-) {
-  // TODO optimize how get scroll container
+function setStartRange(editableContainer: Element) {
+  const newRange = document.createRange();
+  let firstNode = editableContainer.firstChild;
+  while (firstNode?.firstChild) {
+    firstNode = firstNode.firstChild;
+  }
+  if (firstNode) {
+    newRange.setStart(firstNode, 0);
+    newRange.setEnd(firstNode, 0);
+  }
+  return newRange;
+}
+
+function setEndRange(editableContainer: Element) {
+  const newRange = document.createRange();
+  let lastNode = editableContainer.lastChild;
+  while (lastNode?.lastChild) {
+    lastNode = lastNode.lastChild;
+  }
+  if (lastNode) {
+    newRange.setStart(lastNode, lastNode.textContent?.length || 0);
+    newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
+  }
+  return newRange;
+}
+
+async function setNewTop(y: number, editableContainer: Element) {
   const scrollContainer = editableContainer.closest('.affine-editor-container');
-  const { top, left, bottom, right } = Rect.fromDom(editableContainer);
+  const { top, bottom } = Rect.fromDom(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
     Number(
       window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
     ) || 16;
-  let range: Range | null = null;
-  if (position instanceof Point) {
-    const { x, y } = position;
-    let newTop = y;
-    let newLeft = x;
-    if (bottom <= y) {
+  const compare = bottom < y;
+  switch (compare) {
+    case true: {
       let finalBottom = bottom;
       if (bottom < SCROLL_THRESHOLD && scrollContainer) {
         scrollContainer.scrollTop =
@@ -125,9 +139,9 @@ export async function focusRichText(
         await sleep();
         finalBottom = editableContainer.getBoundingClientRect().bottom;
       }
-      newTop = finalBottom - lineHeight / 2;
+      return finalBottom - lineHeight / 2;
     }
-    if (bottom >= y) {
+    case false: {
       let finalTop = top;
       if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
         scrollContainer.scrollTop =
@@ -136,40 +150,39 @@ export async function focusRichText(
         await sleep();
         finalTop = editableContainer.getBoundingClientRect().top;
       }
-      newTop = finalTop + lineHeight / 2;
+      return finalTop + lineHeight / 2;
     }
-    if (x <= left) {
-      newLeft = left + 1;
-    }
-    if (x >= right) {
-      newLeft = right - 1;
-    }
-    range = caretRangeFromPoint(newLeft, newTop);
-    resetNativeSelection(range);
   }
-  if (position === 'start') {
-    const newRange = document.createRange();
-    let firstNode = editableContainer.firstChild;
-    while (firstNode?.firstChild) {
-      firstNode = firstNode.firstChild;
+}
+
+export async function focusRichText(
+  position: SelectionPosition,
+  editableContainer: Element
+) {
+  // TODO optimize how get scroll container
+  const { left, right } = Rect.fromDom(editableContainer);
+  let range: Range | null = null;
+  switch (position) {
+    case 'start':
+      range = setStartRange(editableContainer);
+      break;
+    case 'end':
+      range = setEndRange(editableContainer);
+      break;
+    default: {
+      const { x, y } = position;
+      let newLeft = x;
+      const newTop = await setNewTop(y, editableContainer);
+      if (x <= left) {
+        newLeft = left + 1;
+      }
+      if (x >= right) {
+        newLeft = right - 1;
+      }
+      range = caretRangeFromPoint(newLeft, newTop);
+      resetNativeSelection(range);
+      break;
     }
-    if (firstNode) {
-      newRange.setStart(firstNode, 0);
-      newRange.setEnd(firstNode, 0);
-    }
-    range = newRange;
-  }
-  if (position === 'end') {
-    const newRange = document.createRange();
-    let lastNode = editableContainer.lastChild;
-    while (lastNode?.lastChild) {
-      lastNode = lastNode.lastChild;
-    }
-    if (lastNode) {
-      newRange.setStart(lastNode, lastNode.textContent?.length || 0);
-      newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
-    }
-    range = newRange;
   }
   resetNativeSelection(range);
 }
@@ -442,6 +455,72 @@ function expandRangesByCharacter(
   if (!leafNodes.length) {
     return;
   }
+  const [newRange, currentChar, currentNodeIndex] = getNewRangeForDblClick(
+    leafNodes,
+    selection
+  );
+  // try select range by segmenter
+  trySelectBySegmenter(
+    selection,
+    newRange,
+    currentChar,
+    leafNodes,
+    currentNodeIndex
+  );
+  resetNativeSelection(newRange);
+}
+
+function getNewStartAndEndForDblClick(
+  currentNodeIndex: number,
+  leafNodes: Text[],
+  selection: Selection,
+  checkReg: RegExp
+) {
+  let newStartNode = leafNodes[0];
+  let newStartOffset = 0;
+  let newEndNode = leafNodes[leafNodes.length - 1];
+  let newEndOffset = newEndNode.textContent?.length || 0;
+  // get startNode and startOffset
+  for (let i = currentNodeIndex; i >= 0; i--) {
+    const node = leafNodes[i];
+    if (node instanceof Text) {
+      const text = node.textContent?.slice(
+        0,
+        i === currentNodeIndex ? selection.anchorOffset : undefined
+      );
+      if (text) {
+        const reverseText = Array.from(text).reverse().join('');
+        const index = reverseText.search(checkReg);
+        if (index !== -1) {
+          newStartNode = node;
+          newStartOffset = reverseText.length - index;
+          break;
+        }
+      }
+    }
+  }
+  // get endNode and endOffset
+  for (let j = currentNodeIndex; j < leafNodes.length; j++) {
+    const node = leafNodes[j];
+    if (node instanceof Text) {
+      const text = node.textContent?.slice(
+        j === currentNodeIndex ? selection.anchorOffset : undefined
+      );
+      if (text) {
+        const index = text.search(checkReg);
+        if (index !== -1) {
+          newEndNode = node;
+          newEndOffset =
+            j === currentNodeIndex ? selection.anchorOffset + index : index;
+          break;
+        }
+      }
+    }
+  }
+  return [newStartNode, newStartOffset, newEndNode, newEndOffset] as const;
+}
+
+function getNewRangeForDblClick(leafNodes: Text[], selection: Selection) {
   let startNode = leafNodes[0];
   let startOffset = 0;
   let endNode = leafNodes[leafNodes.length - 1];
@@ -477,56 +556,22 @@ function expandRangesByCharacter(
     if (/\w/.test(currentChar)) {
       checkReg = /\W/;
     }
-    // get startNode and startOffset
-    for (let i = currentNodeIndex; i >= 0; i--) {
-      const node = leafNodes[i];
-      if (node instanceof Text) {
-        const text = node.textContent?.slice(
-          0,
-          i === currentNodeIndex ? selection.anchorOffset : undefined
-        );
-        if (text) {
-          const reverseText = Array.from(text).reverse().join('');
-          const index = reverseText.search(checkReg);
-          if (index !== -1) {
-            startNode = node;
-            startOffset = reverseText.length - index;
-            break;
-          }
-        }
-      }
-    }
-    // get endNode and endOffset
-    for (let j = currentNodeIndex; j < leafNodes.length; j++) {
-      const node = leafNodes[j];
-      if (node instanceof Text) {
-        const text = node.textContent?.slice(
-          j === currentNodeIndex ? selection.anchorOffset : undefined
-        );
-        if (text) {
-          const index = text.search(checkReg);
-          if (index !== -1) {
-            endNode = node;
-            endOffset =
-              j === currentNodeIndex ? selection.anchorOffset + index : index;
-            break;
-          }
-        }
-      }
-    }
+    const [newStartNode, newStartOffset, newEndNode, newEndOffset] =
+      getNewStartAndEndForDblClick(
+        currentNodeIndex,
+        leafNodes,
+        selection,
+        checkReg
+      );
+    startNode = newStartNode;
+    startOffset = newStartOffset;
+    endNode = newEndNode;
+    endOffset = newEndOffset;
   }
   const newRange = document.createRange();
   newRange.setStart(startNode, startOffset);
   newRange.setEnd(endNode, endOffset);
-  // try select range by segmenter
-  trySelectBySegmenter(
-    selection,
-    newRange,
-    currentChar,
-    leafNodes,
-    currentNodeIndex
-  );
-  resetNativeSelection(newRange);
+  return [newRange, currentChar, currentNodeIndex] as const;
 }
 
 function trySelectBySegmenter(
@@ -541,41 +586,12 @@ function trySelectBySegmenter(
     !notStrictCharacterAndSpaceReg.test(currentChar) &&
     !/\w/.test(currentChar)
   ) {
-    const rangeString = newRange.toString();
-    // check all languages words
-    const segmenter = new Intl.Segmenter([], { granularity: 'word' });
-    const wordsIterator = segmenter.segment(rangeString)[Symbol.iterator]();
-    const words = Array.from(wordsIterator);
-    let absoluteOffset = 0;
-    let started = false;
-    // get absolute offset of current cursor
-    for (let i = 0; i < leafNodes.length; i++) {
-      const leafNode = leafNodes[i];
-      if (started || leafNode === newRange.startContainer) {
-        started = true;
-        if (leafNode !== selection.anchorNode) {
-          absoluteOffset = absoluteOffset + (leafNode.textContent?.length || 0);
-        } else {
-          absoluteOffset =
-            absoluteOffset + selection.anchorOffset - newRange.startOffset;
-          break;
-        }
-      }
-    }
-    let wordText = words[words.length - 1].segment;
-    // get word text of current cursor
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      if (absoluteOffset === word.index) {
-        wordText = word.segment;
-        break;
-      }
-      if (absoluteOffset < word.index) {
-        wordText = words[i - 1].segment;
-        break;
-      }
-    }
-    const currentCharIndex = wordText.indexOf(currentChar);
+    const [currentCharIndex, wordText] = getCurrentCharIndex(
+      newRange,
+      leafNodes,
+      selection,
+      currentChar
+    );
     // length for expand left
     let leftLength = currentCharIndex;
     // length for expand right
@@ -612,6 +628,49 @@ function trySelectBySegmenter(
   }
 }
 
+function getCurrentCharIndex(
+  newRange: Range,
+  leafNodes: Array<Node>,
+  selection: Selection,
+  currentChar: string
+) {
+  const rangeString = newRange.toString();
+  // check all languages words
+  const segmenter = new Intl.Segmenter([], { granularity: 'word' });
+  const wordsIterator = segmenter.segment(rangeString)[Symbol.iterator]();
+  const words = Array.from(wordsIterator);
+  let absoluteOffset = 0;
+  let started = false;
+  // get absolute offset of current cursor
+  for (let i = 0; i < leafNodes.length; i++) {
+    const leafNode = leafNodes[i];
+    if (started || leafNode === newRange.startContainer) {
+      started = true;
+      if (leafNode !== selection.anchorNode) {
+        absoluteOffset = absoluteOffset + (leafNode.textContent?.length || 0);
+      } else {
+        absoluteOffset =
+          absoluteOffset + selection.anchorOffset - newRange.startOffset;
+        break;
+      }
+    }
+  }
+  let wordText = words[words.length - 1].segment;
+  // get word text of current cursor
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (absoluteOffset === word.index) {
+      wordText = word.segment;
+      break;
+    }
+    if (absoluteOffset < word.index) {
+      wordText = words[i - 1].segment;
+      break;
+    }
+  }
+  const currentCharIndex = wordText.indexOf(currentChar);
+  return [currentCharIndex, wordText] as const;
+}
 /**
  * left first search all leaf text nodes
  * @example
