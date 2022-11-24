@@ -234,12 +234,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _removeHotkeys() {
     removeCommonHotKey();
     hotkey.removeListener([
-      HOTKEYS.UNDO,
-      HOTKEYS.REDO,
       HOTKEYS.BACKSPACE,
       HOTKEYS.SELECT_ALL,
-      HOTKEYS.INLINE_CODE,
-      HOTKEYS.STRIKE,
       HOTKEYS.H1,
       HOTKEYS.H2,
       HOTKEYS.H3,
@@ -248,7 +244,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.H6,
       HOTKEYS.SHIFT_UP,
       HOTKEYS.SHIFT_DOWN,
-      HOTKEYS.LINK,
       HOTKEYS.BULLETED,
       HOTKEYS.NUMBERED_LIST,
       HOTKEYS.TEXT,
