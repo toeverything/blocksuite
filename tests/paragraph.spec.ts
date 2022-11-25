@@ -309,3 +309,23 @@ test('The key "Up" respond when the cursor located in first paragraph  ', async 
   await page.keyboard.press('ArrowUp', { delay: 50 });
   await assertPageTitleFocus(page);
 });
+
+
+test('After deleting a row of the text, the cursor will jump to the end of the previous row of the list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+  await assertSelection(page, 0, 5, 0);
+
+  await pressEnter(page);
+  await page.keyboard.type('w');
+  await assertRichTexts(page, ['hello', 'w']);
+  await assertSelection(page, 1, 1, 0);
+  await page.keyboard.press('ArrowUp')
+  await page.keyboard.press('ArrowDown')
+
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('Backspace')
+  await assertSelection(page, 0, 5, 0);
+});

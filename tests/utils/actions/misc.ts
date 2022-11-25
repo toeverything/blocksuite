@@ -57,6 +57,7 @@ export async function enterPlaygroundWithList(page: Page) {
       .register(window.blockSchema);
     window.space = space;
     const editor = document.createElement('editor-container');
+    // @ts-ignore
     editor.space = space;
 
     const debugMenu = document.createElement('debug-menu');
@@ -81,6 +82,7 @@ export async function initEmptyState(page: Page) {
       .register(window.blockSchema);
     window.space = space;
     const editor = document.createElement('editor-container');
+    // @ts-ignore
     editor.space = space;
 
     const debugMenu = document.createElement('debug-menu');
@@ -111,6 +113,18 @@ export async function initThreeParagraphs(page: Page) {
   await pressEnter(page);
   await page.keyboard.type('456');
   await pressEnter(page);
+  await page.keyboard.type('789');
+}
+
+export async function initThreeList(page: Page) {
+  await focusRichText(page);
+  await page.keyboard.type('-');
+  await page.keyboard.press('Space', { delay: 50 });
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.type('456');
+  await pressEnter(page);
+  await page.keyboard.press('Tab', { delay: 50 });
   await page.keyboard.type('789');
 }
 

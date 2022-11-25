@@ -118,7 +118,19 @@ export class EdgelessPageBlockComponent
   }
 
   private _removeHotkeys() {
-    hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
+    hotkey.removeListener([
+      HOTKEYS.BACKSPACE,
+      HOTKEYS.H1,
+      HOTKEYS.H2,
+      HOTKEYS.H3,
+      HOTKEYS.H4,
+      HOTKEYS.H5,
+      HOTKEYS.H6,
+      HOTKEYS.SHIFT_DOWN,
+      HOTKEYS.NUMBERED_LIST,
+      HOTKEYS.BULLETED,
+      HOTKEYS.TEXT,
+    ], this.flavour);
     removeCommonHotKey();
   }
 
@@ -188,7 +200,9 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
