@@ -7,7 +7,7 @@ import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
 import { uuidv4 } from './utils/id-generator';
 
 export interface SerializedStore {
-  page0: {
+  [key: string]: {
     [key: string]: PrefixedBlockProps;
   };
 }
@@ -49,7 +49,7 @@ export class Store {
   createSpace(spaceId: string) {
     this.spaces.set(
       spaceId,
-      new Space(this.doc, this.awareness, this.idGenerator)
+      new Space(spaceId, this.doc, this.awareness, this.idGenerator)
     );
     return this.getSpace(spaceId);
   }
@@ -62,7 +62,7 @@ export class Store {
   }
 
   /**
-   * @internal Only for testing at now
+   * @internal Only for testing at now, 'page0' should be replaced by props 'spaceId'
    */
   toJSXElement(id = '0') {
     const json = this.serializeDoc();

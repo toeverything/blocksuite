@@ -40,7 +40,7 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const space = window.store
-      .createSpace('page-test')
+      .createSpace('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore
@@ -76,7 +76,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
     const space = window.store
-      .createSpace('page-test')
+      .createSpace('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore
@@ -101,7 +101,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
     const space = window.store
-      .createSpace('page-test')
+      .createSpace('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore
@@ -124,7 +124,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await pageA.evaluate(() => {
     const space = window.store
-      .createSpace('page-test')
+      .createSpace('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore

@@ -46,6 +46,7 @@ function createChildMap(yChildIds: Y.Array<string>) {
 }
 
 export class Space {
+  readonly id: string;
   readonly doc: Y.Doc;
   readonly awareness!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
@@ -71,10 +72,12 @@ export class Space {
   );
 
   constructor(
+    id: string,
     doc: Y.Doc,
     awareness: Awareness,
     idGenerator: IdGenerator = uuidv4
   ) {
+    this.id = id;
     this.doc = doc;
 
     this._idGenerator = idGenerator;
@@ -114,7 +117,7 @@ export class Space {
 
   /** key-value store of blocks */
   private get _yBlocks() {
-    return this.doc.getMap('page0') as YBlocks;
+    return this.doc.getMap(this.id) as YBlocks;
   }
 
   get root() {
