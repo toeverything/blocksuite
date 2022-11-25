@@ -33,6 +33,7 @@ import style from './style.css';
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
+  updateEmbedRects: Signal<DOMRect[]>;
 }
 
 // https://stackoverflow.com/a/2345915
@@ -65,6 +66,36 @@ function FrameSelectionRect(rect: DOMRect | null) {
       class="affine-page-frame-selection-rect"
       style=${styleMap(style)}
     ></div>
+  `;
+}
+
+function EmbedSelectedRectsContainer(rects: DOMRect[]) {
+  return html`
+    <style>
+      .affine-page-selected-embed-rects-container > div {
+        position: fixed;
+        z-index: 1;
+        pointer-events: none;
+        border: 3px solid red;
+      }
+    </style>
+    <div class="affine-page-selected-embed-rects-container">
+      ${rects.map(rect => {
+        const style = {
+          display: 'block',
+          left: rect.left + 'px',
+          top: rect.top + 'px',
+          width: rect.width + 'px',
+          height: rect.height + 'px',
+        };
+        return html`<div class="resizes" style=${styleMap(style)}>
+          <div class="resize top-left"></div>
+          <div class="resize top-right"></div>
+          <div class="resize bottom-left"></div>
+          <div class="resize bottom-right"></div>
+        </div>`;
+      })}
+    </div>
   `;
 }
 
@@ -122,9 +153,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   selectedRects: DOMRect[] = [];
 
+  @state()
+  selectEmbedRects: DOMRect[] = [];
+
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
+    updateEmbedRects: new Signal<DOMRect[]>(),
   };
 
   private _scrollDisposable!: Disposable;
@@ -358,7 +393,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selectedRects = rects;
       this.requestUpdate();
     });
-
+    this.signals.updateEmbedRects.on(rects => {
+      this.selectEmbedRects = rects;
+      this.requestUpdate();
+    });
     tryUpdateGroupSize(this.space, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -394,7 +432,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const childrenContainer = BlockChildrenContainer(this.model, this);
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
-
+    const selectedEmbedContainer = EmbedSelectedRectsContainer(
+      this.selectEmbedRects
+    );
     return html`
       <div class="affine-default-page-block-container">
         <div class="affine-default-page-block-title-container">
@@ -407,6 +447,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           />
         </div>
         ${childrenContainer} ${selectedRectsContainer} ${selectionRect}
+        ${selectedEmbedContainer}
       </div>
     `;
   }

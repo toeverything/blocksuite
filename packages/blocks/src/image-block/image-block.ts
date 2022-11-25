@@ -235,10 +235,10 @@ export class ImageBlockComponent extends LitElement {
               </ul>
             </div>
             <div class="resizes">
-              <div class="resize top-left"></div>
+              <!-- <div class="resize top-left"></div>
               <div class="resize top-right"></div>
               <div class="resize bottom-left"></div>
-              <div class="resize bottom-right"></div>
+              <div class="resize bottom-right"></div> -->
               <!-- <div > -->
               <img src=${source} />
               <!-- </div> -->
