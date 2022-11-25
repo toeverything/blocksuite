@@ -1,39 +1,83 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
-import { createEditor } from '@blocksuite/editor';
+import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
 import {
   DebugProvider,
   IndexedDBProvider,
   createAutoIncrement,
+  uuidv4,
+  Store,
 } from '@blocksuite/store';
+import type { SyncProviderConstructor, StoreOptions } from '@blocksuite/store';
+
 import './style.css';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? '';
+const isTest = params.get('isTest') === 'true';
+
 /**
- * Specified by `?providers=debug` or `?providers=indexeddb,debug`
+ * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
  * Default is debug (using webrtc)
  */
-const providersFromParam = (params.get('providers') ?? 'debug')
-  .split(',')
-  .map(providerName => {
-    switch (providerName) {
+function editorOptionsFromParam(): Pick<
+  StoreOptions,
+  'providers' | 'idGenerator'
+> {
+  const providers: SyncProviderConstructor[] = [];
+
+  const modes = (params.get('syncModes') ?? 'debug').split(',');
+
+  modes.forEach(mode => {
+    switch (mode) {
       case 'debug':
-        return DebugProvider;
+        providers.push(DebugProvider);
+        break;
       case 'indexeddb':
-        return IndexedDBProvider;
+        providers.push(IndexedDBProvider);
+        break;
       default:
         throw new TypeError(
-          `Unknown provider ("${providerName}") supplied in search param ?providers=... (for example "debug" and "indexeddb")`
+          `Unknown provider ("${mode}") supplied in search param ?syncModes=... (for example "debug" and "indexeddb")`
         );
     }
   });
 
+  /**
+   * Specified using "uuidv4" when providers have indexeddb.
+   * Because when persistent data applied to ydoc, we need generator different id for block.
+   * Otherwise, the block id will conflict.
+   */
+  const idGenerator = providers.includes(IndexedDBProvider)
+    ? uuidv4
+    : createAutoIncrement();
+
+  return {
+    providers,
+    idGenerator,
+  };
+}
+
 window.onload = () => {
-  const editor = createEditor({
-    room,
-    providers: providersFromParam,
-    idGenerator: createAutoIncrement(),
+  const store = new Store({
+    room: room,
+    ...editorOptionsFromParam(),
   });
-  document.body.appendChild(editor);
+  // @ts-ignore
+  window.store = store;
+  // @ts-ignore
+  window.blockSchema = BlockSchema;
+
+  // In dev environment, init editor by default, but in test environment, init editor by the test page
+  if (!isTest) {
+    const space = store
+      .createSpace('page0')
+      // @ts-ignore
+      .register(window.blockSchema);
+    const editor = createEditor(space);
+    const debugMenu = createDebugMenu(store, editor);
+
+    document.body.appendChild(editor);
+    document.body.appendChild(debugMenu);
+  }
 };

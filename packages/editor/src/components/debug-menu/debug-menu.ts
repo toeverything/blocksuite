@@ -3,12 +3,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   type CommonBlockElement,
+  type GroupBlockModel,
   convertToList,
   createEvent,
-} from '../__internal__';
+} from '@blocksuite/blocks';
 import type { BaseBlockModel, Store } from '@blocksuite/store';
-import type { GroupBlockModel } from '../group-block';
-
+import type { EditorContainer } from '../editor-container/editor-container';
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {
   undo: html`
@@ -126,8 +126,7 @@ export class DebugMenu extends LitElement {
   store!: Store;
 
   @property()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  contentParser!: any;
+  editor!: EditorContainer;
 
   @state()
   connected = true;
@@ -142,11 +141,15 @@ export class DebugMenu extends LitElement {
   _mode: 'page' | 'edgeless' = 'page';
 
   get space() {
-    return this.store.space;
+    return this.editor.space;
+  }
+
+  get contentParser() {
+    return this.editor.contentParser;
   }
 
   private _onToggleConnection() {
-    if (this.connected === true) {
+    if (this.connected) {
       this.store.providers.forEach(provide => provide.disconnect());
       this.connected = false;
     } else {

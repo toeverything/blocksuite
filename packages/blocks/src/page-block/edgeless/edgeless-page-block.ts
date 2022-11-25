@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Disposable, Signal, Space, Store } from '@blocksuite/store';
+import { Disposable, Signal, Space } from '@blocksuite/store';
 import type { GroupBlockModel, PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
@@ -52,11 +52,7 @@ export class EdgelessPageBlockComponent
   `;
 
   @property()
-  store!: Store;
-
-  get space() {
-    return this.store.space;
-  }
+  space!: Space;
 
   flavour = 'edgeless' as const;
 
@@ -122,7 +118,19 @@ export class EdgelessPageBlockComponent
   }
 
   private _removeHotkeys() {
-    hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
+    hotkey.removeListener([
+      HOTKEYS.BACKSPACE,
+      HOTKEYS.H1,
+      HOTKEYS.H2,
+      HOTKEYS.H3,
+      HOTKEYS.H4,
+      HOTKEYS.H5,
+      HOTKEYS.H6,
+      HOTKEYS.SHIFT_DOWN,
+      HOTKEYS.NUMBERED_LIST,
+      HOTKEYS.BULLETED,
+      HOTKEYS.TEXT,
+    ], this.flavour);
     removeCommonHotKey();
   }
 
@@ -155,7 +163,7 @@ export class EdgelessPageBlockComponent
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('space')) {
       this._selection = new EdgelessSelectionManager(this);
     }
     super.update(changedProperties);
@@ -192,7 +200,9 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();

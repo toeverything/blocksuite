@@ -159,11 +159,13 @@ export function handleLineStartBackspace(space: Space, model: ExtendedModel) {
       if (!parent || parent?.flavour === 'affine:group') {
         const container = getContainerByModel(model);
         const previousSibling = getPreviousBlock(container, model.id);
-        if (previousSibling) {
+        if (previousSibling && previousSibling.flavour === 'affine:paragraph') {
           space.captureSync();
+          const preTextLength = previousSibling.text?.length || 0;
           previousSibling.text?.join(model.text as Text);
           space.deleteBlock(model);
-          asyncFocusRichText(space, previousSibling.id);
+          const richText = getRichTextByModel(previousSibling);
+          richText?.quill?.setSelection(preTextLength, 0);
         }
       } else {
         const grandParent = space.getParent(parent);

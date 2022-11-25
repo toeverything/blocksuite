@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import './utils/declare-test-window';
 import { test } from '@playwright/test';
-import type { Space } from '../packages/store';
 import {
   enterPlaygroundRoom,
   disconnectByClick,
@@ -40,7 +39,13 @@ test('basic init with external text', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await page.evaluate(() => {
-    const space = window.store.space as Space;
+    const space = window.store
+      .createSpace('page0')
+      .register(window.blockSchema);
+    const editor = document.createElement('editor-container');
+    // @ts-ignore
+    editor.space = space;
+    document.body.appendChild(editor);
 
     const pageId = space.addBlock({ flavour: 'affine:page', title: 'hello' });
     const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
@@ -64,10 +69,21 @@ test('basic init with external text', async ({ page }) => {
 
 test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
+  await initEmptyState(pageA);
   await pageA.keyboard.type('hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
+  await pageB.evaluate(() => {
+    const space = window.store
+      .createSpace('page0')
+      .register(window.blockSchema);
+    const editor = document.createElement('editor-container');
+    // @ts-ignore
+    editor.space = space;
+    document.body.appendChild(editor);
+  });
+
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
 
@@ -83,6 +99,15 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
+  await pageB.evaluate(() => {
+    const space = window.store
+      .createSpace('page0')
+      .register(window.blockSchema);
+    const editor = document.createElement('editor-container');
+    // @ts-ignore
+    editor.space = space;
+    document.body.appendChild(editor);
+  });
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -97,10 +122,20 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 
 test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
+  await pageA.evaluate(() => {
+    const space = window.store
+      .createSpace('page0')
+      .register(window.blockSchema);
+    const editor = document.createElement('editor-container');
+    // @ts-ignore
+    editor.space = space;
+    document.body.appendChild(editor);
+  });
   // await focusFirstTextBlock(pageA); // do not init (add blocks) in A
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
+
   await initEmptyState(pageB);
   await focusRichText(pageB);
   await pageB.keyboard.type('hello');
@@ -172,6 +207,7 @@ test('undo/redo with keyboard', async ({ page }) => {
 test('undo after adding block twice', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
+
   await focusRichText(page);
   await page.keyboard.type('hello');
   await pressEnter(page);

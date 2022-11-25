@@ -91,7 +91,14 @@ test('basic link', async ({ page }) => {
 const createLinkBlock = async (page: Page, str: string, link: string) => {
   const id = await page.evaluate(
     ([str, link]) => {
-      const { space } = window.store;
+      const space = window.store
+        .createSpace('page0')
+        .register(window.blockSchema);
+      const editor = document.createElement('editor-container');
+      // @ts-ignore
+      editor.space = space;
+      document.body.appendChild(editor);
+
       const pageId = space.addBlock({
         flavour: 'affine:page',
         title: 'title',

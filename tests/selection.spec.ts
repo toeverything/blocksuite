@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { Page, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -21,6 +21,9 @@ import {
   waitNextFrame,
   selectAllByKeyboard,
   dragBetweenIndices,
+  initThreeList,
+  copyByKeyboard,
+  pasteByKeyboard,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -38,7 +41,7 @@ test('click on blank area', async ({ page }) => {
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 5 };
+    return { x: bbox.left, y: bbox.top + 5 };
   });
   await page.mouse.click(above123.x, above123.y);
   await assertSelection(page, 0, 0, 0);
@@ -46,7 +49,7 @@ test('click on blank area', async ({ page }) => {
   const above456 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="3"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 5 };
+    return { x: bbox.left, y: bbox.top + 5 };
   });
   await page.mouse.click(above456.x, above456.y);
   await assertSelection(page, 1, 0, 0);
@@ -54,7 +57,7 @@ test('click on blank area', async ({ page }) => {
   const below789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.bottom + 5 };
+    return { x: bbox.left, y: bbox.bottom - 5 };
   });
   await page.mouse.click(below789.x, below789.y);
   await assertSelection(page, 2, 0, 0);
@@ -346,4 +349,76 @@ test('select text leaving a few words in the last line and delete', async ({
   await page.keyboard.type('abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc89\n');
+});
+
+test('select text in the same line with dragging leftward and move outside the editor-container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [1, 3],
+    [1, 0],
+    { x: 0, y: 0 },
+    { x: -50, y: 0 }
+  );
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});
+
+test('select text in the same line with dragging rightward and move outside the editor-container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [1, 0],
+    [1, 3],
+    { x: 0, y: 0 },
+    { x: 50, y: 0 }
+  );
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.type('abc');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('abc\n');
+});
+
+async function clickListIcon(page: Page, i = 0) {
+  const locator = page.locator('.affine-list-block__prefix').nth(i);
+  await locator.click();
+}
+
+test('Click the list icon to select', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeList(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await clickListIcon(page, 0);
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page);
+  await assertRichTexts(page, ['123', '123', '456', '789']);
+  await clickListIcon(page, 2);
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page);
+  await assertRichTexts(page, ['123', '123', '456', '789', '456', '789']);
+  await clickListIcon(page, 4);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertRichTexts(page, ['123', '123', '456', '789', '\n']);
+  //TODO:FIX ME!!!!!
+  //This should be ['123', '123', '456', '789'],but there is another bug affecting it
+  await clickListIcon(page, 1);
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertRichTexts(page, ['123', '\n', '456', '789', '\n']);
+  //TODO:FIX ME!!!!!
+  //This should be ['123','456','789'],but there is another bug affecting it
 });

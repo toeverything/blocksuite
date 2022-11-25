@@ -46,6 +46,7 @@ function createChildMap(yChildIds: Y.Array<string>) {
 }
 
 export class Space {
+  readonly id: string;
   readonly doc: Y.Doc;
   readonly awareness!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
@@ -71,10 +72,12 @@ export class Space {
   );
 
   constructor(
+    id: string,
     doc: Y.Doc,
     awareness: Awareness,
     idGenerator: IdGenerator = uuidv4
   ) {
+    this.id = id;
     this.doc = doc;
 
     this._idGenerator = idGenerator;
@@ -82,12 +85,10 @@ export class Space {
     const aware = awareness ?? new Awareness(this.doc);
     this.awareness = new AwarenessAdapter(this, aware);
 
-    // all the events that happen at _any_ level (potentially deep inside the structure).
+    // Handle all the events that happen at _any_ level (potentially deep inside the structure).
     // So, we apply a listener at the top level for the flat structure of the current
     // page/space container.
-    const handleYEventsAndSignalUpdate = (
-      events: Y.YEvent<YBlock | Y.Text>[]
-    ) => {
+    const handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
       for (const event of events) {
         this._handleYEvent(event);
       }
@@ -95,13 +96,13 @@ export class Space {
     };
 
     // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
-    // "unobserve" is potentially necessary to make sure we don't  create
+    // "unobserve" is potentially necessary to make sure we don't create
     // an infinite loop when sync to remote then back to client.
     // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
     // We could unobserve in order to short circuit by ignoring the sync of remote
     // events we actually generated locally.
-    // this._yBlocks.unobserveDeep(handleYEventsAndSignalUpdate);
-    this._yBlocks.observeDeep(handleYEventsAndSignalUpdate);
+    // this._yBlocks.unobserveDeep(handleYEvents);
+    this._yBlocks.observeDeep(handleYEvents);
 
     this._history = new Y.UndoManager([this._yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
@@ -116,7 +117,7 @@ export class Space {
 
   /** key-value store of blocks */
   private get _yBlocks() {
-    return this.doc.getMap('page0') as YBlocks;
+    return this.doc.getMap(this.id) as YBlocks;
   }
 
   get root() {

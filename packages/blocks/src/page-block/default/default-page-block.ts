@@ -2,7 +2,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Disposable, Signal, Space, Store, Text } from '@blocksuite/store';
+import { Disposable, Signal, Space, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -132,11 +132,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   `;
 
   @property()
-  store!: Store;
-
-  get space() {
-    return this.store.space;
-  }
+  space!: Space;
 
   flavour = 'affine:page' as const;
 
@@ -273,12 +269,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _removeHotkeys() {
     removeCommonHotKey();
     hotkey.removeListener([
-      HOTKEYS.UNDO,
-      HOTKEYS.REDO,
       HOTKEYS.BACKSPACE,
       HOTKEYS.SELECT_ALL,
-      HOTKEYS.INLINE_CODE,
-      HOTKEYS.STRIKE,
       HOTKEYS.H1,
       HOTKEYS.H2,
       HOTKEYS.H3,
@@ -287,7 +279,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.H6,
       HOTKEYS.SHIFT_UP,
       HOTKEYS.SHIFT_DOWN,
-      HOTKEYS.LINK,
       HOTKEYS.BULLETED,
       HOTKEYS.NUMBERED_LIST,
       HOTKEYS.TEXT,
@@ -357,7 +348,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('store')) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('space')) {
       this.selection = new DefaultSelectionManager(
         this.space,
         this.mouseRoot,
@@ -405,7 +396,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     // TMP: clear selected rects on scroll
     const scrollContainer = this.mouseRoot.querySelector(
-      '.affine-editor-container'
+      '.affine-default-viewport'
     ) as HTMLDivElement;
     const scrollSignal = Signal.fromEvent(scrollContainer, 'scroll');
     this._scrollDisposable = scrollSignal.on(() => this._clearSelection());
@@ -415,7 +406,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     focusTextEnd(this._title);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
     this._removeHotkeys();
     this._scrollDisposable.dispose();
     this.selection.dispose();
@@ -436,15 +429,18 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selectEmbedRects
     );
     return html`
-      <div class="affine-default-page-block-container">
-        <div class="affine-default-page-block-title-container">
-          <input
-            placeholder="Title"
-            class="affine-default-page-block-title"
-            value=${this.model.title}
-            @keydown=${this._onTitleKeyDown}
-            @input=${this._onTitleInput}
-          />
+      <div class="affine-default-viewport">
+        <div class="affine-default-page-block-container">
+          <div class="affine-default-page-block-title-container">
+            <input
+              placeholder="Title"
+              class="affine-default-page-block-title"
+              value=${this.model.title}
+              @keydown=${this._onTitleKeyDown}
+              @input=${this._onTitleInput}
+            />
+          </div>
+          ${childrenContainer}
         </div>
         ${childrenContainer} ${selectedRectsContainer} ${selectionRect}
         ${selectedEmbedContainer}

@@ -16,6 +16,8 @@ export * from './group-block';
 export * from './image-block';
 export * as SelectionUtils from './__internal__/utils/selection';
 export * from './__internal__/utils/types';
+export * from './__internal__/utils/common-operations';
+export * from './__internal__/utils/std';
 
 const env =
   typeof globalThis !== 'undefined'

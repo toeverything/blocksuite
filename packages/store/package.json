@@ -1,10 +1,10 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0-alpha.1",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "scripts": {
-    "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
+    "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
     "test": "vitest --run"
   },
@@ -19,7 +19,8 @@
     "yjs": "^13.5.41"
   },
   "devDependencies": {
-    "@types/quill": "^2.0.9"
+    "@types/quill": "^2.0.9",
+    "cross-env": "^7.0.3"
   },
   "exports": {
     "./src/*": "./src/*.ts",
