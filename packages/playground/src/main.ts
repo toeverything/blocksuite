@@ -4,6 +4,7 @@ import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
 import {
   DebugDocProvider,
   IndexedDBDocProvider,
+  createWebsocketDocProvider,
   createAutoIncrement,
   uuidv4,
   Store,
@@ -26,6 +27,13 @@ function editorOptionsFromParam(): Pick<
 > {
   const providers: DocProviderConstructor[] = [];
 
+  /**
+   * Specified using "uuidv4" when providers have indexeddb.
+   * Because when persistent data applied to ydoc, we need generator different id for block.
+   * Otherwise, the block id will conflict.
+   */
+  let forceUUIDv4 = false;
+
   const modes = (params.get('syncModes') ?? 'debug').split(',');
 
   modes.forEach(mode => {
@@ -35,7 +43,16 @@ function editorOptionsFromParam(): Pick<
         break;
       case 'indexeddb':
         providers.push(IndexedDBDocProvider);
+        forceUUIDv4 = true;
         break;
+      case 'websocket': {
+        const WebsocketDocProvider = createWebsocketDocProvider(
+          'ws://127.0.0.1:3000/collaboration/AFFiNE'
+        );
+        providers.push(WebsocketDocProvider);
+        forceUUIDv4 = true;
+        break;
+      }
       default:
         throw new TypeError(
           `Unknown provider ("${mode}") supplied in search param ?syncModes=... (for example "debug" and "indexeddb")`
@@ -48,9 +65,7 @@ function editorOptionsFromParam(): Pick<
    * Because when persistent data applied to ydoc, we need generator different id for block.
    * Otherwise, the block id will conflict.
    */
-  const idGenerator = providers.includes(IndexedDBDocProvider)
-    ? uuidv4
-    : createAutoIncrement();
+  const idGenerator = forceUUIDv4 ? uuidv4 : createAutoIncrement();
 
   return {
     providers,

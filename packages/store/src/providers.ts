@@ -3,6 +3,7 @@ import { WebrtcProvider } from 'y-webrtc';
 // In the future, consider making y-indexdb a separate package sync provider.
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { Awareness } from 'y-protocols/awareness';
+import { WebsocketProvider as OriginWebsocketProvider } from 'y-websocket';
 
 /**
  * Different examples of providers could include webrtc sync,
@@ -78,4 +79,24 @@ export class IndexedDBDocProvider
     // Do nothing for now
     return Promise.resolve();
   }
+}
+
+export function createWebsocketDocProvider(url: string) {
+  return class WebsocketProvider
+    extends OriginWebsocketProvider
+    implements DocProvider
+  {
+    constructor(
+      room: string,
+      ydoc: Y.Doc,
+      options?: { awareness?: Awareness }
+    ) {
+      super(url, room, ydoc, options);
+    }
+
+    public clearData() {
+      // Do noting for now
+      return Promise.resolve();
+    }
+  };
 }
