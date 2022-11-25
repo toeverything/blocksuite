@@ -47,7 +47,7 @@ function editorOptionsFromParam(): Pick<
         break;
       case 'websocket': {
         const WebsocketDocProvider = createWebsocketDocProvider(
-          'ws://127.0.0.1:3000/collaboration/AFFiNE'
+          'ws://127.0.0.1:1234'
         );
         providers.push(WebsocketDocProvider);
         forceUUIDv4 = true;
