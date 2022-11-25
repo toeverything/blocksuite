@@ -34,26 +34,6 @@ import {
 } from './icons';
 import { formatQuickBarStyle } from './styles';
 
-const saveSelection = () => {
-  const sel = window.getSelection();
-  if (!sel) {
-    return;
-  }
-  if (sel.getRangeAt && sel.rangeCount) {
-    return sel.getRangeAt(0);
-  }
-  return;
-};
-
-const restoreSelection = (range: Range) => {
-  const sel = window.getSelection();
-  if (!sel) {
-    return;
-  }
-  sel.removeAllRanges();
-  sel.addRange(range);
-};
-
 const paragraphButtons = [
   {
     key: 'text',
