@@ -1,6 +1,6 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
-import { createEditor } from '@blocksuite/editor';
+import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
 import {
   DebugProvider,
   IndexedDBProvider,
@@ -9,7 +9,6 @@ import {
   Store,
 } from '@blocksuite/store';
 import type { SyncProviderConstructor, StoreOptions } from '@blocksuite/store';
-import { BlockSchema } from '@blocksuite/editor';
 
 import './style.css';
 
@@ -76,6 +75,9 @@ window.onload = () => {
       // @ts-ignore
       .register(window.blockSchema);
     const editor = createEditor(space);
+    const debugMenu = createDebugMenu(store, editor);
+
     document.body.appendChild(editor);
+    document.body.appendChild(debugMenu);
   }
 };

@@ -22,7 +22,6 @@ import {
   initEmptyState,
   dragOverTitle,
   resetHistory,
-  focusTitle,
 } from './utils/actions';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
