@@ -53,7 +53,7 @@ export async function enterPlaygroundWithList(page: Page) {
   await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}&isTest=true`);
   await page.evaluate(() => {
     const space = window.store
-      .createSpace('page-test')
+      .createSpace('page0')
       .register(window.blockSchema);
     window.space = space;
     const editor = document.createElement('editor-container');
@@ -73,7 +73,7 @@ export async function enterPlaygroundWithList(page: Page) {
 export async function initEmptyState(page: Page) {
   const id = await page.evaluate(() => {
     const space = window.store
-      .createSpace('page-test')
+      .createSpace('page0')
       .register(window.blockSchema);
     window.space = space;
     const editor = document.createElement('editor-container');
