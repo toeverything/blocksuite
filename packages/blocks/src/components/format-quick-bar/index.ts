@@ -1,8 +1,6 @@
 import type { BaseBlockModel, Space } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { handleFormat } from '../../page-block/utils';
-import { createLink } from '../../__internal__/rich-text/link-node';
+import { customElement, property, state } from 'lit/decorators.js';
 import {
   convertToList,
   getCurrentRange,
@@ -10,100 +8,12 @@ import {
 } from '../../__internal__/utils';
 import { toast } from '../toast';
 import './button';
-import {
-  BoldIcon,
-  BulletedListIcon,
-  CalloutIcon,
-  CodeIcon,
-  CopyIcon,
-  H1Icon,
-  H2Icon,
-  H3Icon,
-  H4Icon,
-  H5Icon,
-  H6Icon,
-  InlineCodeIcon,
-  ItalicIcon,
-  LinkIcon,
-  NumberedIcon,
-  QuoteIcon,
-  StrikethroughIcon,
-  TextIcon,
-  TodoIcon,
-  UnderlineIcon,
-} from './icons';
+import { formatButtons, paragraphButtons } from './config';
+import { ArrowDownIcon, CopyIcon, TextIcon } from './icons';
 import { formatQuickBarStyle } from './styles';
-
-const paragraphButtons = [
-  {
-    key: 'text',
-    name: 'Text',
-    icon: TextIcon,
-  },
-  { key: 'h1', name: 'Heading 1', icon: H1Icon },
-  { key: 'h2', name: 'Heading 2', icon: H2Icon },
-  { key: 'h3', name: 'Heading 3', icon: H3Icon },
-  { key: 'h4', name: 'Heading 4', icon: H4Icon },
-  { key: 'h5', name: 'Heading 5', icon: H5Icon },
-  { key: 'h6', name: 'Heading 6', icon: H6Icon },
-  { key: 'bulleted', name: 'Bulleted List', icon: BulletedListIcon },
-  { key: 'numbered', name: 'Numbered List', icon: NumberedIcon },
-  { key: 'todo', name: 'To-do List', icon: TodoIcon },
-  { key: 'code', name: 'Code Block', icon: CodeIcon },
-  { key: 'quote', name: 'Quote', icon: QuoteIcon },
-  { key: 'callout', name: 'Callout', icon: CalloutIcon },
-];
 
 const isListType = (type: string): type is 'bulleted' | 'numbered' | 'todo' =>
   ['bulleted', 'numbered', 'todo'].includes(type);
-
-const formatButtons = [
-  {
-    name: 'Bold',
-    icon: BoldIcon,
-    activeWhen: (models: BaseBlockModel[]) => false,
-    action: (space: Space) => {
-      handleFormat(space, 'bold');
-    },
-  },
-  {
-    name: 'Italic',
-    icon: ItalicIcon,
-    action: (space: Space) => {
-      handleFormat(space, 'italic');
-    },
-  },
-  {
-    name: 'Underline',
-    icon: UnderlineIcon,
-    action: (space: Space) => {
-      handleFormat(space, 'underline');
-    },
-  },
-  {
-    name: 'Strikethrough',
-    icon: StrikethroughIcon,
-    action: (space: Space) => {
-      handleFormat(space, 'strike');
-    },
-  },
-  {
-    name: 'Code',
-    icon: InlineCodeIcon,
-    action: (space: Space) => {
-      handleFormat(space, 'code');
-    },
-  },
-  {
-    name: 'Link',
-    icon: LinkIcon,
-    // Only can show link button when selection is in one line paragraph
-    showWhen: (models: BaseBlockModel[]) => models.length === 1,
-    action: (space: Space) => {
-      createLink(space);
-    },
-  },
-];
 
 const onCopy = (space: Space) => {
   document.dispatchEvent(new ClipboardEvent('copy'));
@@ -121,13 +31,25 @@ export class FormatQuickBar extends LitElement {
   top = '0px';
 
   @property()
+  abortController = new AbortController();
+
+  @state()
   models: BaseBlockModel[] = [];
 
-  @property()
+  @state()
   space: Space | null = null;
 
-  @property()
+  @state()
   paragraphType = 'text';
+
+  @property()
+  paragraphPanelHoverDelay = 150;
+
+  @state()
+  paragraphPanelTimer = 0;
+
+  @state()
+  showParagraphPanel = false;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -147,10 +69,36 @@ export class FormatQuickBar extends LitElement {
     console.log(models);
   }
 
+  private onHover(e: MouseEvent) {
+    if (this.showParagraphPanel) {
+      clearTimeout(this.paragraphPanelTimer);
+      return;
+    }
+    this.paragraphPanelTimer = window.setTimeout(async () => {
+      this.showParagraphPanel = true;
+    }, this.paragraphPanelHoverDelay);
+  }
+
+  private onHoverEnd(e: Event) {
+    if (this.showParagraphPanel) {
+      // Prepare to disappear
+      this.paragraphPanelTimer = window.setTimeout(async () => {
+        this.showParagraphPanel = false;
+      }, this.paragraphPanelHoverDelay);
+      return;
+    }
+    clearTimeout(this.paragraphPanelTimer);
+  }
+
   private paragraphPanelTemplate() {
+    if (!this.showParagraphPanel) {
+      return html``;
+    }
     return html`<div
       class="paragraph-panel"
       style="left: 0; top: calc(100% + 4px)"
+      @mouseover=${this.onHover}
+      @mouseout=${this.onHoverEnd}
     >
       ${paragraphButtons.map(
         ({ key, name, icon }) => html`<format-bar-button
@@ -169,6 +117,7 @@ export class FormatQuickBar extends LitElement {
                 } else {
                   this.space.updateBlock(model, { type: key });
                 }
+                this.paragraphType = key;
               });
           }}
         >
@@ -185,7 +134,17 @@ export class FormatQuickBar extends LitElement {
       console.error('Failed to render format-quick-bar! space not found!');
       return html``;
     }
-    const paragraphItems = html``;
+    const paragraphIcon =
+      paragraphButtons.find(btn => btn.key === this.paragraphType)?.icon ??
+      paragraphButtons[0].icon;
+    const paragraphItems = html`<format-bar-button
+      width="52px"
+      @mouseover=${this.onHover}
+      @mouseout=${this.onHoverEnd}
+    >
+      ${paragraphIcon} ${ArrowDownIcon}
+    </format-bar-button>`;
+
     const paragraphPanel = this.paragraphPanelTemplate();
 
     const formatItems = html`
@@ -194,7 +153,7 @@ export class FormatQuickBar extends LitElement {
         .map(
           ({ name, icon, action }) => html`<format-bar-button
             class="has-tool-tip"
-            @click=${() => action(space)}
+            @click=${() => action(space, this.abortController)}
           >
             ${icon}
             <tool-tip inert role="tooltip">${name}</tool-tip>
@@ -245,6 +204,7 @@ export const showFormatQuickBar = async ({
   const formatQuickBar = document.createElement('format-quick-bar');
   formatQuickBar.left = `${rect.left}px`;
   formatQuickBar.top = `${offset + offsetY}px`;
+  formatQuickBar.abortController = abortController;
   container.appendChild(formatQuickBar);
 
   // TODO add MutationObserver/ResizeObserver to update position
