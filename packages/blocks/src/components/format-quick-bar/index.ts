@@ -3,6 +3,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
   convertToList,
+  getContainerByModel,
   getCurrentRange,
   getModelsByRange,
 } from '../../__internal__/utils';
@@ -69,7 +70,7 @@ export class FormatQuickBar extends LitElement {
     console.log(models);
   }
 
-  private onHover(e: MouseEvent) {
+  private onHover() {
     if (this.showParagraphPanel) {
       clearTimeout(this.paragraphPanelTimer);
       return;
@@ -79,7 +80,7 @@ export class FormatQuickBar extends LitElement {
     }, this.paragraphPanelHoverDelay);
   }
 
-  private onHoverEnd(e: Event) {
+  private onHoverEnd() {
     if (this.showParagraphPanel) {
       // Prepare to disappear
       this.paragraphPanelTimer = window.setTimeout(async () => {
@@ -94,6 +95,21 @@ export class FormatQuickBar extends LitElement {
     if (!this.showParagraphPanel) {
       return html``;
     }
+    const formatParagraph = (targetFormat: string) => {
+      this.models
+        .filter(i => i.type !== targetFormat)
+        .forEach(model => {
+          if (!this.space) {
+            throw new Error('Space is not defined');
+          }
+          if (isListType(targetFormat)) {
+            convertToList(this.space, model, targetFormat, '');
+          } else {
+            this.space.updateBlock(model, { type: targetFormat });
+          }
+          this.paragraphType = targetFormat;
+        });
+    };
     return html`<div
       class="paragraph-panel"
       style="left: 0; top: calc(100% + 4px)"
@@ -105,21 +121,7 @@ export class FormatQuickBar extends LitElement {
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
-          @click=${() => {
-            this.models
-              .filter(i => i.type !== key)
-              .forEach(model => {
-                if (!this.space) {
-                  throw new Error('Space is not defined');
-                }
-                if (isListType(key)) {
-                  convertToList(this.space, model, key, '');
-                } else {
-                  this.space.updateBlock(model, { type: key });
-                }
-                this.paragraphType = key;
-              });
-          }}
+          @click=${() => formatParagraph(key)}
         >
           ${icon}
         </format-bar-button>`
@@ -189,25 +191,33 @@ export const showFormatQuickBar = async ({
   container = document.body,
   abortController = new AbortController(),
 }: {
-  anchorEl: {
-    getBoundingClientRect: () => DOMRect;
-    // contextElement?: Element;
-  };
+  anchorEl: Element;
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
+  const formatQuickBar = document.createElement('format-quick-bar');
+  formatQuickBar.abortController = abortController;
+
+  const models = getModelsByRange(getCurrentRange());
+  if (!models.length) {
+    return;
+  }
+  const editorContainer = getContainerByModel(models[0]);
+  const scrollContainer = editorContainer.querySelector(
+    '.affine-default-viewport'
+  ) as HTMLDivElement;
+  const updatePos = () => {
   const rect = anchorEl.getBoundingClientRect();
   const bodyRect = document.body.getBoundingClientRect();
   const offset = rect.top - bodyRect.top + rect.height;
   const offsetY = 5;
-
-  const formatQuickBar = document.createElement('format-quick-bar');
   formatQuickBar.left = `${rect.left}px`;
   formatQuickBar.top = `${offset + offsetY}px`;
-  formatQuickBar.abortController = abortController;
+  };
+  scrollContainer.addEventListener('scroll', updatePos, { passive: true });
+  updatePos();
   container.appendChild(formatQuickBar);
 
-  // TODO add MutationObserver/ResizeObserver to update position
   const clickAwayListener = (e: MouseEvent) => {
     if (e.target === formatQuickBar) {
       return;
@@ -221,6 +231,7 @@ export const showFormatQuickBar = async ({
     abortController.signal.addEventListener('abort', () => {
       // TODO add transition
       formatQuickBar.remove();
+      scrollContainer.removeEventListener('scroll', updatePos);
       res();
     });
   });
