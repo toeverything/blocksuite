@@ -211,7 +211,13 @@ export class DefaultSelectionManager {
 
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
-      const { anchor, direction } = getNativeSelectionMouseDragInfo(e);
+      const { anchor, direction, selectedType } =
+        getNativeSelectionMouseDragInfo(e);
+      if (selectedType === 'Caret') {
+        // If nothing is selected, then we should not show the format bar
+        return;
+      }
+
       showFormatQuickBar({ anchorEl: anchor, direction });
     } else if (this.state.type === 'block') {
       // TODO handle block selection

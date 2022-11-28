@@ -1,4 +1,5 @@
 import {
+  assertExists,
   caretRangeFromPoint,
   resetNativeSelection,
   SelectionEvent,
@@ -33,7 +34,7 @@ export type DragDirection =
   | 'none';
 
 // text can be applied both text and paragraph formatting actions, while others can only be applied paragraph actions
-export type SelectedBlockType = 'text' | 'other';
+export type SelectedBlockType = 'Text' | 'Caret' | 'Other';
 
 function isSelectionEvent(
   e: SelectionEvent | FrameSelectionState
@@ -58,21 +59,17 @@ export function getDragDirection(
 }
 
 export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
-  const selectedType: SelectedBlockType = 'text';
   const direction: DragDirection = getDragDirection(e);
-  console.log(`direction: ${direction}`);
   const selection = window.getSelection();
-  if (!selection) {
-    throw new Error('Cannot get selection');
-  }
+  assertExists(selection);
+  const selectedType: SelectedBlockType =
+    selection.type === 'Caret' ? 'Caret' : 'Text';
   const { anchorNode, focusNode, focusOffset, anchorOffset } = selection;
-  const [targetNode, offset] = direction.includes('left')
+  const [targetNode, offset] = ['left-top', 'right-top'].includes(direction)
     ? [anchorNode, anchorOffset]
     : [focusNode, focusOffset];
 
-  if (!targetNode) {
-    throw new Error('Cannot get targetNode from selection');
-  }
+  assertExists(targetNode);
   const range = document.createRange();
   range.setStart(targetNode, offset);
   return { selectedType, direction, anchor: range };
