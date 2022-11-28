@@ -79,7 +79,7 @@ function EmbedSelectedRectsContainer(rects: DOMRect[]) {
         position: fixed;
         z-index: 10;
         /* pointer-events: none; */
-        border: 3px solid red;
+        border: 3px solid #4286f4;
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable">

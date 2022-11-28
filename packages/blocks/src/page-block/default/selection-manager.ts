@@ -127,8 +127,13 @@ export class DefaultSelectionManager {
   private _signals: DefaultPageSignals;
   private _originPosition: { x: number; y: number } = { x: 0, y: 0 };
   private _dropContainer: HTMLElement | null = null;
-  private _dropContainerSize: { w: number; h: number } = { w: 0, h: 0 };
-  private _activeComponent: HTMLElement | null;
+  private _dropContainerSize: { w: number; h: number; left: number } = {
+    w: 0,
+    h: 0,
+    left: 0,
+  };
+  private _activeComponent: HTMLElement | null = null;
+  private _dragMoveTarget = 'right';
   constructor(
     space: Space,
     container: HTMLElement,
@@ -168,17 +173,19 @@ export class DefaultSelectionManager {
       richTextCache,
       selectionRect
     );
-    const selectedEmbed = filterSelectedEmbed(embedCache, selectionRect);
+
     this.state.selectedRichTexts = selectedRichTexts;
     const selectedBounds = selectedRichTexts.map(richText => {
       return richTextCache.get(richText) as DOMRect;
     });
-    const selectedEmbedBounds = selectedEmbed.map(embed => {
-      return embedCache.get(embed) as DOMRect;
-    });
+    // TODO
+    // const selectedEmbed = filterSelectedEmbed(embedCache, selectionRect);
+    // const selectedEmbedBounds = selectedEmbed.map(embed => {
+    //   return embedCache.get(embed) as DOMRect;
+    // });
+    // this._signals.updateEmbedRects.emit(selectedEmbedBounds);
     this._signals.updateSelectedRects.emit(selectedBounds);
     this._signals.updateFrameSelectionRect.emit(selectionRect);
-    this._signals.updateEmbedRects.emit(selectedEmbedBounds);
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
@@ -199,7 +206,6 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    console.log('e: ', e);
     this.state.resetStartRange(e);
     if (isPageTitle(e.raw)) return;
     if (isEmbed(e)) {
@@ -214,12 +220,18 @@ export class DefaultSelectionManager {
   };
 
   private _onEmbedDragStart = (e: SelectionEvent) => {
-    console.log('_onEmbedDragStart: ');
+    // console.log('_onEmbedDragStart: ');
     this.state.type = 'embed';
     this._originPosition.x = e.x;
     this._originPosition.y = e.y;
     this._dropContainer = (e.raw.target as HTMLElement).closest('.resizes');
     this._dropContainerSize.w = this._dropContainer?.clientWidth as number;
+    this._dropContainerSize.h = this._dropContainer?.clientHeight as number;
+    if ((e.raw.target as HTMLElement).className.includes('right')) {
+      this._dragMoveTarget = 'right';
+    } else {
+      this._dragMoveTarget = 'left';
+    }
     // this._dropContainerSize.w = this._dropContainer?.clientWidth
 
     // console.log(e);
@@ -236,16 +248,27 @@ export class DefaultSelectionManager {
   };
   private _onEmbedDragMove(e: SelectionEvent) {
     // console.log(e);
-    const width =
-      this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x);
+    let width = 0;
+    let height = 0;
+    if (this._dragMoveTarget === 'right') {
+      width =
+        this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x);
+    } else {
+      width =
+        this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
+    }
+    if (width > 580) {
+      width = 580;
+    }
+    height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
 
     if (this._dropContainer) {
       this._dropContainer.style.width = width + 'px';
-      // this._activeComponent
+      this._dropContainer.style.height = height + 'px';
       const activeImg = this._activeComponent?.querySelector('img');
-      console.log('activeImg: ', activeImg);
       if (activeImg) {
         activeImg.style.width = width + 'px';
+        activeImg.style.height = height + 'px';
       }
     }
   }
@@ -260,15 +283,21 @@ export class DefaultSelectionManager {
   private _onContainerClick = (e: SelectionEvent) => {
     this.state.clear();
     this._signals.updateSelectedRects.emit([]);
-
+    this._signals.updateEmbedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     const embedBlockComponent = (e.raw.target as HTMLElement).closest(
       'img-block'
     ) as HTMLElement;
     if (embedBlockComponent) {
       this._activeComponent = (e.raw.target as HTMLElement).closest(
-        'img-block'
+        'embed-block'
       );
+      assertExists(this._activeComponent);
+      const imageRect = this._activeComponent
+        .querySelector('img')
+        ?.getBoundingClientRect();
+      assertExists(imageRect);
+      this._signals.updateEmbedRects.emit([imageRect]);
       console.log((e.raw.target as HTMLElement).closest('img-block'));
     }
     if (e.raw.target instanceof HTMLInputElement) return;
