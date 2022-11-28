@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import './utils/declare-test-window';
 import { test } from '@playwright/test';
 import {

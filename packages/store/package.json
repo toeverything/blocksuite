@@ -7,12 +7,14 @@
     "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "serve:websocket": "cross-env HOST=localhost PORT=1234 npx y-websocket",
     "build": "tsc",
+    "test:blob": "playwright test",
     "test": "vitest --run"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "idb-keyval": "^6.2.0",
     "lib0": "^0.2.52",
     "y-indexeddb": "^9.0.9",
     "y-protocols": "^1.0.5",

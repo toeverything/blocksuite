@@ -2,6 +2,7 @@ export * from './space';
 export * from './store';
 export * from './base';
 export * from './awareness';
+export * from './blob';
 export * from './text-adapter';
 export * from './utils/signal';
 export * from './utils/disposable';
