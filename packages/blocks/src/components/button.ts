@@ -109,7 +109,7 @@ export class IconButton extends LitElement {
       border: none;
       width: 28px;
       height: 28px;
-      border-radius: 3px;
+      border-radius: 5px;
       background: transparent;
       cursor: pointer;
       user-select: none;
