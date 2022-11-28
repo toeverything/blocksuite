@@ -1,5 +1,5 @@
 import type { Space } from '@blocksuite/store';
-import type { Quill } from 'quill';
+import Quill from 'quill';
 import type { ExtendedModel } from './types';
 
 // XXX: workaround quill lifecycle issue
@@ -91,5 +91,29 @@ export function convertToParagraph(
     model.text?.delete(0, prefix.length + 1);
     space.updateBlock(model, { type: type });
   }
+  return true;
+}
+
+export function addDivider(
+  quill: Quill,
+  model: ExtendedModel,
+  prefix: string,
+  space: Space
+): boolean {
+  model.text?.insert(' ', prefix.length);
+  space.captureSync();
+  model.text?.delete(0, prefix.length + 1);
+  const BlockEmbed = Quill.import('blots/block/embed');
+
+  class DividerBlot extends BlockEmbed {}
+  DividerBlot.blotName = 'divider';
+  DividerBlot.tagName = 'hr';
+  Quill.register(DividerBlot);
+
+  const range = quill.getSelection(true);
+  quill.insertText(range.index, '\n', Quill.sources.USER);
+  quill.insertEmbed(range.index, 'divider', true, Quill.sources.USER);
+  quill.setSelection(range.index + 1, 0, Quill.sources.SILENT);
+
   return true;
 }
