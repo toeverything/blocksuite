@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
+    "serve:websocket": "cross-env HOST=localhost PORT=1234 npx y-websocket",
     "build": "tsc",
     "test": "vitest --run"
   },
@@ -16,6 +17,7 @@
     "y-indexeddb": "^9.0.9",
     "y-protocols": "^1.0.5",
     "y-webrtc": "^10.2.3",
+    "y-websocket": "^1.4.5",
     "yjs": "^13.5.41"
   },
   "devDependencies": {
