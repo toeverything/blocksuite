@@ -101,7 +101,9 @@ export const linkPopoverStyle = css`
   input:active + label {
     color: var(--affine-primary-color);
   }
-
+  input:invalid + svg {
+    color: var(--affine-disable-color);
+  }
   .affine-link-popover {
     display: flex;
     align-items: center;

@@ -247,7 +247,7 @@ export class LinkPopover extends LitElement {
       <input
         id="link-input"
         class="affine-edit-link-input"
-        type="text"
+        type="url"
         spellcheck="false"
         placeholder="Paste or type a link"
         value=${this.previewLink}
