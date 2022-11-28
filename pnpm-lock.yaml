@@ -97,6 +97,7 @@ importers:
     specifiers:
       '@types/quill': ^2.0.9
       cross-env: ^7.0.3
+      idb-keyval: ^6.2.0
       lib0: ^0.2.52
       y-indexeddb: ^9.0.9
       y-protocols: ^1.0.5
@@ -104,6 +105,7 @@ importers:
       y-websocket: ^1.4.5
       yjs: ^13.5.41
     dependencies:
+      idb-keyval: 6.2.0
       lib0: 0.2.52
       y-indexeddb: 9.0.9_yjs@13.5.41
       y-protocols: 1.0.5
@@ -2250,6 +2252,12 @@ packages:
       safer-buffer: 2.1.2
     dev: true
 
+  /idb-keyval/6.2.0:
+    resolution: {integrity: sha512-uw+MIyQn2jl3+hroD7hF8J7PUviBU7BPKWw4f/ISf32D4LoGu98yHjrzWWJDASu9QNrX10tCJqk9YY0ClWm8Ng==}
+    dependencies:
+      safari-14-idb-fix: 3.0.0
+    dev: false
+
   /ieee754/1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
     dev: false
@@ -3398,6 +3406,10 @@ packages:
     dependencies:
       queue-microtask: 1.2.3
     dev: true
+
+  /safari-14-idb-fix/3.0.0:
+    resolution: {integrity: sha512-eBNFLob4PMq8JA1dGyFn6G97q3/WzNtFK4RnzT1fnLq+9RyrGknzYiM/9B12MnKAxuj1IXr7UKYtTNtjyKMBog==}
+    dev: false
 
   /safe-buffer/5.1.2:
     resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}

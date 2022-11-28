@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import './utils/declare-test-window';
 import { test } from '@playwright/test';
 import {
@@ -40,7 +39,7 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const space = window.store
-      .createSpace('page0')
+      .createSpace('space:page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore
@@ -76,7 +75,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
     const space = window.store
-      .createSpace('page0')
+      .createSpace('space:page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore
@@ -101,7 +100,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
     const space = window.store
-      .createSpace('page0')
+      .createSpace('space:page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore
@@ -124,7 +123,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await pageA.evaluate(() => {
     const space = window.store
-      .createSpace('page0')
+      .createSpace('space:page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     // @ts-ignore
