@@ -4,24 +4,50 @@ import { toolTipStyle } from '../tooltip';
 export const editLinkStyle = css`
   .affine-link-edit-popover {
     box-sizing: border-box;
-    width: 382px;
-    height: 128px;
-    padding: 24px;
+    width: 404px;
+    height: 112px;
+    padding: 12px;
     box-shadow: var(--affine-popover-shadow);
     background: var(--affine-popover-background);
-    border-radius: 0px 10px 10px 10px;
-
+    border-radius: 10px;
     display: grid;
     grid-template-columns: auto auto auto;
     grid-template-rows: repeat(2, 1fr);
     gap: 12px;
     grid-template-areas:
-      'text text-input .'
-      'link link-input btn';
+      'text-area .'
+      'link-area btn';
     justify-items: center;
     align-items: center;
   }
 
+  .affine-edit-text-area {
+    grid-area: text-area;
+    width: 338px;
+    display: grid;
+    gap: 6px;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: repeat(1, 1fr);
+    grid-template-areas: 'text span text-input';
+    justify-items: center;
+    align-items: center;
+  }
+
+  .affine-edit-link-area {
+    grid-area: link-area;
+    width: 338px;
+    display: grid;
+    gap: 6px;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: repeat(1, 1fr);
+    grid-template-areas: 'link span link-input';
+    justify-items: center;
+    align-items: center;
+  }
+
+  .affine-link-popover-dividing-line {
+    grid-area: span;
+  }
   .affine-edit-text-text {
     grid-area: text;
   }
@@ -77,33 +103,55 @@ export const linkPopoverStyle = css`
     left: 0;
     right: 0;
   }
+  .affine-edit-text-area {
+    border: 1px solid var(--affine-border-color);
+    outline: none;
+    border-radius: 10px;
+    background: transparent;
+  }
+  .affine-edit-text-area:focus-within {
+    border: 1px solid var(--affine-primary-color);
+  }
+  .affine-edit-link-area {
+    border: 1px solid var(--affine-border-color);
+    outline: none;
+    border-radius: 10px;
+    background: transparent;
+  }
+  .affine-edit-link-area:focus-within {
+    border: 1px solid var(--affine-primary-color);
+  }
+
+  label {
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-sm);
+    box-sizing: border-box;
+    padding: 6px 0px 6px 12px;
+    color: var(--affine-icon-color);
+  }
+
   input {
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
     box-sizing: border-box;
-    padding: 6px 12px;
+    padding: 6px 12px 6px 0px;
     width: 260px;
     height: 34px;
     color: inherit;
-
-    border: 1px solid var(--affine-border-color);
-    outline: none;
-    border-radius: 10px;
+    border: none;
     background: transparent;
   }
   input::placeholder {
     color: var(--affine-placeholder-color);
   }
   input:focus {
-    border: 1px solid var(--affine-primary-color);
+    outline: none;
   }
-  input:focus + label,
-  input:active + label {
+  input:focus ~ label,
+  input:active ~ label {
     color: var(--affine-primary-color);
   }
-  input:invalid + svg {
-    color: var(--affine-disable-color);
-  }
+
   .affine-link-popover {
     display: flex;
     align-items: center;
