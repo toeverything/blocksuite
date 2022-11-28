@@ -25,10 +25,10 @@ export function repairContextMenuRange(e: SelectionEvent) {
 }
 
 export type DragDirection =
-  | 'rightDown'
-  | 'rightUp'
-  | 'leftDown'
-  | 'leftUp'
+  | 'right-bottom'
+  | 'right-top'
+  | 'left-bottom'
+  | 'left-top'
   // no select direction, for example select all by `ctrl + a`
   | 'none';
 
@@ -50,30 +50,30 @@ export function getDragDirection(
   const endY = isSelectionEvent(e) ? e.y : e.end.y;
   return endX > startX
     ? endY > startY
-      ? 'rightDown'
-      : 'rightUp'
+      ? 'right-bottom'
+      : 'right-top'
     : endY > startY
-    ? 'leftDown'
-    : 'leftUp';
+    ? 'left-bottom'
+    : 'left-top';
 }
 
 export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
   const selectedType: SelectedBlockType = 'text';
-  console.log(`selectedType: ${selectedType}`);
   const direction: DragDirection = getDragDirection(e);
   console.log(`direction: ${direction}`);
   const selection = window.getSelection();
-  let anchor = ['leftUp', 'rightUp'].includes(direction)
-    ? selection?.anchorNode
-    : selection?.focusNode;
-  // Ensure that the anchor has `getBoundingClientRect` method
-  while (anchor && !(anchor instanceof Element)) {
-    anchor = anchor.parentElement;
+  if (!selection) {
+    throw new Error('Cannot get selection');
   }
-  if (!anchor) {
-    throw new Error('Cannot get anchor element from native selection');
-  }
-  console.log(anchor);
+  const { anchorNode, focusNode, focusOffset, anchorOffset } = selection;
+  const [targetNode, offset] = direction.includes('left')
+    ? [anchorNode, anchorOffset]
+    : [focusNode, focusOffset];
 
-  return { selectedType, direction, anchor };
+  if (!targetNode) {
+    throw new Error('Cannot get targetNode from selection');
+  }
+  const range = document.createRange();
+  range.setStart(targetNode, offset);
+  return { selectedType, direction, anchor: range };
 }

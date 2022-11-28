@@ -2,6 +2,7 @@ import { BaseBlockModel, Signal, Space } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import type { DragDirection } from '../../page-block/utils';
 import {
   convertToList,
   getContainerByModel,
@@ -28,10 +29,13 @@ export class FormatQuickBar extends LitElement {
   static styles = formatQuickBarStyle;
 
   @property()
-  left = '0px';
+  left: string | null = null;
 
   @property()
-  top = '0px';
+  top: string | null = null;
+
+  @property()
+  bottom: string | null = null;
 
   @property()
   abortController = new AbortController();
@@ -106,10 +110,10 @@ export class FormatQuickBar extends LitElement {
     if (this.showParagraphPanel === 'hidden') {
       return html``;
     }
-    const formatParagraph = async (targetFormat: string) => {
+    const formatParagraph = (targetFormat: string) => {
       this.models
         .filter(i => i.type !== targetFormat)
-        .forEach(model => {
+        .forEach(async model => {
           if (!this.space) {
             throw new Error('Space is not defined');
           }
@@ -117,13 +121,13 @@ export class FormatQuickBar extends LitElement {
             convertToList(this.space, model, targetFormat, '');
           } else {
             this.space.updateBlock(model, { type: targetFormat });
-          }
-          this.paragraphType = targetFormat;
-        });
       // format quick bar may need to update its position
       // after the paragraph type is changed
       await sleep();
       this.positionUpdated.emit();
+          }
+          this.paragraphType = targetFormat;
+        });
     };
     const styles = styleMap({
       left: '0',
@@ -195,10 +199,12 @@ export class FormatQuickBar extends LitElement {
       <tool-tip inert role="tooltip">Copy</tool-tip>
     </format-bar-button>`;
 
-    return html`<div
-        class="format-quick-bar"
-        style="left: ${this.left}; top: ${this.top}"
-      >
+    const styles = styleMap({
+      left: this.left,
+      top: this.top,
+      bottom: this.bottom,
+    });
+    return html`<div class="format-quick-bar" style="${styles}">
         ${paragraphItems}
         <div class="divider"></div>
         ${formatItems}
@@ -210,6 +216,7 @@ export class FormatQuickBar extends LitElement {
 
 export const showFormatQuickBar = async ({
   anchorEl,
+  direction = 'right-bottom',
   container = document.body,
   abortController = new AbortController(),
 }: {
@@ -217,35 +224,48 @@ export const showFormatQuickBar = async ({
     getBoundingClientRect: () => DOMRect;
     // contextElement?: Element;
   };
+  direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
+  // Init format quick bar
+
   const formatQuickBar = document.createElement('format-quick-bar');
   formatQuickBar.abortController = abortController;
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;
+
+  // Handle Scroll
 
   const models = getModelsByRange(getCurrentRange());
   if (!models.length) {
     return;
   }
   const editorContainer = getContainerByModel(models[0]);
+  // TODO need a better way to get the editor scroll container
+  // Note: at edgeless mode, the scroll container is not exist!
   const scrollContainer = editorContainer.querySelector(
     '.affine-default-viewport'
-  ) as HTMLDivElement;
+  );
 
   const updatePos = () => {
   const rect = anchorEl.getBoundingClientRect();
   const bodyRect = document.body.getBoundingClientRect();
-  const offset = rect.top - bodyRect.top + rect.height;
   const offsetY = 5;
   formatQuickBar.left = `${rect.left}px`;
+    if (direction.includes('bottom')) {
+      const offset = rect.top - bodyRect.top + rect.height;
   formatQuickBar.top = `${offset + offsetY}px`;
+    } else if (direction.includes('top')) {
+      const offset = bodyRect.bottom - rect.bottom + rect.height;
+      formatQuickBar.bottom = `${offset + offsetY}px`;
+    }
   };
-  scrollContainer.addEventListener('scroll', updatePos, { passive: true });
+  scrollContainer?.addEventListener('scroll', updatePos, { passive: true });
   positionUpdatedSignal.on(updatePos);
   updatePos();
-  container.appendChild(formatQuickBar);
+
+  // Handle click outside
 
   const clickAwayListener = (e: MouseEvent) => {
     if (e.target === formatQuickBar) {
@@ -256,11 +276,14 @@ export const showFormatQuickBar = async ({
   };
   window.addEventListener('mousedown', clickAwayListener);
 
+  // Mount
+  container.appendChild(formatQuickBar);
+
   return new Promise<void>(res => {
     abortController.signal.addEventListener('abort', () => {
       // TODO add transition
       formatQuickBar.remove();
-      scrollContainer.removeEventListener('scroll', updatePos);
+      scrollContainer?.removeEventListener('scroll', updatePos);
       res();
     });
   });
