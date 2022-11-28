@@ -162,7 +162,8 @@ describe.concurrent('addBlock', () => {
     assert.ok(root.children[0] instanceof BlockSchema['affine:paragraph']);
     assert.equal(root.childMap.get('1'), 0);
 
-    const serializedChildren = serialize(space)[defaultSpaceId]['0']['sys:children'];
+    const serializedChildren =
+      serialize(space)[defaultSpaceId]['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
   });

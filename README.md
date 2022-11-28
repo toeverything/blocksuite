@@ -3,12 +3,15 @@
 <a href="./packages/store/package.json">
   <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff"/>
 </a>
+
+<!--
 <a href="https://join.slack.com/t/blocksuitedev/shared_invite/zt-1h0zz3b8z-nFpWSu6a6~yId7PxiMcBHA">
   <img src="https://img.shields.io/badge/-Slack-grey?logo=slack">
 </a>
 <a href="https://twitter.com/BlockSuiteDev">
   <img src="https://img.shields.io/badge/-Twitter-grey?logo=twitter">
 </a>
+-->
 
 BlockSuite is a framework providing building blocks for collaborative applications. With BlockSuite, you can build complex applications with fine-grained collaborative features, without going down the rabbit hole of rich text editors and conflict resolution algorithms.
 
