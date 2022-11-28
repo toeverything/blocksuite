@@ -65,7 +65,9 @@ export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
   const direction: DragDirection = getDragDirection(e);
   console.log(`direction: ${direction}`);
   const selection = window.getSelection();
-  let anchor = selection?.focusNode;
+  let anchor = ['leftUp', 'rightUp'].includes(direction)
+    ? selection?.anchorNode
+    : selection?.focusNode;
   // Ensure that the anchor has `getBoundingClientRect` method
   while (anchor && !(anchor instanceof Element)) {
     anchor = anchor.parentElement;
