@@ -77,7 +77,6 @@ export const linkPopoverStyle = css`
     left: 0;
     right: 0;
   }
-
   input {
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
@@ -97,6 +96,10 @@ export const linkPopoverStyle = css`
   }
   input:focus {
     border: 1px solid var(--affine-primary-color);
+  }
+  input:focus + label,
+  input:active + label {
+    color: var(--affine-primary-color);
   }
 
   .affine-link-popover {

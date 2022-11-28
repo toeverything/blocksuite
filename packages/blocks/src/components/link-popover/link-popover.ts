@@ -235,7 +235,6 @@ export class LinkPopover extends LitElement {
    */
   editTemplate() {
     return html`<div class="affine-link-edit-popover">
-      <label class="affine-edit-text-text" for="text-input">Text</label>
       <input
         class="affine-edit-text-input"
         id="text-input"
@@ -244,7 +243,7 @@ export class LinkPopover extends LitElement {
         value=${this.text}
         @keyup=${this.onKeyup}
       />
-      <label class="affine-edit-link-text" for="link-input">Link</label>
+      <label class="affine-edit-text-text" for="text-input">Text</label>
       <input
         id="link-input"
         class="affine-edit-link-input"
@@ -254,6 +253,7 @@ export class LinkPopover extends LitElement {
         value=${this.previewLink}
         @keyup=${this.onKeyup}
       />
+      <label class="affine-edit-link-text" for="link-input">Link</label>
       ${this.confirmBtnTemplate()}
     </div>`;
   }
