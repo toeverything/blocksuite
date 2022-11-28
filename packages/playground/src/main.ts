@@ -2,13 +2,13 @@ import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
 import {
-  DebugProvider,
-  IndexedDBProvider,
+  DebugDocProvider,
+  IndexedDBDocProvider,
   createAutoIncrement,
   uuidv4,
   Store,
 } from '@blocksuite/store';
-import type { SyncProviderConstructor, StoreOptions } from '@blocksuite/store';
+import type { DocProviderConstructor, StoreOptions } from '@blocksuite/store';
 
 import './style.css';
 
@@ -24,17 +24,17 @@ function editorOptionsFromParam(): Pick<
   StoreOptions,
   'providers' | 'idGenerator'
 > {
-  const providers: SyncProviderConstructor[] = [];
+  const providers: DocProviderConstructor[] = [];
 
   const modes = (params.get('syncModes') ?? 'debug').split(',');
 
   modes.forEach(mode => {
     switch (mode) {
       case 'debug':
-        providers.push(DebugProvider);
+        providers.push(DebugDocProvider);
         break;
       case 'indexeddb':
-        providers.push(IndexedDBProvider);
+        providers.push(IndexedDBDocProvider);
         break;
       default:
         throw new TypeError(
@@ -48,7 +48,7 @@ function editorOptionsFromParam(): Pick<
    * Because when persistent data applied to ydoc, we need generator different id for block.
    * Otherwise, the block id will conflict.
    */
-  const idGenerator = providers.includes(IndexedDBProvider)
+  const idGenerator = providers.includes(IndexedDBDocProvider)
     ? uuidv4
     : createAutoIncrement();
 

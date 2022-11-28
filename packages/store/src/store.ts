@@ -2,7 +2,7 @@ import { PrefixedBlockProps, Space } from './space';
 import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
-import type { SyncProvider, SyncProviderConstructor } from './providers';
+import type { DocProvider, DocProviderConstructor } from './providers';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
 import { uuidv4 } from './utils/id-generator';
 
@@ -14,7 +14,7 @@ export interface SerializedStore {
 
 export interface StoreOptions {
   room?: string;
-  providers?: SyncProviderConstructor[];
+  providers?: DocProviderConstructor[];
   awareness?: Awareness;
   idGenerator?: IdGenerator;
 }
@@ -23,7 +23,7 @@ const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
   readonly doc = new Y.Doc();
-  readonly providers: SyncProvider[] = [];
+  readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
   readonly idGenerator: IdGenerator;
