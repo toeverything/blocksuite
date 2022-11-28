@@ -8,6 +8,7 @@ const config: PlaywrightTestConfig = {
     viewport: { width: 900, height: 600 },
     actionTimeout: 5 * 1000,
   },
+  retries: 2,
 };
 
 if (process.env.CI) {
