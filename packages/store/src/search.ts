@@ -61,14 +61,13 @@ export class Indexer {
   }
 
   search(query: QueryContent) {
-    this._indexer.search(query as string);
+    return this._indexer.search(query as string);
   }
 
   private _handleSpaceIndexing(spaceId: string, space?: YMap<YBlock>) {
     if (space) {
       space.forEach((block, key) => {
         this._refreshIndex(spaceId, key, 'add', space.get(key));
-        console.log(block, key);
       });
 
       space.observeDeep(events => {
@@ -105,11 +104,6 @@ export class Indexer {
             block.get('prop:title') || block.get('prop:text')
           );
           if (content) {
-            console.log({
-              content,
-              reference: '',
-              tags: [space],
-            });
             this._indexer.add(id, {
               content,
               reference: '',

@@ -46,7 +46,7 @@ export class Store {
   }
 
   search(query: QueryContent) {
-    this._indexer.search(query);
+    return this._indexer.search(query);
   }
 
   getSpace(spaceId: string) {
