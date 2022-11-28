@@ -4,28 +4,19 @@ import type { YBlock } from './space';
 
 export type QueryContent = string | Partial<DocumentSearchOptions<boolean>>;
 
-function tokenizeZh(text: string) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const tokenizer = Intl?.v8BreakIterator;
+function tokenize(locale: string) {
+  const tokenizer = Intl?.Segmenter;
   if (tokenizer) {
-    const it = tokenizer(['zh-CN'], { type: 'word' });
-    it.adoptText(text);
-    const words = [];
-
-    let cur = 0,
-      prev = 0;
-
-    while (cur < text.length) {
-      prev = cur;
-      cur = it.next();
-      words.push(text.substring(prev, cur));
-    }
-
-    return words;
+    const segmenter = new tokenizer([locale], { granularity: 'word' });
+    return (text: string) =>
+      Array.from(segmenter.segment(text))
+        .filter(s => s.isWordLike)
+        .map(s => s.segment);
   }
-  // eslint-disable-next-line no-control-regex
-  return text.replace(/[\x00-\x7F]/g, '').split('');
+  return (text: string) => {
+    // eslint-disable-next-line no-control-regex
+    return text.replace(/[\x00-\x7F]/g, '').split('');
+  };
 }
 
 export type IndexMetadata = Readonly<{
@@ -35,10 +26,14 @@ export type IndexMetadata = Readonly<{
 }>;
 
 export class Indexer {
-  readonly _doc: Doc;
-  readonly _indexer: DocumentIndexer<IndexMetadata>;
+  private readonly _doc: Doc;
+  private readonly _indexer: DocumentIndexer<IndexMetadata>;
 
-  constructor(doc: Doc) {
+  constructor(
+    doc: Doc,
+    // locale string based on https://www.w3.org/International/articles/bcp47/
+    locale = 'en-US'
+  ) {
     this._doc = doc;
     this._indexer = new DocumentIndexer<IndexMetadata>({
       document: {
@@ -46,7 +41,7 @@ export class Indexer {
         index: ['content', 'reference'],
         tag: 'tags',
       },
-      encode: tokenizeZh,
+      encode: tokenize(locale),
       tokenize: 'forward',
       context: true,
     });
