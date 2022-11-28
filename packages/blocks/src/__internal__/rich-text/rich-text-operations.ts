@@ -342,6 +342,9 @@ export function tryMatchSpaceHotkey(
     case '*':
       isConverted = convertToList(space, model, 'bulleted', prefix);
       break;
+    case '***':
+      isConverted = addDivider(quill, model, prefix, space);
+      break;
     case '#':
       isConverted = convertToParagraph(space, model, 'h1', prefix);
       break;
