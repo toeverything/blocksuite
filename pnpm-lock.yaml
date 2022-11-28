@@ -95,8 +95,10 @@ importers:
 
   packages/store:
     specifiers:
+      '@types/flexsearch': ^0.7.3
       '@types/quill': ^2.0.9
       cross-env: ^7.0.3
+      flexsearch: 0.7.21
       idb-keyval: ^6.2.0
       lib0: ^0.2.52
       y-indexeddb: ^9.0.9
@@ -105,6 +107,7 @@ importers:
       y-websocket: ^1.4.5
       yjs: ^13.5.41
     dependencies:
+      flexsearch: 0.7.21
       idb-keyval: 6.2.0
       lib0: 0.2.52
       y-indexeddb: 9.0.9_yjs@13.5.41
@@ -113,6 +116,7 @@ importers:
       y-websocket: 1.4.5_yjs@13.5.41
       yjs: 13.5.41
     devDependencies:
+      '@types/flexsearch': 0.7.3
       '@types/quill': 2.0.9
       cross-env: 7.0.3
 
@@ -740,6 +744,10 @@ packages:
 
   /@types/chai/4.3.3:
     resolution: {integrity: sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g==}
+    dev: true
+
+  /@types/flexsearch/0.7.3:
+    resolution: {integrity: sha512-HXwADeHEP4exXkCIwy2n1+i0f1ilP1ETQOH5KDOugjkTFZPntWo0Gr8stZOaebkxsdx+k0X/K6obU/+it07ocg==}
     dev: true
 
   /@types/is-ci/3.0.0:
@@ -2052,6 +2060,10 @@ packages:
   /flatted/3.2.7:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
     dev: true
+
+  /flexsearch/0.7.21:
+    resolution: {integrity: sha512-W7cHV7Hrwjid6lWmy0IhsWDFQboWSng25U3VVywpHOTJnnAZNPScog67G+cVpeX9f7yDD21ih0WDrMMT+JoaYg==}
+    dev: false
 
   /fs-extra/7.0.1:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
