@@ -52,8 +52,9 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await redoByKeyboard(page);
   await assertTextFormat(page, 0, 0, { code: true });
 
+  // the format should be removed after trigger the hotkey again
   await inlineCode(page);
-  await assertTextFormat(page, 0, 0, { code: true });
+  await assertTextFormat(page, 0, 0, {});
 });
 
 test('type character jump out code node', async ({ page }) => {
@@ -63,7 +64,6 @@ test('type character jump out code node', async ({ page }) => {
   await page.keyboard.type('Hello');
   await selectAllByKeyboard(page);
   await inlineCode(page);
-  await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowRight');
   await page.keyboard.type('block suite', { delay: 10 });
   // block suite should not be code
@@ -117,9 +117,9 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await redoByClick(page);
   await assertTextFormat(page, 0, 0, { strike: true });
 
-  // trigger hotkey twice
+  // the format should be removed after trigger the hotkey again
   await strikethrough(page);
-  await assertTextFormat(page, 0, 0, { strike: true });
+  await assertTextFormat(page, 0, 0, {});
 });
 
 test('format list to h1', async ({ page }) => {
