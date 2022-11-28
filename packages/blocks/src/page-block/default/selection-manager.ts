@@ -211,8 +211,8 @@ export class DefaultSelectionManager {
 
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
-      const { anchor } = getNativeSelectionMouseDragInfo(e);
-      showFormatQuickBar({ anchorEl: anchor });
+      const { anchor, direction } = getNativeSelectionMouseDragInfo(e);
+      showFormatQuickBar({ anchorEl: anchor, direction });
     } else if (this.state.type === 'block') {
       // TODO handle block selection
       // const direction = getDragDirection(e);

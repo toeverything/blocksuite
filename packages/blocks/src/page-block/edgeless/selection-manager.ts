@@ -303,8 +303,8 @@ export class EdgelessSelectionManager {
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
     if (this.isActive) {
-      const { anchor } = getNativeSelectionMouseDragInfo(e);
-      showFormatQuickBar({ anchorEl: anchor });
+      const { anchor, direction } = getNativeSelectionMouseDragInfo(e);
+      showFormatQuickBar({ anchorEl: anchor, direction });
     }
     this._frameSelectionState = null;
   };
