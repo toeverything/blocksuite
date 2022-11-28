@@ -86,7 +86,7 @@ window.onload = () => {
   // In dev environment, init editor by default, but in test environment, init editor by the test page
   if (!isTest) {
     const space = store
-      .createSpace('page0')
+      .createSpace('space:page0')
       // @ts-ignore
       .register(window.blockSchema);
     const editor = createEditor(space);

@@ -66,12 +66,12 @@ export class Store {
    */
   toJSXElement(id = '0') {
     const json = this.serializeDoc();
-    if (!('page0' in json)) {
-      throw new Error("Failed to convert to JSX: 'page0' not found");
+    if (!('space:page0' in json)) {
+      throw new Error("Failed to convert to JSX: 'space:page0' not found");
     }
-    if (!json.page0[id]) {
+    if (!json['space:page0'][id]) {
       return null;
     }
-    return yDocToJSXNode(json.page0, id);
+    return yDocToJSXNode(json['space:page0'], id);
   }
 }

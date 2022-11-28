@@ -30,7 +30,7 @@ function waitOnce<T>(signal: Signal<T>) {
   return new Promise<T>(resolve => signal.once(val => resolve(val)));
 }
 
-const defaultSpaceId = 'page0';
+const defaultSpaceId = 'space:page0';
 
 describe.concurrent('basic', () => {
   it('can init store', () => {
