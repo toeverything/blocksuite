@@ -12,6 +12,7 @@ import {
   handleNativeRangeClick,
   isPageTitle,
   handleNativeRangeDblClick,
+  isEmbed,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import { repairContextMenuRange } from '../utils/cursor';
@@ -58,7 +59,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
 
 class PageSelectionState {
   type: PageSelectionType;
@@ -68,7 +69,6 @@ class PageSelectionState {
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
-
   constructor(type: PageSelectionType) {
     this.type = type;
   }
@@ -95,8 +95,7 @@ class PageSelectionState {
 
   refreshRichTextBoundsCache(container: HTMLElement) {
     const richTexts = Array.from(container.querySelectorAll('rich-text'));
-    const embeds = Array.from(container.querySelectorAll('embed-block'));
-    console.log('embeds: ', embeds);
+    const embeds = Array.from(container.querySelectorAll('img-block'));
     richTexts.forEach(richText => {
       // const rect = (
       //   richText.closest(`[${BLOCK_ID_ATTR}]`) as HTMLElement
@@ -126,7 +125,10 @@ export class DefaultSelectionManager {
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
-
+  private _originPosition: { x: number; y: number } = { x: 0, y: 0 };
+  private _dropContainer: HTMLElement | null = null;
+  private _dropContainerSize: { w: number; h: number } = { w: 0, h: 0 };
+  private _activeComponent: HTMLElement | null;
   constructor(
     space: Space,
     container: HTMLElement,
@@ -197,10 +199,13 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
+    console.log('e: ', e);
     this.state.resetStartRange(e);
-
     if (isPageTitle(e.raw)) return;
-
+    if (isEmbed(e)) {
+      this._onEmbedDragStart(e);
+      return;
+    }
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
     } else {
@@ -208,14 +213,42 @@ export class DefaultSelectionManager {
     }
   };
 
+  private _onEmbedDragStart = (e: SelectionEvent) => {
+    console.log('_onEmbedDragStart: ');
+    this.state.type = 'embed';
+    this._originPosition.x = e.x;
+    this._originPosition.y = e.y;
+    this._dropContainer = (e.raw.target as HTMLElement).closest('.resizes');
+    this._dropContainerSize.w = this._dropContainer?.clientWidth as number;
+    // this._dropContainerSize.w = this._dropContainer?.clientWidth
+
+    // console.log(e);
+  };
+
   private _onContainerDragMove = (e: SelectionEvent) => {
     if (this.state.type === 'native') {
       this._onNativeSelectionDragMove(e);
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragMove(e);
+    } else if (this.state.type === 'embed') {
+      this._onEmbedDragMove(e);
     }
   };
+  private _onEmbedDragMove(e: SelectionEvent) {
+    // console.log(e);
+    const width =
+      this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x);
 
+    if (this._dropContainer) {
+      this._dropContainer.style.width = width + 'px';
+      // this._activeComponent
+      const activeImg = this._activeComponent?.querySelector('img');
+      console.log('activeImg: ', activeImg);
+      if (activeImg) {
+        activeImg.style.width = width + 'px';
+      }
+    }
+  }
   private _onContainerDragEnd = (e: SelectionEvent) => {
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
@@ -229,6 +262,15 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+    const embedBlockComponent = (e.raw.target as HTMLElement).closest(
+      'img-block'
+    ) as HTMLElement;
+    if (embedBlockComponent) {
+      this._activeComponent = (e.raw.target as HTMLElement).closest(
+        'img-block'
+      );
+      console.log((e.raw.target as HTMLElement).closest('img-block'));
+    }
     if (e.raw.target instanceof HTMLInputElement) return;
     // TODO handle shift + click
     if (e.keys.shift) return;

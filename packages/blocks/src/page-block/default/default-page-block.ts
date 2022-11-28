@@ -72,14 +72,17 @@ function FrameSelectionRect(rect: DOMRect | null) {
 function EmbedSelectedRectsContainer(rects: DOMRect[]) {
   return html`
     <style>
+      .affine-page-selected-embed-rects-container {
+        z-index: 99;
+      }
       .affine-page-selected-embed-rects-container > div {
         position: fixed;
-        z-index: 1;
-        pointer-events: none;
+        z-index: 10;
+        /* pointer-events: none; */
         border: 3px solid red;
       }
     </style>
-    <div class="affine-page-selected-embed-rects-container">
+    <div class="affine-page-selected-embed-rects-container resizable">
       ${rects.map(rect => {
         const style = {
           display: 'block',
@@ -442,8 +445,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           </div>
           ${childrenContainer}
         </div>
-        ${childrenContainer} ${selectedRectsContainer} ${selectionRect}
-        ${selectedEmbedContainer}
+        ${selectedRectsContainer} ${selectionRect} ${selectedEmbedContainer}
       </div>
     `;
   }

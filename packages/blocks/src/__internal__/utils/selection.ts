@@ -704,3 +704,11 @@ export function getSplicedTitle(title: HTMLInputElement) {
   text.splice(title.selectionStart, title.selectionEnd - title.selectionStart);
   return text.join('');
 }
+
+export function isEmbed(e: SelectionEvent) {
+  console.log((e.raw.target as HTMLElement).className);
+  if ((e.raw.target as HTMLElement).className.includes('resize')) {
+    return true;
+  }
+  return false;
+}

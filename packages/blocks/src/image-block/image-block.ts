@@ -217,10 +217,7 @@ export class ImageBlockComponent extends LitElement {
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <embed-block .model=${this.model}>
-        <div
-          class="affine-image-wrapper ${this._canEditor ? 'active' : ''}"
-          @click=${this._selectImage}
-        >
+        <div class="affine-image-wrapper" @click=${this._selectImage}>
           <div
             class="resizable ${this._optionLocation
               ? 'image-option-inside'
@@ -234,15 +231,15 @@ export class ImageBlockComponent extends LitElement {
                 <li @click=${this._deleteBlock}>${DeleteIcon}</li>
               </ul>
             </div>
-            <div class="resizes">
-              <!-- <div class="resize top-left"></div>
+            <!-- <div class="resizes"> -->
+            <!-- <div class="resize top-left"></div>
               <div class="resize top-right"></div>
               <div class="resize bottom-left"></div>
               <div class="resize bottom-right"></div> -->
-              <!-- <div > -->
-              <img src=${source} />
-              <!-- </div> -->
-            </div>
+            <!-- <div > -->
+            <img src=${source} />
+            <!-- </div> -->
+            <!-- </div> -->
           </div>
           ${childrenContainer}
         </div>

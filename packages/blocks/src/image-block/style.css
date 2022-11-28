@@ -14,9 +14,9 @@
   border: 2px solid #fff;
   max-width: 100%;
 }
-.resizable:hover {
+/* .resizable:hover {
   border: 2px solid #4286f4;
-}
+} */
 .active .resizable {
   border: 2px solid #4286f4 !important;
 }
@@ -74,7 +74,7 @@
 }
 
 .resizable .resizes .resize {
-  display: none;
+  /* display: none; */
   width: 10px;
   height: 10px;
   border-radius: 50%; /*magic to turn square into circle*/
