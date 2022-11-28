@@ -5,7 +5,7 @@ export * from './awareness';
 export * from './text-adapter';
 export * from './utils/signal';
 export * from './utils/disposable';
-export * from './providers';
+export * from './doc-providers';
 export * as Utils from './utils/utils';
 export * from './utils/id-generator';
 
