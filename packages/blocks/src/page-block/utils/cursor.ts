@@ -41,8 +41,6 @@ function isSelectionEvent(
   return (e as SelectionEvent).raw !== undefined;
 }
 
-export function getDragDirection(e: SelectionEvent): DragDirection;
-export function getDragDirection(e: FrameSelectionState): DragDirection;
 export function getDragDirection(
   e: SelectionEvent | FrameSelectionState
 ): DragDirection {

@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Space } from '@blocksuite/store';
+import { BaseBlockModel, Signal, Space } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import {
@@ -6,11 +6,12 @@ import {
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
+  sleep,
 } from '../../__internal__/utils';
 import { toast } from '../toast';
 import './button';
 import { formatButtons, paragraphButtons } from './config';
-import { ArrowDownIcon, CopyIcon, TextIcon } from './icons';
+import { ArrowDownIcon, CopyIcon } from './icons';
 import { formatQuickBarStyle } from './styles';
 
 const isListType = (type: string): type is 'bulleted' | 'numbered' | 'todo' =>
@@ -33,6 +34,10 @@ export class FormatQuickBar extends LitElement {
 
   @property()
   abortController = new AbortController();
+
+  // Sometimes the quick bar need to update position
+  @property()
+  positionUpdated = new Signal();
 
   @state()
   models: BaseBlockModel[] = [];
@@ -66,8 +71,6 @@ export class FormatQuickBar extends LitElement {
     if (models.length > 1) {
       // Select multiple models
     }
-
-    console.log(models);
   }
 
   private onHover() {
@@ -95,7 +98,7 @@ export class FormatQuickBar extends LitElement {
     if (!this.showParagraphPanel) {
       return html``;
     }
-    const formatParagraph = (targetFormat: string) => {
+    const formatParagraph = async (targetFormat: string) => {
       this.models
         .filter(i => i.type !== targetFormat)
         .forEach(model => {
@@ -109,6 +112,10 @@ export class FormatQuickBar extends LitElement {
           }
           this.paragraphType = targetFormat;
         });
+      // format quick bar may need to update its position
+      // after the paragraph type is changed
+      await sleep();
+      this.positionUpdated.emit();
     };
     return html`<div
       class="paragraph-panel"
@@ -140,6 +147,7 @@ export class FormatQuickBar extends LitElement {
       paragraphButtons.find(btn => btn.key === this.paragraphType)?.icon ??
       paragraphButtons[0].icon;
     const paragraphItems = html`<format-bar-button
+      class="paragraph-button"
       width="52px"
       @mouseover=${this.onHover}
       @mouseout=${this.onHoverEnd}
@@ -191,12 +199,17 @@ export const showFormatQuickBar = async ({
   container = document.body,
   abortController = new AbortController(),
 }: {
-  anchorEl: Element;
+  anchorEl: {
+    getBoundingClientRect: () => DOMRect;
+    // contextElement?: Element;
+  };
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
   const formatQuickBar = document.createElement('format-quick-bar');
   formatQuickBar.abortController = abortController;
+  const positionUpdatedSignal = new Signal();
+  formatQuickBar.positionUpdated = positionUpdatedSignal;
 
   const models = getModelsByRange(getCurrentRange());
   if (!models.length) {
@@ -206,6 +219,7 @@ export const showFormatQuickBar = async ({
   const scrollContainer = editorContainer.querySelector(
     '.affine-default-viewport'
   ) as HTMLDivElement;
+
   const updatePos = () => {
   const rect = anchorEl.getBoundingClientRect();
   const bodyRect = document.body.getBoundingClientRect();
@@ -215,6 +229,7 @@ export const showFormatQuickBar = async ({
   formatQuickBar.top = `${offset + offsetY}px`;
   };
   scrollContainer.addEventListener('scroll', updatePos, { passive: true });
+  positionUpdatedSignal.on(updatePos);
   updatePos();
   container.appendChild(formatQuickBar);
 

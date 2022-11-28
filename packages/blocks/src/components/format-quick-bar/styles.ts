@@ -2,6 +2,13 @@ import { css } from 'lit';
 import { toolTipStyle } from '../tooltip';
 
 const paragraphPanelStyle = css`
+  .paragraph-button > svg:nth-child(2) {
+    transition-duration: 0.3s;
+  }
+  .paragraph-button:is(:hover, :focus-visible, :active) > svg:nth-child(2) {
+    transform: rotate(180deg);
+  }
+
   .paragraph-panel {
     box-sizing: border-box;
     position: absolute;
