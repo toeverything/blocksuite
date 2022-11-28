@@ -209,6 +209,7 @@ export class DefaultSelectionManager {
     this.state.resetStartRange(e);
     if (isPageTitle(e.raw)) return;
     if (isEmbed(e)) {
+      console.log('start');
       this._onEmbedDragStart(e);
       return;
     }
@@ -222,16 +223,18 @@ export class DefaultSelectionManager {
   private _onEmbedDragStart = (e: SelectionEvent) => {
     // console.log('_onEmbedDragStart: ');
     this.state.type = 'embed';
-    this._originPosition.x = e.x;
-    this._originPosition.y = e.y;
+    this._originPosition.x = e.raw.pageX;
+    this._originPosition.y = e.raw.pageY;
     this._dropContainer = (e.raw.target as HTMLElement).closest('.resizes');
     this._dropContainerSize.w = this._dropContainer?.clientWidth as number;
     this._dropContainerSize.h = this._dropContainer?.clientHeight as number;
+    this._dropContainerSize.left = this._dropContainer?.offsetLeft as number;
     if ((e.raw.target as HTMLElement).className.includes('right')) {
       this._dragMoveTarget = 'right';
     } else {
       this._dragMoveTarget = 'left';
     }
+    console.log('this._dropContainerSize.left: ', this._dropContainerSize.left);
     // this._dropContainerSize.w = this._dropContainer?.clientWidth
 
     // console.log(e);
@@ -247,9 +250,11 @@ export class DefaultSelectionManager {
     }
   };
   private _onEmbedDragMove(e: SelectionEvent) {
+    console.log('e: ', e);
     // console.log(e);
     let width = 0;
     let height = 0;
+    let left = 0;
     if (this._dragMoveTarget === 'right') {
       width =
         this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x);
@@ -257,18 +262,28 @@ export class DefaultSelectionManager {
       width =
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
-    if (width > 580) {
-      width = 580;
-    }
-    height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
+    console.log('pian', (e.raw.pageX - this._originPosition.x) / 2);
+    console.log(
+      'e.raw.pageX - this._originPosition.x: ',
+      e.raw.pageX,
+      this._originPosition.x
+    );
+    console.log('this._dropContainerSize.left: ', this._dropContainerSize.left);
 
-    if (this._dropContainer) {
-      this._dropContainer.style.width = width + 'px';
-      this._dropContainer.style.height = height + 'px';
-      const activeImg = this._activeComponent?.querySelector('img');
-      if (activeImg) {
-        activeImg.style.width = width + 'px';
-        activeImg.style.height = height + 'px';
+    if (width <= 580) {
+      left =
+        this._dropContainerSize.left -
+        (e.raw.pageX - this._originPosition.x) / 2;
+      height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
+      if (this._dropContainer) {
+        this._dropContainer.style.width = width + 'px';
+        this._dropContainer.style.height = height + 'px';
+        this._dropContainer.style.left = left + 'px';
+        const activeImg = this._activeComponent?.querySelector('img');
+        if (activeImg) {
+          activeImg.style.width = width + 'px';
+          activeImg.style.height = height + 'px';
+        }
       }
     }
   }
@@ -278,6 +293,7 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     }
+    this.state.type = 'none';
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
@@ -290,7 +306,7 @@ export class DefaultSelectionManager {
     ) as HTMLElement;
     if (embedBlockComponent) {
       this._activeComponent = (e.raw.target as HTMLElement).closest(
-        'embed-block'
+        'img-block'
       );
       assertExists(this._activeComponent);
       const imageRect = this._activeComponent

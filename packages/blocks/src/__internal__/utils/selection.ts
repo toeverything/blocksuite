@@ -707,7 +707,7 @@ export function getSplicedTitle(title: HTMLInputElement) {
 
 export function isEmbed(e: SelectionEvent) {
   console.log((e.raw.target as HTMLElement).className);
-  if ((e.raw.target as HTMLElement).className.includes('resize')) {
+  if ((e.raw.target as HTMLElement).classList.contains('resize')) {
     return true;
   }
   return false;
