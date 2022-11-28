@@ -1,6 +1,7 @@
 import { BaseBlockModel, Signal, Space } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import {
   convertToList,
   getContainerByModel,
@@ -55,7 +56,10 @@ export class FormatQuickBar extends LitElement {
   paragraphPanelTimer = 0;
 
   @state()
-  showParagraphPanel = false;
+  showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
+
+  @query('.format-quick-bar')
+  formatQuickBarElement!: HTMLElement;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -74,20 +78,24 @@ export class FormatQuickBar extends LitElement {
   }
 
   private onHover() {
-    if (this.showParagraphPanel) {
+    if (this.showParagraphPanel !== 'hidden') {
       clearTimeout(this.paragraphPanelTimer);
       return;
     }
     this.paragraphPanelTimer = window.setTimeout(async () => {
-      this.showParagraphPanel = true;
+      const rect = this.formatQuickBarElement.getBoundingClientRect();
+      const bodyRect = document.body.getBoundingClientRect();
+      const topSpace = rect.top - bodyRect.top;
+      const bottomSpace = bodyRect.bottom - rect.bottom;
+      this.showParagraphPanel = topSpace > bottomSpace ? 'top' : 'bottom';
     }, this.paragraphPanelHoverDelay);
   }
 
   private onHoverEnd() {
-    if (this.showParagraphPanel) {
+    if (this.showParagraphPanel !== 'hidden') {
       // Prepare to disappear
       this.paragraphPanelTimer = window.setTimeout(async () => {
-        this.showParagraphPanel = false;
+        this.showParagraphPanel = 'hidden';
       }, this.paragraphPanelHoverDelay);
       return;
     }
@@ -95,7 +103,7 @@ export class FormatQuickBar extends LitElement {
   }
 
   private paragraphPanelTemplate() {
-    if (!this.showParagraphPanel) {
+    if (this.showParagraphPanel === 'hidden') {
       return html``;
     }
     const formatParagraph = async (targetFormat: string) => {
@@ -117,9 +125,17 @@ export class FormatQuickBar extends LitElement {
       await sleep();
       this.positionUpdated.emit();
     };
+    const styles = styleMap({
+      left: '0',
+      top: this.showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
+      bottom: this.showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
+      display: 'flex',
+      flexDirection:
+        this.showParagraphPanel === 'bottom' ? 'column' : 'column-reverse',
+    });
     return html`<div
       class="paragraph-panel"
-      style="left: 0; top: calc(100% + 4px)"
+      style="${styles}"
       @mouseover=${this.onHover}
       @mouseout=${this.onHoverEnd}
     >
@@ -179,8 +195,7 @@ export class FormatQuickBar extends LitElement {
       <tool-tip inert role="tooltip">Copy</tool-tip>
     </format-bar-button>`;
 
-    return html`<div class="format-quick-bar-container">
-      <div
+    return html`<div
         class="format-quick-bar"
         style="left: ${this.left}; top: ${this.top}"
       >
@@ -189,7 +204,6 @@ export class FormatQuickBar extends LitElement {
         ${formatItems}
         <div class="divider"></div>
         ${actionItems} ${paragraphPanel}
-      </div>
     </div>`;
   }
 }
