@@ -49,11 +49,11 @@ export function getDragDirection(
   const startY = e.start.y;
   const endX = isSelectionEvent(e) ? e.x : e.end.x;
   const endY = isSelectionEvent(e) ? e.y : e.end.y;
-  return endX > startX
-    ? endY > startY
+  return endX >= startX
+    ? endY >= startY
       ? 'right-bottom'
       : 'right-top'
-    : endY > startY
+    : endY >= startY
     ? 'left-bottom'
     : 'left-top';
 }
