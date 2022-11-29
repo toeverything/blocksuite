@@ -222,10 +222,6 @@ export function handleFormat(space: Space, e: KeyboardEvent, key: string) {
       const { index, length } = range;
       const format = quill.getFormat(range);
       models[0].text?.format(index, length, { [key]: !format[key] });
-      quill.setSelection(index + length, 0);
-      if (key === 'code' || key === 'link') {
-        quill.format(key, false);
-      }
     } else {
       formatModelsByRange(models, space, key);
     }

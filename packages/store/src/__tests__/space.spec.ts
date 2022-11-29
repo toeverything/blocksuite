@@ -324,3 +324,36 @@ describe('store.toJSXElement works', async () => {
     `);
   });
 });
+
+describe('store.search works', async () => {
+  it('store search matching', () => {
+    const store = new Store(getStoreOptions());
+    const space = store.createSpace(defaultSpaceId).register(BlockSchema);
+
+    space.addBlock({ flavour: 'affine:page', title: 'hello' });
+
+    space.addBlock({
+      flavour: 'affine:paragraph',
+      text: new space.Text(
+        space,
+        '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
+      ),
+    });
+
+    space.addBlock({
+      flavour: 'affine:paragraph',
+      text: new space.Text(
+        space,
+        '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
+      ),
+    });
+
+    expect(store.search('处理器')).toStrictEqual([
+      { field: 'content', result: ['1'] },
+    ]);
+
+    expect(store.search('索尼')).toStrictEqual([
+      { field: 'content', result: ['2'] },
+    ]);
+  });
+});
