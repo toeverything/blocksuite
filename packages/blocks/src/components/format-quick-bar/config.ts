@@ -48,7 +48,7 @@ export const formatButtons = [
   {
     name: 'Bold',
     icon: BoldIcon,
-    activeWhen: (models: BaseBlockModel[]) => false,
+    activeWhen: (format: Record<string, unknown>) => 'bold' in format,
     action: (space: Space) => {
       handleFormat(space, 'bold');
     },
@@ -56,6 +56,7 @@ export const formatButtons = [
   {
     name: 'Italic',
     icon: ItalicIcon,
+    activeWhen: (format: Record<string, unknown>) => 'italic' in format,
     action: (space: Space) => {
       handleFormat(space, 'italic');
     },
@@ -63,6 +64,7 @@ export const formatButtons = [
   {
     name: 'Underline',
     icon: UnderlineIcon,
+    activeWhen: (format: Record<string, unknown>) => 'underline' in format,
     action: (space: Space) => {
       handleFormat(space, 'underline');
     },
@@ -70,6 +72,7 @@ export const formatButtons = [
   {
     name: 'Strikethrough',
     icon: StrikethroughIcon,
+    activeWhen: (format: Record<string, unknown>) => 'strike' in format,
     action: (space: Space) => {
       handleFormat(space, 'strike');
     },
@@ -77,6 +80,7 @@ export const formatButtons = [
   {
     name: 'Code',
     icon: InlineCodeIcon,
+    activeWhen: (format: Record<string, unknown>) => 'code' in format,
     action: (space: Space) => {
       handleFormat(space, 'code');
     },
@@ -84,6 +88,7 @@ export const formatButtons = [
   {
     name: 'Link',
     icon: LinkIcon,
+    activeWhen: (format: Record<string, unknown>) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (models: BaseBlockModel[]) => models.length === 1,
     action: (space: Space, abortController: AbortController) => {

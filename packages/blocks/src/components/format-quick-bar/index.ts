@@ -2,7 +2,7 @@ import { BaseBlockModel, Signal, Space } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import type { DragDirection } from '../../page-block/utils';
+import { DragDirection, getFormat } from '../../page-block/utils';
 import {
   convertToList,
   getContainerByModel,
@@ -19,7 +19,7 @@ import { formatQuickBarStyle } from './styles';
 const isListType = (type: string): type is 'bulleted' | 'numbered' | 'todo' =>
   ['bulleted', 'numbered', 'todo'].includes(type);
 
-const onCopy = (space: Space) => {
+const onCopy = () => {
   document.dispatchEvent(new ClipboardEvent('copy'));
   toast('Copied to clipboard');
 };
@@ -62,6 +62,9 @@ export class FormatQuickBar extends LitElement {
   @state()
   showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
 
+  @state()
+  format: Record<string, unknown> = {};
+
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
@@ -73,6 +76,7 @@ export class FormatQuickBar extends LitElement {
     if (!models.length) {
       return;
     }
+    this.format = getFormat();
     const startModel = models[0];
     this.paragraphType = startModel.type;
     this.space = startModel.space;
@@ -121,10 +125,10 @@ export class FormatQuickBar extends LitElement {
             convertToList(this.space, model, targetFormat, '');
           } else {
             this.space.updateBlock(model, { type: targetFormat });
-      // format quick bar may need to update its position
-      // after the paragraph type is changed
-      await sleep();
-      this.positionUpdated.emit();
+            // format quick bar may need to update its position
+            // after the paragraph type is changed
+            await sleep();
+            this.positionUpdated.emit();
           }
           this.paragraphType = targetFormat;
         });
@@ -181,9 +185,14 @@ export class FormatQuickBar extends LitElement {
       ${formatButtons
         .filter(({ showWhen = () => true }) => showWhen(this.models))
         .map(
-          ({ name, icon, action }) => html`<format-bar-button
+          ({ name, icon, action, activeWhen }) => html`<format-bar-button
             class="has-tool-tip"
-            @click=${() => action(space, this.abortController)}
+            ?active=${activeWhen(this.format)}
+            @click=${() => {
+              action(space, this.abortController);
+              // format state need to update after format
+              this.format = getFormat();
+            }}
           >
             ${icon}
             <tool-tip inert role="tooltip">${name}</tool-tip>
@@ -193,7 +202,7 @@ export class FormatQuickBar extends LitElement {
 
     const actionItems = html`<format-bar-button
       class="has-tool-tip"
-      @click=${() => onCopy(space)}
+      @click=${() => onCopy()}
     >
       ${CopyIcon}
       <tool-tip inert role="tooltip">Copy</tool-tip>
@@ -205,11 +214,11 @@ export class FormatQuickBar extends LitElement {
       bottom: this.bottom,
     });
     return html`<div class="format-quick-bar" style="${styles}">
-        ${paragraphItems}
-        <div class="divider"></div>
-        ${formatItems}
-        <div class="divider"></div>
-        ${actionItems} ${paragraphPanel}
+      ${paragraphItems}
+      <div class="divider"></div>
+      ${formatItems}
+      <div class="divider"></div>
+      ${actionItems} ${paragraphPanel}
     </div>`;
   }
 }
@@ -249,13 +258,13 @@ export const showFormatQuickBar = async ({
   );
 
   const updatePos = () => {
-  const rect = anchorEl.getBoundingClientRect();
-  const bodyRect = document.body.getBoundingClientRect();
-  const offsetY = 5;
-  formatQuickBar.left = `${rect.left}px`;
+    const rect = anchorEl.getBoundingClientRect();
+    const bodyRect = document.body.getBoundingClientRect();
+    const offsetY = 5;
+    formatQuickBar.left = `${rect.left}px`;
     if (direction.includes('bottom')) {
       const offset = rect.top - bodyRect.top + rect.height;
-  formatQuickBar.top = `${offset + offsetY}px`;
+      formatQuickBar.top = `${offset + offsetY}px`;
     } else if (direction.includes('top')) {
       const offset = bodyRect.bottom - rect.bottom + rect.height;
       formatQuickBar.bottom = `${offset + offsetY}px`;
