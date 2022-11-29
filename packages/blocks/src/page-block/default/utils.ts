@@ -11,7 +11,7 @@ export const pick = (blocks: BaseBlockModel[], x: number, y: number) => {
       if (isPointIn(imageRect, x, y)) {
         return {
           position: {
-            x: imageRect.right,
+            x: imageRect.right + 10,
             y: imageRect.top,
           },
           model: blocks[index],

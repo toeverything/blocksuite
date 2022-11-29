@@ -30,18 +30,8 @@
   margin: 0;
   padding-left: 12px;
 }
-.image-option-inside .image-option-container {
-  right: 10px !important;
-}
 
-.resizable:hover .image-option-container {
-  display: block;
-}
-.active .image-option-container {
-  display: block !important;
-}
-
-.resizable .image-option-container .image-option {
+.image-option {
   box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),
     0px 3px 16px -6px rgba(24, 39, 75, 0.4);
   border-radius: 10px;
@@ -53,14 +43,15 @@
   margin: 0;
 }
 
-.resizable .image-option-container .image-option li {
+.image-option li {
+  list-style: none;
   cursor: pointer;
   text-align: center;
   width: 32px;
   height: 32px;
   padding-top: 4px;
 }
-.resizable .image-option-container .image-option li:hover {
+.image-option li:hover {
   background: #f1f3ff;
   border-radius: 5px;
   color: #6880ff;

@@ -267,11 +267,14 @@ export class DefaultSelectionManager {
         (e.raw.pageX - this._originPosition.x) / 2;
       height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
       if (this._dropContainer) {
-        console.log('this._dropContainer: ', width);
-
-        this._dropContainer.style.width = width + 'px';
-        this._dropContainer.style.height = height + 'px';
-        this._dropContainer.style.left = left + 'px';
+        this._signals.updateEmbedRects.emit([
+          {
+            width: width,
+            height: height,
+            left: left,
+            top: this._dropContainer.getBoundingClientRect().top,
+          },
+        ]);
         const activeImg = this._activeComponent?.querySelector('img');
         if (activeImg) {
           activeImg.style.width = width + 'px';

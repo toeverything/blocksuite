@@ -49,7 +49,9 @@ export interface EmbedOption {
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
-  updateEmbedRects: Signal<DOMRect[]>;
+  updateEmbedRects: Signal<
+    { left: number; top: number; width: number; height: number }[]
+  >;
   updateEmbedOption: Signal<EmbedOption | null>;
 }
 
@@ -86,16 +88,13 @@ function FrameSelectionRect(rect: DOMRect | null) {
   `;
 }
 
-function EmbedSelectedRectsContainer(rects: DOMRect[]) {
+function EmbedSelectedRectsContainer(
+  rects: { left: number; top: number; width: number; height: number }[]
+) {
   return html`
     <style>
-      .affine-page-selected-embed-rects-container {
-        z-index: 99;
-      }
       .affine-page-selected-embed-rects-container > div {
         position: fixed;
-        z-index: 10;
-        /* pointer-events: none; */
         border: 3px solid #4286f4;
       }
     </style>
@@ -156,7 +155,6 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
         .affine-image-option-container > ul {
           position: fixed;
           z-index: 1;
-          pointer-events: none;
         }
       </style>
 
@@ -198,7 +196,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   selectedRects: DOMRect[] = [];
 
   @state()
-  selectEmbedRects: DOMRect[] = [];
+  selectEmbedRects: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  }[] = [];
 
   @state()
   embedOption!: EmbedOption | null;
@@ -206,7 +209,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
-    updateEmbedRects: new Signal<DOMRect[]>(),
+    updateEmbedRects: new Signal<
+      { left: number; top: number; width: number; height: number }[]
+    >(),
     updateEmbedOption: new Signal<EmbedOption | null>(),
   };
 
