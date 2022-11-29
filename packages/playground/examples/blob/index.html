@@ -5,13 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlockSuite Playground</title>
+    <style>
+      img {
+        max-width: 300px;
+      }
+    </style>
   </head>
   <body>
-    <div id="root">Please open console to see test result.</div>
+    <div id="root">
+      Please run <code>main()</code> in console to see test result.
+    </div>
     <script type="module">
-      import { main } from '@blocksuite/store/src/blob/__tests__/test-entry';
-
-      main();
+      import '@blocksuite/store/src/blob/__tests__/test-entry';
     </script>
   </body>
 </html>

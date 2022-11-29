@@ -1,7 +1,17 @@
 // Test page entry located in playground/examples/blob/index.html
-import { BlobStorage } from '..';
+import { BlobStorage, IndexedDBBlobProvider } from '..';
+import { test, collectTestResult } from './test-utils';
 
-export function main() {
-  const storage = new BlobStorage();
-  console.log(storage);
+export async function main() {
+  test('can init provider', async () => {
+    const storage = new BlobStorage();
+    const provider = new IndexedDBBlobProvider();
+    storage.addProvider(provider);
+    return storage !== null;
+  });
+
+  collectTestResult();
 }
+
+// @ts-ignore
+window.main = main;
