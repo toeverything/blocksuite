@@ -14,8 +14,6 @@ import {
 } from './query';
 import { Rect } from './rect';
 import type { SelectionEvent } from './gesture';
-import type { DragDirection } from '../../page-block/utils';
-import { getDragDirection } from '../../page-block/utils';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -359,15 +357,15 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
+  let isForward = true;
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  const direction: DragDirection = getDragDirection(e);
-  const isForward = ['left-bottom', 'right-bottom'].includes(direction);
-  if (isForward) {
-    currentRange?.setStart(startContainer, startOffset);
-  } else {
+  if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
+    isForward = false;
     currentRange?.setEnd(endContainer, endOffset);
+  } else {
+    currentRange?.setStart(startContainer, startOffset);
   }
   if (currentRange) {
     currentRange = fixCurrentRangeToText(
@@ -665,7 +663,6 @@ function getCurrentCharIndex(
   const currentCharIndex = wordText.indexOf(currentChar);
   return [currentCharIndex, wordText] as const;
 }
-
 /**
  * left first search all leaf text nodes
  * @example
