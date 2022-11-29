@@ -5,7 +5,7 @@ declare global {
   interface WindowEventMap {
     'test-result': CustomEvent<TestResult>;
   }
-  const main: () => Promise<void>;
+  const main: () => void;
 }
 
 function waitForTestResult(page: Page) {
