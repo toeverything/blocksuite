@@ -66,6 +66,10 @@ export class Space {
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
 
+  // In some business scenarios, user need to set some custom attributes, like 'favorite', 'delete'...
+  // Space model should stay a space to make it possibly
+  public attribute = new Map();
+
   // TODO use schema
   private _ignoredKeys = new Set<string>(
     Object.keys(new BaseBlockModel(this, {}))
@@ -166,6 +170,12 @@ export class Space {
 
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
+  }
+
+  getBlockByFlavour(BlockFlavour: string) {
+    return [...this._blockMap.values()].filter(
+      ({ flavour }) => BlockFlavour === flavour
+    );
   }
 
   getParentById(rootId: string, target: BaseBlockModel): BaseBlockModel | null {
