@@ -2,9 +2,10 @@ import { PrefixedBlockProps, Space } from './space';
 import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
-import type { SyncProvider, SyncProviderConstructor } from './providers';
+import type { DocProvider, DocProviderConstructor } from './doc-providers';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
 import { uuidv4 } from './utils/id-generator';
+import { Indexer, QueryContent } from './search';
 
 export interface SerializedStore {
   [key: string]: {
@@ -14,7 +15,7 @@ export interface SerializedStore {
 
 export interface StoreOptions {
   room?: string;
-  providers?: SyncProviderConstructor[];
+  providers?: DocProviderConstructor[];
   awareness?: Awareness;
   idGenerator?: IdGenerator;
 }
@@ -23,10 +24,12 @@ const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
   readonly doc = new Y.Doc();
-  readonly providers: SyncProvider[] = [];
+  readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
   readonly idGenerator: IdGenerator;
+  readonly _indexer: Indexer;
+
   constructor({
     room = DEFAULT_ROOM,
     providers = [],
@@ -39,10 +42,19 @@ export class Store {
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, { awareness: this.awareness })
     );
+    this._indexer = new Indexer(this.doc);
   }
 
-  getSpace(spaceId: string) {
+  search(query: QueryContent) {
+    return this._indexer.search(query);
+  }
+
+  getSpaceById(spaceId: string) {
     return this.spaces.get(spaceId) as Space;
+  }
+
+  getSpace() {
+    return this.spaces;
   }
 
   // TODO: The user cursor should be spread by the spaceId in awareness
@@ -51,7 +63,9 @@ export class Store {
       spaceId,
       new Space(spaceId, this.doc, this.awareness, this.idGenerator)
     );
-    return this.getSpace(spaceId);
+    this._indexer.onCreateSpace(spaceId);
+
+    return this.getSpaceById(spaceId);
   }
 
   /**
@@ -66,12 +80,12 @@ export class Store {
    */
   toJSXElement(id = '0') {
     const json = this.serializeDoc();
-    if (!('page0' in json)) {
-      throw new Error("Failed to convert to JSX: 'page0' not found");
+    if (!('space:page0' in json)) {
+      throw new Error("Failed to convert to JSX: 'space:page0' not found");
     }
-    if (!json.page0[id]) {
+    if (!json['space:page0'][id]) {
       return null;
     }
-    return yDocToJSXNode(json.page0, id);
+    return yDocToJSXNode(json['space:page0'], id);
   }
 }

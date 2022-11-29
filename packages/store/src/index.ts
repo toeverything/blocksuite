@@ -2,10 +2,11 @@ export * from './space';
 export * from './store';
 export * from './base';
 export * from './awareness';
+export * from './blob';
 export * from './text-adapter';
 export * from './utils/signal';
 export * from './utils/disposable';
-export * from './providers';
+export * from './doc-providers';
 export * as Utils from './utils/utils';
 export * from './utils/id-generator';
 

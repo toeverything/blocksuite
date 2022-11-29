@@ -3,14 +3,15 @@ import { WebrtcProvider } from 'y-webrtc';
 // In the future, consider making y-indexdb a separate package sync provider.
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { Awareness } from 'y-protocols/awareness';
+import { WebsocketProvider as OriginWebsocketProvider } from 'y-websocket';
 
 /**
  * Different examples of providers could include webrtc sync,
  * database sync like SQLite / LevelDB, or even web IndexDB.
  *
- * Usually a class will also implement {@link SyncProviderConstructor}.
+ * Usually a class will also implement {@link DocProviderConstructor}.
  */
-export interface SyncProvider {
+export interface DocProvider {
   awareness?: Awareness;
   connect: () => void;
   disconnect: () => void;
@@ -18,16 +19,16 @@ export interface SyncProvider {
   destroy: () => void;
 }
 
-/** See {@link SyncProvider} */
-export interface SyncProviderConstructor {
+/** See {@link DocProvider} */
+export interface DocProviderConstructor {
   new (
     room: string,
-    ydoc: Y.Doc,
+    doc: Y.Doc,
     options?: { awareness?: Awareness }
-  ): SyncProvider;
+  ): DocProvider;
 }
 
-export class DebugProvider extends WebrtcProvider implements SyncProvider {
+export class DebugDocProvider extends WebrtcProvider implements DocProvider {
   constructor(room: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
     super(room, doc, {
       awareness: options?.awareness ?? null,
@@ -57,25 +58,45 @@ export class DebugProvider extends WebrtcProvider implements SyncProvider {
   }
 }
 
-export class IndexedDBProvider
+export class IndexedDBDocProvider
   extends IndexeddbPersistence
-  implements SyncProvider
+  implements DocProvider
 {
-  constructor(room: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
+  constructor(room: string, doc: Y.Doc) {
     super(room, doc);
   }
 
   // Consider whether "connect" and "disconnect" are good to put on the SyncProvider
   connect() {
-    // not necessary as it will be set up in indexdb persistence
+    // not necessary as it will be set up in indexeddb persistence
   }
 
   disconnect() {
-    // not necessary as it will be set up in indexdb persistence
+    // not necessary as it will be set up in indexeddb persistence
   }
 
   public clearData() {
     // Do nothing for now
     return Promise.resolve();
   }
+}
+
+export function createWebsocketDocProvider(url: string) {
+  return class WebsocketProvider
+    extends OriginWebsocketProvider
+    implements DocProvider
+  {
+    constructor(
+      room: string,
+      ydoc: Y.Doc,
+      options?: { awareness?: Awareness }
+    ) {
+      super(url, room, ydoc, options);
+    }
+
+    public clearData() {
+      // Do noting for now
+      return Promise.resolve();
+    }
+  };
 }

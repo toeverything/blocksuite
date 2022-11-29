@@ -30,7 +30,7 @@ function waitOnce<T>(signal: Signal<T>) {
   return new Promise<T>(resolve => signal.once(val => resolve(val)));
 }
 
-const defaultSpaceId = 'page0';
+const defaultSpaceId = 'space:page0';
 
 describe.concurrent('basic', () => {
   it('can init store', () => {
@@ -162,7 +162,8 @@ describe.concurrent('addBlock', () => {
     assert.ok(root.children[0] instanceof BlockSchema['affine:paragraph']);
     assert.equal(root.childMap.get('1'), 0);
 
-    const serializedChildren = serialize(space)[defaultSpaceId]['0']['sys:children'];
+    const serializedChildren =
+      serialize(space)[defaultSpaceId]['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
   });
@@ -321,5 +322,38 @@ describe('store.toJSXElement works', async () => {
         />
       </affine:page>
     `);
+  });
+});
+
+describe('store.search works', async () => {
+  it('store search matching', () => {
+    const store = new Store(getStoreOptions());
+    const space = store.createSpace(defaultSpaceId).register(BlockSchema);
+
+    space.addBlock({ flavour: 'affine:page', title: 'hello' });
+
+    space.addBlock({
+      flavour: 'affine:paragraph',
+      text: new space.Text(
+        space,
+        '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
+      ),
+    });
+
+    space.addBlock({
+      flavour: 'affine:paragraph',
+      text: new space.Text(
+        space,
+        '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
+      ),
+    });
+
+    expect(store.search('处理器')).toStrictEqual([
+      { field: 'content', result: ['1'] },
+    ]);
+
+    expect(store.search('索尼')).toStrictEqual([
+      { field: 'content', result: ['2'] },
+    ]);
   });
 });

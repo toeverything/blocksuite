@@ -1,23 +1,13 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-  testDir: 'tests',
+  testDir: 'src/blob/__tests__',
   fullyParallel: true,
   use: {
     browserName: 'chromium',
     viewport: { width: 900, height: 600 },
-    actionTimeout: 5 * 1000,
+    actionTimeout: 1000,
   },
-  retries: 2,
 };
-
-if (process.env.CI) {
-  config.webServer = {
-    command: 'pnpm dev',
-    port: 5173,
-  };
-  config.retries = 3;
-  // config.workers = 2;
-}
 
 export default config;

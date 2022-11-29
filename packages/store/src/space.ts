@@ -57,6 +57,7 @@ export class Space {
     rootDeleted: new Signal<string>(),
     textUpdated: new Signal<Y.YTextEvent>(),
     updated: new Signal(),
+    attributesUpdated: new Signal<Map<string, unknown>>(),
   };
 
   private _idGenerator: IdGenerator;
@@ -65,6 +66,10 @@ export class Space {
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
+
+  // In some cases, user may need to set some custom attributes, like 'favorite', 'delete'...
+  // Space model should make it possible.
+  public attributes = new Map<string, unknown>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -136,6 +141,11 @@ export class Space {
     return this._history.canRedo();
   }
 
+  setAttribute = (key: string, value: unknown) => {
+    this.attributes.set(key, value);
+    this.signals.attributesUpdated.emit(this.attributes);
+  };
+
   undo() {
     this._history.undo();
   }
@@ -167,6 +177,12 @@ export class Space {
 
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
+  }
+
+  getBlockByFlavour(BlockFlavour: string) {
+    return [...this._blockMap.values()].filter(
+      ({ flavour }) => BlockFlavour === flavour
+    );
   }
 
   getParentById(rootId: string, target: BaseBlockModel): BaseBlockModel | null {

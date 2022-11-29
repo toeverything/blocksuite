@@ -295,7 +295,7 @@ test('get focus from page title enter', async ({ page }) => {
   await assertRichTexts(page, ['world', '\n']);
 });
 
-test('The key "Up" respond when the cursor located in first paragraph  ', async ({
+test('handling keyup when cursor located in first paragraph', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -310,8 +310,9 @@ test('The key "Up" respond when the cursor located in first paragraph  ', async 
   await assertPageTitleFocus(page);
 });
 
-
-test('After deleting a row of the text, the cursor will jump to the end of the previous row of the list', async ({ page }) => {
+test('after deleting a text row, cursor should jump to the end of previous list row', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
   await focusRichText(page);
@@ -322,10 +323,10 @@ test('After deleting a row of the text, the cursor will jump to the end of the p
   await page.keyboard.type('w');
   await assertRichTexts(page, ['hello', 'w']);
   await assertSelection(page, 1, 1, 0);
-  await page.keyboard.press('ArrowUp')
-  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowDown');
 
-  await page.keyboard.press('ArrowLeft')
-  await page.keyboard.press('Backspace')
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('Backspace');
   await assertSelection(page, 0, 5, 0);
 });

@@ -9,9 +9,7 @@ export function bindCommonHotkey(space: Space) {
   hotkey.addListener(STRIKE, e => handleFormat(space, e, 'strike'));
   hotkey.addListener(LINK, e => {
     e.preventDefault();
-    hotkey.withDisableHotkey(async () => {
-      await createLink(space, e);
-    });
+    hotkey.withDisabledHotkey(async () => createLink(space, e));
   });
   hotkey.addListener(UNDO, () => space.undo());
   hotkey.addListener(REDO, () => space.redo());

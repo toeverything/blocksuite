@@ -1,24 +1,29 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.3.0-alpha.1",
+  "version": "0.3.0-alpha.2",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "scripts": {
     "serve": "cross-env PORT=5173 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
+    "test:blob": "playwright test",
     "test": "vitest --run"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "flexsearch": "0.7.21",
+    "idb-keyval": "^6.2.0",
     "lib0": "^0.2.52",
     "y-indexeddb": "^9.0.9",
     "y-protocols": "^1.0.5",
     "y-webrtc": "^10.2.3",
+    "y-websocket": "^1.4.5",
     "yjs": "^13.5.41"
   },
   "devDependencies": {
+    "@types/flexsearch": "^0.7.3",
     "@types/quill": "^2.0.9",
     "cross-env": "^7.0.3"
   },
