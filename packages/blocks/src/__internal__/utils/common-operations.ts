@@ -94,7 +94,7 @@ export function convertToParagraph(
   return true;
 }
 
-export function addDivider(
+export function convertToDivider(
   quill: Quill,
   model: ExtendedModel,
   prefix: string,
@@ -103,15 +103,7 @@ export function addDivider(
   model.text?.insert(' ', prefix.length);
   space.captureSync();
   model.text?.delete(0, prefix.length + 1);
-  const BlockEmbed = Quill.import('blots/block/embed');
-
-  class DividerBlot extends BlockEmbed {}
-  DividerBlot.blotName = 'divider';
-  DividerBlot.tagName = 'hr';
-  Quill.register(DividerBlot);
-
   const range = quill.getSelection(true);
-  quill.insertText(range.index, '\n', Quill.sources.USER);
   quill.insertEmbed(range.index, 'divider', true, Quill.sources.USER);
   quill.setSelection(range.index + 1, 0, Quill.sources.SILENT);
 

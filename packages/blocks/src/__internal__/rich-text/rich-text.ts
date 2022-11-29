@@ -22,6 +22,13 @@ const Strike = Quill.import('formats/strike');
 Strike.tagName = 'del';
 Quill.register(Strike, true);
 
+const BlockEmbed = Quill.import('blots/block/embed');
+
+class DividerBlot extends BlockEmbed {}
+DividerBlot.blotName = 'divider';
+DividerBlot.tagName = 'hr';
+Quill.register(DividerBlot);
+
 @customElement('rich-text')
 export class RichText extends LitElement {
   static styles = css`

@@ -265,7 +265,7 @@ export function createKeyboardBindings(space: Space, model: BaseBlockModel) {
     'list autofill shift': {
       key: ' ',
       shiftKey: true,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
       handler: onSpace,
     },
     backspace: {

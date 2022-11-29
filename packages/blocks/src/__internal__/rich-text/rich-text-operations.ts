@@ -18,7 +18,7 @@ import {
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
-  addDivider,
+  convertToDivider,
 } from '../utils';
 
 export function handleBlockEndEnter(space: Space, model: ExtendedModel) {
@@ -340,10 +340,10 @@ export function tryMatchSpaceHotkey(
       isConverted = convertToList(space, model, 'bulleted', prefix);
       break;
     case '***':
-      isConverted = addDivider(quill, model, prefix, space);
+      isConverted = convertToDivider(quill, model, prefix, space);
       break;
     case '---':
-      isConverted = addDivider(quill, model, prefix, space);
+      isConverted = convertToDivider(quill, model, prefix, space);
       break;
     case '#':
       isConverted = convertToParagraph(space, model, 'h1', prefix);
