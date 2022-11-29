@@ -1,5 +1,5 @@
 import type { Space } from '@blocksuite/store';
-import Quill from 'quill';
+import type Quill from 'quill';
 import type { ExtendedModel } from './types';
 
 // XXX: workaround quill lifecycle issue
@@ -95,13 +95,39 @@ export function convertToParagraph(
 }
 
 export function convertToDivider(
-  quill: Quill,
+  space: Space,
   model: ExtendedModel,
+  type: 'affine:divider' | 'normal',
   prefix: string
 ): boolean {
-  model.text?.insert(' ', prefix.length);
-  model.text?.delete(0, prefix.length + 1);
-  quill.insertEmbed(0, 'divider', true, Quill.sources.USER);
-  quill.setSelection(1, 0);
+  if (model.flavour === 'affine:divider' && model['type'] === type) {
+    return false;
+  }
+  if (model.flavour !== 'affine:divider') {
+    const parent = space.getParent(model);
+    if (!parent) return false;
+
+    const index = parent.children.indexOf(model);
+    model.text?.insert(' ', prefix.length);
+    space.captureSync();
+
+    model.text?.delete(0, prefix.length + 1);
+    const blockProps = {
+      flavour: 'affine:divider',
+      type: type,
+      text: model?.text?.clone(),
+      children: model.children,
+    };
+    space.deleteBlock(model);
+
+    const id = space.addBlock(blockProps, parent, index);
+    asyncFocusRichText(space, id);
+  } else if (model.flavour === 'affine:divider' && model['type'] !== type) {
+    model.text?.insert(' ', prefix.length);
+    space.captureSync();
+
+    model.text?.delete(0, prefix.length + 1);
+    space.updateBlock(model, { type: type });
+  }
   return true;
 }

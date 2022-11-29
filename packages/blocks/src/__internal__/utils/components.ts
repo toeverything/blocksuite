@@ -6,6 +6,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel } from '../../list-block/list-model';
 import type { ParagraphBlockModel } from '../../paragraph-block/paragraph-model';
 import type { GroupBlockModel } from '../../group-block/group-model';
+import type { DividerBlockModel } from '../../divider-block/divider-model';
 
 // TODO support dynamic block types
 export function BlockElement(model: BaseBlockModel, host: BlockHost) {
@@ -30,6 +31,13 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost) {
           .model=${model as GroupBlockModel}
           .host=${host}
         ></group-block>
+      `;
+    case 'affine:divider':
+      return html`
+        <divider-block
+          .model=${model as DividerBlockModel}
+          .host=${host}
+        ></divider-block>
       `;
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;

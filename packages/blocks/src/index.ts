@@ -4,6 +4,7 @@ import './counter-block';
 import './paragraph-block';
 import './list-block';
 import './group-block';
+import './divider-block';
 import './__internal__/rich-text/link-node';
 
 export * from './counter-block';
@@ -11,6 +12,7 @@ export * from './paragraph-block';
 export * from './page-block';
 export * from './list-block';
 export * from './group-block';
+export * from './divider-block';
 export * as SelectionUtils from './__internal__/utils/selection';
 export * from './__internal__/utils/types';
 export * from './__internal__/utils/common-operations';
