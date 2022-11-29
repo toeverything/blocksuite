@@ -332,7 +332,6 @@ export class DefaultSelectionManager {
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
     const hoverOption = pick(this._blocks, e.raw.pageX, e.raw.pageY);
-    console.log('hoverOption: ', hoverOption);
     this._signals.updateEmbedOption.emit(hoverOption);
   };
 
@@ -343,6 +342,8 @@ export class DefaultSelectionManager {
   dispose() {
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
+    this._signals.updateEmbedOption.dispose();
+    this._signals.updateEmbedRects.dispose();
     this._mouseDisposeCallback();
   }
   selectBlockByRect(selectionRect: DOMRect) {

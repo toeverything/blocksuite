@@ -403,6 +403,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _clearSelection() {
     this.selection.state.clear();
     this.signals.updateSelectedRects.emit([]);
+    this.signals.updateEmbedRects.emit([]);
   }
 
   // disable shadow DOM to workaround quill
