@@ -135,6 +135,17 @@ test('markdown shortcut', async ({ page }) => {
   await assertText(page, '> ');
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
+
+  await page.keyboard.type('--- ');
+  [id] = await getCursorBlockIdAndHeight(page);
+  await assertBlockType(page, id, 'text');
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
+  await page.keyboard.type('*** ');
+  [id] = await getCursorBlockIdAndHeight(page);
+  await assertBlockType(page, id, 'text');
+  await undoByClick(page);
+  await assertRichTexts(page, ['\n']);
 });
 
 test('markdown inline-text', async ({ page }) => {
