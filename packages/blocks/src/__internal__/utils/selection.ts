@@ -4,18 +4,16 @@ import { assertExists, caretRangeFromPoint, matchFlavours, sleep } from './std';
 import type { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
-  getDefaultPageBlock,
   getContainerByModel,
-  getPreviousBlock,
-  getNextBlock,
-  getModelsByRange,
   getCurrentRange,
+  getDefaultPageBlock,
+  getModelsByRange,
+  getNextBlock,
+  getPreviousBlock,
   getQuillIndexByNativeSelection,
 } from './query';
 import { Rect } from './rect';
 import type { SelectionEvent } from './gesture';
-import type { DragDirection } from '../../page-block/utils';
-import { getDragDirection } from '../../page-block/utils';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -362,8 +360,7 @@ export function handleNativeRangeDragMove(
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  const direction: DragDirection = getDragDirection(e);
-  const isForward = ['left-bottom', 'right-bottom'].includes(direction);
+  const isForward = e.x > e.start.x || e.y > e.start.y;
   if (isForward) {
     currentRange?.setStart(startContainer, startOffset);
   } else {
