@@ -57,8 +57,7 @@ export class Space {
     rootDeleted: new Signal<string>(),
     textUpdated: new Signal<Y.YTextEvent>(),
     updated: new Signal(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    attribute: new Signal<Map<string, any>>(),
+    attributesUpdated: new Signal<Map<string, unknown>>(),
   };
 
   private _idGenerator: IdGenerator;
@@ -68,10 +67,9 @@ export class Space {
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
 
-  // In some business scenarios, user need to set some custom attributes, like 'favorite', 'delete'...
-  // Space model should stay a space to make it possibly
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public attribute = new Map<string, any>();
+  // In some cases, user may need to set some custom attributes, like 'favorite', 'delete'...
+  // Space model should make it possible.
+  public attributes = new Map<string, unknown>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -143,10 +141,9 @@ export class Space {
     return this._history.canRedo();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setAttribute = (key: string, value: any) => {
-    this.attribute.set(key, value);
-    this.signals.attribute.emit(this.attribute);
+  setAttribute = (key: string, value: unknown) => {
+    this.attributes.set(key, value);
+    this.signals.attributesUpdated.emit(this.attributes);
   };
 
   undo() {
