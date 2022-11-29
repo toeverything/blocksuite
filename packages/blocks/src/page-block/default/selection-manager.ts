@@ -1,4 +1,4 @@
-import type { Space } from '@blocksuite/store';
+import type { BaseBlockModel, Space } from '@blocksuite/store';
 import type { EmbedBlockComponent } from '../../embed-block';
 import {
   initMouseEventHandlers,
@@ -17,6 +17,7 @@ import {
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import { repairContextMenuRange } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
+import { pick } from './utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
   return (
@@ -69,6 +70,7 @@ class PageSelectionState {
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
+  private _optionCache: { x: number; y: number } = { x: 0, y: 0 };
   constructor(type: PageSelectionType) {
     this.type = type;
   }
@@ -154,6 +156,9 @@ export class DefaultSelectionManager {
       this._onContainerContextMenu
     );
   }
+  private get _blocks(): BaseBlockModel[] {
+    return (this.space.root?.children[0].children as BaseBlockModel[]) ?? [];
+  }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
@@ -209,7 +214,6 @@ export class DefaultSelectionManager {
     this.state.resetStartRange(e);
     if (isPageTitle(e.raw)) return;
     if (isEmbed(e)) {
-      console.log('start');
       this._onEmbedDragStart(e);
       return;
     }
@@ -221,23 +225,20 @@ export class DefaultSelectionManager {
   };
 
   private _onEmbedDragStart = (e: SelectionEvent) => {
-    // console.log('_onEmbedDragStart: ');
     this.state.type = 'embed';
     this._originPosition.x = e.raw.pageX;
     this._originPosition.y = e.raw.pageY;
     this._dropContainer = (e.raw.target as HTMLElement).closest('.resizes');
-    this._dropContainerSize.w = this._dropContainer?.clientWidth as number;
-    this._dropContainerSize.h = this._dropContainer?.clientHeight as number;
+    this._dropContainerSize.w = this._dropContainer?.getBoundingClientRect()
+      .width as number;
+    this._dropContainerSize.h = this._dropContainer?.getBoundingClientRect()
+      .height as number;
     this._dropContainerSize.left = this._dropContainer?.offsetLeft as number;
     if ((e.raw.target as HTMLElement).className.includes('right')) {
       this._dragMoveTarget = 'right';
     } else {
       this._dragMoveTarget = 'left';
     }
-    console.log('this._dropContainerSize.left: ', this._dropContainerSize.left);
-    // this._dropContainerSize.w = this._dropContainer?.clientWidth
-
-    // console.log(e);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
@@ -250,8 +251,6 @@ export class DefaultSelectionManager {
     }
   };
   private _onEmbedDragMove(e: SelectionEvent) {
-    console.log('e: ', e);
-    // console.log(e);
     let width = 0;
     let height = 0;
     let left = 0;
@@ -262,14 +261,6 @@ export class DefaultSelectionManager {
       width =
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
-    console.log('pian', (e.raw.pageX - this._originPosition.x) / 2);
-    console.log(
-      'e.raw.pageX - this._originPosition.x: ',
-      e.raw.pageX,
-      this._originPosition.x
-    );
-    console.log('this._dropContainerSize.left: ', this._dropContainerSize.left);
-
     if (width <= 580) {
       left =
         this._dropContainerSize.left -
@@ -314,7 +305,6 @@ export class DefaultSelectionManager {
         ?.getBoundingClientRect();
       assertExists(imageRect);
       this._signals.updateEmbedRects.emit([imageRect]);
-      console.log((e.raw.target as HTMLElement).closest('img-block'));
     }
     if (e.raw.target instanceof HTMLInputElement) return;
     // TODO handle shift + click
@@ -336,7 +326,8 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    // console.log('mousemove', e);
+    const hoverRect = pick(this._blocks, e.raw.pageX, e.raw.pageY);
+    console.log('hoverRect: ', hoverRect);
   };
 
   private _onContainerMouseOut = (e: SelectionEvent) => {
