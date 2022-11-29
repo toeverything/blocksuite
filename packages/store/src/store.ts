@@ -49,8 +49,12 @@ export class Store {
     return this._indexer.search(query);
   }
 
-  getSpace(spaceId: string) {
+  getSpaceById(spaceId: string) {
     return this.spaces.get(spaceId) as Space;
+  }
+
+  getSpace() {
+    return this.spaces;
   }
 
   // TODO: The user cursor should be spread by the spaceId in awareness
@@ -61,7 +65,7 @@ export class Store {
     );
     this._indexer.onCreateSpace(spaceId);
 
-    return this.getSpace(spaceId);
+    return this.getSpaceById(spaceId);
   }
 
   /**
