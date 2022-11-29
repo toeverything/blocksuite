@@ -143,6 +143,63 @@ export function handleBackspace(space: Space, e: KeyboardEvent) {
   }
 }
 
+export const getFormat = () => {
+  const models = getModelsByRange(getCurrentRange());
+  if (models.length === 1) {
+    const richText = getRichTextByModel(models[0]);
+    assertExists(richText);
+    const { quill } = richText;
+    const range = quill.getSelection();
+    assertExists(range);
+    const format = quill.getFormat(range);
+    return format;
+  }
+  const selection = window.getSelection();
+  const first = models[0];
+  const last = models[models.length - 1];
+  const firstRichText = getRichTextByModel(first);
+  const lastRichText = getRichTextByModel(last);
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+  assertExists(selection);
+
+  const firstIndex = getQuillIndexByNativeSelection(
+    selection.anchorNode,
+    selection.anchorOffset,
+    true
+  );
+  const endIndex = getQuillIndexByNativeSelection(
+    selection.focusNode,
+    selection.focusOffset,
+    false
+  );
+  const firstFormat = firstRichText.quill.getFormat(
+    firstIndex,
+    firstRichText.quill.getLength() - firstIndex - 1
+  );
+  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
+
+  const formatArr = [];
+  formatArr.push(firstFormat, lastFormat);
+  for (let i = 1; i < models.length - 1; i++) {
+    const richText = getRichTextByModel(models[i]);
+    assertExists(richText);
+    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
+    formatArr.push(format);
+  }
+  // const allFormat = formatArr.every(item => item[key]);
+  const allFormat = formatArr.reduce((acc, cur) => {
+    const newFormat: Record<string, unknown> = {};
+    for (const key in acc) {
+      if (acc[key] === cur[key]) {
+        newFormat[key] = acc[key];
+      }
+    }
+    return newFormat;
+  });
+  return allFormat;
+};
+
 function formatModelsByRange(
   models: BaseBlockModel[],
   space: Space,
@@ -159,43 +216,28 @@ function formatModelsByRange(
 
   const firstIndex = getQuillIndexByNativeSelection(
     selection.anchorNode,
-    selection.anchorOffset as number,
+    selection.anchorOffset,
     true
   );
   const endIndex = getQuillIndexByNativeSelection(
     selection.focusNode,
-    selection.focusOffset as number,
+    selection.focusOffset,
     false
   );
-  const formatArr = [];
-  const firstFormat = firstRichText.quill.getFormat(
-    firstIndex,
-    firstRichText.quill.getLength() - firstIndex - 1
-  );
-  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
-
-  formatArr.push(firstFormat, lastFormat);
-  for (let i = 1; i < models.length - 1; i++) {
-    const richText = getRichTextByModel(models[i]);
-    assertExists(richText);
-    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
-    formatArr.push(format);
-  }
-  const allFormat = formatArr.every(item => item[key]);
-
+  const isFormatActive = getFormat()[key];
   space.captureSync();
   firstRichText.model.text?.format(
     firstIndex,
     firstRichText.quill.getLength() - firstIndex - 1,
-    { [key]: !allFormat }
+    { [key]: !isFormatActive }
   );
-  lastRichText.model.text?.format(0, endIndex, { [key]: !allFormat });
+  lastRichText.model.text?.format(0, endIndex, { [key]: !isFormatActive });
 
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
     assertExists(richText);
     richText.model.text?.format(0, richText.quill.getLength() - 1, {
-      [key]: !allFormat,
+      [key]: !isFormatActive,
     });
   }
   lastRichText.quill.setSelection(endIndex, 0);
