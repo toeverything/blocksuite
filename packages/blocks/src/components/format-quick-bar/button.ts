@@ -12,23 +12,6 @@ export class FormatBarButton extends IconButton {
       height: var(--button-height);
       fill: var(--affine-icon-color);
     }
-
-    :host(:hover) {
-      background: var(--affine-hover-background);
-      fill: var(--affine-primary-color);
-    }
-
-    :host(:active) {
-      background: transparent;
-      fill: var(--affine-primary-color);
-    }
-
-    :host([disabled]),
-    :host(:disabled) {
-      background: transparent;
-      fill: var(--affine-icon-color);
-      cursor: not-allowed;
-    }
   `;
 
   @property()

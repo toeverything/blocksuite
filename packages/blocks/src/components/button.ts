@@ -47,6 +47,16 @@ export class IconButton extends LitElement {
       fill: var(--affine-icon-color);
       cursor: not-allowed;
     }
+
+    /* You can add a 'active' attribute to the button to revert the active style */
+    :host([active]) {
+      fill: var(--affine-primary-color);
+    }
+
+    :host(:active[active]) {
+      background: transparent;
+      fill: var(--affine-icon-color);
+    }
   `;
 
   @property()
