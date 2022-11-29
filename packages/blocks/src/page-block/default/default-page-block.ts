@@ -41,6 +41,7 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../image-block/icons';
+import { deleteBlock, downloadImage, writeClipImg } from './utils';
 
 export interface EmbedOption {
   position: { x: number; y: number };
@@ -160,10 +161,16 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
 
       <div class="affine-image-option-container">
         <ul style=${styleMap(style)} class="image-option">
-          <li>${CaptionIcon}</li>
-          <li>${DownloadIcon}</li>
-          <li>${CopyIcon}</li>
-          <li>${DeleteIcon}</li>
+          <li @click=${() => downloadImage(embedOption.model.source)}>
+            ${CaptionIcon}
+          </li>
+          <li @click=${() => downloadImage(embedOption.model.source)}>
+            ${DownloadIcon}
+          </li>
+          <li @click=${() => writeClipImg(embedOption.model.source)}>
+            ${CopyIcon}
+          </li>
+          <li @click=${() => deleteBlock(embedOption.model)}>${DeleteIcon}</li>
         </ul>
       </div>
     `;
@@ -279,7 +286,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(SELECT_ALL, e => {
-      // console.log('e: ', e);
       e.preventDefault();
       handleSelectAll();
       this.selection.state.type = 'native';

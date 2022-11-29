@@ -94,17 +94,5 @@ window.onload = () => {
 
     document.body.appendChild(editor);
     document.body.appendChild(debugMenu);
-    const idPage = space.addBlock({ flavour: 'affine:page' });
-    const idGroup = space.addBlock({ flavour: 'affine:group' }, idPage);
-    space.addBlock(
-      {
-        flavour: 'affine:embed',
-        type: 'image',
-        source:
-          'https://m.media-amazon.com/images/G/02/Gateway/BF22Hero/UK-600x226.jpg',
-        width: 200,
-      },
-      idGroup
-    );
   }
 };

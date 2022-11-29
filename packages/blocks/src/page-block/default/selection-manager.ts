@@ -38,16 +38,17 @@ function filterSelectedRichText(
     return intersects(rect, selectionRect);
   });
 }
-function filterSelectedEmbed(
-  embedCache: Map<EmbedBlockComponent, DOMRect>,
-  selectionRect: DOMRect
-): EmbedBlockComponent[] {
-  const embeds = Array.from(embedCache.keys());
-  return embeds.filter(embed => {
-    const rect = embed.getBoundingClientRect();
-    return intersects(rect, selectionRect);
-  });
-}
+// TODO
+// function filterSelectedEmbed(
+//   embedCache: Map<EmbedBlockComponent, DOMRect>,
+//   selectionRect: DOMRect
+// ): EmbedBlockComponent[] {
+//   const embeds = Array.from(embedCache.keys());
+//   return embeds.filter(embed => {
+//     const rect = embed.getBoundingClientRect();
+//     return intersects(rect, selectionRect);
+//   });
+// }
 
 function createSelectionRect(
   current: { x: number; y: number },
@@ -70,7 +71,6 @@ class PageSelectionState {
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
-  private _optionCache: { x: number; y: number } = { x: 0, y: 0 };
   constructor(type: PageSelectionType) {
     this.type = type;
   }
@@ -173,7 +173,7 @@ export class DefaultSelectionManager {
     const { startPoint: start } = this.state;
 
     const selectionRect = createSelectionRect(current, start);
-    const { richTextCache, embedCache } = this.state;
+    const { richTextCache } = this.state;
     const selectedRichTexts = filterSelectedRichText(
       richTextCache,
       selectionRect
@@ -261,7 +261,7 @@ export class DefaultSelectionManager {
       width =
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
-    if (width <= 580) {
+    if (width <= 700) {
       left =
         this._dropContainerSize.left -
         (e.raw.pageX - this._originPosition.x) / 2;
@@ -332,6 +332,7 @@ export class DefaultSelectionManager {
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
     const hoverOption = pick(this._blocks, e.raw.pageX, e.raw.pageY);
+    console.log('hoverOption: ', hoverOption);
     this._signals.updateEmbedOption.emit(hoverOption);
   };
 
