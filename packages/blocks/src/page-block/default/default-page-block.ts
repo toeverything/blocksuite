@@ -2,7 +2,13 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Disposable, Signal, Space, Text } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  Disposable,
+  Signal,
+  Space,
+  Text,
+} from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -29,11 +35,22 @@ import {
   updateTextType,
 } from '../utils';
 import style from './style.css';
+import {
+  CaptionIcon,
+  CopyIcon,
+  DeleteIcon,
+  DownloadIcon,
+} from '../../image-block/icons';
 
+export interface EmbedOption {
+  position: { x: number; y: number };
+  model: BaseBlockModel;
+}
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
   updateEmbedRects: Signal<DOMRect[]>;
+  updateEmbedOption: Signal<EmbedOption | null>;
 }
 
 // https://stackoverflow.com/a/2345915
@@ -128,6 +145,34 @@ function SelectedRectsContainer(rects: DOMRect[]) {
   `;
 }
 
+function EmbedOptionContainer(embedOption: EmbedOption | null) {
+  if (embedOption) {
+    const style = {
+      left: embedOption.position.x + 'px',
+      top: embedOption.position.y + 'px',
+    };
+    return html`
+      <style>
+        .affine-image-option-container > ul {
+          position: fixed;
+          z-index: 1;
+          pointer-events: none;
+        }
+      </style>
+
+      <div class="affine-image-option-container">
+        <ul style=${styleMap(style)} class="image-option">
+          <li>${CaptionIcon}</li>
+          <li>${DownloadIcon}</li>
+          <li>${CopyIcon}</li>
+          <li>${DeleteIcon}</li>
+        </ul>
+      </div>
+    `;
+  } else {
+    return html``;
+  }
+}
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -155,10 +200,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   selectEmbedRects: DOMRect[] = [];
 
+  @state()
+  embedOption!: EmbedOption | null;
+
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
     updateEmbedRects: new Signal<DOMRect[]>(),
+    updateEmbedOption: new Signal<EmbedOption | null>(),
   };
 
   private _scrollDisposable!: Disposable;
@@ -391,6 +440,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selectEmbedRects = rects;
       this.requestUpdate();
     });
+    this.signals.updateEmbedOption.on(embedOption => {
+      this.embedOption = embedOption;
+      this.requestUpdate();
+    });
     tryUpdateGroupSize(this.space, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -431,6 +484,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
+    const embedOptionContainer = EmbedOptionContainer(this.embedOption);
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
@@ -445,7 +499,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           </div>
           ${childrenContainer}
         </div>
-        ${selectedRectsContainer} ${selectionRect} ${selectedEmbedContainer}
+        ${selectedRectsContainer} ${selectionRect}
+        ${selectedEmbedContainer}${embedOptionContainer}
       </div>
     `;
   }

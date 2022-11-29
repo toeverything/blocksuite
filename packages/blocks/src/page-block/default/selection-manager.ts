@@ -267,6 +267,8 @@ export class DefaultSelectionManager {
         (e.raw.pageX - this._originPosition.x) / 2;
       height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
       if (this._dropContainer) {
+        console.log('this._dropContainer: ', width);
+
         this._dropContainer.style.width = width + 'px';
         this._dropContainer.style.height = height + 'px';
         this._dropContainer.style.left = left + 'px';
@@ -326,8 +328,8 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    const hoverRect = pick(this._blocks, e.raw.pageX, e.raw.pageY);
-    console.log('hoverRect: ', hoverRect);
+    const hoverOption = pick(this._blocks, e.raw.pageX, e.raw.pageY);
+    this._signals.updateEmbedOption.emit(hoverOption);
   };
 
   private _onContainerMouseOut = (e: SelectionEvent) => {

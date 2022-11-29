@@ -10,15 +10,18 @@ export const pick = (blocks: BaseBlockModel[], x: number, y: number) => {
       assertExists(imageRect);
       if (isPointIn(imageRect, x, y)) {
         return {
-          x: imageRect.right,
-          y: imageRect.top,
+          position: {
+            x: imageRect.right,
+            y: imageRect.top,
+          },
+          model: blocks[index],
         };
       } else {
         return null;
       }
     }
   }
-  return;
+  return null;
 };
 
 function isPointIn(block: DOMRect, x: number, y: number): boolean {

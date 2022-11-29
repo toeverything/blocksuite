@@ -224,12 +224,12 @@ export class ImageBlockComponent extends LitElement {
               : ''}"
           >
             <div class="image-option-container">
-              <ul class="image-option">
+              <!-- <ul class="image-option">
                 <li @click=${this._editorImageCaption}>${CaptionIcon}</li>
                 <li @click=${this._downloadImage}>${DownloadIcon}</li>
                 <li @click=${this._copyBlock}>${CopyIcon}</li>
                 <li @click=${this._deleteBlock}>${DeleteIcon}</li>
-              </ul>
+              </ul> -->
             </div>
             <!-- <div class="resizes"> -->
             <!-- <div class="resize top-left"></div>
