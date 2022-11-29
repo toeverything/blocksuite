@@ -97,15 +97,11 @@ export function convertToParagraph(
 export function convertToDivider(
   quill: Quill,
   model: ExtendedModel,
-  prefix: string,
-  space: Space
+  prefix: string
 ): boolean {
   model.text?.insert(' ', prefix.length);
-  space.captureSync();
   model.text?.delete(0, prefix.length + 1);
-  const range = quill.getSelection(true);
-  quill.insertEmbed(range.index, 'divider', true, Quill.sources.USER);
-  quill.setSelection(range.index + 1, 0, Quill.sources.SILENT);
-
+  quill.insertEmbed(0, 'divider', true, Quill.sources.USER);
+  quill.setSelection(1, 0);
   return true;
 }
