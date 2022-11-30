@@ -20,6 +20,7 @@ Quill.register('modules/clipboard', EmptyClipboard, true);
 const Strike = Quill.import('formats/strike');
 // Quill uses <s> by default，but <s> is not supported by HTML5
 Strike.tagName = 'del';
+Quill.register(Strike, true);
 @customElement('rich-text')
 export class RichText extends LitElement {
   static styles = css`
