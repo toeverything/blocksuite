@@ -428,7 +428,13 @@ export function handleNativeRangeClick(space: Space, e: SelectionEvent) {
     const { root } = space;
     const lastChild = root?.lastChild();
     assertExists(lastChild);
-    if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
+    if (
+      matchFlavours(lastChild, [
+        'affine:paragraph',
+        'affine:list',
+        'affine:divider',
+      ])
+    ) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
