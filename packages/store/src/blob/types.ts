@@ -9,10 +9,10 @@ export interface BlobProvider {
 }
 
 export type IdbInstance<T = ArrayBufferLike> = {
-  get: (key: string) => Promise<T | undefined>;
-  set: (key: string, value: T) => Promise<void>;
+  get: (key: BlobId) => Promise<T | undefined>;
+  set: (key: BlobId, value: T) => Promise<void>;
   has(id: BlobId): Promise<boolean>;
-  keys: () => Promise<string[]>;
-  delete: (key: string) => Promise<void>;
+  keys: () => Promise<BlobId[]>;
+  delete: (key: BlobId) => Promise<void>;
   clear: () => Promise<void>;
 };

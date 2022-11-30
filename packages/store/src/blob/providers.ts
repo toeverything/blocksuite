@@ -1,42 +1,44 @@
 import { Buffer } from 'buffer';
 import ky from 'ky';
 
-import type { BlobProvider, IdbInstance } from './types';
+import type { BlobId, BlobProvider, BlobURL, IdbInstance } from './types';
 import { getDatabase, sha3, sleep } from './utils';
 
 export class IndexedDBBlobProvider implements BlobProvider {
   private readonly _database: IdbInstance;
-  private readonly _cloud: BlobCloudSync;
+  private readonly _cloud?: BlobCloudSync;
 
-  constructor(workspace: string) {
+  constructor(workspace: string, cloudApi?: string) {
     this._database = getDatabase('blob', workspace);
-    this._cloud = new BlobCloudSync(workspace, this._database);
+    if (cloudApi) {
+      this._cloud = new BlobCloudSync(workspace, cloudApi, this._database);
+    }
   }
 
-  async get(id: string): Promise<string | null> {
+  async get(id: BlobId): Promise<BlobURL | null> {
     const blob = await this._database.get(id);
-    if (!blob) return this._cloud.get(id);
+    if (!blob) return this._cloud?.get(id) || null;
 
     const result = URL.createObjectURL(new Blob([blob]));
     return result;
   }
 
-  async set(blob: Blob): Promise<string> {
+  async set(blob: Blob): Promise<BlobId> {
     const buffer = await blob.arrayBuffer();
     const hash = sha3(Buffer.from(buffer));
     if (!(await this._database.has(hash))) {
       await this._database.set(hash, buffer);
     }
 
-    this._cloud.addTask(hash, 'add');
+    this._cloud?.addTask(hash, 'add');
 
     return hash;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: BlobId): Promise<void> {
     await this._database.delete(id);
 
-    this._cloud.addTask(id, 'delete');
+    this._cloud?.addTask(id, 'delete');
   }
 
   async clear(): Promise<void> {
@@ -45,7 +47,7 @@ export class IndexedDBBlobProvider implements BlobProvider {
 }
 
 type SyncTask = {
-  id: string;
+  id: BlobId;
   blob: ArrayBufferLike | undefined;
   type: 'add' | 'delete';
   retry: number;
@@ -57,10 +59,7 @@ type BlobStatus = {
 
 export class BlobCloudSync {
   private readonly _abortController = new AbortController();
-  private readonly _fetcher = ky.create({
-    prefixUrl: '/api/v1/blob',
-    signal: this._abortController.signal,
-  });
+  private readonly _fetcher: typeof ky;
   private readonly _database: IdbInstance;
   private readonly _padding: IdbInstance<{
     retry: number;
@@ -72,7 +71,12 @@ export class BlobCloudSync {
   private _pipeline: SyncTask[] = [];
   private initialized = false;
 
-  constructor(workspace: string, db: IdbInstance) {
+  constructor(workspace: string, prefixUrl: string, db: IdbInstance) {
+    this._fetcher = ky.create({
+      prefixUrl,
+      signal: this._abortController.signal,
+    });
+
     this._database = db;
     this._padding = getDatabase('padding', workspace);
     this._workspace = workspace;
@@ -137,7 +141,7 @@ export class BlobCloudSync {
     console.error('BlobCloudSync taskRunner exited');
   }
 
-  async get(id: string): Promise<string | null> {
+  async get(id: BlobId): Promise<BlobURL | null> {
     const api = `${this._workspace}/${id}`;
     try {
       const blob = await this._fetcher.get(api).blob();
@@ -151,7 +155,7 @@ export class BlobCloudSync {
     }
   }
 
-  async addTask(id: string, type: 'add' | 'delete') {
+  async addTask(id: BlobId, type: 'add' | 'delete') {
     const blob = await this._database.get(id);
     if (blob || type === 'delete') {
       if (this.initialized) {
