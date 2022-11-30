@@ -5,20 +5,20 @@ declare global {
   interface WindowEventMap {
     'test-result': CustomEvent<TestResult>;
   }
-  const main: () => void;
+  const testBasic: () => void;
 }
 
 function waitForTestResult(page: Page) {
   return page.evaluate(() => {
     return new Promise<TestResult>(resolve => {
       window.addEventListener('test-result', ({ detail }) => resolve(detail));
-      main();
+      testBasic();
     });
   });
 }
 
 // checkout test-entry.ts for actual test cases
-test('blob storage', async ({ page }) => {
+test('blob storage basics', async ({ page }) => {
   await page.goto('http://localhost:5173/examples/blob/');
   const result = await waitForTestResult(page);
   const messages = result.messages.join('\n');

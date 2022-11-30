@@ -15,7 +15,7 @@ export class BlobStorage {
     this._providers = this._providers.filter(p => p !== provider);
   }
 
-  async get(id: string): Promise<string> {
+  async get(id: string): Promise<string | null> {
     for (const provider of this._providers) {
       try {
         return await provider.get(id);

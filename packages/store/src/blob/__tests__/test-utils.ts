@@ -8,7 +8,12 @@ const testResult: TestResult = {
   messages: [],
 };
 
-const testCases: Promise<boolean>[] = [];
+interface TestCase {
+  name: string;
+  callback: () => Promise<boolean>;
+}
+
+const testCases: TestCase[] = [];
 
 function reportTestResult() {
   const event = new CustomEvent<TestResult>('test-result', {
@@ -27,17 +32,34 @@ function reject(message: string) {
   addMessage(`❌ ${message}`);
 }
 
-export async function test(name: string, callback: () => Promise<boolean>) {
-  const resultPromise = callback();
-  testCases.push(resultPromise);
-
-  const result = await resultPromise;
-  if (result) addMessage(`✅ ${name}`);
-  else reject(name);
+export async function testSerial(
+  name: string,
+  callback: () => Promise<boolean>
+) {
+  testCases.push({ name, callback });
 }
 
-export function collectTestResult() {
-  Promise.all(testCases).then(reportTestResult);
+function wait(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function run() {
+  await wait(0); // for better in-browser debug log formatting
+
+  for (const testCase of testCases) {
+    const { name, callback } = testCase;
+    const result = await callback();
+
+    if (result) addMessage(`✅ ${name}`);
+    else reject(name);
+  }
+  reportTestResult();
+}
+
+export function assertExists<T>(val: T | null | undefined): asserts val is T {
+  if (val === null || val === undefined) {
+    throw new Error('val does not exist');
+  }
 }
 
 // Test image source: https://en.wikipedia.org/wiki/Test_card
