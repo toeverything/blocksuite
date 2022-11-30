@@ -1,8 +1,9 @@
 import { uuidv4 } from 'lib0/random';
 import * as IKV from 'idb-keyval';
+import { Signal } from '../utils/signal';
 
-type BlobId = string;
-type BlobURL = string;
+export type BlobId = string;
+export type BlobURL = string;
 
 export interface BlobProvider {
   readonly config: unknown;
@@ -11,6 +12,9 @@ export interface BlobProvider {
   set(blob: Blob): Promise<BlobId>;
   delete(id: BlobId): Promise<void>;
   clear(): Promise<void>;
+  signals: {
+    blobAdded: Signal<BlobId>;
+  };
 }
 
 interface BlobProviderStatic {
@@ -26,16 +30,22 @@ export class IndexedDBBlobProvider implements BlobProvider {
   readonly config: unknown;
   readonly blobs = new Set<BlobId>();
 
+  signals = {
+    blobAdded: new Signal<BlobId>(),
+  };
+
   static async init(): Promise<IndexedDBBlobProvider> {
     const provider = new IndexedDBBlobProvider();
     await provider._initBlobs();
     return provider;
   }
 
-  async _initBlobs() {
+  private async _initBlobs() {
     const entries = await IKV.entries();
     for (const [key] of entries) {
-      this.blobs.add(key as string);
+      const blobId = key as BlobId;
+      this.signals.blobAdded.emit(blobId);
+      this.blobs.add(blobId);
     }
   }
 
@@ -48,10 +58,11 @@ export class IndexedDBBlobProvider implements BlobProvider {
   }
 
   async set(blob: Blob): Promise<BlobId> {
-    const uuid = uuidv4();
-    await IKV.set(uuid, blob);
-    this.blobs.add(uuid);
-    return uuid;
+    const blobId = uuidv4();
+    await IKV.set(blobId, blob);
+    this.blobs.add(blobId);
+    this.signals.blobAdded.emit(blobId);
+    return blobId;
   }
 
   async delete(id: BlobId): Promise<void> {

@@ -30,11 +30,30 @@ async function testBasic() {
     assertExists(url);
 
     const img = await loadImage(url);
-    // for debug
     document.body.appendChild(img);
 
     const isCorrectColor = assertColor(img, 100, 100, [128, 128, 128]);
     return url.startsWith('blob:') && isCorrectColor;
+  });
+
+  testSerial('can trigger event', async () => {
+    let called = false;
+    let idCalled: string | null = null;
+
+    storage.signals.blobAdded.on(id => {
+      called = true;
+      idCalled = id;
+    });
+
+    const blob = await loadTestImageBlob('test-card-2');
+    const id = await storage.set(blob);
+    const url = await storage.get(id);
+    assertExists(url);
+
+    const img = await loadImage(url);
+    document.body.appendChild(img);
+
+    return id === idCalled && called;
   });
 
   testSerial('can delete image', async () => {
@@ -83,7 +102,6 @@ async function testRefreshAfter() {
     assertExists(url);
 
     const img = await loadImage(url);
-    // for debug
     document.body.appendChild(img);
 
     const isCorrectColor = assertColor(img, 100, 100, [193, 193, 193]);

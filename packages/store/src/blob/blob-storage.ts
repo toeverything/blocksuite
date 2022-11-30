@@ -1,32 +1,40 @@
-import type { BlobProvider } from './blob-providers';
+import { Signal } from '../utils/signal';
+import type { BlobProvider, BlobId, BlobURL } from './blob-providers';
 
 export class BlobStorage {
   private _providers: BlobProvider[] = [];
+
+  signals = {
+    blobAdded: new Signal<BlobId>(),
+  };
 
   get providers() {
     return this._providers;
   }
 
-  private get _firstProvider(): BlobProvider {
-    if (this._providers.length === 0) {
-      throw new Error('No provider found');
+  get blobs(): Set<BlobId> {
+    // merge all blobs from all providers
+    const result = new Set<BlobId>();
+    for (const provider of this._providers) {
+      for (const blob of provider.blobs) {
+        result.add(blob);
+      }
     }
-    return this._providers[0];
-  }
-
-  get blobs(): Set<string> {
-    return this._firstProvider.blobs;
+    return result;
   }
 
   addProvider(provider: BlobProvider) {
     this._providers.push(provider);
+    provider.signals.blobAdded.on(blobId => {
+      this.signals.blobAdded.emit(blobId);
+    });
   }
 
   removeProvider(provider: BlobProvider) {
     this._providers = this._providers.filter(p => p !== provider);
   }
 
-  async get(id: string): Promise<string | null> {
+  async get(id: BlobId): Promise<BlobURL | null> {
     for (const provider of this._providers) {
       try {
         return await provider.get(id);
@@ -37,8 +45,8 @@ export class BlobStorage {
     throw new Error(`No provider found for blob ${id}`);
   }
 
-  async set(blob: Blob): Promise<string> {
-    let result: string | null = null;
+  async set(blob: Blob): Promise<BlobId> {
+    let result: BlobId | null = null;
     for (const provider of this._providers) {
       try {
         result = await provider.set(blob);
@@ -51,7 +59,7 @@ export class BlobStorage {
     return result;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: BlobId): Promise<void> {
     for (const provider of this._providers) {
       try {
         await provider.delete(id);
