@@ -44,7 +44,7 @@ function wait(ms: number) {
 }
 
 export async function run() {
-  await wait(0); // for better in-browser debug log formatting
+  await wait(50); // for correct event sequence
 
   for (const testCase of testCases) {
     const { name, callback } = testCase;
