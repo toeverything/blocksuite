@@ -13,17 +13,27 @@ export interface BlobProvider {
   clear(): Promise<void>;
 }
 
+interface BlobProviderStatic {
+  init(): Promise<BlobProvider>;
+}
+
+function staticImplements<T>() {
+  return <U extends T>(constructor: U) => constructor;
+}
+
+@staticImplements<BlobProviderStatic>()
 export class IndexedDBBlobProvider implements BlobProvider {
   readonly config: unknown;
   readonly blobs = new Set<BlobId>();
 
-  constructor() {
-    this._initBlobs();
+  static async init(): Promise<IndexedDBBlobProvider> {
+    const provider = new IndexedDBBlobProvider();
+    await provider._initBlobs();
+    return provider;
   }
 
   async _initBlobs() {
     const entries = await IKV.entries();
-    console.log('entries', entries);
     for (const [key] of entries) {
       this.blobs.add(key as string);
     }
