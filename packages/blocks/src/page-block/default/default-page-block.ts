@@ -41,7 +41,12 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../image-block/icons';
-import { deleteBlock, downloadImage, writeClipImg } from './utils';
+import {
+  deleteBlock,
+  downloadImage,
+  focusCaption,
+  writeClipImg,
+} from './utils';
 
 export interface EmbedOption {
   position: { x: number; y: number };
@@ -161,7 +166,7 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
 
       <div class="affine-image-option-container">
         <ul style=${styleMap(style)} class="image-option">
-          <li @click=${() => downloadImage(embedOption.model.source)}>
+          <li @click=${() => focusCaption(embedOption.model)}>
             ${CaptionIcon}
           </li>
           <li @click=${() => downloadImage(embedOption.model.source)}>

@@ -1,5 +1,9 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { assertExists, getBlockById } from '../../__internal__/utils';
+import {
+  assertExists,
+  getBlockById,
+  getBlockElementByModel,
+} from '../../__internal__/utils';
 
 export const pick = (blocks: BaseBlockModel[], x: number, y: number) => {
   let result = null;
@@ -67,4 +71,11 @@ export async function writeClipImg(imgURL: string | undefined) {
 
 export function deleteBlock(model: BaseBlockModel) {
   model.space.deleteBlock(model);
+}
+
+export function focusCaption(model: BaseBlockModel) {
+  const dom = getBlockElementByModel(model)?.querySelector(
+    '.affine-embed-wrapper-caption'
+  ) as HTMLInputElement;
+  dom.focus();
 }
