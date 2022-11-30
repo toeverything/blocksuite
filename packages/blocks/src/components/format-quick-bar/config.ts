@@ -26,26 +26,27 @@ import {
 
 export const paragraphButtons = [
   {
-    key: 'text',
+    id: 'text',
     name: 'Text',
     icon: TextIcon,
   },
-  { key: 'h1', name: 'Heading 1', icon: H1Icon },
-  { key: 'h2', name: 'Heading 2', icon: H2Icon },
-  { key: 'h3', name: 'Heading 3', icon: H3Icon },
-  { key: 'h4', name: 'Heading 4', icon: H4Icon },
-  { key: 'h5', name: 'Heading 5', icon: H5Icon },
-  { key: 'h6', name: 'Heading 6', icon: H6Icon },
-  { key: 'bulleted', name: 'Bulleted List', icon: BulletedListIcon },
-  { key: 'numbered', name: 'Numbered List', icon: NumberedIcon },
-  { key: 'todo', name: 'To-do List', icon: TodoIcon },
-  { key: 'code', name: 'Code Block', icon: CodeIcon },
-  { key: 'quote', name: 'Quote', icon: QuoteIcon },
-  { key: 'callout', name: 'Callout', icon: CalloutIcon },
+  { id: 'h1', name: 'Heading 1', icon: H1Icon },
+  { id: 'h2', name: 'Heading 2', icon: H2Icon },
+  { id: 'h3', name: 'Heading 3', icon: H3Icon },
+  { id: 'h4', name: 'Heading 4', icon: H4Icon },
+  { id: 'h5', name: 'Heading 5', icon: H5Icon },
+  { id: 'h6', name: 'Heading 6', icon: H6Icon },
+  { id: 'bulleted', name: 'Bulleted List', icon: BulletedListIcon },
+  { id: 'numbered', name: 'Numbered List', icon: NumberedIcon },
+  { id: 'todo', name: 'To-do List', icon: TodoIcon },
+  { id: 'code', name: 'Code Block', icon: CodeIcon },
+  { id: 'quote', name: 'Quote', icon: QuoteIcon },
+  { id: 'callout', name: 'Callout', icon: CalloutIcon },
 ] as const;
 
 export const formatButtons = [
   {
+    id: 'bold',
     name: 'Bold',
     icon: BoldIcon,
     activeWhen: (format: Record<string, unknown>) => 'bold' in format,
@@ -54,6 +55,7 @@ export const formatButtons = [
     },
   },
   {
+    id: 'italic',
     name: 'Italic',
     icon: ItalicIcon,
     activeWhen: (format: Record<string, unknown>) => 'italic' in format,
@@ -62,6 +64,7 @@ export const formatButtons = [
     },
   },
   {
+    id: 'underline',
     name: 'Underline',
     icon: UnderlineIcon,
     activeWhen: (format: Record<string, unknown>) => 'underline' in format,
@@ -70,6 +73,7 @@ export const formatButtons = [
     },
   },
   {
+    id: 'strike',
     name: 'Strikethrough',
     icon: StrikethroughIcon,
     activeWhen: (format: Record<string, unknown>) => 'strike' in format,
@@ -78,6 +82,7 @@ export const formatButtons = [
     },
   },
   {
+    id: 'code',
     name: 'Code',
     icon: InlineCodeIcon,
     activeWhen: (format: Record<string, unknown>) => 'code' in format,
@@ -86,6 +91,7 @@ export const formatButtons = [
     },
   },
   {
+    id: 'link',
     name: 'Link',
     icon: LinkIcon,
     activeWhen: (format: Record<string, unknown>) => 'link' in format,

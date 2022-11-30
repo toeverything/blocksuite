@@ -148,11 +148,11 @@ export class FormatQuickBar extends LitElement {
       @mouseout=${this.onHoverEnd}
     >
       ${paragraphButtons.map(
-        ({ key, name, icon }) => html`<format-bar-button
+        ({ id, name, icon }) => html`<format-bar-button
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
-          @click=${() => formatParagraph(key)}
+          @click=${() => formatParagraph(id)}
         >
           ${icon}
         </format-bar-button>`
@@ -168,7 +168,7 @@ export class FormatQuickBar extends LitElement {
       return html``;
     }
     const paragraphIcon =
-      paragraphButtons.find(btn => btn.key === this.paragraphType)?.icon ??
+      paragraphButtons.find(btn => btn.id === this.paragraphType)?.icon ??
       paragraphButtons[0].icon;
     const paragraphItems = html`<format-bar-button
       class="paragraph-button"
@@ -185,8 +185,9 @@ export class FormatQuickBar extends LitElement {
       ${formatButtons
         .filter(({ showWhen = () => true }) => showWhen(this.models))
         .map(
-          ({ name, icon, action, activeWhen }) => html`<format-bar-button
+          ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
             class="has-tool-tip"
+            data-testid=${id}
             ?active=${activeWhen(this.format)}
             @click=${() => {
               action(space, this.abortController);
