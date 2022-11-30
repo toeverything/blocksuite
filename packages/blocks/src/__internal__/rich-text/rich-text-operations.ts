@@ -157,10 +157,14 @@ export function handleLineStartBackspace(space: Space, model: ExtendedModel) {
       space.updateBlock(model, { type: 'text' });
     } else {
       const parent = space.getParent(model);
+      const container = getContainerByModel(model);
+      const previousSibling = getPreviousBlock(container, model.id);
       if (!parent || parent?.flavour === 'affine:group') {
-        const container = getContainerByModel(model);
-        const previousSibling = getPreviousBlock(container, model.id);
-        if (previousSibling && previousSibling.flavour === 'affine:paragraph') {
+        if (previousSibling?.flavour == 'affine:divider') {
+          space.captureSync();
+          space.deleteBlock(previousSibling);
+        }
+        if (previousSibling?.flavour == 'affine:paragraph') {
           space.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
           previousSibling.text?.join(model.text as Text);
