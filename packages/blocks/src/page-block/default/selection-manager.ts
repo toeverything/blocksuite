@@ -14,6 +14,7 @@ import {
   noop,
   resetNativeSelection,
   SelectionEvent,
+  getModelByElement,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -298,10 +299,22 @@ export class DefaultSelectionManager {
       this._onNativeSelectionDragEnd(e);
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
+    } else if (this.state.type === 'embed') {
+      this._onEmbedDragEnd(e);
     }
     this._showFormatQuickBar(e);
   };
 
+  private _onEmbedDragEnd(e: SelectionEvent) {
+    // console.log(this._activeComponent.model);
+    assertExists(this._activeComponent);
+    const dragModel = getModelByElement(this._activeComponent);
+    console.log(this._dropContainer?.getBoundingClientRect());
+    assertExists(this._dropContainer);
+    const { width, height } = this._dropContainer.getBoundingClientRect();
+    // console.log(getModelByElement(this._activeComponent));
+    dragModel.space.updateBlock(dragModel, { width: width, height: height });
+  }
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
       const { anchor, direction, selectedType } =
