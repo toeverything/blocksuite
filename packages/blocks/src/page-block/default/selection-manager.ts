@@ -289,7 +289,6 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     }
-    this.state.type = 'none';
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
