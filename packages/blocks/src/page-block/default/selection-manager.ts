@@ -22,7 +22,7 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
-import { pick } from './utils';
+import { getHoverBlockOptionByPosition } from './utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
   return (
@@ -306,13 +306,10 @@ export class DefaultSelectionManager {
   };
 
   private _onEmbedDragEnd(e: SelectionEvent) {
-    // console.log(this._activeComponent.model);
     assertExists(this._activeComponent);
     const dragModel = getModelByElement(this._activeComponent);
-    console.log(this._dropContainer?.getBoundingClientRect());
     assertExists(this._dropContainer);
     const { width, height } = this._dropContainer.getBoundingClientRect();
-    // console.log(getModelByElement(this._activeComponent));
     dragModel.space.updateBlock(dragModel, { width: width, height: height });
   }
   private _showFormatQuickBar(e: SelectionEvent) {
@@ -388,7 +385,11 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    const hoverOption = pick(this._blocks, e.raw.pageX, e.raw.pageY);
+    const hoverOption = getHoverBlockOptionByPosition(
+      this._blocks,
+      e.raw.pageX,
+      e.raw.pageY
+    );
     this._signals.updateEmbedOption.emit(hoverOption);
   };
 

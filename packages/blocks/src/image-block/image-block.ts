@@ -14,39 +14,10 @@ export class ImageBlockComponent extends LitElement {
     ${unsafeCSS(style)}
   `;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
   model!: EmbedBlockModel;
 
   @property()
   host!: BlockHost;
-
-  @query('.top-left')
-  _topLeft!: HTMLElement;
-
-  @query('.affine-image-wrapper')
-  _container!: HTMLElement;
-
-  @query('.top-right')
-  _topRight!: HTMLElement;
-
-  @query('.bottom-left')
-  _bottomLeft!: HTMLElement;
-
-  @query('.bottom-right')
-  _bottomRight!: HTMLElement;
-
-  @query('.resizable')
-  _resizable!: HTMLElement;
-
-  @query('.affine-embed-wrapper-caption')
-  _captionDom!: HTMLInputElement;
-
-  @state()
-  _canEditor!: boolean;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -54,10 +25,6 @@ export class ImageBlockComponent extends LitElement {
   }
 
   // This is the initial width before event resize is applied
-
-  private _selectImage() {
-    this._canEditor = true;
-  }
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -69,11 +36,6 @@ export class ImageBlockComponent extends LitElement {
     // img.onload = () => {};
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    // this._cancelResize();
-  }
-
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     // const { deep, index } = getListInfo(this.host, this.model);
@@ -83,7 +45,7 @@ export class ImageBlockComponent extends LitElement {
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <embed-block .model=${this.model}>
-        <div class="affine-image-wrapper" @click=${this._selectImage}>
+        <div class="affine-image-wrapper">
           <div class="resizable">
             <img src=${source} />
           </div>

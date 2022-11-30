@@ -41,12 +41,7 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../image-block/icons';
-import {
-  deleteBlock,
-  downloadImage,
-  focusCaption,
-  writeClipImg,
-} from './utils';
+import { downloadImage, focusCaption, copyImgToClip } from './utils';
 
 export interface EmbedOption {
   position: { x: number; y: number };
@@ -169,13 +164,28 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
           <li @click=${() => focusCaption(embedOption.model)}>
             ${CaptionIcon}
           </li>
-          <li @click=${() => downloadImage(embedOption.model.source)}>
+          <li
+            @click=${() => {
+              assertExists(embedOption.model.source);
+              downloadImage(embedOption.model.source);
+            }}
+          >
             ${DownloadIcon}
           </li>
-          <li @click=${() => writeClipImg(embedOption.model.source)}>
+          <li
+            @click=${() => {
+              assertExists(embedOption.model.source);
+              copyImgToClip(embedOption.model.source);
+            }}
+          >
             ${CopyIcon}
           </li>
-          <li @click=${() => deleteBlock(embedOption.model)}>${DeleteIcon}</li>
+          <li
+            @click=${() =>
+              embedOption.model.space.deleteBlock(embedOption.model)}
+          >
+            ${DeleteIcon}
+          </li>
         </ul>
       </div>
     `;

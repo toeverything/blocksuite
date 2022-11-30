@@ -5,8 +5,11 @@ import {
   getBlockElementByModel,
 } from '../../__internal__/utils';
 
-export const pick = (blocks: BaseBlockModel[], x: number, y: number) => {
-  let result = null;
+export const getHoverBlockOptionByPosition = (
+  blocks: BaseBlockModel[],
+  x: number,
+  y: number
+) => {
   for (let index = 0; index <= blocks.length - 1; index++) {
     if (blocks[index].flavour === 'affine:embed') {
       const hoverDom = getBlockById(blocks[index].id);
@@ -14,7 +17,7 @@ export const pick = (blocks: BaseBlockModel[], x: number, y: number) => {
       const imageRect = hoverImage?.getBoundingClientRect();
       assertExists(imageRect);
       if (isPointIn(imageRect, x, y)) {
-        result = {
+        return {
           position: {
             x: imageRect.right + 10,
             y: imageRect.top,
@@ -24,7 +27,7 @@ export const pick = (blocks: BaseBlockModel[], x: number, y: number) => {
       }
     }
   }
-  return result;
+  return null;
 };
 
 function isPointIn(block: DOMRect, x: number, y: number): boolean {
@@ -39,8 +42,7 @@ function isPointIn(block: DOMRect, x: number, y: number): boolean {
   return true;
 }
 
-export function downloadImage(url: string | undefined) {
-  assertExists(url);
+export function downloadImage(url: string) {
   const link = document.createElement('a');
   link.href = url;
   link.setAttribute('target', '_blank');
@@ -51,26 +53,14 @@ export function downloadImage(url: string | undefined) {
   link.remove();
 }
 
-export async function writeClipImg(imgURL: string | undefined) {
-  assertExists(imgURL);
-  try {
-    const data = await fetch(imgURL);
-    const blob = await data.blob();
-
-    await navigator.clipboard.write([
-      new ClipboardItem({
-        [blob.type]: blob,
-      }),
-    ]);
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      console.error(err.name, err.message);
-    }
-  }
-}
-
-export function deleteBlock(model: BaseBlockModel) {
-  model.space.deleteBlock(model);
+export async function copyImgToClip(imgURL: string) {
+  const data = await fetch(imgURL);
+  const blob = await data.blob();
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      [blob.type]: blob,
+    }),
+  ]);
 }
 
 export function focusCaption(model: BaseBlockModel) {
