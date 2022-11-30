@@ -4,7 +4,10 @@ import {
   ALLOW_DEFAULT,
   focusNextBlock,
   focusPreviousBlock,
+  getContainerByModel,
   getCurrentRange,
+  getNextBlock,
+  getPreviousBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   noop,
@@ -190,6 +193,12 @@ export function createKeyboardBindings(space: Space, model: BaseBlockModel) {
   function onKeyLeft(this: KeyboardEventThis, range: QuillRange) {
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
     if (range.index === 0 && range.length === 0) {
+      const container = getContainerByModel(model);
+      const preNodeModel = getPreviousBlock(container, model.id);
+      if (preNodeModel?.flavour === 'affine:divider') {
+        focusPreviousBlock(preNodeModel, 'end');
+        return PREVENT_DEFAULT;
+      }
       focusPreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
@@ -199,6 +208,11 @@ export function createKeyboardBindings(space: Space, model: BaseBlockModel) {
   function onKeyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + 1 === textLength) {
+      const nextBlock = getNextBlock(model.id);
+      if (nextBlock?.flavour === 'affine:divider') {
+        focusNextBlock(nextBlock, 'start');
+        return PREVENT_DEFAULT;
+      }
       focusNextBlock(model, 'start');
       return PREVENT_DEFAULT;
     }

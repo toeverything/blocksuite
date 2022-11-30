@@ -208,12 +208,19 @@ export function handleLineStartBackspace(space: Space, model: ExtendedModel) {
 
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
   const selection = window.getSelection();
+  const container = getContainerByModel(model);
+  const preNodeModel = getPreviousBlock(container, model.id);
   if (selection) {
     const range = selection.getRangeAt(0);
     const { height, left, top } = range.getBoundingClientRect();
     // if cursor is on the first line and has no text, height is 0
     if (height === 0 && top === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
+      if (preNodeModel?.flavour === 'affine:divider') {
+        rect &&
+          focusPreviousBlock(preNodeModel, new Point(rect.left, rect.top));
+        return PREVENT_DEFAULT;
+      }
       rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
     }
@@ -223,8 +230,6 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      const container = getContainerByModel(model);
-      const preNodeModel = getPreviousBlock(container, model.id);
       // FIXME: Then it will turn the input into the div
       if (preNodeModel?.flavour === 'affine:group') {
         (
@@ -232,6 +237,8 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
             '.affine-default-page-block-title'
           ) as HTMLInputElement
         ).focus();
+      } else if (preNodeModel?.flavour === 'affine:divider') {
+        focusPreviousBlock(preNodeModel, new Point(left, top));
       } else {
         focusPreviousBlock(model, new Point(left, top));
       }
@@ -278,6 +285,10 @@ export function handleKeyDown(
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
+      if (nextBlock.flavour === 'affine:divider') {
+        rect && focusNextBlock(nextBlock, new Point(rect.left, rect.top));
+        return PREVENT_DEFAULT;
+      }
       rect && focusNextBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
     }
@@ -287,6 +298,10 @@ export function handleKeyDown(
       const nextBlock = getNextBlock(model.id);
       if (!nextBlock) {
         return ALLOW_DEFAULT;
+      }
+      if (nextBlock.flavour === 'affine:divider') {
+        focusNextBlock(nextBlock, new Point(left, bottom));
+        return PREVENT_DEFAULT;
       }
       focusNextBlock(model, new Point(left, bottom));
       return PREVENT_DEFAULT;
