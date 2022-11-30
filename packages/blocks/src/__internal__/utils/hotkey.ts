@@ -46,17 +46,44 @@ class HotkeyManager {
   }
 
   /**
-   * Create a context to shielding against global hotkey
+   * Create a context to shielding against global hotkey.
+   *
+   * The param `fn` will be executed immediately.
+   * @example
+   * ```ts
+   * const ret = await hotkey.withDisableHotkey(async () => {
+   *   const result = await createLink(space);
+   *   return result;
+   * });
+   * ```
    */
-  async withDisabledHotkey(
-    fn: () => void | Promise<unknown>
-  ): Promise<void | unknown> {
+  async withDisabledHotkey<T = void>(fn: () => Promise<T>) {
     this.disableHotkey();
     try {
       return await fn();
     } finally {
       this.enableHotkey();
     }
+  }
+
+  /**
+   * Similar to {@link withDisableHotkey}, but return a function instead of execute immediately.
+   * @example
+   * ```ts
+   * const createLinkWithoutHotkey = withDisabledHotkeyFn((space) => createLink(space));
+   * await createLinkWithoutHotkey(space);
+   * ```
+   */
+  withDisabledHotkeyFn<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    T extends (...args: any[]) => Promise<any> = (
+      ...args: unknown[]
+    ) => Promise<unknown>
+  >(fn: T) {
+    return ((...args: Parameters<T>) =>
+      this.withDisabledHotkey<ReturnType<T>>(() =>
+        fn(...args)
+      ) as ReturnType<T>) as unknown as T;
   }
 }
 
