@@ -6,7 +6,7 @@ type BlobURL = string;
 
 export interface BlobProvider {
   readonly config: unknown;
-  get(id: BlobId): Promise<BlobURL>;
+  get(id: BlobId): Promise<BlobURL | null>;
   set(blob: Blob): Promise<BlobId>;
   delete(id: BlobId): Promise<void>;
   clear(): Promise<void>;
@@ -14,9 +14,12 @@ export interface BlobProvider {
 
 export class IndexedDBBlobProvider implements BlobProvider {
   readonly config: unknown;
+  blobs = new Set<Blob>();
 
-  async get(id: string): Promise<string> {
-    const blob = (await IKV.get(id)) as Blob;
+  async get(id: string): Promise<string | null> {
+    const blob = (await IKV.get(id)) as Blob | null;
+    if (!blob) return null;
+
     const result = URL.createObjectURL(blob);
     return result;
   }
