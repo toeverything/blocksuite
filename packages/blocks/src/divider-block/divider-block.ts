@@ -41,9 +41,7 @@ export class DividerBlockComponent extends LitElement {
 
     return html`
       <div class=${`affine-divider-block-container`}>
-        <div class=${`affine-divider-rich-text-wrapper`}>
-          <rich-text .host=${this.host} .model=${this.model}></rich-text>
-        </div>
+        <hr />
         ${childrenContainer}
       </div>
     `;
