@@ -1,13 +1,12 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.3.0-alpha.2",
+  "version": "0.3.0-alpha.3",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "scripts": {
     "serve": "cross-env PORT=5173 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
-    "test:blob": "playwright test",
-    "test": "vitest --run"
+    "test": "playwright test"
   },
   "keywords": [],
   "author": "toeverything",
