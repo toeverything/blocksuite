@@ -1,2 +1,2 @@
-export { BlobStorage } from './blob-storage';
-export * from './blob-providers';
+export { BlobStorage } from './storage';
+export { IndexedDBBlobProvider } from './providers';

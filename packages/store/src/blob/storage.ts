@@ -1,5 +1,5 @@
 import { Signal } from '../utils/signal';
-import type { BlobProvider, BlobId, BlobURL } from './blob-providers';
+import type { BlobId, BlobProvider } from './types';
 
 export class BlobStorage {
   private _providers: BlobProvider[] = [];
