@@ -12,11 +12,11 @@ import {
 
 async function testBasic() {
   const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init();
+  const provider = await IndexedDBBlobProvider.init('test');
   storage.addProvider(provider);
 
   const blob = await loadTestImageBlob('test-card-1');
-  const id = await storage.set(blob);
+  let id: string | undefined = undefined;
 
   // @ts-ignore
   window.storage = storage;
@@ -26,6 +26,9 @@ async function testBasic() {
   });
 
   testSerial('can store image', async () => {
+    id = await storage.set(blob);
+    console.log(id);
+
     const url = await storage.get(id);
     assertExists(url);
 
@@ -57,8 +60,8 @@ async function testBasic() {
   });
 
   testSerial('can delete image', async () => {
-    await storage.delete(id);
-    const url = await storage.get(id);
+    await storage.delete(id!);
+    const url = await storage.get(id!);
     return url === null;
   });
 

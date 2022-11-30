@@ -97,19 +97,23 @@ importers:
     specifiers:
       '@types/flexsearch': ^0.7.3
       '@types/quill': ^2.0.9
+      buffer: ^6.0.3
       cross-env: ^7.0.3
       flexsearch: 0.7.21
       idb-keyval: ^6.2.0
       lib0: ^0.2.52
+      sha3: ^2.1.4
       y-indexeddb: ^9.0.9
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
       y-websocket: ^1.4.5
       yjs: ^13.5.41
     dependencies:
+      buffer: 6.0.3
       flexsearch: 0.7.21
       idb-keyval: 6.2.0
       lib0: 0.2.52
+      sha3: 2.1.4
       y-indexeddb: 9.0.9_yjs@13.5.41
       y-protocols: 1.0.5
       y-webrtc: 10.2.3
@@ -3470,6 +3474,12 @@ packages:
   /set-blocking/2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
     dev: true
+
+  /sha3/2.1.4:
+    resolution: {integrity: sha512-S8cNxbyb0UGUM2VhRD4Poe5N58gJnJsLJ5vC7FYWGUmGhcsj4++WaIOBFVDxlG0W3To6xBuiRh+i0Qp2oNCOtg==}
+    dependencies:
+      buffer: 6.0.3
+    dev: false
 
   /shebang-command/1.2.0:
     resolution: {integrity: sha512-EV3L1+UQWGor21OmnvojK36mhg+TyIKDh3iFBKBohr5xeXIhNBcx8oWdgkTEEQ+BEFFYdLRuqMfd5L84N1V5Vg==}

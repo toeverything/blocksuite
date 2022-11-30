@@ -3,12 +3,11 @@ import type { BlobProvider, BlobId, BlobURL } from './blob-providers';
 
 export class BlobStorage {
   private _providers: BlobProvider[] = [];
-
   signals = {
     blobAdded: new Signal<BlobId>(),
   };
 
-  get providers() {
+  get providers(): Readonly<BlobProvider[]> {
     return this._providers;
   }
 
