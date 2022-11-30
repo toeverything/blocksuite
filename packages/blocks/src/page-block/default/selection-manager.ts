@@ -1,21 +1,25 @@
 import type { BaseBlockModel, Space } from '@blocksuite/store';
 import type { EmbedBlockComponent } from '../../embed-block';
+import { showFormatQuickBar } from '../../components/format-quick-bar';
 import {
-  initMouseEventHandlers,
-  SelectionEvent,
-  caretRangeFromPoint,
-  resetNativeSelection,
   assertExists,
-  noop,
-  handleNativeRangeDragMove,
-  isBlankArea,
+  caretRangeFromPoint,
   handleNativeRangeClick,
-  isPageTitle,
   handleNativeRangeDblClick,
+  handleNativeRangeDragMove,
+  initMouseEventHandlers,
+  isBlankArea,
+  isPageTitle,
   isEmbed,
+  noop,
+  resetNativeSelection,
+  SelectionEvent,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
-import { repairContextMenuRange } from '../utils/cursor';
+import {
+  getNativeSelectionMouseDragInfo,
+  repairContextMenuRange,
+} from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 import { pick } from './utils';
 
@@ -169,6 +173,18 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
+    const { selectionRect, richTextCache, selectedRichTexts } =
+      this._getSelectedBlockInfo(e);
+    this.state.selectedRichTexts = selectedRichTexts;
+    const selectedBounds = selectedRichTexts.map(richText => {
+      return richTextCache.get(richText) as DOMRect;
+    });
+    this._signals.updateSelectedRects.emit(selectedBounds);
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
+  }
+
+  private _getSelectedBlockInfo(e: SelectionEvent) {
+    assertExists(this.state.startPoint);
     const current = { x: e.raw.clientX, y: e.raw.clientY };
     const { startPoint: start } = this.state;
 
@@ -178,19 +194,13 @@ export class DefaultSelectionManager {
       richTextCache,
       selectionRect
     );
-
-    this.state.selectedRichTexts = selectedRichTexts;
-    const selectedBounds = selectedRichTexts.map(richText => {
-      return richTextCache.get(richText) as DOMRect;
-    });
     // TODO
     // const selectedEmbed = filterSelectedEmbed(embedCache, selectionRect);
     // const selectedEmbedBounds = selectedEmbed.map(embed => {
     //   return embedCache.get(embed) as DOMRect;
     // });
     // this._signals.updateEmbedRects.emit(selectedEmbedBounds);
-    this._signals.updateSelectedRects.emit(selectedBounds);
-    this._signals.updateFrameSelectionRect.emit(selectionRect);
+    return { selectionRect, richTextCache, selectedRichTexts };
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
@@ -289,7 +299,42 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     }
+    this._showFormatQuickBar(e);
   };
+
+  private _showFormatQuickBar(e: SelectionEvent) {
+    if (this.state.type === 'native') {
+      const { anchor, direction, selectedType } =
+        getNativeSelectionMouseDragInfo(e);
+      if (selectedType === 'Caret') {
+        // If nothing is selected, then we should not show the format bar
+        return;
+      }
+
+      showFormatQuickBar({ anchorEl: anchor, direction });
+    } else if (this.state.type === 'block') {
+      // TODO handle block selection
+      // const direction = getDragDirection(e);
+      // const { selectedRichTexts } = this._getSelectedBlockInfo(e);
+      // if (selectedRichTexts.length === 0) {
+      //   // Selecting nothing
+      //   return;
+      // }
+      // const selectedBlocks = selectedRichTexts.map(richText => {
+      //   return getBlockById(richText.model.id) as unknown as HTMLElement;
+      // });
+      // const selectedType: SelectedBlockType = selectedBlocks.every(block => {
+      //   return /paragraph-block/i.test(block.tagName);
+      // })
+      //   ? 'text'
+      //   : 'other';
+      // console.log(`selectedType: ${selectedType}`, this.state.type);
+      // const anchor = ['rightDown', 'leftDown'].includes(direction)
+      //   ? selectedBlocks[selectedBlocks.length - 1]
+      //   : selectedBlocks[0];
+      // showFormatQuickBar({ anchorEl: anchor });
+    }
+  }
 
   private _onContainerClick = (e: SelectionEvent) => {
     this.state.clear();
@@ -345,6 +390,7 @@ export class DefaultSelectionManager {
     this._signals.updateEmbedRects.dispose();
     this._mouseDisposeCallback();
   }
+
   selectBlockByRect(selectionRect: DOMRect) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);

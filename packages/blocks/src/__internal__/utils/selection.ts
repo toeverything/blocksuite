@@ -1,6 +1,6 @@
 import type { BaseBlockModel, Space } from '@blocksuite/store';
 import type { RichText } from '../rich-text/rich-text';
-import { assertExists, caretRangeFromPoint, matchFlavours } from './std';
+import { assertExists, caretRangeFromPoint, matchFlavours, sleep } from './std';
 import type { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
@@ -84,14 +84,6 @@ function fixCurrentRangeToText(
     }
   }
   return range;
-}
-
-async function sleep(delay = 0) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(null);
-    }, delay);
-  });
 }
 
 function setStartRange(editableContainer: Element) {
