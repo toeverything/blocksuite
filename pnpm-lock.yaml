@@ -101,6 +101,7 @@ importers:
       cross-env: ^7.0.3
       flexsearch: 0.7.21
       idb-keyval: ^6.2.0
+      ky: ^0.32.2
       lib0: ^0.2.52
       sha3: ^2.1.4
       y-indexeddb: ^9.0.9
@@ -112,6 +113,7 @@ importers:
       buffer: 6.0.3
       flexsearch: 0.7.21
       idb-keyval: 6.2.0
+      ky: 0.32.2
       lib0: 0.2.52
       sha3: 2.1.4
       y-indexeddb: 9.0.9_yjs@13.5.41
@@ -2545,6 +2547,11 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
     dev: true
+
+  /ky/0.32.2:
+    resolution: {integrity: sha512-eBJeF6IXNwX5rksdwBrE2rIJrU2d84GoTvdM7OmmTIwUVXEMd72wIwvT+nyhrqtv7AzbSNsWz7yRsHgVhj1uog==}
+    engines: {node: '>=14.16'}
+    dev: false
 
   /level-codec/9.0.2:
     resolution: {integrity: sha512-UyIwNb1lJBChJnGfjmO0OR+ezh2iVu1Kas3nvBS/BzGnx79dv6g7unpKIDNPMhfdTEGoc7mC8uAu51XEtX+FHQ==}

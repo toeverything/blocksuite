@@ -15,14 +15,21 @@ export function sha3(buffer: Buffer): string {
     .replace(/\//g, '_');
 }
 
-export function getDatabase(type: string, database: string): IdbInstance {
+export function getDatabase<T = ArrayBufferLike>(
+  type: string,
+  database: string
+): IdbInstance<T> {
   const db = createStore(`${database}_${type}`, type);
   return {
-    get: (key: string) => get<ArrayBufferLike>(key, db),
-    set: (key: string, value: ArrayBufferLike) => set(key, value, db),
+    get: (key: string) => get<T>(key, db),
+    set: (key: string, value: T) => set(key, value, db),
     has: (key: string) => get(key, db).then(value => value !== undefined),
     keys: () => keys(db),
     delete: (key: string) => del(key, db),
     clear: () => clear(db),
   };
+}
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
