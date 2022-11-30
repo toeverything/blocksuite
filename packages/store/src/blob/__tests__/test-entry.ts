@@ -56,7 +56,4 @@ export async function testBasic() {
   await run();
 }
 
-(window as any).main = () => {
-  testBasic();
-};
-(window as any).testBasic = testBasic;
+document.getElementById('test-basic')?.addEventListener('click', testBasic);
