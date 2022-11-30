@@ -7,6 +7,17 @@ export class BlobStorage {
     return this._providers;
   }
 
+  private get _firstProvider(): BlobProvider {
+    if (this._providers.length === 0) {
+      throw new Error('No provider found');
+    }
+    return this._providers[0];
+  }
+
+  get blobs(): Set<string> {
+    return this._firstProvider.blobs;
+  }
+
   addProvider(provider: BlobProvider) {
     this._providers.push(provider);
   }
@@ -27,14 +38,17 @@ export class BlobStorage {
   }
 
   async set(blob: Blob): Promise<string> {
+    let result: string | null = null;
     for (const provider of this._providers) {
       try {
-        return await provider.set(blob);
+        result = await provider.set(blob);
       } catch (e) {
         console.warn(e);
       }
     }
-    throw new Error('No provider found for blob');
+
+    if (result === null) throw new Error('No provider found for blob');
+    return result;
   }
 
   async delete(id: string): Promise<void> {

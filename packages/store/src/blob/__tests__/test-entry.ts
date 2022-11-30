@@ -1,16 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Test page entry located in playground/examples/blob/index.html
 import { BlobStorage, IndexedDBBlobProvider } from '..';
 import {
   testSerial,
-  run,
+  runOnce,
   loadTestImageBlob,
   loadImage,
   assertColor,
   assertExists,
+  disableButtonsAfterClick,
 } from './test-utils';
 
-export async function testBasic() {
+async function testBasic() {
   const storage = new BlobStorage();
   const provider = new IndexedDBBlobProvider();
   storage.addProvider(provider);
@@ -53,7 +53,66 @@ export async function testBasic() {
     return result === null;
   });
 
-  await run();
+  await runOnce();
+  clearIndexedDB();
+}
+
+async function testRefreshBefore() {
+  clearIndexedDB();
+  const storage = new BlobStorage();
+  const provider = new IndexedDBBlobProvider();
+  storage.addProvider(provider);
+
+  testSerial('can set blob', async () => {
+    const blob = await loadTestImageBlob('test-card-2');
+    const id = await storage.set(blob);
+    return id !== null && storage.blobs.has(id);
+  });
+
+  await runOnce();
+}
+
+async function testRefreshAfter() {
+  const storage = new BlobStorage();
+  const provider = new IndexedDBBlobProvider();
+  storage.addProvider(provider);
+
+  testSerial('can get saved blob', async () => {
+    const id = storage.blobs.values().next().value;
+    const url = await storage.get(id);
+    assertExists(url);
+
+    const img = await loadImage(url);
+    // for debug
+    document.body.appendChild(img);
+
+    const isCorrectColor = assertColor(img, 100, 100, [193, 193, 193]);
+    return storage.blobs.size === 1 && isCorrectColor;
+  });
+
+  await runOnce();
+  clearIndexedDB();
+}
+
+function clearIndexedDB() {
+  return new Promise<void>(resolve => {
+    const request = indexedDB.deleteDatabase('keyval-store');
+    request.onsuccess = () => {
+      console.log('IndexedDB cleared');
+      resolve();
+    };
+  });
 }
 
 document.getElementById('test-basic')?.addEventListener('click', testBasic);
+document
+  .getElementById('test-refresh-before')
+  ?.addEventListener('click', testRefreshBefore);
+document
+  .getElementById('test-refresh-after')
+  ?.addEventListener('click', testRefreshAfter);
+document
+  .getElementById('clear-indexeddb')
+  ?.addEventListener('click', clearIndexedDB);
+
+disableButtonsAfterClick();

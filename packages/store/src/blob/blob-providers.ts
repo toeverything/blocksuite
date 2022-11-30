@@ -6,6 +6,7 @@ type BlobURL = string;
 
 export interface BlobProvider {
   readonly config: unknown;
+  readonly blobs: Set<BlobId>;
   get(id: BlobId): Promise<BlobURL | null>;
   set(blob: Blob): Promise<BlobId>;
   delete(id: BlobId): Promise<void>;
@@ -14,9 +15,21 @@ export interface BlobProvider {
 
 export class IndexedDBBlobProvider implements BlobProvider {
   readonly config: unknown;
-  blobs = new Set<Blob>();
+  readonly blobs = new Set<BlobId>();
 
-  async get(id: string): Promise<string | null> {
+  constructor() {
+    this._initBlobs();
+  }
+
+  async _initBlobs() {
+    const entries = await IKV.entries();
+    console.log('entries', entries);
+    for (const [key] of entries) {
+      this.blobs.add(key as string);
+    }
+  }
+
+  async get(id: BlobId): Promise<BlobURL | null> {
     const blob = (await IKV.get(id)) as Blob | null;
     if (!blob) return null;
 
@@ -24,17 +37,20 @@ export class IndexedDBBlobProvider implements BlobProvider {
     return result;
   }
 
-  async set(blob: Blob): Promise<string> {
+  async set(blob: Blob): Promise<BlobId> {
     const uuid = uuidv4();
     await IKV.set(uuid, blob);
+    this.blobs.add(uuid);
     return uuid;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: BlobId): Promise<void> {
+    this.blobs.delete(id);
     await IKV.del(id);
   }
 
   async clear(): Promise<void> {
+    this.blobs.clear();
     await IKV.clear();
   }
 }
