@@ -1,4 +1,5 @@
 import type { Space, Text, BaseBlockModel } from '@blocksuite/store';
+import { DividerBlockModel } from '../../divider-block';
 import type { GroupBlockModel } from '../../group-block';
 import {
   assertExists,
@@ -265,6 +266,10 @@ export function handleBlockSelectionBatchDelete(
   models: ExtendedModel[]
 ) {
   space.captureSync();
+  if (models[0].flavour === 'affine:divider') {
+    space.deleteBlock(models[0]);
+    return;
+  }
   assertExists(models[0].text);
 
   models[0].text.delete(0, models[0].text.length);

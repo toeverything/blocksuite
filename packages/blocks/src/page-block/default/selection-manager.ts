@@ -1,4 +1,4 @@
-import type { Space } from '@blocksuite/store';
+import type { BaseBlockModel, Space } from '@blocksuite/store';
 import {
   initMouseEventHandlers,
   SelectionEvent,
@@ -52,7 +52,7 @@ type PageSelectionType = 'native' | 'block' | 'none';
 class PageSelectionState {
   type: PageSelectionType;
   selectedRichTexts: RichText[] = [];
-
+  model: BaseBlockModel | null = null;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
@@ -94,6 +94,7 @@ class PageSelectionState {
     this._richTextCache.clear();
     this._startRange = null;
     this._startPoint = null;
+    this.model = null;
     this.selectedRichTexts = [];
   }
 }
@@ -234,7 +235,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.dispose();
     this._mouseDisposeCallback();
   }
-  selectBlockByRect(selectionRect: DOMRect) {
+  selectBlockByRect(selectionRect: DOMRect, model?: BaseBlockModel) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);
     const { richTextCache } = this.state;
@@ -242,6 +243,10 @@ export class DefaultSelectionManager {
       richTextCache,
       selectionRect
     );
+
+    if (model?.flavour === 'affine:divider') {
+      this.state.model = model;
+    }
     this.state.selectedRichTexts = selectedRichTexts;
     const selectedBounds: DOMRect[] = [selectionRect];
     this._signals.updateSelectedRects.emit(selectedBounds);

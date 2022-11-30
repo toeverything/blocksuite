@@ -13,7 +13,7 @@ import type { DividerBlockModel } from './divider-model';
 import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
-function selectDivider(model: DividerBlockModel) {
+export function selectDivider(model: DividerBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;
   const blockElement = getBlockElementByModel(model);
   if (!blockElement) {
@@ -21,7 +21,7 @@ function selectDivider(model: DividerBlockModel) {
     throw new Error('Failed to select divider! blockElement not found!');
   }
   const selectionRect = blockElement.getBoundingClientRect();
-  selectionManager.selectBlockByRect(selectionRect);
+  selectionManager.selectBlockByRect(selectionRect, model);
 }
 @customElement('divider-block')
 export class DividerBlockComponent extends LitElement {
