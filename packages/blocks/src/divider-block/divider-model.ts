@@ -1,11 +1,8 @@
 import { Space, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
-type DividerType = 'normal';
-//TODO: add another type like https://jjuliano.github.io/markdown-ui/docs/divider.html
-
 export interface DividerBlockProps extends IBaseBlockProps {
   flavour: 'affine:divider';
-  type: DividerType;
+  type: 'normal';
 }
 
 export class DividerBlockModel
@@ -13,7 +10,7 @@ export class DividerBlockModel
   implements DividerBlockProps
 {
   flavour = 'affine:divider' as const;
-  type: DividerType;
+  type: 'normal';
 
   constructor(space: Space, props: Partial<DividerBlockProps>) {
     super(space, props);
@@ -21,12 +18,6 @@ export class DividerBlockModel
   }
 
   override block2html(_previousSiblingId: string, _nextSiblingId: string) {
-    switch (this.type) {
-      case 'normal':
-        return `<hr>`;
-      default:
-        return `<hr>`;
-      ////TODO: add another type like https://jjuliano.github.io/markdown-ui/docs/divider.html
-    }
+    return `<hr>`;
   }
 }
