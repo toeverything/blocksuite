@@ -118,16 +118,10 @@ export function convertToDivider(
       text: model?.text?.clone(),
       children: model.children,
     };
-    space.deleteBlock(model);
-
-    const id = space.addBlock(blockProps, parent, index);
+    // space.deleteBlock(model);
+    space.addBlock(blockProps, parent, index);
+    const id = space.id;
     asyncFocusRichText(space, id);
-  } else if (model.flavour === 'affine:divider' && model['type'] !== type) {
-    model.text?.insert(' ', prefix.length);
-    space.captureSync();
-
-    model.text?.delete(0, prefix.length + 1);
-    space.updateBlock(model, { type: type });
   }
   return true;
 }
