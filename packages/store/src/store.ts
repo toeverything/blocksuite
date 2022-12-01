@@ -5,7 +5,6 @@ import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
 import { uuidv4 } from './utils/id-generator';
-import { Indexer, QueryContent } from './search';
 
 export interface SerializedStore {
   [key: string]: {
@@ -28,7 +27,6 @@ export class Store {
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
   readonly idGenerator: IdGenerator;
-  readonly _indexer: Indexer;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
   constructor({
@@ -43,11 +41,6 @@ export class Store {
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, { awareness: this.awareness })
     );
-    this._indexer = new Indexer(this.doc);
-  }
-
-  search(query: QueryContent) {
-    return this._indexer.search(query);
   }
 
   getSpaceById(spaceId: string) {
@@ -56,7 +49,6 @@ export class Store {
 
   addSpace(space: Space) {
     this.spaces.set(space.id, space);
-    this._indexer.onCreateSpace(space.id);
   }
 
   /**
