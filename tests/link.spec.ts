@@ -104,7 +104,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       });
       const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
 
-      const text = page.Text.fromDelta(page.getUnderlyingSpace(), [
+      const text = page.Text.fromDelta(page, [
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);

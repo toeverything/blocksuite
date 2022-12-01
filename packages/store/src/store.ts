@@ -1,4 +1,4 @@
-import { PrefixedBlockProps, Space } from './space';
+import type { PrefixedBlockProps, Space } from './space';
 import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
@@ -30,6 +30,7 @@ export class Store {
   readonly idGenerator: IdGenerator;
   readonly _indexer: Indexer;
 
+  // TODO: The user cursor should be spread by the spaceId in awareness
   constructor({
     room = DEFAULT_ROOM,
     providers = [],
@@ -53,15 +54,9 @@ export class Store {
     return this.spaces.get(spaceId) as Space;
   }
 
-  // TODO: The user cursor should be spread by the spaceId in awareness
-  createSpace(spaceId: string) {
-    this.spaces.set(
-      spaceId,
-      new Space(spaceId, this.doc, this.awareness, this.idGenerator)
-    );
-    this._indexer.onCreateSpace(spaceId);
-
-    return this.getSpaceById(spaceId);
+  addSpace(space: Space) {
+    this.spaces.set(space.id, space);
+    this._indexer.onCreateSpace(space.id);
   }
 
   /**

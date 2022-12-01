@@ -49,7 +49,7 @@ test('basic init with external text', async ({ page }) => {
     const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
 
-    const text = new page.Text(page.getUnderlyingSpace(), 'world');
+    const text = new page.Text(page, 'world');
     page.addBlock({ flavour: 'affine:paragraph', text }, groupId);
 
     const delta = [
@@ -59,7 +59,7 @@ test('basic init with external text', async ({ page }) => {
     page.addBlock(
       {
         flavour: 'affine:paragraph',
-        text: page.Text.fromDelta(page.getUnderlyingSpace(), delta),
+        text: page.Text.fromDelta(page, delta),
       },
       groupId
     );

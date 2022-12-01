@@ -341,7 +341,7 @@ describe('store.search works', async () => {
     page.addBlock({
       flavour: 'affine:paragraph',
       text: new page.Text(
-        page.getUnderlyingSpace(),
+        page,
         '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
       ),
     });
@@ -349,7 +349,7 @@ describe('store.search works', async () => {
     page.addBlock({
       flavour: 'affine:paragraph',
       text: new page.Text(
-        page.getUnderlyingSpace(),
+        page,
         '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
       ),
     });

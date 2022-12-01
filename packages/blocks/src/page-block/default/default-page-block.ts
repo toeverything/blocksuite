@@ -262,7 +262,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       const defaultGroup = this.model.children[0];
       const props = {
         flavour: 'affine:paragraph',
-        text: new Text(this.page.getUnderlyingSpace(), contentRight),
+        text: new Text(this.page, contentRight),
       };
       const newFirstParagraphId = this.page.addBlock(props, defaultGroup, 0);
       this.page.updateBlock(this.model, { title: contentLeft });
