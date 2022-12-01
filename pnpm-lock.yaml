@@ -5,7 +5,7 @@ importers:
   .:
     specifiers:
       '@changesets/cli': ^2.25.0
-      '@playwright/test': ^1.25.2
+      '@playwright/test': ^1.28.1
       '@types/node': ^18.7.16
       '@types/quill': ^2.0.9
       '@types/react': ^18.0.19
@@ -24,7 +24,7 @@ importers:
       vitest: ^0.23.4
     devDependencies:
       '@changesets/cli': 2.25.0
-      '@playwright/test': 1.25.2
+      '@playwright/test': 1.28.1
       '@types/node': 18.7.18
       '@types/quill': 2.0.9
       '@types/react': 18.0.20
@@ -723,13 +723,13 @@ packages:
       fastq: 1.13.0
     dev: true
 
-  /@playwright/test/1.25.2:
-    resolution: {integrity: sha512-6qPznIR4Fw02OMbqXUPMG6bFFg1hDVNEdihKy0t9K0dmRbus1DyP5Q5XFQhGwEHQkLG5hrSfBuu9CW/foqhQHQ==}
+  /@playwright/test/1.28.1:
+    resolution: {integrity: sha512-xN6spdqrNlwSn9KabIhqfZR7IWjPpFK1835tFNgjrlysaSezuX8PYUwaz38V/yI8TJLG9PkAMEXoHRXYXlpTPQ==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
       '@types/node': 18.7.18
-      playwright-core: 1.25.2
+      playwright-core: 1.28.1
     dev: true
 
   /@sinclair/typebox/0.24.44:
@@ -3141,8 +3141,8 @@ packages:
       find-up: 4.1.0
     dev: true
 
-  /playwright-core/1.25.2:
-    resolution: {integrity: sha512-0yTbUE9lIddkEpLHL3u8PoCL+pWiZtj5A/j3U7YoNjcmKKDGBnCrgHJMzwd2J5vy6l28q4ki3JIuz7McLHhl1A==}
+  /playwright-core/1.28.1:
+    resolution: {integrity: sha512-3PixLnGPno0E8rSBJjtwqTwJe3Yw72QwBBBxNoukIj3lEeBNXwbNiKrNuB1oyQgTBw5QHUhNO3SteEtHaMK6ag==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
