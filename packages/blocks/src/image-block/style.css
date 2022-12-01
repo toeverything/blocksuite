@@ -1,20 +1,17 @@
 .affine-image-wrapper {
   padding: 8px;
   width: 100%;
+  text-align: center;
 }
 .affine-image-wrapper img {
   max-width: 100%;
   margin: auto;
   width: 100%;
-  text-align: center;
 }
 
 .resizable {
-  position: relative;
-  margin: auto;
-  border: 2px solid #fff;
   max-width: 100%;
-  text-align: center;
+  /* text-align: center; */
 }
 /* .resizable:hover {
   border: 2px solid #4286f4;

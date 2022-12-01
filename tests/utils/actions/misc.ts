@@ -33,6 +33,10 @@ export async function waitDefaultPageLoaded(page: Page) {
   await page.waitForSelector('default-page-block[data-block-id="0"]');
 }
 
+export async function waitEmbedLoaded(page: Page) {
+  await page.waitForSelector('.resizable-img');
+}
+
 export async function waitNextFrame(page: Page) {
   await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
 }
