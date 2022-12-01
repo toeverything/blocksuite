@@ -176,13 +176,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       if (state.type === 'native') {
         handleBackspace(page, e);
       } else if (state.type === 'block') {
-        const { selectedRichTexts, model } = state;
-        handleBlockSelectionBatchDelete(
-          page,
-          model?.flavour === 'affine:divider'
-            ? [model]
-            : selectedRichTexts.map(richText => richText.model)
-        );
+        const { selectedRichTexts, selectedDividers } = state;
+        const SelectedBatch = selectedRichTexts
+          .map(richText => richText.model)
+          .concat(selectedDividers.map(divider => divider.model));
+        handleBlockSelectionBatchDelete(page, SelectedBatch);
         state.clear();
         this.signals.updateSelectedRects.emit([]);
       }

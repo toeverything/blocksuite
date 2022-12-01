@@ -1,5 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
+import type { DividerBlockComponent } from '../../divider-block';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -39,6 +40,16 @@ function filterSelectedRichText(
     return intersects(rect, selectionRect);
   });
 }
+function filterSelectedDivider(
+  dividerCache: Map<DividerBlockComponent, DOMRect>,
+  selectionRect: DOMRect
+): DividerBlockComponent[] {
+  const dividers = Array.from(dividerCache.keys());
+  return dividers.filter(divider => {
+    const rect = divider.getBoundingClientRect();
+    return intersects(rect, selectionRect);
+  });
+}
 
 function createSelectionRect(
   current: { x: number; y: number },
@@ -56,10 +67,12 @@ type PageSelectionType = 'native' | 'block' | 'none';
 class PageSelectionState {
   type: PageSelectionType;
   selectedRichTexts: RichText[] = [];
+  selectedDividers: DividerBlockComponent[] = [];
   model: BaseBlockModel | null = null;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
+  private _dividerCache = new Map<DividerBlockComponent, DOMRect>();
 
   constructor(type: PageSelectionType) {
     this.type = type;
@@ -76,6 +89,9 @@ class PageSelectionState {
   get richTextCache() {
     return this._richTextCache;
   }
+  get dividerCache() {
+    return this._dividerCache;
+  }
 
   resetStartRange(e: SelectionEvent) {
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
@@ -84,12 +100,18 @@ class PageSelectionState {
 
   refreshRichTextBoundsCache(container: HTMLElement) {
     const richTexts = Array.from(container.querySelectorAll('rich-text'));
+    const dividers = Array.from(container.querySelectorAll('divider-block'));
     richTexts.forEach(richText => {
       // const rect = (
       //   richText.closest(`[${BLOCK_ID_ATTR}]`) as HTMLElement
       // ).getBoundingClientRect();
       const rect = richText.getBoundingClientRect();
       this._richTextCache.set(richText, rect);
+    });
+    dividers.forEach(divider => {
+      const rect = divider.getBoundingClientRect();
+      // @ts-ignore
+      this._dividerCache.set(divider, rect);
     });
   }
 
@@ -140,11 +162,20 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
-    const { selectionRect, richTextCache, selectedRichTexts } =
-      this._getSelectedBlockInfo(e);
+    const {
+      selectionRect,
+      richTextCache,
+      dividerCache,
+      selectedRichTexts,
+      selectedDividers,
+    } = this._getSelectedBlockInfo(e);
     this.state.selectedRichTexts = selectedRichTexts;
+    this.state.selectedDividers = selectedDividers;
     const selectedBounds = selectedRichTexts.map(richText => {
       return richTextCache.get(richText) as DOMRect;
+    });
+    selectedDividers.map(divider => {
+      return selectedBounds.push(dividerCache.get(divider) as DOMRect);
     });
     this._signals.updateSelectedRects.emit(selectedBounds);
     this._signals.updateFrameSelectionRect.emit(selectionRect);
@@ -154,14 +185,21 @@ export class DefaultSelectionManager {
     assertExists(this.state.startPoint);
     const current = { x: e.raw.clientX, y: e.raw.clientY };
     const { startPoint: start } = this.state;
-
+    const { dividerCache } = this.state;
     const selectionRect = createSelectionRect(current, start);
     const { richTextCache } = this.state;
+    const selectedDividers = filterSelectedDivider(dividerCache, selectionRect);
     const selectedRichTexts = filterSelectedRichText(
       richTextCache,
       selectionRect
     );
-    return { selectionRect, richTextCache, selectedRichTexts };
+    return {
+      selectionRect,
+      richTextCache,
+      dividerCache,
+      selectedRichTexts,
+      selectedDividers,
+    };
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
@@ -285,12 +323,14 @@ export class DefaultSelectionManager {
   selectBlockByRect(selectionRect: DOMRect, model?: BaseBlockModel) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);
-    const { richTextCache } = this.state;
+    const { richTextCache, dividerCache } = this.state;
     const selectedRichTexts = filterSelectedRichText(
       richTextCache,
       selectionRect
     );
-
+    const selectedDividers = filterSelectedDivider(dividerCache, selectionRect);
+    this.state.selectedRichTexts = selectedRichTexts;
+    this.state.selectedDividers = selectedDividers;
     if (model?.flavour === 'affine:divider') {
       this.state.model = model;
     }
