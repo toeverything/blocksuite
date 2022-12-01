@@ -173,6 +173,29 @@ describe.concurrent('addBlock', () => {
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
   });
+
+  it('can add and remove multi pages', async () => {
+    const workspace = new Workspace(getStoreOptions());
+
+    let page0!: Page;
+    let page1!: Page;
+    queueMicrotask(() => {
+      page0 = workspace.createPage('page0').register(BlockSchema);
+      page1 = workspace.createPage('page1').register(BlockSchema);
+    });
+    const idAdded = await waitOnce(workspace.signals.pageAdded);
+    assert.equal(idAdded, 'space:page0');
+    assert.equal(workspace.pages.size, 2);
+
+    queueMicrotask(() => {
+      workspace.removePage(page0);
+      assert.equal(workspace.pages.size, 1);
+      workspace.removePage(page1);
+      assert.equal(workspace.pages.size, 0);
+    });
+    const idRemoved = await waitOnce(workspace.signals.pageRemoved);
+    assert.equal(idRemoved, 'space:page0');
+  });
 });
 
 async function initWithRoot(page: Page) {
@@ -289,7 +312,7 @@ describe.concurrent('getBlock', () => {
   });
 });
 
-describe('store.toJSXElement works', async () => {
+describe.concurrent('store.toJSXElement works', async () => {
   it('store match snapshot', () => {
     const workspace = new Workspace(getStoreOptions());
     const page = workspace.createPage(defaultPageId).register(BlockSchema);
@@ -331,7 +354,7 @@ describe('store.toJSXElement works', async () => {
   });
 });
 
-describe('store.search works', async () => {
+describe.concurrent('store.search works', async () => {
   it('store search matching', () => {
     const workspace = new Workspace(getStoreOptions());
     const page = workspace.createPage(defaultPageId).register(BlockSchema);

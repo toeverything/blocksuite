@@ -61,7 +61,7 @@ export class Indexer {
 
   private _handleSpaceIndexing(spaceId: string, space?: YMap<YBlock>) {
     if (space) {
-      space.forEach((block, key) => {
+      space.forEach((_, key) => {
         this._refreshIndex(spaceId, key, 'add', space.get(key));
       });
 
