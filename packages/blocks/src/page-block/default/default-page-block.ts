@@ -2,7 +2,7 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Disposable, Signal, Space, Text } from '@blocksuite/store';
+import { Disposable, Signal, Page, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -101,7 +101,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   `;
 
   @property()
-  space!: Space;
+  page!: Page;
 
   flavour = 'affine:page' as const;
 
@@ -138,7 +138,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _title!: HTMLInputElement;
 
   private _bindHotkeys() {
-    const { space } = this;
+    const { page } = this;
     const {
       BACKSPACE,
       SELECT_ALL,
@@ -155,7 +155,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       TEXT,
     } = HOTKEYS;
 
-    bindCommonHotkey(space);
+    bindCommonHotkey(page);
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
       if (isPageTitle(e)) {
@@ -164,7 +164,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         if (target.selectionStart !== target.selectionEnd) {
           e.preventDefault();
           const title = getSplicedTitle(target);
-          space.updateBlock(this.model, { title });
+          page.updateBlock(this.model, { title });
         }
         // collapsed delete
         else {
@@ -174,11 +174,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       }
 
       if (state.type === 'native') {
-        handleBackspace(space, e);
+        handleBackspace(page, e);
       } else if (state.type === 'block') {
         const { selectedRichTexts } = state;
         handleBlockSelectionBatchDelete(
-          space,
+          page,
           selectedRichTexts.map(richText => richText.model)
         );
         state.clear();
@@ -194,31 +194,31 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(H1, () =>
-      this._updateType('affine:paragraph', 'h1', space)
+      this._updateType('affine:paragraph', 'h1', page)
     );
     hotkey.addListener(H2, () =>
-      this._updateType('affine:paragraph', 'h2', space)
+      this._updateType('affine:paragraph', 'h2', page)
     );
     hotkey.addListener(H3, () =>
-      this._updateType('affine:paragraph', 'h3', space)
+      this._updateType('affine:paragraph', 'h3', page)
     );
     hotkey.addListener(H4, () =>
-      this._updateType('affine:paragraph', 'h4', space)
+      this._updateType('affine:paragraph', 'h4', page)
     );
     hotkey.addListener(H5, () =>
-      this._updateType('affine:paragraph', 'h5', space)
+      this._updateType('affine:paragraph', 'h5', page)
     );
     hotkey.addListener(H6, () =>
-      this._updateType('affine:paragraph', 'h6', space)
+      this._updateType('affine:paragraph', 'h6', page)
     );
     hotkey.addListener(NUMBERED_LIST, () =>
-      this._updateType('affine:list', 'numbered', space)
+      this._updateType('affine:list', 'numbered', page)
     );
     hotkey.addListener(BULLETED, () =>
-      this._updateType('affine:list', 'bulleted', space)
+      this._updateType('affine:list', 'bulleted', page)
     );
     hotkey.addListener(TEXT, () =>
-      this._updateType('affine:paragraph', 'text', space)
+      this._updateType('affine:paragraph', 'text', page)
     );
     hotkey.addListener(SHIFT_UP, e => {
       // TODO expand selection up
@@ -251,7 +251,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   private _onTitleKeyDown(e: KeyboardEvent) {
-    const hasContent = !this.space.isEmpty;
+    const hasContent = !this.page.isEmpty;
 
     if (e.key === 'Enter' && hasContent) {
       assertExists(this._title.selectionStart);
@@ -262,19 +262,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       const defaultGroup = this.model.children[0];
       const props = {
         flavour: 'affine:paragraph',
-        text: new Text(this.space, contentRight),
+        text: new Text(this.page.getUnderlyingSpace(), contentRight),
       };
-      const newFirstParagraphId = this.space.addBlock(props, defaultGroup, 0);
-      this.space.updateBlock(this.model, { title: contentLeft });
-      asyncFocusRichText(this.space, newFirstParagraphId);
+      const newFirstParagraphId = this.page.addBlock(props, defaultGroup, 0);
+      this.page.updateBlock(this.model, { title: contentLeft });
+      asyncFocusRichText(this.page, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      asyncFocusRichText(this.space, this.model.children[0].children[0].id);
+      asyncFocusRichText(this.page, this.model.children[0].children[0].id);
     }
   }
 
   private _onTitleInput(e: InputEvent) {
-    const { space } = this;
+    const { page: space } = this;
 
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
@@ -288,7 +288,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     space.updateBlock(this.model, { title });
   }
 
-  private _updateType(flavour: string, type: string, space: Space) {
+  private _updateType(flavour: string, type: string, space: Page) {
     const { state } = this.selection;
     if (state.selectedRichTexts.length > 0) {
       batchUpdateTextType(
@@ -313,9 +313,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('space')) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager(
-        this.space,
+        this.page,
         this.mouseRoot,
         this.signals
       );
@@ -350,10 +350,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.requestUpdate();
     });
 
-    tryUpdateGroupSize(this.space, 1);
+    tryUpdateGroupSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.space, 1);
+      tryUpdateGroupSize(this.page, 1);
     });
 
     // TMP: clear selected rects on scroll

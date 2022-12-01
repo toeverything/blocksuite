@@ -1,4 +1,4 @@
-import type { Space } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
 import {
   assertExists,
@@ -103,18 +103,18 @@ class PageSelectionState {
 }
 
 export class DefaultSelectionManager {
-  space: Space;
+  page: Page;
   state = new PageSelectionState('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
 
   constructor(
-    space: Space,
+    space: Page,
     container: HTMLElement,
     signals: DefaultPageSignals
   ) {
-    this.space = space;
+    this.page = space;
     this._signals = signals;
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
@@ -252,7 +252,7 @@ export class DefaultSelectionManager {
     // TODO handle shift + click
     if (e.keys.shift) return;
 
-    handleNativeRangeClick(this.space, e);
+    handleNativeRangeClick(this.page, e);
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
@@ -260,7 +260,7 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;
-    handleNativeRangeDblClick(this.space, e);
+    handleNativeRangeDblClick(this.page, e);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

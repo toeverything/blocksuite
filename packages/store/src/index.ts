@@ -7,6 +7,7 @@ export * from './text-adapter';
 export * from './utils/signal';
 export * from './utils/disposable';
 export * from './doc-providers';
+export * from './workspace';
 export * as Utils from './utils/utils';
 export * from './utils/id-generator';
 

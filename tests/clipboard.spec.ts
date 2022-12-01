@@ -196,7 +196,7 @@ test('copy clipItems format', async ({ page }) => {
   await initEmptyState(page);
   await focusRichText(page);
   await page.evaluate(() => {
-    window.space.captureSync();
+    window.page.captureSync();
   });
 
   const clipData = `

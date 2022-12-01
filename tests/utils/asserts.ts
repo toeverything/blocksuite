@@ -140,7 +140,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() =>
-    window.store.doc.toJSON()
+    window.workspace.doc.toJSON()
   )) as SerializedStore;
   expect(actual).toEqual(expected);
 }
@@ -242,7 +242,7 @@ export async function assertBlockTypes(page: Page, blockTypes: string[]) {
  */
 export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
-    window.store.doc.toJSON()
+    window.workspace.doc.toJSON()
   )) as SerializedStore;
   const titleNode = jsonDoc['space:page0']['0'];
 
@@ -301,7 +301,7 @@ export async function assertStoreMatchJSX(
   id?: string
 ) {
   const element = (await page.evaluate(
-    id => window.store.toJSXElement(id),
+    id => window.workspace.toJSXElement(id),
     id
   )) as JSXElement;
 

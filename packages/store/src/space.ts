@@ -178,9 +178,9 @@ export class Space {
     return this._blockMap.get(id) ?? null;
   }
 
-  getBlockByFlavour(BlockFlavour: string) {
+  getBlockByFlavour(blockFlavour: string) {
     return [...this._blockMap.values()].filter(
-      ({ flavour }) => BlockFlavour === flavour
+      ({ flavour }) => blockFlavour === flavour
     );
   }
 
