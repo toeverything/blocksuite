@@ -208,6 +208,7 @@ export class FormatQuickBar extends LitElement {
 
     const actionItems = html`<format-bar-button
       class="has-tool-tip"
+      data-testid="copy"
       @click=${() => onCopy()}
     >
       ${CopyIcon}

@@ -6,7 +6,7 @@ import {
   initThreeParagraphs,
   pressEnter,
 } from './utils/actions';
-import { assertStoreMatchJSX } from './utils/asserts';
+import { assertSelection, assertStoreMatchJSX } from './utils/asserts';
 
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -26,11 +26,17 @@ test('should format quick bar be able to format text', async ({ page }) => {
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const boldBtnLocator = page.locator(`[data-testid=bold]`);
-  const italicBtnLocator = page.locator(`[data-testid=italic]`);
-  const underlineBtnLocator = page.locator(`[data-testid=underline]`);
-  const strikeBtnLocator = page.locator(`[data-testid=strike]`);
-  const codeBtnLocator = page.locator(`[data-testid=code]`);
+  const boldBtnLocator = page.locator(`.format-quick-bar [data-testid=bold]`);
+  const italicBtnLocator = page.locator(
+    `.format-quick-bar [data-testid=italic]`
+  );
+  const underlineBtnLocator = page.locator(
+    `.format-quick-bar [data-testid=underline]`
+  );
+  const strikeBtnLocator = page.locator(
+    `.format-quick-bar [data-testid=strike]`
+  );
+  const codeBtnLocator = page.locator(`.format-quick-bar [data-testid=code]`);
 
   await expect(boldBtnLocator).not.toHaveAttribute('active', '');
   await expect(italicBtnLocator).not.toHaveAttribute('active', '');
@@ -134,7 +140,7 @@ test('should format quick bar be able to format text when select multiple line',
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
 
-  const boldBtnLocator = page.locator(`[data-testid=bold]`);
+  const boldBtnLocator = page.locator(`.format-quick-bar [data-testid=bold]`);
   await expect(boldBtnLocator).not.toHaveAttribute('active', '');
   await boldBtnLocator.click();
   // The bold button should be active after click
@@ -193,7 +199,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const linkBtnLocator = page.locator(`[data-testid=link]`);
+  const linkBtnLocator = page.locator(`.format-quick-bar [data-testid=link]`);
   await expect(linkBtnLocator).not.toHaveAttribute('active', '');
   await linkBtnLocator.click();
 
@@ -276,7 +282,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 
   const paragraphBtnLocator = page.locator(`.paragraph-button`);
   await paragraphBtnLocator.hover();
-  const h1BtnLocator = page.locator(`[data-testid=h1]`);
+  const h1BtnLocator = page.locator(`.format-quick-bar [data-testid=h1]`);
   await expect(h1BtnLocator).toBeVisible();
   await h1BtnLocator.click();
 
@@ -300,7 +306,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:group>`,
     groupId
   );
-  const bulletedBtnLocator = page.locator(`[data-testid=bulleted]`);
+  const bulletedBtnLocator = page.locator(
+    `.format-quick-bar [data-testid=bulleted]`
+  );
   await bulletedBtnLocator.click();
   await assertStoreMatchJSX(
     page,
@@ -323,8 +331,27 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:group>`,
     groupId
   );
+
   // TODO FIXME: The paragraph button should prevent selection after click
   // const textBtnLocator = page.locator(`[data-testid=text]`);
   // await textBtnLocator.click();
   // await assertStoreMatchJSX(page, ``, groupId);
+});
+
+test('should format quick bar be able to copy', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyState(page);
+  await initThreeParagraphs(page);
+  // drag only the `456` paragraph
+  await dragBetweenIndices(page, [1, 0], [1, 3]);
+
+  const copyBtnLocator = page.locator(`.format-quick-bar [data-testid=copy]`);
+  await expect(copyBtnLocator).toBeVisible();
+  await assertSelection(page, 1, 0, 3);
+  await copyBtnLocator.click();
+
+  // TODO assert clipboard
+
+  // TODO FIXME: The paragraph button should prevent selection after click
+  // await assertSelection(page, 1, 0, 3);
 });
