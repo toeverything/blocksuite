@@ -74,7 +74,6 @@ export async function assertRichDragButton(page: Page) {
 
 export async function assertImageSize(page: Page, {width,height}:{width:number,height:number}) {
   const actual = await page.locator('.resizable-img').boundingBox();
-  console.log('actual: ', actual);
   expect(actual?.width).toEqual(width);
   expect(actual?.height).toEqual(height);
 }

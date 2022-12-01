@@ -82,10 +82,6 @@ export async function dragEmbedResize(page: Page) {
     ) as HTMLInputElement;
     const bottomRightButtonBound = bottomRightButton.getBoundingClientRect();
     const y = bottomRightButtonBound.top;
-      console.log({
-        from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-        to: { x: bottomRightButtonBound.left + 110, y: y + 5 },
-      })
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
       to: { x: bottomRightButtonBound.left + 110, y },
