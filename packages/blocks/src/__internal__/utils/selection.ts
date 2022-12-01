@@ -319,8 +319,10 @@ export function getSelectInfo(page: Page): SelectionInfo {
   const nativeSelection = window.getSelection();
   if (state.type === 'block') {
     type = 'Block';
-    const { selectedRichTexts } = state;
-    selectedModels = selectedRichTexts.map(richText => richText.model);
+    const { selectedRichTexts, selectedDividers } = state;
+    selectedModels = selectedRichTexts
+      .map(richText => richText.model)
+      .concat(selectedDividers.map(divider => divider.model));
   } else if (nativeSelection && nativeSelection.type !== 'None') {
     type = nativeSelection.type;
     selectedModels = getModelsByRange(getCurrentRange());
