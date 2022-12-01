@@ -138,7 +138,7 @@ async function testCloudSyncBefore() {
   const storage = new BlobStorage();
   const provider = await IndexedDBBlobProvider.init(
     'test',
-    'http://localhost:3000/api/v1'
+    'http://localhost:3000/api/blobs'
   );
   storage.addProvider(provider);
 
@@ -157,7 +157,7 @@ async function testCloudSyncAfter() {
   const storage = new BlobStorage();
   const provider = await IndexedDBBlobProvider.init(
     'test',
-    'http://localhost:3000/api/v1/blob'
+    'http://localhost:3000/api/blobs'
   );
   storage.addProvider(provider);
 

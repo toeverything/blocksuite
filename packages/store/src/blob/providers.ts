@@ -124,6 +124,7 @@ export class BlobCloudSync {
     this._fetcher = ky.create({
       prefixUrl,
       signal: this._abortController.signal,
+      throwHttpErrors: false,
     });
 
     this._database = db;
@@ -152,7 +153,7 @@ export class BlobCloudSync {
     });
   }
 
-  private async addTaskRetry(task: SyncTask, status?: BlobStatus) {
+  private async handleTaskRetry(task: SyncTask, status?: BlobStatus) {
     if (status?.exists) {
       await this._padding.delete(task.id);
     } else {
@@ -175,18 +176,18 @@ export class BlobCloudSync {
         !signal.aborted
       ) {
         try {
-          const api = `${this._workspace}/blobs/${task.id}`;
+          const api = `${this._workspace}/${task.id}`;
 
-          const status = await this._fetcher.head(api).json<BlobStatus>();
-          if (!status.exists) {
+          const resp = await this._fetcher.head(api);
+          if (resp.status === 404) {
             const status = await this._fetcher
               .post(api, { body: task.blob, retry: 3 })
               .json<BlobStatus>();
-            await this.addTaskRetry(task, status);
+            await this.handleTaskRetry(task, status);
           }
         } catch (e) {
           console.warn('Error while syncing blob', e);
-          await this.addTaskRetry(task);
+          await this.handleTaskRetry(task);
         }
       }
       await sleep(500);
@@ -196,9 +197,11 @@ export class BlobCloudSync {
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
-    const api = `${this._workspace}/blobs/${id}`;
+    const api = `${this._workspace}/${id}`;
     try {
-      const blob = await this._fetcher.get(api).blob();
+      const blob = await this._fetcher
+        .get(api, { throwHttpErrors: true })
+        .blob();
 
       await this._database.set(id, await blob.arrayBuffer());
 
