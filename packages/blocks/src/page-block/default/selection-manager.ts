@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Space } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { EmbedBlockComponent } from '../../embed-block';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
 import {
@@ -127,7 +127,7 @@ class PageSelectionState {
 }
 
 export class DefaultSelectionManager {
-  space: Space;
+  page: Page;
   state = new PageSelectionState('none');
   private _container: HTMLElement;
   private _mouseDisposeCallback: () => void;
@@ -142,11 +142,11 @@ export class DefaultSelectionManager {
   private _activeComponent: HTMLElement | null = null;
   private _dragMoveTarget = 'right';
   constructor(
-    space: Space,
+    space: Page,
     container: HTMLElement,
     signals: DefaultPageSignals
   ) {
-    this.space = space;
+    this.page = space;
     this._signals = signals;
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
@@ -162,7 +162,7 @@ export class DefaultSelectionManager {
     );
   }
   private get _blocks(): BaseBlockModel[] {
-    return (this.space.root?.children[0].children as BaseBlockModel[]) ?? [];
+    return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -310,7 +310,7 @@ export class DefaultSelectionManager {
     const dragModel = getModelByElement(this._activeComponent);
     assertExists(this._dropContainer);
     const { width, height } = this._dropContainer.getBoundingClientRect();
-    dragModel.space.updateBlock(dragModel, { width: width, height: height });
+    dragModel.page.updateBlock(dragModel, { width: width, height: height });
   }
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
@@ -369,7 +369,7 @@ export class DefaultSelectionManager {
     // TODO handle shift + click
     if (e.keys.shift) return;
 
-    handleNativeRangeClick(this.space, e);
+    handleNativeRangeClick(this.page, e);
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
@@ -377,7 +377,7 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;
-    handleNativeRangeDblClick(this.space, e);
+    handleNativeRangeDblClick(this.page, e);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

@@ -169,7 +169,7 @@ export class EdgelessSelectionManager {
   }
 
   private get _space() {
-    return this._container.space;
+    return this._container.page;
   }
 
   private get _blocks(): GroupBlockModel[] {

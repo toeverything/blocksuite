@@ -34,7 +34,7 @@ export class ImageBlockComponent extends LitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
-    if (width) {
+    if (width && height) {
       this._resizeImg.style.width = width + 'px';
       this._resizeImg.style.height = height + 'px';
     }

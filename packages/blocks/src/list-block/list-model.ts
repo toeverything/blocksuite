@@ -1,4 +1,4 @@
-import { Space, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
 type ListType = 'bulleted' | 'numbered' | 'todo';
 
@@ -13,28 +13,28 @@ export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
   type: ListType;
   checked: boolean;
 
-  constructor(space: Space, props: Partial<ListBlockProps>) {
-    super(space, props);
+  constructor(page: Page, props: Partial<ListBlockProps>) {
+    super(page, props);
     this.type = props.type ?? 'bulleted';
     this.checked = props.checked ?? false;
   }
 
   override block2html(
     childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
     let text = super.block2html(
       childText,
-      _previousSiblingId,
-      _nextSiblingId,
+      previousSiblingId,
+      nextSiblingId,
       begin,
       end
     );
-    const previousSiblingBlock = this.space.getBlockById(_previousSiblingId);
-    const nextSiblingBlock = this.space.getBlockById(_nextSiblingId);
+    const previousSiblingBlock = this.page.getBlockById(previousSiblingId);
+    const nextSiblingBlock = this.page.getBlockById(nextSiblingId);
     switch (this.type) {
       case 'bulleted':
         text = `<li>${text}</li>`;

@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Space } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { handleFormat } from '../../page-block/utils';
 import { createLink } from '../../__internal__/rich-text/link-node';
 import './button';
@@ -49,40 +49,40 @@ export const formatButtons = [
     name: 'Bold',
     icon: BoldIcon,
     activeWhen: (format: Record<string, unknown>) => 'bold' in format,
-    action: (space: Space) => {
-      handleFormat(space, 'bold');
+    action: (page: Page) => {
+      handleFormat(page, 'bold');
     },
   },
   {
     name: 'Italic',
     icon: ItalicIcon,
     activeWhen: (format: Record<string, unknown>) => 'italic' in format,
-    action: (space: Space) => {
-      handleFormat(space, 'italic');
+    action: (page: Page) => {
+      handleFormat(page, 'italic');
     },
   },
   {
     name: 'Underline',
     icon: UnderlineIcon,
     activeWhen: (format: Record<string, unknown>) => 'underline' in format,
-    action: (space: Space) => {
-      handleFormat(space, 'underline');
+    action: (page: Page) => {
+      handleFormat(page, 'underline');
     },
   },
   {
     name: 'Strikethrough',
     icon: StrikethroughIcon,
     activeWhen: (format: Record<string, unknown>) => 'strike' in format,
-    action: (space: Space) => {
-      handleFormat(space, 'strike');
+    action: (page: Page) => {
+      handleFormat(page, 'strike');
     },
   },
   {
     name: 'Code',
     icon: InlineCodeIcon,
     activeWhen: (format: Record<string, unknown>) => 'code' in format,
-    action: (space: Space) => {
-      handleFormat(space, 'code');
+    action: (page: Page) => {
+      handleFormat(page, 'code');
     },
   },
   {
@@ -91,8 +91,8 @@ export const formatButtons = [
     activeWhen: (format: Record<string, unknown>) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (models: BaseBlockModel[]) => models.length === 1,
-    action: (space: Space, abortController: AbortController) => {
-      createLink(space);
+    action: (page: Page, abortController: AbortController) => {
+      createLink(page);
       abortController.abort();
     },
   },

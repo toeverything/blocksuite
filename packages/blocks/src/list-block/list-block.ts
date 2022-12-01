@@ -63,8 +63,8 @@ export class ListBlockComponent extends LitElement {
           selectList(this.model);
           return;
         }
-        this.host.space.captureSync();
-        this.host.space.updateBlock(this.model, {
+        this.host.page.captureSync();
+        this.host.page.updateBlock(this.model, {
           checked: !this.model.checked,
         });
       },

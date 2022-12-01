@@ -108,17 +108,17 @@ export function getPreviousBlock(container: Element, blockId: string) {
 }
 
 export function getDefaultPageBlock(model: BaseBlockModel) {
-  assertExists(model.space.root);
+  assertExists(model.page.root);
   const page = document.querySelector(
-    `[${ATTR}="${model.space.root.id}"]`
+    `[${ATTR}="${model.page.root.id}"]`
   ) as DefaultPageBlockComponent;
   return page;
 }
 
 export function getContainerByModel(model: BaseBlockModel) {
-  assertExists(model.space.root);
+  assertExists(model.page.root);
   const page = document.querySelector(
-    `[${ATTR}="${model.space.root.id}"]`
+    `[${ATTR}="${model.page.root.id}"]`
   ) as DefaultPageBlockComponent;
   const container = page.closest('editor-container');
   assertExists(container);
@@ -126,13 +126,13 @@ export function getContainerByModel(model: BaseBlockModel) {
 }
 
 export function getBlockElementByModel(model: BaseBlockModel) {
-  assertExists(model.space.root);
+  assertExists(model.page.root);
   const page = document.querySelector(
-    `[${ATTR}="${model.space.root.id}"]`
+    `[${ATTR}="${model.page.root.id}"]`
   ) as DefaultPageBlockComponent;
   if (!page) return null;
 
-  if (model.id === model.space.root.id) {
+  if (model.id === model.page.root.id) {
     return page as HTMLElement;
   }
 

@@ -1,11 +1,11 @@
-import type { Space } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import type { ExtendedModel } from './types';
 
 // XXX: workaround quill lifecycle issue
-export function asyncFocusRichText(space: Space, id: string) {
+export function asyncFocusRichText(page: Page, id: string) {
   setTimeout(() => {
-    const adapter = space.richTextAdapters.get(id);
+    const adapter = page.richTextAdapters.get(id);
     adapter?.quill.focus();
   });
 }
@@ -17,7 +17,7 @@ export function isCollapsedAtBlockStart(quill: Quill) {
 }
 
 export function convertToList(
-  space: Space,
+  page: Page,
   model: ExtendedModel,
   listType: 'bulleted' | 'numbered' | 'todo',
   prefix: string,
@@ -27,12 +27,12 @@ export function convertToList(
     return false;
   }
   if (model.flavour === 'affine:paragraph') {
-    const parent = space.getParent(model);
+    const parent = page.getParent(model);
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
     model.text?.insert(' ', prefix.length);
-    space.captureSync();
+    page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
@@ -42,22 +42,22 @@ export function convertToList(
       children: model.children,
       ...otherProperties,
     };
-    space.deleteBlock(model);
+    page.deleteBlock(model);
 
-    const id = space.addBlock(blockProps, parent, index);
-    asyncFocusRichText(space, id);
+    const id = page.addBlock(blockProps, parent, index);
+    asyncFocusRichText(page, id);
   } else if (model.flavour === 'affine:list' && model['type'] !== listType) {
     model.text?.insert(' ', prefix.length);
-    space.captureSync();
+    page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
-    space.updateBlock(model, { type: listType });
+    page.updateBlock(model, { type: listType });
   }
   return true;
 }
 
 export function convertToParagraph(
-  space: Space,
+  page: Page,
   model: ExtendedModel,
   type: 'affine:paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
@@ -66,12 +66,12 @@ export function convertToParagraph(
     return false;
   }
   if (model.flavour !== 'affine:paragraph') {
-    const parent = space.getParent(model);
+    const parent = page.getParent(model);
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
     model.text?.insert(' ', prefix.length);
-    space.captureSync();
+    page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
@@ -80,16 +80,16 @@ export function convertToParagraph(
       text: model?.text?.clone(),
       children: model.children,
     };
-    space.deleteBlock(model);
+    page.deleteBlock(model);
 
-    const id = space.addBlock(blockProps, parent, index);
-    asyncFocusRichText(space, id);
+    const id = page.addBlock(blockProps, parent, index);
+    asyncFocusRichText(page, id);
   } else if (model.flavour === 'affine:paragraph' && model['type'] !== type) {
     model.text?.insert(' ', prefix.length);
-    space.captureSync();
+    page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
-    space.updateBlock(model, { type: type });
+    page.updateBlock(model, { type: type });
   }
   return true;
 }

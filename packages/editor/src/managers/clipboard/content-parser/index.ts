@@ -22,14 +22,14 @@ export class ContentParser {
   }
 
   public onExportHtml() {
-    const root = this._editor.space.root;
+    const root = this._editor.page.root;
     if (!root) return;
     const htmlContent = this.block2Html(this._getSelectedBlock(root).children);
     FileExporter.exportHtml((root as PageBlockModel).title, htmlContent);
   }
 
   public onExportMarkdown() {
-    const root = this._editor.space.root;
+    const root = this._editor.page.root;
     if (!root) return;
     const htmlContent = this.block2Html(this._getSelectedBlock(root).children);
     FileExporter.exportMarkdown((root as PageBlockModel).title, htmlContent);
@@ -128,7 +128,7 @@ export class ContentParser {
     previousSibling: SelectedBlock | null,
     nextSibling: SelectedBlock | null
   ): string {
-    const model = this._editor.space.getBlockById(block.id);
+    const model = this._editor.page.getBlockById(block.id);
     if (!model) {
       return '';
     }
@@ -158,7 +158,7 @@ export class ContentParser {
   }
 
   private _getTextInfoBySelectionInfo(selectedBlock: SelectedBlock): string {
-    const model = this._editor.space.getBlockById(selectedBlock.id);
+    const model = this._editor.page.getBlockById(selectedBlock.id);
     if (!model) {
       return '';
     }

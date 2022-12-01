@@ -1,4 +1,4 @@
-import type { Space } from './space';
+import type { Page } from './workspace';
 import type { TextType } from './text-adapter';
 import { Signal } from './utils/signal';
 
@@ -13,7 +13,7 @@ export interface IBaseBlockProps {
 }
 
 export class BaseBlockModel implements IBaseBlockProps {
-  space: Space;
+  page: Page;
   propsUpdated = new Signal();
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
@@ -26,8 +26,8 @@ export class BaseBlockModel implements IBaseBlockProps {
   text?: TextType;
   source?: string;
 
-  constructor(space: Space, props: Partial<IBaseBlockProps>) {
-    this.space = space;
+  constructor(page: Page, props: Partial<IBaseBlockProps>) {
+    this.page = page;
     this.id = props.id as string;
     this.children = [];
   }

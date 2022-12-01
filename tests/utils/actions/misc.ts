@@ -43,7 +43,7 @@ export async function clearLog(page: Page) {
 
 export async function resetHistory(page: Page) {
   await page.evaluate(() => {
-    const space = window.space;
+    const space = window.page;
     space.resetHistory();
   });
 }
@@ -52,24 +52,23 @@ export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}&isTest=true`);
   await page.evaluate(() => {
-    const space = window.store
-      .createSpace('space:page0')
+    const page = window.workspace
+      .createPage('page0')
       .register(window.blockSchema);
-    window.space = space;
+    window.page = page;
     const editor = document.createElement('editor-container');
-    // @ts-ignore
-    editor.space = space;
+    editor.page = page;
 
     const debugMenu = document.createElement('debug-menu');
-    debugMenu.store = window.store;
+    debugMenu.workspace = window.workspace;
     debugMenu.editor = editor;
     document.body.appendChild(editor);
     document.body.appendChild(debugMenu);
 
-    const pageId = space.addBlock({ flavour: 'affine:page' });
-    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
+    const pageId = page.addBlock({ flavour: 'affine:page' });
+    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
     for (let i = 0; i < 3; i++) {
-      space.addBlock({ flavour: 'affine:list' }, groupId);
+      page.addBlock({ flavour: 'affine:list' }, groupId);
     }
   });
   await waitNextFrame(page);
@@ -77,26 +76,22 @@ export async function enterPlaygroundWithList(page: Page) {
 
 export async function initEmptyState(page: Page) {
   const id = await page.evaluate(() => {
-    const space = window.store
-      .createSpace('space:page0')
+    const page = window.workspace
+      .createPage('page0')
       .register(window.blockSchema);
-    window.space = space;
+    window.page = page;
     const editor = document.createElement('editor-container');
-    // @ts-ignore
-    editor.space = space;
+    editor.page = page;
 
     const debugMenu = document.createElement('debug-menu');
-    debugMenu.store = window.store;
+    debugMenu.workspace = window.workspace;
     debugMenu.editor = editor;
     document.body.appendChild(editor);
     document.body.appendChild(debugMenu);
 
-    const pageId = space.addBlock({ flavour: 'affine:page' });
-    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
-    const paragraphId = space.addBlock(
-      { flavour: 'affine:paragraph' },
-      groupId
-    );
+    const pageId = page.addBlock({ flavour: 'affine:page' });
+    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, groupId);
     return { pageId, groupId, paragraphId };
   });
   return id;

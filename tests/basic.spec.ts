@@ -22,6 +22,7 @@ import {
   assertRichTexts,
   assertTitle,
 } from './utils/asserts';
+import type { EditorContainer } from '../packages/editor/src/components/editor-container/editor-container';
 
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -38,26 +39,28 @@ test('basic init with external text', async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await page.evaluate(() => {
-    const space = window.store
-      .createSpace('space:page0')
+    const page = window.workspace
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
-    // @ts-ignore
-    editor.space = space;
+    editor.page = page;
     document.body.appendChild(editor);
 
-    const pageId = space.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
+    const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
+    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
 
-    const text = new space.Text(space, 'world');
-    space.addBlock({ flavour: 'affine:paragraph', text }, groupId);
+    const text = new page.Text(page, 'world');
+    page.addBlock({ flavour: 'affine:paragraph', text }, groupId);
 
     const delta = [
       { insert: 'foo ' },
       { insert: 'bar', attributes: { bold: true } },
     ];
-    space.addBlock(
-      { flavour: 'affine:paragraph', text: space.Text.fromDelta(space, delta) },
+    page.addBlock(
+      {
+        flavour: 'affine:paragraph',
+        text: page.Text.fromDelta(page, delta),
+      },
       groupId
     );
   });
@@ -74,12 +77,11 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
-    const space = window.store
-      .createSpace('space:page0')
+    const page = window.workspace
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
-    // @ts-ignore
-    editor.space = space;
+    editor.page = page;
     document.body.appendChild(editor);
   });
 
@@ -99,12 +101,11 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
-    const space = window.store
-      .createSpace('space:page0')
+    const page = window.workspace
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
-    // @ts-ignore
-    editor.space = space;
+    editor.page = page;
     document.body.appendChild(editor);
   });
 
@@ -122,12 +123,11 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await pageA.evaluate(() => {
-    const space = window.store
-      .createSpace('space:page0')
+    const page = window.workspace
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
-    // @ts-ignore
-    editor.space = space;
+    editor.page = page;
     document.body.appendChild(editor);
   });
   // await focusFirstTextBlock(pageA); // do not init (add blocks) in A

@@ -25,7 +25,7 @@ export class EmbedBlockComponent extends LitElement {
   }
   private _inputChange() {
     this._caption = this._input.value;
-    this.model.space.updateBlock(this.model, { caption: this._caption });
+    this.model.page.updateBlock(this.model, { caption: this._caption });
   }
   render() {
     return html`

@@ -95,20 +95,20 @@ export class LinkNodeComponent extends LitElement {
    */
   private async updateLink(blot: Blot, link: string | false, text?: string) {
     const model = getModelByElement(this);
-    const { space } = model;
+    const { page: page } = model;
 
     if (text) {
       // Replace the text
       // Save the blot's index otherwise it will be lost after the blot is removed
       const offset = blot.offset();
-      space.captureSync();
+      page.captureSync();
       // TODO save the format of the original text
       // for make a distinction between user type in and set
       model.text?.delete(offset, blot.length());
       model.text?.insert(text, offset);
       model.text?.format(offset, text.length, { link });
     } else {
-      space.captureSync();
+      page.captureSync();
       model.text?.format(blot.offset(), blot.length(), { link });
     }
   }

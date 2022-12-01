@@ -1,4 +1,4 @@
-import { BaseBlockModel, Signal, Space } from '@blocksuite/store';
+import { BaseBlockModel, Signal, Page } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -48,7 +48,7 @@ export class FormatQuickBar extends LitElement {
   models: BaseBlockModel[] = [];
 
   @state()
-  space: Space | null = null;
+  page: Page | null = null;
 
   @state()
   paragraphType = 'text';
@@ -79,7 +79,7 @@ export class FormatQuickBar extends LitElement {
     this.format = getFormat();
     const startModel = models[0];
     this.paragraphType = startModel.type;
-    this.space = startModel.space;
+    this.page = startModel.page as Page;
     if (models.length > 1) {
       // Select multiple models
     }
@@ -118,13 +118,13 @@ export class FormatQuickBar extends LitElement {
       this.models
         .filter(i => i.type !== targetFormat)
         .forEach(async model => {
-          if (!this.space) {
+          if (!this.page) {
             throw new Error('Space is not defined');
           }
           if (isListType(targetFormat)) {
-            convertToList(this.space, model, targetFormat, '');
+            convertToList(this.page, model, targetFormat, '');
           } else {
-            this.space.updateBlock(model, { type: targetFormat });
+            this.page.updateBlock(model, { type: targetFormat });
             // format quick bar may need to update its position
             // after the paragraph type is changed
             await sleep();
@@ -161,7 +161,7 @@ export class FormatQuickBar extends LitElement {
   }
 
   override render() {
-    const space = this.space;
+    const space = this.page;
 
     if (!this.models.length || !space) {
       console.error('Failed to render format-quick-bar! space not found!');
