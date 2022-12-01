@@ -152,6 +152,19 @@ export class BlobCloudSync {
     });
   }
 
+  private async addTaskRetry(task: SyncTask, status?: BlobStatus) {
+    if (status?.exists) {
+      await this._padding.delete(task.id);
+    } else {
+      await this._padding.set(task.id, {
+        type: task.type,
+        retry: task.retry + 1,
+      });
+      this._pipeline.push({ ...task, retry: task.retry + 1 });
+      await sleep(Math.min(10, task.retry) * 100);
+    }
+  }
+
   private async taskRunner() {
     const signal = this._abortController.signal;
 
@@ -162,26 +175,18 @@ export class BlobCloudSync {
         !signal.aborted
       ) {
         try {
-          const api = `${this._workspace}/${task.id}`;
+          const api = `${this._workspace}/blobs/${task.id}`;
 
           const status = await this._fetcher.head(api).json<BlobStatus>();
           if (!status.exists) {
             const status = await this._fetcher
               .post(api, { body: task.blob, retry: 3 })
               .json<BlobStatus>();
-            if (status.exists) {
-              await this._padding.delete(task.id);
-            } else {
-              await this._padding.set(task.id, {
-                type: task.type,
-                retry: task.retry + 1,
-              });
-              this._pipeline.push({ ...task, retry: task.retry + 1 });
-              await sleep(Math.min(10, task.retry) * 100);
-            }
+            await this.addTaskRetry(task, status);
           }
         } catch (e) {
           console.warn('Error while syncing blob', e);
+          await this.addTaskRetry(task);
         }
       }
       await sleep(500);
@@ -191,7 +196,7 @@ export class BlobCloudSync {
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
-    const api = `${this._workspace}/${id}`;
+    const api = `${this._workspace}/blobs/${id}`;
     try {
       const blob = await this._fetcher.get(api).blob();
 
@@ -212,6 +217,8 @@ export class BlobCloudSync {
       } else {
         this._paddingPipeline.push({ id, blob, type, retry: 0 });
       }
+
+      console.log(this._pipeline, this._paddingPipeline);
     } else {
       console.error('Blob not found', id);
     }

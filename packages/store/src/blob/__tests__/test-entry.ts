@@ -119,12 +119,62 @@ async function testRefreshAfter() {
 
 function clearIndexedDB() {
   return new Promise<void>(resolve => {
-    const request = indexedDB.deleteDatabase('keyval-store');
+    const request = indexedDB.deleteDatabase('test_blob');
     request.onsuccess = () => {
-      console.log('IndexedDB cleared');
-      resolve();
+      console.log('IndexedDB test_blob cleared');
+
+      const request = indexedDB.deleteDatabase('test_padding');
+      request.onsuccess = () => {
+        console.log('IndexedDB test_padding cleared');
+
+        resolve();
+      };
     };
   });
+}
+
+async function testCloudSyncBefore() {
+  clearIndexedDB();
+  const storage = new BlobStorage();
+  const provider = await IndexedDBBlobProvider.init(
+    'test',
+    'http://localhost:3000/api/v1'
+  );
+  storage.addProvider(provider);
+
+  testSerial('can set blob', async () => {
+    const blob = await loadTestImageBlob('test-card-2');
+    const id = await storage.set(blob);
+    console.log(id);
+    return id !== null && storage.blobs.has(id);
+  });
+
+  await runOnce();
+}
+
+async function testCloudSyncAfter() {
+  clearIndexedDB();
+  const storage = new BlobStorage();
+  const provider = await IndexedDBBlobProvider.init(
+    'test',
+    'http://localhost:3000/api/v1/blob'
+  );
+  storage.addProvider(provider);
+
+  testSerial('can get saved blob', async () => {
+    // the test-card-2's hash
+    const url = await storage.get('WgdXT3DKV2HwV5SqePRHuw');
+    assertExists(url);
+
+    const img = await loadImage(url);
+    document.body.appendChild(img);
+
+    const isCorrectColor = assertColor(img, 100, 100, [193, 193, 193]);
+    return storage.blobs.size === 1 && isCorrectColor;
+  });
+
+  await runOnce();
+  clearIndexedDB();
 }
 
 document.getElementById('test-basic')?.addEventListener('click', testBasic);
@@ -137,5 +187,11 @@ document
 document
   .getElementById('clear-indexeddb')
   ?.addEventListener('click', clearIndexedDB);
+document
+  .getElementById('cloud-sync-before')
+  ?.addEventListener('click', testCloudSyncBefore);
+document
+  .getElementById('cloud-sync-after')
+  ?.addEventListener('click', testCloudSyncAfter);
 
 disableButtonsAfterClick();
