@@ -30,4 +30,5 @@ export type OpenBlockInfo = {
   text: Record<string, unknown>[];
   checked?: boolean;
   children: OpenBlockInfo[];
+  source?: string;
 };
