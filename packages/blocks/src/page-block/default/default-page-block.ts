@@ -2,7 +2,13 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { Disposable, Signal, Page, Text } from '@blocksuite/store';
+import {
+  Disposable,
+  Signal,
+  Page,
+  Text,
+  BaseBlockModel,
+} from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   type BlockHost,
@@ -29,10 +35,25 @@ import {
   updateTextType,
 } from '../utils';
 import style from './style.css';
+import {
+  CaptionIcon,
+  CopyIcon,
+  DeleteIcon,
+  DownloadIcon,
+} from '../../image-block/icons';
+import { downloadImage, focusCaption, copyImgToClip } from './utils';
 
+export interface EmbedOption {
+  position: { x: number; y: number };
+  model: BaseBlockModel;
+}
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
+  updateEmbedRects: Signal<
+    { left: number; top: number; width: number; height: number }[]
+  >;
+  updateEmbedOption: Signal<EmbedOption | null>;
 }
 
 // https://stackoverflow.com/a/2345915
@@ -68,6 +89,36 @@ function FrameSelectionRect(rect: DOMRect | null) {
   `;
 }
 
+function EmbedSelectedRectsContainer(
+  rects: { left: number; top: number; width: number; height: number }[]
+) {
+  return html`
+    <style>
+      .affine-page-selected-embed-rects-container > div {
+        position: fixed;
+        border: 3px solid #4286f4;
+      }
+    </style>
+    <div class="affine-page-selected-embed-rects-container resizable">
+      ${rects.map(rect => {
+        const style = {
+          display: 'block',
+          left: rect.left + 'px',
+          top: rect.top + 'px',
+          width: rect.width + 'px',
+          height: rect.height + 'px',
+        };
+        return html`<div class="resizes" style=${styleMap(style)}>
+          <div class="resize top-left"></div>
+          <div class="resize top-right"></div>
+          <div class="resize bottom-left"></div>
+          <div class="resize bottom-right"></div>
+        </div>`;
+      })}
+    </div>
+  `;
+}
+
 function SelectedRectsContainer(rects: DOMRect[]) {
   return html`
     <style>
@@ -94,6 +145,54 @@ function SelectedRectsContainer(rects: DOMRect[]) {
   `;
 }
 
+function EmbedOptionContainer(embedOption: EmbedOption | null) {
+  if (embedOption) {
+    const style = {
+      left: embedOption.position.x + 'px',
+      top: embedOption.position.y + 'px',
+    };
+    return html`
+      <style>
+        .affine-image-option-container > ul {
+          position: fixed;
+          z-index: 1;
+        }
+      </style>
+
+      <div class="affine-image-option-container">
+        <ul style=${styleMap(style)} class="image-option">
+          <li @click=${() => focusCaption(embedOption.model)}>
+            ${CaptionIcon}
+          </li>
+          <li
+            @click=${() => {
+              assertExists(embedOption.model.source);
+              downloadImage(embedOption.model.source);
+            }}
+          >
+            ${DownloadIcon}
+          </li>
+          <li
+            @click=${() => {
+              assertExists(embedOption.model.source);
+              copyImgToClip(embedOption.model.source);
+            }}
+          >
+            ${CopyIcon}
+          </li>
+          <li
+            @click=${() =>
+              embedOption.model.page.deleteBlock(embedOption.model)}
+          >
+            ${DeleteIcon}
+          </li>
+        </ul>
+      </div>
+    `;
+  } else {
+    return html``;
+  }
+}
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -118,9 +217,24 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   selectedRects: DOMRect[] = [];
 
+  @state()
+  selectEmbedRects: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  }[] = [];
+
+  @state()
+  embedOption!: EmbedOption | null;
+
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
+    updateEmbedRects: new Signal<
+      { left: number; top: number; width: number; height: number }[]
+    >(),
+    updateEmbedOption: new Signal<EmbedOption | null>(),
   };
 
   private _scrollDisposable!: Disposable;
@@ -187,7 +301,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(SELECT_ALL, e => {
-      // console.log('e: ', e);
       e.preventDefault();
       handleSelectAll();
       this.selection.state.type = 'native';
@@ -262,7 +375,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       const defaultGroup = this.model.children[0];
       const props = {
         flavour: 'affine:paragraph',
-        text: new Text(this.page.getUnderlyingSpace(), contentRight),
+        text: new Text(this.page, contentRight),
       };
       const newFirstParagraphId = this.page.addBlock(props, defaultGroup, 0);
       this.page.updateBlock(this.model, { title: contentLeft });
@@ -305,6 +418,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   private _clearSelection() {
     this.selection.state.clear();
     this.signals.updateSelectedRects.emit([]);
+    this.signals.updateEmbedRects.emit([]);
   }
 
   // disable shadow DOM to workaround quill
@@ -349,7 +463,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selectedRects = rects;
       this.requestUpdate();
     });
-
+    this.signals.updateEmbedRects.on(rects => {
+      this.selectEmbedRects = rects;
+      this.requestUpdate();
+    });
+    this.signals.updateEmbedOption.on(embedOption => {
+      this.embedOption = embedOption;
+      this.requestUpdate();
+    });
     tryUpdateGroupSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -387,7 +508,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const childrenContainer = BlockChildrenContainer(this.model, this);
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
-
+    const selectedEmbedContainer = EmbedSelectedRectsContainer(
+      this.selectEmbedRects
+    );
+    const embedOptionContainer = EmbedOptionContainer(this.embedOption);
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
@@ -402,7 +526,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           </div>
           ${childrenContainer}
         </div>
-        ${selectionRect} ${selectedRectsContainer}
+        ${selectedRectsContainer} ${selectionRect}
+        ${selectedEmbedContainer}${embedOptionContainer}
       </div>
     `;
   }

@@ -85,7 +85,7 @@ window.onload = () => {
 
   // In dev environment, init editor by default, but in test environment, init editor by the test page
   if (!isTest) {
-    const page = workspace.createPage('space:page0').register(BlockSchema);
+    const page = workspace.createPage('page0').register(BlockSchema);
     const editor = createEditor(page);
     const debugMenu = createDebugMenu(workspace, editor);
 

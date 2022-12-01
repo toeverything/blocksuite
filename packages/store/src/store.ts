@@ -1,11 +1,10 @@
-import { PrefixedBlockProps, Space } from './space';
+import type { PrefixedBlockProps, Space } from './space';
 import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
 import { uuidv4 } from './utils/id-generator';
-import { Indexer, QueryContent } from './search';
 
 export interface SerializedStore {
   [key: string]: {
@@ -28,8 +27,8 @@ export class Store {
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
   readonly idGenerator: IdGenerator;
-  readonly _indexer: Indexer;
 
+  // TODO: The user cursor should be spread by the spaceId in awareness
   constructor({
     room = DEFAULT_ROOM,
     providers = [],
@@ -42,26 +41,14 @@ export class Store {
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, { awareness: this.awareness })
     );
-    this._indexer = new Indexer(this.doc);
-  }
-
-  search(query: QueryContent) {
-    return this._indexer.search(query);
   }
 
   getSpaceById(spaceId: string) {
     return this.spaces.get(spaceId) as Space;
   }
 
-  // TODO: The user cursor should be spread by the spaceId in awareness
-  createSpace(spaceId: string) {
-    this.spaces.set(
-      spaceId,
-      new Space(spaceId, this.doc, this.awareness, this.idGenerator)
-    );
-    this._indexer.onCreateSpace(spaceId);
-
-    return this.getSpaceById(spaceId);
+  addSpace(space: Space) {
+    this.spaces.set(space.id, space);
   }
 
   /**

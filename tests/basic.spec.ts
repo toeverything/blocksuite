@@ -40,7 +40,7 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const page = window.workspace
-      .createPage('space:page0')
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     editor.page = page;
@@ -49,7 +49,7 @@ test('basic init with external text', async ({ page }) => {
     const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
 
-    const text = new page.Text(page.getUnderlyingSpace(), 'world');
+    const text = new page.Text(page, 'world');
     page.addBlock({ flavour: 'affine:paragraph', text }, groupId);
 
     const delta = [
@@ -59,7 +59,7 @@ test('basic init with external text', async ({ page }) => {
     page.addBlock(
       {
         flavour: 'affine:paragraph',
-        text: page.Text.fromDelta(page.getUnderlyingSpace(), delta),
+        text: page.Text.fromDelta(page, delta),
       },
       groupId
     );
@@ -78,7 +78,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
     const page = window.workspace
-      .createPage('space:page0')
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     editor.page = page;
@@ -102,7 +102,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await enterPlaygroundRoom(pageB, room);
   await pageB.evaluate(() => {
     const page = window.workspace
-      .createPage('space:page0')
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     editor.page = page;
@@ -124,7 +124,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await pageA.evaluate(() => {
     const page = window.workspace
-      .createPage('space:page0')
+      .createPage('page0')
       .register(window.blockSchema);
     const editor = document.createElement('editor-container');
     editor.page = page;

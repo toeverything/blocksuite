@@ -7,6 +7,7 @@ import type { ListBlockModel } from '../../list-block/list-model';
 import type { ParagraphBlockModel } from '../../paragraph-block/paragraph-model';
 import type { GroupBlockModel } from '../../group-block/group-model';
 import type { DividerBlockModel } from '../../divider-block/divider-model';
+import type { EmbedBlockModel } from '../../embed-block';
 
 // TODO support dynamic block types
 export function BlockElement(model: BaseBlockModel, host: BlockHost) {
@@ -39,8 +40,21 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost) {
           .host=${host}
         ></divider-block>
       `;
+    case 'affine:embed':
+      return EmbedBlock(model as EmbedBlockModel, host);
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
+}
+
+function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
+  switch (model.type) {
+    case 'image':
+      return html`
+        <img-block .model=${model as EmbedBlockModel} .host=${host}></img-block>
+      `;
+    default:
+      return html`<div>Unknown embed type: "${model.type}"</div>`;
+  }
 }
 
 // Naming convention borrowed from

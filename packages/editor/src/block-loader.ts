@@ -4,7 +4,7 @@ import { ParagraphBlockModel } from '@blocksuite/blocks';
 import { ListBlockModel } from '@blocksuite/blocks';
 import { GroupBlockModel } from '@blocksuite/blocks';
 import { DividerBlockModel } from '@blocksuite/blocks';
-
+import { EmbedBlockModel } from '@blocksuite/blocks';
 export type { ParagraphBlockProps as TextBlockProps } from '@blocksuite/blocks';
 
 // TODO support dynamic register
@@ -14,4 +14,5 @@ export const BlockSchema = {
   'affine:list': ListBlockModel,
   'affine:group': GroupBlockModel,
   'affine:divider': DividerBlockModel,
+  'affine:embed': EmbedBlockModel,
 } as const;

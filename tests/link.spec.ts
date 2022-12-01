@@ -92,7 +92,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   const id = await page.evaluate(
     ([str, link]) => {
       const page = window.workspace
-        .createPage('space:page0')
+        .createPage('page0')
         .register(window.blockSchema);
       const editor = document.createElement('editor-container');
       editor.page = page;
@@ -104,7 +104,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       });
       const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
 
-      const text = page.Text.fromDelta(page.getUnderlyingSpace(), [
+      const text = page.Text.fromDelta(page, [
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);
