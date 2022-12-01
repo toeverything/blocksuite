@@ -1,6 +1,5 @@
 import type * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
-// In the future, consider making y-indexdb a separate package sync provider.
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { Awareness } from 'y-protocols/awareness';
 import { WebsocketProvider as OriginWebsocketProvider } from 'y-websocket';

@@ -1,6 +1,6 @@
 // operations used in rich-text level
 
-import { Space, Text } from '@blocksuite/store';
+import { Page, Text } from '@blocksuite/store';
 import type Quill from 'quill';
 import {
   ExtendedModel,
@@ -21,12 +21,12 @@ import {
   convertToDivider,
 } from '../utils';
 
-export function handleBlockEndEnter(space: Space, model: ExtendedModel) {
-  const parent = space.getParent(model);
+export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
+  const parent = page.getParent(model);
   const index = parent?.children.indexOf(model);
   if (parent && index !== undefined && index > -1) {
     // make adding text block by enter a standalone operation
-    space.captureSync();
+    page.captureSync();
 
     let id = '';
     if (model.flavour === 'affine:list') {
@@ -35,44 +35,44 @@ export function handleBlockEndEnter(space: Space, model: ExtendedModel) {
         type: model.type,
       };
       if (model.children.length === 0) {
-        id = space.addBlock(blockProps, parent, index + 1);
+        id = page.addBlock(blockProps, parent, index + 1);
       } else {
-        id = space.addBlock(blockProps, model, 0);
+        id = page.addBlock(blockProps, model, 0);
       }
     } else {
       const blockProps = {
         flavour: model.flavour,
         type: 'text',
       };
-      id = space.addBlock(blockProps, parent, index + 1);
+      id = page.addBlock(blockProps, parent, index + 1);
     }
-    id && asyncFocusRichText(space, id);
+    id && asyncFocusRichText(page, id);
   }
 }
 
 export function handleSoftEnter(
-  space: Space,
+  page: Page,
   model: ExtendedModel,
   index: number
 ) {
-  space.captureSync();
+  page.captureSync();
   model.text?.insert('\n', index);
 }
 
 export function handleBlockSplit(
-  space: Space,
+  page: Page,
   model: ExtendedModel,
   splitIndex: number
 ) {
   if (!(model.text instanceof Text)) return;
 
-  const parent = space.getParent(model);
+  const parent = page.getParent(model);
   if (!parent) return;
 
   const [left, right] = model.text.split(splitIndex);
-  space.captureSync();
-  space.markTextSplit(model.text, left, right);
-  space.updateBlock(model, { text: left });
+  page.captureSync();
+  page.markTextSplit(model.text, left, right);
+  page.updateBlock(model, { text: left });
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;
@@ -80,22 +80,18 @@ export function handleBlockSplit(
     newParent = model;
     newBlockIndex = 0;
   }
-  const id = space.addBlock(
+  const id = page.addBlock(
     { flavour: model.flavour, text: right, type: model.type },
     newParent,
     newBlockIndex
   );
-  asyncFocusRichText(space, id);
+  asyncFocusRichText(page, id);
 }
 
-export function handleIndent(
-  space: Space,
-  model: ExtendedModel,
-  offset: number
-) {
-  const previousSibling = space.getPreviousSibling(model);
+export function handleIndent(page: Page, model: ExtendedModel, offset: number) {
+  const previousSibling = page.getPreviousSibling(model);
   if (previousSibling) {
-    space.captureSync();
+    page.captureSync();
 
     const blockProps = {
       flavour: model.flavour,
@@ -103,11 +99,11 @@ export function handleIndent(
       text: model?.text?.clone(), // should clone before `deleteBlock`
       children: model.children,
     };
-    space.deleteBlock(model);
-    const id = space.addBlock(blockProps, previousSibling);
+    page.deleteBlock(model);
+    const id = page.addBlock(blockProps, previousSibling);
     // FIXME: after quill onload
     requestAnimationFrame(() => {
-      const block = space.getBlockById(id);
+      const block = page.getBlockById(id);
       assertExists(block);
       const richText = getRichTextByModel(block);
       richText?.quill.setSelection(offset, 0);
@@ -116,14 +112,14 @@ export function handleIndent(
 }
 
 export async function handleUnindent(
-  space: Space,
+  page: Page,
   model: ExtendedModel,
   offset: number
 ) {
-  const parent = space.getParent(model);
+  const parent = page.getParent(model);
   if (!parent || parent?.flavour === 'affine:group') return;
 
-  const grandParent = space.getParent(parent);
+  const grandParent = page.getParent(parent);
   if (!grandParent) return;
 
   const index = grandParent.children.indexOf(parent);
@@ -134,13 +130,13 @@ export async function handleUnindent(
     type: model.type,
   };
 
-  space.captureSync();
-  space.deleteBlock(model);
-  const id = space.addBlock(blockProps, grandParent, index + 1);
+  page.captureSync();
+  page.deleteBlock(model);
+  const id = page.addBlock(blockProps, grandParent, index + 1);
 
   // FIXME: after quill onload
   requestAnimationFrame(() => {
-    const block = space.getBlockById(id);
+    const block = page.getBlockById(id);
     assertExists(block);
 
     const richText = getRichTextByModel(block);
@@ -148,32 +144,32 @@ export async function handleUnindent(
   });
 }
 
-export function handleLineStartBackspace(space: Space, model: ExtendedModel) {
+export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
   if (model.flavour === 'affine:paragraph') {
     if (model.type !== 'text') {
-      space.captureSync();
-      space.updateBlock(model, { type: 'text' });
+      page.captureSync();
+      page.updateBlock(model, { type: 'text' });
     } else {
-      const parent = space.getParent(model);
-      const container = getContainerByModel(model);
-      const previousSibling = getPreviousBlock(container, model.id);
+      const parent = page.getParent(model);
       if (!parent || parent?.flavour === 'affine:group') {
+        const container = getContainerByModel(model);
+        const previousSibling = getPreviousBlock(container, model.id);
         if (previousSibling?.flavour == 'affine:divider') {
-          space.captureSync();
-          space.deleteBlock(previousSibling);
+          page.captureSync();
+          page.deleteBlock(previousSibling);
         }
-        if (previousSibling?.flavour == 'affine:paragraph') {
-          space.captureSync();
+        if (previousSibling && previousSibling.flavour === 'affine:paragraph') {
+          page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
           previousSibling.text?.join(model.text as Text);
-          space.deleteBlock(model);
+          page.deleteBlock(model);
           const richText = getRichTextByModel(previousSibling);
           richText?.quill?.setSelection(preTextLength, 0);
         }
       } else {
-        const grandParent = space.getParent(parent);
+        const grandParent = page.getParent(parent);
         if (!grandParent) return;
         const index = grandParent.children.indexOf(parent);
         const blockProps = {
@@ -183,20 +179,20 @@ export function handleLineStartBackspace(space: Space, model: ExtendedModel) {
           type: model.type,
         };
 
-        space.captureSync();
-        space.deleteBlock(model);
-        space.addBlock(blockProps, grandParent, index + 1);
+        page.captureSync();
+        page.deleteBlock(model);
+        page.addBlock(blockProps, grandParent, index + 1);
       }
     }
   }
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
   else if (model.flavour === 'affine:list') {
-    const parent = space.getParent(model);
+    const parent = page.getParent(model);
     if (!parent) return;
 
     const index = parent.children.indexOf(model);
-    space.captureSync();
+    page.captureSync();
 
     const blockProps = {
       flavour: 'affine:paragraph',
@@ -204,9 +200,9 @@ export function handleLineStartBackspace(space: Space, model: ExtendedModel) {
       text: model?.text?.clone(),
       children: model.children,
     };
-    space.deleteBlock(model);
-    const id = space.addBlock(blockProps, parent, index);
-    asyncFocusRichText(space, id);
+    page.deleteBlock(model);
+    const id = page.addBlock(blockProps, parent, index);
+    asyncFocusRichText(page, id);
   }
 }
 
@@ -331,7 +327,7 @@ export function handleKeyDown(
 }
 
 export function tryMatchSpaceHotkey(
-  space: Space,
+  page: Page,
   model: ExtendedModel,
   quill: Quill,
   prefix: string,
@@ -345,48 +341,48 @@ export function tryMatchSpaceHotkey(
   switch (prefix.trim()) {
     case '[]':
     case '[ ]':
-      isConverted = convertToList(space, model, 'todo', prefix, {
+      isConverted = convertToList(page, model, 'todo', prefix, {
         checked: false,
       });
       break;
     case '[x]':
-      isConverted = convertToList(space, model, 'todo', prefix, {
+      isConverted = convertToList(page, model, 'todo', prefix, {
         checked: true,
       });
       break;
     case '-':
     case '*':
-      isConverted = convertToList(space, model, 'bulleted', prefix);
+      isConverted = convertToList(page, model, 'bulleted', prefix);
       break;
     case '***':
-      isConverted = convertToDivider(space, model, 'normal', prefix);
+      isConverted = convertToDivider(page, model, 'normal', prefix);
       break;
     case '---':
-      isConverted = convertToDivider(space, model, 'normal', prefix);
+      isConverted = convertToDivider(page, model, 'normal', prefix);
       break;
     case '#':
-      isConverted = convertToParagraph(space, model, 'h1', prefix);
+      isConverted = convertToParagraph(page, model, 'h1', prefix);
       break;
     case '##':
-      isConverted = convertToParagraph(space, model, 'h2', prefix);
+      isConverted = convertToParagraph(page, model, 'h2', prefix);
       break;
     case '###':
-      isConverted = convertToParagraph(space, model, 'h3', prefix);
+      isConverted = convertToParagraph(page, model, 'h3', prefix);
       break;
     case '####':
-      isConverted = convertToParagraph(space, model, 'h4', prefix);
+      isConverted = convertToParagraph(page, model, 'h4', prefix);
       break;
     case '#####':
-      isConverted = convertToParagraph(space, model, 'h5', prefix);
+      isConverted = convertToParagraph(page, model, 'h5', prefix);
       break;
     case '######':
-      isConverted = convertToParagraph(space, model, 'h6', prefix);
+      isConverted = convertToParagraph(page, model, 'h6', prefix);
       break;
     case '>':
-      isConverted = convertToParagraph(space, model, 'quote', prefix);
+      isConverted = convertToParagraph(page, model, 'quote', prefix);
       break;
     default:
-      isConverted = convertToList(space, model, 'numbered', prefix);
+      isConverted = convertToList(page, model, 'numbered', prefix);
   }
 
   return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;

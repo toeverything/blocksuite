@@ -43,8 +43,8 @@ function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function run() {
-  await wait(0); // for better in-browser debug log formatting
+export async function runOnce() {
+  await wait(50); // for correct event sequence
 
   for (const testCase of testCases) {
     const { name, callback } = testCase;
@@ -93,4 +93,16 @@ export function assertColor(
   const g = data[1];
   const b = data[2];
   return r === color[0] && g === color[1] && b === color[2];
+}
+
+// prevent redundant test runs
+export function disableButtonsAfterClick() {
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(button => {
+        button.disabled = true;
+      });
+    });
+  });
 }

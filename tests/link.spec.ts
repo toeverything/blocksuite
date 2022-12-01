@@ -88,28 +88,27 @@ test('basic link', async ({ page }) => {
   );
 });
 
-const createLinkBlock = async (page: Page, str: string, link: string) => {
+async function createLinkBlock(page: Page, str: string, link: string) {
   const id = await page.evaluate(
     ([str, link]) => {
-      const space = window.store
-        .createSpace('space:page0')
+      const page = window.workspace
+        .createPage('space:page0')
         .register(window.blockSchema);
       const editor = document.createElement('editor-container');
-      // @ts-ignore
-      editor.space = space;
+      editor.page = page;
       document.body.appendChild(editor);
 
-      const pageId = space.addBlock({
+      const pageId = page.addBlock({
         flavour: 'affine:page',
         title: 'title',
       });
-      const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
+      const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
 
-      const text = space.Text.fromDelta(space, [
+      const text = page.Text.fromDelta(page.getUnderlyingSpace(), [
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);
-      const id = space.addBlock(
+      const id = page.addBlock(
         { flavour: 'affine:paragraph', type: 'text', text: text },
         groupId
       );
@@ -118,7 +117,7 @@ const createLinkBlock = async (page: Page, str: string, link: string) => {
     [str, link]
   );
   return id;
-};
+}
 
 test('text added after a link should not have link formatting', async ({
   page,

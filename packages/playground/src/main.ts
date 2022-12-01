@@ -7,7 +7,7 @@ import {
   createWebsocketDocProvider,
   createAutoIncrement,
   uuidv4,
-  Store,
+  Workspace,
 } from '@blocksuite/store';
 import type { DocProviderConstructor, StoreOptions } from '@blocksuite/store';
 
@@ -74,23 +74,20 @@ function editorOptionsFromParam(): Pick<
 }
 
 window.onload = () => {
-  const store = new Store({
+  const workspace = new Workspace({
     room: room,
     ...editorOptionsFromParam(),
   });
   // @ts-ignore
-  window.store = store;
+  window.workspace = workspace;
   // @ts-ignore
   window.blockSchema = BlockSchema;
 
   // In dev environment, init editor by default, but in test environment, init editor by the test page
   if (!isTest) {
-    const space = store
-      .createSpace('space:page0')
-      // @ts-ignore
-      .register(window.blockSchema);
-    const editor = createEditor(space);
-    const debugMenu = createDebugMenu(store, editor);
+    const page = workspace.createPage('space:page0').register(BlockSchema);
+    const editor = createEditor(page);
+    const debugMenu = createDebugMenu(workspace, editor);
 
     document.body.appendChild(editor);
     document.body.appendChild(debugMenu);

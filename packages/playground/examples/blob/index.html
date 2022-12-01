@@ -13,8 +13,15 @@
   </head>
   <body>
     <div id="root">
-      Please run <code>main()</code> in console to see test result.
+      <p>Please click buttons below to run test.</p>
+      <button id="test-basic">test IDB basics</button>
+      <button id="test-refresh-before">
+        test IDB refresh (before refresh)
+      </button>
+      <button id="test-refresh-after">test IDB refresh (after refresh)</button>
+      <button id="clear-indexeddb">clear IDB</button>
     </div>
+    <br />
     <script type="module">
       import '@blocksuite/store/src/blob/__tests__/test-entry';
     </script>

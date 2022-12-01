@@ -1,4 +1,4 @@
-import { Space, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
 export type ParagraphType =
   | 'text'
@@ -22,22 +22,22 @@ export class ParagraphBlockModel
   flavour = 'affine:paragraph' as const;
   type: ParagraphType = 'text';
 
-  constructor(space: Space, props: Partial<ParagraphBlockProps>) {
-    super(space, props);
+  constructor(page: Page, props: Partial<ParagraphBlockProps>) {
+    super(page, props);
     this.type = props.type ?? 'text';
   }
 
   override block2html(
     childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {
     const text = super.block2html(
       childText,
-      _previousSiblingId,
-      _nextSiblingId,
+      previousSiblingId,
+      nextSiblingId,
       begin,
       end
     );

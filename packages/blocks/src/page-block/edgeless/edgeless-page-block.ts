@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Disposable, Signal, Space } from '@blocksuite/store';
+import { Disposable, Signal, Page } from '@blocksuite/store';
 import type { GroupBlockModel, PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
@@ -32,7 +32,7 @@ import {
 import style from './style.css';
 
 export interface EdgelessContainer extends HTMLElement {
-  readonly space: Space;
+  readonly page: Page;
   readonly viewport: ViewportState;
   readonly mouseRoot: HTMLElement;
   readonly signals: {
@@ -52,7 +52,7 @@ export class EdgelessPageBlockComponent
   `;
 
   @property()
-  space!: Space;
+  page!: Page;
 
   flavour = 'edgeless' as const;
 
@@ -79,7 +79,7 @@ export class EdgelessPageBlockComponent
   private _selection!: EdgelessSelectionManager;
 
   private _bindHotkeys() {
-    const { space } = this;
+    const { page: space } = this;
 
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace.bind(this));
     hotkey.addListener(HOTKEYS.H1, () =>
@@ -113,7 +113,7 @@ export class EdgelessPageBlockComponent
     bindCommonHotkey(space);
   }
 
-  private _updateType(flavour: string, type: string, space: Space): void {
+  private _updateType(flavour: string, type: string, space: Page): void {
     updateTextType(flavour, type, space);
   }
 
@@ -139,7 +139,7 @@ export class EdgelessPageBlockComponent
 
   private _handleBackspace(e: KeyboardEvent) {
     if (this._selection.blockSelectionState.type === 'single') {
-      handleBackspace(this.space, e);
+      handleBackspace(this.page, e);
     }
   }
 
@@ -166,7 +166,7 @@ export class EdgelessPageBlockComponent
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('space')) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
     }
     super.update(changedProperties);
@@ -183,7 +183,7 @@ export class EdgelessPageBlockComponent
     );
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
-    this._historyDisposable = this.space.signals.historyUpdated.on(() => {
+    this._historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
     });
 
@@ -191,7 +191,7 @@ export class EdgelessPageBlockComponent
 
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.space, this.viewport.zoom);
+      tryUpdateGroupSize(this.page, this.viewport.zoom);
     });
 
     requestAnimationFrame(() => {

@@ -48,8 +48,8 @@ export class RichText extends LitElement {
 
   firstUpdated() {
     const { host, model, placeholder, _textContainer } = this;
-    const { space } = host;
-    const keyboardBindings = createKeyboardBindings(space, model);
+    const { page } = host;
+    const keyboardBindings = createKeyboardBindings(page, model);
 
     this.quill = new Quill(_textContainer, {
       modules: {
@@ -66,8 +66,8 @@ export class RichText extends LitElement {
       placeholder,
     });
 
-    space.attachRichText(model.id, this.quill);
-    space.awareness.updateLocalCursor();
+    page.attachRichText(model.id, this.quill);
+    page.awareness.updateLocalCursor();
     this.model.propsUpdated.on(() => this.requestUpdate());
 
     // If you type a character after the code or link node,
@@ -123,7 +123,7 @@ export class RichText extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.host.space.detachRichText(this.model.id);
+    this.host.page.detachRichText(this.model.id);
   }
 
   updated() {

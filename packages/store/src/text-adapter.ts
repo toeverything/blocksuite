@@ -345,9 +345,9 @@ export class RichTextAdapter {
   };
 
   private _quillObserver = (
-    _eventType: string,
+    eventType: string,
     delta: any,
-    _state: any,
+    state: any,
     origin: any
   ) => {
     const { yText } = this;

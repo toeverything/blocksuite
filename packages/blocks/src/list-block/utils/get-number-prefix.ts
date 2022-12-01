@@ -1,4 +1,4 @@
-const number2letter = (n: number) => {
+function number2letter(n: number) {
   const ordA = 'a'.charCodeAt(0);
   const ordZ = 'z'.charCodeAt(0);
   const len = ordZ - ordA + 1;
@@ -8,10 +8,10 @@ const number2letter = (n: number) => {
     n = Math.floor(n / len) - 1;
   }
   return s;
-};
+}
 
 // Derive from https://gist.github.com/imilu/00f32c61e50b7ca296f91e9d96d8e976
-export const number2roman = (num: number) => {
+export function number2roman(num: number) {
   const lookup: { [key: string]: number } = {
     M: 1000,
     CM: 900,
@@ -35,20 +35,20 @@ export const number2roman = (num: number) => {
     }
   }
   return romanStr;
-};
+}
 
-const getPrefix = (deep: number, index: number) => {
+function getPrefix(deep: number, index: number) {
   const map = [() => index + 1, number2letter, () => number2roman(index + 1)];
   return map[deep % map.length](index);
-};
+}
 
-export const getNumberPrefix = ({
+export function getNumberPrefix({
   index,
   deep,
 }: {
   index: number;
   deep: number;
-}) => {
+}) {
   const prefix = getPrefix(deep, index);
   return `${prefix} .`;
-};
+}

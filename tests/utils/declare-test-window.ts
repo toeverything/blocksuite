@@ -1,10 +1,10 @@
-import type { Store, Space, BaseBlockModel } from '../../packages/store/src';
+import type { Workspace, Page, BaseBlockModel } from '../../packages/store/src';
 
 declare global {
   interface Window {
     /** Available on playground window */
-    store: Store;
+    workspace: Workspace;
     blockSchema: Record<string, typeof BaseBlockModel>;
-    space: Space;
+    page: Page;
   }
 }

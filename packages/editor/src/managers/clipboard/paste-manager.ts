@@ -126,7 +126,7 @@ export class PasteManager {
       return;
     }
     const currentSelectionInfo =
-      selectInfo || SelectionUtils.getSelectInfo(this._editor.space);
+      selectInfo || SelectionUtils.getSelectInfo(this._editor.page);
     if (
       currentSelectionInfo.type === 'Range' ||
       currentSelectionInfo.type === 'Caret'
@@ -135,7 +135,7 @@ export class PasteManager {
         currentSelectionInfo.selectedBlocks[
           currentSelectionInfo.selectedBlocks.length - 1
         ];
-      const selectedBlock = this._editor.space.getBlockById(lastBlock.id);
+      const selectedBlock = this._editor.page.getBlockById(lastBlock.id);
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
@@ -143,14 +143,14 @@ export class PasteManager {
           if (selectedBlock.children[0]?.flavour === 'affine:group') {
             parent = selectedBlock.children[0];
           } else {
-            const id = this._editor.space.addBlock(
+            const id = this._editor.page.addBlock(
               { flavour: 'affine:group' },
               selectedBlock.id
             );
-            parent = this._editor.space.getBlockById(id);
+            parent = this._editor.page.getBlockById(id);
           }
         } else if (selectedBlock.flavour !== 'affine:group') {
-          parent = this._editor.space.getParent(selectedBlock);
+          parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
@@ -175,7 +175,7 @@ export class PasteManager {
             endIndex + insertLen
           );
           lastId = addBlockIds[addBlockIds.length - 1];
-          const lastBlock = this._editor.space.getBlockById(lastId);
+          const lastBlock = this._editor.page.getBlockById(lastId);
           selectedBlock?.text?.delete(
             endIndex + insertLen,
             selectedBlock?.text?.length
@@ -185,7 +185,7 @@ export class PasteManager {
         }
         setTimeout(() => {
           lastId &&
-            this._editor.space.richTextAdapters
+            this._editor.page.richTextAdapters
               .get(lastId)
               ?.quill.setSelection(position, 0);
         });
@@ -193,7 +193,7 @@ export class PasteManager {
         parent && this._addBlocks(blocks, parent, index, addBlockIds);
       }
     } else if (currentSelectionInfo.type === 'Block') {
-      const selectedBlock = this._editor.space.getBlockById(
+      const selectedBlock = this._editor.page.getBlockById(
         currentSelectionInfo.selectedBlocks[
           currentSelectionInfo.selectedBlocks.length - 1
         ].id
@@ -206,14 +206,14 @@ export class PasteManager {
           if (selectedBlock.children[0]?.flavour === 'affine:group') {
             parent = selectedBlock.children[0];
           } else {
-            const id = this._editor.space.addBlock(
+            const id = this._editor.page.addBlock(
               { flavour: 'affine:group' },
               selectedBlock.id
             );
-            parent = this._editor.space.getBlockById(id);
+            parent = this._editor.page.getBlockById(id);
           }
         } else if (selectedBlock.flavour !== 'affine:group') {
-          parent = this._editor.space.getParent(selectedBlock);
+          parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
@@ -237,8 +237,8 @@ export class PasteManager {
         type: block.type as string,
         checked: block.checked,
       };
-      const id = this._editor.space.addBlock(blockProps, parent, index + i);
-      const model = this._editor.space.getBlockById(id);
+      const id = this._editor.page.addBlock(blockProps, parent, index + i);
+      const model = this._editor.page.getBlockById(id);
       block.text && model?.text?.applyDelta(block.text);
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);

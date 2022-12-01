@@ -1,17 +1,17 @@
-import { BaseBlockModel, Space } from '@blocksuite/store';
+import { BaseBlockModel, Page } from '@blocksuite/store';
 
 export class PageBlockModel extends BaseBlockModel {
   flavour = 'affine:page' as const;
   title = '';
-  constructor(space: Space, props: Partial<PageBlockModel>) {
-    super(space, props);
+  constructor(page: Page, props: Partial<PageBlockModel>) {
+    super(page, props);
     this.title = props.title ?? '';
   }
 
   override block2html(
     childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
+    previousSiblingId: string,
+    nextSiblingId: string,
     begin?: number,
     end?: number
   ) {

@@ -1,4 +1,4 @@
-import type { Space, Store } from '@blocksuite/store';
+import type { Page, Workspace } from '@blocksuite/store';
 import type { EditorContainer } from './components';
 
 export * from './components';
@@ -24,15 +24,15 @@ if (env[importIdentifier] === true) {
 // @ts-ignore
 env[importIdentifier] = true;
 
-export const createEditor = (space: Space): EditorContainer => {
+export const createEditor = (page: Page): EditorContainer => {
   const editor = document.createElement('editor-container');
-  editor.space = space;
+  editor.page = page;
   return editor;
 };
 
-export const createDebugMenu = (store: Store, editor: EditorContainer) => {
+export const createDebugMenu = (store: Workspace, editor: EditorContainer) => {
   const debugMenu = document.createElement('debug-menu');
-  debugMenu.store = store;
+  debugMenu.workspace = store;
   debugMenu.editor = editor;
   return debugMenu;
 };

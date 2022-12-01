@@ -1,5 +1,4 @@
-import type { Space, Text, BaseBlockModel } from '@blocksuite/store';
-import { DividerBlockModel } from '../../divider-block';
+import type { Page, Text, BaseBlockModel } from '@blocksuite/store';
 import type { GroupBlockModel } from '../../group-block';
 import {
   assertExists,
@@ -26,7 +25,7 @@ import {
   resetNativeSelection,
 } from '../../__internal__/utils/selection';
 
-function deleteModels(space: Space, models: BaseBlockModel[]) {
+function deleteModels(page: Page, models: BaseBlockModel[]) {
   const selection = window.getSelection();
   const first = models[0];
   const last = models[models.length - 1];
@@ -60,33 +59,34 @@ function deleteModels(space: Space, models: BaseBlockModel[]) {
 
   // delete models in between
   for (let i = 1; i <= models.length - 1; i++) {
-    space.deleteBlock(models[i]);
+    page.deleteBlock(models[i]);
   }
 
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-export function updateTextType(flavour: string, type: string, space: Space) {
+export function updateTextType(flavour: string, type: string, page: Page) {
   const range = window.getSelection()?.getRangeAt(0);
   assertExists(range);
   const modelsInRange = getModelsByRange(range);
-  space.captureSync();
+  page.captureSync();
   modelsInRange.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list']);
     if (model.flavour === flavour) {
-      space.updateBlock(model, { type });
+      page.updateBlock(model, { type });
     } else {
-      transformBlock(space, model, flavour, type);
+      transformBlock(page, model, flavour, type);
     }
   });
 }
+
 export function transformBlock(
-  space: Space,
+  page: Page,
   model: BaseBlockModel,
   flavour: string,
   type: string
 ) {
-  const parent = space.getParent(model);
+  const parent = page.getParent(model);
   assertExists(parent);
   const blockProps = {
     flavour,
@@ -95,29 +95,29 @@ export function transformBlock(
     children: model.children,
   };
   const index = parent.children.indexOf(model);
-  space.deleteBlock(model);
-  const id = space.addBlock(blockProps, parent, index);
-  asyncFocusRichText(space, id);
+  page.deleteBlock(model);
+  const id = page.addBlock(blockProps, parent, index);
+  asyncFocusRichText(page, id);
 }
 
 export function batchUpdateTextType(
   flavour: string,
-  space: Space,
+  page: Page,
   models: ExtendedModel[],
   type: string
 ) {
-  space.captureSync();
+  page.captureSync();
   for (const model of models) {
     assertFlavours(model, ['affine:paragraph', 'affine:list']);
     if (model.flavour === flavour) {
-      space.updateBlock(model, { type });
+      page.updateBlock(model, { type });
     } else {
-      transformBlock(space, model, 'affine:paragraph', type);
+      transformBlock(page, model, 'affine:paragraph', type);
     }
   }
 }
 
-export function handleBackspace(space: Space, e: KeyboardEvent) {
+export function handleBackspace(page: Page, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
   if (isNoneSelection()) return;
@@ -138,14 +138,71 @@ export function handleBackspace(space: Space, e: KeyboardEvent) {
     if (isMultiBlockRange(range)) {
       e.preventDefault();
       const intersectedModels = getModelsByRange(range);
-      deleteModels(space, intersectedModels);
+      deleteModels(page, intersectedModels);
     }
   }
 }
 
+export const getFormat = () => {
+  const models = getModelsByRange(getCurrentRange());
+  if (models.length === 1) {
+    const richText = getRichTextByModel(models[0]);
+    assertExists(richText);
+    const { quill } = richText;
+    const range = quill.getSelection();
+    assertExists(range);
+    const format = quill.getFormat(range);
+    return format;
+  }
+  const selection = window.getSelection();
+  const first = models[0];
+  const last = models[models.length - 1];
+  const firstRichText = getRichTextByModel(first);
+  const lastRichText = getRichTextByModel(last);
+  assertExists(firstRichText);
+  assertExists(lastRichText);
+  assertExists(selection);
+
+  const firstIndex = getQuillIndexByNativeSelection(
+    selection.anchorNode,
+    selection.anchorOffset,
+    true
+  );
+  const endIndex = getQuillIndexByNativeSelection(
+    selection.focusNode,
+    selection.focusOffset,
+    false
+  );
+  const firstFormat = firstRichText.quill.getFormat(
+    firstIndex,
+    firstRichText.quill.getLength() - firstIndex - 1
+  );
+  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
+
+  const formatArr = [];
+  formatArr.push(firstFormat, lastFormat);
+  for (let i = 1; i < models.length - 1; i++) {
+    const richText = getRichTextByModel(models[i]);
+    assertExists(richText);
+    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
+    formatArr.push(format);
+  }
+  // const allFormat = formatArr.every(item => item[key]);
+  const allFormat = formatArr.reduce((acc, cur) => {
+    const newFormat: Record<string, unknown> = {};
+    for (const key in acc) {
+      if (acc[key] === cur[key]) {
+        newFormat[key] = acc[key];
+      }
+    }
+    return newFormat;
+  });
+  return allFormat;
+};
+
 function formatModelsByRange(
   models: BaseBlockModel[],
-  space: Space,
+  page: Page,
   key: string
 ) {
   const selection = window.getSelection();
@@ -159,43 +216,28 @@ function formatModelsByRange(
 
   const firstIndex = getQuillIndexByNativeSelection(
     selection.anchorNode,
-    selection.anchorOffset as number,
+    selection.anchorOffset,
     true
   );
   const endIndex = getQuillIndexByNativeSelection(
     selection.focusNode,
-    selection.focusOffset as number,
+    selection.focusOffset,
     false
   );
-  const formatArr = [];
-  const firstFormat = firstRichText.quill.getFormat(
-    firstIndex,
-    firstRichText.quill.getLength() - firstIndex - 1
-  );
-  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
-
-  formatArr.push(firstFormat, lastFormat);
-  for (let i = 1; i < models.length - 1; i++) {
-    const richText = getRichTextByModel(models[i]);
-    assertExists(richText);
-    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
-    formatArr.push(format);
-  }
-  const allFormat = formatArr.every(item => item[key]);
-
-  space.captureSync();
+  const isFormatActive = getFormat()[key];
+  page.captureSync();
   firstRichText.model.text?.format(
     firstIndex,
     firstRichText.quill.getLength() - firstIndex - 1,
-    { [key]: !allFormat }
+    { [key]: !isFormatActive }
   );
-  lastRichText.model.text?.format(0, endIndex, { [key]: !allFormat });
+  lastRichText.model.text?.format(0, endIndex, { [key]: !isFormatActive });
 
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
     assertExists(richText);
     richText.model.text?.format(0, richText.quill.getLength() - 1, {
-      [key]: !allFormat,
+      [key]: !isFormatActive,
     });
   }
   lastRichText.quill.setSelection(endIndex, 0);
@@ -204,10 +246,7 @@ function formatModelsByRange(
   }
 }
 
-export function handleFormat(space: Space, e: KeyboardEvent, key: string) {
-  // workaround page title
-  e.preventDefault();
-  if (e.target instanceof HTMLInputElement) return;
+export function handleFormat(page: Page, key: string) {
   if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
@@ -218,13 +257,13 @@ export function handleFormat(space: Space, e: KeyboardEvent, key: string) {
       const { quill } = richText;
       const range = quill.getSelection();
       assertExists(range);
-      space.captureSync();
+      page.captureSync();
 
       const { index, length } = range;
       const format = quill.getFormat(range);
       models[0].text?.format(index, length, { [key]: !format[key] });
     } else {
-      formatModelsByRange(models, space, key);
+      formatModelsByRange(models, page, key);
     }
   }
 }
@@ -244,7 +283,25 @@ export function handleSelectAll() {
   // @ts-ignore
   range.setEnd(lastNode, lastNode.length);
 
+  const nearestCommonAncestor = findNearestCommonAncestor(
+    firstRichText,
+    lastRichText,
+    document.querySelector('body') as Node
+  );
+  initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
   resetNativeSelection(range);
+}
+
+function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
+  nearestCommonAncestor.addEventListener(
+    'mousemove',
+    e => {
+      e.stopPropagation();
+      // SelectedBlockType 总是 text, DragDirection 总是 never
+      console.log(nearestCommonAncestor);
+    },
+    { once: true }
+  );
 }
 
 function findLastNode(ele: Element | Node): Node {
@@ -261,27 +318,50 @@ function findFirstNode(ele: Element | Node): Node {
   return ele;
 }
 
+function findNearestCommonAncestor(
+  node1: Node,
+  node2: Node,
+  root: Node = document.querySelector('body') as Node
+): Node {
+  const ancestors: Node[][] = new Array(2).fill(0).map(() => []);
+  [node1, node2].forEach((node, index) => {
+    while (node !== root && node.parentElement) {
+      node = node.parentElement;
+      ancestors[index].push(node);
+    }
+  });
+
+  for (let i = 0; i < ancestors[0].length; i++) {
+    for (let j = 0; j < ancestors[1].length; j++) {
+      if (ancestors[0][i] === ancestors[1][j]) {
+        return ancestors[0][i];
+      }
+    }
+  }
+  return root;
+}
+
 export function handleBlockSelectionBatchDelete(
-  space: Space,
+  page: Page,
   models: ExtendedModel[]
 ) {
-  space.captureSync();
+  page.captureSync();
   if (models[0].flavour === 'affine:divider') {
-    space.deleteBlock(models[0]);
+    page.deleteBlock(models[0]);
     return;
   }
   assertExists(models[0].text);
 
   models[0].text.delete(0, models[0].text.length);
   for (let i = 1; i < models.length; i++) {
-    space.deleteBlock(models[i]);
+    page.deleteBlock(models[i]);
   }
 }
 
-export function tryUpdateGroupSize(space: Space, zoom: number) {
+export function tryUpdateGroupSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
-    if (!space.root) return;
-    const groups = space.root.children as GroupBlockModel[];
+    if (!page.root) return;
+    const groups = page.root.children as GroupBlockModel[];
     groups.forEach(model => {
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
@@ -298,7 +378,7 @@ export function tryUpdateGroupSize(space: Space, zoom: number) {
       const newModelHeight = bound.height / zoom;
 
       if (!almostEqual(newModelWidth, w) || !almostEqual(newModelHeight, h)) {
-        space.updateBlock(model, {
+        page.updateBlock(model, {
           xywh: JSON.stringify([x, y, newModelWidth, newModelHeight]),
         });
       }

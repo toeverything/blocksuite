@@ -61,7 +61,7 @@ export class CopyCutManager {
 
   private _getClipItems() {
     const clips: ClipItem[] = [];
-    const selectionInfo = SelectionUtils.getSelectInfo(this._editor.space);
+    const selectionInfo = SelectionUtils.getSelectInfo(this._editor.page);
     const selectedBlocks = selectionInfo.selectedBlocks;
 
     const affineClip = this._getCustomClip(selectedBlocks);
@@ -101,7 +101,7 @@ export class CopyCutManager {
   private _getClipInfoBySelectionInfo(
     selectedBlock: SelectedBlock
   ): OpenBlockInfo | null {
-    const model = this._editor.space.getBlockById(selectedBlock.id);
+    const model = this._editor.page.getBlockById(selectedBlock.id);
     if (!model) {
       return null;
     }

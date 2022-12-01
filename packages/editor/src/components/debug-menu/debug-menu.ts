@@ -7,7 +7,7 @@ import {
   convertToList,
   createEvent,
 } from '@blocksuite/blocks';
-import type { BaseBlockModel, Store } from '@blocksuite/store';
+import type { BaseBlockModel, Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {
@@ -123,7 +123,7 @@ const icons = {
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
   @property()
-  store!: Store;
+  workspace!: Workspace;
 
   @property()
   editor!: EditorContainer;
@@ -138,10 +138,10 @@ export class DebugMenu extends LitElement {
   canRedo = false;
 
   @state()
-  _mode: 'page' | 'edgeless' = 'page';
+  mode: 'page' | 'edgeless' = 'page';
 
-  get space() {
-    return this.editor.space;
+  get page() {
+    return this.editor.page;
   }
 
   get contentParser() {
@@ -150,10 +150,10 @@ export class DebugMenu extends LitElement {
 
   private _onToggleConnection() {
     if (this.connected) {
-      this.store.providers.forEach(provide => provide.disconnect());
+      this.workspace.providers.forEach(provider => provider.disconnect());
       this.connected = false;
     } else {
-      this.store.providers.forEach(provide => provide.connect());
+      this.workspace.providers.forEach(provider => provider.connect());
       this.connected = true;
     }
   }
@@ -164,9 +164,9 @@ export class DebugMenu extends LitElement {
     const block = element.closest('[data-block-id]') as CommonBlockElement;
     if (!block) return;
 
-    const { space } = block.host;
-    const model = space.getBlockById(block.model.id) as BaseBlockModel;
-    convertToList(this.space, model, listType, '');
+    const { page } = block.host;
+    const model = page.getBlockById(block.model.id) as BaseBlockModel;
+    convertToList(this.page, model, listType, '');
   }
 
   private _onDelete() {
@@ -179,32 +179,32 @@ export class DebugMenu extends LitElement {
     const block = element.closest('paragraph-block')?.model;
     if (!block) return;
 
-    this.space.captureSync();
-    this.space.updateBlock(block, { type });
+    this.page.captureSync();
+    this.page.updateBlock(block, { type });
   }
 
   private _onSwitchMode() {
-    this._mode = this._mode === 'page' ? 'edgeless' : 'page';
+    this.mode = this.mode === 'page' ? 'edgeless' : 'page';
 
-    const event = createEvent('affine.switch-mode', this._mode);
+    const event = createEvent('affine.switch-mode', this.mode);
     window.dispatchEvent(event);
   }
 
   private _onAddGroup() {
-    const root = this.space.root;
+    const root = this.page.root;
     if (!root) return;
     const pageId = root.id;
 
-    this.space.captureSync();
+    this.page.captureSync();
 
     const count = root.children.length;
     const xywh = `[0,${count * 60},720,480]`;
 
-    const groupId = this.space.addBlock<GroupBlockModel>(
+    const groupId = this.page.addBlock<GroupBlockModel>(
       { flavour: 'affine:group', xywh },
       pageId
     );
-    this.space.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    this.page.addBlock({ flavour: 'affine:paragraph' }, groupId);
   }
 
   private _onExportHtml() {
@@ -216,9 +216,9 @@ export class DebugMenu extends LitElement {
   }
 
   firstUpdated() {
-    this.space.signals.historyUpdated.on(() => {
-      this.canUndo = this.space.canUndo;
-      this.canRedo = this.space.canRedo;
+    this.page.signals.historyUpdated.on(() => {
+      this.canUndo = this.page.canUndo;
+      this.canRedo = this.page.canRedo;
     });
   }
 
@@ -272,7 +272,7 @@ export class DebugMenu extends LitElement {
           title="undo"
           .disabled=${!this.canUndo}
           tabindex="-1"
-          @click=${() => this.space.undo()}
+          @click=${() => this.page.undo()}
         >
           ${icons.undo}
         </button>
@@ -281,7 +281,7 @@ export class DebugMenu extends LitElement {
           title="redo"
           .disabled=${!this.canRedo}
           tabindex="-1"
-          @click=${() => this.space.redo()}
+          @click=${() => this.page.redo()}
         >
           ${icons.redo}
         </button>

@@ -53,10 +53,6 @@ export class Store {
     return this.spaces.get(spaceId) as Space;
   }
 
-  getSpace() {
-    return this.spaces;
-  }
-
   // TODO: The user cursor should be spread by the spaceId in awareness
   createSpace(spaceId: string) {
     this.spaces.set(
@@ -69,14 +65,14 @@ export class Store {
   }
 
   /**
-   * @internal Only for testing at now
+   * @internal Only for testing
    */
   serializeDoc() {
     return serializeYDoc(this.doc) as unknown as SerializedStore;
   }
 
   /**
-   * @internal Only for testing at now, 'page0' should be replaced by props 'spaceId'
+   * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
    */
   toJSXElement(id = '0') {
     const json = this.serializeDoc();

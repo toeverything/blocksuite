@@ -10,7 +10,11 @@ import {
   handleNativeRangeClick,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
-import { repairContextMenuRange } from '../utils/cursor';
+import {
+  getNativeSelectionMouseDragInfo,
+  repairContextMenuRange,
+} from '../utils/cursor';
+import { showFormatQuickBar } from '../../components/format-quick-bar';
 
 interface NoneBlockSelectionState {
   type: 'none';
@@ -32,7 +36,7 @@ interface HoverState {
   block: GroupBlockModel;
 }
 
-interface FrameSelectionState {
+export interface FrameSelectionState {
   start: DOMPoint;
   end: DOMPoint;
 }
@@ -165,7 +169,7 @@ export class EdgelessSelectionManager {
   }
 
   private get _space() {
-    return this._container.space;
+    return this._container.page;
   }
 
   private get _blocks(): GroupBlockModel[] {
@@ -298,6 +302,15 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
+    if (this.isActive) {
+      const { anchor, direction, selectedType } =
+        getNativeSelectionMouseDragInfo(e);
+      if (selectedType === 'Caret') {
+        // If nothing is selected, then we should not show the format bar
+        return;
+      }
+      showFormatQuickBar({ anchorEl: anchor, direction });
+    }
     this._frameSelectionState = null;
   };
 

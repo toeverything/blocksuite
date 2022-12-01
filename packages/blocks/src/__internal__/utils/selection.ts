@@ -1,6 +1,6 @@
-import type { BaseBlockModel, Space } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { RichText } from '../rich-text/rich-text';
-import { assertExists, caretRangeFromPoint, matchFlavours } from './std';
+import { assertExists, caretRangeFromPoint, matchFlavours, sleep } from './std';
 import type { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
 import {
   getBlockElementByModel,
@@ -84,14 +84,6 @@ function fixCurrentRangeToText(
     }
   }
   return range;
-}
-
-async function sleep(delay = 0) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(null);
-    }, delay);
-  });
 }
 
 function setStartRange(editableContainer: Element) {
@@ -288,7 +280,7 @@ function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {
   const parentMap = new Map<string, SelectedBlock>();
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
-    const parent = model.space.getParent(model);
+    const parent = model.page.getParent(model);
     const block = { id: model.id, children: [] };
     if (!parent || !parentMap.has(parent.id)) {
       result.push(block);
@@ -311,8 +303,8 @@ function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
   return getLastSelectBlock(last.children);
 }
 
-export function getSelectInfo(space: Space): SelectionInfo {
-  if (!space.root) {
+export function getSelectInfo(page: Page): SelectionInfo {
+  if (!page.root) {
     return {
       type: 'None',
       selectedBlocks: [],
@@ -322,8 +314,8 @@ export function getSelectInfo(space: Space): SelectionInfo {
   let type = 'None';
   let selectedBlocks: SelectedBlock[] = [];
   let selectedModels: BaseBlockModel[] = [];
-  const page = getDefaultPageBlock(space.root);
-  const { state } = page.selection;
+  const pageBlock = getDefaultPageBlock(page.root);
+  const { state } = pageBlock.selection;
   const nativeSelection = window.getSelection();
   if (state.type === 'block') {
     type = 'Block';
@@ -405,7 +397,7 @@ export function isBlankArea(e: SelectionEvent) {
   return cursor !== 'text';
 }
 
-export function handleNativeRangeClick(space: Space, e: SelectionEvent) {
+export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
   const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   const startContainer = range?.startContainer;
   // if not left click
@@ -425,7 +417,7 @@ export function handleNativeRangeClick(space: Space, e: SelectionEvent) {
   ) {
     focusRichTextByOffset(startContainer, e.raw.clientX);
   } else if (isBlankAreaAfterLastBlock(startContainer)) {
-    const { root } = space;
+    const { root } = page;
     const lastChild = root?.lastChild();
     assertExists(lastChild);
     if (
@@ -442,7 +434,7 @@ export function handleNativeRangeClick(space: Space, e: SelectionEvent) {
   }
 }
 
-export function handleNativeRangeDblClick(space: Space, e: SelectionEvent) {
+export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
   const selection = window.getSelection();
   if (selection && selection.isCollapsed && selection.anchorNode) {
     const editableContainer =

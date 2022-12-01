@@ -1,18 +1,19 @@
-import type { Space } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { showLinkPopover } from '../../../components/link-popover';
 import {
   assertExists,
   getRichTextByModel,
   getStartModelBySelection,
+  hotkey,
   isRangeSelection,
 } from '../../utils';
 import './link-node';
 import { MockSelectNode } from './mock-select-node';
 
-export const createLink = async (space: Space, e: KeyboardEvent) => {
+// Disable hotkey to fix common hotkey(ctrl+c, ctrl+v, etc) not working at edit link popover
+export const createLink = hotkey.withDisabledHotkeyFn(async (page: Page) => {
   if (!isRangeSelection()) {
     // TODO maybe allow user creating a link with text
-    e.preventDefault();
     return;
   }
   const startModel = getStartModelBySelection();
@@ -28,7 +29,7 @@ export const createLink = async (space: Space, e: KeyboardEvent) => {
   // User can cancel link by pressing shortcut again
   const format = quill.getFormat(range);
   if (format?.link) {
-    space.captureSync();
+    page.captureSync();
     const { index, length } = range;
     startModel.text?.format(index, length, { link: false });
     return;
@@ -61,6 +62,6 @@ export const createLink = async (space: Space, e: KeyboardEvent) => {
   }
   const link = linkState.link;
 
-  space.captureSync();
+  page.captureSync();
   startModel.text?.format(range.index, range.length, { link });
-};
+});
