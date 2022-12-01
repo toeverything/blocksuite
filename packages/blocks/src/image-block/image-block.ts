@@ -1,5 +1,5 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import type { EmbedBlockModel } from '../embed-block';
 import {
   BLOCK_ID_ATTR,
@@ -19,6 +19,9 @@ export class ImageBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
+  @query('.resizable-img')
+  _resizeImg!: HTMLElement;
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -30,10 +33,11 @@ export class ImageBlockComponent extends LitElement {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
-    const { source } = this.model;
-    const img = new Image();
-    img.src = source;
-    // img.onload = () => {};
+    const { width, height } = this.model;
+    if (width) {
+      this._resizeImg.style.width = width + 'px';
+      this._resizeImg.style.height = height + 'px';
+    }
   }
 
   render() {
@@ -41,13 +45,14 @@ export class ImageBlockComponent extends LitElement {
     // const { deep, index } = getListInfo(this.host, this.model);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
     const { source } = this.model;
+
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <embed-block .model=${this.model}>
         <div class="affine-image-wrapper">
           <div class="resizable">
-            <img src=${source} />
+            <img class="resizable-img" src=${source} />
           </div>
           ${childrenContainer}
         </div>

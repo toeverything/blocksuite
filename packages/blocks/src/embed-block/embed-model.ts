@@ -7,8 +7,6 @@ export interface EmbedBlockProps extends IBaseBlockProps {
   source: string;
   width?: number;
   height?: number;
-  visitWidth?: number;
-  visitHeight?: number;
   caption?: string;
 }
 
@@ -17,8 +15,6 @@ export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
   public width: number;
   public height: number;
   public type: EmbedType;
-  public visitWidth: number;
-  public visitHeight: number;
   public source: string;
   public caption: string;
   constructor(space: Space, props: Partial<EmbedBlockProps>) {
@@ -28,7 +24,5 @@ export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
     this.source = props.source ?? '';
     this.width = props.width ?? 0;
     this.height = props.height ?? 0;
-    this.visitWidth = props.visitWidth ?? 0;
-    this.visitHeight = props.visitHeight ?? 0;
   }
 }
