@@ -1,14 +1,16 @@
-import { BaseBlockModel, Signal, Page } from '@blocksuite/store';
+import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { DragDirection, getFormat } from '../../page-block/utils';
 import {
-  convertToList,
+  DragDirection,
+  getFormat,
+  updateTextType,
+} from '../../page-block/utils';
+import {
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
-  sleep,
 } from '../../__internal__/utils';
 import { toast } from '../toast';
 import './button';
@@ -114,25 +116,6 @@ export class FormatQuickBar extends LitElement {
     if (this.showParagraphPanel === 'hidden') {
       return html``;
     }
-    const formatParagraph = (targetFormat: string) => {
-      this.models
-        .filter(i => i.type !== targetFormat)
-        .forEach(async model => {
-          if (!this.page) {
-            throw new Error('Space is not defined');
-          }
-          if (isListType(targetFormat)) {
-            convertToList(this.page, model, targetFormat, '');
-          } else {
-            this.page.updateBlock(model, { type: targetFormat });
-            // format quick bar may need to update its position
-            // after the paragraph type is changed
-            await sleep();
-            this.positionUpdated.emit();
-          }
-          this.paragraphType = targetFormat;
-        });
-    };
     const styles = styleMap({
       left: '0',
       top: this.showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
@@ -148,12 +131,26 @@ export class FormatQuickBar extends LitElement {
       @mouseout=${this.onHoverEnd}
     >
       ${paragraphButtons.map(
-        ({ id, name, icon }) => html`<format-bar-button
+        ({ flavour, type, name, icon }) => html`<format-bar-button
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
-          data-testid="${id}"
-          @click=${() => formatParagraph(id)}
+          data-testid="${type}"
+          @click=${() => {
+            if (!this.page) {
+              throw new Error('Failed to format paragraph! Page not found.');
+            }
+            if (this.paragraphType === type) {
+              // Already in the target format, convert back to text
+              const { flavour: defaultParagraph, type: defaultType } =
+                paragraphButtons[0];
+              updateTextType(defaultParagraph, defaultType, this.page);
+              this.paragraphType = defaultType;
+              return;
+            }
+            updateTextType(flavour, type, this.page);
+            this.paragraphType = type;
+          }}
         >
           ${icon}
         </format-bar-button>`
@@ -169,7 +166,7 @@ export class FormatQuickBar extends LitElement {
       return html``;
     }
     const paragraphIcon =
-      paragraphButtons.find(btn => btn.id === this.paragraphType)?.icon ??
+      paragraphButtons.find(btn => btn.type === this.paragraphType)?.icon ??
       paragraphButtons[0].icon;
     const paragraphItems = html`<format-bar-button
       class="paragraph-button"
