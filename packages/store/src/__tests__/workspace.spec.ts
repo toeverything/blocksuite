@@ -36,14 +36,15 @@ function waitOnce<T>(signal: Signal<T>) {
   return new Promise<T>(resolve => signal.once(val => resolve(val)));
 }
 
-const defaultPageId = 'space:page0';
+const defaultPageId = 'page0';
+const spaceId = `space:${defaultPageId}`;
 
 describe.concurrent('basic', () => {
   it('can init store', () => {
     const workspace = new Workspace(getStoreOptions());
 
     assert.deepEqual(serialize(workspace.createPage(defaultPageId)), {
-      [defaultPageId]: {},
+      [spaceId]: {},
     });
   });
 });
@@ -56,7 +57,7 @@ describe.concurrent('addBlock', () => {
 
     page.addBlock({ flavour: 'affine:page' });
 
-    assert.deepEqual(serialize(page)[defaultPageId], {
+    assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -82,7 +83,7 @@ describe.concurrent('addBlock', () => {
     page.addBlock({ flavour: 'affine:paragraph' });
     page.addBlock({ flavour: 'affine:paragraph' });
 
-    assert.deepEqual(serialize(page)[defaultPageId], {
+    assert.deepEqual(serialize(page)[spaceId], {
       '7': {
         'sys:children': ['100', '2'],
         'sys:flavour': 'affine:page',
@@ -112,7 +113,7 @@ describe.concurrent('addBlock', () => {
 
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
 
-    assert.deepEqual(serialize(page)[defaultPageId], {
+    assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -129,7 +130,7 @@ describe.concurrent('addBlock', () => {
     page.addBlock({ flavour: 'affine:page' });
     page.addBlock({ flavour: 'affine:paragraph' });
 
-    assert.deepEqual(serialize(page)[defaultPageId], {
+    assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -168,8 +169,7 @@ describe.concurrent('addBlock', () => {
     assert.ok(root.children[0] instanceof BlockSchema['affine:paragraph']);
     assert.equal(root.childMap.get('1'), 0);
 
-    const serializedChildren =
-      serialize(page)[defaultPageId]['0']['sys:children'];
+    const serializedChildren = serialize(page)[spaceId]['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
   });
@@ -188,7 +188,7 @@ describe.concurrent('deleteBlock', () => {
       .register(BlockSchema);
 
     page.addBlock({ flavour: 'affine:page' });
-    assert.deepEqual(serialize(page)[defaultPageId], {
+    assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -197,7 +197,7 @@ describe.concurrent('deleteBlock', () => {
     });
 
     page.deleteBlockById('0');
-    assert.deepEqual(serialize(page)[defaultPageId], {});
+    assert.deepEqual(serialize(page)[spaceId], {});
   });
 
   it('can delete model with parent', async () => {
@@ -209,7 +209,7 @@ describe.concurrent('deleteBlock', () => {
     page.addBlock({ flavour: 'affine:paragraph' });
 
     // before delete
-    assert.deepEqual(serialize(page)[defaultPageId], {
+    assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -227,7 +227,7 @@ describe.concurrent('deleteBlock', () => {
     page.deleteBlock(root.children[0]);
 
     // after delete
-    assert.deepEqual(serialize(page)[defaultPageId], {
+    assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',

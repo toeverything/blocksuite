@@ -92,7 +92,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
   const id = await page.evaluate(
     ([str, link]) => {
       const page = window.workspace
-        .createPage('space:page0')
+        .createPage('page0')
         .register(window.blockSchema);
       const editor = document.createElement('editor-container');
       editor.page = page;

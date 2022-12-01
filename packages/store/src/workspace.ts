@@ -9,10 +9,13 @@ export class Page extends Space {
 export class Workspace {
   private _store: Store;
   private _indexer: Indexer;
-  pages = new Map<string, Page>();
 
   get providers() {
     return this._store.providers;
+  }
+
+  get pages() {
+    return this._store.spaces as Map<string, Page>;
   }
 
   get doc() {
@@ -26,14 +29,13 @@ export class Workspace {
 
   createPage(pageId: string) {
     const page = new Page(
-      pageId,
+      'space:' + pageId,
       this.doc,
       this._store.awareness,
       this._store.idGenerator
     );
     this._store.addSpace(page);
     this._indexer.onCreateSpace(page.id);
-    this.pages.set(pageId, page);
     return page;
   }
 
