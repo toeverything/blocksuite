@@ -346,8 +346,12 @@ export function handleBlockSelectionBatchDelete(
   models: ExtendedModel[]
 ) {
   page.captureSync();
-  if (models[0].flavour === 'affine:divider') {
-    page.deleteBlock(models[0]);
+  for (let i = 0; i < models.length; i++) {
+    if (models[i].flavour === 'affine:divider') {
+      page.deleteBlock(models[i]);
+    }
+  }
+  if (models.length === 0) {
     return;
   }
   assertExists(models[0].text);
