@@ -1,0 +1,18 @@
+.affine-embed-wrapper {
+  /* padding: 10px; */
+  text-align: center;
+}
+.affine-embed-wrapper-caption {
+  width: 100%;
+  font-size: var(--affine-font-sm);
+  outline: none;
+  border: 0;
+  font-family: inherit;
+  color: inherit;
+  text-align: center;
+  color: var(--affine-placeholder-color);
+}
+
+.affine-embed-wrapper-caption::placeholder {
+  color: var(--affine-placeholder-color);
+}

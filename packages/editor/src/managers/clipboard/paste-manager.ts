@@ -95,9 +95,30 @@ export class PasteManager {
     clipboardData: DataTransfer
   ): Promise<OpenBlockInfo[]> {
     const file = PasteManager._getImageFile(clipboardData);
+    // assertExists(file)
     if (file) {
-      //  todo upload file to file server
-      return [];
+      if (file.type.includes('image')) {
+        //  todo upload file to file server
+        const url = URL.createObjectURL(file);
+
+        return [
+          // FIXME: Add two img blocks I should only add one
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            source: url,
+            children: [],
+            text: [{ insert: '' }],
+          },
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            source: url,
+            children: [],
+            text: [{ insert: '' }],
+          },
+        ];
+      }
     }
     return [];
   }
@@ -165,8 +186,10 @@ export class PasteManager {
           0
         );
         selectedBlock?.text?.insertList(insertTexts, endIndex);
+
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
+
         parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
         let lastId = selectedBlock?.id;
         let position = endIndex + insertLen;
@@ -236,10 +259,13 @@ export class PasteManager {
         flavour: block.flavour as string,
         type: block.type as string,
         checked: block.checked,
+        source: block.source,
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);
-      block.text && model?.text?.applyDelta(block.text);
+      if (model?.type !== 'affine:embed') {
+        block.text && model?.text?.applyDelta(block.text);
+      }
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);
     }
