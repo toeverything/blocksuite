@@ -18,9 +18,6 @@ import { formatButtons, paragraphButtons } from './config';
 import { ArrowDownIcon, CopyIcon } from './icons';
 import { formatQuickBarStyle } from './styles';
 
-const isListType = (type: string): type is 'bulleted' | 'numbered' | 'todo' =>
-  ['bulleted', 'numbered', 'todo'].includes(type);
-
 const onCopy = () => {
   document.dispatchEvent(new ClipboardEvent('copy'));
   toast('Copied to clipboard');
