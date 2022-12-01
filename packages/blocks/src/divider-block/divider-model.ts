@@ -1,4 +1,4 @@
-import { Space, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
 export interface DividerBlockProps extends IBaseBlockProps {
   flavour: 'affine:divider';
@@ -12,8 +12,8 @@ export class DividerBlockModel
   flavour = 'affine:divider' as const;
   type: 'normal';
 
-  constructor(space: Space, props: Partial<DividerBlockProps>) {
-    super(space, props);
+  constructor(page: Page, props: Partial<DividerBlockProps>) {
+    super(page, props);
     this.type = props.type ?? 'normal';
   }
 
