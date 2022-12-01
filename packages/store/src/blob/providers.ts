@@ -5,6 +5,8 @@ import { Signal } from '../utils/signal';
 import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types';
 import { getDatabase, sha3, sleep } from './utils';
 
+const RETRY_TIMEOUT = 500;
+
 interface BlobProviderStatic {
   init(workspace: string, cloudApi?: string): Promise<BlobProvider>;
 }
@@ -190,7 +192,7 @@ export class BlobCloudSync {
           await this._handleTaskRetry(task);
         }
       }
-      await sleep(500);
+      await sleep(RETRY_TIMEOUT);
     }
 
     console.error('BlobCloudSync taskRunner exited');
