@@ -60,7 +60,9 @@ async function testBasic() {
   });
 
   testSerial('can delete image', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await storage.delete(id!);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const url = await storage.get(id!);
     return url === null;
   });
