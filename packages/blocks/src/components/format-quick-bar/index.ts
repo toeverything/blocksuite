@@ -79,7 +79,7 @@ export class FormatQuickBar extends LitElement {
     this.format = getFormat();
     const startModel = models[0];
     this.paragraphType = startModel.type;
-    this.page = startModel.page;
+    this.page = startModel.page as Page;
     if (models.length > 1) {
       // Select multiple models
     }
