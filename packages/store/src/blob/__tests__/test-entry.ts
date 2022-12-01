@@ -60,10 +60,11 @@ async function testBasic() {
   });
 
   testSerial('can delete image', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await storage.delete(id!);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const url = await storage.get(id!);
+    assertExists(id);
+
+    await storage.delete(id);
+    const url = await storage.get(id);
+
     return url === null;
   });
 
@@ -123,9 +124,9 @@ function clearIndexedDB() {
     request.onsuccess = () => {
       console.log('IndexedDB test_blob cleared');
 
-      const request = indexedDB.deleteDatabase('test_padding');
+      const request = indexedDB.deleteDatabase('test_pending');
       request.onsuccess = () => {
-        console.log('IndexedDB test_padding cleared');
+        console.log('IndexedDB test_pending cleared');
 
         resolve();
       };

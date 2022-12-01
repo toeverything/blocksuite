@@ -1,7 +1,7 @@
 import type { Buffer } from 'buffer';
 import { createStore, del, get, keys, set, clear } from 'idb-keyval';
 import { SHAKE } from 'sha3';
-import type { IdbInstance } from './types';
+import type { IDBInstance } from './types';
 
 const hash = new SHAKE(128);
 
@@ -18,7 +18,7 @@ export function sha3(buffer: Buffer): string {
 export function getDatabase<T = ArrayBufferLike>(
   type: string,
   database: string
-): IdbInstance<T> {
+): IDBInstance<T> {
   const db = createStore(`${database}_${type}`, type);
   return {
     get: (key: string) => get<T>(key, db),

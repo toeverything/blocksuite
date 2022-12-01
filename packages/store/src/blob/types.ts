@@ -14,7 +14,7 @@ export interface BlobProvider {
   clear(): Promise<void>;
 }
 
-export type IdbInstance<T = ArrayBufferLike> = {
+export type IDBInstance<T = ArrayBufferLike> = {
   get: (key: BlobId) => Promise<T | undefined>;
   set: (key: BlobId, value: T) => Promise<void>;
   has(id: BlobId): Promise<boolean>;

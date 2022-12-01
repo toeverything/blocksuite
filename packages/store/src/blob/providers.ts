@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import ky from 'ky';
 import { Signal } from '../utils/signal';
 
-import type { BlobId, BlobProvider, BlobURL, IdbInstance } from './types';
+import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types';
 import { getDatabase, sha3, sleep } from './utils';
 
 interface BlobProviderStatic {
@@ -15,7 +15,7 @@ function staticImplements<T>() {
 
 @staticImplements<BlobProviderStatic>()
 export class IndexedDBBlobProvider implements BlobProvider {
-  private readonly _database: IdbInstance;
+  private readonly _database: IDBInstance;
   private readonly _cloud?: BlobCloudSync;
 
   readonly blobs: Set<string> = new Set();
@@ -109,18 +109,18 @@ type BlobStatus = {
 export class BlobCloudSync {
   private readonly _abortController = new AbortController();
   private readonly _fetcher: typeof ky;
-  private readonly _database: IdbInstance;
-  private readonly _padding: IdbInstance<{
+  private readonly _database: IDBInstance;
+  private readonly _pending: IDBInstance<{
     retry: number;
     type: 'add' | 'delete';
   }>;
-  private readonly _paddingPipeline: SyncTask[] = [];
+  private readonly _pendingPipeline: SyncTask[] = [];
   private readonly _workspace: string;
 
   private _pipeline: SyncTask[] = [];
   private initialized = false;
 
-  constructor(workspace: string, prefixUrl: string, db: IdbInstance) {
+  constructor(workspace: string, prefixUrl: string, db: IDBInstance) {
     this._fetcher = ky.create({
       prefixUrl,
       signal: this._abortController.signal,
@@ -128,14 +128,14 @@ export class BlobCloudSync {
     });
 
     this._database = db;
-    this._padding = getDatabase('padding', workspace);
+    this._pending = getDatabase('pending', workspace);
     this._workspace = workspace;
 
-    this._padding.keys().then(async keys => {
+    this._pending.keys().then(async keys => {
       this._pipeline = (
         await Promise.all(
           keys.map(async id => {
-            const { retry = 0, type } = (await this._padding.get(id)) || {};
+            const { retry = 0, type } = (await this._pending.get(id)) || {};
             const blob = await db.get(id);
             if ((blob || type === 'delete') && type) {
               return { id, blob, retry, type };
@@ -146,18 +146,18 @@ export class BlobCloudSync {
       ).filter((v): v is SyncTask => !!v);
 
       this.initialized = true;
-      this._paddingPipeline.forEach(task => this._pipeline.push(task));
-      this._paddingPipeline.length = 0;
+      this._pendingPipeline.forEach(task => this._pipeline.push(task));
+      this._pendingPipeline.length = 0;
 
-      this.taskRunner();
+      this._taskRunner();
     });
   }
 
-  private async handleTaskRetry(task: SyncTask, status?: BlobStatus) {
+  private async _handleTaskRetry(task: SyncTask, status?: BlobStatus) {
     if (status?.exists) {
-      await this._padding.delete(task.id);
+      await this._pending.delete(task.id);
     } else {
-      await this._padding.set(task.id, {
+      await this._pending.set(task.id, {
         type: task.type,
         retry: task.retry + 1,
       });
@@ -166,7 +166,7 @@ export class BlobCloudSync {
     }
   }
 
-  private async taskRunner() {
+  private async _taskRunner() {
     const signal = this._abortController.signal;
 
     while (!signal.aborted) {
@@ -183,11 +183,11 @@ export class BlobCloudSync {
             const status = await this._fetcher
               .post(api, { body: task.blob, retry: 3 })
               .json<BlobStatus>();
-            await this.handleTaskRetry(task, status);
+            await this._handleTaskRetry(task, status);
           }
         } catch (e) {
           console.warn('Error while syncing blob', e);
-          await this.handleTaskRetry(task);
+          await this._handleTaskRetry(task);
         }
       }
       await sleep(500);
@@ -218,10 +218,10 @@ export class BlobCloudSync {
       if (this.initialized) {
         this._pipeline.push({ id, blob, type, retry: 0 });
       } else {
-        this._paddingPipeline.push({ id, blob, type, retry: 0 });
+        this._pendingPipeline.push({ id, blob, type, retry: 0 });
       }
 
-      console.log(this._pipeline, this._paddingPipeline);
+      console.log(this._pipeline, this._pendingPipeline);
     } else {
       console.error('Blob not found', id);
     }
