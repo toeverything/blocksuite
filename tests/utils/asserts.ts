@@ -63,6 +63,23 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   expect(actual).toEqual(texts);
 }
 
+export async function assertRichImage(page: Page, count: number) {
+  const actual = await page.locator('.resizable-img').count();
+  expect(actual).toEqual(count);
+}
+export async function assertRichDragButton(page: Page) {
+  const actual = await page.locator('.resize').count();
+  expect(actual).toEqual(4);
+}
+
+export async function assertImageSize(page: Page, {width,height}:{width:number,height:number}) {
+  const actual = await page.locator('.resizable-img').boundingBox();
+  console.log('actual: ', actual);
+  expect(actual?.width).toEqual(width);
+  expect(actual?.height).toEqual(height);
+}
+
+
 export async function assertPageTitleFocus(page: Page) {
   const locator = await page.locator('input').nth(0);
   await expect(locator).toBeFocused();

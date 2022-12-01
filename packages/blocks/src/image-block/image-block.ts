@@ -44,14 +44,18 @@ export class ImageBlockComponent extends LitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     // const { deep, index } = getListInfo(this.host, this.model);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
-    const { source } = this.model;
+    const { source, width, height } = this.model;
 
+    if (width && height && this._resizeImg) {
+      this._resizeImg.style.width = width + 'px';
+      this._resizeImg.style.height = height + 'px';
+    }
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <embed-block .model=${this.model}>
         <div class="affine-image-wrapper">
-          <div class="resizable">
+          <div>
             <img class="resizable-img" src=${source} />
           </div>
           ${childrenContainer}
