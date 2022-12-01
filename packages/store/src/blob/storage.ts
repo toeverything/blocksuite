@@ -1,14 +1,13 @@
 import { Signal } from '../utils/signal';
-import type { BlobProvider, BlobId, BlobURL } from './blob-providers';
+import type { BlobId, BlobProvider, BlobURL } from './types';
 
 export class BlobStorage {
   private _providers: BlobProvider[] = [];
-
   signals = {
     blobAdded: new Signal<BlobId>(),
   };
 
-  get providers() {
+  get providers(): Readonly<BlobProvider[]> {
     return this._providers;
   }
 
