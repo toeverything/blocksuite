@@ -152,6 +152,7 @@ export class FormatQuickBar extends LitElement {
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
+          data-testid="${id}"
           @click=${() => formatParagraph(id)}
         >
           ${icon}
@@ -190,7 +191,11 @@ export class FormatQuickBar extends LitElement {
             data-testid=${id}
             ?active=${activeWhen(this.format)}
             @click=${() => {
-              action(space, this.abortController);
+              action({
+                page: space,
+                abortController: this.abortController,
+                format: this.format,
+              });
               // format state need to update after format
               this.format = getFormat();
             }}

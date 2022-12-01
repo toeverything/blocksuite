@@ -44,13 +44,19 @@ export const paragraphButtons = [
   { id: 'callout', name: 'Callout', icon: CalloutIcon },
 ] as const;
 
+type ActionProps = {
+  page: Page;
+  abortController: AbortController;
+  format: Record<string, unknown>;
+};
+
 export const formatButtons = [
   {
     id: 'bold',
     name: 'Bold',
     icon: BoldIcon,
     activeWhen: (format: Record<string, unknown>) => 'bold' in format,
-    action: (page: Page) => {
+    action: ({ page }: ActionProps) => {
       handleFormat(page, 'bold');
     },
   },
@@ -59,7 +65,7 @@ export const formatButtons = [
     name: 'Italic',
     icon: ItalicIcon,
     activeWhen: (format: Record<string, unknown>) => 'italic' in format,
-    action: (page: Page) => {
+    action: ({ page }: ActionProps) => {
       handleFormat(page, 'italic');
     },
   },
@@ -68,7 +74,7 @@ export const formatButtons = [
     name: 'Underline',
     icon: UnderlineIcon,
     activeWhen: (format: Record<string, unknown>) => 'underline' in format,
-    action: (page: Page) => {
+    action: ({ page }: ActionProps) => {
       handleFormat(page, 'underline');
     },
   },
@@ -77,7 +83,7 @@ export const formatButtons = [
     name: 'Strikethrough',
     icon: StrikethroughIcon,
     activeWhen: (format: Record<string, unknown>) => 'strike' in format,
-    action: (page: Page) => {
+    action: ({ page }: ActionProps) => {
       handleFormat(page, 'strike');
     },
   },
@@ -86,7 +92,7 @@ export const formatButtons = [
     name: 'Code',
     icon: InlineCodeIcon,
     activeWhen: (format: Record<string, unknown>) => 'code' in format,
-    action: (page: Page) => {
+    action: ({ page }: ActionProps) => {
       handleFormat(page, 'code');
     },
   },
@@ -97,9 +103,11 @@ export const formatButtons = [
     activeWhen: (format: Record<string, unknown>) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (models: BaseBlockModel[]) => models.length === 1,
-    action: (page: Page, abortController: AbortController) => {
+    action: ({ page, abortController, format }: ActionProps) => {
       createLink(page);
-      abortController.abort();
+      if (!('link' in format)) {
+        abortController.abort();
+      }
     },
   },
 ];
