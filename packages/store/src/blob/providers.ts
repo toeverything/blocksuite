@@ -1,14 +1,48 @@
 import { Buffer } from 'buffer';
 import ky from 'ky';
+import { Signal } from '../utils/signal';
 
 import type { BlobId, BlobProvider, BlobURL, IdbInstance } from './types';
 import { getDatabase, sha3, sleep } from './utils';
 
+interface BlobProviderStatic {
+  init(workspace: string, cloudApi?: string): Promise<BlobProvider>;
+}
+
+function staticImplements<T>() {
+  return <U extends T>(constructor: U) => constructor;
+}
+
+@staticImplements<BlobProviderStatic>()
 export class IndexedDBBlobProvider implements BlobProvider {
   private readonly _database: IdbInstance;
   private readonly _cloud?: BlobCloudSync;
 
-  constructor(workspace: string, cloudApi?: string) {
+  readonly blobs: Set<string> = new Set();
+  readonly signals = {
+    blobAdded: new Signal<BlobId>(),
+    blobDeleted: new Signal<BlobId>(),
+  };
+
+  static async init(
+    workspace: string,
+    cloudApi?: string
+  ): Promise<IndexedDBBlobProvider> {
+    const provider = new IndexedDBBlobProvider(workspace, cloudApi);
+    await provider._initBlobs();
+    return provider;
+  }
+
+  private async _initBlobs() {
+    const entries = await this._database.keys();
+    for (const key of entries) {
+      const blobId = key as BlobId;
+      this.signals.blobAdded.emit(blobId);
+      this.blobs.add(blobId);
+    }
+  }
+
+  private constructor(workspace: string, cloudApi?: string) {
     this._database = getDatabase('blob', workspace);
     if (cloudApi) {
       this._cloud = new BlobCloudSync(workspace, cloudApi, this._database);
@@ -17,7 +51,16 @@ export class IndexedDBBlobProvider implements BlobProvider {
 
   async get(id: BlobId): Promise<BlobURL | null> {
     const blob = await this._database.get(id);
-    if (!blob) return this._cloud?.get(id) || null;
+    if (!blob) {
+      const blob = this._cloud?.get(id);
+      if (blob) {
+        this.signals.blobAdded.emit(id);
+        this.blobs.add(id);
+
+        return blob;
+      }
+      return null;
+    }
 
     const result = URL.createObjectURL(new Blob([blob]));
     return result;
@@ -28,6 +71,9 @@ export class IndexedDBBlobProvider implements BlobProvider {
     const hash = sha3(Buffer.from(buffer));
     if (!(await this._database.has(hash))) {
       await this._database.set(hash, buffer);
+
+      this.signals.blobAdded.emit(hash);
+      this.blobs.add(hash);
     }
 
     this._cloud?.addTask(hash, 'add');
@@ -38,11 +84,14 @@ export class IndexedDBBlobProvider implements BlobProvider {
   async delete(id: BlobId): Promise<void> {
     await this._database.delete(id);
 
+    this.signals.blobDeleted.emit(id);
+    this.blobs.delete(id);
     this._cloud?.addTask(id, 'delete');
   }
 
   async clear(): Promise<void> {
     await this._database.clear();
+    this.blobs.clear();
   }
 }
 

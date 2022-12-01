@@ -1,7 +1,13 @@
+import type { Signal } from '../utils/signal';
+
 export type BlobId = string;
 export type BlobURL = string;
 
 export interface BlobProvider {
+  blobs: Set<BlobId>;
+  signals: {
+    blobAdded: Signal<BlobId>;
+  };
   get(id: BlobId): Promise<BlobURL | null>;
   set(blob: Blob): Promise<BlobId>;
   delete(id: BlobId): Promise<void>;

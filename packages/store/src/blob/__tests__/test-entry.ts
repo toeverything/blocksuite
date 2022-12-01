@@ -82,7 +82,7 @@ async function testBasic() {
 async function testRefreshBefore() {
   clearIndexedDB();
   const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init();
+  const provider = await IndexedDBBlobProvider.init('test');
   storage.addProvider(provider);
 
   testSerial('can set blob', async () => {
@@ -96,7 +96,7 @@ async function testRefreshBefore() {
 
 async function testRefreshAfter() {
   const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init();
+  const provider = await IndexedDBBlobProvider.init('test');
   storage.addProvider(provider);
 
   testSerial('can get saved blob', async () => {
