@@ -440,12 +440,9 @@ export class DefaultSelectionManager {
   selectBlockByRect(selectionRect: DOMRect) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);
-    const { richTextCache } = this.state;
-    const selectedRichTexts = filterSelectedRichText(
-      richTextCache,
-      selectionRect
-    );
-    this.state.selectedRichTexts = selectedRichTexts;
+    const { blockCache } = this.state;
+    const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
+    this.state.selectedBlocks = selectedBlocks;
     const selectedBounds: DOMRect[] = [selectionRect];
     this._signals.updateSelectedRects.emit(selectedBounds);
   }
