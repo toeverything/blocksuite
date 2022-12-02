@@ -239,11 +239,11 @@ export class EdgelessSelectedRect extends LitElement {
   private _onDrag = (e: MouseEvent) => {
     let newX = 0;
     let newW = 0;
-    if (this.state.type !== 'none') {
+    if (this.state.type === 'single') {
       const {
-        selected,
-        selected: { space, xywh },
+        selected
       } = this.state;
+      const { xywh } = selected
       const [x, y, w] = JSON.parse(xywh) as XYWH;
       const minus = this._dragStartInfo.startMouseLeft - e.clientX;
       if (this._dragStartInfo.direction === 'left') {
@@ -272,19 +272,17 @@ export class EdgelessSelectedRect extends LitElement {
       // reset the width of the container may trigger animation
       requestAnimationFrame(() => {
         // refresh xywh by model
-        space.updateBlock(selected, {
-          xywh: JSON.stringify([
-            newX,
-            y,
-            newW,
-            (groupBlock?.getBoundingClientRect().height || 0) / this.zoom,
-          ]),
-        });
+        selected.xywh = JSON.stringify([
+          newX,
+          y,
+          newW,
+          (groupBlock?.getBoundingClientRect().height || 0) / this.zoom,
+        ])
       });
     }
   };
 
-  private _onDragEnd = (e: MouseEvent) => {
+  private _onDragEnd = (_: MouseEvent) => {
     this.parentElement?.removeEventListener('mousemove', this._onDrag);
     this.parentElement?.removeEventListener('mouseup', this._onDragEnd);
   };
