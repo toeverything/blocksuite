@@ -357,15 +357,14 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  let isForward = true;
+  const isForward = e.x > e.start.x || e.y > e.start.y;
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
-    isForward = false;
-    currentRange?.setEnd(endContainer, endOffset);
-  } else {
+  if (isForward) {
     currentRange?.setStart(startContainer, startOffset);
+  } else {
+    currentRange?.setEnd(endContainer, endOffset);
   }
   if (currentRange) {
     currentRange = fixCurrentRangeToText(
