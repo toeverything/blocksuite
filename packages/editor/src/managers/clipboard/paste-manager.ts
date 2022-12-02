@@ -199,12 +199,15 @@ export class PasteManager {
           );
           lastId = addBlockIds[addBlockIds.length - 1];
           const lastBlock = this._editor.page.getBlockById(lastId);
-          selectedBlock?.text?.delete(
-            endIndex + insertLen,
-            selectedBlock?.text?.length
-          );
-          position = lastBlock?.text?.length || 0;
-          lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
+          if(lastBlock?.flavour !== 'affine:embed'){
+            selectedBlock?.text?.delete(
+              endIndex + insertLen,
+              selectedBlock?.text?.length
+            );
+            position = lastBlock?.text?.length || 0;
+            lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
+          }
+          
         }
         setTimeout(() => {
           lastId &&

@@ -22,6 +22,7 @@ import {
   isPageTitle,
   getSplicedTitle,
   noop,
+  getModelByElement,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -145,7 +146,10 @@ function SelectedRectsContainer(rects: DOMRect[]) {
   `;
 }
 
-function EmbedOptionContainer(embedOption: EmbedOption | null) {
+function EmbedOptionContainer(
+  embedOption: EmbedOption | null,
+  signals: DefaultPageSignals
+) {
   if (embedOption) {
     const style = {
       left: embedOption.position.x + 'px',
@@ -181,8 +185,10 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
             ${CopyIcon}
           </li>
           <li
-            @click=${() =>
-              embedOption.model.page.deleteBlock(embedOption.model)}
+            @click=${() => {
+              embedOption.model.page.deleteBlock(embedOption.model);
+              signals.updateEmbedRects.emit([]);
+            }}
           >
             ${DeleteIcon}
           </li>
@@ -272,6 +278,22 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     bindCommonHotkey(page);
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
+      if (state.type === 'native') {
+        handleBackspace(page, e);
+        return;
+      } else if (state.type === 'block') {
+        const { selectedBlocks } = state;
+        handleBlockSelectionBatchDelete(
+          page,
+          selectedBlocks.map(block => getModelByElement(block))
+        );
+
+        state.clear();
+        this.signals.updateSelectedRects.emit([]);
+        this.signals.updateEmbedRects.emit([]);
+        this.signals.updateEmbedOption.emit(null);
+        return;
+      }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
         // range delete
@@ -285,18 +307,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           noop();
         }
         return;
-      }
-
-      if (state.type === 'native') {
-        handleBackspace(page, e);
-      } else if (state.type === 'block') {
-        const { selectedRichTexts } = state;
-        handleBlockSelectionBatchDelete(
-          page,
-          selectedRichTexts.map(richText => richText.model)
-        );
-        state.clear();
-        this.signals.updateSelectedRects.emit([]);
       }
     });
 
@@ -403,11 +413,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _updateType(flavour: string, type: string, space: Page) {
     const { state } = this.selection;
-    if (state.selectedRichTexts.length > 0) {
+    if (state.selectedBlocks.length > 0) {
       batchUpdateTextType(
         flavour,
         space,
-        state.selectedRichTexts.map(richText => richText.model),
+        state.selectedBlocks.map(block => getModelByElement(block)),
         type
       );
     } else {
@@ -511,7 +521,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
-    const embedOptionContainer = EmbedOptionContainer(this.embedOption);
+    const embedOptionContainer = EmbedOptionContainer(
+      this.embedOption,
+      this.signals
+    );
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
