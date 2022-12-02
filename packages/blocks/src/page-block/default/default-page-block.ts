@@ -356,6 +356,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         handleBackspace(page, e);
       } else if (state.type === 'block') {
         const { selectedRichTexts, selectedDividers } = state;
+        if (selectedRichTexts.length === 0 && selectedDividers.length == 1) {
+          state.type = 'divider';
+          return;
+        }
         const SelectedBatch = selectedRichTexts
           .map(richText => richText.model)
           .concat(selectedDividers.map(divider => divider.model));

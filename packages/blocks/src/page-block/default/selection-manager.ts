@@ -248,6 +248,11 @@ export class DefaultSelectionManager {
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
+    const { selectedRichTexts, selectedDividers } =
+      this._getSelectedBlockInfo(e);
+    if (selectedRichTexts.length === 0 && selectedDividers.length == 1) {
+      this.state.type = 'divider';
+    }
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
@@ -416,7 +421,7 @@ export class DefaultSelectionManager {
       return;
     }
     if (dividerBlockComponent) {
-      this.state.type = 'block';
+      this.state.type = 'divider';
       this._activeComponent = (e.raw.target as HTMLElement).closest(
         'divider-block'
       );

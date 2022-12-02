@@ -159,9 +159,15 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
       if (!parent || parent?.flavour === 'affine:group') {
         const container = getContainerByModel(model);
         const previousSibling = getPreviousBlock(container, model.id);
-        if (previousSibling?.flavour == 'affine:divider') {
-          page.captureSync();
-          page.deleteBlock(previousSibling);
+        if (previousSibling?.flavour === 'affine:divider') {
+          const selectionManager = getDefaultPageBlock(model).selection;
+          const dividerBlockElement = getBlockElementByModel(
+            previousSibling
+          ) as HTMLElement;
+          const selectionRect = dividerBlockElement.getBoundingClientRect();
+          selectionManager.selectBlockByRect(selectionRect, model);
+          resetNativeSelection(null);
+          return PREVENT_DEFAULT;
         }
         if (previousSibling && previousSibling.flavour === 'affine:paragraph') {
           page.captureSync();
