@@ -12,7 +12,7 @@ import type {
 } from './selection-manager';
 import { BlockElement, BlockHost, getBlockById } from '../../__internal__';
 import '../../__internal__';
-import { PADDING_X, PADDING_Y, GROUP_MIN_LENGTH } from './utils';
+import { PADDING_X, PADDING_Y, GROUP_MIN_LENGTH, getSelectionBoxBound } from './utils'
 
 function getCommonRectStyle(rect: DOMRect, zoom: number) {
   return {
@@ -244,7 +244,8 @@ export class EdgelessSelectedRect extends LitElement {
     let newW = 0;
     if (this.state.type === 'single') {
       const {
-        selected
+        selected,
+        viewpoint
       } = this.state;
       const { xywh } = selected
       const [x, y, w] = JSON.parse(xywh) as XYWH;
@@ -278,6 +279,11 @@ export class EdgelessSelectedRect extends LitElement {
         if (!this.lock) {
           selected.page.captureSync();
           this.lock = true;
+        }
+        if (this.state.type !== 'none') {
+          this.state.rect = getSelectionBoxBound(viewpoint, selected.xywh);
+        } else {
+          console.error('unexpected state.type:', this.state.type)
         }
         selected.xywh = JSON.stringify([
           newX,
