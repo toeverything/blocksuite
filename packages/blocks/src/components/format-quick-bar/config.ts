@@ -5,8 +5,6 @@ import './button';
 import {
   BoldIcon,
   BulletedListIcon,
-  CalloutIcon,
-  CodeIcon,
   H1Icon,
   H2Icon,
   H3Icon,
@@ -26,22 +24,43 @@ import {
 
 export const paragraphButtons = [
   {
-    id: 'text',
+    flavour: 'affine:paragraph',
+    type: 'text',
     name: 'Text',
     icon: TextIcon,
   },
-  { id: 'h1', name: 'Heading 1', icon: H1Icon },
-  { id: 'h2', name: 'Heading 2', icon: H2Icon },
-  { id: 'h3', name: 'Heading 3', icon: H3Icon },
-  { id: 'h4', name: 'Heading 4', icon: H4Icon },
-  { id: 'h5', name: 'Heading 5', icon: H5Icon },
-  { id: 'h6', name: 'Heading 6', icon: H6Icon },
-  { id: 'bulleted', name: 'Bulleted List', icon: BulletedListIcon },
-  { id: 'numbered', name: 'Numbered List', icon: NumberedIcon },
-  { id: 'todo', name: 'To-do List', icon: TodoIcon },
-  { id: 'code', name: 'Code Block', icon: CodeIcon },
-  { id: 'quote', name: 'Quote', icon: QuoteIcon },
-  { id: 'callout', name: 'Callout', icon: CalloutIcon },
+  { flavour: 'affine:paragraph', type: 'h1', name: 'Heading 1', icon: H1Icon },
+  { flavour: 'affine:paragraph', type: 'h2', name: 'Heading 2', icon: H2Icon },
+  { flavour: 'affine:paragraph', type: 'h3', name: 'Heading 3', icon: H3Icon },
+  { flavour: 'affine:paragraph', type: 'h4', name: 'Heading 4', icon: H4Icon },
+  { flavour: 'affine:paragraph', type: 'h5', name: 'Heading 5', icon: H5Icon },
+  { flavour: 'affine:paragraph', type: 'h6', name: 'Heading 6', icon: H6Icon },
+  {
+    flavour: 'affine:list',
+    type: 'bulleted',
+    name: 'Bulleted List',
+    icon: BulletedListIcon,
+  },
+  {
+    flavour: 'affine:list',
+    type: 'numbered',
+    name: 'Numbered List',
+    icon: NumberedIcon,
+  },
+  { flavour: 'affine:list', type: 'todo', name: 'To-do List', icon: TodoIcon },
+  // { flavour: 'affine:', type: 'code', name: 'Code Block', icon: CodeIcon },
+  {
+    flavour: 'affine:paragraph',
+    type: 'quote',
+    name: 'Quote',
+    icon: QuoteIcon,
+  },
+  // {
+  //   flavour: 'affine:',
+  //   type: 'callout',
+  //   name: 'Callout',
+  //   icon: CalloutIcon,
+  // },
 ] as const;
 
 type ActionProps = {
