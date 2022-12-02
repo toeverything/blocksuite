@@ -25,7 +25,6 @@ import {
   getContainerByModel,
   getPreviousBlock,
   focusPreviousBlock,
-  resetNativeSelection,
   getDefaultPageBlock,
   getBlockElementByModel,
   getNextBlock,
