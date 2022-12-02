@@ -332,10 +332,31 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     groupId
   );
 
+  const textBtnLocator = page.locator(`[data-testid=text]`);
+  await textBtnLocator.click();
+  await assertStoreMatchJSX(
+    page,
+    `<affine:group
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
+
   // TODO FIXME: The paragraph button should prevent selection after click
-  // const textBtnLocator = page.locator(`[data-testid=text]`);
-  // await textBtnLocator.click();
-  // await assertStoreMatchJSX(page, ``, groupId);
+  // await assertSelection(page, 1, 0, 3);
 });
 
 test('should format quick bar be able to copy', async ({ page }) => {
