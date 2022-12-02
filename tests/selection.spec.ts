@@ -24,10 +24,12 @@ import {
   initThreeList,
   copyByKeyboard,
   pasteByKeyboard,
+  initThreeDivider,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
   assertBlockCount,
+  assertDivider,
   assertRichTexts,
   assertSelection,
 } from './utils/asserts';
@@ -421,4 +423,29 @@ test('Click the list icon to select', async ({ page }) => {
   await assertRichTexts(page, ['123', '\n', '456', '789', '\n']);
   //TODO:FIX ME!!!!!
   //This should be ['123','456','789'],but there is another bug affecting it
+});
+
+async function clickDivider(page: Page, i = 0) {
+  const locator = page.locator('divider-block').nth(i);
+  await locator.click();
+}
+
+test('Click the divider to select', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeDivider(page);
+  await assertDivider(page, 3);
+  await assertRichTexts(page, ['123', '123']);
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await clickDivider(page, 0);
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page);
+  await assertDivider(page, 3);
+  await assertRichTexts(page, ['123', '123']);
 });

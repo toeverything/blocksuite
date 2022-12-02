@@ -84,6 +84,7 @@ export function syncBlockProps(
   if (props.flavour === 'affine:list' && !yBlock.has('prop:type')) {
     yBlock.set('prop:type', props.type ?? 'bulleted');
   }
+
   if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
     yBlock.set('prop:checked', props.checked ?? false);
   }
@@ -98,6 +99,9 @@ export function syncBlockProps(
   }
   if (props.flavour === 'affine:embed' && !yBlock.has('prop:caption')) {
     yBlock.set('prop:caption', props.caption ?? '');
+  }
+  if (props.flavour === 'affine:divider' && !yBlock.has('prop:type')) {
+    yBlock.set('prop:type', props.type ?? 'normal');
   }
 }
 
