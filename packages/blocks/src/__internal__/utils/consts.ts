@@ -21,4 +21,8 @@ export const HOTKEYS = {
   H6: 'command+option+6,ctrl+shift+6',
   BULLETED: 'command+option+8,ctrl+shift+8',
   NUMBERED_LIST: 'command+option+9,ctrl+shift+9',
+  UP: 'up',
+  DOWN: 'down',
+  LEFT: 'left',
+  RIGHT: 'right',
 };

@@ -83,6 +83,7 @@ class PageSelectionState {
   type: PageSelectionType;
   selectedRichTexts: RichText[] = [];
   selectedDividers: DividerBlockComponent[] = [];
+  selectedModels: BaseBlockModel[] = [];
   model: BaseBlockModel | null = null;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
@@ -142,10 +143,12 @@ class PageSelectionState {
   clear() {
     this.type = 'none';
     this._richTextCache.clear();
+    this._dividerCache.clear();
     this._startRange = null;
     this._startPoint = null;
     this.model = null;
     this.selectedRichTexts = [];
+    this.selectedDividers = [];
   }
 }
 
@@ -461,15 +464,20 @@ export class DefaultSelectionManager {
     this._mouseDisposeCallback();
   }
 
-  selectBlockByRect(selectionRect: DOMRect) {
+  selectBlockByRect(selectionRect: DOMRect, model?: BaseBlockModel) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);
-    const { richTextCache } = this.state;
+    const { richTextCache, dividerCache } = this.state;
     const selectedRichTexts = filterSelectedRichText(
       richTextCache,
       selectionRect
     );
+    const selectedDividers = filterSelectedDivider(dividerCache, selectionRect);
     this.state.selectedRichTexts = selectedRichTexts;
+    this.state.selectedDividers = selectedDividers;
+    if (model?.flavour === 'affine:divider') {
+      this.state.model = model;
+    }
     this.state.selectedRichTexts = selectedRichTexts;
     const selectedBounds: DOMRect[] = [selectionRect];
     this._signals.updateSelectedRects.emit(selectedBounds);

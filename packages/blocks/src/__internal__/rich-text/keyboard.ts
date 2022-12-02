@@ -4,14 +4,17 @@ import {
   ALLOW_DEFAULT,
   focusNextBlock,
   focusPreviousBlock,
+  getBlockElementByModel,
   getContainerByModel,
   getCurrentRange,
+  getDefaultPageBlock,
   getNextBlock,
   getPreviousBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   noop,
   PREVENT_DEFAULT,
+  resetNativeSelection,
 } from '../utils';
 import {
   handleLineStartBackspace,
@@ -196,7 +199,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       const container = getContainerByModel(model);
       const preNodeModel = getPreviousBlock(container, model.id);
       if (preNodeModel?.flavour === 'affine:divider') {
-        focusPreviousBlock(preNodeModel, 'end');
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          preNodeModel
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
         return PREVENT_DEFAULT;
       }
       focusPreviousBlock(model, 'end');
@@ -209,8 +218,18 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     const textLength = this.quill.getText().length;
     if (range.index + 1 === textLength) {
       const nextBlock = getNextBlock(model.id);
-      if (nextBlock?.flavour === 'affine:divider') {
-        focusNextBlock(nextBlock, 'start');
+      if (!nextBlock) {
+        return ALLOW_DEFAULT;
+      }
+      if (nextBlock.flavour === 'affine:divider') {
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          nextBlock
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        // focusNextBlock(nextBlock, 'start');
         return PREVENT_DEFAULT;
       }
       focusNextBlock(model, 'start');

@@ -267,6 +267,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       NUMBERED_LIST,
       BULLETED,
       TEXT,
+      UP,
+      DOWN,
+      LEFT,
+      RIGHT,
     } = HOTKEYS;
 
     bindCommonHotkey(page);
@@ -304,6 +308,72 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       e.preventDefault();
       handleSelectAll();
       this.selection.state.type = 'native';
+    });
+
+    hotkey.addListener(UP, e => {
+      const { state } = this.selection;
+      if (isPageTitle(e)) {
+        return;
+      }
+      if (state.type === 'block') {
+        console.log('selectedUP');
+
+        // const { selectedDividers } = state;
+        // const SelectedBatch = selectedDividers.map(divider => divider.model);
+        // console.log(SelectedBatch);
+        // handleBlockSelectionBatchDelete(page, SelectedBatch);
+        // state.clear();
+        // this.signals.updateSelectedRects.emit([]);
+      }
+    });
+    hotkey.addListener(DOWN, e => {
+      const { state } = this.selection;
+      if (isPageTitle(e)) {
+        return;
+      }
+
+      if (state.type === 'block') {
+        console.log('selectedDOWN');
+
+        // const { selectedDividers } = state;
+        // const SelectedBatch = selectedDividers.map(divider => divider.model);
+        // console.log(SelectedBatch);
+        // handleBlockSelectionBatchDelete(page, SelectedBatch);
+        // state.clear();
+        // this.signals.updateSelectedRects.emit([]);
+      }
+    });
+    hotkey.addListener(LEFT, e => {
+      const { state } = this.selection;
+      if (isPageTitle(e)) {
+        return;
+      }
+      if (state.type === 'block') {
+        console.log('selectedLEFT');
+
+        // const { selectedDividers } = state;
+        // const SelectedBatch = selectedDividers.map(divider => divider.model);
+        // console.log(SelectedBatch);
+        // handleBlockSelectionBatchDelete(page, SelectedBatch);
+        // state.clear();
+        // this.signals.updateSelectedRects.emit([]);
+      }
+    });
+    hotkey.addListener(RIGHT, e => {
+      const { state } = this.selection;
+      if (isPageTitle(e)) {
+        return;
+      }
+      if (state.type === 'block') {
+        console.log('selectedRIGHT');
+
+        // const { selectedDividers } = state;
+        // const SelectedBatch = selectedDividers.map(divider => divider.model);
+        // console.log(SelectedBatch);
+        // handleBlockSelectionBatchDelete(page, SelectedBatch);
+        // state.clear();
+        // this.signals.updateSelectedRects.emit([]);
+      }
     });
 
     hotkey.addListener(H1, () =>

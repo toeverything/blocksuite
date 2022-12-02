@@ -19,6 +19,9 @@ import {
   convertToList,
   convertToParagraph,
   convertToDivider,
+  getDefaultPageBlock,
+  getBlockElementByModel,
+  resetNativeSelection,
 } from '../utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -217,8 +220,13 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
     if (height === 0 && top === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
       if (preNodeModel?.flavour === 'affine:divider') {
-        rect &&
-          focusPreviousBlock(preNodeModel, new Point(rect.left, rect.top));
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          preNodeModel
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
         return PREVENT_DEFAULT;
       }
       rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
@@ -238,7 +246,14 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
           ) as HTMLInputElement
         ).focus();
       } else if (preNodeModel?.flavour === 'affine:divider') {
-        focusPreviousBlock(preNodeModel, new Point(left, top));
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          preNodeModel
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        return PREVENT_DEFAULT;
       } else {
         focusPreviousBlock(model, new Point(left, top));
       }
@@ -286,7 +301,13 @@ export function handleKeyDown(
         return ALLOW_DEFAULT;
       }
       if (nextBlock.flavour === 'affine:divider') {
-        rect && focusNextBlock(nextBlock, new Point(rect.left, rect.top));
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          nextBlock
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
         return PREVENT_DEFAULT;
       }
       rect && focusNextBlock(model, new Point(rect.left, rect.top));
@@ -300,7 +321,13 @@ export function handleKeyDown(
         return ALLOW_DEFAULT;
       }
       if (nextBlock.flavour === 'affine:divider') {
-        focusNextBlock(nextBlock, new Point(left, bottom));
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          nextBlock
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
         return PREVENT_DEFAULT;
       }
       focusNextBlock(model, new Point(left, bottom));
