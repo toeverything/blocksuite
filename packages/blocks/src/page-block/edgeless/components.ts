@@ -65,7 +65,7 @@ function Handle(
   };
 
   return html`
-    <div style=${styleMap(style)} @mousedown=${handlerMouseDown}></div>
+    <div aria-label=${`handle-${handleType}`} style=${styleMap(style)} @mousedown=${handlerMouseDown}></div>
   `;
 }
 
@@ -169,6 +169,9 @@ export function EdgelessBlockChildrenContainer(
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
+  @property({ type: Boolean })
+  lock!: boolean;
+
   @property({ type: Number })
   zoom!: number;
 
@@ -185,7 +188,7 @@ export class EdgelessSelectedRect extends LitElement {
     direction: 'left',
   };
 
-  private getHandles(rect: DOMRect) {
+  private _getHandles(rect: DOMRect) {
     let handles: TemplateResult | null = null;
     if (this.state.type === 'none') return handles;
     if (!this.state.active) {
@@ -231,12 +234,12 @@ export class EdgelessSelectedRect extends LitElement {
         direction: type,
       };
       // parent ele is the edgeless block container
-      this.parentElement?.addEventListener('mousemove', this._onDrag);
+      this.parentElement?.addEventListener('mousemove', this._onDragMove);
       this.parentElement?.addEventListener('mouseup', this._onDragEnd);
     }
   };
 
-  private _onDrag = (e: MouseEvent) => {
+  private _onDragMove = (e: MouseEvent) => {
     let newX = 0;
     let newW = 0;
     if (this.state.type === 'single') {
@@ -272,6 +275,10 @@ export class EdgelessSelectedRect extends LitElement {
       // reset the width of the container may trigger animation
       requestAnimationFrame(() => {
         // refresh xywh by model
+        if (!this.lock) {
+          selected.page.captureSync();
+          this.lock = true;
+        }
         selected.xywh = JSON.stringify([
           newX,
           y,
@@ -283,7 +290,8 @@ export class EdgelessSelectedRect extends LitElement {
   };
 
   private _onDragEnd = (_: MouseEvent) => {
-    this.parentElement?.removeEventListener('mousemove', this._onDrag);
+    this.lock = false;
+    this.parentElement?.removeEventListener('mousemove', this._onDragMove);
     this.parentElement?.removeEventListener('mouseup', this._onDragEnd);
   };
 
@@ -297,7 +305,7 @@ export class EdgelessSelectedRect extends LitElement {
     };
 
     return html`
-      ${this.getHandles(this.rect)}
+      ${this._getHandles(this.rect)}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
     `;
   }
