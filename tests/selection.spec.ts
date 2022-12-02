@@ -436,13 +436,9 @@ test('Click the divider to select', async ({ page }) => {
   await initThreeDivider(page);
   await assertDivider(page, 3);
   await assertRichTexts(page, ['123', '123']);
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await clickDivider(page, 0);
   await page.keyboard.press('Backspace', { delay: 50 });
+  await assertDivider(page, 2);
   await clickDivider(page, 0);
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
