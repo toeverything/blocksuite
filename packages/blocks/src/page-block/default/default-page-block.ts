@@ -362,6 +362,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         handleBlockSelectionBatchDelete(page, SelectedBatch);
         state.clear();
         this.signals.updateSelectedRects.emit([]);
+      } else if (state.type === 'divider') {
+        const { selectedDividers } = state;
+        const SelectedBatch = selectedDividers.map(divider => divider.model);
+        handleBlockSelectionBatchDelete(page, SelectedBatch);
+        state.clear();
+        this.signals.updateSelectedRects.emit([]);
       }
     });
 
