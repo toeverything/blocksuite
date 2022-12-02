@@ -35,17 +35,6 @@ function intersects(rect: DOMRect, selectionRect: DOMRect) {
   );
 }
 
-function filterSelectedRichText(
-  richTextCache: Map<RichText, DOMRect>,
-  selectionRect: DOMRect
-): RichText[] {
-  const richTexts = Array.from(richTextCache.keys());
-  return richTexts.filter(richText => {
-    const rect = richText.getBoundingClientRect();
-    return intersects(rect, selectionRect);
-  });
-}
-
 function filterSelectedBlock(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect
