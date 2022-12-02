@@ -245,7 +245,7 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       const {
         selected,
-        viewpoint
+        viewport
       } = this.state;
       const { xywh } = selected
       const [x, y, w] = JSON.parse(xywh) as XYWH;
@@ -281,7 +281,7 @@ export class EdgelessSelectedRect extends LitElement {
           this.lock = true;
         }
         if (this.state.type !== 'none') {
-          this.state.rect = getSelectionBoxBound(viewpoint, selected.xywh);
+          this.state.rect = getSelectionBoxBound(viewport, selected.xywh);
         } else {
           console.error('unexpected state.type:', this.state.type)
         }
