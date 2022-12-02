@@ -75,25 +75,15 @@ export class Space {
     id: string,
     doc: Y.Doc,
     awareness: Awareness,
-    idGenerator: IdGenerator = uuidv4
+    idGenerator: IdGenerator = uuidv4,
+    observeEvents = true
   ) {
     this.id = id;
     this.doc = doc;
-
     this._idGenerator = idGenerator;
 
     const aware = awareness ?? new Awareness(this.doc);
     this.awareness = new AwarenessAdapter(this, aware);
-
-    // Handle all the events that happen at _any_ level (potentially deep inside the structure).
-    // So, we apply a listener at the top level for the flat structure of the current
-    // page/space container.
-    const handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
-      for (const event of events) {
-        this._handleYEvent(event);
-      }
-      this.signals.updated.emit();
-    };
 
     // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
     // "unobserve" is potentially necessary to make sure we don't create
@@ -101,8 +91,10 @@ export class Space {
     // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
     // We could unobserve in order to short circuit by ignoring the sync of remote
     // events we actually generated locally.
-    // this._yBlocks.unobserveDeep(handleYEvents);
-    this._yBlocks.observeDeep(handleYEvents);
+    // this._yBlocks.unobserveDeep(this._handleYEvents);
+    if (observeEvents) {
+      this._yBlocks.observeDeep(this._handleYEvents);
+    }
 
     this._history = new Y.UndoManager([this._yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
@@ -116,7 +108,7 @@ export class Space {
   }
 
   /** key-value store of blocks */
-  private get _yBlocks() {
+  protected get _yBlocks() {
     return this.doc.getMap(this.id) as YBlocks;
   }
 
@@ -525,4 +517,14 @@ export class Space {
       }
     }
   }
+
+  // Handle all the events that happen at _any_ level (potentially deep inside the structure).
+  // So, we apply a listener at the top level for the flat structure of the current
+  // page/space container.
+  private _handleYEvents = (events: Y.YEvent<YBlock | Y.Text>[]) => {
+    for (const event of events) {
+      this._handleYEvent(event);
+    }
+    this.signals.updated.emit();
+  };
 }

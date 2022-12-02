@@ -1,19 +1,78 @@
+import * as Y from 'yjs';
 import { Store, StoreOptions } from './store';
 import { Space } from './space';
 import { Signal } from './utils/signal';
 import { Indexer, QueryContent } from './search';
+import { uuidv4 } from './utils/id-generator';
+import type { Awareness } from 'y-protocols/awareness';
 
 export class Page extends Space {
   // ...
+}
+
+interface PageMeta {
+  id: string;
+  title: string;
+}
+
+class WorkspaceMeta extends Space {
+  pagesUpdated = new Signal();
+
+  constructor(id: string, doc: Y.Doc, awareness: Awareness) {
+    super(id, doc, awareness, uuidv4, false);
+    this._yPages.observe(this._handlePageEvent);
+  }
+
+  private get _yMetaRoot() {
+    return this._yBlocks as Y.Map<unknown>;
+  }
+
+  private get _yPages() {
+    if (!this._yMetaRoot.has('pages')) {
+      this._yMetaRoot.set('pages', new Y.Array());
+    }
+
+    return this._yMetaRoot.get('pages') as Y.Array<unknown>;
+  }
+
+  get pages() {
+    return this._yPages.toArray() as PageMeta[];
+  }
+
+  addPage(page: PageMeta, index?: number) {
+    const yPage = new Y.Map();
+    yPage.set('id', page.id);
+    yPage.set('title', page.title);
+
+    if (index === undefined) {
+      this._yPages.push([yPage]);
+    } else {
+      this._yPages.insert(index, [yPage]);
+    }
+  }
+
+  removePage(id: string) {
+    const pages = this._yPages.toArray() as PageMeta[];
+    const index = pages.findIndex((page: PageMeta) => id === page.id);
+
+    if (index !== -1) {
+      this._yPages.delete(index, 1);
+    }
+  }
+
+  private _handlePageEvent = (_: Y.YEvent<Y.Array<unknown>>) => {
+    this.pagesUpdated.emit();
+  };
 }
 
 export class Workspace {
   private _store: Store;
   private _indexer: Indexer;
 
-  signals = {
-    pageAdded: new Signal<string>(),
-    pageRemoved: new Signal<string>(),
+  meta: WorkspaceMeta;
+
+  signals: {
+    pagesUpdated: Signal;
   };
 
   get providers() {
@@ -31,9 +90,18 @@ export class Workspace {
   constructor(options: StoreOptions) {
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
+    this.meta = new WorkspaceMeta(
+      'space:meta',
+      this.doc,
+      this._store.awareness
+    );
+
+    this.signals = {
+      pagesUpdated: this.meta.pagesUpdated,
+    };
   }
 
-  createPage(pageId: string) {
+  createPage(pageId: string, title = '') {
     const page = new Page(
       'space:' + pageId,
       this.doc,
@@ -41,15 +109,14 @@ export class Workspace {
       this._store.idGenerator
     );
     this._store.addSpace(page);
+    this.meta.addPage({ id: pageId, title });
     this._indexer.onCreateSpace(page.id);
-    this.signals.pageAdded.emit(page.id);
     return page;
   }
 
   removePage(page: Page) {
-    const { id } = page;
     this._store.removeSpace(page);
-    this.signals.pageRemoved.emit(id);
+    this.meta.removePage(page.id);
   }
 
   serializeDoc() {

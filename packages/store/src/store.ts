@@ -1,4 +1,4 @@
-import type { PrefixedBlockProps, Space } from './space';
+import type { Space } from './space';
 import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
@@ -8,7 +8,7 @@ import { uuidv4 } from './utils/id-generator';
 
 export interface SerializedStore {
   [key: string]: {
-    [key: string]: PrefixedBlockProps;
+    [key: string]: unknown;
   };
 }
 
