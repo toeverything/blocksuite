@@ -12,11 +12,11 @@ import {
 
 async function testBasic() {
   const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init();
+  const provider = await IndexedDBBlobProvider.init('test');
   storage.addProvider(provider);
 
   const blob = await loadTestImageBlob('test-card-1');
-  const id = await storage.set(blob);
+  let id: string | undefined = undefined;
 
   // @ts-ignore
   window.storage = storage;
@@ -26,6 +26,9 @@ async function testBasic() {
   });
 
   testSerial('can store image', async () => {
+    id = await storage.set(blob);
+    console.log(id);
+
     const url = await storage.get(id);
     assertExists(url);
 
@@ -57,8 +60,11 @@ async function testBasic() {
   });
 
   testSerial('can delete image', async () => {
+    assertExists(id);
+
     await storage.delete(id);
     const url = await storage.get(id);
+
     return url === null;
   });
 
@@ -79,7 +85,7 @@ async function testBasic() {
 async function testRefreshBefore() {
   clearIndexedDB();
   const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init();
+  const provider = await IndexedDBBlobProvider.init('test');
   storage.addProvider(provider);
 
   testSerial('can set blob', async () => {
@@ -93,7 +99,7 @@ async function testRefreshBefore() {
 
 async function testRefreshAfter() {
   const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init();
+  const provider = await IndexedDBBlobProvider.init('test');
   storage.addProvider(provider);
 
   testSerial('can get saved blob', async () => {
@@ -114,12 +120,62 @@ async function testRefreshAfter() {
 
 function clearIndexedDB() {
   return new Promise<void>(resolve => {
-    const request = indexedDB.deleteDatabase('keyval-store');
+    const request = indexedDB.deleteDatabase('test_blob');
     request.onsuccess = () => {
-      console.log('IndexedDB cleared');
-      resolve();
+      console.log('IndexedDB test_blob cleared');
+
+      const request = indexedDB.deleteDatabase('test_pending');
+      request.onsuccess = () => {
+        console.log('IndexedDB test_pending cleared');
+
+        resolve();
+      };
     };
   });
+}
+
+async function testCloudSyncBefore() {
+  clearIndexedDB();
+  const storage = new BlobStorage();
+  const provider = await IndexedDBBlobProvider.init(
+    'test',
+    'http://localhost:3000/api/blobs'
+  );
+  storage.addProvider(provider);
+
+  testSerial('can set blob', async () => {
+    const blob = await loadTestImageBlob('test-card-2');
+    const id = await storage.set(blob);
+    console.log(id);
+    return id !== null && storage.blobs.has(id);
+  });
+
+  await runOnce();
+}
+
+async function testCloudSyncAfter() {
+  clearIndexedDB();
+  const storage = new BlobStorage();
+  const provider = await IndexedDBBlobProvider.init(
+    'test',
+    'http://localhost:3000/api/blobs'
+  );
+  storage.addProvider(provider);
+
+  testSerial('can get saved blob', async () => {
+    // the test-card-2's hash
+    const url = await storage.get('WgdXT3DKV2HwV5SqePRHuw');
+    assertExists(url);
+
+    const img = await loadImage(url);
+    document.body.appendChild(img);
+
+    const isCorrectColor = assertColor(img, 100, 100, [193, 193, 193]);
+    return storage.blobs.size === 1 && isCorrectColor;
+  });
+
+  await runOnce();
+  clearIndexedDB();
 }
 
 document.getElementById('test-basic')?.addEventListener('click', testBasic);
@@ -132,5 +188,11 @@ document
 document
   .getElementById('clear-indexeddb')
   ?.addEventListener('click', clearIndexedDB);
+document
+  .getElementById('cloud-sync-before')
+  ?.addEventListener('click', testCloudSyncBefore);
+document
+  .getElementById('cloud-sync-after')
+  ?.addEventListener('click', testCloudSyncAfter);
 
 disableButtonsAfterClick();

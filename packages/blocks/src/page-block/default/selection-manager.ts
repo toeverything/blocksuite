@@ -16,6 +16,7 @@ import {
   resetNativeSelection,
   SelectionEvent,
   getModelByElement,
+  getBlockElementByModel,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -350,6 +351,7 @@ export class DefaultSelectionManager {
   private _onEmbedDragEnd(e: SelectionEvent) {
     assertExists(this._activeComponent);
     const dragModel = getModelByElement(this._activeComponent);
+    dragModel.page.captureSync();
     assertExists(this._dropContainer);
     const { width, height } = this._dropContainer.getBoundingClientRect();
     dragModel.page.updateBlock(dragModel, { width: width, height: height });
@@ -393,22 +395,25 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+
     const dividerBlockComponent = (e.raw.target as HTMLElement).closest(
       'divider-block'
     ) as HTMLElement;
-    const embedBlockComponent = (e.raw.target as HTMLElement).closest(
-      'img-block'
-    ) as HTMLElement;
-    if (embedBlockComponent) {
-      this._activeComponent = (e.raw.target as HTMLElement).closest(
-        'img-block'
-      );
+    const clickBlockInfo = getHoverBlockOptionByPosition(
+      this._blocks,
+      e.raw.pageX,
+      e.raw.pageY
+    );
+    if (clickBlockInfo?.model.type === 'image') {
+      assertExists(clickBlockInfo?.model);
+      this._activeComponent = getBlockElementByModel(clickBlockInfo?.model);
       assertExists(this._activeComponent);
       const imageRect = this._activeComponent
         .querySelector('img')
         ?.getBoundingClientRect();
       assertExists(imageRect);
       this._signals.updateEmbedRects.emit([imageRect]);
+      return;
     }
     if (dividerBlockComponent) {
       this.state.type = 'block';

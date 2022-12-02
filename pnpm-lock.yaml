@@ -5,7 +5,7 @@ importers:
   .:
     specifiers:
       '@changesets/cli': ^2.25.0
-      '@playwright/test': ^1.25.2
+      '@playwright/test': ^1.28.1
       '@types/node': ^18.7.16
       '@types/quill': ^2.0.9
       '@types/react': ^18.0.19
@@ -24,7 +24,7 @@ importers:
       vitest: ^0.23.4
     devDependencies:
       '@changesets/cli': 2.25.0
-      '@playwright/test': 1.25.2
+      '@playwright/test': 1.28.1
       '@types/node': 18.7.18
       '@types/quill': 2.0.9
       '@types/react': 18.0.20
@@ -97,19 +97,25 @@ importers:
     specifiers:
       '@types/flexsearch': ^0.7.3
       '@types/quill': ^2.0.9
+      buffer: ^6.0.3
       cross-env: ^7.0.3
       flexsearch: 0.7.21
       idb-keyval: ^6.2.0
+      ky: ^0.32.2
       lib0: ^0.2.52
+      sha3: ^2.1.4
       y-indexeddb: ^9.0.9
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
       y-websocket: ^1.4.5
       yjs: ^13.5.41
     dependencies:
+      buffer: 6.0.3
       flexsearch: 0.7.21
       idb-keyval: 6.2.0
+      ky: 0.32.2
       lib0: 0.2.52
+      sha3: 2.1.4
       y-indexeddb: 9.0.9_yjs@13.5.41
       y-protocols: 1.0.5
       y-webrtc: 10.2.3
@@ -723,13 +729,13 @@ packages:
       fastq: 1.13.0
     dev: true
 
-  /@playwright/test/1.25.2:
-    resolution: {integrity: sha512-6qPznIR4Fw02OMbqXUPMG6bFFg1hDVNEdihKy0t9K0dmRbus1DyP5Q5XFQhGwEHQkLG5hrSfBuu9CW/foqhQHQ==}
+  /@playwright/test/1.28.1:
+    resolution: {integrity: sha512-xN6spdqrNlwSn9KabIhqfZR7IWjPpFK1835tFNgjrlysaSezuX8PYUwaz38V/yI8TJLG9PkAMEXoHRXYXlpTPQ==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
       '@types/node': 18.7.18
-      playwright-core: 1.25.2
+      playwright-core: 1.28.1
     dev: true
 
   /@sinclair/typebox/0.24.44:
@@ -2542,6 +2548,11 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /ky/0.32.2:
+    resolution: {integrity: sha512-eBJeF6IXNwX5rksdwBrE2rIJrU2d84GoTvdM7OmmTIwUVXEMd72wIwvT+nyhrqtv7AzbSNsWz7yRsHgVhj1uog==}
+    engines: {node: '>=14.16'}
+    dev: false
+
   /level-codec/9.0.2:
     resolution: {integrity: sha512-UyIwNb1lJBChJnGfjmO0OR+ezh2iVu1Kas3nvBS/BzGnx79dv6g7unpKIDNPMhfdTEGoc7mC8uAu51XEtX+FHQ==}
     engines: {node: '>=6'}
@@ -3141,8 +3152,8 @@ packages:
       find-up: 4.1.0
     dev: true
 
-  /playwright-core/1.25.2:
-    resolution: {integrity: sha512-0yTbUE9lIddkEpLHL3u8PoCL+pWiZtj5A/j3U7YoNjcmKKDGBnCrgHJMzwd2J5vy6l28q4ki3JIuz7McLHhl1A==}
+  /playwright-core/1.28.1:
+    resolution: {integrity: sha512-3PixLnGPno0E8rSBJjtwqTwJe3Yw72QwBBBxNoukIj3lEeBNXwbNiKrNuB1oyQgTBw5QHUhNO3SteEtHaMK6ag==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
@@ -3470,6 +3481,12 @@ packages:
   /set-blocking/2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
     dev: true
+
+  /sha3/2.1.4:
+    resolution: {integrity: sha512-S8cNxbyb0UGUM2VhRD4Poe5N58gJnJsLJ5vC7FYWGUmGhcsj4++WaIOBFVDxlG0W3To6xBuiRh+i0Qp2oNCOtg==}
+    dependencies:
+      buffer: 6.0.3
+    dev: false
 
   /shebang-command/1.2.0:
     resolution: {integrity: sha512-EV3L1+UQWGor21OmnvojK36mhg+TyIKDh3iFBKBohr5xeXIhNBcx8oWdgkTEEQ+BEFFYdLRuqMfd5L84N1V5Vg==}

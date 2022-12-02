@@ -57,7 +57,6 @@ export class Space {
     rootDeleted: new Signal<string>(),
     textUpdated: new Signal<Y.YTextEvent>(),
     updated: new Signal(),
-    attributesUpdated: new Signal<Map<string, unknown>>(),
   };
 
   private _idGenerator: IdGenerator;
@@ -66,10 +65,6 @@ export class Space {
   private _flavourMap = new Map<string, typeof BaseBlockModel>();
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
-
-  // In some cases, user may need to set some custom attributes, like 'favorite', 'delete'...
-  // Space model should make it possible.
-  public attributes = new Map<string, unknown>();
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -141,10 +136,9 @@ export class Space {
     return this._history.canRedo();
   }
 
-  setAttribute = (key: string, value: unknown) => {
-    this.attributes.set(key, value);
-    this.signals.attributesUpdated.emit(this.attributes);
-  };
+  get Text() {
+    return Text;
+  }
 
   undo() {
     this._history.undo();
@@ -291,6 +285,7 @@ export class Space {
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
+    this._blockMap.delete(model.id);
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
@@ -305,10 +300,6 @@ export class Space {
         }
       }
     });
-  }
-
-  get Text() {
-    return Text;
   }
 
   /** Connect a rich text editor instance with a YText instance. */
@@ -340,6 +331,18 @@ export class Space {
 
   markTextSplit(base: Text, left: PrelimText, right: PrelimText) {
     this._splitSet.add(base).add(left).add(right);
+  }
+
+  dispose() {
+    this.signals.historyUpdated.dispose();
+    this.signals.rootAdded.dispose();
+    this.signals.rootDeleted.dispose();
+    this.signals.textUpdated.dispose();
+    this.signals.updated.dispose();
+
+    this._yBlocks.forEach((_, key) => {
+      this.deleteBlockById(key);
+    });
   }
 
   private _getYBlock(id: string): YBlock {

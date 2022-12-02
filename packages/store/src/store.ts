@@ -43,12 +43,13 @@ export class Store {
     );
   }
 
-  getSpaceById(spaceId: string) {
-    return this.spaces.get(spaceId) as Space;
-  }
-
   addSpace(space: Space) {
     this.spaces.set(space.id, space);
+  }
+
+  removeSpace(space: Space) {
+    space.dispose();
+    this.spaces.delete(space.id);
   }
 
   /**
