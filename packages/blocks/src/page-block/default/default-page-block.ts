@@ -278,6 +278,22 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     bindCommonHotkey(page);
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
+      if (state.type === 'native') {
+        handleBackspace(page, e);
+        return;
+      } else if (state.type === 'block') {
+        const { selectedBlocks } = state;
+        handleBlockSelectionBatchDelete(
+          page,
+          selectedBlocks.map(block => getModelByElement(block))
+        );
+
+        state.clear();
+        this.signals.updateSelectedRects.emit([]);
+        this.signals.updateEmbedRects.emit([]);
+        this.signals.updateEmbedOption.emit(null);
+        return;
+      }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
         // range delete
@@ -291,21 +307,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           noop();
         }
         return;
-      }
-
-      if (state.type === 'native') {
-        handleBackspace(page, e);
-      } else if (state.type === 'block') {
-        const { selectedBlocks } = state;
-        handleBlockSelectionBatchDelete(
-          page,
-          selectedBlocks.map(block => getModelByElement(block))
-        );
-
-        state.clear();
-        this.signals.updateSelectedRects.emit([]);
-        this.signals.updateEmbedRects.emit([]);
-        this.signals.updateEmbedOption.emit(null);
       }
     });
 
@@ -412,11 +413,11 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _updateType(flavour: string, type: string, space: Page) {
     const { state } = this.selection;
-    if (state.selectedRichTexts.length > 0) {
+    if (state.selectedBlocks.length > 0) {
       batchUpdateTextType(
         flavour,
         space,
-        state.selectedRichTexts.map(richText => richText.model),
+        state.selectedBlocks.map(block => getModelByElement(block)),
         type
       );
     } else {

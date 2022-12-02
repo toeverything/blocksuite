@@ -222,7 +222,7 @@ export class Text {
 
   applyDelta(delta: any) {
     this._transact(() => {
-      this._yText.applyDelta(delta);
+      this._yText?.applyDelta(delta);
     });
   }
 

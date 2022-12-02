@@ -84,7 +84,6 @@ type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
 
 class PageSelectionState {
   type: PageSelectionType;
-  selectedRichTexts: RichText[] = [];
   selectEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: Element[] = [];
   private _startRange: Range | null = null;
@@ -139,7 +138,6 @@ class PageSelectionState {
     this._richTextCache.clear();
     this._startRange = null;
     this._startPoint = null;
-    this.selectedRichTexts = [];
     this.selectedBlocks = [];
   }
 }
@@ -192,9 +190,8 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
-    const { selectionRect, selectedRichTexts, selectedBlocks, blockCache } =
+    const { selectionRect, selectedBlocks, blockCache } =
       this._getSelectedBlockInfo(e);
-    this.state.selectedRichTexts = selectedRichTexts;
     this.state.selectedBlocks = selectedBlocks;
 
     const selectedBounds = selectedBlocks.map(block => {
@@ -210,14 +207,14 @@ export class DefaultSelectionManager {
     const { startPoint: start } = this.state;
 
     const selectionRect = createSelectionRect(current, start);
-    const { richTextCache, blockCache } = this.state;
+    const { blockCache } = this.state;
 
     const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
 
-    const selectedRichTexts = filterSelectedRichText(
-      richTextCache,
-      selectionRect
-    );
+    // const selectedRichTexts = filterSelectedRichText(
+    //   richTextCache,
+    //   selectionRect
+    // );
     // TODO
     // const selectedEmbed = filterSelectedEmbed(embedCache, selectionRect);
     // const selectedEmbedBounds = selectedEmbed.map(embed => {
@@ -226,8 +223,6 @@ export class DefaultSelectionManager {
     // this._signals.updateEmbedRects.emit(selectedEmbedBounds);
     return {
       selectionRect,
-      richTextCache,
-      selectedRichTexts,
       selectedBlocks,
       blockCache,
     };
@@ -387,6 +382,8 @@ export class DefaultSelectionManager {
       e.raw.pageY
     );
     if (clickBlockInfo?.model.type === 'image') {
+      this.state.type = 'block';
+      window.getSelection()?.removeAllRanges();
       assertExists(clickBlockInfo?.model);
       this._activeComponent = getBlockElementByModel(clickBlockInfo?.model);
       assertExists(this._activeComponent);
@@ -395,6 +392,7 @@ export class DefaultSelectionManager {
         ?.getBoundingClientRect();
       assertExists(imageRect);
       this._signals.updateEmbedRects.emit([imageRect]);
+      this.state.selectedBlocks.push(this._activeComponent);
       return;
     }
     if (e.raw.target instanceof HTMLInputElement) return;

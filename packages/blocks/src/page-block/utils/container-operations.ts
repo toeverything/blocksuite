@@ -349,14 +349,17 @@ export function handleBlockSelectionBatchDelete(
 ) {
   page.captureSync();
   const parent = getParentBlockById(models[0].id);
+
   assertExists(parent);
   const parentModel = getModelByElement(parent);
+  const index = parentModel?.children.indexOf(models[0]);
   for (let i = 0; i < models.length; i++) {
     page.deleteBlock(models[i]);
   }
   const id = page.addBlock(
     { flavour: 'affine:paragraph', page, type: 'text' },
-    parentModel
+    parentModel,
+    index
   );
   id && asyncFocusRichText(page, id);
 }

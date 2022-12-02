@@ -91,18 +91,18 @@ window.onload = () => {
 
     document.body.appendChild(editor);
     document.body.appendChild(debugMenu);
-    // const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    // const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-    // page.addBlock(
-    //   {
-    //     flavour: 'affine:embed',
-    //     type: 'image',
-    //     source:
-    //       'https://images-eu.ssl-images-amazon.com/images/G/02/kindle/journeys/Gj9vUkHh7N3zSj99/YzllYjE5NGQt-w758._SY608_CB604768303_.jpg',
-    //     width: 200,
-    //     height: 180,
-    //   },
-    //   groupId
-    // );
+    const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
+    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    page.addBlock(
+      {
+        flavour: 'affine:embed',
+        type: 'image',
+        source:
+          'https://images-eu.ssl-images-amazon.com/images/G/02/kindle/journeys/Gj9vUkHh7N3zSj99/YzllYjE5NGQt-w758._SY608_CB604768303_.jpg',
+        width: 200,
+        height: 180,
+      },
+      groupId
+    );
   }
 };
