@@ -22,6 +22,7 @@ import {
   isPageTitle,
   getSplicedTitle,
   noop,
+  getModelByElement,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -145,7 +146,10 @@ function SelectedRectsContainer(rects: DOMRect[]) {
   `;
 }
 
-function EmbedOptionContainer(embedOption: EmbedOption | null, signals:DefaultPageSignals) {
+function EmbedOptionContainer(
+  embedOption: EmbedOption | null,
+  signals: DefaultPageSignals
+) {
   if (embedOption) {
     const style = {
       left: embedOption.position.x + 'px',
@@ -181,11 +185,10 @@ function EmbedOptionContainer(embedOption: EmbedOption | null, signals:DefaultPa
             ${CopyIcon}
           </li>
           <li
-            @click=${() =>{
-              embedOption.model.page.deleteBlock(embedOption.model)
-              signals.updateEmbedRects.emit([])
-            }
-            }
+            @click=${() => {
+              embedOption.model.page.deleteBlock(embedOption.model);
+              signals.updateEmbedRects.emit([]);
+            }}
           >
             ${DeleteIcon}
           </li>
@@ -293,13 +296,16 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       if (state.type === 'native') {
         handleBackspace(page, e);
       } else if (state.type === 'block') {
-        const { selectedRichTexts } = state;
+        const { selectedBlocks } = state;
         handleBlockSelectionBatchDelete(
           page,
-          selectedRichTexts.map(richText => richText.model)
+          selectedBlocks.map(block => getModelByElement(block))
         );
+
         state.clear();
         this.signals.updateSelectedRects.emit([]);
+        this.signals.updateEmbedRects.emit([]);
+        this.signals.updateEmbedOption.emit(null);
       }
     });
 
@@ -514,7 +520,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
-    const embedOptionContainer = EmbedOptionContainer(this.embedOption, this.signals);
+    const embedOptionContainer = EmbedOptionContainer(
+      this.embedOption,
+      this.signals
+    );
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">

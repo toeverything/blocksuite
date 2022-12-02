@@ -16,6 +16,7 @@ import {
   SelectionEvent,
   getModelByElement,
   getBlockElementByModel,
+  getAllBlocks,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -44,6 +45,18 @@ function filterSelectedRichText(
     return intersects(rect, selectionRect);
   });
 }
+
+function filterSelectedBlock(
+  blockCache: Map<Element, DOMRect>,
+  selectionRect: DOMRect
+): Element[] {
+  const blocks = Array.from(blockCache.keys());
+  return blocks.filter(block => {
+    const rect = block.getBoundingClientRect();
+    return intersects(rect, selectionRect);
+  });
+}
+
 // TODO
 // function filterSelectedEmbed(
 //   embedCache: Map<EmbedBlockComponent, DOMRect>,
@@ -72,11 +85,14 @@ type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
 class PageSelectionState {
   type: PageSelectionType;
   selectedRichTexts: RichText[] = [];
-
+  selectEmbeds: EmbedBlockComponent[] = [];
+  selectedBlocks: Element[] = [];
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
+  private _blockCache = new Map<Element, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
+
   constructor(type: PageSelectionType) {
     this.type = type;
   }
@@ -92,6 +108,9 @@ class PageSelectionState {
   get richTextCache() {
     return this._richTextCache;
   }
+  get blockCache() {
+    return this._blockCache;
+  }
   get embedCache() {
     return this._embedCache;
   }
@@ -103,18 +122,15 @@ class PageSelectionState {
 
   refreshRichTextBoundsCache(container: HTMLElement) {
     const richTexts = Array.from(container.querySelectorAll('rich-text'));
-    const embeds = Array.from(container.querySelectorAll('img-block'));
+    const allBlocks = getAllBlocks();
+
+    allBlocks.forEach(block => {
+      const rect = block.getBoundingClientRect();
+      this._blockCache.set(block, rect);
+    });
     richTexts.forEach(richText => {
-      // const rect = (
-      //   richText.closest(`[${BLOCK_ID_ATTR}]`) as HTMLElement
-      // ).getBoundingClientRect();
       const rect = richText.getBoundingClientRect();
       this._richTextCache.set(richText, rect);
-    });
-    embeds.forEach(embed => {
-      const rect = embed.querySelector('img')?.getBoundingClientRect();
-      // @ts-ignore
-      this._embedCache.set(embed, rect);
     });
   }
 
@@ -124,6 +140,7 @@ class PageSelectionState {
     this._startRange = null;
     this._startPoint = null;
     this.selectedRichTexts = [];
+    this.selectedBlocks = [];
   }
 }
 
@@ -175,11 +192,13 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
-    const { selectionRect, richTextCache, selectedRichTexts } =
+    const { selectionRect, selectedRichTexts, selectedBlocks, blockCache } =
       this._getSelectedBlockInfo(e);
     this.state.selectedRichTexts = selectedRichTexts;
-    const selectedBounds = selectedRichTexts.map(richText => {
-      return richTextCache.get(richText) as DOMRect;
+    this.state.selectedBlocks = selectedBlocks;
+
+    const selectedBounds = selectedBlocks.map(block => {
+      return blockCache.get(block) as DOMRect;
     });
     this._signals.updateSelectedRects.emit(selectedBounds);
     this._signals.updateFrameSelectionRect.emit(selectionRect);
@@ -191,7 +210,10 @@ export class DefaultSelectionManager {
     const { startPoint: start } = this.state;
 
     const selectionRect = createSelectionRect(current, start);
-    const { richTextCache } = this.state;
+    const { richTextCache, blockCache } = this.state;
+
+    const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
+
     const selectedRichTexts = filterSelectedRichText(
       richTextCache,
       selectionRect
@@ -202,7 +224,13 @@ export class DefaultSelectionManager {
     //   return embedCache.get(embed) as DOMRect;
     // });
     // this._signals.updateEmbedRects.emit(selectedEmbedBounds);
-    return { selectionRect, richTextCache, selectedRichTexts };
+    return {
+      selectionRect,
+      richTextCache,
+      selectedRichTexts,
+      selectedBlocks,
+      blockCache,
+    };
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
@@ -301,12 +329,12 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     } else if (this.state.type === 'embed') {
-      this._onEmbedDragEnd(e);
+      this._onEmbedDragEnd();
     }
     this._showFormatQuickBar(e);
   };
 
-  private _onEmbedDragEnd(e: SelectionEvent) {
+  private _onEmbedDragEnd() {
     assertExists(this._activeComponent);
     const dragModel = getModelByElement(this._activeComponent);
     dragModel.page.captureSync();

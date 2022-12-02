@@ -1,10 +1,9 @@
-import { Page, test } from '@playwright/test';
+import { test } from '@playwright/test';
 import {
   activeEmbed,
   dragEmbedResize,
   enterPlaygroundRoom,
   redoByKeyboard,
-  undoByClick,
   undoByKeyboard,
 } from './utils/actions';
 import {
