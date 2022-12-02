@@ -229,7 +229,6 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         const selectionRect = dividerBlockElement.getBoundingClientRect();
         selectionManager.selectBlockByRect(selectionRect, model);
         resetNativeSelection(null);
-        // focusNextBlock(nextBlock, 'start');
         return PREVENT_DEFAULT;
       }
       focusNextBlock(model, 'start');

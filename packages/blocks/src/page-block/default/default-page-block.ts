@@ -22,6 +22,14 @@ import {
   isPageTitle,
   getSplicedTitle,
   noop,
+  getContainerByModel,
+  getPreviousBlock,
+  focusPreviousBlock,
+  resetNativeSelection,
+  getDefaultPageBlock,
+  getBlockElementByModel,
+  getNextBlock,
+  focusNextBlock,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -193,6 +201,60 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
     return html``;
   }
 }
+
+function handleUP(selection: DefaultSelectionManager) {
+  const { state } = selection;
+  if (state.selectedDividers.length === 1) {
+    const model = state.selectedDividers[0].model;
+    const container = getContainerByModel(model);
+    const preNodeModel = getPreviousBlock(container, model.id);
+    if (!preNodeModel || preNodeModel.id == '1') {
+      return;
+    } else if (
+      preNodeModel.flavour === 'affine:list' ||
+      preNodeModel.flavour === 'affine:paragraph'
+    ) {
+      focusPreviousBlock(model, 'end');
+      state.clear();
+      return;
+    } else if (preNodeModel.flavour === 'affine:divider') {
+      const selectionManager = getDefaultPageBlock(model).selection;
+      const dividerBlockElement = getBlockElementByModel(
+        preNodeModel
+      ) as HTMLElement;
+      const selectionRect = dividerBlockElement.getBoundingClientRect();
+      selectionManager.selectBlockByRect(selectionRect, preNodeModel);
+      state.type = 'divider';
+      return;
+    }
+  }
+}
+function handleDOWN(selection: DefaultSelectionManager) {
+  const { state } = selection;
+  if (state.selectedDividers.length === 1) {
+    const model = state.selectedDividers[0].model;
+    const nextBlock = getNextBlock(model.id);
+    if (!nextBlock) {
+      return;
+    } else if (
+      nextBlock.flavour === 'affine:list' ||
+      nextBlock.flavour === 'affine:paragraph'
+    ) {
+      focusNextBlock(model, 'start');
+      state.clear();
+      return;
+    } else if (nextBlock.flavour === 'affine:divider') {
+      const selectionManager = getDefaultPageBlock(model).selection;
+      const dividerBlockElement = getBlockElementByModel(
+        nextBlock
+      ) as HTMLElement;
+      const selectionRect = dividerBlockElement.getBoundingClientRect();
+      selectionManager.selectBlockByRect(selectionRect, nextBlock);
+      state.type = 'divider';
+      return;
+    }
+  }
+}
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -274,8 +336,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     } = HOTKEYS;
 
     bindCommonHotkey(page);
+    const { state } = this.selection;
     hotkey.addListener(BACKSPACE, e => {
-      const { state } = this.selection;
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
         // range delete
@@ -311,68 +373,64 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(UP, e => {
-      const { state } = this.selection;
-      if (isPageTitle(e)) {
-        return;
-      }
-      if (state.type === 'block') {
-        console.log('selectedUP');
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleUP(this.selection);
 
-        // const { selectedDividers } = state;
-        // const SelectedBatch = selectedDividers.map(divider => divider.model);
-        // console.log(SelectedBatch);
-        // handleBlockSelectionBatchDelete(page, SelectedBatch);
-        // state.clear();
-        // this.signals.updateSelectedRects.emit([]);
+          break;
+        default:
+          break;
       }
     });
     hotkey.addListener(DOWN, e => {
-      const { state } = this.selection;
-      if (isPageTitle(e)) {
-        return;
-      }
-
-      if (state.type === 'block') {
-        console.log('selectedDOWN');
-
-        // const { selectedDividers } = state;
-        // const SelectedBatch = selectedDividers.map(divider => divider.model);
-        // console.log(SelectedBatch);
-        // handleBlockSelectionBatchDelete(page, SelectedBatch);
-        // state.clear();
-        // this.signals.updateSelectedRects.emit([]);
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleDOWN(this.selection);
+          break;
+        default:
+          break;
       }
     });
     hotkey.addListener(LEFT, e => {
-      const { state } = this.selection;
-      if (isPageTitle(e)) {
-        return;
-      }
-      if (state.type === 'block') {
-        console.log('selectedLEFT');
-
-        // const { selectedDividers } = state;
-        // const SelectedBatch = selectedDividers.map(divider => divider.model);
-        // console.log(SelectedBatch);
-        // handleBlockSelectionBatchDelete(page, SelectedBatch);
-        // state.clear();
-        // this.signals.updateSelectedRects.emit([]);
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleUP(this.selection);
+          break;
+        default:
+          break;
       }
     });
     hotkey.addListener(RIGHT, e => {
-      const { state } = this.selection;
-      if (isPageTitle(e)) {
-        return;
-      }
-      if (state.type === 'block') {
-        console.log('selectedRIGHT');
-
-        // const { selectedDividers } = state;
-        // const SelectedBatch = selectedDividers.map(divider => divider.model);
-        // console.log(SelectedBatch);
-        // handleBlockSelectionBatchDelete(page, SelectedBatch);
-        // state.clear();
-        // this.signals.updateSelectedRects.emit([]);
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleDOWN(this.selection);
+          break;
+        default:
+          break;
       }
     });
 

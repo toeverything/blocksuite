@@ -320,9 +320,7 @@ export function getSelectInfo(page: Page): SelectionInfo {
   if (state.type === 'block') {
     type = 'Block';
     const { selectedRichTexts, selectedDividers } = state;
-    selectedModels = selectedRichTexts
-      .map(richText => richText.model)
-      .concat(selectedDividers.map(divider => divider.model));
+    selectedModels = selectedRichTexts.map(richText => richText.model);
     if (!selectedRichTexts.length) {
       selectedModels = selectedDividers.map(divider => divider.model);
     }
