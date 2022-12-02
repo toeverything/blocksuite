@@ -177,6 +177,12 @@ export class PasteManager {
       }
       const addBlockIds: string[] = [];
       if (selectedBlock?.flavour !== 'affine:page') {
+        if (blocks.length === 1 && blocks[0].flavour === 'affine:divider') {
+          parent && this._addBlocks(blocks, parent, index, addBlockIds);
+          parent && this._editor.page.deleteBlockById(lastBlock.id);
+
+          return;
+        }
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
@@ -186,7 +192,6 @@ export class PasteManager {
           0
         );
         selectedBlock?.text?.insertList(insertTexts, endIndex);
-
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
 
@@ -203,8 +208,10 @@ export class PasteManager {
             endIndex + insertLen,
             selectedBlock?.text?.length
           );
-          position = lastBlock?.text?.length || 0;
-          lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
+          if (lastBlock?.flavour !== 'affine:divider') {
+            position = lastBlock?.text?.length || 0;
+            lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
+          }
         }
         setTimeout(() => {
           lastId &&
@@ -263,7 +270,10 @@ export class PasteManager {
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);
-      if (model?.type !== 'affine:embed') {
+      if (
+        model?.type !== 'affine:embed' &&
+        model?.flavour !== 'affine:divider'
+      ) {
         block.text && model?.text?.applyDelta(block.text);
       }
       addBlockIds.push(id);

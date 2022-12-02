@@ -323,6 +323,9 @@ export function getSelectInfo(page: Page): SelectionInfo {
     selectedModels = selectedRichTexts
       .map(richText => richText.model)
       .concat(selectedDividers.map(divider => divider.model));
+    if (!selectedRichTexts.length) {
+      selectedModels = selectedDividers.map(divider => divider.model);
+    }
   } else if (nativeSelection && nativeSelection.type !== 'None') {
     type = nativeSelection.type;
     selectedModels = getModelsByRange(getCurrentRange());
@@ -422,13 +425,7 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
     const { root } = page;
     const lastChild = root?.lastChild();
     assertExists(lastChild);
-    if (
-      matchFlavours(lastChild, [
-        'affine:paragraph',
-        'affine:list',
-        'affine:divider',
-      ])
-    ) {
+    if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);

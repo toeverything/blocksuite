@@ -355,8 +355,9 @@ export function handleBlockSelectionBatchDelete(
     return;
   }
   assertExists(models[0].text);
-
-  models[0].text.delete(0, models[0].text.length);
+  if (models[0].flavour !== 'affine:divider') {
+    models[0].text.delete(0, models[0].text.length);
+  }
   for (let i = 1; i < models.length; i++) {
     page.deleteBlock(models[i]);
   }
