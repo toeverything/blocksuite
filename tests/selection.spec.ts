@@ -429,19 +429,3 @@ async function clickDivider(page: Page, i = 0) {
   const locator = page.locator('divider-block').nth(i);
   await locator.click();
 }
-
-test('Click the divider to select', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyState(page);
-  await initThreeDivider(page);
-  await assertDivider(page, 3);
-  await assertRichTexts(page, ['123', '123']);
-  await clickDivider(page, 0);
-  await page.keyboard.press('Backspace', { delay: 50 });
-  await assertDivider(page, 2);
-  await clickDivider(page, 0);
-  await copyByKeyboard(page);
-  await pasteByKeyboard(page);
-  await assertDivider(page, 3);
-  await assertRichTexts(page, ['123', '123']);
-});
