@@ -129,10 +129,9 @@ class PageSelectionState {
     });
     dividers.forEach(divider => {
       const rect = divider.getBoundingClientRect();
-      // @ts-ignore
       this._dividerCache.set(divider, rect);
     });
-  }
+
     embeds.forEach(embed => {
       const rect = embed.querySelector('img')?.getBoundingClientRect();
       // @ts-ignore
@@ -391,6 +390,9 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+    const dividerBlockComponent = (e.raw.target as HTMLElement).closest(
+      'divider-block'
+    ) as HTMLElement;
     const embedBlockComponent = (e.raw.target as HTMLElement).closest(
       'img-block'
     ) as HTMLElement;
@@ -405,10 +407,24 @@ export class DefaultSelectionManager {
       assertExists(imageRect);
       this._signals.updateEmbedRects.emit([imageRect]);
     }
+    if (dividerBlockComponent) {
+      this.state.type = 'block';
+      this._activeComponent = (e.raw.target as HTMLElement).closest(
+        'divider-block'
+      );
+      assertExists(this._activeComponent);
+      const dividerRect = this._activeComponent.getBoundingClientRect();
+      this.state.refreshRichTextBoundsCache(this._container);
+      const selectedDividers = filterSelectedDivider(
+        this.state.dividerCache,
+        dividerRect
+      );
+      this.state.selectedDividers = selectedDividers;
+      assertExists(dividerRect);
+      this._signals.updateSelectedRects.emit([dividerRect]);
+    }
     if (e.raw.target instanceof HTMLInputElement) return;
-    // TODO handle shift + click
     if (e.keys.shift) return;
-
     handleNativeRangeClick(this.page, e);
   };
 
@@ -445,20 +461,15 @@ export class DefaultSelectionManager {
     this._mouseDisposeCallback();
   }
 
-  selectBlockByRect(selectionRect: DOMRect, model?: BaseBlockModel) {
+  selectBlockByRect(selectionRect: DOMRect) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);
-    const { richTextCache, dividerCache } = this.state;
+    const { richTextCache } = this.state;
     const selectedRichTexts = filterSelectedRichText(
       richTextCache,
       selectionRect
     );
-    const selectedDividers = filterSelectedDivider(dividerCache, selectionRect);
     this.state.selectedRichTexts = selectedRichTexts;
-    this.state.selectedDividers = selectedDividers;
-    if (model?.flavour === 'affine:divider') {
-      this.state.model = model;
-    }
     this.state.selectedRichTexts = selectedRichTexts;
     const selectedBounds: DOMRect[] = [selectionRect];
     this._signals.updateSelectedRects.emit(selectedBounds);

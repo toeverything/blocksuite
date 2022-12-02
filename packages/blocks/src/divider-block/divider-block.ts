@@ -1,28 +1,13 @@
 /// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import {
-  BLOCK_ID_ATTR,
-  BlockHost,
-  getDefaultPageBlock,
-  getBlockElementByModel,
-} from '../__internal__';
+import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
 
 import type { DividerBlockModel } from './divider-model';
 
 import { BlockChildrenContainer } from '../__internal__';
 import style from './style.css';
 
-export function selectDivider(model: DividerBlockModel) {
-  const selectionManager = getDefaultPageBlock(model).selection;
-  const blockElement = getBlockElementByModel(model);
-  if (!blockElement) {
-    console.error('divider block model:', model, 'blockElement:', blockElement);
-    throw new Error('Failed to select divider! blockElement not found!');
-  }
-  const selectionRect = blockElement.getBoundingClientRect();
-  selectionManager.selectBlockByRect(selectionRect, model);
-}
 @customElement('divider-block')
 export class DividerBlockComponent extends LitElement {
   static styles = css`
@@ -52,15 +37,9 @@ export class DividerBlockComponent extends LitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
-    // For the first list item, we need to add a margin-top to make it align with the text
 
     return html`
-      <div
-        class=${`affine-divider-block-container`}
-        @click="${() => {
-          selectDivider(this.model);
-        }}"
-      >
+      <div class=${`affine-divider-block-container`}>
         <hr />
         ${childrenContainer}
       </div>
