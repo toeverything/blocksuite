@@ -167,7 +167,6 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           const selectionRect = dividerBlockElement.getBoundingClientRect();
           selectionManager.selectBlockByRect(selectionRect, model);
           resetNativeSelection(null);
-          return PREVENT_DEFAULT;
         }
         if (previousSibling && previousSibling.flavour === 'affine:paragraph') {
           page.captureSync();
