@@ -145,7 +145,7 @@ function SelectedRectsContainer(rects: DOMRect[]) {
   `;
 }
 
-function EmbedOptionContainer(embedOption: EmbedOption | null) {
+function EmbedOptionContainer(embedOption: EmbedOption | null, signals:DefaultPageSignals) {
   if (embedOption) {
     const style = {
       left: embedOption.position.x + 'px',
@@ -181,8 +181,11 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
             ${CopyIcon}
           </li>
           <li
-            @click=${() =>
-              embedOption.model.page.deleteBlock(embedOption.model)}
+            @click=${() =>{
+              embedOption.model.page.deleteBlock(embedOption.model)
+              signals.updateEmbedRects.emit([])
+            }
+            }
           >
             ${DeleteIcon}
           </li>
@@ -511,7 +514,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
-    const embedOptionContainer = EmbedOptionContainer(this.embedOption);
+    const embedOptionContainer = EmbedOptionContainer(this.embedOption, this.signals);
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
