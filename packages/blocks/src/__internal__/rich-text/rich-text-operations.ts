@@ -387,10 +387,10 @@ export function tryMatchSpaceHotkey(
       isConverted = convertToList(page, model, 'bulleted', prefix);
       break;
     case '***':
-      isConverted = convertToDivider(page, model, 'normal', prefix);
+      isConverted = convertToDivider(page, model, prefix);
       break;
     case '---':
-      isConverted = convertToDivider(page, model, 'normal', prefix);
+      isConverted = convertToDivider(page, model, prefix);
       break;
     case '#':
       isConverted = convertToParagraph(page, model, 'h1', prefix);

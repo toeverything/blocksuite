@@ -97,10 +97,9 @@ export function convertToParagraph(
 export function convertToDivider(
   page: Page,
   model: ExtendedModel,
-  type: 'affine:divider' | 'normal',
   prefix: string
 ): boolean {
-  if (model.flavour === 'affine:divider' && model['type'] === type) {
+  if (model.flavour === 'affine:divider') {
     return false;
   }
   if (model.flavour !== 'affine:divider') {
@@ -114,8 +113,6 @@ export function convertToDivider(
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
       flavour: 'affine:divider',
-      type: type,
-      text: model?.text?.clone(),
       children: model.children,
     };
     // space.deleteBlock(model);
