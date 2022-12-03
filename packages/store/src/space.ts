@@ -67,6 +67,7 @@ export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = 
   private _blockMap = new Map<string, InstanceType<IBlockSchema[keyof IBlockSchema]>>();
   private _splitSet = new Set<Text | PrelimText>();
 
+  // TODO use schema
   private _ignoredKeys: Set<keyof InstanceType<IBlockSchema[keyof IBlockSchema]> & string> = new Set(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.keys(new BaseBlockModel(this, {})) as any
