@@ -388,7 +388,7 @@ export function tryUpdateGroupSize(page: Page, zoom: number) {
         page.updateBlock(model, {
           xywh: JSON.stringify([newX, y, w, newModelHeight]),
         });
-        offset = newX + JSON.parse(model.xywh)[2];
+        offset = newX + w;
       }
     });
   });
