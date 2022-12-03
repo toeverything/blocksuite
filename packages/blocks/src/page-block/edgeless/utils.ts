@@ -6,6 +6,9 @@ import type { ViewportState, XYWH } from './selection-manager';
 export const PADDING_X = 48;
 export const PADDING_Y = 48;
 
+// XXX: edgeless group min length
+export const GROUP_MIN_LENGTH = 20;
+
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
   const a = JSON.parse(block.xywh) as [number, number, number, number];
   const [ax, ay, aw, ah] = a;

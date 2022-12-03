@@ -6,7 +6,6 @@ import type { GroupBlockModel, PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
   EdgelessHoverRect,
-  EdgelessSelectedRect,
   EdgelessFrameSelectionRect,
 } from './components';
 import {
@@ -189,6 +188,7 @@ export class EdgelessPageBlockComponent
 
     this._bindHotkeys();
 
+    tryUpdateGroupSize(this.page, this.viewport.zoom);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
       tryUpdateGroupSize(this.page, this.viewport.zoom);
@@ -224,16 +224,23 @@ export class EdgelessPageBlockComponent
     );
 
     const { _selection } = this;
-    const { frameSelectionRect } = _selection;
+    const { frameSelectionRect, blockSelectionState: selectionState } =
+      _selection;
     const { zoom } = this.viewport;
-    const selectedRect = EdgelessSelectedRect(_selection, zoom);
     const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
     const hoverRect = EdgelessHoverRect(_selection.hoverRect, zoom);
 
     return html`
       <style></style>
       <div class="affine-edgeless-page-block-container">
-        ${childrenContainer} ${hoverRect} ${selectionRect} ${selectedRect}
+        ${childrenContainer} ${hoverRect} ${selectionRect}
+        ${selectionState.type !== 'none'
+          ? html`<edgeless-selected-rect
+              .state=${selectionState}
+              .rect=${selectionState.rect}
+              .zoom=${zoom}
+            ></edgeless-selected-rect>`
+          : null}
       </div>
     `;
   }

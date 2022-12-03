@@ -23,6 +23,7 @@ interface NoneBlockSelectionState {
 interface SingleBlockSelectionState {
   type: 'single';
   selected: GroupBlockModel;
+  viewport: ViewportState;
   rect: DOMRect;
   active: boolean;
 }
@@ -191,6 +192,7 @@ export class EdgelessSelectionManager {
       this._blockSelectionState = {
         type: 'single',
         selected: this._hoverState.block,
+        viewport: this._container.viewport,
         rect: this._hoverState.rect,
         active: false,
       };
@@ -216,6 +218,7 @@ export class EdgelessSelectionManager {
         this._blockSelectionState = {
           type: 'single',
           active: false,
+          viewport: this._container.viewport,
           selected,
           rect: getSelectionBoxBound(viewport, selected.xywh),
         };
@@ -230,6 +233,7 @@ export class EdgelessSelectionManager {
         } else {
           this._blockSelectionState = {
             type: 'single',
+            viewport: this._container.viewport,
             active: false,
             selected,
             rect: getSelectionBoxBound(viewport, selected.xywh),
