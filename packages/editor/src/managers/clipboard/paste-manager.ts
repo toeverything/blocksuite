@@ -174,7 +174,7 @@ export class PasteManager {
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (matchFlavours(selectedBlock, ['affine:group'])) {
+        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
@@ -184,7 +184,6 @@ export class PasteManager {
         if (blocks.length === 1 && blocks[0].flavour === 'affine:divider') {
           parent && this._addBlocks(blocks, parent, index, addBlockIds);
           parent && this._editor.page.deleteBlockById(lastBlock.id);
-
           return;
         }
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
