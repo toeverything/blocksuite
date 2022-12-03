@@ -201,7 +201,7 @@ function EmbedOptionContainer(embedOption: EmbedOption | null) {
   }
 }
 
-function handleUP(selection: DefaultSelectionManager) {
+function handleUp(selection: DefaultSelectionManager) {
   const { state } = selection;
   if (state.selectedDividers.length === 1) {
     const model = state.selectedDividers[0].model;
@@ -228,7 +228,7 @@ function handleUP(selection: DefaultSelectionManager) {
     }
   }
 }
-function handleDOWN(selection: DefaultSelectionManager) {
+function handleDown(selection: DefaultSelectionManager) {
   const { state } = selection;
   if (state.selectedDividers.length === 1) {
     const model = state.selectedDividers[0].model;
@@ -390,7 +390,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
-          handleUP(this.selection);
+          handleUp(this.selection);
 
           break;
         default:
@@ -406,7 +406,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
-          handleDOWN(this.selection);
+          handleDown(this.selection);
           break;
         default:
           break;
@@ -421,7 +421,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
-          handleUP(this.selection);
+          handleUp(this.selection);
           break;
         default:
           break;
@@ -436,7 +436,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
-          handleDOWN(this.selection);
+          handleDown(this.selection);
           break;
         default:
           break;
