@@ -1,7 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { EmbedBlockComponent } from '../../embed-block';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
-import type { DividerBlockComponent } from '../../divider-block';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -17,8 +16,8 @@ import {
   SelectionEvent,
   getModelByElement,
   getBlockElementByModel,
-  matchFlavours,
   getAllBlocks,
+  matchFlavours,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -97,10 +96,9 @@ class PageSelectionState {
   get richTextCache() {
     return this._richTextCache;
   }
-  
+
   get blockCache() {
     return this._blockCache;
-
   }
   get embedCache() {
     return this._embedCache;
@@ -127,7 +125,6 @@ class PageSelectionState {
   clear() {
     this.type = 'none';
     this._richTextCache.clear();
-    this._dividerCache.clear();
     this._startRange = null;
     this._startPoint = null;
     this.selectedBlocks = [];
@@ -189,9 +186,6 @@ export class DefaultSelectionManager {
     const selectedBounds = selectedBlocks.map(block => {
       return blockCache.get(block) as DOMRect;
     });
-    selectedDividers.map(divider => {
-      return selectedBounds.push(dividerCache.get(divider) as DOMRect);
-    });
     this._signals.updateSelectedRects.emit(selectedBounds);
     this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
@@ -200,7 +194,6 @@ export class DefaultSelectionManager {
     assertExists(this.state.startPoint);
     const current = { x: e.raw.clientX, y: e.raw.clientY };
     const { startPoint: start } = this.state;
-    const { dividerCache } = this.state;
     const selectionRect = createSelectionRect(current, start);
 
     const { blockCache } = this.state;
@@ -224,13 +217,20 @@ export class DefaultSelectionManager {
       blockCache,
     };
   }
+  private _setDragOnlyOneDividerType() {
+    const { state } = this;
+    const { selectedBlocks } = state;
+    if (
+      selectedBlocks.length === 1 &&
+      matchFlavours(getModelByElement(selectedBlocks[0]), ['affine:divider'])
+    ) {
+      state.type = 'divider';
+      return;
+    }
+  }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
-    const { selectedRichTexts, selectedDividers } =
-      this._getSelectedBlockInfo(e);
-    if (selectedRichTexts.length === 0 && selectedDividers.length == 1) {
-      this.state.type = 'divider';
-    }
+    this._setDragOnlyOneDividerType();
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
@@ -409,13 +409,9 @@ export class DefaultSelectionManager {
       assertExists(this._activeComponent);
       const dividerRect = this._activeComponent.getBoundingClientRect();
       this.state.refreshRichTextBoundsCache(this._container);
-      const selectedDividers = filterSelectedDivider(
-        this.state.dividerCache,
-        dividerRect
-      );
-      this.state.selectedDividers = selectedDividers;
       assertExists(dividerRect);
       this._signals.updateSelectedRects.emit([dividerRect]);
+      this.state.selectedBlocks.push(this._activeComponent);
     }
     if (e.raw.target instanceof HTMLInputElement) return;
     if (e.keys.shift) return;

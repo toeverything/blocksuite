@@ -23,6 +23,14 @@ import {
   getSplicedTitle,
   noop,
   getModelByElement,
+  matchFlavours,
+  focusPreviousBlock,
+  getDefaultPageBlock,
+  getBlockElementByModel,
+  getContainerByModel,
+  getPreviousBlock,
+  getNextBlock,
+  focusNextBlock,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -43,6 +51,7 @@ import {
   DownloadIcon,
 } from '../../image-block/icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
+import { stat } from 'fs';
 
 export interface EmbedOption {
   position: { x: number; y: number };
@@ -202,21 +211,24 @@ function EmbedOptionContainer(
 
 function handleUp(selection: DefaultSelectionManager) {
   const { state } = selection;
-  if (state.selectedDividers.length === 1) {
-    const model = state.selectedDividers[0].model;
-    const container = getContainerByModel(model);
-    const preNodeModel = getPreviousBlock(container, model.id);
+  if (state.selectedBlocks.length === 1) {
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    if (!matchFlavours(selectedModel, ['affine:divider'])) {
+      return;
+    }
+    const container = getContainerByModel(selectedModel);
+    const preNodeModel = getPreviousBlock(container, selectedModel.id);
     if (!preNodeModel || preNodeModel.id == '1') {
       return;
     } else if (
       matchFlavours(preNodeModel, ['affine:list']) ||
       matchFlavours(preNodeModel, ['affine:paragraph'])
     ) {
-      focusPreviousBlock(model, 'end');
+      focusPreviousBlock(selectedModel, 'end');
       state.clear();
       return;
     } else if (matchFlavours(preNodeModel, ['affine:divider'])) {
-      const selectionManager = getDefaultPageBlock(model).selection;
+      const selectionManager = getDefaultPageBlock(selectedModel).selection;
       const dividerBlockElement = getBlockElementByModel(
         preNodeModel
       ) as HTMLElement;
@@ -229,20 +241,23 @@ function handleUp(selection: DefaultSelectionManager) {
 }
 function handleDown(selection: DefaultSelectionManager) {
   const { state } = selection;
-  if (state.selectedDividers.length === 1) {
-    const model = state.selectedDividers[0].model;
-    const nextBlock = getNextBlock(model.id);
+  if (state.selectedBlocks.length === 1) {
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    if (!matchFlavours(selectedModel, ['affine:divider'])) {
+      return;
+    }
+    const nextBlock = getNextBlock(selectedModel.id);
     if (!nextBlock) {
       return;
     } else if (
       matchFlavours(nextBlock, ['affine:list']) ||
       matchFlavours(nextBlock, ['affine:paragraph'])
     ) {
-      focusNextBlock(model, 'start');
+      focusNextBlock(selectedModel, 'start');
       state.clear();
       return;
     } else if (matchFlavours(nextBlock, ['affine:divider'])) {
-      const selectionManager = getDefaultPageBlock(model).selection;
+      const selectionManager = getDefaultPageBlock(selectedModel).selection;
       const dividerBlockElement = getBlockElementByModel(
         nextBlock
       ) as HTMLElement;
@@ -342,6 +357,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         return;
       } else if (state.type === 'block') {
         const { selectedBlocks } = state;
+        if (
+          selectedBlocks.length === 1 &&
+          matchFlavours(getModelByElement(selectedBlocks[0]), [
+            'affine:divider',
+          ])
+        ) {
+          state.type = 'divider';
+          return;
+        }
         handleBlockSelectionBatchDelete(
           page,
           selectedBlocks.map(block => getModelByElement(block))
@@ -352,6 +376,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         this.signals.updateEmbedRects.emit([]);
         this.signals.updateEmbedOption.emit(null);
         return;
+      } else if (state.type === 'divider') {
+        const { selectedBlocks } = state;
+        handleBlockSelectionBatchDelete(
+          page,
+          selectedBlocks.map(block => getModelByElement(block))
+        );
+
+        state.clear();
+        this.signals.updateSelectedRects.emit([]);
+        this.signals.updateEmbedRects.emit([]);
+        this.signals.updateEmbedOption.emit(null);
       }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;

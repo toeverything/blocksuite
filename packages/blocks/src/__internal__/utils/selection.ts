@@ -339,8 +339,8 @@ export function getSelectInfo(page: Page): SelectionInfo {
   }
   if (state.type === 'divider') {
     type = 'Block';
-    const { selectedDividers } = state;
-    selectedModels = selectedDividers.map(divider => divider.model);
+    const { selectedBlocks } = state;
+    selectedModels = selectedBlocks.map(block => getModelByElement(block));
   }
   if (type !== 'None') {
     selectedBlocks = getSelectedBlock(selectedModels);
