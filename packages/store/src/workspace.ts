@@ -5,8 +5,9 @@ import { Signal } from './utils/signal';
 import { Indexer, QueryContent } from './search';
 import { uuidv4 } from './utils/id-generator';
 import type { Awareness } from 'y-protocols/awareness';
+import type { BaseBlockModel } from './base'
 
-export class Page extends Space {
+export class Page<IBlockSchema extends Record<string, typeof BaseBlockModel> = any> extends Space<IBlockSchema> {
   // ...
 }
 
@@ -98,7 +99,7 @@ export class Workspace {
 
   get pages() {
     // the meta space is not included
-    return this._store.spaces as Map<string, Page>;
+    return this._store.spaces as Map<string, Page<any>>;
   }
 
   get doc() {
@@ -119,8 +120,8 @@ export class Workspace {
     };
   }
 
-  createPage(pageId: string, title = '') {
-    const page = new Page(
+  createPage<IBlockSchema extends Record<string, typeof BaseBlockModel> = Record<string, typeof BaseBlockModel>>(pageId: string, title = '') {
+    const page = new Page<IBlockSchema>(
       'space:' + pageId,
       this.doc,
       this._store.awareness,
@@ -136,7 +137,7 @@ export class Workspace {
     this.meta.setPage(pageId, props);
   }
 
-  removePage(page: Page) {
+  removePage(page: Page<any>) {
     this._store.removeSpace(page);
     this.meta.removePage(page.id);
   }
