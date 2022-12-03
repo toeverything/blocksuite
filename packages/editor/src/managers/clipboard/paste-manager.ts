@@ -2,7 +2,11 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
-import { SelectionUtils, SelectionInfo } from '@blocksuite/blocks';
+import {
+  SelectionUtils,
+  SelectionInfo,
+  matchFlavours,
+} from '@blocksuite/blocks';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -160,8 +164,8 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'affine:page') {
-          if (selectedBlock.children[0]?.flavour === 'affine:group') {
+        if (matchFlavours(selectedBlock, ['affine:page'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
@@ -170,13 +174,13 @@ export class PasteManager {
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'affine:group') {
+        } else if (matchFlavours(selectedBlock, ['affine:group'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
       const addBlockIds: string[] = [];
-      if (selectedBlock?.flavour !== 'affine:page') {
+      if (selectedBlock && !matchFlavours(selectedBlock, ['affine:page'])) {
         if (blocks.length === 1 && blocks[0].flavour === 'affine:divider') {
           parent && this._addBlocks(blocks, parent, index, addBlockIds);
           parent && this._editor.page.deleteBlockById(lastBlock.id);
@@ -232,8 +236,8 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'affine:page') {
-          if (selectedBlock.children[0]?.flavour === 'affine:group') {
+        if (matchFlavours(selectedBlock, ['affine:page'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
@@ -242,7 +246,7 @@ export class PasteManager {
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'affine:group') {
+        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
@@ -270,10 +274,7 @@ export class PasteManager {
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);
-      if (
-        model?.type !== 'affine:embed' &&
-        model?.flavour !== 'affine:divider'
-      ) {
+      if (model && !matchFlavours(model, ['affine:embed', 'affine:divider'])) {
         block.text && model?.text?.applyDelta(block.text);
       }
       addBlockIds.push(id);

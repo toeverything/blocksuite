@@ -29,6 +29,7 @@ import {
   getBlockElementByModel,
   getNextBlock,
   focusNextBlock,
+  matchFlavours,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -210,13 +211,13 @@ function handleUp(selection: DefaultSelectionManager) {
     if (!preNodeModel || preNodeModel.id == '1') {
       return;
     } else if (
-      preNodeModel.flavour === 'affine:list' ||
-      preNodeModel.flavour === 'affine:paragraph'
+      matchFlavours(preNodeModel, ['affine:list']) ||
+      matchFlavours(preNodeModel, ['affine:paragraph'])
     ) {
       focusPreviousBlock(model, 'end');
       state.clear();
       return;
-    } else if (preNodeModel.flavour === 'affine:divider') {
+    } else if (matchFlavours(preNodeModel, ['affine:divider'])) {
       const selectionManager = getDefaultPageBlock(model).selection;
       const dividerBlockElement = getBlockElementByModel(
         preNodeModel
@@ -236,13 +237,13 @@ function handleDown(selection: DefaultSelectionManager) {
     if (!nextBlock) {
       return;
     } else if (
-      nextBlock.flavour === 'affine:list' ||
-      nextBlock.flavour === 'affine:paragraph'
+      matchFlavours(nextBlock, ['affine:list']) ||
+      matchFlavours(nextBlock, ['affine:paragraph'])
     ) {
       focusNextBlock(model, 'start');
       state.clear();
       return;
-    } else if (nextBlock.flavour === 'affine:divider') {
+    } else if (matchFlavours(nextBlock, ['affine:divider'])) {
       const selectionManager = getDefaultPageBlock(model).selection;
       const dividerBlockElement = getBlockElementByModel(
         nextBlock

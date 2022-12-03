@@ -2,7 +2,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from '../..';
 import type { RichText } from '../rich-text/rich-text';
 import { BLOCK_ID_ATTR as ATTR } from './consts';
-import { assertExists } from './std';
+import { assertExists, matchFlavours } from './std';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -184,15 +184,14 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       assertExists(block.model);
       // @ts-ignore
       const blockElement = getBlockElementByModel(block.model);
-      const mainElelment =
-        block.model.flavour === 'affine:page'
-          ? blockElement?.querySelector(
-              '.affine-default-page-block-title-container'
-            )
-          : blockElement?.querySelector('rich-text');
+      const mainElement = matchFlavours(block.model, ['affine:page'])
+        ? blockElement?.querySelector(
+            '.affine-default-page-block-title-container'
+          )
+        : blockElement?.querySelector('rich-text');
       if (
-        mainElelment &&
-        range.intersectsNode(mainElelment) &&
+        mainElement &&
+        range.intersectsNode(mainElement) &&
         blockElement?.tagName !== 'GROUP-BLOCK'
       ) {
         // @ts-ignore

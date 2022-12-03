@@ -12,6 +12,7 @@ import {
   getPreviousBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
+  matchFlavours,
   noop,
   PREVENT_DEFAULT,
   resetNativeSelection,
@@ -102,7 +103,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     const parent = page.getParent(model);
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList =
-      model.flavour === 'affine:list' && model.text?.length === 0;
+      matchFlavours(model, ['affine:list']) && model.text?.length === 0;
     const index = this.quill.getSelection()?.index || 0;
 
     // Some block should treat Enter as soft enter
@@ -119,7 +120,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
 
     if (
       isEmptyList &&
-      parent?.flavour === 'affine:group' &&
+      parent &&
+      matchFlavours(parent, ['affine:group']) &&
       model.children.length === 0
     ) {
       handleLineStartBackspace(page, model);
@@ -198,7 +200,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     if (range.index === 0 && range.length === 0) {
       const container = getContainerByModel(model);
       const preNodeModel = getPreviousBlock(container, model.id);
-      if (preNodeModel?.flavour === 'affine:divider') {
+      if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
         const selectionManager = getDefaultPageBlock(model).selection;
         const dividerBlockElement = getBlockElementByModel(
           preNodeModel
@@ -221,7 +223,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
-      if (nextBlock.flavour === 'affine:divider') {
+      if (matchFlavours(nextBlock, ['affine:divider'])) {
         const selectionManager = getDefaultPageBlock(model).selection;
         const dividerBlockElement = getBlockElementByModel(
           nextBlock

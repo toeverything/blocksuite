@@ -17,6 +17,7 @@ import {
   SelectionEvent,
   getModelByElement,
   getBlockElementByModel,
+  matchFlavours,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -485,7 +486,7 @@ export class DefaultSelectionManager {
     const selectedDividers = filterSelectedDivider(dividerCache, selectionRect);
     this.state.selectedRichTexts = selectedRichTexts;
     this.state.selectedDividers = selectedDividers;
-    if (model?.flavour === 'affine:divider') {
+    if (model && matchFlavours(model, ['affine:divider'])) {
       this.state.model = model;
     }
     this.state.selectedRichTexts = selectedRichTexts;

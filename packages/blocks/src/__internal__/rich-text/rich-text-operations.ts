@@ -22,6 +22,7 @@ import {
   getDefaultPageBlock,
   getBlockElementByModel,
   resetNativeSelection,
+  matchFlavours,
 } from '../utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -32,7 +33,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     page.captureSync();
 
     let id = '';
-    if (model.flavour === 'affine:list') {
+    if (matchFlavours(model, ['affine:list'])) {
       const blockProps = {
         flavour: model.flavour,
         type: model.type,
@@ -79,7 +80,7 @@ export function handleBlockSplit(
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (model.flavour === 'affine:list' && model.children.length > 0) {
+  if (matchFlavours(model, ['affine:list']) && model.children.length > 0) {
     newParent = model;
     newBlockIndex = 0;
   }
@@ -120,7 +121,7 @@ export async function handleUnindent(
   offset: number
 ) {
   const parent = page.getParent(model);
-  if (!parent || parent?.flavour === 'affine:group') return;
+  if (!parent || matchFlavours(parent, ['affine:group'])) return;
 
   const grandParent = page.getParent(parent);
   if (!grandParent) return;
@@ -150,16 +151,19 @@ export async function handleUnindent(
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
-  if (model.flavour === 'affine:paragraph') {
+  if (matchFlavours(model, ['affine:paragraph'])) {
     if (model.type !== 'text') {
       page.captureSync();
       page.updateBlock(model, { type: 'text' });
     } else {
       const parent = page.getParent(model);
-      if (!parent || parent?.flavour === 'affine:group') {
+      if (!parent || matchFlavours(parent, ['affine:group'])) {
         const container = getContainerByModel(model);
         const previousSibling = getPreviousBlock(container, model.id);
-        if (previousSibling?.flavour === 'affine:divider') {
+        if (
+          previousSibling &&
+          matchFlavours(previousSibling, ['affine:divider'])
+        ) {
           const selectionManager = getDefaultPageBlock(model).selection;
           const dividerBlockElement = getBlockElementByModel(
             previousSibling
@@ -168,7 +172,10 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           selectionManager.selectBlockByRect(selectionRect, model);
           resetNativeSelection(null);
         }
-        if (previousSibling && previousSibling.flavour === 'affine:paragraph') {
+        if (
+          previousSibling &&
+          matchFlavours(previousSibling, ['affine:paragraph'])
+        ) {
           page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
           previousSibling.text?.join(model.text as Text);
@@ -195,7 +202,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   }
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
-  else if (model.flavour === 'affine:list') {
+  else if (matchFlavours(model, ['affine:list'])) {
     const parent = page.getParent(model);
     if (!parent) return;
 
@@ -224,7 +231,7 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
     // if cursor is on the first line and has no text, height is 0
     if (height === 0 && top === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      if (preNodeModel?.flavour === 'affine:divider') {
+      if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
         const selectionManager = getDefaultPageBlock(model).selection;
         const dividerBlockElement = getBlockElementByModel(
           preNodeModel
@@ -244,13 +251,16 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       !isAtLineEdge(range)
     ) {
       // FIXME: Then it will turn the input into the div
-      if (preNodeModel?.flavour === 'affine:group') {
+      if (preNodeModel && matchFlavours(preNodeModel, ['affine:group'])) {
         (
           document.querySelector(
             '.affine-default-page-block-title'
           ) as HTMLInputElement
         ).focus();
-      } else if (preNodeModel?.flavour === 'affine:divider') {
+      } else if (
+        preNodeModel &&
+        matchFlavours(preNodeModel, ['affine:divider'])
+      ) {
         const selectionManager = getDefaultPageBlock(model).selection;
         const dividerBlockElement = getBlockElementByModel(
           preNodeModel
@@ -305,7 +315,7 @@ export function handleKeyDown(
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
-      if (nextBlock.flavour === 'affine:divider') {
+      if (matchFlavours(nextBlock, ['affine:divider'])) {
         const selectionManager = getDefaultPageBlock(model).selection;
         const dividerBlockElement = getBlockElementByModel(
           nextBlock
@@ -325,7 +335,7 @@ export function handleKeyDown(
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
-      if (nextBlock.flavour === 'affine:divider') {
+      if (matchFlavours(nextBlock, ['affine:divider'])) {
         const selectionManager = getDefaultPageBlock(model).selection;
         const dividerBlockElement = getBlockElementByModel(
           nextBlock

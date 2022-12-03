@@ -7,6 +7,7 @@ import {
   noop,
   almostEqual,
   isCollapsedAtBlockStart,
+  matchFlavours,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
@@ -347,7 +348,7 @@ export function handleBlockSelectionBatchDelete(
 ) {
   page.captureSync();
   for (let i = 0; i < models.length; i++) {
-    if (models[i].flavour === 'affine:divider') {
+    if (matchFlavours(models[i], ['affine:divider'])) {
       page.deleteBlock(models[i]);
     }
   }
