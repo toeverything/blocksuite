@@ -99,7 +99,7 @@ export class Workspace {
 
   get pages() {
     // the meta space is not included
-    return this._store.spaces as Map<string, Page<any>>;
+    return this._store.spaces as Map<string, Page>;
   }
 
   get doc() {
@@ -137,7 +137,7 @@ export class Workspace {
     this.meta.setPage(pageId, props);
   }
 
-  removePage(page: Page<any>) {
+  removePage(page: Page) {
     this._store.removeSpace(page);
     this.meta.removePage(page.id);
   }
