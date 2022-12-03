@@ -16,7 +16,7 @@ import {
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
-    pages: [{ id: 'page0', title: '' }],
+    pages: [{ id: 'page0', title: '', favorite: false, trash: false }],
   },
   'space:page0': {
     '0': {

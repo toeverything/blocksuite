@@ -46,7 +46,7 @@ describe.concurrent('basic', () => {
 
     assert.deepEqual(serialize(workspace.createPage(defaultPageId)), {
       [spaceMetaId]: {
-        pages: [{ id: 'page0', title: '' }],
+        pages: [{ id: 'page0', title: '', favorite: false, trash: false }],
       },
       [spaceId]: {},
     });
@@ -196,6 +196,20 @@ describe.concurrent('addBlock', () => {
       workspace.removePage(page1);
       assert.equal(workspace.pages.size, 0);
     });
+  });
+
+  it('can set page state', async () => {
+    const workspace = new Workspace(getStoreOptions());
+
+    workspace.createPage('page0').register(BlockSchema);
+    assert.deepEqual(workspace.meta.pages, [
+      { id: 'page0', title: '', favorite: false, trash: false },
+    ]);
+
+    workspace.setPage('page0', { favorite: true });
+    assert.deepEqual(workspace.meta.pages, [
+      { id: 'page0', title: '', favorite: true, trash: false },
+    ]);
   });
 });
 

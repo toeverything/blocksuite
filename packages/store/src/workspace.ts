@@ -10,9 +10,11 @@ export class Page extends Space {
   // ...
 }
 
-interface PageMeta {
+export interface PageMeta {
   id: string;
   title: string;
+  favorite: boolean;
+  trash: boolean;
 }
 
 class WorkspaceMeta extends Space {
@@ -36,18 +38,33 @@ class WorkspaceMeta extends Space {
   }
 
   get pages() {
-    return this._yPages.toArray() as PageMeta[];
+    return this._yPages.toJSON() as PageMeta[];
   }
 
   addPage(page: PageMeta, index?: number) {
     const yPage = new Y.Map();
     yPage.set('id', page.id);
     yPage.set('title', page.title);
+    yPage.set('favorite', page.favorite);
+    yPage.set('trash', page.trash);
 
     if (index === undefined) {
       this._yPages.push([yPage]);
     } else {
       this._yPages.insert(index, [yPage]);
+    }
+  }
+
+  setPage(id: string, props: Partial<PageMeta>) {
+    const pages = this._yPages.toJSON() as PageMeta[];
+    const index = pages.findIndex((page: PageMeta) => id === page.id);
+
+    if (index !== -1) {
+      const yPage = this._yPages.get(index) as Y.Map<unknown>;
+      if ('id' in props) yPage.set('id', props.id);
+      if ('title' in props) yPage.set('title', props.title);
+      if ('favorite' in props) yPage.set('favorite', props.favorite);
+      if ('trash' in props) yPage.set('trash', props.trash);
     }
   }
 
@@ -80,6 +97,7 @@ export class Workspace {
   }
 
   get pages() {
+    // the meta space is not included
     return this._store.spaces as Map<string, Page>;
   }
 
@@ -109,9 +127,13 @@ export class Workspace {
       this._store.idGenerator
     );
     this._store.addSpace(page);
-    this.meta.addPage({ id: pageId, title });
+    this.meta.addPage({ id: pageId, title, favorite: false, trash: false });
     this._indexer.onCreateSpace(page.id);
     return page;
+  }
+
+  setPage(pageId: string, props: Partial<PageMeta>) {
+    this.meta.setPage(pageId, props);
   }
 
   removePage(page: Page) {
