@@ -28,9 +28,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:group',
       'sys:id': '1',
       'sys:children': ['2'],
-      // we don't really care about the xywh here, 
-      //  because in this mode we don't access this value
-      'prop:xywh': '[0,0,720,480]',
+      'prop:xywh': '[0,0,720,32]',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
