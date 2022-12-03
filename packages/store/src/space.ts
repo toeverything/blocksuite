@@ -157,9 +157,6 @@ export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = 
   register(blockSchema: IBlockSchema) {
     Object.keys(blockSchema).forEach(key => {
       this._flavourMap.set(key, blockSchema[key as keyof IBlockSchema]);
-      Object.keys(new blockSchema[key](this, {})).forEach(key => {
-        this._ignoredKeys.add(key as keyof InstanceType<IBlockSchema[keyof IBlockSchema]> & string);
-      });
     });
     return this
   }
