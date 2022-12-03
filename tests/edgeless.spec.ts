@@ -92,4 +92,11 @@ test('resize the block', async ({ page }) => {
   expect(y).toBe(oldY);
   expect(w).toBe(oldW - 100);
   expect(h).toBe(oldH);
+  await switchMode(page);
+  await switchMode(page);
+  const newXywh = await page.evaluate(([id, oldXywh]) => {
+    const block = window.workspace.pages.get('space:page0')?.getBlockById(id.groupId) as GroupBlockModel;
+    return block.xywh;
+  }, [id, oldXywh] as const)
+  expect(newXywh).toBe(xywh);
 });
