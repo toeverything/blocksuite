@@ -116,7 +116,7 @@ function EdgelessBlockChild(
   };
 
   return html`
-    <div class="affine-edgeless-block-child" style=${styleMap(style)}>
+    <div test-id=${model.id} class="affine-edgeless-block-child" style=${styleMap(style)}>
       ${BlockElement(model, host)}
     </div>
   `;
