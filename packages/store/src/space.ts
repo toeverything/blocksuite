@@ -45,6 +45,7 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = any> {
   readonly id: string;
   readonly doc: Y.Doc;

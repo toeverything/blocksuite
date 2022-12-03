@@ -7,6 +7,7 @@ import { uuidv4 } from './utils/id-generator';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from './base'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class Page<IBlockSchema extends Record<string, typeof BaseBlockModel> = any> extends Space<IBlockSchema> {
   // ...
 }
