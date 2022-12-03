@@ -51,8 +51,6 @@ import {
   DownloadIcon,
 } from '../../image-block/icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
-import { stat } from 'fs';
-
 export interface EmbedOption {
   position: { x: number; y: number };
   model: BaseBlockModel;

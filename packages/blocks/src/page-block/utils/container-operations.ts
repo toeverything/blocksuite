@@ -7,7 +7,6 @@ import {
   noop,
   almostEqual,
   isCollapsedAtBlockStart,
-  matchFlavours,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
