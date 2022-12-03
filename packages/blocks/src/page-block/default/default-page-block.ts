@@ -32,7 +32,6 @@ import {
   handleBlockSelectionBatchDelete,
   handleSelectAll,
   removeCommonHotKey,
-  tryUpdateGroupSize,
   updateTextType,
 } from '../utils';
 import style from './style.css';
@@ -480,11 +479,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.signals.updateEmbedOption.on(embedOption => {
       this.embedOption = embedOption;
       this.requestUpdate();
-    });
-    tryUpdateGroupSize(this.page, 1);
-    this.addEventListener('keydown', e => {
-      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.page, 1);
     });
 
     // TMP: clear selected rects on scroll

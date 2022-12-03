@@ -188,6 +188,7 @@ export class EdgelessPageBlockComponent
 
     this._bindHotkeys();
 
+    tryUpdateGroupSize(this.page, this.viewport.zoom);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
       tryUpdateGroupSize(this.page, this.viewport.zoom);

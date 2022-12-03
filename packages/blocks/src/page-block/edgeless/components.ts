@@ -285,12 +285,14 @@ export class EdgelessSelectedRect extends LitElement {
         } else {
           console.error('unexpected state.type:', this.state.type)
         }
-        selected.xywh = JSON.stringify([
+        const newXywh = JSON.stringify([
           newX,
           y,
           newW,
           (groupBlock?.getBoundingClientRect().height || 0) / this.zoom,
         ])
+        selected.xywh = newXywh
+        selected.page.updateBlock(selected, { xywh: newXywh })
       });
     }
   };
