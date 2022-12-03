@@ -380,12 +380,11 @@ export function tryUpdateGroupSize(page: Page, zoom: number) {
         number,
         number
       ];
-      const newModelWidth = bound.width / zoom;
       const newModelHeight = bound.height / zoom;
 
-      if (!almostEqual(newModelWidth, w) || !almostEqual(newModelHeight, h)) {
+      if (!almostEqual(newModelHeight, h)) {
         page.updateBlock(model, {
-          xywh: JSON.stringify([x, y, newModelWidth, newModelHeight]),
+          xywh: JSON.stringify([x, y, w, newModelHeight]),
         });
       }
     });

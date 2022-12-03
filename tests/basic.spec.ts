@@ -12,6 +12,7 @@ import {
   pressEnter,
   addGroupByClick,
   initEmptyState,
+  switchMode,
 } from './utils/actions';
 import {
   defaultStore,
