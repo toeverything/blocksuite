@@ -17,6 +17,8 @@ import {
   getBlockElementByModel,
   getQuillIndexByNativeSelection,
   getCurrentRange,
+  getParentBlockById,
+  getModelByElement,
 } from '../../__internal__/utils/query';
 import {
   isCollapsedSelection,
@@ -347,21 +349,20 @@ export function handleBlockSelectionBatchDelete(
   models: ExtendedModel[]
 ) {
   page.captureSync();
+  const parent = getParentBlockById(models[0].id);
+
+  assertExists(parent);
+  const parentModel = getModelByElement(parent);
+  const index = parentModel?.children.indexOf(models[0]);
   for (let i = 0; i < models.length; i++) {
-    if (matchFlavours(models[i], ['affine:divider'])) {
-      page.deleteBlock(models[i]);
-    }
-  }
-  if (models.length === 0) {
-    return;
-  }
-  assertExists(models[0].text);
-  if (models[0].flavour !== 'affine:divider') {
-    models[0].text.delete(0, models[0].text.length);
-  }
-  for (let i = 1; i < models.length; i++) {
     page.deleteBlock(models[i]);
   }
+  const id = page.addBlock(
+    { flavour: 'affine:paragraph', page, type: 'text' },
+    parentModel,
+    index
+  );
+  id && asyncFocusRichText(page, id);
 }
 
 export function tryUpdateGroupSize(page: Page, zoom: number) {

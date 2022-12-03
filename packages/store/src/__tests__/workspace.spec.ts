@@ -40,12 +40,16 @@ function waitOnce<T>(signal: Signal<T>) {
 
 const defaultPageId = 'page0';
 const spaceId = `space:${defaultPageId}`;
+const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
   it('can init store', () => {
     const workspace = new Workspace(getStoreOptions());
 
     assert.deepEqual(serialize(workspace.createPage(defaultPageId)), {
+      [spaceMetaId]: {
+        pages: [{ id: 'page0', title: '', favorite: false, trash: false }],
+      },
       [spaceId]: {},
     });
   });
@@ -185,8 +189,7 @@ describe.concurrent('addBlock', () => {
       page0 = workspace.createPage('page0').register(BlockSchema);
       page1 = workspace.createPage('page1').register(BlockSchema);
     });
-    const idAdded = await waitOnce(workspace.signals.pageAdded);
-    assert.equal(idAdded, 'space:page0');
+    await waitOnce(workspace.signals.pagesUpdated);
     assert.equal(workspace.pages.size, 2);
 
     queueMicrotask(() => {
@@ -195,8 +198,20 @@ describe.concurrent('addBlock', () => {
       workspace.removePage(page1);
       assert.equal(workspace.pages.size, 0);
     });
-    const idRemoved = await waitOnce(workspace.signals.pageRemoved);
-    assert.equal(idRemoved, 'space:page0');
+  });
+
+  it('can set page state', async () => {
+    const workspace = new Workspace(getStoreOptions());
+
+    workspace.createPage('page0').register(BlockSchema);
+    assert.deepEqual(workspace.meta.pages, [
+      { id: 'page0', title: '', favorite: false, trash: false },
+    ]);
+
+    workspace.setPage('page0', { favorite: true });
+    assert.deepEqual(workspace.meta.pages, [
+      { id: 'page0', title: '', favorite: true, trash: false },
+    ]);
   });
 });
 

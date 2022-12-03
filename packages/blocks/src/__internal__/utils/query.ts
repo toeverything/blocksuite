@@ -304,3 +304,12 @@ export function getQuillIndexByNativeSelection(
   }
   return offset;
 }
+
+export function getAllBlocks() {
+  const blocks = Array.from(document.querySelectorAll(`[${ATTR}]`));
+  return blocks.filter(item => {
+    return (
+      item.tagName !== 'DEFAULT-PAGE-BLOCK' && item.tagName !== 'GROUP-BLOCK'
+    );
+  });
+}

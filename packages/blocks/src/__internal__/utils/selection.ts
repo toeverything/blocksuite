@@ -11,6 +11,7 @@ import {
   getModelsByRange,
   getCurrentRange,
   getQuillIndexByNativeSelection,
+  getModelByElement,
 } from './query';
 import { Rect } from './rect';
 import type { SelectionEvent } from './gesture';
@@ -183,6 +184,16 @@ function focusRichTextByModel(
   position: SelectionPosition,
   model: BaseBlockModel
 ) {
+  if (model.flavour === 'affine:embed') {
+    const defaultPageBlock = getDefaultPageBlock(model);
+    const rect = getBlockElementByModel(model)?.getBoundingClientRect();
+    rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
+    const embedElement = getBlockElementByModel(model);
+    assertExists(embedElement);
+    defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
+    defaultPageBlock.selection.state.type = 'block';
+    window.getSelection()?.removeAllRanges();
+  }
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
@@ -224,6 +235,7 @@ export function focusNextBlock(
     nextPosition = page.lastSelectionPosition;
   }
   const nextNodeModel = getNextBlock(model.id);
+
   if (nextNodeModel) {
     focusRichTextByModel(nextPosition, nextNodeModel);
   }
@@ -319,11 +331,8 @@ export function getSelectInfo(page: Page): SelectionInfo {
   const nativeSelection = window.getSelection();
   if (state.type === 'block') {
     type = 'Block';
-    const { selectedRichTexts, selectedDividers } = state;
-    selectedModels = selectedRichTexts.map(richText => richText.model);
-    if (!selectedRichTexts.length) {
-      selectedModels = selectedDividers.map(divider => divider.model);
-    }
+    const { selectedBlocks } = state;
+    selectedModels = selectedBlocks.map(block => getModelByElement(block));
   } else if (nativeSelection && nativeSelection.type !== 'None') {
     type = nativeSelection.type;
     selectedModels = getModelsByRange(getCurrentRange());

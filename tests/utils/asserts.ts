@@ -15,6 +15,9 @@ import {
 } from 'pretty-format';
 
 export const defaultStore: SerializedStore = {
+  'space:meta': {
+    pages: [{ id: 'page0', title: '', favorite: false, trash: false }],
+  },
   'space:page0': {
     '0': {
       'sys:id': '0',
@@ -266,7 +269,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
     window.workspace.doc.toJSON()
   )) as SerializedStore;
-  const titleNode = jsonDoc['space:page0']['0'];
+  const titleNode = jsonDoc['space:page0']['0'] as PrefixedBlockProps;
 
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
@@ -300,7 +303,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
     return [
       visitor(node),
       ...children.flatMap(child =>
-        visitNodes(child, visitor).map(line => {
+        visitNodes(child as PrefixedBlockProps, visitor).map(line => {
           if (node['sys:flavour'] === 'affine:page') {
             // Ad hoc way to remove the title indent
             return line;

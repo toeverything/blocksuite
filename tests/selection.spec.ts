@@ -400,7 +400,7 @@ async function clickListIcon(page: Page, i = 0) {
   await locator.click();
 }
 
-test('Click the list icon to select', async ({ page }) => {
+test('click the list icon to select', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyState(page);
   await initThreeList(page);
@@ -416,13 +416,13 @@ test('Click the list icon to select', async ({ page }) => {
   await clickListIcon(page, 4);
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertRichTexts(page, ['123', '123', '456', '789', '\n']);
-  //TODO:FIX ME!!!!!
-  //This should be ['123', '123', '456', '789'],but there is another bug affecting it
+  // FIXME
+  // This should be ['123', '123', '456', '789'] but there is another bug affecting it
   await clickListIcon(page, 1);
   await page.keyboard.press('Backspace', { delay: 50 });
-  await assertRichTexts(page, ['123', '\n', '456', '789', '\n']);
-  //TODO:FIX ME!!!!!
-  //This should be ['123','456','789'],but there is another bug affecting it
+  await assertRichTexts(page, ['123', '\n', '456', '789']);
+  // FIXME
+  // This should be ['123','456','789'] but there is another bug affecting it
 });
 
 async function clickDivider(page: Page, i = 0) {
