@@ -76,8 +76,11 @@ test('resize the block', async ({ page }) => {
     return block.xywh;
   }, id)
   const lefthandle = await page.locator('[aria-label="handle-left"]');
-  const box = (await lefthandle.boundingBox())!;
+  const box = await lefthandle.boundingBox();
   expect(box).not.toBeNull();
+  if (box === null) {
+    throw new Error();
+  }
   await dragBetweenCoords(page, { x: box.x + 5, y: box.y + 5 }, { x: box.x + 105, y: box.y + 5 });
   const xywh = await page.evaluate(([id, oldXywh]) => {
     const block = window.workspace.pages.get('space:page0')?.getBlockById(id.groupId) as GroupBlockModel;
