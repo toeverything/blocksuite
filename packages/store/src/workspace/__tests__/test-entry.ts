@@ -8,7 +8,7 @@ import { assertExists } from '../../utils/utils';
 let i = 0;
 
 async function testBasic() {
-  testSerial('can create workspace', async () => {
+  testSerial('can create page', async () => {
     i++;
     workspace.createPage(`${i}`, 'hello');
     await nextFrame();
@@ -22,9 +22,10 @@ async function testBasic() {
 }
 
 const workspace = new Workspace({});
+window.workspace = workspace;
+
 const app = document.createElement('test-app') as TestApp;
 app.workspace = workspace;
 document.body.appendChild(app);
-window.workspace = workspace;
 
 document.getElementById('test-basic')?.addEventListener('click', testBasic);

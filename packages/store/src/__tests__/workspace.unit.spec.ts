@@ -16,11 +16,9 @@ import { ListBlockModel } from '../../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../../blocks/src/group-block/group-model';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model';
 
-function getInitOptions() {
-  return {
-    room: '',
-    idGenerator: createAutoIncrementIdGenerator(),
-  };
+function createTestOptions() {
+  const idGenerator = createAutoIncrementIdGenerator();
+  return { idGenerator };
 }
 
 // Create BlockSchema manually
@@ -46,7 +44,8 @@ const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
   it('can init store', () => {
-    const workspace = new Workspace(getInitOptions());
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
 
     assert.deepEqual(serialize(workspace.createPage(defaultPageId)), {
       [spaceMetaId]: {
@@ -59,7 +58,8 @@ describe.concurrent('basic', () => {
 
 describe.concurrent('addBlock', () => {
   it('can add single model', () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
 
@@ -76,7 +76,7 @@ describe.concurrent('addBlock', () => {
 
   it('use custom idGenerator', () => {
     const options = {
-      ...getInitOptions(),
+      ...createTestOptions(),
       idGenerator: (() => {
         const keys = ['7', '100', '2'];
         let i = 0;
@@ -115,7 +115,8 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add model with props', () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
 
@@ -132,7 +133,8 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add multi models', () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
     page.addBlock({ flavour: 'affine:page' });
@@ -155,7 +157,8 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can observe signal events', async () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
 
@@ -165,7 +168,8 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add block to root', async () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
 
@@ -183,7 +187,8 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add and remove multi pages', async () => {
-    const workspace = new Workspace(getInitOptions());
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
 
     let page0!: Page;
     let page1!: Page;
@@ -203,7 +208,8 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can set page state', async () => {
-    const workspace = new Workspace(getInitOptions());
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
 
     workspace.createPage('page0').register(BlockSchema);
     assert.deepEqual(workspace.meta.pages, [
@@ -225,7 +231,8 @@ async function initWithRoot(page: Page) {
 
 describe.concurrent('deleteBlock', () => {
   it('can delete single model', () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
 
@@ -243,7 +250,8 @@ describe.concurrent('deleteBlock', () => {
   });
 
   it('can delete model with parent', async () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
     const root = await initWithRoot(page);
@@ -282,7 +290,8 @@ describe.concurrent('deleteBlock', () => {
 
 describe.concurrent('getBlock', () => {
   it('can get block by id', async () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
     const root = await initWithRoot(page);
@@ -299,7 +308,8 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get parent', async () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
     const root = await initWithRoot(page);
@@ -315,7 +325,8 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get previous sibling', async () => {
-    const page = new Workspace(getInitOptions())
+    const options = createTestOptions();
+    const page = new Workspace(options)
       .createPage(defaultPageId)
       .register(BlockSchema);
     const root = await initWithRoot(page);
@@ -333,7 +344,8 @@ describe.concurrent('getBlock', () => {
 
 describe.concurrent('store.toJSXElement works', async () => {
   it('store match snapshot', () => {
-    const workspace = new Workspace(getInitOptions());
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
     const page = workspace.createPage(defaultPageId).register(BlockSchema);
 
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
@@ -346,14 +358,16 @@ describe.concurrent('store.toJSXElement works', async () => {
   });
 
   it('empty store match snapshot', () => {
-    const store = new Workspace(getInitOptions());
+    const options = createTestOptions();
+    const store = new Workspace(options);
     store.createPage(defaultPageId).register(BlockSchema);
 
     expect(store.toJSXElement()).toMatchInlineSnapshot('null');
   });
 
   it('store with multiple blocks children match snapshot', () => {
-    const workspace = new Workspace(getInitOptions());
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
     const page = workspace.createPage(defaultPageId).register(BlockSchema);
 
     page.addBlock({ flavour: 'affine:page' });
@@ -375,7 +389,8 @@ describe.concurrent('store.toJSXElement works', async () => {
 
 describe.concurrent('store.search works', async () => {
   it('store search matching', () => {
-    const workspace = new Workspace(getInitOptions());
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
     const page = workspace.createPage(defaultPageId).register(BlockSchema);
 
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
