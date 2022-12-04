@@ -18,8 +18,8 @@
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
-    "lib0": "^0.2.52",
     "ky": "^0.32.2",
+    "lib0": "^0.2.52",
     "sha3": "^2.1.4",
     "y-indexeddb": "^9.0.9",
     "y-protocols": "^1.0.5",
@@ -30,7 +30,8 @@
   "devDependencies": {
     "@types/flexsearch": "^0.7.3",
     "@types/quill": "^2.0.9",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "lit": "^2.3.1"
   },
   "exports": {
     "./src/*": "./src/*.ts",

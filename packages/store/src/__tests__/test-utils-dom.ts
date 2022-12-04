@@ -1,3 +1,14 @@
+import type { Workspace } from '../workspace/workspace';
+
+declare global {
+  interface WindowEventMap {
+    'test-result': CustomEvent<TestResult>;
+  }
+  interface Window {
+    workspace: Workspace;
+  }
+}
+
 export interface TestResult {
   success: boolean;
   messages: string[];
@@ -13,7 +24,7 @@ interface TestCase {
   callback: () => Promise<boolean>;
 }
 
-const testCases: TestCase[] = [];
+let testCases: TestCase[] = [];
 
 function reportTestResult() {
   const event = new CustomEvent<TestResult>('test-result', {
@@ -54,12 +65,17 @@ export async function runOnce() {
     else reject(name);
   }
   reportTestResult();
+  testCases = [];
 }
 
 export function assertExists<T>(val: T | null | undefined): asserts val is T {
   if (val === null || val === undefined) {
     throw new Error('val does not exist');
   }
+}
+
+export async function nextFrame() {
+  return new Promise(resolve => requestAnimationFrame(resolve));
 }
 
 // Test image source: https://en.wikipedia.org/wiki/Test_card

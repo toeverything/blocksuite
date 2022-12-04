@@ -5,7 +5,7 @@ import {
   DebugDocProvider,
   IndexedDBDocProvider,
   createWebsocketDocProvider,
-  createAutoIncrement,
+  createAutoIncrementIdGenerator,
   uuidv4,
   Workspace,
 } from '@blocksuite/store';
@@ -65,7 +65,7 @@ function editorOptionsFromParam(): Pick<
    * Because when persistent data applied to ydoc, we need generator different id for block.
    * Otherwise, the block id will conflict.
    */
-  const idGenerator = forceUUIDv4 ? uuidv4 : createAutoIncrement();
+  const idGenerator = forceUUIDv4 ? uuidv4 : createAutoIncrementIdGenerator();
 
   return {
     providers,
@@ -85,7 +85,9 @@ window.onload = () => {
 
   // In dev environment, init editor by default, but in test environment, init editor by the test page
   if (!isTest) {
-    const page = workspace.createPage<typeof BlockSchema>('page0').register(BlockSchema);
+    const page = workspace
+      .createPage<typeof BlockSchema>('page0')
+      .register(BlockSchema);
     const editor = createEditor(page);
     const debugMenu = createDebugMenu(workspace, editor);
 

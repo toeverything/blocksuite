@@ -8,7 +8,7 @@ import {
   assertColor,
   assertExists,
   disableButtonsAfterClick,
-} from './test-utils';
+} from '../../__tests__/test-utils-dom';
 
 async function testBasic() {
   const storage = new BlobStorage();

@@ -1,13 +1,12 @@
-import { uuidv4 as uuidv4WithoutType } from 'lib0/random';
+import { uuidv4 as uuidv4IdGenerator } from 'lib0/random';
 
 export type IdGenerator = () => string;
 
-export const createAutoIncrement = (): IdGenerator => {
+export function createAutoIncrementIdGenerator(): IdGenerator {
   let i = 0;
+  return () => (i++).toString();
+}
 
-  return function autoIncrement(): string {
-    return (i++).toString();
-  };
-};
-
-export const uuidv4: IdGenerator = () => uuidv4WithoutType();
+export function uuidv4() {
+  return uuidv4IdGenerator();
+}

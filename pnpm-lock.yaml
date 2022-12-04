@@ -103,6 +103,7 @@ importers:
       idb-keyval: ^6.2.0
       ky: ^0.32.2
       lib0: ^0.2.52
+      lit: ^2.3.1
       sha3: ^2.1.4
       y-indexeddb: ^9.0.9
       y-protocols: ^1.0.5
@@ -125,6 +126,7 @@ importers:
       '@types/flexsearch': 0.7.3
       '@types/quill': 2.0.9
       cross-env: 7.0.3
+      lit: 2.3.1
 
 packages:
 
@@ -686,7 +688,6 @@ packages:
 
   /@lit/reactive-element/1.4.1:
     resolution: {integrity: sha512-qDv4851VFSaBWzpS02cXHclo40jsbAjRXnebNXpm0uVg32kCneZPo9RYVQtrTNICtZ+1wAYHu1ZtxWSWMbKrBw==}
-    dev: false
 
   /@manypkg/find-root/1.1.0:
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -821,7 +822,6 @@ packages:
 
   /@types/trusted-types/2.0.2:
     resolution: {integrity: sha512-F5DIZ36YVLE+PN+Zwws4kJogq47hNgX3Nx6WyDJ3kcplxyke3XIzB8uK5n/Lpm1HBsbGzd6nmGehL8cPekP+Tg==}
-    dev: false
 
   /@types/turndown/5.0.1:
     resolution: {integrity: sha512-N8Ad4e3oJxh9n9BiZx9cbe/0M3kqDpOTm2wzj13wdDUxDPjfjloWIJaquZzWE1cYTAHpjOH3rcTnXQdpEfS/SQ==}
@@ -2669,13 +2669,11 @@ packages:
     dependencies:
       '@lit/reactive-element': 1.4.1
       lit-html: 2.3.1
-    dev: false
 
   /lit-html/2.3.1:
     resolution: {integrity: sha512-FyKH6LTW6aBdkfNhNSHyZTnLgJSTe5hMk7HFtc/+DcN1w74C215q8B+Cfxc2OuIEpBNcEKxgF64qL8as30FDHA==}
     dependencies:
       '@types/trusted-types': 2.0.2
-    dev: false
 
   /lit/2.3.1:
     resolution: {integrity: sha512-TejktDR4mqG3qB32Y8Lm5Lye3c8SUehqz7qRsxe1PqGYL6me2Ef+jeQAEqh20BnnGncv4Yxy2njEIT0kzK1WCw==}
@@ -2683,7 +2681,6 @@ packages:
       '@lit/reactive-element': 1.4.1
       lit-element: 3.2.2
       lit-html: 2.3.1
-    dev: false
 
   /load-json-file/4.0.0:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}

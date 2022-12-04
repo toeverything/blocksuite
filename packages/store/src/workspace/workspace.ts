@@ -1,15 +1,19 @@
 import * as Y from 'yjs';
-import { Store, StoreOptions } from './store';
-import { Space } from './space';
-import { Signal } from './utils/signal';
-import { Indexer, QueryContent } from './search';
-import { uuidv4 } from './utils/id-generator';
+import { Store, StoreOptions } from '../store';
+import { Space } from '../space';
+import { Signal } from '../utils/signal';
+import { Indexer, QueryContent } from '../search';
+import { uuidv4 } from '../utils/id-generator';
 import type { Awareness } from 'y-protocols/awareness';
-import type { BaseBlockModel } from './base'
+import type { BaseBlockModel } from '../base';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class Page<IBlockSchema extends Record<string, typeof BaseBlockModel> = any> extends Space<IBlockSchema> {
-  // ...
+export class Page<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  IBlockSchema extends Record<string, typeof BaseBlockModel> = any
+> extends Space<IBlockSchema> {
+  get pageId() {
+    return this.id.replace('space:', '');
+  }
 }
 
 export interface PageMeta {
@@ -24,7 +28,7 @@ class WorkspaceMeta extends Space {
 
   constructor(id: string, doc: Y.Doc, awareness: Awareness) {
     super(id, doc, awareness, uuidv4, false);
-    this._yPages.observe(this._handlePageEvent);
+    this._yPages.observeDeep(this._handlePageEvent);
   }
 
   private get _yMetaRoot() {
@@ -79,7 +83,7 @@ class WorkspaceMeta extends Space {
     }
   }
 
-  private _handlePageEvent = (_: Y.YEvent<Y.Array<unknown>>) => {
+  private _handlePageEvent = (_: Y.YEvent<Y.Array<unknown>>[]) => {
     this.pagesUpdated.emit();
   };
 }
@@ -121,7 +125,12 @@ export class Workspace {
     };
   }
 
-  createPage<IBlockSchema extends Record<string, typeof BaseBlockModel> = Record<string, typeof BaseBlockModel>>(pageId: string, title = '') {
+  createPage<
+    IBlockSchema extends Record<string, typeof BaseBlockModel> = Record<
+      string,
+      typeof BaseBlockModel
+    >
+  >(pageId: string, title = '') {
     const page = new Page<IBlockSchema>(
       'space:' + pageId,
       this.doc,

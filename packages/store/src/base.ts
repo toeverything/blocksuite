@@ -1,4 +1,4 @@
-import type { Page } from './workspace';
+import type { Page } from './workspace/workspace';
 import type { TextType } from './text-adapter';
 import { Signal } from './utils/signal';
 

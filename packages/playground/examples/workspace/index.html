@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Counter Example</title>
+    <title>Workspace Example</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="./main.tsx"></script>
+    <p>
+      <button id="test-basic">test workspace basics</button>
+    </p>
+    <script type="module">
+      import '@blocksuite/store/src/workspace/__tests__/test-entry';
+    </script>
   </body>
 </html>
