@@ -337,7 +337,11 @@ export function getSelectInfo(page: Page): SelectionInfo {
     type = nativeSelection.type;
     selectedModels = getModelsByRange(getCurrentRange());
   }
-
+  if (state.type === 'divider') {
+    type = 'Block';
+    const { selectedBlocks } = state;
+    selectedModels = selectedBlocks.map(block => getModelByElement(block));
+  }
   if (type !== 'None') {
     selectedBlocks = getSelectedBlock(selectedModels);
     if (type !== 'Block' && nativeSelection && selectedBlocks.length > 0) {

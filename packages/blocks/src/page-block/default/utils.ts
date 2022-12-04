@@ -3,6 +3,7 @@ import {
   assertExists,
   getBlockById,
   getBlockElementByModel,
+  matchFlavours,
 } from '../../__internal__/utils';
 
 export const getHoverBlockOptionByPosition = (
@@ -11,7 +12,7 @@ export const getHoverBlockOptionByPosition = (
   y: number
 ) => {
   for (let index = 0; index <= blocks.length - 1; index++) {
-    if (blocks[index].flavour === 'affine:embed') {
+    if (matchFlavours(blocks[index], ['affine:embed'])) {
       const hoverDom = getBlockById(blocks[index].id);
       const hoverImage = hoverDom?.querySelector('img');
       const imageRect = hoverImage?.getBoundingClientRect();

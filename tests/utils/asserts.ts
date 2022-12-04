@@ -70,6 +70,10 @@ export async function assertRichImage(page: Page, count: number) {
   const actual = await page.locator('.resizable-img').count();
   expect(actual).toEqual(count);
 }
+export async function assertDivider(page: Page, count: number) {
+  const actual = await page.locator('divider-block').count();
+  expect(actual).toEqual(count);
+}
 export async function assertRichDragButton(page: Page) {
   const actual = await page.locator('.resize').count();
   expect(actual).toEqual(4);

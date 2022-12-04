@@ -17,6 +17,7 @@ import {
   getModelByElement,
   getBlockElementByModel,
   getAllBlocks,
+  matchFlavours,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -45,7 +46,6 @@ function filterSelectedBlock(
     return intersects(rect, selectionRect);
   });
 }
-
 // TODO
 // function filterSelectedEmbed(
 //   embedCache: Map<EmbedBlockComponent, DOMRect>,
@@ -69,7 +69,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'divider';
 
 class PageSelectionState {
   type: PageSelectionType;
@@ -96,6 +96,7 @@ class PageSelectionState {
   get richTextCache() {
     return this._richTextCache;
   }
+
   get blockCache() {
     return this._blockCache;
   }
@@ -111,7 +112,6 @@ class PageSelectionState {
   refreshRichTextBoundsCache(container: HTMLElement) {
     const richTexts = Array.from(container.querySelectorAll('rich-text'));
     const allBlocks = getAllBlocks();
-
     allBlocks.forEach(block => {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
@@ -194,8 +194,8 @@ export class DefaultSelectionManager {
     assertExists(this.state.startPoint);
     const current = { x: e.raw.clientX, y: e.raw.clientY };
     const { startPoint: start } = this.state;
-
     const selectionRect = createSelectionRect(current, start);
+
     const { blockCache } = this.state;
 
     const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
@@ -204,6 +204,7 @@ export class DefaultSelectionManager {
     //   richTextCache,
     //   selectionRect
     // );
+
     // TODO
     // const selectedEmbed = filterSelectedEmbed(embedCache, selectionRect);
     // const selectedEmbedBounds = selectedEmbed.map(embed => {
@@ -216,8 +217,20 @@ export class DefaultSelectionManager {
       blockCache,
     };
   }
+  private _setDragOnlyOneDividerType() {
+    const { state } = this;
+    const { selectedBlocks } = state;
+    if (
+      selectedBlocks.length === 1 &&
+      matchFlavours(getModelByElement(selectedBlocks[0]), ['affine:divider'])
+    ) {
+      state.type = 'divider';
+      return;
+    }
+  }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
+    this._setDragOnlyOneDividerType();
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
@@ -365,6 +378,10 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+
+    const dividerBlockComponent = (e.raw.target as HTMLElement).closest(
+      'divider-block'
+    ) as HTMLElement;
     const clickBlockInfo = getHoverBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
@@ -384,10 +401,20 @@ export class DefaultSelectionManager {
       this.state.selectedBlocks.push(this._activeComponent);
       return;
     }
+    if (dividerBlockComponent) {
+      this.state.type = 'divider';
+      this._activeComponent = (e.raw.target as HTMLElement).closest(
+        'divider-block'
+      );
+      assertExists(this._activeComponent);
+      const dividerRect = this._activeComponent.getBoundingClientRect();
+      this.state.refreshRichTextBoundsCache(this._container);
+      assertExists(dividerRect);
+      this._signals.updateSelectedRects.emit([dividerRect]);
+      this.state.selectedBlocks.push(this._activeComponent);
+    }
     if (e.raw.target instanceof HTMLInputElement) return;
-    // TODO handle shift + click
     if (e.keys.shift) return;
-
     handleNativeRangeClick(this.page, e);
   };
 
@@ -424,7 +451,7 @@ export class DefaultSelectionManager {
     this._mouseDisposeCallback();
   }
 
-  selectBlockByRect(selectionRect: DOMRect) {
+  selectBlockByRect(selectionRect: DOMRect, model?: BaseBlockModel) {
     this.state.type = 'block';
     this.state.refreshRichTextBoundsCache(this._container);
     const { blockCache } = this.state;

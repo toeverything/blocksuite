@@ -6,6 +6,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { ListBlockModel } from '../../list-block/list-model';
 import type { ParagraphBlockModel } from '../../paragraph-block/paragraph-model';
 import type { GroupBlockModel } from '../../group-block/group-model';
+import type { DividerBlockModel } from '../../divider-block/divider-model';
 import type { EmbedBlockModel } from '../../embed-block';
 
 // TODO support dynamic block types
@@ -31,6 +32,13 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost) {
           .model=${model as GroupBlockModel}
           .host=${host}
         ></group-block>
+      `;
+    case 'affine:divider':
+      return html`
+        <divider-block
+          .model=${model as DividerBlockModel}
+          .host=${host}
+        ></divider-block>
       `;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);

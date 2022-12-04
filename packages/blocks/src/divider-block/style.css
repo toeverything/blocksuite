@@ -1,0 +1,11 @@
+.affine-divider-block-container {
+  width: 100%;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: var(--affine-paragraph-space);
+}
+hr {
+  width: 100%;
+}

@@ -23,6 +23,14 @@ import {
   getSplicedTitle,
   noop,
   getModelByElement,
+  matchFlavours,
+  focusPreviousBlock,
+  getDefaultPageBlock,
+  getBlockElementByModel,
+  getContainerByModel,
+  getPreviousBlock,
+  getNextBlock,
+  focusNextBlock,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -43,7 +51,6 @@ import {
   DownloadIcon,
 } from '../../image-block/icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
-
 export interface EmbedOption {
   position: { x: number; y: number };
   model: BaseBlockModel;
@@ -199,6 +206,66 @@ function EmbedOptionContainer(
     return html``;
   }
 }
+
+function handleUp(selection: DefaultSelectionManager) {
+  const { state } = selection;
+  if (state.selectedBlocks.length === 1) {
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    if (!matchFlavours(selectedModel, ['affine:divider'])) {
+      return;
+    }
+    const container = getContainerByModel(selectedModel);
+    const preNodeModel = getPreviousBlock(container, selectedModel.id);
+    if (!preNodeModel || preNodeModel.id == '1') {
+      return;
+    } else if (
+      matchFlavours(preNodeModel, ['affine:list']) ||
+      matchFlavours(preNodeModel, ['affine:paragraph'])
+    ) {
+      focusPreviousBlock(selectedModel, 'end');
+      state.clear();
+      return;
+    } else if (matchFlavours(preNodeModel, ['affine:divider'])) {
+      const selectionManager = getDefaultPageBlock(selectedModel).selection;
+      const dividerBlockElement = getBlockElementByModel(
+        preNodeModel
+      ) as HTMLElement;
+      const selectionRect = dividerBlockElement.getBoundingClientRect();
+      selectionManager.selectBlockByRect(selectionRect, preNodeModel);
+      state.type = 'divider';
+      return;
+    }
+  }
+}
+function handleDown(selection: DefaultSelectionManager) {
+  const { state } = selection;
+  if (state.selectedBlocks.length === 1) {
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    if (!matchFlavours(selectedModel, ['affine:divider'])) {
+      return;
+    }
+    const nextBlock = getNextBlock(selectedModel.id);
+    if (!nextBlock) {
+      return;
+    } else if (
+      matchFlavours(nextBlock, ['affine:list']) ||
+      matchFlavours(nextBlock, ['affine:paragraph'])
+    ) {
+      focusNextBlock(selectedModel, 'start');
+      state.clear();
+      return;
+    } else if (matchFlavours(nextBlock, ['affine:divider'])) {
+      const selectionManager = getDefaultPageBlock(selectedModel).selection;
+      const dividerBlockElement = getBlockElementByModel(
+        nextBlock
+      ) as HTMLElement;
+      const selectionRect = dividerBlockElement.getBoundingClientRect();
+      selectionManager.selectBlockByRect(selectionRect, nextBlock);
+      state.type = 'divider';
+      return;
+    }
+  }
+}
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -273,9 +340,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       NUMBERED_LIST,
       BULLETED,
       TEXT,
+      UP,
+      DOWN,
+      LEFT,
+      RIGHT,
     } = HOTKEYS;
 
     bindCommonHotkey(page);
+    const { state } = this.selection;
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
       if (state.type === 'native') {
@@ -283,6 +355,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         return;
       } else if (state.type === 'block') {
         const { selectedBlocks } = state;
+        if (
+          selectedBlocks.length === 1 &&
+          matchFlavours(getModelByElement(selectedBlocks[0]), [
+            'affine:divider',
+          ])
+        ) {
+          state.type = 'divider';
+          return;
+        }
         handleBlockSelectionBatchDelete(
           page,
           selectedBlocks.map(block => getModelByElement(block))
@@ -293,6 +374,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         this.signals.updateEmbedRects.emit([]);
         this.signals.updateEmbedOption.emit(null);
         return;
+      } else if (state.type === 'divider') {
+        const { selectedBlocks } = state;
+        handleBlockSelectionBatchDelete(
+          page,
+          selectedBlocks.map(block => getModelByElement(block))
+        );
+
+        state.clear();
+        this.signals.updateSelectedRects.emit([]);
+        this.signals.updateEmbedRects.emit([]);
+        this.signals.updateEmbedOption.emit(null);
       }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
@@ -314,6 +406,68 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       e.preventDefault();
       handleSelectAll();
       this.selection.state.type = 'native';
+    });
+
+    hotkey.addListener(UP, e => {
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleUp(this.selection);
+
+          break;
+        default:
+          break;
+      }
+    });
+    hotkey.addListener(DOWN, e => {
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleDown(this.selection);
+          break;
+        default:
+          break;
+      }
+    });
+    hotkey.addListener(LEFT, e => {
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleUp(this.selection);
+          break;
+        default:
+          break;
+      }
+    });
+    hotkey.addListener(RIGHT, e => {
+      switch (state.type) {
+        case 'none':
+          break;
+        case 'block':
+          state.type = 'divider';
+          break;
+        case 'divider':
+          this.signals.updateSelectedRects.emit([]);
+          handleDown(this.selection);
+          break;
+        default:
+          break;
+      }
     });
 
     hotkey.addListener(H1, () =>

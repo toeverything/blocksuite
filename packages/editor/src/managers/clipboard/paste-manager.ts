@@ -2,7 +2,11 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
-import { SelectionUtils, SelectionInfo } from '@blocksuite/blocks';
+import {
+  SelectionUtils,
+  SelectionInfo,
+  matchFlavours,
+} from '@blocksuite/blocks';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -160,8 +164,8 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'affine:page') {
-          if (selectedBlock.children[0]?.flavour === 'affine:group') {
+        if (matchFlavours(selectedBlock, ['affine:page'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
@@ -170,13 +174,18 @@ export class PasteManager {
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'affine:group') {
+        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
       const addBlockIds: string[] = [];
-      if (selectedBlock?.flavour !== 'affine:page') {
+      if (selectedBlock && !matchFlavours(selectedBlock, ['affine:page'])) {
+        if (blocks.length === 1 && blocks[0].flavour === 'affine:divider') {
+          parent && this._addBlocks(blocks, parent, index, addBlockIds);
+          parent && this._editor.page.deleteBlockById(lastBlock.id);
+          return;
+        }
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
@@ -186,7 +195,6 @@ export class PasteManager {
           0
         );
         selectedBlock?.text?.insertList(insertTexts, endIndex);
-
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
 
@@ -199,7 +207,7 @@ export class PasteManager {
           );
           lastId = addBlockIds[addBlockIds.length - 1];
           const lastBlock = this._editor.page.getBlockById(lastId);
-          if(lastBlock?.flavour !== 'affine:embed'){
+          if(lastBlock?.flavour !== 'affine:embed' && lastBlock?.flavour !== 'affine:divider'){
             selectedBlock?.text?.delete(
               endIndex + insertLen,
               selectedBlock?.text?.length
@@ -228,8 +236,8 @@ export class PasteManager {
       let parent = selectedBlock;
       let index = 0;
       if (selectedBlock) {
-        if (selectedBlock.flavour === 'affine:page') {
-          if (selectedBlock.children[0]?.flavour === 'affine:group') {
+        if (matchFlavours(selectedBlock, ['affine:page'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
@@ -238,7 +246,7 @@ export class PasteManager {
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (selectedBlock.flavour !== 'affine:group') {
+        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
@@ -266,7 +274,7 @@ export class PasteManager {
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);
-      if (model?.type !== 'affine:embed') {
+      if (model && !matchFlavours(model, ['affine:embed', 'affine:divider'])) {
         block.text && model?.text?.applyDelta(block.text);
       }
       addBlockIds.push(id);

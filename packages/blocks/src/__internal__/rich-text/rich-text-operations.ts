@@ -18,6 +18,11 @@ import {
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
+  convertToDivider,
+  getDefaultPageBlock,
+  getBlockElementByModel,
+  resetNativeSelection,
+  matchFlavours,
 } from '../utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -28,7 +33,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     page.captureSync();
 
     let id = '';
-    if (model.flavour === 'affine:list') {
+    if (matchFlavours(model, ['affine:list'])) {
       const blockProps = {
         flavour: model.flavour,
         type: model.type,
@@ -75,7 +80,7 @@ export function handleBlockSplit(
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (model.flavour === 'affine:list' && model.children.length > 0) {
+  if (matchFlavours(model, ['affine:list']) && model.children.length > 0) {
     newParent = model;
     newBlockIndex = 0;
   }
@@ -116,7 +121,7 @@ export async function handleUnindent(
   offset: number
 ) {
   const parent = page.getParent(model);
-  if (!parent || parent?.flavour === 'affine:group') return;
+  if (!parent || matchFlavours(parent, ['affine:group'])) return;
 
   const grandParent = page.getParent(parent);
   if (!grandParent) return;
@@ -146,16 +151,31 @@ export async function handleUnindent(
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
-  if (model.flavour === 'affine:paragraph') {
+  if (matchFlavours(model, ['affine:paragraph'])) {
     if (model.type !== 'text') {
       page.captureSync();
       page.updateBlock(model, { type: 'text' });
     } else {
       const parent = page.getParent(model);
-      if (!parent || parent?.flavour === 'affine:group') {
+      if (!parent || matchFlavours(parent, ['affine:group'])) {
         const container = getContainerByModel(model);
         const previousSibling = getPreviousBlock(container, model.id);
-        if (previousSibling && previousSibling.flavour === 'affine:paragraph') {
+        if (
+          previousSibling &&
+          matchFlavours(previousSibling, ['affine:divider'])
+        ) {
+          const selectionManager = getDefaultPageBlock(model).selection;
+          const dividerBlockElement = getBlockElementByModel(
+            previousSibling
+          ) as HTMLElement;
+          const selectionRect = dividerBlockElement.getBoundingClientRect();
+          selectionManager.selectBlockByRect(selectionRect, model);
+          resetNativeSelection(null);
+        }
+        if (
+          previousSibling &&
+          matchFlavours(previousSibling, ['affine:paragraph'])
+        ) {
           page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
           previousSibling.text?.join(model.text as Text);
@@ -182,7 +202,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   }
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
-  else if (model.flavour === 'affine:list') {
+  else if (matchFlavours(model, ['affine:list'])) {
     const parent = page.getParent(model);
     if (!parent) return;
 
@@ -203,12 +223,24 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
   const selection = window.getSelection();
+  const container = getContainerByModel(model);
+  const preNodeModel = getPreviousBlock(container, model.id);
   if (selection) {
     const range = selection.getRangeAt(0);
     const { height, left, top } = range.getBoundingClientRect();
     // if cursor is on the first line and has no text, height is 0
     if (height === 0 && top === 0) {
       const rect = range.startContainer.parentElement?.getBoundingClientRect();
+      if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          preNodeModel
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        return PREVENT_DEFAULT;
+      }
       rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
     }
@@ -218,15 +250,25 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      const container = getContainerByModel(model);
-      const preNodeModel = getPreviousBlock(container, model.id);
       // FIXME: Then it will turn the input into the div
-      if (preNodeModel?.flavour === 'affine:group') {
+      if (preNodeModel && matchFlavours(preNodeModel, ['affine:group'])) {
         (
           document.querySelector(
             '.affine-default-page-block-title'
           ) as HTMLInputElement
         ).focus();
+      } else if (
+        preNodeModel &&
+        matchFlavours(preNodeModel, ['affine:divider'])
+      ) {
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          preNodeModel
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        return PREVENT_DEFAULT;
       } else {
         focusPreviousBlock(model, new Point(left, top));
       }
@@ -273,6 +315,16 @@ export function handleKeyDown(
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
+      if (matchFlavours(nextBlock, ['affine:divider'])) {
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          nextBlock
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        return PREVENT_DEFAULT;
+      }
       rect && focusNextBlock(model, new Point(rect.left, rect.top));
       return PREVENT_DEFAULT;
     }
@@ -282,6 +334,16 @@ export function handleKeyDown(
       const nextBlock = getNextBlock(model.id);
       if (!nextBlock) {
         return ALLOW_DEFAULT;
+      }
+      if (matchFlavours(nextBlock, ['affine:divider'])) {
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          nextBlock
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        return PREVENT_DEFAULT;
       }
       focusNextBlock(model, new Point(left, bottom));
       return PREVENT_DEFAULT;
@@ -333,6 +395,12 @@ export function tryMatchSpaceHotkey(
     case '-':
     case '*':
       isConverted = convertToList(page, model, 'bulleted', prefix);
+      break;
+    case '***':
+      isConverted = convertToDivider(page, model, prefix);
+      break;
+    case '---':
+      isConverted = convertToDivider(page, model, prefix);
       break;
     case '#':
       isConverted = convertToParagraph(page, model, 'h1', prefix);

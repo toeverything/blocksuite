@@ -14,6 +14,7 @@ import { PageBlockModel } from '../../../blocks/src/page-block/page-model';
 import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragraph-model';
 import { ListBlockModel } from '../../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../../blocks/src/group-block/group-model';
+import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model';
 
 const getStoreOptions = () => ({
   room: '',
@@ -26,6 +27,7 @@ export const BlockSchema = {
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
   'affine:group': GroupBlockModel,
+  'affine:divider': DividerBlockModel,
 } as const;
 
 function serialize(page: Page) {

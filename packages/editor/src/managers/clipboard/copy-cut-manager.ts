@@ -1,7 +1,7 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 import { ClipItem } from './clip-item';
 import type { EditorContainer } from '../../components';
-import { ListBlockModel } from '@blocksuite/blocks';
+import { ListBlockModel, matchFlavours } from '@blocksuite/blocks';
 import { SelectionUtils } from '@blocksuite/blocks';
 
 export class CopyCutManager {
@@ -108,7 +108,7 @@ export class CopyCutManager {
 
     let { flavour, type } = model;
     let delta = [];
-    if (model.flavour === 'affine:page') {
+    if (matchFlavours(model, ['affine:page'])) {
       flavour = 'affine:paragraph';
       type = 'text';
       const text = model.block2Text(

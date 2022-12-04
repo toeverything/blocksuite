@@ -4,11 +4,18 @@ import {
   ALLOW_DEFAULT,
   focusNextBlock,
   focusPreviousBlock,
+  getBlockElementByModel,
+  getContainerByModel,
   getCurrentRange,
+  getDefaultPageBlock,
+  getNextBlock,
+  getPreviousBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
+  matchFlavours,
   noop,
   PREVENT_DEFAULT,
+  resetNativeSelection,
 } from '../utils';
 import {
   handleLineStartBackspace,
@@ -96,7 +103,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     const parent = page.getParent(model);
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList =
-      model.flavour === 'affine:list' && model.text?.length === 0;
+      matchFlavours(model, ['affine:list']) && model.text?.length === 0;
     const index = this.quill.getSelection()?.index || 0;
 
     // Some block should treat Enter as soft enter
@@ -113,7 +120,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
 
     if (
       isEmptyList &&
-      parent?.flavour === 'affine:group' &&
+      parent &&
+      matchFlavours(parent, ['affine:group']) &&
       model.children.length === 0
     ) {
       handleLineStartBackspace(page, model);
@@ -190,6 +198,18 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   function onKeyLeft(this: KeyboardEventThis, range: QuillRange) {
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
     if (range.index === 0 && range.length === 0) {
+      const container = getContainerByModel(model);
+      const preNodeModel = getPreviousBlock(container, model.id);
+      if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          preNodeModel
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        return PREVENT_DEFAULT;
+      }
       focusPreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
@@ -199,6 +219,20 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   function onKeyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + 1 === textLength) {
+      const nextBlock = getNextBlock(model.id);
+      if (!nextBlock) {
+        return ALLOW_DEFAULT;
+      }
+      if (matchFlavours(nextBlock, ['affine:divider'])) {
+        const selectionManager = getDefaultPageBlock(model).selection;
+        const dividerBlockElement = getBlockElementByModel(
+          nextBlock
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        selectionManager.selectBlockByRect(selectionRect, model);
+        resetNativeSelection(null);
+        return PREVENT_DEFAULT;
+      }
       focusNextBlock(model, 'start');
       return PREVENT_DEFAULT;
     }
@@ -259,13 +293,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     'list autofill': {
       key: ' ',
       shiftKey: false,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
       handler: onSpace,
     },
     'list autofill shift': {
       key: ' ',
       shiftKey: true,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|>)$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
       handler: onSpace,
     },
     backspace: {

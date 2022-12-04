@@ -84,6 +84,7 @@ export function syncBlockProps(
   if (props.flavour === 'affine:list' && !yBlock.has('prop:type')) {
     yBlock.set('prop:type', props.type ?? 'bulleted');
   }
+
   if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
     yBlock.set('prop:checked', props.checked ?? false);
   }
