@@ -2,6 +2,8 @@ import type { GroupBlockModel } from '../../group-block';
 import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
 
+export const DEFAULT_SPACING = 64;
+
 // XXX: edgeless group container padding
 export const PADDING_X = 48;
 export const PADDING_Y = 48;
