@@ -45,8 +45,10 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = any> {
+export class Space<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  IBlockSchema extends Record<string, typeof BaseBlockModel> = any
+> {
   readonly id: string;
   readonly doc: Y.Doc;
   readonly awareness!: AwarenessAdapter;
@@ -64,11 +66,17 @@ export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = 
   private _history: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _flavourMap = new Map<string, IBlockSchema[keyof IBlockSchema]>();
-  private _blockMap = new Map<string, InstanceType<IBlockSchema[keyof IBlockSchema]>>();
+  private _blockMap = new Map<
+    string,
+    InstanceType<IBlockSchema[keyof IBlockSchema]>
+  >();
   private _splitSet = new Set<Text | PrelimText>();
 
   // TODO use schema
-  private _ignoredKeys: Set<keyof InstanceType<IBlockSchema[keyof IBlockSchema]> & string> = new Set(
+  private _ignoredKeys: Set<
+    keyof InstanceType<IBlockSchema[keyof IBlockSchema]> & string
+  > = new Set(
+    // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.keys(new BaseBlockModel(this, {})) as any
   );
@@ -159,14 +167,16 @@ export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = 
     Object.keys(blockSchema).forEach(key => {
       this._flavourMap.set(key, blockSchema[key as keyof IBlockSchema]);
     });
-    return this
+    return this;
   }
 
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }
 
-  getBlockByFlavour(blockFlavour: InstanceType<IBlockSchema[keyof IBlockSchema]>['flavour']) {
+  getBlockByFlavour(
+    blockFlavour: InstanceType<IBlockSchema[keyof IBlockSchema]>['flavour']
+  ) {
     return [...this._blockMap.values()].filter(
       ({ flavour }) => blockFlavour === flavour
     );
@@ -208,7 +218,10 @@ export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = 
     return parent?.children[index + 1] ?? null;
   }
 
-  addBlock<T extends Omit<BlockProps, 'flavour'> & Pick<InstanceType<IBlockSchema[keyof IBlockSchema]>, 'flavour'>>(
+  addBlock<
+    T extends Omit<BlockProps, 'flavour'> &
+      Pick<InstanceType<IBlockSchema[keyof IBlockSchema]>, 'flavour'>
+  >(
     blockProps: Partial<T>,
     parent?: BaseBlockModel | string,
     parentIndex?: number
@@ -377,7 +390,11 @@ export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = 
     if (!BlockModelCtor) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
     }
-    const blockModel = new BlockModelCtor(this, props) as InstanceType<IBlockSchema[keyof IBlockSchema]>;
+
+    // @ts-ignore
+    const blockModel = new BlockModelCtor(this, props) as InstanceType<
+      IBlockSchema[keyof IBlockSchema]
+    >;
     return blockModel;
   }
 

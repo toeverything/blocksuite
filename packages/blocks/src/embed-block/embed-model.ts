@@ -1,4 +1,4 @@
-import { BaseBlockModel, IBaseBlockProps, Space } from '@blocksuite/store';
+import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
 
 type EmbedType = 'image' | 'video' | 'audio' | 'file';
 export interface EmbedBlockProps extends IBaseBlockProps {
@@ -17,8 +17,8 @@ export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
   public type: EmbedType;
   public source: string;
   public caption: string;
-  constructor(space: Space, props: Partial<EmbedBlockProps>) {
-    super(space, props);
+  constructor(page: Page, props: Partial<EmbedBlockProps>) {
+    super(page, props);
     this.type = props.type ?? 'image';
     this.caption = props.caption ?? 'image';
     this.source = props.source ?? '';
