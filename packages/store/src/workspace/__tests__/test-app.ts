@@ -39,10 +39,10 @@ export class TestApp extends LitElement {
 
   render() {
     return html`
-      <form>
+      <div>
         <input type="text" name="page" placeholder="add a page" />
         <button type="button" @click=${this._createPage}>add</button>
-      </form>
+      </div>
       <ul>
         ${this.pages.map(
           (todo, index) => html`
