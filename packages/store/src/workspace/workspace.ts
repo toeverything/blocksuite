@@ -3,7 +3,7 @@ import { Store, StoreOptions } from '../store';
 import { Space } from '../space';
 import { Page } from './page';
 import { Signal } from '../utils/signal';
-import { Indexer, QueryContent } from '../search';
+import { Indexer, QueryContent } from './search';
 import type { BaseBlockModel } from '../base';
 import type { Awareness } from 'y-protocols/awareness';
 
@@ -130,7 +130,7 @@ export class Workspace {
     );
     this._store.addSpace(page);
     this.meta.addPage({ id: pageId, title, favorite: false, trash: false });
-    this._indexer.onCreateSpace(page.id);
+    this._indexer.onCreatePage(page.id);
     return page;
   }
 

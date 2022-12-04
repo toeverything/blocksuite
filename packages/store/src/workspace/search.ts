@@ -1,6 +1,6 @@
 import { Document as DocumentIndexer, DocumentSearchOptions } from 'flexsearch';
 import { Doc, Map as YMap, Text as YText } from 'yjs';
-import type { YBlock } from './space';
+import type { YBlock } from './page';
 
 export type QueryContent = string | Partial<DocumentSearchOptions<boolean>>;
 
@@ -47,25 +47,25 @@ export class Indexer {
     });
 
     Array.from(doc.share.keys())
-      .map(k => [k, this._getSpace(k)] as const)
-      .forEach(([spaceId, space]) => this._handleSpaceIndexing(spaceId, space));
+      .map(k => [k, this._getPage(k)] as const)
+      .forEach(([pageId, page]) => this._handlePageIndexing(pageId, page));
   }
 
-  onCreateSpace(spaceId: string) {
-    this._handleSpaceIndexing(spaceId, this._getSpace(spaceId));
+  onCreatePage(pageId: string) {
+    this._handlePageIndexing(pageId, this._getPage(pageId));
   }
 
   search(query: QueryContent) {
     return this._indexer.search(query as string);
   }
 
-  private _handleSpaceIndexing(spaceId: string, space?: YMap<YBlock>) {
-    if (space) {
-      space.forEach((_, key) => {
-        this._refreshIndex(spaceId, key, 'add', space.get(key));
+  private _handlePageIndexing(pageId: string, page?: YMap<YBlock>) {
+    if (page) {
+      page.forEach((_, key) => {
+        this._refreshIndex(pageId, key, 'add', page.get(key));
       });
 
-      space.observeDeep(events => {
+      page.observeDeep(events => {
         const keys = events.flatMap(e => {
           // eslint-disable-next-line no-bitwise
           if ((e.path?.length | 0) > 0) {
@@ -78,7 +78,7 @@ export class Indexer {
 
         if (keys.length) {
           keys.forEach(([key, action]) => {
-            this._refreshIndex(spaceId, key, action, space.get(key));
+            this._refreshIndex(pageId, key, action, page.get(key));
           });
         }
       });
@@ -86,7 +86,7 @@ export class Indexer {
   }
 
   private _refreshIndex(
-    space: string,
+    page: string,
     id: string,
     action: 'add' | 'update' | 'delete',
     block?: YBlock
@@ -102,7 +102,7 @@ export class Indexer {
             this._indexer.add(id, {
               content,
               reference: '',
-              tags: [space],
+              tags: [page],
             });
           }
         }
@@ -127,9 +127,9 @@ export class Indexer {
     return undefined;
   }
 
-  private _getSpace(key: string): YMap<YBlock> | undefined {
+  private _getPage(key: string): YMap<YBlock> | undefined {
     try {
-      // we only indexing blocks in spaces
+      // only indexing blocks in spaces
       if (key.startsWith('space:')) {
         return this._doc.getMap(key);
       }

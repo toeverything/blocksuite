@@ -1,5 +1,5 @@
 import { AbstractType, Doc, Map, Text, Array } from 'yjs';
-import type { PrefixedBlockProps } from '../space';
+import type { PrefixedBlockProps } from '../workspace/page';
 
 type DocRecord = {
   [id: string]: PrefixedBlockProps & {

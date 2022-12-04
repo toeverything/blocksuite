@@ -3,15 +3,8 @@ import type Quill from 'quill';
 import type { Awareness } from 'y-protocols/awareness';
 import { uuidv4 } from 'lib0/random';
 import { BaseBlockModel } from '../base';
-import {
-  BlockProps,
-  PrefixedBlockProps,
-  Space,
-  StackItem,
-  YBlock,
-  YBlocks,
-} from '../space';
-import { Text, PrelimText, RichTextAdapter } from '../text-adapter';
+import { Space, StackItem } from '../space';
+import { Text, PrelimText, RichTextAdapter, TextType } from '../text-adapter';
 import type { IdGenerator } from '../utils/id-generator';
 import { Signal } from '../utils/signal';
 import {
@@ -22,6 +15,23 @@ import {
   toBlockProps,
   matchFlavours,
 } from '../utils/utils';
+
+export type YBlock = Y.Map<unknown>;
+export type YBlocks = Y.Map<YBlock>;
+
+/** JSON-serializable properties of a block */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BlockProps = Record<string, any> & {
+  id: string;
+  flavour: string;
+  text?: void | TextType;
+  children?: BaseBlockModel[];
+};
+
+export type PrefixedBlockProps = Record<string, unknown> & {
+  'sys:id': string;
+  'sys:flavour': string;
+};
 
 const IS_WEB = typeof window !== 'undefined';
 
