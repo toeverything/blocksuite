@@ -45,7 +45,8 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-export class Space {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class Space<IBlockSchema extends Record<string, typeof BaseBlockModel> = any> {
   readonly id: string;
   readonly doc: Y.Doc;
   readonly awareness!: AwarenessAdapter;
@@ -62,13 +63,14 @@ export class Space {
   private _idGenerator: IdGenerator;
   private _history: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
-  private _flavourMap = new Map<string, typeof BaseBlockModel>();
-  private _blockMap = new Map<string, BaseBlockModel>();
+  private _flavourMap = new Map<string, IBlockSchema[keyof IBlockSchema]>();
+  private _blockMap = new Map<string, InstanceType<IBlockSchema[keyof IBlockSchema]>>();
   private _splitSet = new Set<Text | PrelimText>();
 
   // TODO use schema
-  private _ignoredKeys = new Set<string>(
-    Object.keys(new BaseBlockModel(this, {}))
+  private _ignoredKeys: Set<keyof InstanceType<IBlockSchema[keyof IBlockSchema]> & string> = new Set(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Object.keys(new BaseBlockModel(this, {})) as any
   );
 
   constructor(
@@ -153,18 +155,18 @@ export class Space {
     this.doc.transact(fn, this.doc.clientID);
   }
 
-  register(blockSchema: Record<string, typeof BaseBlockModel>) {
+  register(blockSchema: IBlockSchema) {
     Object.keys(blockSchema).forEach(key => {
-      this._flavourMap.set(key, blockSchema[key]);
+      this._flavourMap.set(key, blockSchema[key as keyof IBlockSchema]);
     });
-    return this;
+    return this
   }
 
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }
 
-  getBlockByFlavour(blockFlavour: string) {
+  getBlockByFlavour(blockFlavour: InstanceType<IBlockSchema[keyof IBlockSchema]>['flavour']) {
     return [...this._blockMap.values()].filter(
       ({ flavour }) => blockFlavour === flavour
     );
@@ -206,7 +208,7 @@ export class Space {
     return parent?.children[index + 1] ?? null;
   }
 
-  addBlock<T extends BlockProps>(
+  addBlock<T extends Omit<BlockProps, 'flavour'> & Pick<InstanceType<IBlockSchema[keyof IBlockSchema]>, 'flavour'>>(
     blockProps: Partial<T>,
     parent?: BaseBlockModel | string,
     parentIndex?: number
@@ -215,7 +217,7 @@ export class Space {
       throw new Error('Block props must contain flavour');
     }
 
-    const clonedProps = { ...blockProps };
+    const clonedProps: Partial<BlockProps> = { ...blockProps };
     const id = this._idGenerator();
     clonedProps.id = id;
 
@@ -375,7 +377,7 @@ export class Space {
     if (!BlockModelCtor) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
     }
-    const blockModel = new BlockModelCtor(this, props);
+    const blockModel = new BlockModelCtor(this, props) as InstanceType<IBlockSchema[keyof IBlockSchema]>;
     return blockModel;
   }
 

@@ -5,8 +5,10 @@ import { Signal } from './utils/signal';
 import { Indexer, QueryContent } from './search';
 import { uuidv4 } from './utils/id-generator';
 import type { Awareness } from 'y-protocols/awareness';
+import type { BaseBlockModel } from './base'
 
-export class Page extends Space {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class Page<IBlockSchema extends Record<string, typeof BaseBlockModel> = any> extends Space<IBlockSchema> {
   // ...
 }
 
@@ -119,8 +121,8 @@ export class Workspace {
     };
   }
 
-  createPage(pageId: string, title = '') {
-    const page = new Page(
+  createPage<IBlockSchema extends Record<string, typeof BaseBlockModel> = Record<string, typeof BaseBlockModel>>(pageId: string, title = '') {
+    const page = new Page<IBlockSchema>(
       'space:' + pageId,
       this.doc,
       this._store.awareness,
