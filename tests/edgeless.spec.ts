@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import type { GroupBlockModel } from '../packages/blocks/src/group-block/group-model'
+import type { GroupBlockModel } from '../packages/blocks/src/group-block/group-model';
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -72,20 +72,31 @@ test('resize the block', async ({ page }) => {
   await switchMode(page);
   await page.click('[test-id="1"]');
   const oldXywh = await page.evaluate(id => {
-    const block = window.workspace.pages.get('space:page0')?.getBlockById(id.groupId) as GroupBlockModel;
+    const block = window.workspace.pages
+      .get('space:page0')
+      ?.getBlockById(id.groupId) as GroupBlockModel;
     return block.xywh;
-  }, id)
+  }, id);
   const lefthandle = await page.locator('[aria-label="handle-left"]');
   const box = await lefthandle.boundingBox();
   expect(box).not.toBeNull();
   if (box === null) {
     throw new Error();
   }
-  await dragBetweenCoords(page, { x: box.x + 5, y: box.y + 5 }, { x: box.x + 105, y: box.y + 5 });
-  const xywh = await page.evaluate(([id, oldXywh]) => {
-    const block = window.workspace.pages.get('space:page0')?.getBlockById(id.groupId) as GroupBlockModel;
-    return block.xywh;
-  }, [id, oldXywh] as const)
+  await dragBetweenCoords(
+    page,
+    { x: box.x + 5, y: box.y + 5 },
+    { x: box.x + 105, y: box.y + 5 }
+  );
+  const xywh = await page.evaluate(
+    ([id, oldXywh]) => {
+      const block = window.workspace.pages
+        .get('space:page0')
+        ?.getBlockById(id.groupId) as GroupBlockModel;
+      return block.xywh;
+    },
+    [id, oldXywh] as const
+  );
   const [oldX, oldY, oldW, oldH] = JSON.parse(oldXywh);
   const [x, y, w, h] = JSON.parse(xywh);
   expect(x).toBe(oldX + 100);
@@ -94,9 +105,14 @@ test('resize the block', async ({ page }) => {
   expect(h).toBe(oldH);
   await switchMode(page);
   await switchMode(page);
-  const newXywh = await page.evaluate(([id, oldXywh]) => {
-    const block = window.workspace.pages.get('space:page0')?.getBlockById(id.groupId) as GroupBlockModel;
-    return block.xywh;
-  }, [id, oldXywh] as const)
+  const newXywh = await page.evaluate(
+    ([id]) => {
+      const block = window.workspace.pages
+        .get('space:page0')
+        ?.getBlockById(id.groupId) as GroupBlockModel;
+      return block.xywh;
+    },
+    [id, oldXywh] as const
+  );
   expect(newXywh).toBe(xywh);
 });

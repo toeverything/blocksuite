@@ -26,7 +26,7 @@ import {
   isRangeSelection,
   resetNativeSelection,
 } from '../../__internal__/utils/selection';
-import { DEFAULT_SPACING } from '../edgeless/utils'
+import { DEFAULT_SPACING } from '../edgeless/utils';
 
 function deleteModels(page: Page, models: BaseBlockModel[]) {
   const selection = window.getSelection();
@@ -384,7 +384,7 @@ export function tryUpdateGroupSize(page: Page, zoom: number) {
       ];
       const newModelHeight = bound.height / zoom;
       if (!almostEqual(newModelHeight, h)) {
-        const newX = x + (offset === 0 ? 0 : (offset + DEFAULT_SPACING))
+        const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {
           xywh: JSON.stringify([newX, y, w, newModelHeight]),
         });

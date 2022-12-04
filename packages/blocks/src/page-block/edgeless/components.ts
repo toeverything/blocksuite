@@ -12,7 +12,12 @@ import type {
 } from './selection-manager';
 import { BlockElement, BlockHost, getBlockById } from '../../__internal__';
 import '../../__internal__';
-import { PADDING_X, PADDING_Y, GROUP_MIN_LENGTH, getSelectionBoxBound } from './utils'
+import {
+  PADDING_X,
+  PADDING_Y,
+  GROUP_MIN_LENGTH,
+  getSelectionBoxBound,
+} from './utils';
 
 function getCommonRectStyle(rect: DOMRect, zoom: number) {
   return {
@@ -65,7 +70,11 @@ function Handle(
   };
 
   return html`
-    <div aria-label=${`handle-${handleType}`} style=${styleMap(style)} @mousedown=${handlerMouseDown}></div>
+    <div
+      aria-label=${`handle-${handleType}`}
+      style=${styleMap(style)}
+      @mousedown=${handlerMouseDown}
+    ></div>
   `;
 }
 
@@ -116,7 +125,11 @@ function EdgelessBlockChild(
   };
 
   return html`
-    <div test-id=${model.id} class="affine-edgeless-block-child" style=${styleMap(style)}>
+    <div
+      test-id=${model.id}
+      class="affine-edgeless-block-child"
+      style=${styleMap(style)}
+    >
       ${BlockElement(model, host)}
     </div>
   `;
@@ -243,11 +256,8 @@ export class EdgelessSelectedRect extends LitElement {
     let newX = 0;
     let newW = 0;
     if (this.state.type === 'single') {
-      const {
-        selected,
-        viewport
-      } = this.state;
-      const { xywh } = selected
+      const { selected, viewport } = this.state;
+      const { xywh } = selected;
       const [x, y, w] = JSON.parse(xywh) as XYWH;
       const minus = this._dragStartInfo.startMouseLeft - e.clientX;
       if (this._dragStartInfo.direction === 'left') {
@@ -283,16 +293,16 @@ export class EdgelessSelectedRect extends LitElement {
         if (this.state.type !== 'none') {
           this.state.rect = getSelectionBoxBound(viewport, selected.xywh);
         } else {
-          console.error('unexpected state.type:', this.state.type)
+          console.error('unexpected state.type:', this.state.type);
         }
         const newXywh = JSON.stringify([
           newX,
           y,
           newW,
           (groupBlock?.getBoundingClientRect().height || 0) / this.zoom,
-        ])
-        selected.xywh = newXywh
-        selected.page.updateBlock(selected, { xywh: newXywh })
+        ]);
+        selected.xywh = newXywh;
+        selected.page.updateBlock(selected, { xywh: newXywh });
       });
     }
   };

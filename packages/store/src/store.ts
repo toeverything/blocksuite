@@ -48,7 +48,6 @@ export class Store {
   }
 
   removeSpace(space: Space) {
-    space.dispose();
     this.spaces.delete(space.id);
   }
 

@@ -1,20 +1,11 @@
 import * as Y from 'yjs';
 import { Store, StoreOptions } from '../store';
 import { Space } from '../space';
+import { Page } from './page';
 import { Signal } from '../utils/signal';
 import { Indexer, QueryContent } from '../search';
-import { uuidv4 } from '../utils/id-generator';
-import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base';
-
-export class Page<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  IBlockSchema extends Record<string, typeof BaseBlockModel> = any
-> extends Space<IBlockSchema> {
-  get pageId() {
-    return this.id.replace('space:', '');
-  }
-}
+import type { Awareness } from 'y-protocols/awareness';
 
 export interface PageMeta {
   id: string;
@@ -27,12 +18,12 @@ class WorkspaceMeta extends Space {
   pagesUpdated = new Signal();
 
   constructor(id: string, doc: Y.Doc, awareness: Awareness) {
-    super(id, doc, awareness, uuidv4, false);
+    super(id, doc, awareness);
     this._yPages.observeDeep(this._handlePageEvent);
   }
 
   private get _yMetaRoot() {
-    return this._yBlocks as Y.Map<unknown>;
+    return this.doc.getMap(this.id);
   }
 
   private get _yPages() {
@@ -148,6 +139,7 @@ export class Workspace {
   }
 
   removePage(page: Page) {
+    page.dispose();
     this._store.removeSpace(page);
     this.meta.removePage(page.id);
   }
