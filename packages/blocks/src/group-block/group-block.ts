@@ -7,7 +7,7 @@ import {
   BLOCK_ID_ATTR,
   type BlockHost,
 } from '../__internal__';
-import style from './style.css';
+import style from './style.css?raw';
 
 @customElement('group-block')
 export class GroupBlockComponent extends LitElement {

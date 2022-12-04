@@ -20,7 +20,8 @@
   "devDependencies": {
     "@types/marked": "^4.0.7",
     "@types/quill": "^2.0.9",
-    "@types/turndown": "^5.0.1"
+    "@types/turndown": "^5.0.1",
+    "typescript": "^4.9.3"
   },
   "exports": {
     "./src/*": "./src/*.ts",

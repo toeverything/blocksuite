@@ -6,7 +6,7 @@ import {
   type BlockHost,
   BlockChildrenContainer,
 } from '../__internal__';
-import style from './style.css';
+import style from './style.css?raw';
 
 @customElement('img-block')
 export class ImageBlockComponent extends LitElement {

@@ -43,7 +43,7 @@ import {
   tryUpdateGroupSize,
   updateTextType,
 } from '../utils';
-import style from './style.css';
+import style from './style.css?raw';
 import {
   CaptionIcon,
   CopyIcon,

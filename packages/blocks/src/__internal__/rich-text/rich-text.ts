@@ -6,7 +6,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { BlockHost } from '../utils';
 import { createKeyboardBindings } from './keyboard';
 
-import style from './styles.css';
+import style from './styles.css?raw';
 
 Quill.register('modules/cursors', QuillCursors);
 const Clipboard = Quill.import('modules/clipboard');

@@ -28,7 +28,7 @@ import {
   tryUpdateGroupSize,
   updateTextType,
 } from '../utils';
-import style from './style.css';
+import style from './style.css?raw';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;

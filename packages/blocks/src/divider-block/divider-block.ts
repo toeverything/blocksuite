@@ -6,7 +6,7 @@ import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
 import type { DividerBlockModel } from './divider-model';
 
 import { BlockChildrenContainer } from '../__internal__';
-import style from './style.css';
+import style from './style.css?raw';
 
 @customElement('divider-block')
 export class DividerBlockComponent extends LitElement {

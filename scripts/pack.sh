@@ -1,14 +1,15 @@
+#!/usr/bin/env sh
 pnpm build
 
-cd packages/store
+cd packages/store || exit 1
 pnpm pack
 cd ../../
 
-cd packages/blocks
+cd packages/blocks || exit 1
 pnpm pack
 cd ../../
 
-cd packages/editor
+cd packages/editor || exit 1
 pnpm pack
 cd ../../
 

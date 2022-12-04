@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/store';
 import type { DocProviderConstructor, StoreOptions } from '@blocksuite/store';
 
-import './style.css';
+import './style.css?raw';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? '';
@@ -85,7 +85,9 @@ window.onload = () => {
 
   // In dev environment, init editor by default, but in test environment, init editor by the test page
   if (!isTest) {
-    const page = workspace.createPage<typeof BlockSchema>('page0').register(BlockSchema);
+    const page = workspace
+      .createPage<typeof BlockSchema>('page0')
+      .register(BlockSchema);
     const editor = createEditor(page);
     const debugMenu = createDebugMenu(workspace, editor);
 
