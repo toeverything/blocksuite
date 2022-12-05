@@ -31,11 +31,15 @@ import {
   getPreviousBlock,
   getNextBlock,
   focusNextBlock,
+  getCurrentRange,
+  isMultiBlockRange,
+  getModelsByRange,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
   batchUpdateTextType,
   bindCommonHotkey,
+  deleteModels,
   handleBackspace,
   handleBlockSelectionBatchDelete,
   handleSelectAll,
@@ -62,6 +66,7 @@ export interface DefaultPageSignals {
     { left: number; top: number; width: number; height: number }[]
   >;
   updateEmbedOption: Signal<EmbedOption | null>;
+  nativeSelection: Signal<boolean>;
 }
 
 // https://stackoverflow.com/a/2345915
@@ -308,6 +313,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       { left: number; top: number; width: number; height: number }[]
     >(),
     updateEmbedOption: new Signal<EmbedOption | null>(),
+    nativeSelection: new Signal<boolean>()
   };
 
   private _scrollDisposable!: Disposable;
@@ -613,6 +619,30 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.isCompositionStart = false;
   };
 
+  // Fixes: https://github.com/toeverything/blocksuite/issues/200
+  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
+  //  that have pop-up for selecting local characters.
+  // So we could just hook on the keydown event and detect whether user input a new character.
+  private _handleNativeKeydown = (e: KeyboardEvent) => {
+    // Only the length of character buttons is 1
+    if ((
+        e.key.length === 1 ||
+         e.key === 'Enter'
+      ) &&
+      window.getSelection()?.type === 'Range'
+    ) {
+      const range = getCurrentRange();
+      if (isMultiBlockRange(range)) {
+        const intersectedModels = getModelsByRange(range);
+        deleteModels(this.page, intersectedModels);
+      }
+      window.removeEventListener('keydown', this._handleNativeKeydown);
+    } else if (window.getSelection()?.type !== 'Range') {
+      // remove, user don't have native selection
+      window.removeEventListener('keydown', this._handleNativeKeydown);
+    }
+  }
+
   firstUpdated() {
     this._bindHotkeys();
     hotkey.enableHotkey();
@@ -639,6 +669,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.embedOption = embedOption;
       this.requestUpdate();
     });
+
+    this.signals.nativeSelection.on(bind => {
+      if (bind) {
+        window.addEventListener('keydown', this._handleNativeKeydown)
+      } else {
+        window.removeEventListener('keydown', this._handleNativeKeydown)
+      }
+    })
+
     tryUpdateGroupSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
