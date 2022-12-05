@@ -348,6 +348,35 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
     bindCommonHotkey(page);
     const { state } = this.selection;
+
+    this.addEventListener('keypress', event => {
+      const { state } = this.selection;
+      if (state.type !== 'divider') {
+        return;
+      }
+
+      state.type = 'none';
+      const model = getModelByElement(state.selectedBlocks[0]);
+      console.log(model);
+
+      const parent = page.getParent(model);
+      if (!parent) return;
+
+      const index = parent.children.indexOf(model);
+      page.captureSync();
+
+      const blockProps = {
+        flavour: 'affine:paragraph',
+        type: 'text',
+        children: model.children,
+      };
+      page.deleteBlock(model);
+      const id = page.addBlock(blockProps, parent, index);
+      asyncFocusRichText(page, id);
+
+      return;
+    });
+
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
       if (state.type === 'native') {
