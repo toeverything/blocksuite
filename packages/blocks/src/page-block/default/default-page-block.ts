@@ -524,6 +524,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       HOTKEYS.BULLETED,
       HOTKEYS.NUMBERED_LIST,
       HOTKEYS.TEXT,
+      HOTKEYS.UP,
+      HOTKEYS.DOWN,
+      HOTKEYS.LEFT,
+      HOTKEYS.RIGHT,
     ]);
   }
 
