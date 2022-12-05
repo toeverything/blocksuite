@@ -354,17 +354,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       if (state.type !== 'divider') {
         return;
       }
-
-      state.type = 'none';
+      event.preventDefault();
       const model = getModelByElement(state.selectedBlocks[0]);
-      console.log(model);
-
       const parent = page.getParent(model);
       if (!parent) return;
 
       const index = parent.children.indexOf(model);
       page.captureSync();
-
       const blockProps = {
         flavour: 'affine:paragraph',
         type: 'text',
@@ -373,6 +369,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       page.deleteBlock(model);
       const id = page.addBlock(blockProps, parent, index);
       asyncFocusRichText(page, id);
+
+      state.clear();
+      this.signals.updateSelectedRects.emit([]);
 
       return;
     });
