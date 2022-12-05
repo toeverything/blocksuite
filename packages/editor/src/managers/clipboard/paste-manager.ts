@@ -197,8 +197,13 @@ export class PasteManager {
         selectedBlock?.text?.insertList(insertTexts, endIndex);
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
-
-        parent && this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
+        if (blocks[0].flavour === 'affine:divider') {
+          parent &&
+            this._addBlocks(blocks.slice(0), parent, index, addBlockIds);
+        } else {
+          parent &&
+            this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
+        }
         let lastId = selectedBlock?.id;
         let position = endIndex + insertLen;
         if (addBlockIds.length > 0) {
