@@ -1,6 +1,8 @@
 import {
   assertExists,
   caretRangeFromPoint,
+  getCurrentRange,
+  isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__';
@@ -42,32 +44,6 @@ function isSelectionEvent(
   return 'raw' in e;
 }
 
-/**
- * Determine if the selection contains only one line
- */
-function isOnlyOneLineSelected(selection: Selection) {
-  // Before the user has clicked a freshly loaded page, the rangeCount is 0.
-  if (selection.rangeCount === 0) {
-    return true;
-  }
-  // The rangeCount will usually be 1.
-  // Scripting can be used to make the selection contain more than one range.
-  if (selection.rangeCount > 1) {
-    return false;
-  }
-  const range = selection.getRangeAt(0);
-  // Get the selection height
-  const { height } = range.getBoundingClientRect();
-
-  const oneLineRange = document.createRange();
-  const { anchorNode, anchorOffset } = selection;
-  assertExists(anchorNode);
-  oneLineRange.setStart(anchorNode, anchorOffset);
-  // Get the base line height
-  const { height: oneLineHeight } = oneLineRange.getBoundingClientRect();
-  return height <= oneLineHeight;
-}
-
 export function getDragDirection(
   e: SelectionEvent | FrameSelectionState,
   selection: Selection
@@ -78,7 +54,8 @@ export function getDragDirection(
   const endY = isSelectionEvent(e) ? e.y : e.end.y;
   // selection direction
   const isForwards = endX > startX;
-  const selectedOneLine = isOnlyOneLineSelected(selection);
+  const range = getCurrentRange();
+  const selectedOneLine = !isMultiLineRange(range);
 
   if (isForwards) {
     if (selectedOneLine || endY >= startY) {

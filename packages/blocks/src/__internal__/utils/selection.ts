@@ -283,8 +283,36 @@ export function isRangeSelection() {
   return !selection.isCollapsed;
 }
 
+/**
+ * Determine if the range contains multiple block.
+ *
+ * Please check the difference between {@link isMultiLineRange} before use this function
+ */
 export function isMultiBlockRange(range: Range) {
   return range.commonAncestorContainer.nodeType !== Node.TEXT_NODE;
+}
+
+/**
+ * Determine if the range contains multiple lines.
+ *
+ * Note that this function is very similar to {@link isMultiBlockRange},
+ * but they are slightly different.
+ *
+ * Consider the following scenarios:
+ * One block contains multiple lines,
+ * if you select multiple lines of text under this block,
+ * this function will return true,
+ * but {@link isMultiBlockRange} will return false.
+ */
+export function isMultiLineRange(range: Range) {
+  // Get the selection height
+  const { height } = range.getBoundingClientRect();
+
+  const oneLineRange = document.createRange();
+  oneLineRange.setStart(range.startContainer, range.startOffset);
+  // Get the base line height
+  const { height: oneLineHeight } = oneLineRange.getBoundingClientRect();
+  return height > oneLineHeight;
 }
 
 function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {
