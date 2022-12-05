@@ -31,7 +31,7 @@ export type DragDirection =
   | 'left-bottom'
   | 'left-top'
   // no select direction, for example select all by `ctrl + a`
-  | 'none';
+  | 'directionless';
 
 // text can be applied both text and paragraph formatting actions, while others can only be applied paragraph actions
 export type SelectedBlockType = 'Text' | 'Caret' | 'Other';
@@ -39,32 +39,70 @@ export type SelectedBlockType = 'Text' | 'Caret' | 'Other';
 function isSelectionEvent(
   e: SelectionEvent | FrameSelectionState
 ): e is SelectionEvent {
-  return (e as SelectionEvent).raw !== undefined;
+  return 'raw' in e;
+}
+
+/**
+ * Determine if the selection contains only one line
+ */
+function isOnlyOneLineSelected(selection: Selection) {
+  // Before the user has clicked a freshly loaded page, the rangeCount is 0.
+  if (selection.rangeCount === 0) {
+    return true;
+  }
+  // The rangeCount will usually be 1.
+  // Scripting can be used to make the selection contain more than one range.
+  if (selection.rangeCount > 1) {
+    return false;
+  }
+  const range = selection.getRangeAt(0);
+  // Get the selection height
+  const { height } = range.getBoundingClientRect();
+
+  const oneLineRange = document.createRange();
+  const { anchorNode, anchorOffset } = selection;
+  assertExists(anchorNode);
+  oneLineRange.setStart(anchorNode, anchorOffset);
+  // Get the base line height
+  const { height: oneLineHeight } = oneLineRange.getBoundingClientRect();
+  return height <= oneLineHeight;
 }
 
 export function getDragDirection(
-  e: SelectionEvent | FrameSelectionState
+  e: SelectionEvent | FrameSelectionState,
+  selection: Selection
 ): DragDirection {
   const startX = e.start.x;
   const startY = e.start.y;
   const endX = isSelectionEvent(e) ? e.x : e.end.x;
   const endY = isSelectionEvent(e) ? e.y : e.end.y;
-  return endX > startX
-    ? endY > startY
-      ? 'right-bottom'
-      : 'right-top'
-    : endY > startY
-    ? 'left-bottom'
-    : 'left-top';
+  // selection direction
+  const isForwards = endX > startX;
+  const selectedOneLine = isOnlyOneLineSelected(selection);
+
+  if (isForwards) {
+    if (selectedOneLine || endY >= startY) {
+      return 'right-bottom';
+    } else {
+      return 'right-top';
+    }
+  } else {
+    // backwards
+    if (selectedOneLine || endY <= startY) {
+      return 'left-top';
+    } else {
+      return 'left-bottom';
+    }
+  }
 }
 
 export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
-  const direction: DragDirection = getDragDirection(e);
   const selection = window.getSelection();
   assertExists(selection);
+  const direction = getDragDirection(e, selection);
   const selectedType: SelectedBlockType =
     selection.type === 'Caret' ? 'Caret' : 'Text';
-  const { anchorNode, focusNode, focusOffset, anchorOffset } = selection;
+  const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
   const [targetNode, offset] = ['left-top', 'right-top'].includes(direction)
     ? [anchorNode, anchorOffset]
     : [focusNode, focusOffset];
