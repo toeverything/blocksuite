@@ -17,7 +17,7 @@ import {
   getModelByElement,
   getBlockElementByModel,
   getAllBlocks,
-  matchFlavours, getCurrentRange,
+  matchFlavours,
 } from '../../__internal__'
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
