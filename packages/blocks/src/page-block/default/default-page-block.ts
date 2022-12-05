@@ -34,7 +34,7 @@ import {
   getCurrentRange,
   isMultiBlockRange,
   getModelsByRange,
-} from '../../__internal__'
+} from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
   batchUpdateTextType,
