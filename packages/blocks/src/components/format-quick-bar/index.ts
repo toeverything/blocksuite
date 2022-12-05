@@ -269,6 +269,10 @@ export const showFormatQuickBar = async ({
     } else if (direction.includes('top')) {
       const offset = bodyRect.bottom - rect.bottom + rect.height;
       formatQuickBar.bottom = `${offset + offsetY}px`;
+    } else {
+      throw new Error(
+        `Failed to update position! Invalid direction: ${direction}!`
+      );
     }
   };
   scrollContainer?.addEventListener('scroll', updatePos, { passive: true });

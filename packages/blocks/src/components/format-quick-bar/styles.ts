@@ -10,6 +10,7 @@ const paragraphPanelStyle = css`
   }
 
   .paragraph-panel {
+    font-size: var(--affine-font-sm);
     box-sizing: border-box;
     position: absolute;
     width: 173px;
