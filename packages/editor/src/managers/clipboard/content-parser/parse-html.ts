@@ -122,6 +122,14 @@ export class ParserHtml {
               node
             );
           break;
+        case 'HR':
+          result = this._contentParser.getParserHtmlText2Block(
+            'commonParser'
+          )?.({
+            element: node,
+            flavour: 'affine:divider',
+          });
+          break;
         default:
           break;
       }
