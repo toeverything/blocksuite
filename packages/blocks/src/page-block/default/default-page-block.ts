@@ -625,7 +625,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   // So we could just hook on the keydown event and detect whether user input a new character.
   private _handleNativeKeydown = (e: KeyboardEvent) => {
     // Only the length of character buttons is 1
-    // Fixme 'Enter' key special case, cause wrong result
     if ((
         e.key.length === 1 ||
          e.key === 'Enter'
