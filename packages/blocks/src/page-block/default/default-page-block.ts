@@ -30,19 +30,23 @@ import {
   getContainerByModel,
   getPreviousBlock,
   getNextBlock,
-  focusNextBlock, getCurrentRange, isMultiBlockRange, getModelsByRange,
+  focusNextBlock,
+  getCurrentRange,
+  isMultiBlockRange,
+  getModelsByRange,
 } from '../../__internal__'
 import { DefaultSelectionManager } from './selection-manager';
 import {
   batchUpdateTextType,
-  bindCommonHotkey, deleteModels,
+  bindCommonHotkey,
+  deleteModels,
   handleBackspace,
   handleBlockSelectionBatchDelete,
   handleSelectAll,
   removeCommonHotKey,
   tryUpdateGroupSize,
   updateTextType,
-} from '../utils'
+} from '../utils';
 import style from './style.css';
 import {
   CaptionIcon,
@@ -633,10 +637,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         const intersectedModels = getModelsByRange(range);
         deleteModels(this.page, intersectedModels);
       }
-      window.removeEventListener('keydown', this._handleNativeKeydown)
+      window.removeEventListener('keydown', this._handleNativeKeydown);
     } else if (window.getSelection()?.type !== 'Range') {
       // remove, user don't have native selection
-      window.removeEventListener('keydown', this._handleNativeKeydown)
+      window.removeEventListener('keydown', this._handleNativeKeydown);
     }
   }
 

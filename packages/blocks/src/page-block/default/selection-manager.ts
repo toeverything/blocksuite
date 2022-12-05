@@ -18,7 +18,7 @@ import {
   getBlockElementByModel,
   getAllBlocks,
   matchFlavours,
-} from '../../__internal__'
+} from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
   getNativeSelectionMouseDragInfo,
