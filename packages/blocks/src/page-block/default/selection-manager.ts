@@ -17,8 +17,8 @@ import {
   getModelByElement,
   getBlockElementByModel,
   getAllBlocks,
-  matchFlavours,
-} from '../../__internal__';
+  matchFlavours, getCurrentRange,
+} from '../../__internal__'
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
   getNativeSelectionMouseDragInfo,
@@ -236,6 +236,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
+    this._signals.nativeSelection.emit(false)
     this.state.type = 'native';
   }
 
@@ -244,6 +245,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
+    this._signals.nativeSelection.emit(true)
     noop();
   }
 

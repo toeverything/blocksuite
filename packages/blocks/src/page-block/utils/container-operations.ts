@@ -28,7 +28,7 @@ import {
 } from '../../__internal__/utils/selection';
 import { DEFAULT_SPACING } from '../edgeless/utils';
 
-function deleteModels(page: Page, models: BaseBlockModel[]) {
+export function deleteModels(page: Page, models: BaseBlockModel[]) {
   const selection = window.getSelection();
   const first = models[0];
   const last = models[models.length - 1];

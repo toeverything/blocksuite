@@ -99,6 +99,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function hardEnter(this: KeyboardEventThis) {
+    console.log(1)
     const isEnd = isAtBlockEnd(this.quill);
     const parent = page.getParent(model);
     const isLastChild = parent?.lastChild() === model;
