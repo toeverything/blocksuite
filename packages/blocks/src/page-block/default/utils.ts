@@ -6,26 +6,30 @@ import {
   matchFlavours,
 } from '../../__internal__/utils';
 
-export const getHoverBlockOptionByPosition = (
+export const getBlockOptionByPosition = (
   blocks: BaseBlockModel[],
   x: number,
   y: number
 ) => {
   for (let index = 0; index <= blocks.length - 1; index++) {
-    if (matchFlavours(blocks[index], ['affine:embed'])) {
-      const hoverDom = getBlockById(blocks[index].id);
+    // if (matchFlavours(blocks[index], ['affine:embed','affine'])) {
+    const hoverDom = getBlockById(blocks[index].id);
+
+    let blockRect;
+    if (blocks[index].type === 'image') {
       const hoverImage = hoverDom?.querySelector('img');
-      const imageRect = hoverImage?.getBoundingClientRect();
-      assertExists(imageRect);
-      if (isPointIn(imageRect, x, y)) {
-        return {
-          position: {
-            x: imageRect.right + 10,
-            y: imageRect.top,
-          },
-          model: blocks[index],
-        };
-      }
+      blockRect = hoverImage?.getBoundingClientRect();
+    } else {
+      blockRect = hoverDom?.getBoundingClientRect();
+    }
+
+    assertExists(blockRect);
+    if (isPointIn(blockRect, x, y)) {
+      return {
+        position: blockRect,
+        model: blocks[index],
+      };
+      // }
     }
   }
   return null;

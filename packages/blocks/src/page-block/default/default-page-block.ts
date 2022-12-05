@@ -44,12 +44,7 @@ import {
   updateTextType,
 } from '../utils';
 import style from './style.css';
-import {
-  CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
-  DownloadIcon,
-} from '../../image-block/icons';
+import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
 export interface EmbedOption {
   position: { x: number; y: number };
@@ -230,9 +225,9 @@ function handleUp(selection: DefaultSelectionManager) {
       const dividerBlockElement = getBlockElementByModel(
         preNodeModel
       ) as HTMLElement;
-      const selectionRect = dividerBlockElement.getBoundingClientRect();
-      selectionManager.selectBlockByRect(selectionRect, preNodeModel);
-      state.type = 'divider';
+      // const selectionRect = dividerBlockElement.getBoundingClientRect();
+      // selectionManager.selectBlockByRect(selectionRect, preNodeModel);
+      // state.type = 'divider';
       return;
     }
   }
@@ -259,9 +254,9 @@ function handleDown(selection: DefaultSelectionManager) {
       const dividerBlockElement = getBlockElementByModel(
         nextBlock
       ) as HTMLElement;
-      const selectionRect = dividerBlockElement.getBoundingClientRect();
-      selectionManager.selectBlockByRect(selectionRect, nextBlock);
-      state.type = 'divider';
+      // const selectionRect = dividerBlockElement.getBoundingClientRect();
+      // selectionManager.selectBlockByRect(selectionRect, nextBlock);
+      // state.type = 'divider';
       return;
     }
   }
@@ -350,20 +345,23 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const { state } = this.selection;
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
+      console.log('state: ', state);
+
       if (state.type === 'native') {
         handleBackspace(page, e);
         return;
       } else if (state.type === 'block') {
         const { selectedBlocks } = state;
-        if (
-          selectedBlocks.length === 1 &&
-          matchFlavours(getModelByElement(selectedBlocks[0]), [
-            'affine:divider',
-          ])
-        ) {
-          state.type = 'divider';
-          return;
-        }
+        console.log('selectedBlocks: ', selectedBlocks);
+        // if (
+        //   selectedBlocks.length === 1 &&
+        //   matchFlavours(getModelByElement(selectedBlocks[0]), [
+        //     'affine:divider',
+        //   ])
+        // ) {
+        //   state.type = 'divider';
+        //   return;
+        // }
         handleBlockSelectionBatchDelete(
           page,
           selectedBlocks.map(block => getModelByElement(block))
@@ -374,18 +372,19 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         this.signals.updateEmbedRects.emit([]);
         this.signals.updateEmbedOption.emit(null);
         return;
-      } else if (state.type === 'divider') {
-        const { selectedBlocks } = state;
-        handleBlockSelectionBatchDelete(
-          page,
-          selectedBlocks.map(block => getModelByElement(block))
-        );
-
-        state.clear();
-        this.signals.updateSelectedRects.emit([]);
-        this.signals.updateEmbedRects.emit([]);
-        this.signals.updateEmbedOption.emit(null);
       }
+      // else if (state.type === 'divider') {
+      //   const { selectedBlocks } = state;
+      //   handleBlockSelectionBatchDelete(
+      //     page,
+      //     selectedBlocks.map(block => getModelByElement(block))
+      //   );
+
+      //   state.clear();
+      //   this.signals.updateSelectedRects.emit([]);
+      //   this.signals.updateEmbedRects.emit([]);
+      //   this.signals.updateEmbedOption.emit(null);
+      // }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
         // range delete
@@ -413,7 +412,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         case 'none':
           break;
         case 'block':
-          state.type = 'divider';
+          // state.type = 'divider';
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
@@ -429,7 +428,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         case 'none':
           break;
         case 'block':
-          state.type = 'divider';
+          // state.type = 'divider';
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
@@ -444,7 +443,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         case 'none':
           break;
         case 'block':
-          state.type = 'divider';
+          // state.type = 'divider';
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
@@ -459,7 +458,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         case 'none':
           break;
         case 'block':
-          state.type = 'divider';
+          // state.type = 'divider';
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);

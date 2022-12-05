@@ -2,6 +2,7 @@ import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
 
 export interface DividerBlockProps extends IBaseBlockProps {
   flavour: 'affine:divider';
+  type: 'divider';
 }
 
 export class DividerBlockModel
@@ -9,7 +10,7 @@ export class DividerBlockModel
   implements DividerBlockProps
 {
   flavour = 'affine:divider' as const;
-
+  type = 'divider' as const;
   constructor(page: Page, props: Partial<DividerBlockProps>) {
     super(page, props);
   }
