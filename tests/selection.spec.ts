@@ -74,13 +74,13 @@ test('native range delete', async ({ page }) => {
   const topLeft123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top - 2 };
+    return { x: bbox.left + 1, y: bbox.top + 1 };
   });
 
   const bottomRight789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right, y: bbox.bottom };
+    return { x: bbox.right - 1, y: bbox.bottom - 1 };
   });
 
   // from top to bottom
@@ -96,6 +96,31 @@ test('native range delete', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['\n']);
+});
+
+test('native range input', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const topLeft123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left + 1, y: bbox.top + 1 };
+  });
+
+  const bottomRight789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right - 1, y: bbox.bottom - 1 };
+  });
+
+  // from top to bottom
+  await dragBetweenCoords(page, topLeft123, bottomRight789);
+  await page.keyboard.press('a');
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertRichTexts(page, ['a']);
 });
 
 test('native range selection backwards', async ({ page }) => {
