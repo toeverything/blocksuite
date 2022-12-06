@@ -207,6 +207,9 @@ export class DebugMenu extends LitElement {
     this.page.addBlock({ flavour: 'affine:paragraph' }, groupId);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private _onStartShape() {}
+
   private _onExportHtml() {
     this.contentParser.onExportHtml();
   }

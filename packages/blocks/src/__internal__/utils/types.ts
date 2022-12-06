@@ -41,6 +41,7 @@ export interface BlockSelectionInfo {
 declare global {
   interface WindowEventMap {
     'affine.switch-mode': CustomEvent<'page' | 'edgeless'>;
+    'affine.shape': CustomEvent<'todo'>;
   }
 }
 
