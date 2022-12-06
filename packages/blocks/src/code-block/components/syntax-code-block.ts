@@ -18,14 +18,14 @@ class SyntaxCodeBlock extends CodeBlock {
     super.replaceWith(block);
   }
 
-  update(highlight: (text: string) => string) {
-    this.highlight(highlight);
+  refresh(highlight: (text: string) => string, forceRefresh) {
+    this.highlight(highlight, forceRefresh);
     this.updateLineNumber();
   }
 
-  highlight(highlight: (text: string) => string) {
+  highlight(highlight: (text: string) => string, forceRefresh) {
     const text = this.domNode.textContent;
-    if (this.cachedText !== text) {
+    if (this.cachedText !== text || forceRefresh) {
       if (text.trim().length > 0 || this.cachedText == null) {
         this.domNode.innerHTML = highlight(text);
         this.domNode.normalize();
@@ -62,6 +62,7 @@ class Syntax extends Module {
 
   setLang(lang: string) {
     this.lang = lang;
+    this.highlight(true);
   }
 
   constructor(quill: Quill, options: Record<string, unknown>) {
@@ -81,15 +82,15 @@ class Syntax extends Module {
     this.highlight();
   }
 
-  highlight() {
+  highlight(forceRefresh = false) {
     if (this.quill.selection.composing) return;
     this.quill.update(Quill.sources.USER);
     const range = this.quill.getSelection();
     // Notice: In BlockSuite, one quill instance has only one SyntaxCodeBlock instance.
     this.quill.scroll.descendants(SyntaxCodeBlock).forEach((code: SyntaxCodeBlock) => {
-      code.update((text: string) => {
+      code.refresh((text: string) => {
         return this.options.highlight(text, {language: this.lang}).value;
-      });
+      }, forceRefresh);
     });
     this.quill.update(Quill.sources.SILENT);
     if (range != null) {

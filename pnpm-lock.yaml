@@ -49,12 +49,14 @@ importers:
   packages/blocks:
     specifiers:
       '@blocksuite/store': workspace:*
+      highlight.js: ^11.7.0
       hotkeys-js: ^3.10.0
       lit: ^2.3.1
       quill: ^1.3.7
       quill-cursors: ^4.0.0
     dependencies:
       '@blocksuite/store': link:../store
+      highlight.js: 11.7.0
       hotkeys-js: 3.10.0
       lit: 2.3.1
       quill: 1.3.7
@@ -2350,6 +2352,11 @@ packages:
     dependencies:
       function-bind: 1.1.1
 
+  /highlight.js/11.7.0:
+    resolution: {integrity: sha512-1rRqesRFhMO/PRF+G86evnyJkCgaZFOI+Z6kdj15TA18funfoqJXvgPCLSf0SWq3SRfg1j3HlDs8o4s3EGq1oQ==}
+    engines: {node: '>=12.0.0'}
+    dev: false
+
   /hosted-git-info/2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
     dev: true
@@ -4497,3 +4504,4 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+

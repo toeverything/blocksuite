@@ -1,0 +1,7 @@
+.affine-code-block-container {
+    border-radius: 5px;
+}
+
+.affine-code-block-container.selected {
+    background-color: var(--affine-selected-color);
+}

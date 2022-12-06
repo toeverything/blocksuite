@@ -7,6 +7,7 @@ import type { BlockHost } from '../utils';
 import { createKeyboardBindings } from './keyboard';
 
 import style from './styles.css';
+import Syntax from '../../code-block/components/syntax-code-block';
 
 Quill.register('modules/cursors', QuillCursors);
 const Clipboard = Quill.import('modules/clipboard');
@@ -21,6 +22,12 @@ const Strike = Quill.import('formats/strike');
 // Quill uses <s> by default，but <s> is not supported by HTML5
 Strike.tagName = 'del';
 Quill.register(Strike, true);
+
+const CodeToken = Quill.import('modules/syntax');
+CodeToken.register();
+Syntax.register();
+Quill.register('modules/syntax', Syntax, true);
+
 @customElement('rich-text')
 export class RichText extends LitElement {
   static styles = css`
@@ -41,6 +48,9 @@ export class RichText extends LitElement {
   @property()
   placeholder?: string;
 
+  @property()
+  modules: Record<string, unknown> = {};
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -52,17 +62,20 @@ export class RichText extends LitElement {
     const keyboardBindings = createKeyboardBindings(page, model);
 
     this.quill = new Quill(_textContainer, {
-      modules: {
-        cursors: true,
-        toolbar: false,
-        history: {
-          maxStack: 0,
-          userOnly: true,
+      modules: Object.assign(
+        {
+          cursors: true,
+          toolbar: false,
+          history: {
+            maxStack: 0,
+            userOnly: true,
+          },
+          keyboard: {
+            bindings: keyboardBindings,
+          },
         },
-        keyboard: {
-          bindings: keyboardBindings,
-        },
-      },
+        this.modules
+      ),
       placeholder,
     });
 
@@ -134,6 +147,7 @@ export class RichText extends LitElement {
   render() {
     return html`
       <div class="affine-rich-text quill-container ql-container"></div>
+      <div id="line-number"></div>
     `;
   }
 }
