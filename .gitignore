@@ -11,3 +11,6 @@ node_modules
 # Build out
 dist/
 build
+
+# Cache
+.eslintcache
