@@ -180,6 +180,9 @@ export function EdgelessBlockChildrenContainer(
   `;
 }
 
+@customElement('edgeless-draw-layer')
+export class EdgelessDrawLayer extends LitElement {}
+
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
   @property({ type: Boolean })
@@ -332,5 +335,6 @@ export class EdgelessSelectedRect extends LitElement {
 declare global {
   interface HTMLElementTagNameMap {
     'edgeless-selected-rect': EdgelessSelectedRect;
+    'edgeless-draw-layer': EdgelessDrawLayer;
   }
 }
