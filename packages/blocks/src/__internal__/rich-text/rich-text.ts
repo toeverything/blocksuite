@@ -83,6 +83,10 @@ export class RichText extends LitElement {
     page.awareness.updateLocalCursor();
     this.model.propsUpdated.on(() => this.requestUpdate());
 
+    if (this.modules.syntax) {
+      this.quill.formatText(0, this.quill.getLength(), 'code-block', true);
+      this.quill.format('code-block', true);
+    }
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
@@ -146,8 +150,8 @@ export class RichText extends LitElement {
 
   render() {
     return html`
-      <div class="affine-rich-text quill-container ql-container"></div>
       <div id="line-number"></div>
+      <div class="affine-rich-text quill-container ql-container"></div>
     `;
   }
 }

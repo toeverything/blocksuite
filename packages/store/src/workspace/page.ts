@@ -396,7 +396,11 @@ export class Page<
 
     if (
       // TODO use schema
-      matchFlavours(model, ['affine:paragraph', 'affine:list']) &&
+      matchFlavours(model, [
+        'affine:paragraph',
+        'affine:list',
+        'affine:code',
+      ]) &&
       !yBlock.get('prop:text')
     ) {
       this.transact(() => yBlock.set('prop:text', new Y.Text()));

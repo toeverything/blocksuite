@@ -37,7 +37,6 @@ export class CodeBlockComponent extends LitElement {
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
     return html`
       <div class="affine-code-block-container">
         <rich-text
@@ -46,6 +45,7 @@ export class CodeBlockComponent extends LitElement {
           .modules=${{
             syntax: {
               highlight: highlight.highlight,
+              codeBlockElement: this,
             },
           }}
         ></rich-text>

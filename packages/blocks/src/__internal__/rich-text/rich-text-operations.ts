@@ -60,7 +60,12 @@ export function handleSoftEnter(
   index: number
 ) {
   page.captureSync();
-  model.text?.insert('\n', index);
+  const shouldFormatCode = matchFlavours(model, ['affine:code']);
+  model.text?.insert(
+    '\n',
+    index,
+    shouldFormatCode ? { 'code-block': true } : {}
+  );
 }
 
 export function handleBlockSplit(

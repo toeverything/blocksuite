@@ -1,16 +1,14 @@
 // @ts-nocheck
 import Quill from 'quill';
+import { assertExists } from '../../__internal__';
 
 const Module = Quill.import('core/module');
 const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
 
 class SyntaxCodeBlock extends CodeBlock {
-  private container: HTMLElement;
-
   constructor(domNode) {
     super(domNode);
-    this.container = document.querySelector('#line-number');
   }
 
   replaceWith(block: unknown) {
@@ -18,12 +16,16 @@ class SyntaxCodeBlock extends CodeBlock {
     super.replaceWith(block);
   }
 
-  refresh(highlight: (text: string) => string, forceRefresh) {
+  refresh(
+    highlight: (text: string) => string,
+    forceRefresh: boolean,
+    codeBlockElement: HTMLElement
+  ) {
     this.highlight(highlight, forceRefresh);
-    this.updateLineNumber();
+    this.updateLineNumber(codeBlockElement);
   }
 
-  highlight(highlight: (text: string) => string, forceRefresh) {
+  highlight(highlight: (text: string) => string, forceRefresh: boolean) {
     const text = this.domNode.textContent;
     if (this.cachedText !== text || forceRefresh) {
       if (text.trim().length > 0 || this.cachedText == null) {
@@ -35,9 +37,11 @@ class SyntaxCodeBlock extends CodeBlock {
     }
   }
 
-  updateLineNumber() {
-    while (this.container.firstChild) {
-      this.container.removeChild(this.container.firstChild);
+  updateLineNumber(codeBlockElement: HTMLElement) {
+    const container = codeBlockElement.querySelector('#line-number');
+    assertExists(container);
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
     }
 
     const text = this.domNode.textContent;
@@ -45,15 +49,21 @@ class SyntaxCodeBlock extends CodeBlock {
     for (let i = 1; i <= lines; i++) {
       const node = document.createElement('div');
       node.innerHTML = i;
-      this.container.appendChild(node);
+      container.appendChild(node);
     }
   }
 }
 
+type SyntaxCodeBlockOptions = {
+  highlight: (text: string) => string;
+  codeBlockElement: HTMLElement;
+};
 SyntaxCodeBlock.className = 'ql-syntax';
 
 class Syntax extends Module {
   private lang = 'javascript';
+
+  private codeBlockElement: HTMLElement;
 
   static register() {
     Quill.register(CodeToken, true);
@@ -62,11 +72,13 @@ class Syntax extends Module {
 
   setLang(lang: string) {
     this.lang = lang;
-    this.highlight(true);
+    this.highlight(true, this.codeBlockElement);
   }
 
-  constructor(quill: Quill, options: Record<string, unknown>) {
+  constructor(quill: Quill, options: SyntaxCodeBlockOptions) {
     super(quill, options);
+    this.codeBlockElement = options.codeBlockElement;
+    console.log(options); // 传一下 container, 区分下不同 code-block 的行号
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
         'Syntax module requires highlight.js. Please include the library on the page before Quill.'
@@ -76,22 +88,28 @@ class Syntax extends Module {
     this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
       clearTimeout(timer);
       timer = window.setTimeout(() => {
-        this.highlight();
+        this.highlight(false, options.codeBlockElement);
       }, this.options.interval);
     });
-    this.highlight();
+    this.highlight(false, options.codeBlockElement);
   }
 
-  highlight(forceRefresh = false) {
+  highlight(forceRefresh: boolean, container: HTMLElement) {
     if (this.quill.selection.composing) return;
     this.quill.update(Quill.sources.USER);
     const range = this.quill.getSelection();
     // Notice: In BlockSuite, one quill instance has only one SyntaxCodeBlock instance.
-    this.quill.scroll.descendants(SyntaxCodeBlock).forEach((code: SyntaxCodeBlock) => {
-      code.refresh((text: string) => {
-        return this.options.highlight(text, {language: this.lang}).value;
-      }, forceRefresh);
-    });
+    this.quill.scroll
+      .descendants(SyntaxCodeBlock)
+      .forEach((code: SyntaxCodeBlock) => {
+        code.refresh(
+          (text: string) => {
+            return this.options.highlight(text, { language: this.lang }).value;
+          },
+          forceRefresh,
+          container
+        );
+      });
     this.quill.update(Quill.sources.SILENT);
     if (range != null) {
       this.quill.setSelection(range, Quill.sources.SILENT);

@@ -1,7 +1,26 @@
 .affine-code-block-container {
-    border-radius: 5px;
+  border-radius: 5px;
+  width: 720px;
 }
 
 .affine-code-block-container.selected {
-    background-color: var(--affine-selected-color);
+  background-color: var(--affine-selected-color);
+}
+
+rich-text {
+  position: relative;
+}
+
+#line-number {
+  position: absolute;
+  top: 18px;
+}
+
+.ql-container {
+  left: 25px;
+}
+
+.ql-syntax {
+  width: 690px;
+  overflow-x: scroll;
 }
