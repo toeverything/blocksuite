@@ -34,6 +34,7 @@ import {
   getCurrentRange,
   isMultiBlockRange,
   getModelsByRange,
+  getStartModelBySelection,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -55,10 +56,12 @@ import {
   DownloadIcon,
 } from '../../image-block/icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
+
 export interface EmbedOption {
   position: { x: number; y: number };
   model: BaseBlockModel;
 }
+
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
@@ -121,7 +124,7 @@ function EmbedSelectedRectsContainer(
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
-        return html`<div class="resizes" style=${styleMap(style)}>
+        return html` <div class="resizes" style=${styleMap(style)}>
           <div class="resize top-left"></div>
           <div class="resize top-right"></div>
           <div class="resize bottom-left"></div>
@@ -152,7 +155,7 @@ function SelectedRectsContainer(rects: DOMRect[]) {
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
-        return html`<div style=${styleMap(style)}></div>`;
+        return html` <div style=${styleMap(style)}></div>`;
       })}
     </div>
   `;
@@ -242,6 +245,7 @@ function handleUp(selection: DefaultSelectionManager) {
     }
   }
 }
+
 function handleDown(selection: DefaultSelectionManager) {
   const { state } = selection;
   if (state.selectedBlocks.length === 1) {
@@ -271,6 +275,7 @@ function handleDown(selection: DefaultSelectionManager) {
     }
   }
 }
+
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
@@ -341,6 +346,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       H4,
       H5,
       H6,
+      CODE_BLOCK,
       SHIFT_UP,
       SHIFT_DOWN,
       NUMBERED_LIST,
@@ -509,6 +515,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkey.addListener(SHIFT_DOWN, e => {
       // TODO expand selection down
+    });
+    hotkey.addListener(CODE_BLOCK, e => {
+      const startModel = getStartModelBySelection();
+      const parent = page.getParent(startModel);
+      assertExists(parent);
+      const blockProps = {
+        flavour: 'affine:code',
+        text: startModel.text?.clone(),
+      };
+      page.deleteBlock(startModel);
+      page.addBlock(blockProps, parent);
     });
 
     // !!!

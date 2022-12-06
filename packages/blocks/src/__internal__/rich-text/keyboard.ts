@@ -116,6 +116,9 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         flavour: 'affine:paragraph',
         type: 'quote',
       },
+      {
+        flavour: 'affine:code',
+      },
     ];
 
     if (
@@ -266,7 +269,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     'code exit': {
       key: 'enter',
       // override default quill behavior
-      handler: () => ALLOW_DEFAULT
+      handler: () => ALLOW_DEFAULT,
     },
     enterMarkdownMatch: {
       key: 'enter',
