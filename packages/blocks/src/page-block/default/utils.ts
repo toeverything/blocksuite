@@ -3,8 +3,9 @@ import {
   assertExists,
   getBlockById,
   getBlockElementByModel,
-  matchFlavours,
 } from '../../__internal__/utils';
+
+export const NON_TEXT_ARR = ['image', 'divider'];
 
 export const getBlockOptionByPosition = (
   blocks: BaseBlockModel[],

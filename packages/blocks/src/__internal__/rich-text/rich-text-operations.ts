@@ -2,6 +2,7 @@
 
 import { Page, Text } from '@blocksuite/store';
 import type Quill from 'quill';
+import { NON_TEXT_ARR } from '../../page-block/default/utils';
 import {
   ExtendedModel,
   assertExists,
@@ -229,22 +230,23 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
     const range = selection.getRangeAt(0);
     const { height, left, top } = range.getBoundingClientRect();
     // if cursor is on the first line and has no text, height is 0
-    if (height === 0 && top === 0) {
-      const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
-        const selectionManager = getDefaultPageBlock(model).selection;
-        const dividerBlockElement = getBlockElementByModel(
-          preNodeModel
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
-        resetNativeSelection(null);
-        return PREVENT_DEFAULT;
-      }
-      rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
-      return PREVENT_DEFAULT;
-    }
+    // if (height === 0 && top === 0) {
+    //   const rect = range.startContainer.parentElement?.getBoundingClientRect();
+    //   if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
+    //     const selectionManager = getDefaultPageBlock(model).selection;
+    //     const dividerBlockElement = getBlockElementByModel(
+    //       preNodeModel
+    //     ) as HTMLElement;
+    //     const selectionRect = dividerBlockElement.getBoundingClientRect();
+    //     selectionManager.selectBlockByRect(selectionRect, model);
+    //     resetNativeSelection(null);
+    //     return PREVENT_DEFAULT;
+    //   }
+    //   rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
+    //   return PREVENT_DEFAULT;
+    // }
     // TODO resolve compatible problem
+
     const newRange = caretRangeFromPoint(left, top - height / 2);
     if (
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
@@ -257,18 +259,17 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
             '.affine-default-page-block-title'
           ) as HTMLInputElement
         ).focus();
-      } else if (
-        preNodeModel &&
-        matchFlavours(preNodeModel, ['affine:divider'])
-      ) {
-        const selectionManager = getDefaultPageBlock(model).selection;
+      } else if (preNodeModel && NON_TEXT_ARR.includes(preNodeModel.type)) {
+        const pageBlock = getDefaultPageBlock(model);
+        pageBlock.selection.state.type = 'block';
         const dividerBlockElement = getBlockElementByModel(
           preNodeModel
         ) as HTMLElement;
         const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
+        pageBlock.signals.updateSelectedRects.emit([selectionRect]);
+        pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
         resetNativeSelection(null);
-        return PREVENT_DEFAULT;
+        return ALLOW_DEFAULT;
       } else {
         focusPreviousBlock(model, new Point(left, top));
       }
@@ -281,7 +282,7 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
 // We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
 // but only one bounding rect.
 // If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
-function isAtLineEdge(range: Range) {
+export function isAtLineEdge(range: Range) {
   if (
     range.startOffset > 0 &&
     Number(range.startContainer.textContent?.length) - range.startOffset > 0

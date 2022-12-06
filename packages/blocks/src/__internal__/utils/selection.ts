@@ -107,6 +107,7 @@ function setEndRange(editableContainer: Element) {
     lastNode = lastNode.lastChild;
   }
   if (lastNode) {
+    console.log(lastNode.textContent?.length);
     newRange.setStart(lastNode, lastNode.textContent?.length || 0);
     newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
   }
@@ -173,11 +174,12 @@ export async function focusRichText(
         newLeft = right - 1;
       }
       range = caretRangeFromPoint(newLeft, newTop);
+      console.log('range: ', range);
       resetNativeSelection(range);
       break;
     }
   }
-  resetNativeSelection(range);
+  // resetNativeSelection(range);
 }
 
 function focusRichTextByModel(
@@ -243,6 +245,7 @@ export function focusNextBlock(
 
 export function resetNativeSelection(range: Range | null) {
   const selection = window.getSelection();
+  console.log('range111');
   selection?.removeAllRanges();
   range && selection?.addRange(range);
 }

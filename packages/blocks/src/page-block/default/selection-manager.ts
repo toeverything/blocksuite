@@ -233,7 +233,6 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
     // this._setDragOnlyOneDividerType();
-    console.log('yyyy');
     this.state.type = 'none';
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
@@ -388,12 +387,13 @@ export class DefaultSelectionManager {
       e.raw.pageX,
       e.raw.pageY
     );
-    assertExists(clickBlockInfo);
-    if (NON_TEXT_ARR.includes(clickBlockInfo?.model?.type)) {
+    if (clickBlockInfo && NON_TEXT_ARR.includes(clickBlockInfo.model.type)) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
+
       assertExists(clickBlockInfo?.model);
       this._activeComponent = getBlockElementByModel(clickBlockInfo?.model);
+      this._activeComponent?.focus();
       assertExists(this._activeComponent);
       if (clickBlockInfo.model.type === 'image') {
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);

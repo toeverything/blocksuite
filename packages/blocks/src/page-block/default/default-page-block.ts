@@ -31,6 +31,10 @@ import {
   getPreviousBlock,
   getNextBlock,
   focusNextBlock,
+  resetNativeSelection,
+  getModelsByRange,
+  Point,
+  caretRangeFromPoint,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -45,7 +49,13 @@ import {
 } from '../utils';
 import style from './style.css';
 import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
-import { downloadImage, focusCaption, copyImgToClip } from './utils';
+import {
+  downloadImage,
+  focusCaption,
+  copyImgToClip,
+  NON_TEXT_ARR,
+} from './utils';
+import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
 export interface EmbedOption {
   position: { x: number; y: number };
   model: BaseBlockModel;
@@ -202,34 +212,93 @@ function EmbedOptionContainer(
   }
 }
 
-function handleUp(selection: DefaultSelectionManager) {
+function handleUp(
+  selection: DefaultSelectionManager,
+  signals: DefaultPageSignals
+) {
+  // const nativeSelection = window.getSelection();
+
+  // if (nativeSelection) {
+  //   const model = getModelsByRange(nativeSelection?.getRangeAt(0) as Range)[0];
+  //   const testcontainer = getContainerByModel(model);
+  //   const testpreNodeModel = getPreviousBlock(testcontainer, model.id);
+  //   const editableContainer = getBlockElementByModel(model)?.querySelector(
+  //     '.ql-editor'
+  //   ) as HTMLElement;
+  //   const range = nativeSelection.getRangeAt(0);
+  //   const { height, left, top } = range.getBoundingClientRect();
+  //   // if cursor is on the first line and has no text, height is 0
+  //   // if (height === 0 && top === 0) {
+  //   //   const rect = range.startContainer.parentElement?.getBoundingClientRect();
+  //   //   if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
+  //   //     const selectionManager = getDefaultPageBlock(model).selection;
+  //   //     const dividerBlockElement = getBlockElementByModel(
+  //   //       preNodeModel
+  //   //     ) as HTMLElement;
+  //   //     const selectionRect = dividerBlockElement.getBoundingClientRect();
+  //   //     selectionManager.selectBlockByRect(selectionRect, model);
+  //   //     resetNativeSelection(null);
+  //   //     return PREVENT_DEFAULT;
+  //   //   }
+  //   //   rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
+  //   //   return PREVENT_DEFAULT;
+  //   // }
+  //   // TODO resolve compatible problem
+  //   const newRange = caretRangeFromPoint(left, top - height / 2);
+  //   if (
+  //     (!newRange || !editableContainer.contains(newRange.startContainer)) &&
+  //     !isAtLineEdge(range)
+  //   ) {
+  //     // FIXME: Then it will turn the input into the div
+  //     if (
+  //       testpreNodeModel &&
+  //       matchFlavours(testpreNodeModel, ['affine:group'])
+  //     ) {
+  //       (
+  //         document.querySelector(
+  //           '.affine-default-page-block-title'
+  //         ) as HTMLInputElement
+  //       ).focus();
+  //     } else if (
+  //       testpreNodeModel &&
+  //       NON_TEXT_ARR.includes(testpreNodeModel.type)
+  //     ) {
+  //       const pageBlock = getDefaultPageBlock(model);
+  //       pageBlock.selection.state.type = 'block';
+  //       const dividerBlockElement = getBlockElementByModel(
+  //         testpreNodeModel
+  //       ) as HTMLElement;
+  //       const selectionRect = dividerBlockElement.getBoundingClientRect();
+  //       pageBlock.signals.updateSelectedRects.emit([selectionRect]);
+  //       pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
+  //       resetNativeSelection(null);
+  //     } else {
+  //       focusPreviousBlock(model, new Point(left, top));
+  //     }
+  //   }
+  //   return;
+  // }
+  signals.updateSelectedRects.emit([]);
   const { state } = selection;
-  if (state.selectedBlocks.length === 1) {
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    if (!matchFlavours(selectedModel, ['affine:divider'])) {
-      return;
-    }
-    const container = getContainerByModel(selectedModel);
-    const preNodeModel = getPreviousBlock(container, selectedModel.id);
-    if (!preNodeModel || preNodeModel.id == '1') {
-      return;
-    } else if (
-      matchFlavours(preNodeModel, ['affine:list']) ||
-      matchFlavours(preNodeModel, ['affine:paragraph'])
-    ) {
-      focusPreviousBlock(selectedModel, 'end');
-      state.clear();
-      return;
-    } else if (matchFlavours(preNodeModel, ['affine:divider'])) {
-      const selectionManager = getDefaultPageBlock(selectedModel).selection;
-      const dividerBlockElement = getBlockElementByModel(
-        preNodeModel
-      ) as HTMLElement;
-      // const selectionRect = dividerBlockElement.getBoundingClientRect();
-      // selectionManager.selectBlockByRect(selectionRect, preNodeModel);
-      // state.type = 'divider';
-      return;
-    }
+  if (state.type !== 'block') {
+    return;
+  }
+  const selectedModel = getModelByElement(state.selectedBlocks[0]);
+  const container = getContainerByModel(selectedModel);
+  const preNodeModel = getPreviousBlock(container, selectedModel.id);
+  assertExists(preNodeModel);
+  if (
+    matchFlavours(preNodeModel, ['affine:list']) ||
+    matchFlavours(preNodeModel, ['affine:paragraph'])
+  ) {
+    focusPreviousBlock(selectedModel, 'end');
+    state.clear();
+    return;
+  } else if (NON_TEXT_ARR.includes(selectedModel.type)) {
+    const preNodeElement = getBlockElementByModel(preNodeModel);
+    assertExists(preNodeElement);
+    state.selectedBlocks.push(preNodeElement);
+    signals.updateSelectedRects.emit([preNodeElement.getBoundingClientRect()]);
   }
 }
 function handleDown(selection: DefaultSelectionManager) {
@@ -246,7 +315,7 @@ function handleDown(selection: DefaultSelectionManager) {
       matchFlavours(nextBlock, ['affine:list']) ||
       matchFlavours(nextBlock, ['affine:paragraph'])
     ) {
-      focusNextBlock(selectedModel, 'start');
+      focusNextBlock(selectedModel, 'end');
       state.clear();
       return;
     } else if (matchFlavours(nextBlock, ['affine:divider'])) {
@@ -345,23 +414,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const { state } = this.selection;
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
-      console.log('state: ', state);
 
       if (state.type === 'native') {
         handleBackspace(page, e);
         return;
       } else if (state.type === 'block') {
         const { selectedBlocks } = state;
-        console.log('selectedBlocks: ', selectedBlocks);
-        // if (
-        //   selectedBlocks.length === 1 &&
-        //   matchFlavours(getModelByElement(selectedBlocks[0]), [
-        //     'affine:divider',
-        //   ])
-        // ) {
-        //   state.type = 'divider';
-        //   return;
-        // }
         handleBlockSelectionBatchDelete(
           page,
           selectedBlocks.map(block => getModelByElement(block))
@@ -373,18 +431,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         this.signals.updateEmbedOption.emit(null);
         return;
       }
-      // else if (state.type === 'divider') {
-      //   const { selectedBlocks } = state;
-      //   handleBlockSelectionBatchDelete(
-      //     page,
-      //     selectedBlocks.map(block => getModelByElement(block))
-      //   );
-
-      //   state.clear();
-      //   this.signals.updateSelectedRects.emit([]);
-      //   this.signals.updateEmbedRects.emit([]);
-      //   this.signals.updateEmbedOption.emit(null);
-      // }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
         // range delete
@@ -408,20 +454,26 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(UP, e => {
-      switch (state.type) {
-        case 'none':
-          break;
-        case 'block':
-          // state.type = 'divider';
-          break;
-        case 'divider':
-          this.signals.updateSelectedRects.emit([]);
-          handleUp(this.selection);
+      // if (
+      //   Array.from((e.target as HTMLDivElement).classList).includes(
+      //     'ql-editor'
+      //   ) &&
+      //   window.getSelection()?.anchorNode
+      // ) {
+      //   return;
+      // }
+      handleUp(this.selection, this.signals);
+      // switch (state.type) {
+      //   case 'none':
 
-          break;
-        default:
-          break;
-      }
+      //     break;
+      //   case 'block':
+      //     // this.signals.updateSelectedRects.emit([]);
+      //     handleUp(this.selection, this.signals);
+      //     break;
+      //   default:
+      //     break;
+      // }
     });
     hotkey.addListener(DOWN, e => {
       switch (state.type) {
@@ -444,10 +496,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           break;
         case 'block':
           // state.type = 'divider';
+          handleUp(this.selection, this.signals);
           break;
-        case 'divider':
-          this.signals.updateSelectedRects.emit([]);
-          handleUp(this.selection);
+
           break;
         default:
           break;
@@ -614,6 +665,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   firstUpdated() {
     this._bindHotkeys();
+
     hotkey.enableHotkey();
     this.model.propsUpdated.on(() => {
       if (this.model.title !== this._title.value) {
