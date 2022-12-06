@@ -11,6 +11,8 @@ import {
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
+  sleep,
+  throttle,
 } from '../../__internal__/utils';
 import { toast } from '../toast';
 import './button';
@@ -159,7 +161,11 @@ export class FormatQuickBar extends LitElement {
     const space = this.page;
 
     if (!this.models.length || !space) {
-      console.error('Failed to render format-quick-bar! space not found!');
+      console.error(
+        'Failed to render format-quick-bar! space not found!',
+        this.models,
+        space
+      );
       return html``;
     }
     const paragraphIcon =
@@ -247,22 +253,26 @@ export const showFormatQuickBar = async ({
 
   // Handle Scroll
 
-  const models = getModelsByRange(getCurrentRange());
-  if (!models.length) {
-    return;
-  }
-  const editorContainer = getContainerByModel(models[0]);
-  // TODO need a better way to get the editor scroll container
-  // Note: at edgeless mode, the scroll container is not exist!
-  const scrollContainer = editorContainer.querySelector(
-    '.affine-default-viewport'
-  );
-
-  const updatePos = () => {
+  // Once performance problems occur, they can be mitigated increasing throttle limit
+  const updatePos = throttle(() => {
     const rect = anchorEl.getBoundingClientRect();
     const bodyRect = document.body.getBoundingClientRect();
+    const formatBarRect =
+      formatQuickBar.formatQuickBarElement.getBoundingClientRect();
+    const halfWidth = formatBarRect.width / 2;
+    // Add offset to avoid the quick bar being covered by the window border
+    const edgeGap = 20;
+    const extraShift =
+      // Right side is out of the window
+      rect.left + halfWidth > bodyRect.width - edgeGap
+        ? rect.left + halfWidth - bodyRect.width + edgeGap
+        : // Left side is out of the window
+        rect.left - halfWidth < edgeGap
+        ? rect.left - halfWidth - edgeGap
+        : 0;
+    const offsetX = -halfWidth - extraShift;
     const offsetY = 5;
-    formatQuickBar.left = `${rect.left}px`;
+    formatQuickBar.left = `${rect.left + offsetX}px`;
     if (direction.includes('bottom')) {
       const offset = rect.top - bodyRect.top + rect.height;
       formatQuickBar.top = `${offset + offsetY}px`;
@@ -274,10 +284,24 @@ export const showFormatQuickBar = async ({
         `Failed to update position! Invalid direction: ${direction}!`
       );
     }
-  };
-  scrollContainer?.addEventListener('scroll', updatePos, { passive: true });
+  }, 10);
+
+  const models = getModelsByRange(getCurrentRange());
+  if (!models.length) {
+    return;
+  }
+  const editorContainer = getContainerByModel(models[0]);
+  // TODO need a better way to get the editor scroll container
+  const scrollContainer = editorContainer.querySelector(
+    '.affine-default-viewport'
+  );
+
+  if (scrollContainer) {
+    // Note: at edgeless mode, the scroll container is not exist!
+    scrollContainer.addEventListener('scroll', updatePos, { passive: true });
+  }
   positionUpdatedSignal.on(updatePos);
-  updatePos();
+  window.addEventListener('resize', updatePos, { passive: true });
 
   // Handle click outside
 
@@ -292,12 +316,16 @@ export const showFormatQuickBar = async ({
 
   // Mount
   container.appendChild(formatQuickBar);
+  // Wait for the format quick bar to be mounted
+  await sleep();
+  updatePos();
 
   return new Promise<void>(res => {
     abortController.signal.addEventListener('abort', () => {
       // TODO add transition
       formatQuickBar.remove();
       scrollContainer?.removeEventListener('scroll', updatePos);
+      window.removeEventListener('resize', updatePos);
       res();
     });
   });
