@@ -118,9 +118,16 @@ export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
     range.setEnd(targetNode, offset + 1);
   }
 
+  // Workaround select to empty line will get empty range
   // If range is empty, range.getBoundingClientRect of range will return the empty value({ x: 0, y: 0 ...})
-  const isRangeIsEmpty = range.toString().length === 0;
-  if (isRangeIsEmpty) {
+  const rangeRect = range.getBoundingClientRect();
+  const isRangeIsWrong =
+    rangeRect.x === 0 &&
+    rangeRect.y === 0 &&
+    rangeRect.width === 0 &&
+    rangeRect.height === 0;
+
+  if (isRangeIsWrong) {
     // Try to select something prevent range.getBoundingClientRect return empty value
     range.setEnd(targetNode, offset + 1);
   }
