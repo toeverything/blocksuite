@@ -158,8 +158,8 @@ export async function handleUnindent(
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
-  if (matchFlavours(model, ['affine:paragraph'])) {
-    if (model.type !== 'text') {
+  if (matchFlavours(model, ['affine:paragraph', 'affine:code'])) {
+    if (matchFlavours(model, ['affine:paragraph']) && model.type !== 'text') {
       page.captureSync();
       page.updateBlock(model, { type: 'text' });
     } else {
@@ -181,7 +181,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         }
         if (
           previousSibling &&
-          matchFlavours(previousSibling, ['affine:paragraph'])
+          matchFlavours(previousSibling, ['affine:paragraph', 'affine:code'])
         ) {
           page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;

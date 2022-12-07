@@ -92,7 +92,6 @@ class Syntax extends Module {
   constructor(quill: Quill, options: SyntaxCodeBlockOptions) {
     super(quill, options);
     this.codeBlockElement = options.codeBlockElement;
-    console.log(options); // 传一下 container, 区分下不同 code-block 的行号
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
         'Syntax module requires highlight.js. Please include the library on the page before Quill.'
@@ -144,7 +143,7 @@ Syntax.DEFAULTS = {
       return result.value;
     };
   })(),
-  interval: 5,
+  interval: 0,
 };
 
 export { SyntaxCodeBlock as CodeBlock, CodeToken, Syntax as default };
