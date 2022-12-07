@@ -158,13 +158,13 @@ export class FormatQuickBar extends LitElement {
   }
 
   override render() {
-    const space = this.page;
+    const page = this.page;
 
-    if (!this.models.length || !space) {
+    if (!this.models.length || !page) {
       console.error(
-        'Failed to render format-quick-bar! space not found!',
+        'Failed to render format-quick-bar! page not found!',
         this.models,
-        space
+        page
       );
       return html``;
     }
@@ -192,7 +192,7 @@ export class FormatQuickBar extends LitElement {
             ?active=${activeWhen(this.format)}
             @click=${() => {
               action({
-                page: space,
+                page,
                 abortController: this.abortController,
                 format: this.format,
               });
