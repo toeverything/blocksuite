@@ -1,6 +1,7 @@
 import { Signal } from '@blocksuite/store';
 import type { DragDirection } from '../../page-block/utils';
 import {
+  clamp,
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
@@ -39,26 +40,21 @@ export const showFormatQuickBar = async ({
     const bodyRect = document.body.getBoundingClientRect();
     const formatBarRect =
       formatQuickBar.formatQuickBarElement.getBoundingClientRect();
-    const halfWidth = formatBarRect.width / 2;
     // Add offset to avoid the quick bar being covered by the window border
     const edgeGap = 20;
-    const extraShift =
-      // Right side is out of the window
-      rect.left + halfWidth > bodyRect.width - edgeGap
-        ? rect.left + halfWidth - bodyRect.width + edgeGap
-        : // Left side is out of the window
-        rect.left - halfWidth < edgeGap
-        ? rect.left - halfWidth - edgeGap
-        : 0;
-    const offsetX = -halfWidth - extraShift;
+    const offsetX = clamp(
+      rect.left - formatBarRect.width / 2,
+      edgeGap,
+      bodyRect.width - formatBarRect.width - edgeGap
+    );
     const offsetY = 5;
-    formatQuickBar.left = `${rect.left + offsetX}px`;
+    formatQuickBar.left = `${offsetX}px`;
     if (direction.includes('bottom')) {
-      const offset = rect.top - bodyRect.top + rect.height;
-      formatQuickBar.top = `${offset + offsetY}px`;
+      const baseTop = rect.top - bodyRect.top + rect.height;
+      formatQuickBar.top = `${baseTop + offsetY}px`;
     } else if (direction.includes('top')) {
-      const offset = bodyRect.bottom - rect.bottom + rect.height;
-      formatQuickBar.bottom = `${offset + offsetY}px`;
+      const baseTop = bodyRect.bottom - rect.bottom + rect.height;
+      formatQuickBar.bottom = `${baseTop + offsetY}px`;
     } else {
       throw new Error(
         `Failed to update position! Invalid direction: ${direction}!`
