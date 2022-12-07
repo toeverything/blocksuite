@@ -77,10 +77,6 @@ export class EditorContainer extends LitElement {
       this.mode = detail;
     });
 
-    window.addEventListener('affine.shape', ({ detail }) => {
-      // todo: the next click event should be shaping event
-    });
-
     this._subscribeStore();
 
     this._placeholderInput?.focus();

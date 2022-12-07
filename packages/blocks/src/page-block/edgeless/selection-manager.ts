@@ -8,6 +8,7 @@ import {
   caretRangeFromPoint,
   handleNativeRangeDragMove,
   handleNativeRangeClick,
+  MouseMode,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
 import {
@@ -122,6 +123,7 @@ export class ViewportState {
 }
 
 export class EdgelessSelectionManager {
+  private _mouseMode: MouseMode;
   private _container: EdgelessContainer;
   private _mouseDisposeCallback: () => void;
   private _wheelDisposeCallback: () => void;
@@ -132,6 +134,14 @@ export class EdgelessSelectionManager {
   private _startRange: Range | null = null;
   private _hoverState: HoverState | null = null;
   private _frameSelectionState: FrameSelectionState | null = null;
+
+  get mouseMode() {
+    return this._mouseMode;
+  }
+
+  set mouseMode(mode: MouseMode) {
+    this._mouseMode = mode;
+  }
 
   get blockSelectionState() {
     return this._blockSelectionState;
@@ -154,6 +164,7 @@ export class EdgelessSelectionManager {
   }
 
   constructor(container: EdgelessContainer) {
+    this._mouseMode = 'default';
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,

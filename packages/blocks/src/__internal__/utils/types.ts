@@ -38,10 +38,12 @@ export interface BlockSelectionInfo {
   blocks: SelectedBlock[];
 }
 
+export type MouseMode = 'default' | 'shape';
+
 declare global {
   interface WindowEventMap {
     'affine.switch-mode': CustomEvent<'page' | 'edgeless'>;
-    'affine.shape': CustomEvent<'todo'>;
+    'affine.switch-mouse-mode': CustomEvent<MouseMode>;
   }
 }
 

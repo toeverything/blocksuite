@@ -203,6 +203,14 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    window.addEventListener('affine.switch-mouse-mode', ({ detail }) => {
+      this._selection.mouseMode = detail;
+    });
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 

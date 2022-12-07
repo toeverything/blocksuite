@@ -6,6 +6,7 @@ import {
   type GroupBlockModel,
   convertToList,
   createEvent,
+  MouseMode,
 } from '@blocksuite/blocks';
 import type { BaseBlockModel, Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
@@ -140,6 +141,9 @@ export class DebugMenu extends LitElement {
   @state()
   mode: 'page' | 'edgeless' = 'page';
 
+  @state()
+  shapeMode: MouseMode = 'default';
+
   get page() {
     return this.editor.page;
   }
@@ -207,8 +211,10 @@ export class DebugMenu extends LitElement {
     this.page.addBlock({ flavour: 'affine:paragraph' }, groupId);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private _onStartShape() {}
+  private _onSwitchShape() {
+    const event = createEvent('affine.switch-mouse-mode', this.shapeMode);
+    window.dispatchEvent(event);
+  }
 
   private _onExportHtml() {
     this.contentParser.onExportHtml();
@@ -411,6 +417,12 @@ export class DebugMenu extends LitElement {
         >
           ${icons.addGroup}
         </button>
+        <button
+          aria-label="switch mouse mode"
+          title="switch mouse mode"
+          tabindex="-1"
+          @click=${this._onSwitchShape}
+        ></button>
         <button
           aria-label="export markdown"
           title="export markdown"
