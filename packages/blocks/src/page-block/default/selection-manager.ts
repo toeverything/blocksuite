@@ -18,6 +18,7 @@ import {
   getBlockElementByModel,
   getAllBlocks,
   matchFlavours,
+  hotkey,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -393,7 +394,7 @@ export class DefaultSelectionManager {
 
       assertExists(clickBlockInfo?.model);
       this._activeComponent = getBlockElementByModel(clickBlockInfo?.model);
-      this._activeComponent?.focus();
+
       assertExists(this._activeComponent);
       if (clickBlockInfo.model.type === 'image') {
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);

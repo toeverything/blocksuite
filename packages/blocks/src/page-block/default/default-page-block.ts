@@ -35,6 +35,8 @@ import {
   getModelsByRange,
   Point,
   caretRangeFromPoint,
+  getStartModelBySelection,
+  getPreviousSiblingById,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -216,119 +218,176 @@ function handleUp(
   selection: DefaultSelectionManager,
   signals: DefaultPageSignals
 ) {
-  // const nativeSelection = window.getSelection();
+  const nativeSelection = window.getSelection();
+  if (nativeSelection?.anchorNode) {
+    const model = getStartModelBySelection();
+    const activeContainer = getContainerByModel(model);
+    const activePreNodeModel = getPreviousBlock(activeContainer, model.id);
+    const editableContainer = getBlockElementByModel(model)?.querySelector(
+      '.ql-editor'
+    ) as HTMLElement;
+    const range = nativeSelection.getRangeAt(0);
+    const { height, left, top } = range.getBoundingClientRect();
 
-  // if (nativeSelection) {
-  //   const model = getModelsByRange(nativeSelection?.getRangeAt(0) as Range)[0];
-  //   const testcontainer = getContainerByModel(model);
-  //   const testpreNodeModel = getPreviousBlock(testcontainer, model.id);
-  //   const editableContainer = getBlockElementByModel(model)?.querySelector(
-  //     '.ql-editor'
-  //   ) as HTMLElement;
-  //   const range = nativeSelection.getRangeAt(0);
-  //   const { height, left, top } = range.getBoundingClientRect();
-  //   // if cursor is on the first line and has no text, height is 0
-  //   // if (height === 0 && top === 0) {
-  //   //   const rect = range.startContainer.parentElement?.getBoundingClientRect();
-  //   //   if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
-  //   //     const selectionManager = getDefaultPageBlock(model).selection;
-  //   //     const dividerBlockElement = getBlockElementByModel(
-  //   //       preNodeModel
-  //   //     ) as HTMLElement;
-  //   //     const selectionRect = dividerBlockElement.getBoundingClientRect();
-  //   //     selectionManager.selectBlockByRect(selectionRect, model);
-  //   //     resetNativeSelection(null);
-  //   //     return PREVENT_DEFAULT;
-  //   //   }
-  //   //   rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
-  //   //   return PREVENT_DEFAULT;
-  //   // }
-  //   // TODO resolve compatible problem
-  //   const newRange = caretRangeFromPoint(left, top - height / 2);
-  //   if (
-  //     (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-  //     !isAtLineEdge(range)
-  //   ) {
-  //     // FIXME: Then it will turn the input into the div
-  //     if (
-  //       testpreNodeModel &&
-  //       matchFlavours(testpreNodeModel, ['affine:group'])
-  //     ) {
-  //       (
-  //         document.querySelector(
-  //           '.affine-default-page-block-title'
-  //         ) as HTMLInputElement
-  //       ).focus();
-  //     } else if (
-  //       testpreNodeModel &&
-  //       NON_TEXT_ARR.includes(testpreNodeModel.type)
-  //     ) {
-  //       const pageBlock = getDefaultPageBlock(model);
-  //       pageBlock.selection.state.type = 'block';
-  //       const dividerBlockElement = getBlockElementByModel(
-  //         testpreNodeModel
-  //       ) as HTMLElement;
-  //       const selectionRect = dividerBlockElement.getBoundingClientRect();
-  //       pageBlock.signals.updateSelectedRects.emit([selectionRect]);
-  //       pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
-  //       resetNativeSelection(null);
-  //     } else {
-  //       focusPreviousBlock(model, new Point(left, top));
-  //     }
-  //   }
-  //   return;
-  // }
-  signals.updateSelectedRects.emit([]);
-  const { state } = selection;
-  if (state.type !== 'block') {
-    return;
-  }
-  const selectedModel = getModelByElement(state.selectedBlocks[0]);
-  const container = getContainerByModel(selectedModel);
-  const preNodeModel = getPreviousBlock(container, selectedModel.id);
-  assertExists(preNodeModel);
-  if (
-    matchFlavours(preNodeModel, ['affine:list']) ||
-    matchFlavours(preNodeModel, ['affine:paragraph'])
-  ) {
-    focusPreviousBlock(selectedModel, 'end');
-    state.clear();
-    return;
-  } else if (NON_TEXT_ARR.includes(selectedModel.type)) {
-    const preNodeElement = getBlockElementByModel(preNodeModel);
-    assertExists(preNodeElement);
-    state.selectedBlocks.push(preNodeElement);
-    signals.updateSelectedRects.emit([preNodeElement.getBoundingClientRect()]);
+    // TODO resolve compatible problem
+    const newRange = caretRangeFromPoint(left, top - height / 2);
+    if (
+      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
+      !isAtLineEdge(range)
+    ) {
+      // FIXME: Then it will turn the input into the div
+      if (
+        activePreNodeModel &&
+        matchFlavours(activePreNodeModel, ['affine:group'])
+      ) {
+        (
+          document.querySelector(
+            '.affine-default-page-block-title'
+          ) as HTMLInputElement
+        ).focus();
+      }
+      // else if (
+      //   activePreNodeModel &&
+      //   NON_TEXT_ARR.includes(activePreNodeModel.type)
+      // ) {
+      //   const pageBlock = getDefaultPageBlock(model);
+      //   pageBlock.selection.state.type = 'block';
+      //   const dividerBlockElement = getBlockElementByModel(
+      //     activePreNodeModel
+      //   ) as HTMLElement;
+      //   const selectionRect = dividerBlockElement.getBoundingClientRect();
+      //   pageBlock.signals.updateSelectedRects.emit([selectionRect]);
+      //   pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
+      //   resetNativeSelection(null);
+      // }
+      else {
+        focusPreviousBlock(model, new Point(left, top));
+      }
+    }
+  } else {
+    signals.updateSelectedRects.emit([]);
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const container = getContainerByModel(selectedModel);
+    const preNodeModel = getPreviousBlock(container, selectedModel.id);
+    assertExists(preNodeModel);
+    if (
+      matchFlavours(preNodeModel, ['affine:list']) ||
+      matchFlavours(preNodeModel, ['affine:paragraph'])
+    ) {
+      focusPreviousBlock(selectedModel, 'end');
+      state.clear();
+      return;
+    } else if (NON_TEXT_ARR.includes(selectedModel.type)) {
+      const preNodeElement = getBlockElementByModel(preNodeModel);
+      assertExists(preNodeElement);
+      state.selectedBlocks.push(preNodeElement);
+      signals.updateSelectedRects.emit([
+        preNodeElement.getBoundingClientRect(),
+      ]);
+    }
   }
 }
-function handleDown(selection: DefaultSelectionManager) {
-  const { state } = selection;
-  if (state.selectedBlocks.length === 1) {
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    if (!matchFlavours(selectedModel, ['affine:divider'])) {
-      return;
+function handleDown(
+  selection: DefaultSelectionManager,
+  signals: DefaultPageSignals
+) {
+  const nativeSelection = window.getSelection();
+  if (nativeSelection?.anchorNode) {
+    const model = getStartModelBySelection();
+    // const activeContainer = getContainerByModel(model);
+    const activePreNodeModel = getNextBlock(model.id);
+
+    const editableContainer = getBlockElementByModel(model)?.querySelector(
+      '.ql-editor'
+    ) as HTMLElement;
+    const range = nativeSelection.getRangeAt(0);
+    const { height, left, bottom } = range.getBoundingClientRect();
+
+    // TODO resolve compatible problem
+    const newRange = caretRangeFromPoint(left, bottom + height / 2);
+    if (
+      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
+      !isAtLineEdge(range)
+    ) {
+      // FIXME: Then it will turn the input into the div
+      if (
+        activePreNodeModel &&
+        matchFlavours(activePreNodeModel, ['affine:group'])
+      ) {
+        (
+          document.querySelector(
+            '.affine-default-page-block-title'
+          ) as HTMLInputElement
+        ).focus();
+      } else if (
+        activePreNodeModel &&
+        NON_TEXT_ARR.includes(activePreNodeModel.type)
+      ) {
+        const pageBlock = getDefaultPageBlock(model);
+        pageBlock.selection.state.type = 'block';
+        const dividerBlockElement = getBlockElementByModel(
+          activePreNodeModel
+        ) as HTMLElement;
+        const selectionRect = dividerBlockElement.getBoundingClientRect();
+        signals.updateSelectedRects.emit([selectionRect]);
+        pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
+        resetNativeSelection(null);
+      } else {
+        focusNextBlock(model, new Point(left, bottom));
+      }
     }
-    const nextBlock = getNextBlock(selectedModel.id);
-    if (!nextBlock) {
-      return;
-    } else if (
-      matchFlavours(nextBlock, ['affine:list']) ||
-      matchFlavours(nextBlock, ['affine:paragraph'])
+  } else {
+    signals.updateSelectedRects.emit([]);
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const container = getContainerByModel(selectedModel);
+    const preNodeModel = getPreviousBlock(container, selectedModel.id);
+    assertExists(preNodeModel);
+    if (
+      matchFlavours(preNodeModel, ['affine:list']) ||
+      matchFlavours(preNodeModel, ['affine:paragraph'])
     ) {
       focusNextBlock(selectedModel, 'end');
       state.clear();
       return;
-    } else if (matchFlavours(nextBlock, ['affine:divider'])) {
-      const selectionManager = getDefaultPageBlock(selectedModel).selection;
-      const dividerBlockElement = getBlockElementByModel(
-        nextBlock
-      ) as HTMLElement;
-      // const selectionRect = dividerBlockElement.getBoundingClientRect();
-      // selectionManager.selectBlockByRect(selectionRect, nextBlock);
-      // state.type = 'divider';
-      return;
+    } else if (NON_TEXT_ARR.includes(selectedModel.type)) {
+      const preNodeElement = getBlockElementByModel(preNodeModel);
+      assertExists(preNodeElement);
+      state.selectedBlocks.push(preNodeElement);
+      signals.updateSelectedRects.emit([
+        preNodeElement.getBoundingClientRect(),
+      ]);
     }
   }
+
+  // const { state } = selection;
+  // if (state.selectedBlocks.length === 1) {
+  //   const selectedModel = getModelByElement(state.selectedBlocks[0]);
+  //   if (!matchFlavours(selectedModel, ['affine:divider'])) {
+  //     return;
+  //   }
+  //   const nextBlock = getNextBlock(selectedModel.id);
+  //   if (!nextBlock) {
+  //     return;
+  //   } else if (
+  //     matchFlavours(nextBlock, ['affine:list']) ||
+  //     matchFlavours(nextBlock, ['affine:paragraph'])
+  //   ) {
+  //     focusNextBlock(selectedModel, 'end');
+  //     state.clear();
+  //     return;
+  //   } else if (matchFlavours(nextBlock, ['affine:divider'])) {
+  //     const selectionManager = getDefaultPageBlock(selectedModel).selection;
+  //     const dividerBlockElement = getBlockElementByModel(
+  //       nextBlock
+  //     ) as HTMLElement;
+  //     // const selectionRect = dividerBlockElement.getBoundingClientRect();
+  //     // selectionManager.selectBlockByRect(selectionRect, nextBlock);
+  //     // state.type = 'divider';
+  //     return;
+  //   }
+  // }
 }
 @customElement('default-page-block')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
@@ -454,55 +513,34 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(UP, e => {
-      // if (
-      //   Array.from((e.target as HTMLDivElement).classList).includes(
-      //     'ql-editor'
-      //   ) &&
-      //   window.getSelection()?.anchorNode
-      // ) {
-      //   return;
-      // }
       handleUp(this.selection, this.signals);
-      // switch (state.type) {
-      //   case 'none':
-
-      //     break;
-      //   case 'block':
-      //     // this.signals.updateSelectedRects.emit([]);
-      //     handleUp(this.selection, this.signals);
-      //     break;
-      //   default:
-      //     break;
-      // }
     });
     hotkey.addListener(DOWN, e => {
-      switch (state.type) {
-        case 'none':
-          break;
-        case 'block':
-          // state.type = 'divider';
-          break;
-        case 'divider':
-          this.signals.updateSelectedRects.emit([]);
-          handleDown(this.selection);
-          break;
-        default:
-          break;
-      }
+      handleDown(this.selection, this.signals);
     });
     hotkey.addListener(LEFT, e => {
-      switch (state.type) {
-        case 'none':
-          break;
-        case 'block':
-          // state.type = 'divider';
-          handleUp(this.selection, this.signals);
-          break;
-
-          break;
-        default:
-          break;
+      // const selection = window.getSelection();
+      console.log('test');
+      // console.log('selection: ', this.selection.state.selectedBlocks);
+      let model: BaseBlockModel | null = null;
+      if (this.selection.state.selectedBlocks.length) {
+        model = getModelByElement(this.selection.state.selectedBlocks[0]);
+        this.signals.updateSelectedRects.emit([]);
+        this.selection.state.clear();
+      } else {
+        const range = window.getSelection()?.getRangeAt(0);
+        if (range && range.collapsed && range.startOffset === 0) {
+          // handleUp(this.selection, this.signals);
+          model = getStartModelBySelection();
+        }
       }
+      assertExists(model);
+      // const preBlock = getPreviousSiblingById(model.id);
+      // console.log('preBlock: ', preBlock);
+      // assertExists(preBlock)
+      // const html1 = getBlockElementByModel(preBlock)?.querySelector('.rich-text')
+      // preBlock?.TEXT_NODE
+      model && focusPreviousBlock(model, 'end');
     });
     hotkey.addListener(RIGHT, e => {
       switch (state.type) {
@@ -513,7 +551,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           break;
         case 'divider':
           this.signals.updateSelectedRects.emit([]);
-          handleDown(this.selection);
+          // handleDown(this.selection);
           break;
         default:
           break;

@@ -182,6 +182,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onKeyUp(this: KeyboardEventThis, range: QuillRange) {
+    // return PREVENT_DEFAULT;
     if (range.index >= 0) {
       return handleKeyUp(model, this.quill.root);
     }
@@ -196,23 +197,32 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onKeyLeft(this: KeyboardEventThis, range: QuillRange) {
+    console.log('rich-text');
+    // console.log('range: ', range);
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
+    const pageBlock = getDefaultPageBlock(model);
     if (range.index === 0 && range.length === 0) {
-      const container = getContainerByModel(model);
-      const preNodeModel = getPreviousBlock(container, model.id);
-      if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
-        const selectionManager = getDefaultPageBlock(model).selection;
-        const dividerBlockElement = getBlockElementByModel(
-          preNodeModel
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
-        resetNativeSelection(null);
-        return PREVENT_DEFAULT;
-      }
-      focusPreviousBlock(model, 'end');
+      // const container = getContainerByModel(model);
+      // const preNodeModel = getPreviousBlock(container, model.id);
+      // if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
+      //   const selectionManager = getDefaultPageBlock(model).selection;
+      //   const dividerBlockElement = getBlockElementByModel(
+      //     preNodeModel
+      //   ) as HTMLElement;
+      //   const selectionRect = dividerBlockElement.getBoundingClientRect();
+      //   selectionManager.selectBlockByRect(selectionRect, model);
+      //   resetNativeSelection(null);
+      //   return PREVENT_DEFAULT;
+      // }
+      // focusPreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
+
+    console.log(
+      'pageBlock.selection.state.selectedBlocks: ',
+      pageBlock.selection.state.selectedBlocks
+    );
+
     return ALLOW_DEFAULT;
   }
 
@@ -316,7 +326,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       shiftKey: false,
       handler: onKeyDown,
     },
-    'embed left': {
+    left: {
       key: 37,
       shiftKey: false,
       handler: onKeyLeft,

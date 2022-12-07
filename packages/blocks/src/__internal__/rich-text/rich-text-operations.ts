@@ -11,10 +11,7 @@ import {
   getPreviousBlock,
   ALLOW_DEFAULT,
   caretRangeFromPoint,
-  focusNextBlock,
-  focusPreviousBlock,
   getNextBlock,
-  Point,
   PREVENT_DEFAULT,
   asyncFocusRichText,
   convertToList,
@@ -229,49 +226,14 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
   if (selection) {
     const range = selection.getRangeAt(0);
     const { height, left, top } = range.getBoundingClientRect();
-    // if cursor is on the first line and has no text, height is 0
-    // if (height === 0 && top === 0) {
-    //   const rect = range.startContainer.parentElement?.getBoundingClientRect();
-    //   if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
-    //     const selectionManager = getDefaultPageBlock(model).selection;
-    //     const dividerBlockElement = getBlockElementByModel(
-    //       preNodeModel
-    //     ) as HTMLElement;
-    //     const selectionRect = dividerBlockElement.getBoundingClientRect();
-    //     selectionManager.selectBlockByRect(selectionRect, model);
-    //     resetNativeSelection(null);
-    //     return PREVENT_DEFAULT;
-    //   }
-    //   rect && focusPreviousBlock(model, new Point(rect.left, rect.top));
-    //   return PREVENT_DEFAULT;
-    // }
-    // TODO resolve compatible problem
 
     const newRange = caretRangeFromPoint(left, top - height / 2);
     if (
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      // FIXME: Then it will turn the input into the div
-      if (preNodeModel && matchFlavours(preNodeModel, ['affine:group'])) {
-        (
-          document.querySelector(
-            '.affine-default-page-block-title'
-          ) as HTMLInputElement
-        ).focus();
-      } else if (preNodeModel && NON_TEXT_ARR.includes(preNodeModel.type)) {
-        const pageBlock = getDefaultPageBlock(model);
-        pageBlock.selection.state.type = 'block';
-        const dividerBlockElement = getBlockElementByModel(
-          preNodeModel
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        pageBlock.signals.updateSelectedRects.emit([selectionRect]);
-        pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
-        resetNativeSelection(null);
+      if (preNodeModel && NON_TEXT_ARR.includes(preNodeModel.type)) {
         return ALLOW_DEFAULT;
-      } else {
-        focusPreviousBlock(model, new Point(left, top));
       }
       return PREVENT_DEFAULT;
     }
@@ -310,25 +272,7 @@ export function handleKeyDown(
     const range = selection.getRangeAt(0);
     const { bottom, left, height } = range.getBoundingClientRect();
     // if cursor is on the last line and has no text, height is 0
-    if (height === 0 && bottom === 0) {
-      const rect = range.startContainer.parentElement?.getBoundingClientRect();
-      const nextBlock = getNextBlock(model.id);
-      if (!nextBlock) {
-        return ALLOW_DEFAULT;
-      }
-      if (matchFlavours(nextBlock, ['affine:divider'])) {
-        const selectionManager = getDefaultPageBlock(model).selection;
-        const dividerBlockElement = getBlockElementByModel(
-          nextBlock
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
-        resetNativeSelection(null);
-        return PREVENT_DEFAULT;
-      }
-      rect && focusNextBlock(model, new Point(rect.left, rect.top));
-      return PREVENT_DEFAULT;
-    }
+
     // TODO resolve compatible problem
     const newRange = caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
@@ -337,16 +281,8 @@ export function handleKeyDown(
         return ALLOW_DEFAULT;
       }
       if (matchFlavours(nextBlock, ['affine:divider'])) {
-        const selectionManager = getDefaultPageBlock(model).selection;
-        const dividerBlockElement = getBlockElementByModel(
-          nextBlock
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
-        resetNativeSelection(null);
         return PREVENT_DEFAULT;
       }
-      focusNextBlock(model, new Point(left, bottom));
       return PREVENT_DEFAULT;
     }
     // if cursor is at the edge of a block, it may out of the textContainer after keydown
@@ -358,10 +294,6 @@ export function handleKeyDown(
       } = newRange.getBoundingClientRect();
       const nextRange = caretRangeFromPoint(left, nextBottom + height / 2);
       if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
-        focusNextBlock(
-          model,
-          new Point(textContainer.getBoundingClientRect().left || left, bottom)
-        );
         return PREVENT_DEFAULT;
       }
     }

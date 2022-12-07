@@ -15,6 +15,7 @@ import {
 } from './query';
 import { Rect } from './rect';
 import type { SelectionEvent } from './gesture';
+import { NON_TEXT_ARR } from '../../page-block/default/utils';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -107,7 +108,6 @@ function setEndRange(editableContainer: Element) {
     lastNode = lastNode.lastChild;
   }
   if (lastNode) {
-    console.log(lastNode.textContent?.length);
     newRange.setStart(lastNode, lastNode.textContent?.length || 0);
     newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
   }
@@ -174,20 +174,19 @@ export async function focusRichText(
         newLeft = right - 1;
       }
       range = caretRangeFromPoint(newLeft, newTop);
-      console.log('range: ', range);
       resetNativeSelection(range);
       break;
     }
   }
-  // resetNativeSelection(range);
+  resetNativeSelection(range);
 }
 
 function focusRichTextByModel(
   position: SelectionPosition,
   model: BaseBlockModel
 ) {
-  if (model.flavour === 'affine:embed') {
-    const defaultPageBlock = getDefaultPageBlock(model);
+  const defaultPageBlock = getDefaultPageBlock(model);
+  if (NON_TEXT_ARR.includes(model.type)) {
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
     const embedElement = getBlockElementByModel(model);
@@ -195,11 +194,14 @@ function focusRichTextByModel(
     defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
     defaultPageBlock.selection.state.type = 'block';
     window.getSelection()?.removeAllRanges();
-  }
-  const element = getBlockElementByModel(model);
-  const editableContainer = element?.querySelector('[contenteditable]');
-  if (editableContainer) {
-    focusRichText(position, editableContainer);
+    (document.activeElement as HTMLInputElement).blur();
+  } else {
+    const element = getBlockElementByModel(model);
+    const editableContainer = element?.querySelector('[contenteditable]');
+    defaultPageBlock.selection.state.clear();
+    if (editableContainer) {
+      focusRichText(position, editableContainer);
+    }
   }
 }
 
@@ -228,8 +230,6 @@ export function focusNextBlock(
   position: SelectionPosition = 'start'
 ) {
   const page = getDefaultPageBlock(model);
-  // const container = getContainerByModel(model);
-
   let nextPosition = position;
   if (nextPosition) {
     page.lastSelectionPosition = nextPosition;
@@ -244,8 +244,8 @@ export function focusNextBlock(
 }
 
 export function resetNativeSelection(range: Range | null) {
+  console.log('range: ', range);
   const selection = window.getSelection();
-  console.log('range111');
   selection?.removeAllRanges();
   range && selection?.addRange(range);
 }
