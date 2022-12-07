@@ -44,8 +44,10 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
         id = page.addBlock(blockProps, model, 0);
       }
     } else {
+      const flavour =
+        model.flavour !== 'affine:code' ? model.flavour : 'affine:paragraph';
       const blockProps = {
-        flavour: model.flavour,
+        flavour,
         type: 'text',
       };
       id = page.addBlock(blockProps, parent, index + 1);

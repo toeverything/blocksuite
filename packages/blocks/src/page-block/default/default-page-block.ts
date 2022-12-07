@@ -519,13 +519,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     hotkey.addListener(CODE_BLOCK, e => {
       const startModel = getStartModelBySelection();
       const parent = page.getParent(startModel);
+      const index = parent?.children.indexOf(startModel);
       assertExists(parent);
       const blockProps = {
         flavour: 'affine:code',
         text: startModel.text?.clone(),
       };
       page.deleteBlock(startModel);
-      page.addBlock(blockProps, parent);
+      page.addBlock(blockProps, parent, index);
     });
 
     // !!!

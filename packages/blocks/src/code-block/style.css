@@ -1,23 +1,30 @@
 .affine-code-block-container {
   border-radius: 5px;
   width: 720px;
+  margin-top: 15px;
+  background: #aae9ff26;
+  box-shadow: 1px 1px 1px var(--affine-border-color);
 }
 
 .affine-code-block-container.selected {
   background-color: var(--affine-selected-color);
 }
 
-rich-text {
+.affine-code-block-container rich-text {
   position: relative;
 }
 
 #line-number {
   position: absolute;
-  top: 18px;
+  text-align: right;
+  top: 20px;
+  left: 25px;
 }
 
 .affine-code-block-container .ql-container {
-  left: 25px;
+  left: 40px;
+  border-radius: 5px;
+  padding: 2px 15px;
 }
 
 .ql-syntax {
