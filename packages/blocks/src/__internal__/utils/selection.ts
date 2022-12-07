@@ -187,6 +187,7 @@ function focusRichTextByModel(
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
   if (NON_TEXT_ARR.includes(model.type)) {
+    defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
     const embedElement = getBlockElementByModel(model);
@@ -244,7 +245,6 @@ export function focusNextBlock(
 }
 
 export function resetNativeSelection(range: Range | null) {
-  console.log('range: ', range);
   const selection = window.getSelection();
   selection?.removeAllRanges();
   range && selection?.addRange(range);

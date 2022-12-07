@@ -197,31 +197,10 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onKeyLeft(this: KeyboardEventThis, range: QuillRange) {
-    console.log('rich-text');
-    // console.log('range: ', range);
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
-    const pageBlock = getDefaultPageBlock(model);
     if (range.index === 0 && range.length === 0) {
-      // const container = getContainerByModel(model);
-      // const preNodeModel = getPreviousBlock(container, model.id);
-      // if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
-      //   const selectionManager = getDefaultPageBlock(model).selection;
-      //   const dividerBlockElement = getBlockElementByModel(
-      //     preNodeModel
-      //   ) as HTMLElement;
-      //   const selectionRect = dividerBlockElement.getBoundingClientRect();
-      //   selectionManager.selectBlockByRect(selectionRect, model);
-      //   resetNativeSelection(null);
-      //   return PREVENT_DEFAULT;
-      // }
-      // focusPreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
-
-    console.log(
-      'pageBlock.selection.state.selectedBlocks: ',
-      pageBlock.selection.state.selectedBlocks
-    );
 
     return ALLOW_DEFAULT;
   }
@@ -233,17 +212,6 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
-      if (matchFlavours(nextBlock, ['affine:divider'])) {
-        const selectionManager = getDefaultPageBlock(model).selection;
-        const dividerBlockElement = getBlockElementByModel(
-          nextBlock
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
-        resetNativeSelection(null);
-        return PREVENT_DEFAULT;
-      }
-      focusNextBlock(model, 'start');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
