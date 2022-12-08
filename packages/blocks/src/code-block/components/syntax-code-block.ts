@@ -68,14 +68,15 @@ class SyntaxCodeBlock extends CodeBlock {
   }
 }
 
-type SyntaxCodeBlockOptions = {
+export type SyntaxCodeBlockOptions = {
   highlight: (text: string) => string;
   codeBlockElement: HTMLElement;
+  lang: string;
 };
 SyntaxCodeBlock.className = 'ql-syntax';
 
 class Syntax extends Module {
-  private lang = 'javascript';
+  private language = 'javascript';
 
   private codeBlockElement: HTMLElement;
 
@@ -85,12 +86,13 @@ class Syntax extends Module {
   }
 
   setLang(lang: string) {
-    this.lang = lang;
+    this.language = lang;
     this.highlight(true, this.codeBlockElement);
   }
 
   constructor(quill: Quill, options: SyntaxCodeBlockOptions) {
     super(quill, options);
+    this.language = options.language;
     this.codeBlockElement = options.codeBlockElement;
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
@@ -122,7 +124,8 @@ class Syntax extends Module {
       .forEach((code: SyntaxCodeBlock) => {
         code.refresh(
           (text: string) => {
-            return this.options.highlight(text, { language: this.lang }).value;
+            return this.options.highlight(text, { language: this.language })
+              .value;
           },
           forceRefresh,
           container

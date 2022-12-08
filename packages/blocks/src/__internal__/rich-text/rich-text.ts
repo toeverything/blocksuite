@@ -11,11 +11,13 @@ import Syntax from '../../code-block/components/syntax-code-block';
 
 Quill.register('modules/cursors', QuillCursors);
 const Clipboard = Quill.import('modules/clipboard');
+
 class EmptyClipboard extends Clipboard {
   onPaste() {
     // No need to execute
   }
 }
+
 Quill.register('modules/clipboard', EmptyClipboard, true);
 
 const Strike = Quill.import('formats/strike');
@@ -48,7 +50,9 @@ export class RichText extends LitElement {
   @property()
   placeholder?: string;
 
-  @property()
+  @property({
+    hasChanged: () => true,
+  })
   modules: Record<string, unknown> = {};
 
   // disable shadow DOM to workaround quill
@@ -146,12 +150,17 @@ export class RichText extends LitElement {
   updated() {
     // Update placeholder if block`s type changed
     this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
+    if (this.modules.syntax) {
+      //@ts-ignore
+      this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);
+    }
   }
 
   render() {
     return html`
-      <div id="line-number"></div>
-      <div class="affine-rich-text quill-container ql-container"></div>
+      <div class="affine-rich-text quill-container ql-container">
+        <slot></slot>
+      </div>
     `;
   }
 }

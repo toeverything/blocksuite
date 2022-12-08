@@ -1,4 +1,4 @@
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import type { CodeBlockModel } from './code-model';
 import style from './style.css';
@@ -15,15 +15,34 @@ export class CodeBlockComponent extends LitElement {
     `;
   }
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
   model!: CodeBlockModel;
 
   @property()
   host!: BlockHost;
+
+  @query('.lang-container')
+  langContainerElement!: HTMLElement;
+
+  @query('lang-list')
+  langListElement!: HTMLElement;
+
+  @state()
+  language = 'javascript';
+
+  @state()
+  showLangList = 'hidden';
+
+  @state()
+  popoverTimer = 0;
+
+  @state()
+  disposeTimer = 0;
+
+  @state()
+  filterText = '';
+
+  @property()
+  delay = 150;
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
@@ -46,9 +65,35 @@ export class CodeBlockComponent extends LitElement {
             syntax: {
               highlight: highlight.highlight,
               codeBlockElement: this,
+              language: this.language,
             },
           }}
-        ></rich-text>
+        >
+          <div id="line-number"></div>
+        </rich-text>
+        <div
+          class="lang-container"
+          @mouseover=${() => {
+            this.popoverTimer = window.setTimeout(() => {
+              this.showLangList = 'visible';
+            }, this.delay);
+          }}
+          @mouseout=${() => {
+            clearTimeout(this.popoverTimer);
+          }}
+        >
+          ${this.language}
+        </div>
+        <lang-list
+          showLangList=${this.showLangList}
+          filterText=${this.filterText}
+          @selected-language-changed=${(e: CustomEvent) => {
+            this.language = e.detail.language;
+          }}
+          @dispose=${() => {
+            this.showLangList = 'hidden';
+          }}
+        ></lang-list>
       </div>
     `;
   }

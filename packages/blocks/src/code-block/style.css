@@ -28,6 +28,11 @@
 }
 
 .ql-syntax {
-  width: 690px;
+  width: 660px;
   overflow-x: scroll;
+}
+
+.lang-container {
+  display: flex;
+  flex-direction: column;
 }
