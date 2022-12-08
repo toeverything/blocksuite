@@ -365,15 +365,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       if (state.type === 'native') {
         handleBackspace(page, e);
         return;
-      } else if (state.type === 'block') {
+      } else if (['block', 'divider', 'focus'].includes(state.type)) {
         const { selectedBlocks } = state;
-        if (
-          selectedBlocks.length === 1 &&
-          matchFlavours(getModelByElement(selectedBlocks[0]), [
-            'affine:divider',
-          ])
-        ) {
-          state.type = 'divider';
+        if (state.type === 'focus') {
+          state.type = 'block';
           return;
         }
         handleBlockSelectionBatchDelete(
@@ -386,17 +381,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         this.signals.updateEmbedRects.emit([]);
         this.signals.updateEmbedOption.emit(null);
         return;
-      } else if (state.type === 'divider') {
-        const { selectedBlocks } = state;
-        handleBlockSelectionBatchDelete(
-          page,
-          selectedBlocks.map(block => getModelByElement(block))
-        );
-
-        state.clear();
-        this.signals.updateSelectedRects.emit([]);
-        this.signals.updateEmbedRects.emit([]);
-        this.signals.updateEmbedOption.emit(null);
       }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;

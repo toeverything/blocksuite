@@ -4,20 +4,20 @@ import { showFormatQuickBar } from '../../components/format-quick-bar';
 import {
   assertExists,
   caretRangeFromPoint,
+  getAllBlocks,
+  getBlockElementByModel,
+  getModelByElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
   initMouseEventHandlers,
   isBlankArea,
-  isPageTitle,
   isEmbed,
+  isPageTitle,
+  matchFlavours,
   noop,
   resetNativeSelection,
   SelectionEvent,
-  getModelByElement,
-  getBlockElementByModel,
-  getAllBlocks,
-  matchFlavours,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -46,6 +46,7 @@ function filterSelectedBlock(
     return intersects(rect, selectionRect);
   });
 }
+
 // TODO
 // function filterSelectedEmbed(
 //   embedCache: Map<EmbedBlockComponent, DOMRect>,
@@ -69,7 +70,13 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'divider';
+type PageSelectionType =
+  | 'native'
+  | 'block'
+  | 'none'
+  | 'embed'
+  | 'divider'
+  | 'focus';
 
 class PageSelectionState {
   type: PageSelectionType;
@@ -100,6 +107,7 @@ class PageSelectionState {
   get blockCache() {
     return this._blockCache;
   }
+
   get embedCache() {
     return this._embedCache;
   }
@@ -146,6 +154,7 @@ export class DefaultSelectionManager {
   };
   private _activeComponent: HTMLElement | null = null;
   private _dragMoveTarget = 'right';
+
   constructor(
     space: Page,
     container: HTMLElement,
@@ -166,6 +175,7 @@ export class DefaultSelectionManager {
       this._onContainerContextMenu
     );
   }
+
   private get _blocks(): BaseBlockModel[] {
     return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
   }
@@ -217,6 +227,7 @@ export class DefaultSelectionManager {
       blockCache,
     };
   }
+
   private _setDragOnlyOneDividerType() {
     const { state } = this;
     const { selectedBlocks } = state;
@@ -236,7 +247,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
-    this._signals.nativeSelection.emit(false)
+    this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
 
@@ -245,7 +256,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
-    this._signals.nativeSelection.emit(true)
+    this._signals.nativeSelection.emit(true);
     noop();
   }
 
@@ -289,6 +300,7 @@ export class DefaultSelectionManager {
       this._onEmbedDragMove(e);
     }
   };
+
   private _onEmbedDragMove(e: SelectionEvent) {
     let width = 0;
     let height = 0;
@@ -322,6 +334,7 @@ export class DefaultSelectionManager {
       }
     }
   }
+
   private _onContainerDragEnd = (e: SelectionEvent) => {
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
@@ -341,6 +354,7 @@ export class DefaultSelectionManager {
     const { width, height } = this._dropContainer.getBoundingClientRect();
     dragModel.page.updateBlock(dragModel, { width: width, height: height });
   }
+
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
       const { anchor, direction, selectedType } =
@@ -453,8 +467,12 @@ export class DefaultSelectionManager {
     this._mouseDisposeCallback();
   }
 
-  selectBlockByRect(selectionRect: DOMRect, model?: BaseBlockModel) {
-    this.state.type = 'block';
+  selectBlockByRect(
+    selectionRect: DOMRect,
+    model?: BaseBlockModel,
+    pageSelectionType: PageSelectionType = 'block'
+  ) {
+    this.state.type = pageSelectionType;
     this.state.refreshRichTextBoundsCache(this._container);
     const { blockCache } = this.state;
     const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);

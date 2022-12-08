@@ -158,8 +158,8 @@ export async function handleUnindent(
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
-  if (matchFlavours(model, ['affine:paragraph', 'affine:code'])) {
-    if (matchFlavours(model, ['affine:paragraph']) && model.type !== 'text') {
+  if (matchFlavours(model, ['affine:paragraph'])) {
+    if (model.type !== 'text') {
       page.captureSync();
       page.updateBlock(model, { type: 'text' });
     } else {
@@ -176,17 +176,24 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
             previousSibling
           ) as HTMLElement;
           const selectionRect = dividerBlockElement.getBoundingClientRect();
-          selectionManager.selectBlockByRect(selectionRect, model);
+          selectionManager.selectBlockByRect(selectionRect, model, 'focus');
           resetNativeSelection(null);
-        }
-        if (
+        } else if (
           previousSibling &&
-          matchFlavours(previousSibling, ['affine:paragraph', 'affine:code'])
+          matchFlavours(previousSibling, ['affine:paragraph'])
         ) {
           page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
           model.text?.length && previousSibling.text?.join(model.text as Text);
           page.deleteBlock(model);
+          const richText = getRichTextByModel(previousSibling);
+          richText?.quill?.setSelection(preTextLength, 0);
+        } else if (
+          previousSibling &&
+          matchFlavours(previousSibling, ['affine:code'])
+        ) {
+          page.captureSync();
+          const preTextLength = previousSibling.text?.length || 0;
           const richText = getRichTextByModel(previousSibling);
           richText?.quill?.setSelection(preTextLength, 0);
         }
@@ -225,6 +232,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     page.deleteBlock(model);
     const id = page.addBlock(blockProps, parent, index);
     asyncFocusRichText(page, id);
+  } else if (matchFlavours(model, ['affine:code'])) {
+    const selectionManager = getDefaultPageBlock(model).selection;
+    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
+    const selectionRect = codeBlockElement.getBoundingClientRect();
+    selectionManager.selectBlockByRect(selectionRect, model, 'focus');
+    resetNativeSelection(null);
   }
 }
 
