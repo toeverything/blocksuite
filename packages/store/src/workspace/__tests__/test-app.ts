@@ -7,7 +7,7 @@ export class TestApp extends LitElement {
   workspace!: Workspace;
 
   @property()
-  pages: Omit<PageMeta, 'id' | 'trash'>[] = [];
+  pages: Pick<PageMeta, 'title' | 'favorite'>[] = [];
 
   @query('input[name="page"]')
   input!: HTMLInputElement;
