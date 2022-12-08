@@ -70,8 +70,7 @@ test('basic init with external text', async ({ page }) => {
   await assertRichTexts(page, ['world', 'foo bar']);
 });
 
-// FIXME!
-test.skip('basic multi user state', async ({ browser, page: pageA }) => {
+test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyState(pageA);
   await pageA.keyboard.type('hello');
@@ -94,8 +93,7 @@ test.skip('basic multi user state', async ({ browser, page: pageA }) => {
   await assertTitle(pageA, 'hello world');
 });
 
-// FIXME!
-test.skip('A open and edit, then joins B', async ({ browser, page: pageA }) => {
+test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyState(pageA);
   await focusRichText(pageA);
@@ -123,8 +121,7 @@ test.skip('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   ]);
 });
 
-// FIXME!
-test.skip('A first open, B first edit', async ({ browser, page: pageA }) => {
+test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await pageA.evaluate(() => {
     const page = window.workspace

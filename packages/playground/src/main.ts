@@ -1,4 +1,5 @@
-// import * as Y from 'yjs';
+// @ts-ignore
+import * as Y from 'yjs';
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
@@ -99,4 +100,6 @@ window.onload = () => {
   }
 };
 
-// window.Y = Y;
+Object.defineProperty(window, 'Y', {
+  get: () => Y,
+});
