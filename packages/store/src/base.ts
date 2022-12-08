@@ -66,7 +66,7 @@ export class BaseBlockModel implements IBaseBlockProps {
     return `${text}${childText}`;
   }
 
-  private _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
+  _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
     let text = deltaLeaf.insert;
     const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
       string,

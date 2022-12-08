@@ -1,10 +1,8 @@
-import { BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
-
-export type ShapeColor = 'black';
-export type ShapeType = 'rectangle';
+import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
+import type { ShapeColor, ShapeType } from '../__internal__';
 
 export interface ShapeBlockProps extends IBaseBlockProps {
-  flavor: 'affine:block';
+  flavor: 'affine:shape';
   color: ShapeColor;
   type: ShapeType;
 
@@ -13,4 +11,10 @@ export interface ShapeBlockProps extends IBaseBlockProps {
   xywh: string;
 }
 
-export class ShapeBlockModel extends BaseBlockModel {}
+export class ShapeBlockModel extends BaseBlockModel {
+  flavour = 'affine:shape' as const;
+
+  constructor(page: Page, props: Partial<ShapeBlockModel>) {
+    super(page, props);
+  }
+}

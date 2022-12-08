@@ -39,6 +39,8 @@ export interface BlockSelectionInfo {
 }
 
 export type MouseMode = 'default' | 'shape';
+export type ShapeType = 'rectangle';
+export type ShapeColor = 'black';
 
 declare global {
   interface WindowEventMap {
