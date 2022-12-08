@@ -263,24 +263,32 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    const { viewport } = this._container;
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
+    switch (this.mouseMode) {
+      case 'shape': {
+        break;
+      }
+      case 'default': {
+        const { viewport } = this._container;
+        const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
+        const selected = pick(this._blocks, modelX, modelY);
 
-    if (selected) {
-      this._handleClickOnSelected(selected, e);
-    } else {
-      this._blockSelectionState = { type: 'none' };
-      this._frameSelectionState = {
-        start: new DOMPoint(e.raw.x, e.raw.y),
-        end: new DOMPoint(e.raw.x, e.raw.y),
-      };
+        if (selected) {
+          this._handleClickOnSelected(selected, e);
+        } else {
+          this._blockSelectionState = { type: 'none' };
+          this._frameSelectionState = {
+            start: new DOMPoint(e.raw.x, e.raw.y),
+            end: new DOMPoint(e.raw.x, e.raw.y),
+          };
 
-      this._container.signals.updateSelection.emit(this.blockSelectionState);
-      resetNativeSelection(null);
+          this._container.signals.updateSelection.emit(this.blockSelectionState);
+          resetNativeSelection(null);
+        }
+
+        this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+        break;
+      }
     }
-
-    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {

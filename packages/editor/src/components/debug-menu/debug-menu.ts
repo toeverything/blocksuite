@@ -142,7 +142,7 @@ export class DebugMenu extends LitElement {
   mode: 'page' | 'edgeless' = 'page';
 
   @state()
-  shapeMode: MouseMode = 'default';
+  mouseMode: MouseMode = 'default';
 
   get page() {
     return this.editor.page;
@@ -212,7 +212,8 @@ export class DebugMenu extends LitElement {
   }
 
   private _onSwitchShape() {
-    const event = createEvent('affine.switch-mouse-mode', this.shapeMode);
+    this.mouseMode = this.mouseMode === 'default' ? 'shape' : 'default';
+    const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
     window.dispatchEvent(event);
   }
 

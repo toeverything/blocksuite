@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-types
 import Vec from './vector'
 import { getStroke } from 'perfect-freehand'
 
