@@ -1,4 +1,3 @@
-import type { GroupBlockModel } from '../../group-block';
 import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
 import type { RootBlockModels } from '../../__internal__'

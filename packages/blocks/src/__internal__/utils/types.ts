@@ -1,7 +1,7 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect';
-import { GroupBlockModel } from '../../group-block'
-import { ShapeBlockModel } from '../../shape-block'
+import type { GroupBlockModel } from '../../group-block'
+import type { ShapeBlockModel } from '../../shape-block'
 
 export type SelectionPosition = 'start' | 'end' | Point;
 

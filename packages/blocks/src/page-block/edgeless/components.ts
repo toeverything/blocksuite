@@ -4,7 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { GroupBlockModel, ShapeBlockModel } from '../..';
+import type { GroupBlockModel, RootBlockModels, ShapeBlockModel } from '../..'
 import type {
   BlockSelectionState,
   ViewportState,
@@ -19,24 +19,24 @@ import {
   getSelectionBoxBound,
 } from './utils';
 
-function getCommonRectStyle(rect: DOMRect, zoom: number) {
+function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
   return {
     position: 'absolute',
     left: rect.x + 'px',
     top: rect.y + 'px',
-    width: rect.width + PADDING_X * zoom + 'px',
-    height: rect.height + PADDING_Y * zoom + 'px',
+    width: rect.width + (isShape ? 0: PADDING_X) * zoom + 'px',
+    height: rect.height + (isShape ? 0 : PADDING_Y) * zoom + 'px',
     borderRadius: `${10 * zoom}px`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
   };
 }
 
-export function EdgelessHoverRect(rect: DOMRect | null, zoom: number) {
+export function EdgelessHoverRect(rect: DOMRect | null, zoom: number, isShape = false) {
   if (!rect) return html`<div></div>`;
 
   const style = {
-    ...getCommonRectStyle(rect, zoom),
+    ...getCommonRectStyle(rect, zoom, isShape),
     border: '1px solid var(--affine-primary-color)',
   };
 
@@ -45,11 +45,29 @@ export function EdgelessHoverRect(rect: DOMRect | null, zoom: number) {
   `;
 }
 
+enum HandleDirection {
+  Left = 'left',
+  Right = 'right',
+  LeftTop='left-top',
+  LeftBottom='left-bottom',
+  RightTop='right-top',
+  RightBottom = 'right-bottom'
+}
+
+const directionCursors = {
+  [HandleDirection.Right]: 'ew-resize',
+  [HandleDirection.Left]: 'ew-resize',
+  [HandleDirection.LeftTop]: 'nw-resize',
+  [HandleDirection.RightTop]: 'ne-resize',
+  [HandleDirection.LeftBottom]: 'sw-resize',
+  [HandleDirection.RightBottom]: 'se-resize'
+} as const
+
 function Handle(
   centerX: number,
   centerY: number,
-  handleType: 'left' | 'right',
-  onMouseDown?: (e: MouseEvent, type: 'left' | 'right') => void
+  handleDirection: HandleDirection,
+  onMouseDown?: (e: MouseEvent, direction: HandleDirection) => void
 ) {
   const style = {
     position: 'absolute',
@@ -62,16 +80,16 @@ function Handle(
     zIndex: '10',
     border: '2px var(--affine-primary-color) solid',
     background: 'white',
-    cursor: 'ew-resize',
+    cursor: directionCursors[handleDirection],
   };
 
   const handlerMouseDown = (e: MouseEvent) => {
-    onMouseDown && onMouseDown(e, handleType);
+    onMouseDown && onMouseDown(e, handleDirection);
   };
 
   return html`
     <div
-      aria-label=${`handle-${handleType}`}
+      aria-label=${`handle-${handleDirection}`}
       style=${styleMap(style)}
       @mousedown=${handlerMouseDown}
     ></div>
@@ -104,7 +122,7 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
 }
 
 function EdgelessBlockChild(
-  model: GroupBlockModel | ShapeBlockModel,
+  model: RootBlockModels,
   host: BlockHost,
   viewport: ViewportState
 ) {
@@ -114,14 +132,16 @@ function EdgelessBlockChild(
   const translateX = (modelX - viewportX) * zoom;
   const translateY = (modelY - viewportY) * zoom;
 
+  const isShape = flavour === 'affine:shape'
+
   const style = {
     position: 'absolute',
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
-    width: modelW + PADDING_X + 'px',
-    height: modelH + PADDING_Y + 'px',
-    padding: `${PADDING_X / 2}px`,
-    background: flavour === 'affine:shape' ? 'transparent': 'white',
+    width: modelW + (isShape ? 0 : PADDING_X) + 'px',
+    height: modelH + (isShape ? 0 : PADDING_Y) + 'px',
+    padding: isShape ? '0px': `${PADDING_X / 2}px`,
+    background: isShape ? 'transparent': 'white',
   };
 
   return html`
@@ -180,9 +200,6 @@ export function EdgelessBlockChildrenContainer(
   `;
 }
 
-@customElement('edgeless-draw-layer')
-export class EdgelessDrawLayer extends LitElement {}
-
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
   @property({ type: Boolean })
@@ -197,43 +214,76 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Object })
   rect!: DOMRect;
 
-  private _dragStartInfo = {
+  private _dragStartInfo: {
+    startMouseLeft: number,
+    absoluteLeft: number
+    width: number
+    direction: HandleDirection
+  } = {
     startMouseLeft: 0,
     absoluteLeft: 0,
     width: 0,
-    direction: 'left',
+    direction: HandleDirection.Left,
   };
 
-  private _getHandles(rect: DOMRect) {
-    let handles: TemplateResult | null = null;
-    if (this.state.type === 'none') return handles;
-    if (!this.state.active) {
-      const leftCenter = [
+  private _getHandles(rect: DOMRect, isShape: boolean) {
+    if (isShape) {
+      // todo: four corners
+      const leftTop = [
         rect.x,
-        rect.y + rect.height / 2 + (PADDING_Y * this.zoom) / 2,
+        rect.y
       ];
-      const rightCenter = [
-        rect.x + rect.width + PADDING_X * this.zoom,
-        rect.y + rect.height / 2 + (PADDING_Y * this.zoom) / 2,
-      ];
-      const handleLeft = Handle(
-        leftCenter[0],
-        leftCenter[1],
-        'left',
-        this._onHandleMouseDown
-      );
-      const handleRight = Handle(
-        rightCenter[0],
-        rightCenter[1],
-        'right',
-        this._onHandleMouseDown
-      );
-      handles = html` ${handleLeft}${handleRight} `;
+      const rightTop = [
+        rect.x + rect.width,
+        rect.y
+      ]
+      const leftBottom = [
+        rect.x,
+        rect.y + rect.height
+      ]
+      const rightBottom = [
+        rect.x + rect.width,
+        rect.y + rect.height
+      ]
+      return html`
+        ${Handle(leftTop[0], leftTop[1], HandleDirection.LeftTop)}
+        ${Handle(rightTop[0], rightTop[1], HandleDirection.RightTop)}
+        ${Handle(leftBottom[0], leftBottom[1], HandleDirection.LeftBottom)}
+        ${Handle(rightBottom[0], rightBottom[1], HandleDirection.RightBottom)}
+      `
+    } else {
+      let handles: TemplateResult | null = null;
+      if (this.state.type === 'none') return handles;
+      if (!this.state.active) {
+        const leftCenter = [
+          rect.x,
+          rect.y + rect.height / 2 + (PADDING_Y * this.zoom) /
+          2,
+        ];
+        const rightCenter = [
+          rect.x + rect.width + PADDING_X * this.zoom,
+          rect.y + rect.height / 2 + (PADDING_Y * this.zoom) /
+          2,
+        ];
+        const handleLeft = Handle(
+          leftCenter[0],
+          leftCenter[1],
+          HandleDirection.Left,
+          this._onHandleMouseDown
+        );
+        const handleRight = Handle(
+          rightCenter[0],
+          rightCenter[1],
+          HandleDirection.Right,
+          this._onHandleMouseDown
+        );
+        handles = html` ${handleLeft}${handleRight} `;
+      }
+      return handles;
     }
-    return handles;
   }
 
-  private _onHandleMouseDown = (e: MouseEvent, type: 'left' | 'right') => {
+  private _onHandleMouseDown = (e: MouseEvent, direction: HandleDirection) => {
     // prevent selection action being fired
     e.stopPropagation();
     if (this.state?.type !== 'none') {
@@ -247,7 +297,7 @@ export class EdgelessSelectedRect extends LitElement {
         absoluteLeft: x,
         // the width of the selected group may 0 after init use rect.width instead
         width: rect.width,
-        direction: type,
+        direction,
       };
       // parent ele is the edgeless block container
       this.parentElement?.addEventListener('mousemove', this._onDragMove);
@@ -263,12 +313,17 @@ export class EdgelessSelectedRect extends LitElement {
       const { xywh } = selected;
       const [x, y, w] = JSON.parse(xywh) as XYWH;
       const minus = this._dragStartInfo.startMouseLeft - e.clientX;
-      if (this._dragStartInfo.direction === 'left') {
-        newX = this._dragStartInfo.absoluteLeft - minus / this.zoom;
-        newW = (this._dragStartInfo.width + minus) / this.zoom;
-      } else {
-        newX = x;
-        newW = (this._dragStartInfo.width - minus) / this.zoom;
+      switch (this._dragStartInfo.direction) {
+        case HandleDirection.Left: {
+          newX = this._dragStartInfo.absoluteLeft - minus / this.zoom;
+          newW = (this._dragStartInfo.width + minus) / this.zoom;
+          break;
+        }
+        case HandleDirection.Right: {
+          newX = x;
+          newW = (this._dragStartInfo.width - minus) / this.zoom;
+          break
+        }
       }
       // limit the width of the selected group
       if (newW < GROUP_MIN_LENGTH) {
@@ -318,15 +373,16 @@ export class EdgelessSelectedRect extends LitElement {
 
   render() {
     if (this.state.type === 'none') return html``;
+    const isShape = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      ...getCommonRectStyle(this.rect, this.zoom),
+      ...getCommonRectStyle(this.rect, this.zoom, isShape),
     };
 
     return html`
-      ${this._getHandles(this.rect)}
+      ${this._getHandles(this.rect, isShape)}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
     `;
   }
@@ -335,6 +391,5 @@ export class EdgelessSelectedRect extends LitElement {
 declare global {
   interface HTMLElementTagNameMap {
     'edgeless-selected-rect': EdgelessSelectedRect;
-    'edgeless-draw-layer': EdgelessDrawLayer;
   }
 }

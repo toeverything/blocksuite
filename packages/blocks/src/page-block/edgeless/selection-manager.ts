@@ -151,6 +151,10 @@ export class EdgelessSelectionManager {
     return this._hoverState.rect;
   }
 
+  get isHoveringShape (): boolean {
+    return this._hoverState?.block.flavour === 'affine:shape'
+  }
+
   get frameSelectionRect() {
     if (!this._frameSelectionState) return null;
 
@@ -215,6 +219,7 @@ export class EdgelessSelectionManager {
         rect: getSelectionBoxBound(this._container.viewport, hoverBlock.xywh),
         block: hoverBlock,
       };
+      console.log('state', this._hoverState)
     } else {
       this._hoverState = null;
     }
