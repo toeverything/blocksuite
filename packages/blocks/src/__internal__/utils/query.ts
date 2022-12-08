@@ -243,8 +243,7 @@ export function getDOMRectByLine(
   }
 }
 
-export function getCurrentRange() {
-  const selection = window.getSelection();
+export function getCurrentRange(selection = window.getSelection()) {
   // When called on an <iframe> that is not displayed (e.g., where display: none is set) Firefox will return null
   // See https://developer.mozilla.org/en-US/docs/Web/API/Window/getSelection for more details
   if (!selection) {
