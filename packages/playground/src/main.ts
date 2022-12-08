@@ -1,5 +1,3 @@
-// @ts-ignore
-import * as Y from 'yjs';
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
@@ -99,7 +97,3 @@ window.onload = () => {
     document.body.appendChild(debugMenu);
   }
 };
-
-Object.defineProperty(window, 'Y', {
-  get: () => Y,
-});
