@@ -4,7 +4,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCursorBlockIdAndHeight,
-  initEmptyState,
+  initEmptyParagraphState,
   undoByClick,
   undoByKeyboard,
 } from './utils/actions';
@@ -18,7 +18,7 @@ import {
 
 test('markdown shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await resetHistory(page);
 
@@ -150,7 +150,7 @@ test('markdown shortcut', async ({ page }) => {
 
 test('markdown inline-text', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await resetHistory(page);
 

@@ -12,7 +12,7 @@ import {
   pressEnter,
   initThreeParagraphs,
   dragBetweenIndices,
-  initEmptyState,
+  initEmptyParagraphState,
   convertToBulletedListByClick,
   formatType,
 } from './utils/actions';
@@ -24,7 +24,7 @@ import {
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
@@ -38,7 +38,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
 
 test('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await selectAllByKeyboard(page);
@@ -59,7 +59,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
 
 test('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('Hello');
   await selectAllByKeyboard(page);
@@ -72,7 +72,7 @@ test('type character jump out code node', async ({ page }) => {
 
 test('multi line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -104,7 +104,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
 
 test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await selectAllByKeyboard(page);
@@ -124,7 +124,7 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
 
 test('format list to h1', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
   await convertToBulletedListByClick(page);

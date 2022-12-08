@@ -3,7 +3,8 @@ import { expect, Page, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
-  initEmptyState,
+  initEmptyEditor,
+  initEmptyParagraphState,
   pressEnter,
   selectAllByKeyboard,
   withCtrlOrMeta,
@@ -21,7 +22,7 @@ test('basic link', async ({ page }) => {
   const linkText = 'linkText';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type(linkText);
 
@@ -89,15 +90,10 @@ test('basic link', async ({ page }) => {
 });
 
 async function createLinkBlock(page: Page, str: string, link: string) {
+  await initEmptyEditor(page);
   const id = await page.evaluate(
     ([str, link]) => {
-      const page = window.workspace
-        .createPage('page0')
-        .register(window.blockSchema);
-      const editor = document.createElement('editor-container');
-      editor.page = page;
-      document.body.appendChild(editor);
-
+      const { page } = window;
       const pageId = page.addBlock({
         flavour: 'affine:page',
         title: 'title',
@@ -123,7 +119,6 @@ test('text added after a link should not have link formatting', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  // await initEmptyState(page);
   const id = await createLinkBlock(page, 'link text', 'http://example.com');
   await focusRichText(page, 0);
   await page.keyboard.type('after link');

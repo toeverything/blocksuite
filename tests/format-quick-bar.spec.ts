@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import {
   dragBetweenIndices,
   enterPlaygroundRoom,
-  initEmptyState,
+  initEmptyParagraphState,
   initThreeParagraphs,
   pressEnter,
 } from './utils/actions';
@@ -10,7 +10,7 @@ import { assertSelection, assertStoreMatchJSX } from './utils/asserts';
 
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   const formatQuickBarLocator = page.locator(`.format-quick-bar`);
@@ -21,7 +21,7 @@ test('should format quick bar show when select text', async ({ page }) => {
 
 test('should format quick bar be able to format text', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyState(page);
+  const { groupId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
@@ -136,7 +136,7 @@ test('should format quick bar be able to format text when select multiple line',
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyState(page);
+  const { groupId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
 
@@ -147,7 +147,8 @@ test('should format quick bar be able to format text when select multiple line',
   await expect(boldBtnLocator).toHaveAttribute('active', '');
   await assertStoreMatchJSX(
     page,
-    `<affine:group
+    `
+<affine:group
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -194,7 +195,7 @@ test('should format quick bar be able to format text when select multiple line',
 
 test('should format quick bar be able to link text', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyState(page);
+  const { groupId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
@@ -211,7 +212,8 @@ test('should format quick bar be able to link text', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:group
+    `
+<affine:group
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -244,7 +246,8 @@ test('should format quick bar be able to link text', async ({ page }) => {
   await expect(linkBtnLocator).not.toHaveAttribute('active', '');
   await assertStoreMatchJSX(
     page,
-    `<affine:group
+    `
+<affine:group
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -275,7 +278,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyState(page);
+  const { groupId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
@@ -288,7 +291,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 
   await assertStoreMatchJSX(
     page,
-    `<affine:group
+    `
+<affine:group
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -312,7 +316,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await bulletedBtnLocator.click();
   await assertStoreMatchJSX(
     page,
-    `<affine:group
+    `
+<affine:group
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -336,7 +341,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await textBtnLocator.click();
   await assertStoreMatchJSX(
     page,
-    `<affine:group
+    `
+<affine:group
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -361,7 +367,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 
 test('should format quick bar be able to copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyState(page);
+  const { groupId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);

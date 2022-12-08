@@ -1,8 +1,10 @@
-import { test } from '@playwright/test';
+import './utils/declare-test-window';
+import { test, Page } from '@playwright/test';
 import {
   activeEmbed,
   dragEmbedResize,
   enterPlaygroundRoom,
+  initEmptyEditor,
   redoByKeyboard,
   undoByKeyboard,
 } from './utils/actions';
@@ -12,72 +14,57 @@ import {
   assertRichImage,
 } from './utils/asserts';
 
-test('Drag and drop to change image size', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+async function initImageState(page: Page) {
   await page.evaluate(() => {
-    const page = window.workspace
-      .createPage('page0')
-      .register(window.blockSchema);
-    const editor = document.createElement('editor-container');
-    editor.page = page;
-    document.body.appendChild(editor);
+    const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
     page.addBlock(
       {
         flavour: 'affine:embed',
         type: 'image',
-        source:
-          'https://images-eu.ssl-images-amazon.com/images/G/02/kindle/journeys/Gj9vUkHh7N3zSj99/YzllYjE5NGQt-w758._SY608_CB604768303_.jpg',
+        source: '/test-card-1.png',
         width: 200,
         height: 180,
       },
       groupId
     );
   });
+}
 
+test('can drag resize image', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEditor(page);
+  await initImageState(page);
   await assertRichImage(page, 1);
+
   await activeEmbed(page);
   await assertRichDragButton(page);
   await assertImageSize(page, { width: 200, height: 180 });
+
   await dragEmbedResize(page);
   await assertImageSize(page, { width: 305, height: 274.5 });
+
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 200, height: 180 });
+
   await redoByKeyboard(page);
   await assertImageSize(page, { width: 305, height: 274.5 });
 });
 
-test('click and delete image', async ({ page }) => {
+test('can click and delete image', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await page.evaluate(() => {
-    const page = window.workspace
-      .createPage('page0')
-      .register(window.blockSchema);
-    const editor = document.createElement('editor-container');
-    editor.page = page;
-    document.body.appendChild(editor);
-    const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-    page.addBlock(
-      {
-        flavour: 'affine:embed',
-        type: 'image',
-        source:
-          'https://images-eu.ssl-images-amazon.com/images/G/02/kindle/journeys/Gj9vUkHh7N3zSj99/YzllYjE5NGQt-w758._SY608_CB604768303_.jpg',
-        width: 200,
-        height: 180,
-      },
-      groupId
-    );
-  });
-
+  await initEmptyEditor(page);
+  await initImageState(page);
   await assertRichImage(page, 1);
+
   await activeEmbed(page);
   await page.keyboard.press('Backspace');
   await assertRichImage(page, 0);
+
   await undoByKeyboard(page);
   await assertRichImage(page, 1);
+
   await redoByKeyboard(page);
   await assertRichImage(page, 0);
 });
