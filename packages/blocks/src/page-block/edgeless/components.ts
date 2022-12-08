@@ -4,7 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { GroupBlockModel } from '../..';
+import type { GroupBlockModel, ShapeBlockModel } from '../..';
 import type {
   BlockSelectionState,
   ViewportState,
@@ -104,11 +104,11 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
 }
 
 function EdgelessBlockChild(
-  model: GroupBlockModel,
+  model: GroupBlockModel | ShapeBlockModel,
   host: BlockHost,
   viewport: ViewportState
 ) {
-  const { xywh } = model;
+  const { xywh, flavour } = model;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
   const translateX = (modelX - viewportX) * zoom;
@@ -121,7 +121,7 @@ function EdgelessBlockChild(
     width: modelW + PADDING_X + 'px',
     height: modelH + PADDING_Y + 'px',
     padding: `${PADDING_X / 2}px`,
-    background: 'white',
+    background: flavour === 'affine:shape' ? 'transparent': 'white',
   };
 
   return html`
@@ -130,7 +130,7 @@ function EdgelessBlockChild(
       class="affine-edgeless-block-child"
       style=${styleMap(style)}
     >
-      ${BlockElement(model, host)}
+      ${BlockElement(model, host, true)}
     </div>
   `;
 }
@@ -174,7 +174,7 @@ export function EdgelessBlockChildrenContainer(
       ${repeat(
         model.children,
         child => child.id,
-        child => EdgelessBlockChild(child as GroupBlockModel, host, viewport)
+        child => EdgelessBlockChild(child as (GroupBlockModel | ShapeBlockModel), host, viewport)
       )}
     </div>
   `;

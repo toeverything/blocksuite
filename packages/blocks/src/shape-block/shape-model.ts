@@ -13,8 +13,12 @@ export interface ShapeBlockProps extends IBaseBlockProps {
 
 export class ShapeBlockModel extends BaseBlockModel {
   flavour = 'affine:shape' as const;
+  type: ShapeType;
+  xywh: string;
 
   constructor(page: Page, props: Partial<ShapeBlockModel>) {
     super(page, props);
+    this.xywh = props.xywh ?? '[0, 0, 100, 100]';
+    this.type = props.type ?? 'rectangle';
   }
 }
