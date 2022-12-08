@@ -1,4 +1,3 @@
-import type { GroupBlockModel } from '../../group-block';
 import type { EdgelessContainer } from './edgeless-page-block';
 import {
   SelectionEvent,
@@ -9,21 +8,21 @@ import {
   handleNativeRangeDragMove,
   handleNativeRangeClick,
   MouseMode,
-} from '../../__internal__';
+  RootBlockModels
+} from '../../__internal__'
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../utils/cursor';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
-
 interface NoneBlockSelectionState {
   type: 'none';
 }
 
 interface SingleBlockSelectionState {
   type: 'single';
-  selected: GroupBlockModel;
+  selected: RootBlockModels;
   viewport: ViewportState;
   rect: DOMRect;
   active: boolean;
@@ -35,7 +34,7 @@ export type BlockSelectionState =
 
 interface HoverState {
   rect: DOMRect;
-  block: GroupBlockModel;
+  block: RootBlockModels;
 }
 
 export interface FrameSelectionState {
@@ -184,8 +183,8 @@ export class EdgelessSelectionManager {
     return this._container.page;
   }
 
-  private get _blocks(): GroupBlockModel[] {
-    return (this._space.root?.children as GroupBlockModel[]) ?? [];
+  private get _blocks(): RootBlockModels[] {
+    return (this._space.root?.children as RootBlockModels[]) ?? [];
   }
 
   get isActive() {
@@ -210,7 +209,7 @@ export class EdgelessSelectionManager {
     }
   }
 
-  private _updateHoverState(hoverBlock: GroupBlockModel | null) {
+  private _updateHoverState(hoverBlock: RootBlockModels | null) {
     if (hoverBlock) {
       this._hoverState = {
         rect: getSelectionBoxBound(this._container.viewport, hoverBlock.xywh),
@@ -221,7 +220,7 @@ export class EdgelessSelectionManager {
     }
   }
 
-  private _handleClickOnSelected(selected: GroupBlockModel, e: SelectionEvent) {
+  private _handleClickOnSelected(selected: RootBlockModels, e: SelectionEvent) {
     const { viewport } = this._container;
 
     switch (this.blockSelectionState.type) {

@@ -1,5 +1,7 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect';
+import { GroupBlockModel } from '../../group-block'
+import { ShapeBlockModel } from '../../shape-block'
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
@@ -37,6 +39,9 @@ export interface BlockSelectionInfo {
   type: 'Block';
   blocks: SelectedBlock[];
 }
+
+// blocks that would only appear under the root
+export type RootBlockModels = GroupBlockModel | ShapeBlockModel
 
 export type MouseMode = 'default' | 'shape';
 export type ShapeType = 'rectangle';

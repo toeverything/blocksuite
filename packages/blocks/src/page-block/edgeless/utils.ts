@@ -1,6 +1,7 @@
 import type { GroupBlockModel } from '../../group-block';
 import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
+import type { RootBlockModels } from '../../__internal__'
 
 export const DEFAULT_SPACING = 64;
 
@@ -20,10 +21,10 @@ function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
 }
 
 export function pick(
-  blocks: GroupBlockModel[],
+  blocks: RootBlockModels[],
   modelX: number,
   modelY: number
-): GroupBlockModel | null {
+): RootBlockModels | null {
   for (let i = blocks.length - 1; i >= 0; i--) {
     if (isPointIn(blocks[i], modelX, modelY)) {
       return blocks[i];
