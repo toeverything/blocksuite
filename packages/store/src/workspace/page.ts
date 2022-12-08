@@ -79,16 +79,17 @@ export class Page<
     super(id, doc, awareness);
     this._idGenerator = idGenerator;
 
+    const { _yBlocks } = this;
     // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
     // "unobserve" is potentially necessary to make sure we don't create
     // an infinite loop when sync to remote then back to client.
     // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
     // We could unobserve in order to short circuit by ignoring the sync of remote
     // events we actually generated locally.
-    // this._yBlocks.unobserveDeep(this._handleYEvents);
-    this._yBlocks.observeDeep(this._handleYEvents);
+    // _yBlocks.unobserveDeep(this._handleYEvents);
+    _yBlocks.observeDeep(this._handleYEvents);
 
-    this._history = new Y.UndoManager([this._yBlocks], {
+    this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
       doc: this.doc,
     });

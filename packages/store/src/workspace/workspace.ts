@@ -19,7 +19,7 @@ class WorkspaceMeta extends Space {
 
   constructor(id: string, doc: Y.Doc, awareness: Awareness) {
     super(id, doc, awareness);
-    this._yPages.observeDeep(this._handlePageEvent);
+    this._yMetaRoot.observeDeep(this._handlePageEvent);
   }
 
   private get _yMetaRoot() {
@@ -40,41 +40,50 @@ class WorkspaceMeta extends Space {
 
   addPage(page: PageMeta, index?: number) {
     const yPage = new Y.Map();
-    yPage.set('id', page.id);
-    yPage.set('title', page.title);
-    yPage.set('favorite', page.favorite);
-    yPage.set('trash', page.trash);
-
-    if (index === undefined) {
-      this._yPages.push([yPage]);
-    } else {
-      this._yPages.insert(index, [yPage]);
-    }
+    this.doc.transact(() => {
+      if (index === undefined) {
+        this._yPages.push([yPage]);
+        yPage.set('id', page.id);
+        yPage.set('title', page.title);
+        yPage.set('favorite', page.favorite);
+        yPage.set('trash', page.trash);
+      } else {
+        this._yPages.insert(index, [yPage]);
+      }
+    });
   }
 
   setPage(id: string, props: Partial<PageMeta>) {
     const pages = this._yPages.toJSON() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
-    if (index !== -1) {
-      const yPage = this._yPages.get(index) as Y.Map<unknown>;
-      if ('id' in props) yPage.set('id', props.id);
-      if ('title' in props) yPage.set('title', props.title);
-      if ('favorite' in props) yPage.set('favorite', props.favorite);
-      if ('trash' in props) yPage.set('trash', props.trash);
-    }
+    this.doc.transact(() => {
+      if (index !== -1) {
+        const yPage = this._yPages.get(index) as Y.Map<unknown>;
+        if ('id' in props) yPage.set('id', props.id);
+        if ('title' in props) yPage.set('title', props.title);
+        if ('favorite' in props) yPage.set('favorite', props.favorite);
+        if ('trash' in props) yPage.set('trash', props.trash);
+      }
+    });
   }
 
   removePage(id: string) {
     const pages = this._yPages.toArray() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
-    if (index !== -1) {
-      this._yPages.delete(index, 1);
-    }
+    this.doc.transact(() => {
+      if (index !== -1) {
+        this._yPages.delete(index, 1);
+      }
+    });
   }
 
   private _handlePageEvent = (_: Y.YEvent<Y.Array<unknown>>[]) => {
+    // newly added space can't be found unless explictly getMap after meta updated
+    this.pages.forEach(page => {
+      this.doc.getMap('space:' + page.id);
+    });
     this.pagesUpdated.emit();
   };
 }
@@ -128,8 +137,8 @@ export class Workspace {
       this._store.awareness,
       this._store.idGenerator
     );
-    this._store.addSpace(page);
     this.meta.addPage({ id: pageId, title, favorite: false, trash: false });
+    this._store.addSpace(page);
     this._indexer.onCreatePage(page.id);
     return page;
   }
