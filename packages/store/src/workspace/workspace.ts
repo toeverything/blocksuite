@@ -64,12 +64,20 @@ class WorkspaceMeta extends Space {
     this.doc.transact(() => {
       if (index !== -1) {
         const yPage = this._yPages.get(index) as Y.Map<unknown>;
-        if ('id' in props) yPage.set('id', props.id);
-        if ('title' in props) yPage.set('title', props.title);
-        if ('favorite' in props) yPage.set('favorite', props.favorite);
-        if ('trash' in props) yPage.set('trash', props.trash);
-        if ('createDate' in props) yPage.set('createDate', props.createDate);
-        if ('trashDate' in props) yPage.set('trashDate', props.trashDate);
+        if ('id' in props) yPage.set('id', props.id ?? pages[index]['id']);
+        if ('title' in props)
+          yPage.set('title', props.title ?? pages[index]['title']);
+        if ('favorite' in props)
+          yPage.set('favorite', props.favorite ?? pages[index]['favorite']);
+        if ('trash' in props)
+          yPage.set('trash', props.trash ?? pages[index]['trash']);
+        if ('createDate' in props)
+          yPage.set(
+            'createDate',
+            props.createDate ?? pages[index]['createDate']
+          );
+        if ('trashDate' in props)
+          yPage.set('trashDate', props.trashDate ?? pages[index]['trashDate']);
       }
     });
   }
