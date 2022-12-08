@@ -19,7 +19,7 @@ export const HOTKEYS = {
   H4: 'command+option+4,ctrl+shift+4',
   H5: 'command+option+5,ctrl+shift+5',
   H6: 'command+option+6,ctrl+shift+6',
-  CODE_BLOCK: 'command+option+c,ctrl+shift+c',
+  CODE_BLOCK: 'command+option+c,ctrl+alt+c',
   BULLETED: 'command+option+8,ctrl+shift+8',
   NUMBERED_LIST: 'command+option+9,ctrl+shift+9',
   UP: 'up',
