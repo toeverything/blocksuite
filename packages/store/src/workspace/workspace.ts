@@ -12,6 +12,8 @@ export interface PageMeta {
   title: string;
   favorite: boolean;
   trash: boolean;
+  createDate: number;
+  trashDate: number | null;
 }
 
 class WorkspaceMeta extends Space {
@@ -47,6 +49,8 @@ class WorkspaceMeta extends Space {
         yPage.set('title', page.title);
         yPage.set('favorite', page.favorite);
         yPage.set('trash', page.trash);
+        yPage.set('createDate', page.createDate);
+        yPage.set('trashDate', page.trashDate);
       } else {
         this._yPages.insert(index, [yPage]);
       }
@@ -64,6 +68,8 @@ class WorkspaceMeta extends Space {
         if ('title' in props) yPage.set('title', props.title);
         if ('favorite' in props) yPage.set('favorite', props.favorite);
         if ('trash' in props) yPage.set('trash', props.trash);
+        if ('createDate' in props) yPage.set('createDate', props.createDate);
+        if ('trashDate' in props) yPage.set('trashDate', props.trashDate);
       }
     });
   }
@@ -138,7 +144,14 @@ export class Workspace {
       this._store.awareness,
       this._store.idGenerator
     );
-    this.meta.addPage({ id: pageId, title: '', favorite: false, trash: false });
+    this.meta.addPage({
+      id: pageId,
+      title: '',
+      favorite: false,
+      trash: false,
+      createDate: +new Date(),
+      trashDate: null,
+    });
     this._store.addSpace(page);
     this._indexer.onCreatePage(page.id);
     return page;

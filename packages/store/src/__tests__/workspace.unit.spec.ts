@@ -15,6 +15,7 @@ import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragra
 import { ListBlockModel } from '../../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../../blocks/src/group-block/group-model';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model';
+import { PageMeta } from '../workspace/workspace';
 
 function createTestOptions() {
   const idGenerator = createAutoIncrementIdGenerator();
@@ -47,9 +48,23 @@ describe.concurrent('basic', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
-    assert.deepEqual(serialize(workspace.createPage(defaultPageId)), {
+    const actual = serialize(workspace.createPage(defaultPageId));
+    const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
+    assert.equal(typeof actualPage.createDate, 'number');
+    // @ts-ignore
+    delete actualPage.createDate;
+
+    assert.deepEqual(actual, {
       [spaceMetaId]: {
-        pages: [{ id: 'page0', title: '', favorite: false, trash: false }],
+        pages: [
+          {
+            id: 'page0',
+            title: '',
+            favorite: false,
+            trash: false,
+            trashDate: null,
+          },
+        ],
       },
       [spaceId]: {},
     });
@@ -212,14 +227,44 @@ describe.concurrent('addBlock', () => {
     const workspace = new Workspace(options);
 
     workspace.createPage('page0').register(BlockSchema);
-    assert.deepEqual(workspace.meta.pages, [
-      { id: 'page0', title: '', favorite: false, trash: false },
-    ]);
+    assert.deepEqual(
+      workspace.meta.pages.map(({ id, title, favorite, trash, trashDate }) => ({
+        id,
+        title,
+        favorite,
+        trash,
+        trashDate,
+      })),
+      [
+        {
+          id: 'page0',
+          title: '',
+          favorite: false,
+          trash: false,
+          trashDate: null,
+        },
+      ]
+    );
 
     workspace.setPageMeta('page0', { favorite: true });
-    assert.deepEqual(workspace.meta.pages, [
-      { id: 'page0', title: '', favorite: true, trash: false },
-    ]);
+    assert.deepEqual(
+      workspace.meta.pages.map(({ id, title, favorite, trash, trashDate }) => ({
+        id,
+        title,
+        favorite,
+        trash,
+        trashDate,
+      })),
+      [
+        {
+          id: 'page0',
+          title: '',
+          favorite: true,
+          trash: false,
+          trashDate: null,
+        },
+      ]
+    );
   });
 });
 
