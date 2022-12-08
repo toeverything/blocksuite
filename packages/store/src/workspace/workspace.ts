@@ -130,20 +130,26 @@ export class Workspace {
       string,
       typeof BaseBlockModel
     >
-  >(pageId: string, title = '') {
+  >(pageId: string) {
     const page = new Page<IBlockSchema>(
+      this,
       'space:' + pageId,
       this.doc,
       this._store.awareness,
       this._store.idGenerator
     );
-    this.meta.addPage({ id: pageId, title, favorite: false, trash: false });
+    this.meta.addPage({ id: pageId, title: '', favorite: false, trash: false });
     this._store.addSpace(page);
     this._indexer.onCreatePage(page.id);
     return page;
   }
 
-  setPage(pageId: string, props: Partial<PageMeta>) {
+  /** Update page meta state. Note that this intentionally does not mutate page state. */
+  setPageMeta(pageId: string, props: Partial<PageMeta>) {
+    if (pageId.startsWith('space:')) {
+      pageId = pageId.slice(6);
+    }
+
     this.meta.setPage(pageId, props);
   }
 

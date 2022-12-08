@@ -216,7 +216,7 @@ describe.concurrent('addBlock', () => {
       { id: 'page0', title: '', favorite: false, trash: false },
     ]);
 
-    workspace.setPage('page0', { favorite: true });
+    workspace.setPageMeta('page0', { favorite: true });
     assert.deepEqual(workspace.meta.pages, [
       { id: 'page0', title: '', favorite: true, trash: false },
     ]);

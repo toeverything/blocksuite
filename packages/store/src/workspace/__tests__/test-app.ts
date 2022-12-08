@@ -14,12 +14,12 @@ export class TestApp extends LitElement {
 
   private _toggleFavorite(index: number) {
     const { id } = this.workspace.meta.pages[index];
-    this.workspace.setPage(id, { favorite: !this.pages[index].favorite });
+    this.workspace.setPageMeta(id, { favorite: !this.pages[index].favorite });
   }
 
   private _createPage() {
-    const id = `${this.pages.length}`;
-    this.workspace.createPage(id, this.input.value);
+    const page = this.workspace.createPage(`${this.pages.length}`);
+    this.workspace.setPageMeta(page.id, { title: this.input.value });
     this.input.value = '';
   }
 
