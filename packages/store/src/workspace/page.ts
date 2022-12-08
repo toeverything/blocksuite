@@ -15,6 +15,7 @@ import {
   toBlockProps,
   matchFlavours,
 } from '../utils/utils';
+import type { Workspace } from './workspace';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -43,6 +44,7 @@ export class Page<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   IBlockSchema extends Record<string, typeof BaseBlockModel> = any
 > extends Space<IBlockSchema> {
+  public workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
@@ -71,24 +73,27 @@ export class Page<
   };
 
   constructor(
+    workspace: Workspace,
     id: string,
     doc: Y.Doc,
     awareness: Awareness,
     idGenerator: IdGenerator = uuidv4
   ) {
     super(id, doc, awareness);
+    this.workspace = workspace;
     this._idGenerator = idGenerator;
 
+    const { _yBlocks } = this;
     // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
     // "unobserve" is potentially necessary to make sure we don't create
     // an infinite loop when sync to remote then back to client.
     // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
     // We could unobserve in order to short circuit by ignoring the sync of remote
     // events we actually generated locally.
-    // this._yBlocks.unobserveDeep(this._handleYEvents);
-    this._yBlocks.observeDeep(this._handleYEvents);
+    // _yBlocks.unobserveDeep(this._handleYEvents);
+    _yBlocks.observeDeep(this._handleYEvents);
 
-    this._history = new Y.UndoManager([this._yBlocks], {
+    this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
       doc: this.doc,
     });
