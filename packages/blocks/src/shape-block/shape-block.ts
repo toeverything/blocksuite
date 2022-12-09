@@ -4,6 +4,7 @@ import type { ShapeBlockModel } from './shape-model';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager';
 import { getRectanglePath } from './utils';
+import { assertExists } from '../__internal__';
 
 @customElement('shape-block')
 export class ShapeBlockComponent extends LitElement {
@@ -14,12 +15,17 @@ export class ShapeBlockComponent extends LitElement {
   })
   model!: ShapeBlockModel;
 
-  public detectCollision(x: number, y: number): boolean {
-    const root = this.shadowRoot!;
-    const point = root.querySelector('svg')!.createSVGPoint();
-    point.x = x;
-    point.y = y;
-    return root.querySelector('path')!.isPointInStroke(point);
+  public detectCollision(offsetX: number, offsetY: number): boolean {
+    const root = this.shadowRoot;
+    assertExists(root);
+    const svg = root.querySelector('svg');
+    assertExists(svg);
+    const point = svg.createSVGPoint();
+    point.x = offsetX;
+    point.y = offsetY;
+    const path = root.querySelector('path');
+    assertExists(path);
+    return path.isPointInStroke(point);
   }
 
   render() {
