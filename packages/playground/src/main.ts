@@ -10,12 +10,11 @@ import {
   Workspace,
 } from '@blocksuite/store';
 import type { DocProviderConstructor, StoreOptions } from '@blocksuite/store';
-
 import './style.css';
 
 const params = new URLSearchParams(location.search);
-const room = params.get('room') ?? '';
-const isTest = params.get('isTest') === 'true';
+const room = params.get('room') ?? 'playground';
+const joining = params.get('collab') !== null;
 
 /**
  * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
@@ -75,7 +74,7 @@ function editorOptionsFromParam(): Pick<
 
 window.onload = () => {
   const workspace = new Workspace({
-    room: room,
+    room,
     ...editorOptionsFromParam(),
   });
   // @ts-ignore
@@ -83,8 +82,11 @@ window.onload = () => {
   // @ts-ignore
   window.blockSchema = BlockSchema;
 
-  // In dev environment, init editor by default, but in test environment, init editor by the test page
-  if (!isTest) {
+  if (joining) return;
+
+  // Init default workspace for manual local testing.
+  // In single mode E2E test cases, room name are random IDs.
+  if (room === 'playground') {
     const page = workspace
       .createPage<typeof BlockSchema>('page0')
       .register(BlockSchema);

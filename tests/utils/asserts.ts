@@ -3,11 +3,9 @@
 
 import './declare-test-window';
 import { expect, type Page } from '@playwright/test';
-import type {
-  BaseBlockModel,
-  PrefixedBlockProps,
-  SerializedStore,
-} from '../../packages/store';
+import type { BaseBlockModel, SerializedStore } from '../../packages/store';
+import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page';
+
 import type { JSXElement } from '../../packages/store/src/utils/jsx';
 import {
   format as prettyFormat,
@@ -16,7 +14,15 @@ import {
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
-    pages: [{ id: 'page0', title: '', favorite: false, trash: false }],
+    pages: [
+      {
+        id: 'page0',
+        title: '',
+        favorite: false,
+        trash: false,
+        trashDate: null,
+      },
+    ],
   },
   'space:page0': {
     '0': {
@@ -164,9 +170,11 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 }
 
 export async function assertStore(page: Page, expected: SerializedStore) {
-  const actual = (await page.evaluate(() =>
-    window.workspace.doc.toJSON()
-  )) as SerializedStore;
+  const actual = (await page.evaluate(() => {
+    const json = window.workspace.doc.toJSON();
+    delete json['space:meta'].pages[0].createDate;
+    return json;
+  })) as SerializedStore;
   expect(actual).toEqual(expected);
 }
 

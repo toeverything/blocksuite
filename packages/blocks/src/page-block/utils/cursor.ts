@@ -1,6 +1,8 @@
 import {
   assertExists,
   caretRangeFromPoint,
+  getCurrentRange,
+  isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__';
@@ -42,32 +44,6 @@ function isSelectionEvent(
   return 'raw' in e;
 }
 
-/**
- * Determine if the selection contains only one line
- */
-function isOnlyOneLineSelected(selection: Selection) {
-  // Before the user has clicked a freshly loaded page, the rangeCount is 0.
-  if (selection.rangeCount === 0) {
-    return true;
-  }
-  // The rangeCount will usually be 1.
-  // Scripting can be used to make the selection contain more than one range.
-  if (selection.rangeCount > 1) {
-    return false;
-  }
-  const range = selection.getRangeAt(0);
-  // Get the selection height
-  const { height } = range.getBoundingClientRect();
-
-  const oneLineRange = document.createRange();
-  const { anchorNode, anchorOffset } = selection;
-  assertExists(anchorNode);
-  oneLineRange.setStart(anchorNode, anchorOffset);
-  // Get the base line height
-  const { height: oneLineHeight } = oneLineRange.getBoundingClientRect();
-  return height <= oneLineHeight;
-}
-
 export function getDragDirection(
   e: SelectionEvent | FrameSelectionState,
   selection: Selection
@@ -78,7 +54,8 @@ export function getDragDirection(
   const endY = isSelectionEvent(e) ? e.y : e.end.y;
   // selection direction
   const isForwards = endX > startX;
-  const selectedOneLine = isOnlyOneLineSelected(selection);
+  const range = getCurrentRange();
+  const selectedOneLine = !isMultiLineRange(range);
 
   if (isForwards) {
     if (selectedOneLine || endY >= startY) {
@@ -96,19 +73,67 @@ export function getDragDirection(
   }
 }
 
+/**
+ * Return a base range for element positioning based on the current selection and selection info
+ *
+ * @example
+ * ```ts
+ * const { selectedType, direction, anchor } = getNativeSelectionMouseDragInfo(e);
+ * if (selectedType === 'Caret') {
+ *   return;
+ * }
+ * const rect = anchor.getBoundingClientRect();
+ * ```
+ */
 export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
   const selection = window.getSelection();
   assertExists(selection);
+  const curRange = getCurrentRange(selection);
   const direction = getDragDirection(e, selection);
-  const selectedType: SelectedBlockType =
-    selection.type === 'Caret' ? 'Caret' : 'Text';
+  const isSelectedNothing =
+    selection.type === 'Caret' ||
+    // If you try to drag from back to front on an empty line,
+    // you will get a empty range, but the `selection.type` is not 'Caret',
+    // and the range has different startContainer and endContainer
+    curRange.toString().length === 0;
+  const selectedType: SelectedBlockType = isSelectedNothing ? 'Caret' : 'Text';
   const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
-  const [targetNode, offset] = ['left-top', 'right-top'].includes(direction)
+  const isStartAnchor = ['left-top', 'right-top'].includes(direction);
+  const [targetNode, offset] = isStartAnchor
     ? [anchorNode, anchorOffset]
     : [focusNode, focusOffset];
 
   assertExists(targetNode);
   const range = document.createRange();
   range.setStart(targetNode, offset);
+  // Workaround for select to the start of line
+  // If not set end, the getBoundingClientRect of range will return the wrong value
+  //
+  // For example
+  // line1↩
+  //      ↑ range.getBoundingClientRect will return this position
+  //        if you select `line2` from back to front,
+  // line2↩
+  if (isStartAnchor) {
+    range.setEnd(targetNode, offset + 1);
+  }
+
+  // XXX the workaround is very ugly, please improve after you find a way to identify the range is empty
+  // Workaround select to empty line will get empty range
+  // If range is empty, range.getBoundingClientRect of range will return the empty value({ x: 0, y: 0 ...})
+  const rangeRect = range.getBoundingClientRect();
+  const isWrongRect =
+    rangeRect.x === 0 &&
+    rangeRect.y === 0 &&
+    rangeRect.width === 0 &&
+    rangeRect.height === 0;
+
+  if (isWrongRect) {
+    // Try to select something prevent range.getBoundingClientRect return empty value
+    range.setEnd(targetNode, offset + 1);
+  }
+  // You can uncomment follow line to debug the positioning range
+  // selection.removeAllRanges();
+  // selection.addRange(range);
   return { selectedType, direction, anchor: range };
 }

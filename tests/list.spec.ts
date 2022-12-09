@@ -21,12 +21,12 @@ import {
   undoByClick,
   undoByKeyboard,
   pressTab,
-  initEmptyState,
+  initEmptyParagraphState,
 } from './utils/actions';
 
 test('add new bulleted list', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
   await convertToBulletedListByClick(page);
@@ -41,7 +41,7 @@ test('add new bulleted list', async ({ page }) => {
 
 test('convert to numbered list block', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
 
   await focusRichText(page, 0); // created 0, 1, 2
   await convertToBulletedListByClick(page); // replaced 2 to 3
@@ -217,7 +217,7 @@ test('nested list blocks', async ({ page }) => {
 
 test('basic indent and unindent', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
 
   await page.keyboard.type('text1');

@@ -52,9 +52,7 @@ export async function resetHistory(page: Page) {
   });
 }
 
-export async function enterPlaygroundWithList(page: Page) {
-  const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUND}?init=list&room=${room}&isTest=true`);
+export async function initEmptyEditor(page: Page) {
   await page.evaluate(() => {
     const page = window.workspace
       .createPage('page0')
@@ -62,13 +60,23 @@ export async function enterPlaygroundWithList(page: Page) {
     window.page = page;
     const editor = document.createElement('editor-container');
     editor.page = page;
+    window.editor = editor;
 
     const debugMenu = document.createElement('debug-menu');
     debugMenu.workspace = window.workspace;
     debugMenu.editor = editor;
     document.body.appendChild(editor);
     document.body.appendChild(debugMenu);
+  });
+}
 
+export async function enterPlaygroundWithList(page: Page) {
+  const room = generateRandomRoomId();
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
+
+  await initEmptyEditor(page);
+  await page.evaluate(() => {
+    const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
     for (let i = 0; i < 3; i++) {
@@ -78,27 +86,16 @@ export async function enterPlaygroundWithList(page: Page) {
   await waitNextFrame(page);
 }
 
-export async function initEmptyState(page: Page) {
-  const id = await page.evaluate(() => {
-    const page = window.workspace
-      .createPage('page0')
-      .register(window.blockSchema);
-    window.page = page;
-    const editor = document.createElement('editor-container');
-    editor.page = page;
-
-    const debugMenu = document.createElement('debug-menu');
-    debugMenu.workspace = window.workspace;
-    debugMenu.editor = editor;
-    document.body.appendChild(editor);
-    document.body.appendChild(debugMenu);
-
+export async function initEmptyParagraphState(page: Page) {
+  await initEmptyEditor(page);
+  const ids = await page.evaluate(() => {
+    const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
     const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, groupId);
     return { pageId, groupId, paragraphId };
   });
-  return id;
+  return ids;
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -106,6 +103,7 @@ export async function focusRichText(page: Page, i = 0) {
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
   await locator.click();
 }
+
 export async function initThreeParagraphs(page: Page) {
   await focusRichText(page);
   await page.keyboard.type('123');
@@ -115,7 +113,7 @@ export async function initThreeParagraphs(page: Page) {
   await page.keyboard.type('789');
 }
 
-export async function initThreeList(page: Page) {
+export async function initThreeLists(page: Page) {
   await focusRichText(page);
   await page.keyboard.type('-');
   await page.keyboard.press('Space', { delay: 50 });
@@ -126,7 +124,8 @@ export async function initThreeList(page: Page) {
   await page.keyboard.press('Tab', { delay: 50 });
   await page.keyboard.type('789');
 }
-export async function initThreeDivider(page: Page) {
+
+export async function initThreeDividers(page: Page) {
   await focusRichText(page);
   await page.keyboard.type('123');
   await pressEnter(page);

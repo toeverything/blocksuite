@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import type { GroupBlockModel } from '../packages/blocks/src/group-block/group-model';
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  initEmptyState,
+  initEmptyParagraphState,
   pressEnter,
   redoByClick,
   switchMode,
@@ -17,9 +17,25 @@ import {
   assertSelection,
 } from './utils/asserts';
 
+async function getGroupSize(
+  page: Page,
+  ids: { pageId: string; groupId: string; paragraphId: string }
+) {
+  const result = await page.evaluate(
+    ([id]) => {
+      const block = window.workspace.pages
+        .get('space:page0')
+        ?.getBlockById(id.groupId) as GroupBlockModel;
+      return block.xywh;
+    },
+    [ids] as const
+  );
+  return result;
+}
+
 test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await assertRichTexts(page, ['hello']);
@@ -36,7 +52,7 @@ test('switch to edgeless mode', async ({ page }) => {
 
 test('cursor for active and inactive state', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
@@ -65,54 +81,33 @@ test('cursor for active and inactive state', async ({ page }) => {
 
 test('resize the block', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const id = await initEmptyState(page);
+  const ids = await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await assertRichTexts(page, ['hello']);
+
   await switchMode(page);
   await page.click('[test-id="1"]');
-  const oldXywh = await page.evaluate(id => {
-    const block = window.workspace.pages
-      .get('space:page0')
-      ?.getBlockById(id.groupId) as GroupBlockModel;
-    return block.xywh;
-  }, id);
-  const lefthandle = await page.locator('[aria-label="handle-left"]');
-  const box = await lefthandle.boundingBox();
-  expect(box).not.toBeNull();
-  if (box === null) {
-    throw new Error();
-  }
+  const oldXywh = await getGroupSize(page, ids);
+  const leftHandle = page.locator('[aria-label="handle-left"]');
+  const box = await leftHandle.boundingBox();
+  if (box === null) throw new Error();
+
   await dragBetweenCoords(
     page,
     { x: box.x + 5, y: box.y + 5 },
     { x: box.x + 105, y: box.y + 5 }
   );
-  const xywh = await page.evaluate(
-    ([id, oldXywh]) => {
-      const block = window.workspace.pages
-        .get('space:page0')
-        ?.getBlockById(id.groupId) as GroupBlockModel;
-      return block.xywh;
-    },
-    [id, oldXywh] as const
-  );
+  const xywh = await getGroupSize(page, ids);
   const [oldX, oldY, oldW, oldH] = JSON.parse(oldXywh);
   const [x, y, w, h] = JSON.parse(xywh);
   expect(x).toBe(oldX + 100);
   expect(y).toBe(oldY);
   expect(w).toBe(oldW - 100);
   expect(h).toBe(oldH);
+
   await switchMode(page);
   await switchMode(page);
-  const newXywh = await page.evaluate(
-    ([id]) => {
-      const block = window.workspace.pages
-        .get('space:page0')
-        ?.getBlockById(id.groupId) as GroupBlockModel;
-      return block.xywh;
-    },
-    [id, oldXywh] as const
-  );
+  const newXywh = await getGroupSize(page, ids);
   expect(newXywh).toBe(xywh);
 });

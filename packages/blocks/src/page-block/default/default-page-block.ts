@@ -33,11 +33,15 @@ import {
   Point,
   caretRangeFromPoint,
   getStartModelBySelection,
+  getCurrentRange,
+  isMultiBlockRange,
+  getModelsByRange,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
   batchUpdateTextType,
   bindCommonHotkey,
+  deleteModels,
   handleBackspace,
   handleBlockSelectionBatchDelete,
   handleSelectAll,
@@ -63,6 +67,7 @@ export interface DefaultPageSignals {
     { left: number; top: number; width: number; height: number }[]
   >;
   updateEmbedOption: Signal<EmbedOption | null>;
+  nativeSelection: Signal<boolean>;
 }
 
 // https://stackoverflow.com/a/2345915
@@ -348,6 +353,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       { left: number; top: number; width: number; height: number }[]
     >(),
     updateEmbedOption: new Signal<EmbedOption | null>(),
+    nativeSelection: new Signal<boolean>(),
   };
 
   private _scrollDisposable!: Disposable;
@@ -412,6 +418,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           e.preventDefault();
           const title = getSplicedTitle(target);
           page.updateBlock(this.model, { title });
+          page.workspace.setPageMeta(page.id, { title });
         }
         // collapsed delete
         else {
@@ -537,53 +544,56 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   private _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = !this.page.isEmpty;
+    const { page, model, _title } = this;
 
     if (e.key === 'Enter' && hasContent) {
-      assertExists(this._title.selectionStart);
-      const titleCursorIndex = this._title.selectionStart;
-      const contentLeft = this._title.value.slice(0, titleCursorIndex);
-      const contentRight = this._title.value.slice(titleCursorIndex);
+      assertExists(_title.selectionStart);
+      const titleCursorIndex = _title.selectionStart;
+      const contentLeft = _title.value.slice(0, titleCursorIndex);
+      const contentRight = _title.value.slice(titleCursorIndex);
 
-      const defaultGroup = this.model.children[0];
+      const defaultGroup = model.children[0];
       const props = {
         flavour: 'affine:paragraph',
-        text: new Text(this.page, contentRight),
+        text: new Text(page, contentRight),
       };
-      const newFirstParagraphId = this.page.addBlock(props, defaultGroup, 0);
-      this.page.updateBlock(this.model, { title: contentLeft });
+      const newFirstParagraphId = page.addBlock(props, defaultGroup, 0);
+      page.updateBlock(model, { title: contentLeft });
+      page.workspace.setPageMeta(page.id, { title: contentLeft });
       asyncFocusRichText(this.page, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      asyncFocusRichText(this.page, this.model.children[0].children[0].id);
+      asyncFocusRichText(page, model.children[0].children[0].id);
     }
   }
 
   private _onTitleInput(e: InputEvent) {
-    const { page: space } = this;
+    const { page } = this;
 
     if (!this.model.id) {
       const title = (e.target as HTMLInputElement).value;
-      const pageId = space.addBlock({ flavour: 'affine:page', title });
-      const groupId = space.addBlock({ flavour: 'affine:group' }, pageId);
-      space.addBlock({ flavour: 'affine:paragraph' }, groupId);
+      const pageId = page.addBlock({ flavour: 'affine:page', title });
+      const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+      page.addBlock({ flavour: 'affine:paragraph' }, groupId);
       return;
     }
 
     const title = (e.target as HTMLInputElement).value;
-    space.updateBlock(this.model, { title });
+    page.updateBlock(this.model, { title });
+    page.workspace.setPageMeta(page.id, { title });
   }
 
-  private _updateType(flavour: string, type: string, space: Page) {
+  private _updateType(flavour: string, type: string, page: Page) {
     const { state } = this.selection;
     if (state.selectedBlocks.length > 0) {
       batchUpdateTextType(
         flavour,
-        space,
+        page,
         state.selectedBlocks.map(block => getModelByElement(block)),
         type
       );
     } else {
-      updateTextType(flavour, type, space);
+      updateTextType(flavour, type, page);
     }
   }
 
@@ -617,6 +627,28 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.isCompositionStart = false;
   };
 
+  // Fixes: https://github.com/toeverything/blocksuite/issues/200
+  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
+  //  that have pop-up for selecting local characters.
+  // So we could just hook on the keydown event and detect whether user input a new character.
+  private _handleNativeKeydown = (e: KeyboardEvent) => {
+    // Only the length of character buttons is 1
+    if (
+      (e.key.length === 1 || e.key === 'Enter') &&
+      window.getSelection()?.type === 'Range'
+    ) {
+      const range = getCurrentRange();
+      if (isMultiBlockRange(range)) {
+        const intersectedModels = getModelsByRange(range);
+        deleteModels(this.page, intersectedModels);
+      }
+      window.removeEventListener('keydown', this._handleNativeKeydown);
+    } else if (window.getSelection()?.type !== 'Range') {
+      // remove, user don't have native selection
+      window.removeEventListener('keydown', this._handleNativeKeydown);
+    }
+  };
+
   firstUpdated() {
     this._bindHotkeys();
 
@@ -644,6 +676,15 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.embedOption = embedOption;
       this.requestUpdate();
     });
+
+    this.signals.nativeSelection.on(bind => {
+      if (bind) {
+        window.addEventListener('keydown', this._handleNativeKeydown);
+      } else {
+        window.removeEventListener('keydown', this._handleNativeKeydown);
+      }
+    });
+
     tryUpdateGroupSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;

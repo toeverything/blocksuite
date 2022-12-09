@@ -163,7 +163,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         ) {
           page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
-          previousSibling.text?.join(model.text as Text);
+          model.text?.length && previousSibling.text?.join(model.text as Text);
           page.deleteBlock(model);
           const richText = getRichTextByModel(previousSibling);
           richText?.quill?.setSelection(preTextLength, 0);

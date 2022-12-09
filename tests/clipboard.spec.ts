@@ -10,7 +10,7 @@ import {
   dragBetweenCoords,
   setSelection,
   pressEnter,
-  initEmptyState,
+  initEmptyParagraphState,
   resetHistory,
   copyByKeyboard,
   pasteByKeyboard,
@@ -27,7 +27,7 @@ import {
 // TODO fix CI
 test.skip('clipboard copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
 
   await page.keyboard.type('test');
@@ -40,7 +40,7 @@ test.skip('clipboard copy paste', async ({ page }) => {
 
 test('markdown format parse', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await resetHistory(page);
 
@@ -140,7 +140,7 @@ test('markdown format parse', async ({ page }) => {
 
 test('splic block when paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await resetHistory(page);
 
@@ -177,7 +177,7 @@ test('splic block when paste', async ({ page }) => {
 
 test('import markdown', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await resetHistory(page);
 
@@ -193,7 +193,7 @@ test('import markdown', async ({ page }) => {
 
 test('copy clipItems format', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyState(page);
+  await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.evaluate(() => {
     window.page.captureSync();
