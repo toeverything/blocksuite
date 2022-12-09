@@ -1,6 +1,6 @@
 import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
-import type { RootBlockModels } from '../../__internal__'
+import type { RootBlockModels } from '../../__internal__';
 
 export const DEFAULT_SPACING = 64;
 
@@ -25,8 +25,13 @@ export function pick(
   modelY: number
 ): RootBlockModels | null {
   for (let i = blocks.length - 1; i >= 0; i--) {
-    if (isPointIn(blocks[i], modelX, modelY)) {
-      return blocks[i];
+    const block = blocks[i];
+    if (block.flavour === 'affine:shape') {
+      continue;
+    } else {
+      if (isPointIn(block, modelX, modelY)) {
+        return block;
+      }
     }
   }
   return null;

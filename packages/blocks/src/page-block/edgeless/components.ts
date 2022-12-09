@@ -151,6 +151,7 @@ function EdgelessBlockChild(
     height: modelH + (isShape ? 0 : PADDING_Y) + 'px',
     padding: isShape ? '0px' : `${PADDING_X / 2}px`,
     background: isShape ? 'transparent' : 'white',
+    pointerEvents: isShape ? 'none' : 'all',
   };
 
   return html`
