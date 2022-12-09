@@ -283,7 +283,7 @@ export class EdgelessSelectionManager {
       case 'default': {
         const { viewport } = this._container;
         const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-        const selected = pick(this._blocks, modelX, modelY);
+        const selected = pick(this._blocks, modelX, modelY, this._container, e);
 
         if (selected) {
           this._handleClickOnSelected(selected, e);
@@ -388,7 +388,7 @@ export class EdgelessSelectionManager {
   private _onContainerClick = (e: SelectionEvent) => {
     const { viewport } = this._container;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
+    const selected = pick(this._blocks, modelX, modelY, this._container, e);
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
@@ -419,7 +419,7 @@ export class EdgelessSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     const { viewport } = this._container;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const hovered = pick(this._blocks, modelX, modelY);
+    const hovered = pick(this._blocks, modelX, modelY, this._container, e);
 
     this._updateHoverState(hovered);
     this._container.signals.hoverUpdated.emit();

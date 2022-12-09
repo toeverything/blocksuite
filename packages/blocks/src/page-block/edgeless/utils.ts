@@ -1,6 +1,8 @@
 import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
 import type { RootBlockModels } from '../../__internal__';
+import type { ShapeBlockComponent } from '../../shape-block';
+import type { SelectionEvent } from '../../__internal__';
 
 export const DEFAULT_SPACING = 64;
 
@@ -22,12 +24,23 @@ function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
 export function pick(
   blocks: RootBlockModels[],
   modelX: number,
-  modelY: number
+  modelY: number,
+  container: EdgelessContainer,
+  e: SelectionEvent
 ): RootBlockModels | null {
   for (let i = blocks.length - 1; i >= 0; i--) {
     const block = blocks[i];
     if (block.flavour === 'affine:shape') {
-      continue;
+      if (isPointIn(block, modelX, modelY)) {
+        const items = container.getElementsByTagName('shape-block');
+        for (let j = 0; j < items.length; j++) {
+          const item = items.item(j) as ShapeBlockComponent;
+          const collision = item.detectCollision(e.raw.offsetX, e.raw.offsetY);
+          if (collision) {
+            return block;
+          }
+        }
+      }
     } else {
       if (isPointIn(block, modelX, modelY)) {
         return block;
