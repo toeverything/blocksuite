@@ -47,10 +47,12 @@ class SyntaxCodeBlock extends CodeBlock {
     }
 
     const text = this.domNode.textContent;
-    const lines = text.split('\n').length;
+    const lines = text.split('\n');
+    // quill must end with a newline, see https://quilljs.com/docs/delta/#line-formatting
+    const lineNum = text.endsWith('\n') ? lines.length - 1 : lines.length;
 
     // adjust position according to line number digits
-    const curLineNumberDigits = lines.toString().length;
+    const curLineNumberDigits = lineNum.toString().length;
     if (curLineNumberDigits !== this.lineNumberDigits) {
       const style = getComputedStyle(container);
       const left = parseInt(style.left, 10);
@@ -60,7 +62,7 @@ class SyntaxCodeBlock extends CodeBlock {
       this.lineNumberDigits = curLineNumberDigits;
     }
 
-    for (let i = 1; i <= lines; i++) {
+    for (let i = 1; i <= lineNum; i++) {
       const node = document.createElement('div');
       node.innerHTML = i;
       container.appendChild(node);

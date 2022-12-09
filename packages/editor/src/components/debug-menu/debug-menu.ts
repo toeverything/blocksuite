@@ -1,11 +1,12 @@
-import { LitElement, html, css } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
+  assertExists,
   type CommonBlockElement,
-  type GroupBlockModel,
   convertToList,
   createEvent,
+  type GroupBlockModel,
 } from '@blocksuite/blocks';
 import type { BaseBlockModel, Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
@@ -167,6 +168,33 @@ export class DebugMenu extends LitElement {
     const { page } = block.host;
     const model = page.getBlockById(block.model.id) as BaseBlockModel;
     convertToList(this.page, model, listType, '');
+  }
+
+  private _onAddCodeBlock() {
+    const selection = window.getSelection() as Selection;
+    if (selection.rangeCount === 0) {
+      throw new Error("Can't get start model by selection, rangeCount is 0");
+    }
+
+    const range = selection.getRangeAt(0);
+    const startContainer =
+      range.startContainer instanceof Text
+        ? (range.startContainer.parentElement as HTMLElement)
+        : (range.startContainer as HTMLElement);
+
+    const startComponent = startContainer.closest(`[data-block-id]`) as {
+      model?: BaseBlockModel;
+    };
+    const startModel = startComponent.model as BaseBlockModel;
+    const parent = this.page.getParent(startModel);
+    const index = parent?.children.indexOf(startModel);
+    assertExists(parent);
+    const blockProps = {
+      flavour: 'affine:code',
+      text: startModel.text?.clone(),
+    };
+    this.page.deleteBlock(startModel);
+    this.page.addBlock(blockProps, parent, index);
   }
 
   private _onDelete() {
@@ -407,6 +435,14 @@ export class DebugMenu extends LitElement {
           @click=${this._onAddGroup}
         >
           ${icons.addGroup}
+        </button>
+        <button
+          aria-label="code block"
+          title="code block"
+          tabindex="-1"
+          @click=${this._onAddCodeBlock}
+        >
+          <>
         </button>
         <button
           aria-label="export markdown"

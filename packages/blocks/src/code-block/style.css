@@ -1,9 +1,25 @@
+code-block {
+  position: relative;
+  z-index: 1;
+}
+
 .affine-code-block-container {
-  border-radius: 5px;
+  position: relative;
+  border-radius: 10px;
   width: 720px;
   margin-top: 15px;
-  background: #aae9ff26;
+  background: #fafbfd;
   box-shadow: 1px 1px 1px var(--affine-border-color);
+  font-size: calc(var(--affine-font-base) - 4px);
+  font-family: var(--affine-font-family2);
+  line-height: calc(var(--affine-line-height-base) - 6px);
+}
+
+.container {
+  position: absolute;
+  bottom: 5px;
+  right: 40px;
+  font-size: var(--affine-font-xs);
 }
 
 .affine-code-block-container.selected {
@@ -17,8 +33,9 @@
 #line-number {
   position: absolute;
   text-align: right;
-  top: 20px;
+  top: 16px;
   left: 25px;
+  line-height: calc(var(--affine-line-height-base) - 6px);
 }
 
 .affine-code-block-container .ql-container {
@@ -29,10 +46,42 @@
 
 .ql-syntax {
   width: 660px;
-  overflow-x: scroll;
+  /*overflow-x: scroll;*/
 }
 
 .lang-container {
-  display: flex;
-  flex-direction: column;
+  color: var(--affine-icon-color);
+  line-height: calc(var(--affine-line-height-base) - 10px);
+  text-align: justify;
+  position: relative;
+}
+
+tool-tip {
+  font-family: var(--affine-font-family);
+  position: absolute;
+  left: 0;
+  top: 0;
+  inline-size: max-content;
+  text-align: center;
+  font-size: var(--affine-font-xs);
+  padding: 4px 12px;
+  border-radius: 10px 10px 10px 0px;
+  color: var(--affine-tooltip-color);
+  background: var(--affine-tooltip-background);
+  box-shadow: var(--affine-tooltip-shadow);
+  border-radius: 10px 10px 10px 0px;
+
+  opacity: 0;
+  transform: translateX(0) translateY(calc(-100% - 8px));
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  user-select: none;
+}
+
+.has-tool-tip {
+  position: relative;
+}
+.has-tool-tip:is(:hover, :focus-visible, :active) > tool-tip {
+  opacity: 1;
+  transition-delay: 200ms;
 }

@@ -1,20 +1,23 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import type { CodeBlockModel } from './code-model';
-import style from './style.css';
-import codeStyle from 'highlight.js/styles/color-brewer.css';
+import codeBlockStyle from './style.css';
+import codeTheme from 'highlight.js/styles/color-brewer.css';
+import { toolTipStyle } from '../components/tooltip';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
 import highlight from 'highlight.js';
 
 @customElement('code-block')
 export class CodeBlockComponent extends LitElement {
-  static get styles() {
-    return css`
-      ${unsafeCSS(style)}
-      ${unsafeCSS(codeStyle)}
-    `;
-  }
+  static styles = css`
+    ${unsafeCSS(codeTheme)}
+    ${unsafeCSS(codeBlockStyle)}
+      ${toolTipStyle}
+  `;
 
+  @property({
+    hasChanged: () => true,
+  })
   model!: CodeBlockModel;
 
   @property()
@@ -54,6 +57,20 @@ export class CodeBlockComponent extends LitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
+  private mouseout() {
+    return () => {
+      clearTimeout(this.popoverTimer);
+    };
+  }
+
+  private mouseover() {
+    return () => {
+      this.popoverTimer = window.setTimeout(() => {
+        this.showLangList = 'visible';
+      }, this.delay);
+    };
+  }
+
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
@@ -71,29 +88,26 @@ export class CodeBlockComponent extends LitElement {
         >
           <div id="line-number"></div>
         </rich-text>
-        <div
-          class="lang-container"
-          @mouseover=${() => {
-            this.popoverTimer = window.setTimeout(() => {
-              this.showLangList = 'visible';
-            }, this.delay);
-          }}
-          @mouseout=${() => {
-            clearTimeout(this.popoverTimer);
-          }}
-        >
-          ${this.language}
+        <div class="container">
+          <div
+            class="lang-container has-tool-tip"
+            @mouseover=${this.mouseover()}
+            @mouseout=${this.mouseout()}
+          >
+            <code-block-button> ${this.language} </code-block-button>
+            <tool-tip inert role="tooltip">switch language</tool-tip>
+          </div>
+          <lang-list
+            showLangList=${this.showLangList}
+            filterText=${this.filterText}
+            @selected-language-changed=${(e: CustomEvent) => {
+              this.language = e.detail.language;
+            }}
+            @dispose=${() => {
+              this.showLangList = 'hidden';
+            }}
+          ></lang-list>
         </div>
-        <lang-list
-          showLangList=${this.showLangList}
-          filterText=${this.filterText}
-          @selected-language-changed=${(e: CustomEvent) => {
-            this.language = e.detail.language;
-          }}
-          @dispose=${() => {
-            this.showLangList = 'hidden';
-          }}
-        ></lang-list>
       </div>
     `;
   }

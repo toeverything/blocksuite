@@ -1,0 +1,13 @@
+lang-list {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 40px;
+  width: 110px;
+  background: white;
+}
+
+.lang-item {
+  display: flex;
+  justify-content: flex-start;
+}
