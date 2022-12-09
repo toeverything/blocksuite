@@ -17,10 +17,8 @@ import {
   convertToList,
   convertToParagraph,
   convertToDivider,
-  getDefaultPageBlock,
-  getBlockElementByModel,
-  resetNativeSelection,
   matchFlavours,
+  focusPreviousBlock,
 } from '../utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -149,6 +147,9 @@ export async function handleUnindent(
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
+
+  const container = getContainerByModel(model);
+  const previousSibling = getPreviousBlock(container, model.id);
   if (matchFlavours(model, ['affine:paragraph'])) {
     if (model.type !== 'text') {
       page.captureSync();
@@ -156,20 +157,6 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     } else {
       const parent = page.getParent(model);
       if (!parent || matchFlavours(parent, ['affine:group'])) {
-        const container = getContainerByModel(model);
-        const previousSibling = getPreviousBlock(container, model.id);
-        if (
-          previousSibling &&
-          matchFlavours(previousSibling, ['affine:divider'])
-        ) {
-          const selectionManager = getDefaultPageBlock(model).selection;
-          const dividerBlockElement = getBlockElementByModel(
-            previousSibling
-          ) as HTMLElement;
-          const selectionRect = dividerBlockElement.getBoundingClientRect();
-          selectionManager.selectBlockByRect(selectionRect, model);
-          resetNativeSelection(null);
-        }
         if (
           previousSibling &&
           matchFlavours(previousSibling, ['affine:paragraph'])
@@ -180,6 +167,11 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           page.deleteBlock(model);
           const richText = getRichTextByModel(previousSibling);
           richText?.quill?.setSelection(preTextLength, 0);
+        } else if (
+          previousSibling &&
+          matchFlavours(previousSibling, ['affine:embed', 'affine:divider'])
+        ) {
+          focusPreviousBlock(model, 'start');
         }
       } else {
         const grandParent = page.getParent(parent);

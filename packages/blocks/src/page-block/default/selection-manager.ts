@@ -17,8 +17,7 @@ import {
   getModelByElement,
   getBlockElementByModel,
   getAllBlocks,
-  matchFlavours,
-  hotkey,
+  getDefaultPageBlock,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -113,16 +112,11 @@ class PageSelectionState {
   }
 
   refreshRichTextBoundsCache(container: HTMLElement) {
-    // const richTexts = Array.from(container.querySelectorAll('rich-text'));
     const allBlocks = getAllBlocks();
     allBlocks.forEach(block => {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
     });
-    // richTexts.forEach(richText => {
-    //   const rect = richText.getBoundingClientRect();
-    //   this._richTextCache.set(richText, rect);
-    // });
   }
 
   clear() {
@@ -203,38 +197,15 @@ export class DefaultSelectionManager {
 
     const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
 
-    // const selectedRichTexts = filterSelectedRichText(
-    //   richTextCache,
-    //   selectionRect
-    // );
-
-    // TODO
-    // const selectedEmbed = filterSelectedEmbed(embedCache, selectionRect);
-    // const selectedEmbedBounds = selectedEmbed.map(embed => {
-    //   return embedCache.get(embed) as DOMRect;
-    // });
-    // this._signals.updateEmbedRects.emit(selectedEmbedBounds);
     return {
       selectionRect,
       selectedBlocks,
       blockCache,
     };
   }
-  // private _setDragOnlyOneDividerType() {
-  //   const { state } = this;
-  //   const { selectedBlocks } = state;
-  //   if (
-  //     selectedBlocks.length === 1 &&
-  //     matchFlavours(getModelByElement(selectedBlocks[0]), ['affine:divider'])
-  //   ) {
-  //     state.type = 'divider';
-  //     return;
-  //   }
-  // }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
-    // this._setDragOnlyOneDividerType();
-    this.state.type = 'none';
+    this.state.type = 'block';
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
@@ -388,6 +359,11 @@ export class DefaultSelectionManager {
       e.raw.pageX,
       e.raw.pageY
     );
+    if (clickBlockInfo && clickBlockInfo.model) {
+      const { model } = clickBlockInfo;
+      const page = getDefaultPageBlock(model);
+      page.lastSelectionPosition = 'start';
+    }
     if (clickBlockInfo && NON_TEXT_ARR.includes(clickBlockInfo.model.type)) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();

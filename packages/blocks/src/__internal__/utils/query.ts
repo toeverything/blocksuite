@@ -41,7 +41,6 @@ export function getPreviousSiblingById<T extends ElementTagName>(
   ele: Element = document.body
 ) {
   const siblings = getSiblingsById(id, ele);
-  console.log('siblings: ', siblings);
   const currentBlock = getBlockById<T>(id, ele);
   if (siblings && siblings.length > 0 && currentBlock) {
     const index = [...siblings].indexOf(currentBlock);
@@ -86,14 +85,13 @@ export function getNextBlock(blockId: string) {
 }
 
 export function getPreviousBlock(container: Element, blockId: string) {
-  console.log('blockId: ', blockId);
   const parentBlock = getParentBlockById<'paragraph-block'>(blockId, container);
   if (parentBlock) {
     const previousBlock = getPreviousSiblingById<'paragraph-block'>(
       blockId,
       container
     );
-    console.log('previousBlock: ', previousBlock);
+
     if (previousBlock?.model) {
       if (previousBlock.model.children.length) {
         let firstChild =

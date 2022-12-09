@@ -8,6 +8,7 @@ import {
   almostEqual,
   isCollapsedAtBlockStart,
 } from '../../__internal__';
+import { handleLineStartBackspace } from '../../__internal__/rich-text/rich-text-operations';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
   getStartModelBySelection,
@@ -133,7 +134,6 @@ export function handleBackspace(page: Page, e: KeyboardEvent) {
       const { quill } = richText;
       if (isCollapsedAtBlockStart(quill)) {
         // use quill handler
-        noop();
       }
     }
   } else if (isRangeSelection()) {

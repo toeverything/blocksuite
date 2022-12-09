@@ -29,14 +29,10 @@ import {
   getBlockElementByModel,
   getContainerByModel,
   getPreviousBlock,
-  getNextBlock,
   focusNextBlock,
-  resetNativeSelection,
-  getModelsByRange,
   Point,
   caretRangeFromPoint,
   getStartModelBySelection,
-  getPreviousSiblingById,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -51,13 +47,11 @@ import {
 } from '../utils';
 import style from './style.css';
 import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
+import { downloadImage, focusCaption, copyImgToClip } from './utils';
 import {
-  downloadImage,
-  focusCaption,
-  copyImgToClip,
-  NON_TEXT_ARR,
-} from './utils';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
+  handleLineStartBackspace,
+  isAtLineEdge,
+} from '../../__internal__/rich-text/rich-text-operations';
 export interface EmbedOption {
   position: { x: number; y: number };
   model: BaseBlockModel;
@@ -216,7 +210,8 @@ function EmbedOptionContainer(
 
 function handleUp(
   selection: DefaultSelectionManager,
-  signals: DefaultPageSignals
+  signals: DefaultPageSignals,
+  e: KeyboardEvent
 ) {
   const nativeSelection = window.getSelection();
   if (nativeSelection?.anchorNode) {
@@ -271,61 +266,28 @@ function handleUp(
     const container = getContainerByModel(selectedModel);
     const preNodeModel = getPreviousBlock(container, selectedModel.id);
     assertExists(preNodeModel);
-    focusPreviousBlock(selectedModel, 'end');
+    const page = getDefaultPageBlock(selectedModel);
+    e.preventDefault();
+    focusPreviousBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'end'
+    );
   }
 }
 function handleDown(
   selection: DefaultSelectionManager,
-  signals: DefaultPageSignals
+  signals: DefaultPageSignals,
+  e: KeyboardEvent
 ) {
   if (!selection.state.selectedBlocks.length) {
     const nativeSelection = window.getSelection();
     const model = getStartModelBySelection();
-    // const activeContainer = getContainerByModel(model);
-    const activePreNodeModel = getNextBlock(model.id);
-
-    const editableContainer = getBlockElementByModel(model)?.querySelector(
-      '.ql-editor'
-    ) as HTMLElement;
     assertExists(nativeSelection);
     const range = nativeSelection.getRangeAt(0);
-    const { height, left, bottom } = range.getBoundingClientRect();
-
-    // TODO resolve compatible problem
-    const newRange = caretRangeFromPoint(left, bottom + height / 2);
-    // if (
-    //   (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-    //   !isAtLineEdge(range)
-    // ) {
-    //   // FIXME: Then it will turn the input into the div
-    //   if (
-    //     activePreNodeModel &&
-    //     matchFlavours(activePreNodeModel, ['affine:group'])
-    //   ) {
-    //     (
-    //       document.querySelector(
-    //         '.affine-default-page-block-title'
-    //       ) as HTMLInputElement
-    //     ).focus();
-    //   }
-    // else if (
-    //   activePreNodeModel &&
-    //   NON_TEXT_ARR.includes(activePreNodeModel.type)
-    // ) {
-    //   const pageBlock = getDefaultPageBlock(model);
-    //   pageBlock.selection.state.type = 'block';
-    //   const dividerBlockElement = getBlockElementByModel(
-    //     activePreNodeModel
-    //   ) as HTMLElement;
-    //   const selectionRect = dividerBlockElement.getBoundingClientRect();
-    //   signals.updateSelectedRects.emit([selectionRect]);
-    //   pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
-    //   resetNativeSelection(null);
-    // }
-    // else {
+    const { left, bottom } = range.getBoundingClientRect();
     focusNextBlock(model, new Point(left, bottom));
-    // }
-    // }
   } else {
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
@@ -333,7 +295,14 @@ function handleDown(
     const container = getContainerByModel(selectedModel);
     const preNodeModel = getPreviousBlock(container, selectedModel.id);
     assertExists(preNodeModel);
-    focusNextBlock(selectedModel, 'end');
+    const page = getDefaultPageBlock(selectedModel);
+    e.preventDefault();
+    focusNextBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'start'
+    );
     return;
   }
 }
@@ -418,10 +387,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     } = HOTKEYS;
 
     bindCommonHotkey(page);
-    const { state } = this.selection;
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
-
       if (state.type === 'native') {
         handleBackspace(page, e);
         return;
@@ -431,7 +398,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           page,
           selectedBlocks.map(block => getModelByElement(block))
         );
-
+        e.preventDefault();
         state.clear();
         this.signals.updateSelectedRects.emit([]);
         this.signals.updateEmbedRects.emit([]);
@@ -461,10 +428,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(UP, e => {
-      handleUp(this.selection, this.signals);
+      handleUp(this.selection, this.signals, e);
     });
     hotkey.addListener(DOWN, e => {
-      handleDown(this.selection, this.signals);
+      handleDown(this.selection, this.signals, e);
     });
     hotkey.addListener(LEFT, e => {
       let model: BaseBlockModel | null = null;
@@ -472,14 +439,13 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         model = getModelByElement(this.selection.state.selectedBlocks[0]);
         this.signals.updateSelectedRects.emit([]);
         this.selection.state.clear();
+        e.preventDefault();
       } else {
         const range = window.getSelection()?.getRangeAt(0);
         if (range && range.collapsed && range.startOffset === 0) {
-          // handleUp(this.selection, this.signals);
           model = getStartModelBySelection();
         }
       }
-      assertExists(model);
       model && focusPreviousBlock(model, 'end');
     });
     hotkey.addListener(RIGHT, e => {
@@ -492,6 +458,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         );
         this.signals.updateSelectedRects.emit([]);
         this.selection.state.clear();
+        e.preventDefault();
       } else {
         const range = window.getSelection()?.getRangeAt(0);
         const textModel = getStartModelBySelection();
@@ -504,7 +471,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           model = getStartModelBySelection();
         }
       }
-      assertExists(model);
       model && focusNextBlock(model, 'start');
     });
 
