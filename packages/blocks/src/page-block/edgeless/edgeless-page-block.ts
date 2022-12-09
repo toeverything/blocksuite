@@ -235,8 +235,15 @@ export class EdgelessPageBlockComponent
     const { frameSelectionRect, blockSelectionState: selectionState } =
       _selection;
     const { zoom } = this.viewport;
-    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
-    const hoverRect = EdgelessHoverRect(_selection.hoverRect, zoom, _selection.isHoveringShape);
+    const selectionRect = EdgelessFrameSelectionRect(
+      frameSelectionRect,
+      _selection.isHoveringShape
+    );
+    const hoverRect = EdgelessHoverRect(
+      _selection.hoverRect,
+      zoom,
+      _selection.isHoveringShape
+    );
 
     return html`
       <style></style>

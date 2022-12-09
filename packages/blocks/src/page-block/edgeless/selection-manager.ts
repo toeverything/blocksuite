@@ -8,8 +8,9 @@ import {
   handleNativeRangeDragMove,
   handleNativeRangeClick,
   MouseMode,
-  RootBlockModels
-} from '../../__internal__'
+  RootBlockModels,
+  assertExists,
+} from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
 import {
   getNativeSelectionMouseDragInfo,
@@ -131,6 +132,7 @@ export class EdgelessSelectionManager {
     type: 'none',
   };
   private _startRange: Range | null = null;
+  private _draggingShapeBlockId: string | null = null;
   private _hoverState: HoverState | null = null;
   private _frameSelectionState: FrameSelectionState | null = null;
 
@@ -151,8 +153,8 @@ export class EdgelessSelectionManager {
     return this._hoverState.rect;
   }
 
-  get isHoveringShape (): boolean {
-    return this._hoverState?.block.flavour === 'affine:shape'
+  get isHoveringShape(): boolean {
+    return this._hoverState?.block.flavour === 'affine:shape';
   }
 
   get frameSelectionRect() {
@@ -219,7 +221,6 @@ export class EdgelessSelectionManager {
         rect: getSelectionBoxBound(this._container.viewport, hoverBlock.xywh),
         block: hoverBlock,
       };
-      console.log('state', this._hoverState)
     } else {
       this._hoverState = null;
     }
@@ -265,6 +266,18 @@ export class EdgelessSelectionManager {
   private _onContainerDragStart = (e: SelectionEvent) => {
     switch (this.mouseMode) {
       case 'shape': {
+        const [modelX, modelY] = this._container.viewport.toModelCoord(
+          e.x,
+          e.y
+        );
+        this._draggingShapeBlockId = this._container.page.addBlock({
+          flavour: 'affine:shape',
+          xywh: JSON.stringify([modelX, modelY, 0, 0]),
+        });
+        this._frameSelectionState = {
+          start: new DOMPoint(e.raw.x, e.raw.y),
+          end: new DOMPoint(e.raw.x, e.raw.y),
+        };
         break;
       }
       case 'default': {
@@ -281,7 +294,9 @@ export class EdgelessSelectionManager {
             end: new DOMPoint(e.raw.x, e.raw.y),
           };
 
-          this._container.signals.updateSelection.emit(this.blockSelectionState);
+          this._container.signals.updateSelection.emit(
+            this.blockSelectionState
+          );
           resetNativeSelection(null);
         }
 
@@ -292,39 +307,68 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    switch (this.blockSelectionState.type) {
-      case 'none':
-        break;
-      case 'single':
-        if (this.blockSelectionState.active) {
-          // TODO reset if drag out of group
-          handleNativeRangeDragMove(this._startRange, e);
-        }
-        // for inactive selection, drag move selected group
-        else if (!this._frameSelectionState) {
-          const block = this.blockSelectionState.selected;
-          const [modelX, modelY, modelW, modelH] = JSON.parse(
-            block.xywh
-          ) as XYWH;
-          const { zoom } = this._container.viewport;
+    switch (this._mouseMode) {
+      case 'default': {
+        switch (this.blockSelectionState.type) {
+          case 'none':
+            break;
+          case 'single':
+            if (this.blockSelectionState.active) {
+              // TODO reset if drag out of group
+              handleNativeRangeDragMove(this._startRange, e);
+            }
+            // for inactive selection, drag move selected group
+            else if (!this._frameSelectionState) {
+              const block = this.blockSelectionState.selected;
+              const [modelX, modelY, modelW, modelH] = JSON.parse(
+                block.xywh
+              ) as XYWH;
+              const { zoom } = this._container.viewport;
 
-          this._space.updateBlock(block, {
-            xywh: JSON.stringify([
-              modelX + e.delta.x / zoom,
-              modelY + e.delta.y / zoom,
-              modelW,
-              modelH,
-            ]),
-          });
-          this._container.signals.updateSelection.emit(
-            this.blockSelectionState
-          );
+              this._space.updateBlock(block, {
+                xywh: JSON.stringify([
+                  modelX + e.delta.x / zoom,
+                  modelY + e.delta.y / zoom,
+                  modelW,
+                  modelH,
+                ]),
+              });
+              this._container.signals.updateSelection.emit(
+                this.blockSelectionState
+              );
+            }
+            break;
         }
-        break;
-    }
 
-    if (this._frameSelectionState) {
-      this._updateFrameSelectionState(e.raw.x, e.raw.y);
+        if (this._frameSelectionState) {
+          this._updateFrameSelectionState(e.raw.x, e.raw.y);
+        }
+        return;
+      }
+      case 'shape': {
+        assertExists(this._draggingShapeBlockId);
+        assertExists(this._frameSelectionState);
+        this._frameSelectionState.end = new DOMPoint(e.raw.x, e.raw.y);
+        const [x, y] = this._container.viewport.toModelCoord(
+          Math.min(
+            this._frameSelectionState.start.x,
+            this._frameSelectionState.end.x
+          ),
+          Math.min(
+            this._frameSelectionState.start.y,
+            this._frameSelectionState.end.y
+          )
+        );
+        const w = Math.abs(
+          this._frameSelectionState.start.x - this._frameSelectionState.end.x
+        );
+        const h = Math.abs(
+          this._frameSelectionState.start.y - this._frameSelectionState.end.y
+        );
+        this._container.page.updateBlockById(this._draggingShapeBlockId, {
+          xywh: JSON.stringify([x, y, w, h]),
+        });
+      }
     }
   };
 
