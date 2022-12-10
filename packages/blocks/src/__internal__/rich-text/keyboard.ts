@@ -2,20 +2,13 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 import {
   ALLOW_DEFAULT,
-  focusNextBlock,
-  focusPreviousBlock,
-  getBlockElementByModel,
-  getContainerByModel,
   getCurrentRange,
-  getDefaultPageBlock,
   getNextBlock,
-  getPreviousBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   matchFlavours,
   noop,
   PREVENT_DEFAULT,
-  resetNativeSelection,
 } from '../utils';
 import {
   handleLineStartBackspace,

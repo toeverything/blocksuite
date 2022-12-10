@@ -4,11 +4,9 @@ import {
   assertExists,
   assertFlavours,
   ExtendedModel,
-  noop,
   almostEqual,
   isCollapsedAtBlockStart,
 } from '../../__internal__';
-import { handleLineStartBackspace } from '../../__internal__/rich-text/rich-text-operations';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
   getStartModelBySelection,

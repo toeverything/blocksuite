@@ -52,10 +52,7 @@ import {
 import style from './style.css';
 import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
-import {
-  handleLineStartBackspace,
-  isAtLineEdge,
-} from '../../__internal__/rich-text/rich-text-operations';
+import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
 export interface EmbedOption {
   position: { x: number; y: number };
   model: BaseBlockModel;
@@ -245,22 +242,7 @@ function handleUp(
             '.affine-default-page-block-title'
           ) as HTMLInputElement
         ).focus();
-      }
-      // else if (
-      //   activePreNodeModel &&
-      //   NON_TEXT_ARR.includes(activePreNodeModel.type)
-      // ) {
-      //   const pageBlock = getDefaultPageBlock(model);
-      //   pageBlock.selection.state.type = 'block';
-      //   const dividerBlockElement = getBlockElementByModel(
-      //     activePreNodeModel
-      //   ) as HTMLElement;
-      //   const selectionRect = dividerBlockElement.getBoundingClientRect();
-      //   pageBlock.signals.updateSelectedRects.emit([selectionRect]);
-      //   pageBlock.selection.state.selectedBlocks.push(dividerBlockElement);
-      //   resetNativeSelection(null);
-      // }
-      else {
+      } else {
         focusPreviousBlock(model, new Point(left, top));
       }
     }
