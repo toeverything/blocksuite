@@ -37,7 +37,7 @@ export function EdgelessHoverRect(
   zoom: number,
   isShape = false
 ) {
-  if (!rect) return html`<div></div>`;
+  if (!rect) return html` <div></div>`;
 
   const style = {
     ...getCommonRectStyle(rect, zoom, isShape),
@@ -191,7 +191,7 @@ export function EdgelessBlockChildrenContainer(
         height: 100%;
 
         /* background-image: linear-gradient(#cccccc66 1px, transparent 1px),
-          linear-gradient(90deg, #cccccc66 1px, transparent 1px); */
+                linear-gradient(90deg, #cccccc66 1px, transparent 1px); */
         background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
         background-position: ${translateX}px ${translateY}px;
         background-color: #fff;
@@ -230,14 +230,20 @@ export class EdgelessSelectedRect extends LitElement {
   rect!: DOMRect;
 
   private _dragStartInfo: {
-    startMouseLeft: number;
-    absoluteLeft: number;
+    startMouseX: number;
+    startMouseY: number;
+    absoluteX: number;
+    absoluteY: number;
     width: number;
+    height: number;
     direction: HandleDirection;
   } = {
-    startMouseLeft: 0,
-    absoluteLeft: 0,
+    startMouseX: 0,
+    startMouseY: 0,
+    absoluteX: 0,
+    absoluteY: 0,
     width: 0,
+    height: 0,
     direction: HandleDirection.Left,
   };
 
@@ -249,10 +255,30 @@ export class EdgelessSelectedRect extends LitElement {
       const leftBottom = [rect.x, rect.y + rect.height];
       const rightBottom = [rect.x + rect.width, rect.y + rect.height];
       return html`
-        ${Handle(leftTop[0], leftTop[1], HandleDirection.LeftTop)}
-        ${Handle(rightTop[0], rightTop[1], HandleDirection.RightTop)}
-        ${Handle(leftBottom[0], leftBottom[1], HandleDirection.LeftBottom)}
-        ${Handle(rightBottom[0], rightBottom[1], HandleDirection.RightBottom)}
+        ${Handle(
+          leftTop[0],
+          leftTop[1],
+          HandleDirection.LeftTop,
+          this._onHandleMouseDown
+        )}
+        ${Handle(
+          rightTop[0],
+          rightTop[1],
+          HandleDirection.RightTop,
+          this._onHandleMouseDown
+        )}
+        ${Handle(
+          leftBottom[0],
+          leftBottom[1],
+          HandleDirection.LeftBottom,
+          this._onHandleMouseDown
+        )}
+        ${Handle(
+          rightBottom[0],
+          rightBottom[1],
+          HandleDirection.RightBottom,
+          this._onHandleMouseDown
+        )}
       `;
     } else {
       let handles: TemplateResult | null = null;
@@ -292,12 +318,15 @@ export class EdgelessSelectedRect extends LitElement {
         rect,
         selected: { xywh },
       } = this.state;
-      const [x] = JSON.parse(xywh) as XYWH;
+      const [x, y] = JSON.parse(xywh) as XYWH;
       this._dragStartInfo = {
-        startMouseLeft: e.clientX,
-        absoluteLeft: x,
+        startMouseX: e.clientX,
+        startMouseY: e.clientY,
+        absoluteX: x,
+        absoluteY: y,
         // the width of the selected group may 0 after init use rect.width instead
         width: rect.width,
+        height: rect.height,
         direction,
       };
       // parent ele is the edgeless block container
@@ -307,22 +336,88 @@ export class EdgelessSelectedRect extends LitElement {
   };
 
   private _onDragMove = (e: MouseEvent) => {
-    let newX = 0;
-    let newW = 0;
     if (this.state.type === 'single') {
       const { selected, viewport } = this.state;
       const { xywh } = selected;
-      const [x, y, w] = JSON.parse(xywh) as XYWH;
-      const minus = this._dragStartInfo.startMouseLeft - e.clientX;
+      const [x, y, w, h] = JSON.parse(xywh) as XYWH;
+      let newX = x;
+      let newY = y;
+      let newW = w;
+      let newH = h;
+      let autoH = true;
+      const deltaX = this._dragStartInfo.startMouseX - e.clientX;
+      const deltaY = this._dragStartInfo.startMouseY - e.clientY;
+      let rightBottomX: number;
+      let rightBottomY: number;
+      // FIXME SHIT CODE and WONT WORK
       switch (this._dragStartInfo.direction) {
+        case HandleDirection.RightTop:
+          newX = this._dragStartInfo.absoluteX;
+          newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
+          rightBottomX =
+            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
+              this.zoom -
+            deltaX / this.zoom;
+          rightBottomY =
+            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
+              this.zoom +
+            deltaY / this.zoom;
+          newW = rightBottomX - newX;
+          newH = rightBottomY - newY;
+          autoH = false;
+          break;
+        case HandleDirection.LeftBottom:
+          newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
+          newY = this._dragStartInfo.absoluteY;
+          rightBottomX =
+            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
+              this.zoom +
+            deltaX / this.zoom;
+          rightBottomY =
+            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
+              this.zoom -
+            deltaY / this.zoom;
+          newW = rightBottomX - newX;
+          newH = rightBottomY - newY;
+          autoH = false;
+          break;
+        case HandleDirection.RightBottom:
+          newX = this._dragStartInfo.absoluteX;
+          newY = this._dragStartInfo.absoluteY;
+          rightBottomX =
+            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
+              this.zoom -
+            deltaX / this.zoom;
+          rightBottomY =
+            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
+              this.zoom -
+            deltaY / this.zoom;
+          newW = rightBottomX - newX;
+          newH = rightBottomY - newY;
+          autoH = false;
+          break;
+        case HandleDirection.LeftTop: {
+          newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
+          newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
+          rightBottomX =
+            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
+            this.zoom;
+          rightBottomY =
+            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
+            this.zoom;
+          newW = rightBottomX - newX;
+          newH = rightBottomY - newY;
+          autoH = false;
+          break;
+        }
         case HandleDirection.Left: {
-          newX = this._dragStartInfo.absoluteLeft - minus / this.zoom;
-          newW = (this._dragStartInfo.width + minus) / this.zoom;
+          newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
+          newW = (this._dragStartInfo.width + deltaX) / this.zoom;
           break;
         }
         case HandleDirection.Right: {
           newX = x;
-          newW = (this._dragStartInfo.width - minus) / this.zoom;
+          newW = (this._dragStartInfo.width - deltaX) / this.zoom;
           break;
         }
       }
@@ -340,7 +435,7 @@ export class EdgelessSelectedRect extends LitElement {
       // first change container`s x/w directly for get groups real height
       if (groupContainer) {
         groupContainer.style.width = newW + 'px';
-        groupContainer.style.translate = `translate(${newX}px, ${y}px) scale(${this.zoom})`;
+        groupContainer.style.translate = `translate(${newX}px, ${newY}px) scale(${this.zoom})`;
       }
       // reset the width of the container may trigger animation
       requestAnimationFrame(() => {
@@ -356,9 +451,11 @@ export class EdgelessSelectedRect extends LitElement {
         }
         const newXywh = JSON.stringify([
           newX,
-          y,
+          newY,
           newW,
-          (groupBlock?.getBoundingClientRect().height || 0) / this.zoom,
+          autoH
+            ? (groupBlock?.getBoundingClientRect().height || 0) / this.zoom
+            : newH,
         ]);
         selected.xywh = newXywh;
         selected.page.updateBlock(selected, { xywh: newXywh });
