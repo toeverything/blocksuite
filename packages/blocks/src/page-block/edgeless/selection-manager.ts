@@ -266,6 +266,7 @@ export class EdgelessSelectionManager {
   private _onContainerDragStart = (e: SelectionEvent) => {
     switch (this.mouseMode) {
       case 'shape': {
+        this._container.page.captureSync();
         const [modelX, modelY] = this._container.viewport.toModelCoord(
           e.x,
           e.y
@@ -359,12 +360,14 @@ export class EdgelessSelectionManager {
             this._frameSelectionState.end.y
           )
         );
-        const w = Math.abs(
-          this._frameSelectionState.start.x - this._frameSelectionState.end.x
-        );
-        const h = Math.abs(
-          this._frameSelectionState.start.y - this._frameSelectionState.end.y
-        );
+        const w =
+          Math.abs(
+            this._frameSelectionState.start.x - this._frameSelectionState.end.x
+          ) / this._container.viewport.zoom;
+        const h =
+          Math.abs(
+            this._frameSelectionState.start.y - this._frameSelectionState.end.y
+          ) / this._container.viewport.zoom;
         this._container.page.updateBlockById(this._draggingShapeBlockId, {
           xywh: JSON.stringify([x, y, w, h]),
         });
@@ -376,6 +379,7 @@ export class EdgelessSelectionManager {
     switch (this.mouseMode) {
       case 'shape': {
         this._draggingShapeBlockId = null;
+        this._container.page.captureSync();
         return;
       }
       case 'default': {
