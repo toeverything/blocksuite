@@ -251,7 +251,6 @@ export class EdgelessSelectedRect extends LitElement {
 
   private _getHandles(rect: DOMRect, isShape: boolean) {
     if (isShape) {
-      // todo: four corners
       const leftTop = [rect.x, rect.y];
       const rightTop = [rect.x + rect.width, rect.y];
       const leftBottom = [rect.x, rect.y + rect.height];
@@ -346,70 +345,34 @@ export class EdgelessSelectedRect extends LitElement {
       let newY = y;
       let newW = w;
       let newH = h;
-      let autoH = true;
+      let isShape = false;
       const deltaX = this._dragStartInfo.startMouseX - e.clientX;
       const deltaY = this._dragStartInfo.startMouseY - e.clientY;
-      let rightBottomX: number;
-      let rightBottomY: number;
-      // FIXME SHIT CODE and WONT WORK
-      switch (this._dragStartInfo.direction) {
+      const direction = this._dragStartInfo.direction;
+      switch (direction) {
         case HandleDirection.RightTop:
-          newX = this._dragStartInfo.absoluteX;
           newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
-          rightBottomX =
-            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
-              this.zoom -
-            deltaX / this.zoom;
-          rightBottomY =
-            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
-              this.zoom +
-            deltaY / this.zoom;
-          newW = rightBottomX - newX;
-          newH = rightBottomY - newY;
-          autoH = false;
+          newW = (this._dragStartInfo.width - deltaX) / this.zoom;
+          newH = (this._dragStartInfo.height + deltaY) / this.zoom;
+          isShape = true;
           break;
         case HandleDirection.LeftBottom:
           newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
-          newY = this._dragStartInfo.absoluteY;
-          rightBottomX =
-            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
-              this.zoom +
-            deltaX / this.zoom;
-          rightBottomY =
-            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
-              this.zoom -
-            deltaY / this.zoom;
-          newW = rightBottomX - newX;
-          newH = rightBottomY - newY;
-          autoH = false;
+          newW = (this._dragStartInfo.width + deltaX) / this.zoom;
+          newH = (this._dragStartInfo.height - deltaY) / this.zoom;
+          isShape = true;
           break;
         case HandleDirection.RightBottom:
-          newX = this._dragStartInfo.absoluteX;
-          newY = this._dragStartInfo.absoluteY;
-          rightBottomX =
-            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
-              this.zoom -
-            deltaX / this.zoom;
-          rightBottomY =
-            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
-              this.zoom -
-            deltaY / this.zoom;
-          newW = rightBottomX - newX;
-          newH = rightBottomY - newY;
-          autoH = false;
+          newW = (this._dragStartInfo.width - deltaX) / this.zoom;
+          newH = (this._dragStartInfo.height - deltaY) / this.zoom;
+          isShape = true;
           break;
         case HandleDirection.LeftTop: {
-          newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
           newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
-          rightBottomX =
-            (this._dragStartInfo.absoluteX + this._dragStartInfo.width) /
-            this.zoom;
-          rightBottomY =
-            (this._dragStartInfo.absoluteY + this._dragStartInfo.height) /
-            this.zoom;
-          newW = rightBottomX - newX;
-          newH = rightBottomY - newY;
-          autoH = false;
+          newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
+          newW = (this._dragStartInfo.width + deltaX) / this.zoom;
+          newH = (this._dragStartInfo.height + deltaY) / this.zoom;
+          isShape = true;
           break;
         }
         case HandleDirection.Left: {
@@ -428,8 +391,13 @@ export class EdgelessSelectedRect extends LitElement {
         newW = GROUP_MIN_LENGTH;
         newX = x;
       }
+      // limit the height of the selected group
+      if (newH < GROUP_MIN_LENGTH) {
+        newH = GROUP_MIN_LENGTH;
+        newY = y;
+      }
       // if xywh do not change, no need to update
-      if (newW === w && newX === x) {
+      if (newW === w && newX === x && newY === y && newW === w) {
         return;
       }
       const groupBlock = getBlockById<'div'>(selected.id);
@@ -455,7 +423,7 @@ export class EdgelessSelectedRect extends LitElement {
           newX,
           newY,
           newW,
-          autoH
+          !isShape
             ? (groupBlock?.getBoundingClientRect().height || 0) / this.zoom
             : newH,
         ]);
