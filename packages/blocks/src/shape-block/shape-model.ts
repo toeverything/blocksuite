@@ -18,7 +18,7 @@ export class ShapeBlockModel extends BaseBlockModel {
 
   constructor(page: Page, props: Partial<ShapeBlockModel>) {
     super(page, props);
-    this.xywh = props.xywh ?? '[0, 0, 100, 100]';
+    this.xywh = props.xywh ?? '[0,0,100,100]';
     this.type = props.type ?? 'rectangle';
   }
 }

@@ -373,16 +373,25 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this.isActive) {
-      const { anchor, direction, selectedType } =
-        getNativeSelectionMouseDragInfo(e);
-      if (selectedType === 'Caret') {
-        // If nothing is selected, then we should not show the format bar
+    switch (this.mouseMode) {
+      case 'shape': {
+        this._draggingShapeBlockId = null;
         return;
       }
-      showFormatQuickBar({ anchorEl: anchor, direction });
+      case 'default': {
+        if (this.isActive) {
+          const { anchor, direction, selectedType } =
+            getNativeSelectionMouseDragInfo(e);
+          if (selectedType === 'Caret') {
+            // If nothing is selected, then we should not show the format bar
+            return;
+          }
+          showFormatQuickBar({ anchorEl: anchor, direction });
+        }
+        this._frameSelectionState = null;
+        return;
+      }
     }
-    this._frameSelectionState = null;
   };
 
   private _onContainerClick = (e: SelectionEvent) => {

@@ -152,6 +152,8 @@ function EdgelessBlockChild(
     padding: isShape ? '0px' : `${PADDING_X / 2}px`,
     background: isShape ? 'transparent' : 'white',
     pointerEvents: isShape ? 'none' : 'all',
+    // shape block should always on the top
+    zIndex: isShape ? '1' : '0',
   };
 
   return html`
