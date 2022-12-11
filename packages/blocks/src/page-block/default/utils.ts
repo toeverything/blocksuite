@@ -5,13 +5,11 @@ import {
   getBlockElementByModel,
 } from '../../__internal__/utils';
 
-export const NON_TEXT_ARR = ['image', 'divider'];
-
-export const getBlockOptionByPosition = (
+export function getBlockOptionByPosition(
   blocks: BaseBlockModel[],
   x: number,
   y: number
-) => {
+) {
   for (let index = 0; index <= blocks.length - 1; index++) {
     // if (matchFlavours(blocks[index], ['affine:embed','affine'])) {
     const hoverDom = getBlockById(blocks[index].id);
@@ -34,7 +32,7 @@ export const getBlockOptionByPosition = (
     }
   }
   return null;
-};
+}
 
 function isPointIn(block: DOMRect, x: number, y: number): boolean {
   if (
@@ -73,5 +71,6 @@ export function focusCaption(model: BaseBlockModel) {
   const dom = getBlockElementByModel(model)?.querySelector(
     '.affine-embed-wrapper-caption'
   ) as HTMLInputElement;
+  model.page.updateBlock(model, { showCaption: true });
   dom.focus();
 }

@@ -53,7 +53,8 @@ import style from './style.css';
 import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
-export interface EmbedOption {
+
+export interface EmbedEditingState {
   position: { x: number; y: number };
   model: BaseBlockModel;
 }
@@ -63,7 +64,7 @@ export interface DefaultPageSignals {
   updateEmbedRects: Signal<
     { left: number; top: number; width: number; height: number }[]
   >;
-  updateEmbedOption: Signal<EmbedOption | null>;
+  updateEmbedEditingState: Signal<EmbedEditingState | null>;
   nativeSelection: Signal<boolean>;
 }
 
@@ -156,14 +157,14 @@ function SelectedRectsContainer(rects: DOMRect[]) {
   `;
 }
 
-function EmbedOptionContainer(
-  embedOption: EmbedOption | null,
+function EmbedEditingContainer(
+  embedEditingState: EmbedEditingState | null,
   signals: DefaultPageSignals
 ) {
-  if (embedOption) {
+  if (embedEditingState) {
     const style = {
-      left: embedOption.position.x + 'px',
-      top: embedOption.position.y + 'px',
+      left: embedEditingState.position.x + 'px',
+      top: embedEditingState.position.y + 'px',
     };
     return html`
       <style>
@@ -175,28 +176,28 @@ function EmbedOptionContainer(
 
       <div class="affine-image-option-container">
         <ul style=${styleMap(style)} class="image-option">
-          <li @click=${() => focusCaption(embedOption.model)}>
+          <li @click=${() => focusCaption(embedEditingState.model)}>
             ${CaptionIcon}
           </li>
           <li
             @click=${() => {
-              assertExists(embedOption.model.source);
-              downloadImage(embedOption.model.source);
+              assertExists(embedEditingState.model.source);
+              downloadImage(embedEditingState.model.source);
             }}
           >
             ${DownloadIcon}
           </li>
           <li
             @click=${() => {
-              assertExists(embedOption.model.source);
-              copyImgToClip(embedOption.model.source);
+              assertExists(embedEditingState.model.source);
+              copyImgToClip(embedEditingState.model.source);
             }}
           >
             ${CopyIcon}
           </li>
           <li
             @click=${() => {
-              embedOption.model.page.deleteBlock(embedOption.model);
+              embedEditingState.model.page.deleteBlock(embedEditingState.model);
               signals.updateEmbedRects.emit([]);
             }}
           >
@@ -225,8 +226,6 @@ function handleUp(
     ) as HTMLElement;
     const range = nativeSelection.getRangeAt(0);
     const { height, left, top } = range.getBoundingClientRect();
-
-    // TODO resolve compatible problem
     const newRange = caretRangeFromPoint(left, top - height / 2);
     if (
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
@@ -326,7 +325,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }[] = [];
 
   @state()
-  embedOption!: EmbedOption | null;
+  embedEditingState!: EmbedEditingState | null;
 
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
@@ -334,7 +333,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     updateEmbedRects: new Signal<
       { left: number; top: number; width: number; height: number }[]
     >(),
-    updateEmbedOption: new Signal<EmbedOption | null>(),
+    updateEmbedEditingState: new Signal<EmbedEditingState | null>(),
     nativeSelection: new Signal<boolean>(),
   };
 
@@ -390,7 +389,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         state.clear();
         this.signals.updateSelectedRects.emit([]);
         this.signals.updateEmbedRects.emit([]);
-        this.signals.updateEmbedOption.emit(null);
+        this.signals.updateEmbedEditingState.emit(null);
         return;
       }
       if (isPageTitle(e)) {
@@ -654,8 +653,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selectEmbedRects = rects;
       this.requestUpdate();
     });
-    this.signals.updateEmbedOption.on(embedOption => {
-      this.embedOption = embedOption;
+    this.signals.updateEmbedEditingState.on(embedEditingState => {
+      this.embedEditingState = embedEditingState;
       this.requestUpdate();
     });
 
@@ -707,8 +706,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
-    const embedOptionContainer = EmbedOptionContainer(
-      this.embedOption,
+    const embedEditingContainer = EmbedEditingContainer(
+      this.embedEditingState,
       this.signals
     );
     return html`
@@ -726,7 +725,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           ${childrenContainer}
         </div>
         ${selectedRectsContainer} ${selectionRect}
-        ${selectedEmbedContainer}${embedOptionContainer}
+        ${selectedEmbedContainer}${embedEditingContainer}
       </div>
     `;
   }

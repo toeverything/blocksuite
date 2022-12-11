@@ -26,6 +26,7 @@ import {
 } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 import { getBlockOptionByPosition } from './utils';
+import { matchFlavours } from '@blocksuite/store/src/utils/utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
   return (
@@ -58,8 +59,6 @@ function filterSelectedBlock(
 //   });
 // }
 
-const NON_TEXT_ARR = ['image', 'divider'];
-
 function createSelectionRect(
   current: { x: number; y: number },
   start: { x: number; y: number }
@@ -71,7 +70,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'divider';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
 
 class PageSelectionState {
   type: PageSelectionType;
@@ -211,7 +210,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
-    this._signals.nativeSelection.emit(false)
+    this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
 
@@ -220,7 +219,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
-    this._signals.nativeSelection.emit(true)
+    this._signals.nativeSelection.emit(true);
     noop();
   }
 
@@ -356,17 +355,23 @@ export class DefaultSelectionManager {
     this._signals.updateEmbedRects.emit([]);
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+
     const clickBlockInfo = getBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
       e.raw.pageY
     );
+
     if (clickBlockInfo && clickBlockInfo.model) {
       const { model } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
     }
-    if (clickBlockInfo && NON_TEXT_ARR.includes(clickBlockInfo.model.type)) {
+
+    if (
+      clickBlockInfo &&
+      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+    ) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
 
@@ -405,11 +410,12 @@ export class DefaultSelectionManager {
       e.raw.pageX,
       e.raw.pageY
     );
+
     if (hoverOption?.model.type === 'image') {
       hoverOption.position.x = hoverOption.position.right + 10;
-      this._signals.updateEmbedOption.emit(hoverOption);
+      this._signals.updateEmbedEditingState.emit(hoverOption);
     } else {
-      this._signals.updateEmbedOption.emit(null);
+      this._signals.updateEmbedEditingState.emit(null);
     }
   };
 
@@ -420,7 +426,7 @@ export class DefaultSelectionManager {
   dispose() {
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
-    this._signals.updateEmbedOption.dispose();
+    this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
     this._mouseDisposeCallback();
   }

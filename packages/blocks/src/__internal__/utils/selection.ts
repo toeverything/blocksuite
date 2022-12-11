@@ -15,7 +15,6 @@ import {
 } from './query';
 import { Rect } from './rect';
 import type { SelectionEvent } from './gesture';
-import { NON_TEXT_ARR } from '../../page-block/default/utils';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -186,7 +185,7 @@ function focusRichTextByModel(
   model: BaseBlockModel
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
-  if (NON_TEXT_ARR.includes(model.type)) {
+  if (matchFlavours(model, ['affine:embed', 'affine:divider'])) {
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
@@ -367,11 +366,6 @@ export function getSelectInfo(page: Page): SelectionInfo {
   } else if (nativeSelection && nativeSelection.type !== 'None') {
     type = nativeSelection.type;
     selectedModels = getModelsByRange(getCurrentRange());
-  }
-  if (state.type === 'divider') {
-    type = 'Block';
-    const { selectedBlocks } = state;
-    selectedModels = selectedBlocks.map(block => getModelByElement(block));
   }
   if (type !== 'None') {
     selectedBlocks = getSelectedBlock(selectedModels);

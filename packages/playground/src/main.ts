@@ -95,15 +95,5 @@ window.onload = () => {
 
     document.body.appendChild(editor);
     document.body.appendChild(debugMenu);
-    // const idPage = page.addBlock({ flavour: 'affine:page' });
-    // const idGroup = page.addBlock({ flavour: 'affine:group' }, idPage);
-
-    // page.addBlock(
-    //   {
-    //     flavour: 'affine:divider',
-    //     type: 'divider',
-    //   },
-    //   idGroup
-    // );
   }
 };

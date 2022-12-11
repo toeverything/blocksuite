@@ -2,7 +2,6 @@
 
 import { Page, Text } from '@blocksuite/store';
 import type Quill from 'quill';
-import { NON_TEXT_ARR } from '../../page-block/default/utils';
 import {
   ExtendedModel,
   assertExists,
@@ -224,7 +223,10 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      if (preNodeModel && NON_TEXT_ARR.includes(preNodeModel.type)) {
+      if (
+        preNodeModel &&
+        matchFlavours(model, ['affine:embed', 'affine:divider'])
+      ) {
         return ALLOW_DEFAULT;
       }
       return PREVENT_DEFAULT;

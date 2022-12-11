@@ -47,12 +47,6 @@ export class RichText extends LitElement {
   }
 
   firstUpdated() {
-    // this._textContainer.addEventListener('keyup', e => {
-    //   // console.log('e: ', e.target);
-    //   if (e.key === 'ArrowUp') {
-    //     e.stopPropagation();
-    //   }
-    // });
     const { host, model, placeholder, _textContainer } = this;
     const { page } = host;
     const keyboardBindings = createKeyboardBindings(page, model);

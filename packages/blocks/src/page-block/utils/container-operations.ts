@@ -6,6 +6,7 @@ import {
   ExtendedModel,
   almostEqual,
   isCollapsedAtBlockStart,
+  noop,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
@@ -132,6 +133,7 @@ export function handleBackspace(page: Page, e: KeyboardEvent) {
       const { quill } = richText;
       if (isCollapsedAtBlockStart(quill)) {
         // use quill handler
+        noop();
       }
     }
   } else if (isRangeSelection()) {
