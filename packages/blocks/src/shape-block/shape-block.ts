@@ -29,7 +29,7 @@ export class ShapeBlockComponent extends LitElement {
               // enable pointer events, otherwise edgeless block cannot detect by mouse event
               pointerEvents: 'all',
             })}
-            d=${getRectanglePath({}, [modelW, modelH])}
+            d=${getRectanglePath([modelW, modelH])}
             stroke-width="2"
           />
         </svg>

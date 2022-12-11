@@ -1,5 +1,5 @@
 import Vec from './vector';
-import { getStroke, getStrokePoints, StrokePoint } from 'perfect-freehand';
+import { getStroke } from 'perfect-freehand';
 
 function average(a: number, b: number): number {
   return (a + b) / 2;
@@ -43,50 +43,6 @@ function getSvgPathFromStroke(points: number[][], closed = true): string {
 
   return result;
 }
-
-/**
- * Turn an array of stroke points into a path of quadradic curves.
- * @param points - the stroke points returned from perfect-freehand
- */
-function getSvgPathFromStrokePoints(
-  points: StrokePoint[],
-  closed = false
-): string {
-  const len = points.length;
-
-  if (len < 4) {
-    return ``;
-  }
-
-  let a = points[0].point;
-  let b = points[1].point;
-  const c = points[2].point;
-
-  let result = `M${a[0].toFixed(2)},${a[1].toFixed(2)} Q${b[0].toFixed(
-    2
-  )},${b[1].toFixed(2)} ${average(b[0], c[0]).toFixed(2)},${average(
-    b[1],
-    c[1]
-  ).toFixed(2)} T`;
-
-  for (let i = 2, max = len - 1; i < max; i++) {
-    a = points[i].point;
-    b = points[i + 1].point;
-    result += `${average(a[0], b[0]).toFixed(2)},${average(a[1], b[1]).toFixed(
-      2
-    )} `;
-  }
-
-  if (closed) {
-    result += 'Z';
-  }
-
-  return result;
-}
-
-export type ShapeStyle = {
-  size?: number;
-};
 
 export const stokeWidths = {
   small: 2,
@@ -139,10 +95,12 @@ function getRectangleDrawPoints([w, h]: Size) {
   };
 }
 
-export function getRectanglePath(style: ShapeStyle, size: Size): string {
+export function getRectanglePath(size: Size): string {
   const { points } = getRectangleDrawPoints(size);
+  // TODO: support size
+  //  https://github.com/tldraw/tldraw/blob/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/tldraw/src/state/shapes/RectangleUtil/rectangleHelpers.ts#L81-L85
   const stoke = getStroke(points, {
-    size: style.size ?? stokeWidths.small,
+    size: stokeWidths.small,
     thinning: 0.65,
     streamline: 0.3,
     smoothing: 1,
@@ -150,21 +108,4 @@ export function getRectanglePath(style: ShapeStyle, size: Size): string {
     last: true,
   });
   return getSvgPathFromStroke(stoke);
-}
-
-export function getRectangleIndicatorPathTDSnapshot(
-  style: ShapeStyle,
-  size: Size
-): string {
-  const { points } = getRectangleDrawPoints(size);
-  return getSvgPathFromStrokePoints(
-    getStrokePoints(points, {
-      size: stokeWidths.small,
-      thinning: 0.65,
-      streamline: 0.3,
-      smoothing: 1,
-      simulatePressure: false,
-      last: true,
-    })
-  );
 }
