@@ -3,7 +3,6 @@ import { expect, Page, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
-  initEmptyEditor,
   initEmptyParagraphState,
   pressEnter,
   selectAllByKeyboard,
@@ -90,7 +89,6 @@ test('basic link', async ({ page }) => {
 });
 
 async function createLinkBlock(page: Page, str: string, link: string) {
-  await initEmptyEditor(page);
   const id = await page.evaluate(
     ([str, link]) => {
       const { page } = window;
