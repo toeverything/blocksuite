@@ -463,5 +463,8 @@ describe.concurrent('store.search works', async () => {
     expect(workspace.search('索尼')).toStrictEqual([
       { field: 'content', result: ['2'] },
     ]);
+
+    expect(workspace.findBlockPage('1')).toEqual(`space:${defaultPageId}`);
+    expect(workspace.findBlockPage('2')).toEqual(`space:${defaultPageId}`);
   });
 });

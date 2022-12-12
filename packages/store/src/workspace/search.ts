@@ -28,6 +28,7 @@ export type IndexMetadata = Readonly<{
 export class Indexer {
   private readonly _doc: Doc;
   private readonly _indexer: DocumentIndexer<IndexMetadata>;
+  private readonly _pageMap = new Map<string, string>();
 
   constructor(
     doc: Doc,
@@ -53,6 +54,10 @@ export class Indexer {
 
   onCreatePage(pageId: string) {
     this._handlePageIndexing(pageId, this._getPage(pageId));
+  }
+
+  findBlockPage(blockId: string): string | null {
+    return this._pageMap.get(blockId) || null;
   }
 
   search(query: QueryContent) {
@@ -104,6 +109,7 @@ export class Indexer {
               reference: '',
               tags: [page],
             });
+            this._pageMap.set(id, page);
           }
         }
 
