@@ -7,6 +7,7 @@ import {
   almostEqual,
   isCollapsedAtBlockStart,
   noop,
+  RootBlockModel,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
@@ -368,9 +369,11 @@ export function handleBlockSelectionBatchDelete(
 export function tryUpdateGroupSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const groups = page.root.children as GroupBlockModel[];
+    const groups = page.root.children as RootBlockModel[];
     let offset = 0;
     groups.forEach(model => {
+      // DO NOT resize shape block
+      if (model.flavour === 'affine:shape') return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();
