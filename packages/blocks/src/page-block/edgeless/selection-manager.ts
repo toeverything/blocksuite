@@ -267,6 +267,7 @@ export class EdgelessSelectionManager {
     switch (this.mouseMode) {
       case 'shape': {
         this._container.page.captureSync();
+        // create a shape block when drag start
         const [modelX, modelY] = this._container.viewport.toModelCoord(
           e.x,
           e.y
@@ -341,9 +342,7 @@ export class EdgelessSelectionManager {
             break;
         }
 
-        if (this._frameSelectionState) {
-          this._updateFrameSelectionState(e.raw.x, e.raw.y);
-        }
+        this._updateFrameSelectionState(e.raw.x, e.raw.y);
         return;
       }
       case 'shape': {
@@ -379,6 +378,7 @@ export class EdgelessSelectionManager {
     switch (this.mouseMode) {
       case 'shape': {
         this._draggingShapeBlockId = null;
+        this._frameSelectionState = null;
         this._container.page.captureSync();
         return;
       }

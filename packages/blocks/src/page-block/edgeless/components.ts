@@ -314,7 +314,7 @@ export class EdgelessSelectedRect extends LitElement {
   private _onHandleMouseDown = (e: MouseEvent, direction: HandleDirection) => {
     // prevent selection action being fired
     e.stopPropagation();
-    if (this.state?.type !== 'none') {
+    if (this.state?.type === 'single') {
       const {
         rect,
         selected: { xywh },
@@ -414,7 +414,7 @@ export class EdgelessSelectedRect extends LitElement {
           selected.page.captureSync();
           this.lock = true;
         }
-        if (this.state.type !== 'none') {
+        if (this.state.type === 'single') {
           this.state.rect = getSelectionBoxBound(viewport, selected.xywh);
         } else {
           console.error('unexpected state.type:', this.state.type);
@@ -435,6 +435,11 @@ export class EdgelessSelectedRect extends LitElement {
 
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
+    if (this.state.type === 'single') {
+      this.state.selected.page.captureSync();
+    } else {
+      console.error('unexpected state.type:', this.state.type);
+    }
     this.parentElement?.removeEventListener('mousemove', this._onDragMove);
     this.parentElement?.removeEventListener('mouseup', this._onDragEnd);
   };
