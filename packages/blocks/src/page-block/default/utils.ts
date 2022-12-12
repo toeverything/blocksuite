@@ -263,7 +263,13 @@ export function bindHotkeys(
   });
   hotkey.addListener(LEFT, e => {
     let model: BaseBlockModel | null = null;
-    if (selection.state.selectedBlocks.length) {
+    const {
+      state: { selectedBlocks, type },
+    } = selection;
+    if (
+      selectedBlocks.length &&
+      !(type === 'native' && window.getSelection()?.rangeCount)
+    ) {
       model = getModelByElement(selection.state.selectedBlocks[0]);
       signals.updateSelectedRects.emit([]);
       selection.state.clear();
@@ -278,7 +284,13 @@ export function bindHotkeys(
   });
   hotkey.addListener(RIGHT, e => {
     let model: BaseBlockModel | null = null;
-    if (selection.state.selectedBlocks.length) {
+    const {
+      state: { selectedBlocks, type },
+    } = selection;
+    if (
+      selectedBlocks.length &&
+      !(type === 'native' && window.getSelection()?.rangeCount)
+    ) {
       model = getModelByElement(
         selection.state.selectedBlocks[
           selection.state.selectedBlocks.length - 1
