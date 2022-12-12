@@ -22,13 +22,16 @@ export class EmbedBlockComponent extends LitElement {
 
   override firstUpdated() {
     this._caption = this.model?.caption ?? '';
+    if (this._caption) {
+      this._input.classList.add('caption-show');
+    }
   }
   private _inputChange() {
     this._caption = this._input.value;
     this.model.page.updateBlock(this.model, { caption: this._caption });
   }
   private _inputBlur() {
-    if (!this.model.caption) {
+    if (!this._caption) {
       this._input.classList.remove('caption-show');
     }
   }
@@ -39,12 +42,13 @@ export class EmbedBlockComponent extends LitElement {
           <slot></slot>
           <input
             placeholder="write a caption"
-            class="affine-embed-wrapper-caption ${this.model.caption
-              ? 'caption-show'
-              : ''}"
+            class="affine-embed-wrapper-caption"
             value=${this._caption}
             @input=${this._inputChange}
             @blur=${this._inputBlur}
+            @click=${(e: Event) => {
+              e.stopPropagation();
+            }}
           />
         </div>
       </div>

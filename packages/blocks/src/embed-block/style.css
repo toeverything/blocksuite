@@ -1,6 +1,7 @@
 .affine-embed-wrapper {
   /* padding: 10px; */
   text-align: center;
+  height: 24px;
 }
 .affine-embed-wrapper-caption {
   width: 100%;
@@ -11,7 +12,7 @@
   color: inherit;
   text-align: center;
   color: var(--affine-placeholder-color);
-  height: 24px;
+
   display: none;
 }
 .affine-embed-wrapper-caption::placeholder {

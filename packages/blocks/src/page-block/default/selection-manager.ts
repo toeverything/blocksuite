@@ -9,7 +9,6 @@ import {
   handleNativeRangeDragMove,
   initMouseEventHandlers,
   isBlankArea,
-  isPageTitle,
   isEmbed,
   noop,
   resetNativeSelection,
@@ -18,6 +17,7 @@ import {
   getBlockElementByModel,
   getAllBlocks,
   getDefaultPageBlock,
+  isInput,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -226,7 +226,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isPageTitle(e.raw)) return;
+    if (isInput(e.raw)) return;
     if (isEmbed(e)) {
       this._onEmbedDragStart(e);
       return;
@@ -356,6 +356,16 @@ export class DefaultSelectionManager {
     this._signals.updateEmbedRects.emit([]);
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
+
+    // container click will blur all captions
+    const allCaptions = Array.from(
+      document.querySelectorAll('.affine-embed-wrapper-caption')
+    );
+    allCaptions.forEach(el => {
+      if (el !== e.raw.target) {
+        (el as HTMLInputElement).blur();
+      }
+    });
 
     const clickBlockInfo = getBlockOptionByPosition(
       this._blocks,
