@@ -92,14 +92,32 @@ function initEmptyEditor() {
   document.body.appendChild(debugMenu);
   initButton.disabled = true;
 
-  // @ts-ignore
-  window.workspace = workspace;
-  // @ts-ignore
-  window.blockSchema = BlockSchema;
-  // @ts-ignore
-  window.editor = editor;
-  // @ts-ignore
-  window.page = page;
+  Object.defineProperties(globalThis ?? window, {
+    workspace: {
+      enumerable: true,
+      configurable: true,
+      writable: false,
+      value: workspace,
+    },
+    blockSchema: {
+      enumerable: true,
+      configurable: true,
+      writable: false,
+      value: BlockSchema,
+    },
+    editor: {
+      enumerable: true,
+      configurable: true,
+      writable: false,
+      value: editor,
+    },
+    page: {
+      enumerable: true,
+      configurable: true,
+      writable: false,
+      value: page,
+    },
+  });
 }
 
 initButton.addEventListener('click', initEmptyEditor);

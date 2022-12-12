@@ -183,7 +183,6 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     blockElementArray.forEach(ele => {
       const block = ele as ContainerBlock;
       assertExists(block.model);
-      // @ts-ignore
       const blockElement = getBlockElementByModel(block.model);
       const mainElement = matchFlavours(block.model, ['affine:page'])
         ? blockElement?.querySelector(
@@ -195,7 +194,6 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
         range.intersectsNode(mainElement) &&
         blockElement?.tagName !== 'GROUP-BLOCK'
       ) {
-        // @ts-ignore
         intersectedModels.push(block.model);
       }
     });
