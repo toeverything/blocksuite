@@ -4,6 +4,7 @@ import type { ShapeBlockModel } from './shape-model';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager';
 import { getRectanglePath } from './utils';
+import { BLOCK_ID_ATTR } from '../__internal__';
 
 @customElement('shape-block')
 export class ShapeBlockComponent extends LitElement {
@@ -15,6 +16,7 @@ export class ShapeBlockComponent extends LitElement {
   model!: ShapeBlockModel;
 
   render() {
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     if (this.model.type === 'rectangle') {
       const [, , modelW, modelH] = JSON.parse(this.model.xywh) as XYWH;
       return html`

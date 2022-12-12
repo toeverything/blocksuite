@@ -211,7 +211,7 @@ export class DebugMenu extends LitElement {
     this.page.addBlock({ flavour: 'affine:paragraph' }, groupId);
   }
 
-  private _onSwitchShape() {
+  private _onSwitchMouseMode() {
     this.mouseMode = this.mouseMode === 'default' ? 'shape' : 'default';
     const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
     window.dispatchEvent(event);
@@ -422,7 +422,7 @@ export class DebugMenu extends LitElement {
           aria-label="switch mouse mode"
           title="switch mouse mode"
           tabindex="-1"
-          @click=${this._onSwitchShape}
+          @click=${this._onSwitchMouseMode}
         ></button>
         <button
           aria-label="export markdown"
