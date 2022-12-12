@@ -49,10 +49,15 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
     false
   );
 
-  firstRichText.model.text?.delete(
-    firstTextIndex,
-    firstRichText.model.text.length - firstTextIndex
-  );
+  if (
+    firstRichText.model.text &&
+    firstRichText.model.text.length !== firstTextIndex
+  ) {
+    firstRichText.model.text.delete(
+      firstTextIndex,
+      firstRichText.model.text.length - firstTextIndex
+    );
+  }
   const isLastRichTextFullSelected: boolean =
     lastRichText.model.text?.length === endTextIndex;
   if (!isLastRichTextFullSelected) {
