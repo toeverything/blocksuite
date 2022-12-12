@@ -43,7 +43,7 @@ function createChildMap(yChildIds: Y.Array<string>) {
 export class Page<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   IBlockSchema extends Record<string, typeof BaseBlockModel> = any
-> extends Space<IBlockSchema> {
+> extends Space {
   public workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history: Y.UndoManager;
@@ -219,7 +219,7 @@ export class Page<
 
     if (blockProps.flavour === 'affine:shape') {
       if (parent != null || parentIndex != null) {
-        throw new Error('Shape block should only be appear under page')
+        throw new Error('Shape block should only be appear under page');
       }
     }
 

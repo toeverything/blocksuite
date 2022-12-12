@@ -12,13 +12,13 @@ export interface IBaseBlockProps {
   text?: TextType;
 }
 
-export class BaseBlockModel implements IBaseBlockProps {
+export abstract class BaseBlockModel implements IBaseBlockProps {
   page: Page;
   propsUpdated = new Signal();
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
-  flavour!: string;
+  abstract flavour: string;
   type!: string;
   id: string;
   children: BaseBlockModel[];
