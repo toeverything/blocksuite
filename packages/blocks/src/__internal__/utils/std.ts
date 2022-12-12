@@ -58,18 +58,20 @@ export const sleep = (ms = 0) =>
  * throttledLog("Hello, world!");
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- The any is safe, because it in the generic type T
-export const throttle = <T extends (...args: any[]) => void>(
+export const throttle = <
+  Args extends unknown[],
+  T extends (this: unknown, ...args: Args) => void
+>(
   fn: T,
   limit: number,
   { leading = true, trailing = true } = {}
 ): T => {
   let timer: ReturnType<typeof setTimeout> | null = null;
-  let lastArgs: Parameters<T> | null = null;
+  let lastArgs: Args | null = null;
 
   const setTimer = () => {
     if (lastArgs && trailing) {
-      fn.apply(this, lastArgs);
+      fn(...lastArgs);
       lastArgs = null;
       timer = setTimeout(setTimer, limit);
     } else {

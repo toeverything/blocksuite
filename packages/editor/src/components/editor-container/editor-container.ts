@@ -13,8 +13,8 @@ export class EditorContainer extends LitElement {
   @property()
   page!: Page;
 
-  @state()
-  mode: 'page' | 'edgeless' = 'page';
+  @property()
+  mode?: 'page' | 'edgeless' = 'page';
 
   @state()
   model!: PageBlockModel;
@@ -72,10 +72,6 @@ export class EditorContainer extends LitElement {
       throw new Error("EditorContainer's store is not set!");
     }
     this.placeholderModel = new BlockSchema['affine:page'](this.page, {});
-
-    window.addEventListener('affine.switch-mode', ({ detail }) => {
-      this.mode = detail;
-    });
 
     this._subscribeStore();
 
