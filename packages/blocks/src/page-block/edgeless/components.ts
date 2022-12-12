@@ -4,7 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { GroupBlockModel, RootBlockModels, ShapeBlockModel } from '../..';
+import type { GroupBlockModel, RootBlockModel, ShapeBlockModel } from '../..';
 import type {
   BlockSelectionState,
   ViewportState,
@@ -131,7 +131,7 @@ export function EdgelessFrameSelectionRect(
 }
 
 function EdgelessBlockChild(
-  model: RootBlockModels,
+  model: RootBlockModel,
   host: BlockHost,
   viewport: ViewportState
 ) {

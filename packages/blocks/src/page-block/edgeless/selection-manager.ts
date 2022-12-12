@@ -8,7 +8,7 @@ import {
   handleNativeRangeDragMove,
   handleNativeRangeClick,
   MouseMode,
-  RootBlockModels,
+  RootBlockModel,
   assertExists,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
@@ -23,7 +23,7 @@ interface NoneBlockSelectionState {
 
 interface SingleBlockSelectionState {
   type: 'single';
-  selected: RootBlockModels;
+  selected: RootBlockModel;
   viewport: ViewportState;
   rect: DOMRect;
   active: boolean;
@@ -35,7 +35,7 @@ export type BlockSelectionState =
 
 interface HoverState {
   rect: DOMRect;
-  block: RootBlockModels;
+  block: RootBlockModel;
 }
 
 export interface FrameSelectionState {
@@ -189,8 +189,8 @@ export class EdgelessSelectionManager {
     return this._container.page;
   }
 
-  private get _blocks(): RootBlockModels[] {
-    return (this._space.root?.children as RootBlockModels[]) ?? [];
+  private get _blocks(): RootBlockModel[] {
+    return (this._space.root?.children as RootBlockModel[]) ?? [];
   }
 
   get isActive() {
@@ -215,7 +215,7 @@ export class EdgelessSelectionManager {
     }
   }
 
-  private _updateHoverState(hoverBlock: RootBlockModels | null) {
+  private _updateHoverState(hoverBlock: RootBlockModel | null) {
     if (hoverBlock) {
       this._hoverState = {
         rect: getSelectionBoxBound(this._container.viewport, hoverBlock.xywh),
@@ -226,7 +226,7 @@ export class EdgelessSelectionManager {
     }
   }
 
-  private _handleClickOnSelected(selected: RootBlockModels, e: SelectionEvent) {
+  private _handleClickOnSelected(selected: RootBlockModel, e: SelectionEvent) {
     const { viewport } = this._container;
 
     switch (this.blockSelectionState.type) {

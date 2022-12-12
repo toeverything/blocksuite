@@ -1,6 +1,6 @@
 import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
-import type { RootBlockModels } from '../../__internal__';
+import type { RootBlockModel } from '../../__internal__';
 import { ShapeBlockComponent } from '../../shape-block';
 import type { SelectionEvent } from '../../__internal__';
 
@@ -22,12 +22,12 @@ function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
 }
 
 export function pick(
-  blocks: RootBlockModels[],
+  blocks: RootBlockModel[],
   modelX: number,
   modelY: number,
   container: EdgelessContainer,
   e: SelectionEvent
-): RootBlockModels | null {
+): RootBlockModel | null {
   const target = e.raw.target;
   const isShapeBlock = target instanceof ShapeBlockComponent;
   for (let i = blocks.length - 1; i >= 0; i--) {
