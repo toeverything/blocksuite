@@ -1,4 +1,4 @@
-import Vec from './vector';
+import { Vec } from '@tldraw/vec';
 import { getStroke } from 'perfect-freehand';
 
 function average(a: number, b: number): number {

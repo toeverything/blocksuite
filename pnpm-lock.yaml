@@ -49,6 +49,7 @@ importers:
   packages/blocks:
     specifiers:
       '@blocksuite/store': workspace:*
+      '@tldraw/vec': ^1.8.0
       hotkeys-js: ^3.10.0
       lit: ^2.3.1
       perfect-freehand: ^1.2.0
@@ -56,6 +57,7 @@ importers:
       quill-cursors: ^4.0.0
     dependencies:
       '@blocksuite/store': link:../store
+      '@tldraw/vec': 1.8.0
       hotkeys-js: 3.10.0
       lit: 2.3.1
       perfect-freehand: 1.2.0
@@ -748,6 +750,10 @@ packages:
   /@sinclair/typebox/0.24.44:
     resolution: {integrity: sha512-ka0W0KN5i6LfrSocduwliMMpqVgohtPFidKdMEOUjoOFCHcOOYkKsPRxfs5f15oPNHTm6ERAm0GV/+/LTKeiWg==}
     dev: true
+
+  /@tldraw/vec/1.8.0:
+    resolution: {integrity: sha512-GiS5Df3CzXY/fPBFcM0CKFERZfI4Cg1X33VPZX+NLo7Fwm/h9zu/aU24N1mG75Q9LuMnwKm7woxKr8BiUXGYCg==}
+    dev: false
 
   /@types/chai-subset/1.3.3:
     resolution: {integrity: sha512-frBecisrNGz+F4T6bcc+NLeolfiojh5FxW2klu669+8BARtyQv2C/GkNW6FUodVe4BroGMP/wER/YDGc7rEllw==}

@@ -44,6 +44,6 @@ export class ShapeBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'pencil-block': ShapeBlockComponent;
+    'shape-block': ShapeBlockComponent;
   }
 }
