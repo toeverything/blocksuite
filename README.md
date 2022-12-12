@@ -55,7 +55,7 @@ pnpm i
 pnpm dev
 ```
 
-The example page should work at [http://localhost:5173?init](http://localhost:5173?init)
+The example page should work at [http://localhost:5173/?init](http://localhost:5173/?init)
 
 To test locally, please make sure browser binaries are already installed via `npx playwright install` and Vite playground is started with `pnpm dev`. Then there are multi commands to choose from:
 

@@ -13,13 +13,14 @@ export class TestApp extends LitElement {
   input!: HTMLInputElement;
 
   private _toggleFavorite(index: number) {
-    const { id } = this.workspace.meta.pages[index];
+    const { id } = this.workspace.meta.pageMetas[index];
     this.workspace.setPageMeta(id, { favorite: !this.pages[index].favorite });
   }
 
   private _createPage() {
-    const page = this.workspace.createPage(`${this.pages.length}`);
-    this.workspace.setPageMeta(page.id, { title: this.input.value });
+    const id = `${this.pages.length}`;
+    this.workspace.createPage(id);
+    this.workspace.setPageMeta(id, { title: this.input.value });
     this.input.value = '';
   }
 
@@ -27,7 +28,7 @@ export class TestApp extends LitElement {
     super.firstUpdated(changedProps);
 
     this.workspace.signals.pagesUpdated.on(() => {
-      this.pages = this.workspace.meta.pages.map(page => ({
+      this.pages = this.workspace.meta.pageMetas.map(page => ({
         title: page.title,
         favorite: page.favorite,
       }));

@@ -2,11 +2,9 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import type { Page } from '@blocksuite/store';
+import type { Page, Disposable } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
-import { BlockSchema } from '../../block-loader';
-
-type PageBlockModel = InstanceType<typeof BlockSchema['affine:page']>;
+import type { PageBlockModel } from '@blocksuite/blocks';
 
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
@@ -16,9 +14,6 @@ export class EditorContainer extends LitElement {
   @property()
   mode?: 'page' | 'edgeless' = 'page';
 
-  @state()
-  model!: PageBlockModel;
-
   // TODO only select block
   @state()
   clipboard = new ClipboardManager(this, this);
@@ -26,38 +21,20 @@ export class EditorContainer extends LitElement {
   @state()
   contentParser = new ContentParser(this);
 
-  @state()
-  isEmptyPage = true;
+  get model() {
+    return this.page.root as PageBlockModel;
+  }
 
   @query('.affine-block-placeholder-input')
   private _placeholderInput!: HTMLInputElement;
 
-  @state()
-  placeholderModel!: PageBlockModel;
-
-  @state()
-  unsubscribe = [] as (() => void)[];
-
-  update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('page')) {
-      this.placeholderModel = new BlockSchema['affine:page'](this.page, {});
-    }
-    super.update(changedProperties);
-  }
+  private _disposables: Disposable[] = [];
 
   private _subscribeStore() {
-    // if undo to empty page, reset to empty placeholder
-    const unsubscribeUpdate = this.page.signals.updated.on(() => {
-      this.isEmptyPage = this.page.isEmpty;
-    });
-    this.unsubscribe.push(unsubscribeUpdate.dispose);
-
-    const unsubscribeRootAdd = this.page.signals.rootAdded.on(block => {
-      this.model = block as PageBlockModel;
-      this.model.childrenUpdated.on(() => this.requestUpdate());
+    const rootAddedDisposable = this.page.signals.rootAdded.on(() => {
       this.requestUpdate();
     });
-    this.unsubscribe.push(unsubscribeRootAdd.dispose);
+    this._disposables.push(rootAddedDisposable);
   }
 
   // disable shadow DOM to workaround quill
@@ -69,9 +46,8 @@ export class EditorContainer extends LitElement {
     super.connectedCallback();
 
     if (!this.page) {
-      throw new Error("EditorContainer's store is not set!");
+      throw new Error('Missing page for EditorContainer!');
     }
-    this.placeholderModel = new BlockSchema['affine:page'](this.page, {});
 
     this._subscribeStore();
 
@@ -81,17 +57,11 @@ export class EditorContainer extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.unsubscribe.forEach(fn => fn());
+    this._disposables.forEach(disposable => disposable.dispose());
   }
 
   render() {
-    const placeholderRoot = html`
-      <default-page-block
-        .mouseRoot=${this as HTMLElement}
-        .page=${this.page}
-        .model=${this.placeholderModel}
-      ></default-page-block>
-    `;
+    if (!this.model) return null;
 
     const pageContainer = html`
       <default-page-block
@@ -125,9 +95,7 @@ export class EditorContainer extends LitElement {
           overflow-x: hidden;
         }
       </style>
-      <div class="affine-editor-container">
-        ${this.isEmptyPage ? placeholderRoot : blockRoot}
-      </div>
+      <div class="affine-editor-container">${blockRoot}</div>
     `;
   }
 }

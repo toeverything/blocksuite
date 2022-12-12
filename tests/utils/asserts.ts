@@ -47,8 +47,7 @@ export const defaultStore: SerializedStore = {
 };
 
 export async function assertEmpty(page: Page) {
-  const actual = await page.locator('paragraph-block').count();
-  expect(actual).toBe(0);
+  await assertRichTexts(page, ['\n']);
 }
 
 export async function assertTitle(page: Page, text: string) {
@@ -68,6 +67,7 @@ export async function assertTextContain(page: Page, text: string) {
 }
 
 export async function assertRichTexts(page: Page, texts: string[]) {
+  await page.mouse.move(100, 100); // move mouse for focus
   const actual = await page.locator('.ql-editor').allInnerTexts();
   expect(actual).toEqual(texts);
 }
@@ -95,7 +95,7 @@ export async function assertImageSize(
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = await page.locator('input').nth(0);
+  const locator = page.locator('input').nth(0);
   await expect(locator).toBeFocused();
 }
 

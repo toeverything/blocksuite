@@ -7,14 +7,40 @@ const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 
 function generateRandomRoomId() {
-  return `virgo-${Math.random().toFixed(8).substring(2)}`;
+  return `playwright-${Math.random().toFixed(8).substring(2)}`;
+}
+
+async function initEmptyEditor(page: Page) {
+  await page.evaluate(() => {
+    const { workspace } = window;
+
+    workspace.signals.pageAdded.once(pageId => {
+      const page = workspace.getPage(pageId);
+      const editor = document.createElement('editor-container');
+      editor.page = page;
+
+      const debugMenu = document.createElement('debug-menu');
+      debugMenu.workspace = workspace;
+      debugMenu.editor = editor;
+
+      document.body.appendChild(editor);
+      document.body.appendChild(debugMenu);
+
+      window.editor = editor;
+      window.page = page;
+    });
+
+    workspace.createPage('page0');
+  });
+  await waitNextFrame(page);
 }
 
 export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
     room = generateRandomRoomId();
   }
-  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&init`);
+  const roomParam = `room=${room}`;
+  await page.goto(`${DEFAULT_PLAYGROUND}?${roomParam}`);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -26,6 +52,8 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
       throw new Error('Unexpected console error: ' + message.text());
     }
   });
+
+  await initEmptyEditor(page);
   return room;
 }
 
@@ -54,7 +82,8 @@ export async function resetHistory(page: Page) {
 
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&init`);
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
+  await initEmptyEditor(page);
 
   await page.evaluate(() => {
     const { page } = window;
@@ -70,9 +99,11 @@ export async function enterPlaygroundWithList(page: Page) {
 export async function initEmptyParagraphState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
+    page.captureSync();
     const pageId = page.addBlock({ flavour: 'affine:page' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
     const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    page.captureSync();
     return { pageId, groupId, paragraphId };
   });
   return ids;
