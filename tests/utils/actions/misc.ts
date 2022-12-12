@@ -14,7 +14,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   if (!room) {
     room = generateRandomRoomId();
   }
-  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&isTest=true`);
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&init`);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -52,29 +52,10 @@ export async function resetHistory(page: Page) {
   });
 }
 
-export async function initEmptyEditor(page: Page) {
-  await page.evaluate(() => {
-    const page = window.workspace
-      .createPage('page0')
-      .register(window.blockSchema);
-    window.page = page;
-    const editor = document.createElement('editor-container');
-    editor.page = page;
-    window.editor = editor;
-
-    const debugMenu = document.createElement('debug-menu');
-    debugMenu.workspace = window.workspace;
-    debugMenu.editor = editor;
-    document.body.appendChild(editor);
-    document.body.appendChild(debugMenu);
-  });
-}
-
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
-  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
+  await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}&init`);
 
-  await initEmptyEditor(page);
   await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page' });
@@ -87,7 +68,6 @@ export async function enterPlaygroundWithList(page: Page) {
 }
 
 export async function initEmptyParagraphState(page: Page) {
-  await initEmptyEditor(page);
   const ids = await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page' });

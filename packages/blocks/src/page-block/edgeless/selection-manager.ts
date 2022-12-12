@@ -1,4 +1,3 @@
-import type { GroupBlockModel } from '../../group-block';
 import type { EdgelessContainer } from './edgeless-page-block';
 import {
   SelectionEvent,
@@ -8,6 +7,9 @@ import {
   caretRangeFromPoint,
   handleNativeRangeDragMove,
   handleNativeRangeClick,
+  MouseMode,
+  RootBlockModel,
+  assertExists,
 } from '../../__internal__';
 import { getSelectionBoxBound, initWheelEventHandlers, pick } from './utils';
 import {
@@ -15,14 +17,13 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
-
 interface NoneBlockSelectionState {
   type: 'none';
 }
 
 interface SingleBlockSelectionState {
   type: 'single';
-  selected: GroupBlockModel;
+  selected: RootBlockModel;
   viewport: ViewportState;
   rect: DOMRect;
   active: boolean;
@@ -34,7 +35,7 @@ export type BlockSelectionState =
 
 interface HoverState {
   rect: DOMRect;
-  block: GroupBlockModel;
+  block: RootBlockModel;
 }
 
 export interface FrameSelectionState {
@@ -122,6 +123,7 @@ export class ViewportState {
 }
 
 export class EdgelessSelectionManager {
+  private _mouseMode: MouseMode;
   private _container: EdgelessContainer;
   private _mouseDisposeCallback: () => void;
   private _wheelDisposeCallback: () => void;
@@ -130,8 +132,17 @@ export class EdgelessSelectionManager {
     type: 'none',
   };
   private _startRange: Range | null = null;
+  private _draggingShapeBlockId: string | null = null;
   private _hoverState: HoverState | null = null;
   private _frameSelectionState: FrameSelectionState | null = null;
+
+  get mouseMode() {
+    return this._mouseMode;
+  }
+
+  set mouseMode(mode: MouseMode) {
+    this._mouseMode = mode;
+  }
 
   get blockSelectionState() {
     return this._blockSelectionState;
@@ -140,6 +151,10 @@ export class EdgelessSelectionManager {
   get hoverRect() {
     if (!this._hoverState) return null;
     return this._hoverState.rect;
+  }
+
+  get isHoveringShape(): boolean {
+    return this._hoverState?.block.flavour === 'affine:shape';
   }
 
   get frameSelectionRect() {
@@ -154,6 +169,7 @@ export class EdgelessSelectionManager {
   }
 
   constructor(container: EdgelessContainer) {
+    this._mouseMode = 'default';
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -173,8 +189,8 @@ export class EdgelessSelectionManager {
     return this._container.page;
   }
 
-  private get _blocks(): GroupBlockModel[] {
-    return (this._space.root?.children as GroupBlockModel[]) ?? [];
+  private get _blocks(): RootBlockModel[] {
+    return (this._space.root?.children as RootBlockModel[]) ?? [];
   }
 
   get isActive() {
@@ -199,7 +215,7 @@ export class EdgelessSelectionManager {
     }
   }
 
-  private _updateHoverState(hoverBlock: GroupBlockModel | null) {
+  private _updateHoverState(hoverBlock: RootBlockModel | null) {
     if (hoverBlock) {
       this._hoverState = {
         rect: getSelectionBoxBound(this._container.viewport, hoverBlock.xywh),
@@ -210,7 +226,7 @@ export class EdgelessSelectionManager {
     }
   }
 
-  private _handleClickOnSelected(selected: GroupBlockModel, e: SelectionEvent) {
+  private _handleClickOnSelected(selected: RootBlockModel, e: SelectionEvent) {
     const { viewport } = this._container;
 
     switch (this.blockSelectionState.type) {
@@ -248,80 +264,144 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    const { viewport } = this._container;
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
-
-    if (selected) {
-      this._handleClickOnSelected(selected, e);
-    } else {
-      this._blockSelectionState = { type: 'none' };
-      this._frameSelectionState = {
-        start: new DOMPoint(e.raw.x, e.raw.y),
-        end: new DOMPoint(e.raw.x, e.raw.y),
-      };
-
-      this._container.signals.updateSelection.emit(this.blockSelectionState);
-      resetNativeSelection(null);
-    }
-
-    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  };
-
-  private _onContainerDragMove = (e: SelectionEvent) => {
-    switch (this.blockSelectionState.type) {
-      case 'none':
+    switch (this.mouseMode) {
+      case 'shape': {
+        this._container.page.captureSync();
+        // create a shape block when drag start
+        const [modelX, modelY] = this._container.viewport.toModelCoord(
+          e.x,
+          e.y
+        );
+        this._draggingShapeBlockId = this._container.page.addBlock({
+          flavour: 'affine:shape',
+          xywh: JSON.stringify([modelX, modelY, 0, 0]),
+        });
+        this._frameSelectionState = {
+          start: new DOMPoint(e.raw.x, e.raw.y),
+          end: new DOMPoint(e.raw.x, e.raw.y),
+        };
         break;
-      case 'single':
-        if (this.blockSelectionState.active) {
-          // TODO reset if drag out of group
-          handleNativeRangeDragMove(this._startRange, e);
-        }
-        // for inactive selection, drag move selected group
-        else if (!this._frameSelectionState) {
-          const block = this.blockSelectionState.selected;
-          const [modelX, modelY, modelW, modelH] = JSON.parse(
-            block.xywh
-          ) as XYWH;
-          const { zoom } = this._container.viewport;
+      }
+      case 'default': {
+        const { viewport } = this._container;
+        const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
+        const selected = pick(this._blocks, modelX, modelY, this._container, e);
 
-          this._space.updateBlock(block, {
-            xywh: JSON.stringify([
-              modelX + e.delta.x / zoom,
-              modelY + e.delta.y / zoom,
-              modelW,
-              modelH,
-            ]),
-          });
+        if (selected) {
+          this._handleClickOnSelected(selected, e);
+        } else {
+          this._blockSelectionState = { type: 'none' };
+          this._frameSelectionState = {
+            start: new DOMPoint(e.raw.x, e.raw.y),
+            end: new DOMPoint(e.raw.x, e.raw.y),
+          };
+
           this._container.signals.updateSelection.emit(
             this.blockSelectionState
           );
+          resetNativeSelection(null);
         }
-        break;
-    }
 
-    if (this._frameSelectionState) {
-      this._updateFrameSelectionState(e.raw.x, e.raw.y);
+        this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+        break;
+      }
+    }
+  };
+
+  private _onContainerDragMove = (e: SelectionEvent) => {
+    switch (this._mouseMode) {
+      case 'default': {
+        switch (this.blockSelectionState.type) {
+          case 'none':
+            break;
+          case 'single':
+            if (this.blockSelectionState.active) {
+              // TODO reset if drag out of group
+              handleNativeRangeDragMove(this._startRange, e);
+            }
+            // for inactive selection, drag move selected group
+            else if (!this._frameSelectionState) {
+              const block = this.blockSelectionState.selected;
+              const [modelX, modelY, modelW, modelH] = JSON.parse(
+                block.xywh
+              ) as XYWH;
+              const { zoom } = this._container.viewport;
+
+              this._space.updateBlock(block, {
+                xywh: JSON.stringify([
+                  modelX + e.delta.x / zoom,
+                  modelY + e.delta.y / zoom,
+                  modelW,
+                  modelH,
+                ]),
+              });
+              this._container.signals.updateSelection.emit(
+                this.blockSelectionState
+              );
+            }
+            break;
+        }
+
+        this._updateFrameSelectionState(e.raw.x, e.raw.y);
+        return;
+      }
+      case 'shape': {
+        assertExists(this._draggingShapeBlockId);
+        assertExists(this._frameSelectionState);
+        this._frameSelectionState.end = new DOMPoint(e.raw.x, e.raw.y);
+        const [x, y] = this._container.viewport.toModelCoord(
+          Math.min(
+            this._frameSelectionState.start.x,
+            this._frameSelectionState.end.x
+          ),
+          Math.min(
+            this._frameSelectionState.start.y,
+            this._frameSelectionState.end.y
+          )
+        );
+        const w =
+          Math.abs(
+            this._frameSelectionState.start.x - this._frameSelectionState.end.x
+          ) / this._container.viewport.zoom;
+        const h =
+          Math.abs(
+            this._frameSelectionState.start.y - this._frameSelectionState.end.y
+          ) / this._container.viewport.zoom;
+        this._container.page.updateBlockById(this._draggingShapeBlockId, {
+          xywh: JSON.stringify([x, y, w, h]),
+        });
+      }
     }
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this.isActive) {
-      const { anchor, direction, selectedType } =
-        getNativeSelectionMouseDragInfo(e);
-      if (selectedType === 'Caret') {
-        // If nothing is selected, then we should not show the format bar
+    switch (this.mouseMode) {
+      case 'shape': {
+        this._draggingShapeBlockId = null;
+        this._frameSelectionState = null;
+        this._container.page.captureSync();
         return;
       }
-      showFormatQuickBar({ anchorEl: anchor, direction });
+      case 'default': {
+        if (this.isActive) {
+          const { anchor, direction, selectedType } =
+            getNativeSelectionMouseDragInfo(e);
+          if (selectedType === 'Caret') {
+            // If nothing is selected, then we should not show the format bar
+            return;
+          }
+          showFormatQuickBar({ anchorEl: anchor, direction });
+        }
+        this._frameSelectionState = null;
+        return;
+      }
     }
-    this._frameSelectionState = null;
   };
 
   private _onContainerClick = (e: SelectionEvent) => {
     const { viewport } = this._container;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
+    const selected = pick(this._blocks, modelX, modelY, this._container, e);
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
@@ -352,7 +432,7 @@ export class EdgelessSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     const { viewport } = this._container;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const hovered = pick(this._blocks, modelX, modelY);
+    const hovered = pick(this._blocks, modelX, modelY, this._container, e);
 
     this._updateHoverState(hovered);
     this._container.signals.hoverUpdated.emit();

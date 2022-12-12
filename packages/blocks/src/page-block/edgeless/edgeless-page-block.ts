@@ -203,6 +203,14 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    window.addEventListener('affine.switch-mouse-mode', ({ detail }) => {
+      this._selection.mouseMode = detail;
+    });
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
@@ -227,8 +235,15 @@ export class EdgelessPageBlockComponent
     const { frameSelectionRect, blockSelectionState: selectionState } =
       _selection;
     const { zoom } = this.viewport;
-    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
-    const hoverRect = EdgelessHoverRect(_selection.hoverRect, zoom);
+    const selectionRect = EdgelessFrameSelectionRect(
+      frameSelectionRect,
+      _selection.isHoveringShape
+    );
+    const hoverRect = EdgelessHoverRect(
+      _selection.hoverRect,
+      zoom,
+      _selection.isHoveringShape
+    );
 
     return html`
       <style></style>

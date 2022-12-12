@@ -1,6 +1,8 @@
-import type { GroupBlockModel } from '../../group-block';
 import type { EdgelessContainer } from './edgeless-page-block';
 import type { ViewportState, XYWH } from './selection-manager';
+import type { RootBlockModel } from '../../__internal__';
+import { ShapeBlockComponent } from '../../shape-block';
+import type { SelectionEvent } from '../../__internal__';
 
 export const DEFAULT_SPACING = 64;
 
@@ -20,13 +22,28 @@ function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
 }
 
 export function pick(
-  blocks: GroupBlockModel[],
+  blocks: RootBlockModel[],
   modelX: number,
-  modelY: number
-): GroupBlockModel | null {
+  modelY: number,
+  container: EdgelessContainer,
+  e: SelectionEvent
+): RootBlockModel | null {
+  const target = e.raw.target;
+  const isShapeBlock = target instanceof ShapeBlockComponent;
   for (let i = blocks.length - 1; i >= 0; i--) {
-    if (isPointIn(blocks[i], modelX, modelY)) {
-      return blocks[i];
+    const block = blocks[i];
+    if (isPointIn(block, modelX, modelY)) {
+      if (
+        isShapeBlock &&
+        block.flavour === 'affine:shape' &&
+        (target as ShapeBlockComponent).model === block
+      ) {
+        return block;
+      } else if (!isShapeBlock && block.flavour !== 'affine:shape') {
+        return block;
+      } else {
+        continue;
+      }
     }
   }
   return null;

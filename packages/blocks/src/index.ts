@@ -16,6 +16,7 @@ export * from './list-block';
 export * from './group-block';
 export * from './divider-block';
 export * from './image-block';
+export * from './shape-block';
 export * as SelectionUtils from './__internal__/utils/selection';
 export * from './__internal__/utils/types';
 export * from './__internal__/utils/common-operations';

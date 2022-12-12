@@ -12,7 +12,6 @@ import {
   pressEnter,
   addGroupByClick,
   initEmptyParagraphState,
-  initEmptyEditor,
 } from './utils/actions';
 import {
   defaultStore,
@@ -37,7 +36,6 @@ test('basic input', async ({ page }) => {
 
 test('basic init with external text', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyEditor(page);
 
   await page.evaluate(() => {
     const { page } = window;
@@ -71,7 +69,6 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
-  await initEmptyEditor(pageB);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
 
@@ -87,7 +84,6 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, room);
-  await initEmptyEditor(pageB);
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -102,7 +98,6 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
 
 test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
-  await initEmptyEditor(pageA);
   // await focusFirstTextBlock(pageA); // do not init (add blocks) in A
 
   const pageB = await browser.newPage();

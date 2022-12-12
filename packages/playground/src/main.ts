@@ -14,16 +14,17 @@ import './style.css';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? 'playground';
-const joining = params.get('collab') !== null;
+/**
+ * With `?init` in url, an empty editor will be initialized automatically.
+ * Without this option, only workspace will be initialized, the editor need to be loaded by clicking init button.
+ */
+const autoInit = params.get('init') !== null;
 
 /**
  * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
  * Default is debug (using webrtc)
  */
-function editorOptionsFromParam(): Pick<
-  StoreOptions,
-  'providers' | 'idGenerator'
-> {
+function getEditorOptions(): Pick<StoreOptions, 'providers' | 'idGenerator'> {
   const providers: DocProviderConstructor[] = [];
 
   /**
@@ -72,28 +73,37 @@ function editorOptionsFromParam(): Pick<
   };
 }
 
-window.onload = () => {
-  const workspace = new Workspace({
-    room,
-    ...editorOptionsFromParam(),
-  });
+const workspace = new Workspace({
+  room,
+  ...getEditorOptions(),
+});
+
+const initButton = <HTMLButtonElement>document.getElementById('init-btn');
+
+function initEmptyEditor() {
+  // Init default workspace for manual local testing.
+  const page = workspace
+    .createPage<typeof BlockSchema>('page0')
+    .register(BlockSchema);
+  const editor = createEditor(page);
+  const debugMenu = createDebugMenu(workspace, editor);
+
+  document.body.appendChild(editor);
+  document.body.appendChild(debugMenu);
+  initButton.disabled = true;
+
   // @ts-ignore
   window.workspace = workspace;
   // @ts-ignore
   window.blockSchema = BlockSchema;
+  // @ts-ignore
+  window.editor = editor;
+  // @ts-ignore
+  window.page = page;
+}
 
-  if (joining) return;
+initButton.addEventListener('click', initEmptyEditor);
 
-  // Init default workspace for manual local testing.
-  // In single mode E2E test cases, room name are random IDs.
-  if (room === 'playground') {
-    const page = workspace
-      .createPage<typeof BlockSchema>('page0')
-      .register(BlockSchema);
-    const editor = createEditor(page);
-    const debugMenu = createDebugMenu(workspace, editor);
-
-    document.body.appendChild(editor);
-    document.body.appendChild(debugMenu);
-  }
-};
+if (autoInit) {
+  initEmptyEditor();
+}
