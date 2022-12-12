@@ -188,10 +188,6 @@ export class Workspace {
     return this._indexer.search(query);
   }
 
-  findBlockPage(blockId: string) {
-    return this._indexer.findBlockPage(blockId);
-  }
-
   toJSXElement(id = '0') {
     return this._store.toJSXElement(id);
   }
