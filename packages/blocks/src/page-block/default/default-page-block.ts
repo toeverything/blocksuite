@@ -445,8 +445,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkey.addListener(LEFT, e => {
       let model: BaseBlockModel | null = null;
-      if (this.selection.state.selectedBlocks.length) {
-        model = getModelByElement(this.selection.state.selectedBlocks[0]);
+      const {
+        state: { selectedBlocks, type },
+      } = this.selection;
+      if (
+        selectedBlocks.length &&
+        !(type === 'native' && window.getSelection()?.rangeCount)
+      ) {
+        model = getModelByElement(selectedBlocks[0]);
         this.signals.updateSelectedRects.emit([]);
         this.selection.state.clear();
         e.preventDefault();
@@ -460,12 +466,14 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
     hotkey.addListener(RIGHT, e => {
       let model: BaseBlockModel | null = null;
-      if (this.selection.state.selectedBlocks.length) {
-        model = getModelByElement(
-          this.selection.state.selectedBlocks[
-            this.selection.state.selectedBlocks.length - 1
-          ]
-        );
+      const {
+        state: { selectedBlocks, type },
+      } = this.selection;
+      if (
+        selectedBlocks.length &&
+        !(type === 'native' && window.getSelection()?.rangeCount)
+      ) {
+        model = getModelByElement(selectedBlocks[selectedBlocks.length - 1]);
         this.signals.updateSelectedRects.emit([]);
         this.selection.state.clear();
         e.preventDefault();
