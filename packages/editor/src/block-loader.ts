@@ -16,5 +16,5 @@ export const BlockSchema = {
   'affine:group': GroupBlockModel,
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
-  'affine:shape': ShapeBlockModel
+  'affine:shape': ShapeBlockModel,
 } as const;

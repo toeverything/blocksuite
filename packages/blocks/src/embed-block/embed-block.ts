@@ -27,6 +27,11 @@ export class EmbedBlockComponent extends LitElement {
     this._caption = this._input.value;
     this.model.page.updateBlock(this.model, { caption: this._caption });
   }
+  private _inputBlur() {
+    if (!this.model.caption) {
+      this._input.classList.remove('caption-show');
+    }
+  }
   render() {
     return html`
       <div class=${`affine-embed-block-container`}>
@@ -34,9 +39,12 @@ export class EmbedBlockComponent extends LitElement {
           <slot></slot>
           <input
             placeholder="write a caption"
-            class="affine-embed-wrapper-caption"
+            class="affine-embed-wrapper-caption ${this.model.caption
+              ? 'caption-show'
+              : ''}"
             value=${this._caption}
             @input=${this._inputChange}
+            @blur=${this._inputBlur}
           />
         </div>
       </div>

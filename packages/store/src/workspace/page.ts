@@ -219,7 +219,7 @@ export class Page<
 
     if (blockProps.flavour === 'affine:shape') {
       if (parent != null || parentIndex != null) {
-        throw new Error('Shape block should only be appear under page')
+        throw new Error('Shape block should only be appear under page');
       }
     }
 
