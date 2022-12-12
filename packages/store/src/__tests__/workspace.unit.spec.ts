@@ -437,6 +437,7 @@ describe.concurrent('store.search works', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage(defaultPageId).register(BlockSchema);
+    const pageId = `space:${defaultPageId}`;
 
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
 
@@ -456,12 +457,8 @@ describe.concurrent('store.search works', async () => {
       ),
     });
 
-    expect(workspace.search('处理器')).toStrictEqual([
-      { field: 'content', result: ['1'] },
-    ]);
+    expect(workspace.search('处理器')).toStrictEqual(new Map([['1', pageId]]));
 
-    expect(workspace.search('索尼')).toStrictEqual([
-      { field: 'content', result: ['2'] },
-    ]);
+    expect(workspace.search('索尼')).toStrictEqual(new Map([['2', pageId]]));
   });
 });
