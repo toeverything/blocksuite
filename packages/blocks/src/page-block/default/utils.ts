@@ -1,4 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import { toast } from '../../components/toast';
 import {
   assertExists,
   getBlockById,
@@ -65,6 +66,7 @@ export async function copyImgToClip(imgURL: string) {
       [blob.type]: blob,
     }),
   ]);
+  toast('Copied image to clipboard');
 }
 
 export function focusCaption(model: BaseBlockModel) {

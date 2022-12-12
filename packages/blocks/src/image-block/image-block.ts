@@ -42,7 +42,6 @@ export class ImageBlockComponent extends LitElement {
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    // const { deep, index } = getListInfo(this.host, this.model);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
     const { source, width, height } = this.model;
 
