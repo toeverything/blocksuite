@@ -188,10 +188,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _onSwitchMode() {
-    this.mode = this.mode === 'page' ? 'edgeless' : 'page';
-
-    const event = createEvent('affine.switch-mode', this.mode);
-    window.dispatchEvent(event);
+    this.editor.mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
   }
 
   private _onAddGroup() {
