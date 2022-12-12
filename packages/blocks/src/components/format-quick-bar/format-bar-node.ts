@@ -3,7 +3,11 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { getFormat, updateTextType } from '../../page-block/utils';
-import { getCurrentRange, getModelsByRange } from '../../__internal__/utils';
+import {
+  getCurrentRange,
+  getModelsByRange,
+  restoreSelection,
+} from '../../__internal__/utils';
 import { toast } from '../toast';
 import './button';
 import { formatButtons, paragraphButtons } from './config';
@@ -11,7 +15,15 @@ import { ArrowDownIcon, CopyIcon } from './icons';
 import { formatQuickBarStyle } from './styles';
 
 const onCopy = () => {
+  const curRange = getCurrentRange();
   document.dispatchEvent(new ClipboardEvent('copy'));
+
+  // Workaround for copyToClipboardFromPc's bad implementation
+  // copyToClipboardFromPc will createElement('textarea') and select all text,
+  // so will cause the selection to be lost.
+  // See more details in copy-cut-manager.ts
+  // The next line can be removed after the issue is solved
+  restoreSelection(curRange);
   toast('Copied to clipboard');
 };
 

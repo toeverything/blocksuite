@@ -390,6 +390,5 @@ test('should format quick bar be able to copy', async ({ page }) => {
 
   // TODO assert clipboard
 
-  // TODO FIXME: The paragraph button should prevent selection after click
-  // await assertSelection(page, 1, 0, 3);
+  await assertSelection(page, 1, 0, 3);
 });
