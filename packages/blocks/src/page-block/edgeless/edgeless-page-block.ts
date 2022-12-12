@@ -203,9 +203,9 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  private _handleSwitchMouseMode({ detail }: CustomEvent<MouseMode>) {
+  private _handleSwitchMouseMode = ({ detail }: CustomEvent<MouseMode>) => {
     this._selection.mouseMode = detail;
-  }
+  };
 
   override connectedCallback() {
     super.connectedCallback();
