@@ -49,7 +49,6 @@ export type ShapeColor = 'black';
 
 declare global {
   interface WindowEventMap {
-    'affine.switch-mode': CustomEvent<'page' | 'edgeless'>;
     'affine.switch-mouse-mode': CustomEvent<MouseMode>;
   }
 }
