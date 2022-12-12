@@ -49,7 +49,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
       console.warn(message.text());
     }
     if (message.type() === 'error') {
-      throw new Error('Unexpected console error: ' + message.text());
+      console.error('Unexpected console error: ' + message.text());
     }
   });
 
