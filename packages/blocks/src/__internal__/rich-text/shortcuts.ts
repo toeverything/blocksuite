@@ -282,7 +282,7 @@ export class Shortcuts {
         assertExists(parent);
         const index = parent.children.indexOf(model);
         const blockProps = {
-          flavour: 'affine:code',
+          flavour: 'affine:code-block',
         };
         page.deleteBlock(model);
         page.addBlock(blockProps, parent, index);

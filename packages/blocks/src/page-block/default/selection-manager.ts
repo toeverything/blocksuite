@@ -177,7 +177,11 @@ export class DefaultSelectionManager {
   }
 
   private get _blocks(): BaseBlockModel[] {
-    return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
+    const blocks: BaseBlockModel[] = [];
+    this.page.root?.children.forEach(child => {
+      blocks.push(...child.children);
+    });
+    return blocks;
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -401,7 +405,9 @@ export class DefaultSelectionManager {
     const clickBlockInfo = getHoverBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
-      e.raw.pageY
+      e.raw.pageY,
+      ['affine:embed'],
+      'img'
     );
     if (clickBlockInfo?.model.type === 'image') {
       this.state.type = 'block';
@@ -447,12 +453,22 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    const hoverOption = getHoverBlockOptionByPosition(
+    const embedHoverOption = getHoverBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
-      e.raw.pageY
+      e.raw.pageY,
+      ['affine:embed'],
+      'img'
     );
-    this._signals.updateEmbedOption.emit(hoverOption);
+    this._signals.updateEmbedOption.emit(embedHoverOption);
+    const codeBlockHoverOption = getHoverBlockOptionByPosition(
+      this._blocks,
+      e.raw.pageX,
+      e.raw.pageY,
+      ['affine:code-block'],
+      '.affine-code-block-container'
+    );
+    this._signals.updateCodeBlockOption.emit(codeBlockHoverOption);
   };
 
   private _onContainerMouseOut = (e: SelectionEvent) => {

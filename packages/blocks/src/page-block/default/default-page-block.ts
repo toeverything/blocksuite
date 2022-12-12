@@ -1,40 +1,40 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
-  Disposable,
-  Signal,
-  Page,
-  Text,
   BaseBlockModel,
+  Disposable,
+  Page,
+  Signal,
+  Text,
 } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
-  type BlockHost,
+  assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
-  hotkey,
   BlockChildrenContainer,
-  SelectionPosition,
-  HOTKEYS,
-  assertExists,
-  isPageTitle,
-  getSplicedTitle,
-  noop,
-  getModelByElement,
-  matchFlavours,
+  type BlockHost,
+  focusNextBlock,
   focusPreviousBlock,
-  getDefaultPageBlock,
   getBlockElementByModel,
   getContainerByModel,
-  getPreviousBlock,
-  getNextBlock,
-  focusNextBlock,
   getCurrentRange,
-  isMultiBlockRange,
+  getDefaultPageBlock,
+  getModelByElement,
   getModelsByRange,
+  getNextBlock,
+  getPreviousBlock,
+  getSplicedTitle,
   getStartModelBySelection,
+  hotkey,
+  HOTKEYS,
+  isMultiBlockRange,
+  isPageTitle,
+  matchFlavours,
+  noop,
+  SelectionPosition,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import {
@@ -55,12 +55,22 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../image-block/icons';
-import { downloadImage, focusCaption, copyImgToClip } from './utils';
+import { LineWrapIcon, SwitchLangIcon } from '../../code-block/icons';
+import {
+  copyCode,
+  copyImgToClip,
+  deleteCodeBlock,
+  downloadImage,
+  focusCaption,
+  toggleWrap,
+} from './utils';
 
 export interface EmbedOption {
   position: { x: number; y: number };
   model: BaseBlockModel;
 }
+
+export type CodeBlockOption = EmbedOption;
 
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
@@ -69,6 +79,7 @@ export interface DefaultPageSignals {
     { left: number; top: number; width: number; height: number }[]
   >;
   updateEmbedOption: Signal<EmbedOption | null>;
+  updateCodeBlockOption: Signal<CodeBlockOption | null>;
   nativeSelection: Signal<boolean>;
 }
 
@@ -159,6 +170,42 @@ function SelectedRectsContainer(rects: DOMRect[]) {
       })}
     </div>
   `;
+}
+
+function CodeBlockOptionContainer(codeBlockOption: CodeBlockOption | null) {
+  if (codeBlockOption) {
+    const style = {
+      left: codeBlockOption.position.x + 'px',
+      top: codeBlockOption.position.y + 'px',
+    };
+    return html`
+      <style>
+        .affine-codeblock-option-container > ul {
+          position: fixed;
+          z-index: 1;
+        }
+      </style>
+
+      <div class="affine-codeblock-option-container">
+        <ul style=${styleMap(style)} class="code-block-option">
+          <li
+            @click=${() => {
+              console.log('a');
+            }}
+          >
+            ${SwitchLangIcon}
+          </li>
+          <li @click=${() => copyCode(codeBlockOption)}>${CopyIcon}</li>
+          <li @click=${() => toggleWrap(codeBlockOption)}>${LineWrapIcon}</li>
+          <li @click=${() => deleteCodeBlock(codeBlockOption)}>
+            ${DeleteIcon}
+          </li>
+        </ul>
+      </div>
+    `;
+  } else {
+    return html``;
+  }
 }
 
 function EmbedOptionContainer(
@@ -311,6 +358,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   embedOption!: EmbedOption | null;
 
+  @state()
+  codeBlockOption!: CodeBlockOption | null;
+
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
@@ -318,6 +368,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       { left: number; top: number; width: number; height: number }[]
     >(),
     updateEmbedOption: new Signal<EmbedOption | null>(),
+    updateCodeBlockOption: new Signal<CodeBlockOption | null>(),
     nativeSelection: new Signal<boolean>(),
   };
 
@@ -506,7 +557,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       const index = parent?.children.indexOf(startModel);
       assertExists(parent);
       const blockProps = {
-        flavour: 'affine:code',
+        flavour: 'affine:code-block',
         text: startModel.text?.clone(),
       };
       page.deleteBlock(startModel);
@@ -673,6 +724,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.embedOption = embedOption;
       this.requestUpdate();
     });
+    this.signals.updateCodeBlockOption.on(codeBlockOption => {
+      this.codeBlockOption = codeBlockOption;
+      this.requestUpdate();
+    });
 
     this.signals.nativeSelection.on(bind => {
       if (bind) {
@@ -726,6 +781,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.embedOption,
       this.signals
     );
+    const codeBlockOptionContainer = CodeBlockOptionContainer(
+      this.codeBlockOption
+    );
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
@@ -742,6 +800,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         </div>
         ${selectedRectsContainer} ${selectionRect}
         ${selectedEmbedContainer}${embedOptionContainer}
+        ${codeBlockOptionContainer}
       </div>
     `;
   }

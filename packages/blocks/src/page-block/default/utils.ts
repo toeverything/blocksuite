@@ -1,21 +1,31 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import {
   assertExists,
+  BLOCK_ID_ATTR,
   getBlockById,
   getBlockElementByModel,
+  getRichTextByModel,
   matchFlavours,
+  resetNativeSelection,
 } from '../../__internal__/utils';
+import { toast } from '../../components/toast';
+import type { EmbedOption } from './default-page-block';
 
 export const getHoverBlockOptionByPosition = (
   blocks: BaseBlockModel[],
   x: number,
-  y: number
+  y: number,
+  flavours: string[],
+  targetSelector: string
 ) => {
-  for (let index = 0; index <= blocks.length - 1; index++) {
-    if (matchFlavours(blocks[index], ['affine:embed'])) {
-      const hoverDom = getBlockById(blocks[index].id);
-      const hoverImage = hoverDom?.querySelector('img');
-      const imageRect = hoverImage?.getBoundingClientRect();
+  while (blocks.length) {
+    const blockModel = blocks.shift();
+    assertExists(blockModel);
+    blockModel.children && blocks.push(...blockModel.children);
+    if (matchFlavours(blockModel, flavours)) {
+      const hoverDom = getBlockById(blockModel.id);
+      const hoverTarget = hoverDom?.querySelector(targetSelector);
+      const imageRect = hoverTarget?.getBoundingClientRect();
       assertExists(imageRect);
       if (isPointIn(imageRect, x, y)) {
         return {
@@ -23,7 +33,7 @@ export const getHoverBlockOptionByPosition = (
             x: imageRect.right + 10,
             y: imageRect.top,
           },
-          model: blocks[index],
+          model: blockModel,
         };
       }
     }
@@ -36,7 +46,8 @@ function isPointIn(block: DOMRect, x: number, y: number): boolean {
     x < block.left ||
     x > block.left + block.width + 50 ||
     y < block.top ||
-    y > block.top + block.height
+    // when block height is smaller than height of option menu, need a stricter value to prevent bar disappear
+    y > block.top + Math.max(block.height, 120)
   ) {
     return false;
   }
@@ -69,4 +80,34 @@ export function focusCaption(model: BaseBlockModel) {
     '.affine-embed-wrapper-caption'
   ) as HTMLInputElement;
   dom.focus();
+}
+
+function removeCodeBlockOptionMenu() {
+  document.querySelector(`.affine-codeblock-option-container`)?.remove();
+}
+
+export function copyCode(codeBlockOption: EmbedOption) {
+  const richText = getRichTextByModel(codeBlockOption.model);
+  assertExists(richText);
+  const quill = richText?.quill;
+  quill.setSelection(0, quill.getLength());
+  document.dispatchEvent(new ClipboardEvent('copy'));
+  resetNativeSelection(null);
+  toast('Copied to clipboard');
+  removeCodeBlockOptionMenu();
+}
+
+export function deleteCodeBlock(codeBlockOption: EmbedOption) {
+  const model = codeBlockOption.model;
+  model.page.deleteBlock(model);
+  removeCodeBlockOptionMenu();
+}
+
+export function toggleWrap(codeBlockOption: EmbedOption) {
+  const syntaxElem = document.querySelector(
+    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
+  );
+  assertExists(syntaxElem);
+  syntaxElem.classList.toggle('wrap');
+  removeCodeBlockOptionMenu();
 }

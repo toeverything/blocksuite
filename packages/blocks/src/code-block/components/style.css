@@ -11,3 +11,11 @@ lang-list {
   display: flex;
   justify-content: flex-start;
 }
+
+code-block-button {
+  color: var(--affine-icon-color);
+}
+
+code-block-button:hover {
+  color: var(--affine-primary-color);
+}

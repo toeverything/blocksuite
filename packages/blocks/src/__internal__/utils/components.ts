@@ -43,10 +43,10 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost) {
       `;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
-    case 'affine:code':
+    case 'affine:code-block':
       return html` <code-block
-          .model=${model as CodeBlockModel}
-          .host=${host}
+        .model=${model as CodeBlockModel}
+        .host=${host}
       ></code-block>`;
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;

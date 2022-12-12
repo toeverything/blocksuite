@@ -45,7 +45,9 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
       }
     } else {
       const flavour =
-        model.flavour !== 'affine:code' ? model.flavour : 'affine:paragraph';
+        model.flavour !== 'affine:code-block'
+          ? model.flavour
+          : 'affine:paragraph';
       const blockProps = {
         flavour,
         type: 'text',
@@ -62,7 +64,7 @@ export function handleSoftEnter(
   index: number
 ) {
   page.captureSync();
-  const shouldFormatCode = matchFlavours(model, ['affine:code']);
+  const shouldFormatCode = matchFlavours(model, ['affine:code-block']);
   model.text?.insert(
     '\n',
     index,
@@ -190,7 +192,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           richText?.quill?.setSelection(preTextLength, 0);
         } else if (
           previousSibling &&
-          matchFlavours(previousSibling, ['affine:code'])
+          matchFlavours(previousSibling, ['affine:code-block'])
         ) {
           page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
@@ -232,7 +234,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     page.deleteBlock(model);
     const id = page.addBlock(blockProps, parent, index);
     asyncFocusRichText(page, id);
-  } else if (matchFlavours(model, ['affine:code'])) {
+  } else if (matchFlavours(model, ['affine:code-block'])) {
     const selectionManager = getDefaultPageBlock(model).selection;
     const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
     const selectionRect = codeBlockElement.getBoundingClientRect();

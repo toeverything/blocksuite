@@ -399,7 +399,7 @@ export class Page<
       matchFlavours(model, [
         'affine:paragraph',
         'affine:list',
-        'affine:code',
+        'affine:code-block',
       ]) &&
       !yBlock.get('prop:text')
     ) {

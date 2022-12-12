@@ -117,7 +117,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         type: 'quote',
       },
       {
-        flavour: 'affine:code',
+        flavour: 'affine:code-block',
       },
     ];
 

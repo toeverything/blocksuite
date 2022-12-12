@@ -15,7 +15,7 @@ export const BlockSchema = {
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
   'affine:group': GroupBlockModel,
-  'affine:code': CodeBlockModel,
+  'affine:code-block': CodeBlockModel,
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
 } as const;

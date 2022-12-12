@@ -9,10 +9,10 @@ code-block {
   width: 720px;
   margin-top: 15px;
   background: #fafbfd;
-  box-shadow: 1px 1px 1px var(--affine-border-color);
   font-size: calc(var(--affine-font-base) - 4px);
   font-family: var(--affine-font-family2);
   line-height: calc(var(--affine-line-height-base) - 6px);
+  padding-bottom: 20px;
 }
 
 .container {
@@ -36,6 +36,7 @@ code-block {
   top: 16px;
   left: 25px;
   line-height: calc(var(--affine-line-height-base) - 6px);
+  color: var(--affine-line-number-color);
 }
 
 .affine-code-block-container .ql-container {
@@ -44,9 +45,13 @@ code-block {
   padding: 2px 15px;
 }
 
-.ql-syntax {
+.affine-code-block-container .ql-syntax {
   width: 660px;
-  /*overflow-x: scroll;*/
+  overflow: scroll;
+}
+
+.affine-code-block-container .wrap {
+  white-space: pre-wrap;
 }
 
 .lang-container {
@@ -54,6 +59,36 @@ code-block {
   line-height: calc(var(--affine-line-height-base) - 10px);
   text-align: justify;
   position: relative;
+}
+
+.code-block-option {
+  box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),
+    0px 3px 16px -6px rgba(24, 39, 75, 0.4);
+  border-radius: 10px;
+  list-style: none;
+  overflow: hidden;
+  padding: 4px;
+  width: 40px;
+  background-color: var(--affine-page-background);
+  margin: 0;
+}
+
+.code-block-option li {
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+  width: 32px;
+  height: 32px;
+  padding-top: 4px;
+}
+.code-block-option li:hover {
+  background: #f1f3ff;
+  border-radius: 5px;
+  color: #6880ff;
+}
+
+.code-block-option {
+  fill: #6880ff;
 }
 
 tool-tip {
