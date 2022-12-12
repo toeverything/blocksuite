@@ -151,11 +151,10 @@ export class Indexer {
 
   private _getPage(key: string): YMap<YBlock> | undefined {
     try {
-      // only indexing blocks in spaces
-      if (key.startsWith('space:')) {
-        return this._doc.getMap(key);
+      if (!key.startsWith('space:')) {
+        key = `space:${key}`;
       }
-      return undefined;
+      return this._doc.getMap(key);
     } catch (_) {
       return undefined;
     }

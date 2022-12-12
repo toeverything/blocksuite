@@ -39,16 +39,35 @@ function waitOnce<T>(signal: Signal<T>) {
   return new Promise<T>(resolve => signal.once(val => resolve(val)));
 }
 
+async function createRoot(page: Page) {
+  queueMicrotask(() => page.addBlock({ flavour: 'affine:page' }));
+  const root = await waitOnce(page.signals.rootAdded);
+  return root;
+}
+
+async function createPage(workspace: Workspace, pageId = 'page0') {
+  queueMicrotask(() => workspace.createPage(pageId));
+  await waitOnce(workspace.signals.pageAdded);
+  return workspace.getPage(pageId);
+}
+
+async function createTestPage() {
+  const options = createTestOptions();
+  const workspace = new Workspace(options).register(BlockSchema);
+  const page = await createPage(workspace);
+  return page;
+}
+
 const defaultPageId = 'page0';
 const spaceId = `space:${defaultPageId}`;
 const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
-  it('can init store', () => {
+  it('can init store', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-
-    const actual = serialize(workspace.createPage(defaultPageId));
+    const page = await createPage(workspace);
+    const actual = serialize(page);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
     assert.equal(typeof actualPage.createDate, 'number');
     // @ts-ignore
@@ -72,12 +91,8 @@ describe.concurrent('basic', () => {
 });
 
 describe.concurrent('addBlock', () => {
-  it('can add single model', () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
-
+  it('can add single model', async () => {
+    const page = await createTestPage();
     page.addBlock({ flavour: 'affine:page' });
 
     assert.deepEqual(serialize(page)[spaceId], {
@@ -89,7 +104,7 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('use custom idGenerator', () => {
+  it('can set custom idGenerator', async () => {
     const options = {
       ...createTestOptions(),
       idGenerator: (() => {
@@ -98,9 +113,8 @@ describe.concurrent('addBlock', () => {
         return () => keys[i++];
       })(),
     };
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchema);
+    const page = await createPage(workspace);
 
     page.addBlock({ flavour: 'affine:page' });
     page.addBlock({ flavour: 'affine:paragraph' });
@@ -129,12 +143,8 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('can add model with props', () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
-
+  it('can add model with props', async () => {
+    const page = await createTestPage();
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
 
     assert.deepEqual(serialize(page)[spaceId], {
@@ -147,11 +157,8 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('can add multi models', () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
+  it('can add multi models', async () => {
+    const page = await createTestPage();
     page.addBlock({ flavour: 'affine:page' });
     page.addBlock({ flavour: 'affine:paragraph' });
 
@@ -172,10 +179,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can observe signal events', async () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
+    const page = await createTestPage();
 
     queueMicrotask(() => page.addBlock({ flavour: 'affine:page' }));
     const block = await waitOnce(page.signals.rootAdded);
@@ -183,10 +187,7 @@ describe.concurrent('addBlock', () => {
   });
 
   it('can add block to root', async () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
+    const page = await createTestPage();
 
     queueMicrotask(() => page.addBlock({ flavour: 'affine:page' }));
     const root = await waitOnce(page.signals.rootAdded);
@@ -203,38 +204,39 @@ describe.concurrent('addBlock', () => {
 
   it('can add and remove multi pages', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new Workspace(options).register(BlockSchema);
 
-    let page0!: Page;
-    let page1!: Page;
-    queueMicrotask(() => {
-      page0 = workspace.createPage('page0').register(BlockSchema);
-      page1 = workspace.createPage('page1').register(BlockSchema);
-    });
-    await waitOnce(workspace.signals.pagesUpdated);
-    assert.equal(workspace.pages.size, 2);
+    const page0 = await createPage(workspace, 'page0');
+    const page1 = await createPage(workspace, 'page1');
+
+    // @ts-ignore
+    assert.equal(workspace._pages.size, 2);
 
     queueMicrotask(() => {
       workspace.removePage(page0);
-      assert.equal(workspace.pages.size, 1);
+      // @ts-ignore
+      assert.equal(workspace._pages.size, 1);
       workspace.removePage(page1);
-      assert.equal(workspace.pages.size, 0);
+      // @ts-ignore
+      assert.equal(workspace._pages.size, 0);
     });
   });
 
   it('can set page state', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
+    const workspace = new Workspace(options).register(BlockSchema);
+    workspace.createPage('page0');
 
-    workspace.createPage('page0').register(BlockSchema);
     assert.deepEqual(
-      workspace.meta.pages.map(({ id, title, favorite, trash, trashDate }) => ({
-        id,
-        title,
-        favorite,
-        trash,
-        trashDate,
-      })),
+      workspace.meta.pageMetas.map(
+        ({ id, title, favorite, trash, trashDate }) => ({
+          id,
+          title,
+          favorite,
+          trash,
+          trashDate,
+        })
+      ),
       [
         {
           id: 'page0',
@@ -248,13 +250,15 @@ describe.concurrent('addBlock', () => {
 
     workspace.setPageMeta('page0', { favorite: true });
     assert.deepEqual(
-      workspace.meta.pages.map(({ id, title, favorite, trash, trashDate }) => ({
-        id,
-        title,
-        favorite,
-        trash,
-        trashDate,
-      })),
+      workspace.meta.pageMetas.map(
+        ({ id, title, favorite, trash, trashDate }) => ({
+          id,
+          title,
+          favorite,
+          trash,
+          trashDate,
+        })
+      ),
       [
         {
           id: 'page0',
@@ -268,18 +272,9 @@ describe.concurrent('addBlock', () => {
   });
 });
 
-async function initWithRoot(page: Page) {
-  queueMicrotask(() => page.addBlock({ flavour: 'affine:page' }));
-  const root = await waitOnce(page.signals.rootAdded);
-  return root;
-}
-
 describe.concurrent('deleteBlock', () => {
-  it('can delete single model', () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
+  it('can delete single model', async () => {
+    const page = await createTestPage();
 
     page.addBlock({ flavour: 'affine:page' });
     assert.deepEqual(serialize(page)[spaceId], {
@@ -295,11 +290,8 @@ describe.concurrent('deleteBlock', () => {
   });
 
   it('can delete model with parent', async () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
-    const root = await initWithRoot(page);
+    const page = await createTestPage();
+    const root = await createRoot(page);
 
     page.addBlock({ flavour: 'affine:paragraph' });
 
@@ -335,11 +327,8 @@ describe.concurrent('deleteBlock', () => {
 
 describe.concurrent('getBlock', () => {
   it('can get block by id', async () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
-    const root = await initWithRoot(page);
+    const page = await createTestPage();
+    const root = await createRoot(page);
 
     page.addBlock({ flavour: 'affine:paragraph' });
     page.addBlock({ flavour: 'affine:paragraph' });
@@ -353,11 +342,8 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get parent', async () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
-    const root = await initWithRoot(page);
+    const page = await createTestPage();
+    const root = await createRoot(page);
 
     page.addBlock({ flavour: 'affine:paragraph' });
     page.addBlock({ flavour: 'affine:paragraph' });
@@ -370,11 +356,8 @@ describe.concurrent('getBlock', () => {
   });
 
   it('can get previous sibling', async () => {
-    const options = createTestOptions();
-    const page = new Workspace(options)
-      .createPage(defaultPageId)
-      .register(BlockSchema);
-    const root = await initWithRoot(page);
+    const page = await createTestPage();
+    const root = await createRoot(page);
 
     page.addBlock({ flavour: 'affine:paragraph' });
     page.addBlock({ flavour: 'affine:paragraph' });
@@ -387,11 +370,12 @@ describe.concurrent('getBlock', () => {
   });
 });
 
-describe.concurrent('store.toJSXElement works', async () => {
-  it('store match snapshot', () => {
+// Inline snapshot is not supported under describe.parallel config
+describe('store.toJSXElement works', async () => {
+  it('store matches snapshot', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
-    const page = workspace.createPage(defaultPageId).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchema);
+    const page = await createPage(workspace);
 
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
 
@@ -402,18 +386,18 @@ describe.concurrent('store.toJSXElement works', async () => {
     `);
   });
 
-  it('empty store match snapshot', () => {
+  it('empty store matches snapshot', async () => {
     const options = createTestOptions();
-    const store = new Workspace(options);
-    store.createPage(defaultPageId).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchema);
+    await createPage(workspace);
 
-    expect(store.toJSXElement()).toMatchInlineSnapshot('null');
+    expect(workspace.toJSXElement()).toMatchInlineSnapshot('null');
   });
 
-  it('store with multiple blocks children match snapshot', () => {
+  it('store with multiple blocks children matches snapshot', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
-    const page = workspace.createPage(defaultPageId).register(BlockSchema);
+    const workspace = new Workspace(options).register(BlockSchema);
+    const page = await createPage(workspace);
 
     page.addBlock({ flavour: 'affine:page' });
     page.addBlock({ flavour: 'affine:paragraph' });
@@ -433,11 +417,10 @@ describe.concurrent('store.toJSXElement works', async () => {
 });
 
 describe.concurrent('store.search works', async () => {
-  it('store search matching', () => {
+  it('store search matching', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options);
-    const page = workspace.createPage(defaultPageId).register(BlockSchema);
-    const pageId = `space:${defaultPageId}`;
+    const workspace = new Workspace(options).register(BlockSchema);
+    const page = await createPage(workspace);
 
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
 
@@ -457,8 +440,10 @@ describe.concurrent('store.search works', async () => {
       ),
     });
 
-    expect(workspace.search('处理器')).toStrictEqual(new Map([['1', pageId]]));
+    const id = page.id.replace('space:', '');
 
-    expect(workspace.search('索尼')).toStrictEqual(new Map([['2', pageId]]));
+    expect(workspace.search('处理器')).toStrictEqual(new Map([['1', id]]));
+
+    expect(workspace.search('索尼')).toStrictEqual(new Map([['2', id]]));
   });
 });

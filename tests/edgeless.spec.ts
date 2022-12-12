@@ -24,9 +24,9 @@ async function getGroupSize(
 ) {
   const result = await page.evaluate(
     ([id]) => {
-      const block = window.workspace.pages
-        .get('space:page0')
-        ?.getBlockById(id.groupId) as GroupBlockModel;
+      const block = window.workspace
+        .getPage('page0')
+        .getBlockById(id.groupId) as GroupBlockModel;
       return block.xywh;
     },
     [ids] as const
@@ -48,7 +48,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 0);
+  await assertNativeSelectionRangeCount(page, 1);
 });
 
 test('cursor for active and inactive state', async ({ page }) => {
