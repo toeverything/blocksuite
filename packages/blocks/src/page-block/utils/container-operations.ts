@@ -4,9 +4,9 @@ import {
   assertExists,
   assertFlavours,
   ExtendedModel,
-  noop,
   almostEqual,
   isCollapsedAtBlockStart,
+  noop,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {

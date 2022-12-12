@@ -29,8 +29,10 @@ import {
   getBlockElementByModel,
   getContainerByModel,
   getPreviousBlock,
-  getNextBlock,
   focusNextBlock,
+  Point,
+  caretRangeFromPoint,
+  getStartModelBySelection,
   getCurrentRange,
   isMultiBlockRange,
   getModelsByRange,
@@ -48,14 +50,11 @@ import {
   updateTextType,
 } from '../utils';
 import style from './style.css';
-import {
-  CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
-  DownloadIcon,
-} from '../../image-block/icons';
+import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
 import { downloadImage, focusCaption, copyImgToClip } from './utils';
-export interface EmbedOption {
+import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
+
+export interface EmbedEditingState {
   position: { x: number; y: number };
   model: BaseBlockModel;
 }
@@ -65,7 +64,7 @@ export interface DefaultPageSignals {
   updateEmbedRects: Signal<
     { left: number; top: number; width: number; height: number }[]
   >;
-  updateEmbedOption: Signal<EmbedOption | null>;
+  updateEmbedEditingState: Signal<EmbedEditingState | null>;
   nativeSelection: Signal<boolean>;
 }
 
@@ -158,14 +157,14 @@ function SelectedRectsContainer(rects: DOMRect[]) {
   `;
 }
 
-function EmbedOptionContainer(
-  embedOption: EmbedOption | null,
+function EmbedEditingContainer(
+  embedEditingState: EmbedEditingState | null,
   signals: DefaultPageSignals
 ) {
-  if (embedOption) {
+  if (embedEditingState) {
     const style = {
-      left: embedOption.position.x + 'px',
-      top: embedOption.position.y + 'px',
+      left: embedEditingState.position.x + 'px',
+      top: embedEditingState.position.y + 'px',
     };
     return html`
       <style>
@@ -177,28 +176,28 @@ function EmbedOptionContainer(
 
       <div class="affine-image-option-container">
         <ul style=${styleMap(style)} class="image-option">
-          <li @click=${() => focusCaption(embedOption.model)}>
+          <li @click=${() => focusCaption(embedEditingState.model)}>
             ${CaptionIcon}
           </li>
           <li
             @click=${() => {
-              assertExists(embedOption.model.source);
-              downloadImage(embedOption.model.source);
+              assertExists(embedEditingState.model.source);
+              downloadImage(embedEditingState.model.source);
             }}
           >
             ${DownloadIcon}
           </li>
           <li
             @click=${() => {
-              assertExists(embedOption.model.source);
-              copyImgToClip(embedOption.model.source);
+              assertExists(embedEditingState.model.source);
+              copyImgToClip(embedEditingState.model.source);
             }}
           >
             ${CopyIcon}
           </li>
           <li
             @click=${() => {
-              embedOption.model.page.deleteBlock(embedOption.model);
+              embedEditingState.model.page.deleteBlock(embedEditingState.model);
               signals.updateEmbedRects.emit([]);
             }}
           >
@@ -212,63 +211,85 @@ function EmbedOptionContainer(
   }
 }
 
-function handleUp(selection: DefaultSelectionManager) {
-  const { state } = selection;
-  if (state.selectedBlocks.length === 1) {
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    if (!matchFlavours(selectedModel, ['affine:divider'])) {
-      return;
+function handleUp(
+  selection: DefaultSelectionManager,
+  signals: DefaultPageSignals,
+  e: KeyboardEvent
+) {
+  const nativeSelection = window.getSelection();
+  if (nativeSelection?.anchorNode) {
+    const model = getStartModelBySelection();
+    const activeContainer = getContainerByModel(model);
+    const activePreNodeModel = getPreviousBlock(activeContainer, model.id);
+    const editableContainer = getBlockElementByModel(model)?.querySelector(
+      '.ql-editor'
+    ) as HTMLElement;
+    const range = nativeSelection.getRangeAt(0);
+    const { height, left, top } = range.getBoundingClientRect();
+    const newRange = caretRangeFromPoint(left, top - height / 2);
+    if (
+      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
+      !isAtLineEdge(range)
+    ) {
+      // FIXME: Then it will turn the input into the div
+      if (
+        activePreNodeModel &&
+        matchFlavours(activePreNodeModel, ['affine:group'])
+      ) {
+        (
+          document.querySelector(
+            '.affine-default-page-block-title'
+          ) as HTMLInputElement
+        ).focus();
+      } else {
+        focusPreviousBlock(model, new Point(left, top));
+      }
     }
+  } else {
+    signals.updateSelectedRects.emit([]);
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
     const container = getContainerByModel(selectedModel);
     const preNodeModel = getPreviousBlock(container, selectedModel.id);
-    if (!preNodeModel || preNodeModel.id == '1') {
-      return;
-    } else if (
-      matchFlavours(preNodeModel, ['affine:list']) ||
-      matchFlavours(preNodeModel, ['affine:paragraph'])
-    ) {
-      focusPreviousBlock(selectedModel, 'end');
-      state.clear();
-      return;
-    } else if (matchFlavours(preNodeModel, ['affine:divider'])) {
-      const selectionManager = getDefaultPageBlock(selectedModel).selection;
-      const dividerBlockElement = getBlockElementByModel(
-        preNodeModel
-      ) as HTMLElement;
-      const selectionRect = dividerBlockElement.getBoundingClientRect();
-      selectionManager.selectBlockByRect(selectionRect, preNodeModel);
-      state.type = 'divider';
-      return;
-    }
+    assertExists(preNodeModel);
+    const page = getDefaultPageBlock(selectedModel);
+    e.preventDefault();
+    focusPreviousBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'end'
+    );
   }
 }
-function handleDown(selection: DefaultSelectionManager) {
-  const { state } = selection;
-  if (state.selectedBlocks.length === 1) {
+function handleDown(
+  selection: DefaultSelectionManager,
+  signals: DefaultPageSignals,
+  e: KeyboardEvent
+) {
+  if (!selection.state.selectedBlocks.length) {
+    const nativeSelection = window.getSelection();
+    const model = getStartModelBySelection();
+    assertExists(nativeSelection);
+    const range = nativeSelection.getRangeAt(0);
+    const { left, bottom } = range.getBoundingClientRect();
+    focusNextBlock(model, new Point(left, bottom));
+  } else {
+    signals.updateSelectedRects.emit([]);
+    const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    if (!matchFlavours(selectedModel, ['affine:divider'])) {
-      return;
-    }
-    const nextBlock = getNextBlock(selectedModel.id);
-    if (!nextBlock) {
-      return;
-    } else if (
-      matchFlavours(nextBlock, ['affine:list']) ||
-      matchFlavours(nextBlock, ['affine:paragraph'])
-    ) {
-      focusNextBlock(selectedModel, 'start');
-      state.clear();
-      return;
-    } else if (matchFlavours(nextBlock, ['affine:divider'])) {
-      const selectionManager = getDefaultPageBlock(selectedModel).selection;
-      const dividerBlockElement = getBlockElementByModel(
-        nextBlock
-      ) as HTMLElement;
-      const selectionRect = dividerBlockElement.getBoundingClientRect();
-      selectionManager.selectBlockByRect(selectionRect, nextBlock);
-      state.type = 'divider';
-      return;
-    }
+    const container = getContainerByModel(selectedModel);
+    const preNodeModel = getPreviousBlock(container, selectedModel.id);
+    assertExists(preNodeModel);
+    const page = getDefaultPageBlock(selectedModel);
+    e.preventDefault();
+    focusNextBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'start'
+    );
+    return;
   }
 }
 @customElement('default-page-block')
@@ -304,7 +325,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   }[] = [];
 
   @state()
-  embedOption!: EmbedOption | null;
+  embedEditingState!: EmbedEditingState | null;
 
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
@@ -312,7 +333,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     updateEmbedRects: new Signal<
       { left: number; top: number; width: number; height: number }[]
     >(),
-    updateEmbedOption: new Signal<EmbedOption | null>(),
+    updateEmbedEditingState: new Signal<EmbedEditingState | null>(),
     nativeSelection: new Signal<boolean>(),
   };
 
@@ -353,7 +374,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     } = HOTKEYS;
 
     bindCommonHotkey(page);
-    const { state } = this.selection;
     hotkey.addListener(BACKSPACE, e => {
       const { state } = this.selection;
       if (state.type === 'native') {
@@ -361,36 +381,16 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         return;
       } else if (state.type === 'block') {
         const { selectedBlocks } = state;
-        if (
-          selectedBlocks.length === 1 &&
-          matchFlavours(getModelByElement(selectedBlocks[0]), [
-            'affine:divider',
-          ])
-        ) {
-          state.type = 'divider';
-          return;
-        }
         handleBlockSelectionBatchDelete(
           page,
           selectedBlocks.map(block => getModelByElement(block))
         );
-
+        e.preventDefault();
         state.clear();
         this.signals.updateSelectedRects.emit([]);
         this.signals.updateEmbedRects.emit([]);
-        this.signals.updateEmbedOption.emit(null);
+        this.signals.updateEmbedEditingState.emit(null);
         return;
-      } else if (state.type === 'divider') {
-        const { selectedBlocks } = state;
-        handleBlockSelectionBatchDelete(
-          page,
-          selectedBlocks.map(block => getModelByElement(block))
-        );
-
-        state.clear();
-        this.signals.updateSelectedRects.emit([]);
-        this.signals.updateEmbedRects.emit([]);
-        this.signals.updateEmbedOption.emit(null);
       }
       if (isPageTitle(e)) {
         const target = e.target as HTMLInputElement;
@@ -416,65 +416,50 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     hotkey.addListener(UP, e => {
-      switch (state.type) {
-        case 'none':
-          break;
-        case 'block':
-          state.type = 'divider';
-          break;
-        case 'divider':
-          this.signals.updateSelectedRects.emit([]);
-          handleUp(this.selection);
-
-          break;
-        default:
-          break;
-      }
+      handleUp(this.selection, this.signals, e);
     });
     hotkey.addListener(DOWN, e => {
-      switch (state.type) {
-        case 'none':
-          break;
-        case 'block':
-          state.type = 'divider';
-          break;
-        case 'divider':
-          this.signals.updateSelectedRects.emit([]);
-          handleDown(this.selection);
-          break;
-        default:
-          break;
-      }
+      handleDown(this.selection, this.signals, e);
     });
     hotkey.addListener(LEFT, e => {
-      switch (state.type) {
-        case 'none':
-          break;
-        case 'block':
-          state.type = 'divider';
-          break;
-        case 'divider':
-          this.signals.updateSelectedRects.emit([]);
-          handleUp(this.selection);
-          break;
-        default:
-          break;
+      let model: BaseBlockModel | null = null;
+      if (this.selection.state.selectedBlocks.length) {
+        model = getModelByElement(this.selection.state.selectedBlocks[0]);
+        this.signals.updateSelectedRects.emit([]);
+        this.selection.state.clear();
+        e.preventDefault();
+      } else {
+        const range = window.getSelection()?.getRangeAt(0);
+        if (range && range.collapsed && range.startOffset === 0) {
+          model = getStartModelBySelection();
+        }
       }
+      model && focusPreviousBlock(model, 'end');
     });
     hotkey.addListener(RIGHT, e => {
-      switch (state.type) {
-        case 'none':
-          break;
-        case 'block':
-          state.type = 'divider';
-          break;
-        case 'divider':
-          this.signals.updateSelectedRects.emit([]);
-          handleDown(this.selection);
-          break;
-        default:
-          break;
+      let model: BaseBlockModel | null = null;
+      if (this.selection.state.selectedBlocks.length) {
+        model = getModelByElement(
+          this.selection.state.selectedBlocks[
+            this.selection.state.selectedBlocks.length - 1
+          ]
+        );
+        this.signals.updateSelectedRects.emit([]);
+        this.selection.state.clear();
+        e.preventDefault();
+      } else {
+        const range = window.getSelection()?.getRangeAt(0);
+        const textModel = getStartModelBySelection();
+        if (
+          range &&
+          range.collapsed &&
+          range.startOffset === textModel.text?.length
+        ) {
+          // handleUp(this.selection, this.signals);
+          model = getStartModelBySelection();
+        }
       }
+      model && focusNextBlock(model, 'start');
     });
 
     hotkey.addListener(H1, () =>
@@ -647,6 +632,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   firstUpdated() {
     this._bindHotkeys();
+
     hotkey.enableHotkey();
     this.model.propsUpdated.on(() => {
       if (this.model.title !== this._title.value) {
@@ -667,8 +653,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selectEmbedRects = rects;
       this.requestUpdate();
     });
-    this.signals.updateEmbedOption.on(embedOption => {
-      this.embedOption = embedOption;
+    this.signals.updateEmbedEditingState.on(embedEditingState => {
+      this.embedEditingState = embedEditingState;
       this.requestUpdate();
     });
 
@@ -720,8 +706,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
-    const embedOptionContainer = EmbedOptionContainer(
-      this.embedOption,
+    const embedEditingContainer = EmbedEditingContainer(
+      this.embedEditingState,
       this.signals
     );
     return html`
@@ -739,7 +725,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
           ${childrenContainer}
         </div>
         ${selectedRectsContainer} ${selectionRect}
-        ${selectedEmbedContainer}${embedOptionContainer}
+        ${selectedEmbedContainer}${embedEditingContainer}
       </div>
     `;
   }

@@ -9,7 +9,6 @@ export class DividerBlockModel
   implements DividerBlockProps
 {
   flavour = 'affine:divider' as const;
-
   constructor(page: Page, props: Partial<DividerBlockProps>) {
     super(page, props);
   }
