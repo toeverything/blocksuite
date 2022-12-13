@@ -99,8 +99,8 @@ export function syncBlockProps(
   if (props.flavour === 'affine:embed' && !yBlock.has('prop:width')) {
     yBlock.set('prop:width', props.width ?? 20);
   }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:source')) {
-    yBlock.set('prop:source', props.source ?? '');
+  if (props.flavour === 'affine:embed' && !yBlock.has('prop:sourceId')) {
+    yBlock.set('prop:sourceId', props.sourceId ?? '');
   }
   if (props.flavour === 'affine:embed' && !yBlock.has('prop:caption')) {
     yBlock.set('prop:caption', props.caption ?? '');

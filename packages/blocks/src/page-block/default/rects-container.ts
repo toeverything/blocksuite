@@ -123,8 +123,8 @@ export function EmbedEditingContainer(
             class="has-tool-tip"
             width="100%"
             @click=${() => {
-              assertExists(embedEditingState.model.source);
-              downloadImage(embedEditingState.model.source);
+              assertExists(embedEditingState.model.sourceId);
+              downloadImage(embedEditingState.model.sourceId);
             }}
           >
             ${DownloadIcon}
@@ -136,8 +136,8 @@ export function EmbedEditingContainer(
             class="has-tool-tip"
             width="100%"
             @click=${() => {
-              assertExists(embedEditingState.model.source);
-              copyImgToClip(embedEditingState.model.source);
+              assertExists(embedEditingState.model.sourceId);
+              copyImgToClip(embedEditingState.model.sourceId);
             }}
           >
             ${CopyIcon}

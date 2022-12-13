@@ -1,4 +1,9 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  BlobStorage,
+  IndexedDBBlobProvider,
+  Page,
+} from '@blocksuite/store';
 import { toast } from '../../components/toast';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
 import {
@@ -75,9 +80,13 @@ function isPointIn(block: DOMRect, x: number, y: number): boolean {
   return true;
 }
 
-export function downloadImage(url: string) {
+export async function downloadImage(urlId: string) {
   const link = document.createElement('a');
-  link.href = url;
+  const storage = new BlobStorage();
+  const provider = await IndexedDBBlobProvider.init('test');
+  storage.addProvider(provider);
+  const url = await storage.get(urlId);
+  url && (link.href = url);
   link.setAttribute('target', '_blank');
   document.body.appendChild(link);
   link.download = 'test';

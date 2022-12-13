@@ -18,7 +18,6 @@ import {
   getAllBlocks,
   getDefaultPageBlock,
   isInput,
-  getBlockById,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -426,6 +425,7 @@ export class DefaultSelectionManager {
       e.raw.pageX,
       e.raw.pageY
     );
+    if ((e.raw.target as HTMLElement).closest('.image-option')) return;
 
     if (hoverOption?.model.type === 'image') {
       hoverOption.position.x = hoverOption.position.right + 10;
