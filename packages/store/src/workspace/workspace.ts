@@ -5,7 +5,6 @@ import { Page } from './page';
 import { Signal } from '../utils/signal';
 import { Indexer, QueryContent } from './search';
 import type { Awareness } from 'y-protocols/awareness';
-import { assertExists } from '../utils/utils';
 import type { BaseBlockModel } from '../base';
 
 export interface PageMeta {
@@ -185,13 +184,12 @@ export class Workspace {
     return this._pages.has('space:' + pageId);
   }
 
-  getPage(pageId: string) {
+  getPage(pageId: string): Page | null {
     if (!pageId.startsWith('space:')) {
       pageId = 'space:' + pageId;
     }
 
-    const page = this._pages.get(pageId);
-    assertExists(page);
+    const page = this._pages.get(pageId) ?? null;
     return page;
   }
 

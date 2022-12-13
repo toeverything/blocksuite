@@ -39,13 +39,12 @@ import {
 import type { DefaultPageSignals } from './default-page-block';
 import type { DefaultSelectionManager } from './selection-manager';
 
-export function getBlockOptionByPosition(
+export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
   x: number,
   y: number
 ) {
   for (let index = 0; index <= blocks.length - 1; index++) {
-    // if (matchFlavours(blocks[index], ['affine:embed','affine'])) {
     const hoverDom = getBlockById(blocks[index].id);
 
     let blockRect;
@@ -62,7 +61,6 @@ export function getBlockOptionByPosition(
         position: blockRect,
         model: blocks[index],
       };
-      // }
     }
   }
   return null;

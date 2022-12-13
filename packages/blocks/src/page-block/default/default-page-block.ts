@@ -23,20 +23,20 @@ import {
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import { deleteModels, tryUpdateGroupSize } from '../utils';
-import style from './style.css';
-
 import {
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
   FrameSelectionRect,
   SelectedRectsContainer,
-} from './rects-container';
+} from './components';
 import { bindHotkeys, removeHotkeys } from './utils';
+import style from './style.css';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
   model: BaseBlockModel;
 }
+
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;

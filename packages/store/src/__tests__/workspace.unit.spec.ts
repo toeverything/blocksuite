@@ -16,6 +16,7 @@ import { ListBlockModel } from '../../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../../blocks/src/group-block/group-model';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model';
 import { PageMeta } from '../workspace/workspace';
+import { assertExists } from '../utils/utils';
 
 function createTestOptions() {
   const idGenerator = createAutoIncrementIdGenerator();
@@ -48,7 +49,9 @@ async function createRoot(page: Page) {
 async function createPage(workspace: Workspace, pageId = 'page0') {
   queueMicrotask(() => workspace.createPage(pageId));
   await waitOnce(workspace.signals.pageAdded);
-  return workspace.getPage(pageId);
+  const page = workspace.getPage(pageId);
+  assertExists(page);
+  return page;
 }
 
 async function createTestPage() {

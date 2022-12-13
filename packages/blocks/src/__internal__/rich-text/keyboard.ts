@@ -224,7 +224,9 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     // To workaround uncontrolled behavior when deleting character at block start,
     // in this case backspace should be handled in quill.
     if (isCollapsedAtBlockStart(this.quill)) {
+      // window.requestAnimationFrame(() => {
       handleLineStartBackspace(page, model);
+      // });
       return PREVENT_DEFAULT;
     } else if (isMultiBlockRange(getCurrentRange())) {
       // return PREVENT_DEFAULT;
