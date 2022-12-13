@@ -1,7 +1,7 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
-import { Workspace } from '@blocksuite/store';
+import { Workspace, Page } from '@blocksuite/store';
 import { getOptions } from './utils';
 import './style.css';
 
@@ -20,7 +20,7 @@ const options = getOptions();
  */
 function createInitialPage(workspace: Workspace) {
   workspace.signals.pageAdded.once(id => {
-    const page = workspace.getPage(id);
+    const page = workspace.getPage(id) as Page;
     const pageBlockId = page.addBlock({ flavour: 'affine:page' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
     page.addBlock({ flavour: 'affine:paragraph' }, groupId);
@@ -32,7 +32,7 @@ function createInitialPage(workspace: Workspace) {
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
-    const page = workspace.getPage(pageId);
+    const page = workspace.getPage(pageId) as Page;
     const editor = createEditor(page);
     const debugMenu = createDebugMenu(workspace, editor);
     document.body.appendChild(editor);
