@@ -73,9 +73,10 @@ function isPointIn(block: DOMRect, x: number, y: number): boolean {
   return true;
 }
 
-export function downloadImage(url: string) {
+export async function downloadImage(model: BaseBlockModel) {
   const link = document.createElement('a');
-  link.href = url;
+  const url = await getUrlByModel(model);
+  url && (link.href = url);
   link.setAttribute('target', '_blank');
   document.body.appendChild(link);
   link.download = 'test';
@@ -84,8 +85,10 @@ export function downloadImage(url: string) {
   link.remove();
 }
 
-export async function copyImgToClip(imgURL: string) {
-  const data = await fetch(imgURL);
+export async function copyImgToClip(model: BaseBlockModel) {
+  const url = await getUrlByModel(model);
+  assertExists(url);
+  const data = await fetch(url);
   const blob = await data.blob();
   await navigator.clipboard.write([
     new ClipboardItem({
@@ -154,7 +157,6 @@ export function handleUp(
     );
   }
 }
-
 export function handleDown(
   selection: DefaultSelectionManager,
   signals: DefaultPageSignals,
@@ -391,4 +393,11 @@ export function updateType(
   } else {
     updateTextType(flavour, type, page);
   }
+}
+
+async function getUrlByModel(model: BaseBlockModel) {
+  assertExists(model.sourceId);
+  const store = await model.page.blobs;
+  const url = store?.get(model.sourceId);
+  return url;
 }

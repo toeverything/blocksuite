@@ -24,7 +24,7 @@ export class BaseBlockModel implements IBaseBlockProps {
   children: BaseBlockModel[];
   // TODO use schema
   text?: TextType;
-  source?: string;
+  sourceId?: string;
 
   constructor(page: Page, props: Partial<IBaseBlockProps>) {
     this.page = page;

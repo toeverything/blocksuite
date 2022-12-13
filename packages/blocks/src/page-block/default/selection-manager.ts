@@ -425,6 +425,7 @@ export class DefaultSelectionManager {
       e.raw.pageX,
       e.raw.pageY
     );
+    if ((e.raw.target as HTMLElement).closest('.image-option')) return;
 
     if (hoverEditingState?.model.type === 'image') {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;

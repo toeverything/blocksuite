@@ -1,10 +1,11 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from '../embed-block';
 import {
   BLOCK_ID_ATTR,
   type BlockHost,
   BlockChildrenContainer,
+  assertExists,
 } from '../__internal__';
 import style from './style.css';
 
@@ -22,6 +23,8 @@ export class ImageBlockComponent extends LitElement {
   @query('.resizable-img')
   _resizeImg!: HTMLElement;
 
+  @state()
+  _source!: string;
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -29,11 +32,15 @@ export class ImageBlockComponent extends LitElement {
 
   // This is the initial width before event resize is applied
 
-  override firstUpdated() {
+  override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
+    const storage = await this.model.page.blobs;
+    assertExists(storage);
+    const url = await storage.get(this.model.sourceId);
+    url && (this._source = url);
     if (width && height) {
       this._resizeImg.style.width = width + 'px';
       this._resizeImg.style.height = height + 'px';
@@ -43,7 +50,7 @@ export class ImageBlockComponent extends LitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
-    const { source, width, height } = this.model;
+    const { width, height } = this.model;
 
     if (width && height && this._resizeImg) {
       this._resizeImg.style.width = width + 'px';
@@ -55,7 +62,7 @@ export class ImageBlockComponent extends LitElement {
       <embed-block .model=${this.model}>
         <div class="affine-image-wrapper">
           <div>
-            <img class="resizable-img" src=${source} />
+            <img class="resizable-img" src=${this._source} />
           </div>
           ${childrenContainer}
         </div>

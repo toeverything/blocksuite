@@ -6,6 +6,7 @@ import {
   SelectionUtils,
   SelectionInfo,
   matchFlavours,
+  assertExists,
 } from '@blocksuite/blocks';
 
 export class PasteManager {
@@ -103,21 +104,14 @@ export class PasteManager {
     if (file) {
       if (file.type.includes('image')) {
         //  todo upload file to file server
-        const url = URL.createObjectURL(file);
-
+        const storage = await this._editor.page.blobs;
+        assertExists(storage);
+        const id = await storage.set(file);
         return [
-          // FIXME: Add two img blocks I should only add one
           {
             flavour: 'affine:embed',
             type: 'image',
-            source: url,
-            children: [],
-            text: [{ insert: '' }],
-          },
-          {
-            flavour: 'affine:embed',
-            type: 'image',
-            source: url,
+            sourceId: id,
             children: [],
             text: [{ insert: '' }],
           },
@@ -181,11 +175,6 @@ export class PasteManager {
       }
       const addBlockIds: string[] = [];
       if (selectedBlock && !matchFlavours(selectedBlock, ['affine:page'])) {
-        if (blocks.length === 1 && blocks[0].flavour === 'affine:divider') {
-          parent && this._addBlocks(blocks, parent, index, addBlockIds);
-          parent && this._editor.page.deleteBlockById(lastBlock.id);
-          return;
-        }
         const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
@@ -198,7 +187,10 @@ export class PasteManager {
         selectedBlock &&
           this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
         //This is a temporary processing of the divider block, subsequent refactoring of the divider will remove it
-        if (blocks[0].flavour === 'affine:divider') {
+        if (
+          blocks[0].flavour === 'affine:divider' ||
+          blocks[0].flavour === 'affine:embed'
+        ) {
           parent &&
             this._addBlocks(blocks.slice(0), parent, index, addBlockIds);
         } else {
@@ -278,7 +270,8 @@ export class PasteManager {
         flavour: block.flavour as string,
         type: block.type as string,
         checked: block.checked,
-        source: block.source,
+        sourceId: block.sourceId,
+        caption: block.caption,
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);

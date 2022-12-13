@@ -7,7 +7,6 @@ import type {
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block';
-import { assertExists } from '../../__internal__/utils';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -102,6 +101,7 @@ export function EmbedEditingContainer(
     left: embedEditingState.position.x + 'px',
     top: embedEditingState.position.y + 'px',
   };
+
   return html`
     <style>
       .affine-embed-editing-state-container > div {
@@ -125,8 +125,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            assertExists(embedEditingState.model.source);
-            downloadImage(embedEditingState.model.source);
+            downloadImage(embedEditingState.model);
           }}
         >
           ${DownloadIcon}
@@ -138,8 +137,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            assertExists(embedEditingState.model.source);
-            copyImgToClip(embedEditingState.model.source);
+            copyImgToClip(embedEditingState.model);
           }}
         >
           ${CopyIcon}

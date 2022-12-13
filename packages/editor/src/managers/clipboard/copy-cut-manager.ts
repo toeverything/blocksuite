@@ -1,7 +1,11 @@
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 import { ClipItem } from './clip-item';
 import type { EditorContainer } from '../../components';
-import { ListBlockModel, matchFlavours } from '@blocksuite/blocks';
+import {
+  EmbedBlockModel,
+  ListBlockModel,
+  matchFlavours,
+} from '@blocksuite/blocks';
 import { SelectionUtils } from '@blocksuite/blocks';
 
 export class CopyCutManager {
@@ -121,6 +125,15 @@ export class CopyCutManager {
           insert: text,
         },
       ];
+    } else if (matchFlavours(model, ['affine:embed'])) {
+      flavour = 'affine:embed';
+      type = 'image';
+      const text = model.block2Text('', 0, 0);
+      delta = [
+        {
+          insert: text,
+        },
+      ];
     } else {
       delta = model?.text?.sliceToDelta(
         selectedBlock?.startPos || 0,
@@ -133,14 +146,21 @@ export class CopyCutManager {
       const childInfo = this._getClipInfoBySelectionInfo(child);
       childInfo && children.push(childInfo);
     });
-
-    return {
+    const result = {
       flavour: flavour,
       type: type,
       text: delta,
       checked: model instanceof ListBlockModel ? model.checked : undefined,
       children: children,
     };
+    if (model instanceof EmbedBlockModel) {
+      Object.assign(result, {
+        sourceId: model.sourceId,
+        caption: model.caption,
+      });
+    }
+
+    return result;
   }
 
   private _copyToClipboard(e: ClipboardEvent, clipItems: ClipItem[]) {

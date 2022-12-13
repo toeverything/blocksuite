@@ -22,7 +22,7 @@ async function initImageState(page: Page) {
       {
         flavour: 'affine:embed',
         type: 'image',
-        source: '/test-card-1.png',
+        sourceId: '/test-card-1.png',
         width: 200,
         height: 180,
       },
