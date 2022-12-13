@@ -169,7 +169,7 @@ export class Workspace {
     return this._store.providers;
   }
 
-  get blobStorage() {
+  get blobs() {
     return this._blobStorage;
   }
 
