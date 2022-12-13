@@ -59,7 +59,7 @@ export class EdgelessPageBlockComponent
   mouseRoot!: HTMLElement;
 
   @property()
-  mouseMode: MouseMode = 'default';
+  mouseMode!: MouseMode;
 
   @property({
     hasChanged() {

@@ -18,6 +18,7 @@ import {
   GROUP_MIN_LENGTH,
   getSelectionBoxBound,
 } from './utils';
+import { SHAPE_PADDING } from '../..';
 
 function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
   return {
@@ -136,19 +137,20 @@ function EdgelessBlockChild(
   viewport: ViewportState
 ) {
   const { xywh, flavour } = model;
+  const isShape = flavour === 'affine:shape';
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
-  const translateX = (modelX - viewportX) * zoom;
-  const translateY = (modelY - viewportY) * zoom;
-
-  const isShape = flavour === 'affine:shape';
+  const translateX =
+    (modelX - viewportX - (isShape ? SHAPE_PADDING / 2 : 0)) * zoom;
+  const translateY =
+    (modelY - viewportY - (isShape ? SHAPE_PADDING / 2 : 0)) * zoom;
 
   const style = {
     position: 'absolute',
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
-    width: modelW + (isShape ? 0 : PADDING_X) + 'px',
-    height: modelH + (isShape ? 0 : PADDING_Y) + 'px',
+    width: modelW + (isShape ? SHAPE_PADDING : PADDING_X) + 'px',
+    height: modelH + (isShape ? SHAPE_PADDING : PADDING_Y) + 'px',
     padding: isShape ? '0px' : `${PADDING_X / 2}px`,
     background: isShape ? 'transparent' : 'white',
     pointerEvents: isShape ? 'none' : 'all',

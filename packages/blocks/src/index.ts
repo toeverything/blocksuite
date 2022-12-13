@@ -22,6 +22,7 @@ export * from './__internal__/utils/types';
 export * from './__internal__/utils/common-operations';
 export * from './__internal__/utils/std';
 export * from './__internal__/utils/query';
+export * from './__internal__/utils/shape';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
