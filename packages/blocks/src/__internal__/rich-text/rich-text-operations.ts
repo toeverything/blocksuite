@@ -170,7 +170,9 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           previousSibling &&
           matchFlavours(previousSibling, ['affine:embed', 'affine:divider'])
         ) {
-          focusPreviousBlock(model, 'start');
+          window.requestAnimationFrame(() => {
+            focusPreviousBlock(model, 'start');
+          });
         }
       } else {
         const grandParent = page.getParent(parent);
