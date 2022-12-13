@@ -1,5 +1,5 @@
 // Test page entry located in playground/examples/blob/index.html
-import { BlobStorage, IndexedDBBlobProvider } from '..';
+import { getBlobStorage } from '..';
 import {
   testSerial,
   runOnce,
@@ -11,9 +11,8 @@ import {
 } from '../../__tests__/test-utils-dom';
 
 async function testBasic() {
-  const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init('test');
-  storage.addProvider(provider);
+  const storage = await getBlobStorage('test', '');
+  assertExists(storage);
 
   const blob = await loadTestImageBlob('test-card-1');
   let id: string | undefined = undefined;
@@ -84,9 +83,9 @@ async function testBasic() {
 
 async function testRefreshBefore() {
   clearIndexedDB();
-  const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init('test');
-  storage.addProvider(provider);
+
+  const storage = await getBlobStorage('test', '');
+  assertExists(storage);
 
   testSerial('can set blob', async () => {
     const blob = await loadTestImageBlob('test-card-2');
@@ -98,9 +97,8 @@ async function testRefreshBefore() {
 }
 
 async function testRefreshAfter() {
-  const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init('test');
-  storage.addProvider(provider);
+  const storage = await getBlobStorage('test', '');
+  assertExists(storage);
 
   testSerial('can get saved blob', async () => {
     const id = storage.blobs.values().next().value;
@@ -136,12 +134,11 @@ function clearIndexedDB() {
 
 async function testCloudSyncBefore() {
   clearIndexedDB();
-  const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init(
+  const storage = await getBlobStorage(
     'test',
     'http://localhost:3000/api/blobs'
   );
-  storage.addProvider(provider);
+  assertExists(storage);
 
   testSerial('can set blob', async () => {
     const blob = await loadTestImageBlob('test-card-2');
@@ -155,12 +152,11 @@ async function testCloudSyncBefore() {
 
 async function testCloudSyncAfter() {
   clearIndexedDB();
-  const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init(
+  const storage = await getBlobStorage(
     'test',
     'http://localhost:3000/api/blobs'
   );
-  storage.addProvider(provider);
+  assertExists(storage);
 
   testSerial('can get saved blob', async () => {
     // the test-card-2's hash
