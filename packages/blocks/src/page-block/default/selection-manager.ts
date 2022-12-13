@@ -9,7 +9,6 @@ import {
   handleNativeRangeDragMove,
   initMouseEventHandlers,
   isBlankArea,
-  isPageTitle,
   isEmbed,
   noop,
   resetNativeSelection,
@@ -18,6 +17,7 @@ import {
   getBlockElementByModel,
   getAllBlocks,
   getDefaultPageBlock,
+  isInput,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -161,6 +161,7 @@ export class DefaultSelectionManager {
       this._onContainerMouseOut,
       this._onContainerContextMenu
     );
+    // this._initListenNativeSelection();
   }
   private get _blocks(): BaseBlockModel[] {
     return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
@@ -225,7 +226,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isPageTitle(e.raw)) return;
+    if (isInput(e.raw)) return;
     if (isEmbed(e)) {
       this._onEmbedDragStart(e);
       return;
@@ -356,6 +357,16 @@ export class DefaultSelectionManager {
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
 
+    // container click will blur all captions
+    const allCaptions = Array.from(
+      document.querySelectorAll('.affine-embed-wrapper-caption')
+    );
+    allCaptions.forEach(el => {
+      if (el !== e.raw.target) {
+        (el as HTMLInputElement).blur();
+      }
+    });
+
     const clickBlockInfo = getBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
@@ -422,6 +433,32 @@ export class DefaultSelectionManager {
   private _onContainerMouseOut = (e: SelectionEvent) => {
     // console.log('mouseout', e);
   };
+
+  // TODO fix  native selection and delete after non-text
+  // private _initListenNativeSelection() {
+  //   document.addEventListener('selectionchange', this._onNativeSelectionChange);
+  // }
+
+  // private _onNativeSelectionChange = () => {
+  //   const selection = window.getSelection();
+  //   if (selection?.isCollapsed && selection?.rangeCount) {
+  //     let { anchorNode } = selection;
+  //     this.state.type = 'native';
+  //     if (anchorNode) {
+  //       anchorNode =
+  //         anchorNode instanceof Element ? anchorNode : anchorNode.parentElement;
+  //       const blockModel = getModelByElement(anchorNode as Element);
+  //       if (blockModel) {
+  //         const block = getBlockById(blockModel.id);
+  //         if (block) {
+  //           this.state.selectedBlocks = [block];
+  //           this._signals.updateSelectedRects.emit([]);
+  //           this._signals.updateFrameSelectionRect.emit(null);
+  //         }
+  //       }
+  //     }
+  //   }
+  // };
 
   dispose() {
     this._signals.updateSelectedRects.dispose();

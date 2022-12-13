@@ -4,13 +4,10 @@ import {
   assertFlavours,
   ExtendedModel,
   almostEqual,
-  isCollapsedAtBlockStart,
-  noop,
   RootBlockModel,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
-  getStartModelBySelection,
   getRichTextByModel,
   getModelsByRange,
   getBlockElementByModel,
@@ -130,19 +127,7 @@ export function handleBackspace(page: Page, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
   if (isNoneSelection()) return;
-
-  if (isCollapsedSelection()) {
-    const startModel = getStartModelBySelection();
-    const richText = getRichTextByModel(startModel);
-
-    if (richText) {
-      const { quill } = richText;
-      if (isCollapsedAtBlockStart(quill)) {
-        // use quill handler
-        noop();
-      }
-    }
-  } else if (isRangeSelection()) {
+  if (!isCollapsedSelection() && isRangeSelection()) {
     const range = getCurrentRange();
     if (isMultiBlockRange(range)) {
       e.preventDefault();

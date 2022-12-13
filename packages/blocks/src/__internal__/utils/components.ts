@@ -8,10 +8,14 @@ import type { ParagraphBlockModel } from '../../paragraph-block/paragraph-model'
 import type { GroupBlockModel } from '../../group-block/group-model';
 import type { DividerBlockModel } from '../../divider-block/divider-model';
 import type { EmbedBlockModel } from '../../embed-block';
-import type { ShapeBlockModel } from '../../shape-block'
+import type { ShapeBlockModel } from '../../shape-block';
 
 // TODO support dynamic block types
-export function BlockElement(model: BaseBlockModel, host: BlockHost, edgeless = false) {
+export function BlockElement(
+  model: BaseBlockModel,
+  host: BlockHost,
+  edgeless = false
+) {
   switch (model.flavour) {
     case 'affine:paragraph':
       return html`
@@ -49,9 +53,8 @@ export function BlockElement(model: BaseBlockModel, host: BlockHost, edgeless = 
             .model=${model as ShapeBlockModel}
             .host=${host}
           ></shape-block>
-        `
-      else
-        return html``
+        `;
+      else return html``;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
   }
