@@ -1,9 +1,4 @@
-import {
-  BaseBlockModel,
-  BlobStorage,
-  IndexedDBBlobProvider,
-  Page,
-} from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { toast } from '../../components/toast';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
 import {
@@ -78,12 +73,9 @@ function isPointIn(block: DOMRect, x: number, y: number): boolean {
   return true;
 }
 
-export async function downloadImage(urlId: string) {
+export async function downloadImage(model: BaseBlockModel) {
   const link = document.createElement('a');
-  const storage = new BlobStorage();
-  const provider = await IndexedDBBlobProvider.init('test');
-  storage.addProvider(provider);
-  const url = await storage.get(urlId);
+  const url = await getUrlByModel(model);
   url && (link.href = url);
   link.setAttribute('target', '_blank');
   document.body.appendChild(link);
@@ -93,8 +85,10 @@ export async function downloadImage(urlId: string) {
   link.remove();
 }
 
-export async function copyImgToClip(imgURL: string) {
-  const data = await fetch(imgURL);
+export async function copyImgToClip(model: BaseBlockModel) {
+  const url = await getUrlByModel(model);
+  assertExists(url);
+  const data = await fetch(url);
   const blob = await data.blob();
   await navigator.clipboard.write([
     new ClipboardItem({
@@ -399,4 +393,11 @@ export function updateType(
   } else {
     updateTextType(flavour, type, page);
   }
+}
+
+async function getUrlByModel(model: BaseBlockModel) {
+  assertExists(model.sourceId);
+  const store = await model.page.blobs;
+  const url = store?.get(model.sourceId);
+  return url;
 }

@@ -1,4 +1,3 @@
-import { BlobStorage, IndexedDBBlobProvider } from '@blocksuite/store';
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from '../embed-block';
@@ -6,6 +5,7 @@ import {
   BLOCK_ID_ATTR,
   type BlockHost,
   BlockChildrenContainer,
+  assertExists,
 } from '../__internal__';
 import style from './style.css';
 
@@ -37,10 +37,8 @@ export class ImageBlockComponent extends LitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
-    // FIXME: after export global storage, we can use it directly
-    const storage = new BlobStorage();
-    const provider = await IndexedDBBlobProvider.init('test');
-    storage.addProvider(provider);
+    const storage = await this.model.page.blobs;
+    assertExists(storage);
     const url = await storage.get(this.model.sourceId);
     url && (this._source = url);
     if (width && height) {

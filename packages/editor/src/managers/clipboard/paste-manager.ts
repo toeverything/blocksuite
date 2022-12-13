@@ -1,8 +1,4 @@
-import {
-  BaseBlockModel,
-  BlobStorage,
-  IndexedDBBlobProvider,
-} from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { EditorContainer } from '../../components';
 import { MarkdownUtils } from './markdown-utils';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types';
@@ -10,6 +6,7 @@ import {
   SelectionUtils,
   SelectionInfo,
   matchFlavours,
+  assertExists,
 } from '@blocksuite/blocks';
 
 export class PasteManager {
@@ -107,9 +104,8 @@ export class PasteManager {
     if (file) {
       if (file.type.includes('image')) {
         //  todo upload file to file server
-        const storage = new BlobStorage();
-        const provider = await IndexedDBBlobProvider.init('test');
-        storage.addProvider(provider);
+        const storage = await this._editor.page.blobs;
+        assertExists(storage);
         const id = await storage.set(file);
         return [
           {
