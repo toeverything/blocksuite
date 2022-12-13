@@ -46,11 +46,12 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
     false
   );
 
-  if (
+  const isFirstRichTextNotEmpty =
     firstRichText.model.text &&
-    firstRichText.model.text.length !== firstTextIndex
-  ) {
-    firstRichText.model.text.delete(
+    firstRichText.model.text.length !== firstTextIndex;
+  // See https://github.com/toeverything/blocksuite/issues/283
+  if (isFirstRichTextNotEmpty) {
+    firstRichText.model.text?.delete(
       firstTextIndex,
       firstRichText.model.text.length - firstTextIndex
     );
