@@ -71,12 +71,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType =
-  | 'native'
-  | 'native_collapsed'
-  | 'block'
-  | 'none'
-  | 'embed';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
 
 class PageSelectionState {
   type: PageSelectionType;
