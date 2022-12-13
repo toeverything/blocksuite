@@ -32,6 +32,10 @@ export class BaseBlockModel implements IBaseBlockProps {
     this.children = [];
   }
 
+  get blobs() {
+    return this.page.workspace.blobStorage;
+  }
+
   firstChild() {
     const children = this.children;
     if (!children?.length) {
