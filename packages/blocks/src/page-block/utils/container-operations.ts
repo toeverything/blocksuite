@@ -1,16 +1,13 @@
 import type { Page, Text, BaseBlockModel } from '@blocksuite/store';
-import type { GroupBlockModel } from '../../group-block';
 import {
   assertExists,
   assertFlavours,
   ExtendedModel,
-  noop,
   almostEqual,
-  isCollapsedAtBlockStart,
+  RootBlockModel,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
-  getStartModelBySelection,
   getRichTextByModel,
   getModelsByRange,
   getBlockElementByModel,
@@ -49,10 +46,16 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
     false
   );
 
-  firstRichText.model.text?.delete(
-    firstTextIndex,
-    firstRichText.model.text.length - firstTextIndex
-  );
+  const isFirstRichTextNotEmpty =
+    firstRichText.model.text &&
+    firstRichText.model.text.length !== firstTextIndex;
+  // See https://github.com/toeverything/blocksuite/issues/283
+  if (isFirstRichTextNotEmpty) {
+    firstRichText.model.text?.delete(
+      firstTextIndex,
+      firstRichText.model.text.length - firstTextIndex
+    );
+  }
   const isLastRichTextFullSelected: boolean =
     lastRichText.model.text?.length === endTextIndex;
   if (!isLastRichTextFullSelected) {
@@ -124,19 +127,7 @@ export function handleBackspace(page: Page, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;
   if (isNoneSelection()) return;
-
-  if (isCollapsedSelection()) {
-    const startModel = getStartModelBySelection();
-    const richText = getRichTextByModel(startModel);
-
-    if (richText) {
-      const { quill } = richText;
-      if (isCollapsedAtBlockStart(quill)) {
-        // use quill handler
-        noop();
-      }
-    }
-  } else if (isRangeSelection()) {
+  if (!isCollapsedSelection() && isRangeSelection()) {
     const range = getCurrentRange();
     if (isMultiBlockRange(range)) {
       e.preventDefault();
@@ -368,9 +359,11 @@ export function handleBlockSelectionBatchDelete(
 export function tryUpdateGroupSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const groups = page.root.children as GroupBlockModel[];
+    const groups = page.root.children as RootBlockModel[];
     let offset = 0;
     groups.forEach(model => {
+      // DO NOT resize shape block
+      if (model.flavour === 'affine:shape') return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();

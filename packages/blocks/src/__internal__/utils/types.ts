@@ -1,5 +1,7 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect';
+import type { GroupBlockModel } from '../../group-block';
+import type { ShapeBlockModel } from '../../shape-block';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
@@ -38,9 +40,16 @@ export interface BlockSelectionInfo {
   blocks: SelectedBlock[];
 }
 
+// blocks that would only appear under the edgeless container root
+export type RootBlockModel = GroupBlockModel | ShapeBlockModel;
+
+export type MouseMode = 'default' | 'shape';
+export type ShapeType = 'rectangle';
+export type ShapeColor = 'black';
+
 declare global {
   interface WindowEventMap {
-    'affine.switch-mode': CustomEvent<'page' | 'edgeless'>;
+    'affine.switch-mouse-mode': CustomEvent<MouseMode>;
   }
 }
 

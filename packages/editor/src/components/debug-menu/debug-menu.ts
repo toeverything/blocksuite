@@ -1,12 +1,13 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   assertExists,
   type CommonBlockElement,
+  type GroupBlockModel,
   convertToList,
   createEvent,
-  type GroupBlockModel,
+  MouseMode,
 } from '@blocksuite/blocks';
 import type { BaseBlockModel, Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
@@ -66,6 +67,20 @@ const icons = {
     >
       <path
         d="M0 224c0 17.7 14.3 32 32 32s32-14.3 32-32c0-53 43-96 96-96H320v32c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-9.2-9.2-22.9-11.9-34.9-6.9S320 19.1 320 32V64H160C71.6 64 0 135.6 0 224zm512 64c0-17.7-14.3-32-32-32s-32 14.3-32 32c0 53-43 96-96 96H192V352c0-12.9-7.8-24.6-19.8-29.6s-25.7-2.2-34.9 6.9l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V448H352c88.4 0 160-71.6 160-160z"
+      />
+    </svg>
+  `,
+  mouseDefaultMode: html`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+      <path
+        d="M0 55.2V426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320H297.9c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"
+      />
+    </svg>
+  `,
+  mouseShapeMode: html`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+      <path
+        d="M315.4 15.5C309.7 5.9 299.2 0 288 0s-21.7 5.9-27.4 15.5l-96 160c-5.9 9.9-6.1 22.2-.4 32.2s16.3 16.2 27.8 16.2H384c11.5 0 22.2-6.2 27.8-16.2s5.5-22.3-.4-32.2l-96-160zM288 312V456c0 22.1 17.9 40 40 40H472c22.1 0 40-17.9 40-40V312c0-22.1-17.9-40-40-40H328c-22.1 0-40 17.9-40 40zM128 512c70.7 0 128-57.3 128-128s-57.3-128-128-128S0 313.3 0 384s57.3 128 128 128z"
       />
     </svg>
   `,
@@ -141,6 +156,9 @@ export class DebugMenu extends LitElement {
   @state()
   mode: 'page' | 'edgeless' = 'page';
 
+  @state()
+  mouseMode: MouseMode = 'default';
+
   get page() {
     return this.editor.page;
   }
@@ -212,10 +230,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _onSwitchMode() {
-    this.mode = this.mode === 'page' ? 'edgeless' : 'page';
-
-    const event = createEvent('affine.switch-mode', this.mode);
-    window.dispatchEvent(event);
+    this.editor.mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
   }
 
   private _onAddGroup() {
@@ -233,6 +248,12 @@ export class DebugMenu extends LitElement {
       pageId
     );
     this.page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+  }
+
+  private _onSwitchMouseMode() {
+    this.mouseMode = this.mouseMode === 'default' ? 'shape' : 'default';
+    const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
+    window.dispatchEvent(event);
   }
 
   private _onExportHtml() {
@@ -443,6 +464,16 @@ export class DebugMenu extends LitElement {
           @click=${this._onAddCodeBlock}
         >
           <>
+        </button>
+        <button
+          aria-label="switch mouse mode"
+          title="switch mouse mode"
+          tabindex="-1"
+          @click=${this._onSwitchMouseMode}
+        >
+          ${this.mouseMode === 'default'
+            ? icons.mouseDefaultMode
+            : icons.mouseShapeMode}
         </button>
         <button
           aria-label="export markdown"

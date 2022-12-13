@@ -6,6 +6,7 @@ import { GroupBlockModel } from '@blocksuite/blocks';
 import { CodeBlockModel } from '@blocksuite/blocks';
 import { DividerBlockModel } from '@blocksuite/blocks';
 import { EmbedBlockModel } from '@blocksuite/blocks';
+import { ShapeBlockModel } from '@blocksuite/blocks';
 
 export type { ParagraphBlockProps as TextBlockProps } from '@blocksuite/blocks';
 
@@ -18,4 +19,5 @@ export const BlockSchema = {
   'affine:code-block': CodeBlockModel,
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
+  'affine:shape': ShapeBlockModel,
 } as const;

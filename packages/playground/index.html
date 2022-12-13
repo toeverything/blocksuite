@@ -5,8 +5,34 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlockSuite Playground</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: var(--affine-page-background);
+        transition: background-color 0.3s;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        padding: 10px;
+      }
+
+      #init-btn {
+        position: fixed;
+        left: 10px;
+        bottom: 10px;
+        z-index: 10;
+      }
+    </style>
   </head>
   <body>
+    <button id="init-btn">init empty editor</button>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

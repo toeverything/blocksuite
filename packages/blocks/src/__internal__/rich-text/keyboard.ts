@@ -2,20 +2,13 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 import {
   ALLOW_DEFAULT,
-  focusNextBlock,
-  focusPreviousBlock,
-  getBlockElementByModel,
-  getContainerByModel,
   getCurrentRange,
-  getDefaultPageBlock,
   getNextBlock,
-  getPreviousBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   matchFlavours,
   noop,
   PREVENT_DEFAULT,
-  resetNativeSelection,
 } from '../utils';
 import {
   handleLineStartBackspace,
@@ -185,6 +178,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onKeyUp(this: KeyboardEventThis, range: QuillRange) {
+    // return PREVENT_DEFAULT;
     if (range.index >= 0) {
       return handleKeyUp(model, this.quill.root);
     }
@@ -201,21 +195,9 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   function onKeyLeft(this: KeyboardEventThis, range: QuillRange) {
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
     if (range.index === 0 && range.length === 0) {
-      const container = getContainerByModel(model);
-      const preNodeModel = getPreviousBlock(container, model.id);
-      if (preNodeModel && matchFlavours(preNodeModel, ['affine:divider'])) {
-        const selectionManager = getDefaultPageBlock(model).selection;
-        const dividerBlockElement = getBlockElementByModel(
-          preNodeModel
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
-        resetNativeSelection(null);
-        return PREVENT_DEFAULT;
-      }
-      focusPreviousBlock(model, 'end');
       return PREVENT_DEFAULT;
     }
+
     return ALLOW_DEFAULT;
   }
 
@@ -226,17 +208,6 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
-      if (matchFlavours(nextBlock, ['affine:divider'])) {
-        const selectionManager = getDefaultPageBlock(model).selection;
-        const dividerBlockElement = getBlockElementByModel(
-          nextBlock
-        ) as HTMLElement;
-        const selectionRect = dividerBlockElement.getBoundingClientRect();
-        selectionManager.selectBlockByRect(selectionRect, model);
-        resetNativeSelection(null);
-        return PREVENT_DEFAULT;
-      }
-      focusNextBlock(model, 'start');
       return PREVENT_DEFAULT;
     }
     return ALLOW_DEFAULT;
@@ -256,7 +227,9 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     // To workaround uncontrolled behavior when deleting character at block start,
     // in this case backspace should be handled in quill.
     if (isCollapsedAtBlockStart(this.quill)) {
+      // window.requestAnimationFrame(() => {
       handleLineStartBackspace(page, model);
+      // });
       return PREVENT_DEFAULT;
     } else if (isMultiBlockRange(getCurrentRange())) {
       // return PREVENT_DEFAULT;
@@ -324,7 +297,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       shiftKey: false,
       handler: onKeyDown,
     },
-    'embed left': {
+    left: {
       key: 37,
       shiftKey: false,
       handler: onKeyLeft,

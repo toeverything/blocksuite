@@ -40,28 +40,17 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-export class Page<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  IBlockSchema extends Record<string, typeof BaseBlockModel> = any
-> extends Space<IBlockSchema> {
+export class Page extends Space {
   public workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
-  private _flavourMap = new Map<string, IBlockSchema[keyof IBlockSchema]>();
-  private _blockMap = new Map<
-    string,
-    InstanceType<IBlockSchema[keyof IBlockSchema]>
-  >();
+  private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
 
   // TODO use schema
-  private _ignoredKeys: Set<
-    keyof InstanceType<IBlockSchema[keyof IBlockSchema]> & string
-  > = new Set(
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Object.keys(new BaseBlockModel(this, {})) as any
+  private _ignoredKeys = new Set<string>(
+    Object.keys(new BaseBlockModel(this, {}))
   );
 
   readonly signals = {
@@ -150,22 +139,13 @@ export class Page<
     this._history.clear();
   }
 
-  register(blockSchema: IBlockSchema) {
-    Object.keys(blockSchema).forEach(key => {
-      this._flavourMap.set(key, blockSchema[key as keyof IBlockSchema]);
-    });
-    return this;
-  }
-
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }
 
-  getBlockByFlavour(
-    blockFlavour: InstanceType<IBlockSchema[keyof IBlockSchema]>['flavour']
-  ) {
+  getBlockByFlavour(blockFlavour: string) {
     return [...this._blockMap.values()].filter(
-      ({ flavour }) => blockFlavour === flavour
+      ({ flavour }) => flavour === blockFlavour
     );
   }
 
@@ -205,16 +185,19 @@ export class Page<
     return parent?.children[index + 1] ?? null;
   }
 
-  addBlock<
-    T extends Omit<BlockProps, 'flavour'> &
-      Pick<InstanceType<IBlockSchema[keyof IBlockSchema]>, 'flavour'>
-  >(
+  addBlock<T extends BlockProps>(
     blockProps: Partial<T>,
     parent?: BaseBlockModel | string,
     parentIndex?: number
   ): string {
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
+    }
+
+    if (blockProps.flavour === 'affine:shape') {
+      if (parent != null || parentIndex != null) {
+        throw new Error('Shape block should only be appear under page');
+      }
     }
 
     const clonedProps: Partial<BlockProps> = { ...blockProps };
@@ -327,6 +310,16 @@ export class Page<
     this._splitSet.add(base).add(left).add(right);
   }
 
+  syncFromExistingDoc() {
+    const visited = new Set<string>();
+
+    this._yBlocks.forEach((_, id) => {
+      if (visited.has(id)) return;
+      visited.add(id);
+      this._handleYBlockAdd(visited, id);
+    });
+  }
+
   dispose() {
     this.signals.historyUpdated.dispose();
     this.signals.rootAdded.dispose();
@@ -373,15 +366,12 @@ export class Page<
   };
 
   private _createBlockModel(props: Omit<BlockProps, 'children'>) {
-    const BlockModelCtor = this._flavourMap.get(props.flavour);
+    const BlockModelCtor = this.workspace.flavourMap.get(props.flavour);
     if (!BlockModelCtor) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
     }
 
-    // @ts-ignore
-    const blockModel = new BlockModelCtor(this, props) as InstanceType<
-      IBlockSchema[keyof IBlockSchema]
-    >;
+    const blockModel = new BlockModelCtor(this, props);
     return blockModel;
   }
 

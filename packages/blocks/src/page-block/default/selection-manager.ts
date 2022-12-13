@@ -4,20 +4,20 @@ import { showFormatQuickBar } from '../../components/format-quick-bar';
 import {
   assertExists,
   caretRangeFromPoint,
-  getAllBlocks,
-  getBlockElementByModel,
-  getModelByElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
   initMouseEventHandlers,
   isBlankArea,
   isEmbed,
-  isPageTitle,
-  matchFlavours,
   noop,
   resetNativeSelection,
   SelectionEvent,
+  getModelByElement,
+  getBlockElementByModel,
+  getAllBlocks,
+  getDefaultPageBlock,
+  isInput,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -26,6 +26,8 @@ import {
 } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 import { getHoverBlockOptionByPosition } from './utils';
+import { getBlockOptionByPosition } from './utils';
+import { matchFlavours } from '@blocksuite/store/src/utils/utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
   return (
@@ -118,15 +120,10 @@ class PageSelectionState {
   }
 
   refreshRichTextBoundsCache(container: HTMLElement) {
-    const richTexts = Array.from(container.querySelectorAll('rich-text'));
     const allBlocks = getAllBlocks();
     allBlocks.forEach(block => {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
-    });
-    richTexts.forEach(richText => {
-      const rect = richText.getBoundingClientRect();
-      this._richTextCache.set(richText, rect);
     });
   }
 
@@ -174,6 +171,7 @@ export class DefaultSelectionManager {
       this._onContainerMouseOut,
       this._onContainerContextMenu
     );
+    // this._initListenNativeSelection();
   }
 
   private get _blocks(): BaseBlockModel[] {
@@ -214,17 +212,6 @@ export class DefaultSelectionManager {
 
     const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
 
-    // const selectedRichTexts = filterSelectedRichText(
-    //   richTextCache,
-    //   selectionRect
-    // );
-
-    // TODO
-    // const selectedEmbed = filterSelectedEmbed(embedCache, selectionRect);
-    // const selectedEmbedBounds = selectedEmbed.map(embed => {
-    //   return embedCache.get(embed) as DOMRect;
-    // });
-    // this._signals.updateEmbedRects.emit(selectedEmbedBounds);
     return {
       selectionRect,
       selectedBlocks,
@@ -232,20 +219,8 @@ export class DefaultSelectionManager {
     };
   }
 
-  private _setDragOnlyOneDividerType() {
-    const { state } = this;
-    const { selectedBlocks } = state;
-    if (
-      selectedBlocks.length === 1 &&
-      matchFlavours(getModelByElement(selectedBlocks[0]), ['affine:divider'])
-    ) {
-      state.type = 'divider';
-      return;
-    }
-  }
-
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
-    this._setDragOnlyOneDividerType();
+    this.state.type = 'block';
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
@@ -266,7 +241,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isPageTitle(e.raw)) return;
+    if (isInput(e.raw)) return;
     if (isEmbed(e)) {
       this._onEmbedDragStart(e);
       return;
@@ -397,43 +372,51 @@ export class DefaultSelectionManager {
     this.state.clear();
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
+
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
 
-    const dividerBlockComponent = (e.raw.target as HTMLElement).closest(
-      'divider-block'
-    ) as HTMLElement;
-    const clickBlockInfo = getHoverBlockOptionByPosition(
+    // container click will blur all captions
+    const allCaptions = Array.from(
+      document.querySelectorAll('.affine-embed-wrapper-caption')
+    );
+    allCaptions.forEach(el => {
+      if (el !== e.raw.target) {
+        (el as HTMLInputElement).blur();
+      }
+    });
+
+    const clickBlockInfo = getBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
       e.raw.pageY,
       ['affine:embed'],
       'img'
     );
-    if (clickBlockInfo?.model.type === 'image') {
+
+    if (clickBlockInfo && clickBlockInfo.model) {
+      const { model } = clickBlockInfo;
+      const page = getDefaultPageBlock(model);
+      page.lastSelectionPosition = 'start';
+    }
+
+    if (
+      clickBlockInfo &&
+      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+    ) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
+
       assertExists(clickBlockInfo?.model);
       this._activeComponent = getBlockElementByModel(clickBlockInfo?.model);
+
       assertExists(this._activeComponent);
-      const imageRect = this._activeComponent
-        .querySelector('img')
-        ?.getBoundingClientRect();
-      assertExists(imageRect);
-      this._signals.updateEmbedRects.emit([imageRect]);
+      if (clickBlockInfo.model.type === 'image') {
+        this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
+      } else {
+        this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
+      }
       this.state.selectedBlocks.push(this._activeComponent);
       return;
-    }
-    if (dividerBlockComponent) {
-      this.state.type = 'divider';
-      this._activeComponent = (e.raw.target as HTMLElement).closest(
-        'divider-block'
-      );
-      assertExists(this._activeComponent);
-      const dividerRect = this._activeComponent.getBoundingClientRect();
-      this.state.refreshRichTextBoundsCache(this._container);
-      assertExists(dividerRect);
-      this._signals.updateSelectedRects.emit([dividerRect]);
-      this.state.selectedBlocks.push(this._activeComponent);
     }
     if (e.raw.target instanceof HTMLInputElement) return;
     if (e.keys.shift) return;
@@ -453,14 +436,20 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    const embedHoverOption = getHoverBlockOptionByPosition(
+    const hoverOption = getBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
       e.raw.pageY,
       ['affine:embed'],
       'img'
     );
-    this._signals.updateEmbedOption.emit(embedHoverOption);
+
+    if (hoverOption?.model.type === 'image') {
+      hoverOption.position.x = hoverOption.position.right + 10;
+      this._signals.updateEmbedEditingState.emit(hoverOption);
+    } else {
+      this._signals.updateEmbedEditingState.emit(null);
+    }
     const codeBlockHoverOption = getHoverBlockOptionByPosition(
       this._blocks,
       e.raw.pageX,
@@ -475,10 +464,36 @@ export class DefaultSelectionManager {
     // console.log('mouseout', e);
   };
 
+  // TODO fix  native selection and delete after non-text
+  // private _initListenNativeSelection() {
+  //   document.addEventListener('selectionchange', this._onNativeSelectionChange);
+  // }
+
+  // private _onNativeSelectionChange = () => {
+  //   const selection = window.getSelection();
+  //   if (selection?.isCollapsed && selection?.rangeCount) {
+  //     let { anchorNode } = selection;
+  //     this.state.type = 'native';
+  //     if (anchorNode) {
+  //       anchorNode =
+  //         anchorNode instanceof Element ? anchorNode : anchorNode.parentElement;
+  //       const blockModel = getModelByElement(anchorNode as Element);
+  //       if (blockModel) {
+  //         const block = getBlockById(blockModel.id);
+  //         if (block) {
+  //           this.state.selectedBlocks = [block];
+  //           this._signals.updateSelectedRects.emit([]);
+  //           this._signals.updateFrameSelectionRect.emit(null);
+  //         }
+  //       }
+  //     }
+  //   }
+  // };
+
   dispose() {
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
-    this._signals.updateEmbedOption.dispose();
+    this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
     this._mouseDisposeCallback();
   }

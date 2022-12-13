@@ -114,8 +114,9 @@ export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
   //      ↑ range.getBoundingClientRect will return this position
   //        if you select `line2` from back to front,
   // line2↩
+  const endOffset = Math.min(offset + 1, targetNode.textContent?.length || 0);
   if (isStartAnchor) {
-    range.setEnd(targetNode, offset + 1);
+    range.setEnd(targetNode, endOffset);
   }
 
   // XXX the workaround is very ugly, please improve after you find a way to identify the range is empty
@@ -130,7 +131,7 @@ export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
 
   if (isWrongRect) {
     // Try to select something prevent range.getBoundingClientRect return empty value
-    range.setEnd(targetNode, offset + 1);
+    range.setEnd(targetNode, endOffset);
   }
   // You can uncomment follow line to debug the positioning range
   // selection.removeAllRanges();

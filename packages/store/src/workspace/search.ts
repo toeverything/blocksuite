@@ -4,6 +4,9 @@ import type { YBlock } from './page';
 
 export type QueryContent = string | Partial<DocumentSearchOptions<boolean>>;
 
+type SearchResult = { id: string; doc: { space: string } };
+type SearchResults = { field: string; result: SearchResult[] };
+
 function tokenize(locale: string) {
   const tokenizer = Intl?.Segmenter;
   if (tokenizer) {
@@ -20,14 +23,15 @@ function tokenize(locale: string) {
 }
 
 export type IndexMetadata = Readonly<{
-  content: string | undefined;
-  reference: string | undefined;
+  content: string;
+  reference?: string;
+  space: string;
   tags: string[];
 }>;
 
 export class Indexer {
   private readonly _doc: Doc;
-  private readonly _indexer: DocumentIndexer<IndexMetadata>;
+  private readonly _indexer: DocumentIndexer<IndexMetadata, string[]>;
 
   constructor(
     doc: Doc,
@@ -35,11 +39,12 @@ export class Indexer {
     locale = 'en-US'
   ) {
     this._doc = doc;
-    this._indexer = new DocumentIndexer<IndexMetadata>({
+    this._indexer = new DocumentIndexer<IndexMetadata, string[]>({
       document: {
         id: 'id',
-        index: ['content', 'reference'],
+        index: ['content', 'reference', 'space'],
         tag: 'tags',
+        store: ['space'],
       },
       encode: tokenize(locale),
       tokenize: 'forward',
@@ -56,7 +61,24 @@ export class Indexer {
   }
 
   search(query: QueryContent) {
-    return this._indexer.search(query as string);
+    return new Map(
+      this._search(query).flatMap(({ result }) =>
+        result.map(r => [r.id, r.doc.space])
+      )
+    );
+  }
+
+  private _search(query: QueryContent): SearchResults[] {
+    if (typeof query === 'object') {
+      return this._indexer.search({
+        ...query,
+        enrich: true,
+      }) as unknown as SearchResults[];
+    } else {
+      return this._indexer.search(query, {
+        enrich: true,
+      }) as unknown as SearchResults[];
+    }
   }
 
   private _handlePageIndexing(pageId: string, page?: YMap<YBlock>) {
@@ -101,7 +123,7 @@ export class Indexer {
           if (content) {
             this._indexer.add(id, {
               content,
-              reference: '',
+              space: page,
               tags: [page],
             });
           }
@@ -129,11 +151,10 @@ export class Indexer {
 
   private _getPage(key: string): YMap<YBlock> | undefined {
     try {
-      // only indexing blocks in spaces
-      if (key.startsWith('space:')) {
-        return this._doc.getMap(key);
+      if (!key.startsWith('space:')) {
+        key = `space:${key}`;
       }
-      return undefined;
+      return this._doc.getMap(key);
     } catch (_) {
       return undefined;
     }

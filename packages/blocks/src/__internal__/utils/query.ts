@@ -91,6 +91,7 @@ export function getPreviousBlock(container: Element, blockId: string) {
       blockId,
       container
     );
+
     if (previousBlock?.model) {
       if (previousBlock.model.children.length) {
         let firstChild =

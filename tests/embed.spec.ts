@@ -4,7 +4,6 @@ import {
   activeEmbed,
   dragEmbedResize,
   enterPlaygroundRoom,
-  initEmptyEditor,
   redoByKeyboard,
   undoByKeyboard,
 } from './utils/actions';
@@ -34,7 +33,6 @@ async function initImageState(page: Page) {
 
 test('can drag resize image', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyEditor(page);
   await initImageState(page);
   await assertRichImage(page, 1);
 
@@ -54,7 +52,6 @@ test('can drag resize image', async ({ page }) => {
 
 test('can click and delete image', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyEditor(page);
   await initImageState(page);
   await assertRichImage(page, 1);
 

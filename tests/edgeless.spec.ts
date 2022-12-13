@@ -8,6 +8,7 @@ import {
   pressEnter,
   redoByClick,
   switchMode,
+  switchMouseMode,
   undoByClick,
   waitNextFrame,
 } from './utils/actions';
@@ -23,9 +24,9 @@ async function getGroupSize(
 ) {
   const result = await page.evaluate(
     ([id]) => {
-      const block = window.workspace.pages
-        .get('space:page0')
-        ?.getBlockById(id.groupId) as GroupBlockModel;
+      const block = window.workspace
+        .getPage('page0')
+        .getBlockById(id.groupId) as GroupBlockModel;
       return block.xywh;
     },
     [ids] as const
@@ -47,7 +48,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await waitNextFrame(page);
-  await assertNativeSelectionRangeCount(page, 0);
+  await assertNativeSelectionRangeCount(page, 1);
 });
 
 test('cursor for active and inactive state', async ({ page }) => {
@@ -110,4 +111,29 @@ test('resize the block', async ({ page }) => {
   await switchMode(page);
   const newXywh = await getGroupSize(page, ids);
   expect(newXywh).toBe(xywh);
+});
+
+test('add shape block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['hello']);
+
+  await switchMode(page);
+  await switchMouseMode(page);
+  const locator = await page.locator('[test-id="1"]');
+  if (!locator) throw new Error();
+  const box = await locator.boundingBox();
+  if (!box) throw new Error();
+  const { x, y } = box;
+  await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
+
+  await switchMouseMode(page);
+  const tag = await page.evaluate(() => {
+    const element = document.querySelector(`[data-block-id="3"]`);
+    return element?.tagName;
+  });
+  expect(tag).toBe('SHAPE-BLOCK');
+  await assertRichTexts(page, ['hello']);
 });

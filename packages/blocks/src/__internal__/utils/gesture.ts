@@ -59,12 +59,18 @@ function toSelectionEvent(
 }
 
 export function isPageTitle(e: Event) {
+  return (
+    e.target instanceof HTMLInputElement &&
+    e.target.classList.contains('affine-default-page-block-title')
+  );
+}
+export function isInput(e: Event) {
   return e.target instanceof HTMLInputElement;
 }
 
 function tryPreventDefault(e: MouseEvent) {
   // workaround page title click
-  if (!isPageTitle(e)) {
+  if (!isInput(e)) {
     e.preventDefault();
   }
 }

@@ -184,8 +184,9 @@ function focusRichTextByModel(
   position: SelectionPosition,
   model: BaseBlockModel
 ) {
-  if (model.flavour === 'affine:embed') {
-    const defaultPageBlock = getDefaultPageBlock(model);
+  const defaultPageBlock = getDefaultPageBlock(model);
+  if (matchFlavours(model, ['affine:embed', 'affine:divider'])) {
+    defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
     const embedElement = getBlockElementByModel(model);
@@ -193,11 +194,14 @@ function focusRichTextByModel(
     defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
     defaultPageBlock.selection.state.type = 'block';
     window.getSelection()?.removeAllRanges();
-  }
-  const element = getBlockElementByModel(model);
-  const editableContainer = element?.querySelector('[contenteditable]');
-  if (editableContainer) {
-    focusRichText(position, editableContainer);
+    (document.activeElement as HTMLInputElement).blur();
+  } else {
+    const element = getBlockElementByModel(model);
+    const editableContainer = element?.querySelector('[contenteditable]');
+    defaultPageBlock.selection.state.clear();
+    if (editableContainer) {
+      focusRichText(position, editableContainer);
+    }
   }
 }
 
@@ -226,8 +230,6 @@ export function focusNextBlock(
   position: SelectionPosition = 'start'
 ) {
   const page = getDefaultPageBlock(model);
-  // const container = getContainerByModel(model);
-
   let nextPosition = position;
   if (nextPosition) {
     page.lastSelectionPosition = nextPosition;
@@ -364,11 +366,6 @@ export function getSelectInfo(page: Page): SelectionInfo {
   } else if (nativeSelection && nativeSelection.type !== 'None') {
     type = nativeSelection.type;
     selectedModels = getModelsByRange(getCurrentRange());
-  }
-  if (state.type === 'divider') {
-    type = 'Block';
-    const { selectedBlocks } = state;
-    selectedModels = selectedBlocks.map(block => getModelByElement(block));
   }
   if (type !== 'None') {
     selectedBlocks = getSelectedBlock(selectedModels);

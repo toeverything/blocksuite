@@ -24,15 +24,15 @@ if (env[importIdentifier] === true) {
 // @ts-ignore
 env[importIdentifier] = true;
 
-export const createEditor = (page: Page): EditorContainer => {
+export function createEditor(page: Page): EditorContainer {
   const editor = document.createElement('editor-container');
   editor.page = page;
   return editor;
-};
+}
 
-export const createDebugMenu = (store: Workspace, editor: EditorContainer) => {
+export function createDebugMenu(workspace: Workspace, editor: EditorContainer) {
   const debugMenu = document.createElement('debug-menu');
-  debugMenu.workspace = store;
+  debugMenu.workspace = workspace;
   debugMenu.editor = editor;
   return debugMenu;
-};
+}

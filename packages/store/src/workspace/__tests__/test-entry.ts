@@ -10,11 +10,12 @@ let i = 0;
 async function testBasic() {
   testSerial('can create page', async () => {
     i++;
-    const page = workspace.createPage(`${i}`);
-    workspace.setPageMeta(page.id, { title: 'hello' });
+    const id = `${i}`;
+    workspace.createPage(id);
+    workspace.setPageMeta(id, { title: 'hello' });
     await nextFrame();
 
-    const pageMeta = workspace.meta.pages.pop();
+    const pageMeta = workspace.meta.pageMetas.pop();
     assertExists(pageMeta);
     return pageMeta.id === `${i}` && pageMeta.title === 'hello';
   });

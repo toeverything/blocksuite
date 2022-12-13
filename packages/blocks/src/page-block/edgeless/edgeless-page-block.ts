@@ -2,7 +2,7 @@
 import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
-import type { GroupBlockModel, PageBlockModel } from '../..';
+import type { GroupBlockModel, MouseMode, PageBlockModel } from '../..';
 import {
   EdgelessBlockChildrenContainer,
   EdgelessHoverRect,
@@ -203,9 +203,26 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
+  private _handleSwitchMouseMode = ({ detail }: CustomEvent<MouseMode>) => {
+    this._selection.mouseMode = detail;
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    window.addEventListener(
+      'affine.switch-mouse-mode',
+      this._handleSwitchMouseMode
+    );
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
+    window.removeEventListener(
+      'affine.switch-mouse-mode',
+      this._handleSwitchMouseMode
+    );
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
@@ -227,8 +244,15 @@ export class EdgelessPageBlockComponent
     const { frameSelectionRect, blockSelectionState: selectionState } =
       _selection;
     const { zoom } = this.viewport;
-    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
-    const hoverRect = EdgelessHoverRect(_selection.hoverRect, zoom);
+    const selectionRect = EdgelessFrameSelectionRect(
+      frameSelectionRect,
+      _selection.isHoveringShape
+    );
+    const hoverRect = EdgelessHoverRect(
+      _selection.hoverRect,
+      zoom,
+      _selection.isHoveringShape
+    );
 
     return html`
       <style></style>
