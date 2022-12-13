@@ -18,4 +18,3 @@ export const getBlobStorage = async (
 };
 
 export { BlobStorage } from './storage';
-export { IndexedDBBlobProvider } from './providers';
