@@ -23,7 +23,7 @@ export * from './__internal__/utils/common-operations';
 export * from './__internal__/utils/std';
 export * from './__internal__/utils/query';
 
-const env =
+const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis
     : typeof window !== 'undefined'
@@ -33,12 +33,11 @@ const env =
     : {};
 const importIdentifier = '__ $BLOCKSUITE_BLOCKS$ __';
 
-// @ts-ignore
 if (env[importIdentifier] === true) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
     '@blocksuite/blocks was already imported. This breaks constructor checks and will lead to issues!'
   );
 }
-// @ts-ignore
+
 env[importIdentifier] = true;
