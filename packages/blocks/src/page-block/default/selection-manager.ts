@@ -25,7 +25,7 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
-import { getBlockOptionByPosition } from './utils';
+import { getBlockEditingStateByPosition } from './utils';
 import { matchFlavours } from '@blocksuite/store/src/utils/utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -47,6 +47,7 @@ function filterSelectedBlock(
     return intersects(rect, selectionRect);
   });
 }
+
 // TODO
 // function filterSelectedEmbed(
 //   embedCache: Map<EmbedBlockComponent, DOMRect>,
@@ -264,6 +265,7 @@ export class DefaultSelectionManager {
       this._onEmbedDragMove(e);
     }
   };
+
   private _onEmbedDragMove(e: SelectionEvent) {
     let width = 0;
     let height = 0;
@@ -297,6 +299,7 @@ export class DefaultSelectionManager {
       }
     }
   }
+
   private _onContainerDragEnd = (e: SelectionEvent) => {
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
@@ -316,6 +319,7 @@ export class DefaultSelectionManager {
     const { width, height } = this._dropContainer.getBoundingClientRect();
     dragModel.page.updateBlock(dragModel, { width: width, height: height });
   }
+
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
       const { anchor, direction, selectedType } =
@@ -367,7 +371,7 @@ export class DefaultSelectionManager {
       }
     });
 
-    const clickBlockInfo = getBlockOptionByPosition(
+    const clickBlockInfo = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
       e.raw.pageY
@@ -416,15 +420,15 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    const hoverOption = getBlockOptionByPosition(
+    const hoverEditingState = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
       e.raw.pageY
     );
 
-    if (hoverOption?.model.type === 'image') {
-      hoverOption.position.x = hoverOption.position.right + 10;
-      this._signals.updateEmbedEditingState.emit(hoverOption);
+    if (hoverEditingState?.model.type === 'image') {
+      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      this._signals.updateEmbedEditingState.emit(hoverEditingState);
     } else {
       this._signals.updateEmbedEditingState.emit(null);
     }

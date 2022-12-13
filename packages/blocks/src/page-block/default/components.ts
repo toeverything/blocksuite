@@ -8,8 +8,9 @@ import type {
   EmbedEditingState,
 } from './default-page-block';
 import { assertExists } from '../../__internal__/utils';
+
 export function FrameSelectionRect(rect: DOMRect | null) {
-  if (rect === null) return html``;
+  if (rect === null) return null;
 
   const style = {
     left: rect.left + 'px',
@@ -52,12 +53,14 @@ export function EmbedSelectedRectsContainer(
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
-        return html`<div class="resizes" style=${styleMap(style)}>
-          <div class="resize top-left"></div>
-          <div class="resize top-right"></div>
-          <div class="resize bottom-left"></div>
-          <div class="resize bottom-right"></div>
-        </div>`;
+        return html`
+          <div class="resizes" style=${styleMap(style)}>
+            <div class="resize top-left"></div>
+            <div class="resize top-right"></div>
+            <div class="resize bottom-left"></div>
+            <div class="resize bottom-right"></div>
+          </div>
+        `;
       })}
     </div>
   `;
@@ -93,73 +96,67 @@ export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
   signals: DefaultPageSignals
 ) {
-  if (embedEditingState) {
-    const style = {
-      left: embedEditingState.position.x + 'px',
-      top: embedEditingState.position.y + 'px',
-    };
-    return html`
-      <style>
-        .affine-image-option-container > div {
-          position: fixed;
-          z-index: 1;
-        }
-        ${toolTipStyle}
-      </style>
+  if (!embedEditingState) return null;
 
-      <div class="affine-image-option-container">
-        <div style=${styleMap(style)} class="image-option">
-          <format-bar-button
-            class="has-tool-tip"
-            width="100%"
-            @click=${() => focusCaption(embedEditingState.model)}
+  const style = {
+    left: embedEditingState.position.x + 'px',
+    top: embedEditingState.position.y + 'px',
+  };
+  return html`
+    <style>
+      .affine-embed-editing-state-container > div {
+        position: fixed;
+        z-index: 1;
+      }
+      ${toolTipStyle}
+    </style>
+
+    <div class="affine-embed-editing-state-container">
+      <div style=${styleMap(style)} class="embed-editing-state">
+        <format-bar-button
+          class="has-tool-tip"
+          width="100%"
+          @click=${() => focusCaption(embedEditingState.model)}
+        >
+          ${CaptionIcon}
+          <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
+        </format-bar-button>
+        <format-bar-button
+          class="has-tool-tip"
+          width="100%"
+          @click=${() => {
+            assertExists(embedEditingState.model.source);
+            downloadImage(embedEditingState.model.source);
+          }}
+        >
+          ${DownloadIcon}
+          <tool-tip inert tip-position="right" role="tooltip"
+            >Download</tool-tip
           >
-            ${CaptionIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Caption</tool-tip
-            >
-          </format-bar-button>
-          <format-bar-button
-            class="has-tool-tip"
-            width="100%"
-            @click=${() => {
-              assertExists(embedEditingState.model.source);
-              downloadImage(embedEditingState.model.source);
-            }}
-          >
-            ${DownloadIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Download</tool-tip
-            >
-          </format-bar-button>
-          <format-bar-button
-            class="has-tool-tip"
-            width="100%"
-            @click=${() => {
-              assertExists(embedEditingState.model.source);
-              copyImgToClip(embedEditingState.model.source);
-            }}
-          >
-            ${CopyIcon}
-            <tool-tip inert tip-position="right" role="tooltip">Copy</tool-tip>
-          </format-bar-button>
-          <format-bar-button
-            class="has-tool-tip"
-            width="100%"
-            @click="${() => {
-              embedEditingState.model.page.deleteBlock(embedEditingState.model);
-              signals.updateEmbedRects.emit([]);
-            }}"
-          >
-            ${DeleteIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Delete</tool-tip
-            >
-          </format-bar-button>
-        </div>
+        </format-bar-button>
+        <format-bar-button
+          class="has-tool-tip"
+          width="100%"
+          @click=${() => {
+            assertExists(embedEditingState.model.source);
+            copyImgToClip(embedEditingState.model.source);
+          }}
+        >
+          ${CopyIcon}
+          <tool-tip inert tip-position="right" role="tooltip">Copy</tool-tip>
+        </format-bar-button>
+        <format-bar-button
+          class="has-tool-tip"
+          width="100%"
+          @click="${() => {
+            embedEditingState.model.page.deleteBlock(embedEditingState.model);
+            signals.updateEmbedRects.emit([]);
+          }}"
+        >
+          ${DeleteIcon}
+          <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>
+        </format-bar-button>
       </div>
-    `;
-  } else {
-    return html``;
-  }
+    </div>
+  `;
 }

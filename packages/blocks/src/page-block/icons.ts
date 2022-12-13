@@ -29,5 +29,4 @@ export const DeleteIcon = svg`
     <path fill-rule="evenodd" clip-rule="evenodd" d="M7.50016 15L7.50016 7.5L8.8335 7.5L8.8335 15L7.50016 15Z" />
     <path fill-rule="evenodd" clip-rule="evenodd" d="M12.4998 7.5L12.4998 15L11.1665 15L11.1665 7.5L12.4998 7.5Z" />
 </svg>
-
 `;
