@@ -6,6 +6,7 @@ import { Signal } from '../utils/signal';
 import { Indexer, QueryContent } from './search';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base';
+import { BlobStorage, getBlobStorage } from '../blob';
 
 export interface PageMeta {
   id: string;
@@ -131,6 +132,7 @@ class WorkspaceMeta extends Space {
 export class Workspace {
   private _store: Store;
   private _indexer: Indexer;
+  private _blobStorage: Promise<BlobStorage | null>;
 
   meta: WorkspaceMeta;
 
@@ -145,6 +147,8 @@ export class Workspace {
   constructor(options: StoreOptions) {
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
+    this._blobStorage = getBlobStorage(options.room);
+
     this.meta = new WorkspaceMeta(
       'space:meta',
       this.doc,
@@ -162,6 +166,10 @@ export class Workspace {
 
   get providers() {
     return this._store.providers;
+  }
+
+  get blobs() {
+    return this._blobStorage;
   }
 
   private get _pages() {

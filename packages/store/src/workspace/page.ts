@@ -93,6 +93,10 @@ export class Page extends Space {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
+  get blobs() {
+    return this.workspace.blobs;
+  }
+
   get pageId() {
     return this.id.replace('space:', '');
   }
