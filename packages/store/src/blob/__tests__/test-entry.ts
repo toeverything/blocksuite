@@ -1,5 +1,5 @@
 // Test page entry located in playground/examples/blob/index.html
-import { BlobStorage, getBlobStorage } from '..';
+import { getBlobStorage } from '..';
 import {
   testSerial,
   runOnce,
