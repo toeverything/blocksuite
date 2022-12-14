@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
 import type { GroupBlockModel, ShapeBlockModel } from '../packages/blocks';
 import {
   dragBetweenCoords,
@@ -9,6 +9,8 @@ import {
   redoByClick,
   switchMode,
   switchMouseMode,
+  switchShapeColor,
+  switchShapeType,
   undoByClick,
   waitNextFrame,
 } from './utils/actions';
@@ -46,8 +48,7 @@ async function getModel<Model extends BaseBlockModel>(
   const result: BaseBlockModel | null | undefined = await page.evaluate(
     blockId => {
       const page = window.workspace.getPage('page0');
-      const block = page?.getBlockById(blockId);
-      return block;
+      return page?.getBlockById(blockId);
     },
     blockId
   );
@@ -134,7 +135,7 @@ test('resize the block', async ({ page }) => {
   expect(newXywh).toBe(xywh);
 });
 
-test('add shape block', async ({ page }) => {
+test('add shape blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -143,14 +144,17 @@ test('add shape block', async ({ page }) => {
 
   await switchMode(page);
   await switchMouseMode(page);
-  const locator = await page.locator(
-    '[data-test-id="affine-edgeless-block-child-1-container"]'
-  );
-  if (!locator) throw new Error();
-  const box = await locator.boundingBox();
-  if (!box) throw new Error();
+  const box = await page
+    .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
+    ?.boundingBox();
+  if (!box) {
+    throw new Error('box is null');
+  }
   const { x, y } = box;
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
+  await switchShapeColor(page, 'blue');
+  await switchShapeType(page, 'triangle');
+  await dragBetweenCoords(page, { x, y }, { x: x + 200, y: y + 200 });
 
   await switchMouseMode(page);
 
@@ -158,6 +162,10 @@ test('add shape block', async ({ page }) => {
   expect(JSON.parse(shapeModel.xywh)).toStrictEqual([0, 0, 100, 100]);
   expect(shapeModel.color).toBe('black');
   expect(shapeModel.type).toBe('rectangle');
+  const shapeModel2 = await getModel<ShapeBlockModel>(page, '4');
+  expect(JSON.parse(shapeModel2.xywh)).toStrictEqual([0, 0, 200, 200]);
+  expect(shapeModel2.color).toBe('blue');
+  expect(shapeModel2.type).toBe('triangle');
 
   const tag = await page.evaluate(() => {
     const element = document.querySelector(`[data-block-id="3"]`);
