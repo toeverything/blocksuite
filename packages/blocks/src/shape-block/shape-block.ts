@@ -1,13 +1,32 @@
 import { customElement, property } from 'lit/decorators.js';
-import { html, LitElement } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import type { ShapeBlockModel } from './shape-model';
-import { styleMap } from 'lit/directives/style-map.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager';
-import { getRectanglePath } from './utils';
 import { BLOCK_ID_ATTR } from '../__internal__';
+import {
+  DashStyle,
+  ShapeStyles,
+  SizeStyle,
+  TDShapeType,
+} from '../__internal__';
+import { getRectanglePath } from './utils/rectangle-helpers';
+import { getShapeStyle } from './utils/shape-style';
+import { getTrianglePath } from './utils/triangle-helpers';
+import style from './style.css';
+
+export const SHAPE_PADDING = 48;
 
 @customElement('shape-block')
 export class ShapeBlockComponent extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+
+    /* to make it at the center of the container */
+    .affine-shape-block-g {
+      transform: translate(${SHAPE_PADDING / 2}px, ${SHAPE_PADDING / 2}px);
+    }
+  `;
+
   @property({
     hasChanged() {
       return true;
@@ -16,29 +35,53 @@ export class ShapeBlockComponent extends LitElement {
   model!: ShapeBlockModel;
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    if (this.model.type === 'rectangle') {
-      const [, , modelW, modelH] = JSON.parse(this.model.xywh) as XYWH;
-      return html`
-        <svg
-          style=${styleMap({
-            width: modelW + 'px',
-            height: modelH + 'px',
-          })}
-        >
-          <path
-            style=${styleMap({
-              // enable pointer events, otherwise edgeless block cannot detect by mouse event
-              pointerEvents: 'all',
-            })}
-            d=${getRectanglePath([modelW, modelH])}
-            stroke-width="2"
-          />
-        </svg>
-      `;
+    const id = this.model.id;
+    this.setAttribute(BLOCK_ID_ATTR, id);
+    const [, , modelW, modelH] = JSON.parse(this.model.xywh) as XYWH;
+    const shapeStyles: ShapeStyles = {
+      color: this.model.color,
+      dash: DashStyle.Draw,
+      size: SizeStyle.Small,
+    };
+
+    const size = [modelW, modelH];
+    const { stroke, strokeWidth } = getShapeStyle(shapeStyles, false);
+    switch (this.model.type) {
+      case TDShapeType.Rectangle: {
+        return html`
+          <svg class="affine-shape-block">
+            <g class="affine-shape-block-g">
+              <path
+                class="affine-shape-block-hit-box"
+                d=${getRectanglePath(id, shapeStyles, size)}
+                fill=${stroke}
+                stroke=${stroke}
+                stroke-width=${strokeWidth}
+              />
+            </g>
+          </svg>
+        `;
+      }
+      case TDShapeType.Triangle: {
+        return html`
+          <svg class="affine-shape-block">
+            <g class="affine-shape-block-g">
+              <path
+                class="affine-shape-block-hit-box"
+                d=${getTrianglePath(id, size, shapeStyles)}
+                fill=${stroke}
+                stroke=${stroke}
+                stroke-width=${strokeWidth}
+              />
+            </g>
+          </svg>
+        `;
+      }
+      default: {
+        console.error('not supported shape type: ', this.model.type);
+        return html``;
+      }
     }
-    console.error('not supported');
-    return html``;
   }
 }
 

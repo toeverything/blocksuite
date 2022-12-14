@@ -105,6 +105,17 @@ export function syncBlockProps(
   if (props.flavour === 'affine:embed' && !yBlock.has('prop:caption')) {
     yBlock.set('prop:caption', props.caption ?? '');
   }
+  if (props.flavour === 'affine:shape') {
+    if (!yBlock.has('prop:xywh')) {
+      yBlock.set('prop:xywh', props.xywh ?? '[0,0,50,50]');
+    }
+    if (!yBlock.has('prop:type')) {
+      yBlock.set('prop:type', props.type ?? 'rectangle');
+    }
+    if (!yBlock.has('prop:color')) {
+      yBlock.set('prop:color', props.color ?? 'black');
+    }
+  }
 }
 
 export function trySyncTextProp(

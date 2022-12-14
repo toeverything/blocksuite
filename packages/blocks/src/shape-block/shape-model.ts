@@ -1,10 +1,11 @@
+// https://github.com/tldraw/tldraw/blob/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/tldraw/src/state/shapes/shared/shape-styles.ts
 import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
-import type { ShapeColor, ShapeType } from '../__internal__';
+import { ColorStyle, TDShapeType } from '../__internal__';
 
 export interface ShapeBlockProps extends IBaseBlockProps {
   flavor: 'affine:shape';
-  color: ShapeColor;
-  type: ShapeType;
+  color: ColorStyle;
+  type: TDShapeType;
 
   xywh: string;
 }
@@ -12,14 +13,14 @@ export interface ShapeBlockProps extends IBaseBlockProps {
 export class ShapeBlockModel extends BaseBlockModel {
   flavour = 'affine:shape' as const;
 
-  color: ShapeColor;
-  type: ShapeType;
+  color: ColorStyle;
+  type: TDShapeType;
   xywh: string;
 
   constructor(page: Page, props: Partial<ShapeBlockModel>) {
     super(page, props);
     this.xywh = props.xywh ?? '[0,0,100,100]';
-    this.type = props.type ?? 'rectangle';
-    this.color = props.color ?? 'black';
+    this.type = props.type ?? TDShapeType.Rectangle;
+    this.color = props.color ?? ColorStyle.Black;
   }
 }
