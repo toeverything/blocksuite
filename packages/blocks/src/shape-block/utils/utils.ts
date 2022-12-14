@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vec } from '@tldraw/vec';
 import type { StrokePoint } from 'perfect-freehand';
-import type React from 'react';
 import type { Patch } from '../../__internal__';
 import {
   TLBoundsWithCenter,
@@ -1626,7 +1625,7 @@ left past the initial left edge) then swap points on that axis.
    * Get whether an event is command (mac) or control (pc).
    * @param e
    */
-  static metaKey(e: KeyboardEvent | React.KeyboardEvent): boolean {
+  static metaKey(e: KeyboardEvent): boolean {
     return Utils.isDarwin() ? e.metaKey : e.ctrlKey;
   }
 
