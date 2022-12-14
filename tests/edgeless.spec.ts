@@ -22,16 +22,20 @@ async function getGroupSize(
   page: Page,
   ids: { pageId: string; groupId: string; paragraphId: string }
 ) {
-  const result = await page.evaluate(
+  const result: string | null = await page.evaluate(
     ([id]) => {
-      const block = window.workspace
-        .getPage('page0')
-        .getBlockById(id.groupId) as GroupBlockModel;
-      return block.xywh;
+      const page = window.workspace.getPage('page0');
+      const block = page?.getBlockById(id.groupId);
+      if (block?.flavour === 'affine:group') {
+        return (block as GroupBlockModel).xywh;
+      } else {
+        return null;
+      }
     },
     [ids] as const
   );
-  return result;
+  expect(result).not.toBeNull();
+  return result as string;
 }
 
 test('switch to edgeless mode', async ({ page }) => {
