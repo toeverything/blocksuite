@@ -123,7 +123,9 @@ export class ViewportState {
 }
 
 export class EdgelessSelectionManager {
-  private _mouseMode: MouseMode;
+  private _mouseMode: MouseMode = {
+    type: 'default',
+  };
   private _container: EdgelessContainer;
   private _mouseDisposeCallback: () => void;
   private _wheelDisposeCallback: () => void;
@@ -169,7 +171,6 @@ export class EdgelessSelectionManager {
   }
 
   constructor(container: EdgelessContainer) {
-    this._mouseMode = 'default';
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -264,7 +265,7 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    switch (this.mouseMode) {
+    switch (this.mouseMode.type) {
       case 'shape': {
         this._container.page.captureSync();
         // create a shape block when drag start
@@ -275,6 +276,8 @@ export class EdgelessSelectionManager {
         this._draggingShapeBlockId = this._container.page.addBlock({
           flavour: 'affine:shape',
           xywh: JSON.stringify([modelX, modelY, 0, 0]),
+          color: this.mouseMode.color,
+          type: this.mouseMode.shape,
         });
         this._frameSelectionState = {
           start: new DOMPoint(e.raw.x, e.raw.y),
@@ -309,7 +312,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    switch (this._mouseMode) {
+    switch (this._mouseMode.type) {
       case 'default': {
         switch (this.blockSelectionState.type) {
           case 'none':
@@ -375,7 +378,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    switch (this.mouseMode) {
+    switch (this.mouseMode.type) {
       case 'shape': {
         this._draggingShapeBlockId = null;
         this._frameSelectionState = null;

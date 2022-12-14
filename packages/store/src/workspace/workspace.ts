@@ -11,10 +11,8 @@ import { BlobStorage, getBlobStorage } from '../blob';
 export interface PageMeta {
   id: string;
   title: string;
-  favorite: boolean;
-  trash: boolean;
   createDate: number;
-  trashDate: number | null;
+  [key: string]: string | number | boolean;
 }
 
 class WorkspaceMeta extends Space {
@@ -49,12 +47,9 @@ class WorkspaceMeta extends Space {
     this.doc.transact(() => {
       if (index === undefined) {
         this._yPages.push([yPage]);
-        yPage.set('id', page.id);
-        yPage.set('title', page.title);
-        yPage.set('favorite', page.favorite);
-        yPage.set('trash', page.trash);
-        yPage.set('createDate', page.createDate);
-        yPage.set('trashDate', page.trashDate);
+        Object.entries(page).forEach(([key, value]) => {
+          yPage.set(key, value);
+        });
       } else {
         this._yPages.insert(index, [yPage]);
       }
@@ -69,24 +64,9 @@ class WorkspaceMeta extends Space {
       if (index === -1) return;
 
       const yPage = this._yPages.get(index) as Y.Map<unknown>;
-      if ('id' in props) {
-        yPage.set('id', props.id ?? pages[index]['id']);
-      }
-      if ('title' in props) {
-        yPage.set('title', props.title ?? pages[index]['title']);
-      }
-      if ('favorite' in props) {
-        yPage.set('favorite', props.favorite ?? pages[index]['favorite']);
-      }
-      if ('trash' in props) {
-        yPage.set('trash', props.trash ?? pages[index]['trash']);
-      }
-      if ('createDate' in props) {
-        yPage.set('createDate', props.createDate ?? pages[index]['createDate']);
-      }
-      if ('trashDate' in props) {
-        yPage.set('trashDate', props.trashDate ?? pages[index]['trashDate']);
-      }
+      Object.entries(props).forEach(([key, value]) => {
+        yPage.set(key, value);
+      });
     });
   }
 
@@ -230,10 +210,7 @@ export class Workspace {
     this.meta.addPage({
       id: pageId,
       title: '',
-      favorite: false,
-      trash: false,
       createDate: +new Date(),
-      trashDate: null,
     });
   }
 

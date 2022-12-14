@@ -1,0 +1,10 @@
+.affine-shape-block {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* enable pointer events, otherwise edgeless block cannot detect by mouse event */
+.affine-shape-block-hit-box {
+  pointer-events: all;
+}

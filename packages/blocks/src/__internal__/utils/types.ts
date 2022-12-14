@@ -2,7 +2,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect';
 import type { GroupBlockModel } from '../../group-block';
 import type { ShapeBlockModel } from '../../shape-block';
-
+import type { ColorStyle, TDShapeType } from './shape';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {
@@ -43,9 +43,17 @@ export interface BlockSelectionInfo {
 // blocks that would only appear under the edgeless container root
 export type RootBlockModel = GroupBlockModel | ShapeBlockModel;
 
-export type MouseMode = 'default' | 'shape';
-export type ShapeType = 'rectangle';
-export type ShapeColor = 'black';
+export type DefaultMouseMode = {
+  type: 'default';
+};
+
+export type ShapeMouseMode = {
+  type: 'shape';
+  shape: TDShapeType;
+  color: ColorStyle;
+};
+
+export type MouseMode = DefaultMouseMode | ShapeMouseMode;
 
 declare global {
   interface WindowEventMap {

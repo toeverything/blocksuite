@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.3.0-alpha.7",
+  "version": "0.3.0-alpha.8",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@blocksuite/store": "workspace:*",
     "highlight.js": "^11.7.0",
+    "@tldraw/intersect": "^1.8.0",
     "@tldraw/vec": "^1.8.0",
     "hotkeys-js": "^3.10.0",
     "lit": "^2.3.1",

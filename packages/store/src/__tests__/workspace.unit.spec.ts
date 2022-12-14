@@ -15,7 +15,7 @@ import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragra
 import { ListBlockModel } from '../../../blocks/src/list-block/list-model';
 import { GroupBlockModel } from '../../../blocks/src/group-block/group-model';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model';
-import { PageMeta } from '../workspace/workspace';
+import type { PageMeta } from '../workspace';
 import { assertExists } from '../utils/utils';
 
 function createTestOptions() {
@@ -82,9 +82,6 @@ describe.concurrent('basic', () => {
           {
             id: 'page0',
             title: '',
-            favorite: false,
-            trash: false,
-            trashDate: null,
           },
         ],
       },
@@ -231,44 +228,30 @@ describe.concurrent('addBlock', () => {
     workspace.createPage('page0');
 
     assert.deepEqual(
-      workspace.meta.pageMetas.map(
-        ({ id, title, favorite, trash, trashDate }) => ({
-          id,
-          title,
-          favorite,
-          trash,
-          trashDate,
-        })
-      ),
+      workspace.meta.pageMetas.map(({ id, title }) => ({
+        id,
+        title,
+      })),
       [
         {
           id: 'page0',
           title: '',
-          favorite: false,
-          trash: false,
-          trashDate: null,
         },
       ]
     );
 
     workspace.setPageMeta('page0', { favorite: true });
     assert.deepEqual(
-      workspace.meta.pageMetas.map(
-        ({ id, title, favorite, trash, trashDate }) => ({
-          id,
-          title,
-          favorite,
-          trash,
-          trashDate,
-        })
-      ),
+      workspace.meta.pageMetas.map(({ id, title, favorite }) => ({
+        id,
+        title,
+        favorite,
+      })),
       [
         {
           id: 'page0',
           title: '',
           favorite: true,
-          trash: false,
-          trashDate: null,
         },
       ]
     );

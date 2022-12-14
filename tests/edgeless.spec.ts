@@ -1,5 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
-import type { GroupBlockModel } from '../packages/blocks/src/group-block/group-model';
+import { expect, Page, test } from '@playwright/test';
+import type { GroupBlockModel, ShapeBlockModel } from '../packages/blocks';
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -9,6 +9,8 @@ import {
   redoByClick,
   switchMode,
   switchMouseMode,
+  switchShapeColor,
+  switchShapeType,
   undoByClick,
   waitNextFrame,
 } from './utils/actions';
@@ -17,21 +19,41 @@ import {
   assertRichTexts,
   assertSelection,
 } from './utils/asserts';
+import type { BaseBlockModel } from '../packages/store';
 
 async function getGroupSize(
   page: Page,
   ids: { pageId: string; groupId: string; paragraphId: string }
 ) {
-  const result = await page.evaluate(
+  const result: string | null = await page.evaluate(
     ([id]) => {
-      const block = window.workspace
-        .getPage('page0')
-        .getBlockById(id.groupId) as GroupBlockModel;
-      return block.xywh;
+      const page = window.workspace.getPage('page0');
+      const block = page?.getBlockById(id.groupId);
+      if (block?.flavour === 'affine:group') {
+        return (block as GroupBlockModel).xywh;
+      } else {
+        return null;
+      }
     },
     [ids] as const
   );
-  return result;
+  expect(result).not.toBeNull();
+  return result as string;
+}
+
+async function getModel<Model extends BaseBlockModel>(
+  page: Page,
+  blockId: string
+) {
+  const result: BaseBlockModel | null | undefined = await page.evaluate(
+    blockId => {
+      const page = window.workspace.getPage('page0');
+      return page?.getBlockById(blockId);
+    },
+    blockId
+  );
+  expect(result).not.toBeNull();
+  return result as Model;
 }
 
 test('switch to edgeless mode', async ({ page }) => {
@@ -113,7 +135,7 @@ test('resize the block', async ({ page }) => {
   expect(newXywh).toBe(xywh);
 });
 
-test('add shape block', async ({ page }) => {
+test('add shape blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -122,14 +144,29 @@ test('add shape block', async ({ page }) => {
 
   await switchMode(page);
   await switchMouseMode(page);
-  const locator = await page.locator('[data-block-id="1"]');
-  if (!locator) throw new Error();
-  const box = await locator.boundingBox();
-  if (!box) throw new Error();
+  const box = await page
+    .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
+    ?.boundingBox();
+  if (!box) {
+    throw new Error('box is null');
+  }
   const { x, y } = box;
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
+  await switchShapeColor(page, 'blue');
+  await switchShapeType(page, 'triangle');
+  await dragBetweenCoords(page, { x, y }, { x: x + 200, y: y + 200 });
 
   await switchMouseMode(page);
+
+  const shapeModel = await getModel<ShapeBlockModel>(page, '3');
+  expect(JSON.parse(shapeModel.xywh)).toStrictEqual([0, 0, 100, 100]);
+  expect(shapeModel.color).toBe('black');
+  expect(shapeModel.type).toBe('rectangle');
+  const shapeModel2 = await getModel<ShapeBlockModel>(page, '4');
+  expect(JSON.parse(shapeModel2.xywh)).toStrictEqual([0, 0, 200, 200]);
+  expect(shapeModel2.color).toBe('blue');
+  expect(shapeModel2.type).toBe('triangle');
+
   const tag = await page.evaluate(() => {
     const element = document.querySelector(`[data-block-id="3"]`);
     return element?.tagName;

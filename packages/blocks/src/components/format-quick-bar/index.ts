@@ -34,7 +34,7 @@ export const showFormatQuickBar = async ({
 
   // Handle Scroll
 
-  // Once performance problems occur, they can be mitigated increasing throttle limit
+  // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
     const rect = anchorEl.getBoundingClientRect();
     const bodyRect = document.body.getBoundingClientRect();
@@ -73,7 +73,7 @@ export const showFormatQuickBar = async ({
   );
 
   if (scrollContainer) {
-    // Note: at edgeless mode, the scroll container is not exist!
+    // Note: in edgeless mode, the scroll container is not exist!
     scrollContainer.addEventListener('scroll', updatePos, { passive: true });
   }
   positionUpdatedSignal.on(updatePos);
@@ -90,6 +90,16 @@ export const showFormatQuickBar = async ({
   };
   window.addEventListener('mousedown', clickAwayListener);
 
+  // Handle selection change
+
+  const selectionChangeHandler = () => {
+    const selection = document.getSelection();
+    if (!selection || selection.type === 'Caret') {
+      abortController.abort();
+    }
+  };
+  document.addEventListener('selectionchange', selectionChangeHandler);
+
   // Mount
   container.appendChild(formatQuickBar);
   // Wait for the format quick bar to be mounted
@@ -102,6 +112,8 @@ export const showFormatQuickBar = async ({
       formatQuickBar.remove();
       scrollContainer?.removeEventListener('scroll', updatePos);
       window.removeEventListener('resize', updatePos);
+      document.removeEventListener('selectionchange', selectionChangeHandler);
+      positionUpdatedSignal.dispose();
       res();
     });
   });

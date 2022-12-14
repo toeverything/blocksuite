@@ -15,7 +15,9 @@ export class EditorContainer extends LitElement {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
-  mouseMode: MouseMode = 'default';
+  mouseMode: MouseMode = {
+    type: 'default',
+  };
 
   // TODO only select block
   @state()

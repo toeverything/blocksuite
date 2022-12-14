@@ -3,14 +3,18 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   assertExists,
+  ColorStyle,
   type CommonBlockElement,
-  type GroupBlockModel,
   convertToList,
   createEvent,
+  type GroupBlockModel,
   MouseMode,
+  ShapeMouseMode,
+  TDShapeType,
 } from '@blocksuite/blocks';
 import type { BaseBlockModel, Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
+
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {
   undo: html`
@@ -157,7 +161,27 @@ export class DebugMenu extends LitElement {
   mode: 'page' | 'edgeless' = 'page';
 
   @state()
-  mouseMode: MouseMode = 'default';
+  mouseModeType: MouseMode['type'] = 'default';
+
+  @state()
+  shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
+
+  @state()
+  shapeModeShape: ShapeMouseMode['shape'] = TDShapeType.Rectangle;
+
+  get mouseMode(): MouseMode {
+    if (this.mouseModeType === 'default') {
+      return {
+        type: this.mouseModeType,
+      };
+    } else {
+      return {
+        type: this.mouseModeType,
+        color: this.shapeModeColor,
+        shape: this.shapeModeShape,
+      };
+    }
+  }
 
   get page() {
     return this.editor.page;
@@ -251,9 +275,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _onSwitchMouseMode() {
-    this.mouseMode = this.mouseMode === 'default' ? 'shape' : 'default';
-    const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
-    window.dispatchEvent(event);
+    this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
   }
 
   private _onExportHtml() {
@@ -312,6 +334,18 @@ export class DebugMenu extends LitElement {
       flex: 1;
     }
   `;
+
+  update(changedProperties: Map<string, unknown>) {
+    if (
+      changedProperties.has('mouseModeType') ||
+      changedProperties.has('shapeModeColor') ||
+      changedProperties.has('shapeModeShape')
+    ) {
+      const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
+      window.dispatchEvent(event);
+    }
+    super.update(changedProperties);
+  }
 
   render() {
     return html`
@@ -471,7 +505,7 @@ export class DebugMenu extends LitElement {
           tabindex="-1"
           @click=${this._onSwitchMouseMode}
         >
-          ${this.mouseMode === 'default'
+          ${this.mouseMode.type === 'default'
             ? icons.mouseDefaultMode
             : icons.mouseShapeMode}
         </button>
@@ -494,6 +528,63 @@ export class DebugMenu extends LitElement {
         <button aria-label="clear data" title="clear data" disabled>
           ${icons.trash}
         </button>
+        <select
+          style="width: 72px"
+          aria-label="switch shape color"
+          title="switch shape color"
+          name="switch shape color"
+          tabindex="-1"
+          @change=${(e: Event) => {
+            const target = e.target;
+            if (target instanceof HTMLSelectElement) {
+              const color = target.value as ColorStyle;
+              this.shapeModeColor = color;
+            }
+          }}
+        >
+          <optgroup label="select a shape color">
+            ${Object.entries(ColorStyle).map(([name, style]) => {
+              return html`
+                <option value=${style} ?selected=${style === ColorStyle.Black}>
+                  ${name}
+                </option>
+              `;
+            })}
+          </optgroup>
+        </select>
+        <select
+          style="width: 72px"
+          aria-label="switch shape type"
+          title="switch shape type"
+          name="switch shape type"
+          tabindex="-1"
+          @change=${(e: Event) => {
+            const target = e.target;
+            if (target instanceof HTMLSelectElement) {
+              const shape = target.value as TDShapeType;
+              this.shapeModeShape = shape;
+            }
+          }}
+        >
+          <optgroup label="select a shape color">
+            ${Object.entries(TDShapeType).map(([name, style]) => {
+              if (
+                style === TDShapeType.Triangle ||
+                style === TDShapeType.Rectangle
+              ) {
+                return html`
+                  <option
+                    value=${style}
+                    ?selected=${style === TDShapeType.Rectangle}
+                  >
+                    ${name}
+                  </option>
+                `;
+              }
+              return null;
+            })}
+          </optgroup>
+        </select>
       </div>
     `;
   }

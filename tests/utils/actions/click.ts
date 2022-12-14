@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import type { ColorStyle, TDShapeType } from '../../../packages/blocks';
 
 export async function undoByClick(page: Page) {
   await page.click('button[aria-label="undo"]');
@@ -38,6 +39,14 @@ export async function switchMode(page: Page) {
 
 export async function switchMouseMode(page: Page) {
   await page.click('button[aria-label="switch mouse mode"]');
+}
+
+export async function switchShapeColor(page: Page, color: string) {
+  await page.selectOption('select[aria-label="switch shape color"]', color);
+}
+
+export async function switchShapeType(page: Page, shapeType: string) {
+  await page.selectOption('select[aria-label="switch shape type"]', shapeType);
 }
 
 export async function activeEmbed(page: Page) {
