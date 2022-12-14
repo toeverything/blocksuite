@@ -38,31 +38,28 @@ import type { DefaultPageSignals } from './default-page-block';
 import type { DefaultSelectionManager } from './selection-manager';
 import type { CodeBlockOption } from './default-page-block';
 
-export function getBlockOptionByPosition(
+export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
   x: number,
-  y: number,
-  flavours: string[],
-  targetSelector: string
+  y: number
 ) {
-  while (blocks.length) {
-    const blockModel = blocks.shift();
-    assertExists(blockModel);
-    blockModel.children && blocks.push(...blockModel.children);
-    if (matchFlavours(blockModel, flavours)) {
-      const hoverDom = getBlockById(blockModel.id);
-      const hoverTarget = hoverDom?.querySelector(targetSelector);
-      const imageRect = hoverTarget?.getBoundingClientRect();
-      assertExists(imageRect);
-      if (isPointIn(imageRect, x, y)) {
-        return {
-          position: {
-            x: imageRect.right + 10,
-            y: imageRect.top,
-          },
-          model: blockModel,
-        };
-      }
+  for (let index = 0; index <= blocks.length - 1; index++) {
+    const hoverDom = getBlockById(blocks[index].id);
+
+    let blockRect;
+    if (blocks[index].type === 'image') {
+      const hoverImage = hoverDom?.querySelector('img');
+      blockRect = hoverImage?.getBoundingClientRect();
+    } else {
+      blockRect = hoverDom?.getBoundingClientRect();
+    }
+
+    assertExists(blockRect);
+    if (isPointIn(blockRect, x, y)) {
+      return {
+        position: blockRect,
+        model: blocks[index],
+      };
     }
   }
   return null;
@@ -162,6 +159,7 @@ export function handleUp(
     );
   }
 }
+
 export function handleDown(
   selection: DefaultSelectionManager,
   signals: DefaultPageSignals,
@@ -235,7 +233,7 @@ export function bindHotkeys(
         page,
         selectedBlocks.map(block => getModelByElement(block))
       );
-
+      e.preventDefault();
       state.clear();
       signals.updateSelectedRects.emit([]);
       signals.updateEmbedRects.emit([]);

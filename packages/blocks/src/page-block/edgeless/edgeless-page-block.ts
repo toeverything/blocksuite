@@ -58,6 +58,9 @@ export class EdgelessPageBlockComponent
   @property()
   mouseRoot!: HTMLElement;
 
+  @property()
+  mouseMode: MouseMode = 'default';
+
   @property({
     hasChanged() {
       return true;
@@ -168,6 +171,9 @@ export class EdgelessPageBlockComponent
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
     }
+    if (changedProperties.has('mouseMode')) {
+      this._selection.mouseMode = this.mouseMode;
+    }
     super.update(changedProperties);
   }
 
@@ -203,26 +209,9 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  private _handleSwitchMouseMode = ({ detail }: CustomEvent<MouseMode>) => {
-    this._selection.mouseMode = detail;
-  };
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    window.addEventListener(
-      'affine.switch-mouse-mode',
-      this._handleSwitchMouseMode
-    );
-  }
-
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    window.removeEventListener(
-      'affine.switch-mouse-mode',
-      this._handleSwitchMouseMode
-    );
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();

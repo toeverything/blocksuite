@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import {
   Disposable,
   Signal,
@@ -16,27 +15,12 @@ import {
   BLOCK_ID_ATTR,
   hotkey,
   BlockChildrenContainer,
-  SelectionPosition,
-  HOTKEYS,
   assertExists,
-  isPageTitle,
-  getSplicedTitle,
-  noop,
   getModelByElement,
-  matchFlavours,
-  focusPreviousBlock,
-  getDefaultPageBlock,
-  getBlockElementByModel,
-  getContainerByModel,
-  getPreviousBlock,
-  getNextBlock,
-  focusNextBlock,
   getCurrentRange,
   isMultiBlockRange,
-  isPageTitle,
-  matchFlavours,
-  noop,
   SelectionPosition,
+  getModelsByRange,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import { deleteModels, tryUpdateGroupSize } from '../utils';
@@ -47,10 +31,13 @@ import {
   EmbedSelectedRectsContainer,
   FrameSelectionRect,
   SelectedRectsContainer,
-} from './rects-container';
-import { downloadImage, focusCaption, copyImgToClip } from './utils';
+} from './components';
 import { bindHotkeys, removeHotkeys } from './utils';
-import { SwitchLangIcon } from '../../code-block/icons';
+import { LineWrapIcon, SwitchLangIcon } from '../../code-block/icons';
+import style from './style.css';
+import { styleMap } from 'lit/directives/style-map.js';
+import { copyCode, deleteCodeBlock, toggleWrap } from '..';
+import { CopyIcon, DeleteIcon } from '../icons';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -216,20 +203,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     const title = (e.target as HTMLInputElement).value;
     page.updateBlock(this.model, { title });
     page.workspace.setPageMeta(page.id, { title });
-  }
-
-  private _updateType(flavour: string, type: string, page: Page) {
-    const { state } = this.selection;
-    if (state.selectedBlocks.length > 0) {
-      batchUpdateTextType(
-        flavour,
-        page,
-        state.selectedBlocks.map(block => getModelByElement(block)),
-        type
-      );
-    } else {
-      updateTextType(flavour, type, page);
-    }
   }
 
   private _clearSelection() {

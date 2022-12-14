@@ -25,8 +25,7 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
-import { getHoverBlockOptionByPosition } from './utils';
-import { getBlockOptionByPosition } from './utils';
+import { getBlockEditingStateByPosition } from './utils';
 import { matchFlavours } from '@blocksuite/store/src/utils/utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
@@ -175,11 +174,7 @@ export class DefaultSelectionManager {
   }
 
   private get _blocks(): BaseBlockModel[] {
-    const blocks: BaseBlockModel[] = [];
-    this.page.root?.children.forEach(child => {
-      blocks.push(...child.children);
-    });
-    return blocks;
+    return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
   }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -385,12 +380,10 @@ export class DefaultSelectionManager {
       }
     });
 
-    const clickBlockInfo = getBlockOptionByPosition(
+    const clickBlockInfo = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
-      e.raw.pageY,
-      ['affine:embed'],
-      'img'
+      e.raw.pageY
     );
 
     if (clickBlockInfo && clickBlockInfo.model) {
@@ -436,28 +429,18 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    const hoverOption = getBlockOptionByPosition(
+    const hoverEditingState = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
-      e.raw.pageY,
-      ['affine:embed'],
-      'img'
+      e.raw.pageY
     );
 
-    if (hoverOption?.model.type === 'image') {
-      hoverOption.position.x = hoverOption.position.right + 10;
-      this._signals.updateEmbedEditingState.emit(hoverOption);
+    if (hoverEditingState?.model.type === 'image') {
+      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      this._signals.updateEmbedEditingState.emit(hoverEditingState);
     } else {
       this._signals.updateEmbedEditingState.emit(null);
     }
-    const codeBlockHoverOption = getHoverBlockOptionByPosition(
-      this._blocks,
-      e.raw.pageX,
-      e.raw.pageY,
-      ['affine:code-block'],
-      '.affine-code-block-container'
-    );
-    this._signals.updateCodeBlockOption.emit(codeBlockHoverOption);
   };
 
   private _onContainerMouseOut = (e: SelectionEvent) => {

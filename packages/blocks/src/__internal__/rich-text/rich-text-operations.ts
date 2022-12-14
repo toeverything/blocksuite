@@ -10,20 +10,17 @@ import {
   getPreviousBlock,
   ALLOW_DEFAULT,
   caretRangeFromPoint,
-  focusNextBlock,
-  focusPreviousBlock,
   getNextBlock,
-  Point,
   PREVENT_DEFAULT,
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
   convertToDivider,
+  matchFlavours,
+  focusPreviousBlock,
   getDefaultPageBlock,
   getBlockElementByModel,
   resetNativeSelection,
-  matchFlavours,
-  focusPreviousBlock,
 } from '../utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {

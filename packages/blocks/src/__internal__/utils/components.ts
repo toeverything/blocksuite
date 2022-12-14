@@ -7,7 +7,7 @@ import type { ListBlockModel } from '../../list-block';
 import type { ParagraphBlockModel } from '../../paragraph-block';
 import type { GroupBlockModel } from '../../group-block';
 import type { CodeBlockModel } from '../../code-block';
-import type { DividerBlockModel } from '../../divider-block/divider-model';
+import type { DividerBlockModel } from '../../divider-block';
 import type { EmbedBlockModel } from '../../embed-block';
 import type { ShapeBlockModel } from '../../shape-block';
 
