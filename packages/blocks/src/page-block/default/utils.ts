@@ -99,8 +99,7 @@ function isPointIn(block: DOMRect, x: number, y: number): boolean {
     x < block.left ||
     x > block.left + block.width + 50 ||
     y < block.top ||
-    // when block height is smaller than height of option menu, need a stricter value to prevent bar disappear
-    y > block.top + Math.max(block.height, 120)
+    y > block.top + block.height
   ) {
     return false;
   }

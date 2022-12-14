@@ -71,13 +71,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType =
-  | 'native'
-  | 'block'
-  | 'none'
-  | 'embed'
-  | 'divider'
-  | 'focus';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'focus';
 
 class PageSelectionState {
   type: PageSelectionType;
@@ -439,8 +433,12 @@ export class DefaultSelectionManager {
     if (hoverEditingState?.model.type === 'image') {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
       this._signals.updateEmbedEditingState.emit(hoverEditingState);
+    } else if (hoverEditingState?.model.flavour === 'affine:code-block') {
+      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
       this._signals.updateEmbedEditingState.emit(null);
+      this._signals.updateCodeBlockOption.emit(null);
     }
   };
 
