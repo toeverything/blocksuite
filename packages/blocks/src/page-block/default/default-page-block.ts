@@ -1,40 +1,37 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
-  Disposable,
-  Signal,
-  Page,
-  Text,
   BaseBlockModel,
+  Disposable,
+  Page,
+  Signal,
+  Text,
 } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
-  type BlockHost,
+  assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
-  hotkey,
   BlockChildrenContainer,
-  assertExists,
+  type BlockHost,
   getCurrentRange,
+  getModelsByRange,
+  hotkey,
   isMultiBlockRange,
   SelectionPosition,
-  getModelsByRange,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import { deleteModels, tryUpdateGroupSize } from '../utils';
 import {
+  CodeBlockOptionContainer,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components';
 import { bindHotkeys, removeHotkeys } from './utils';
-import { LineWrapIcon, SwitchLangIcon } from '../../code-block/icons';
 import style from './style.css';
-import { styleMap } from 'lit/directives/style-map.js';
-import { copyCode, deleteCodeBlock, toggleWrap } from '..';
-import { CopyIcon, DeleteIcon } from '../icons';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -60,42 +57,6 @@ function focusTextEnd(input: HTMLInputElement) {
   input.focus();
   input.value = '';
   input.value = current;
-}
-
-function CodeBlockOptionContainer(codeBlockOption: CodeBlockOption | null) {
-  if (codeBlockOption) {
-    const style = {
-      left: codeBlockOption.position.x + 'px',
-      top: codeBlockOption.position.y + 'px',
-    };
-    return html`
-      <style>
-        .affine-codeblock-option-container > ul {
-          position: fixed;
-          z-index: 1;
-        }
-      </style>
-
-      <div class="affine-codeblock-option-container">
-        <ul style=${styleMap(style)} class="code-block-option">
-          <li
-            @click=${() => {
-              console.log('a');
-            }}
-          >
-            ${SwitchLangIcon}
-          </li>
-          <li @click=${() => copyCode(codeBlockOption)}>${CopyIcon}</li>
-          <li @click=${() => toggleWrap(codeBlockOption)}>${LineWrapIcon}</li>
-          <li @click=${() => deleteCodeBlock(codeBlockOption)}>
-            ${DeleteIcon}
-          </li>
-        </ul>
-      </div>
-    `;
-  } else {
-    return html``;
-  }
 }
 
 @customElement('default-page-block')

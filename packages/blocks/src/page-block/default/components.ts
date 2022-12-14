@@ -1,12 +1,21 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
-import { downloadImage, focusCaption, copyImgToClip } from './utils';
+import {
+  copyCode,
+  copyImgToClip,
+  deleteCodeBlock,
+  downloadImage,
+  focusCaption,
+  toggleWrap,
+} from './utils';
 import { toolTipStyle } from '../../components/tooltip';
 import type {
+  CodeBlockOption,
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block';
+import { LineWrapIcon, SwitchLangIcon } from '../../code-block/icons';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -158,4 +167,42 @@ export function EmbedEditingContainer(
       </div>
     </div>
   `;
+}
+
+export function CodeBlockOptionContainer(
+  codeBlockOption: CodeBlockOption | null
+) {
+  if (codeBlockOption) {
+    const style = {
+      left: codeBlockOption.position.x + 'px',
+      top: codeBlockOption.position.y + 'px',
+    };
+    return html`
+      <style>
+        .affine-codeblock-option-container > ul {
+          position: fixed;
+          z-index: 1;
+        }
+      </style>
+
+      <div class="affine-codeblock-option-container">
+        <ul style=${styleMap(style)} class="code-block-option">
+          <li
+            @click=${() => {
+              console.log('a');
+            }}
+          >
+            ${SwitchLangIcon}
+          </li>
+          <li @click=${() => copyCode(codeBlockOption)}>${CopyIcon}</li>
+          <li @click=${() => toggleWrap(codeBlockOption)}>${LineWrapIcon}</li>
+          <li @click=${() => deleteCodeBlock(codeBlockOption)}>
+            ${DeleteIcon}
+          </li>
+        </ul>
+      </div>
+    `;
+  } else {
+    return html``;
+  }
 }

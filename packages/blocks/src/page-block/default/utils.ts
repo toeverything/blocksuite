@@ -53,7 +53,6 @@ export function getBlockEditingStateByPosition(
     } else {
       blockRect = hoverDom?.getBoundingClientRect();
     }
-
     assertExists(blockRect);
     if (isPointIn(blockRect, x, y)) {
       return {
@@ -64,6 +63,36 @@ export function getBlockEditingStateByPosition(
   }
   return null;
 }
+
+export const getHoverBlockOptionByPosition = (
+  blocks: BaseBlockModel[],
+  x: number,
+  y: number,
+  flavours: string[],
+  targetSelector: string
+) => {
+  while (blocks.length) {
+    const blockModel = blocks.shift();
+    assertExists(blockModel);
+    blockModel.children && blocks.push(...blockModel.children);
+    if (matchFlavours(blockModel, flavours)) {
+      const hoverDom = getBlockById(blockModel.id);
+      const hoverTarget = hoverDom?.querySelector(targetSelector);
+      const imageRect = hoverTarget?.getBoundingClientRect();
+      assertExists(imageRect);
+      if (isPointIn(imageRect, x, y)) {
+        return {
+          position: {
+            x: imageRect.right + 10,
+            y: imageRect.top,
+          },
+          model: blockModel,
+        };
+      }
+    }
+  }
+  return null;
+};
 
 function isPointIn(block: DOMRect, x: number, y: number): boolean {
   if (
