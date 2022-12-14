@@ -18,9 +18,6 @@ export const defaultStore: SerializedStore = {
       {
         id: 'page0',
         title: '',
-        favorite: false,
-        trash: false,
-        trashDate: null,
       },
     ],
   },
