@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import type { GroupBlockModel } from '../packages/blocks/src/group-block/group-model';
+import type { GroupBlockModel, ShapeBlockModel } from '../packages/blocks';
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -17,6 +17,7 @@ import {
   assertRichTexts,
   assertSelection,
 } from './utils/asserts';
+import type { BaseBlockModel } from '../packages/store';
 
 async function getGroupSize(
   page: Page,
@@ -36,6 +37,22 @@ async function getGroupSize(
   );
   expect(result).not.toBeNull();
   return result as string;
+}
+
+async function getModel<Model extends BaseBlockModel>(
+  page: Page,
+  blockId: string
+) {
+  const result: BaseBlockModel | null | undefined = await page.evaluate(
+    blockId => {
+      const page = window.workspace.getPage('page0');
+      const block = page?.getBlockById(blockId);
+      return block;
+    },
+    blockId
+  );
+  expect(result).not.toBeNull();
+  return result as Model;
 }
 
 test('switch to edgeless mode', async ({ page }) => {
@@ -126,7 +143,9 @@ test('add shape block', async ({ page }) => {
 
   await switchMode(page);
   await switchMouseMode(page);
-  const locator = await page.locator('[data-block-id="1"]');
+  const locator = await page.locator(
+    '[data-test-id="affine-edgeless-block-child-1-container"]'
+  );
   if (!locator) throw new Error();
   const box = await locator.boundingBox();
   if (!box) throw new Error();
@@ -134,6 +153,12 @@ test('add shape block', async ({ page }) => {
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
 
   await switchMouseMode(page);
+
+  const shapeModel = await getModel<ShapeBlockModel>(page, '3');
+  expect(JSON.parse(shapeModel.xywh)).toStrictEqual([0, 0, 100, 100]);
+  expect(shapeModel.color).toBe('black');
+  expect(shapeModel.type).toBe('rectangle');
+
   const tag = await page.evaluate(() => {
     const element = document.querySelector(`[data-block-id="3"]`);
     return element?.tagName;
