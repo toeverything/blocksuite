@@ -744,3 +744,10 @@ export function isEmbed(e: SelectionEvent) {
   }
   return false;
 }
+
+export function restoreSelection(range: Range) {
+  const selection = window.getSelection();
+  assertExists(selection);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}

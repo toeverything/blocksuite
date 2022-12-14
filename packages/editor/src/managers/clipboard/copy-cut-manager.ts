@@ -1,12 +1,13 @@
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
-import { ClipItem } from './clip-item';
-import type { EditorContainer } from '../../components';
 import {
   EmbedBlockModel,
+  getCurrentRange,
   ListBlockModel,
   matchFlavours,
+  SelectionUtils,
 } from '@blocksuite/blocks';
-import { SelectionUtils } from '@blocksuite/blocks';
+import type { EditorContainer } from '../../components';
+import { ClipItem } from './clip-item';
+import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -181,6 +182,8 @@ export class CopyCutManager {
   // TODO: Optimization
   // TODO: is not compatible with safari
   private _copyToClipboardFromPc(clips: ClipItem[]) {
+    const curRange = getCurrentRange();
+
     let success = false;
     const tempElem = document.createElement('textarea');
     tempElem.value = 'temp';
@@ -207,6 +210,7 @@ export class CopyCutManager {
     } finally {
       tempElem.removeEventListener('copy', listener);
       document.body.removeChild(tempElem);
+      SelectionUtils.restoreSelection(curRange);
     }
     return success;
   }
