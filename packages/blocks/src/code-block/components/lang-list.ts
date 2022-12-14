@@ -27,7 +27,7 @@ class LangList extends LitElement {
   @property()
   delay = 150;
 
-  languages = [
+  static languages = [
     '1c',
     'abnf',
     'accesslog',
@@ -237,7 +237,7 @@ class LangList extends LitElement {
   }
 
   render() {
-    const filteredLanguages = this.languages.filter(language => {
+    const filteredLanguages = LangList.languages.filter(language => {
       // if (!this.filterText) {
       //   return false;
       // }

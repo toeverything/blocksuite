@@ -218,6 +218,7 @@ export function bindHotkeys(
     DOWN,
     LEFT,
     RIGHT,
+    CODE_BLOCK,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -358,6 +359,18 @@ export function bindHotkeys(
   hotkey.addListener(SHIFT_DOWN, e => {
     // TODO expand selection down
   });
+  hotkey.addListener(CODE_BLOCK, e => {
+    const startModel = getStartModelBySelection();
+    const parent = page.getParent(startModel);
+    const index = parent?.children.indexOf(startModel);
+    assertExists(parent);
+    const blockProps = {
+      flavour: 'affine:code-block',
+      text: startModel.text?.clone(),
+    };
+    page.deleteBlock(startModel);
+    page.addBlock(blockProps, parent, index);
+  });
 
   // !!!
   // Don't forget to remove hotkeys at `_removeHotkeys`
@@ -383,6 +396,7 @@ export function removeHotkeys() {
     HOTKEYS.DOWN,
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
+    HOTKEYS.CODE_BLOCK,
   ]);
 }
 
