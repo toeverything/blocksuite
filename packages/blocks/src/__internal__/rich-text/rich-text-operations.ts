@@ -186,7 +186,9 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
             'affine:code-block',
           ])
         ) {
-          focusPreviousBlock(model, 'start');
+          window.requestAnimationFrame(() => {
+            focusPreviousBlock(model, 'start');
+          });
         }
       } else {
         const grandParent = page.getParent(parent);

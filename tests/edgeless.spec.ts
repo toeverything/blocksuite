@@ -88,7 +88,7 @@ test('resize the block', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchMode(page);
-  await page.click('[test-id="1"]');
+  await page.click('[data-block-id="1"]');
   const oldXywh = await getGroupSize(page, ids);
   const leftHandle = page.locator('[aria-label="handle-left"]');
   const box = await leftHandle.boundingBox();
@@ -122,7 +122,7 @@ test('add shape block', async ({ page }) => {
 
   await switchMode(page);
   await switchMouseMode(page);
-  const locator = await page.locator('[test-id="1"]');
+  const locator = await page.locator('[data-block-id="1"]');
   if (!locator) throw new Error();
   const box = await locator.boundingBox();
   if (!box) throw new Error();

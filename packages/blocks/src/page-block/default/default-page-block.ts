@@ -16,7 +16,6 @@ import {
   hotkey,
   BlockChildrenContainer,
   assertExists,
-  getModelByElement,
   getCurrentRange,
   isMultiBlockRange,
   SelectionPosition,
@@ -24,8 +23,6 @@ import {
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import { deleteModels, tryUpdateGroupSize } from '../utils';
-import style from './style.css';
-
 import {
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,

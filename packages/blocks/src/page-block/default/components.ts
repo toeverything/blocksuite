@@ -7,7 +7,6 @@ import type {
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block';
-import { assertExists } from '../../__internal__/utils';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -86,7 +85,7 @@ export function SelectedRectsContainer(rects: DOMRect[]) {
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
-        return html` <div style=${styleMap(style)}></div>`;
+        return html`<div style=${styleMap(style)}></div>`;
       })}
     </div>
   `;
@@ -102,11 +101,12 @@ export function EmbedEditingContainer(
     left: embedEditingState.position.x + 'px',
     top: embedEditingState.position.y + 'px',
   };
+
   return html`
     <style>
       .affine-embed-editing-state-container > div {
-          position: fixed;
-          z-index: 1;
+        position: fixed;
+        z-index: 1;
       }
 
       ${toolTipStyle}
@@ -126,21 +126,19 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            assertExists(embedEditingState.model.source);
-            downloadImage(embedEditingState.model.source);
+            downloadImage(embedEditingState.model);
           }}
         >
           ${DownloadIcon}
           <tool-tip inert tip-position="right" role="tooltip"
-            >Download
-          </tool-tip>
+            >Download</tool-tip
+          >
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            assertExists(embedEditingState.model.source);
-            copyImgToClip(embedEditingState.model.source);
+            copyImgToClip(embedEditingState.model);
           }}
         >
           ${CopyIcon}

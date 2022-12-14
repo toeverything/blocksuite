@@ -4,7 +4,7 @@ import { choose } from 'lit/directives/choose.js';
 
 import type { Page, Disposable } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../..';
-import type { PageBlockModel } from '@blocksuite/blocks';
+import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
 
 @customElement('editor-container')
 export class EditorContainer extends LitElement {
@@ -13,6 +13,9 @@ export class EditorContainer extends LitElement {
 
   @property()
   mode?: 'page' | 'edgeless' = 'page';
+
+  @property()
+  mouseMode: MouseMode = 'default';
 
   // TODO only select block
   @state()
@@ -42,6 +45,10 @@ export class EditorContainer extends LitElement {
     return this;
   }
 
+  private _handleSwitchMouseMode = ({ detail }: CustomEvent<MouseMode>) => {
+    this.mouseMode = detail;
+  };
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -55,6 +62,11 @@ export class EditorContainer extends LitElement {
       throw new Error('Missing page for EditorContainer!');
     }
 
+    window.addEventListener(
+      'affine.switch-mouse-mode',
+      this._handleSwitchMouseMode
+    );
+
     this._subscribeStore();
 
     this._placeholderInput?.focus();
@@ -63,6 +75,10 @@ export class EditorContainer extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
 
+    window.removeEventListener(
+      'affine.switch-mouse-mode',
+      this._handleSwitchMouseMode
+    );
     this._disposables.forEach(disposable => disposable.dispose());
   }
 
@@ -82,6 +98,7 @@ export class EditorContainer extends LitElement {
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
         .model=${this.model}
+        .mouseMode=${this.mouseMode}
       ></edgeless-page-block>
     `;
 
