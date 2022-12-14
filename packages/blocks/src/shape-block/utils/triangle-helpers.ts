@@ -4,7 +4,7 @@ import Vec from '@tldraw/vec';
 import getStroke, { getStrokePoints } from 'perfect-freehand';
 import type { ShapeStyles } from '../../__internal__';
 import { getShapeStyle } from './shape-style';
-import { getOffsetPolygon } from './PolygonUtils';
+import { getOffsetPolygon } from './polygon-utils';
 
 export function getTrianglePoints(size: number[], offset = 0, rotation = 0) {
   const [w, h] = size;

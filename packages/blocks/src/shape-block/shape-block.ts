@@ -9,9 +9,9 @@ import {
   SizeStyle,
   TDShapeType,
 } from '../__internal__';
-import { getRectanglePath } from './utils/rectangleHelpers';
+import { getRectanglePath } from './utils/rectangle-helpers';
 import { getShapeStyle } from './utils/shape-style';
-import { getTrianglePath } from './utils/triangleHelpers';
+import { getTrianglePath } from './utils/triangle-helpers';
 import style from './style.css';
 
 export const SHAPE_PADDING = 48;
