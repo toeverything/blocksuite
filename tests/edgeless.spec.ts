@@ -144,12 +144,12 @@ test('add shape blocks', async ({ page }) => {
 
   await switchMode(page);
   await switchMouseMode(page);
-  const locator = await page.locator(
-    '[data-test-id="affine-edgeless-block-child-1-container"]'
-  );
-  if (!locator) throw new Error();
-  const box = await locator.boundingBox();
-  if (!box) throw new Error();
+  const box = await page
+    .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
+    ?.boundingBox();
+  if (!box) {
+    throw new Error('box is null');
+  }
   const { x, y } = box;
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
   await switchShapeColor(page, 'blue');
