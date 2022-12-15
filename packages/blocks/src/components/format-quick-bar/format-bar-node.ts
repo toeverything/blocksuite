@@ -2,7 +2,7 @@ import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { getFormat, updateTextType } from '../../page-block/utils';
+import { getFormat, updateSelectedTextType } from '../../page-block/utils';
 import { getCurrentRange, getModelsByRange } from '../../__internal__/utils';
 import { toast } from '../toast';
 import './button';
@@ -133,11 +133,11 @@ export class FormatQuickBar extends LitElement {
               // Already in the target format, convert back to text
               const { flavour: defaultParagraph, type: defaultType } =
                 paragraphButtons[0];
-              updateTextType(defaultParagraph, defaultType, this.page);
+              updateSelectedTextType(defaultParagraph, defaultType, this.page);
               this.paragraphType = defaultType;
               return;
             }
-            updateTextType(flavour, type, this.page);
+            updateSelectedTextType(flavour, type, this.page);
             this.paragraphType = type;
           }}
         >
