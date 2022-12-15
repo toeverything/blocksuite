@@ -264,6 +264,7 @@ test('basic indent and unindent', async ({ page }) => {
 </affine:page>`
   );
 
+  await page.waitForTimeout(100);
   await pressShiftTab(page);
   await assertStoreMatchJSX(
     page,
