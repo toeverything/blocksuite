@@ -3,15 +3,14 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   ColorStyle,
-  type CommonBlockElement,
-  convertToList,
   createEvent,
-  type GroupBlockModel,
   MouseMode,
   ShapeMouseMode,
   TDShapeType,
+  updateTextType,
+  type GroupBlockModel,
 } from '@blocksuite/blocks';
-import type { BaseBlockModel, Workspace } from '@blocksuite/store';
+import type { Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
@@ -201,28 +200,15 @@ export class DebugMenu extends LitElement {
   }
 
   private _convertToList(listType: 'bulleted' | 'numbered' | 'todo') {
-    const selection = window.getSelection();
-    const element = selection?.focusNode?.parentElement as HTMLElement;
-    const block = element.closest('[data-block-id]') as CommonBlockElement;
-    if (!block) return;
-
-    const { page } = block.host;
-    const model = page.getBlockById(block.model.id) as BaseBlockModel;
-    convertToList(this.page, model, listType, '');
+    updateTextType('affine:list', listType, this.page);
   }
 
   private _onDelete() {
     // TODO delete selected block from menu
   }
 
-  private _onSetParagraphType(type: string) {
-    const selection = window.getSelection();
-    const element = selection?.focusNode?.parentElement as HTMLElement;
-    const block = element.closest('paragraph-block')?.model;
-    if (!block) return;
-
-    this.page.captureSync();
-    this.page.updateBlock(block, { type });
+  private _convertToParagraph(type: string) {
+    updateTextType('affine:paragraph', type, this.page);
   }
 
   private _onSwitchMode() {
@@ -344,7 +330,7 @@ export class DebugMenu extends LitElement {
           aria-label="heading-1"
           title="heading-1"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('h1')}
+          @click=${() => this._convertToParagraph('h1')}
         >
           𝐇𝟏
         </button>
@@ -352,7 +338,7 @@ export class DebugMenu extends LitElement {
           aria-label="heading-2"
           title="heading-2"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('h2')}
+          @click=${() => this._convertToParagraph('h2')}
         >
           𝐇𝟐
         </button>
@@ -360,7 +346,7 @@ export class DebugMenu extends LitElement {
           aria-label="heading-3"
           title="heading-3"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('h3')}
+          @click=${() => this._convertToParagraph('h3')}
         >
           𝐇𝟑
         </button>
@@ -368,7 +354,7 @@ export class DebugMenu extends LitElement {
           aria-label="heading-4"
           title="heading-4"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('h4')}
+          @click=${() => this._convertToParagraph('h4')}
         >
           𝐇𝟒
         </button>
@@ -376,7 +362,7 @@ export class DebugMenu extends LitElement {
           aria-label="heading-5"
           title="heading-5"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('h5')}
+          @click=${() => this._convertToParagraph('h5')}
         >
           𝐇𝟓
         </button>
@@ -384,7 +370,7 @@ export class DebugMenu extends LitElement {
           aria-label="heading-6"
           title="heading-6"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('h6')}
+          @click=${() => this._convertToParagraph('h6')}
         >
           𝐇𝟔
         </button>
@@ -392,7 +378,7 @@ export class DebugMenu extends LitElement {
           aria-label="text"
           title="text"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('text')}
+          @click=${() => this._convertToParagraph('text')}
         >
           𝐓
         </button>
@@ -400,7 +386,7 @@ export class DebugMenu extends LitElement {
           aria-label="quote"
           title="quote"
           tabindex="-1"
-          @click=${() => this._onSetParagraphType('quote')}
+          @click=${() => this._convertToParagraph('quote')}
         >
           ${icons.quote}
         </button>
