@@ -11,12 +11,15 @@ export interface EmbedBlockProps extends IBaseBlockProps {
 }
 
 export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
+  static version = [1, 0] as [number, number];
   flavour = 'affine:embed' as const;
-  public width: number;
-  public height: number;
-  public type: EmbedType;
-  public sourceId: string;
-  public caption: string;
+
+  width: number;
+  height: number;
+  type: EmbedType;
+  sourceId: string;
+  caption: string;
+
   constructor(page: Page, props: Partial<EmbedBlockProps>) {
     super(page, props);
     this.type = props.type ?? 'image';

@@ -20,6 +20,15 @@ export const defaultStore: SerializedStore = {
         title: '',
       },
     ],
+    versions: {
+      'affine:paragraph': [1, 0],
+      'affine:page': [1, 0],
+      'affine:list': [1, 0],
+      'affine:group': [1, 0],
+      'affine:divider': [1, 0],
+      'affine:embed': [1, 0],
+      'affine:shape': [1, 0],
+    },
   },
   'space:page0': {
     '0': {

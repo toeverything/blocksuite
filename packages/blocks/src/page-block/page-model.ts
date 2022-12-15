@@ -1,7 +1,9 @@
 import { BaseBlockModel, Page } from '@blocksuite/store';
 
 export class PageBlockModel extends BaseBlockModel {
+  static version = [1, 0] as [number, number];
   flavour = 'affine:page' as const;
+
   title = '';
   constructor(page: Page, props: Partial<PageBlockModel>) {
     super(page, props);

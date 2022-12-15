@@ -84,6 +84,7 @@ describe.concurrent('basic', () => {
             title: '',
           },
         ],
+        versions: {},
       },
       [spaceId]: {},
     });

@@ -16,13 +16,15 @@ export interface PageMeta {
 }
 
 class WorkspaceMeta extends Space {
-  _prevPages = new Set<string>();
+  private _workspace: Workspace;
+  private _prevPages = new Set<string>();
   pageAdded = new Signal<string>();
   pageRemoved = new Signal<string>();
   pagesUpdated = new Signal();
 
-  constructor(id: string, doc: Y.Doc, awareness: Awareness) {
-    super(id, doc, awareness);
+  constructor(id: string, workspace: Workspace, awareness: Awareness) {
+    super(id, workspace.doc, awareness);
+    this._workspace = workspace;
     this._yMetaRoot.observeDeep(this._handlePageEvent);
   }
 
@@ -36,6 +38,14 @@ class WorkspaceMeta extends Space {
     }
 
     return this._yMetaRoot.get('pages') as Y.Array<unknown>;
+  }
+
+  private get _yVersions() {
+    if (!this._yMetaRoot.has('versions')) {
+      this._yMetaRoot.set('versions', new Y.Map());
+    }
+
+    return this._yMetaRoot.get('versions') as Y.Map<unknown>;
   }
 
   get pageMetas() {
@@ -79,6 +89,26 @@ class WorkspaceMeta extends Space {
         this._yPages.delete(index, 1);
       }
     });
+  }
+
+  /**
+   * @internal Only for page initialization
+   */
+  writeVersion() {
+    const { _yVersions, _workspace } = this;
+    _workspace.flavourMap.forEach((model, flavour) => {
+      const yVersion = new Y.Array();
+      const [major, minor] = model.version;
+      yVersion.push([major, minor]);
+      _yVersions.set(flavour, yVersion);
+    });
+  }
+
+  /**
+   * @internal Only for page initialization
+   */
+  validateVersion() {
+    // TODO: validate version
   }
 
   private _handlePageEvent = (_: Y.YEvent<Y.Array<unknown>>[]) => {
@@ -129,11 +159,7 @@ export class Workspace {
     this._indexer = new Indexer(this.doc);
     this._blobStorage = getBlobStorage(options.room);
 
-    this.meta = new WorkspaceMeta(
-      'space:meta',
-      this.doc,
-      this._store.awareness
-    );
+    this.meta = new WorkspaceMeta('space:meta', this, this._store.awareness);
 
     this.signals = {
       pagesUpdated: this.meta.pagesUpdated,

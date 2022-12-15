@@ -19,7 +19,9 @@ export class ParagraphBlockModel
   extends BaseBlockModel
   implements ParagraphBlockProps
 {
+  static version = [1, 0] as [number, number];
   flavour = 'affine:paragraph' as const;
+
   type: ParagraphType = 'text';
 
   constructor(page: Page, props: Partial<ParagraphBlockProps>) {
