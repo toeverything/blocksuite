@@ -72,8 +72,7 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
 }
 
 export function updateTextType(flavour: string, type: string, page: Page) {
-  const range = window.getSelection()?.getRangeAt(0);
-  assertExists(range);
+  const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
   page.captureSync();
   modelsInRange.forEach(model => {
