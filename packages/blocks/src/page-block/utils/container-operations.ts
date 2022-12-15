@@ -71,7 +71,11 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-export function updateTextType(flavour: string, type: string, page: Page) {
+export function updateSelectedTextType(
+  flavour: string,
+  type: string,
+  page: Page
+) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
   page.captureSync();

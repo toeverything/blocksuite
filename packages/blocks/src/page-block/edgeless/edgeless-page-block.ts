@@ -26,7 +26,7 @@ import {
   handleBackspace,
   removeCommonHotKey,
   tryUpdateGroupSize,
-  updateTextType,
+  updateSelectedTextType,
 } from '../utils';
 import style from './style.css';
 
@@ -116,7 +116,7 @@ export class EdgelessPageBlockComponent
   }
 
   private _updateType(flavour: string, type: string, space: Page): void {
-    updateTextType(flavour, type, space);
+    updateSelectedTextType(flavour, type, space);
   }
 
   private _removeHotkeys() {

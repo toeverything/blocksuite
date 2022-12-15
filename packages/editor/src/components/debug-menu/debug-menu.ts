@@ -7,7 +7,7 @@ import {
   MouseMode,
   ShapeMouseMode,
   TDShapeType,
-  updateTextType,
+  updateSelectedTextType,
   type GroupBlockModel,
 } from '@blocksuite/blocks';
 import type { Workspace } from '@blocksuite/store';
@@ -200,7 +200,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _convertToList(listType: 'bulleted' | 'numbered' | 'todo') {
-    updateTextType('affine:list', listType, this.page);
+    updateSelectedTextType('affine:list', listType, this.page);
   }
 
   private _onDelete() {
@@ -208,7 +208,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _convertToParagraph(type: string) {
-    updateTextType('affine:paragraph', type, this.page);
+    updateSelectedTextType('affine:paragraph', type, this.page);
   }
 
   private _onSwitchMode() {
