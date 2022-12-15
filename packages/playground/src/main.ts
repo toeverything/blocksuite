@@ -51,7 +51,11 @@ async function main() {
   initButton.addEventListener('click', () => initFunctions.basic(workspace));
 
   if (init != null) {
-    initFunctions[init || 'basic']?.(workspace);
+    if (initFunctions[init]) {
+      initFunctions[init]?.(workspace);  
+    } else {
+      workspace.fromBase64(init);
+    }
   }
 }
 

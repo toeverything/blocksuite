@@ -1,4 +1,5 @@
 import * as Y from 'yjs';
+import { fromBase64, toBase64 } from 'lib0/buffer';
 import { Store, StoreOptions } from '../store';
 import { Space } from '../space';
 import { Page } from './page';
@@ -280,5 +281,18 @@ export class Workspace {
 
   toJSXElement(id = '0') {
     return this._store.toJSXElement(id);
+  }
+
+  /**
+   * this function is for `option.initBinary` under constructor
+   */
+  toBase64(): string {
+    console.log(this.doc);
+    return toBase64(Y.encodeStateAsUpdateV2(this.doc));
+  }
+
+  fromBase64(update: string): void {
+    Y.applyUpdateV2(this.doc, fromBase64(update));
+    console.log(this.doc);
   }
 }
