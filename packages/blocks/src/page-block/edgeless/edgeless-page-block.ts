@@ -53,6 +53,9 @@ export class EdgelessPageBlockComponent
   @property()
   page!: Page;
 
+  @property()
+  readonly = false;
+
   flavour = 'edgeless' as const;
 
   @property()
@@ -252,6 +255,7 @@ export class EdgelessPageBlockComponent
               .state=${selectionState}
               .rect=${selectionState.rect}
               .zoom=${zoom}
+              .readonly=${this.readonly}
             ></edgeless-selected-rect>`
           : null}
       </div>
