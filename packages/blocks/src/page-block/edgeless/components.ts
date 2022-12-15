@@ -230,6 +230,9 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Object })
   state!: BlockSelectionState;
 
+  @property()
+  readonly?: boolean = false;
+
   @property({ type: Object })
   rect!: DOMRect;
 
@@ -455,9 +458,9 @@ export class EdgelessSelectedRect extends LitElement {
       }px solid var(--affine-primary-color)`,
       ...getCommonRectStyle(this.rect, this.zoom, isShape),
     };
-
+    const handlers = this._getHandles(this.rect, isShape);
     return html`
-      ${this._getHandles(this.rect, isShape)}
+      ${this.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
     `;
   }

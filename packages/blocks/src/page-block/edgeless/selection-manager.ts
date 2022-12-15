@@ -1,4 +1,3 @@
-import type { EdgelessContainer } from './edgeless-page-block';
 import {
   SelectionEvent,
   initMouseEventHandlers,
@@ -17,6 +16,8 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor';
 import { showFormatQuickBar } from '../../components/format-quick-bar';
+import type { EdgelessPageBlockComponent } from './edgeless-page-block';
+
 interface NoneBlockSelectionState {
   type: 'none';
 }
@@ -126,7 +127,7 @@ export class EdgelessSelectionManager {
   private _mouseMode: MouseMode = {
     type: 'default',
   };
-  private _container: EdgelessContainer;
+  private _container: EdgelessPageBlockComponent;
   private _mouseDisposeCallback: () => void;
   private _wheelDisposeCallback: () => void;
 
@@ -170,7 +171,7 @@ export class EdgelessSelectionManager {
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
 
-  constructor(container: EdgelessContainer) {
+  constructor(container: EdgelessPageBlockComponent) {
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -265,6 +266,10 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
+    if (this._container.readonly) {
+      return;
+    }
+
     switch (this.mouseMode.type) {
       case 'shape': {
         this._container.page.captureSync();
@@ -304,7 +309,6 @@ export class EdgelessSelectionManager {
           );
           resetNativeSelection(null);
         }
-
         this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
         break;
       }
