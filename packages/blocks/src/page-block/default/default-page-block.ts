@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html, css, unsafeCSS, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   Disposable,
@@ -279,6 +279,16 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this._handleCompositionStart
     );
     window.removeEventListener('compositionend', this._handleCompositionEnd);
+  }
+
+  protected updated(changedProperties: PropertyValueMap<this>) {
+    const titleInput = this.querySelector('.affine-default-page-block-title');
+
+    if (this.readonly) {
+      titleInput?.setAttribute('disabled', 'disabled');
+    } else {
+      titleInput?.removeAttribute('disabled');
+    }
   }
 
   render() {
