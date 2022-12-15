@@ -87,6 +87,7 @@ describe.concurrent('basic', () => {
         versions: {},
       },
       [spaceId]: {},
+      'sys:version': [1, 0],
     });
   });
 });

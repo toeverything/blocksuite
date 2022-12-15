@@ -13,6 +13,7 @@ import {
 } from 'pretty-format';
 
 export const defaultStore: SerializedStore = {
+  'sys:version': [1, 0] as never,
   'space:meta': {
     pages: [
       {

@@ -102,6 +102,8 @@ class WorkspaceMeta extends Space {
       yVersion.push([major, minor]);
       _yVersions.set(flavour, yVersion);
     });
+    const yVersion = _workspace.doc.getArray('sys:version');
+    yVersion.push(Workspace.version);
   }
 
   /**
@@ -140,6 +142,8 @@ class WorkspaceMeta extends Space {
 }
 
 export class Workspace {
+  static version = [1, 0];
+
   private _store: Store;
   private _indexer: Indexer;
   private _blobStorage: Promise<BlobStorage | null>;
@@ -253,10 +257,6 @@ export class Workspace {
     page.dispose();
     this._store.removeSpace(page);
     this.meta.removePage(page.id);
-  }
-
-  serializeDoc() {
-    return this._store.serializeDoc();
   }
 
   search(query: QueryContent) {
