@@ -145,12 +145,17 @@ export class DefaultSelectionManager {
   };
   private _activeComponent: HTMLElement | null = null;
   private _dragMoveTarget = 'right';
-  constructor(
-    space: Page,
-    mouseRoot: DefaultPageBlockComponent,
-    signals: DefaultPageSignals,
-    container: DefaultPageBlockComponent
-  ) {
+  constructor({
+    space,
+    mouseRoot,
+    signals,
+    container,
+  }: {
+    space: Page;
+    mouseRoot: HTMLElement;
+    signals: DefaultPageSignals;
+    container: DefaultPageBlockComponent;
+  }) {
     this.page = space;
     this._signals = signals;
     this._mouseRoot = mouseRoot;
