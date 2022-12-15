@@ -312,7 +312,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _shareUrl() {
-    const base64 = this.workspace.toBase64();
+    const base64 = this.workspace.toBase64Update();
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);

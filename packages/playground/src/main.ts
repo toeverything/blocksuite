@@ -52,9 +52,9 @@ async function main() {
 
   if (init != null) {
     if (initFunctions[init]) {
-      initFunctions[init]?.(workspace);  
+      initFunctions[init]?.(workspace);
     } else {
-      workspace.fromBase64(init);
+      workspace.fromBase64Update(init);
     }
   }
 }

@@ -283,16 +283,11 @@ export class Workspace {
     return this._store.toJSXElement(id);
   }
 
-  /**
-   * this function is for `option.initBinary` under constructor
-   */
-  toBase64(): string {
-    console.log(this.doc);
+  toBase64Update(): string {
     return toBase64(Y.encodeStateAsUpdateV2(this.doc));
   }
 
-  fromBase64(update: string): void {
+  fromBase64Update(update: string): void {
     Y.applyUpdateV2(this.doc, fromBase64(update));
-    console.log(this.doc);
   }
 }
