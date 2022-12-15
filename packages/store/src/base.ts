@@ -13,6 +13,8 @@ export interface IBaseBlockProps {
 }
 
 export class BaseBlockModel implements IBaseBlockProps {
+  static version: [number, number];
+
   page: Page;
   propsUpdated = new Signal();
   childrenUpdated = new Signal();

@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html, css, unsafeCSS, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   Disposable,
@@ -29,7 +29,7 @@ import {
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components';
-import { bindHotkeys, removeHotkeys } from './utils';
+import { bindHotkeys, isControlledKeyboardEvent, removeHotkeys } from './utils';
 import style from './style.css';
 
 export interface EmbedEditingState {
@@ -194,6 +194,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   //  that have pop-up for selecting local characters.
   // So we could just hook on the keydown event and detect whether user input a new character.
   private _handleNativeKeydown = (e: KeyboardEvent) => {
+    if (isControlledKeyboardEvent(e)) {
+      return;
+    }
     // Only the length of character buttons is 1
     if (
       (e.key.length === 1 || e.key === 'Enter') &&
@@ -276,6 +279,16 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this._handleCompositionStart
     );
     window.removeEventListener('compositionend', this._handleCompositionEnd);
+  }
+
+  protected updated(changedProperties: PropertyValueMap<this>) {
+    const titleInput = this.querySelector('.affine-default-page-block-title');
+
+    if (this.readonly) {
+      titleInput?.setAttribute('disabled', 'disabled');
+    } else {
+      titleInput?.removeAttribute('disabled');
+    }
   }
 
   render() {

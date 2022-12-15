@@ -291,7 +291,7 @@ export function isRangeSelection() {
  * Please check the difference between {@link isMultiLineRange} before use this function
  */
 export function isMultiBlockRange(range: Range) {
-  return range.commonAncestorContainer.nodeType !== Node.TEXT_NODE;
+  return getModelsByRange(range).length > 1;
 }
 
 /**

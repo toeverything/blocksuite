@@ -300,6 +300,7 @@ export class Page extends Space {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
+    this._handleVersion();
     this._initYBlocks();
 
     const visited = new Set<string>();
@@ -538,4 +539,15 @@ export class Page extends Space {
     }
     this.signals.updated.emit();
   };
+
+  private _handleVersion() {
+    // Initialization from empty yDoc, indicating that the document is new.
+    if (this._yBlocks.size === 0) {
+      this.workspace.meta.writeVersion();
+    }
+    // Initialization from existing yDoc, indicating that the document is loaded from storage.
+    else {
+      this.workspace.meta.validateVersion();
+    }
+  }
 }

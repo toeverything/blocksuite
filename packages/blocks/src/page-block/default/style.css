@@ -38,6 +38,9 @@
 .affine-default-page-block-title::placeholder {
   color: var(--affine-placeholder-color);
 }
+.affine-default-page-block-title:disabled {
+  background-color: transparent;
+}
 .affine-default-page-block-title-container {
   margin-top: 78px;
 }
