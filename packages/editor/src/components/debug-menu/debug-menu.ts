@@ -137,6 +137,27 @@ const icons = {
       />
     </svg>
   `,
+  readonly: html` <svg
+    viewBox="0 0 1024 1024"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M791.04 170.666667L853.333333 228.906667 275.626667 853.333333 213.333333 795.093333z"
+      fill="#2E2F30"
+    ></path>
+    <path
+      d="M512 981.333333C252.8 981.333333 42.666667 771.2 42.666667 512S252.8 42.666667 512 42.666667s469.333333 210.133333 469.333333 469.333333-210.133333 469.333333-469.333333 469.333333z m0-85.333333a384 384 0 1 0 0-768 384 384 0 0 0 0 768z"
+      fill="#2E2F30"
+    ></path>
+  </svg>`,
+  unReadonly: html` <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1024 1024"
+  >
+    <path
+      d="M512 64C264.576 64 64 264.576 64 512s200.576 448 448 448 448-200.576 448-448S759.424 64 512 64zM776 400.576l-316.8 316.8c-9.728 9.728-25.472 9.728-35.2 0l-176-176c-9.728-9.728-9.728-25.472 0-35.2l35.2-35.2c9.728-9.728 25.472-9.728 35.2 0L441.6 594.176l264-264c9.728-9.728 25.472-9.728 35.2 0l35.2 35.2C785.728 375.104 785.728 390.848 776 400.576z"
+    ></path>
+  </svg>`,
 };
 
 @customElement('debug-menu')
@@ -167,6 +188,9 @@ export class DebugMenu extends LitElement {
 
   @state()
   shapeModeShape: ShapeMouseMode['shape'] = TDShapeType.Rectangle;
+
+  @state()
+  readonly = false;
 
   get mouseMode(): MouseMode {
     if (this.mouseModeType === 'default') {
@@ -252,6 +276,11 @@ export class DebugMenu extends LitElement {
 
   private _onExportHtml() {
     this.contentParser.onExportHtml();
+  }
+
+  private _onToggleReadonly() {
+    this.editor.readonly = !this.editor.readonly;
+    this.readonly = !this.readonly;
   }
 
   private _onExportMarkDown() {
@@ -491,6 +520,14 @@ export class DebugMenu extends LitElement {
         </button>
         <button aria-label="clear data" title="clear data" disabled>
           ${icons.trash}
+        </button>
+        <button
+          aria-label="toggle readonly"
+          title="toggle readonly"
+          tabindex="-1"
+          @click=${this._onToggleReadonly}
+        >
+          ${this.readonly ? icons.unReadonly : icons.readonly}
         </button>
         <select
           style="width: 72px"

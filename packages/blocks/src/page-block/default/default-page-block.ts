@@ -64,6 +64,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @property()
   page!: Page;
 
+  @property()
+  readonly = false;
+
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
@@ -171,7 +174,8 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.selection = new DefaultSelectionManager(
         this.page,
         this.mouseRoot,
-        this.signals
+        this.signals,
+        this
       );
     }
     super.update(changedProperties);
