@@ -106,23 +106,6 @@ export function transformBlock(
   asyncFocusRichText(page, id);
 }
 
-export function batchUpdateTextType(
-  flavour: string,
-  page: Page,
-  models: ExtendedModel[],
-  type: string
-) {
-  page.captureSync();
-  for (const model of models) {
-    assertFlavours(model, ['affine:paragraph', 'affine:list']);
-    if (model.flavour === flavour) {
-      page.updateBlock(model, { type });
-    } else {
-      transformBlock(page, model, 'affine:paragraph', type);
-    }
-  }
-}
-
 export function handleBackspace(page: Page, e: KeyboardEvent) {
   // workaround page title
   if (e.target instanceof HTMLInputElement) return;

@@ -23,7 +23,6 @@ import {
 } from '../../__internal__/utils';
 import type { PageBlockModel } from '../page-model';
 import {
-  batchUpdateTextType,
   bindCommonHotkey,
   handleBackspace,
   handleBlockSelectionBatchDelete,
@@ -315,32 +314,20 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
-  hotkey.addListener(H1, () =>
-    updateType('affine:paragraph', 'h1', page, selection)
-  );
-  hotkey.addListener(H2, () =>
-    updateType('affine:paragraph', 'h2', page, selection)
-  );
-  hotkey.addListener(H3, () =>
-    updateType('affine:paragraph', 'h3', page, selection)
-  );
-  hotkey.addListener(H4, () =>
-    updateType('affine:paragraph', 'h4', page, selection)
-  );
-  hotkey.addListener(H5, () =>
-    updateType('affine:paragraph', 'h5', page, selection)
-  );
-  hotkey.addListener(H6, () =>
-    updateType('affine:paragraph', 'h6', page, selection)
-  );
+  hotkey.addListener(H1, () => updateTextType('affine:paragraph', 'h1', page));
+  hotkey.addListener(H2, () => updateTextType('affine:paragraph', 'h2', page));
+  hotkey.addListener(H3, () => updateTextType('affine:paragraph', 'h3', page));
+  hotkey.addListener(H4, () => updateTextType('affine:paragraph', 'h4', page));
+  hotkey.addListener(H5, () => updateTextType('affine:paragraph', 'h5', page));
+  hotkey.addListener(H6, () => updateTextType('affine:paragraph', 'h6', page));
   hotkey.addListener(NUMBERED_LIST, () =>
-    updateType('affine:list', 'numbered', page, selection)
+    updateTextType('affine:list', 'numbered', page)
   );
   hotkey.addListener(BULLETED, () =>
-    updateType('affine:list', 'bulleted', page, selection)
+    updateTextType('affine:list', 'bulleted', page)
   );
   hotkey.addListener(TEXT, () =>
-    updateType('affine:paragraph', 'text', page, selection)
+    updateTextType('affine:paragraph', 'text', page)
   );
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
@@ -374,25 +361,6 @@ export function removeHotkeys() {
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
   ]);
-}
-
-export function updateType(
-  flavour: string,
-  type: string,
-  page: Page,
-  selection: DefaultSelectionManager
-) {
-  const { state } = selection;
-  if (state.selectedBlocks.length > 0) {
-    batchUpdateTextType(
-      flavour,
-      page,
-      state.selectedBlocks.map(block => getModelByElement(block)),
-      type
-    );
-  } else {
-    updateTextType(flavour, type, page);
-  }
 }
 
 async function getUrlByModel(model: BaseBlockModel) {
