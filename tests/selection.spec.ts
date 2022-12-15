@@ -422,6 +422,32 @@ test('select text in the same line with dragging rightward and move outside the 
   expect(textOne).toBe('abc\n');
 });
 
+test('select text in the same line with dragging rightward and press enter create block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  // blur the editor
+  await page.mouse.click(0, 0);
+  const above123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left - 30, y: bbox.top - 20 };
+  });
+  const below789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right + 30, y: bbox.bottom + 50 };
+  });
+
+  await dragBetweenCoords(page, below789, above123, 50);
+  await page.keyboard.press('Enter', { delay: 50 });
+  await page.keyboard.type('abc');
+  await assertRichTexts(page, ['123', '456', '789', 'abc']);
+});
+
 async function clickListIcon(page: Page, i = 0) {
   const locator = page.locator('.affine-list-block__prefix').nth(i);
   await locator.click();

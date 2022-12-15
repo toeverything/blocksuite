@@ -25,4 +25,5 @@ export const HOTKEYS = {
   DOWN: 'down',
   LEFT: 'left',
   RIGHT: 'right',
+  ENTER: 'enter',
 };

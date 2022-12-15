@@ -484,6 +484,13 @@ export class DefaultSelectionManager {
   //   }
   // };
 
+  clearRects() {
+    this._signals.updateSelectedRects.emit([]);
+    this._signals.updateFrameSelectionRect.emit(null);
+    this._signals.updateEmbedEditingState.emit(null);
+    this._signals.updateEmbedRects.emit([]);
+  }
+
   dispose() {
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
