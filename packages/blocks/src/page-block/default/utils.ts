@@ -157,6 +157,7 @@ export function handleUp(
     );
   }
 }
+
 export function handleDown(
   selection: DefaultSelectionManager,
   signals: DefaultPageSignals,
@@ -400,4 +401,8 @@ async function getUrlByModel(model: BaseBlockModel) {
   const store = await model.page.blobs;
   const url = store?.get(model.sourceId);
   return url;
+}
+
+export function isControlledKeyboardEvent(e: KeyboardEvent) {
+  return e.ctrlKey || e.metaKey || e.shiftKey;
 }

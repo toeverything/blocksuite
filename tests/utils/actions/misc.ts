@@ -171,6 +171,18 @@ export async function getQuillSelectionText(page: Page) {
   });
 }
 
+export async function getSelectedTextByQuill(page: Page) {
+  return await page.evaluate(() => {
+    const selection = window.getSelection() as Selection;
+    const range = selection.getRangeAt(0);
+    const component = range.startContainer.parentElement?.closest('rich-text');
+    // @ts-expect-error
+    const { index, length } = component.quill.getSelection();
+    // @ts-expect-error
+    return component.quill?.getText(index, length) || '';
+  });
+}
+
 export async function setQuillSelection(
   page: Page,
   index: number,
