@@ -43,10 +43,11 @@ function createChildMap(yChildIds: Y.Array<string>) {
 export class Page extends Space {
   public workspace: Workspace;
   private _idGenerator: IdGenerator;
-  private _history: Y.UndoManager;
+  private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
+  private _synced = false;
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -71,26 +72,6 @@ export class Page extends Space {
     super(id, doc, awareness);
     this.workspace = workspace;
     this._idGenerator = idGenerator;
-
-    const { _yBlocks } = this;
-    // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
-    // "unobserve" is potentially necessary to make sure we don't create
-    // an infinite loop when sync to remote then back to client.
-    // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
-    // We could unobserve in order to short circuit by ignoring the sync of remote
-    // events we actually generated locally.
-    // _yBlocks.unobserveDeep(this._handleYEvents);
-    _yBlocks.observeDeep(this._handleYEvents);
-
-    this._history = new Y.UndoManager([_yBlocks], {
-      trackedOrigins: new Set([this.doc.clientID]),
-      doc: this.doc,
-    });
-
-    this._history.on('stack-cleared', this._historyObserver);
-    this._history.on('stack-item-added', this._historyAddObserver);
-    this._history.on('stack-item-popped', this._historyPopObserver);
-    this._history.on('stack-item-updated', this._historyObserver);
   }
 
   get blobs() {
@@ -315,6 +296,12 @@ export class Page extends Space {
   }
 
   syncFromExistingDoc() {
+    if (this._synced) {
+      throw new Error('Cannot sync from existing doc more than once');
+    }
+
+    this._initYBlocks();
+
     const visited = new Set<string>();
 
     this._yBlocks.forEach((_, id) => {
@@ -322,6 +309,8 @@ export class Page extends Space {
       visited.add(id);
       this._handleYBlockAdd(visited, id);
     });
+
+    this._synced = true;
   }
 
   dispose() {
@@ -334,6 +323,28 @@ export class Page extends Space {
     this._yBlocks.forEach((_, key) => {
       this.deleteBlockById(key);
     });
+  }
+
+  private _initYBlocks() {
+    const { _yBlocks } = this;
+    // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
+    // "unobserve" is potentially necessary to make sure we don't create
+    // an infinite loop when sync to remote then back to client.
+    // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
+    // We could unobserve in order to short circuit by ignoring the sync of remote
+    // events we actually generated locally.
+    // _yBlocks.unobserveDeep(this._handleYEvents);
+    _yBlocks.observeDeep(this._handleYEvents);
+
+    this._history = new Y.UndoManager([_yBlocks], {
+      trackedOrigins: new Set([this.doc.clientID]),
+      doc: this.doc,
+    });
+
+    this._history.on('stack-cleared', this._historyObserver);
+    this._history.on('stack-item-added', this._historyAddObserver);
+    this._history.on('stack-item-popped', this._historyPopObserver);
+    this._history.on('stack-item-updated', this._historyObserver);
   }
 
   private _getYBlock(id: string): YBlock {
