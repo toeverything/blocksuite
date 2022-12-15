@@ -29,7 +29,7 @@ import {
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components';
-import { bindHotkeys, removeHotkeys } from './utils';
+import { bindHotkeys, isControlledKeyBoardEvent, removeHotkeys } from './utils';
 import style from './style.css';
 
 export interface EmbedEditingState {
@@ -194,6 +194,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   //  that have pop-up for selecting local characters.
   // So we could just hook on the keydown event and detect whether user input a new character.
   private _handleNativeKeydown = (e: KeyboardEvent) => {
+    if (isControlledKeyBoardEvent(e)) {
+      return;
+    }
     // Only the length of character buttons is 1
     if (
       (e.key.length === 1 || e.key === 'Enter') &&
