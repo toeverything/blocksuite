@@ -1,9 +1,9 @@
 import type { Buffer } from 'buffer';
 import { createStore, del, get, keys, set, clear } from 'idb-keyval';
-import { SHAKE } from 'sha3';
+import { SHA3 } from 'sha3';
 import type { IDBInstance } from './types';
 
-const hash = new SHAKE(128);
+const hash = new SHA3(256);
 
 export function sha3(buffer: Buffer): string {
   hash.reset();

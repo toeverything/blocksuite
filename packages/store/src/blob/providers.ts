@@ -178,12 +178,12 @@ export class BlobCloudSync {
         !signal.aborted
       ) {
         try {
-          const api = `${this._workspace}/${task.id}`;
-
-          const resp = await this._fetcher.head(api);
+          const resp = await this._fetcher.head(
+            `${this._workspace}/blob/${task.id}`
+          );
           if (resp.status === 404) {
             const status = await this._fetcher
-              .post(api, { body: task.blob, retry: 3 })
+              .put(`${this._workspace}/blob`, { body: task.blob, retry: 3 })
               .json<BlobStatus>();
             await this._handleTaskRetry(task, status);
           }
@@ -199,7 +199,7 @@ export class BlobCloudSync {
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
-    const api = `${this._workspace}/${id}`;
+    const api = `${this._workspace}/blob/${id}`;
     try {
       const blob = await this._fetcher
         .get(api, { throwHttpErrors: true })
