@@ -14,6 +14,7 @@ export type SelectionOptions = {
 export interface BlockHost {
   page: Page;
   flavour: string;
+  readonly: boolean;
 }
 
 export interface CommonBlockElement extends HTMLElement {
