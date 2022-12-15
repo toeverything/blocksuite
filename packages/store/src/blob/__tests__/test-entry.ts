@@ -116,62 +116,70 @@ async function testRefreshAfter() {
   clearIndexedDB();
 }
 
-function clearIndexedDB() {
+function clearIndexedDB(workspace = 'test') {
   return new Promise<void>(resolve => {
-    const request = indexedDB.deleteDatabase('test_blob');
-    request.onsuccess = () => {
-      console.log('IndexedDB test_blob cleared');
-
-      const request = indexedDB.deleteDatabase('test_pending');
-      request.onsuccess = () => {
-        console.log('IndexedDB test_pending cleared');
-
+    let count = 2;
+    const final = () => {
+      count -= 1;
+      if (count === 0) {
         resolve();
-      };
+      }
+    };
+
+    const request1 = indexedDB.deleteDatabase(`${workspace}_blob`);
+    const request2 = indexedDB.deleteDatabase(`${workspace}_pending`);
+    request1.onsuccess = () => {
+      console.log(`IndexedDB ${workspace}_blob cleared`);
+      final();
+    };
+
+    request2.onsuccess = () => {
+      console.log(`IndexedDB ${workspace}_pending cleared`);
+      final();
     };
   });
 }
 
 async function testCloudSyncBefore() {
-  clearIndexedDB();
-  const storage = await getBlobStorage(
-    'test',
-    'http://localhost:3000/api/blobs'
-  );
+  await clearIndexedDB('114514');
+  const storage = await getBlobStorage('114514', '/api/workspace');
   assertExists(storage);
 
   testSerial('can set blob', async () => {
     const blob = await loadTestImageBlob('test-card-2');
     const id = await storage.set(blob);
     console.log(id);
-    return id !== null && storage.blobs.has(id);
+    const ret = id !== null && storage.blobs.has(id);
+
+    return ret;
   });
 
   await runOnce();
+  await clearIndexedDB('114514');
 }
 
 async function testCloudSyncAfter() {
-  clearIndexedDB();
-  const storage = await getBlobStorage(
-    'test',
-    'http://localhost:3000/api/blobs'
-  );
+  const storage = await getBlobStorage('114514', '/api/workspace');
   assertExists(storage);
 
   testSerial('can get saved blob', async () => {
     // the test-card-2's hash
-    const url = await storage.get('WgdXT3DKV2HwV5SqePRHuw');
+    const url = await storage.get(
+      'UYFhfUWakYIN22VrJMmu9-4-VhYOcH830HWVbvZ2LmQ'
+    );
     assertExists(url);
 
     const img = await loadImage(url);
     document.body.appendChild(img);
 
     const isCorrectColor = assertColor(img, 100, 100, [193, 193, 193]);
-    return storage.blobs.size === 1 && isCorrectColor;
+    const ret = storage.blobs.size === 1 && isCorrectColor;
+
+    return ret;
   });
 
   await runOnce();
-  clearIndexedDB();
+  await clearIndexedDB('114514');
 }
 
 document.getElementById('test-basic')?.addEventListener('click', testBasic);
@@ -183,7 +191,7 @@ document
   ?.addEventListener('click', testRefreshAfter);
 document
   .getElementById('clear-indexeddb')
-  ?.addEventListener('click', clearIndexedDB);
+  ?.addEventListener('click', () => clearIndexedDB());
 document
   .getElementById('cloud-sync-before')
   ?.addEventListener('click', testCloudSyncBefore);

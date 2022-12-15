@@ -1,4 +1,5 @@
 import '../declare-test-window';
+import type { Page as StorePage } from '../../../packages/store';
 import type { Page } from '@playwright/test';
 import { pressEnter } from './keyboard';
 
@@ -15,7 +16,7 @@ async function initEmptyEditor(page: Page) {
     const { workspace } = window;
 
     workspace.signals.pageAdded.once(pageId => {
-      const page = workspace.getPage(pageId);
+      const page = workspace.getPage(pageId) as StorePage;
       const editor = document.createElement('editor-container');
       editor.page = page;
 
@@ -155,8 +156,7 @@ export async function getQuillSelectionIndex(page: Page) {
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    // @ts-ignore
-    const index = component.quill?.getSelection()?.index;
+    const index = component?.quill?.getSelection()?.index;
     return index !== undefined ? index : -1;
   });
 }
@@ -166,8 +166,7 @@ export async function getQuillSelectionText(page: Page) {
     const selection = window.getSelection() as Selection;
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
-    // @ts-ignore
-    return component.quill?.getText() || '';
+    return component?.quill?.getText() || '';
   });
 }
 
@@ -178,8 +177,7 @@ export async function getSelectedTextByQuill(page: Page) {
     const component = range.startContainer.parentElement?.closest('rich-text');
     // @ts-expect-error
     const { index, length } = component.quill.getSelection();
-    // @ts-expect-error
-    return component.quill?.getText(index, length) || '';
+    return component?.quill?.getText(index, length) || '';
   });
 }
 
@@ -195,8 +193,7 @@ export async function setQuillSelection(
       const range = selection.getRangeAt(0);
       const component =
         range.startContainer.parentElement?.closest('rich-text');
-      // @ts-ignore
-      component.quill?.setSelection(index, length);
+      component?.quill?.setSelection(index, length);
     },
     { index, length }
   );
@@ -209,10 +206,8 @@ export async function pasteContent(
   await page.evaluate(
     ({ clipData }) => {
       const e = {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        preventDefault: () => {},
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        stopPropagation: () => {},
+        preventDefault: () => null,
+        stopPropagation: () => null,
         clipboardData: {
           types: Object.keys(clipData),
           getData: (mime: string) => {
