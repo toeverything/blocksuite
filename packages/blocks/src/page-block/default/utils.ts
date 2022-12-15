@@ -3,6 +3,7 @@ import { toast } from '../../components/toast';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
 import {
   assertExists,
+  asyncFocusRichText,
   caretRangeFromPoint,
   focusNextBlock,
   focusPreviousBlock,
@@ -212,9 +213,35 @@ export function bindHotkeys(
     DOWN,
     LEFT,
     RIGHT,
+    ENTER,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
+
+  hotkey.addListener(ENTER, e => {
+    const { type, selectedBlocks } = selection.state;
+    if (type === 'block' && selectedBlocks.length) {
+      e.stopPropagation();
+      e.preventDefault();
+      const model = getModelByElement(
+        selectedBlocks[selectedBlocks.length - 1]
+      );
+      const parentModel = page.getParent(model);
+      const index = parentModel?.children.indexOf(model);
+      assertExists(index);
+      assertExists(parentModel);
+      const id = page.addBlock(
+        { flavour: 'affine:paragraph', type: 'text' },
+        parentModel,
+        index + 1
+      );
+      asyncFocusRichText(page, id);
+      selection.state.clear();
+      selection.clearRects();
+      return;
+    }
+  });
+
   hotkey.addListener(BACKSPACE, e => {
     const { state } = selection;
     if (state.type === 'native') {
@@ -373,6 +400,7 @@ export function removeHotkeys() {
     HOTKEYS.DOWN,
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
+    HOTKEYS.ENTER,
   ]);
 }
 
