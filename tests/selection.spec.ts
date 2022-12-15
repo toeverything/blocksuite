@@ -25,6 +25,8 @@ import {
   copyByKeyboard,
   pasteByKeyboard,
   initThreeDividers,
+  getSelectedTextByQuill,
+  withCtrlOrMeta,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
@@ -454,3 +456,35 @@ async function clickDivider(page: Page, i = 0) {
   const locator = page.locator('divider-block').nth(i);
   await locator.click();
 }
+
+test('drag to select tagged text, and copy', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.insertText('123456789');
+  await assertRichTexts(page, ['123456789']);
+
+  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
+  await withCtrlOrMeta(page, () => page.keyboard.press('C'));
+  const textOne = await getSelectedTextByQuill(page);
+  expect(textOne).toBe('12345');
+});
+
+test('drag to select tagged text, and input character', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.insertText('123456789');
+  await assertRichTexts(page, ['123456789']);
+
+  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
+  await page.keyboard.type('1');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('16789\n');
+});

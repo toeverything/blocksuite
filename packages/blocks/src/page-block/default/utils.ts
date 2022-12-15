@@ -403,6 +403,6 @@ async function getUrlByModel(model: BaseBlockModel) {
   return url;
 }
 
-export function isControlledKeyBoardEvent(e: KeyboardEvent) {
+export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
