@@ -21,6 +21,15 @@ function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
   return ax < x && x <= ax + paddedW && ay < y && y <= ay + paddedH;
 }
 
+// Refs: https://stackoverflow.com/questions/3234256/find-mouse-position-relative-to-element
+export function offsetPoint(e: SelectionEvent): [number, number] /* [x, y] */ {
+  if (e.raw.target instanceof HTMLElement) {
+    const rect = e.raw.target.getBoundingClientRect();
+    return [e.raw.x - rect.left, e.raw.y - rect.top];
+  }
+  return [e.raw.x, e.raw.y];
+}
+
 export function pick(
   blocks: RootBlockModel[],
   modelX: number,
