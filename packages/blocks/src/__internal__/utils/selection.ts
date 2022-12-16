@@ -48,8 +48,8 @@ function backwardSelect(newRange: Range, range: Range) {
 }
 
 function fixCurrentRangeToText(
-  pageX: number,
-  pageY: number,
+  clientX: number,
+  clientY: number,
   offset: IPoint,
   range: Range,
   isForward: boolean
@@ -66,11 +66,11 @@ function fixCurrentRangeToText(
       const text = isForward
         ? texts.reverse().find(t => {
             const rect = t.getBoundingClientRect();
-            return pageY >= rect.top; // handle both drag downward, and rightward
+            return clientY >= rect.top; // handle both drag downward, and rightward
           })
         : texts.find(t => {
             const rect = t.getBoundingClientRect();
-            return pageY <= rect.bottom; // handle both drag upwards and leftward
+            return clientY <= rect.bottom; // handle both drag upwards and leftward
           });
       if (!text) {
         throw new Error('Failed to focus text node!');
@@ -79,7 +79,7 @@ function fixCurrentRangeToText(
       const newY = isForward
         ? rect.bottom - offset.y - 6
         : rect.top - offset.y + 6;
-      newRange = caretRangeFromPoint(pageX, newY);
+      newRange = caretRangeFromPoint(clientX, newY);
       if (isForward && newRange) {
         forwardSelect(newRange, range);
       } else if (!isForward && newRange) {
@@ -404,7 +404,7 @@ export function handleNativeRangeDragMove(
   let isForward = true;
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  let currentRange = caretRangeFromPoint(e.raw.pageX, e.raw.pageY);
+  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
     isForward = false;
     currentRange?.setEnd(endContainer, endOffset);
@@ -413,8 +413,8 @@ export function handleNativeRangeDragMove(
   }
   if (currentRange) {
     currentRange = fixCurrentRangeToText(
-      e.raw.pageX,
-      e.raw.pageY,
+      e.raw.clientX,
+      e.raw.clientY,
       e.containerOffset,
       currentRange,
       isForward
