@@ -52,6 +52,14 @@ class WorkspaceMeta extends Space {
     return this._yPages.toJSON() as PageMeta[];
   }
 
+  getPageMeta(id: string) {
+    if (id.startsWith('space:')) {
+      id = id.slice(6);
+    }
+
+    return this.pageMetas.find(page => page.id === id);
+  }
+
   addPage(page: PageMeta, index?: number) {
     const yPage = new Y.Map();
     this.doc.transact(() => {

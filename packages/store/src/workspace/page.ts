@@ -15,7 +15,7 @@ import {
   toBlockProps,
   matchFlavours,
 } from '../utils/utils';
-import type { Workspace } from './workspace';
+import type { PageMeta, Workspace } from './workspace';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -72,6 +72,10 @@ export class Page extends Space {
     super(id, doc, awareness);
     this.workspace = workspace;
     this._idGenerator = idGenerator;
+  }
+
+  get meta() {
+    return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
   get blobs() {

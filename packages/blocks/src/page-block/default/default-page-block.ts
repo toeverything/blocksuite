@@ -187,7 +187,22 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         container: this,
       });
     }
+
+    this._tryUpdateMetaTitle();
     super.update(changedProperties);
+  }
+
+  // happens on undo/redo (model update)
+  private _tryUpdateMetaTitle() {
+    const { _title } = this;
+    if (!_title || _title.value === undefined) {
+      return;
+    }
+
+    const { page } = this;
+    if (_title.value !== page.meta.title) {
+      page.workspace.setPageMeta(page.id, { title: this._title.value });
+    }
   }
 
   private _handleCompositionStart = () => {
