@@ -81,7 +81,7 @@ class WorkspaceMeta extends Space {
   }
 
   removePage(id: string) {
-    const pages = this._yPages.toArray() as PageMeta[];
+    const pages = this._yPages.toJSON() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
     this.doc.transact(() => {
@@ -222,7 +222,12 @@ export class Workspace {
     });
 
     this.signals.pageRemoved.on(id => {
+      if (!id.startsWith('space:')) {
+        id = 'space:' + id;
+      }
+
       const page = this._pages.get(id) as Page;
+      page.dispose();
       this._store.removeSpace(page);
       // TODO remove page from indexer
     });
@@ -249,10 +254,12 @@ export class Workspace {
     this.meta.setPage(pageId, props);
   }
 
-  removePage(page: Page) {
-    page.dispose();
-    this._store.removeSpace(page);
-    this.meta.removePage(page.id);
+  removePage(pageId: string) {
+    if (pageId.startsWith('space:')) {
+      pageId = pageId.slice(6);
+    }
+
+    this.meta.removePage(pageId);
   }
 
   serializeDoc() {

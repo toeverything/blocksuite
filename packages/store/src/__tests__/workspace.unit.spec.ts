@@ -209,18 +209,19 @@ describe.concurrent('addBlock', () => {
 
     const page0 = await createPage(workspace, 'page0');
     const page1 = await createPage(workspace, 'page1');
-
     // @ts-ignore
     assert.equal(workspace._pages.size, 2);
 
-    queueMicrotask(() => {
-      workspace.removePage(page0);
-      // @ts-ignore
-      assert.equal(workspace._pages.size, 1);
-      workspace.removePage(page1);
-      // @ts-ignore
-      assert.equal(workspace._pages.size, 0);
-    });
+    page0.addBlock({ flavour: 'affine:page' });
+    workspace.removePage(page0.id);
+
+    // @ts-expect-error
+    assert.equal(workspace._pages.size, 1);
+    assert.deepEqual(serialize(page0)['space:page0'], {});
+
+    workspace.removePage(page1.id);
+    // @ts-expect-error
+    assert.equal(workspace._pages.size, 0);
   });
 
   it('can set page state', async () => {
