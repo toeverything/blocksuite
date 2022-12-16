@@ -5,3 +5,4 @@ export { copyCode } from './default/utils';
 export { deleteCodeBlock } from './default/utils';
 export { toggleWrap } from './default/utils';
 export { CodeBlockOptionContainer } from './default/components';
+export * from './utils';

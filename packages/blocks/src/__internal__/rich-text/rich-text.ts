@@ -41,12 +41,14 @@ export class RichText extends LitElement {
 
   quill!: Quill;
 
-  @property()
+  @property({
+    hasChanged() {
+      return true;
+    },
+  })
   host!: BlockHost;
 
-  @property({
-    hasChanged: () => true,
-  })
+  @property()
   model!: BaseBlockModel;
 
   @property()
@@ -152,6 +154,7 @@ export class RichText extends LitElement {
   updated() {
     // Update placeholder if block`s type changed
     this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
+    this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
     if (this.modules.syntax) {
       //@ts-ignore
       this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);

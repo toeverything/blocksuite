@@ -1,7 +1,6 @@
 import type * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness.js';
 import { AwarenessAdapter, SelectionRange } from './awareness';
-import type { BaseBlockModel } from './base';
 import type { RichTextAdapter } from './text-adapter';
 
 export interface StackItem {
@@ -9,10 +8,7 @@ export interface StackItem {
   type: 'undo' | 'redo';
 }
 
-export class Space<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  IBlockSchema extends Record<string, typeof BaseBlockModel> = any
-> {
+export class Space {
   readonly id: string;
   readonly doc: Y.Doc;
   readonly awareness!: AwarenessAdapter;

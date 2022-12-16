@@ -15,21 +15,18 @@ import {
   undoByKeyboard,
   resetHistory,
   redoByKeyboard,
-  undoByClick,
-  redoByClick,
-  clearLog,
   waitNextFrame,
   selectAllByKeyboard,
   dragBetweenIndices,
   initThreeLists,
   copyByKeyboard,
   pasteByKeyboard,
-  initThreeDividers,
+  getSelectedTextByQuill,
+  withCtrlOrMeta,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
   assertBlockCount,
-  assertDivider,
   assertRichTexts,
   assertSelection,
 } from './utils/asserts';
@@ -420,6 +417,32 @@ test('select text in the same line with dragging rightward and move outside the 
   expect(textOne).toBe('abc\n');
 });
 
+test('select text in the same line with dragging rightward and press enter create block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  // blur the editor
+  await page.mouse.click(0, 0);
+  const above123 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left - 30, y: bbox.top - 20 };
+  });
+  const below789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right + 30, y: bbox.bottom + 50 };
+  });
+
+  await dragBetweenCoords(page, below789, above123, 50);
+  await page.keyboard.press('Enter', { delay: 50 });
+  await page.keyboard.type('abc');
+  await assertRichTexts(page, ['123', '456', '789', 'abc']);
+});
+
 async function clickListIcon(page: Page, i = 0) {
   const locator = page.locator('.affine-list-block__prefix').nth(i);
   await locator.click();
@@ -450,7 +473,34 @@ test('click the list icon to select', async ({ page }) => {
   // This should be ['123','456','789'] but there is another bug affecting it
 });
 
-async function clickDivider(page: Page, i = 0) {
-  const locator = page.locator('divider-block').nth(i);
-  await locator.click();
-}
+test('drag to select tagged text, and copy', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.insertText('123456789');
+  await assertRichTexts(page, ['123456789']);
+
+  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
+  await withCtrlOrMeta(page, () => page.keyboard.press('C'));
+  const textOne = await getSelectedTextByQuill(page);
+  expect(textOne).toBe('12345');
+});
+
+test('drag to select tagged text, and input character', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.insertText('123456789');
+  await assertRichTexts(page, ['123456789']);
+
+  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
+  await page.keyboard.type('1');
+  const textOne = await getQuillSelectionText(page);
+  expect(textOne).toBe('16789\n');
+});

@@ -26,7 +26,7 @@ import {
   handleBackspace,
   removeCommonHotKey,
   tryUpdateGroupSize,
-  updateTextType,
+  updateSelectedTextType,
 } from '../utils';
 import style from './style.css';
 
@@ -38,6 +38,7 @@ export interface EdgelessContainer extends HTMLElement {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
     updateSelection: Signal<BlockSelectionState>;
+    shapeUpdated: Signal;
   };
 }
 
@@ -52,6 +53,9 @@ export class EdgelessPageBlockComponent
 
   @property()
   page!: Page;
+
+  @property()
+  readonly = false;
 
   flavour = 'edgeless' as const;
 
@@ -75,6 +79,7 @@ export class EdgelessPageBlockComponent
     viewportUpdated: new Signal(),
     updateSelection: new Signal<BlockSelectionState>(),
     hoverUpdated: new Signal(),
+    shapeUpdated: new Signal(),
   };
 
   private _historyDisposable!: Disposable;
@@ -116,7 +121,7 @@ export class EdgelessPageBlockComponent
   }
 
   private _updateType(flavour: string, type: string, space: Page): void {
-    updateTextType(flavour, type, space);
+    updateSelectedTextType(flavour, type, space);
   }
 
   private _removeHotkeys() {
@@ -188,6 +193,7 @@ export class EdgelessPageBlockComponent
     );
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
+    this.signals.shapeUpdated.on(() => this.requestUpdate());
     this._historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
     });
@@ -215,6 +221,7 @@ export class EdgelessPageBlockComponent
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
+    this.signals.shapeUpdated.dispose();
     this._historyDisposable.dispose();
     this._selection.dispose();
     this._removeHotkeys();
@@ -230,18 +237,11 @@ export class EdgelessPageBlockComponent
     );
 
     const { _selection } = this;
-    const { frameSelectionRect, blockSelectionState: selectionState } =
-      _selection;
+    const { frameSelectionRect } = _selection;
+    const selectionState = this._selection.blockSelectionState;
     const { zoom } = this.viewport;
-    const selectionRect = EdgelessFrameSelectionRect(
-      frameSelectionRect,
-      _selection.isHoveringShape
-    );
-    const hoverRect = EdgelessHoverRect(
-      _selection.hoverRect,
-      zoom,
-      _selection.isHoveringShape
-    );
+    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
+    const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
 
     return html`
       <style></style>
@@ -252,6 +252,7 @@ export class EdgelessPageBlockComponent
               .state=${selectionState}
               .rect=${selectionState.rect}
               .zoom=${zoom}
+              .readonly=${this.readonly}
             ></edgeless-selected-rect>`
           : null}
       </div>

@@ -71,9 +71,12 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-export function updateTextType(flavour: string, type: string, page: Page) {
-  const range = window.getSelection()?.getRangeAt(0);
-  assertExists(range);
+export function updateSelectedTextType(
+  flavour: string,
+  type: string,
+  page: Page
+) {
+  const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
   page.captureSync();
   modelsInRange.forEach(model => {
@@ -104,23 +107,6 @@ export function transformBlock(
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, parent, index);
   asyncFocusRichText(page, id);
-}
-
-export function batchUpdateTextType(
-  flavour: string,
-  page: Page,
-  models: ExtendedModel[],
-  type: string
-) {
-  page.captureSync();
-  for (const model of models) {
-    assertFlavours(model, ['affine:paragraph', 'affine:list']);
-    if (model.flavour === flavour) {
-      page.updateBlock(model, { type });
-    } else {
-      transformBlock(page, model, 'affine:paragraph', type);
-    }
-  }
 }
 
 export function handleBackspace(page: Page, e: KeyboardEvent) {

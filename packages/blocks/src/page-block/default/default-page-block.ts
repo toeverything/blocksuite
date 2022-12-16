@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { LitElement, html, css, unsafeCSS, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
-  BaseBlockModel,
   Disposable,
-  Page,
   Signal,
+  Page,
   Text,
+  BaseBlockModel,
 } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
@@ -30,7 +30,7 @@ import {
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components';
-import { bindHotkeys, removeHotkeys } from './utils';
+import { bindHotkeys, isControlledKeyboardEvent, removeHotkeys } from './utils';
 import style from './style.css';
 
 export interface EmbedEditingState {
@@ -67,6 +67,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   @property()
   page!: Page;
+
+  @property()
+  readonly = false;
 
   flavour = 'affine:page' as const;
 
@@ -167,6 +170,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.selection.state.clear();
     this.signals.updateSelectedRects.emit([]);
     this.signals.updateEmbedRects.emit([]);
+    this.signals.updateEmbedEditingState.emit(null);
   }
 
   // disable shadow DOM to workaround quill
@@ -176,11 +180,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
-      this.selection = new DefaultSelectionManager(
-        this.page,
-        this.mouseRoot,
-        this.signals
-      );
+      this.selection = new DefaultSelectionManager({
+        space: this.page,
+        mouseRoot: this.mouseRoot,
+        signals: this.signals,
+        container: this,
+      });
     }
     super.update(changedProperties);
   }
@@ -198,6 +203,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   //  that have pop-up for selecting local characters.
   // So we could just hook on the keydown event and detect whether user input a new character.
   private _handleNativeKeydown = (e: KeyboardEvent) => {
+    if (isControlledKeyboardEvent(e)) {
+      return;
+    }
     // Only the length of character buttons is 1
     if (
       (e.key.length === 1 || e.key === 'Enter') &&
@@ -262,11 +270,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     // TMP: clear selected rects on scroll
-    const scrollContainer = this.mouseRoot.querySelector(
-      '.affine-default-viewport'
-    ) as HTMLDivElement;
-    const scrollSignal = Signal.fromEvent(scrollContainer, 'scroll');
-    this._scrollDisposable = scrollSignal.on(() => this._clearSelection());
+    document.addEventListener('wheel', this._clearSelection);
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
@@ -284,6 +288,17 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this._handleCompositionStart
     );
     window.removeEventListener('compositionend', this._handleCompositionEnd);
+    window.removeEventListener('wheel', this._clearSelection);
+  }
+
+  protected updated(changedProperties: PropertyValueMap<this>) {
+    const titleInput = this.querySelector('.affine-default-page-block-title');
+
+    if (this.readonly) {
+      titleInput?.setAttribute('disabled', 'disabled');
+    } else {
+      titleInput?.removeAttribute('disabled');
+    }
   }
 
   render() {

@@ -27,6 +27,7 @@ import {
 import type { DefaultPageSignals } from './default-page-block';
 import { getBlockEditingStateByPosition } from './utils';
 import { matchFlavours } from '@blocksuite/store/src/utils/utils';
+import type { DefaultPageBlockComponent } from './default-page-block';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect) {
   return (
@@ -112,7 +113,7 @@ class PageSelectionState {
     this._startPoint = { x: e.raw.clientX, y: e.raw.clientY };
   }
 
-  refreshRichTextBoundsCache(container: HTMLElement) {
+  refreshRichTextBoundsCache(mouseRoot: HTMLElement) {
     const allBlocks = getAllBlocks();
     allBlocks.forEach(block => {
       const rect = block.getBoundingClientRect();
@@ -132,7 +133,8 @@ class PageSelectionState {
 export class DefaultSelectionManager {
   page: Page;
   state = new PageSelectionState('none');
-  private _container: HTMLElement;
+  private _mouseRoot: HTMLElement;
+  private _container: DefaultPageBlockComponent;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
   private _originPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -144,17 +146,23 @@ export class DefaultSelectionManager {
   };
   private _activeComponent: HTMLElement | null = null;
   private _dragMoveTarget = 'right';
-
-  constructor(
-    space: Page,
-    container: HTMLElement,
-    signals: DefaultPageSignals
-  ) {
+  constructor({
+    space,
+    mouseRoot,
+    signals,
+    container,
+  }: {
+    space: Page;
+    mouseRoot: HTMLElement;
+    signals: DefaultPageSignals;
+    container: DefaultPageBlockComponent;
+  }) {
     this.page = space;
     this._signals = signals;
+    this._mouseRoot = mouseRoot;
     this._container = container;
     this._mouseDisposeCallback = initMouseEventHandlers(
-      this._container,
+      this._mouseRoot,
       this._onContainerDragStart,
       this._onContainerDragMove,
       this._onContainerDragEnd,
@@ -174,7 +182,7 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
     this.state.resetStartRange(e);
-    this.state.refreshRichTextBoundsCache(this._container);
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
     resetNativeSelection(null);
   }
 
@@ -261,11 +269,18 @@ export class DefaultSelectionManager {
 
   private _onContainerDragMove = (e: SelectionEvent) => {
     if (this.state.type === 'native') {
-      this._onNativeSelectionDragMove(e);
-    } else if (this.state.type === 'block') {
-      this._onBlockSelectionDragMove(e);
-    } else if (this.state.type === 'embed') {
-      this._onEmbedDragMove(e);
+      return this._onNativeSelectionDragMove(e);
+    }
+
+    if (this._container.readonly) {
+      return;
+    }
+
+    if (this.state.type === 'block') {
+      return this._onBlockSelectionDragMove(e);
+    }
+    if (this.state.type === 'embed') {
+      return this._onEmbedDragMove(e);
     }
   };
 
@@ -310,6 +325,9 @@ export class DefaultSelectionManager {
       this._onBlockSelectionDragEnd(e);
     } else if (this.state.type === 'embed') {
       this._onEmbedDragEnd();
+    }
+    if (this._container.readonly) {
+      return;
     }
     this._showFormatQuickBar(e);
   };
@@ -364,7 +382,7 @@ export class DefaultSelectionManager {
 
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
 
-    // container click will blur all captions
+    // mouseRoot click will blur all captions
     const allCaptions = Array.from(
       document.querySelectorAll('.affine-embed-wrapper-caption')
     );
@@ -428,7 +446,7 @@ export class DefaultSelectionManager {
       e.raw.pageX,
       e.raw.pageY
     );
-    if ((e.raw.target as HTMLElement).closest('.image-option')) return;
+    if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     if (hoverEditingState?.model.type === 'image') {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
@@ -472,6 +490,13 @@ export class DefaultSelectionManager {
   //   }
   // };
 
+  clearRects() {
+    this._signals.updateSelectedRects.emit([]);
+    this._signals.updateFrameSelectionRect.emit(null);
+    this._signals.updateEmbedEditingState.emit(null);
+    this._signals.updateEmbedRects.emit([]);
+  }
+
   dispose() {
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
@@ -486,7 +511,7 @@ export class DefaultSelectionManager {
     pageSelectionType: PageSelectionType = 'block'
   ) {
     this.state.type = pageSelectionType;
-    this.state.refreshRichTextBoundsCache(this._container);
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const { blockCache } = this.state;
     const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
     this.state.selectedBlocks = selectedBlocks;

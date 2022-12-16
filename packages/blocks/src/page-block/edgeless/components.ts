@@ -7,6 +7,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { GroupBlockModel, RootBlockModel, ShapeBlockModel } from '../..';
 import type {
   BlockSelectionState,
+  HoverState,
   ViewportState,
   XYWH,
 } from './selection-manager';
@@ -33,12 +34,10 @@ function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
   };
 }
 
-export function EdgelessHoverRect(
-  rect: DOMRect | null,
-  zoom: number,
-  isShape = false
-) {
-  if (!rect) return html` <div></div>`;
+export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
+  if (!hoverState) return null;
+  const rect = hoverState.rect;
+  const isShape = hoverState.block.flavour === 'affine:shape';
 
   const style = {
     ...getCommonRectStyle(rect, zoom, isShape),
@@ -101,13 +100,8 @@ function Handle(
   `;
 }
 
-export function EdgelessFrameSelectionRect(
-  rect: DOMRect | null,
-  isShape: boolean
-) {
+export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return html``;
-  // ignore selection rect in shape mode
-  if (isShape) return html``;
 
   const style = {
     left: rect.left + 'px',
@@ -229,6 +223,9 @@ export class EdgelessSelectedRect extends LitElement {
 
   @property({ type: Object })
   state!: BlockSelectionState;
+
+  @property()
+  readonly?: boolean = false;
 
   @property({ type: Object })
   rect!: DOMRect;
@@ -455,9 +452,9 @@ export class EdgelessSelectedRect extends LitElement {
       }px solid var(--affine-primary-color)`,
       ...getCommonRectStyle(this.rect, this.zoom, isShape),
     };
-
+    const handlers = this._getHandles(this.rect, isShape);
     return html`
-      ${this._getHandles(this.rect, isShape)}
+      ${this.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
     `;
   }

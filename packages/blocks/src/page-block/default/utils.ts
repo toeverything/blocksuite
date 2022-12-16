@@ -3,6 +3,7 @@ import { toast } from '../../components/toast';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
 import {
   assertExists,
+  asyncFocusRichText,
   caretRangeFromPoint,
   focusNextBlock,
   focusPreviousBlock,
@@ -26,13 +27,12 @@ import {
 } from '../../__internal__/utils';
 import type { PageBlockModel } from '../page-model';
 import {
-  batchUpdateTextType,
   bindCommonHotkey,
   handleBackspace,
   handleBlockSelectionBatchDelete,
   handleSelectAll,
   removeCommonHotKey,
-  updateTextType,
+  updateSelectedTextType,
 } from '../utils';
 import type { DefaultPageSignals } from './default-page-block';
 import type { DefaultSelectionManager } from './selection-manager';
@@ -53,6 +53,7 @@ export function getBlockEditingStateByPosition(
     } else {
       blockRect = hoverDom?.getBoundingClientRect();
     }
+
     assertExists(blockRect);
     if (isPointIn(blockRect, x, y)) {
       return {
@@ -249,10 +250,36 @@ export function bindHotkeys(
     DOWN,
     LEFT,
     RIGHT,
+    ENTER,
     CODE_BLOCK,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
+
+  hotkey.addListener(ENTER, e => {
+    const { type, selectedBlocks } = selection.state;
+    if (type === 'block' && selectedBlocks.length) {
+      e.stopPropagation();
+      e.preventDefault();
+      const model = getModelByElement(
+        selectedBlocks[selectedBlocks.length - 1]
+      );
+      const parentModel = page.getParent(model);
+      const index = parentModel?.children.indexOf(model);
+      assertExists(index);
+      assertExists(parentModel);
+      const id = page.addBlock(
+        { flavour: 'affine:paragraph', type: 'text' },
+        parentModel,
+        index + 1
+      );
+      asyncFocusRichText(page, id);
+      selection.state.clear();
+      selection.clearRects();
+      return;
+    }
+  });
+
   hotkey.addListener(BACKSPACE, e => {
     const { state } = selection;
     if (state.type === 'native') {
@@ -358,31 +385,31 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(H1, () =>
-    updateType('affine:paragraph', 'h1', page, selection)
+    updateSelectedTextType('affine:paragraph', 'h1', page)
   );
   hotkey.addListener(H2, () =>
-    updateType('affine:paragraph', 'h2', page, selection)
+    updateSelectedTextType('affine:paragraph', 'h2', page)
   );
   hotkey.addListener(H3, () =>
-    updateType('affine:paragraph', 'h3', page, selection)
+    updateSelectedTextType('affine:paragraph', 'h3', page)
   );
   hotkey.addListener(H4, () =>
-    updateType('affine:paragraph', 'h4', page, selection)
+    updateSelectedTextType('affine:paragraph', 'h4', page)
   );
   hotkey.addListener(H5, () =>
-    updateType('affine:paragraph', 'h5', page, selection)
+    updateSelectedTextType('affine:paragraph', 'h5', page)
   );
   hotkey.addListener(H6, () =>
-    updateType('affine:paragraph', 'h6', page, selection)
+    updateSelectedTextType('affine:paragraph', 'h6', page)
   );
   hotkey.addListener(NUMBERED_LIST, () =>
-    updateType('affine:list', 'numbered', page, selection)
+    updateSelectedTextType('affine:list', 'numbered', page)
   );
   hotkey.addListener(BULLETED, () =>
-    updateType('affine:list', 'bulleted', page, selection)
+    updateSelectedTextType('affine:list', 'bulleted', page)
   );
   hotkey.addListener(TEXT, () =>
-    updateType('affine:paragraph', 'text', page, selection)
+    updateSelectedTextType('affine:paragraph', 'text', page)
   );
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
@@ -428,26 +455,8 @@ export function removeHotkeys() {
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
     HOTKEYS.CODE_BLOCK,
+    HOTKEYS.ENTER,
   ]);
-}
-
-export function updateType(
-  flavour: string,
-  type: string,
-  page: Page,
-  selection: DefaultSelectionManager
-) {
-  const { state } = selection;
-  if (state.selectedBlocks.length > 0) {
-    batchUpdateTextType(
-      flavour,
-      page,
-      state.selectedBlocks.map(block => getModelByElement(block)),
-      type
-    );
-  } else {
-    updateTextType(flavour, type, page);
-  }
 }
 
 async function getUrlByModel(model: BaseBlockModel) {
@@ -455,6 +464,10 @@ async function getUrlByModel(model: BaseBlockModel) {
   const store = await model.page.blobs;
   const url = store?.get(model.sourceId);
   return url;
+}
+
+export function isControlledKeyboardEvent(e: KeyboardEvent) {
+  return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
 function removeCodeBlockOptionMenu() {
