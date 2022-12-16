@@ -2,6 +2,7 @@
   padding: 8px;
   width: 100%;
   text-align: center;
+  line-height: 0;
 }
 .affine-image-wrapper img {
   max-width: 100%;

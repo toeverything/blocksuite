@@ -144,6 +144,7 @@ export class PasteManager {
     if (blocks.length === 0) {
       return;
     }
+
     const currentSelectionInfo =
       selectInfo || SelectionUtils.getSelectInfo(this._editor.page);
     if (
@@ -193,6 +194,17 @@ export class PasteManager {
         ) {
           parent &&
             this._addBlocks(blocks.slice(0), parent, index, addBlockIds);
+          const lastBlockModel = this._editor.page.getBlockById(lastBlock.id);
+          // On pasting image,  replace the last empty focused paragraph instead of appending a new image block,
+          // if this paragraph is empty.
+          if (
+            lastBlockModel &&
+            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            lastBlockModel?.text?.length === 0 &&
+            lastBlockModel?.children.length === 0
+          ) {
+            this._editor.page.deleteBlock(lastBlockModel);
+          }
         } else {
           parent &&
             this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
