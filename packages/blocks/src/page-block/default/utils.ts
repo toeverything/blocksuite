@@ -258,12 +258,18 @@ export function bindHotkeys(
 
   hotkey.addListener(ENTER, e => {
     const { type, selectedBlocks } = selection.state;
-    if (type === 'block' && selectedBlocks.length) {
+    const targetInput = e.target as HTMLInputElement;
+    const isCaption = targetInput.classList.contains(
+      'affine-embed-wrapper-caption'
+    );
+    // select blocks or focus caption input, then enter will create a new block
+    if ((type === 'block' && selectedBlocks.length) || isCaption) {
       e.stopPropagation();
       e.preventDefault();
-      const model = getModelByElement(
-        selectedBlocks[selectedBlocks.length - 1]
-      );
+      const element = isCaption
+        ? targetInput
+        : selectedBlocks[selectedBlocks.length - 1];
+      const model = getModelByElement(element);
       const parentModel = page.getParent(model);
       const index = parentModel?.children.indexOf(model);
       assertExists(index);
