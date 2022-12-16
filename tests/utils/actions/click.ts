@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test';
-import type { ColorStyle, TDShapeType } from '../../../packages/blocks';
 
 export async function undoByClick(page: Page) {
   await page.click('button[aria-label="undo"]');

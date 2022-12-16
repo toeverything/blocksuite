@@ -321,9 +321,8 @@ export class Page extends Space {
     this.signals.textUpdated.dispose();
     this.signals.updated.dispose();
 
-    this._yBlocks.forEach((_, key) => {
-      this.deleteBlockById(key);
-    });
+    this._yBlocks.unobserveDeep(this._handleYEvents);
+    this._yBlocks.clear();
   }
 
   private _initYBlocks() {
