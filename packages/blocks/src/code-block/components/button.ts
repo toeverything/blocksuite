@@ -2,6 +2,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { IconButton } from '../../components/button';
 
+// TODO reuse existing button component
 @customElement('code-block-button')
 export class CodeBlockButton extends IconButton {
   static styles = css`

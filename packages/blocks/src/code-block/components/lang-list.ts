@@ -3,6 +3,7 @@ import { css, html, LitElement, unsafeCSS } from 'lit';
 import { createEvent } from '../../__internal__';
 import style from './style.css';
 
+// TODO extract to a common list component
 @customElement('lang-list')
 export class LangList extends LitElement {
   static get styles() {

@@ -84,6 +84,7 @@ code-block {
   /*fill: #6880ff;*/
 }
 
+/*TODO Reuse existing styles*/
 tool-tip {
   font-family: var(--affine-font-family);
   position: absolute;
