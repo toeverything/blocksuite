@@ -15,23 +15,18 @@ import {
   undoByKeyboard,
   resetHistory,
   redoByKeyboard,
-  undoByClick,
-  redoByClick,
-  clearLog,
   waitNextFrame,
   selectAllByKeyboard,
   dragBetweenIndices,
   initThreeLists,
   copyByKeyboard,
   pasteByKeyboard,
-  initThreeDividers,
   getSelectedTextByQuill,
   withCtrlOrMeta,
 } from './utils/actions';
 import { expect } from '@playwright/test';
 import {
   assertBlockCount,
-  assertDivider,
   assertRichTexts,
   assertSelection,
 } from './utils/asserts';
@@ -477,11 +472,6 @@ test('click the list icon to select', async ({ page }) => {
   // FIXME
   // This should be ['123','456','789'] but there is another bug affecting it
 });
-
-async function clickDivider(page: Page, i = 0) {
-  const locator = page.locator('divider-block').nth(i);
-  await locator.click();
-}
 
 test('drag to select tagged text, and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
