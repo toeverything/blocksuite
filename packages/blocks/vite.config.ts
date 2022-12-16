@@ -11,7 +11,18 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {},
-      external: ['yjs', '@blocksuite/store'],
+      external: [
+        'yjs',
+        '@blocksuite/store',
+        'highlight.js',
+        '@tldraw/intersect',
+        '@tldraw/vec',
+        'hotkeys-js',
+        'lit',
+        'perfect-freehand',
+        'quill',
+        'quill-cursors',
+      ],
     },
   },
 });
