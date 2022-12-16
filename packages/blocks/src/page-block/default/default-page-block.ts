@@ -10,20 +10,21 @@ import {
 } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
-  type BlockHost,
+  assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
-  hotkey,
   BlockChildrenContainer,
-  SelectionPosition,
-  assertExists,
+  type BlockHost,
   getCurrentRange,
-  isMultiBlockRange,
   getModelsByRange,
+  hotkey,
+  isMultiBlockRange,
+  SelectionPosition,
 } from '../../__internal__';
 import { DefaultSelectionManager } from './selection-manager';
 import { deleteModels, tryUpdateGroupSize } from '../utils';
 import {
+  CodeBlockOptionContainer,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
   FrameSelectionRect,
@@ -37,6 +38,8 @@ export interface EmbedEditingState {
   model: BaseBlockModel;
 }
 
+export type CodeBlockOption = EmbedEditingState;
+
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
@@ -44,6 +47,7 @@ export interface DefaultPageSignals {
     { left: number; top: number; width: number; height: number }[]
   >;
   updateEmbedEditingState: Signal<EmbedEditingState | null>;
+  updateCodeBlockOption: Signal<CodeBlockOption | null>;
   nativeSelection: Signal<boolean>;
 }
 
@@ -93,6 +97,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   @state()
   embedEditingState!: EmbedEditingState | null;
 
+  @state()
+  codeBlockOption!: CodeBlockOption | null;
+
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
@@ -100,6 +107,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       { left: number; top: number; width: number; height: number }[]
     >(),
     updateEmbedEditingState: new Signal<EmbedEditingState | null>(),
+    updateCodeBlockOption: new Signal<CodeBlockOption | null>(),
     nativeSelection: new Signal<boolean>(),
   };
 
@@ -242,6 +250,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.embedEditingState = embedEditingState;
       this.requestUpdate();
     });
+    this.signals.updateCodeBlockOption.on(codeBlockOption => {
+      this.codeBlockOption = codeBlockOption;
+      this.requestUpdate();
+    });
 
     this.signals.nativeSelection.on(bind => {
       if (bind) {
@@ -302,6 +314,9 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this.embedEditingState,
       this.signals
     );
+    const codeBlockOptionContainer = CodeBlockOptionContainer(
+      this.codeBlockOption
+    );
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
@@ -318,6 +333,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
         </div>
         ${selectedRectsContainer} ${selectionRect}
         ${selectedEmbedContainer}${embedEditingContainer}
+        ${codeBlockOptionContainer}
       </div>
     `;
   }

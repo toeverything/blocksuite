@@ -72,7 +72,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'focus';
 
 class PageSelectionState {
   type: PageSelectionType;
@@ -103,6 +103,7 @@ class PageSelectionState {
   get blockCache() {
     return this._blockCache;
   }
+
   get embedCache() {
     return this._embedCache;
   }
@@ -173,6 +174,7 @@ export class DefaultSelectionManager {
     );
     // this._initListenNativeSelection();
   }
+
   private get _blocks(): BaseBlockModel[] {
     return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
   }
@@ -449,8 +451,12 @@ export class DefaultSelectionManager {
     if (hoverEditingState?.model.type === 'image') {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
       this._signals.updateEmbedEditingState.emit(hoverEditingState);
+    } else if (hoverEditingState?.model.flavour === 'affine:code-block') {
+      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
       this._signals.updateEmbedEditingState.emit(null);
+      this._signals.updateCodeBlockOption.emit(null);
     }
   };
 
@@ -499,8 +505,12 @@ export class DefaultSelectionManager {
     this._mouseDisposeCallback();
   }
 
-  selectBlockByRect(selectionRect: DOMRect, model?: BaseBlockModel) {
-    this.state.type = 'block';
+  selectBlockByRect(
+    selectionRect: DOMRect,
+    model?: BaseBlockModel,
+    pageSelectionType: PageSelectionType = 'block'
+  ) {
+    this.state.type = pageSelectionType;
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const { blockCache } = this.state;
     const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);

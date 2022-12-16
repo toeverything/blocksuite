@@ -7,20 +7,29 @@ import type { BlockHost } from '../utils';
 import { createKeyboardBindings } from './keyboard';
 
 import style from './styles.css';
+import Syntax from '../../code-block/components/syntax-code-block';
 
 Quill.register('modules/cursors', QuillCursors);
 const Clipboard = Quill.import('modules/clipboard');
+
 class EmptyClipboard extends Clipboard {
   onPaste() {
     // No need to execute
   }
 }
+
 Quill.register('modules/clipboard', EmptyClipboard, true);
 
 const Strike = Quill.import('formats/strike');
 // Quill uses <s> by default，but <s> is not supported by HTML5
 Strike.tagName = 'del';
 Quill.register(Strike, true);
+
+const CodeToken = Quill.import('modules/syntax');
+CodeToken.register();
+Syntax.register();
+Quill.register('modules/syntax', Syntax, true);
+
 @customElement('rich-text')
 export class RichText extends LitElement {
   static styles = css`
@@ -45,6 +54,11 @@ export class RichText extends LitElement {
   @property()
   placeholder?: string;
 
+  @property({
+    hasChanged: () => true,
+  })
+  modules: Record<string, unknown> = {};
+
   // disable shadow DOM to workaround quill
   createRenderRoot() {
     return this;
@@ -56,17 +70,20 @@ export class RichText extends LitElement {
     const keyboardBindings = createKeyboardBindings(page, model);
 
     this.quill = new Quill(_textContainer, {
-      modules: {
-        cursors: true,
-        toolbar: false,
-        history: {
-          maxStack: 0,
-          userOnly: true,
+      modules: Object.assign(
+        {
+          cursors: true,
+          toolbar: false,
+          history: {
+            maxStack: 0,
+            userOnly: true,
+          },
+          keyboard: {
+            bindings: keyboardBindings,
+          },
         },
-        keyboard: {
-          bindings: keyboardBindings,
-        },
-      },
+        this.modules
+      ),
       placeholder,
     });
 
@@ -74,6 +91,10 @@ export class RichText extends LitElement {
     page.awareness.updateLocalCursor();
     this.model.propsUpdated.on(() => this.requestUpdate());
 
+    if (this.modules.syntax) {
+      this.quill.formatText(0, this.quill.getLength(), 'code-block', true);
+      this.quill.format('code-block', true);
+    }
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
@@ -134,11 +155,17 @@ export class RichText extends LitElement {
     // Update placeholder if block`s type changed
     this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
     this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
+    if (this.modules.syntax) {
+      //@ts-ignore
+      this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);
+    }
   }
 
   render() {
     return html`
-      <div class="affine-rich-text quill-container ql-container"></div>
+      <div class="affine-rich-text quill-container ql-container">
+        <slot></slot>
+      </div>
     `;
   }
 }

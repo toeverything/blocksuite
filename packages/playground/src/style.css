@@ -6,6 +6,7 @@
   --affine-popover-background: #fff;
   --affine-hover-background: #f1f3ff;
   --affine-code-background: #f2f5f9;
+  --affine-code-block-background: #fafbfd;
   --affine-text-color: #3a4c5c;
   --affine-edgeless-text-color: #3a4c5c;
   --affine-link-color: #6880ff;
@@ -19,6 +20,7 @@
   --affine-placeholder-color: #c7c7c7;
   --affine-border-color: #d0d7e3;
   --affine-disable-color: #c0c0c0;
+  --affine-line-number-color: #92afc8;
   --affine-modal-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
     -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   --affine-popover-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),

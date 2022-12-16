@@ -1,7 +1,12 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type Quill from 'quill';
 import type { RangeStatic } from 'quill';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '..';
+import {
+  ALLOW_DEFAULT,
+  assertExists,
+  getDefaultPageBlock,
+  PREVENT_DEFAULT,
+} from '..';
 
 type Match = {
   name: string;
@@ -225,7 +230,7 @@ export class Shortcuts {
     },
     {
       name: 'code',
-      pattern: /(?:`)(.+?)(?:`)$/g,
+      pattern: /(?:`)([^`]+?)(?:`)$/g,
       action: (
         model: BaseBlockModel,
         quill: Quill,
@@ -256,6 +261,31 @@ export class Shortcuts {
         model.text?.delete(startIndex, 1);
         quill.format('code', false);
 
+        return ALLOW_DEFAULT;
+      },
+    },
+    {
+      name: 'codeblock',
+      pattern: /^```/g,
+      action: (
+        model: BaseBlockModel,
+        quill: Quill,
+        text: string,
+        selection: RangeStatic,
+        pattern: RegExp
+      ) => {
+        if (model.flavour === 'affine:paragraph' && model.type === 'quote') {
+          return PREVENT_DEFAULT;
+        }
+        const page = getDefaultPageBlock(model).page;
+        const parent = page.getParent(model);
+        assertExists(parent);
+        const index = parent.children.indexOf(model);
+        const blockProps = {
+          flavour: 'affine:code-block',
+        };
+        page.deleteBlock(model);
+        page.addBlock(blockProps, parent, index);
         return ALLOW_DEFAULT;
       },
     },

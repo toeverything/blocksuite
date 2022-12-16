@@ -3,10 +3,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from '../utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { ListBlockModel } from '../../list-block/list-model';
-import type { ParagraphBlockModel } from '../../paragraph-block/paragraph-model';
-import type { GroupBlockModel } from '../../group-block/group-model';
-import type { DividerBlockModel } from '../../divider-block/divider-model';
+import type { ListBlockModel } from '../../list-block';
+import type { ParagraphBlockModel } from '../../paragraph-block';
+import type { GroupBlockModel } from '../../group-block';
+import type { CodeBlockModel } from '../../code-block';
+import type { DividerBlockModel } from '../../divider-block';
 import type { EmbedBlockModel } from '../../embed-block';
 import type { ShapeBlockModel } from '../../shape-block';
 
@@ -57,6 +58,11 @@ export function BlockElement(
       else return html``;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
+    case 'affine:code-block':
+      return html` <code-block
+        .model=${model as CodeBlockModel}
+        .host=${host}
+      ></code-block>`;
   }
   return html`<div>Unknown block type: "${model.flavour}"</div>`;
 }

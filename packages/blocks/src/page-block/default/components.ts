@@ -1,9 +1,23 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
-import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
-import { downloadImage, focusCaption, copyImgToClip } from './utils';
+import {
+  CaptionIcon,
+  CopyIcon,
+  DeleteIcon,
+  DownloadIcon,
+  LineWrapIcon,
+} from '../icons';
+import {
+  copyCode,
+  copyImgToClip,
+  deleteCodeBlock,
+  downloadImage,
+  focusCaption,
+  toggleWrap,
+} from './utils';
 import { toolTipStyle } from '../../components/tooltip';
 import type {
+  CodeBlockOption,
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block';
@@ -85,7 +99,7 @@ export function SelectedRectsContainer(rects: DOMRect[]) {
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
-        return html`<div style=${styleMap(style)}></div>`;
+        return html` <div style=${styleMap(style)}></div>`;
       })}
     </div>
   `;
@@ -105,9 +119,10 @@ export function EmbedEditingContainer(
   return html`
     <style>
       .affine-embed-editing-state-container > div {
-        position: fixed;
-        z-index: 1;
+          position: fixed;
+          z-index: 1;
       }
+
       ${toolTipStyle}
     </style>
 
@@ -130,8 +145,8 @@ export function EmbedEditingContainer(
         >
           ${DownloadIcon}
           <tool-tip inert tip-position="right" role="tooltip"
-            >Download</tool-tip
-          >
+            >Download
+          </tool-tip>
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip"
@@ -157,4 +172,62 @@ export function EmbedEditingContainer(
       </div>
     </div>
   `;
+}
+
+export function CodeBlockOptionContainer(
+  codeBlockOption: CodeBlockOption | null
+) {
+  if (codeBlockOption) {
+    const style = {
+      left: codeBlockOption.position.x + 'px',
+      top: codeBlockOption.position.y + 'px',
+    };
+    return html`
+      <style>
+        .affine-codeblock-option-container > div {
+            position: fixed;
+            z-index: 1;
+        }
+
+        ${toolTipStyle}
+      </style>
+
+      <div class="affine-codeblock-option-container">
+        <div style=${styleMap(style)} class="code-block-option">
+          <format-bar-button
+            class="has-tool-tip"
+            width="100%"
+            @click=${() => copyCode(codeBlockOption)}
+          >
+            ${CopyIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Copy to Clipboard
+            </tool-tip>
+          </format-bar-button>
+          <format-bar-button
+            class="has-tool-tip"
+            width="100%"
+            @click=${() => toggleWrap(codeBlockOption)}
+          >
+            ${LineWrapIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Wrap code
+            </tool-tip>
+          </format-bar-button>
+          <format-bar-button
+            class="has-tool-tip"
+            width="100%"
+            @click=${() => deleteCodeBlock(codeBlockOption)}
+          >
+            ${DeleteIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Delete
+            </tool-tip>
+          </format-bar-button>
+        </div>
+      </div>
+    `;
+  } else {
+    return html``;
+  }
 }

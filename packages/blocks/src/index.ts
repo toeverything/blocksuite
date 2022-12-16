@@ -14,6 +14,7 @@ export * from './paragraph-block';
 export * from './page-block';
 export * from './list-block';
 export * from './group-block';
+export * from './code-block';
 export * from './divider-block';
 export * from './image-block';
 export * from './shape-block';

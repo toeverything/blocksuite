@@ -18,6 +18,9 @@ import {
   convertToDivider,
   matchFlavours,
   focusPreviousBlock,
+  getDefaultPageBlock,
+  getBlockElementByModel,
+  resetNativeSelection,
 } from '../utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -39,8 +42,12 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
         id = page.addBlock(blockProps, model, 0);
       }
     } else {
+      const flavour =
+        model.flavour !== 'affine:code-block'
+          ? model.flavour
+          : 'affine:paragraph';
       const blockProps = {
-        flavour: model.flavour,
+        flavour,
         type: 'text',
       };
       id = page.addBlock(blockProps, parent, index + 1);
@@ -55,7 +62,12 @@ export function handleSoftEnter(
   index: number
 ) {
   page.captureSync();
-  model.text?.insert('\n', index);
+  const shouldFormatCode = matchFlavours(model, ['affine:code-block']);
+  model.text?.insert(
+    '\n',
+    index,
+    shouldFormatCode ? { 'code-block': true } : {}
+  );
 }
 
 export function handleBlockSplit(
@@ -168,7 +180,11 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           richText?.quill?.setSelection(preTextLength, 0);
         } else if (
           previousSibling &&
-          matchFlavours(previousSibling, ['affine:embed', 'affine:divider'])
+          matchFlavours(previousSibling, [
+            'affine:embed',
+            'affine:divider',
+            'affine:code-block',
+          ])
         ) {
           window.requestAnimationFrame(() => {
             focusPreviousBlock(model, 'start');
@@ -209,6 +225,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     page.deleteBlock(model);
     const id = page.addBlock(blockProps, parent, index);
     asyncFocusRichText(page, id);
+  } else if (matchFlavours(model, ['affine:code-block'])) {
+    const selectionManager = getDefaultPageBlock(model).selection;
+    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
+    const selectionRect = codeBlockElement.getBoundingClientRect();
+    selectionManager.selectBlockByRect(selectionRect, model, 'focus');
+    resetNativeSelection(null);
   }
 }
 

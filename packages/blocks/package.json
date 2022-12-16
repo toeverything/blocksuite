@@ -13,6 +13,7 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@blocksuite/store": "workspace:*",
+    "highlight.js": "^11.7.0",
     "@tldraw/intersect": "^1.8.0",
     "@tldraw/vec": "^1.8.0",
     "hotkeys-js": "^3.10.0",

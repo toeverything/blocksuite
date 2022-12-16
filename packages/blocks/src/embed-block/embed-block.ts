@@ -17,9 +17,11 @@ export class EmbedBlockComponent extends LitElement {
 
   @query('input')
   _input!: HTMLInputElement;
+
   createRenderRoot() {
     return this;
   }
+
   @state()
   _caption!: string;
 
@@ -40,6 +42,7 @@ export class EmbedBlockComponent extends LitElement {
       this._input.classList.remove('caption-show');
     }
   }
+
   render() {
     return html`
       <div class=${`affine-embed-block-container`}>

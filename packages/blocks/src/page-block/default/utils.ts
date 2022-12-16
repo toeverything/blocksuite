@@ -18,9 +18,12 @@ import {
   hotkey,
   HOTKEYS,
   isPageTitle,
+  getRichTextByModel,
   matchFlavours,
   noop,
   Point,
+  resetNativeSelection,
+  BLOCK_ID_ATTR,
 } from '../../__internal__/utils';
 import type { PageBlockModel } from '../page-model';
 import {
@@ -33,6 +36,7 @@ import {
 } from '../utils';
 import type { DefaultPageSignals } from './default-page-block';
 import type { DefaultSelectionManager } from './selection-manager';
+import type { CodeBlockOption } from './default-page-block';
 
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
@@ -60,6 +64,36 @@ export function getBlockEditingStateByPosition(
   }
   return null;
 }
+
+export const getHoverBlockOptionByPosition = (
+  blocks: BaseBlockModel[],
+  x: number,
+  y: number,
+  flavours: string[],
+  targetSelector: string
+) => {
+  while (blocks.length) {
+    const blockModel = blocks.shift();
+    assertExists(blockModel);
+    blockModel.children && blocks.push(...blockModel.children);
+    if (matchFlavours(blockModel, flavours)) {
+      const hoverDom = getBlockById(blockModel.id);
+      const hoverTarget = hoverDom?.querySelector(targetSelector);
+      const imageRect = hoverTarget?.getBoundingClientRect();
+      assertExists(imageRect);
+      if (isPointIn(imageRect, x, y)) {
+        return {
+          position: {
+            x: imageRect.right + 10,
+            y: imageRect.top,
+          },
+          model: blockModel,
+        };
+      }
+    }
+  }
+  return null;
+};
 
 function isPointIn(block: DOMRect, x: number, y: number): boolean {
   if (
@@ -166,6 +200,9 @@ export function handleDown(
   if (!selection.state.selectedBlocks.length) {
     const nativeSelection = window.getSelection();
     const model = getStartModelBySelection();
+    if (model.flavour === 'affine:code-block') {
+      return;
+    }
     assertExists(nativeSelection);
     const range = nativeSelection.getRangeAt(0);
     const { left, bottom } = range.getBoundingClientRect();
@@ -214,6 +251,7 @@ export function bindHotkeys(
     LEFT,
     RIGHT,
     ENTER,
+    CODE_BLOCK,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -247,8 +285,12 @@ export function bindHotkeys(
     if (state.type === 'native') {
       handleBackspace(page, e);
       return;
-    } else if (state.type === 'block') {
+    } else if (['block', 'divider', 'focus'].includes(state.type)) {
       const { selectedBlocks } = state;
+      if (state.type === 'focus') {
+        state.type = 'block';
+        return;
+      }
       handleBlockSelectionBatchDelete(
         page,
         selectedBlocks.map(block => getModelByElement(block))
@@ -375,6 +417,18 @@ export function bindHotkeys(
   hotkey.addListener(SHIFT_DOWN, e => {
     // TODO expand selection down
   });
+  hotkey.addListener(CODE_BLOCK, e => {
+    const startModel = getStartModelBySelection();
+    const parent = page.getParent(startModel);
+    const index = parent?.children.indexOf(startModel);
+    assertExists(parent);
+    const blockProps = {
+      flavour: 'affine:code-block',
+      text: startModel.text?.clone(),
+    };
+    page.deleteBlock(startModel);
+    page.addBlock(blockProps, parent, index);
+  });
 
   // !!!
   // Don't forget to remove hotkeys at `_removeHotkeys`
@@ -400,6 +454,7 @@ export function removeHotkeys() {
     HOTKEYS.DOWN,
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
+    HOTKEYS.CODE_BLOCK,
     HOTKEYS.ENTER,
   ]);
 }
@@ -413,4 +468,34 @@ async function getUrlByModel(model: BaseBlockModel) {
 
 export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
+}
+
+function removeCodeBlockOptionMenu() {
+  document.querySelector(`.affine-codeblock-option-container`)?.remove();
+}
+
+export function copyCode(codeBlockOption: CodeBlockOption) {
+  const richText = getRichTextByModel(codeBlockOption.model);
+  assertExists(richText);
+  const quill = richText?.quill;
+  quill.setSelection(0, quill.getLength());
+  document.dispatchEvent(new ClipboardEvent('copy'));
+  resetNativeSelection(null);
+  toast('Copied to clipboard');
+  removeCodeBlockOptionMenu();
+}
+
+export function deleteCodeBlock(codeBlockOption: CodeBlockOption) {
+  const model = codeBlockOption.model;
+  model.page.deleteBlock(model);
+  removeCodeBlockOptionMenu();
+}
+
+export function toggleWrap(codeBlockOption: CodeBlockOption) {
+  const syntaxElem = document.querySelector(
+    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
+  );
+  assertExists(syntaxElem);
+  syntaxElem.classList.toggle('wrap');
+  removeCodeBlockOptionMenu();
 }

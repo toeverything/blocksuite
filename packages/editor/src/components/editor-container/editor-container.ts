@@ -57,6 +57,12 @@ export class EditorContainer extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
 
+    window.addEventListener('keydown', e => {
+      if (e.altKey && e.metaKey && e.code === 'KeyC') {
+        e.preventDefault();
+      }
+    });
+
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
     }
