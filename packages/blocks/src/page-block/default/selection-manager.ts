@@ -109,7 +109,7 @@ class PageSelectionState {
   }
 
   resetStartRange(e: SelectionEvent) {
-    this._startRange = caretRangeFromPoint(e.x, e.y);
+    this._startRange = caretRangeFromPoint(e.raw.pageX, e.raw.pageY);
     this._startPoint = { x: e.x, y: e.y };
   }
 

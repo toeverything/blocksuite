@@ -174,8 +174,11 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     commonAncestor.attributes &&
     !commonAncestor.attributes.getNamedItem(ATTR)
   ) {
-    commonAncestor = commonAncestor.closest(`[${ATTR}]`)
+    const parentElement = commonAncestor.closest(`[${ATTR}]`)
       ?.parentElement as HTMLElement;
+    if (parentElement != null) {
+      commonAncestor = parentElement;
+    }
   }
   const intersectedModels: BaseBlockModel[] = [];
   const blockElementArray = commonAncestor.querySelectorAll(`[${ATTR}]`);
