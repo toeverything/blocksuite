@@ -158,6 +158,8 @@ export class CopyCutManager {
       Object.assign(result, {
         sourceId: model.sourceId,
         caption: model.caption,
+        width: model.width,
+        height: model.height,
       });
     }
 

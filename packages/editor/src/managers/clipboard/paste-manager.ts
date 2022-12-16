@@ -284,6 +284,8 @@ export class PasteManager {
         checked: block.checked,
         sourceId: block.sourceId,
         caption: block.caption,
+        width: block.width,
+        height: block.height,
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);

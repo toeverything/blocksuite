@@ -34,4 +34,6 @@ export type OpenBlockInfo = {
   children: OpenBlockInfo[];
   sourceId?: string;
   caption?: string;
+  width?: number;
+  height?: number;
 };
