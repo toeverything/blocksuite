@@ -258,7 +258,7 @@ export function bindHotkeys(
 
   hotkey.addListener(ENTER, e => {
     const { type, selectedBlocks } = selection.state;
-    const targetInput = e.target as HTMLInputElement;
+    const targetInput = e.target as HTMLElement;
     const isCaption = targetInput.classList.contains(
       'affine-embed-wrapper-caption'
     );
