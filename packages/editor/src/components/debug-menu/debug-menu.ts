@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
@@ -215,6 +215,10 @@ export class DebugMenu extends LitElement {
     return this.editor.contentParser;
   }
 
+  createRenderRoot() {
+    return this;
+  }
+
   private _onToggleConnection() {
     if (this.connected) {
       this.workspace.providers.forEach(provider => provider.disconnect());
@@ -309,48 +313,6 @@ export class DebugMenu extends LitElement {
     });
   }
 
-  static styles = css`
-    .debug-menu {
-      display: flex;
-      flex-wrap: wrap;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 1000; /* for debug visibility */
-    }
-    .debug-menu > button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-left: 2px;
-      margin-top: 2px;
-      width: 26px;
-      height: 22px;
-      border: 0;
-      border-radius: 2px;
-      background-color: var(--affine-border-color);
-      color: var(--affine-text-color);
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-    .debug-menu > button:hover {
-      background-color: var(--affine-hover-background);
-    }
-    .debug-menu > button:disabled,
-    .debug-menu > button:disabled:hover {
-      opacity: 0.5;
-      background-color: var(--affine-border-color);
-      cursor: default;
-    }
-    .debug-menu > button path {
-      fill: var(--affine-text-color);
-    }
-    .debug-menu > button > * {
-      flex: 1;
-    }
-  `;
-
   update(changedProperties: Map<string, unknown>) {
     if (
       changedProperties.has('mouseModeType') ||
@@ -365,6 +327,47 @@ export class DebugMenu extends LitElement {
 
   render() {
     return html`
+      <style>
+        .debug-menu {
+          display: flex;
+          flex-wrap: wrap;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          z-index: 1000; /* for debug visibility */
+        }
+        .debug-menu > button {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-left: 2px;
+          margin-top: 2px;
+          width: 26px;
+          height: 22px;
+          border: 0;
+          border-radius: 2px;
+          background-color: var(--affine-border-color);
+          color: var(--affine-text-color);
+          transition: all 0.3s;
+          cursor: pointer;
+        }
+        .debug-menu > button:hover {
+          background-color: var(--affine-hover-background);
+        }
+        .debug-menu > button:disabled,
+        .debug-menu > button:disabled:hover {
+          opacity: 0.5;
+          background-color: var(--affine-border-color);
+          cursor: default;
+        }
+        .debug-menu > button path {
+          fill: var(--affine-text-color);
+        }
+        .debug-menu > button > * {
+          flex: 1;
+        }
+      </style>
       <div class="debug-menu">
         <button
           aria-label="undo"
