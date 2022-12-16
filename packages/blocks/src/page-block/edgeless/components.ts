@@ -7,6 +7,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { GroupBlockModel, RootBlockModel, ShapeBlockModel } from '../..';
 import type {
   BlockSelectionState,
+  HoverState,
   ViewportState,
   XYWH,
 } from './selection-manager';
@@ -33,12 +34,10 @@ function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
   };
 }
 
-export function EdgelessHoverRect(
-  rect: DOMRect | null,
-  zoom: number,
-  isShape = false
-) {
-  if (!rect) return html` <div></div>`;
+export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
+  if (!hoverState) return null;
+  const rect = hoverState.rect;
+  const isShape = hoverState.block.flavour === 'affine:shape';
 
   const style = {
     ...getCommonRectStyle(rect, zoom, isShape),
@@ -101,13 +100,8 @@ function Handle(
   `;
 }
 
-export function EdgelessFrameSelectionRect(
-  rect: DOMRect | null,
-  isShape: boolean
-) {
+export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return html``;
-  // ignore selection rect in shape mode
-  if (isShape) return html``;
 
   const style = {
     left: rect.left + 'px',

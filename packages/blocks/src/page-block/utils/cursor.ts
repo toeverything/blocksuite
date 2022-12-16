@@ -6,7 +6,7 @@ import {
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__';
-import type { FrameSelectionState } from '../edgeless/selection-manager';
+import type { SelectionArea } from '../edgeless/selection-manager';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const currentRange = window.getSelection()?.getRangeAt(0);
@@ -39,13 +39,13 @@ export type DragDirection =
 export type SelectedBlockType = 'Text' | 'Caret' | 'Other';
 
 function isSelectionEvent(
-  e: SelectionEvent | FrameSelectionState
+  e: SelectionEvent | SelectionArea
 ): e is SelectionEvent {
   return 'raw' in e;
 }
 
 export function getDragDirection(
-  e: SelectionEvent | FrameSelectionState,
+  e: SelectionEvent | SelectionArea,
   selection: Selection
 ): DragDirection {
   const startX = e.start.x;

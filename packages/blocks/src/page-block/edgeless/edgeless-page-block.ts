@@ -38,6 +38,7 @@ export interface EdgelessContainer extends HTMLElement {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
     updateSelection: Signal<BlockSelectionState>;
+    shapeUpdated: Signal;
   };
 }
 
@@ -78,6 +79,7 @@ export class EdgelessPageBlockComponent
     viewportUpdated: new Signal(),
     updateSelection: new Signal<BlockSelectionState>(),
     hoverUpdated: new Signal(),
+    shapeUpdated: new Signal(),
   };
 
   private _historyDisposable!: Disposable;
@@ -191,6 +193,7 @@ export class EdgelessPageBlockComponent
     );
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
+    this.signals.shapeUpdated.on(() => this.requestUpdate());
     this._historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
     });
@@ -218,6 +221,7 @@ export class EdgelessPageBlockComponent
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
+    this.signals.shapeUpdated.dispose();
     this._historyDisposable.dispose();
     this._selection.dispose();
     this._removeHotkeys();
@@ -233,18 +237,11 @@ export class EdgelessPageBlockComponent
     );
 
     const { _selection } = this;
-    const { frameSelectionRect, blockSelectionState: selectionState } =
-      _selection;
+    const { frameSelectionRect } = _selection;
+    const selectionState = this._selection.blockSelectionState;
     const { zoom } = this.viewport;
-    const selectionRect = EdgelessFrameSelectionRect(
-      frameSelectionRect,
-      _selection.isHoveringShape
-    );
-    const hoverRect = EdgelessHoverRect(
-      _selection.hoverRect,
-      zoom,
-      _selection.isHoveringShape
-    );
+    const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
+    const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
 
     return html`
       <style></style>
