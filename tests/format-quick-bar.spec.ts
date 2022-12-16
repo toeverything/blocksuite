@@ -389,6 +389,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 
 test('should format quick bar be able to copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
