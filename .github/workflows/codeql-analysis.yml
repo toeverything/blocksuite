@@ -1,15 +1,9 @@
 name: 'CodeQL'
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - '**.tsx?'
-      - '**.jsx?'
-  pull_request:
-    branches: [master]
   schedule:
-    - cron: '27 1 * * 0'
+    # At the end of every day
+    - cron: '0 0 * * *'
 
 jobs:
   analyze:
