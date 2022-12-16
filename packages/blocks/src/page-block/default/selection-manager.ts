@@ -18,6 +18,7 @@ import {
   getAllBlocks,
   getDefaultPageBlock,
   isInput,
+  IPoint,
 } from '../../__internal__';
 import type { RichText } from '../../__internal__/rich-text/rich-text';
 import {
@@ -29,23 +30,24 @@ import { getBlockEditingStateByPosition } from './utils';
 import { matchFlavours } from '@blocksuite/store/src/utils/utils';
 import type { DefaultPageBlockComponent } from './default-page-block';
 
-function intersects(rect: DOMRect, selectionRect: DOMRect) {
+function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
-    rect.left < selectionRect.right &&
-    rect.right > selectionRect.left &&
-    rect.top < selectionRect.bottom &&
-    rect.bottom > selectionRect.top
+    rect.left < selectionRect.right + offset.x &&
+    rect.right > selectionRect.left + offset.x &&
+    rect.top < selectionRect.bottom + offset.y &&
+    rect.bottom > selectionRect.top + offset.y
   );
 }
 
 function filterSelectedBlock(
   blockCache: Map<Element, DOMRect>,
-  selectionRect: DOMRect
+  selectionRect: DOMRect,
+  offset: IPoint
 ): Element[] {
   const blocks = Array.from(blockCache.keys());
   return blocks.filter(block => {
     const rect = block.getBoundingClientRect();
-    return intersects(rect, selectionRect);
+    return intersects(rect, selectionRect, offset);
   });
 }
 
@@ -207,7 +209,11 @@ export class DefaultSelectionManager {
 
     const { blockCache } = this.state;
 
-    const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
+    const selectedBlocks = filterSelectedBlock(
+      blockCache,
+      selectionRect,
+      e.containerOffset
+    );
 
     return {
       selectionRect,
@@ -513,7 +519,10 @@ export class DefaultSelectionManager {
     this.state.type = pageSelectionType;
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const { blockCache } = this.state;
-    const selectedBlocks = filterSelectedBlock(blockCache, selectionRect);
+    const selectedBlocks = filterSelectedBlock(blockCache, selectionRect, {
+      x: 0,
+      y: 0,
+    });
     this.state.selectedBlocks = selectedBlocks;
     const selectedBounds: DOMRect[] = [selectionRect];
     this._signals.updateSelectedRects.emit(selectedBounds);
