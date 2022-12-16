@@ -195,6 +195,8 @@ export class PasteManager {
           parent &&
             this._addBlocks(blocks.slice(0), parent, index, addBlockIds);
           const lastBlockModel = this._editor.page.getBlockById(lastBlock.id);
+          // On pasting image,  replace the last empty focused paragraph instead of appending a new image block,
+          // if this paragraph is empty.
           if (
             lastBlockModel &&
             matchFlavours(lastBlockModel, ['affine:paragraph']) &&
