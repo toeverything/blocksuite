@@ -24,6 +24,7 @@ function createInitialPage(workspace: Workspace) {
     const pageBlockId = page.addBlock({ flavour: 'affine:page' });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
     page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    page.resetHistory();
   });
 
   workspace.createPage('page0');
