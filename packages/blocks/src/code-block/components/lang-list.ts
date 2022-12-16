@@ -1,18 +1,17 @@
-import { customElement, property, state } from 'lit/decorators.js';
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { createEvent } from '../../__internal__';
 import style from './style.css';
-import { IconMap } from './icons';
 
 @customElement('lang-list')
-class LangList extends LitElement {
+export class LangList extends LitElement {
   static get styles() {
     return css`
       ${unsafeCSS(style)}
     `;
   }
 
-  @property({ type: String })
+  @state()
   filterText = '';
 
   @property({ type: String })
@@ -20,6 +19,9 @@ class LangList extends LitElement {
 
   @property()
   showLangList = 'hidden';
+
+  @query('#filter-input')
+  filterInput!: HTMLInputElement;
 
   @state()
   disposeTimer = 0;
@@ -234,8 +236,8 @@ class LangList extends LitElement {
       })
     );
     this.dispatchEvent(createEvent('dispose', null));
+    this.filterText = '';
   }
-
   render() {
     const filteredLanguages = LangList.languages.filter(language => {
       // if (!this.filterText) {
@@ -249,14 +251,21 @@ class LangList extends LitElement {
     }
 
     return html`
-      <div style="overflow: auto">
+      <div class="lang-list-container">
+        <input
+          id="filter-input"
+          type="text"
+          placeholder="Search"
+          value=${this.filterText}
+          @keyup=${() => (this.filterText = this.filterInput?.value)}
+        />
         ${filteredLanguages.map(
           language => html`
             <code-block-button
               @click="${() => this.onLanguageClicked(language)}"
               class="lang-item"
             >
-              ${IconMap.get(language) || IconMap.get('typescript')} ${language}
+              ${language}
             </code-block-button>
           `
         )}

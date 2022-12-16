@@ -7,12 +7,24 @@ lang-list {
   background: white;
 }
 
+.lang-list-container {
+  overflow: scroll;
+  height: 424px;
+  width: 200px;
+  scrollbar-color: #fff0 #fff0;
+}
+
+.lang-list-container::-webkit-scrollbar {
+  background: none;
+}
+
 .lang-item {
   display: flex;
   justify-content: flex-start;
 }
 
 code-block-button {
+  text-align: justify;
   color: var(--affine-icon-color);
 }
 

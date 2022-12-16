@@ -44,7 +44,9 @@ export class RichText extends LitElement {
   @property()
   host!: BlockHost;
 
-  @property()
+  @property({
+    hasChanged: () => true,
+  })
   model!: BaseBlockModel;
 
   @property()

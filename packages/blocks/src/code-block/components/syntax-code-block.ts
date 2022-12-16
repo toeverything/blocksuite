@@ -40,13 +40,16 @@ class SyntaxCodeBlock extends CodeBlock {
   }
 
   updateLineNumber(codeBlockElement: HTMLElement) {
+    const text = this.domNode.textContent;
+    if (text === this.cachedTextLineNumber) {
+      return;
+    }
     const container = codeBlockElement.querySelector('#line-number');
     assertExists(container);
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
 
-    const text = this.domNode.textContent;
     const lines = text.split('\n');
     // quill must end with a newline, see https://quilljs.com/docs/delta/#line-formatting
     const lineNum = text.endsWith('\n') ? lines.length - 1 : lines.length;
@@ -57,7 +60,7 @@ class SyntaxCodeBlock extends CodeBlock {
       const style = getComputedStyle(container);
       const left = parseInt(style.left, 10);
       container.style.left = `${
-        left + (this.lineNumberDigits - curLineNumberDigits) * 10
+        left + (this.lineNumberDigits - curLineNumberDigits) * 8
       }px`;
       this.lineNumberDigits = curLineNumberDigits;
     }
@@ -67,6 +70,8 @@ class SyntaxCodeBlock extends CodeBlock {
       node.innerHTML = i;
       container.appendChild(node);
     }
+
+    this.cachedTextLineNumber = text;
   }
 }
 
@@ -88,6 +93,9 @@ class Syntax extends Module {
   }
 
   setLang(lang: string) {
+    if (this.language === lang) {
+      return;
+    }
     this.language = lang;
     this.highlight(true, this.codeBlockElement);
   }

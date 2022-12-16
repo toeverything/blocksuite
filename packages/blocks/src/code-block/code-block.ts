@@ -30,9 +30,6 @@ export class CodeBlockComponent extends LitElement {
   langListElement!: HTMLElement;
 
   @state()
-  language = 'javascript';
-
-  @state()
   showLangList = 'hidden';
 
   @state()
@@ -75,6 +72,25 @@ export class CodeBlockComponent extends LitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
       <div class="affine-code-block-container">
+        <div class="container">
+          <div
+            class="lang-container has-tool-tip"
+            @mouseover=${this.mouseover()}
+            @mouseout=${this.mouseout()}
+          >
+            <code-block-button> ${this.model.language}</code-block-button>
+            <tool-tip inert role="tooltip">switch language</tool-tip>
+          </div>
+          <lang-list
+            showLangList=${this.showLangList}
+            @selected-language-changed=${(e: CustomEvent) => {
+              this.model.setLang(e.detail.language);
+            }}
+            @dispose=${() => {
+              this.showLangList = 'hidden';
+            }}
+          ></lang-list>
+        </div>
         <rich-text
           .host=${this.host}
           .model=${this.model}
@@ -82,36 +98,26 @@ export class CodeBlockComponent extends LitElement {
             syntax: {
               highlight: highlight.highlight,
               codeBlockElement: this,
-              language: this.language,
+              language: this.model.language,
             },
           }}
         >
           <div id="line-number"></div>
         </rich-text>
-        <div class="container">
-          <div
-            class="lang-container has-tool-tip"
-            @mouseover=${this.mouseover()}
-            @mouseout=${this.mouseout()}
-          >
-            <code-block-button> ${this.language} </code-block-button>
-            <tool-tip inert role="tooltip">switch language</tool-tip>
-          </div>
-          <lang-list
-            showLangList=${this.showLangList}
-            filterText=${this.filterText}
-            @selected-language-changed=${(e: CustomEvent) => {
-              this.language = e.detail.language;
-            }}
-            @dispose=${() => {
-              this.showLangList = 'hidden';
-            }}
-          ></lang-list>
-        </div>
       </div>
     `;
   }
 }
+
+// <input
+//     id="filter-input"
+// type="text"
+// placeholder="search language"
+// value=${this.filterText}
+//     @keyup=${() => {
+//               this.filterText = this.filterInput?.value;
+//             }}
+// />
 
 declare global {
   interface HTMLElementTagNameMap {

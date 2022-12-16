@@ -14,10 +14,10 @@ export class CodeBlockButton extends IconButton {
   `;
 
   @property()
-  width: string | number = '70px';
+  width: string | number = '101px';
 
   @property()
-  height: string | number = '32px';
+  height: string | number = '24px';
 
   override connectedCallback() {
     super.connectedCallback();

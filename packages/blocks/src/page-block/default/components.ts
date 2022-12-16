@@ -1,6 +1,12 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
-import { CaptionIcon, CopyIcon, DeleteIcon, DownloadIcon } from '../icons';
+import {
+  CaptionIcon,
+  CopyIcon,
+  DeleteIcon,
+  DownloadIcon,
+  LineWrapIcon,
+} from '../icons';
 import {
   copyCode,
   copyImgToClip,
@@ -15,7 +21,6 @@ import type {
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block';
-import { LineWrapIcon, SwitchLangIcon } from '../../code-block/icons';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -94,7 +99,7 @@ export function SelectedRectsContainer(rects: DOMRect[]) {
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
-        return html`<div style=${styleMap(style)}></div>`;
+        return html` <div style=${styleMap(style)}></div>`;
       })}
     </div>
   `;
@@ -114,8 +119,8 @@ export function EmbedEditingContainer(
   return html`
     <style>
       .affine-embed-editing-state-container > div {
-        position: fixed;
-        z-index: 1;
+          position: fixed;
+          z-index: 1;
       }
 
       ${toolTipStyle}
@@ -140,8 +145,8 @@ export function EmbedEditingContainer(
         >
           ${DownloadIcon}
           <tool-tip inert tip-position="right" role="tooltip"
-            >Download</tool-tip
-          >
+            >Download
+          </tool-tip>
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip"
@@ -179,27 +184,47 @@ export function CodeBlockOptionContainer(
     };
     return html`
       <style>
-        .affine-codeblock-option-container > ul {
-          position: fixed;
-          z-index: 1;
+        .affine-codeblock-option-container > div {
+            position: fixed;
+            z-index: 1;
         }
+
+        ${toolTipStyle}
       </style>
 
       <div class="affine-codeblock-option-container">
-        <ul style=${styleMap(style)} class="code-block-option">
-          <li
-            @click=${() => {
-              console.log('a');
-            }}
+        <div style=${styleMap(style)} class="code-block-option">
+          <format-bar-button
+            class="has-tool-tip"
+            width="100%"
+            @click=${() => copyCode(codeBlockOption)}
           >
-            ${SwitchLangIcon}
-          </li>
-          <li @click=${() => copyCode(codeBlockOption)}>${CopyIcon}</li>
-          <li @click=${() => toggleWrap(codeBlockOption)}>${LineWrapIcon}</li>
-          <li @click=${() => deleteCodeBlock(codeBlockOption)}>
+            ${CopyIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Copy to Clipboard
+            </tool-tip>
+          </format-bar-button>
+          <format-bar-button
+            class="has-tool-tip"
+            width="100%"
+            @click=${() => toggleWrap(codeBlockOption)}
+          >
+            ${LineWrapIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Wrap code
+            </tool-tip>
+          </format-bar-button>
+          <format-bar-button
+            class="has-tool-tip"
+            width="100%"
+            @click=${() => deleteCodeBlock(codeBlockOption)}
+          >
             ${DeleteIcon}
-          </li>
-        </ul>
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Delete
+            </tool-tip>
+          </format-bar-button>
+        </div>
       </div>
     `;
   } else {
