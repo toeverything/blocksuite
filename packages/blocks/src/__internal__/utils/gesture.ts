@@ -43,6 +43,10 @@ function toSelectionEvent(
     x: offsetX,
     y: offsetY,
     raw: e,
+    // absolute position is still **relative** to the nearest positioned ancestor.
+    //  In our case, it is the editor. For example, if there is padding/margin in editor,
+    //    then the correct absolute `x`/`y` of mouse position is `containerOffset.x - x`
+    // Refs: https://developer.mozilla.org/en-US/docs/Web/CSS/position#absolute_positioning
     containerOffset: {
       x: rect.left,
       y: rect.top,
