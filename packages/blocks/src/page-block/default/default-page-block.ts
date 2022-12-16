@@ -162,6 +162,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.selection.state.clear();
     this.signals.updateSelectedRects.emit([]);
     this.signals.updateEmbedRects.emit([]);
+    this.signals.updateEmbedEditingState.emit(null);
   }
 
   // disable shadow DOM to workaround quill
@@ -257,11 +258,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     // TMP: clear selected rects on scroll
-    const scrollContainer = this.mouseRoot.querySelector(
-      '.affine-default-viewport'
-    ) as HTMLDivElement;
-    const scrollSignal = Signal.fromEvent(scrollContainer, 'scroll');
-    this._scrollDisposable = scrollSignal.on(() => this._clearSelection());
+    document.addEventListener('wheel', this._clearSelection);
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
@@ -279,6 +276,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this._handleCompositionStart
     );
     window.removeEventListener('compositionend', this._handleCompositionEnd);
+    window.removeEventListener('wheel', this._clearSelection);
   }
 
   protected updated(changedProperties: PropertyValueMap<this>) {
