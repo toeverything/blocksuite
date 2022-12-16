@@ -30,22 +30,22 @@ function isFarEnough(a: IPoint, b: IPoint, d = 2) {
 
 function toSelectionEvent(
   e: MouseEvent,
-  rect: DOMRect | null,
+  rect: DOMRect,
   startX: number,
   startY: number,
   last: SelectionEvent | null = null
 ): SelectionEvent {
   const delta = { x: 0, y: 0 };
   const start = { x: startX, y: startY };
-  const offsetX = e.clientX - (rect?.left ?? 0);
-  const offsetY = e.clientY - (rect?.top ?? 0);
+  const offsetX = e.clientX - rect.left;
+  const offsetY = e.clientY - rect.top;
   const selectionEvent: SelectionEvent = {
     x: offsetX,
     y: offsetY,
     raw: e,
     containerOffset: {
-      x: rect?.left ?? 0,
-      y: rect?.top ?? 0,
+      x: rect.left,
+      y: rect.top,
     },
     delta,
     start,
@@ -95,7 +95,7 @@ export function initMouseEventHandlers(
   let startY = -Infinity;
   let isDragging = false;
   let last: SelectionEvent | null = null;
-  let rect: DOMRect | null = null;
+  const rect: DOMRect = container.getBoundingClientRect();
 
   const mouseOutHandler = (e: MouseEvent) =>
     onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
@@ -103,7 +103,6 @@ export function initMouseEventHandlers(
   const mouseDownHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
 
-    rect = container.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
     isDragging = false;
@@ -117,8 +116,6 @@ export function initMouseEventHandlers(
 
   const mouseMoveHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
-
-    if (!rect) rect = container.getBoundingClientRect();
 
     const a = { x: startX, y: startY };
     const offsetX = e.clientX - rect.left;
