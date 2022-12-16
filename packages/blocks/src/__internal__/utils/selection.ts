@@ -443,7 +443,7 @@ export function isBlankArea(e: SelectionEvent) {
 }
 
 export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
-  const range = caretRangeFromPoint(e.x, e.y);
+  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   const startContainer = range?.startContainer;
   // if not left click
   if (e.button) {
@@ -460,7 +460,7 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
     isBlankAreaBetweenBlocks(startContainer) ||
     isBlankAreaBeforeFirstBlock(startContainer)
   ) {
-    focusRichTextByOffset(startContainer, e.x);
+    focusRichTextByOffset(startContainer, e.raw.clientX);
   } else if (isBlankAreaAfterLastBlock(startContainer)) {
     const { root } = page;
     const lastChild = root?.lastChild();
@@ -468,7 +468,7 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
     if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
-      focusRichTextByOffset(block, e.x);
+      focusRichTextByOffset(block, e.raw.clientX);
     }
   }
 }
