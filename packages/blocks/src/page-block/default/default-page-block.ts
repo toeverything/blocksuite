@@ -288,7 +288,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
       this._handleCompositionStart
     );
     window.removeEventListener('compositionend', this._handleCompositionEnd);
-    window.removeEventListener('wheel', this._clearSelection);
+    document.removeEventListener('wheel', this._clearSelection);
   }
 
   protected updated(changedProperties: PropertyValueMap<this>) {

@@ -12,6 +12,9 @@ export class EmbedBlockComponent extends LitElement {
   @property()
   model!: EmbedBlockModel;
 
+  @property()
+  readonly!: boolean;
+
   @query('input')
   _input!: HTMLInputElement;
 
@@ -46,6 +49,7 @@ export class EmbedBlockComponent extends LitElement {
         <div class=${`affine-embed-wrapper`}>
           <slot></slot>
           <input
+            .disabled=${this.readonly}
             placeholder="write a caption"
             class="affine-embed-wrapper-caption"
             value=${this._caption}
