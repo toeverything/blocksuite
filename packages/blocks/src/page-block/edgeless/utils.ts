@@ -23,8 +23,8 @@ function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
 
 // Refs: https://stackoverflow.com/questions/3234256/find-mouse-position-relative-to-element
 export function offsetPoint(e: SelectionEvent): [number, number] /* [x, y] */ {
-  if (e.raw.target instanceof HTMLElement) {
-    const rect = e.raw.target.getBoundingClientRect();
+  if (e.raw.currentTarget instanceof HTMLElement) {
+    const rect = e.raw.currentTarget.getBoundingClientRect();
     return [e.raw.x - rect.left, e.raw.y - rect.top];
   }
   return [e.raw.x, e.raw.y];
