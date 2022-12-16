@@ -14,6 +14,7 @@ export interface SelectionEvent extends IPoint {
   start: IPoint;
   delta: IPoint;
   raw: MouseEvent;
+  containerOffset: IPoint;
   keys: {
     shift: boolean;
     /** command or control */
@@ -42,6 +43,10 @@ function toSelectionEvent(
     x: offsetX,
     y: offsetY,
     raw: e,
+    containerOffset: {
+      x: rect?.left ?? 0,
+      y: rect?.top ?? 0,
+    },
     delta,
     start,
     keys: {

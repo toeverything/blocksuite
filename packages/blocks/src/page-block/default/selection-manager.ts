@@ -109,8 +109,8 @@ class PageSelectionState {
   }
 
   resetStartRange(e: SelectionEvent) {
-    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    this._startPoint = { x: e.raw.clientX, y: e.raw.clientY };
+    this._startRange = caretRangeFromPoint(e.x, e.y);
+    this._startPoint = { x: e.x, y: e.y };
   }
 
   refreshRichTextBoundsCache(mouseRoot: HTMLElement) {
@@ -201,7 +201,7 @@ export class DefaultSelectionManager {
 
   private _getSelectedBlockInfo(e: SelectionEvent) {
     assertExists(this.state.startPoint);
-    const current = { x: e.raw.clientX, y: e.raw.clientY };
+    const current = { x: e.x, y: e.y };
     const { startPoint: start } = this.state;
     const selectionRect = createSelectionRect(current, start);
 

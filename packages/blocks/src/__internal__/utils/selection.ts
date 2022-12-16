@@ -14,7 +14,7 @@ import {
   getModelByElement,
 } from './query';
 import { Rect } from './rect';
-import type { SelectionEvent } from './gesture';
+import type { IPoint, SelectionEvent } from './gesture';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -50,6 +50,7 @@ function backwardSelect(newRange: Range, range: Range) {
 function fixCurrentRangeToText(
   x: number,
   y: number,
+  offset: IPoint,
   range: Range,
   isForward: boolean
 ) {
@@ -65,17 +66,19 @@ function fixCurrentRangeToText(
       const text = isForward
         ? texts.reverse().find(t => {
             const rect = t.getBoundingClientRect();
-            return y >= rect.top; // handle both drag downward, and rightward
+            return y >= rect.top - offset.y; // handle both drag downward, and rightward
           })
         : texts.find(t => {
             const rect = t.getBoundingClientRect();
-            return y <= rect.bottom; // handle both drag upwards and leftward
+            return y <= rect.bottom - offset.y; // handle both drag upwards and leftward
           });
       if (!text) {
         throw new Error('Failed to focus text node!');
       }
       const rect = text.getBoundingClientRect();
-      const newY = isForward ? rect.bottom - 6 : rect.top + 6;
+      const newY = isForward
+        ? rect.bottom - offset.y - 6
+        : rect.top - offset.y + 6;
       newRange = caretRangeFromPoint(x, newY);
       if (isForward && newRange) {
         forwardSelect(newRange, range);
@@ -401,7 +404,7 @@ export function handleNativeRangeDragMove(
   let isForward = true;
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  let currentRange = caretRangeFromPoint(e.x, e.y);
   if (currentRange?.comparePoint(endContainer, endOffset) === 1) {
     isForward = false;
     currentRange?.setEnd(endContainer, endOffset);
@@ -410,8 +413,9 @@ export function handleNativeRangeDragMove(
   }
   if (currentRange) {
     currentRange = fixCurrentRangeToText(
-      e.raw.clientX,
-      e.raw.clientY,
+      e.x,
+      e.y,
+      e.containerOffset,
       currentRange,
       isForward
     );
@@ -439,7 +443,7 @@ export function isBlankArea(e: SelectionEvent) {
 }
 
 export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
-  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  const range = caretRangeFromPoint(e.x, e.y);
   const startContainer = range?.startContainer;
   // if not left click
   if (e.button) {
@@ -456,7 +460,7 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
     isBlankAreaBetweenBlocks(startContainer) ||
     isBlankAreaBeforeFirstBlock(startContainer)
   ) {
-    focusRichTextByOffset(startContainer, e.raw.clientX);
+    focusRichTextByOffset(startContainer, e.x);
   } else if (isBlankAreaAfterLastBlock(startContainer)) {
     const { root } = page;
     const lastChild = root?.lastChild();
@@ -464,7 +468,7 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
     if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
-      focusRichTextByOffset(block, e.raw.clientX);
+      focusRichTextByOffset(block, e.x);
     }
   }
 }
