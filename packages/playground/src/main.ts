@@ -44,7 +44,9 @@ async function main() {
   >;
   initButton.addEventListener('click', () => initFunctions.basic(workspace));
 
-  initFunctions[init || 'basic']?.(workspace);
+  if (init != null) {
+    initFunctions[init || 'basic']?.(workspace);
+  }
 }
 
 main();
