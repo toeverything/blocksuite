@@ -16,14 +16,20 @@ import type {
 export { HoverState };
 
 interface NoneBlockSelectionState {
+  // No selected block
   type: 'none';
 }
 
 interface SingleBlockSelectionState {
+  // There is one block that be selected
   type: 'single';
+  // Which block that be selected
   selected: RootBlockModel;
+  // Current viewport
   viewport: ViewportState;
+  // Rect of the selected block
   rect: DOMRect;
+  // True if the block is active (like double click)
   active: boolean;
 }
 

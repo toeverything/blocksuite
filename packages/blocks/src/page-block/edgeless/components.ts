@@ -35,7 +35,7 @@ function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
 }
 
 export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
-  if (!hoverState) return html` <div></div>`;
+  if (!hoverState) return null;
   const rect = hoverState.rect;
   const isShape = hoverState.block.flavour === 'affine:shape';
 

@@ -1,5 +1,5 @@
 import type { SelectionEvent, ShapeMouseMode } from '../../../__internal__';
-import { assertExists } from '../../../__internal__';
+import { assertExists, noop } from '../../../__internal__';
 import { SelectionController } from './index';
 import type { SelectionArea } from '../selection-manager';
 
@@ -15,15 +15,15 @@ export class ShapeSelectionController extends SelectionController<ShapeMouseMode
   protected _draggingArea: SelectionArea | null = null;
 
   onContainerClick(e: SelectionEvent): void {
-    // do nothing
+    noop();
   }
 
   onContainerContextMenu(e: SelectionEvent): void {
-    // do nothing
+    noop();
   }
 
   onContainerDblClick(e: SelectionEvent): void {
-    // do nothing
+    noop();
   }
   onContainerDragStart(e: SelectionEvent): void {
     this._container.page.captureSync();
@@ -70,14 +70,14 @@ export class ShapeSelectionController extends SelectionController<ShapeMouseMode
   }
 
   onContainerMouseMove(e: SelectionEvent): void {
-    // do nothing
+    noop();
   }
 
   onContainerMouseOut(e: SelectionEvent): void {
-    // do nothing
+    noop();
   }
 
   syncBlockSelectionRect() {
-    // do nothing
+    noop();
   }
 }

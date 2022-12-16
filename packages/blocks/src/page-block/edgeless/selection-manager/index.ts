@@ -35,6 +35,9 @@ export abstract class SelectionController<Mode extends MouseMode = MouseMode> {
     return this._hoverState;
   }
 
+  /**
+   * Hold the state that the current selection of block(s)
+   */
   public get blockSelectionState() {
     return this._blockSelectionState;
   }

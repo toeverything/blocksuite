@@ -5,6 +5,7 @@ import {
   caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  noop,
   resetNativeSelection,
   RootBlockModel,
 } from '../../../__internal__';
@@ -104,7 +105,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   }
 
   onContainerDblClick(e: SelectionEvent): void {
-    // do nothing
+    noop();
   }
 
   onContainerDragStart(e: SelectionEvent): void {
@@ -164,7 +165,6 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
     if (this._frameSelectionState) {
       this._updateFrameSelectionState(e.raw.x, e.raw.y);
     }
-    return;
   }
 
   onContainerDragEnd(e: SelectionEvent): void {
@@ -178,7 +178,6 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
       showFormatQuickBar({ anchorEl: anchor, direction });
     }
     this._frameSelectionState = null;
-    return;
   }
 
   onContainerMouseMove(e: SelectionEvent): void {
@@ -188,11 +187,10 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
 
     this._updateHoverState(hovered);
     this._container.signals.hoverUpdated.emit();
-    return;
   }
 
   onContainerMouseOut(e: SelectionEvent): void {
-    // do nothing
+    noop();
   }
 
   syncBlockSelectionRect() {
