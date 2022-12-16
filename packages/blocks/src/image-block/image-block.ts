@@ -59,7 +59,7 @@ export class ImageBlockComponent extends LitElement {
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <embed-block .model=${this.model}>
+      <embed-block .model=${this.model} .readonly=${this.host.readonly}>
         <div class="affine-image-wrapper">
           <div>
             <img class="resizable-img" src=${this._source} />
