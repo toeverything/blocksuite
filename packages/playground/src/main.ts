@@ -31,7 +31,7 @@ async function main() {
   if (isE2E) {
     // We need a predictable id generator in test environment.
     // Keep in mind that the collaboration will cause playground crash,
-    //  because the id will conflict for both starting at 0.
+    //  because all clients' id starting at 0.
     options.idGenerator = Generator.AutoIncrement;
   }
   const workspace = new Workspace(options).register(BlockSchema);
