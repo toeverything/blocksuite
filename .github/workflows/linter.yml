@@ -30,4 +30,6 @@ jobs:
         run: prettier --cache --check packages tests
 
       - name: Run ESLint
-        run: eslint --cache --cache-file=node_modules/.cache/.eslintcache ./ --max-warnings=0
+        # by default: eslint will save the cache files on cwd
+        #   Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
+        run: eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0
