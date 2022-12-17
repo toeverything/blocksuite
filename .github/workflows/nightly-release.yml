@@ -2,9 +2,9 @@
 name: Nightly Release
 
 on:
-  push:
-    branches:
-      - master
+  schedule:
+    # At the end of every day
+    - cron: '0 0 * * *'
 
 jobs:
   nightly-release:
