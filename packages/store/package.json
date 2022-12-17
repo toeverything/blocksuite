@@ -6,7 +6,7 @@
   "module": "dist/index.mjs",
   "types": "dist/src/index.d.ts",
   "exports": {
-    ".": "./dist/index.umd.js"
+    ".": "./dist/src/index.js"
   },
   "scripts": {
     "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",

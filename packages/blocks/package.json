@@ -2,13 +2,12 @@
   "name": "@blocksuite/blocks",
   "version": "0.3.0-alpha.11",
   "description": "Default BlockSuite editable blocks.",
-  "main": "dist/index.js",
-  "module": "dist/index.",
-  "types": "dist/src/index.d.ts",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/src/index.d.ts",
   "exports": {
     "./style": "./dist/style.css",
-    ".": "./dist/index.umd.js"
+    ".": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc && vite build",
