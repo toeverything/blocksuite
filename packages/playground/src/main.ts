@@ -1,7 +1,7 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
-import { createEditor, createDebugMenu, BlockSchema } from '@blocksuite/editor';
-import { Workspace, Page } from '@blocksuite/store';
+import { BlockSchema, createDebugMenu, createEditor } from '@blocksuite/editor';
+import { Generator, Page, Workspace } from '@blocksuite/store';
 import { getOptions } from './utils';
 import './style.css';
 
@@ -28,6 +28,10 @@ function subscribePage(workspace: Workspace) {
 }
 
 async function main() {
+  if (isE2E) {
+    // we need a predictable id generator in test environment
+    options.idGenerator = Generator.AutoIncrement;
+  }
   const workspace = new Workspace(options).register(BlockSchema);
   // @ts-ignore
   [window.workspace, window.blockSchema] = [workspace, BlockSchema];

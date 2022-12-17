@@ -4,7 +4,11 @@ import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
-import { uuidv4 } from './utils/id-generator';
+import {
+  createAutoIncrementIdGenerator,
+  createAutoIncrementIdGeneratorByClientId,
+  uuidv4,
+} from './utils/id-generator';
 
 export interface SerializedStore {
   [key: string]: {
@@ -12,11 +16,17 @@ export interface SerializedStore {
   };
 }
 
+export enum Generator {
+  UUIDv4 = 'uuidV4',
+  AutoIncrementByClientId = 'autoIncrementByClientId',
+  AutoIncrement = 'autoIncrement',
+}
+
 export interface StoreOptions {
   room?: string;
   providers?: DocProviderConstructor[];
   awareness?: Awareness;
-  idGenerator?: IdGenerator;
+  idGenerator?: Generator;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
@@ -36,7 +46,26 @@ export class Store {
     idGenerator,
   }: StoreOptions = {}) {
     this.awareness = awareness ?? new Awareness(this.doc);
-    this.idGenerator = idGenerator ?? uuidv4;
+    switch (idGenerator) {
+      case Generator.AutoIncrement: {
+        this.idGenerator = createAutoIncrementIdGenerator();
+        break;
+      }
+      case Generator.AutoIncrementByClientId: {
+        this.idGenerator = createAutoIncrementIdGeneratorByClientId(
+          this.doc.clientID
+        );
+        break;
+      }
+      case Generator.UUIDv4: {
+        this.idGenerator = uuidv4;
+        break;
+      }
+      default: {
+        this.idGenerator = uuidv4;
+        break;
+      }
+    }
     this.providers = providers.map(
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, { awareness: this.awareness })
