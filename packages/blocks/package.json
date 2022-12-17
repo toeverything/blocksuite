@@ -8,8 +8,7 @@
   "type": "module",
   "exports": {
     "./style": "./dist/style.css",
-    "./src/*": "./dist/*.js",
-    ".": "./dist/index.js"
+    ".": "./dist/index.umd.js"
   },
   "scripts": {
     "build": "tsc && vite build",

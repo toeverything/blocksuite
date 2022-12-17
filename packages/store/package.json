@@ -5,6 +5,9 @@
   "main": "dist/index.umd.js",
   "module": "dist/index.mjs",
   "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": "./dist/index.umd.js"
+  },
   "scripts": {
     "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "serve:websocket": "cross-env HOST=localhost PORT=1234 npx y-websocket",
@@ -34,10 +37,6 @@
     "@types/quill": "^2.0.9",
     "cross-env": "^7.0.3",
     "lit": "^2.3.1"
-  },
-  "exports": {
-    "./src/*": "./src/*.ts",
-    ".": "./src/index.ts"
   },
   "publishConfig": {
     "access": "public"

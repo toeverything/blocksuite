@@ -6,7 +6,7 @@
   "module": "dist/index.mjs",
   "types": "dist/src/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.umd.js"
   },
   "scripts": {
     "build": "tsc && vite build",
