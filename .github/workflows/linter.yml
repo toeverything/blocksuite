@@ -26,8 +26,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          eslint: true
-          prettier: true
+      - name: Run Prettier
+        run: prettier --check packages tests
+
+      - name: Run ESLint
+        run: eslint ./ --max-warnings=0
