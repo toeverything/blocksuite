@@ -30,4 +30,4 @@ jobs:
         run: prettier --cache --check packages tests
 
       - name: Run ESLint
-        run: eslint --cache ./ --max-warnings=0
+        run: eslint --cache --cache-file=node_modules/.cache/.eslintcache ./ --max-warnings=0
