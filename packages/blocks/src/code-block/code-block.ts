@@ -7,6 +7,7 @@ import { toolTipStyle } from '../components/tooltip.js';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__/index.js';
 // @ts-ignore
 import highlight from 'highlight.js';
+import { ArrowDownIcon } from '../components/format-quick-bar/icons';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends LitElement {
@@ -73,13 +74,15 @@ export class CodeBlockComponent extends LitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
       <div class="affine-code-block-container">
-        <div class="container">
+        <div class="container active">
           <div
             class="lang-container has-tool-tip"
             @mouseover=${this.mouseover()}
             @mouseout=${this.mouseout()}
           >
-            <code-block-button> ${this.model.language}</code-block-button>
+            <code-block-button width="101px" height="24px">
+              ${this.model.language} ${ArrowDownIcon}
+            </code-block-button>
             <tool-tip inert role="tooltip">switch language</tool-tip>
           </div>
           <lang-list

@@ -50,11 +50,11 @@ code-block {
   width: 660px;
   margin: 0;
   overflow: scroll;
-  scrollbar-color: #fff0 #fff0;
+  /*scrollbar-color: #fff0 #fff0;*/
 }
 
 .affine-code-block-container .ql-syntax::-webkit-scrollbar {
-  background: none;
+  /*background: none;*/
 }
 
 .affine-code-block-container .wrap {
@@ -62,11 +62,18 @@ code-block {
 }
 
 .lang-container {
-  color: var(--affine-icon-color);
   line-height: calc(var(--affine-line-height-base) - 10px);
   text-align: justify;
   position: relative;
 }
+
+/*TODO delete if not used*/
+/*.lang-container svg {*/
+/*  transition-duration: 0.3s;*/
+/*}*/
+/*.lang-container:is(:hover, :focus-visible, :active)  svg {*/
+/*  transform: rotate(180deg);*/
+/*}*/
 
 .code-block-option {
   box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),

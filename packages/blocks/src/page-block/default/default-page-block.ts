@@ -281,7 +281,7 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     });
 
     // TMP: clear selected rects on scroll
-    document.addEventListener('wheel', this._clearSelection);
+    document.addEventListener('wheel', this._clearSelection.bind(this));
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
