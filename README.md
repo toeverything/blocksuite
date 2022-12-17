@@ -1,7 +1,8 @@
 # BlockSuite
 
+[![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 <a href="./packages/store/package.json">
-  <img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff"/>
+<img src="https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff"/>
 </a>
 
 <!--
