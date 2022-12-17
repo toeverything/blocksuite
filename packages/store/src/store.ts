@@ -17,8 +17,21 @@ export interface SerializedStore {
 }
 
 export enum Generator {
+  /**
+   * Default mode, generator for the unpredictable id
+   */
   UUIDv4 = 'uuidV4',
+  /**
+   * This generator is trying to fix the real-time collaboration on debug mode.
+   * This will make generator predictable and won't make conflict
+   * @link https://docs.yjs.dev/api/faq#i-get-a-new-clientid-for-every-session-is-there-a-way-to-make-it-static-for-a-peer-accessing-the-doc
+   */
   AutoIncrementByClientId = 'autoIncrementByClientId',
+  /**
+   * **Warning**: This generator mode will crash the collaborative feature
+   *  if multiple client are adding new blocks.
+   * Use this mode only if you know what you're doing.
+   */
   AutoIncrement = 'autoIncrement',
 }
 
@@ -57,10 +70,7 @@ export class Store {
         );
         break;
       }
-      case Generator.UUIDv4: {
-        this.idGenerator = uuidv4;
-        break;
-      }
+      case Generator.UUIDv4:
       default: {
         this.idGenerator = uuidv4;
         break;
