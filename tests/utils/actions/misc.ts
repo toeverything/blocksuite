@@ -37,11 +37,12 @@ async function initEmptyEditor(page: Page) {
 }
 
 export async function enterPlaygroundRoom(page: Page, room?: string) {
+  const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
   }
-  const roomParam = `room=${room}`;
-  await page.goto(`${DEFAULT_PLAYGROUND}?${roomParam}`);
+  url.searchParams.set('room', room);
+  await page.goto(url.toString());
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
