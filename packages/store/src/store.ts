@@ -29,7 +29,7 @@ export enum Generator {
   AutoIncrementByClientId = 'autoIncrementByClientId',
   /**
    * **Warning**: This generator mode will crash the collaborative feature
-   *  if multiple client are adding new blocks.
+   *  if multiple clients are adding new blocks.
    * Use this mode only if you know what you're doing.
    */
   AutoIncrement = 'autoIncrement',
