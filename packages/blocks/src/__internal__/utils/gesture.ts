@@ -93,13 +93,23 @@ export function initMouseEventHandlers(
   onContainerDblClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
-  onContainerContextMenu: (e: SelectionEvent) => void
+  onContainerContextMenu: (e: SelectionEvent) => void,
+  onContainerScroll: (e: Event) => void,
+  onContainerResize: (e: UIEvent) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
   let isDragging = false;
   let last: SelectionEvent | null = null;
   const rect: DOMRect = container.getBoundingClientRect();
+
+  const scrollHandler = (e: Event) => {
+    onContainerScroll(e);
+  };
+
+  const resizeHandler = (e: UIEvent) => {
+    onContainerResize(e);
+  };
 
   const mouseOutHandler = (e: MouseEvent) =>
     onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
@@ -172,12 +182,15 @@ export function initMouseEventHandlers(
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
+  container.addEventListener('scroll', scrollHandler);
+  container.addEventListener('resize', resizeHandler);
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
+    container.removeEventListener('scroll', scrollHandler);
   };
   return dispose;
 }

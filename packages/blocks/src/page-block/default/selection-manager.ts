@@ -172,7 +172,9 @@ export class DefaultSelectionManager {
       this._onContainerDblClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
-      this._onContainerContextMenu
+      this._onContainerContextMenu,
+      noop,
+      noop
     );
     // this._initListenNativeSelection();
   }

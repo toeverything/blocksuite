@@ -3,6 +3,7 @@ import {
   initMouseEventHandlers,
   MouseMode,
   RootBlockModel,
+  noop,
 } from '../../__internal__';
 import { initWheelEventHandlers } from './utils';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block';
@@ -188,7 +189,9 @@ export class EdgelessSelectionManager {
       this._onContainerDblClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
-      this._onContainerContextMenu
+      this._onContainerContextMenu,
+      noop,
+      noop
     );
     this._wheelDisposeCallback = initWheelEventHandlers(container);
   }
