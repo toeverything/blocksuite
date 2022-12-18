@@ -85,7 +85,7 @@ const dtsMatrix = (): RollupOptions[] => {
 };
 
 const build: RollupOptions[] = [
-  buildMatrix('./src/shape.ts', 'utils'),
+  buildMatrix('./src/shape.ts', 'shape'),
   ...dtsMatrix(),
 ];
 
