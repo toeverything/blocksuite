@@ -1,7 +1,6 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from './embed-model';
-
 import style from './style.css';
 
 @customElement('affine-embed')
@@ -45,8 +44,8 @@ export class EmbedBlockComponent extends LitElement {
 
   render() {
     return html`
-      <div class=${`affine-embed-block-container`}>
-        <div class=${`affine-embed-wrapper`}>
+      <div class="affine-embed-block-container">
+        <div class="affine-embed-wrapper">
           <slot></slot>
           <input
             .disabled=${this.readonly}

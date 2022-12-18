@@ -14,8 +14,6 @@ export function getBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
 ) {
-  console.log(`[${ATTR}="${id}"]`, ele);
-
   return ele.querySelector<T>(`[${ATTR}="${id}"]` as T);
 }
 
