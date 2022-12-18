@@ -1,5 +1,4 @@
 import * as Y from 'yjs';
-import { fromBase64, toBase64 } from 'lib0/buffer';
 import { Store, StoreOptions } from '../store';
 import { Space } from '../space';
 import { Page } from './page';
