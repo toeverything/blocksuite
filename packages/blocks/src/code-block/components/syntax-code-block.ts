@@ -1,17 +1,13 @@
 import Quill from 'quill';
 import type hljs from 'highlight.js';
-// @ts-ignore
-import CodeToken from 'quill/modules/syntax';
-// @ts-ignore
-import CodeBlock from 'quill/formats/code';
-// @ts-ignore
-import Module from 'quill/core/module';
-// @ts-ignore
-import Emitter from 'quill/core/emitter';
 import { assertExists } from '../../__internal__';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-class SyntaxCodeBlock extends (CodeBlock as any) {
+const Module = Quill.import('core/module');
+const Emitter = Quill.import('core/emitter');
+const CodeBlock = Quill.import('formats/code-block');
+const CodeToken = Quill.import('modules/syntax');
+
+class SyntaxCodeBlock extends CodeBlock {
   private lineNumberDigits = 0;
 
   constructor(domNode: HTMLElement) {
@@ -89,8 +85,7 @@ export type SyntaxCodeBlockOptions = {
 };
 SyntaxCodeBlock.className = 'ql-syntax';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-class Syntax extends (Module as any) {
+class Syntax extends Module {
   private language = 'javascript';
 
   private codeBlockElement: HTMLElement;
