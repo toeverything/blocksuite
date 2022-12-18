@@ -755,6 +755,35 @@ export function isEmbed(e: SelectionEvent) {
   return false;
 }
 
+/**
+ * Save the current block selection. Can be restored with {@link restoreSelection}.
+ *
+ * See also {@link restoreSelection}
+ *
+ * Note: If only one block is selected, this function will return the same block twice still.
+ * Note: If select multiple blocks, blocks in the middle will be skipped, only the first and last block will be returned.
+ */
+export const saveBlockSelection = (): [SelectedBlock, SelectedBlock] => {
+  const selection = window.getSelection();
+  assertExists(selection);
+  const models = getModelsByRange(getCurrentRange(selection));
+  const startPos = getQuillIndexByNativeSelection(
+    selection.anchorNode,
+    selection.anchorOffset,
+    true
+  );
+  const endPos = getQuillIndexByNativeSelection(
+    selection.focusNode,
+    selection.focusOffset,
+    false
+  );
+
+  return [
+    { id: models[0].id, startPos, children: [] },
+    { id: models[models.length - 1].id, endPos, children: [] },
+  ];
+};
+
 export function restoreSelection(
   rangeOrSelectedBlock: Range | SelectedBlock[]
 ) {

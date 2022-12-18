@@ -1,21 +1,20 @@
-import type { Page, Text, BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
+  almostEqual,
   assertExists,
   assertFlavours,
   ExtendedModel,
-  almostEqual,
   RootBlockModel,
-  SelectedBlock,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
-  getRichTextByModel,
-  getModelsByRange,
   getBlockElementByModel,
-  getQuillIndexByNativeSelection,
   getCurrentRange,
-  getParentBlockById,
   getModelByElement,
+  getModelsByRange,
+  getParentBlockById,
+  getQuillIndexByNativeSelection,
+  getRichTextByModel,
 } from '../../__internal__/utils/query';
 import {
   isCollapsedSelection,
@@ -24,6 +23,7 @@ import {
   isRangeSelection,
   resetNativeSelection,
   restoreSelection,
+  saveBlockSelection,
 } from '../../__internal__/utils/selection';
 import { DEFAULT_SPACING } from '../edgeless/utils';
 
@@ -124,28 +124,6 @@ export function handleBackspace(page: Page, e: KeyboardEvent) {
     }
   }
 }
-
-export const saveBlockSelection = (): SelectedBlock[] => {
-  const selection = window.getSelection();
-  assertExists(selection);
-  const models = getModelsByRange(getCurrentRange(selection));
-  const startPos = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset,
-    true
-  );
-  const endPos = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset,
-    false
-  );
-  console.log(selection, startPos, endPos);
-
-  return [
-    { id: models[0].id, startPos, children: [] },
-    { id: models[models.length - 1].id, endPos, children: [] },
-  ];
-};
 
 export const getFormat = () => {
   const models = getModelsByRange(getCurrentRange());
