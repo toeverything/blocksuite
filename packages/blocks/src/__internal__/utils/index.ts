@@ -8,3 +8,4 @@ export * from './components';
 export * from './gesture';
 export * from './selection';
 export * from './std';
+export * from '@blocksuite/shared/shape';

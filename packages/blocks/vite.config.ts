@@ -2,6 +2,11 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@blocksuite/shared': resolve(__dirname, '..', 'shared', 'src'),
+    },
+  },
   build: {
     emptyOutDir: false,
     lib: {
@@ -22,6 +27,7 @@ export default defineConfig({
         'perfect-freehand',
         'quill',
         'quill-cursors',
+        /^@blocksuite\/shared/,
       ],
     },
   },

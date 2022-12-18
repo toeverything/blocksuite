@@ -33,7 +33,6 @@
     "types": "dist/index.d.ts",
     "exports": {
       "./style": "./dist/style.css",
-      "./src/*": "./dist/*.js",
       ".": "./dist/index.js"
     }
   }
