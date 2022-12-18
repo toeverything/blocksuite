@@ -3,24 +3,28 @@ lang-list {
   flex-direction: column;
   position: absolute;
   background: white;
+  border-radius: 10px;
   top: 24px;
 }
 
 .lang-list-container {
+  box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
+    -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
+  border-radius: 0 10px 10px 10px;
+}
+
+.lang-list-button-container {
   position: relative;
   overflow: scroll;
   height: 424px;
   width: 200px;
-  padding-top: 40px;
+  padding-top: 5px;
   padding-left: 4px;
   padding-right: 4px;
-  box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-    -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
-  border-radius: 0px 10px 10px 10px;
   /*scrollbar-color: #fff0 #fff0;*/
 }
 
-.lang-list-container::-webkit-scrollbar {
+.lang-list-button-container::-webkit-scrollbar {
   /*background: none;*/
 }
 

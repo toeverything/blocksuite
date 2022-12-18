@@ -4,10 +4,10 @@ import type { CodeBlockModel } from './code-model.js';
 import codeBlockStyle from './style.css';
 import codeTheme from 'highlight.js/styles/color-brewer.css';
 import { toolTipStyle } from '../components/tooltip.js';
-import { BLOCK_ID_ATTR, BlockHost } from '../__internal__/index.js';
+import { BLOCK_ID_ATTR, BlockChildrenContainer, BlockHost } from '../__internal__/index.js';
 // @ts-ignore
 import highlight from 'highlight.js';
-import { ArrowDownIcon } from '../components/format-quick-bar/icons';
+import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends LitElement {
@@ -71,10 +71,11 @@ export class CodeBlockComponent extends LitElement {
   }
 
   render() {
+    const childrenContainer = BlockChildrenContainer(this.model, this.host);
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
       <div class="affine-code-block-container">
-        <div class="container active">
+        <div class="container">
           <div
             class="lang-container has-tool-tip"
             @mouseover=${this.mouseover()}
@@ -87,6 +88,7 @@ export class CodeBlockComponent extends LitElement {
           </div>
           <lang-list
             showLangList=${this.showLangList}
+            id=${this.model.id}
             @selected-language-changed=${(e: CustomEvent) => {
               this.model.setLang(e.detail.language);
             }}
@@ -108,6 +110,7 @@ export class CodeBlockComponent extends LitElement {
         >
           <div id="line-number"></div>
         </rich-text>
+        ${childrenContainer}
       </div>
     `;
   }

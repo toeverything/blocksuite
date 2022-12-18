@@ -17,6 +17,9 @@ export class LangList extends LitElement {
   @state()
   filterText = '';
 
+  @property()
+  id!: string;
+
   @property({ type: String })
   selectedLanguage = '';
 
@@ -237,6 +240,25 @@ export class LangList extends LitElement {
     }
   }
 
+  protected firstUpdated() {
+    document.addEventListener('click', (e: MouseEvent) => {
+      this.clickHandler(e);
+    });
+  }
+
+  private clickHandler(e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (!target.closest('lang-list')?.closest(`[data-block-id="${this.id}"]`)) {
+      this.dispose();
+    }
+  }
+
+  private dispose() {
+    this.dispatchEvent(createEvent('dispose', null));
+    document.removeEventListener('click', this.clickHandler);
+    this.filterText = '';
+  }
+
   onLanguageClicked(language: string) {
     this.selectedLanguage = language;
     this.dispatchEvent(
@@ -244,8 +266,7 @@ export class LangList extends LitElement {
         language: this.selectedLanguage ?? 'javascript',
       })
     );
-    this.dispatchEvent(createEvent('dispose', null));
-    this.filterText = '';
+    this.dispose();
   }
 
   render() {
@@ -262,37 +283,37 @@ export class LangList extends LitElement {
 
     const styles = styleMap({
       display: 'flex',
-      position: 'fixed',
-      top: this.getBoundingClientRect().top + 'px',
-      left: this.getBoundingClientRect().left + 4 + 'px',
       'padding-top': '8px',
-      background: 'white',
+      'padding-left': '4px',
     });
 
     return html`
-      <div class="lang-list-container">
-        <div style=${styles}">
-          <div class="search-icon">
-            ${SearchIcon}
-          </div>
-          <input id="filter-input" type="text"
-           placeholder="Search" value=${this.filterText}
-           @keyup=${() => (this.filterText = this.filterInput?.value)}
-          />
-        </div>
-        ${filteredLanguages.map(
-          language => html`
-            <code-block-button
-              width="100%"
-              @click="${() => this.onLanguageClicked(language)}"
-              class="lang-item"
-            >
-              ${language}
-            </code-block-button>
-          `
-        )}
-      </div>
-    `;
+            <div class="lang-list-container">
+                <div style=${styles}">
+                    <div class="search-icon">
+                        ${SearchIcon}
+                    </div>
+                    <input id="filter-input" type="text"
+                           placeholder="Search" value=${this.filterText}
+                           @keyup=${() =>
+                             (this.filterText = this.filterInput?.value)}
+                    />
+                </div>
+                <div class="lang-list-button-container">
+                    ${filteredLanguages.map(
+                      language => html`
+                        <code-block-button
+                          width="100%"
+                          @click="${() => this.onLanguageClicked(language)}"
+                          class="lang-item"
+                        >
+                          ${language}
+                        </code-block-button>
+                      `
+                    )}
+                </div>
+            </div>
+        `;
   }
 }
 

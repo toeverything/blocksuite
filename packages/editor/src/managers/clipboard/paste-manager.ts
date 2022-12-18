@@ -7,6 +7,7 @@ import {
   SelectionInfo,
   matchFlavours,
   assertExists,
+  getStartModelBySelection,
 } from '@blocksuite/blocks';
 
 export class PasteManager {
@@ -79,7 +80,11 @@ export class PasteManager {
     }
 
     const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
-
+    const shouldNotSplitBlock =
+      getStartModelBySelection().flavour === 'affine:code-block';
+    if (shouldNotSplitBlock) {
+      return [{ text: [{ insert: textClipData }], children: [] }];
+    }
     const shouldConvertMarkdown =
       MarkdownUtils.checkIfTextContainsMd(textClipData);
     if (
