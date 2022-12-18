@@ -64,7 +64,7 @@ export function BlockElement(
         .host=${host}
       ></code-block>`;
   }
-  return html`<div>Unknown block type: "${model.flavour}"</div>`;
+  return html`<div>Unknown block flavour: "${model.flavour}"</div>`;
 }
 
 function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {

@@ -14,15 +14,15 @@ export interface IBaseBlockProps {
 
 export class BaseBlockModel implements IBaseBlockProps {
   static version: [number, number];
+  flavour!: string;
+  id: string;
 
   page: Page;
   propsUpdated = new Signal();
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
-  flavour!: string;
   type!: string;
-  id: string;
   children: BaseBlockModel[];
   // TODO use schema
   text?: TextType;

@@ -38,7 +38,8 @@ const DEFAULT_SIGNALING = [
   'wss://y-webrtc-signaling-eu.herokuapp.com',
 ];
 
-const isLocalhost = window.location.hostname === 'localhost';
+const isWeb = typeof window !== 'undefined';
+const isLocalhost = isWeb && window.location.hostname === 'localhost';
 const signaling = isLocalhost ? LOCAL_SIGNALING : DEFAULT_SIGNALING;
 
 export class DebugDocProvider extends WebrtcProvider implements DocProvider {
