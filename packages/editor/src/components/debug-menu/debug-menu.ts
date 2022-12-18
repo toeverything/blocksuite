@@ -11,6 +11,7 @@ import {
   updateSelectedTextType,
   type GroupBlockModel,
 } from '@blocksuite/blocks';
+import { Utils } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -312,7 +313,7 @@ export class DebugMenu extends LitElement {
   }
 
   private _shareUrl() {
-    const base64 = this.workspace.toBase64Update();
+    const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);

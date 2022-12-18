@@ -282,12 +282,4 @@ export class Workspace {
   toJSXElement(id = '0') {
     return this._store.toJSXElement(id);
   }
-
-  toBase64Update(): string {
-    return toBase64(Y.encodeStateAsUpdateV2(this.doc));
-  }
-
-  fromBase64Update(update: string): void {
-    Y.applyUpdateV2(this.doc, fromBase64(update));
-  }
 }
