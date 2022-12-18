@@ -56,7 +56,7 @@ async function main() {
     } else {
       const isBase64 =
         /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-      if (isBase64.test(init)) {
+      if (init !== '' && isBase64.test(init)) {
         Utils.applyYjsUpdateV2(workspace, init);
       } else {
         // fallback
