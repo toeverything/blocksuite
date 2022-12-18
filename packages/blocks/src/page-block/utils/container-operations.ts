@@ -5,6 +5,7 @@ import {
   ExtendedModel,
   almostEqual,
   RootBlockModel,
+  SelectedBlock,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
@@ -22,6 +23,7 @@ import {
   isNoneSelection,
   isRangeSelection,
   resetNativeSelection,
+  restoreSelection,
 } from '../../__internal__/utils/selection';
 import { DEFAULT_SPACING } from '../edgeless/utils';
 
@@ -122,6 +124,28 @@ export function handleBackspace(page: Page, e: KeyboardEvent) {
     }
   }
 }
+
+export const saveBlockSelection = (): SelectedBlock[] => {
+  const selection = window.getSelection();
+  assertExists(selection);
+  const models = getModelsByRange(getCurrentRange(selection));
+  const startPos = getQuillIndexByNativeSelection(
+    selection.anchorNode,
+    selection.anchorOffset,
+    true
+  );
+  const endPos = getQuillIndexByNativeSelection(
+    selection.focusNode,
+    selection.focusOffset,
+    false
+  );
+  console.log(selection, startPos, endPos);
+
+  return [
+    { id: models[0].id, startPos, children: [] },
+    { id: models[models.length - 1].id, endPos, children: [] },
+  ];
+};
 
 export const getFormat = () => {
   const models = getModelsByRange(getCurrentRange());
@@ -243,7 +267,9 @@ export function handleFormat(page: Page, key: string) {
       const format = quill.getFormat(range);
       models[0].text?.format(index, length, { [key]: !format[key] });
     } else {
+      const selectedBlocks = saveBlockSelection();
       formatModelsByRange(models, page, key);
+      restoreSelection(selectedBlocks);
     }
   }
 }

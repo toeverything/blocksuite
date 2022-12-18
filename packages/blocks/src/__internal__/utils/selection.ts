@@ -1,20 +1,26 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { RichText } from '../rich-text/rich-text';
-import { assertExists, caretRangeFromPoint, matchFlavours, sleep } from './std';
-import type { SelectedBlock, SelectionInfo, SelectionPosition } from './types';
+import type { IPoint, SelectionEvent } from './gesture';
 import {
   getBlockElementByModel,
-  getDefaultPageBlock,
   getContainerByModel,
-  getPreviousBlock,
-  getNextBlock,
-  getModelsByRange,
   getCurrentRange,
-  getQuillIndexByNativeSelection,
+  getDefaultPageBlock,
   getModelByElement,
+  getModelsByRange,
+  getNextBlock,
+  getPreviousBlock,
+  getQuillIndexByNativeSelection,
+  getTextNodeBySelectedBlock,
 } from './query';
 import { Rect } from './rect';
-import type { IPoint, SelectionEvent } from './gesture';
+import { assertExists, caretRangeFromPoint, matchFlavours, sleep } from './std';
+import type {
+  DomSelectionType,
+  SelectedBlock,
+  SelectionInfo,
+  SelectionPosition,
+} from './types';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -356,7 +362,7 @@ export function getSelectInfo(page: Page): SelectionInfo {
     };
   }
 
-  let type = 'None';
+  let type: SelectionInfo['type'] = 'None';
   let selectedBlocks: SelectedBlock[] = [];
   let selectedModels: BaseBlockModel[] = [];
   const pageBlock = getDefaultPageBlock(page.root);
@@ -367,7 +373,7 @@ export function getSelectInfo(page: Page): SelectionInfo {
     const { selectedBlocks } = state;
     selectedModels = selectedBlocks.map(block => getModelByElement(block));
   } else if (nativeSelection && nativeSelection.type !== 'None') {
-    type = nativeSelection.type;
+    type = nativeSelection.type as DomSelectionType;
     selectedModels = getModelsByRange(getCurrentRange());
   }
   if (type !== 'None') {
@@ -392,7 +398,7 @@ export function getSelectInfo(page: Page): SelectionInfo {
     }
   }
   return {
-    type: type,
+    type,
     selectedBlocks,
   };
 }
@@ -749,9 +755,37 @@ export function isEmbed(e: SelectionEvent) {
   return false;
 }
 
-export function restoreSelection(range: Range) {
+export function restoreSelection(
+  rangeOrSelectedBlock: Range | SelectedBlock[]
+) {
   const selection = window.getSelection();
   assertExists(selection);
+
+  if (rangeOrSelectedBlock instanceof Range) {
+    const range = rangeOrSelectedBlock;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return;
+  }
+  const selectedBlocks = rangeOrSelectedBlock;
+  const range = new Range();
+
+  const startBlock = selectedBlocks[0];
+  const [startNode, startOffset] = getTextNodeBySelectedBlock(startBlock);
+
+  const endBlock = selectedBlocks[selectedBlocks.length - 1];
+  const [endNode, endOffset] = getTextNodeBySelectedBlock(endBlock);
+  if (!startNode || !endNode) {
+    console.warn(
+      'restoreSelection: startNode or endNode is null',
+      startNode,
+      endNode
+    );
+    return;
+  }
+
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
   selection.removeAllRanges();
   selection.addRange(range);
 }
