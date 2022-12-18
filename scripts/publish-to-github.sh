@@ -24,3 +24,8 @@ cd packages/store
 jq '.name = "@blocksuite/store"' package.json > package-modified.json
 replace
 cd ../..
+
+cd packages/shared
+jq '.name = "@blocksuite/shared"' package.json > package-modified.json
+replace
+cd ../..
