@@ -35,7 +35,6 @@ code-block {
   position: absolute;
   text-align: right;
   top: 5.4px;
-  left: 25px;
   line-height: calc(var(--affine-line-height-base) - 6px);
   color: var(--affine-line-number-color);
 }

@@ -10,8 +10,6 @@ const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
 
 class SyntaxCodeBlock extends CodeBlock {
-  private lineNumberDigits = 0;
-
   constructor(domNode: HTMLElement) {
     super(domNode);
   }
@@ -60,15 +58,8 @@ class SyntaxCodeBlock extends CodeBlock {
     const lineNum = text.endsWith('\n') ? lines.length - 1 : lines.length;
 
     // adjust position according to line number digits
-    const curLineNumberDigits = lineNum.toString().length;
-    if (curLineNumberDigits !== this.lineNumberDigits) {
-      const style = getComputedStyle(container);
-      const left = parseInt(style.left, 10);
-      container.style.left = `${
-        left + (this.lineNumberDigits - curLineNumberDigits) * 8
-      }px`;
-      this.lineNumberDigits = curLineNumberDigits;
-    }
+    const lineNumberDigits = lineNum.toString().length;
+    container.style.left = 25 - lineNumberDigits * 8 + 'px';
 
     for (let i = 1; i <= lineNum; i++) {
       const node = document.createElement('div');
