@@ -14,7 +14,7 @@ export interface ShapeBlockProps extends IBaseBlockProps {
 export class ShapeBlockModel extends BaseBlockModel {
   static version = [1, 0] as [number, number];
   flavour = 'affine:shape' as const;
-  tag = literal`shape-block`;
+  tag = literal`affine-shape`;
 
   color: ColorStyle;
   type: TDShapeType;

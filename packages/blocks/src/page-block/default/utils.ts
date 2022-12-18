@@ -200,7 +200,7 @@ export function handleDown(
   if (!selection.state.selectedBlocks.length) {
     const nativeSelection = window.getSelection();
     const model = getStartModelBySelection();
-    if (model.flavour === 'affine:code-block') {
+    if (model.flavour === 'affine:code') {
       return;
     }
     assertExists(nativeSelection);
@@ -423,7 +423,7 @@ export function bindHotkeys(
     const index = parent?.children.indexOf(startModel);
     assertExists(parent);
     const blockProps = {
-      flavour: 'affine:code-block',
+      flavour: 'affine:code',
       text: startModel.text?.clone(),
     };
     page.deleteBlock(startModel);

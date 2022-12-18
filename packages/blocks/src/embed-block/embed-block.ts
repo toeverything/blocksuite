@@ -4,7 +4,7 @@ import type { EmbedBlockModel } from './embed-model';
 
 import style from './style.css';
 
-@customElement('embed-block')
+@customElement('affine-embed')
 export class EmbedBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -67,6 +67,6 @@ export class EmbedBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'embed-block': EmbedBlockComponent;
+    'affine-embed': EmbedBlockComponent;
   }
 }

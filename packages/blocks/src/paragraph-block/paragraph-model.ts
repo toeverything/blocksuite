@@ -22,7 +22,7 @@ export class ParagraphBlockModel
 {
   static version = [1, 0] as [number, number];
   flavour = 'affine:paragraph' as const;
-  tag = literal`paragraph-block`;
+  tag = literal`affine-paragraph`;
 
   type: ParagraphType = 'text';
 

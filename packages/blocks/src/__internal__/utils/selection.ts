@@ -429,7 +429,7 @@ function isBlankAreaBetweenBlocks(startContainer: Node) {
 }
 
 function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
-  return startContainer.tagName === 'GROUP-BLOCK';
+  return startContainer.tagName === 'AFFINE-GROUP';
 }
 
 function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {

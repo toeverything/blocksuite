@@ -259,7 +259,7 @@ export class DebugMenu extends LitElement {
     const index = parent?.children.indexOf(startModel);
     assertExists(parent);
     const blockProps = {
-      flavour: 'affine:code-block',
+      flavour: 'affine:code',
       text: startModel.text?.clone(),
     };
     this.page.deleteBlock(startModel);

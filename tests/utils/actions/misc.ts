@@ -60,7 +60,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
 }
 
 export async function waitDefaultPageLoaded(page: Page) {
-  await page.waitForSelector('default-page-block[data-block-id="0"]');
+  await page.waitForSelector('affine-default-page[data-block-id="0"]');
 }
 
 export async function waitEmbedLoaded(page: Page) {

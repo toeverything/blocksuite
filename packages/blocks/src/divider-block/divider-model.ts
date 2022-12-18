@@ -11,7 +11,7 @@ export class DividerBlockModel
 {
   static version = [1, 0] as [number, number];
   flavour = 'affine:divider' as const;
-  tag = literal`list-block`;
+  tag = literal`affine-divider`;
 
   constructor(page: Page, props: Partial<DividerBlockProps>) {
     super(page, props);

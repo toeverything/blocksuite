@@ -408,7 +408,7 @@ export class Page extends Space {
       matchFlavours(model, [
         'affine:paragraph',
         'affine:list',
-        'affine:code-block',
+        'affine:code',
       ]) &&
       !yBlock.get('prop:text')
     ) {

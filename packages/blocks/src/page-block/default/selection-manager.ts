@@ -457,7 +457,7 @@ export class DefaultSelectionManager {
     if (hoverEditingState?.model.type === 'image') {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
       this._signals.updateEmbedEditingState.emit(hoverEditingState);
-    } else if (hoverEditingState?.model.flavour === 'affine:code-block') {
+    } else if (hoverEditingState?.model.flavour === 'affine:code') {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {

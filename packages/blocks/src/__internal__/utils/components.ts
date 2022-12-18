@@ -15,7 +15,7 @@ export function BlockElement(
     case 'affine:list':
     case 'affine:group':
     case 'affine:divider':
-    case 'affine:code-block':
+    case 'affine:code':
       return html`
         <${model.tag}
           .model=${model}
@@ -42,7 +42,10 @@ function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
   switch (model.type) {
     case 'image':
       return html`
-        <img-block .model=${model as EmbedBlockModel} .host=${host}></img-block>
+        <affine-image
+          .model=${model as EmbedBlockModel}
+          .host=${host}
+        ></affine-image>
       `;
     default:
       return html`<div>Unknown embed type: "${model.type}"</div>`;

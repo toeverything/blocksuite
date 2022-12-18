@@ -9,7 +9,7 @@ import {
 } from '../__internal__';
 import style from './style.css';
 
-@customElement('img-block')
+@customElement('affine-image')
 export class ImageBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -73,6 +73,6 @@ export class ImageBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'img-block': ImageBlockComponent;
+    'affine-image': ImageBlockComponent;
   }
 }

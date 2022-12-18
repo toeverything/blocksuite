@@ -7,7 +7,7 @@ import { toolTipStyle } from '../components/tooltip';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
 import highlight from 'highlight.js';
 
-@customElement('code-block')
+@customElement('affine-code')
 export class CodeBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(codeTheme)}
@@ -121,6 +121,6 @@ export class CodeBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'code-block': CodeBlockComponent;
+    'affine-code': CodeBlockComponent;
   }
 }

@@ -59,7 +59,7 @@ function focusTextEnd(input: HTMLInputElement) {
   input.value = current;
 }
 
-@customElement('default-page-block')
+@customElement('affine-default-page')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
   static styles = css`
     ${unsafeCSS(style)}
@@ -356,6 +356,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'default-page-block': DefaultPageBlockComponent;
+    'affine-default-page': DefaultPageBlockComponent;
   }
 }

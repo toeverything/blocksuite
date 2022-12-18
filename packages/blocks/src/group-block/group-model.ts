@@ -10,7 +10,7 @@ export interface GroupBlockProps extends IBaseBlockProps {
 export class GroupBlockModel extends BaseBlockModel implements GroupBlockProps {
   static version = [1, 0] as [number, number];
   flavour = 'affine:group' as const;
-  tag = literal`group-block`;
+  tag = literal`affine-group`;
 
   xywh: string;
 
