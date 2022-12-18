@@ -7,6 +7,8 @@ import type {
   YBlocks,
 } from '../workspace/page';
 import { PrelimText, Text, TextType } from '../text-adapter';
+import type { Workspace } from '../workspace';
+import { fromBase64, toBase64 } from 'lib0/buffer';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -191,4 +193,12 @@ export function toBlockProps(
   });
 
   return props;
+}
+
+export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
+  return toBase64(Y.encodeStateAsUpdateV2(workspace.doc));
+}
+
+export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
+  Y.applyUpdateV2(workspace.doc, fromBase64(update));
 }

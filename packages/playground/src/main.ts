@@ -1,7 +1,7 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import { BlockSchema, createDebugMenu, createEditor } from '@blocksuite/editor';
-import { Generator, Page, Workspace } from '@blocksuite/store';
+import { Generator, Page, Workspace, Utils } from '@blocksuite/store';
 import { getOptions } from './utils';
 import './style.css';
 
@@ -51,7 +51,18 @@ async function main() {
   initButton.addEventListener('click', () => initFunctions.basic(workspace));
 
   if (init != null) {
-    initFunctions[init || 'basic']?.(workspace);
+    if (initFunctions[init]) {
+      initFunctions[init]?.(workspace);
+    } else {
+      const isBase64 =
+        /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
+      if (isBase64.test(init)) {
+        Utils.applyYjsUpdateV2(workspace, init);
+      } else {
+        // fallback
+        initFunctions.basic(workspace);
+      }
+    }
   }
 }
 
