@@ -1,13 +1,11 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
+/** Uncomment this line if you are using BlockSuite in your own project */
+// import "@blocksuite/blocks/style";
 import { BlockSchema, createDebugMenu, createEditor } from '@blocksuite/editor';
-import { Generator, Page, Workspace, Utils } from '@blocksuite/store';
-import { getOptions } from './utils';
+import { Page, Workspace, Utils } from '@blocksuite/store';
+import { getOptions, initParam, isBase64, isE2E } from './utils';
 import './style.css';
-
-const params = new URLSearchParams(location.search);
-const init = params.get('init');
-const isE2E = params.get('room')?.includes('playwright');
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
@@ -28,12 +26,6 @@ function subscribePage(workspace: Workspace) {
 }
 
 async function main() {
-  if (isE2E) {
-    // We need a predictable id generator in test environment.
-    // Keep in mind that the collaboration will cause playground crash,
-    //  because all clients' id starting at 0.
-    options.idGenerator = Generator.AutoIncrement;
-  }
   const workspace = new Workspace(options).register(BlockSchema);
   // @ts-ignore
   [window.workspace, window.blockSchema] = [workspace, BlockSchema];
@@ -50,14 +42,12 @@ async function main() {
   >;
   initButton.addEventListener('click', () => initFunctions.basic(workspace));
 
-  if (init != null) {
-    if (initFunctions[init]) {
-      initFunctions[init]?.(workspace);
+  if (initParam != null) {
+    if (initFunctions[initParam]) {
+      initFunctions[initParam]?.(workspace);
     } else {
-      const isBase64 =
-        /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-      if (init !== '' && isBase64.test(init)) {
-        Utils.applyYjsUpdateV2(workspace, init);
+      if (initParam !== '' && isBase64.test(initParam)) {
+        Utils.applyYjsUpdateV2(workspace, initParam);
       } else {
         // fallback
         initFunctions.basic(workspace);

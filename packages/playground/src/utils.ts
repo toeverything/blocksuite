@@ -9,6 +9,10 @@ import {
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? 'playground';
+export const initParam = params.get('init');
+export const isE2E = params.get('room')?.includes('playwright');
+export const isBase64 =
+  /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
 /**
  * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
@@ -53,9 +57,16 @@ export function getOptions(): Pick<
     }
   });
 
-  const idGenerator = forceUUIDv4
+  let idGenerator = forceUUIDv4
     ? Generator.UUIDv4
     : Generator.AutoIncrementByClientId;
+
+  if (isE2E) {
+    // We need a predictable id generator in single page test environment.
+    // Keep in mind that with this config, the collaboration will easily crash,
+    // because all clients will count id from 0.
+    idGenerator = Generator.AutoIncrement;
+  }
 
   return {
     room,
