@@ -3,7 +3,6 @@ import type hljs from 'highlight.js';
 import { assertExists } from '../../__internal__';
 
 const Module = Quill.import('core/module');
-const Emitter = Quill.import('core/emitter');
 const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
 
@@ -81,7 +80,7 @@ class SyntaxCodeBlock extends CodeBlock {
 export type SyntaxCodeBlockOptions = {
   highlight: (text: string) => string;
   codeBlockElement: HTMLElement;
-  lang: string;
+  language: string;
 };
 SyntaxCodeBlock.className = 'ql-syntax';
 
@@ -105,7 +104,7 @@ class Syntax extends Module {
 
   constructor(quill: Quill, options: SyntaxCodeBlockOptions) {
     super(quill, options);
-    this.language = options.lang;
+    this.language = options.language;
     this.codeBlockElement = options.codeBlockElement;
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
@@ -113,7 +112,8 @@ class Syntax extends Module {
       );
     }
     let timer: number | undefined;
-    this.quill.on(Emitter.events.SCROLL_OPTIMIZE, () => {
+    // @ts-ignore
+    this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
       clearTimeout(timer);
       timer = window.setTimeout(() => {
         this.highlight(false, options.codeBlockElement);
