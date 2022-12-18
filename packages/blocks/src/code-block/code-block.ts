@@ -5,7 +5,7 @@ import codeBlockStyle from './style.css';
 import codeTheme from 'highlight.js/styles/color-brewer.css';
 import { toolTipStyle } from '../components/tooltip';
 import { BLOCK_ID_ATTR, BlockHost } from '../__internal__';
-import highlight from 'highlight.js/es/core';
+import highlight from 'highlight.js';
 
 @customElement('code-block')
 export class CodeBlockComponent extends LitElement {
