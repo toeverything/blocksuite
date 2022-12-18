@@ -4,7 +4,11 @@ import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
-import { uuidv4 } from './utils/id-generator';
+import {
+  createAutoIncrementIdGenerator,
+  createAutoIncrementIdGeneratorByClientId,
+  uuidv4,
+} from './utils/id-generator';
 
 export interface SerializedStore {
   [key: string]: {
@@ -12,11 +16,30 @@ export interface SerializedStore {
   };
 }
 
+export enum Generator {
+  /**
+   * Default mode, generator for the unpredictable id
+   */
+  UUIDv4 = 'uuidV4',
+  /**
+   * This generator is trying to fix the real-time collaboration on debug mode.
+   * This will make generator predictable and won't make conflict
+   * @link https://docs.yjs.dev/api/faq#i-get-a-new-clientid-for-every-session-is-there-a-way-to-make-it-static-for-a-peer-accessing-the-doc
+   */
+  AutoIncrementByClientId = 'autoIncrementByClientId',
+  /**
+   * **Warning**: This generator mode will crash the collaborative feature
+   *  if multiple clients are adding new blocks.
+   * Use this mode only if you know what you're doing.
+   */
+  AutoIncrement = 'autoIncrement',
+}
+
 export interface StoreOptions {
   room?: string;
   providers?: DocProviderConstructor[];
   awareness?: Awareness;
-  idGenerator?: IdGenerator;
+  idGenerator?: Generator;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
@@ -36,7 +59,23 @@ export class Store {
     idGenerator,
   }: StoreOptions = {}) {
     this.awareness = awareness ?? new Awareness(this.doc);
-    this.idGenerator = idGenerator ?? uuidv4;
+    switch (idGenerator) {
+      case Generator.AutoIncrement: {
+        this.idGenerator = createAutoIncrementIdGenerator();
+        break;
+      }
+      case Generator.AutoIncrementByClientId: {
+        this.idGenerator = createAutoIncrementIdGeneratorByClientId(
+          this.doc.clientID
+        );
+        break;
+      }
+      case Generator.UUIDv4:
+      default: {
+        this.idGenerator = uuidv4;
+        break;
+      }
+    }
     this.providers = providers.map(
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, { awareness: this.awareness })

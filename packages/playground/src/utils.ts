@@ -1,11 +1,10 @@
 import {
-  createAutoIncrementIdGenerator,
   createWebsocketDocProvider,
   DebugDocProvider,
   DocProviderConstructor,
+  Generator,
   IndexedDBDocProvider,
   StoreOptions,
-  uuidv4,
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
@@ -54,12 +53,9 @@ export function getOptions(): Pick<
     }
   });
 
-  /**
-   * Specified using "uuidv4" when providers have indexeddb.
-   * Because when persistent data applied to ydoc, we need generator different id for block.
-   * Otherwise, the block id will conflict.
-   */
-  const idGenerator = forceUUIDv4 ? uuidv4 : createAutoIncrementIdGenerator();
+  const idGenerator = forceUUIDv4
+    ? Generator.UUIDv4
+    : Generator.AutoIncrementByClientId;
 
   return {
     room,
