@@ -1,15 +1,16 @@
-// @ts-nocheck
 import Quill from 'quill';
+import type hljs from 'highlight.js';
 import { assertExists } from '../../__internal__';
 
 const Module = Quill.import('core/module');
+const Emitter = Quill.import('core/emitter');
 const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
 
 class SyntaxCodeBlock extends CodeBlock {
-  private lineNumberDigits: number;
+  private lineNumberDigits = 0;
 
-  constructor(domNode) {
+  constructor(domNode: HTMLElement) {
     super(domNode);
   }
 
@@ -44,7 +45,9 @@ class SyntaxCodeBlock extends CodeBlock {
     if (text === this.cachedTextLineNumber) {
       return;
     }
-    const container = codeBlockElement.querySelector('#line-number');
+    const container = codeBlockElement.querySelector(
+      '#line-number'
+    ) as HTMLDivElement | null;
     assertExists(container);
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -67,7 +70,7 @@ class SyntaxCodeBlock extends CodeBlock {
 
     for (let i = 1; i <= lineNum; i++) {
       const node = document.createElement('div');
-      node.innerHTML = i;
+      node.innerHTML = `${i}`;
       container.appendChild(node);
     }
 
@@ -102,7 +105,7 @@ class Syntax extends Module {
 
   constructor(quill: Quill, options: SyntaxCodeBlockOptions) {
     super(quill, options);
-    this.language = options.language;
+    this.language = options.lang;
     this.codeBlockElement = options.codeBlockElement;
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
@@ -110,7 +113,7 @@ class Syntax extends Module {
       );
     }
     let timer: number | undefined;
-    this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
+    this.quill.on(Emitter.events.SCROLL_OPTIMIZE, () => {
       clearTimeout(timer);
       timer = window.setTimeout(() => {
         this.highlight(false, options.codeBlockElement);
@@ -145,6 +148,12 @@ class Syntax extends Module {
     if (range != null) {
       quill.setSelection(range, Quill.sources.SILENT);
     }
+  }
+}
+
+declare global {
+  interface Window {
+    hljs: typeof hljs;
   }
 }
 
