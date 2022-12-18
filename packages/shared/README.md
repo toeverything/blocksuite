@@ -1,0 +1,1 @@
+# `@blocksuite/shared`

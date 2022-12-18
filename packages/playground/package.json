@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocksuite/shared": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*",

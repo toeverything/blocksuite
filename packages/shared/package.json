@@ -1,0 +1,26 @@
+{
+  "name": "@blocksuite/shared",
+  "version": "0.3.0-alpha.11",
+  "exports": {
+    "./package.json": "./package.json",
+    "./shape": {
+      "types": "./shape.d.ts",
+      "require": "./shape.js",
+      "import": "./shape.mjs"
+    }
+  },
+  "repository": "https://github.com/TexteaInc/dev-kit",
+  "bugs": {
+    "url": "https://github.com/TexteaInc/dev-kit/issues"
+  },
+  "homepage": "https://github.com/TexteaInc/dev-kit#readme",
+  "files": [
+    "utils.d.ts",
+    "utils.js",
+    "utils.mjs"
+  ],
+  "scripts": {
+    "build:rollup": "rollup -c rollup.config.ts",
+    "build": "pnpm run build:rollup --configPlugin swc3"
+  }
+}

@@ -12,6 +12,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/shared": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "highlight.js": "^11.7.0",
     "@tldraw/intersect": "^1.8.0",
