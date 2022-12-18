@@ -763,8 +763,9 @@ export function isEmbed(e: SelectionEvent) {
  * Note: If only one block is selected, this function will return the same block twice still.
  * Note: If select multiple blocks, blocks in the middle will be skipped, only the first and last block will be returned.
  */
-export const saveBlockSelection = (): [SelectedBlock, SelectedBlock] => {
-  const selection = window.getSelection();
+export const saveBlockSelection = (
+  selection = window.getSelection()
+): [SelectedBlock, SelectedBlock] => {
   assertExists(selection);
   const models = getModelsByRange(getCurrentRange(selection));
   const startPos = getQuillIndexByNativeSelection(

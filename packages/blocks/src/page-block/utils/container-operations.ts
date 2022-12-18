@@ -188,6 +188,7 @@ function formatModelsByRange(
   key: string
 ) {
   const selection = window.getSelection();
+  const selectedBlocks = saveBlockSelection(selection);
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
@@ -222,10 +223,7 @@ function formatModelsByRange(
       [key]: !isFormatActive,
     });
   }
-  lastRichText.quill.setSelection(endIndex, 0);
-  if (key === 'code' || key === 'link') {
-    lastRichText.quill.format(key, false);
-  }
+  restoreSelection(selectedBlocks);
 }
 
 export function handleFormat(page: Page, key: string) {
@@ -245,9 +243,7 @@ export function handleFormat(page: Page, key: string) {
       const format = quill.getFormat(range);
       models[0].text?.format(index, length, { [key]: !format[key] });
     } else {
-      const selectedBlocks = saveBlockSelection();
       formatModelsByRange(models, page, key);
-      restoreSelection(selectedBlocks);
     }
   }
 }
