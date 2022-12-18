@@ -1,9 +1,12 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src/",
+    "baseUrl": ".",
     "outDir": "./dist/",
-    "noEmit": false
+    "noEmit": false,
+    "paths": {
+      "@blocksuite/shared/*": ["../shared/src/*"]
+    }
   },
   "include": ["./src"],
   "references": []
