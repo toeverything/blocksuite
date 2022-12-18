@@ -1,5 +1,5 @@
-// @ts-nocheck
 import Quill from 'quill';
+import type hljs from 'highlight.js';
 import { assertExists } from '../../__internal__';
 
 const Module = Quill.import('core/module');
@@ -7,9 +7,9 @@ const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
 
 class SyntaxCodeBlock extends CodeBlock {
-  private lineNumberDigits: number;
+  private lineNumberDigits = 0;
 
-  constructor(domNode) {
+  constructor(domNode: HTMLElement) {
     super(domNode);
   }
 
@@ -44,7 +44,9 @@ class SyntaxCodeBlock extends CodeBlock {
     if (text === this.cachedTextLineNumber) {
       return;
     }
-    const container = codeBlockElement.querySelector('#line-number');
+    const container = codeBlockElement.querySelector(
+      '#line-number'
+    ) as HTMLDivElement | null;
     assertExists(container);
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -67,7 +69,7 @@ class SyntaxCodeBlock extends CodeBlock {
 
     for (let i = 1; i <= lineNum; i++) {
       const node = document.createElement('div');
-      node.innerHTML = i;
+      node.innerHTML = `${i}`;
       container.appendChild(node);
     }
 
@@ -78,7 +80,7 @@ class SyntaxCodeBlock extends CodeBlock {
 export type SyntaxCodeBlockOptions = {
   highlight: (text: string) => string;
   codeBlockElement: HTMLElement;
-  lang: string;
+  language: string;
 };
 SyntaxCodeBlock.className = 'ql-syntax';
 
@@ -110,6 +112,7 @@ class Syntax extends Module {
       );
     }
     let timer: number | undefined;
+    // @ts-ignore
     this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
       clearTimeout(timer);
       timer = window.setTimeout(() => {
@@ -145,6 +148,12 @@ class Syntax extends Module {
     if (range != null) {
       quill.setSelection(range, Quill.sources.SILENT);
     }
+  }
+}
+
+declare global {
+  interface Window {
+    hljs: typeof hljs;
   }
 }
 
