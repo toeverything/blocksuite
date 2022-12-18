@@ -166,12 +166,12 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     page.workspace.setPageMeta(page.id, { title });
   }
 
-  private _clearSelection() {
+  private _clearSelection = () => {
     this.selection.state.clear();
     this.signals.updateSelectedRects.emit([]);
     this.signals.updateEmbedRects.emit([]);
     this.signals.updateEmbedEditingState.emit(null);
-  }
+  };
 
   // disable shadow DOM to workaround quill
   createRenderRoot() {
