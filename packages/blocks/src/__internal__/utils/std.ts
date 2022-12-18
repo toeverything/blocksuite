@@ -12,15 +12,18 @@ export const matchFlavours = Utils.matchFlavours;
 
 const IS_FIREFOX = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
-export function caretRangeFromPoint(x: number, y: number): Range | null {
+export function caretRangeFromPoint(
+  clientX: number,
+  clientY: number
+): Range | null {
   if (IS_FIREFOX) {
     // @ts-ignore
-    const caret = document.caretPositionFromPoint(x, y);
+    const caret = document.caretPositionFromPoint(clientX, clientY);
     const range = document.createRange();
     range.setStart(caret.offsetNode, caret.offset);
     return range;
   }
-  return document.caretRangeFromPoint(x, y);
+  return document.caretRangeFromPoint(clientX, clientY);
 }
 
 export function almostEqual(a: number, b: number) {
