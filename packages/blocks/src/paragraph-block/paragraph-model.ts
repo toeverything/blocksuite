@@ -1,4 +1,5 @@
 import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { literal } from 'lit/static-html.js';
 
 export type ParagraphType =
   | 'text'
@@ -21,6 +22,7 @@ export class ParagraphBlockModel
 {
   static version = [1, 0] as [number, number];
   flavour = 'affine:paragraph' as const;
+  tag = literal`paragraph-block`;
 
   type: ParagraphType = 'text';
 
