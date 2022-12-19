@@ -40,7 +40,7 @@ jobs:
             **/tsconfig.tsbuildinfo
             **/tsconfig.*.tsbuildinfo
             **/dist
-          key: ${{ runner.os }}-${{ hashFiles('**/tsconfig.*.tsbuildinfo', '**/tsconfig.tsbuildinfo') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/tsconfig.tsbuildinfo')-${{ hashFiles('**/tsconfig.*.tsbuildinfo') }}
 
       - name: Type Check
         run: pnpm exec tsc -b
