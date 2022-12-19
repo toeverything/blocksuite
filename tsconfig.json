@@ -15,11 +15,28 @@
     "importsNotUsedAsValues": "error",
     "isolatedModules": true,
     "esModuleInterop": true,
-    "noEmit": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "incremental": true
   },
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/blocks"
+    },
+    {
+      "path": "./packages/editor"
+    },
+    {
+      "path": "./packages/playground"
+    },
+    {
+      "path": "./packages/store"
+    },
+    {
+      "path": "./tests"
+    }
+  ]
 }
