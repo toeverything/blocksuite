@@ -5,6 +5,7 @@ import {
   initEmptyParagraphState,
   initThreeParagraphs,
   pressEnter,
+  switchReadonly,
 } from './utils/actions';
 import { assertSelection, assertStoreMatchJSX } from './utils/asserts';
 
@@ -439,4 +440,29 @@ test('should format quick bar be able to copy', async ({ page }) => {
   // TODO assert clipboard
 
   await assertSelection(page, 1, 0, 3);
+});
+
+test('should format quick bar show when double click text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await page.dblclick('.affine-rich-text p', { position: { x: 10, y: 10 } });
+  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBarLocator).toBeVisible();
+});
+
+test('should format quick bar not show at readonly mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await switchReadonly(page);
+
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBarLocator).not.toBeVisible();
+
+  await page.dblclick('.affine-rich-text p', { position: { x: 10, y: 10 } });
+  await expect(formatQuickBarLocator).not.toBeVisible();
 });
