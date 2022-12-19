@@ -22,10 +22,20 @@ export interface CommonBlockElement extends HTMLElement {
   model: BaseBlockModel;
 }
 
+/**
+ * type of `window.getSelection().type`
+ *
+ * The attribute must return "None" if this is empty, "Caret" if this's range is collapsed, and "Range" otherwise.
+ *
+ * More details see https://w3c.github.io/selection-api/#dom-selection-type
+ */
+export type DomSelectionType = 'Caret' | 'Range' | 'None';
+
 export interface SelectionInfo {
-  type: string;
+  type: 'Block' | DomSelectionType;
   selectedBlocks: SelectedBlock[];
 }
+
 export interface SelectedBlock {
   id: string;
   startPos?: number;

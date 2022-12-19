@@ -98,3 +98,16 @@ export async function dragEmbedResize(page: Page) {
     steps: 5,
   });
 }
+
+export async function moveToImage(page: Page) {
+  const { x, y } = await page.evaluate(() => {
+    const bottomRightButton = document.querySelector('img') as HTMLElement;
+    const imageClient = bottomRightButton.getBoundingClientRect();
+    const y = imageClient.top;
+    return {
+      x: imageClient.left + 30,
+      y: y + 30,
+    };
+  });
+  await page.mouse.move(x, y);
+}
