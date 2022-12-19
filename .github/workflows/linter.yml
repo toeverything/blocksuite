@@ -35,12 +35,10 @@ jobs:
         run: npx eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0
 
       - uses: actions/cache@v3
+        id: restore-build
         with:
-          path: |
-            **/tsconfig.tsbuildinfo
-            **/tsconfig.*.tsbuildinfo
-            **/dist
-          key: ${{ runner.os }}-${{ hashFiles('**/tsconfig.tsbuildinfo') }}-${{ hashFiles('**/tsconfig.*.tsbuildinfo') }}
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Type Check
         run: pnpm exec tsc -b
