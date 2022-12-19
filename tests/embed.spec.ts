@@ -2,7 +2,8 @@ import './utils/declare-test-window';
 import { test, Page } from '@playwright/test';
 import {
   activeEmbed,
-  dragEmbedResize,
+  dragEmbedResizeByBottomLeft,
+  dragEmbedResizeByBottomRight,
   enterPlaygroundRoom,
   redoByKeyboard,
   undoByKeyboard,
@@ -31,7 +32,7 @@ async function initImageState(page: Page) {
   });
 }
 
-test('can drag resize image', async ({ page }) => {
+test('can drag resize image by left menu', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
   await assertRichImage(page, 1);
@@ -40,7 +41,26 @@ test('can drag resize image', async ({ page }) => {
   await assertRichDragButton(page);
   await assertImageSize(page, { width: 200, height: 180 });
 
-  await dragEmbedResize(page);
+  await dragEmbedResizeByBottomLeft(page);
+  await assertImageSize(page, { width: 315, height: 283.5 });
+
+  await undoByKeyboard(page);
+  await assertImageSize(page, { width: 200, height: 180 });
+
+  await redoByKeyboard(page);
+  await assertImageSize(page, { width: 315, height: 283.5 });
+});
+
+test('can drag resize image by right menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  await activeEmbed(page);
+  await assertRichDragButton(page);
+  await assertImageSize(page, { width: 200, height: 180 });
+
+  await dragEmbedResizeByBottomRight(page);
   await assertImageSize(page, { width: 305, height: 274.5 });
 
   await undoByKeyboard(page);
