@@ -388,14 +388,11 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     groupId
   );
 
-  // TODO FIXME: The paragraph transform should not lost selection
-  // Remove next line after fix
-  await dragBetweenIndices(page, [1, 0], [1, 3]);
-  await paragraphBtn.hover();
-  // End of workaround
+  // XXX wait for selection restore
+  await page.waitForTimeout(100);
+  const textBtnLocator = page.locator(`[data-testid=text]`);
+  await textBtnLocator.click();
 
-  const textBtn = page.locator(`[data-testid=text]`);
-  await textBtn.click();
   await assertStoreMatchJSX(
     page,
     `
@@ -417,9 +414,10 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:group>`,
     groupId
   );
-
-  // TODO FIXME: The paragraph button should prevent selection after click
-  // await assertSelection(page, 1, 0, 3);
+  // XXX wait for selection restore
+  await page.waitForTimeout(100);
+  // The paragraph button should prevent selection after click
+  await assertSelection(page, 1, 0, 3);
 });
 
 test('should format quick bar be able to copy', async ({ page }) => {
