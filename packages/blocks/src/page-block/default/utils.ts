@@ -122,13 +122,25 @@ export async function downloadImage(model: BaseBlockModel) {
 export async function copyImgToClip(model: BaseBlockModel) {
   const url = await getUrlByModel(model);
   assertExists(url);
-  const data = await fetch(url);
-  const blob = await data.blob();
-  await navigator.clipboard.write([
-    new ClipboardItem({
-      [blob.type]: blob,
-    }),
-  ]);
+
+  const newImage = new Image();
+  newImage.src = url;
+  newImage.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = newImage.width;
+    canvas.height = newImage.height;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(newImage, 0, 0);
+    canvas.toBlob(blob => {
+      if (blob) {
+        navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob,
+          }),
+        ]);
+      }
+    });
+  };
   toast('Copied image to clipboard');
 }
 
