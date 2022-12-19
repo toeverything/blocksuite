@@ -92,7 +92,7 @@ export class EdgelessPageBlockComponent
   private _bindHotkeys() {
     const { page: space } = this;
 
-    hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace.bind(this));
+    hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
     hotkey.addListener(HOTKEYS.H1, () =>
       this._updateType('affine:paragraph', 'h1', space)
     );
@@ -148,11 +148,19 @@ export class EdgelessPageBlockComponent
     removeCommonHotKey();
   }
 
-  private _handleBackspace(e: KeyboardEvent) {
+  private _handleBackspace = (e: KeyboardEvent) => {
     if (this._selection.blockSelectionState.type === 'single') {
-      handleBackspace(this.page, e);
+      const selectedBlock = this._selection.blockSelectionState.selected;
+      if (selectedBlock.flavour === 'affine:shape') {
+        this.page.deleteBlock(selectedBlock);
+        this.signals.updateSelection.emit({
+          type: 'none',
+        });
+      } else {
+        handleBackspace(this.page, e);
+      }
     }
-  }
+  };
 
   private _initViewport() {
     const bound = this.mouseRoot.getBoundingClientRect();
