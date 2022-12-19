@@ -11,6 +11,8 @@ node_modules
 # Build out
 dist/
 build
+tsconfig.tsbuildinfo
+tsconfig.*.tsbuildinfo
 
 # Cache
 .eslintcache

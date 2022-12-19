@@ -138,7 +138,7 @@ test('markdown format parse', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 });
 
-test('splic block when paste', async ({ page }) => {
+test('split block when paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

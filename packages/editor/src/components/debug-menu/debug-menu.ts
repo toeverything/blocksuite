@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {
@@ -11,6 +11,7 @@ import {
   updateSelectedTextType,
   type GroupBlockModel,
 } from '@blocksuite/blocks';
+import { Utils } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -159,6 +160,11 @@ const icons = {
       d="M512 64C264.576 64 64 264.576 64 512s200.576 448 448 448 448-200.576 448-448S759.424 64 512 64zM776 400.576l-316.8 316.8c-9.728 9.728-25.472 9.728-35.2 0l-176-176c-9.728-9.728-9.728-25.472 0-35.2l35.2-35.2c9.728-9.728 25.472-9.728 35.2 0L441.6 594.176l264-264c9.728-9.728 25.472-9.728 35.2 0l35.2 35.2C785.728 375.104 785.728 390.848 776 400.576z"
     ></path>
   </svg>`,
+  share: html`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+    <path
+      d="M352 224H305.5c-45 0-81.5 36.5-81.5 81.5c0 22.3 10.3 34.3 19.2 40.5c6.8 4.7 12.8 12 12.8 20.3c0 9.8-8 17.8-17.8 17.8h-2.5c-2.4 0-4.8-.4-7.1-1.4C210.8 374.8 128 333.4 128 240c0-79.5 64.5-144 144-144h80V34.7C352 15.5 367.5 0 386.7 0c8.6 0 16.8 3.2 23.2 8.9L548.1 133.3c7.6 6.8 11.9 16.5 11.9 26.7s-4.3 19.9-11.9 26.7l-139 125.1c-5.9 5.3-13.5 8.2-21.4 8.2H384c-17.7 0-32-14.3-32-32V224zM80 96c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16H400c8.8 0 16-7.2 16-16V384c0-17.7 14.3-32 32-32s32 14.3 32 32v48c0 44.2-35.8 80-80 80H80c-44.2 0-80-35.8-80-80V112C0 67.8 35.8 32 80 32h48c17.7 0 32 14.3 32 32s-14.3 32-32 32H80z"
+    />
+  </svg> `,
 };
 
 @customElement('debug-menu')
@@ -215,6 +221,10 @@ export class DebugMenu extends LitElement {
     return this.editor.contentParser;
   }
 
+  createRenderRoot() {
+    return this;
+  }
+
   private _onToggleConnection() {
     if (this.connected) {
       this.workspace.providers.forEach(provider => provider.disconnect());
@@ -249,7 +259,7 @@ export class DebugMenu extends LitElement {
     const index = parent?.children.indexOf(startModel);
     assertExists(parent);
     const blockProps = {
-      flavour: 'affine:code-block',
+      flavour: 'affine:code',
       text: startModel.text?.clone(),
     };
     this.page.deleteBlock(startModel);
@@ -302,54 +312,19 @@ export class DebugMenu extends LitElement {
     this.contentParser.onExportMarkdown();
   }
 
+  private _shareUrl() {
+    const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
+    const url = new URL(window.location.toString());
+    url.searchParams.set('init', base64);
+    window.history.pushState({}, '', url);
+  }
+
   firstUpdated() {
     this.page.signals.historyUpdated.on(() => {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
   }
-
-  static styles = css`
-    .debug-menu {
-      display: flex;
-      flex-wrap: wrap;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 1000; /* for debug visibility */
-    }
-    .debug-menu > button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-left: 2px;
-      margin-top: 2px;
-      width: 26px;
-      height: 22px;
-      border: 0;
-      border-radius: 2px;
-      background-color: var(--affine-border-color);
-      color: var(--affine-text-color);
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-    .debug-menu > button:hover {
-      background-color: var(--affine-hover-background);
-    }
-    .debug-menu > button:disabled,
-    .debug-menu > button:disabled:hover {
-      opacity: 0.5;
-      background-color: var(--affine-border-color);
-      cursor: default;
-    }
-    .debug-menu > button path {
-      fill: var(--affine-text-color);
-    }
-    .debug-menu > button > * {
-      flex: 1;
-    }
-  `;
 
   update(changedProperties: Map<string, unknown>) {
     if (
@@ -365,6 +340,47 @@ export class DebugMenu extends LitElement {
 
   render() {
     return html`
+      <style>
+        .debug-menu {
+          display: flex;
+          flex-wrap: wrap;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          z-index: 1000; /* for debug visibility */
+        }
+        .debug-menu > button {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-left: 2px;
+          margin-top: 2px;
+          width: 26px;
+          height: 22px;
+          border: 0;
+          border-radius: 2px;
+          background-color: var(--affine-border-color);
+          color: var(--affine-text-color);
+          transition: all 0.3s;
+          cursor: pointer;
+        }
+        .debug-menu > button:hover {
+          background-color: var(--affine-hover-background);
+        }
+        .debug-menu > button:disabled,
+        .debug-menu > button:disabled:hover {
+          opacity: 0.5;
+          background-color: var(--affine-border-color);
+          cursor: default;
+        }
+        .debug-menu > button path {
+          fill: var(--affine-text-color);
+        }
+        .debug-menu > button > * {
+          flex: 1;
+        }
+      </style>
       <div class="debug-menu">
         <button
           aria-label="undo"
@@ -551,6 +567,14 @@ export class DebugMenu extends LitElement {
           @click=${this._onToggleReadonly}
         >
           ${this.readonly ? icons.unReadonly : icons.readonly}
+        </button>
+        <button
+          aria-label="share url"
+          title="share url"
+          tabindex="-1"
+          @click=${this._shareUrl}
+        >
+          ${icons.share}
         </button>
         <select
           style="width: 72px"

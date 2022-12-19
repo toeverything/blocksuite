@@ -1,15 +1,8 @@
-import { html } from 'lit';
+import { html } from 'lit/static-html.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from '../utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-
-import type { ListBlockModel } from '../../list-block';
-import type { ParagraphBlockModel } from '../../paragraph-block';
-import type { GroupBlockModel } from '../../group-block';
-import type { CodeBlockModel } from '../../code-block';
-import type { DividerBlockModel } from '../../divider-block';
 import type { EmbedBlockModel } from '../../embed-block';
-import type { ShapeBlockModel } from '../../shape-block';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -19,59 +12,40 @@ export function BlockElement(
 ) {
   switch (model.flavour) {
     case 'affine:paragraph':
-      return html`
-        <paragraph-block
-          .model=${model as ParagraphBlockModel}
-          .host=${host}
-        ></paragraph-block>
-      `;
     case 'affine:list':
-      return html`
-        <list-block
-          .model=${model as ListBlockModel}
-          .host=${host}
-        ></list-block>
-      `;
     case 'affine:group':
-      return html`
-        <group-block
-          .model=${model as GroupBlockModel}
-          .host=${host}
-        ></group-block>
-      `;
     case 'affine:divider':
+    case 'affine:code':
       return html`
-        <divider-block
-          .model=${model as DividerBlockModel}
+        <${model.tag}
+          .model=${model}
           .host=${host}
-        ></divider-block>
+        ></${model.tag}>
       `;
     case 'affine:shape':
+      // only render shape block in edgeless mode
       if (edgeless)
-        // only render shape block in edgeless mode
         return html`
-          <shape-block
-            .model=${model as ShapeBlockModel}
+          <${model.tag}
+            .model=${model}
             .host=${host}
-          ></shape-block>
+          ></${model.tag}>
         `;
-      else return html``;
+      else return null;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
-    case 'affine:code-block':
-      return html` <code-block
-        .model=${model as CodeBlockModel}
-        .host=${host}
-      ></code-block>`;
   }
-  return html`<div>Unknown block type: "${model.flavour}"</div>`;
+  return html`<div>Unknown block flavour: "${model.flavour}"</div>`;
 }
 
 function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
   switch (model.type) {
     case 'image':
       return html`
-        <img-block .model=${model as EmbedBlockModel} .host=${host}></img-block>
+        <affine-image
+          .model=${model as EmbedBlockModel}
+          .host=${host}
+        ></affine-image>
       `;
     default:
       return html`<div>Unknown embed type: "${model.type}"</div>`;

@@ -6,11 +6,10 @@ import {
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__';
-import type { SelectionArea } from '../edgeless/selection-manager';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const currentRange = window.getSelection()?.getRangeAt(0);
-  const pointRange = caretRangeFromPoint(e.x, e.y);
+  const pointRange = caretRangeFromPoint(e.raw.x, e.raw.y);
   // repair browser context menu change selection can not go through blocks
   if (
     currentRange &&
@@ -38,20 +37,11 @@ export type DragDirection =
 // text can be applied both text and paragraph formatting actions, while others can only be applied paragraph actions
 export type SelectedBlockType = 'Text' | 'Caret' | 'Other';
 
-function isSelectionEvent(
-  e: SelectionEvent | SelectionArea
-): e is SelectionEvent {
-  return 'raw' in e;
-}
-
-export function getDragDirection(
-  e: SelectionEvent | SelectionArea,
-  selection: Selection
-): DragDirection {
+export function getDragDirection(e: SelectionEvent): DragDirection {
   const startX = e.start.x;
   const startY = e.start.y;
-  const endX = isSelectionEvent(e) ? e.x : e.end.x;
-  const endY = isSelectionEvent(e) ? e.y : e.end.y;
+  const endX = e.x;
+  const endY = e.y;
   // selection direction
   const isForwards = endX > startX;
   const range = getCurrentRange();
@@ -89,7 +79,7 @@ export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
   const selection = window.getSelection();
   assertExists(selection);
   const curRange = getCurrentRange(selection);
-  const direction = getDragDirection(e, selection);
+  const direction = getDragDirection(e);
   const isSelectedNothing =
     selection.type === 'Caret' ||
     // If you try to drag from back to front on an empty line,

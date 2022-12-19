@@ -1,13 +1,7 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { assert, describe, expect, it } from 'vitest';
-import {
-  BaseBlockModel,
-  Signal,
-  Workspace,
-  Page,
-  createAutoIncrementIdGenerator,
-} from '..';
+import { BaseBlockModel, Signal, Workspace, Page, Generator } from '..';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModel } from '../../../blocks/src/page-block/page-model';
@@ -19,7 +13,7 @@ import type { PageMeta } from '../workspace';
 import { assertExists } from '../utils/utils';
 
 function createTestOptions() {
-  const idGenerator = createAutoIncrementIdGenerator();
+  const idGenerator = Generator.AutoIncrement;
   return { idGenerator };
 }
 
@@ -101,45 +95,6 @@ describe.concurrent('addBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
-      },
-    });
-  });
-
-  it('can set custom idGenerator', async () => {
-    const options = {
-      ...createTestOptions(),
-      idGenerator: (() => {
-        const keys = ['7', '100', '2'];
-        let i = 0;
-        return () => keys[i++];
-      })(),
-    };
-    const workspace = new Workspace(options).register(BlockSchema);
-    const page = await createPage(workspace);
-
-    page.addBlock({ flavour: 'affine:page' });
-    page.addBlock({ flavour: 'affine:paragraph' });
-    page.addBlock({ flavour: 'affine:paragraph' });
-
-    assert.deepEqual(serialize(page)[spaceId], {
-      '7': {
-        'sys:children': ['100', '2'],
-        'sys:flavour': 'affine:page',
-        'sys:id': '7',
-      },
-      '100': {
-        'sys:children': [],
-        'sys:flavour': 'affine:paragraph',
-        'sys:id': '100',
-        'prop:text': '',
-        'prop:type': 'text',
-      },
-      '2': {
-        'sys:children': [],
-        'sys:flavour': 'affine:paragraph',
-        'sys:id': '2',
-        'prop:text': '',
-        'prop:type': 'text',
       },
     });
   });

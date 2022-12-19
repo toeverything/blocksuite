@@ -28,7 +28,7 @@ export const defaultStore: SerializedStore = {
       'affine:divider': [1, 0],
       'affine:embed': [1, 0],
       'affine:shape': [1, 0],
-      'affine:code-block': [1, 0],
+      'affine:code': [1, 0],
     },
   },
   'space:page0': {
@@ -111,7 +111,7 @@ export async function assertBlockCount(
   flavour: string,
   count: number
 ) {
-  const actual = await page.locator(`${flavour}-block`).count();
+  const actual = await page.locator(`affine-${flavour}`).count();
   expect(actual).toBe(count);
 }
 

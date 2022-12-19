@@ -9,7 +9,7 @@ import {
 } from '../__internal__';
 import style from './style.css';
 
-@customElement('group-block')
+@customElement('affine-group')
 export class GroupBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -48,6 +48,6 @@ export class GroupBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'group-block': GroupBlockComponent;
+    'affine-group': GroupBlockComponent;
   }
 }

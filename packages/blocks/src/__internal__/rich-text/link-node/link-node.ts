@@ -5,7 +5,12 @@ import {
   ALLOWED_SCHEMES,
   showLinkPopover,
 } from '../../../components/link-popover';
-import { assertExists, getModelByElement, hotkey } from '../../utils';
+import {
+  assertExists,
+  getDefaultPageBlock,
+  getModelByElement,
+  hotkey,
+} from '../../utils';
 import { LinkIcon } from './link-icon';
 
 // TODO fix Blot types
@@ -56,6 +61,12 @@ export class LinkNodeComponent extends LitElement {
   // }
 
   onHover(e: MouseEvent) {
+    const model = getModelByElement(this);
+    const page = getDefaultPageBlock(model);
+    if (page.readonly) {
+      return;
+    }
+
     this.popoverTimer = window.setTimeout(async () => {
       this.onDelayHover(e);
     }, this.popoverHoverOpenDelay);

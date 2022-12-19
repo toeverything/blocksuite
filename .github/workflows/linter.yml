@@ -1,0 +1,35 @@
+name: Linter
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Prettier
+        run: npx prettier --cache --check packages tests
+
+      - name: Run ESLint
+        # by default: eslint will save the cache files on cwd
+        #   Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
+        run: npx eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0

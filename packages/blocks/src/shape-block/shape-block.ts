@@ -16,7 +16,7 @@ import style from './style.css';
 
 export const SHAPE_PADDING = 48;
 
-@customElement('shape-block')
+@customElement('affine-shape')
 export class ShapeBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -87,6 +87,6 @@ export class ShapeBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'shape-block': ShapeBlockComponent;
+    'affine-shape': ShapeBlockComponent;
   }
 }

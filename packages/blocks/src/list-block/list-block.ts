@@ -25,7 +25,7 @@ function selectList(model: ListBlockModel) {
   const selectionRect = blockElement.getBoundingClientRect();
   selectionManager.selectBlockByRect(selectionRect);
 }
-@customElement('list-block')
+@customElement('affine-list')
 export class ListBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -95,6 +95,6 @@ export class ListBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'list-block': ListBlockComponent;
+    'affine-list': ListBlockComponent;
   }
 }

@@ -437,7 +437,9 @@ test('select text in the same line with dragging rightward and press enter creat
     return { x: bbox.right + 30, y: bbox.bottom + 50 };
   });
 
-  await dragBetweenCoords(page, below789, above123, 50);
+  await dragBetweenCoords(page, below789, above123, {
+    steps: 50,
+  });
   await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.type('abc');
   await assertRichTexts(page, ['123', '456', '789', 'abc']);
@@ -503,4 +505,58 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   await page.keyboard.type('1');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('16789\n');
+});
+
+test('selection on heavy page', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page
+    .locator('body')
+    .evaluate(element => (element.style.padding = '50px'));
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  for (let i = 0; i < 5; i++) {
+    await page.keyboard.insertText(`Line ${i + 1}`);
+    await pressEnter(page);
+  }
+  const [first, last] = await page.evaluate(() => {
+    const first = document.querySelector('[data-block-id="2"]');
+    if (!first) {
+      throw new Error();
+    }
+
+    const last = document.querySelector('[data-block-id="6"]');
+    if (!last) {
+      throw new Error();
+    }
+    return [first.getBoundingClientRect(), last.getBoundingClientRect()];
+  });
+  await dragBetweenCoords(
+    page,
+    {
+      x: first.x - 1,
+      y: first.y - 1,
+    },
+    {
+      x: last.x + 1,
+      y: last.y + 1,
+    },
+    {
+      beforeMouseUp: async () => {
+        const rect = await page
+          .locator('.affine-page-frame-selection-rect')
+          .evaluate(element => element.getBoundingClientRect());
+        expect(rect.x).toBe(first.x - 1);
+        expect(rect.y).toBe(first.y - 1);
+        expect(rect.right).toBe(last.x + 1);
+        expect(rect.bottom).toBe(last.y + 1);
+      },
+    }
+  );
+  const rectNum = await page.evaluate(() => {
+    const container = document.querySelector(
+      '.affine-page-selected-rects-container'
+    );
+    return container?.children.length;
+  });
+  expect(rectNum).toBe(5);
 });
