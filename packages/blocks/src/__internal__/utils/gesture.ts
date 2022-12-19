@@ -14,6 +14,7 @@ export interface SelectionEvent extends IPoint {
   start: IPoint;
   delta: IPoint;
   raw: MouseEvent;
+  containerOffset: IPoint;
   keys: {
     shift: boolean;
     /** command or control */
@@ -29,19 +30,27 @@ function isFarEnough(a: IPoint, b: IPoint, d = 2) {
 
 function toSelectionEvent(
   e: MouseEvent,
-  rect: DOMRect | null,
+  rect: DOMRect,
   startX: number,
   startY: number,
   last: SelectionEvent | null = null
 ): SelectionEvent {
   const delta = { x: 0, y: 0 };
   const start = { x: startX, y: startY };
-  const offsetX = e.clientX - (rect?.left ?? 0);
-  const offsetY = e.clientY - (rect?.top ?? 0);
+  const offsetX = e.clientX - rect.left;
+  const offsetY = e.clientY - rect.top;
   const selectionEvent: SelectionEvent = {
     x: offsetX,
     y: offsetY,
     raw: e,
+    // absolute position is still **relative** to the nearest positioned ancestor.
+    //  In our case, it is the editor. For example, if there is padding/margin in editor,
+    //    then the correct absolute `x`/`y` of mouse position is `containerOffset.x - x`
+    // Refs: https://developer.mozilla.org/en-US/docs/Web/CSS/position#absolute_positioning
+    containerOffset: {
+      x: rect.left,
+      y: rect.top,
+    },
     delta,
     start,
     keys: {
@@ -90,7 +99,7 @@ export function initMouseEventHandlers(
   let startY = -Infinity;
   let isDragging = false;
   let last: SelectionEvent | null = null;
-  let rect: DOMRect | null = null;
+  const rect: DOMRect = container.getBoundingClientRect();
 
   const mouseOutHandler = (e: MouseEvent) =>
     onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
@@ -98,7 +107,6 @@ export function initMouseEventHandlers(
   const mouseDownHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
 
-    rect = container.getBoundingClientRect();
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
     isDragging = false;
@@ -112,8 +120,6 @@ export function initMouseEventHandlers(
 
   const mouseMoveHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
-
-    if (!rect) rect = container.getBoundingClientRect();
 
     const a = { x: startX, y: startY };
     const offsetX = e.clientX - rect.left;

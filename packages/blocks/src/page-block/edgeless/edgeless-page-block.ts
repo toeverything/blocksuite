@@ -42,7 +42,7 @@ export interface EdgelessContainer extends HTMLElement {
   };
 }
 
-@customElement('edgeless-page-block')
+@customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
   extends LitElement
   implements EdgelessContainer, BlockHost
@@ -262,6 +262,6 @@ export class EdgelessPageBlockComponent
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-page-block': EdgelessPageBlockComponent;
+    'affine-edgeless-page': EdgelessPageBlockComponent;
   }
 }

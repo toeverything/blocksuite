@@ -7,6 +7,13 @@ export function createAutoIncrementIdGenerator(): IdGenerator {
   return () => (i++).toString();
 }
 
+export function createAutoIncrementIdGeneratorByClientId(
+  clientId: number
+): IdGenerator {
+  let i = 0;
+  return () => `${clientId}:${i++}`;
+}
+
 export function uuidv4() {
   return uuidv4IdGenerator();
 }

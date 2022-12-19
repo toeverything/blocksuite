@@ -15,7 +15,7 @@ export class EditorContainer extends LitElement {
   mode?: 'page' | 'edgeless' = 'page';
 
   @property()
-  readonly?: boolean = false;
+  readonly = false;
 
   @property()
   mouseMode: MouseMode = {
@@ -91,22 +91,22 @@ export class EditorContainer extends LitElement {
     if (!this.model) return null;
 
     const pageContainer = html`
-      <default-page-block
+      <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
         .model=${this.model}
         .readonly=${this.readonly}
-      ></default-page-block>
+      ></affine-default-page>
     `;
 
     const edgelessContainer = html`
-      <edgeless-page-block
+      <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
         .model=${this.model}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
-      ></edgeless-page-block>
+      ></affine-edgeless-page>
     `;
 
     const blockRoot = html`

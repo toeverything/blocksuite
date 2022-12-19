@@ -1,0 +1,44 @@
+# This workflow will release a new version that follows `${version}-${date}-${hash}`
+name: Nightly Release
+
+on:
+  schedule:
+    # At the end of every day
+    - cron: '0 0 * * *'
+
+jobs:
+  nightly-release:
+    name: Nightly Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - uses: toeverything/set-build-version@latest
+
+      - name: Replace version
+        run: ./scripts/publish-to-github.sh
+
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm release --tag nightly
+          createGithubReleases: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -27,7 +27,7 @@ const getPlaceholder = (model: ParagraphBlockModel) => {
   }
 };
 
-@customElement('paragraph-block')
+@customElement('affine-paragraph')
 export class ParagraphBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -74,6 +74,6 @@ export class ParagraphBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'paragraph-block': ParagraphBlockComponent;
+    'affine-paragraph': ParagraphBlockComponent;
   }
 }

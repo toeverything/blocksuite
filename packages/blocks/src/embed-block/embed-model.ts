@@ -1,4 +1,5 @@
 import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
+import { literal } from 'lit/static-html.js';
 
 type EmbedType = 'image' | 'video' | 'audio' | 'file';
 export interface EmbedBlockProps extends IBaseBlockProps {
@@ -13,6 +14,7 @@ export interface EmbedBlockProps extends IBaseBlockProps {
 export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
   static version = [1, 0] as [number, number];
   flavour = 'affine:embed' as const;
+  tag = literal`affine-embed`;
 
   width: number;
   height: number;

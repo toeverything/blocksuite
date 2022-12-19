@@ -25,6 +25,7 @@
 }
 
 .affine-default-page-block-title {
+  height: 100%;
   width: 100%;
   font-size: 40px;
   line-height: 50px;

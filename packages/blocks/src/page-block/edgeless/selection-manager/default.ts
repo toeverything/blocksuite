@@ -1,6 +1,6 @@
 import type { XYWH } from '../selection-manager';
 import type { DefaultMouseMode, SelectionEvent } from '../../../__internal__';
-import { getSelectionBoxBound, offsetPoint, pick } from '../utils';
+import { getSelectionBoxBound, pick } from '../utils';
 import {
   caretRangeFromPoint,
   handleNativeRangeClick,
@@ -88,7 +88,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
 
   onContainerClick(e: SelectionEvent): void {
     const { viewport } = this._container;
-    const [modelX, modelY] = viewport.toModelCoord(...offsetPoint(e));
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const selected = pick(this._blocks, modelX, modelY, this._container, e);
 
     if (selected) {
@@ -110,7 +110,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
 
   onContainerDragStart(e: SelectionEvent): void {
     const { viewport } = this._container;
-    const [modelX, modelY] = viewport.toModelCoord(...offsetPoint(e));
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const selected = pick(this._blocks, modelX, modelY, this._container, e);
 
     if (selected) {
@@ -118,14 +118,14 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
     } else {
       this._blockSelectionState = { type: 'none' };
       this._frameSelectionState = {
-        start: new DOMPoint(...offsetPoint(e)),
-        end: new DOMPoint(...offsetPoint(e)),
+        start: new DOMPoint(e.x, e.y),
+        end: new DOMPoint(e.x, e.y),
       };
 
       this._container.signals.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
-    this._startRange = caretRangeFromPoint(...offsetPoint(e));
+    this._startRange = caretRangeFromPoint(e.x, e.y);
   }
 
   onContainerDragMove(e: SelectionEvent): void {
@@ -163,7 +163,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
     }
 
     if (this._frameSelectionState) {
-      this._updateFrameSelectionState(...offsetPoint(e));
+      this._updateFrameSelectionState(e.x, e.y);
     }
   }
 
@@ -182,7 +182,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
 
   onContainerMouseMove(e: SelectionEvent): void {
     const { viewport } = this._container;
-    const [modelX, modelY] = viewport.toModelCoord(...offsetPoint(e));
+    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
     const hovered = pick(this._blocks, modelX, modelY, this._container, e);
 
     this._updateHoverState(hovered);

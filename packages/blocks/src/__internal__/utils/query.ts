@@ -63,16 +63,16 @@ export function getNextSiblingById<T extends ElementTagName>(
 }
 
 export function getNextBlock(blockId: string) {
-  let currentBlock = getBlockById<'paragraph-block'>(blockId);
+  let currentBlock = getBlockById<'affine-paragraph'>(blockId);
   if (currentBlock?.model.children.length) {
     return currentBlock.model.children[0];
   }
   while (currentBlock) {
-    const parentBlock = getParentBlockById<'paragraph-block'>(
+    const parentBlock = getParentBlockById<'affine-paragraph'>(
       currentBlock.model.id
     );
     if (parentBlock) {
-      const nextSiblings = getNextSiblingById<'paragraph-block'>(
+      const nextSiblings = getNextSiblingById<'affine-paragraph'>(
         currentBlock.model.id
       );
       if (nextSiblings) {
@@ -85,9 +85,12 @@ export function getNextBlock(blockId: string) {
 }
 
 export function getPreviousBlock(container: Element, blockId: string) {
-  const parentBlock = getParentBlockById<'paragraph-block'>(blockId, container);
+  const parentBlock = getParentBlockById<'affine-paragraph'>(
+    blockId,
+    container
+  );
   if (parentBlock) {
-    const previousBlock = getPreviousSiblingById<'paragraph-block'>(
+    const previousBlock = getPreviousSiblingById<'affine-paragraph'>(
       blockId,
       container
     );
@@ -174,8 +177,11 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
     commonAncestor.attributes &&
     !commonAncestor.attributes.getNamedItem(ATTR)
   ) {
-    commonAncestor = commonAncestor.closest(`[${ATTR}]`)
+    const parentElement = commonAncestor.closest(`[${ATTR}]`)
       ?.parentElement as HTMLElement;
+    if (parentElement != null) {
+      commonAncestor = parentElement;
+    }
   }
   const intersectedModels: BaseBlockModel[] = [];
   const blockElementArray = commonAncestor.querySelectorAll(`[${ATTR}]`);
@@ -192,7 +198,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
-        blockElement?.tagName !== 'GROUP-BLOCK'
+        blockElement?.tagName !== 'AFFINE-GROUP'
       ) {
         intersectedModels.push(block.model);
       }
@@ -322,7 +328,7 @@ export function getAllBlocks() {
   const blocks = Array.from(document.querySelectorAll(`[${ATTR}]`));
   return blocks.filter(item => {
     return (
-      item.tagName !== 'DEFAULT-PAGE-BLOCK' && item.tagName !== 'GROUP-BLOCK'
+      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-GROUP'
     );
   });
 }

@@ -2,6 +2,12 @@ import type { Page } from './workspace';
 import type { TextType } from './text-adapter';
 import { Signal } from './utils/signal';
 
+// ported from lit
+interface StaticValue {
+  _$litStatic$: string;
+  r: unknown;
+}
+
 export interface IBaseBlockProps {
   flavour: string;
   type: string;
@@ -14,15 +20,16 @@ export interface IBaseBlockProps {
 
 export class BaseBlockModel implements IBaseBlockProps {
   static version: [number, number];
+  flavour!: string;
+  tag!: StaticValue;
+  id: string;
 
   page: Page;
   propsUpdated = new Signal();
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
-  flavour!: string;
   type!: string;
-  id: string;
   children: BaseBlockModel[];
   // TODO use schema
   text?: TextType;

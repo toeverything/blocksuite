@@ -34,7 +34,7 @@ export type PrefixedBlockProps = Record<string, unknown> & {
   'sys:flavour': string;
 };
 
-const IS_WEB = typeof window !== 'undefined';
+const isWeb = typeof window !== 'undefined';
 
 function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
@@ -360,7 +360,7 @@ export class Page extends Space {
   }
 
   private _historyAddObserver = (event: { stackItem: StackItem }) => {
-    if (IS_WEB) {
+    if (isWeb) {
       event.stackItem.meta.set(
         'cursor-location',
         this.awareness.getLocalCursor()
@@ -408,7 +408,7 @@ export class Page extends Space {
       matchFlavours(model, [
         'affine:paragraph',
         'affine:list',
-        'affine:code-block',
+        'affine:code',
       ]) &&
       !yBlock.get('prop:text')
     ) {

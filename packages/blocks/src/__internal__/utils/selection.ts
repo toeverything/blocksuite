@@ -14,7 +14,7 @@ import {
   getModelByElement,
 } from './query';
 import { Rect } from './rect';
-import type { SelectionEvent } from './gesture';
+import type { IPoint, SelectionEvent } from './gesture';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -48,8 +48,9 @@ function backwardSelect(newRange: Range, range: Range) {
 }
 
 function fixCurrentRangeToText(
-  x: number,
-  y: number,
+  clientX: number,
+  clientY: number,
+  offset: IPoint,
   range: Range,
   isForward: boolean
 ) {
@@ -65,18 +66,20 @@ function fixCurrentRangeToText(
       const text = isForward
         ? texts.reverse().find(t => {
             const rect = t.getBoundingClientRect();
-            return y >= rect.top; // handle both drag downward, and rightward
+            return clientY >= rect.top; // handle both drag downward, and rightward
           })
         : texts.find(t => {
             const rect = t.getBoundingClientRect();
-            return y <= rect.bottom; // handle both drag upwards and leftward
+            return clientY <= rect.bottom; // handle both drag upwards and leftward
           });
       if (!text) {
         throw new Error('Failed to focus text node!');
       }
       const rect = text.getBoundingClientRect();
-      const newY = isForward ? rect.bottom - 6 : rect.top + 6;
-      newRange = caretRangeFromPoint(x, newY);
+      const newY = isForward
+        ? rect.bottom - offset.y - 6
+        : rect.top - offset.y + 6;
+      newRange = caretRangeFromPoint(clientX, newY);
       if (isForward && newRange) {
         forwardSelect(newRange, range);
       } else if (!isForward && newRange) {
@@ -412,6 +415,7 @@ export function handleNativeRangeDragMove(
     currentRange = fixCurrentRangeToText(
       e.raw.clientX,
       e.raw.clientY,
+      e.containerOffset,
       currentRange,
       isForward
     );
@@ -425,7 +429,7 @@ function isBlankAreaBetweenBlocks(startContainer: Node) {
 }
 
 function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
-  return startContainer.tagName === 'GROUP-BLOCK';
+  return startContainer.tagName === 'AFFINE-GROUP';
 }
 
 function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {

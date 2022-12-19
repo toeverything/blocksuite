@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: lint and test
+    name: test
     runs-on: ubuntu-latest
 
     steps:
@@ -29,11 +29,8 @@ jobs:
       - name: Install Playwright browsers
         run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 
-      - name: Run lint
-        run: pnpm lint
-
       - name: Type Check
-        run: pnpm -r exec tsc --noEmit
+        run: pnpm exec tsc -b
 
       - name: Run tests
         run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only

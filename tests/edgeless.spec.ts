@@ -171,6 +171,6 @@ test('add shape blocks', async ({ page }) => {
     const element = document.querySelector(`[data-block-id="3"]`);
     return element?.tagName;
   });
-  expect(tag).toBe('SHAPE-BLOCK');
+  expect(tag).toBe('AFFINE-SHAPE');
   await assertRichTexts(page, ['hello']);
 });
