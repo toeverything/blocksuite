@@ -155,10 +155,6 @@ test('should format quick bar be able to format text when select multiple line',
   await expect(boldBtnLocator).not.toHaveAttribute('active', '');
   await boldBtnLocator.click();
 
-  // TODO FIXME: selection should not be lost after click
-  // Remove next line after fix
-  await dragBetweenIndices(page, [0, 0], [2, 3]);
-
   // The bold button should be active after click
   await expect(boldBtnLocator).toHaveAttribute('active', '');
   await assertStoreMatchJSX(
@@ -204,9 +200,50 @@ test('should format quick bar be able to format text when select multiple line',
     groupId
   );
 
-  // TODO FIXME: The bold button should be inactive after click again
-  // await boldBtnLocator.click();
-  // await assertStoreMatchJSX(page, ``, groupId);
+  await boldBtnLocator.click();
+  await expect(boldBtnLocator).not.toHaveAttribute('active', '');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={false}
+          insert="123"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={false}
+          insert="456"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={false}
+          insert="789"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
 });
 
 test('should format quick bar be able to link text', async ({ page }) => {

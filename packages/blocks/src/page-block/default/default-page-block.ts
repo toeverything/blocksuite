@@ -1,13 +1,7 @@
 /// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import {
-  Disposable,
-  Signal,
-  Page,
-  Text,
-  BaseBlockModel,
-} from '@blocksuite/store';
+import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
 import type { PageBlockModel } from '..';
 import {
   assertExists,
@@ -110,8 +104,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     updateCodeBlockOption: new Signal<CodeBlockOption | null>(),
     nativeSelection: new Signal<boolean>(),
   };
-
-  private _scrollDisposable!: Disposable;
 
   public isCompositionStart = false;
 
@@ -296,7 +288,6 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     super.disconnectedCallback();
 
     removeHotkeys();
-    this._scrollDisposable.dispose();
     this.selection.dispose();
     window.removeEventListener(
       'compositionstart',

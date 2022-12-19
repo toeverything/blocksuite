@@ -1,5 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { DefaultPageBlockComponent } from '../..';
+import type { DefaultPageBlockComponent, SelectedBlock } from '../..';
 import type { RichText } from '../rich-text/rich-text';
 import { BLOCK_ID_ATTR as ATTR } from './consts';
 import { assertExists, matchFlavours } from './std';
@@ -316,12 +316,52 @@ export function getQuillIndexByNativeSelection(
       selfAdded = true;
       offset += nodeOffset;
     } else {
-      offset += textWithoutNode(ele as Node, lastNode as Node).length;
+      offset += textWithoutNode(ele, lastNode as Node).length;
     }
     lastNode = ele;
     ele = ele?.parentNode;
   }
   return offset;
+}
+
+/**
+ * Get the specific text node and offset by the selected block.
+ * The reverse implementation of {@link getQuillIndexByNativeSelection}
+ * See also {@link getQuillIndexByNativeSelection}
+ *
+ * ```ts
+ * const [startNode, startOffset] = getTextNodeBySelectedBlock(startBlock);
+ * const [endNode, endOffset] = getTextNodeBySelectedBlock(endBlock);
+ *
+ * const range = new Range();
+ * range.setStart(startNode, startOffset);
+ * range.setEnd(endNode, endOffset);
+ *
+ * const selection = window.getSelection();
+ * selection.removeAllRanges();
+ * selection.addRange(range);
+ * ```
+ */
+export function getTextNodeBySelectedBlock(selectedBlock: SelectedBlock) {
+  const blockElement = getBlockById(selectedBlock.id);
+  const offset = selectedBlock.startPos ?? selectedBlock.endPos ?? 0;
+  if (!blockElement) {
+    throw new Error('Failed to get block element');
+  }
+  const richText = blockElement.querySelector('rich-text');
+  if (!richText) {
+    throw new Error('Failed to get rich text element');
+  }
+  const quill = richText.quill;
+
+  const [leaf, leafOffset]: [
+    {
+      // Blot
+      domNode: HTMLElement;
+    },
+    number
+  ] = quill.getLeaf(offset);
+  return [leaf.domNode, leafOffset] as const;
 }
 
 export function getAllBlocks() {
