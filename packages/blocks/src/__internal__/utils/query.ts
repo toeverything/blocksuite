@@ -357,7 +357,9 @@ export function getTextNodeBySelectedBlock(selectedBlock: SelectedBlock) {
   const blockElement = getBlockById(selectedBlock.id);
   const offset = selectedBlock.startPos ?? selectedBlock.endPos ?? 0;
   if (!blockElement) {
-    throw new Error('Failed to get block element');
+    throw new Error(
+      'Failed to get block element, block id: ' + selectedBlock.id
+    );
   }
   const richText = blockElement.querySelector('rich-text');
   if (!richText) {
