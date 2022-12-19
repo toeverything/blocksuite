@@ -4,7 +4,7 @@ const IS_MAC = process.platform === 'darwin';
 // const IS_WINDOWS = process.platform === 'win32';
 // const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
-async function keyDownCtrlOrMeta(page: Page) {
+export async function keyDownCtrlOrMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Meta');
   } else {
@@ -12,14 +12,14 @@ async function keyDownCtrlOrMeta(page: Page) {
   }
 }
 
-async function keyUpCtrlOrMeta(page: Page) {
+export async function keyUpCtrlOrMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.up('Meta');
   } else {
     await page.keyboard.up('Control');
   }
 }
-async function keyDownOptionMeta(page: Page) {
+export async function keyDownOptionMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Alt');
   } else {
@@ -27,7 +27,7 @@ async function keyDownOptionMeta(page: Page) {
   }
 }
 
-async function keyUpOptionMeta(page: Page) {
+export async function keyUpOptionMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.up('Alt');
   } else {

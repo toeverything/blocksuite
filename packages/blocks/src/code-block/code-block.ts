@@ -35,9 +35,6 @@ export class CodeBlockComponent extends LitElement {
   showLangList = 'hidden';
 
   @state()
-  popoverTimer = 0;
-
-  @state()
   disposeTimer = 0;
 
   @state()
@@ -56,17 +53,11 @@ export class CodeBlockComponent extends LitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  private mouseout() {
+  private onClick() {
     return () => {
-      clearTimeout(this.popoverTimer);
-    };
-  }
-
-  private mouseover() {
-    return () => {
-      this.popoverTimer = window.setTimeout(() => {
+      window.setTimeout(() => {
         this.showLangList = 'visible';
-      }, this.delay);
+      }, 0);
     };
   }
 
@@ -76,11 +67,7 @@ export class CodeBlockComponent extends LitElement {
     return html`
       <div class="affine-code-block-container">
         <div class="container">
-          <div
-            class="lang-container has-tool-tip"
-            @mouseover=${this.mouseover()}
-            @mouseout=${this.mouseout()}
-          >
+          <div class="lang-container has-tool-tip" @click=${this.onClick()}>
             <code-block-button width="101px" height="24px">
               ${this.model.language} ${ArrowDownIcon}
             </code-block-button>
@@ -115,16 +102,6 @@ export class CodeBlockComponent extends LitElement {
     `;
   }
 }
-
-// <input
-//     id="filter-input"
-// type="text"
-// placeholder="search language"
-// value=${this.filterText}
-//     @keyup=${() => {
-//               this.filterText = this.filterInput?.value;
-//             }}
-// />
 
 declare global {
   interface HTMLElementTagNameMap {

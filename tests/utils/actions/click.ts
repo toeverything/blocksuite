@@ -36,6 +36,10 @@ export async function switchMode(page: Page) {
   await page.click('button[aria-label="switch mode"]');
 }
 
+export async function addCodeBlock(page: Page) {
+  await page.click('button[aria-label="code block"]');
+}
+
 export async function switchMouseMode(page: Page) {
   await page.click('button[aria-label="switch mouse mode"]');
 }
