@@ -33,3 +33,12 @@ jobs:
         # by default: eslint will save the cache files on cwd
         #   Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
         run: npx eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0
+
+      - uses: actions/cache@v3
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Type Check
+        run: pnpm exec tsc -b
