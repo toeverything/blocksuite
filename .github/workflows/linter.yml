@@ -20,7 +20,7 @@ jobs:
           version: 7.9.5
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -33,3 +33,12 @@ jobs:
         # by default: eslint will save the cache files on cwd
         #   Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
         run: npx eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0
+
+      - uses: actions/cache@v3
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Type Check
+        run: pnpm exec tsc -b
