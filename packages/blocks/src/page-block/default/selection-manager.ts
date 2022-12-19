@@ -446,7 +446,14 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLInputElement) return;
-    handleNativeRangeDblClick(this.page, e);
+    const range = handleNativeRangeDblClick(this.page, e);
+    if (!range || range.collapsed) {
+      return;
+    }
+    if (this._container.readonly) {
+      return;
+    }
+    showFormatQuickBar({ anchorEl: range });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

@@ -42,8 +42,9 @@ export const showFormatQuickBar = async ({
       formatQuickBar.formatQuickBarElement.getBoundingClientRect();
     // Add offset to avoid the quick bar being covered by the window border
     const edgeGap = 20;
+    const baseX = (rect.left + rect.right) / 2;
     const offsetX = clamp(
-      rect.left - formatBarRect.width / 2,
+      baseX - formatBarRect.width / 2,
       edgeGap,
       bodyRect.width - formatBarRect.width - edgeGap
     );

@@ -254,8 +254,9 @@ export function focusNextBlock(
 
 export function resetNativeSelection(range: Range | null) {
   const selection = window.getSelection();
-  selection?.removeAllRanges();
-  range && selection?.addRange(range);
+  assertExists(selection);
+  selection.removeAllRanges();
+  range && selection.addRange(range);
 }
 
 export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
@@ -484,9 +485,11 @@ export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
     const editableContainer =
       selection.anchorNode.parentElement?.closest('[contenteditable]');
     if (editableContainer) {
-      expandRangesByCharacter(selection, editableContainer);
+      return expandRangesByCharacter(selection, editableContainer);
     }
+    return null;
   }
+  return null;
 }
 
 function expandRangesByCharacter(
@@ -495,21 +498,22 @@ function expandRangesByCharacter(
 ) {
   const leafNodes = leftFirstSearchLeafNodes(editableContainer);
   if (!leafNodes.length) {
-    return;
+    return null;
   }
   const [newRange, currentChar, currentNodeIndex] = getNewRangeForDblClick(
     leafNodes,
     selection
   );
   // try select range by segmenter
-  trySelectBySegmenter(
+  const extendRange = trySelectBySegmenter(
     selection,
     newRange,
     currentChar,
     leafNodes,
     currentNodeIndex
   );
-  resetNativeSelection(newRange);
+  resetNativeSelection(extendRange);
+  return extendRange;
 }
 
 function getNewStartAndEndForDblClick(
@@ -668,6 +672,7 @@ function trySelectBySegmenter(
       }
     }
   }
+  return newRange;
 }
 
 function getCurrentCharIndex(
@@ -787,13 +792,9 @@ export const saveBlockSelection = (
 export function restoreSelection(
   rangeOrSelectedBlock: Range | SelectedBlock[]
 ) {
-  const selection = window.getSelection();
-  assertExists(selection);
-
   if (rangeOrSelectedBlock instanceof Range) {
     const range = rangeOrSelectedBlock;
-    selection.removeAllRanges();
-    selection.addRange(range);
+    resetNativeSelection(range);
     return;
   }
   const selectedBlocks = rangeOrSelectedBlock;
@@ -815,6 +816,5 @@ export function restoreSelection(
 
   range.setStart(startNode, startOffset);
   range.setEnd(endNode, endOffset);
-  selection.removeAllRanges();
-  selection.addRange(range);
+  resetNativeSelection(range);
 }
