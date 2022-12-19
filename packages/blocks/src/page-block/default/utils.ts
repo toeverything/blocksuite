@@ -410,33 +410,33 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
-  hotkey.addListener(H1, () =>
-    updateSelectedTextType('affine:paragraph', 'h1', page)
-  );
-  hotkey.addListener(H2, () =>
-    updateSelectedTextType('affine:paragraph', 'h2', page)
-  );
-  hotkey.addListener(H3, () =>
-    updateSelectedTextType('affine:paragraph', 'h3', page)
-  );
-  hotkey.addListener(H4, () =>
-    updateSelectedTextType('affine:paragraph', 'h4', page)
-  );
-  hotkey.addListener(H5, () =>
-    updateSelectedTextType('affine:paragraph', 'h5', page)
-  );
-  hotkey.addListener(H6, () =>
-    updateSelectedTextType('affine:paragraph', 'h6', page)
-  );
-  hotkey.addListener(NUMBERED_LIST, () =>
-    updateSelectedTextType('affine:list', 'numbered', page)
-  );
-  hotkey.addListener(BULLETED, () =>
-    updateSelectedTextType('affine:list', 'bulleted', page)
-  );
-  hotkey.addListener(TEXT, () =>
-    updateSelectedTextType('affine:paragraph', 'text', page)
-  );
+  hotkey.addListener(H1, () => {
+    updateSelectedTextType('affine:paragraph', 'h1', page);
+  });
+  hotkey.addListener(H2, () => {
+    updateSelectedTextType('affine:paragraph', 'h2', page);
+  });
+  hotkey.addListener(H3, () => {
+    updateSelectedTextType('affine:paragraph', 'h3', page);
+  });
+  hotkey.addListener(H4, () => {
+    updateSelectedTextType('affine:paragraph', 'h4', page);
+  });
+  hotkey.addListener(H5, () => {
+    updateSelectedTextType('affine:paragraph', 'h5', page);
+  });
+  hotkey.addListener(H6, () => {
+    updateSelectedTextType('affine:paragraph', 'h6', page);
+  });
+  hotkey.addListener(NUMBERED_LIST, () => {
+    updateSelectedTextType('affine:list', 'numbered', page);
+  });
+  hotkey.addListener(BULLETED, () => {
+    updateSelectedTextType('affine:list', 'bulleted', page);
+  });
+  hotkey.addListener(TEXT, () => {
+    updateSelectedTextType('affine:paragraph', 'text', page);
+  });
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
   });
