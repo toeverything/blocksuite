@@ -302,9 +302,16 @@ export class DefaultSelectionManager {
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
     if (width <= 700) {
-      left =
-        this._dropContainerSize.left -
-        (e.raw.pageX - this._originPosition.x) / 2;
+      if (this._dragMoveTarget === 'right') {
+        left =
+          this._dropContainerSize.left -
+          (e.raw.pageX - this._originPosition.x) / 2;
+      } else {
+        left =
+          this._dropContainerSize.left +
+          (e.raw.pageX - this._originPosition.x) / 2;
+      }
+
       height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
       if (this._dropContainer) {
         this._signals.updateEmbedRects.emit([

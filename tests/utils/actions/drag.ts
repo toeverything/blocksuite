@@ -82,7 +82,7 @@ export async function dragOverTitle(page: Page) {
   });
 }
 
-export async function dragEmbedResize(page: Page) {
+export async function dragEmbedResizeByBottomRight(page: Page) {
   const { from, to } = await page.evaluate(() => {
     const bottomRightButton = document.querySelector(
       '.bottom-right'
@@ -92,6 +92,23 @@ export async function dragEmbedResize(page: Page) {
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
       to: { x: bottomRightButtonBound.left + 110, y },
+    };
+  });
+  await dragBetweenCoords(page, from, to, {
+    steps: 5,
+  });
+}
+
+export async function dragEmbedResizeByBottomLeft(page: Page) {
+  const { from, to } = await page.evaluate(() => {
+    const bottomRightButton = document.querySelector(
+      '.bottom-left'
+    ) as HTMLInputElement;
+    const bottomRightButtonBound = bottomRightButton.getBoundingClientRect();
+    const y = bottomRightButtonBound.top;
+    return {
+      from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
+      to: { x: bottomRightButtonBound.left - 110, y },
     };
   });
   await dragBetweenCoords(page, from, to, {
