@@ -29,9 +29,6 @@ jobs:
       - name: Install Playwright browsers
         run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 
-      - name: Type Check
-        run: pnpm exec tsc -b
-
       - name: Run tests
         run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
 
