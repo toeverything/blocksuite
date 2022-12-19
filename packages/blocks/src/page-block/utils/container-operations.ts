@@ -166,6 +166,11 @@ export const getFormat = () => {
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
     assertExists(richText);
+    const content = richText.quill.getText();
+    if (!content || content === '\n') {
+      // empty line should not be included
+      continue;
+    }
     const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
     formatArr.push(format);
   }
