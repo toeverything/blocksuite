@@ -1,4 +1,8 @@
-import { Document as DocumentIndexer, DocumentSearchOptions } from 'flexsearch';
+import {
+  Document as DocumentIndexer,
+  DocumentSearchOptions,
+  Index,
+} from 'flexsearch';
 import { Doc, Map as YMap, Text as YText } from 'yjs';
 import type { YBlock } from './page';
 
@@ -10,11 +14,30 @@ type SearchResults = { field: string; result: SearchResult[] };
 function tokenize(locale: string) {
   const tokenizer = Intl?.Segmenter;
   if (tokenizer) {
+    // extract the latin encoder inside flexsearch
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const latinIndexer: any = new Index({ charset: 'latin:advanced' });
+    const latinEncoder = latinIndexer.encode.bind(latinIndexer);
+    // check latin characters
+    const latinChecker = /^[\p{Script=Latin}\p{Mark}\d]+$/u;
+
     const segmenter = new tokenizer([locale], { granularity: 'word' });
-    return (text: string) =>
-      Array.from(segmenter.segment(text))
-        .filter(s => s.isWordLike)
+    return (text: string) => {
+      const latinChars: string[] = [];
+      const cjkChars = Array.from(segmenter.segment(text))
+        .filter(s => {
+          if (s.isWordLike) {
+            if (!latinChecker.test(s.segment)) {
+              return true;
+            }
+            latinChars.push(s.segment);
+          }
+          return false;
+        })
         .map(s => s.segment);
+
+      return [...cjkChars, ...latinEncoder(latinChars.join(' '))];
+    };
   }
   return (text: string) => {
     // eslint-disable-next-line no-control-regex
