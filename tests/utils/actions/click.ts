@@ -51,7 +51,3 @@ export async function switchShapeType(page: Page, shapeType: string) {
 export async function activeEmbed(page: Page) {
   await page.click('.resizable-img');
 }
-
-export async function focusCaption(page: Page) {
-  await page.click('.embed-editing-state>format-bar-button:nth-child(1)');
-}
