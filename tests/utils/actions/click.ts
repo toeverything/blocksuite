@@ -48,6 +48,10 @@ export async function switchShapeType(page: Page, shapeType: string) {
   await page.selectOption('select[aria-label="switch shape type"]', shapeType);
 }
 
+export async function switchReadonly(page: Page) {
+  await page.click('button[aria-label="toggle readonly"]');
+}
+
 export async function activeEmbed(page: Page) {
   await page.click('.resizable-img');
 }

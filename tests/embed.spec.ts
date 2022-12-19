@@ -5,13 +5,16 @@ import {
   dragEmbedResizeByBottomLeft,
   dragEmbedResizeByBottomRight,
   enterPlaygroundRoom,
+  moveToImage,
   redoByKeyboard,
   undoByKeyboard,
 } from './utils/actions';
 import {
+  assertImageOption,
   assertImageSize,
   assertRichDragButton,
   assertRichImage,
+  assertRichTexts,
 } from './utils/asserts';
 
 async function initImageState(page: Page) {
@@ -30,6 +33,10 @@ async function initImageState(page: Page) {
       groupId
     );
   });
+}
+
+async function focusCaption(page: Page) {
+  await page.click('.embed-editing-state>format-bar-button:nth-child(1)');
 }
 
 test('can drag resize image by left menu', async ({ page }) => {
@@ -84,4 +91,34 @@ test('can click and delete image', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichImage(page, 0);
+});
+
+test('press enter will create new block when click and select image', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  await activeEmbed(page);
+  await page.keyboard.press('Enter', { delay: 50 });
+  await page.keyboard.type('aa');
+  await assertRichTexts(page, ['\n', 'aa']);
+});
+
+test('enter shortcut on focusing embed block and its caption', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  await activeEmbed(page);
+  await moveToImage(page);
+  await assertImageOption(page);
+
+  await focusCaption(page);
+  await page.keyboard.press('Enter', { delay: 50 });
+  await page.keyboard.type('aa');
+  await assertRichTexts(page, ['aa']);
 });
