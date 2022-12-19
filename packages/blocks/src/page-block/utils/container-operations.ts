@@ -1,20 +1,20 @@
-import type { Page, Text, BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
+  almostEqual,
   assertExists,
   assertFlavours,
   ExtendedModel,
-  almostEqual,
   RootBlockModel,
 } from '../../__internal__';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
 import {
-  getRichTextByModel,
-  getModelsByRange,
   getBlockElementByModel,
-  getQuillIndexByNativeSelection,
   getCurrentRange,
-  getParentBlockById,
   getModelByElement,
+  getModelsByRange,
+  getParentBlockById,
+  getQuillIndexByNativeSelection,
+  getRichTextByModel,
 } from '../../__internal__/utils/query';
 import {
   isCollapsedSelection,
@@ -22,6 +22,8 @@ import {
   isNoneSelection,
   isRangeSelection,
   resetNativeSelection,
+  restoreSelection,
+  saveBlockSelection,
 } from '../../__internal__/utils/selection';
 import { DEFAULT_SPACING } from '../edgeless/utils';
 
@@ -186,6 +188,7 @@ function formatModelsByRange(
   key: string
 ) {
   const selection = window.getSelection();
+  const selectedBlocks = saveBlockSelection(selection);
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
@@ -220,10 +223,7 @@ function formatModelsByRange(
       [key]: !isFormatActive,
     });
   }
-  lastRichText.quill.setSelection(endIndex, 0);
-  if (key === 'code' || key === 'link') {
-    lastRichText.quill.format(key, false);
-  }
+  restoreSelection(selectedBlocks);
 }
 
 export function handleFormat(page: Page, key: string) {
