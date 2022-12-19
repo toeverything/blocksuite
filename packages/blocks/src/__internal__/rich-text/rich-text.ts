@@ -101,7 +101,7 @@ export class RichText extends LitElement {
     this.quill.on('text-change', delta => {
       const selectorMap = {
         code: 'code',
-        link: 'link-code',
+        link: 'link-node',
       } as const;
       let attr = '';
       if (delta.ops[1]?.attributes?.code) {
