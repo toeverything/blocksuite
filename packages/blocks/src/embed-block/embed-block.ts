@@ -49,7 +49,7 @@ export class EmbedBlockComponent extends LitElement {
           <slot></slot>
           <input
             .disabled=${this.readonly}
-            placeholder="write a caption"
+            placeholder="Write a caption"
             class="affine-embed-wrapper-caption"
             value=${this._caption}
             @input=${this._onInputChange}
