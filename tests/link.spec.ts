@@ -6,6 +6,7 @@ import {
   initEmptyParagraphState,
   pressEnter,
   selectAllByKeyboard,
+  switchReadonly,
   withCtrlOrMeta,
 } from './utils/actions';
 import { assertStoreMatchJSX } from './utils/asserts';
@@ -29,23 +30,23 @@ test('basic link', async ({ page }) => {
   await selectAllByKeyboard(page);
   await pressCreateLinkShortCut(page);
 
-  const linkPopoverLocator = page.locator('.overlay-container');
-  expect(await linkPopoverLocator.isVisible()).toBe(true);
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).toBeVisible();
   const linkPopoverInput = page.locator('.affine-link-popover-input');
-  expect(await linkPopoverInput.isVisible()).toBe(true);
+  await expect(linkPopoverInput).toBeVisible();
   await page.keyboard.type(link);
   await pressEnter(page);
-  expect(await linkPopoverLocator.isVisible()).toBe(false);
+  await expect(linkPopoverLocator).not.toBeVisible();
 
   const linkLocator = page.locator(`text="${linkText}"`);
   await expect(linkLocator).toHaveAttribute('href', link);
 
   // Hover link
-  expect(await linkPopoverLocator.isVisible()).toBe(false);
+  await expect(linkPopoverLocator).not.toBeVisible();
   await linkLocator.hover();
   // wait for popover delay open
   await page.waitForTimeout(200);
-  expect(await linkPopoverLocator.isVisible()).toBe(true);
+  await expect(linkPopoverLocator).toBeVisible();
 
   // Edit link
   const text2 = 'link2';
@@ -55,7 +56,7 @@ test('basic link', async ({ page }) => {
   await pressEnter(page);
 
   const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
-  expect(await editLinkPopoverLocator.isVisible()).toBe(true);
+  await expect(editLinkPopoverLocator).toBeVisible();
   await page.keyboard.press('Tab');
   await page.keyboard.type(text2);
   await page.keyboard.press('Tab');
@@ -148,4 +149,53 @@ test('text added after a link should not have link formatting', async ({
 />`,
     id
   );
+});
+
+test('type character in link should not jump out link node', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const id = await createLinkBlock(page, 'link text', 'http://example.com');
+  await focusRichText(page, 0);
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.type('IN_LINK');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert="Hello"
+      />
+      <text
+        insert="link texIN_LINKt"
+        link="http://example.com"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    id
+  );
+});
+
+test('readonly mode should not trigger link hover', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const linkText = 'linkText';
+  await createLinkBlock(page, 'linkText', 'http://example.com');
+  await focusRichText(page, 0);
+  const linkLocator = page.locator(`text="${linkText}"`);
+
+  // Hover link
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await linkLocator.hover();
+  await expect(linkPopoverLocator).toBeVisible();
+  await switchReadonly(page);
+
+  // XXX Wait for readonly delay
+  await page.waitForTimeout(300);
+
+  await linkLocator.hover();
+  await expect(linkPopoverLocator).not.toBeVisible();
 });

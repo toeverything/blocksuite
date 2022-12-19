@@ -101,9 +101,9 @@ export class RichText extends LitElement {
     this.quill.on('text-change', delta => {
       const selectorMap = {
         code: 'code',
-        link: 'link-code',
+        link: 'link-node',
       } as const;
-      let attr = '';
+      let attr: keyof typeof selectorMap | null = null;
       if (delta.ops[1]?.attributes?.code) {
         attr = 'code';
       }
@@ -113,7 +113,7 @@ export class RichText extends LitElement {
       // only length is 2 need to be handled
       if (delta.ops.length === 2 && delta.ops[1]?.insert && attr) {
         const retain = delta.ops[0].retain;
-        const selector = selectorMap[attr as keyof typeof selectorMap];
+        const selector = selectorMap[attr];
         if (retain !== undefined) {
           const currentLeaf = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length)
@@ -126,9 +126,16 @@ export class RichText extends LitElement {
           const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
           const nextEmbedElement = nextParentElement?.closest(selector);
           const insertedString = delta.ops[1]?.insert.toString();
+
+          // if insert to the same node, no need to handle
+          // For example,
+          // `inline |code`
+          //         ⬆️ should not remove format when insert to inside the format
           if (
-            (nextEmbedElement && nextEmbedElement !== currentEmbedElement) ||
-            !nextEmbedElement
+            // At the end of the node, need to remove format
+            !nextEmbedElement ||
+            // At the edge of the node, need to remove format
+            nextEmbedElement !== currentEmbedElement
           ) {
             model.text?.replace(
               retain,
