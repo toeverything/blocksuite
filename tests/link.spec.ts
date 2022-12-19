@@ -29,23 +29,23 @@ test('basic link', async ({ page }) => {
   await selectAllByKeyboard(page);
   await pressCreateLinkShortCut(page);
 
-  const linkPopoverLocator = page.locator('.overlay-container');
-  expect(await linkPopoverLocator.isVisible()).toBe(true);
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).toBeVisible();
   const linkPopoverInput = page.locator('.affine-link-popover-input');
-  expect(await linkPopoverInput.isVisible()).toBe(true);
+  await expect(linkPopoverInput).toBeVisible();
   await page.keyboard.type(link);
   await pressEnter(page);
-  expect(await linkPopoverLocator.isVisible()).toBe(false);
+  await expect(linkPopoverLocator).not.toBeVisible();
 
   const linkLocator = page.locator(`text="${linkText}"`);
   await expect(linkLocator).toHaveAttribute('href', link);
 
   // Hover link
-  expect(await linkPopoverLocator.isVisible()).toBe(false);
+  await expect(linkPopoverLocator).not.toBeVisible();
   await linkLocator.hover();
   // wait for popover delay open
   await page.waitForTimeout(200);
-  expect(await linkPopoverLocator.isVisible()).toBe(true);
+  await expect(linkPopoverLocator).toBeVisible();
 
   // Edit link
   const text2 = 'link2';
@@ -55,7 +55,7 @@ test('basic link', async ({ page }) => {
   await pressEnter(page);
 
   const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
-  expect(await editLinkPopoverLocator.isVisible()).toBe(true);
+  await expect(editLinkPopoverLocator).toBeVisible();
   await page.keyboard.press('Tab');
   await page.keyboard.type(text2);
   await page.keyboard.press('Tab');
