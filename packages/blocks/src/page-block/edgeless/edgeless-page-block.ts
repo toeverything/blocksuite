@@ -152,7 +152,9 @@ export class EdgelessPageBlockComponent
     if (this._selection.blockSelectionState.type === 'single') {
       const selectedBlock = this._selection.blockSelectionState.selected;
       if (selectedBlock.flavour === 'affine:shape') {
+        this.page.captureSync();
         this.page.deleteBlock(selectedBlock);
+        this.page.captureSync();
         // TODO: cleanup state instead of create a instance
         this._selection = new EdgelessSelectionManager(this);
         this.signals.updateSelection.emit({

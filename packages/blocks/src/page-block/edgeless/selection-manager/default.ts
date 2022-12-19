@@ -161,6 +161,10 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
           this._container.signals.updateSelection.emit(
             this.blockSelectionState
           );
+        } else if (
+          this.blockSelectionState.selected.flavour === 'affine:shape'
+        ) {
+          // todo
         }
         break;
     }

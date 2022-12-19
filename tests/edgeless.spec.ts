@@ -191,3 +191,18 @@ test('add shape blocks', async ({ page }) => {
   expect(newBox.y).toBeLessThan(box.y);
   await assertRichTexts(page, ['hello']);
 });
+
+test('delete shape block by keyboard', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await switchMode(page);
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 80, y: 80 }, { x: 220, y: 220 });
+  await page.keyboard.press('Delete', {
+    delay: 10,
+  });
+});
