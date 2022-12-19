@@ -102,10 +102,10 @@ export async function assertImageSize(
 }
 
 export async function assertImageOption(page: Page) {
-  const actual = await page
-    .locator('.affine-embed-editing-state-container')
-    .count();
-  expect(actual).toEqual(1);
+  // const actual = await page.locator('.embed-editing-state').count();
+  // expect(actual).toEqual(1);
+  const locator = page.locator('.embed-editing-state');
+  await expect(locator).toBeVisible();
 }
 
 export async function assertPageTitleFocus(page: Page) {
