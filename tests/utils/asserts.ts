@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import './declare-test-window';
+import './declare-test-window.js';
 import { expect, type Page } from '@playwright/test';
 import type {
   BaseBlockModel,
