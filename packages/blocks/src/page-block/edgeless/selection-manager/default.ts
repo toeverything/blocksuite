@@ -1,5 +1,9 @@
 import type { XYWH } from '../selection-manager';
-import type { DefaultMouseMode, SelectionEvent } from '../../../__internal__';
+import {
+  DefaultMouseMode,
+  getBlockEdgelessContainerById,
+  SelectionEvent,
+} from '../../../__internal__';
 import { getSelectionBoxBound, pick } from '../utils';
 import {
   caretRangeFromPoint,
@@ -22,6 +26,15 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   };
 
   private _startRange: Range | null = null;
+
+  private _showShapeToolBar(e: SelectionEvent) {
+    if (this.blockSelectionState.type === 'single') {
+      const selected = this.blockSelectionState.selected;
+      if (selected.flavour === 'affine:shape') {
+        const anchorEl = getBlockEdgelessContainerById(selected.id);
+      }
+    }
+  }
 
   private _updateFrameSelectionState(x: number, y: number) {
     if (this._frameSelectionState) {

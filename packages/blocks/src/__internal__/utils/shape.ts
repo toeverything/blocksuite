@@ -1,3 +1,12 @@
+export enum Direction {
+  Left = 'left',
+  Right = 'right',
+  LeftTop = 'left-top',
+  LeftBottom = 'left-bottom',
+  RightTop = 'right-top',
+  RightBottom = 'right-bottom',
+}
+
 // https://github.com/tldraw/tldraw/blob/6c7ee29625a21891a6ec05d5a6efdf64ccbaad5f/packages/core/src/types.ts
 // https://github.com/tldraw/tldraw/blob/d721ae6a2f72cbfbeaca9e75ab833f89a0ef19f7/packages/tldraw/src/types.ts
 export type Theme = 'dark' | 'light';

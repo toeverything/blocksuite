@@ -1,6 +1,7 @@
 import {
   assertExists,
   caretRangeFromPoint,
+  Direction,
   getCurrentRange,
   isMultiLineRange,
   resetNativeSelection,
@@ -26,18 +27,10 @@ export function repairContextMenuRange(e: SelectionEvent) {
   }
 }
 
-export type DragDirection =
-  | 'right-bottom'
-  | 'right-top'
-  | 'left-bottom'
-  | 'left-top'
-  // no select direction, for example select all by `ctrl + a`
-  | 'directionless';
-
 // text can be applied both text and paragraph formatting actions, while others can only be applied paragraph actions
 export type SelectedBlockType = 'Text' | 'Caret' | 'Other';
 
-export function getDragDirection(e: SelectionEvent): DragDirection {
+export function getDragDirection(e: SelectionEvent): Direction {
   const startX = e.start.x;
   const startY = e.start.y;
   const endX = e.x;
@@ -49,16 +42,16 @@ export function getDragDirection(e: SelectionEvent): DragDirection {
 
   if (isForwards) {
     if (selectedOneLine || endY >= startY) {
-      return 'right-bottom';
+      return Direction.RightBottom;
     } else {
-      return 'right-top';
+      return Direction.RightTop;
     }
   } else {
     // backwards
     if (selectedOneLine || endY <= startY) {
-      return 'left-top';
+      return Direction.LeftTop;
     } else {
-      return 'left-bottom';
+      return Direction.LeftBottom;
     }
   }
 }

@@ -10,6 +10,16 @@ interface ContainerBlock {
   model?: BaseBlockModel;
 }
 
+export function getBlockEdgelessContainerById(
+  id: string,
+  ele: Element = document.body
+) {
+  const containerId = `affine-edgeless-block-child-${id}-container`;
+  return ele.querySelector<HTMLDivElement>(
+    `[data-container-id=${containerId}]`
+  );
+}
+
 export function getBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body

@@ -1,10 +1,10 @@
 import { Signal } from '@blocksuite/store';
-import type { DragDirection } from '../../page-block/utils';
 import {
   clamp,
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
+  Direction,
   sleep,
   throttle,
 } from '../../__internal__/utils';
@@ -13,7 +13,7 @@ import './format-bar-node';
 
 export const showFormatQuickBar = async ({
   anchorEl,
-  direction = 'right-bottom',
+  direction = Direction.RightBottom,
   container = document.body,
   abortController = new AbortController(),
 }: {
@@ -21,7 +21,7 @@ export const showFormatQuickBar = async ({
     getBoundingClientRect: () => DOMRect;
     // contextElement?: Element;
   };
-  direction?: DragDirection;
+  direction?: Direction;
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
@@ -49,16 +49,24 @@ export const showFormatQuickBar = async ({
     );
     const offsetY = 5;
     formatQuickBar.left = `${offsetX}px`;
-    if (direction.includes('bottom')) {
-      const baseTop = rect.top - bodyRect.top + rect.height;
-      formatQuickBar.top = `${baseTop + offsetY}px`;
-    } else if (direction.includes('top')) {
-      const baseTop = bodyRect.bottom - rect.bottom + rect.height;
-      formatQuickBar.bottom = `${baseTop + offsetY}px`;
-    } else {
-      throw new Error(
-        `Failed to update position! Invalid direction: ${direction}!`
-      );
+    switch (direction) {
+      case Direction.LeftTop:
+      case Direction.RightTop: {
+        const baseTop = bodyRect.bottom - rect.bottom + rect.height;
+        formatQuickBar.bottom = `${baseTop + offsetY}px`;
+        break;
+      }
+      case Direction.LeftBottom:
+      case Direction.RightBottom: {
+        const baseTop = rect.top - bodyRect.top + rect.height;
+        formatQuickBar.top = `${baseTop + offsetY}px`;
+        break;
+      }
+      default: {
+        throw new Error(
+          `Failed to update position! Invalid direction: ${direction}!`
+        );
+      }
     }
   }, 10);
 
