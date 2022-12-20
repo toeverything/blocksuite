@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import type { Workspace, Page, BaseBlockModel } from '../../packages/store/src';
 import type { EditorContainer } from '../../packages/editor/src/components/editor-container/editor-container';
 

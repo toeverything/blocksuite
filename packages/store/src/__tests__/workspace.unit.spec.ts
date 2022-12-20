@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { assert, describe, expect, it } from 'vitest';
