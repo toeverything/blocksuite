@@ -188,9 +188,10 @@ export class EdgelessPageBlockComponent
       group.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
     });
 
-    this.signals.viewportUpdated.on(() =>
-      this._selection.syncBlockSelectionRect()
-    );
+    this.signals.viewportUpdated.on(() => {
+      this._selection.syncBlockSelectionRect();
+      this.requestUpdate();
+    });
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
     this.signals.shapeUpdated.on(() => this.requestUpdate());
