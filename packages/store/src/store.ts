@@ -3,7 +3,7 @@ import type { IdGenerator } from './utils/id-generator';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers';
-import { serializeYDoc, yDocToJSXNode } from './utils/jsx';
+import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,

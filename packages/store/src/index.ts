@@ -1,15 +1,15 @@
-export * from './space';
-export * from './store';
-export * from './base';
-export * from './awareness';
+export * from './space.js';
+export * from './store.js';
+export * from './base.js';
+export * from './awareness.js';
 export * from './blob';
-export * from './text-adapter';
-export * from './utils/signal';
-export * from './utils/disposable';
-export * from './doc-providers';
+export * from './text-adapter.js';
+export * from './utils/signal.js';
+export * from './utils/disposable.js';
+export * from './doc-providers.js';
 export * from './workspace';
-export * as Utils from './utils/utils';
-export * from './utils/id-generator';
+export * as Utils from './utils/utils.js';
+export * from './utils/id-generator.js';
 
 const env =
   typeof globalThis !== 'undefined'

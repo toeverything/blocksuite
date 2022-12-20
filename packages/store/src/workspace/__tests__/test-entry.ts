@@ -1,8 +1,12 @@
 // Test page entry located in playground/examples/workspace/index.html
-import { Workspace } from '../workspace';
+import { Workspace } from '../workspace.js';
 import type { TestApp } from './test-app';
-import { testSerial, runOnce, nextFrame } from '../../__tests__/test-utils-dom';
-import { assertExists } from '../../utils/utils';
+import {
+  testSerial,
+  runOnce,
+  nextFrame,
+} from '../../__tests__/test-utils-dom.js';
+import { assertExists } from '../../utils/utils.js';
 import './test-app';
 
 let i = 0;

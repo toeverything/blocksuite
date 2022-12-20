@@ -2,8 +2,8 @@ import { marked } from 'marked';
 import type { PageBlockModel } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
 import type { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
-import { FileExporter } from '../../file-exporter/file-exporter';
-import { ParserHtml } from './parse-html';
+import { FileExporter } from '../../file-exporter/file-exporter.js';
+import { ParserHtml } from './parse-html.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ParseHtml2BlockFunc = (...args: any[]) => OpenBlockInfo[] | null;

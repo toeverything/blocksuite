@@ -6,9 +6,9 @@ import type {
   YBlock,
   YBlocks,
 } from '../workspace/page';
-import { PrelimText, Text, TextType } from '../text-adapter';
+import { PrelimText, Text, TextType } from '../text-adapter.js';
 import type { Workspace } from '../workspace';
-import { fromBase64, toBase64 } from 'lib0/buffer';
+import { fromBase64, toBase64 } from 'lib0/buffer.js';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 

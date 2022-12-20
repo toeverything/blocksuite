@@ -1,5 +1,5 @@
 import { Signal } from '@blocksuite/store';
-import { ClipboardAction } from './types';
+import { ClipboardAction } from './types.js';
 
 export class ClipEventDispatch {
   readonly signals = {

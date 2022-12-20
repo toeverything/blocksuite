@@ -1,4 +1,4 @@
-import { uuidv4 as uuidv4IdGenerator } from 'lib0/random';
+import { uuidv4 as uuidv4IdGenerator } from 'lib0/random.js';
 
 export type IdGenerator = () => string;
 

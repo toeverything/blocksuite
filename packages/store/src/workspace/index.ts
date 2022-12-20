@@ -1,3 +1,3 @@
-export { Workspace } from './workspace';
-export type { PageMeta } from './workspace';
-export { Page } from './page';
+export { Workspace } from './workspace.js';
+export type { PageMeta } from './workspace.js';
+export { Page } from './page.js';

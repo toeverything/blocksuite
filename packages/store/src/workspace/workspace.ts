@@ -1,9 +1,9 @@
 import * as Y from 'yjs';
-import { Store, StoreOptions } from '../store';
-import { Space } from '../space';
-import { Page } from './page';
-import { Signal } from '../utils/signal';
-import { Indexer, QueryContent } from './search';
+import { Store, StoreOptions } from '../store.js';
+import { Space } from '../space.js';
+import { Page } from './page.js';
+import { Signal } from '../utils/signal.js';
+import { Indexer, QueryContent } from './search.js';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base';
 import { BlobStorage, getBlobStorage } from '../blob';

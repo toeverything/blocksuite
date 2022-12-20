@@ -1,6 +1,6 @@
 import type { Page } from './workspace';
 import type { TextType } from './text-adapter';
-import { Signal } from './utils/signal';
+import { Signal } from './utils/signal.js';
 
 // ported from lit
 interface StaticValue {

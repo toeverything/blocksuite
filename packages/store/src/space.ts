@@ -1,6 +1,6 @@
 import type * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness.js';
-import { AwarenessAdapter, SelectionRange } from './awareness';
+import { AwarenessAdapter, SelectionRange } from './awareness.js';
 import type { RichTextAdapter } from './text-adapter';
 
 export interface StackItem {

@@ -1,7 +1,7 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { describe, expect, it } from 'vitest';
-import { yDocToJSXNode } from '../utils/jsx';
+import { yDocToJSXNode } from '../utils/jsx.js';
 
 describe('basic', () => {
   it('serialized doc match snapshot', () => {

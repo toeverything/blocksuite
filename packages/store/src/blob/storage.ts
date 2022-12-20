@@ -1,4 +1,4 @@
-import { Signal } from '../utils/signal';
+import { Signal } from '../utils/signal.js';
 import type { BlobId, BlobProvider, BlobURL } from './types';
 
 export class BlobStorage {

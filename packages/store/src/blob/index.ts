@@ -1,5 +1,5 @@
-import { IndexedDBBlobProvider } from './providers';
-import { BlobStorage } from './storage';
+import { IndexedDBBlobProvider } from './providers.js';
+import { BlobStorage } from './storage.js';
 
 const CLOUD_API = '/api/workspace';
 
@@ -19,4 +19,4 @@ export const getBlobStorage = async (
   return null;
 };
 
-export { BlobStorage } from './storage';
+export { BlobStorage } from './storage.js';

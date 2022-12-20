@@ -5,13 +5,13 @@ import { assert, describe, expect, it } from 'vitest';
 import { BaseBlockModel, Signal, Workspace, Page, Generator } from '..';
 
 // Use manual per-module import/export to support vitest environment on Node.js
-import { PageBlockModel } from '../../../blocks/src/page-block/page-model';
-import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragraph-model';
-import { ListBlockModel } from '../../../blocks/src/list-block/list-model';
-import { GroupBlockModel } from '../../../blocks/src/group-block/group-model';
-import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model';
+import { PageBlockModel } from '../../../blocks/src/page-block/page-model.js';
+import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import { ListBlockModel } from '../../../blocks/src/list-block/list-model.js';
+import { GroupBlockModel } from '../../../blocks/src/group-block/group-model.js';
+import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model.js';
 import type { PageMeta } from '../workspace';
-import { assertExists } from '../utils/utils';
+import { assertExists } from '../utils/utils.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;

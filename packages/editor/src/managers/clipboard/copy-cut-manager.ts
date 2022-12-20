@@ -6,8 +6,8 @@ import {
   SelectionUtils,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '../../components';
-import { ClipItem } from './clip-item';
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types';
+import { ClipItem } from './clip-item.js';
+import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
 
 export class CopyCutManager {
   private _editor: EditorContainer;

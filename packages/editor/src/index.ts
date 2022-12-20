@@ -3,7 +3,7 @@ import type { EditorContainer } from './components';
 
 export * from './components';
 export * from './managers';
-export * from './block-loader';
+export * from './block-loader.js';
 const env =
   typeof globalThis !== 'undefined'
     ? globalThis

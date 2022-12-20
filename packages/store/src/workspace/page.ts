@@ -1,12 +1,17 @@
 import * as Y from 'yjs';
 import type Quill from 'quill';
 import type { Awareness } from 'y-protocols/awareness';
-import { uuidv4 } from 'lib0/random';
-import { BaseBlockModel } from '../base';
-import { Space, StackItem } from '../space';
-import { Text, PrelimText, RichTextAdapter, TextType } from '../text-adapter';
+import { uuidv4 } from 'lib0/random.js';
+import { BaseBlockModel } from '../base.js';
+import { Space, StackItem } from '../space.js';
+import {
+  Text,
+  PrelimText,
+  RichTextAdapter,
+  TextType,
+} from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator';
-import { Signal } from '../utils/signal';
+import { Signal } from '../utils/signal.js';
 import {
   assertValidChildren,
   initSysProps,

@@ -1,9 +1,9 @@
 import { Buffer } from 'buffer';
 import ky from 'ky';
-import { Signal } from '../utils/signal';
+import { Signal } from '../utils/signal.js';
 
 import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types';
-import { getDatabase, sha3, sleep } from './utils';
+import { getDatabase, sha3, sleep } from './utils.js';
 
 const RETRY_TIMEOUT = 500;
 
