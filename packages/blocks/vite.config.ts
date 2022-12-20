@@ -1,16 +1,19 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
+import { basename, extname } from 'node:path';
+import banner from 'vite-plugin-banner';
 
 export default defineConfig({
   build: {
     emptyOutDir: false,
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      fileName: 'index',
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        std: resolve(__dirname, 'src/std.ts'),
+      },
       formats: ['es'],
     },
     rollupOptions: {
-      output: {},
       external: [
         'yjs',
         '@blocksuite/store',
@@ -25,4 +28,14 @@ export default defineConfig({
       ],
     },
   },
+  plugins: [
+    banner({
+      content: fileName => {
+        return `/// <reference types="./${basename(
+          fileName,
+          extname(fileName)
+        )}.d.ts" />`;
+      },
+    }),
+  ],
 });
