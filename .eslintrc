@@ -37,5 +37,23 @@
     "sourceType": "module"
   },
   "plugins": ["react", "@typescript-eslint"],
-  "rules": {}
+  "rules": {
+    "@typescript-eslint/no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/dist", "**/dist/**"],
+            "message": "Don't import from dist",
+            "allowTypeImports": false
+          },
+          {
+            "group": ["**/src", "**/src/**"],
+            "message": "Don't import from src",
+            "allowTypeImports": false
+          }
+        ]
+      }
+    ]
+  }
 }
