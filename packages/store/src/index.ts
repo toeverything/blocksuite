@@ -2,14 +2,19 @@ export * from './space.js';
 export * from './store.js';
 export * from './base.js';
 export * from './awareness.js';
-export * from './blob';
+export * from './blob/index.js';
 export * from './text-adapter.js';
 export * from './utils/signal.js';
 export * from './utils/disposable.js';
 export * from './doc-providers.js';
-export * from './workspace';
+export * from './workspace/index.js';
 export * as Utils from './utils/utils.js';
-export * from './utils/id-generator.js';
+export {
+  createAutoIncrementIdGenerator,
+  createAutoIncrementIdGeneratorByClientId,
+  uuidv4,
+} from './utils/id-generator.js';
+export type { IdGenerator } from './utils/id-generator.js';
 
 const env =
   typeof globalThis !== 'undefined'

@@ -1,10 +1,10 @@
-import {
-  Document as DocumentIndexer,
-  DocumentSearchOptions,
-  Index,
-} from 'flexsearch';
+import FlexSearch from 'flexsearch';
+import type { DocumentSearchOptions } from 'flexsearch';
 import { Doc, Map as YMap, Text as YText } from 'yjs';
 import type { YBlock } from './page';
+
+const DocumentIndexer = FlexSearch.Document;
+const Index = FlexSearch.Index;
 
 export type QueryContent = string | Partial<DocumentSearchOptions<boolean>>;
 
@@ -54,7 +54,7 @@ export type IndexMetadata = Readonly<{
 
 export class Indexer {
   private readonly _doc: Doc;
-  private readonly _indexer: DocumentIndexer<IndexMetadata, string[]>;
+  private readonly _indexer: FlexSearch.Document<IndexMetadata, string[]>;
 
   constructor(
     doc: Doc,

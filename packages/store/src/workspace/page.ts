@@ -19,7 +19,7 @@ import {
   trySyncTextProp,
   toBlockProps,
   matchFlavours,
-} from '../utils/utils';
+} from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace';
 
 export type YBlock = Y.Map<unknown>;
