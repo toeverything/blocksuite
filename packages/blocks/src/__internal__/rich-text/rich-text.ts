@@ -1,13 +1,16 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import Quill from 'quill';
+import type { Quill as QuillType } from 'quill';
+import Q from 'quill';
 import QuillCursors from 'quill-cursors';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { BlockHost } from '../utils';
-import { createKeyboardBindings } from './keyboard';
+import type { BlockHost } from '../utils/index.js';
+import { createKeyboardBindings } from './keyboard.js';
 
 import style from './styles.css';
-import Syntax from '../../code-block/components/syntax-code-block';
+import Syntax from '../../code-block/components/syntax-code-block.js';
+
+const Quill = Q as unknown as typeof QuillType;
 
 Quill.register('modules/cursors', QuillCursors);
 const Clipboard = Quill.import('modules/clipboard');
@@ -39,7 +42,7 @@ export class RichText extends LitElement {
   @query('.affine-rich-text.quill-container')
   private _textContainer!: HTMLDivElement;
 
-  quill!: Quill;
+  quill!: QuillType;
 
   @property({
     hasChanged() {
@@ -98,7 +101,8 @@ export class RichText extends LitElement {
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
-    this.quill.on('text-change', delta => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.quill.on('text-change', (delta: any) => {
       const selectorMap = {
         code: 'code',
         link: 'link-node',

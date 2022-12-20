@@ -6,7 +6,7 @@ import {
   DeleteIcon,
   DownloadIcon,
   LineWrapIcon,
-} from '../icons';
+} from '../icons.js';
 import {
   copyCode,
   copyImgToClip,
@@ -14,13 +14,13 @@ import {
   downloadImage,
   focusCaption,
   toggleWrap,
-} from './utils';
-import { toolTipStyle } from '../../components/tooltip';
+} from './utils.js';
+import { toolTipStyle } from '../../components/tooltip.js';
 import type {
   CodeBlockOption,
   DefaultPageSignals,
   EmbedEditingState,
-} from './default-page-block';
+} from './default-page-block.js';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;

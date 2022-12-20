@@ -8,8 +8,8 @@ import {
   selectAllByKeyboard,
   switchReadonly,
   withCtrlOrMeta,
-} from './utils/actions';
-import { assertStoreMatchJSX } from './utils/asserts';
+} from './utils/actions/index.js';
+import { assertStoreMatchJSX } from './utils/asserts.js';
 
 const pressCreateLinkShortCut = async (page: Page) => {
   await withCtrlOrMeta(page, async () => {

@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { GroupBlockModel } from './group-model';
+import type { GroupBlockModel } from './group-model.js';
 import {
   BlockChildrenContainer,
   BLOCK_ID_ATTR,
   type BlockHost,
-} from '../__internal__';
+} from '../__internal__/index.js';
 import style from './style.css';
 
 @customElement('affine-group')

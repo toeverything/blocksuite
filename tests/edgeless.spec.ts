@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { expect, Page, test } from '@playwright/test';
-import type { GroupBlockModel, ShapeBlockModel } from '../packages/blocks';
+import type {
+  GroupBlockModel,
+  ShapeBlockModel,
+} from '../packages/blocks/src/index.js';
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -13,13 +17,13 @@ import {
   switchShapeType,
   undoByClick,
   waitNextFrame,
-} from './utils/actions';
+} from './utils/actions/index.js';
 import {
   assertNativeSelectionRangeCount,
   assertRichTexts,
   assertSelection,
-} from './utils/asserts';
-import type { BaseBlockModel } from '../packages/store';
+} from './utils/asserts.js';
+import type { BaseBlockModel } from '../packages/store/src/index.js';
 
 async function getGroupSize(
   page: Page,

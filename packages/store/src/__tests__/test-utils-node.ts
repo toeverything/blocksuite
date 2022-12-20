@@ -1,5 +1,5 @@
 import { Page, expect } from '@playwright/test';
-import type { TestResult } from './test-utils-dom';
+import type { TestResult } from './test-utils-dom.js';
 
 // TODO: use custom playwright reporter
 export async function collectTestResult(page: Page) {

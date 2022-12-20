@@ -3,7 +3,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import type { Page, Disposable } from '@blocksuite/store';
-import { ClipboardManager, ContentParser } from '../..';
+import { ClipboardManager, ContentParser } from '../../index.js';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
 
 @customElement('editor-container')

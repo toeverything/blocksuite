@@ -1,12 +1,12 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import type Quill from 'quill';
+import type { Quill } from 'quill';
 import type { RangeStatic } from 'quill';
 import {
   ALLOW_DEFAULT,
   assertExists,
   getDefaultPageBlock,
   PREVENT_DEFAULT,
-} from '..';
+} from '../index.js';
 
 type Match = {
   name: string;

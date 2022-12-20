@@ -1,2 +1,2 @@
-export * from './paragraph-block';
-export * from './paragraph-model';
+export * from './paragraph-block.js';
+export * from './paragraph-model.js';

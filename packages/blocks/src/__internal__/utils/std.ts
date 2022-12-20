@@ -1,5 +1,5 @@
 import { Utils } from '@blocksuite/store';
-import type { Detail } from './types';
+import type { Detail } from './types.js';
 
 // workaround ts(2775)
 export function assertExists<T>(val: T | null | undefined): asserts val is T {

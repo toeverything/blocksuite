@@ -1,6 +1,6 @@
 // https://github.com/tldraw/tldraw/blob/c5124b160e406d58955b0753247338a2f90744ad/packages/tldraw/src/state/shapes/shared/PolygonUtils.ts
 import { intersectLineLine } from '@tldraw/intersect';
-import Vec from '@tldraw/vec';
+import { Vec } from '@tldraw/vec';
 
 const PI2 = Math.PI * 2;
 

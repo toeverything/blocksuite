@@ -1,6 +1,9 @@
-import type { XYWH } from '../selection-manager';
-import type { DefaultMouseMode, SelectionEvent } from '../../../__internal__';
-import { getSelectionBoxBound, pick } from '../utils';
+import type { XYWH } from '../selection-manager.js';
+import type {
+  DefaultMouseMode,
+  SelectionEvent,
+} from '../../../__internal__/index.js';
+import { getSelectionBoxBound, pick } from '../utils.js';
 import {
   caretRangeFromPoint,
   handleNativeRangeClick,
@@ -8,13 +11,13 @@ import {
   noop,
   resetNativeSelection,
   RootBlockModel,
-} from '../../../__internal__';
+} from '../../../__internal__/index.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-} from '../../utils/cursor';
-import { showFormatQuickBar } from '../../../components/format-quick-bar';
-import { SelectionController } from './index';
+} from '../../utils/cursor.js';
+import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import { SelectionController } from './index.js';
 
 export class DefaultSelectionController extends SelectionController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{

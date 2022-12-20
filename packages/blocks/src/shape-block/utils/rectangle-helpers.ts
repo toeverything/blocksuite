@@ -1,9 +1,13 @@
 // https://github.com/tldraw/tldraw/blob/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/tldraw/src/state/shapes/RectangleUtil/rectangleHelpers.ts
-import { Utils } from './utils';
-import Vec from '@tldraw/vec';
-import getStroke, { getStrokePoints } from 'perfect-freehand';
-import { getShapeStyle } from './shape-style';
-import type { ShapeStyles } from '../../__internal__';
+import { Utils } from './utils.js';
+import { Vec } from '@tldraw/vec';
+import { getShapeStyle } from './shape-style.js';
+import type { ShapeStyles } from '../../__internal__/index.js';
+
+import PF from 'perfect-freehand';
+import type { getStroke as getStrokeType } from 'perfect-freehand';
+import { getStrokePoints } from 'perfect-freehand';
+const getStroke = PF as unknown as typeof getStrokeType;
 
 function getRectangleDrawPoints(
   id: string,

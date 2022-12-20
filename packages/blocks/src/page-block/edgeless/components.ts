@@ -4,22 +4,30 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { GroupBlockModel, RootBlockModel, ShapeBlockModel } from '../..';
+import type {
+  GroupBlockModel,
+  RootBlockModel,
+  ShapeBlockModel,
+} from '../../index.js';
 import type {
   BlockSelectionState,
   HoverState,
   ViewportState,
   XYWH,
-} from './selection-manager';
-import { BlockElement, BlockHost, getBlockById } from '../../__internal__';
-import '../../__internal__';
+} from './selection-manager.js';
+import {
+  BlockElement,
+  BlockHost,
+  getBlockById,
+} from '../../__internal__/index.js';
+import '../../__internal__/index.js';
 import {
   PADDING_X,
   PADDING_Y,
   GROUP_MIN_LENGTH,
   getSelectionBoxBound,
-} from './utils';
-import { SHAPE_PADDING } from '../..';
+} from './utils.js';
+import { SHAPE_PADDING } from '../../index.js';
 
 function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
   return {

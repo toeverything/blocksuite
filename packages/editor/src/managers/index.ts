@@ -1,1 +1,1 @@
-export * from './clipboard';
+export * from './clipboard/index.js';

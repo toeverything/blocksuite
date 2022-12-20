@@ -1,2 +1,2 @@
-export * from './list-block';
-export * from './list-model';
+export * from './list-block.js';
+export * from './list-model.js';

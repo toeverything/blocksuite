@@ -1,7 +1,7 @@
 import type { Page } from '@blocksuite/store';
 import type { Quill } from 'quill';
-import { matchFlavours } from './std';
-import type { ExtendedModel } from './types';
+import { matchFlavours } from './std.js';
+import type { ExtendedModel } from './types.js';
 
 // XXX: workaround quill lifecycle issue
 export function asyncFocusRichText(page: Page, id: string) {

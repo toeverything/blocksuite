@@ -9,7 +9,7 @@ import {
   matchFlavours,
   noop,
   PREVENT_DEFAULT,
-} from '../utils';
+} from '../utils/index.js';
 import {
   handleLineStartBackspace,
   handleUnindent,
@@ -20,8 +20,8 @@ import {
   handleKeyDown,
   handleKeyUp,
   tryMatchSpaceHotkey,
-} from './rich-text-operations';
-import { Shortcuts } from './shortcuts';
+} from './rich-text-operations.js';
+import { Shortcuts } from './shortcuts.js';
 
 interface QuillRange {
   index: number;

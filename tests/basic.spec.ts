@@ -1,4 +1,4 @@
-import './utils/declare-test-window';
+import './utils/declare-test-window.js';
 import { test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
@@ -12,7 +12,7 @@ import {
   pressEnter,
   addGroupByClick,
   initEmptyParagraphState,
-} from './utils/actions';
+} from './utils/actions/index.js';
 import {
   defaultStore,
   assertBlockChildrenIds,
@@ -21,7 +21,7 @@ import {
   assertText,
   assertRichTexts,
   assertTitle,
-} from './utils/asserts';
+} from './utils/asserts.js';
 
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);

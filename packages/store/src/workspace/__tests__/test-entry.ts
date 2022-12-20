@@ -1,6 +1,6 @@
 // Test page entry located in playground/examples/workspace/index.html
 import { Workspace } from '../workspace.js';
-import type { TestApp } from './test-app';
+import type { TestApp } from './test-app.js';
 import {
   testSerial,
   runOnce,

@@ -1,1 +1,1 @@
-export * from './image-block';
+export * from './image-block.js';

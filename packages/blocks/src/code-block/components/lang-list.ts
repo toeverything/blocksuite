@@ -1,6 +1,6 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
-import { createEvent } from '../../__internal__';
+import { createEvent } from '../../__internal__/index.js';
 import style from './style.css';
 
 // TODO extract to a common list component

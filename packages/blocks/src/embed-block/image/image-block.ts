@@ -1,12 +1,12 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import type { EmbedBlockModel } from '..';
+import type { EmbedBlockModel } from '../index.js';
 import {
   BLOCK_ID_ATTR,
   type BlockHost,
   BlockChildrenContainer,
   assertExists,
-} from '../../__internal__';
+} from '../../__internal__/index.js';
 import style from './style.css';
 
 @customElement('affine-image')

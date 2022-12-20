@@ -1,8 +1,8 @@
 import { html } from 'lit/static-html.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost } from '../utils';
+import type { BlockHost } from '../utils/index.js';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { EmbedBlockModel } from '../../embed-block';
+import type { EmbedBlockModel } from '../../embed-block/index.js';
 
 // TODO support dynamic block types
 export function BlockElement(

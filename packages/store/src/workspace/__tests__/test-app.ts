@@ -1,4 +1,4 @@
-import type { PageMeta, Workspace } from '../workspace';
+import type { PageMeta, Workspace } from '../workspace.js';
 import { LitElement, html, PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 

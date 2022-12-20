@@ -1,5 +1,5 @@
 import { Signal } from '../utils/signal.js';
-import type { BlobId, BlobProvider, BlobURL } from './types';
+import type { BlobId, BlobProvider, BlobURL } from './types.js';
 
 export class BlobStorage {
   private _providers: BlobProvider[] = [];

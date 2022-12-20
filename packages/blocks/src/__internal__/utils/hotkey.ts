@@ -1,4 +1,6 @@
-import hotkeys, { KeyHandler } from 'hotkeys-js';
+import Hotkeys from 'hotkeys-js';
+import type { Hotkeys as HotkeysType, KeyHandler } from 'hotkeys-js';
+const hotkeys = Hotkeys as unknown as HotkeysType;
 
 hotkeys.filter = () => true;
 

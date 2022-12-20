@@ -1,8 +1,8 @@
-import type { EdgelessContainer } from './edgeless-page-block';
-import type { ViewportState, XYWH } from './selection-manager';
-import type { RootBlockModel } from '../../__internal__';
-import { ShapeBlockComponent } from '../../shape-block';
-import type { SelectionEvent } from '../../__internal__';
+import type { EdgelessContainer } from './edgeless-page-block.js';
+import type { ViewportState, XYWH } from './selection-manager.js';
+import type { RootBlockModel } from '../../__internal__/index.js';
+import { ShapeBlockComponent } from '../../shape-block/index.js';
+import type { SelectionEvent } from '../../__internal__/index.js';
 
 export const DEFAULT_SPACING = 64;
 

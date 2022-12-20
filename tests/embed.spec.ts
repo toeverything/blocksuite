@@ -1,4 +1,4 @@
-import './utils/declare-test-window';
+import './utils/declare-test-window.js';
 import { test, Page } from '@playwright/test';
 import {
   activeEmbed,
@@ -8,14 +8,14 @@ import {
   moveToImage,
   redoByKeyboard,
   undoByKeyboard,
-} from './utils/actions';
+} from './utils/actions/index.js';
 import {
   assertImageOption,
   assertImageSize,
   assertRichDragButton,
   assertRichImage,
   assertRichTexts,
-} from './utils/asserts';
+} from './utils/asserts.js';
 
 async function initImageState(page: Page) {
   await page.evaluate(() => {

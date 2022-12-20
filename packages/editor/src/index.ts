@@ -1,8 +1,8 @@
 import type { Page, Workspace } from '@blocksuite/store';
-import type { EditorContainer } from './components';
+import type { EditorContainer } from './components/index.js';
 
-export * from './components';
-export * from './managers';
+export * from './components/index.js';
+export * from './managers/index.js';
 export * from './block-loader.js';
 const env =
   typeof globalThis !== 'undefined'

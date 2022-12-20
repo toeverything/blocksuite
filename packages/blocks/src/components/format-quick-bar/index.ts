@@ -1,5 +1,6 @@
 import { Signal } from '@blocksuite/store';
-import type { DragDirection } from '../../page-block/utils';
+import type { DragDirection } from '../../page-block/utils/index.js';
+import type { FormatQuickBar } from './format-bar-node.js';
 import {
   clamp,
   getContainerByModel,
@@ -7,7 +8,7 @@ import {
   getModelsByRange,
   sleep,
   throttle,
-} from '../../__internal__/utils';
+} from '../../__internal__/utils/index.js';
 import './button';
 import './format-bar-node';
 
@@ -27,7 +28,9 @@ export const showFormatQuickBar = async ({
 }) => {
   // Init format quick bar
 
-  const formatQuickBar = document.createElement('format-quick-bar');
+  const formatQuickBar = document.createElement(
+    'format-quick-bar'
+  ) as FormatQuickBar;
   formatQuickBar.abortController = abortController;
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;

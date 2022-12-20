@@ -2,13 +2,19 @@ import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { getFormat, updateSelectedTextType } from '../../page-block/utils';
-import { getCurrentRange, getModelsByRange } from '../../__internal__/utils';
-import { toast } from '../toast';
+import {
+  getFormat,
+  updateSelectedTextType,
+} from '../../page-block/utils/index.js';
+import {
+  getCurrentRange,
+  getModelsByRange,
+} from '../../__internal__/utils/index.js';
+import { toast } from '../toast.js';
 import './button';
-import { formatButtons, paragraphButtons } from './config';
-import { ArrowDownIcon, CopyIcon } from './icons';
-import { formatQuickBarStyle } from './styles';
+import { formatButtons, paragraphButtons } from './config.js';
+import { ArrowDownIcon, CopyIcon } from './icons.js';
+import { formatQuickBarStyle } from './styles.js';
 
 const onCopy = () => {
   document.dispatchEvent(new ClipboardEvent('copy'));

@@ -1,8 +1,8 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { Point } from './rect';
-import type { GroupBlockModel } from '../../group-block';
-import type { ShapeBlockModel } from '../../shape-block';
-import type { ColorStyle, TDShapeType } from './shape';
+import type { Point } from './rect.js';
+import type { GroupBlockModel } from '../../group-block/index.js';
+import type { ShapeBlockModel } from '../../shape-block/index.js';
+import type { ColorStyle, TDShapeType } from './shape.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {

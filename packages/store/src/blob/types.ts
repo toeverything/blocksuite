@@ -1,4 +1,4 @@
-import type { Signal } from '../utils/signal';
+import type { Signal } from '../utils/signal.js';
 
 export type BlobId = string;
 export type BlobURL = string;

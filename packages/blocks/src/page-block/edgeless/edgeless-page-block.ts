@@ -2,32 +2,36 @@
 import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
-import type { GroupBlockModel, MouseMode, PageBlockModel } from '../..';
+import type {
+  GroupBlockModel,
+  MouseMode,
+  PageBlockModel,
+} from '../../index.js';
 import {
   EdgelessBlockChildrenContainer,
   EdgelessHoverRect,
   EdgelessFrameSelectionRect,
-} from './components';
+} from './components.js';
 import {
   BlockHost,
   BLOCK_ID_ATTR,
   hotkey,
   HOTKEYS,
   resetNativeSelection,
-} from '../../__internal__';
+} from '../../__internal__/index.js';
 import {
   EdgelessSelectionManager,
   BlockSelectionState,
   ViewportState,
   XYWH,
-} from './selection-manager';
+} from './selection-manager.js';
 import {
   bindCommonHotkey,
   handleBackspace,
   removeCommonHotKey,
   tryUpdateGroupSize,
   updateSelectedTextType,
-} from '../utils';
+} from '../utils/index.js';
 import style from './style.css';
 
 export interface EdgelessContainer extends HTMLElement {

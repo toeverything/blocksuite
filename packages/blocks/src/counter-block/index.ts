@@ -1,1 +1,1 @@
-export * from './counter-block';
+export * from './counter-block.js';

@@ -1,3 +1,3 @@
-export * from './embed-block';
-export * from './embed-model';
-export * from './image';
+export * from './embed-block.js';
+export * from './embed-model.js';
+export * from './image/index.js';

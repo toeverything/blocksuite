@@ -15,13 +15,13 @@ import {
   initEmptyParagraphState,
   convertToBulletedListByClick,
   formatType,
-} from './utils/actions';
+} from './utils/actions/index.js';
 import {
   assertRichTexts,
   assertStoreMatchJSX,
   assertTextFormat,
   assertTypeFormat,
-} from './utils/asserts';
+} from './utils/asserts.js';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);

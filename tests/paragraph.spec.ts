@@ -8,7 +8,7 @@ import {
   assertBlockType,
   assertTitle,
   assertPageTitleFocus,
-} from './utils/asserts';
+} from './utils/asserts.js';
 import {
   clickMenuButton,
   enterPlaygroundRoom,
@@ -22,7 +22,7 @@ import {
   initEmptyParagraphState,
   dragOverTitle,
   resetHistory,
-} from './utils/actions';
+} from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);

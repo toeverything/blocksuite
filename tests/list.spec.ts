@@ -8,7 +8,7 @@ import {
   assertSelection,
   assertStoreMatchJSX,
   assertTextContent,
-} from './utils/asserts';
+} from './utils/asserts.js';
 import {
   convertToBulletedListByClick,
   convertToNumberedListByClick,
@@ -22,7 +22,7 @@ import {
   undoByKeyboard,
   pressTab,
   initEmptyParagraphState,
-} from './utils/actions';
+} from './utils/actions/index.js';
 
 test('add new bulleted list', async ({ page }) => {
   await enterPlaygroundRoom(page);

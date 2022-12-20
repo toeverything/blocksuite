@@ -1,10 +1,14 @@
 // https://github.com/tldraw/tldraw/blob/ca91e56b29212897b6c97650f567f7ea3e818d1e/packages/tldraw/src/state/shapes/TriangleUtil/triangleHelpers.ts
-import { Utils } from './utils';
-import Vec from '@tldraw/vec';
-import getStroke, { getStrokePoints } from 'perfect-freehand';
-import type { ShapeStyles } from '../../__internal__';
-import { getShapeStyle } from './shape-style';
-import { getOffsetPolygon } from './polygon-utils';
+import { Utils } from './utils.js';
+import { Vec } from '@tldraw/vec';
+import type { ShapeStyles } from '../../__internal__/index.js';
+import { getShapeStyle } from './shape-style.js';
+import { getOffsetPolygon } from './polygon-utils.js';
+
+import PF from 'perfect-freehand';
+import type { getStroke as getStrokeType } from 'perfect-freehand';
+import { getStrokePoints } from 'perfect-freehand';
+const getStroke = PF as unknown as typeof getStrokeType;
 
 export function getTrianglePoints(size: number[], offset = 0, rotation = 0) {
   const [w, h] = size;

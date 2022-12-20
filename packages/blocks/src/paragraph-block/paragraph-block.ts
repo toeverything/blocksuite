@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { BLOCK_ID_ATTR, type BlockHost } from '../__internal__';
-import type { ParagraphBlockModel } from './paragraph-model';
+import { BLOCK_ID_ATTR, type BlockHost } from '../__internal__/index.js';
+import type { ParagraphBlockModel } from './paragraph-model.js';
 
-import { BlockChildrenContainer } from '../__internal__';
+import { BlockChildrenContainer } from '../__internal__/index.js';
 import style from './style.css';
 
 const getPlaceholder = (model: ParagraphBlockModel) => {

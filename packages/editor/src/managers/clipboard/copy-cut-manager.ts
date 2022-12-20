@@ -5,7 +5,7 @@ import {
   matchFlavours,
   SelectionUtils,
 } from '@blocksuite/blocks';
-import type { EditorContainer } from '../../components';
+import type { EditorContainer } from '../../components/index.js';
 import { ClipItem } from './clip-item.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
 

@@ -1,2 +1,2 @@
-export * from './lang-list';
-export * from './button';
+export * from './lang-list.js';
+export * from './button.js';

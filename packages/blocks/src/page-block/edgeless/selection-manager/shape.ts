@@ -1,7 +1,10 @@
-import type { SelectionEvent, ShapeMouseMode } from '../../../__internal__';
-import { assertExists, noop } from '../../../__internal__';
-import { SelectionController } from './index';
-import type { SelectionArea } from '../selection-manager';
+import type {
+  SelectionEvent,
+  ShapeMouseMode,
+} from '../../../__internal__/index.js';
+import { assertExists, noop } from '../../../__internal__/index.js';
+import { SelectionController } from './index.js';
+import type { SelectionArea } from '../selection-manager.js';
 
 export class ShapeSelectionController extends SelectionController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{
