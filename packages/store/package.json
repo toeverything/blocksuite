@@ -2,7 +2,7 @@
   "name": "@blocksuite/store",
   "version": "0.3.0-alpha.13",
   "description": "BlockSuite data store built for general purpose state management.",
-  "main": "src/index.ts",
+  "main": "dist/store/src/index.js",
   "scripts": {
     "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "serve:websocket": "cross-env HOST=localhost PORT=1234 npx y-websocket",
@@ -34,8 +34,8 @@
     "lit": "^2.3.1"
   },
   "exports": {
-    "./src/*": "./src/*.ts",
-    ".": "./src/index.ts"
+    "./src/*": "./dist/store/src/*.js",
+    ".": "./dist/store/src/index.js"
   },
   "publishConfig": {
     "access": "public",
