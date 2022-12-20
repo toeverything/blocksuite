@@ -1,17 +1,20 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import Quill from 'quill';
+import type { Quill as QuillType } from 'quill';
+import Q from 'quill';
 import {
   ALLOWED_SCHEMES,
   showLinkPopover,
-} from '../../../components/link-popover';
+} from '../../../components/link-popover/index.js';
 import {
   assertExists,
   getDefaultPageBlock,
   getModelByElement,
   hotkey,
-} from '../../utils';
-import { LinkIcon } from './link-icon';
+} from '../../utils/index.js';
+import { LinkIcon } from './link-icon.js';
+
+const Quill = Q as unknown as typeof QuillType;
 
 // TODO fix Blot types
 type Blot = {

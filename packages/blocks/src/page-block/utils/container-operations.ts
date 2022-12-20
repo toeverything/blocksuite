@@ -5,8 +5,8 @@ import {
   assertFlavours,
   ExtendedModel,
   RootBlockModel,
-} from '../../__internal__';
-import { asyncFocusRichText } from '../../__internal__/utils/common-operations';
+} from '../../__internal__/index.js';
+import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
   getBlockElementByModel,
   getCurrentRange,
@@ -15,7 +15,7 @@ import {
   getParentBlockById,
   getQuillIndexByNativeSelection,
   getRichTextByModel,
-} from '../../__internal__/utils/query';
+} from '../../__internal__/utils/query.js';
 import {
   isCollapsedSelection,
   isMultiBlockRange,
@@ -24,8 +24,8 @@ import {
   resetNativeSelection,
   restoreSelection,
   saveBlockSelection,
-} from '../../__internal__/utils/selection';
-import { DEFAULT_SPACING } from '../edgeless/utils';
+} from '../../__internal__/utils/selection.js';
+import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
 export function deleteModels(page: Page, models: BaseBlockModel[]) {
   const selection = window.getSelection();

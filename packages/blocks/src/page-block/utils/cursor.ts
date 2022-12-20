@@ -5,7 +5,7 @@ import {
   isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
-} from '../../__internal__';
+} from '../../__internal__/index.js';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const currentRange = window.getSelection()?.getRangeAt(0);

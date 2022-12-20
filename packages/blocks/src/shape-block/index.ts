@@ -1,2 +1,2 @@
-export * from './shape-block';
-export * from './shape-model';
+export * from './shape-block.js';
+export * from './shape-model.js';

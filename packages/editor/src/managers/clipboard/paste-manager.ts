@@ -1,5 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { EditorContainer } from '../../components';
+import type { EditorContainer } from '../../components/index.js';
 import { MarkdownUtils } from './markdown-utils.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
 import {

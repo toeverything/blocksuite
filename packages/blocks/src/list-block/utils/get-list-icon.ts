@@ -1,6 +1,6 @@
-import type { ListBlockModel } from '../list-model';
-import { points, checkboxChecked, checkboxUnchecked } from './icons';
-import { getNumberPrefix } from './get-number-prefix';
+import type { ListBlockModel } from '../list-model.js';
+import { points, checkboxChecked, checkboxUnchecked } from './icons.js';
+import { getNumberPrefix } from './get-number-prefix.js';
 import { html } from 'lit';
 
 export function getListIcon({

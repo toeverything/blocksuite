@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import type { AwarenessAdapter } from './awareness';
+import type { AwarenessAdapter } from './awareness.js';
 import type { DeltaOperation, Quill } from 'quill';
-import type { Space } from './space';
+import type { Space } from './space.js';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';
 

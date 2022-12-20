@@ -6,12 +6,12 @@ import {
   BlockHost,
   getBlockElementByModel,
   getDefaultPageBlock,
-} from '../__internal__';
+} from '../__internal__/index.js';
 
-import type { ListBlockModel } from './list-model';
-import { getListIcon } from './utils/get-list-icon';
-import { getListInfo } from './utils/get-list-info';
-import { BlockChildrenContainer } from '../__internal__';
+import type { ListBlockModel } from './list-model.js';
+import { getListIcon } from './utils/get-list-icon.js';
+import { getListInfo } from './utils/get-list-info.js';
+import { BlockChildrenContainer } from '../__internal__/index.js';
 import style from './style.css';
 
 function selectList(model: ListBlockModel) {

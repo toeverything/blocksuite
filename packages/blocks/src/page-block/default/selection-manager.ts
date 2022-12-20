@@ -1,6 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { EmbedBlockComponent } from '../../embed-block';
-import { showFormatQuickBar } from '../../components/format-quick-bar';
+import type { EmbedBlockComponent } from '../../embed-block/index.js';
+import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -19,16 +19,16 @@ import {
   getDefaultPageBlock,
   isInput,
   IPoint,
-} from '../../__internal__';
-import type { RichText } from '../../__internal__/rich-text/rich-text';
+} from '../../__internal__/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-} from '../utils/cursor';
-import type { DefaultPageSignals } from './default-page-block';
-import { getBlockEditingStateByPosition } from './utils';
+} from '../utils/cursor.js';
+import type { DefaultPageSignals } from './default-page-block.js';
+import { getBlockEditingStateByPosition } from './utils.js';
 import { Utils } from '@blocksuite/store';
-import type { DefaultPageBlockComponent } from './default-page-block';
+import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (

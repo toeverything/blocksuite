@@ -1,7 +1,7 @@
 // operations used in rich-text level
 
 import { Page, Text } from '@blocksuite/store';
-import type Quill from 'quill';
+import type { Quill } from 'quill';
 import {
   ExtendedModel,
   assertExists,
@@ -21,7 +21,7 @@ import {
   getDefaultPageBlock,
   getBlockElementByModel,
   resetNativeSelection,
-} from '../utils';
+} from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);

@@ -1,8 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { DefaultPageBlockComponent, SelectedBlock } from '../..';
-import type { RichText } from '../rich-text/rich-text';
-import { BLOCK_ID_ATTR as ATTR } from './consts';
-import { assertExists, matchFlavours } from './std';
+import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
+import type { RichText } from '../rich-text/rich-text.js';
+import { BLOCK_ID_ATTR as ATTR } from './consts.js';
+import { assertExists, matchFlavours } from './std.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 

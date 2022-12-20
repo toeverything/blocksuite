@@ -1,14 +1,14 @@
-import type { Space } from './space';
-import type { IdGenerator } from './utils/id-generator';
+import type { Space } from './space.js';
+import type { IdGenerator } from './utils/id-generator.js';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';
-import type { DocProvider, DocProviderConstructor } from './doc-providers';
+import type { DocProvider, DocProviderConstructor } from './doc-providers.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
-} from './utils/id-generator';
+} from './utils/id-generator.js';
 
 export interface SerializedStore {
   [key: string]: {

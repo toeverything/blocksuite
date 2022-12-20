@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { RelativePosition } from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
-import type { Space } from './space';
+import type { Space } from './space.js';
 import { Signal } from './utils/signal.js';
 
 export interface SelectionRange {

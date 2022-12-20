@@ -1,17 +1,17 @@
 import { customElement, property } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
-import type { ShapeBlockModel } from './shape-model';
-import type { XYWH } from '../page-block/edgeless/selection-manager';
-import { BLOCK_ID_ATTR } from '../__internal__';
+import type { ShapeBlockModel } from './shape-model.js';
+import type { XYWH } from '../page-block/edgeless/selection-manager.js';
+import { BLOCK_ID_ATTR } from '../__internal__/index.js';
 import {
   DashStyle,
   ShapeStyles,
   SizeStyle,
   TDShapeType,
-} from '../__internal__';
-import { getRectanglePath } from './utils/rectangle-helpers';
-import { getShapeStyle } from './utils/shape-style';
-import { getTrianglePath } from './utils/triangle-helpers';
+} from '../__internal__/index.js';
+import { getRectanglePath } from './utils/rectangle-helpers.js';
+import { getShapeStyle } from './utils/shape-style.js';
+import { getTrianglePath } from './utils/triangle-helpers.js';
 import style from './style.css';
 
 export const SHAPE_PADDING = 48;

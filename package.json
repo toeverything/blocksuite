@@ -30,7 +30,7 @@
     "@changesets/cli": "^2.25.0",
     "@playwright/test": "^1.28.1",
     "@types/node": "^18.7.16",
-    "@types/quill": "^2.0.9",
+    "@types/quill": "^1.3.7",
     "@types/react": "^18.0.19",
     "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^5.36.2",

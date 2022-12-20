@@ -1,6 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { toast } from '../../components/toast';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations';
+import { toast } from '../../components/toast.js';
+import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
 import {
   assertExists,
   asyncFocusRichText,
@@ -24,8 +24,8 @@ import {
   Point,
   resetNativeSelection,
   BLOCK_ID_ATTR,
-} from '../../__internal__/utils';
-import type { PageBlockModel } from '../page-model';
+} from '../../__internal__/utils/index.js';
+import type { PageBlockModel } from '../page-model.js';
 import {
   bindCommonHotkey,
   handleBackspace,
@@ -33,10 +33,10 @@ import {
   handleSelectAll,
   removeCommonHotKey,
   updateSelectedTextType,
-} from '../utils';
-import type { DefaultPageSignals } from './default-page-block';
-import type { DefaultSelectionManager } from './selection-manager';
-import type { CodeBlockOption } from './default-page-block';
+} from '../utils/index.js';
+import type { DefaultPageSignals } from './default-page-block.js';
+import type { DefaultSelectionManager } from './selection-manager.js';
+import type { CodeBlockOption } from './default-page-block.js';
 
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],

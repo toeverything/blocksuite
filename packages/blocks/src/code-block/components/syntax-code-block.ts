@@ -1,7 +1,10 @@
-import Quill from 'quill';
+import Q from 'quill';
+import type { Quill as QuillType } from 'quill';
+// @ts-ignore
 import type hljs from 'highlight.js';
-import { assertExists } from '../../__internal__';
+import { assertExists } from '../../__internal__/index.js';
 
+const Quill = Q as unknown as typeof QuillType;
 const Module = Quill.import('core/module');
 const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
@@ -102,7 +105,7 @@ class Syntax extends Module {
     this.highlight(true, this.codeBlockElement);
   }
 
-  constructor(quill: Quill, options: SyntaxCodeBlockOptions) {
+  constructor(quill: QuillType, options: SyntaxCodeBlockOptions) {
     super(quill, options);
     this.language = options.language;
     this.codeBlockElement = options.codeBlockElement;
@@ -129,6 +132,7 @@ class Syntax extends Module {
     if (!quill.getFormat(0, quill.getLength())['code-block']) {
       quill.formatText(0, quill.getLength(), 'code-block', true);
     }
+    // @ts-ignore
     quill.update(Quill.sources.USER);
     const range = quill.getSelection();
     // Notice: In BlockSuite, one quill instance has only one SyntaxCodeBlock instance.
@@ -144,8 +148,10 @@ class Syntax extends Module {
           container
         );
       });
+    // @ts-ignore
     quill.update(Quill.sources.SILENT);
     if (range != null) {
+      // @ts-ignore
       quill.setSelection(range, Quill.sources.SILENT);
     }
   }

@@ -1,7 +1,11 @@
 import { marked } from 'marked';
 import type { PageBlockModel } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
-import type { OpenBlockInfo, EditorContainer, SelectedBlock } from '../../..';
+import type {
+  OpenBlockInfo,
+  EditorContainer,
+  SelectedBlock,
+} from '../../../index.js';
 import { FileExporter } from '../../file-exporter/file-exporter.js';
 import { ParserHtml } from './parse-html.js';
 

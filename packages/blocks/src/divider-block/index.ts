@@ -1,2 +1,2 @@
-export * from './divider-model';
-export * from './divider-block';
+export * from './divider-model.js';
+export * from './divider-block.js';

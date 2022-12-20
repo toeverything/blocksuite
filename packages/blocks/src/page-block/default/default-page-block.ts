@@ -2,7 +2,7 @@
 import { LitElement, html, css, unsafeCSS, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
-import type { PageBlockModel } from '..';
+import type { PageBlockModel } from '../index.js';
 import {
   assertExists,
   asyncFocusRichText,
@@ -14,17 +14,21 @@ import {
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
-} from '../../__internal__';
-import { DefaultSelectionManager } from './selection-manager';
-import { deleteModels, tryUpdateGroupSize } from '../utils';
+} from '../../__internal__/index.js';
+import { DefaultSelectionManager } from './selection-manager.js';
+import { deleteModels, tryUpdateGroupSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
   EmbedEditingContainer,
   EmbedSelectedRectsContainer,
   FrameSelectionRect,
   SelectedRectsContainer,
-} from './components';
-import { bindHotkeys, isControlledKeyboardEvent, removeHotkeys } from './utils';
+} from './components.js';
+import {
+  bindHotkeys,
+  isControlledKeyboardEvent,
+  removeHotkeys,
+} from './utils.js';
 import style from './style.css';
 
 export interface EmbedEditingState {

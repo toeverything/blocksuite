@@ -1,4 +1,4 @@
 import './link-node';
 
-export { LinkNodeComponent } from './link-node';
-export { createLink } from './create-link';
+export { LinkNodeComponent } from './link-node.js';
+export { createLink } from './create-link.js';

@@ -1,4 +1,4 @@
-export * from './bind-hotkey';
-export * from './container-operations';
-export { getDragDirection } from './cursor';
-export type { DragDirection } from './cursor';
+export * from './bind-hotkey.js';
+export * from './container-operations.js';
+export { getDragDirection } from './cursor.js';
+export type { DragDirection } from './cursor.js';

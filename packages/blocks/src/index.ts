@@ -8,22 +8,22 @@ import './divider-block';
 import './__internal__/rich-text/link-node';
 import './embed-block';
 import './embed-block/image';
-export * from './counter-block';
-export * from './embed-block';
-export * from './paragraph-block';
-export * from './page-block';
-export * from './list-block';
-export * from './group-block';
-export * from './code-block';
-export * from './divider-block';
-export * from './embed-block/image';
-export * from './shape-block';
-export * as SelectionUtils from './__internal__/utils/selection';
-export * from './__internal__/utils/types';
-export * from './__internal__/utils/common-operations';
-export * from './__internal__/utils/std';
-export * from './__internal__/utils/query';
-export * from './__internal__/utils/shape';
+export * from './counter-block/index.js';
+export * from './embed-block/index.js';
+export * from './paragraph-block/index.js';
+export * from './page-block/index.js';
+export * from './list-block/index.js';
+export * from './group-block/index.js';
+export * from './code-block/index.js';
+export * from './divider-block/index.js';
+export * from './embed-block/image/index.js';
+export * from './shape-block/index.js';
+export * as SelectionUtils from './__internal__/utils/selection.js';
+export * from './__internal__/utils/types.js';
+export * from './__internal__/utils/common-operations.js';
+export * from './__internal__/utils/std.js';
+export * from './__internal__/utils/query.js';
+export * from './__internal__/utils/shape.js';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'

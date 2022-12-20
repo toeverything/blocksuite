@@ -1,5 +1,5 @@
 import { css, html, TemplateResult } from 'lit';
-import { sleep } from '../__internal__/utils';
+import { sleep } from '../__internal__/utils/index.js';
 
 let ToastContainer: HTMLDivElement | null = null;
 

@@ -1,7 +1,7 @@
 import type * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness.js';
 import { AwarenessAdapter, SelectionRange } from './awareness.js';
-import type { RichTextAdapter } from './text-adapter';
+import type { RichTextAdapter } from './text-adapter.js';
 
 export interface StackItem {
   meta: Map<'cursor-location', SelectionRange | undefined>;

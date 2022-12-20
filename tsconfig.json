@@ -6,7 +6,7 @@
     "experimentalDecorators": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
     "strict": true,
     "sourceMap": true,
     "declaration": true,

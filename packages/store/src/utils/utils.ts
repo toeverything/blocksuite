@@ -1,13 +1,13 @@
 import * as Y from 'yjs';
-import type { BaseBlockModel } from '../base';
+import type { BaseBlockModel } from '../base.js';
 import type {
   BlockProps,
   PrefixedBlockProps,
   YBlock,
   YBlocks,
-} from '../workspace/page';
+} from '../workspace/page.js';
 import { PrelimText, Text, TextType } from '../text-adapter.js';
-import type { Workspace } from '../workspace';
+import type { Workspace } from '../workspace/index.js';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);

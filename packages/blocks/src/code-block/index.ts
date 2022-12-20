@@ -1,3 +1,3 @@
-export * from './code-model';
-export * from './code-block';
-export * from './components';
+export * from './code-model.js';
+export * from './code-block.js';
+export * from './components/index.js';

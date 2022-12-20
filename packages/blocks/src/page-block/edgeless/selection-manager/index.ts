@@ -2,9 +2,12 @@ import type {
   MouseMode,
   RootBlockModel,
   SelectionEvent,
-} from '../../../__internal__';
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block';
-import type { BlockSelectionState, SelectionArea } from '../selection-manager';
+} from '../../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type {
+  BlockSelectionState,
+  SelectionArea,
+} from '../selection-manager.js';
 
 export interface HoverState {
   rect: DOMRect;

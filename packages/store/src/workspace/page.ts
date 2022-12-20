@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import type Quill from 'quill';
+import type { Quill } from 'quill';
 import type { Awareness } from 'y-protocols/awareness';
 import { uuidv4 } from 'lib0/random.js';
 import { BaseBlockModel } from '../base.js';
@@ -10,7 +10,7 @@ import {
   RichTextAdapter,
   TextType,
 } from '../text-adapter.js';
-import type { IdGenerator } from '../utils/id-generator';
+import type { IdGenerator } from '../utils/id-generator.js';
 import { Signal } from '../utils/signal.js';
 import {
   assertValidChildren,
@@ -20,7 +20,7 @@ import {
   toBlockProps,
   matchFlavours,
 } from '../utils/utils.js';
-import type { PageMeta, Workspace } from './workspace';
+import type { PageMeta, Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;

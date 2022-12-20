@@ -1,4 +1,5 @@
 import type * as Y from 'yjs';
+// @ts-ignore
 import { WebrtcProvider } from 'y-webrtc';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import type { Awareness } from 'y-protocols/awareness';
@@ -11,10 +12,10 @@ import type { Awareness } from 'y-protocols/awareness';
  */
 export interface DocProvider {
   awareness?: Awareness;
-  connect: () => void;
-  disconnect: () => void;
-  clearData: () => Promise<void>;
-  destroy: () => void;
+  connect?: () => void;
+  disconnect?: () => void;
+  clearData?: () => Promise<void>;
+  destroy?: () => void;
 }
 
 /** See {@link DocProvider} */

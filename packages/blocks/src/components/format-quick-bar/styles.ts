@@ -1,5 +1,5 @@
 import { css } from 'lit';
-import { toolTipStyle } from '../tooltip';
+import { toolTipStyle } from '../tooltip.js';
 
 const paragraphPanelStyle = css`
   .paragraph-button > svg:nth-child(2) {

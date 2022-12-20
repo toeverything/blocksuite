@@ -1,5 +1,5 @@
-import type { Page } from './workspace';
-import type { TextType } from './text-adapter';
+import type { Page } from './workspace/index.js';
+import type { TextType } from './text-adapter.js';
 import { Signal } from './utils/signal.js';
 
 // ported from lit

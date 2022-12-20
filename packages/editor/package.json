@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/marked": "^4.0.7",
-    "@types/quill": "^2.0.9",
+    "@types/quill": "^1.3.7",
     "@types/turndown": "^5.0.1"
   },
   "exports": {

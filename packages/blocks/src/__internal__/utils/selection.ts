@@ -1,6 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { RichText } from '../rich-text/rich-text';
-import type { IPoint, SelectionEvent } from './gesture';
+import type { RichText } from '../rich-text/rich-text.js';
+import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   getBlockElementByModel,
   getContainerByModel,
@@ -12,15 +12,20 @@ import {
   getPreviousBlock,
   getQuillIndexByNativeSelection,
   getTextNodeBySelectedBlock,
-} from './query';
-import { Rect } from './rect';
-import { assertExists, caretRangeFromPoint, matchFlavours, sleep } from './std';
+} from './query.js';
+import { Rect } from './rect.js';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+  sleep,
+} from './std.js';
 import type {
   DomSelectionType,
   SelectedBlock,
   SelectionInfo,
   SelectionPosition,
-} from './types';
+} from './types.js';
 
 const SCROLL_THRESHOLD = 100;
 

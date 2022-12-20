@@ -1,7 +1,7 @@
 import type { Buffer } from 'buffer';
 import { createStore, del, get, keys, set, clear } from 'idb-keyval';
 import { SHA3 } from 'sha3';
-import type { IDBInstance } from './types';
+import type { IDBInstance } from './types.js';
 
 const hash = new SHA3(256);
 

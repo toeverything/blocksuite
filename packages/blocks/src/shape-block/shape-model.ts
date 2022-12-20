@@ -1,6 +1,6 @@
 // https://github.com/tldraw/tldraw/blob/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/tldraw/src/state/shapes/shared/shape-styles.ts
 import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
-import { ColorStyle, TDShapeType } from '../__internal__';
+import { ColorStyle, TDShapeType } from '../__internal__/index.js';
 import { literal } from 'lit/static-html.js';
 
 export interface ShapeBlockProps extends IBaseBlockProps {

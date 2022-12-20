@@ -1,6 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { handleFormat } from '../../page-block/utils';
-import { createLink } from '../../__internal__/rich-text/link-node';
+import { handleFormat } from '../../page-block/utils/index.js';
+import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import './button';
 import {
   BoldIcon,
@@ -20,7 +20,7 @@ import {
   TextIcon,
   TodoIcon,
   UnderlineIcon,
-} from './icons';
+} from './icons.js';
 
 export const paragraphButtons = [
   {

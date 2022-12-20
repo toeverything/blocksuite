@@ -13,7 +13,7 @@ import {
 } from '@blocksuite/blocks';
 import { Utils } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
-import type { EditorContainer } from '../editor-container/editor-container';
+import type { EditorContainer } from '../editor-container/editor-container.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
@@ -227,10 +227,16 @@ export class DebugMenu extends LitElement {
 
   private _onToggleConnection() {
     if (this.connected) {
-      this.workspace.providers.forEach(provider => provider.disconnect());
+      this.workspace.providers.forEach(provider => {
+        if (!provider || !provider.disconnect) return;
+        provider.disconnect();
+      });
       this.connected = false;
     } else {
-      this.workspace.providers.forEach(provider => provider.connect());
+      this.workspace.providers.forEach(provider => {
+        if (!provider || !provider.connect) return;
+        provider.connect();
+      });
       this.connected = true;
     }
   }

@@ -3,15 +3,15 @@ import {
   initMouseEventHandlers,
   MouseMode,
   RootBlockModel,
-} from '../../__internal__';
-import { initWheelEventHandlers } from './utils';
-import type { EdgelessPageBlockComponent } from './edgeless-page-block';
-import { DefaultSelectionController } from './selection-manager/default';
-import { ShapeSelectionController } from './selection-manager/shape';
+} from '../../__internal__/index.js';
+import { initWheelEventHandlers } from './utils.js';
+import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import { DefaultSelectionController } from './selection-manager/default.js';
+import { ShapeSelectionController } from './selection-manager/shape.js';
 import type {
   HoverState,
   SelectionController,
-} from './selection-manager/index';
+} from './selection-manager/index.js';
 
 export { HoverState };
 
