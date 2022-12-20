@@ -6,8 +6,8 @@ import {
   initThreeParagraphs,
   pressEnter,
   switchReadonly,
-} from './utils/actions';
-import { assertSelection, assertStoreMatchJSX } from './utils/asserts';
+} from './utils/actions/index.js';
+import { assertSelection, assertStoreMatchJSX } from './utils/asserts.js';
 
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);

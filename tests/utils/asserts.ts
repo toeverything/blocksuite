@@ -4,10 +4,13 @@
 
 import './declare-test-window';
 import { expect, type Page } from '@playwright/test';
-import type { BaseBlockModel, SerializedStore } from '../../packages/store';
-import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page';
+import type {
+  BaseBlockModel,
+  SerializedStore,
+} from '../../packages/store/src/index.js';
+import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
 
-import type { JSXElement } from '../../packages/store/src/utils/jsx';
+import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,

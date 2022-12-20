@@ -1,7 +1,8 @@
-import '../declare-test-window';
-import type { Page as StorePage } from '../../../packages/store';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import '../declare-test-window.js';
+import type { Page as StorePage } from '../../../packages/store/src/index.js';
 import type { Page } from '@playwright/test';
-import { pressEnter } from './keyboard';
+import { pressEnter } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 50;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';

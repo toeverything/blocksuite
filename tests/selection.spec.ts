@@ -23,14 +23,14 @@ import {
   pasteByKeyboard,
   getSelectedTextByQuill,
   withCtrlOrMeta,
-} from './utils/actions';
+} from './utils/actions/index.js';
 import { expect } from '@playwright/test';
 import {
   assertBlockCount,
   assertRichTexts,
   assertSelection,
   assertAlmostEqual,
-} from './utils/asserts';
+} from './utils/asserts.js';
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);

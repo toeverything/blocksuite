@@ -14,7 +14,7 @@ import {
   resetHistory,
   copyByKeyboard,
   pasteByKeyboard,
-} from './utils/actions';
+} from './utils/actions/index.js';
 import {
   assertBlockTypes,
   assertClipItems,
@@ -22,7 +22,7 @@ import {
   assertSelection,
   assertText,
   assertTextFormats,
-} from './utils/asserts';
+} from './utils/asserts.js';
 
 // TODO fix CI
 test.skip('clipboard copy paste', async ({ page }) => {

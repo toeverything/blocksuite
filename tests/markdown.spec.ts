@@ -7,14 +7,14 @@ import {
   initEmptyParagraphState,
   undoByClick,
   undoByKeyboard,
-} from './utils/actions';
+} from './utils/actions/index.js';
 import {
   assertBlockType,
   assertRichTexts,
   assertText,
   assertTextContain,
   assertTextFormat,
-} from './utils/asserts';
+} from './utils/asserts.js';
 
 test('markdown shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);

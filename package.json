@@ -1,6 +1,7 @@
 {
   "name": "blocksuite",
   "private": true,
+  "type": "module",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
     "dev": "run-p serve dev:playground",
