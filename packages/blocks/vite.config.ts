@@ -1,5 +1,7 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
+import { basename, extname } from 'node:path';
+import banner from 'vite-plugin-banner';
 
 export default defineConfig({
   build: {
@@ -7,7 +9,6 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
-        // FIXME: add banner reference in the output file
         std: resolve(__dirname, 'src/std.ts'),
       },
       formats: ['es'],
@@ -27,4 +28,14 @@ export default defineConfig({
       ],
     },
   },
+  plugins: [
+    banner({
+      content: fileName => {
+        return `/// <reference types="./${basename(
+          fileName,
+          extname(fileName)
+        )}.d.ts" />`;
+      },
+    }),
+  ],
 });

@@ -23,6 +23,7 @@ importers:
       pretty-format: ^29.1.2
       typescript: ^4.8.3
       vite: ^3.1.0
+      vite-plugin-banner: ^0.7.0
       vitest: ^0.23.4
     devDependencies:
       '@changesets/cli': 2.25.0
@@ -44,6 +45,7 @@ importers:
       pretty-format: 29.1.2
       typescript: 4.8.3
       vite: 3.2.5_@types+node@18.7.18
+      vite-plugin-banner: 0.7.0
       vitest: 0.23.4
 
   packages/blocks:
@@ -4221,6 +4223,10 @@ packages:
     dependencies:
       spdx-correct: 3.1.1
       spdx-expression-parse: 3.0.1
+    dev: true
+
+  /vite-plugin-banner/0.7.0:
+    resolution: {integrity: sha512-g0cm0wbrR6b6wR8FWtfD1RSDPacdumKEOAnneXv+NpJ9ez+j6rklRv6lMOO+aPf+Y6Zb8OzgIk0FXBZ6h+DeZQ==}
     dev: true
 
   /vite/3.2.5_@types+node@18.7.18:
