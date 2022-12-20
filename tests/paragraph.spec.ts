@@ -290,6 +290,7 @@ test('delete at start of paragraph immediately following bulleted list', async (
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 });
 
+// TODO merge with above test
 test('delete at start of paragraph immediately following numbered list', async ({
   page,
 }) => {
@@ -318,6 +319,7 @@ test('delete at start of paragraph immediately following numbered list', async (
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 });
 
+// TODO merge with above test
 test('delete at start of paragraph immediately following todo list', async ({
   page,
 }) => {
