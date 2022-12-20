@@ -274,7 +274,7 @@ export function bindHotkeys(
     const isCaption = targetInput.classList.contains(
       'affine-embed-wrapper-caption'
     );
-    // select blocks or focus caption input, then enter will create a new block
+    // select blocks or focus caption input, then enter will create a new block.
     if ((type === 'block' && selectedBlocks.length) || isCaption) {
       e.stopPropagation();
       e.preventDefault();

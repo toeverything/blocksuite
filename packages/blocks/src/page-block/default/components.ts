@@ -156,7 +156,9 @@ export function EmbedEditingContainer(
           }}
         >
           ${CopyIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Copy</tool-tip>
+          <tool-tip inert tip-position="right" role="tooltip"
+            >Copy to clipboard
+          </tool-tip>
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip"
