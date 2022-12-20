@@ -108,15 +108,23 @@ function isPointIn(block: DOMRect, x: number, y: number): boolean {
 }
 
 export async function downloadImage(model: BaseBlockModel) {
-  const link = document.createElement('a');
-  const url = await getUrlByModel(model);
-  url && (link.href = url);
-  link.setAttribute('target', '_blank');
-  document.body.appendChild(link);
-  link.download = 'test';
-  link.click();
-  document.body.removeChild(link);
-  link.remove();
+  const imgSrc = await getUrlByModel(model);
+  const image = new Image();
+  imgSrc && (image.src = imgSrc);
+  image.setAttribute('crossOrigin', 'anonymous');
+  image.onload = function () {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    context && context.drawImage(image, 0, 0, image.width, image.height);
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    const event = new MouseEvent('click');
+    a.download = 'image';
+    a.href = url;
+    a.dispatchEvent(event);
+  };
 }
 
 export async function copyImgToClip(model: BaseBlockModel) {
