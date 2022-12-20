@@ -168,7 +168,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
       if (!parent || matchFlavours(parent, ['affine:group'])) {
         if (
           previousSibling &&
-          matchFlavours(previousSibling, ['affine:paragraph'])
+          matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
         ) {
           page.captureSync();
           const preTextLength = previousSibling.text?.length || 0;
