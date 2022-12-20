@@ -1,6 +1,8 @@
 // https://github.com/tldraw/tldraw/blob/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/tldraw/src/state/shapes/RectangleUtil/rectangleHelpers.ts
+// Credits to tldraw
+
 import { Utils } from './utils.js';
-import { Vec } from '@tldraw/vec';
+import { Vec } from './vec.js';
 import { getShapeStyle } from './shape-style.js';
 import type { ShapeStyles } from '../../__internal__/index.js';
 

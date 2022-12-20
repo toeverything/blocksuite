@@ -52,7 +52,6 @@ importers:
     specifiers:
       '@blocksuite/store': workspace:*
       '@tldraw/intersect': ^1.8.0
-      '@tldraw/vec': ^1.8.0
       highlight.js: ^11.7.0
       hotkeys-js: ^3.10.0
       lit: ^2.3.1
@@ -62,7 +61,6 @@ importers:
     dependencies:
       '@blocksuite/store': link:../store
       '@tldraw/intersect': 1.8.0
-      '@tldraw/vec': 1.8.0
       highlight.js: 11.7.0
       hotkeys-js: 3.10.0
       lit: 2.3.1

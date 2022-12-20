@@ -1,6 +1,8 @@
 // https://github.com/tldraw/tldraw/blob/ca91e56b29212897b6c97650f567f7ea3e818d1e/packages/tldraw/src/state/shapes/TriangleUtil/triangleHelpers.ts
+// Credits to tldraw
+
 import { Utils } from './utils.js';
-import { Vec } from '@tldraw/vec';
+import { Vec } from './vec.js';
 import type { ShapeStyles } from '../../__internal__/index.js';
 import { getShapeStyle } from './shape-style.js';
 import { getOffsetPolygon } from './polygon-utils.js';
