@@ -176,6 +176,10 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
         return;
       }
       showFormatQuickBar({ anchorEl: anchor, direction });
+    } else if (this.blockSelectionState.type === 'single') {
+      if (!this._frameSelectionState) {
+        this._space.captureSync();
+      }
     }
     this._frameSelectionState = null;
   }
