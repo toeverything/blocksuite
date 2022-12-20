@@ -1,4 +1,4 @@
-import './utils/declare-test-window';
+import './utils/declare-test-window.js';
 import { test } from '@playwright/test';
 import {
   enterPlaygroundRoom,

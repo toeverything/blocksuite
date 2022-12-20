@@ -1,4 +1,4 @@
-import './utils/declare-test-window';
+import './utils/declare-test-window.js';
 import { test, Page } from '@playwright/test';
 import {
   activeEmbed,
