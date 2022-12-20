@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.3.0-alpha.15",
+  "version": "0.3.0-alpha.16",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
