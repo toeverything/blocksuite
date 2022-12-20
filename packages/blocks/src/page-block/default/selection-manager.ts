@@ -27,7 +27,7 @@ import {
 } from '../utils/cursor';
 import type { DefaultPageSignals } from './default-page-block';
 import { getBlockEditingStateByPosition } from './utils';
-import { matchFlavours } from '@blocksuite/store/src/utils/utils';
+import { Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
@@ -419,7 +419,10 @@ export class DefaultSelectionManager {
 
     if (
       clickBlockInfo &&
-      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+      Utils.matchFlavours(clickBlockInfo.model, [
+        'affine:embed',
+        'affine:divider',
+      ])
     ) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
