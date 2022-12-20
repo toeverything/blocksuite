@@ -10,13 +10,15 @@ export const assertFlavours = Utils.assertFlavours;
 
 export const matchFlavours = Utils.matchFlavours;
 
-const IS_FIREFOX = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+const isWeb = typeof window !== 'undefined';
+const isFirefox =
+  isWeb && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 export function caretRangeFromPoint(
   clientX: number,
   clientY: number
 ): Range | null {
-  if (IS_FIREFOX) {
+  if (isFirefox) {
     // @ts-ignore
     const caret = document.caretPositionFromPoint(clientX, clientY);
     const range = document.createRange();
