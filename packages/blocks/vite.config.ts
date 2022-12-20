@@ -34,8 +34,11 @@ export default defineConfig({
         return `/// <reference types="./${basename(
           fileName,
           extname(fileName)
-        )}.d.ts" />`;
+        )}.d.ts" />
+/**/
+`;
       },
+      verify: false,
     }),
   ],
 });
