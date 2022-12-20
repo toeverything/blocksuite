@@ -39,11 +39,11 @@
   },
   "publishConfig": {
     "access": "public",
-    "main": "dist/index.js",
+    "main": "dist/store/src/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./src/*": "./dist/*.js",
-      ".": "./dist/index.js"
+      "./src/*": "./dist/store/src/*.js",
+      ".": "./dist/store/src/index.js"
     }
   }
 }
