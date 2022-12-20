@@ -1,5 +1,4 @@
 import {
-  createWebsocketDocProvider,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
@@ -43,11 +42,9 @@ export function getOptions(): Pick<
         forceUUIDv4 = true;
         break;
       case 'websocket': {
-        const WebsocketDocProvider = createWebsocketDocProvider(
-          'ws://127.0.0.1:1234'
+        console.warn(
+          'Websocket provider is not maintained in BlockSuite currently.'
         );
-        providers.push(WebsocketDocProvider);
-        forceUUIDv4 = true;
         break;
       }
       default:

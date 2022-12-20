@@ -6,7 +6,7 @@ import { Signal } from '../utils/signal.js';
 import { Indexer, QueryContent } from './search.js';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base';
-import { BlobStorage, getBlobStorage } from '../blob';
+import { BlobStorage, getBlobStorage } from '../blob/index.js';
 
 export interface PageMeta {
   id: string;
