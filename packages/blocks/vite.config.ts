@@ -7,6 +7,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
+        // FIXME: add banner reference in the output file
         std: resolve(__dirname, 'src/std.ts'),
       },
       formats: ['es'],
