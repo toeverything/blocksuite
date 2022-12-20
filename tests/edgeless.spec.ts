@@ -176,5 +176,18 @@ test('add shape blocks', async ({ page }) => {
     return element?.tagName;
   });
   expect(tag).toBe('AFFINE-SHAPE');
+
+  await page.mouse.move(100, 100);
+  await page.mouse.wheel(10, 10);
+  const newBox = await page
+    .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
+    ?.boundingBox();
+  if (!newBox) {
+    throw new Error('box is null');
+  }
+  // TODO: detect the offset precisely because delta is different between different `window.devicePixelRatio`.
+  //  Refs: https://bugzilla.mozilla.org/show_bug.cgi?id=970141
+  expect(newBox.x).toBeLessThan(box.x);
+  expect(newBox.y).toBeLessThan(box.y);
   await assertRichTexts(page, ['hello']);
 });
