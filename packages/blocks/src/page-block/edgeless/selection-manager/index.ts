@@ -46,12 +46,12 @@ export abstract class SelectionController<Mode extends MouseMode = MouseMode> {
     return this._frameSelectionState;
   }
 
-  protected get _space() {
+  protected get _page() {
     return this._container.page;
   }
 
   protected get _blocks(): RootBlockModel[] {
-    return (this._space.root?.children as RootBlockModel[]) ?? [];
+    return (this._page.root?.children as RootBlockModel[]) ?? [];
   }
 
   public abstract mouseMode: Mode;

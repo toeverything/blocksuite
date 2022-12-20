@@ -81,7 +81,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
             this.blockSelectionState
           );
         }
-        handleNativeRangeClick(this._space, e);
+        handleNativeRangeClick(this._page, e);
         break;
     }
   }
@@ -150,7 +150,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
             modelW,
             modelH,
           ]);
-          this._space.updateBlock(block, { xywh });
+          this._page.updateBlock(block, { xywh });
           this.blockSelectionState.rect = getSelectionBoxBound(
             this._container.viewport,
             xywh
@@ -178,7 +178,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
       showFormatQuickBar({ anchorEl: anchor, direction });
     } else if (this.blockSelectionState.type === 'single') {
       if (!this._frameSelectionState) {
-        this._space.captureSync();
+        this._page.captureSync();
       }
     }
     this._frameSelectionState = null;
