@@ -16,12 +16,13 @@ export default defineConfig({
     rollupOptions: {
       external: [
         'yjs',
+        /^y-protocols/,
         '@blocksuite/store',
         'highlight.js',
         '@tldraw/intersect',
         '@tldraw/vec',
         'hotkeys-js',
-        'lit',
+        /^lit/,
         'perfect-freehand',
         'quill',
         'quill-cursors',
