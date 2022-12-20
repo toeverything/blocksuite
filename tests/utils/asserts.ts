@@ -394,3 +394,11 @@ export async function assertClipItems(page: Page, key: string, value: unknown) {
   const actual = clipItems.find(item => item.mimeType === key)?.data;
   expect(actual).toEqual(value);
 }
+
+export function assertAlmostEqual(
+  actual: number,
+  expected: number,
+  precision = 0.001
+) {
+  expect(Math.abs(actual - expected)).toBeLessThan(precision);
+}

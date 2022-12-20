@@ -29,6 +29,7 @@ import {
   assertBlockCount,
   assertRichTexts,
   assertSelection,
+  assertAlmostEqual,
 } from './utils/asserts';
 
 test('click on blank area', async ({ page }) => {
@@ -545,10 +546,10 @@ test('selection on heavy page', async ({ page }) => {
         const rect = await page
           .locator('.affine-page-frame-selection-rect')
           .evaluate(element => element.getBoundingClientRect());
-        expect(rect.x).toBe(first.x - 1);
-        expect(rect.y).toBe(first.y - 1);
-        expect(rect.right).toBe(last.x + 1);
-        expect(rect.bottom).toBe(last.y + 1);
+        assertAlmostEqual(rect.x, first.x - 1, 1);
+        assertAlmostEqual(rect.y, first.y - 1, 1);
+        assertAlmostEqual(rect.right, last.x + 1, 1);
+        assertAlmostEqual(rect.bottom, last.y + 1, 1);
       },
     }
   );
