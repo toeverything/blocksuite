@@ -5,12 +5,13 @@ export default defineConfig({
   build: {
     emptyOutDir: false,
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      fileName: 'index',
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        std: resolve(__dirname, 'src/std.ts'),
+      },
       formats: ['es'],
     },
     rollupOptions: {
-      output: {},
       external: [
         'yjs',
         '@blocksuite/store',

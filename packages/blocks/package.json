@@ -24,7 +24,8 @@
   },
   "exports": {
     "./style": "./dist/style.css",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./std": "./src/std.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -33,7 +34,11 @@
     "exports": {
       "./style": "./dist/style.css",
       "./src/*": "./dist/*.js",
-      ".": "./dist/index.js"
+      ".": "./dist/index.js",
+      "./std": {
+        "types": "./dist/std.d.ts",
+        "default": "./dist/std.js"
+      }
     }
   }
 }
