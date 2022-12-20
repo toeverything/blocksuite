@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "./dist/",
-    "noEmit": false
+    "noEmit": false,
+    "moduleResolution": "NodeNext"
   },
   "include": ["./src"],
   "exclude": ["./src/__tests__", "./src/blob/__tests__"],

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "./dist/",
-    "noEmit": false
+    "noEmit": false,
+    "moduleResolution": "NodeNext"
   },
   "include": ["./src"],
   "references": []
