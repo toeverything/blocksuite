@@ -6,5 +6,6 @@
     "noEmit": false
   },
   "include": ["./src"],
+  "exclude": ["./src/__tests__", "./src/blob/__tests__"],
   "references": []
 }
