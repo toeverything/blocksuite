@@ -180,6 +180,7 @@ export const linkPopoverStyle = css`
     align-items: center;
     user-select: none;
     cursor: pointer;
+    overflow: hidden;
   }
 
   .affine-link-popover-dividing-line {
