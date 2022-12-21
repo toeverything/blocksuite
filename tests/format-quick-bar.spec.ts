@@ -515,7 +515,7 @@ async function scrollToBottom(page: Page) {
   });
 }
 
-test.only('should format quick bar follow scroll', async ({ page }) => {
+test('should format quick bar follow scroll', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);

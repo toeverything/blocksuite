@@ -140,14 +140,7 @@ export function calcPositionPointByRange(
   return positioningPoint;
 }
 
-export const calcSafeCoordinate = ({
-  positioningPoint,
-  objRect = { width: 0, height: 0 },
-  boundaryRect = document.body.getBoundingClientRect(),
-  offsetX = 0,
-  offsetY = 0,
-  edgeGap = 20,
-}: {
+type CollisionBox = {
   /**
    * The point that the objRect is positioned to.
    */
@@ -163,7 +156,16 @@ export const calcSafeCoordinate = ({
   offsetX?: number;
   offsetY?: number;
   edgeGap?: number;
-}) => {
+};
+
+export function calcSafeCoordinate({
+  positioningPoint,
+  objRect = { width: 0, height: 0 },
+  boundaryRect = document.body.getBoundingClientRect(),
+  offsetX = 0,
+  offsetY = 0,
+  edgeGap = 20,
+}: CollisionBox) {
   const safeX = clamp(
     positioningPoint.x + offsetX,
     edgeGap,
@@ -180,4 +182,4 @@ export const calcSafeCoordinate = ({
     x: safeX,
     y,
   };
-};
+}
