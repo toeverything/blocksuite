@@ -8,7 +8,7 @@ import type { DividerBlockModel } from './divider-model.js';
 import { BlockChildrenContainer } from '../__internal__/index.js';
 import style from './style.css';
 
-@customElement('divider-block')
+@customElement('affine-divider')
 export class DividerBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -49,6 +49,6 @@ export class DividerBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'divider-block': DividerBlockComponent;
+    'affine-divider': DividerBlockComponent;
   }
 }
