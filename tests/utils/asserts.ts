@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import './declare-test-window.js';
-import { expect, type Page } from '@playwright/test';
+import { expect, Locator, type Page } from '@playwright/test';
 import type {
   BaseBlockModel,
   SerializedStore,
@@ -407,4 +407,49 @@ export function assertAlmostEqual(
   precision = 0.001
 ) {
   expect(Math.abs(actual - expected)).toBeLessThan(precision);
+}
+
+/**
+ * Assert the locator is visible in the viewport.
+ * It will check the bounding box of the locator is within the viewport.
+ *
+ * See also https://playwright.dev/docs/actionability#visible
+ */
+export async function assertLocatorVisible(
+  page: Page,
+  locator: Locator,
+  visible = true
+) {
+  const bodyRect = await page.locator('body').boundingBox();
+  const rect = await locator.boundingBox();
+  expect(rect).toBeTruthy();
+  expect(bodyRect).toBeTruthy();
+  if (!rect || !bodyRect) {
+    throw new Error('Unreachable');
+  }
+  if (visible) {
+    // Assert the locator is **fully** visible
+    await expect(locator).toBeVisible();
+    expect(rect.x).toBeGreaterThanOrEqual(0);
+    expect(rect.y).toBeGreaterThanOrEqual(0);
+    expect(rect.x + rect.width).toBeLessThanOrEqual(
+      bodyRect.x + bodyRect.width
+    );
+    expect(rect.y + rect.height).toBeLessThanOrEqual(
+      bodyRect.x + bodyRect.height
+    );
+  } else {
+    // Assert the locator is **fully** invisible
+    const locatorIsVisible = await locator.isVisible();
+    if (!locatorIsVisible) {
+      // If the locator is invisible, we don't need to check the bounding box
+      return;
+    }
+    const isInVisible =
+      rect.x > bodyRect.x + bodyRect.width ||
+      rect.y > bodyRect.y + bodyRect.height ||
+      rect.x + rect.width < bodyRect.x ||
+      rect.y + rect.height < bodyRect.y;
+    expect(isInVisible).toBe(true);
+  }
 }

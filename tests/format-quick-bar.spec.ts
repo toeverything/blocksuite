@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
 import {
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -7,7 +7,11 @@ import {
   pressEnter,
   switchReadonly,
 } from './utils/actions/index.js';
-import { assertSelection, assertStoreMatchJSX } from './utils/asserts.js';
+import {
+  assertLocatorVisible,
+  assertSelection,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -38,17 +42,16 @@ test('should format quick bar be able to format text', async ({ page }) => {
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const boldBtnLocator = page.locator(`.format-quick-bar [data-testid=bold]`);
-  const italicBtnLocator = page.locator(
-    `.format-quick-bar [data-testid=italic]`
+  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
+  const boldBtnLocator = formatQuickBarLocator.locator(`[data-testid=bold]`);
+  const italicBtnLocator =
+    formatQuickBarLocator.locator(`[data-testid=italic]`);
+  const underlineBtnLocator = formatQuickBarLocator.locator(
+    `[data-testid=underline]`
   );
-  const underlineBtnLocator = page.locator(
-    `.format-quick-bar [data-testid=underline]`
-  );
-  const strikeBtnLocator = page.locator(
-    `.format-quick-bar [data-testid=strike]`
-  );
-  const codeBtnLocator = page.locator(`.format-quick-bar [data-testid=code]`);
+  const strikeBtnLocator =
+    formatQuickBarLocator.locator(`[data-testid=strike]`);
+  const codeBtnLocator = formatQuickBarLocator.locator(`[data-testid=code]`);
 
   await expect(boldBtnLocator).not.toHaveAttribute('active', '');
   await expect(italicBtnLocator).not.toHaveAttribute('active', '');
@@ -465,4 +468,79 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
 
   await page.dblclick('.affine-rich-text p', { position: { x: 10, y: 10 } });
   await expect(formatQuickBarLocator).not.toBeVisible();
+});
+
+async function scrollToTop(page: Page) {
+  // await page.mouse.wheel(0, -1000);
+  await page
+    .locator('.affine-default-viewport')
+    .evaluate(node =>
+      node.scrollTo({ left: 0, top: -1000, behavior: 'smooth' })
+    );
+  await page.waitForFunction(() => {
+    const scrollContainer = document.querySelector('.affine-default-viewport');
+    if (!scrollContainer) {
+      throw new Error("Can't find scroll container");
+    }
+    return scrollContainer.scrollTop < 10;
+  });
+}
+
+async function scrollToBottom(page: Page) {
+  // await page.mouse.wheel(0, 1000);
+  await page
+    .locator('.affine-default-viewport')
+    .evaluate(node =>
+      node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
+    );
+  await page.waitForFunction(() => {
+    const scrollContainer = document.querySelector('.affine-default-viewport');
+    if (!scrollContainer) {
+      throw new Error("Can't find scroll container");
+    }
+    console.warn(
+      scrollContainer.scrollHeight - scrollContainer.scrollTop,
+      scrollContainer.clientHeight
+    );
+
+    return (
+      // Wait for scrolled to the bottom
+      // Refer to https://stackoverflow.com/questions/3898130/check-if-a-user-has-scrolled-to-the-bottom-not-just-the-window-but-any-element
+      Math.abs(
+        scrollContainer.scrollHeight -
+          scrollContainer.scrollTop -
+          scrollContainer.clientHeight
+      ) < 10
+    );
+  });
+}
+
+test.only('should format quick bar follow scroll', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  for (let i = 0; i < 30; i++) {
+    await page.keyboard.press('Enter');
+  }
+  page.keyboard.type('bottom');
+
+  await scrollToTop(page);
+
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
+  await assertLocatorVisible(page, formatQuickBarLocator);
+
+  await scrollToBottom(page);
+
+  await assertLocatorVisible(page, formatQuickBarLocator, false);
+
+  // should format bar follow scroll after click bold button
+  await scrollToTop(page);
+  const boldBtnLocator = formatQuickBarLocator.locator(`[data-testid=bold]`);
+  await assertLocatorVisible(page, formatQuickBarLocator);
+  await boldBtnLocator.click();
+  await page.mouse.move(0, 0);
+  await scrollToBottom(page);
+  await assertLocatorVisible(page, formatQuickBarLocator, false);
 });
