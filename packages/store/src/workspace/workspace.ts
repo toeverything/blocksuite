@@ -202,6 +202,8 @@ class WorkspaceMeta extends Space {
 }
 
 export class Workspace {
+  static Y = Y;
+
   private _store: Store;
   private _indexer: Indexer;
   private _blobStorage: Promise<BlobStorage | null>;
