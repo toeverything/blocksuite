@@ -21,11 +21,12 @@ class WorkspaceMeta extends Space {
   pageAdded = new Signal<string>();
   pageRemoved = new Signal<string>();
   pagesUpdated = new Signal();
+  commonFieldsUpdated = new Signal();
 
   constructor(id: string, workspace: Workspace, awareness: Awareness) {
     super(id, workspace.doc, awareness);
     this._workspace = workspace;
-    this._yMetaRoot.observeDeep(this._handlePageEvent);
+    this._yMetaRoot.observeDeep(this._handleEvents);
   }
 
   private get _yMetaRoot() {
@@ -46,6 +47,40 @@ class WorkspaceMeta extends Space {
     }
 
     return this._yMetaRoot.get('versions') as Y.Map<unknown>;
+  }
+
+  private get _yName() {
+    if (!this._yMetaRoot.has('name')) {
+      return null;
+    }
+    return this._yMetaRoot.get('name') as string;
+  }
+
+  private get _yAvatar() {
+    if (!this._yMetaRoot.has('avatar')) {
+      return null;
+    }
+    return this._yMetaRoot.get('avatar') as Y.Text;
+  }
+
+  get name() {
+    return this._yName ? this._yName.toString() : '';
+  }
+
+  get avatar() {
+    return this._yAvatar ? this._yAvatar.toString() : '';
+  }
+
+  setName(val: string) {
+    this.doc.transact(() => {
+      this._yMetaRoot.set('name', val);
+    });
+  }
+
+  setAvatar(val: string) {
+    this.doc.transact(() => {
+      this._yMetaRoot.set('avatar', val);
+    });
   }
 
   get pageMetas() {
@@ -119,7 +154,7 @@ class WorkspaceMeta extends Space {
     // TODO: validate version
   }
 
-  private _handlePageEvent = (_: Y.YEvent<Y.Array<unknown>>[]) => {
+  private _handlePageEvent() {
     const { pageMetas, _prevPages } = this;
 
     pageMetas.forEach(page => {
@@ -144,6 +179,25 @@ class WorkspaceMeta extends Space {
     pageMetas.forEach(page => _prevPages.add(page.id));
 
     this.pagesUpdated.emit();
+  }
+
+  private _handleCommonFieldsEvent() {
+    this.commonFieldsUpdated.emit();
+  }
+
+  private _handleEvents = (
+    events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<unknown>>[]
+  ) => {
+    events.forEach(e => {
+      const hasKey = (k: string) =>
+        e.target === this._yMetaRoot && e.changes.keys.has(k);
+
+      if (e.target === this._yPages || hasKey('pages')) {
+        this._handlePageEvent();
+      } else if (hasKey('name') || hasKey('avatar')) {
+        this._handleCommonFieldsEvent();
+      }
+    });
   };
 }
 

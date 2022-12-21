@@ -214,6 +214,19 @@ describe.concurrent('addBlock', () => {
       ]
     );
   });
+
+  it('can set workspace common meta fields', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options);
+
+    queueMicrotask(() => workspace.meta.setName('hello'));
+    await waitOnce(workspace.meta.commonFieldsUpdated);
+    assert.deepEqual(workspace.meta.name, 'hello');
+
+    queueMicrotask(() => workspace.meta.setAvatar('gengar.jpg'));
+    await waitOnce(workspace.meta.commonFieldsUpdated);
+    assert.deepEqual(workspace.meta.avatar, 'gengar.jpg');
+  });
 });
 
 describe.concurrent('deleteBlock', () => {
