@@ -1,1 +1,1 @@
-export * from './__internal__/index.js';
+export * from './__internal__/utils/index.js';
