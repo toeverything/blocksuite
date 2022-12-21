@@ -30,6 +30,7 @@ import {
   assertRichTexts,
   assertSelection,
   assertAlmostEqual,
+  assertDivider,
 } from './utils/asserts.js';
 
 test('click on blank area', async ({ page }) => {
@@ -560,4 +561,17 @@ test('selection on heavy page', async ({ page }) => {
     return container?.children.length;
   });
   expect(rectNum).toBe(5);
+});
+
+test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('--- ');
+  await assertDivider(page, 1);
+  await page.keyboard.press('ArrowUp');
+  await withCtrlOrMeta(page, () => page.keyboard.press('c'));
+  await withCtrlOrMeta(page, () => page.keyboard.press('v'));
+  await page.keyboard.press('ArrowDown');
+  await assertDivider(page, 2);
 });
