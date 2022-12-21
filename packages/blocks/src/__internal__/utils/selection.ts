@@ -794,17 +794,11 @@ export const saveBlockSelection = (
   ];
 };
 
-export function restoreSelection(
-  rangeOrSelectedBlock: Range | SelectedBlock[]
-) {
-  if (rangeOrSelectedBlock instanceof Range) {
-    const range = rangeOrSelectedBlock;
-    resetNativeSelection(range);
-    return;
-  }
-  const selectedBlocks = rangeOrSelectedBlock;
-  const range = new Range();
-
+/**
+ * Restore the block selection.
+ * See also {@link resetNativeSelection}
+ */
+export function restoreSelection(selectedBlocks: SelectedBlock[]) {
   const startBlock = selectedBlocks[0];
   const [startNode, startOffset] = getTextNodeBySelectedBlock(startBlock);
 
@@ -819,7 +813,9 @@ export function restoreSelection(
     return;
   }
 
+  const range = getCurrentRange();
   range.setStart(startNode, startOffset);
   range.setEnd(endNode, endOffset);
   resetNativeSelection(range);
+  return range;
 }

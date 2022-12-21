@@ -456,7 +456,7 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ anchorEl: range });
+    showFormatQuickBar({ anchorEl: range, direction: 'center-bottom' });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
