@@ -1,9 +1,8 @@
-import { Buffer } from 'buffer';
 import ky from 'ky';
 import { Signal } from '../utils/signal.js';
 
 import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types.js';
-import { getDatabase, sha3, sleep } from './utils.js';
+import { getDatabase, sha, sleep } from './utils.js';
 
 const RETRY_TIMEOUT = 500;
 
@@ -70,7 +69,7 @@ export class IndexedDBBlobProvider implements BlobProvider {
 
   async set(blob: Blob): Promise<BlobId> {
     const buffer = await blob.arrayBuffer();
-    const hash = sha3(Buffer.from(buffer));
+    const hash = await sha(buffer);
     if (!(await this._database.has(hash))) {
       await this._database.set(hash, buffer);
 

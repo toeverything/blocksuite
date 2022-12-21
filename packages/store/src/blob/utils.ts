@@ -1,18 +1,12 @@
-import type { Buffer } from 'buffer';
 import { createStore, del, get, keys, set, clear } from 'idb-keyval';
-import { SHA3 } from 'sha3';
 import type { IDBInstance } from './types.js';
+import { Buffer } from 'buffer';
 
-const hash = new SHA3(256);
+export async function sha(input: ArrayBuffer): Promise<string> {
+  const hash = await crypto.subtle.digest('SHA-256', input);
+  const buffer = Buffer.from(hash);
 
-export function sha3(buffer: Buffer): string {
-  hash.reset();
-  hash.update(buffer);
-  return hash
-    .digest('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+  return buffer.toString('base64url');
 }
 
 export function getDatabase<T = ArrayBufferLike>(
