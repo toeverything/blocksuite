@@ -1,8 +1,10 @@
 import { Signal } from '@blocksuite/store';
-import type { DragDirection } from '../../page-block/utils/index.js';
-import type { FormatQuickBar } from './format-bar-node.js';
 import {
-  clamp,
+  calcPositionPointByRange,
+  calcSafeCoordinate,
+  DragDirection,
+} from '../../page-block/utils/cursor.js';
+import {
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
@@ -11,6 +13,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import './button';
 import './format-bar-node';
+import type { FormatQuickBar } from './format-bar-node.js';
 
 export const showFormatQuickBar = async ({
   anchorEl,
@@ -18,10 +21,12 @@ export const showFormatQuickBar = async ({
   container = document.body,
   abortController = new AbortController(),
 }: {
-  anchorEl: {
-    getBoundingClientRect: () => DOMRect;
-    // contextElement?: Element;
-  };
+  anchorEl:
+    | {
+        getBoundingClientRect: () => DOMRect;
+        // contextElement?: Element;
+      }
+    | Range;
   direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
@@ -39,31 +44,30 @@ export const showFormatQuickBar = async ({
 
   // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
-    const rect = anchorEl.getBoundingClientRect();
-    const bodyRect = document.body.getBoundingClientRect();
+    const positioningPoint =
+      anchorEl instanceof Range
+        ? calcPositionPointByRange(anchorEl, direction)
+        : anchorEl.getBoundingClientRect();
+
+    // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
+    const boundaryRect = document.body.getBoundingClientRect();
     const formatBarRect =
       formatQuickBar.formatQuickBarElement.getBoundingClientRect();
     // Add offset to avoid the quick bar being covered by the window border
-    const edgeGap = 20;
-    const baseX = (rect.left + rect.right) / 2;
-    const offsetX = clamp(
-      baseX - formatBarRect.width / 2,
-      edgeGap,
-      bodyRect.width - formatBarRect.width - edgeGap
-    );
-    const offsetY = 5;
-    formatQuickBar.left = `${offsetX}px`;
-    if (direction.includes('bottom')) {
-      const baseTop = rect.top - bodyRect.top + rect.height;
-      formatQuickBar.top = `${baseTop + offsetY}px`;
-    } else if (direction.includes('top')) {
-      const baseTop = bodyRect.bottom - rect.bottom + rect.height;
-      formatQuickBar.bottom = `${baseTop + offsetY}px`;
-    } else {
-      throw new Error(
-        `Failed to update position! Invalid direction: ${direction}!`
-      );
-    }
+
+    const gapY = 5;
+    const isBottom = direction.includes('bottom');
+    const safeCoordinate = calcSafeCoordinate({
+      positioningPoint,
+      objRect: formatBarRect,
+      boundaryRect,
+      // place the format bar in the center of the position point
+      offsetX: -formatBarRect.width / 2,
+      offsetY: isBottom ? gapY : -formatBarRect.height - gapY,
+    });
+
+    formatQuickBar.left = `${safeCoordinate.x}px`;
+    formatQuickBar.top = `${safeCoordinate.y}px`;
   }, 10);
 
   const models = getModelsByRange(getCurrentRange());
