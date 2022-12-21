@@ -15,7 +15,6 @@
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,playground,store}/dist",
     "changeset": "changeset",
-    "pack:local": "sh ./scripts/pack.sh",
     "release": "pnpm build && changeset publish",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "husky install"
