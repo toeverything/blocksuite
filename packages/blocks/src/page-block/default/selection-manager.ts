@@ -556,11 +556,8 @@ export class DefaultSelectionManager {
       this._signals.updateEmbedRects.emit([]);
       return;
     }
-    console.log(this.state.blockCache);
-
     this.state.type = pageSelectionType;
     this.state.selectedBlocks = selectedBlocksElement;
-    console.log(this.state.selectedBlocks);
     this._signals.updateSelectedRects.emit(selectionRects);
     return;
   }
