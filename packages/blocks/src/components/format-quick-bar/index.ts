@@ -87,19 +87,6 @@ export const showFormatQuickBar = async ({
   positionUpdatedSignal.on(updatePos);
   window.addEventListener('resize', updatePos, { passive: true });
 
-  // Handle click outside
-
-  const clickAwayListener = (e: MouseEvent) => {
-    if (e.target === formatQuickBar) {
-      // Prevent selection loss
-      e.preventDefault();
-      return;
-    }
-    abortController.abort();
-    window.removeEventListener('mousedown', clickAwayListener);
-  };
-  window.addEventListener('mousedown', clickAwayListener);
-
   // Handle selection change
 
   const selectionChangeHandler = () => {
