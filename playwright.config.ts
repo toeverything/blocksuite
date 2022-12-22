@@ -24,7 +24,7 @@ if (process.env.CI) {
     port: 5173,
   };
   config.retries = 3;
-  // config.workers = 2;
+  config.workers = 16;
 }
 
 export default config;
