@@ -37,13 +37,12 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 });
 
-//TODO FIXME: select all feature is modified
-test.skip('single line rich-text inline code hotkey', async ({ page }) => {
+test('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await selectAllByKeyboard(page);
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
   await inlineCode(page);
   await assertTextFormat(page, 0, 0, { code: true });
 
@@ -208,13 +207,12 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   );
 });
 
-//TODO FIXME: select all feature is modified
-test.skip('single line rich-text strikethrough hotkey', async ({ page }) => {
+test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await selectAllByKeyboard(page);
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, { strike: true });
 
