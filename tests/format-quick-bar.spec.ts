@@ -492,10 +492,6 @@ async function scrollToBottom(page: Page) {
     if (!scrollContainer) {
       throw new Error("Can't find scroll container");
     }
-    console.warn(
-      scrollContainer.scrollHeight - scrollContainer.scrollTop,
-      scrollContainer.clientHeight
-    );
 
     return (
       // Wait for scrolled to the bottom
