@@ -1,3 +1,9 @@
+/**
+ * This file should be pure, which means cannot modify global environment
+ *  and couldn't cause differ between server and browser.
+ *
+ * Simply put, `import '@blocksuite/blocks/std.ts'` should work well in the Next.js
+ */
 export * from './consts.js';
 export * from './types.js';
 export * from './common-operations.js';

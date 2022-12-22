@@ -1,6 +1,6 @@
 import { html } from 'lit/static-html.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost } from '../utils/index.js';
+import type { BlockHost } from './types.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 
