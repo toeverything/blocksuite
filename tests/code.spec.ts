@@ -157,9 +157,9 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await addCodeBlock(page);
   await page.keyboard.type('use');
 
-  await page.keyboard.press('Shift');
+  await page.keyboard.down('Shift');
   for (let i = 0; i < 'use'.length; i++) {
-    page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
   }
   await page.keyboard.up('Shift');
   await copyByKeyboard(page);

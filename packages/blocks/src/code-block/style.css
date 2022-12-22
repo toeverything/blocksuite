@@ -67,14 +67,6 @@ code-block {
   position: relative;
 }
 
-/*TODO delete if not used*/
-/*.lang-container svg {*/
-/*  transition-duration: 0.3s;*/
-/*}*/
-/*.lang-container:is(:hover, :focus-visible, :active)  svg {*/
-/*  transform: rotate(180deg);*/
-/*}*/
-
 .code-block-option {
   box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),
     0px 3px 16px -6px rgba(24, 39, 75, 0.4);

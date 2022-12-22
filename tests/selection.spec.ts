@@ -567,13 +567,11 @@ test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('---');
-  await page.keyboard.type(' ');
+  await page.keyboard.type('--- ');
   await assertDivider(page, 1);
   await page.keyboard.press('ArrowUp');
   await copyByKeyboard(page);
-  await page.waitForTimeout(500);
-  await pasteByKeyboard(page);
   await page.keyboard.press('ArrowDown');
+  await pasteByKeyboard(page);
   await assertDivider(page, 2);
 });
