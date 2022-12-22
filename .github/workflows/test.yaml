@@ -30,7 +30,7 @@ jobs:
         run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 
       - name: Run tests
-        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
+        run: PLAYWRIGHT_BROWSERS_PATH=0 CI=true pnpm test -- --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}
