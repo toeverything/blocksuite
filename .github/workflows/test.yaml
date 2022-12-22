@@ -32,9 +32,10 @@ jobs:
       - name: Run tests
         run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
 
-      # - name: Upload test results
-      #   if: always()
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: playwright-report
-      #     path: playwright-report
+      - name: Upload test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ./test-results
+          if-no-files-found: ignore
