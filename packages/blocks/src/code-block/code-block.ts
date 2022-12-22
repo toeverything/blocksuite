@@ -4,7 +4,11 @@ import type { CodeBlockModel } from './code-model.js';
 import codeBlockStyle from './style.css';
 import codeTheme from 'highlight.js/styles/color-brewer.css';
 import { toolTipStyle } from '../components/tooltip.js';
-import { BLOCK_ID_ATTR, BlockChildrenContainer, BlockHost } from '../__internal__/index.js';
+import {
+  BLOCK_ID_ATTR,
+  BlockChildrenContainer,
+  BlockHost,
+} from '../__internal__/index.js';
 // @ts-ignore
 import highlight from 'highlight.js';
 import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';

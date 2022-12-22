@@ -1,14 +1,20 @@
 import { expect, test } from '@playwright/test';
 import {
   addCodeBlock,
+  copyByKeyboard,
+  createCodeBlock,
+  dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getQuillSelectionIndex,
+  getQuillSelectionText,
   initEmptyParagraphState,
-  keyDownCtrlOrMeta,
-  keyDownOptionMeta,
-  keyUpCtrlOrMeta,
-  keyUpOptionMeta,
-} from './utils/actions';
+  pasteByKeyboard,
+  redoByKeyboard,
+  selectAllByKeyboard,
+  undoByKeyboard,
+} from './utils/actions/index.js';
+import { assertRichTexts } from './utils/asserts.js';
 
 test('use debug menu can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -33,17 +39,12 @@ test('use markdown syntax can create code block', async ({ page }) => {
   await expect(locator).toBeVisible();
 });
 
-// TODO confirm shortcut
 test('use shortcut can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await keyDownCtrlOrMeta(page);
-  await keyDownOptionMeta(page);
-  await page.keyboard.press('c');
-  await keyUpCtrlOrMeta(page);
-  await keyUpOptionMeta(page);
+  await createCodeBlock(page);
 
   const locator = page.locator('affine-code');
   await expect(locator).toBeVisible();
@@ -89,36 +90,171 @@ test('language select list can disappear when click other place', async ({
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right + 10, y: bbox.top + 10 };
   });
-  page.mouse.click(position.x, position.y);
+  await page.mouse.click(position.x, position.y);
 
   await expect(locator).toBeHidden();
 });
 
-/*
-- 初始化
-  - Debug menu 初始化代码块（done）
-  - ``` markdown 语法（done）
-  - 快捷键（done）
-- 语言选择
-  - 点击 button 出现语言选择下拉框，自动 focus 输入框，然后选择语言，能够正常切换（done）
-  - 点击 button 出现语言选择下拉框后，在空白的地方点击下拉框消失（done）
-TODO
-- 复制
-  - 复制多行代码，内容在代码块里
-  - 拖选复制
-  - 键盘选择复制
-- 删除
-  - 在代码块开始按两次退格键，删除
-  - 框选删除
-- 跳出
-  - 最后按两次回车跳出代码块
-  - 最后按下箭头跳出代码块（还没搞定）
-- 进入
-  - 代码块后按退格进入代码块的起始位置
-  - 代码块后按上箭头，进入代码块最后一行
-- 键盘行为
-  - Markdown 语法禁用
-- Format bar（功能待开发）
-  - 代码块内拖选，支持的格式：段落（多行的代码块是否会换成多行），复制
-- Undo redo
- */
+test('paste with more than one continuous breakline should remain in code block, ', async ({
+  page,
+}) => {
+  await page.setContent(`<div contenteditable>use super::*;
+use fern::{
+    colors::{Color, ColoredLevelConfig},
+    Dispatch,
+};
+<br><br>
+#[inline]</div>`);
+  await page.focus('div');
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await addCodeBlock(page);
+  await pasteByKeyboard(page);
+
+  const locator = page.locator('affine-paragraph');
+  await expect(locator).toBeHidden();
+});
+
+test('drag copy paste', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await addCodeBlock(page);
+  await page.keyboard.type('use');
+
+  const position = await page.evaluate(() => {
+    const paragraph = document.querySelector('pre');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return {
+      startX: bbox.left,
+      startY: bbox.bottom - bbox.height / 2,
+      endX: bbox.right,
+      endY: bbox.bottom - bbox.height / 2,
+    };
+  });
+
+  await dragBetweenCoords(
+    page,
+    { x: position.startX, y: position.startY },
+    { x: position.endX, y: position.endY }
+  );
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page);
+  const sdf = await getQuillSelectionText(page);
+  expect(sdf).toBe('useuse\n');
+});
+
+test('keyboard selection and copy paste', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await addCodeBlock(page);
+  await page.keyboard.type('use');
+
+  await page.keyboard.press('Shift');
+  for (let i = 0; i < 'use'.length; i++) {
+    page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.up('Shift');
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page);
+  const content = await getQuillSelectionText(page);
+  expect(content).toBe('useuse\n');
+});
+
+test('drag select code block can delete it', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await addCodeBlock(page);
+
+  const position = await page.evaluate(() => {
+    const paragraph = document.querySelector('affine-code');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return {
+      startX: bbox.left,
+      startY: bbox.bottom - bbox.height / 2,
+      endX: bbox.right,
+      endY: bbox.bottom - bbox.height / 2,
+    };
+  });
+  await page.mouse.click(position.endX + 150, position.endY + 150);
+  await dragBetweenCoords(
+    page,
+    { x: position.startX, y: position.startY },
+    { x: position.endX, y: position.endY }
+  );
+  await page.locator('.ql-syntax').evaluate(e => e.blur());
+  await page.keyboard.press('Backspace');
+  const locator = page.locator('affine-code');
+  await expect(locator).toBeHidden();
+});
+
+test('press enter twice at end of code block can jump out', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await addCodeBlock(page);
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  const locator = page.locator('affine-paragraph');
+  await expect(locator).toBeVisible();
+});
+
+test('press backspace after code block can jump into start of code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await addCodeBlock(page);
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Backspace');
+  const index = await getQuillSelectionIndex(page);
+  expect(index).toBe(0);
+});
+
+test('press ArrowUp after code block can jump into start of code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await addCodeBlock(page);
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('ArrowUp');
+  const index = await getQuillSelectionIndex(page);
+  expect(index).toBe(0);
+});
+
+test('undo and redo works in code block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await addCodeBlock(page);
+
+  await page.keyboard.type('const a = 10;');
+  await assertRichTexts(page, ['const a = 10;\n']);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['\n']);
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['const a = 10;\n']);
+});

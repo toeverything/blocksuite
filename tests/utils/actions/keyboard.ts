@@ -4,7 +4,7 @@ const IS_MAC = process.platform === 'darwin';
 // const IS_WINDOWS = process.platform === 'win32';
 // const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
-export async function keyDownCtrlOrMeta(page: Page) {
+async function keyDownCtrlOrMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Meta');
   } else {
@@ -12,14 +12,15 @@ export async function keyDownCtrlOrMeta(page: Page) {
   }
 }
 
-export async function keyUpCtrlOrMeta(page: Page) {
+async function keyUpCtrlOrMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.up('Meta');
   } else {
     await page.keyboard.up('Control');
   }
 }
-export async function keyDownOptionMeta(page: Page) {
+
+async function keyDownOptionMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Alt');
   } else {
@@ -27,7 +28,7 @@ export async function keyDownOptionMeta(page: Page) {
   }
 }
 
-export async function keyUpOptionMeta(page: Page) {
+async function keyUpOptionMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.up('Alt');
   } else {
@@ -187,4 +188,12 @@ export async function focusLine(page: Page, line = 0, end = true) {
   if (end) {
     await page.keyboard.press('End');
   }
+}
+
+export async function createCodeBlock(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.down('Alt');
+  await page.keyboard.press('c');
+  await page.keyboard.up('Alt');
+  await keyUpCtrlOrMeta(page);
 }

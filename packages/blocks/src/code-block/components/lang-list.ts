@@ -3,7 +3,7 @@ import { css, html, LitElement, unsafeCSS } from 'lit';
 import { createEvent } from '../../__internal__/index.js';
 import style from './style.css';
 import { styleMap } from 'lit/directives/style-map.js';
-import { SearchIcon } from './icons';
+import { SearchIcon } from './icons.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
