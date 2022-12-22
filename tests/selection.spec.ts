@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Page, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
@@ -16,7 +17,6 @@ import {
   resetHistory,
   redoByKeyboard,
   waitNextFrame,
-  selectAllByKeyboard,
   dragBetweenIndices,
   initThreeLists,
   copyByKeyboard,
@@ -333,20 +333,25 @@ test('double click choose words', async ({ page }) => {
     }
     return text;
   });
-  await expect(text).toBe('hello');
+  expect(text).toBe('hello');
 });
 
-test('select all text with hotkey and delete', async ({ page }) => {
+// XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
+test('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await selectAllByKeyboard(page);
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.evaluate(() => {
+    const defaultPage = document.querySelector('affine-default-page')!;
+    const rect = defaultPage.getBoundingClientRect();
+    defaultPage.selection.selectBlocksByRect(rect);
+  });
+  await page.keyboard.press('Backspace');
+  await focusRichText(page, 0);
   await page.keyboard.type('abc');
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('abc\n');
+  await assertRichTexts(page, ['abc']);
 });
 
 test('select all text with dragging and delete', async ({ page }) => {

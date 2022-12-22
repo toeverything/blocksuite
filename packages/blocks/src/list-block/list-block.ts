@@ -22,9 +22,10 @@ function selectList(model: ListBlockModel) {
     console.error('list block model:', model, 'blockElement:', blockElement);
     throw new Error('Failed to select list! blockElement not found!');
   }
-  const selectionRect = blockElement.getBoundingClientRect();
-  selectionManager.selectBlockByRect(selectionRect);
+  const blockRect = blockElement.getBoundingClientRect();
+  selectionManager.resetSelectedBlockByRect(blockRect);
 }
+
 @customElement('affine-list')
 export class ListBlockComponent extends LitElement {
   static styles = css`

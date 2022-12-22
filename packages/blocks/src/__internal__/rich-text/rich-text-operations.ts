@@ -226,8 +226,8 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   } else if (matchFlavours(model, ['affine:code'])) {
     const selectionManager = getDefaultPageBlock(model).selection;
     const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
-    const selectionRect = codeBlockElement.getBoundingClientRect();
-    selectionManager.selectBlockByRect(selectionRect, model, 'focus');
+    const blockRect = codeBlockElement.getBoundingClientRect();
+    selectionManager.resetSelectedBlockByRect(blockRect, 'focus');
     resetNativeSelection(null);
   }
 }

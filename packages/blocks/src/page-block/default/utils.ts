@@ -347,8 +347,8 @@ export function bindHotkeys(
 
   hotkey.addListener(SELECT_ALL, e => {
     e.preventDefault();
-    handleSelectAll();
-    selection.state.type = 'native';
+    handleSelectAll(selection);
+    selection.state.type = 'block';
   });
 
   hotkey.addListener(UP, e => {

@@ -32,7 +32,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await page.keyboard.type('world');
   await assertRichTexts(page, ['hello', 'world']);
 
-  await selectAllByKeyboard(page); // first select all in rich text
+  await dragBetweenIndices(page, [0, 0], [1, 5]);
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['\n']);
 });
@@ -42,7 +42,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await selectAllByKeyboard(page);
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
   await inlineCode(page);
   await assertTextFormat(page, 0, 0, { code: true });
 
@@ -212,7 +212,7 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
-  await selectAllByKeyboard(page);
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, { strike: true });
 

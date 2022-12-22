@@ -25,6 +25,7 @@ import {
   restoreSelection,
   saveBlockSelection,
 } from '../../__internal__/utils/selection.js';
+import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
 export function deleteModels(page: Page, models: BaseBlockModel[]) {
@@ -253,7 +254,10 @@ export function handleFormat(page: Page, key: string) {
   }
 }
 
-export function handleSelectAll() {
+/**
+ * @deprecated
+ */
+export function handleNativeSelectAll() {
   const blocks = document.querySelectorAll('.ql-editor');
   const firstRichText = blocks[0];
   const lastRichText = blocks[blocks.length - 1];
@@ -275,6 +279,19 @@ export function handleSelectAll() {
   );
   initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
   resetNativeSelection(range);
+}
+
+export function handleSelectAll(selection: DefaultSelectionManager) {
+  if (selection.state.selectedBlocks.length === 0) {
+    const currentRange = getCurrentRange();
+    const rangeRect = currentRange.getBoundingClientRect();
+    selection.selectBlocksByRect(rangeRect);
+  } else {
+    const rect = document.body.getBoundingClientRect();
+    selection.selectBlocksByRect(rect);
+  }
+
+  resetNativeSelection(null);
 }
 
 function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {

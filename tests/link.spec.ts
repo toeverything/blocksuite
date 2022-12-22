@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, Page, test } from '@playwright/test';
 import {
+  dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
   pressEnter,
-  selectAllByKeyboard,
   switchReadonly,
   withCtrlOrMeta,
 } from './utils/actions/index.js';
@@ -27,7 +27,7 @@ test('basic link', async ({ page }) => {
   await page.keyboard.type(linkText);
 
   // Create link
-  await selectAllByKeyboard(page);
+  await dragBetweenIndices(page, [0, 0], [0, 8]);
   await pressCreateLinkShortCut(page);
 
   const linkPopoverLocator = page.locator('.affine-link-popover');
