@@ -91,6 +91,8 @@ export const showFormatQuickBar = async ({
 
   const clickAwayListener = (e: MouseEvent) => {
     if (e.target === formatQuickBar) {
+      // Prevent selection loss
+      e.preventDefault();
       return;
     }
     abortController.abort();
