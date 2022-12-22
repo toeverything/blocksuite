@@ -341,7 +341,7 @@ test('select all text with hotkey and delete', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-
+  await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await page.keyboard.press('Backspace', { delay: 50 });
   await page.keyboard.type('abc');
