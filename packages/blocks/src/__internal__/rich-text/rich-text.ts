@@ -91,7 +91,8 @@ export class RichText extends LitElement {
     });
 
     page.attachRichText(model.id, this.quill);
-    page.awareness.updateLocalCursor();
+    // TODO it can cause cursor flickering, by need to evaluate impact
+    // page.awareness.updateLocalCursor();
     this.model.propsUpdated.on(() => this.requestUpdate());
 
     if (this.modules.syntax) {
@@ -102,7 +103,7 @@ export class RichText extends LitElement {
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.quill.on('text-change', (delta: any) => {
+    this.quill.on('text-change', delta => {
       const selectorMap = {
         code: 'code',
         link: 'link-node',
