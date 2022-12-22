@@ -30,11 +30,12 @@ function isFarEnough(a: IPoint, b: IPoint, d = 2) {
 
 function toSelectionEvent(
   e: MouseEvent,
-  rect: DOMRect,
+  getBoundingClientRect: () => DOMRect,
   startX: number,
   startY: number,
   last: SelectionEvent | null = null
 ): SelectionEvent {
+  const rect = getBoundingClientRect();
   const delta = { x: 0, y: 0 };
   const start = { x: startX, y: startY };
   const offsetX = e.clientX - rect.left;
@@ -99,20 +100,24 @@ export function initMouseEventHandlers(
   let startY = -Infinity;
   let isDragging = false;
   let last: SelectionEvent | null = null;
-  const rect: DOMRect = container.getBoundingClientRect();
+  const getBoundingClientRect: () => DOMRect = () =>
+    container.getBoundingClientRect();
 
   const mouseOutHandler = (e: MouseEvent) =>
-    onContainerMouseOut(toSelectionEvent(e, rect, startX, startY));
+    onContainerMouseOut(
+      toSelectionEvent(e, getBoundingClientRect, startX, startY)
+    );
 
   const mouseDownHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
+    const rect = getBoundingClientRect();
 
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
     isDragging = false;
     // e.button is 0 means left button
     if (!e.button) {
-      last = toSelectionEvent(e, rect, startX, startY);
+      last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
@@ -120,6 +125,7 @@ export function initMouseEventHandlers(
 
   const mouseMoveHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
+    const rect = getBoundingClientRect();
 
     const a = { x: startX, y: startY };
     const offsetX = e.clientX - rect.left;
@@ -127,7 +133,9 @@ export function initMouseEventHandlers(
     const b = { x: offsetX, y: offsetY };
 
     if (!last) {
-      onContainerMouseMove(toSelectionEvent(e, rect, startX, startY, last));
+      onContainerMouseMove(
+        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+      );
       return;
     }
 
@@ -137,9 +145,13 @@ export function initMouseEventHandlers(
     }
 
     if (isDragging) {
-      onContainerDragMove(toSelectionEvent(e, rect, startX, startY, last));
-      onContainerMouseMove(toSelectionEvent(e, rect, startX, startY, last));
-      last = toSelectionEvent(e, rect, startX, startY);
+      onContainerDragMove(
+        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+      );
+      onContainerMouseMove(
+        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+      );
+      last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
   };
 
@@ -147,8 +159,13 @@ export function initMouseEventHandlers(
     tryPreventDefault(e);
 
     if (!isDragging)
-      onContainerClick(toSelectionEvent(e, rect, startX, startY));
-    else onContainerDragEnd(toSelectionEvent(e, rect, startX, startY, last));
+      onContainerClick(
+        toSelectionEvent(e, getBoundingClientRect, startX, startY)
+      );
+    else
+      onContainerDragEnd(
+        toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
+      );
 
     startX = startY = -Infinity;
     isDragging = false;
@@ -161,11 +178,15 @@ export function initMouseEventHandlers(
   const contextMenuHandler = (e: MouseEvent) => {
     // e.preventDefault();
     // e.stopPropagation();
-    onContainerContextMenu(toSelectionEvent(e, rect, startX, startY));
+    onContainerContextMenu(
+      toSelectionEvent(e, getBoundingClientRect, startX, startY)
+    );
   };
 
   const dblClickHandler = (e: MouseEvent) => {
-    onContainerDblClick(toSelectionEvent(e, rect, startX, startY));
+    onContainerDblClick(
+      toSelectionEvent(e, getBoundingClientRect, startX, startY)
+    );
   };
 
   container.addEventListener('mousedown', mouseDownHandler);
