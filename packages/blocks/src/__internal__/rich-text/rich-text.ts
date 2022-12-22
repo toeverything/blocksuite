@@ -103,7 +103,7 @@ export class RichText extends LitElement {
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.quill.on('text-change', delta => {
+    this.quill.on('text-change', (delta: any) => {
       const selectorMap = {
         code: 'code',
         link: 'link-node',
