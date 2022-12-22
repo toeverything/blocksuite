@@ -9,17 +9,18 @@ code-block {
   line-height: calc(var(--affine-line-height-base) - 6px);
   position: relative;
   width: 720px;
-  padding: 24px 0px;
+  padding: 32px 0;
   background: var(--affine-code-block-background);
   border-radius: 10px;
+  margin-top: calc(var(--affine-paragraph-space) + 3px);
 }
 
 .affine-code-block-container .container {
   position: absolute;
   font-size: var(--affine-font-xs);
   line-height: calc(var(--affine-line-height-base) - 10px);
-  top: 6px;
-  left: 18px;
+  top: 12px;
+  left: 24px;
   z-index: 1;
 }
 
@@ -35,7 +36,6 @@ code-block {
   position: absolute;
   text-align: right;
   top: 5.4px;
-  left: 25px;
   line-height: calc(var(--affine-line-height-base) - 6px);
   color: var(--affine-line-number-color);
 }
@@ -50,11 +50,11 @@ code-block {
   width: 660px;
   margin: 0;
   overflow: scroll;
-  scrollbar-color: #fff0 #fff0;
+  /*scrollbar-color: #fff0 #fff0;*/
 }
 
 .affine-code-block-container .ql-syntax::-webkit-scrollbar {
-  background: none;
+  /*background: none;*/
 }
 
 .affine-code-block-container .wrap {
@@ -62,7 +62,6 @@ code-block {
 }
 
 .lang-container {
-  color: var(--affine-icon-color);
   line-height: calc(var(--affine-line-height-base) - 10px);
   text-align: justify;
   position: relative;
@@ -94,11 +93,10 @@ tool-tip {
   text-align: center;
   font-size: var(--affine-font-xs);
   padding: 4px 12px;
-  border-radius: 10px 10px 10px 0px;
   color: var(--affine-tooltip-color);
   background: var(--affine-tooltip-background);
   box-shadow: var(--affine-tooltip-shadow);
-  border-radius: 10px 10px 10px 0px;
+  border-radius: 10px 10px 10px 0;
 
   opacity: 0;
   transform: translateX(0) translateY(calc(-100% - 8px));

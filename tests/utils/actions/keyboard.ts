@@ -19,6 +19,7 @@ async function keyUpCtrlOrMeta(page: Page) {
     await page.keyboard.up('Control');
   }
 }
+
 async function keyDownOptionMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Alt');
@@ -187,4 +188,12 @@ export async function focusLine(page: Page, line = 0, end = true) {
   if (end) {
     await page.keyboard.press('End');
   }
+}
+
+export async function createCodeBlock(page: Page) {
+  await keyDownCtrlOrMeta(page);
+  await page.keyboard.down('Alt');
+  await page.keyboard.press('c');
+  await page.keyboard.up('Alt');
+  await keyUpCtrlOrMeta(page);
 }

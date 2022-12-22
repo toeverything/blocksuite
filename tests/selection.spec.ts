@@ -371,7 +371,7 @@ test('select text leaving a few words in the last line and delete', async ({
   await assertRichTexts(page, ['123', '456', '789']);
 
   await dragBetweenIndices(page, [0, 0], [2, 1]);
-  await page.keyboard.press('Backspace', { delay: 50 });
+  await page.keyboard.press('Backspace');
   await page.keyboard.type('abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc89\n');
@@ -570,8 +570,8 @@ test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await page.keyboard.type('--- ');
   await assertDivider(page, 1);
   await page.keyboard.press('ArrowUp');
-  await withCtrlOrMeta(page, () => page.keyboard.press('c'));
-  await withCtrlOrMeta(page, () => page.keyboard.press('v'));
+  await copyByKeyboard(page);
   await page.keyboard.press('ArrowDown');
+  await pasteByKeyboard(page);
   await assertDivider(page, 2);
 });

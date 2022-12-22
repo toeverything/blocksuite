@@ -7,6 +7,7 @@ import {
   SelectionInfo,
   matchFlavours,
   assertExists,
+  getStartModelBySelection,
 } from '@blocksuite/blocks';
 
 export class PasteManager {
@@ -33,13 +34,13 @@ export class PasteManager {
   }
 
   /* FIXME
-  private get _selection() {
-    const page =
-      document.querySelector<DefaultPageBlockComponent>('default-page-block');
-    if (!page) throw new Error('No page block');
-    return page.selection;
-  }
-  */
+    private get _selection() {
+      const page =
+        document.querySelector<DefaultPageBlockComponent>('default-page-block');
+      if (!page) throw new Error('No page block');
+      return page.selection;
+    }
+    */
 
   private async _clipboardEvent2Blocks(e: ClipboardEvent) {
     const clipboardData = e.clipboardData;
@@ -79,7 +80,11 @@ export class PasteManager {
     }
 
     const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
-
+    const shouldNotSplitBlock =
+      getStartModelBySelection().flavour === 'affine:code';
+    if (shouldNotSplitBlock) {
+      return [{ text: [{ insert: textClipData }], children: [] }];
+    }
     const shouldConvertMarkdown =
       MarkdownUtils.checkIfTextContainsMd(textClipData);
     if (
