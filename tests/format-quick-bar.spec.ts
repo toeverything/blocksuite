@@ -1,5 +1,6 @@
 import { expect, Page, test } from '@playwright/test';
 import {
+  convertToBulletedListByClick,
   dragBetweenIndices,
   enterPlaygroundRoom,
   initEmptyParagraphState,
@@ -524,7 +525,13 @@ test('should format quick bar follow scroll', async ({ page }) => {
   const boldBtn = formatQuickBar.locator(`[data-testid=bold]`);
   await assertLocatorVisible(page, formatQuickBar);
   await boldBtn.click();
-  await page.mouse.move(0, 0);
+  await scrollToBottom(page);
+  await assertLocatorVisible(page, formatQuickBar, false);
+
+  // should format bar follow scroll after transform text type
+  await scrollToTop(page);
+  await assertLocatorVisible(page, formatQuickBar);
+  await convertToBulletedListByClick(page);
   await scrollToBottom(page);
   await assertLocatorVisible(page, formatQuickBar, false);
 });
