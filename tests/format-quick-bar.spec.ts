@@ -388,10 +388,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     groupId
   );
 
-  // XXX wait for selection restore
-  await page.waitForTimeout(100);
-  const textBtnLocator = page.locator(`[data-testid=text]`);
-  await textBtnLocator.click();
+  const textBtn = page.locator(`[data-testid=text]`);
+  await textBtn.click();
 
   await assertStoreMatchJSX(
     page,
@@ -414,8 +412,6 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:group>`,
     groupId
   );
-  // XXX wait for selection restore
-  await page.waitForTimeout(100);
   // The paragraph button should prevent selection after click
   await assertSelection(page, 1, 0, 3);
 });

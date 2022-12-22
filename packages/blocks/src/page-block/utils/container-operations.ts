@@ -118,6 +118,7 @@ export async function updateSelectedTextType(
     } else {
       const oldId = model.id;
       const newId = transformBlock(page, model, flavour, type);
+
       // Replace selected block id
       const blocks = selectedBlocks.filter(block => block.id === oldId);
       // Because selectedBlocks maybe contains same block when only select one block, so we need to replace all of them
@@ -126,8 +127,8 @@ export async function updateSelectedTextType(
       });
     }
   });
-  // XXX FIXME: wait for page update
-  await sleep(100);
+  // Wait for ui update
+  await sleep();
   restoreSelection(selectedBlocks);
 }
 
@@ -148,7 +149,7 @@ export function transformBlock(
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, parent, index);
-  asyncFocusRichText(page, id);
+  // asyncFocusRichText(page, id);
   return id;
 }
 

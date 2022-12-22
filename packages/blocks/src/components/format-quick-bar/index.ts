@@ -100,9 +100,7 @@ export const showFormatQuickBar = async ({
 
   // Handle selection change
 
-  const selectionChangeHandler = async () => {
-    // XXX wait for the selection to be updated
-    await sleep(100);
+  const selectionChangeHandler = () => {
     const selection = document.getSelection();
     if (!selection || selection.type === 'Caret') {
       abortController.abort();
