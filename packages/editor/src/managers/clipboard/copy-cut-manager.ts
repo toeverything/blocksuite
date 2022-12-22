@@ -212,7 +212,7 @@ export class CopyCutManager {
     } finally {
       tempElem.removeEventListener('copy', listener);
       document.body.removeChild(tempElem);
-      SelectionUtils.restoreSelection(curRange);
+      SelectionUtils.resetNativeSelection(curRange);
     }
     return success;
   }

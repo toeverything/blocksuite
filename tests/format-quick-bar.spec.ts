@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
 import {
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -7,17 +7,21 @@ import {
   pressEnter,
   switchReadonly,
 } from './utils/actions/index.js';
-import { assertSelection, assertStoreMatchJSX } from './utils/asserts.js';
+import {
+  assertLocatorVisible,
+  assertSelection,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
-  await expect(formatQuickBarLocator).toBeVisible();
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
   page.mouse.click(0, 0);
-  await expect(formatQuickBarLocator).not.toBeVisible();
+  await expect(formatQuickBar).not.toBeVisible();
 });
 
 test('should format quick bar hide when type text', async ({ page }) => {
@@ -25,10 +29,10 @@ test('should format quick bar hide when type text', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
-  await expect(formatQuickBarLocator).toBeVisible();
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
   await page.keyboard.type('1');
-  await expect(formatQuickBarLocator).not.toBeVisible();
+  await expect(formatQuickBar).not.toBeVisible();
 });
 
 test('should format quick bar be able to format text', async ({ page }) => {
@@ -38,36 +42,31 @@ test('should format quick bar be able to format text', async ({ page }) => {
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const boldBtnLocator = page.locator(`.format-quick-bar [data-testid=bold]`);
-  const italicBtnLocator = page.locator(
-    `.format-quick-bar [data-testid=italic]`
-  );
-  const underlineBtnLocator = page.locator(
-    `.format-quick-bar [data-testid=underline]`
-  );
-  const strikeBtnLocator = page.locator(
-    `.format-quick-bar [data-testid=strike]`
-  );
-  const codeBtnLocator = page.locator(`.format-quick-bar [data-testid=code]`);
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  const boldBtn = formatQuickBar.locator(`[data-testid=bold]`);
+  const italicBtn = formatQuickBar.locator(`[data-testid=italic]`);
+  const underlineBtn = formatQuickBar.locator(`[data-testid=underline]`);
+  const strikeBtn = formatQuickBar.locator(`[data-testid=strike]`);
+  const codeBtn = formatQuickBar.locator(`[data-testid=code]`);
 
-  await expect(boldBtnLocator).not.toHaveAttribute('active', '');
-  await expect(italicBtnLocator).not.toHaveAttribute('active', '');
-  await expect(underlineBtnLocator).not.toHaveAttribute('active', '');
-  await expect(strikeBtnLocator).not.toHaveAttribute('active', '');
-  await expect(codeBtnLocator).not.toHaveAttribute('active', '');
+  await expect(boldBtn).not.toHaveAttribute('active', '');
+  await expect(italicBtn).not.toHaveAttribute('active', '');
+  await expect(underlineBtn).not.toHaveAttribute('active', '');
+  await expect(strikeBtn).not.toHaveAttribute('active', '');
+  await expect(codeBtn).not.toHaveAttribute('active', '');
 
-  await boldBtnLocator.click();
-  await italicBtnLocator.click();
-  await underlineBtnLocator.click();
-  await strikeBtnLocator.click();
-  await codeBtnLocator.click();
+  await boldBtn.click();
+  await italicBtn.click();
+  await underlineBtn.click();
+  await strikeBtn.click();
+  await codeBtn.click();
 
   // The button should be active after click
-  await expect(boldBtnLocator).toHaveAttribute('active', '');
-  await expect(italicBtnLocator).toHaveAttribute('active', '');
-  await expect(underlineBtnLocator).toHaveAttribute('active', '');
-  await expect(strikeBtnLocator).toHaveAttribute('active', '');
-  await expect(codeBtnLocator).toHaveAttribute('active', '');
+  await expect(boldBtn).toHaveAttribute('active', '');
+  await expect(italicBtn).toHaveAttribute('active', '');
+  await expect(underlineBtn).toHaveAttribute('active', '');
+  await expect(strikeBtn).toHaveAttribute('active', '');
+  await expect(codeBtn).toHaveAttribute('active', '');
 
   await assertStoreMatchJSX(
     page,
@@ -100,16 +99,16 @@ test('should format quick bar be able to format text', async ({ page }) => {
 </affine:group>`,
     groupId
   );
-  await boldBtnLocator.click();
-  await underlineBtnLocator.click();
-  await codeBtnLocator.click();
+  await boldBtn.click();
+  await underlineBtn.click();
+  await codeBtn.click();
 
   // The bold button should be inactive after click again
-  await expect(boldBtnLocator).not.toHaveAttribute('active', '');
-  await expect(italicBtnLocator).toHaveAttribute('active', '');
-  await expect(underlineBtnLocator).not.toHaveAttribute('active', '');
-  await expect(strikeBtnLocator).toHaveAttribute('active', '');
-  await expect(codeBtnLocator).not.toHaveAttribute('active', '');
+  await expect(boldBtn).not.toHaveAttribute('active', '');
+  await expect(italicBtn).toHaveAttribute('active', '');
+  await expect(underlineBtn).not.toHaveAttribute('active', '');
+  await expect(strikeBtn).toHaveAttribute('active', '');
+  await expect(codeBtn).not.toHaveAttribute('active', '');
 
   await assertStoreMatchJSX(
     page,
@@ -152,12 +151,12 @@ test('should format quick bar be able to format text when select multiple line',
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
 
-  const boldBtnLocator = page.locator(`.format-quick-bar [data-testid=bold]`);
-  await expect(boldBtnLocator).not.toHaveAttribute('active', '');
-  await boldBtnLocator.click();
+  const boldBtn = page.locator(`.format-quick-bar [data-testid=bold]`);
+  await expect(boldBtn).not.toHaveAttribute('active', '');
+  await boldBtn.click();
 
   // The bold button should be active after click
-  await expect(boldBtnLocator).toHaveAttribute('active', '');
+  await expect(boldBtn).toHaveAttribute('active', '');
   await assertStoreMatchJSX(
     page,
     `
@@ -201,8 +200,8 @@ test('should format quick bar be able to format text when select multiple line',
     groupId
   );
 
-  await boldBtnLocator.click();
-  await expect(boldBtnLocator).not.toHaveAttribute('active', '');
+  await boldBtn.click();
+  await expect(boldBtn).not.toHaveAttribute('active', '');
   await assertStoreMatchJSX(
     page,
     `
@@ -254,9 +253,9 @@ test('should format quick bar be able to link text', async ({ page }) => {
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const linkBtnLocator = page.locator(`.format-quick-bar [data-testid=link]`);
-  await expect(linkBtnLocator).not.toHaveAttribute('active', '');
-  await linkBtnLocator.click();
+  const linkBtn = page.locator(`.format-quick-bar [data-testid=link]`);
+  await expect(linkBtn).not.toHaveAttribute('active', '');
+  await linkBtn.click();
 
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await expect(linkPopoverInput).toBeVisible();
@@ -295,9 +294,9 @@ test('should format quick bar be able to link text', async ({ page }) => {
 
   await dragBetweenIndices(page, [1, 0], [1, 3]);
   // The link button should be active after click
-  await expect(linkBtnLocator).toHaveAttribute('active', '');
-  await linkBtnLocator.click();
-  await expect(linkBtnLocator).not.toHaveAttribute('active', '');
+  await expect(linkBtn).toHaveAttribute('active', '');
+  await linkBtn.click();
+  await expect(linkBtn).not.toHaveAttribute('active', '');
   await assertStoreMatchJSX(
     page,
     `
@@ -337,11 +336,11 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const paragraphBtnLocator = page.locator(`.paragraph-button`);
-  await paragraphBtnLocator.hover();
-  const h1BtnLocator = page.locator(`.format-quick-bar [data-testid=h1]`);
-  await expect(h1BtnLocator).toBeVisible();
-  await h1BtnLocator.click();
+  const paragraphBtn = page.locator(`.paragraph-button`);
+  await paragraphBtn.hover();
+  const h1Btn = page.locator(`.format-quick-bar [data-testid=h1]`);
+  await expect(h1Btn).toBeVisible();
+  await h1Btn.click();
 
   await assertStoreMatchJSX(
     page,
@@ -364,10 +363,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:group>`,
     groupId
   );
-  const bulletedBtnLocator = page.locator(
-    `.format-quick-bar [data-testid=bulleted]`
-  );
-  await bulletedBtnLocator.click();
+  const bulletedBtn = page.locator(`.format-quick-bar [data-testid=bulleted]`);
+  await bulletedBtn.click();
   await assertStoreMatchJSX(
     page,
     `
@@ -394,11 +391,11 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   // TODO FIXME: The paragraph transform should not lost selection
   // Remove next line after fix
   await dragBetweenIndices(page, [1, 0], [1, 3]);
-  await paragraphBtnLocator.hover();
+  await paragraphBtn.hover();
   // End of workaround
 
-  const textBtnLocator = page.locator(`[data-testid=text]`);
-  await textBtnLocator.click();
+  const textBtn = page.locator(`[data-testid=text]`);
+  await textBtn.click();
   await assertStoreMatchJSX(
     page,
     `
@@ -432,10 +429,10 @@ test('should format quick bar be able to copy', async ({ page }) => {
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const copyBtnLocator = page.locator(`.format-quick-bar [data-testid=copy]`);
-  await expect(copyBtnLocator).toBeVisible();
+  const copyBtn = page.locator(`.format-quick-bar [data-testid=copy]`);
+  await expect(copyBtn).toBeVisible();
   await assertSelection(page, 1, 0, 3);
-  await copyBtnLocator.click();
+  await copyBtn.click();
 
   // TODO assert clipboard
 
@@ -449,8 +446,8 @@ test('should format quick bar show when double click text', async ({
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await page.dblclick('.affine-rich-text p', { position: { x: 10, y: 10 } });
-  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
-  await expect(formatQuickBarLocator).toBeVisible();
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
 });
 
 test('should format quick bar not show at readonly mode', async ({ page }) => {
@@ -460,9 +457,84 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
   await switchReadonly(page);
 
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  const formatQuickBarLocator = page.locator(`.format-quick-bar`);
-  await expect(formatQuickBarLocator).not.toBeVisible();
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).not.toBeVisible();
 
   await page.dblclick('.affine-rich-text p', { position: { x: 10, y: 10 } });
-  await expect(formatQuickBarLocator).not.toBeVisible();
+  await expect(formatQuickBar).not.toBeVisible();
+});
+
+async function scrollToTop(page: Page) {
+  // await page.mouse.wheel(0, -1000);
+  await page
+    .locator('.affine-default-viewport')
+    .evaluate(node =>
+      node.scrollTo({ left: 0, top: -1000, behavior: 'smooth' })
+    );
+  await page.waitForFunction(() => {
+    const scrollContainer = document.querySelector('.affine-default-viewport');
+    if (!scrollContainer) {
+      throw new Error("Can't find scroll container");
+    }
+    return scrollContainer.scrollTop < 10;
+  });
+}
+
+async function scrollToBottom(page: Page) {
+  // await page.mouse.wheel(0, 1000);
+  await page
+    .locator('.affine-default-viewport')
+    .evaluate(node =>
+      node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
+    );
+  await page.waitForFunction(() => {
+    const scrollContainer = document.querySelector('.affine-default-viewport');
+    if (!scrollContainer) {
+      throw new Error("Can't find scroll container");
+    }
+    console.warn(
+      scrollContainer.scrollHeight - scrollContainer.scrollTop,
+      scrollContainer.clientHeight
+    );
+
+    return (
+      // Wait for scrolled to the bottom
+      // Refer to https://stackoverflow.com/questions/3898130/check-if-a-user-has-scrolled-to-the-bottom-not-just-the-window-but-any-element
+      Math.abs(
+        scrollContainer.scrollHeight -
+          scrollContainer.scrollTop -
+          scrollContainer.clientHeight
+      ) < 10
+    );
+  });
+}
+
+test('should format quick bar follow scroll', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  for (let i = 0; i < 30; i++) {
+    await page.keyboard.press('Enter');
+  }
+  page.keyboard.type('bottom');
+
+  await scrollToTop(page);
+
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await assertLocatorVisible(page, formatQuickBar);
+
+  await scrollToBottom(page);
+
+  await assertLocatorVisible(page, formatQuickBar, false);
+
+  // should format bar follow scroll after click bold button
+  await scrollToTop(page);
+  const boldBtn = formatQuickBar.locator(`[data-testid=bold]`);
+  await assertLocatorVisible(page, formatQuickBar);
+  await boldBtn.click();
+  await page.mouse.move(0, 0);
+  await scrollToBottom(page);
+  await assertLocatorVisible(page, formatQuickBar, false);
 });
