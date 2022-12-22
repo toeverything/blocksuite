@@ -30,7 +30,7 @@ import {
   bindCommonHotkey,
   handleBackspace,
   handleBlockSelectionBatchDelete,
-  handleSelectAllBlock,
+  handleSelectAll,
   removeCommonHotKey,
   updateSelectedTextType,
 } from '../utils/index.js';
@@ -347,7 +347,7 @@ export function bindHotkeys(
 
   hotkey.addListener(SELECT_ALL, e => {
     e.preventDefault();
-    handleSelectAllBlock(selection);
+    handleSelectAll(selection);
     selection.state.type = 'block';
   });
 

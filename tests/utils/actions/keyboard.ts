@@ -72,7 +72,6 @@ export async function redoByKeyboard(page: Page) {
 export async function selectAllByKeyboard(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('a');
-  await page.keyboard.up('a');
   await keyUpCtrlOrMeta(page);
 }
 

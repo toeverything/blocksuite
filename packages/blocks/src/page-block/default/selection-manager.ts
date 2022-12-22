@@ -139,7 +139,7 @@ export class DefaultSelectionManager {
   private _container: DefaultPageBlockComponent;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
-  private _originPosition: { x: number; y: number } = { x: 0, y: 0 };
+  private _originPosition: IPoint = { x: 0, y: 0 };
   private _dropContainer: HTMLElement | null = null;
   private _dropContainerSize: { w: number; h: number; left: number } = {
     w: 0,
@@ -181,6 +181,24 @@ export class DefaultSelectionManager {
     return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
   }
 
+  private get _containerOffset() {
+    const containerRect = this._mouseRoot.getBoundingClientRect();
+    const containerOffset = {
+      x: containerRect.left,
+      y: containerRect.top,
+    };
+    return containerOffset;
+  }
+
+  private _setSelectedBlocks(selectedBlocks: Element[]) {
+    this.state.selectedBlocks = selectedBlocks;
+    const { blockCache } = this.state;
+    const selectedRects = selectedBlocks.map(block => {
+      return blockCache.get(block) as DOMRect;
+    });
+    this._signals.updateSelectedRects.emit(selectedRects);
+  }
+
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
     this.state.resetStartRange(e);
@@ -190,36 +208,18 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
-    const { selectionRect, selectedBlocks, blockCache } =
-      this._getSelectedBlockInfo(e);
-    this.state.selectedBlocks = selectedBlocks;
-
-    const selectedBounds = selectedBlocks.map(block => {
-      return blockCache.get(block) as DOMRect;
-    });
-    this._signals.updateSelectedRects.emit(selectedBounds);
-    this._signals.updateFrameSelectionRect.emit(selectionRect);
-  }
-
-  private _getSelectedBlockInfo(e: SelectionEvent) {
     assertExists(this.state.startPoint);
     const current = { x: e.x, y: e.y };
     const { startPoint: start } = this.state;
     const selectionRect = createSelectionRect(current, start);
-
-    const { blockCache } = this.state;
-
     const selectedBlocks = filterSelectedBlock(
-      blockCache,
+      this.state.blockCache,
       selectionRect,
       e.containerOffset
     );
 
-    return {
-      selectionRect,
-      selectedBlocks,
-      blockCache,
-    };
+    this._setSelectedBlocks(selectedBlocks);
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
@@ -487,32 +487,6 @@ export class DefaultSelectionManager {
     // console.log('mouseout', e);
   };
 
-  // TODO fix  native selection and delete after non-text
-  // private _initListenNativeSelection() {
-  //   document.addEventListener('selectionchange', this._onNativeSelectionChange);
-  // }
-
-  // private _onNativeSelectionChange = () => {
-  //   const selection = window.getSelection();
-  //   if (selection?.isCollapsed && selection?.rangeCount) {
-  //     let { anchorNode } = selection;
-  //     this.state.type = 'native';
-  //     if (anchorNode) {
-  //       anchorNode =
-  //         anchorNode instanceof Element ? anchorNode : anchorNode.parentElement;
-  //       const blockModel = getModelByElement(anchorNode as Element);
-  //       if (blockModel) {
-  //         const block = getBlockById(blockModel.id);
-  //         if (block) {
-  //           this.state.selectedBlocks = [block];
-  //           this._signals.updateSelectedRects.emit([]);
-  //           this._signals.updateFrameSelectionRect.emit(null);
-  //         }
-  //       }
-  //     }
-  //   }
-  // };
-
   clearRects() {
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateFrameSelectionRect.emit(null);
@@ -528,37 +502,42 @@ export class DefaultSelectionManager {
     this._mouseDisposeCallback();
   }
 
-  selectBlockByRect(
-    selectionRect: DOMRect,
-    model?: BaseBlockModel,
+  resetSelectedBlockByRect(
+    blockRect: DOMRect,
     pageSelectionType: PageSelectionType = 'block'
   ) {
     this.state.type = pageSelectionType;
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const { blockCache } = this.state;
-    const selectedBlocks = filterSelectedBlock(blockCache, selectionRect, {
-      x: 0,
-      y: 0,
-    });
-    this.state.selectedBlocks = selectedBlocks;
-    const selectedBounds: DOMRect[] = [selectionRect];
-    this._signals.updateSelectedRects.emit(selectedBounds);
+    const { _containerOffset } = this;
+    const selectedBlocks = filterSelectedBlock(
+      blockCache,
+      blockRect,
+      _containerOffset
+    );
+    this._setSelectedBlocks(selectedBlocks);
   }
-  selectAllBlockByRect(
-    selectionRects: DOMRect[],
-    selectedBlocksElement: Element[],
-    pageSelectionType: PageSelectionType = 'block'
-  ) {
+
+  selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
+
+    const { _containerOffset } = this;
+    const selectedBlocks = filterSelectedBlock(
+      this.state.blockCache,
+      hitRect,
+      _containerOffset
+    );
+
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
-      this.state.clear();
       this._signals.updateSelectedRects.emit([]);
       this._signals.updateEmbedRects.emit([]);
       return;
     }
-    this.state.type = pageSelectionType;
-    this.state.selectedBlocks = selectedBlocksElement;
-    this._signals.updateSelectedRects.emit(selectionRects);
+    this.state.clear();
+    this.state.type = 'block';
+
+    this._signals.updateEmbedRects.emit([]);
+    this._setSelectedBlocks(selectedBlocks);
     return;
   }
 }

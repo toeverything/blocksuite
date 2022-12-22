@@ -8,7 +8,6 @@ import {
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
-  getAllBlocks,
   getBlockElementByModel,
   getCurrentRange,
   getModelByElement,
@@ -255,7 +254,10 @@ export function handleFormat(page: Page, key: string) {
   }
 }
 
-export function handleSelectAll() {
+/**
+ * @deprecated
+ */
+export function handleNativeSelectAll() {
   const blocks = document.querySelectorAll('.ql-editor');
   const firstRichText = blocks[0];
   const lastRichText = blocks[blocks.length - 1];
@@ -278,15 +280,17 @@ export function handleSelectAll() {
   initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
   resetNativeSelection(range);
 }
-export function handleSelectAllBlock(selection: DefaultSelectionManager) {
-  const filterBlocksElement = getAllBlocks();
-  if (!filterBlocksElement || filterBlocksElement.length === 0) {
-    return;
+
+export function handleSelectAll(selection: DefaultSelectionManager) {
+  if (selection.state.selectedBlocks.length === 0) {
+    const currentRange = getCurrentRange();
+    const rangeRect = currentRange.getBoundingClientRect();
+    selection.selectBlocksByRect(rangeRect);
+  } else {
+    const rect = document.body.getBoundingClientRect();
+    selection.selectBlocksByRect(rect);
   }
-  const allBlockRects = filterBlocksElement.map(blockElement =>
-    blockElement.getBoundingClientRect()
-  );
-  selection.selectAllBlockByRect(allBlockRects, filterBlocksElement);
+
   resetNativeSelection(null);
 }
 
