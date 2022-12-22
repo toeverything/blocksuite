@@ -278,10 +278,29 @@ export function handleSelectAll() {
   initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
   resetNativeSelection(range);
 }
+
+function getCurrentBlocks() {
+  const currentRange = getCurrentRange();
+  const currentModels = getModelsByRange(currentRange);
+  const blockElements = currentModels.map(model => {
+    return getBlockElementByModel(model) as Element;
+  });
+  return blockElements;
+}
+
 export function handleSelectAllBlock(selection: DefaultSelectionManager) {
-  const filterBlocksElement = getAllBlocks();
+  let filterBlocksElement: Element[] = [];
+
+  const currentSelection = window.getSelection();
+  filterBlocksElement =
+    currentSelection?.focusNode?.nodeName === '#text'
+      ? getCurrentBlocks()
+      : getAllBlocks();
   if (!filterBlocksElement || filterBlocksElement.length === 0) {
     return;
+  }
+  if (selection.state.selectedBlocks.length > 0) {
+    filterBlocksElement = getAllBlocks();
   }
   const allBlockRects = filterBlocksElement.map(blockElement =>
     blockElement.getBoundingClientRect()
