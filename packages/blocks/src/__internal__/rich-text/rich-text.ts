@@ -91,8 +91,7 @@ export class RichText extends LitElement {
     });
 
     page.attachRichText(model.id, this.quill);
-    // TODO it can cause cursor flickering, by need to evaluate impact
-    // page.awareness.updateLocalCursor();
+    page.awareness.updateLocalCursor();
     this.model.propsUpdated.on(() => this.requestUpdate());
 
     if (this.modules.syntax) {
