@@ -544,4 +544,24 @@ export class DefaultSelectionManager {
     const selectedBounds: DOMRect[] = [selectionRect];
     this._signals.updateSelectedRects.emit(selectedBounds);
   }
+  selectAllBlockByRect(
+    selectionRects: DOMRect[],
+    selectedBlocksElement: Element[],
+    pageSelectionType: PageSelectionType = 'block'
+  ) {
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
+    if (this.state.blockCache.size === this.state.selectedBlocks.length) {
+      this.state.clear();
+      this._signals.updateSelectedRects.emit([]);
+      this._signals.updateEmbedRects.emit([]);
+      return;
+    }
+    console.log(this.state.blockCache);
+
+    this.state.type = pageSelectionType;
+    this.state.selectedBlocks = selectedBlocksElement;
+    console.log(this.state.selectedBlocks);
+    this._signals.updateSelectedRects.emit(selectionRects);
+    return;
+  }
 }

@@ -8,6 +8,7 @@ import {
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
+  getAllBlocks,
   getBlockElementByModel,
   getCurrentRange,
   getModelByElement,
@@ -25,6 +26,7 @@ import {
   restoreSelection,
   saveBlockSelection,
 } from '../../__internal__/utils/selection.js';
+import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
 export function deleteModels(page: Page, models: BaseBlockModel[]) {
@@ -275,6 +277,17 @@ export function handleSelectAll() {
   );
   initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
   resetNativeSelection(range);
+}
+export function handleSelectAllBlock(selection: DefaultSelectionManager) {
+  const filterBlocksElement = getAllBlocks();
+  if (!filterBlocksElement || filterBlocksElement.length === 0) {
+    return;
+  }
+  const allBlockRects = filterBlocksElement.map(blockElement =>
+    blockElement.getBoundingClientRect()
+  );
+  selection.selectAllBlockByRect(allBlockRects, filterBlocksElement);
+  resetNativeSelection(null);
 }
 
 function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
