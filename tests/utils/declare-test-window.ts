@@ -9,6 +9,7 @@ import type { EditorContainer } from '../../packages/editor/src/components/edito
 declare global {
   interface Window {
     /** Available on playground window */
+    std: typeof import('../../packages/blocks/src/std.js');
     workspace: Workspace;
     blockSchema: Record<string, typeof BaseBlockModel>;
     page: Page;

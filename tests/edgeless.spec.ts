@@ -201,7 +201,9 @@ test('delete shape block by keyboard', async ({ page }) => {
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
 
   await switchMouseMode(page);
-  await dragBetweenCoords(page, { x: 80, y: 80 }, { x: 220, y: 220 });
+  const rect = await page.evaluate(() =>
+    window.std.getShapeBlockHitBox('3')?.getBoundingClientRect()
+  );
   await page.keyboard.press('Delete', {
     delay: 10,
   });
