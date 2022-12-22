@@ -262,7 +262,7 @@ test('delete at start of paragraph block', async ({ page }) => {
   await assertBlockChildrenIds(page, '1', ['2', '3']);
 });
 
-test('delete at start of paragraph immediately following bulleted list', async ({
+test('delete at start of paragraph immediately following list', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -287,65 +287,32 @@ test('delete at start of paragraph immediately following bulleted list', async (
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByClick(page);
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
-});
-
-// TODO merge with above test
-test('delete at start of paragraph immediately following numbered list', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await page.keyboard.type('hello');
-
-  await pressEnter(page);
-  await page.keyboard.type('a');
-
+  await undoByClick(page);
   await clickMenuButton(page, 'convert to numbered list');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'numbered');
 
   await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
-  await assertBlockType(page, '5', 'text');
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
+  await assertBlockType(page, '6', 'text');
+  await assertBlockChildrenIds(page, '1', ['2', '6']);
 
   await page.keyboard.press('Backspace');
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await undoByClick(page);
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
-});
-
-// TODO merge with above test
-test('delete at start of paragraph immediately following todo list', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await page.keyboard.type('hello');
-
-  await pressEnter(page);
-  await page.keyboard.type('a');
-
+  await undoByClick(page);
   await clickMenuButton(page, 'convert to todo list');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'todo');
 
   await page.keyboard.press('Backspace');
-  await page.keyboard.press('Backspace');
-  await assertBlockType(page, '5', 'text');
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
+  await assertBlockType(page, '7', 'text');
+  await assertBlockChildrenIds(page, '1', ['2', '7']);
 
   await page.keyboard.press('Backspace');
   await assertBlockChildrenIds(page, '1', ['2']);
-
-  await undoByClick(page);
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
 });
 
 test('delete at start of paragraph with content', async ({ page }) => {
