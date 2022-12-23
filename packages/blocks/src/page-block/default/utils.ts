@@ -231,11 +231,7 @@ export function handleDown(
     const { left, bottom } = range.getBoundingClientRect();
     const nextBlock = getNextBlock(model.id);
     if (nextBlock && matchFlavours(nextBlock, ['affine:divider'])) {
-      focusNextBlock(
-        nextBlock,
-        'start',
-        block => !matchFlavours(block, ['affine:divider'])
-      );
+      focusNextBlock(nextBlock, 'start');
     } else {
       focusNextBlock(model, new Point(left, bottom));
     }
