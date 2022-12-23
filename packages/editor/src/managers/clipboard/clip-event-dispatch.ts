@@ -54,10 +54,9 @@ export class ClipEventDispatch {
     });
   }
 
-  static path(event: ClipboardEvent): EventTarget[] {
+  static path(event: ClipboardEvent & { path?: unknown }): EventTarget[] {
     if ('path' in event) {
-      // @ts-ignore
-      return event.path;
+      return event.path as EventTarget[];
     }
     return event.composedPath && event.composedPath();
   }
