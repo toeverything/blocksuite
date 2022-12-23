@@ -55,6 +55,7 @@ export class ClipEventDispatch {
   }
 
   private _copyHandler(e: ClipboardEvent) {
+    console.log(1, e, document.activeElement);
     if (ClipEventDispatch.editorElementActive()) {
       this.signals.copy.emit(e);
     }
