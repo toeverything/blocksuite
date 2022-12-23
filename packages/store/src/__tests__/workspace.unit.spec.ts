@@ -198,6 +198,11 @@ describe.concurrent('addBlock', () => {
       ]
     );
 
+    let called = false;
+    workspace.meta.pagesUpdated.on(() => {
+      called = true;
+    });
+
     workspace.setPageMeta('page0', { favorite: true });
     assert.deepEqual(
       workspace.meta.pageMetas.map(({ id, title, favorite }) => ({
@@ -213,6 +218,7 @@ describe.concurrent('addBlock', () => {
         },
       ]
     );
+    assert.ok(called);
   });
 
   it('can set workspace common meta fields', async () => {

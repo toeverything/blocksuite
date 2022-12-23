@@ -192,7 +192,11 @@ class WorkspaceMeta extends Space {
       const hasKey = (k: string) =>
         e.target === this._yMetaRoot && e.changes.keys.has(k);
 
-      if (e.target === this._yPages || hasKey('pages')) {
+      if (
+        e.target === this._yPages ||
+        e.target.parent === this._yPages ||
+        hasKey('pages')
+      ) {
         this._handlePageEvent();
       } else if (hasKey('name') || hasKey('avatar')) {
         this._handleCommonFieldsEvent();
