@@ -39,8 +39,8 @@ export class ShapeSelectionController extends SelectionController<ShapeMouseMode
       type: this.mouseMode.shape,
     });
     this._draggingArea = {
-      start: new DOMPoint(e.raw.x, e.raw.y),
-      end: new DOMPoint(e.raw.x, e.raw.y),
+      start: new DOMPoint(e.x, e.y),
+      end: new DOMPoint(e.x, e.y),
     };
     this._container.signals.shapeUpdated.emit();
   }
@@ -48,7 +48,7 @@ export class ShapeSelectionController extends SelectionController<ShapeMouseMode
   onContainerDragMove(e: SelectionEvent): void {
     assertExists(this._draggingShapeBlockId);
     assertExists(this._draggingArea);
-    this._draggingArea.end = new DOMPoint(e.raw.x, e.raw.y);
+    this._draggingArea.end = new DOMPoint(e.x, e.y);
     const [x, y] = this._container.viewport.toModelCoord(
       Math.min(this._draggingArea.start.x, this._draggingArea.end.x),
       Math.min(this._draggingArea.start.y, this._draggingArea.end.y)
