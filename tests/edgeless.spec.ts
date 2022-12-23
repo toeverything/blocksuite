@@ -24,7 +24,6 @@ import {
   assertSelection,
 } from './utils/asserts.js';
 import type { BaseBlockModel } from '../packages/store/src/index.js';
-import type { Rect } from '@blocksuite/blocks/std';
 
 async function getGroupSize(
   page: Page,
