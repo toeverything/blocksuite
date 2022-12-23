@@ -246,15 +246,6 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      if (preNodeModel) {
-        if (document.activeElement instanceof HTMLElement) {
-          if (!document.activeElement.closest('editor-container')) {
-            document.activeElement.blur();
-            const element = getBlockById(preNodeModel.id);
-            element?.focus();
-          }
-        }
-      }
       if (
         preNodeModel &&
         matchFlavours(model, ['affine:embed', 'affine:divider'])
