@@ -253,7 +253,6 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
             const element = getBlockById(preNodeModel.id);
             element?.focus();
           }
-          console.log(document.activeElement);
         }
       }
       if (
