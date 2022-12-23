@@ -255,11 +255,7 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
         matchFlavours(preNodeModel, ['affine:divider'])
       ) {
         window.requestAnimationFrame(() => {
-          focusPreviousBlock(
-            preNodeModel,
-            'start',
-            block => !matchFlavours(block, ['affine:divider'])
-          );
+          focusPreviousBlock(preNodeModel, 'start');
         });
         return PREVENT_DEFAULT;
       }
