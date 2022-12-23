@@ -521,12 +521,10 @@ export class DefaultSelectionManager {
   selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
 
-    const { _containerOffset } = this;
-    const selectedBlocks = filterSelectedBlock(
-      this.state.blockCache,
-      hitRect,
-      _containerOffset
-    );
+    const selectedBlocks = filterSelectedBlock(this.state.blockCache, hitRect, {
+      x: 0,
+      y: 0,
+    });
 
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
       this._signals.updateSelectedRects.emit([]);

@@ -287,7 +287,8 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
     const rangeRect = currentRange.getBoundingClientRect();
     selection.selectBlocksByRect(rangeRect);
   } else {
-    const rect = document.body.getBoundingClientRect();
+    const LARGE_BOUND = 999999;
+    const rect = new DOMRect(0, 0, LARGE_BOUND, LARGE_BOUND);
     selection.selectBlocksByRect(rect);
   }
 
