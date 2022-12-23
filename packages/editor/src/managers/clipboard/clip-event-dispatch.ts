@@ -50,15 +50,23 @@ export class ClipEventDispatch {
     document.removeEventListener(ClipboardAction.paste, this._pasteHandler);
   }
 
+  static editorElementActive(): boolean {
+    return document.activeElement?.closest('editor-container') != null;
+  }
+
   private _copyHandler(e: ClipboardEvent) {
     this.signals.copy.emit(e);
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    this.signals.cut.emit(e);
+    if (ClipEventDispatch.editorElementActive()) {
+      this.signals.cut.emit(e);
+    }
   }
   private _pasteHandler(e: ClipboardEvent) {
-    this.signals.paste.emit(e);
+    if (ClipEventDispatch.editorElementActive()) {
+      this.signals.paste.emit(e);
+    }
   }
 
   dispose(clipboardTarget: HTMLElement) {
