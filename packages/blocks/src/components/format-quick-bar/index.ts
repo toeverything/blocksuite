@@ -11,8 +11,8 @@ import {
   sleep,
   throttle,
 } from '../../__internal__/utils/index.js';
-import './button';
-import './format-bar-node';
+import './button.js';
+import './format-bar-node.js';
 
 export const showFormatQuickBar = async ({
   anchorEl,
