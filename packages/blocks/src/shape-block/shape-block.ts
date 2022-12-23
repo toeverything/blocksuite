@@ -9,14 +9,19 @@ import {
   SizeStyle,
   TDShapeType,
 } from '../__internal__/index.js';
-import { getRectanglePath } from './utils/rectangle-helpers.js';
+import {
+  getRectangleIndicatorPathTDSnapshot,
+  getRectanglePath,
+} from './utils/rectangle-helpers.js';
 import { getShapeStyle } from './utils/shape-style.js';
 import { getTrianglePath } from './utils/triangle-helpers.js';
 import style from './style.css';
 
 export const SHAPE_PADDING = 48;
 
-@customElement('affine-shape')
+export const ShapeBlockTag = 'affine-shape';
+
+@customElement(ShapeBlockTag)
 export class ShapeBlockComponent extends LitElement {
   static styles = css`
     ${unsafeCSS(style)}
@@ -46,13 +51,18 @@ export class ShapeBlockComponent extends LitElement {
 
     const size = [modelW, modelH];
     const { stroke, strokeWidth } = getShapeStyle(shapeStyles, false);
+    const innerPath = getRectangleIndicatorPathTDSnapshot(
+      id,
+      shapeStyles,
+      size
+    );
     switch (this.model.type) {
       case TDShapeType.Rectangle: {
         return html`
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
+              <path class="affine-shape-block-hit-box" d=${innerPath} />
               <path
-                class="affine-shape-block-hit-box"
                 d=${getRectanglePath(id, shapeStyles, size)}
                 fill=${stroke}
                 stroke=${stroke}
@@ -87,6 +97,6 @@ export class ShapeBlockComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-shape': ShapeBlockComponent;
+    [ShapeBlockTag]: ShapeBlockComponent;
   }
 }

@@ -6,5 +6,10 @@
 
 /* enable pointer events, otherwise edgeless block cannot detect by mouse event */
 .affine-shape-block-hit-box {
-  pointer-events: all;
+  fill: none;
+  stroke: transparent;
+  stroke-width: calc(24px * var(--affine-scale));
+  pointer-events: stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

@@ -1,4 +1,5 @@
 import '@blocksuite/blocks';
+import std from '@blocksuite/blocks/std';
 import '@blocksuite/editor';
 /** Uncomment this line if you are using BlockSuite in your own project */
 // import "@blocksuite/blocks/style";
@@ -26,6 +27,8 @@ function subscribePage(workspace: Workspace) {
 }
 
 async function main() {
+  // @ts-ignore
+  window.std = std;
   const workspace = new Workspace(options).register(BlockSchema);
   // @ts-ignore
   [window.workspace, window.blockSchema] = [workspace, BlockSchema];

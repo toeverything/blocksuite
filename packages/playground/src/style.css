@@ -1,4 +1,6 @@
 :root {
+  --affine-zoom: 1;
+  --affine-scale: calc(1 / var(--affine-zoom));
   --affine-theme-mode: light;
   --affine-editor-mode: page;
   --affine-primary-color: #6880ff;

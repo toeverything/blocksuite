@@ -191,3 +191,35 @@ test('add shape blocks', async ({ page }) => {
   expect(newBox.y).toBeLessThan(box.y);
   await assertRichTexts(page, ['hello']);
 });
+
+test('delete shape block by keyboard', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await switchMode(page);
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+
+  await switchMouseMode(page);
+  const startPoint = await page.evaluate(() => {
+    const hitbox = window.std.getShapeBlockHitBox('3');
+    if (!hitbox) {
+      throw new Error('hitbox is null');
+    }
+    const rect = hitbox.getBoundingClientRect();
+    if (rect == null) {
+      throw new Error('rect is null');
+    }
+    return {
+      x: rect.x,
+      y: rect.y,
+    };
+  });
+  await page.mouse.click(startPoint.x + 2, startPoint.y + 2);
+  await page.waitForTimeout(50);
+  await page.keyboard.press('Backspace');
+  const exist = await page.evaluate(() => {
+    return document.querySelector('[data-block-id="3"]') != null;
+  });
+  expect(exist).toBe(false);
+});
