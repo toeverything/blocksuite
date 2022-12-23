@@ -26,11 +26,31 @@ export class PasteManager {
   }
 
   public async handlePaste(e: ClipboardEvent) {
-    const blocks = await this._clipboardEvent2Blocks(e);
-    if (blocks) {
-      e.preventDefault();
-      e.stopPropagation();
-      this.insertBlocks(blocks);
+    const clipboardData = e.clipboardData;
+    if (clipboardData) {
+      const isPlainText = PasteManager._isPlainText(clipboardData);
+      if (isPlainText) {
+        const data = clipboardData.getData('text/plain');
+        if (data === 'text/plain') {
+          return;
+        } else {
+          if (
+            document.activeElement?.classList.contains(
+              'affine-default-page-block-title'
+            )
+          ) {
+            // leave the copy to the default behavior
+            return;
+          }
+        }
+      }
+
+      const blocks = await this._clipboardEvent2Blocks(e);
+      if (blocks) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.insertBlocks(blocks);
+      }
     }
   }
 
@@ -125,6 +145,11 @@ export class PasteManager {
       }
     }
     return [];
+  }
+
+  private static _isPlainText(clipboardData: DataTransfer) {
+    const types = clipboardData.types;
+    return types[0] === 'text/plain';
   }
 
   private static _isPureFileInClipboard(clipboardData: DataTransfer) {
