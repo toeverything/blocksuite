@@ -28,9 +28,6 @@ export class CopyCutManager {
   */
 
   public handleCopy(e: ClipboardEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-
     const clips = this._getClipItems();
     if (!clips.length) {
       return;
