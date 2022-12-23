@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
   assertExists,
@@ -27,6 +27,7 @@ import {
 } from '../../__internal__/utils/selection.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
+import { CodeBlockModel } from '../../code-block/index.js';
 
 export function deleteModels(page: Page, models: BaseBlockModel[]) {
   const selection = window.getSelection();
@@ -74,6 +75,28 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
+function mergeTextOfBlocks(
+  page: Page,
+  models: BaseBlockModel[],
+  blockProps: Record<string, unknown>
+) {
+  const parent = page.getParent(models[0]);
+  assertExists(parent);
+  const index = parent.children.indexOf(models[0]);
+  const id = page.addBlock(blockProps, parent, index);
+  const codeBlock = page.getBlockById(id) as CodeBlockModel;
+
+  models.forEach(model => {
+    if (model.text instanceof Text) {
+      const text = codeBlock.text;
+      assertExists(text);
+      text.join(model.text);
+      text.insert('\n', text.length);
+    }
+    page.deleteBlock(model);
+  });
+}
+
 export function updateSelectedTextType(
   flavour: string,
   type: string,
@@ -82,6 +105,10 @@ export function updateSelectedTextType(
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
   page.captureSync();
+  if (flavour === 'affine:code') {
+    mergeTextOfBlocks(page, modelsInRange, { flavour: 'affine:code' });
+    return;
+  }
   modelsInRange.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
@@ -163,13 +190,18 @@ export const getFormat = () => {
   const lastFormat = lastRichText.quill.getFormat(0, endIndex);
 
   const formatArr = [];
-  formatArr.push(firstFormat, lastFormat);
+  !(models[0] instanceof CodeBlockModel) && formatArr.push(firstFormat);
+  !(models[models.length - 1] instanceof CodeBlockModel) &&
+    formatArr.push(lastFormat);
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
     assertExists(richText);
     const content = richText.quill.getText();
     if (!content || content === '\n') {
       // empty line should not be included
+      continue;
+    }
+    if (models[i] instanceof CodeBlockModel) {
       continue;
     }
     const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
@@ -236,7 +268,9 @@ export function handleFormat(page: Page, key: string) {
   if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
-    const models = getModelsByRange(getCurrentRange());
+    const models = getModelsByRange(getCurrentRange()).filter(model => {
+      return !(model instanceof CodeBlockModel);
+    });
     if (models.length === 1) {
       const richText = getRichTextByModel(models[0]);
       assertExists(richText);
