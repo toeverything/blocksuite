@@ -250,18 +250,6 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
         matchFlavours(model, ['affine:embed', 'affine:divider'])
       ) {
         return ALLOW_DEFAULT;
-      } else if (
-        preNodeModel &&
-        matchFlavours(preNodeModel, ['affine:divider'])
-      ) {
-        window.requestAnimationFrame(() => {
-          focusPreviousBlock(
-            preNodeModel,
-            'start',
-            block => !matchFlavours(block, ['affine:divider'])
-          );
-        });
-        return PREVENT_DEFAULT;
       }
       return PREVENT_DEFAULT;
     }

@@ -18,10 +18,6 @@ export function caretRangeFromPoint(
   clientX: number,
   clientY: number
 ): Range | null {
-  const targetElement = document.elementFromPoint(clientX, clientY);
-  if (!targetElement?.closest('editor-container')) {
-    return null;
-  }
   if (isFirefox) {
     // @ts-ignore
     const caret = document.caretPositionFromPoint(clientX, clientY);

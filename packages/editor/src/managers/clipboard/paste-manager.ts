@@ -26,11 +26,12 @@ export class PasteManager {
   }
 
   public async handlePaste(e: ClipboardEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-
     const blocks = await this._clipboardEvent2Blocks(e);
-    this.insertBlocks(blocks);
+    if (blocks) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.insertBlocks(blocks);
+    }
   }
 
   /* FIXME
