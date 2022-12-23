@@ -148,7 +148,6 @@ export class PasteManager {
   }
 
   private static _isPlainText(clipboardData: DataTransfer) {
-    console.log(clipboardData);
     const types = clipboardData.types;
     return types[0] === 'text/plain';
   }
