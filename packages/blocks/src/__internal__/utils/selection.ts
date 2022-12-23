@@ -221,7 +221,8 @@ function focusRichTextByModel(
 
 export function focusPreviousBlock(
   model: BaseBlockModel,
-  position?: SelectionPosition
+  position?: SelectionPosition,
+  until?: (model: BaseBlockModel) => boolean
 ) {
   const page = getDefaultPageBlock(model);
   const container = getContainerByModel(model);
@@ -233,15 +234,33 @@ export function focusPreviousBlock(
     nextPosition = page.lastSelectionPosition;
   }
 
-  const preNodeModel = getPreviousBlock(container, model.id);
-  if (preNodeModel && nextPosition) {
-    focusRichTextByModel(nextPosition, preNodeModel);
+  if (typeof until === 'function') {
+    let currentModel: BaseBlockModel | null = model;
+    while (currentModel) {
+      const preNodeModel = getPreviousBlock(container, currentModel.id);
+      if (preNodeModel && until(preNodeModel)) {
+        if (nextPosition) {
+          focusRichTextByModel(nextPosition, preNodeModel);
+        }
+        return;
+      } else if (!preNodeModel) {
+        break;
+      } else {
+        currentModel = getPreviousBlock(container, currentModel.id);
+      }
+    }
+  } else {
+    const preNodeModel = getPreviousBlock(container, model.id);
+    if (preNodeModel && nextPosition) {
+      focusRichTextByModel(nextPosition, preNodeModel);
+    }
   }
 }
 
 export function focusNextBlock(
   model: BaseBlockModel,
-  position: SelectionPosition = 'start'
+  position: SelectionPosition = 'start',
+  until?: (model: BaseBlockModel) => boolean
 ) {
   const page = getDefaultPageBlock(model);
   let nextPosition = position;
@@ -252,8 +271,23 @@ export function focusNextBlock(
   }
   const nextNodeModel = getNextBlock(model.id);
 
-  if (nextNodeModel) {
-    focusRichTextByModel(nextPosition, nextNodeModel);
+  if (typeof until === 'function') {
+    let currentModel: BaseBlockModel | null = model;
+    while (currentModel) {
+      const nextBlock = getNextBlock(currentModel.id);
+      if (nextBlock && until(nextBlock)) {
+        if (nextPosition) {
+          focusRichTextByModel(nextPosition, nextBlock);
+        }
+        return;
+      } else {
+        currentModel = getNextBlock(currentModel.id);
+      }
+    }
+  } else {
+    if (nextNodeModel) {
+      focusRichTextByModel(nextPosition, nextNodeModel);
+    }
   }
 }
 
