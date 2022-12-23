@@ -217,3 +217,20 @@ test('copy clipItems format', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 });
+
+test('copy & paste outside editor', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.setAttribute('id', 'input-test');
+    input.value = '123';
+    document.querySelector('.debug-menu')?.appendChild(input);
+  });
+  await page.focus('#input-test');
+  await page.dblclick('#input-test');
+  await copyByKeyboard(page);
+  await focusRichText(page);
+  await pasteByKeyboard(page);
+  await assertRichTexts(page, ['123']);
+});
