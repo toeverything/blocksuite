@@ -248,10 +248,13 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
     ) {
       if (preNodeModel) {
         if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur();
+          if (!document.activeElement.closest('editor-container')) {
+            document.activeElement.blur();
+            const element = getBlockById(preNodeModel.id);
+            element?.focus();
+          }
+          console.log(document.activeElement);
         }
-        const element = getBlockById(preNodeModel.id);
-        element?.focus();
       }
       if (
         preNodeModel &&
