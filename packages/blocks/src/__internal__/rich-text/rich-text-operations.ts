@@ -21,6 +21,7 @@ import {
   getDefaultPageBlock,
   getBlockElementByModel,
   resetNativeSelection,
+  getBlockById,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -245,6 +246,13 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
+      if (preNodeModel) {
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+        const element = getBlockById(preNodeModel.id);
+        element?.focus();
+      }
       if (
         preNodeModel &&
         matchFlavours(model, ['affine:embed', 'affine:divider'])

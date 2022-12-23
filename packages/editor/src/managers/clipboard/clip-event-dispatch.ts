@@ -45,6 +45,9 @@ export class ClipEventDispatch {
       ClipboardAction.paste,
       this._pasteHandler
     );
+    document.removeEventListener(ClipboardAction.copy, this._copyHandler);
+    document.removeEventListener(ClipboardAction.cut, this._cutHandler);
+    document.removeEventListener(ClipboardAction.paste, this._pasteHandler);
   }
 
   static editorElementActive(): boolean {
@@ -52,7 +55,9 @@ export class ClipEventDispatch {
   }
 
   private _copyHandler(e: ClipboardEvent) {
-    this.signals.copy.emit(e);
+    if (ClipEventDispatch.editorElementActive()) {
+      this.signals.copy.emit(e);
+    }
   }
 
   private _cutHandler(e: ClipboardEvent) {
