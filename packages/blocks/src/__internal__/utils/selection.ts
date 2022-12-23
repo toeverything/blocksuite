@@ -199,7 +199,7 @@ function focusRichTextByModel(
   model: BaseBlockModel
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
-  if (matchFlavours(model, ['affine:embed'])) {
+  if (matchFlavours(model, ['affine:embed', 'affine:divider'])) {
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
