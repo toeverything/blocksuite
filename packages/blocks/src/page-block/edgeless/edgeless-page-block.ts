@@ -205,6 +205,7 @@ export class EdgelessPageBlockComponent
     });
 
     this.signals.viewportUpdated.on(() => {
+      this.style.setProperty('--affine-zoom', `${this.viewport.zoom}`);
       this._selection.syncBlockSelectionRect();
       this.requestUpdate();
     });

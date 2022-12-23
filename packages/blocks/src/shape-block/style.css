@@ -8,7 +8,7 @@
 .affine-shape-block-hit-box {
   fill: none;
   stroke: transparent;
-  stroke-width: 24px;
+  stroke-width: calc(24px * var(--affine-scale));
   pointer-events: stroke;
   stroke-linecap: round;
   stroke-linejoin: round;
