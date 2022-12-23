@@ -54,19 +54,27 @@ export class ClipEventDispatch {
     });
   }
 
+  static path(event: ClipboardEvent): EventTarget[] {
+    if ('path' in event) {
+      // @ts-ignore
+      return event.path;
+    }
+    return event.composedPath && event.composedPath();
+  }
+
   private _copyHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.containsEditorElement(e.composedPath())) {
+    if (ClipEventDispatch.containsEditorElement(ClipEventDispatch.path(e))) {
       this.signals.copy.emit(e);
     }
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.containsEditorElement(e.composedPath())) {
+    if (ClipEventDispatch.containsEditorElement(ClipEventDispatch.path(e))) {
       this.signals.cut.emit(e);
     }
   }
   private _pasteHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.containsEditorElement(e.composedPath())) {
+    if (ClipEventDispatch.containsEditorElement(ClipEventDispatch.path(e))) {
       this.signals.paste.emit(e);
     }
   }
