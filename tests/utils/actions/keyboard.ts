@@ -145,7 +145,6 @@ export async function fillLine(page: Page, toNext = false) {
 }
 
 export async function copyByKeyboard(page: Page) {
-  await page.click('editor-container');
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('c', { delay: 50 });
   await keyUpCtrlOrMeta(page);
