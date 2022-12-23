@@ -568,9 +568,7 @@ test('selection on heavy page', async ({ page }) => {
   expect(rectNum).toBe(5);
 });
 
-test.skip('ArrowUp and ArrowDown to select divider and copy', async ({
-  page,
-}) => {
+test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

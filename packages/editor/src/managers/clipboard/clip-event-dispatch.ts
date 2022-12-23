@@ -55,9 +55,7 @@ export class ClipEventDispatch {
   }
 
   private _copyHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.editorElementActive()) {
-      this.signals.copy.emit(e);
-    }
+    this.signals.copy.emit(e);
   }
 
   private _cutHandler(e: ClipboardEvent) {
