@@ -39,7 +39,7 @@ export class PasteManager {
               'affine-default-page-block-title'
             )
           ) {
-            // leave the copy the default behavior
+            // leave the copy to the default behavior
             return;
           }
         }
