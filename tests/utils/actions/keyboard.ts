@@ -152,12 +152,14 @@ export async function copyByKeyboard(page: Page) {
 }
 
 export async function cutByKeyboard(page: Page) {
+  await page.click('editor-container');
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('x', { delay: 50 });
   await keyUpCtrlOrMeta(page);
 }
 
 export async function pasteByKeyboard(page: Page) {
+  await page.click('editor-container');
   await keyDownCtrlOrMeta(page);
   await page.keyboard.press('v', { delay: 50 });
   await keyUpCtrlOrMeta(page);
