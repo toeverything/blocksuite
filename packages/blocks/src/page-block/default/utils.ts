@@ -24,6 +24,9 @@ import {
   Point,
   resetNativeSelection,
   BLOCK_ID_ATTR,
+  getNextBlock,
+  getCurrentRange,
+  getModelsByRange,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -226,7 +229,12 @@ export function handleDown(
     assertExists(nativeSelection);
     const range = nativeSelection.getRangeAt(0);
     const { left, bottom } = range.getBoundingClientRect();
-    focusNextBlock(model, new Point(left, bottom));
+    const nextBlock = getNextBlock(model.id);
+    if (nextBlock && matchFlavours(nextBlock, ['affine:divider'])) {
+      focusNextBlock(nextBlock, 'start');
+    } else {
+      focusNextBlock(model, new Point(left, bottom));
+    }
   } else {
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
@@ -342,6 +350,25 @@ export function bindHotkeys(
         noop();
       }
       return;
+    } else if (state.type === 'none') {
+      const range = getCurrentRange();
+      if (range.startOffset === 0 && range.endOffset === 0) {
+        const currentModels = getModelsByRange(range);
+        if (currentModels.length === 1) {
+          const model = currentModels[0];
+          const previousBlock = getPreviousBlock(
+            getContainerByModel(model),
+            model.id
+          );
+          if (
+            previousBlock &&
+            matchFlavours(previousBlock, ['affine:divider'])
+          ) {
+            page.captureSync();
+            page.deleteBlock(previousBlock);
+          }
+        }
+      }
     }
   });
 
