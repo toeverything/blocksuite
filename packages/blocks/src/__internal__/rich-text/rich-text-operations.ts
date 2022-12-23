@@ -21,7 +21,6 @@ import {
   getDefaultPageBlock,
   getBlockElementByModel,
   resetNativeSelection,
-  getBlockById,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
