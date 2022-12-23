@@ -13,8 +13,9 @@ import {
 import { toast } from '../toast.js';
 import './button';
 import { formatButtons, paragraphButtons } from './config.js';
-import { ArrowDownIcon, CopyIcon } from './icons.js';
+import { ArrowDownIcon, CodeIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
+import { CodeBlockModel } from '../../code-block/index.js';
 
 const onCopy = () => {
   document.dispatchEvent(new ClipboardEvent('copy'));
@@ -62,6 +63,9 @@ export class FormatQuickBar extends LitElement {
   @state()
   format: Record<string, unknown> = {};
 
+  @state()
+  isCodeBlockSelection = false;
+
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
@@ -80,6 +84,10 @@ export class FormatQuickBar extends LitElement {
     if (models.length > 1) {
       // Select multiple models
     }
+
+    this.isCodeBlockSelection = this.models.every(
+      model => model instanceof CodeBlockModel
+    );
   }
 
   private onHover() {
@@ -173,7 +181,7 @@ export class FormatQuickBar extends LitElement {
       @mouseover=${this.onHover}
       @mouseout=${this.onHoverEnd}
     >
-      ${paragraphIcon} ${ArrowDownIcon}
+      ${this.isCodeBlockSelection ? CodeIcon : paragraphIcon} ${ArrowDownIcon}
     </format-bar-button>`;
 
     const paragraphPanel = this.paragraphPanelTemplate();
@@ -216,13 +224,19 @@ export class FormatQuickBar extends LitElement {
       top: this.top,
       bottom: this.bottom,
     });
-    return html`<div class="format-quick-bar" style="${styles}">
-      ${paragraphItems}
-      <div class="divider"></div>
-      ${formatItems}
-      <div class="divider"></div>
-      ${actionItems} ${paragraphPanel}
-    </div>`;
+    return this.isCodeBlockSelection
+      ? html`<div class="format-quick-bar" style="${styles}">
+          ${paragraphItems}
+          <div class="divider"></div>
+          ${actionItems} ${paragraphPanel}
+        </div>`
+      : html`<div class="format-quick-bar" style="${styles}">
+          ${paragraphItems}
+          <div class="divider"></div>
+          ${formatItems}
+          <div class="divider"></div>
+          ${actionItems} ${paragraphPanel}
+        </div>`;
   }
 }
 

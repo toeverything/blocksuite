@@ -83,7 +83,7 @@ export function updateSelectedTextType(
   const modelsInRange = getModelsByRange(range);
   page.captureSync();
   modelsInRange.forEach(model => {
-    assertFlavours(model, ['affine:paragraph', 'affine:list']);
+    assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {

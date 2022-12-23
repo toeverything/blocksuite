@@ -248,7 +248,9 @@ export class LangList extends LitElement {
 
   private clickHandler(e: MouseEvent) {
     const target = e.target as HTMLElement;
-    if (!target.closest('lang-list')?.closest(`[data-block-id="${this.id}"]`)) {
+    if (
+      !target.closest('.container')?.closest(`[data-block-id="${this.id}"]`)
+    ) {
       this.dispose();
     }
   }
