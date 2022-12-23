@@ -16,7 +16,9 @@ export function getShapeBlockHitBox(id: string): SVGPathElement | null {
   if (shapeBlock?.tagName !== ShapeBlockTag.toUpperCase()) {
     throw new Error(`data-block-id: ${id} is not shape block`);
   }
-  return shapeBlock.querySelector('.affine-shape-block-hit-box');
+  return (
+    shapeBlock.shadowRoot?.querySelector('.affine-shape-block-hit-box') ?? null
+  );
 }
 
 export function getBlockById<T extends ElementTagName>(

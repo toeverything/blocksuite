@@ -24,6 +24,7 @@ import {
   assertSelection,
 } from './utils/asserts.js';
 import type { BaseBlockModel } from '../packages/store/src/index.js';
+import type { Rect } from '@blocksuite/blocks/std';
 
 async function getGroupSize(
   page: Page,
@@ -201,10 +202,25 @@ test('delete shape block by keyboard', async ({ page }) => {
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
 
   await switchMouseMode(page);
-  const rect = await page.evaluate(() =>
-    window.std.getShapeBlockHitBox('3')?.getBoundingClientRect()
-  );
-  await page.keyboard.press('Delete', {
-    delay: 10,
+  const startPoint = await page.evaluate(() => {
+    const hitbox = window.std.getShapeBlockHitBox('3');
+    if (!hitbox) {
+      throw new Error('hitbox is null');
+    }
+    const rect = hitbox.getBoundingClientRect();
+    if (rect == null) {
+      throw new Error('rect is null');
+    }
+    return {
+      x: rect.x,
+      y: rect.y,
+    };
   });
+  await page.mouse.click(startPoint.x + 2, startPoint.y + 2);
+  await page.waitForTimeout(50);
+  await page.keyboard.press('Backspace');
+  const exist = await page.evaluate(() => {
+    return document.querySelector('[data-block-id="3"]') != null;
+  });
+  expect(exist).toBe(false);
 });
