@@ -149,7 +149,7 @@ export function transformBlock(
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, parent, index);
-  // asyncFocusRichText(page, id);
+  asyncFocusRichText(page, id);
   return id;
 }
 
@@ -347,6 +347,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   resetNativeSelection(null);
 }
 
+// TODO should show format bar after select all
 function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
   nearestCommonAncestor.addEventListener(
     'mousemove',

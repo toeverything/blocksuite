@@ -176,13 +176,12 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
 
   onContainerDragEnd(e: SelectionEvent): void {
     if (this.isActive) {
-      const { anchor, direction, selectedType } =
-        getNativeSelectionMouseDragInfo(e);
+      const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ anchorEl: anchor, direction });
+      showFormatQuickBar({ direction });
     } else if (this.blockSelectionState.type === 'single') {
       if (!this._frameSelectionState) {
         this._page.captureSync();

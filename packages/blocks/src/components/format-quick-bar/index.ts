@@ -13,7 +13,6 @@ import {
 } from '../../__internal__/utils/index.js';
 import './button';
 import './format-bar-node';
-import type { FormatQuickBar } from './format-bar-node.js';
 
 export const showFormatQuickBar = async ({
   anchorEl,
@@ -21,7 +20,7 @@ export const showFormatQuickBar = async ({
   container = document.body,
   abortController = new AbortController(),
 }: {
-  anchorEl:
+  anchorEl?:
     | {
         getBoundingClientRect: () => DOMRect;
         // contextElement?: Element;
@@ -33,9 +32,7 @@ export const showFormatQuickBar = async ({
 }) => {
   // Init format quick bar
 
-  const formatQuickBar = document.createElement(
-    'format-quick-bar'
-  ) as FormatQuickBar;
+  const formatQuickBar = document.createElement('format-quick-bar');
   formatQuickBar.abortController = abortController;
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;
@@ -44,17 +41,18 @@ export const showFormatQuickBar = async ({
 
   // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
+    const positioningEl = anchorEl ?? getCurrentRange();
+
     const positioningPoint =
-      anchorEl instanceof Range
-        ? calcPositionPointByRange(anchorEl, direction)
-        : anchorEl.getBoundingClientRect();
+      positioningEl instanceof Range
+        ? calcPositionPointByRange(positioningEl, direction)
+        : positioningEl.getBoundingClientRect();
 
     // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
     const boundaryRect = document.body.getBoundingClientRect();
     const formatBarRect =
       formatQuickBar.formatQuickBarElement.getBoundingClientRect();
     // Add offset to avoid the quick bar being covered by the window border
-
     const gapY = 5;
     const isBottom = direction.includes('bottom');
     const safeCoordinate = calcSafeCoordinate({

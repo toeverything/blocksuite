@@ -505,8 +505,8 @@ test('should format quick bar follow scroll', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
-  for (let i = 0; i < 30; i++) {
-    await page.keyboard.press('Enter');
+  for (let i = 0; i < 20; i++) {
+    await pressEnter(page);
   }
   page.keyboard.type('bottom');
 
