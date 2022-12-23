@@ -170,17 +170,22 @@ export class CopyCutManager {
         clipItems.forEach(clip => {
           clipboardData.setData(clip.mimeType, clip.data);
         });
+        e.preventDefault();
+        e.stopPropagation();
       } catch (e) {
         // TODO handle exception
       }
     } else {
-      this._copyToClipboardFromPc(clipItems);
+      if (this._copyToClipboardFromPc(clipItems)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     }
   }
 
   // TODO: Optimization
   // TODO: is not compatible with safari
-  private _copyToClipboardFromPc(clips: ClipItem[]) {
+  private _copyToClipboardFromPc(clips: ClipItem[]): boolean {
     const curRange = getCurrentRange();
 
     let success = false;
