@@ -5,7 +5,6 @@ import {
   assertFlavours,
   ExtendedModel,
   RootBlockModel,
-  sleep,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
@@ -105,12 +104,13 @@ export async function updateSelectedTextType(
 ) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
-  const selectedBlocks = saveBlockSelection();
   page.captureSync();
   if (flavour === 'affine:code') {
     mergeTextOfBlocks(page, modelsInRange, { flavour: 'affine:code' });
     return;
   }
+  const selectedBlocks = saveBlockSelection();
+  let lastNewId: string | null = null;
   modelsInRange.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
@@ -125,10 +125,12 @@ export async function updateSelectedTextType(
       blocks.forEach(block => {
         block.id = newId;
       });
+      lastNewId = newId;
     }
   });
-  // Wait for ui update
-  await sleep();
+  if (lastNewId) {
+    await asyncFocusRichText(page, lastNewId);
+  }
   restoreSelection(selectedBlocks);
 }
 
@@ -149,7 +151,6 @@ export function transformBlock(
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, parent, index);
-  asyncFocusRichText(page, id);
   return id;
 }
 
