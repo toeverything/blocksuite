@@ -151,8 +151,8 @@ export async function copyByKeyboard(page: Page) {
 }
 
 export async function cutByKeyboard(page: Page) {
-  const doesEditorActive = page.evaluate(() =>
-    document.activeElement?.closest('editor-container')
+  const doesEditorActive = await page.evaluate(
+    () => document.activeElement?.closest('editor-container') != null
   );
   if (!doesEditorActive) {
     await page.click('editor-container');
@@ -163,7 +163,7 @@ export async function cutByKeyboard(page: Page) {
 }
 
 export async function pasteByKeyboard(page: Page) {
-  const doesEditorActive = page.evaluate(() =>
+  const doesEditorActive = await page.evaluate(() =>
     document.activeElement?.closest('editor-container')
   );
   if (!doesEditorActive) {

@@ -1,6 +1,5 @@
 import { Signal } from '@blocksuite/store';
 import { ClipboardAction } from './types.js';
-import { EditorContainer } from '../../components/index.js';
 
 export class ClipEventDispatch {
   readonly signals = {
@@ -48,32 +47,23 @@ export class ClipEventDispatch {
     );
   }
 
-  static containsEditorElement(composedPath: EventTarget[]): boolean {
-    return composedPath.reverse().some(element => {
-      return element instanceof EditorContainer;
-    });
-  }
-
-  static path(event: ClipboardEvent & { path?: unknown }): EventTarget[] {
-    if ('path' in event) {
-      return event.path as EventTarget[];
-    }
-    return event.composedPath && event.composedPath();
+  static editorElementActive(): boolean {
+    return document.activeElement?.closest('editor-container') != null;
   }
 
   private _copyHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.containsEditorElement(ClipEventDispatch.path(e))) {
+    if (ClipEventDispatch.editorElementActive()) {
       this.signals.copy.emit(e);
     }
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.containsEditorElement(ClipEventDispatch.path(e))) {
+    if (ClipEventDispatch.editorElementActive()) {
       this.signals.cut.emit(e);
     }
   }
   private _pasteHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.containsEditorElement(ClipEventDispatch.path(e))) {
+    if (ClipEventDispatch.editorElementActive()) {
       this.signals.paste.emit(e);
     }
   }
