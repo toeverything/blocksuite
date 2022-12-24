@@ -22,7 +22,7 @@
     "quill-cursors": "^4.0.0"
   },
   "exports": {
-    "./style": "./dist/style.css",
+    "./dist/*": "./dist/*",
     ".": "./src/index.ts",
     "./std": "./src/std.ts"
   },
