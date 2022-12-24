@@ -22,7 +22,7 @@
     "quill-cursors": "^4.0.0"
   },
   "exports": {
-    "./style": "./dist/style.css",
+    "./style.css": "./dist/style.css",
     ".": "./src/index.ts",
     "./std": "./src/std.ts"
   },
@@ -31,7 +31,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./style": "./dist/style.css",
+      "./style.css": "./dist/style.css",
       "./src/*": "./dist/*.js",
       ".": "./dist/index.js",
       "./std": {
