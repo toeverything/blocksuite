@@ -8,6 +8,7 @@ import {
   caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  matchFlavours,
   noop,
   resetNativeSelection,
   RootBlockModel,
@@ -136,7 +137,10 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
       case 'none':
         break;
       case 'single':
-        if (this.blockSelectionState.active) {
+        if (
+          this.blockSelectionState.active &&
+          !matchFlavours(this.blockSelectionState.selected, ['affine:shape'])
+        ) {
           // TODO reset if drag out of group
           handleNativeRangeDragMove(this._startRange, e);
         }
