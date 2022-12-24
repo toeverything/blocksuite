@@ -6,7 +6,16 @@ export class Signal<T = void> implements Disposable {
   private emitting = false;
   private callbacks: ((v: T) => unknown)[] = [];
   private disposables: Disposable[] = [];
-
+  static fromEvent<N extends keyof WindowEventMap>(
+    element: Window,
+    eventName: N,
+    options?: boolean | AddEventListenerOptions
+  ): Signal<WindowEventMap[N]>;
+  static fromEvent<N extends keyof HTMLElementEventMap>(
+    element: HTMLElement,
+    eventName: N,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): Signal<HTMLElementEventMap[N]>;
   static fromEvent<N extends keyof HTMLElementEventMap>(
     element: HTMLElement | Window,
     eventName: N,
