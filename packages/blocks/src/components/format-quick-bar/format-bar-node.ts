@@ -145,6 +145,7 @@ export class FormatQuickBar extends LitElement {
             }
             updateSelectedTextType(flavour, type, this.page);
             this.paragraphType = type;
+            this.positionUpdated.emit();
           }}
         >
           ${icon}
@@ -193,6 +194,7 @@ export class FormatQuickBar extends LitElement {
             });
             // format state need to update after format
             this.format = getFormat();
+            this.positionUpdated.emit();
           }}
         >
           ${icon}
