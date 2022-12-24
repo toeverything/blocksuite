@@ -282,7 +282,11 @@ export function handleNativeSelectAll() {
 }
 
 export function handleSelectAll(selection: DefaultSelectionManager) {
-  if (selection.state.selectedBlocks.length === 0) {
+  const currentSelection = window.getSelection();
+  if (
+    selection.state.selectedBlocks.length === 0 &&
+    currentSelection?.focusNode?.nodeName === '#text'
+  ) {
     const currentRange = getCurrentRange();
     const rangeRect = currentRange.getBoundingClientRect();
     selection.selectBlocksByRect(rangeRect);
