@@ -20,14 +20,14 @@
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
-    "ky": "^0.32.2",
-    "lib0": "^0.2.52",
+    "ky": "^0.33.0",
+    "lib0": "^0.2.58",
     "y-protocols": "^1.0.5",
     "y-webrtc": "^10.2.3"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "lit": "^2.3.1",
+    "lit": "^2.5.0",
     "yjs": "^13.5.43"
   },
   "peerDependencies": {
