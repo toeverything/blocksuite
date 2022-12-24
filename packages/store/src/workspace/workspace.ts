@@ -225,7 +225,12 @@ export class Workspace {
   constructor(options: StoreOptions) {
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
-    this._blobStorage = getBlobStorage(options.room);
+    if (!options.isSSR) {
+      this._blobStorage = getBlobStorage(options.room);
+    } else {
+      // blob storage is not reachable in server side
+      this._blobStorage = Promise.resolve(null);
+    }
 
     this.meta = new WorkspaceMeta('space:meta', this, this._store.awareness);
 
