@@ -38,7 +38,7 @@ export enum Generator {
 /**
  * @example
  *  const workspace = new Workspace({
- *    isSSR: typeof window !== 'undefined'
+ *    isSSR: typeof window === 'undefined'
  *  })
  */
 export interface SSROptions {
