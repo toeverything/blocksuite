@@ -1,7 +1,7 @@
 import type * as Y from 'yjs';
 // @ts-ignore
 import { WebrtcProvider } from 'y-webrtc';
-import { IndexeddbPersistence } from 'y-indexeddb';
+import { IndexeddbPersistence } from './providers/indexdb.js';
 import type { Awareness } from 'y-protocols/awareness';
 
 /**
