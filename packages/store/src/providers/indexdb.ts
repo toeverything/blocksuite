@@ -86,7 +86,7 @@ export class IndexeddbPersistence extends Observable<string> {
   _storeTimeout = 1000;
 
   _storeTimeoutId: ReturnType<typeof setTimeout> | null;
-  _storeUpdate: (update: Uint8Array, origin: any) => void;
+  _storeUpdate: (update: Uint8Array, origin: this) => void;
   constructor(name: string, doc: Y.Doc) {
     super();
     this.doc = doc;
