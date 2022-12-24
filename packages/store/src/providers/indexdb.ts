@@ -13,10 +13,10 @@ export const fetchUpdates = (
     void 0;
   }
 ) => {
-  const [updatesStore] = idb.transact(
-    /** @type {IDBDatabase} */ idbPersistence.db!,
-    [updatesStoreName]
-  ); // , 'readonly')
+  if (!idbPersistence.db) {
+    throw new Error('idbPersistence.db is null');
+  }
+  const [updatesStore] = idb.transact(idbPersistence.db, [updatesStoreName]); // , 'readonly')
   return idb
     .getAll(
       updatesStore,
@@ -85,7 +85,7 @@ export class IndexeddbPersistence extends Observable<string> {
    */
   _storeTimeout = 1000;
 
-  _storeTimeoutId: any;
+  _storeTimeoutId: ReturnType<typeof setTimeout> | null;
   _storeUpdate: (update: Uint8Array, origin: any) => void;
   constructor(name: string, doc: Y.Doc) {
     super();
