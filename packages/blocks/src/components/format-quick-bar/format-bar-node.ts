@@ -12,12 +12,8 @@ import {
 } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
 import './button';
-import {
-  formatButtons,
-  noneCodeBlockSelected,
-  paragraphButtons,
-} from './config.js';
-import { ArrowDownIcon, CodeIcon, CopyIcon } from './icons.js';
+import { formatButtons, paragraphButtons } from './config.js';
+import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
 
 const onCopy = () => {
@@ -141,9 +137,9 @@ export class FormatQuickBar extends LitElement {
             }
             if (this.paragraphType === type) {
               // Already in the target format, convert back to text
-              const { flavour: defaultParagraph, type: defaultType } =
+              const { flavour: defaultFlavour, type: defaultType } =
                 paragraphButtons[0];
-              updateSelectedTextType(defaultParagraph, defaultType, this.page);
+              updateSelectedTextType(defaultFlavour, defaultType, this.page);
               this.paragraphType = defaultType;
               return;
             }
@@ -177,35 +173,32 @@ export class FormatQuickBar extends LitElement {
       @mouseover=${this.onHover}
       @mouseout=${this.onHoverEnd}
     >
-      ${noneCodeBlockSelected(this.models) ? paragraphIcon : CodeIcon}
-      ${ArrowDownIcon}
+      ${paragraphIcon} ${ArrowDownIcon}
     </format-bar-button>`;
 
     const paragraphPanel = this.paragraphPanelTemplate();
 
-    const formatItems = html`
-      ${formatButtons
-        .filter(({ showWhen = () => true }) => showWhen(this.models))
-        .map(
-          ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
-            class="has-tool-tip"
-            data-testid=${id}
-            ?active=${activeWhen(this.format)}
-            @click=${() => {
-              action({
-                page,
-                abortController: this.abortController,
-                format: this.format,
-              });
-              // format state need to update after format
-              this.format = getFormat();
-            }}
-          >
-            ${icon}
-            <tool-tip inert role="tooltip">${name}</tool-tip>
-          </format-bar-button>`
-        )}
-    `;
+    const formatItems = formatButtons
+      .filter(({ showWhen = () => true }) => showWhen(this.models))
+      .map(
+        ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
+          class="has-tool-tip"
+          data-testid=${id}
+          ?active=${activeWhen(this.format)}
+          @click=${() => {
+            action({
+              page,
+              abortController: this.abortController,
+              format: this.format,
+            });
+            // format state need to update after format
+            this.format = getFormat();
+          }}
+        >
+          ${icon}
+          <tool-tip inert role="tooltip">${name}</tool-tip>
+        </format-bar-button>`
+      );
 
     const actionItems = html`<format-bar-button
       class="has-tool-tip"
@@ -225,9 +218,7 @@ export class FormatQuickBar extends LitElement {
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}
-      ${noneCodeBlockSelected(this.models)
-        ? html`<div class="divider"></div>`
-        : ''}
+      ${formatItems.length ? html`<div class="divider"></div>` : ''}
       ${actionItems} ${paragraphPanel}
     </div>`;
   }

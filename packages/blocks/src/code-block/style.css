@@ -21,7 +21,6 @@ code-block {
   line-height: calc(var(--affine-line-height-base) - 10px);
   top: 12px;
   left: 9px;
-  z-index: 1;
 }
 
 .affine-code-block-container.selected {

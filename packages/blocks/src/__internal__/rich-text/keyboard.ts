@@ -111,6 +111,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       },
       {
         flavour: 'affine:code',
+        type: 'code',
       },
     ];
 
