@@ -35,6 +35,9 @@ export class CodeBlockComponent extends LitElement {
   @query('lang-list')
   langListElement!: HTMLElement;
 
+  @query('.lang-container code-block-button')
+  langSelectionButton!: HTMLElement;
+
   @state()
   showLangList = 'hidden';
 
@@ -58,11 +61,8 @@ export class CodeBlockComponent extends LitElement {
   }
 
   private onClick() {
-    return () => {
-      window.setTimeout(() => {
-        this.showLangList = 'visible';
-      }, 0);
-    };
+    this.showLangList = 'visible';
+    this.langSelectionButton.classList.add('clicked');
   }
 
   render() {
@@ -71,11 +71,10 @@ export class CodeBlockComponent extends LitElement {
     return html`
       <div class="affine-code-block-container">
         <div class="container">
-          <div class="lang-container has-tool-tip" @click=${this.onClick()}>
+          <div class="lang-container" @click=${this.onClick}>
             <code-block-button width="101px" height="24px">
               ${this.model.language} ${ArrowDownIcon}
             </code-block-button>
-            <tool-tip inert role="tooltip">switch language</tool-tip>
           </div>
           <lang-list
             showLangList=${this.showLangList}
@@ -85,6 +84,7 @@ export class CodeBlockComponent extends LitElement {
             }}
             @dispose=${() => {
               this.showLangList = 'hidden';
+              this.langSelectionButton.classList.remove('clicked');
             }}
           ></lang-list>
         </div>

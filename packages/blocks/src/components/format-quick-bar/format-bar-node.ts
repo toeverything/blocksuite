@@ -137,9 +137,9 @@ export class FormatQuickBar extends LitElement {
             }
             if (this.paragraphType === type) {
               // Already in the target format, convert back to text
-              const { flavour: defaultParagraph, type: defaultType } =
+              const { flavour: defaultFlavour, type: defaultType } =
                 paragraphButtons[0];
-              updateSelectedTextType(defaultParagraph, defaultType, this.page);
+              updateSelectedTextType(defaultFlavour, defaultType, this.page);
               this.paragraphType = defaultType;
               return;
             }
@@ -178,29 +178,27 @@ export class FormatQuickBar extends LitElement {
 
     const paragraphPanel = this.paragraphPanelTemplate();
 
-    const formatItems = html`
-      ${formatButtons
-        .filter(({ showWhen = () => true }) => showWhen(this.models))
-        .map(
-          ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
-            class="has-tool-tip"
-            data-testid=${id}
-            ?active=${activeWhen(this.format)}
-            @click=${() => {
-              action({
-                page,
-                abortController: this.abortController,
-                format: this.format,
-              });
-              // format state need to update after format
-              this.format = getFormat();
-            }}
-          >
-            ${icon}
-            <tool-tip inert role="tooltip">${name}</tool-tip>
-          </format-bar-button>`
-        )}
-    `;
+    const formatItems = formatButtons
+      .filter(({ showWhen = () => true }) => showWhen(this.models))
+      .map(
+        ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
+          class="has-tool-tip"
+          data-testid=${id}
+          ?active=${activeWhen(this.format)}
+          @click=${() => {
+            action({
+              page,
+              abortController: this.abortController,
+              format: this.format,
+            });
+            // format state need to update after format
+            this.format = getFormat();
+          }}
+        >
+          ${icon}
+          <tool-tip inert role="tooltip">${name}</tool-tip>
+        </format-bar-button>`
+      );
 
     const actionItems = html`<format-bar-button
       class="has-tool-tip"
@@ -220,7 +218,7 @@ export class FormatQuickBar extends LitElement {
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}
-      <div class="divider"></div>
+      ${formatItems.length ? html`<div class="divider"></div>` : ''}
       ${actionItems} ${paragraphPanel}
     </div>`;
   }
