@@ -10,7 +10,7 @@ export type SelectionOptions = {
   from?: 'previous' | 'next';
 };
 
-/** Common context interface definition for block models.js. */
+/** Common context interface definition for block models. */
 export interface BlockHost {
   page: Page;
   flavour: string;
