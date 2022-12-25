@@ -3,9 +3,9 @@ import { Disposable, flattenDisposable } from './disposable.js';
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor
 export class Signal<T = void> implements Disposable {
-  private emitting = false;
-  private callbacks: ((v: T) => unknown)[] = [];
-  private disposables: Disposable[] = [];
+  private _emitting = false;
+  private _callbacks: ((v: T) => unknown)[] = [];
+  private _disposables: Disposable[] = [];
   static fromEvent<N extends keyof WindowEventMap>(
     element: Window,
     eventName: N,
@@ -26,7 +26,7 @@ export class Signal<T = void> implements Disposable {
       signal.emit(ev);
     };
     (element as HTMLElement).addEventListener(eventName, handler, eventOptions);
-    signal.disposables.push({
+    signal._disposables.push({
       dispose: () => {
         (element as HTMLElement).removeEventListener(eventName, handler);
       },
@@ -37,7 +37,7 @@ export class Signal<T = void> implements Disposable {
   filter(testFun: (v: T) => boolean): Signal<T> {
     const result = new Signal<T>();
     // if result is disposed, dispose this too
-    result.disposables.push({ dispose: () => this.dispose() });
+    result._disposables.push({ dispose: () => this.dispose() });
 
     this.on((v: T) => {
       if (testFun(v)) {
@@ -49,20 +49,20 @@ export class Signal<T = void> implements Disposable {
   }
 
   on(callback: (v: T) => unknown): Disposable {
-    if (this.emitting) {
-      const newCallback = [...this.callbacks, callback];
-      this.callbacks = newCallback;
+    if (this._emitting) {
+      const newCallback = [...this._callbacks, callback];
+      this._callbacks = newCallback;
     } else {
-      this.callbacks.push(callback);
+      this._callbacks.push(callback);
     }
     return {
       dispose: () => {
-        if (this.emitting) {
-          this.callbacks = this.callbacks.filter(v => v !== callback);
+        if (this._emitting) {
+          this._callbacks = this._callbacks.filter(v => v !== callback);
         } else {
-          const index = this.callbacks.indexOf(callback);
+          const index = this._callbacks.indexOf(callback);
           if (index > -1) {
-            this.callbacks.splice(index, 1); // remove one item only
+            this._callbacks.splice(index, 1); // remove one item only
           }
         }
       },
@@ -81,20 +81,20 @@ export class Signal<T = void> implements Disposable {
   }
 
   unshift(callback: (v: T) => unknown): Disposable {
-    if (this.emitting) {
-      const newCallback = [callback, ...this.callbacks];
-      this.callbacks = newCallback;
+    if (this._emitting) {
+      const newCallback = [callback, ...this._callbacks];
+      this._callbacks = newCallback;
     } else {
-      this.callbacks.unshift(callback);
+      this._callbacks.unshift(callback);
     }
     return {
       dispose: () => {
-        if (this.emitting) {
-          this.callbacks = this.callbacks.filter(v => v !== callback);
+        if (this._emitting) {
+          this._callbacks = this._callbacks.filter(v => v !== callback);
         } else {
-          const index = this.callbacks.indexOf(callback);
+          const index = this._callbacks.indexOf(callback);
           if (index > -1) {
-            this.callbacks.splice(index, 1); // remove one item only
+            this._callbacks.splice(index, 1); // remove one item only
           }
         }
       },
@@ -102,26 +102,26 @@ export class Signal<T = void> implements Disposable {
   }
 
   emit(v: T) {
-    const prevEmitting = this.emitting;
-    this.emitting = true;
-    this.callbacks.forEach(f => {
+    const prevEmitting = this._emitting;
+    this._emitting = true;
+    this._callbacks.forEach(f => {
       try {
         f(v);
       } catch (err) {
         console.error(err);
       }
     });
-    this.emitting = prevEmitting;
+    this._emitting = prevEmitting;
   }
 
   pipe(that: Signal<T>): Signal<T> {
-    this.callbacks.push(v => that.emit(v));
+    this._callbacks.push(v => that.emit(v));
     return this;
   }
 
   dispose() {
-    flattenDisposable(this.disposables).dispose();
-    this.callbacks.length = 0;
+    flattenDisposable(this._disposables).dispose();
+    this._callbacks.length = 0;
   }
 
   toDispose(disposables: Disposable[]): Signal<T> {

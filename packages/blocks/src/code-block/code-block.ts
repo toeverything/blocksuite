@@ -56,7 +56,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  private onClick() {
+  private _onClick() {
     this.showLangList = 'visible';
     this.langSelectionButton.classList.add('clicked');
   }
@@ -67,7 +67,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     return html`
       <div class="affine-code-block-container">
         <div class="container">
-          <div class="lang-container" @click=${this.onClick}>
+          <div class="lang-container" @click=${this._onClick}>
             <code-block-button width="101px" height="24px">
               ${this.model.language} ${ArrowDownIcon}
             </code-block-button>

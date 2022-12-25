@@ -11,14 +11,14 @@ const SCOPE = {
 
 // Singleton
 class HotkeyManager {
-  private readonly hotkeys: typeof hotkeys;
+  private readonly _hotkeys: typeof hotkeys;
 
   constructor() {
-    this.hotkeys = hotkeys;
+    this._hotkeys = hotkeys;
   }
 
-  private setScope(scope: string): void {
-    this.hotkeys.setScope(scope);
+  private _setScope(scope: string): void {
+    this._hotkeys.setScope(scope);
   }
 
   addListener(
@@ -26,25 +26,25 @@ class HotkeyManager {
     listener: KeyHandler,
     scope: string = SCOPE.AFFINE_PAGE
   ): void {
-    this.hotkeys(hotkey, { scope }, listener);
+    this._hotkeys(hotkey, { scope }, listener);
   }
 
   removeListener(
     hotkey: string | Array<string>,
     scope: string = SCOPE.AFFINE_PAGE
   ): void {
-    this.hotkeys.unbind(
+    this._hotkeys.unbind(
       (Array.isArray(hotkey) ? hotkey : [hotkey]).join(','),
       scope
     );
   }
 
   disableHotkey(): void {
-    this.hotkeys.setScope(SCOPE.OTHER);
+    this._hotkeys.setScope(SCOPE.OTHER);
   }
 
   enableHotkey(): void {
-    this.setScope(SCOPE.AFFINE_PAGE);
+    this._setScope(SCOPE.AFFINE_PAGE);
   }
 
   /**

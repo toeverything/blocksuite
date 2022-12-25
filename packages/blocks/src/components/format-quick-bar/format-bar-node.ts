@@ -82,7 +82,7 @@ export class FormatQuickBar extends LitElement {
     }
   }
 
-  private onHover() {
+  private _onHover() {
     if (this.showParagraphPanel !== 'hidden') {
       clearTimeout(this.paragraphPanelTimer);
       return;
@@ -96,7 +96,7 @@ export class FormatQuickBar extends LitElement {
     }, this.paragraphPanelHoverDelay);
   }
 
-  private onHoverEnd() {
+  private _onHoverEnd() {
     if (this.showParagraphPanel !== 'hidden') {
       // Prepare to disappear
       this.paragraphPanelTimer = window.setTimeout(async () => {
@@ -107,7 +107,7 @@ export class FormatQuickBar extends LitElement {
     clearTimeout(this.paragraphPanelTimer);
   }
 
-  private paragraphPanelTemplate() {
+  private _paragraphPanelTemplate() {
     if (this.showParagraphPanel === 'hidden') {
       return html``;
     }
@@ -122,8 +122,8 @@ export class FormatQuickBar extends LitElement {
     return html`<div
       class="paragraph-panel"
       style="${styles}"
-      @mouseover=${this.onHover}
-      @mouseout=${this.onHoverEnd}
+      @mouseover=${this._onHover}
+      @mouseout=${this._onHoverEnd}
     >
       ${paragraphButtons.map(
         ({ flavour, type, name, icon }) => html`<format-bar-button
@@ -171,13 +171,13 @@ export class FormatQuickBar extends LitElement {
     const paragraphItems = html`<format-bar-button
       class="paragraph-button"
       width="52px"
-      @mouseover=${this.onHover}
-      @mouseout=${this.onHoverEnd}
+      @mouseover=${this._onHover}
+      @mouseout=${this._onHoverEnd}
     >
       ${paragraphIcon} ${ArrowDownIcon}
     </format-bar-button>`;
 
-    const paragraphPanel = this.paragraphPanelTemplate();
+    const paragraphPanel = this._paragraphPanelTemplate();
 
     const formatItems = formatButtons
       .filter(({ showWhen = () => true }) => showWhen(this.models))
