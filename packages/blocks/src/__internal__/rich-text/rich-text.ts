@@ -7,7 +7,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { BlockHost } from '../utils/index.js';
 import { createKeyboardBindings } from './keyboard.js';
 
-import style from './styles.css';
+import style from './styles.css?inline';
 import Syntax from '../../code-block/components/syntax-code-block.js';
 
 const Quill = Q as unknown as typeof QuillType;

@@ -1,8 +1,8 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import type { CodeBlockModel } from './code-model.js';
-import codeBlockStyle from './style.css';
-import codeTheme from 'highlight.js/styles/color-brewer.css';
+import codeBlockStyle from './style.css?inline';
+import codeTheme from 'highlight.js/styles/color-brewer.css?inline';
 import { toolTipStyle } from '../components/tooltip.js';
 import {
   BLOCK_ID_ATTR,

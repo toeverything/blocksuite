@@ -29,7 +29,7 @@ import {
   isControlledKeyboardEvent,
   removeHotkeys,
 } from './utils.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };

@@ -6,7 +6,7 @@ import { BLOCK_ID_ATTR, BlockHost } from '../__internal__/index.js';
 import type { DividerBlockModel } from './divider-model.js';
 
 import { BlockChildrenContainer } from '../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends LitElement {

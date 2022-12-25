@@ -12,7 +12,7 @@ import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { BlockChildrenContainer } from '../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 function selectList(model: ListBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;

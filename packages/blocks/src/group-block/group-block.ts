@@ -7,7 +7,7 @@ import {
   BLOCK_ID_ATTR,
   type BlockHost,
 } from '../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 @customElement('affine-group')
 export class GroupBlockComponent extends LitElement {

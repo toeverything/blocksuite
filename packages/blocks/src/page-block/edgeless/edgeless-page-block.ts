@@ -32,7 +32,7 @@ import {
   tryUpdateGroupSize,
   updateSelectedTextType,
 } from '../utils/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;

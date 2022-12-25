@@ -5,7 +5,7 @@ import { BLOCK_ID_ATTR, type BlockHost } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 import { BlockChildrenContainer } from '../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 const getPlaceholder = (model: ParagraphBlockModel) => {
   const { type } = model;

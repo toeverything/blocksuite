@@ -15,7 +15,7 @@ import {
 } from './utils/rectangle-helpers.js';
 import { getShapeStyle } from './utils/shape-style.js';
 import { getTrianglePath } from './utils/triangle-helpers.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 export const SHAPE_PADDING = 48;
 

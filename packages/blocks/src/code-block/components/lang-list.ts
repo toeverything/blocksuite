@@ -1,7 +1,7 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { createEvent } from '../../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 import { styleMap } from 'lit/directives/style-map.js';
 import { SearchIcon } from './icons.js';
 

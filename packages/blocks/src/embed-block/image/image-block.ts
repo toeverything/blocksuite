@@ -7,7 +7,7 @@ import {
   BlockChildrenContainer,
   assertExists,
 } from '../../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends LitElement {
