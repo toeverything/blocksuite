@@ -6,7 +6,7 @@ import { BlockSchema } from '@blocksuite/blocks/models';
 // import "@blocksuite/blocks/style";
 import { DebugMenu, EditorContainer } from '@blocksuite/editor';
 import { Page, Workspace, Utils } from '@blocksuite/store';
-import { getOptions, initParam, isBase64, isE2E } from './utils';
+import { getOptions, initParam, isBase64, isE2E } from './utils.js';
 import './style.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
@@ -46,7 +46,7 @@ async function main() {
 
   subscribePage(workspace);
 
-  const initFunctions = (await import('./data')) as Record<
+  const initFunctions = (await import('./data/index.js')) as Record<
     string,
     (workspace: Workspace) => void
   >;
