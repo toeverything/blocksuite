@@ -1,8 +1,9 @@
 import { useBlockSuiteStore } from '@blocksuite/react';
 import { useEffect } from 'react';
+import { NoSsr } from '../components/NoSsr';
 
 export default function Home() {
-  const workspace = useBlockSuiteStore(store => store.workspace);
+  const workspace = useBlockSuiteStore(store => store.currentWorkspace);
   useEffect(() => {
     console.log('workspace', workspace);
     // @ts-ignore
@@ -11,5 +12,9 @@ export default function Home() {
       window.workspace = workspace;
     }
   }, [workspace]);
-  return <div>your client id is {workspace.doc.clientID}</div>;
+  return (
+    <div>
+      your client id is <NoSsr>{workspace.doc.clientID}</NoSsr>
+    </div>
+  );
 }
