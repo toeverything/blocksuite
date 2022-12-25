@@ -3,7 +3,7 @@ import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
 /** Uncomment this line if you are using BlockSuite in your own project */
 // import "@blocksuite/blocks/style";
-import { BlockSchema, createDebugMenu, createEditor } from '@blocksuite/editor';
+import { BlockSchema, DebugMenu, EditorContainer } from '@blocksuite/editor';
 import { Page, Workspace, Utils } from '@blocksuite/store';
 import { getOptions, initParam, isBase64, isE2E } from './utils';
 import './style.css';
@@ -15,10 +15,16 @@ const options = getOptions();
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
     const page = workspace.getPage(pageId) as Page;
-    const editor = createEditor(page);
-    const debugMenu = createDebugMenu(workspace, editor);
+
+    const editor = new EditorContainer();
+    editor.page = page;
     document.body.appendChild(editor);
+
+    const debugMenu = new DebugMenu();
+    debugMenu.workspace = workspace;
+    debugMenu.editor = editor;
     document.body.appendChild(debugMenu);
+
     initButton.disabled = true;
 
     // @ts-ignore
