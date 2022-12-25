@@ -7,7 +7,7 @@ import { ListBlockModel } from './list-block/list-model.js';
 import { PageBlockModel } from './page-block/page-model.js';
 import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ShapeBlockModel } from './shape-block/shape-model.js';
-import { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 export {
   CodeBlockModel,
