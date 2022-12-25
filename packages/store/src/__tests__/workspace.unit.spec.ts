@@ -114,7 +114,7 @@ describe.concurrent('addBlock', () => {
     });
   });
 
-  it('can add multi models.js', async () => {
+  it('can add multi models', async () => {
     const page = await createTestPage();
     page.addBlock({ flavour: 'affine:page' });
     page.addBlock({ flavour: 'affine:paragraph' });
