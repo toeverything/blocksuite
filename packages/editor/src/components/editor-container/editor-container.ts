@@ -1,4 +1,4 @@
-import { html, LitElement } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
@@ -6,9 +6,10 @@ import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../../index.js';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
+import { NonShadowComponent } from '@blocksuite/blocks/std';
 
 @customElement('editor-container')
-export class EditorContainer extends LitElement {
+export class EditorContainer extends NonShadowComponent {
   @property()
   page!: Page;
 

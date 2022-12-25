@@ -1,4 +1,4 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { html, css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { Quill as QuillType } from 'quill';
 import Q from 'quill';
@@ -9,6 +9,7 @@ import { createKeyboardBindings } from './keyboard.js';
 
 import style from './styles.css?inline';
 import Syntax from '../../code-block/components/syntax-code-block.js';
+import { NonShadowLitElement } from '../utils/lit.js';
 
 const Quill = Q as unknown as typeof QuillType;
 
@@ -34,7 +35,7 @@ Syntax.register();
 Quill.register('modules/syntax', Syntax, true);
 
 @customElement('rich-text')
-export class RichText extends LitElement {
+export class RichText extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -61,11 +62,6 @@ export class RichText extends LitElement {
     hasChanged: () => true,
   })
   modules: Record<string, unknown> = {};
-
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
 
   firstUpdated() {
     const { host, model, placeholder, _textContainer } = this;

@@ -1,10 +1,11 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from './embed-model.js';
 import style from './style.css?inline';
+import { NonShadowLitElement } from '../__internal__/index.js';
 
 @customElement('affine-embed')
-export class EmbedBlockComponent extends LitElement {
+export class EmbedBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -16,10 +17,6 @@ export class EmbedBlockComponent extends LitElement {
 
   @query('input')
   _input!: HTMLInputElement;
-
-  createRenderRoot() {
-    return this;
-  }
 
   @state()
   _caption!: string;

@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { LitElement, html, unsafeCSS, css } from 'lit';
+import { html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
@@ -33,6 +33,7 @@ import {
   updateSelectedTextType,
 } from '../utils/index.js';
 import style from './style.css?inline';
+import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -48,7 +49,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends LitElement
+  extends NonShadowLitElement
   implements EdgelessContainer, BlockHost
 {
   static styles = css`
@@ -180,11 +181,6 @@ export class EdgelessPageBlockComponent
         resetNativeSelection(null);
       }
     });
-  }
-
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
   }
 
   update(changedProperties: Map<string, unknown>) {
