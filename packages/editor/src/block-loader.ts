@@ -1,14 +1,14 @@
 // Use manual per-module import/export to support vitest environment on Node.js
-import { PageBlockModel } from '@blocksuite/blocks';
-import { ParagraphBlockModel } from '@blocksuite/blocks';
-import { ListBlockModel } from '@blocksuite/blocks';
-import { GroupBlockModel } from '@blocksuite/blocks';
-import { CodeBlockModel } from '@blocksuite/blocks';
-import { DividerBlockModel } from '@blocksuite/blocks';
-import { EmbedBlockModel } from '@blocksuite/blocks';
-import { ShapeBlockModel } from '@blocksuite/blocks';
-
-export type { ParagraphBlockProps as TextBlockProps } from '@blocksuite/blocks';
+import {
+  PageBlockModel,
+  ParagraphBlockModel,
+  ListBlockModel,
+  GroupBlockModel,
+  CodeBlockModel,
+  DividerBlockModel,
+  EmbedBlockModel,
+  ShapeBlockModel,
+} from '@blocksuite/blocks/models';
 
 // TODO support dynamic register
 export const BlockSchema = {
