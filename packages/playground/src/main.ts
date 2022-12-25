@@ -1,7 +1,7 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
-import BlockSchema from '@blocksuite/blocks/models';
+import { BlockSchema } from '@blocksuite/blocks/models';
 /** Uncomment this line if you are using BlockSuite in your own project */
 // import "@blocksuite/blocks/style";
 import { DebugMenu, EditorContainer } from '@blocksuite/editor';

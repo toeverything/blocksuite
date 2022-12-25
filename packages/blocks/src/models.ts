@@ -30,5 +30,3 @@ export const BlockSchema = {
   'affine:embed': EmbedBlockModel,
   'affine:shape': ShapeBlockModel,
 };
-
-export default BlockSchema;
