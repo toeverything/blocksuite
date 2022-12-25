@@ -1,11 +1,15 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { BLOCK_ID_ATTR, type BlockHost } from '../__internal__/index.js';
+import {
+  BLOCK_ID_ATTR,
+  type BlockHost,
+  NonShadowLitElement,
+} from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 import { BlockChildrenContainer } from '../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 const getPlaceholder = (model: ParagraphBlockModel) => {
   const { type } = model;
@@ -28,7 +32,7 @@ const getPlaceholder = (model: ParagraphBlockModel) => {
 };
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends LitElement {
+export class ParagraphBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -41,11 +45,6 @@ export class ParagraphBlockComponent extends LitElement {
 
   @property()
   host!: BlockHost;
-
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
 
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());

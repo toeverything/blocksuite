@@ -1,20 +1,21 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, unsafeCSS } from 'lit';
 import type { CodeBlockModel } from './code-model.js';
-import codeBlockStyle from './style.css';
-import codeTheme from 'highlight.js/styles/color-brewer.css';
+import codeBlockStyle from './style.css?inline';
+import codeTheme from 'highlight.js/styles/color-brewer.css?inline';
 import { toolTipStyle } from '../components/tooltip.js';
 import {
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
   BlockHost,
+  NonShadowLitElement,
 } from '../__internal__/index.js';
 // @ts-ignore
 import highlight from 'highlight.js';
 import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends LitElement {
+export class CodeBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(codeTheme)}
     ${unsafeCSS(codeBlockStyle)}
@@ -49,11 +50,6 @@ export class CodeBlockComponent extends LitElement {
 
   @property()
   delay = 150;
-
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
 
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());

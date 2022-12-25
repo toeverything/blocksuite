@@ -1,4 +1,4 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from '../index.js';
 import {
@@ -6,11 +6,12 @@ import {
   type BlockHost,
   BlockChildrenContainer,
   assertExists,
+  NonShadowLitElement,
 } from '../../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends LitElement {
+export class ImageBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -25,10 +26,6 @@ export class ImageBlockComponent extends LitElement {
 
   @state()
   _source!: string;
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
 
   // This is the initial width before event resize is applied
 

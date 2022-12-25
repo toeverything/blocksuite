@@ -1,13 +1,13 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
-import { createEvent } from '../../__internal__/index.js';
-import style from './style.css';
+import { css, html, unsafeCSS } from 'lit';
+import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
+import style from './style.css?inline';
 import { styleMap } from 'lit/directives/style-map.js';
 import { SearchIcon } from './icons.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
-export class LangList extends LitElement {
+export class LangList extends NonShadowLitElement {
   static get styles() {
     return css`
       ${unsafeCSS(style)}
@@ -229,10 +229,6 @@ export class LangList extends LitElement {
     'xquery',
     'zephir',
   ];
-
-  createRenderRoot() {
-    return this;
-  }
 
   protected updated() {
     if (this.showLangList !== 'hidden') {

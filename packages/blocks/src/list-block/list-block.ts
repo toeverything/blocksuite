@@ -1,18 +1,19 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
   BlockHost,
   getBlockElementByModel,
   getDefaultPageBlock,
+  NonShadowLitElement,
 } from '../__internal__/index.js';
 
 import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { BlockChildrenContainer } from '../__internal__/index.js';
-import style from './style.css';
+import style from './style.css?inline';
 
 function selectList(model: ListBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;
@@ -27,7 +28,7 @@ function selectList(model: ListBlockModel) {
 }
 
 @customElement('affine-list')
-export class ListBlockComponent extends LitElement {
+export class ListBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -41,11 +42,6 @@ export class ListBlockComponent extends LitElement {
 
   @property()
   host!: BlockHost;
-
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
 
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
