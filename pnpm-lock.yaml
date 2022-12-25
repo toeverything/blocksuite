@@ -54,7 +54,7 @@ importers:
       '@tldraw/intersect': ^1.8.0
       highlight.js: ^11.7.0
       hotkeys-js: ^3.10.1
-      lit: ^2.5.0
+      lit: ^2.4.1
       perfect-freehand: ^1.2.0
       quill: ^1.3.7
       quill-cursors: ^4.0.0
@@ -75,7 +75,7 @@ importers:
       '@types/marked': ^4.0.8
       '@types/quill': ^1.3.7
       '@types/turndown': ^5.0.1
-      lit: ^2.5.0
+      lit: ^2.4.1
       marked: ^4.2.5
       turndown: ^7.1.1
     dependencies:
@@ -115,7 +115,7 @@ importers:
       idb-keyval: ^6.2.0
       ky: ^0.33.0
       lib0: ^0.2.58
-      lit: ^2.5.0
+      lit: ^2.4.1
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
       yjs: ^13.5.43
@@ -837,9 +837,6 @@ packages:
   /@lit-labs/react/1.1.1:
     resolution: {integrity: sha512-9TC+/ZWb6BJlWCyUr14FKFlaGnyKpeEDorufXozQgke/VoVrslUQNaL7nBmrAWdNrmzx5jWgi8lFmWwrxMjnlA==}
     dev: false
-
-  /@lit/reactive-element/1.4.1:
-    resolution: {integrity: sha512-qDv4851VFSaBWzpS02cXHclo40jsbAjRXnebNXpm0uVg32kCneZPo9RYVQtrTNICtZ+1wAYHu1ZtxWSWMbKrBw==}
 
   /@lit/reactive-element/1.5.0:
     resolution: {integrity: sha512-fQh9FDK0LPTwDk+0HhSZEtb8K0LTN1wXerwpGrWA+a8tWulYRDLI4vQDWp4GOIsewn0572KYV/oZ3+492D7osA==}
@@ -2680,13 +2677,8 @@ packages:
   /lit-element/3.2.2:
     resolution: {integrity: sha512-6ZgxBR9KNroqKb6+htkyBwD90XGRiqKDHVrW/Eh0EZ+l+iC+u+v+w3/BA5NGi4nizAVHGYvQBHUDuSmLjPp7NQ==}
     dependencies:
-      '@lit/reactive-element': 1.4.1
-      lit-html: 2.3.1
-
-  /lit-html/2.3.1:
-    resolution: {integrity: sha512-FyKH6LTW6aBdkfNhNSHyZTnLgJSTe5hMk7HFtc/+DcN1w74C215q8B+Cfxc2OuIEpBNcEKxgF64qL8as30FDHA==}
-    dependencies:
-      '@types/trusted-types': 2.0.2
+      '@lit/reactive-element': 1.5.0
+      lit-html: 2.5.0
 
   /lit-html/2.5.0:
     resolution: {integrity: sha512-bLHosg1XL3JRUcKdSVI0sLCs0y1wWrj2sqqAN3cZ7bDDPNgmDHH29RV48x6Wz3ZmkxIupaE+z7uXSZ/pXWAO1g==}
