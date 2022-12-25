@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
@@ -12,6 +12,7 @@ import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { BlockChildrenContainer } from '../__internal__/index.js';
+import style from './style.css';
 
 function selectList(model: ListBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;
@@ -27,6 +28,10 @@ function selectList(model: ListBlockModel) {
 
 @customElement('affine-list')
 export class ListBlockComponent extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @property({
     hasChanged() {
       return true;

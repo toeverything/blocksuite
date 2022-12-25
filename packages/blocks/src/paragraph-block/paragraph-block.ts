@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
-import { LitElement, html } from 'lit';
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { BLOCK_ID_ATTR, type BlockHost } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 import { BlockChildrenContainer } from '../__internal__/index.js';
+import style from './style.css';
 
 const getPlaceholder = (model: ParagraphBlockModel) => {
   const { type } = model;
@@ -28,6 +29,9 @@ const getPlaceholder = (model: ParagraphBlockModel) => {
 
 @customElement('affine-paragraph')
 export class ParagraphBlockComponent extends LitElement {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
   @property({
     hasChanged() {
       return true;

@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { LitElement, html } from 'lit';
+import { LitElement, html, unsafeCSS, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
@@ -32,6 +32,7 @@ import {
   tryUpdateGroupSize,
   updateSelectedTextType,
 } from '../utils/index.js';
+import style from './style.css';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -50,6 +51,10 @@ export class EdgelessPageBlockComponent
   extends LitElement
   implements EdgelessContainer, BlockHost
 {
+  static styles = css`
+    ${unsafeCSS(style)}
+  `;
+
   @property()
   page!: Page;
 
