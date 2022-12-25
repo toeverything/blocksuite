@@ -26,6 +26,7 @@ export class NonShadowLitElement extends LitElement {
   }
 
   createRenderRoot() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (this.constructor as any).disableShadowRoot
       ? this
       : super.createRenderRoot();
