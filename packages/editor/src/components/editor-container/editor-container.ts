@@ -6,10 +6,10 @@ import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../../index.js';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
-import { NonShadowComponent } from '@blocksuite/blocks/std';
+import { NonShadowLitElement } from '@blocksuite/blocks';
 
 @customElement('editor-container')
-export class EditorContainer extends NonShadowComponent {
+export class EditorContainer extends NonShadowLitElement {
   @property()
   page!: Page;
 
