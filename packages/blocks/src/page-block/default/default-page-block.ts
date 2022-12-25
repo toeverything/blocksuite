@@ -176,7 +176,7 @@ export class DefaultPageBlockComponent
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
-        space: this.page,
+        page: this.page,
         mouseRoot: this.mouseRoot,
         signals: this.signals,
         container: this,

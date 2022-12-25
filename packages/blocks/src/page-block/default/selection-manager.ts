@@ -13,7 +13,6 @@ import {
   noop,
   resetNativeSelection,
   SelectionEvent,
-  getModelByElement,
   getBlockElementByModel,
   getAllBlocks,
   getDefaultPageBlock,
@@ -29,6 +28,7 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import { getBlockEditingStateByPosition } from './utils.js';
 import { Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
+import { EmbedResizeManager } from './embed-resize-manager.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -76,7 +76,7 @@ function createSelectionRect(
 
 type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'focus';
 
-class PageSelectionState {
+export class PageSelectionState {
   type: PageSelectionType;
   selectEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: Element[] = [];
@@ -85,9 +85,18 @@ class PageSelectionState {
   private _richTextCache = new Map<RichText, DOMRect>();
   private _blockCache = new Map<Element, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
+  private _activeComponent: HTMLElement | null = null;
 
   constructor(type: PageSelectionType) {
     this.type = type;
+  }
+
+  get activeComponent() {
+    return this._activeComponent;
+  }
+
+  set activeComponent(component: HTMLElement | null) {
+    this._activeComponent = component;
   }
 
   get startRange() {
@@ -139,30 +148,23 @@ export class DefaultSelectionManager {
   private _container: DefaultPageBlockComponent;
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
-  private _originPosition: IPoint = { x: 0, y: 0 };
-  private _dropContainer: HTMLElement | null = null;
-  private _dropContainerSize: { w: number; h: number; left: number } = {
-    w: 0,
-    h: 0,
-    left: 0,
-  };
-  private _activeComponent: HTMLElement | null = null;
-  private _dragMoveTarget = 'right';
+  private _embedResizeManager: EmbedResizeManager;
   constructor({
-    space,
+    page,
     mouseRoot,
     signals,
     container,
   }: {
-    space: Page;
+    page: Page;
     mouseRoot: HTMLElement;
     signals: DefaultPageSignals;
     container: DefaultPageBlockComponent;
   }) {
-    this.page = space;
+    this.page = page;
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
+    this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._mouseRoot,
       this._onContainerDragStart,
@@ -174,7 +176,6 @@ export class DefaultSelectionManager {
       this._onContainerMouseOut,
       this._onContainerContextMenu
     );
-    // this._initListenNativeSelection();
   }
 
   private get _blocks(): BaseBlockModel[] {
@@ -246,30 +247,14 @@ export class DefaultSelectionManager {
     this.state.resetStartRange(e);
     if (isInput(e.raw)) return;
     if (isEmbed(e)) {
-      this._onEmbedDragStart(e);
+      this.state.type = 'embed';
+      this._embedResizeManager.onStart(e);
       return;
     }
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
     } else {
       this._onNativeSelectionDragStart(e);
-    }
-  };
-
-  private _onEmbedDragStart = (e: SelectionEvent) => {
-    this.state.type = 'embed';
-    this._originPosition.x = e.raw.pageX;
-    this._originPosition.y = e.raw.pageY;
-    this._dropContainer = (e.raw.target as HTMLElement).closest('.resizes');
-    this._dropContainerSize.w = this._dropContainer?.getBoundingClientRect()
-      .width as number;
-    this._dropContainerSize.h = this._dropContainer?.getBoundingClientRect()
-      .height as number;
-    this._dropContainerSize.left = this._dropContainer?.offsetLeft as number;
-    if ((e.raw.target as HTMLElement).className.includes('right')) {
-      this._dragMoveTarget = 'right';
-    } else {
-      this._dragMoveTarget = 'left';
     }
   };
 
@@ -286,50 +271,9 @@ export class DefaultSelectionManager {
       return this._onBlockSelectionDragMove(e);
     }
     if (this.state.type === 'embed') {
-      return this._onEmbedDragMove(e);
+      return this._embedResizeManager.onMove(e);
     }
   };
-
-  private _onEmbedDragMove(e: SelectionEvent) {
-    let width = 0;
-    let height = 0;
-    let left = 0;
-    if (this._dragMoveTarget === 'right') {
-      width =
-        this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x);
-    } else {
-      width =
-        this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
-    }
-    if (width <= 700) {
-      if (this._dragMoveTarget === 'right') {
-        left =
-          this._dropContainerSize.left -
-          (e.raw.pageX - this._originPosition.x) / 2;
-      } else {
-        left =
-          this._dropContainerSize.left +
-          (e.raw.pageX - this._originPosition.x) / 2;
-      }
-
-      height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
-      if (this._dropContainer) {
-        this._signals.updateEmbedRects.emit([
-          {
-            width: width,
-            height: height,
-            left: left,
-            top: this._dropContainer.getBoundingClientRect().top,
-          },
-        ]);
-        const activeImg = this._activeComponent?.querySelector('img');
-        if (activeImg) {
-          activeImg.style.width = width + 'px';
-          activeImg.style.height = height + 'px';
-        }
-      }
-    }
-  }
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
     if (this.state.type === 'native') {
@@ -337,22 +281,13 @@ export class DefaultSelectionManager {
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     } else if (this.state.type === 'embed') {
-      this._onEmbedDragEnd();
+      this._embedResizeManager.onEnd();
     }
     if (this._container.readonly) {
       return;
     }
     this._showFormatQuickBar(e);
   };
-
-  private _onEmbedDragEnd() {
-    assertExists(this._activeComponent);
-    const dragModel = getModelByElement(this._activeComponent);
-    dragModel.page.captureSync();
-    assertExists(this._dropContainer);
-    const { width, height } = this._dropContainer.getBoundingClientRect();
-    dragModel.page.updateBlock(dragModel, { width: width, height: height });
-  }
 
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
@@ -427,15 +362,17 @@ export class DefaultSelectionManager {
       window.getSelection()?.removeAllRanges();
 
       assertExists(clickBlockInfo?.model);
-      this._activeComponent = getBlockElementByModel(clickBlockInfo?.model);
+      this.state.activeComponent = getBlockElementByModel(
+        clickBlockInfo?.model
+      );
 
-      assertExists(this._activeComponent);
+      assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
       } else {
         this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       }
-      this.state.selectedBlocks.push(this._activeComponent);
+      this.state.selectedBlocks.push(this.state.activeComponent);
       return;
     }
     if (e.raw.target instanceof HTMLInputElement) return;
