@@ -22,10 +22,9 @@ export class PasteManager {
 
   constructor(editor: EditorContainer) {
     this._editor = editor;
-    this.handlePaste = this.handlePaste.bind(this);
   }
 
-  public async handlePaste(e: ClipboardEvent) {
+  public handlePaste = async (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
     if (clipboardData) {
       const isPlainText = PasteManager._isPlainText(clipboardData);
@@ -53,7 +52,7 @@ export class PasteManager {
         this.insertBlocks(blocks);
       }
     }
-  }
+  };
 
   /* FIXME
     private get _selection() {

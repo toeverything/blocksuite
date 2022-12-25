@@ -6,7 +6,7 @@ import {
   SelectionUtils,
 } from '@blocksuite/blocks';
 import type { EditorContainer } from '../../components/index.js';
-import { ClipItem } from './clip-item.js';
+import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
 
 export class CopyCutManager {
@@ -62,7 +62,7 @@ export class CopyCutManager {
   }
 
   private _getClipItems() {
-    const clips: ClipItem[] = [];
+    const clips: ClipboardItem[] = [];
     const selectionInfo = SelectionUtils.getSelectInfo(this._editor.page);
     const selectedBlocks = selectionInfo.selectedBlocks;
 
@@ -78,11 +78,13 @@ export class CopyCutManager {
     return clips;
   }
 
-  private _getCustomClip(selectedBlocks: SelectedBlock[]): ClipItem | null {
+  private _getCustomClip(
+    selectedBlocks: SelectedBlock[]
+  ): ClipboardItem | null {
     const clipInfos = selectedBlocks.map(selectedBlock =>
       this._getClipInfoBySelectionInfo(selectedBlock)
     );
-    return new ClipItem(
+    return new ClipboardItem(
       CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
       JSON.stringify({
         data: clipInfos,
@@ -90,14 +92,14 @@ export class CopyCutManager {
     );
   }
 
-  private _getHtmlClip(selectedBlocks: SelectedBlock[]): ClipItem | null {
+  private _getHtmlClip(selectedBlocks: SelectedBlock[]): ClipboardItem | null {
     const htmlText = this._editor.contentParser.block2Html(selectedBlocks);
-    return new ClipItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
+    return new ClipboardItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
   }
 
-  private _getTextClip(selectedBlocks: SelectedBlock[]): ClipItem | null {
+  private _getTextClip(selectedBlocks: SelectedBlock[]): ClipboardItem | null {
     const text = this._editor.contentParser.block2Text(selectedBlocks);
-    return new ClipItem(CLIPBOARD_MIMETYPE.TEXT, text);
+    return new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, text);
   }
 
   private _getClipInfoBySelectionInfo(
@@ -163,7 +165,7 @@ export class CopyCutManager {
     return result;
   }
 
-  private _copyToClipboard(e: ClipboardEvent, clipItems: ClipItem[]) {
+  private _copyToClipboard(e: ClipboardEvent, clipItems: ClipboardItem[]) {
     const clipboardData = e.clipboardData;
     if (clipboardData) {
       try {
@@ -185,7 +187,7 @@ export class CopyCutManager {
 
   // TODO: Optimization
   // TODO: is not compatible with safari
-  private _copyToClipboardFromPc(clips: ClipItem[]): boolean {
+  private _copyToClipboardFromPc(clips: ClipboardItem[]): boolean {
     const curRange = getCurrentRange();
 
     let success = false;
