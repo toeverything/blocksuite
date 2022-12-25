@@ -97,7 +97,7 @@ function mergeTextOfBlocks(
   });
 }
 
-export function updateSelectedTextType(
+export async function updateSelectedTextType(
   flavour: string,
   type: string,
   page: Page
@@ -109,14 +109,29 @@ export function updateSelectedTextType(
     mergeTextOfBlocks(page, modelsInRange, { flavour: 'affine:code' });
     return;
   }
+  const selectedBlocks = saveBlockSelection();
+  let lastNewId: string | null = null;
   modelsInRange.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {
-      transformBlock(page, model, flavour, type);
+      const oldId = model.id;
+      const newId = transformBlock(page, model, flavour, type);
+
+      // Replace selected block id
+      const blocks = selectedBlocks.filter(block => block.id === oldId);
+      // Because selectedBlocks maybe contains same block when only select one block, so we need to replace all of them
+      blocks.forEach(block => {
+        block.id = newId;
+      });
+      lastNewId = newId;
     }
   });
+  if (lastNewId) {
+    await asyncFocusRichText(page, lastNewId);
+  }
+  restoreSelection(selectedBlocks);
 }
 
 export function transformBlock(
@@ -136,7 +151,7 @@ export function transformBlock(
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, parent, index);
-  asyncFocusRichText(page, id);
+  return id;
 }
 
 export function handleBackspace(page: Page, e: KeyboardEvent) {
@@ -333,6 +348,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   resetNativeSelection(null);
 }
 
+// TODO should show format bar after select all
 function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
   nearestCommonAncestor.addEventListener(
     'mousemove',

@@ -356,14 +356,13 @@ export class DefaultSelectionManager {
 
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
-      const { anchor, direction, selectedType } =
-        getNativeSelectionMouseDragInfo(e);
+      const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
 
-      showFormatQuickBar({ anchorEl: anchor, direction });
+      showFormatQuickBar({ direction });
     } else if (this.state.type === 'block') {
       // TODO handle block selection
       // const direction = getDragDirection(e);
@@ -456,7 +455,7 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ anchorEl: range, direction: 'center-bottom' });
+    showFormatQuickBar({ direction: 'center-bottom' });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {

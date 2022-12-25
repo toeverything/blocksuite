@@ -1,5 +1,6 @@
 import { expect, Page, test } from '@playwright/test';
 import {
+  convertToBulletedListByClick,
   dragBetweenIndices,
   enterPlaygroundRoom,
   initEmptyParagraphState,
@@ -388,14 +389,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     groupId
   );
 
-  // TODO FIXME: The paragraph transform should not lost selection
-  // Remove next line after fix
-  await dragBetweenIndices(page, [1, 0], [1, 3]);
-  await paragraphBtn.hover();
-  // End of workaround
-
   const textBtn = page.locator(`[data-testid=text]`);
   await textBtn.click();
+
   await assertStoreMatchJSX(
     page,
     `
@@ -417,9 +413,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:group>`,
     groupId
   );
-
-  // TODO FIXME: The paragraph button should prevent selection after click
-  // await assertSelection(page, 1, 0, 3);
+  // The paragraph button should prevent selection after click
+  await assertSelection(page, 1, 0, 3);
 });
 
 test('should format quick bar be able to copy', async ({ page }) => {
@@ -510,8 +505,8 @@ test('should format quick bar follow scroll', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
-  for (let i = 0; i < 30; i++) {
-    await page.keyboard.press('Enter');
+  for (let i = 0; i < 20; i++) {
+    await pressEnter(page);
   }
   page.keyboard.type('bottom');
 
@@ -530,7 +525,13 @@ test('should format quick bar follow scroll', async ({ page }) => {
   const boldBtn = formatQuickBar.locator(`[data-testid=bold]`);
   await assertLocatorVisible(page, formatQuickBar);
   await boldBtn.click();
-  await page.mouse.move(0, 0);
+  await scrollToBottom(page);
+  await assertLocatorVisible(page, formatQuickBar, false);
+
+  // should format bar follow scroll after transform text type
+  await scrollToTop(page);
+  await assertLocatorVisible(page, formatQuickBar);
+  await convertToBulletedListByClick(page);
   await scrollToBottom(page);
   await assertLocatorVisible(page, formatQuickBar, false);
 });
