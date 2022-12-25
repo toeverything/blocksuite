@@ -21,7 +21,7 @@ export {
 };
 
 // TODO support dynamic register
-export const BlockSchema: Record<string, typeof BaseBlockModel> = {
+export const BlockSchema = {
   'affine:paragraph': ParagraphBlockModel,
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
