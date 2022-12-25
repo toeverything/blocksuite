@@ -35,7 +35,17 @@ export enum Generator {
   AutoIncrement = 'autoIncrement',
 }
 
-export interface StoreOptions {
+/**
+ * @example
+ *  const workspace = new Workspace({
+ *    isSSR: typeof window === 'undefined'
+ *  })
+ */
+export interface SSROptions {
+  isSSR?: boolean;
+}
+
+export interface StoreOptions extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
   awareness?: Awareness;

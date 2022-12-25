@@ -9,7 +9,8 @@ import { getOffsetPolygon } from './polygon-utils.js';
 
 import PF from 'perfect-freehand';
 import type { getStroke as getStrokeType } from 'perfect-freehand';
-import { getStrokePoints } from 'perfect-freehand';
+import * as DPF from 'perfect-freehand';
+const getStrokePoints = DPF.getStrokePoints;
 const getStroke = PF as unknown as typeof getStrokeType;
 
 export function getTrianglePoints(size: number[], offset = 0, rotation = 0) {
