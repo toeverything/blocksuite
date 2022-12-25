@@ -1,3 +1,15 @@
+// import all css files
+import './code-block/style.css';
+import './divider-block/style.css';
+import './embed-block/style.css';
+import './group-block/style.css';
+import './list-block/style.css';
+import './page-block/default/style.css';
+import './page-block/edgeless/style.css';
+import './paragraph-block/style.css';
+import './shape-block/style.css';
+import 'highlight.js/styles/color-brewer.css';
+
 // manual import to avoid being tree-shaked
 import './page-block';
 import './counter-block';

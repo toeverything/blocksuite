@@ -1,13 +1,9 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from './embed-model.js';
-import style from './style.css';
 
 @customElement('affine-embed')
 export class EmbedBlockComponent extends LitElement {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
   @property()
   model!: EmbedBlockModel;
 

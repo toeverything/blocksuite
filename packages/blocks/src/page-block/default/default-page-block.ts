@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS, PropertyValueMap } from 'lit';
+import { LitElement, html, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
@@ -29,7 +29,6 @@ import {
   isControlledKeyboardEvent,
   removeHotkeys,
 } from './utils.js';
-import style from './style.css';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -59,10 +58,6 @@ function focusTextEnd(input: HTMLInputElement) {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent extends LitElement implements BlockHost {
-  static styles = css`
-    ${unsafeCSS(style)}
-  `;
-
   @property()
   page!: Page;
 

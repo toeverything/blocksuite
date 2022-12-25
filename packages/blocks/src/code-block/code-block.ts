@@ -1,8 +1,6 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement } from 'lit';
 import type { CodeBlockModel } from './code-model.js';
-import codeBlockStyle from './style.css';
-import codeTheme from 'highlight.js/styles/color-brewer.css';
 import { toolTipStyle } from '../components/tooltip.js';
 import {
   BLOCK_ID_ATTR,
@@ -16,9 +14,7 @@ import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
 @customElement('affine-code')
 export class CodeBlockComponent extends LitElement {
   static styles = css`
-    ${unsafeCSS(codeTheme)}
-    ${unsafeCSS(codeBlockStyle)}
-      ${toolTipStyle}
+    ${toolTipStyle}
   `;
 
   @property({

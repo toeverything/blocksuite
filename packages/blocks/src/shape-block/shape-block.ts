@@ -1,5 +1,5 @@
 import { customElement, property } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement } from 'lit';
 import type { ShapeBlockModel } from './shape-model.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager.js';
 import { BLOCK_ID_ATTR } from '../__internal__/index.js';
@@ -15,7 +15,6 @@ import {
 } from './utils/rectangle-helpers.js';
 import { getShapeStyle } from './utils/shape-style.js';
 import { getTrianglePath } from './utils/triangle-helpers.js';
-import style from './style.css';
 
 export const SHAPE_PADDING = 48;
 
@@ -24,8 +23,6 @@ export const ShapeBlockTag = 'affine-shape';
 @customElement(ShapeBlockTag)
 export class ShapeBlockComponent extends LitElement {
   static styles = css`
-    ${unsafeCSS(style)}
-
     /* to make it at the center of the container */
     .affine-shape-block-g {
       transform: translate(${SHAPE_PADDING / 2}px, ${SHAPE_PADDING / 2}px);
