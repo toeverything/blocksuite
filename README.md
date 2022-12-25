@@ -34,9 +34,27 @@ To support a smooth rich-text editing experience, BlockSuite also provides a Ric
 
 As an example, in the BlockSuite based [AFFiNE Alpha](https://pathfinder.affine.pro/) editor, you may not feel that this editor is actually a composition of multiple RichText components (check out DevTools 👀). This demonstrates the flexibility and extensibility of BlockSuite.
 
-## Getting Started
+## Resources
 
-For now, the BlockSuite team is focusing on developing first-party blocks built for AFFiNE, its developer documentation is not yet complete. But the project structure in this repository should already demonstrate some key points about how it's supposed to be reused as a progressive framework:
+- 🚧 [Introduction](https://github.com/toeverything/blocksuite#introduction)
+- 🚧 Tutorial
+- 🚧 Examples
+  - [Latest Playground](https://block-suite.pages.dev/?init)
+  - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/)
+- 🚧 API Reference
+- 🚧 Troubleshooting
+- 🚧 [Releases](https://github.com/toeverything/blocksuite/releases)
+
+## Help & Community
+
+- [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
+- [Slack Channel](https://join.slack.com/t/blocksuitedev/shared_invite/zt-1h0zz3b8z-nFpWSu6a6~yId7PxiMcBHA)
+- [AFFiNE Community](https://community.affine.pro/c/open-development/)
+- [Twitter](https://twitter.com/BlockSuiteDev)
+
+## Current Status
+
+The BlockSuite team now focuses on developing first-party blocks built for AFFiNE. Its developer documentation is not yet complete. But the project structure in this repository should already demonstrate some critical points about how it’s supposed to be reused as a progressive framework:
 
 - The `packages/store` package is a data store built for general purpose state management.
 - The `packages/blocks` package holds the default BlockSuite editable blocks.
@@ -44,7 +62,7 @@ For now, the BlockSuite team is focusing on developing first-party blocks built 
 
 Read on to see how to play with BlockSuite!
 
-## Development
+## Local Development
 
 Setting up basic local environment:
 
