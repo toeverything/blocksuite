@@ -9,8 +9,8 @@ import {
   ShapeMouseMode,
   TDShapeType,
   updateSelectedTextType,
-} from '@blocksuite/blocks/std';
-import type { GroupBlockModel } from '@blocksuite/blocks';
+  type GroupBlockModel,
+} from '@blocksuite/blocks';
 import { Utils } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '../editor-container/editor-container.js';

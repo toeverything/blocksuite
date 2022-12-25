@@ -3,11 +3,7 @@ import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
 /** Uncomment this line if you are using BlockSuite in your own project */
 // import "@blocksuite/blocks/style";
-import {
-  loadBlockSchema,
-  createDebugMenu,
-  createEditor,
-} from '@blocksuite/editor';
+import { BlockSchema, createDebugMenu, createEditor } from '@blocksuite/editor';
 import { Page, Workspace, Utils } from '@blocksuite/store';
 import { getOptions, initParam, isBase64, isE2E } from './utils';
 import './style.css';
@@ -31,7 +27,6 @@ function subscribePage(workspace: Workspace) {
 }
 
 async function main() {
-  const BlockSchema = await loadBlockSchema();
   const workspace = new Workspace(options).register(BlockSchema);
   // @ts-ignore
   [window.workspace, window.blockSchema] = [workspace, BlockSchema];
