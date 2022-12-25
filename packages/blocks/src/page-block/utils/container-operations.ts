@@ -67,7 +67,7 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
     firstRichText.model.text?.join(lastRichText.model.text as Text);
   }
 
-  // delete models in between
+  // delete models.js in between
   for (let i = 1; i <= models.length - 1; i++) {
     page.deleteBlock(models[i]);
   }
