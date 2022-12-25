@@ -45,10 +45,11 @@ export class PasteManager {
         }
       }
 
-      const blocks = await this._clipboardEvent2Blocks(e);
-      if (blocks) {
+      const blocksPromise = this._clipboardEvent2Blocks(e);
+      if (blocksPromise instanceof Promise) {
         e.preventDefault();
         e.stopPropagation();
+        const blocks: OpenBlockInfo[] = await blocksPromise;
         this.insertBlocks(blocks);
       }
     }
@@ -63,7 +64,9 @@ export class PasteManager {
     }
     */
 
-  private async _clipboardEvent2Blocks(e: ClipboardEvent) {
+  private _clipboardEvent2Blocks(
+    e: ClipboardEvent
+  ): Promise<OpenBlockInfo[]> | void {
     const clipboardData = e.clipboardData;
     if (!clipboardData) {
       return;
