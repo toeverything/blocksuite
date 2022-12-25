@@ -24,7 +24,8 @@
   "exports": {
     "./dist/*": "./dist/*",
     ".": "./src/index.ts",
-    "./std": "./src/std.ts"
+    "./std": "./src/std.ts",
+    "./models": "./src/models.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -37,6 +38,10 @@
       "./std": {
         "types": "./dist/std.d.ts",
         "default": "./dist/std.js"
+      },
+      "./models": {
+        "types": "./dist/models.d.ts",
+        "default": "./dist/models.js"
       }
     }
   }

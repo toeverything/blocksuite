@@ -10,6 +10,7 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
         std: resolve(__dirname, 'src/std.ts'),
+        models: resolve(__dirname, 'src/models.ts'),
       },
       formats: ['es'],
     },
