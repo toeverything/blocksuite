@@ -18,3 +18,17 @@ export {
   ParagraphBlockModel,
   ShapeBlockModel,
 };
+
+// TODO support dynamic register
+export const BlockSchema = {
+  'affine:paragraph': ParagraphBlockModel,
+  'affine:page': PageBlockModel,
+  'affine:list': ListBlockModel,
+  'affine:group': GroupBlockModel,
+  'affine:code': CodeBlockModel,
+  'affine:divider': DividerBlockModel,
+  'affine:embed': EmbedBlockModel,
+  'affine:shape': ShapeBlockModel,
+} as const;
+
+export default BlockSchema;
