@@ -5,6 +5,7 @@ const nextConfig = {
     '@blocksuite/editor',
     '@blocksuite/blocks',
     '@blocksuite/store',
+    '@blocksuite/react',
   ],
   webpack: config => {
     config.resolve.extensionAlias = {

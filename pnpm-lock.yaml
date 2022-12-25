@@ -52,6 +52,7 @@ importers:
     specifiers:
       '@blocksuite/blocks': workspace:*
       '@blocksuite/editor': workspace:*
+      '@blocksuite/react': workspace:*
       '@blocksuite/store': workspace:*
       '@next/font': 13.1.1
       '@types/node': ^18.11.17
@@ -66,6 +67,7 @@ importers:
     dependencies:
       '@blocksuite/blocks': link:../../packages/blocks
       '@blocksuite/editor': link:../../packages/editor
+      '@blocksuite/react': link:../../packages/react
       '@blocksuite/store': link:../../packages/store
       '@next/font': 13.1.1
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y

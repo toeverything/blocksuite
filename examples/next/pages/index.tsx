@@ -1,14 +1,15 @@
-import { Workspace } from '@blocksuite/store';
-
-const workspace = new Workspace({
-  room: 'test-room',
-});
-
-if (typeof window !== 'undefined') {
-  // @ts-ignore
-  window.workspace = workspace;
-}
+import { useBlockSuiteStore } from '@blocksuite/react';
+import { useEffect } from 'react';
 
 export default function Home() {
-  return <div>hello, world!</div>;
+  const workspace = useBlockSuiteStore(store => store.workspace);
+  useEffect(() => {
+    console.log('workspace', workspace);
+    // @ts-ignore
+    if (!window.workspace) {
+      // @ts-ignore
+      window.workspace = workspace;
+    }
+  }, [workspace]);
+  return <div>your client id is {workspace.doc.clientID}</div>;
 }

@@ -12,6 +12,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/react": "workspace:*",
     "@next/font": "13.1.1",
     "next": "13.1.1",
     "react": "^18.2.0",
