@@ -83,11 +83,11 @@ export class Store {
   }
 
   addSpace(space: Space) {
-    this.spaces.set(space.id, space);
+    this.spaces.set(space.prefixedId, space);
   }
 
   removeSpace(space: Space) {
-    this.spaces.delete(space.id);
+    this.spaces.delete(space.prefixedId);
   }
 
   /**

@@ -87,13 +87,9 @@ export class Page extends Space {
     return this.workspace.blobs;
   }
 
-  get pageId() {
-    return this.id.replace('space:', '');
-  }
-
   /** key-value store of blocks */
   private get _yBlocks() {
-    return this.doc.getMap(this.id) as YBlocks;
+    return this.doc.getMap(this.prefixedId) as YBlocks;
   }
 
   get root() {

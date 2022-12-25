@@ -88,10 +88,6 @@ class WorkspaceMeta extends Space {
   }
 
   getPageMeta(id: string) {
-    if (id.startsWith('space:')) {
-      id = id.slice(6);
-    }
-
     return this.pageMetas.find(page => page.id === id);
   }
 
@@ -157,14 +153,14 @@ class WorkspaceMeta extends Space {
   private _handlePageEvent() {
     const { pageMetas, _prevPages } = this;
 
-    pageMetas.forEach(page => {
+    pageMetas.forEach(pageMeta => {
       // newly added space can't be found
       // unless explictly getMap after meta updated
-      this.doc.getMap('space:' + page.id);
+      this.doc.getMap('space:' + pageMeta.id);
 
-      if (!_prevPages.has(page.id)) {
+      if (!_prevPages.has(pageMeta.id)) {
         // Ensure following YEvent handler could be triggered in correct order.
-        setTimeout(() => this.pageAdded.emit(page.id));
+        setTimeout(() => this.pageAdded.emit(pageMeta.id));
       }
     });
 
@@ -276,25 +272,21 @@ export class Workspace {
   }
 
   private _handlePageEvent() {
-    this.signals.pageAdded.on(pageMeta => {
+    this.signals.pageAdded.on(pageId => {
       const page = new Page(
         this,
-        'space:' + pageMeta,
+        pageId,
         this.doc,
         this._store.awareness,
         this._store.idGenerator
       );
       this._store.addSpace(page);
       page.syncFromExistingDoc();
-      this._indexer.onCreatePage(pageMeta);
+      this._indexer.onCreatePage(pageId);
     });
 
     this.signals.pageRemoved.on(id => {
-      if (!id.startsWith('space:')) {
-        id = 'space:' + id;
-      }
-
-      const page = this._pages.get(id) as Page;
+      const page = this.getPage(id) as Page;
       page.dispose();
       this._store.removeSpace(page);
       // TODO remove page from indexer
@@ -315,18 +307,10 @@ export class Workspace {
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
   setPageMeta(pageId: string, props: Partial<PageMeta>) {
-    if (pageId.startsWith('space:')) {
-      pageId = pageId.slice(6);
-    }
-
     this.meta.setPage(pageId, props);
   }
 
   removePage(pageId: string) {
-    if (pageId.startsWith('space:')) {
-      pageId = pageId.slice(6);
-    }
-
     this.meta.removePage(pageId);
   }
 

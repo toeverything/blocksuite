@@ -9,6 +9,7 @@ export interface StackItem {
 }
 
 export class Space {
+  /** unprefixed id */
   readonly id: string;
   readonly doc: Y.Doc;
   readonly awareness!: AwarenessAdapter;
@@ -20,6 +21,10 @@ export class Space {
 
     const aware = awareness ?? new Awareness(this.doc);
     this.awareness = new AwarenessAdapter(this, aware);
+  }
+
+  get prefixedId() {
+    return `space:${this.id}`;
   }
 
   transact(fn: () => void) {
