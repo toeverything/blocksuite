@@ -1,7 +1,10 @@
 import { useBlockSuiteStore } from '@blocksuite/react';
 import dynamic from 'next/dynamic';
+import type { Page } from '@blocksuite/store';
 
-const Editor: any = dynamic(
+const Editor: React.ComponentType<{
+  page: Page;
+}> = dynamic(
   // @ts-ignore
   async () => (await import('@blocksuite/react/editor')).Editor,
   {
