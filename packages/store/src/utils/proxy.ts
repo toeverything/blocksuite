@@ -18,7 +18,7 @@ export interface EnhancedYMap<
 }
 
 export type ProxyConfig = {
-  allowSet?: boolean;
+  readonly?: boolean;
 };
 
 export function createYMapProxy<
@@ -31,10 +31,10 @@ export function createYMapProxy<
 >(
   yMap: EnhancedYMap<Data, Keys>,
   config: ProxyConfig = {
-    allowSet: false,
+    readonly: false,
   }
 ): any {
-  const { allowSet = false } = config;
+  const { readonly = false } = config;
   if (!(yMap instanceof YMap)) {
     throw new TypeError();
   }
@@ -45,7 +45,7 @@ export function createYMapProxy<
     },
     // set: (target, p, value, receiver) => {
     set: () => {
-      if (!allowSet) {
+      if (readonly) {
         throw new Error('Modify data is not allowed');
       } else {
         throw new Error('Not Implemented');
