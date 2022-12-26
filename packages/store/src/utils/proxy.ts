@@ -3,6 +3,7 @@ import { Map as YMap } from 'yjs';
 export interface EnhancedYMap<
   Data extends Record<string, unknown>,
   Keys extends keyof Data & string = keyof Data & string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > extends YMap<any> {
   clone(): EnhancedYMap<Data, Keys>;
 
@@ -33,6 +34,7 @@ export function createYMapProxy<
   config: ProxyConfig = {
     readonly: false,
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   const { readonly = false } = config;
   if (!(yMap instanceof YMap)) {
