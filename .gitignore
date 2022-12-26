@@ -13,6 +13,8 @@ dist/
 build
 tsconfig.tsbuildinfo
 tsconfig.*.tsbuildinfo
+.next
+next-env.d.ts
 
 # Cache
 .eslintcache
