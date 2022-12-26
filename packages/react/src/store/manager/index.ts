@@ -10,23 +10,24 @@ export const workspacePages = new WeakMap<Workspace, Page[]>();
 
 function bindWorkspaceWithPages(workspace: Workspace) {
   if (workspacePages.has(workspace)) {
-    console.error('should bind once!!!');
     return;
   }
+  workspacePages.set(workspace, []);
   workspace.signals.pageAdded.on(id => {
+    console.log('add', id);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const page = workspace.getPage(id)!;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (workspacePages.has(workspace)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const oldPages = workspacePages.get(workspace)!;
       workspacePages.set(workspace, [...oldPages, page]);
     } else {
-      workspacePages.set(workspace, [page]);
+      console.error('not possible');
     }
   });
   workspace.signals.pageRemoved.on(id => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (workspacePages.has(workspace)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const oldPages = workspacePages.get(workspace)!;
       const index = oldPages.findIndex(page => page.id === id);
       oldPages.splice(index, 1);
