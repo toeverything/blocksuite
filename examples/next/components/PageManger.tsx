@@ -1,8 +1,8 @@
 import { useBlockSuiteStore } from '@blocksuite/react';
 import dynamic from 'next/dynamic';
 
-// @ts-ignore
 const Editor: any = dynamic(
+  // @ts-ignore
   async () => (await import('@blocksuite/react/editor')).Editor,
   {
     ssr: false,
