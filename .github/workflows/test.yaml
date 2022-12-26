@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  test:
-    name: test
+  test-e2e:
+    name: e2e test
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,7 @@ jobs:
       - name: Install Playwright browsers
         run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
 
-      - name: Run tests
+      - name: Run E2E tests
         run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
 
       - name: Upload test results
@@ -39,3 +39,22 @@ jobs:
           name: test-results
           path: ./test-results
           if-no-files-found: ignore
+
+  test-unit:
+    name: unite test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Unit tests
+        run: pnpm run test:unit
+        working-directory: packages/store
