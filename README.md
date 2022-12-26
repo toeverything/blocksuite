@@ -37,7 +37,7 @@ As an example, in the BlockSuite based [AFFiNE Alpha](https://pathfinder.affine.
 ## Resources
 
 - 🚧 [Introduction](https://github.com/toeverything/blocksuite#introduction)
-- 🚧 Tutorial
+- 🚧 [Getting Started](https://github.com/toeverything/blocksuite#getting-started)
 - 🚧 Examples
   - [Latest Playground](https://block-suite.pages.dev/?init)
   - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/)
@@ -52,7 +52,7 @@ As an example, in the BlockSuite based [AFFiNE Alpha](https://pathfinder.affine.
 - [AFFiNE Community](https://community.affine.pro/c/open-development/)
 - [Twitter](https://twitter.com/BlockSuiteDev)
 
-## Current Status
+## Getting Started
 
 The BlockSuite team now focuses on developing first-party blocks built for AFFiNE. Its developer documentation is not yet complete. But the project structure in this repository should already demonstrate some critical points about how it’s supposed to be reused as a progressive framework:
 
@@ -61,7 +61,70 @@ The BlockSuite team now focuses on developing first-party blocks built for AFFiN
 - The `packages/editor` package ships a complete BlockSuite-based editor.
 - The `packages/react` package is a components and hooks library for React.js.
 
-Read on to see how to play with BlockSuite!
+This will install the latest BlockSuite packages into your project:
+
+```sh
+pnpm i \
+  @blocksuite/store@nightly \
+  @blocksuite/blocks@nightly \
+  @blocksuite/editor@nightly
+```
+
+And here is a minimal collaboration-ready editor showing how the BlockSuite packages are composed together:
+
+```ts
+import '@blocksuite/blocks';
+// A workspace can hold multiple pages and a page can hold multiple blocks.
+import { Workspace, Page } from '@blocksuite/store';
+import { BlockSchema } from '@blocksuite/blocks/models';
+import { EditorContainer } from '@blocksuite/editor';
+
+/**
+ * Manually create initial page structure.
+ * In collaboration mode or on page refresh with local persistence,
+ * the page data will be automatically loaded from store providers.
+ * In these cases, this function should not be called.
+ */
+function createInitialPage(workspace: Workspace) {
+  // Events are being emitted using signals.
+  workspace.signals.pageAdded.once(id => {
+    const page = workspace.getPage(id) as Page;
+
+    // Block types are defined and registered in BlockSchema.
+    const pageBlockId = page.addBlock({ flavour: 'affine:page' });
+    const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
+    page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+  });
+
+  // Create a new page. This will trigger the signal above.
+  workspace.createPage('page0');
+}
+
+// Subscribe for page update and create editor on page added.
+function initEditorOnPageAdded(workspace: Workspace) {
+  workspace.signals.pageAdded.once(pageId => {
+    const page = workspace.getPage(pageId) as Page;
+    const editor = new EditorContainer();
+    editor.page = page;
+    document.body.appendChild(editor);
+  });
+}
+
+function main() {
+  // Initialize the store.
+  const workspace = new Workspace({}).register(BlockSchema);
+
+  // Start waiting for the first page...
+  initEditorOnPageAdded(workspace);
+
+  // Suppose we are the first one to create the page.
+  createInitialPage(workspace);
+}
+
+main();
+```
+
+For React developers, check out the [`@blocksuite/react`](./packages/react/README.md) doc for React components and hooks support.
 
 ## Local Development
 
@@ -87,7 +150,7 @@ pnpm test
 pnpm test:headed
 ```
 
-In headed mode, `await page.pause()` can be used in test cases to suspend the test runner.
+In headed mode, `await page.pause()` can be used in test cases to suspend the test runner. Note that the usage of the [Playwright VSCode extension](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) is also highly recommended.
 
 ## License
 
