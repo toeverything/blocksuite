@@ -10,5 +10,9 @@
     "noEmit": false
   },
   "include": ["./src"],
-  "references": []
+  "references": [
+    {
+      "path": "./examples/next"
+    }
+  ]
 }

@@ -47,9 +47,6 @@
     },
     {
       "path": "./tests"
-    },
-    {
-      "path": "./examples/next"
     }
   ]
 }
