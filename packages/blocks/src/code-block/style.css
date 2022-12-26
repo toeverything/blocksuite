@@ -60,6 +60,10 @@ code-block {
   white-space: pre-wrap;
 }
 
+.code-block-option .filled {
+  fill: var(--affine-primary-color);
+}
+
 .lang-container {
   line-height: calc(var(--affine-line-height-base) - 10px);
   text-align: justify;
@@ -71,7 +75,6 @@ code-block {
     0px 3px 16px -6px rgba(24, 39, 75, 0.4);
   border-radius: 10px;
   list-style: none;
-  overflow: hidden;
   padding: 4px;
   width: 40px;
   background-color: var(--affine-page-background);

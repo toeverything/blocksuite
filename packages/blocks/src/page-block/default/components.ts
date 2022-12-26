@@ -21,6 +21,7 @@ import type {
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block.js';
+import { assertExists, BLOCK_ID_ATTR } from '../../__internal__/index.js';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -184,6 +185,11 @@ export function CodeBlockOptionContainer(
       left: codeBlockOption.position.x + 'px',
       top: codeBlockOption.position.y + 'px',
     };
+    const syntaxElem = document.querySelector(
+      `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
+    );
+    assertExists(syntaxElem);
+    const isWrapped = syntaxElem.classList.contains('wrap');
     return html`
       <style>
         .affine-codeblock-option-container > div {
@@ -207,7 +213,7 @@ export function CodeBlockOptionContainer(
             </tool-tip>
           </format-bar-button>
           <format-bar-button
-            class="has-tool-tip"
+            class="has-tool-tip ${isWrapped ? 'filled' : ''}"
             width="100%"
             @click=${() => toggleWrap(codeBlockOption)}
           >

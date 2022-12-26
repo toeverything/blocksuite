@@ -496,10 +496,6 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-function removeCodeBlockOptionMenu() {
-  document.querySelector(`.affine-codeblock-option-container`)?.remove();
-}
-
 export function copyCode(codeBlockOption: CodeBlockOption) {
   const richText = getRichTextByModel(codeBlockOption.model);
   assertExists(richText);
@@ -508,13 +504,11 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   document.dispatchEvent(new ClipboardEvent('copy'));
   resetNativeSelection(null);
   toast('Copied to clipboard');
-  removeCodeBlockOptionMenu();
 }
 
 export function deleteCodeBlock(codeBlockOption: CodeBlockOption) {
   const model = codeBlockOption.model;
   model.page.deleteBlock(model);
-  removeCodeBlockOptionMenu();
 }
 
 export function toggleWrap(codeBlockOption: CodeBlockOption) {
@@ -523,5 +517,4 @@ export function toggleWrap(codeBlockOption: CodeBlockOption) {
   );
   assertExists(syntaxElem);
   syntaxElem.classList.toggle('wrap');
-  removeCodeBlockOptionMenu();
 }

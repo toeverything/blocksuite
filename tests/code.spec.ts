@@ -68,7 +68,7 @@ test('change code language can work', async ({ page }) => {
   );
   await expect(locator).toBeHidden();
 
-  await expect(page.locator(codeLangSelector)).toHaveText('rust');
+  await expect(page.locator(codeLangSelector)).toHaveText('Rust');
 });
 
 test('language select list can disappear when click other place', async ({
