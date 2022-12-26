@@ -9,6 +9,7 @@ import {
   switchReadonly,
 } from './utils/actions/index.js';
 import {
+  assertClipItems,
   assertLocatorVisible,
   assertSelection,
   assertStoreMatchJSX,
@@ -429,7 +430,7 @@ test('should format quick bar be able to copy', async ({ page }) => {
   await assertSelection(page, 1, 0, 3);
   await copyBtn.click();
 
-  // TODO assert clipboard
+  await assertClipItems(page, 'text/plain', '456');
 
   await assertSelection(page, 1, 0, 3);
 });

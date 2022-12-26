@@ -25,33 +25,33 @@ import {
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
-  const index = parent?.children.indexOf(model);
-  if (parent && index !== undefined && index > -1) {
-    // make adding text block by enter a standalone operation
-    page.captureSync();
+  if (!parent) {
+    return;
+  }
+  const index = parent.children.indexOf(model);
+  if (index === -1) {
+    return;
+  }
+  // make adding text block by enter a standalone operation
+  page.captureSync();
 
-    let id = '';
-    if (matchFlavours(model, ['affine:list'])) {
-      const blockProps = {
+  const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
+  const blockProps = shouldInheritFlavour
+    ? {
         flavour: model.flavour,
         type: model.type,
-      };
-      if (model.children.length === 0) {
-        id = page.addBlock(blockProps, parent, index + 1);
-      } else {
-        id = page.addBlock(blockProps, model, 0);
       }
-    } else {
-      const flavour =
-        model.flavour !== 'affine:code' ? model.flavour : 'affine:paragraph';
-      const blockProps = {
-        flavour,
+    : {
+        flavour: 'affine:paragraph',
         type: 'text',
       };
-      id = page.addBlock(blockProps, parent, index + 1);
-    }
-    id && asyncFocusRichText(page, id);
-  }
+
+  const id = !model.children.length
+    ? page.addBlock(blockProps, parent, index + 1)
+    : // If the block has children, insert a new block as the first child
+      page.addBlock(blockProps, model, 0);
+
+  asyncFocusRichText(page, id);
 }
 
 export function handleSoftEnter(

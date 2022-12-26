@@ -125,10 +125,11 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     } else if (isEmptyList && isLastChild) {
       handleUnindent(page, model, index);
     } else if (isEnd) {
-      const isSoftEnterBlock =
-        shouldSoftEnterFirstBlocks.findIndex(({ flavour, type }) => {
+      const isSoftEnterBlock = shouldSoftEnterFirstBlocks.find(
+        ({ flavour, type }) => {
           return model.flavour === flavour && model.type === type;
-        }) !== -1;
+        }
+      );
 
       const isNewLine = /\n\n$/.test(this.quill.getText());
       const shouldSoftEnter = isSoftEnterBlock && !isNewLine;
