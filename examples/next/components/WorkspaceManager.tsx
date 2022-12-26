@@ -1,5 +1,6 @@
 import { useBlockSuiteStore } from '@blocksuite/react';
 import { IndexedDBDocProvider, uuidv4, Workspace } from '@blocksuite/store';
+import { BlockSchema } from '@blocksuite/blocks/models';
 
 export const WorkspaceManager = () => {
   const currentWorkspace = useBlockSuiteStore(store => store.currentWorkspace);
@@ -12,12 +13,12 @@ export const WorkspaceManager = () => {
     <div>
       <button
         onClick={() => {
-          addWorkspace(
-            new Workspace({
-              room: 'random:' + uuidv4(),
-              providers: [IndexedDBDocProvider],
-            })
-          );
+          const workspace = new Workspace({
+            room: 'random:' + uuidv4(),
+            providers: [IndexedDBDocProvider],
+          });
+          workspace.register(BlockSchema);
+          addWorkspace(workspace);
         }}
       >
         add a workspace
