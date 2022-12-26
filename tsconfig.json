@@ -19,7 +19,11 @@
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@blocksuite/blocks": ["../packages/blocks/src/index"],
+      "@blocksuite/blocks/*": ["../packages/blocks/src/*"]
+    }
   },
   "files": [],
   "references": [
