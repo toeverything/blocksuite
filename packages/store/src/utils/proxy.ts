@@ -43,12 +43,12 @@ export function createYMapProxy<
       const has = Reflect.get(target, 'has');
       return Reflect.apply(has, target, [p]);
     },
-    // set: (target, p, value, receiver) => {
-    set: () => {
+    set: (target, p, value, receiver) => {
       if (readonly) {
         throw new Error('Modify data is not allowed');
       } else {
-        throw new Error('Not Implemented');
+        const set = Reflect.get(target, 'set', receiver);
+        return Reflect.apply(set, target, [p, value]);
       }
     },
     get: (target, p, receiver) => {
