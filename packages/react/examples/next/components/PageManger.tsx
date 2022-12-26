@@ -4,13 +4,9 @@ import type { Page } from '@blocksuite/store';
 
 const Editor: React.ComponentType<{
   page: Page;
-}> = dynamic(
-  // @ts-ignore
-  async () => (await import('@blocksuite/react/editor')).Editor,
-  {
-    ssr: false,
-  }
-);
+}> = dynamic(async () => (await import('@blocksuite/react/editor')).Editor, {
+  ssr: false,
+});
 
 export const PageManger = () => {
   const pages = useBlockSuiteStore(store => store.pages);
