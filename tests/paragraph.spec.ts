@@ -8,6 +8,7 @@ import {
   assertBlockType,
   assertTitle,
   assertPageTitleFocus,
+  assertStoreMatchJSX,
 } from './utils/asserts.js';
 import {
   clickMenuButton,
@@ -210,6 +211,61 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertBlockChildrenIds(page, '1', ['2', '5']);
+});
+
+test('indent paragraph block with new line', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.type('456');
+
+  await focusRichText(page, 1);
+  await page.keyboard.press('Tab');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,72]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
+  await focusRichText(page, 0);
+  await pressEnter(page);
+  await page.keyboard.type('789');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
 });
 
 test('switch between paragraph types', async ({ page }) => {
