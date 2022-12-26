@@ -47,6 +47,9 @@
     },
     {
       "path": "./tests"
+    },
+    {
+      "path": "./packages/react/examples/next"
     }
   ]
 }

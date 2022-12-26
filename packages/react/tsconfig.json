@@ -9,10 +9,5 @@
     "jsx": "react-jsx",
     "noEmit": false
   },
-  "include": ["./src"],
-  "references": [
-    {
-      "path": "./examples/next"
-    }
-  ]
+  "include": ["./src"]
 }
