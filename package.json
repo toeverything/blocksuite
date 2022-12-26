@@ -27,6 +27,8 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@commitlint/cli": "^17.3.0",
+    "@commitlint/config-conventional": "^17.3.0",
     "@changesets/cli": "^2.26.0",
     "@playwright/test": "^1.29.1",
     "@types/node": "^18.11.17",
