@@ -1,6 +1,7 @@
 import type { Workspace } from '@blocksuite/store';
 import type { BlockSuiteActionsCreator } from '../../types/index.js';
 import type { Page } from '@blocksuite/store';
+import { BlockSchema } from '@blocksuite/blocks/models';
 
 export interface ManagerState {
   workspaces: Workspace[];
@@ -42,6 +43,7 @@ export const createManagerState = (
   defaultWorkspace: Workspace
 ): ManagerState => {
   bindWorkspaceWithPages(defaultWorkspace);
+  defaultWorkspace.register(BlockSchema);
   return {
     workspaces: [defaultWorkspace],
   };
@@ -57,6 +59,7 @@ export const createManagerActions: BlockSuiteActionsCreator<
 > = set => ({
   addWorkspace: (workspace: Workspace) => {
     bindWorkspaceWithPages(workspace);
+    workspace.register(BlockSchema);
     set(state => ({
       workspaces: [...state.workspaces, workspace],
     }));

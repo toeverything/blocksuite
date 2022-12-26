@@ -12,6 +12,8 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@lit-labs/react": "^1.1.1",
     "zustand": "^4.1.5"
@@ -27,16 +29,16 @@
     "react-dom": ">=18.0.0"
   },
   "exports": {
-    "./src/*": "./src/*.ts",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./editor": "./src/editor.ts"
   },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./src/*": "./dist/*.js",
-      ".": "./dist/index.js"
+      ".": "./dist/index.js",
+      "./editor": "./dist/editor.js"
     }
   }
 }

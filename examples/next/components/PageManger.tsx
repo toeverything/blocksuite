@@ -1,4 +1,13 @@
 import { useBlockSuiteStore } from '@blocksuite/react';
+import dynamic from 'next/dynamic';
+
+// @ts-ignore
+const Editor: any = dynamic(
+  async () => (await import('@blocksuite/react/editor')).Editor,
+  {
+    ssr: false,
+  }
+);
 
 export const PageManger = () => {
   const pages = useBlockSuiteStore(store => store.pages);
@@ -35,5 +44,10 @@ export const PageManger = () => {
       </div>
     );
   }
-  return <div>current page: {currentPage?.doc.guid}</div>;
+  return (
+    <div>
+      <button onClick={() => setCurrentPage(null)}>back to list</button>
+      <Editor page={currentPage} />
+    </div>
+  );
 };

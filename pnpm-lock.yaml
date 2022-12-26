@@ -140,6 +140,8 @@ importers:
 
   packages/react:
     specifiers:
+      '@blocksuite/blocks': workspace:*
+      '@blocksuite/editor': workspace:*
       '@blocksuite/store': workspace:*
       '@lit-labs/react': ^1.1.1
       '@types/react': ^18.0.26
@@ -148,6 +150,8 @@ importers:
       react-dom: ^18.2.0
       zustand: ^4.1.5
     dependencies:
+      '@blocksuite/blocks': link:../blocks
+      '@blocksuite/editor': link:../editor
       '@blocksuite/store': link:../store
       '@lit-labs/react': 1.1.1
       zustand: 4.1.5_react@18.2.0
