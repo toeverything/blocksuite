@@ -59,6 +59,7 @@ The BlockSuite team now focuses on developing first-party blocks built for AFFiN
 - The `packages/store` package is a data store built for general purpose state management.
 - The `packages/blocks` package holds the default BlockSuite editable blocks.
 - The `packages/editor` package ships a complete BlockSuite-based editor.
+- The `packages/react` package is a components and hooks library for React.js.
 
 Read on to see how to play with BlockSuite!
 
