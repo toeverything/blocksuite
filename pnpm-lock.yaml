@@ -48,39 +48,6 @@ importers:
       vite-plugin-banner: 0.7.0
       vitest: 0.26.2
 
-  examples/next:
-    specifiers:
-      '@blocksuite/blocks': workspace:*
-      '@blocksuite/editor': workspace:*
-      '@blocksuite/react': workspace:*
-      '@blocksuite/store': workspace:*
-      '@next/font': 13.1.1
-      '@types/node': ^18.11.17
-      '@types/react': ^18.0.26
-      '@types/react-dom': ^18.0.10
-      eslint: ^8.30.0
-      eslint-config-next: 13.1.1
-      next: 13.1.1
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      typescript: ^4.9.4
-    dependencies:
-      '@blocksuite/blocks': link:../../packages/blocks
-      '@blocksuite/editor': link:../../packages/editor
-      '@blocksuite/react': link:../../packages/react
-      '@blocksuite/store': link:../../packages/store
-      '@next/font': 13.1.1
-      next: 13.1.1_biqbaboplfbrettd7655fr4n2y
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-    devDependencies:
-      '@types/node': 18.11.17
-      '@types/react': 18.0.26
-      '@types/react-dom': 18.0.10
-      eslint: 8.30.0
-      eslint-config-next: 13.1.1_lzzuuodtsqwxnvqeq4g4likcqa
-      typescript: 4.9.4
-
   packages/blocks:
     specifiers:
       '@blocksuite/store': workspace:*
@@ -158,6 +125,39 @@ importers:
       '@types/react-dom': 18.0.10
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+
+  packages/react/examples/next:
+    specifiers:
+      '@blocksuite/blocks': workspace:*
+      '@blocksuite/editor': workspace:*
+      '@blocksuite/react': workspace:*
+      '@blocksuite/store': workspace:*
+      '@next/font': 13.1.1
+      '@types/node': ^18.11.17
+      '@types/react': ^18.0.26
+      '@types/react-dom': ^18.0.10
+      eslint: ^8.30.0
+      eslint-config-next: 13.1.1
+      next: 13.1.1
+      react: ^18.2.0
+      react-dom: ^18.2.0
+      typescript: ^4.9.4
+    dependencies:
+      '@blocksuite/blocks': link:../../../blocks
+      '@blocksuite/editor': link:../../../editor
+      '@blocksuite/react': link:../..
+      '@blocksuite/store': link:../../../store
+      '@next/font': 13.1.1
+      next: 13.1.1_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    devDependencies:
+      '@types/node': 18.11.17
+      '@types/react': 18.0.26
+      '@types/react-dom': 18.0.10
+      eslint: 8.30.0
+      eslint-config-next: 13.1.1_lzzuuodtsqwxnvqeq4g4likcqa
+      typescript: 4.9.4
 
   packages/store:
     specifiers:
