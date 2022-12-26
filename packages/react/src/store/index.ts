@@ -40,7 +40,7 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
     )
   );
 
-  currentWorkspaceSideEffect(store);
+  currentWorkspaceSideEffect(defaultWorkspace, store);
 
   return store;
 };

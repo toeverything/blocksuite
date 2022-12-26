@@ -1,7 +1,8 @@
-import type { Page, Workspace } from '@blocksuite/store';
+import type { Disposable, Page, Workspace } from '@blocksuite/store';
 import type { BlockSuiteActionsCreator } from '../../types/index.js';
 import { uuidv4 } from '@blocksuite/store';
 import type { CreateBlockSuiteStore } from '../index.js';
+import { workspacePages } from '../manager/index.js';
 
 export interface CurrentWorkspaceState {
   currentWorkspace: Workspace;
@@ -18,6 +19,7 @@ export const createCurrentWorkspaceState = (
 });
 
 export interface CurrentWorkspaceActions {
+  setCurrentWorkspace: (workspace: Workspace) => void;
   setCurrentPage: (page: Page | null) => void;
   createPage: (id?: string) => void;
 }
@@ -26,6 +28,16 @@ export const createCurrentWorkspaceActions: BlockSuiteActionsCreator<
   CurrentWorkspaceActions
 > = (set, get, store) => {
   return {
+    setCurrentWorkspace: (workspace: Workspace) => {
+      if (get().workspaces.some(ws => ws === workspace)) {
+        const pages = workspacePages.get(workspace);
+        set({
+          currentWorkspace: workspace,
+          currentPage: null,
+          pages: pages ? [...pages] : [],
+        });
+      }
+    },
     setCurrentPage: page => {
       set({
         currentPage: page,
@@ -37,19 +49,52 @@ export const createCurrentWorkspaceActions: BlockSuiteActionsCreator<
   };
 };
 
-export const currentWorkspaceSideEffect = (store: CreateBlockSuiteStore) => {
+export const currentWorkspaceSideEffect = (
+  workspace: Workspace,
+  store: CreateBlockSuiteStore
+) => {
+  const dispose: Disposable[] = [
+    workspace.signals.pageAdded.on(id => {
+      store.setState(state => {
+        return {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          pages: [...state.pages, workspace.getPage(id)!],
+        };
+      });
+    }),
+    workspace.signals.pageRemoved.on(id => {
+      store.setState(state => {
+        const index = state.pages.findIndex(page => page.id === id);
+        state.pages.splice(index, 1);
+        if (state.currentPage?.id === id) {
+          return {
+            pages: [...state.pages],
+            currentPage: null,
+          };
+        } else {
+          return {
+            pages: [...state.pages],
+          };
+        }
+      });
+    }),
+  ];
   store.subscribe(
     store => store.currentWorkspace,
-    workspace => {
-      workspace.signals.pageAdded.on(id => {
+    (workspace, prev) => {
+      if (prev !== workspace) {
+        dispose.forEach(d => d.dispose());
+      }
+      const disposeAdded = workspace.signals.pageAdded.on(id => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const page = workspace.getPage(id)!;
         store.setState(state => {
           return {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            pages: [...state.pages, workspace.getPage(id)!],
+            pages: [...state.pages, page],
           };
         });
       });
-      workspace.signals.pageRemoved.on(id => {
+      const disposeRemoved = workspace.signals.pageRemoved.on(id => {
         store.setState(state => {
           const index = state.pages.findIndex(page => page.id === id);
           state.pages.splice(index, 1);
@@ -65,6 +110,7 @@ export const currentWorkspaceSideEffect = (store: CreateBlockSuiteStore) => {
           }
         });
       });
+      dispose.push(disposeAdded, disposeRemoved);
     }
   );
 };
