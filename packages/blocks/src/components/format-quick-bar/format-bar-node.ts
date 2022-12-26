@@ -17,6 +17,7 @@ import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
 
 const onCopy = () => {
+  // Will forward to the `CopyCutManager`
   document.dispatchEvent(new ClipboardEvent('copy'));
   toast('Copied to clipboard');
 };
