@@ -5,7 +5,7 @@
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "Node",
-    "noEmit": true,
+    "noEmit": false,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true
   },
