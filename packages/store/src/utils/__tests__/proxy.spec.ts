@@ -18,5 +18,9 @@ describe('proxy', () => {
     const proxy = createYMapProxy(map);
     proxy.x = 2;
     expect(proxy.x).toBe(2);
+
+    const proxy2 = createYMapProxy(map, { readonly: true });
+    expect(() => (proxy2.x = 3)).toThrowError();
+    expect(proxy2.x).toBe(2);
   });
 });
