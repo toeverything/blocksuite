@@ -21,8 +21,14 @@
     "skipLibCheck": true,
     "incremental": true,
     "paths": {
-      "@blocksuite/blocks": ["./packages/blocks/src/index"],
-      "@blocksuite/blocks/*": ["./packages/blocks/src/*"]
+      // Why? See https://github.com/DimensionDev/Maskbook/blob/2a042633c5bde18dd97a21d34e4943c8c4efa514/tsconfig.json#L33-L67
+      "@blocksuite/editor": ["./packages/editor/src"],
+      "@blocksuite/blocks": ["./packages/blocks/src"],
+      "@blocksuite/blocks/*": ["./packages/blocks/src/*"],
+      "@blocksuite/react": ["./packages/react/src"],
+      "@blocksuite/react/*": ["./packages/react/src/*"],
+      "@blocksuite/store": ["./packages/store/src"],
+      "@blocksuite/store/*": ["./packages/store/src/*"]
     }
   },
   "files": [],
