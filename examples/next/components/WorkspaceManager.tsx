@@ -22,12 +22,12 @@ export const WorkspaceManager = () => {
       >
         add a workspace
       </button>
-      <div>current workspace guid: {currentWorkspace.doc.guid}</div>
+      <div>current workspace room id: {currentWorkspace.room}</div>
       <ul>
         {workspaces.map(workspace => {
           return (
             <li key={workspace.doc.guid}>
-              {workspace.doc.guid}
+              {workspace.room}
               <button
                 onClick={() => {
                   setCurrentWorkspace(workspace);
