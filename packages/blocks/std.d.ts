@@ -1,3 +1,3 @@
 /* eslint-disable */
 // @ts-ignore
-export * from './dist/editor';
+export * from './dist/std';
