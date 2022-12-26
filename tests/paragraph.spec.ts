@@ -213,7 +213,8 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 });
 
-test('indent paragraph block with new line', async ({ page }) => {
+// https://github.com/toeverything/blocksuite/issues/364
+test('paragraph with child block should work at enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { groupId } = await initEmptyParagraphState(page);
   await focusRichText(page);
