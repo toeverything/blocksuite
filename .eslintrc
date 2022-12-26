@@ -13,6 +13,7 @@
     "packages/store/dist/*",
     "packages/blocks/dist/*",
     "packages/editor/dist/*",
+    "packages/react/dist/*",
     "packages/playground/dist/assets/*"
   ],
   "overrides": [
