@@ -17,7 +17,10 @@ export default function Home() {
   }, [workspace]);
   return (
     <div>
-      your selected guid is <NoSsr>{workspace.doc.guid}</NoSsr>
+      your selected workspace detail{' '}
+      <NoSsr>
+        {workspace.room} {workspace.doc.guid}
+      </NoSsr>
       <button
         onClick={() =>
           setPanel(state => (state === 'page' ? 'workspace' : 'page'))
