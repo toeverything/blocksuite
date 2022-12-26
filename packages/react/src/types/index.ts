@@ -6,7 +6,7 @@ export type BlockSuiteActionsCreator<
   Store = BlockSuiteState
 > = StateCreator<
   Store,
-  [['zustand/subscribeWithSelector', never]],
+  [['zustand/subscribeWithSelector', unknown]],
   [],
   Actions
 >;

@@ -203,6 +203,7 @@ class WorkspaceMeta extends Space {
 
 export class Workspace {
   static Y = Y;
+  public readonly room: string | undefined;
 
   private _store: Store;
   private _indexer: Indexer;
@@ -227,6 +228,7 @@ export class Workspace {
       // blob storage is not reachable in server side
       this._blobStorage = Promise.resolve(null);
     }
+    this.room = options.room;
 
     this.meta = new WorkspaceMeta('space:meta', this, this._store.awareness);
 
