@@ -1,9 +1,13 @@
 import createContext from 'zustand/context';
 import create from 'zustand';
 import { combine, subscribeWithSelector } from 'zustand/middleware';
-import type { Workspace } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import type { ManagerActions, ManagerState } from './manager/index.js';
-import { createManagerActions, createManagerState } from './manager/index.js';
+import {
+  bindWorkspaceWithPages,
+  createManagerActions,
+  createManagerState,
+} from './manager/index.js';
 import type {
   CurrentWorkspaceActions,
   CurrentWorkspaceState,
@@ -13,6 +17,7 @@ import {
   createCurrentWorkspaceState,
   currentWorkspaceSideEffect,
 } from './currentWorkspace/index.js';
+import { IndexedDBDocProvider } from '@blocksuite/store';
 
 export interface BlockSuiteState extends ManagerState, CurrentWorkspaceState {}
 
@@ -39,6 +44,38 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
       )
     )
   );
+
+  if (typeof window !== 'undefined') {
+    const str = localStorage.getItem('blocksuite-react') ?? '';
+    try {
+      const data = JSON.parse(str);
+      const workspaces: Workspace[] = data.map(
+        (room: string) =>
+          new Workspace({
+            room,
+            providers: [IndexedDBDocProvider],
+          })
+      );
+      workspaces.forEach(workspace => bindWorkspaceWithPages(workspace));
+      window.setTimeout(
+        () =>
+          store.setState({
+            workspaces,
+          }),
+        0
+      );
+    } catch (e) {
+      // ignore
+    }
+
+    store.subscribe(
+      store => store.workspaces,
+      workspaces => {
+        const rooms = workspaces.map(workspace => workspace.room);
+        localStorage.setItem('blocksuite-react', JSON.stringify(rooms));
+      }
+    );
+  }
 
   currentWorkspaceSideEffect(defaultWorkspace, store);
 

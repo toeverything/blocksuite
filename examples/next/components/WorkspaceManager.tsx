@@ -1,5 +1,5 @@
 import { useBlockSuiteStore } from '@blocksuite/react';
-import { uuidv4, Workspace } from '@blocksuite/store';
+import { IndexedDBDocProvider, uuidv4, Workspace } from '@blocksuite/store';
 
 export const WorkspaceManager = () => {
   const currentWorkspace = useBlockSuiteStore(store => store.currentWorkspace);
@@ -15,6 +15,7 @@ export const WorkspaceManager = () => {
           addWorkspace(
             new Workspace({
               room: 'random:' + uuidv4(),
+              providers: [IndexedDBDocProvider],
             })
           );
         }}

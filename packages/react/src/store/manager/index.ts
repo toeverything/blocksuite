@@ -9,7 +9,7 @@ export interface ManagerState {
 
 export const workspacePages = new WeakMap<Workspace, Page[]>();
 
-function bindWorkspaceWithPages(workspace: Workspace) {
+export function bindWorkspaceWithPages(workspace: Workspace) {
   if (workspacePages.has(workspace)) {
     return;
   }
