@@ -12,9 +12,8 @@ import {
   type GroupBlockModel,
 } from '@blocksuite/blocks';
 import { Utils } from '@blocksuite/store';
-import type { Workspace } from '@blocksuite/store';
-import type { EditorContainer } from '../editor-container/editor-container.js';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { Workspace, BaseBlockModel } from '@blocksuite/store';
+import type { EditorContainer } from '@blocksuite/editor';
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {

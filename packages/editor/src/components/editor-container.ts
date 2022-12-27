@@ -4,9 +4,9 @@ import { choose } from 'lit/directives/choose.js';
 
 import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
-import { ClipboardManager, ContentParser } from '../../index.js';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
 import { NonShadowLitElement } from '@blocksuite/blocks';
+import { ClipboardManager, ContentParser } from '../managers/index.js';
 
 @customElement('editor-container')
 export class EditorContainer extends NonShadowLitElement {

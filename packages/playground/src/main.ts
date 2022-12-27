@@ -2,8 +2,9 @@ import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
 import { BlockSchema } from '@blocksuite/blocks/models';
-import { DebugMenu, EditorContainer } from '@blocksuite/editor';
+import { EditorContainer } from '@blocksuite/editor';
 import { Page, Workspace, Utils } from '@blocksuite/store';
+import { DebugMenu } from './components/debug-menu.js';
 import { getOptions, initParam, isBase64, isE2E } from './utils.js';
 import './style.css';
 
