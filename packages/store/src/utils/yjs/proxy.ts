@@ -1,19 +1,18 @@
 import { Map as YMap } from 'yjs';
 
 export interface EnhancedYMap<
-  Data extends object = Record<string, unknown>,
-  Keys extends keyof Data & string = keyof Data & string
+  Data extends object = Record<string, unknown>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > extends YMap<any> {
-  clone(): EnhancedYMap<Data, Keys>;
+  clone(): EnhancedYMap<Data>;
 
-  delete(key: Keys & string): void;
+  delete(key: keyof Data & string): void;
 
-  set<Key extends Keys>(key: Key, value: Data[Key]): Data[Key];
+  set<Key extends keyof Data & string>(key: Key, value: Data[Key]): Data[Key];
 
-  get<Key extends Keys>(key: Key): Data[Key];
+  get<Key extends keyof Data & string>(key: Key): Data[Key];
 
-  has<Key extends Keys>(key: Key): boolean;
+  has<Key extends keyof Data & string>(key: Key): boolean;
 
   clear(): void;
 }
@@ -22,17 +21,14 @@ export type ProxyConfig = {
   readonly?: boolean;
 };
 
-export function createYMapProxy<
-  Data extends object,
-  Keys extends keyof Data & string = keyof Data & string
->(yMap: EnhancedYMap<Data, Keys>, config?: ProxyConfig): Data;
+export function createYMapProxy<Data extends object>(
+  yMap: EnhancedYMap<Data>,
+  config?: ProxyConfig
+): Data;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createYMapProxy(yMap: YMap<any>, config?: ProxyConfig): any;
-export function createYMapProxy<
-  Data extends Record<string, unknown>,
-  Keys extends keyof Data & string = keyof Data & string
->(
-  yMap: EnhancedYMap<Data, Keys>,
+export function createYMapProxy<Data extends Record<string, unknown>>(
+  yMap: EnhancedYMap<Data>,
   config: ProxyConfig = {
     readonly: false,
   }

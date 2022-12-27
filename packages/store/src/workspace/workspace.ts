@@ -17,12 +17,12 @@ export interface PageMeta {
   [key: string]: string | number | boolean;
 }
 
-interface WorkspaceMetaData {
+type WorkspaceMetaData = {
   pages: Y.Array<EnhancedYMap<PageMeta>>;
   versions: EnhancedYMap<Record<string, Y.Array<number>>>;
   name: string;
   avatar?: string;
-}
+};
 
 class WorkspaceMeta extends Space {
   private _workspace: Workspace;
@@ -86,12 +86,8 @@ class WorkspaceMeta extends Space {
     });
   }
 
-  get pageMetas() {
-    return this._yPages.toJSON();
-  }
-
   getPageMeta(id: string) {
-    return this.pageMetas.find(page => page.id === id);
+    return this._yPages.toArray().find(page => page.get('id') === id);
   }
 
   addPageMeta(page: PageMeta, index?: number) {
@@ -105,23 +101,27 @@ class WorkspaceMeta extends Space {
     });
   }
 
-  setPage(id: string, props: Partial<PageMeta>) {
-    const pages = this._yPages.toJSON() as PageMeta[];
-    const index = pages.findIndex((page: PageMeta) => id === page.id);
+  setPageMeta(id: string, props: Partial<PageMeta>) {
+    const index = this._yPages
+      .toArray()
+      .findIndex(pageMeta => pageMeta.get('id') === id);
 
     this.doc.transact(() => {
       if (index === -1) return;
 
-      const yPage = this._yPages.get(index) as Y.Map<unknown>;
+      const yPage = this._yPages.get(index);
       Object.entries(props).forEach(([key, value]) => {
-        yPage.set(key, value);
+        if (value != null) {
+          yPage.set(key, value);
+        }
       });
     });
   }
 
   removePage(id: string) {
-    const pages = this._yPages.toJSON() as PageMeta[];
-    const index = pages.findIndex((page: PageMeta) => id === page.id);
+    const index = this._yPages
+      .toArray()
+      .findIndex(pageMeta => pageMeta.get('id') === id);
 
     this.doc.transact(() => {
       if (index !== -1) {
@@ -151,28 +151,30 @@ class WorkspaceMeta extends Space {
   }
 
   private _handlePageEvent() {
-    const { pageMetas, _prevPages } = this;
+    const { _yPages, _prevPages } = this;
+    const pageMetas = _yPages.toArray();
 
     pageMetas.forEach(pageMeta => {
+      const id = pageMeta.get('id');
       // newly added space can't be found
-      // unless explictly getMap after meta updated
-      this.doc.getMap('space:' + pageMeta.id);
+      // unless explicitly getMap after meta updated
+      this.doc.getMap('space:' + id);
 
-      if (!_prevPages.has(pageMeta.id)) {
+      if (!_prevPages.has(id)) {
         // Ensure following YEvent handler could be triggered in correct order.
-        setTimeout(() => this.pageAdded.emit(pageMeta.id));
+        setTimeout(() => this.pageAdded.emit(id));
       }
     });
 
     _prevPages.forEach(prevPageId => {
-      const isRemoved = !pageMetas.find(p => p.id === prevPageId);
+      const isRemoved = !pageMetas.find(p => p.get('id') === prevPageId);
       if (isRemoved) {
         this.pageRemoved.emit(prevPageId);
       }
     });
 
     _prevPages.clear();
-    pageMetas.forEach(page => _prevPages.add(page.id));
+    pageMetas.forEach(page => _prevPages.add(page.get('id')));
 
     this.pagesUpdated.emit();
   }
@@ -314,7 +316,7 @@ export class Workspace {
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
   setPageMeta(pageId: string, props: Partial<PageMeta>) {
-    this.meta.setPage(pageId, props);
+    this.meta.setPageMeta(pageId, props);
   }
 
   removePage(pageId: string) {
