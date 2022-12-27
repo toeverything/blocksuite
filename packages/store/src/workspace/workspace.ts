@@ -7,6 +7,7 @@ import { Indexer, QueryContent } from './search.js';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
+import { createYMapProxy } from '../utils/proxy.js';
 
 export interface PageMeta {
   id: string;
@@ -50,17 +51,11 @@ class WorkspaceMeta extends Space {
   }
 
   private get _yName() {
-    if (!this._yMetaRoot.has('name')) {
-      return null;
-    }
-    return this._yMetaRoot.get('name') as string;
+    return createYMapProxy(this._yMetaRoot).name;
   }
 
   private get _yAvatar() {
-    if (!this._yMetaRoot.has('avatar')) {
-      return null;
-    }
-    return this._yMetaRoot.get('avatar') as Y.Text;
+    return createYMapProxy(this._yMetaRoot).avatar;
   }
 
   get name() {
