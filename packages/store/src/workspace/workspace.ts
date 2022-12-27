@@ -8,6 +8,7 @@ import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
 import { createYMapProxy, EnhancedYMap } from '../utils/yjs/proxy.js';
+import { createYMap } from '../utils/yjs/index.js';
 
 export interface PageMeta {
   id: string;
@@ -93,14 +94,11 @@ class WorkspaceMeta extends Space {
     return this.pageMetas.find(page => page.id === id);
   }
 
-  addPage(page: PageMeta, index?: number) {
-    const yPage = new Y.Map() as EnhancedYMap<PageMeta>;
+  addPageMeta(page: PageMeta, index?: number) {
     this.doc.transact(() => {
+      const yPage = createYMap<PageMeta>(page);
       if (index === undefined) {
         this._yPages.push([yPage]);
-        Object.entries(page).forEach(([key, value]) => {
-          yPage.set(key, value);
-        });
       } else {
         this._yPages.insert(index, [yPage]);
       }
@@ -307,7 +305,7 @@ export class Workspace {
       throw new Error('page already exists');
     }
 
-    this.meta.addPage({
+    this.meta.addPageMeta({
       id: pageId,
       title: '',
       createDate: +new Date(),
