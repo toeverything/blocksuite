@@ -41,7 +41,7 @@ jobs:
           if-no-files-found: ignore
 
   test-unit:
-    name: unite test
+    name: unit test
     runs-on: ubuntu-latest
 
     steps:
