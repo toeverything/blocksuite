@@ -362,7 +362,7 @@ export class Page extends Space {
 
     this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
-      doc: this.doc as Y.Doc,
+      doc: this.doc,
     });
 
     this._history.on('stack-cleared', this._historyObserver);
