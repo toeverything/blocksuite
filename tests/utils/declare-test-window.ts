@@ -4,7 +4,8 @@ import type {
   Page,
   BaseBlockModel,
 } from '../../packages/store/src/index.js';
-import type { EditorContainer } from '../../packages/editor/src/components/editor-container/editor-container.js';
+import type { EditorContainer } from '../../packages/editor/src/components/editor-container.js';
+import type {} from '../../packages/playground/src/components/debug-menu.js';
 
 declare global {
   interface Window {
