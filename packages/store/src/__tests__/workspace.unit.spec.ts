@@ -2,7 +2,13 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { assert, describe, expect, it } from 'vitest';
-import { BaseBlockModel, Signal, Workspace, Page, Generator } from '..';
+import {
+  BaseBlockModel,
+  Signal,
+  Workspace,
+  Page,
+  Generator,
+} from '../index.js';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModel } from '../../../blocks/src/page-block/page-model.js';
@@ -10,7 +16,7 @@ import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragra
 import { ListBlockModel } from '../../../blocks/src/list-block/list-model.js';
 import { GroupBlockModel } from '../../../blocks/src/group-block/group-model.js';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model.js';
-import type { PageMeta } from '../workspace';
+import type { PageMeta } from '../workspace/index.js';
 import { assertExists } from '../utils/utils.js';
 
 function createTestOptions() {
