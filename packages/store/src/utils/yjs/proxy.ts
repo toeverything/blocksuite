@@ -1,18 +1,17 @@
 import { Map as YMap } from 'yjs';
-import type { EnhancedYMap } from './index.js';
 
 export type ProxyConfig = {
   readonly?: boolean;
 };
 
-export function createYMapProxy<Data extends object>(
-  yMap: EnhancedYMap<Data>,
+export function createYMapProxy<Data extends Record<string, unknown>>(
+  yMap: YMap<Data>,
   config?: ProxyConfig
 ): Data;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createYMapProxy(yMap: YMap<any>, config?: ProxyConfig): any;
 export function createYMapProxy<Data extends Record<string, unknown>>(
-  yMap: EnhancedYMap<Data>,
+  yMap: YMap<Data>,
   config: ProxyConfig = {
     readonly: false,
   }

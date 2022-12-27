@@ -1,5 +1,10 @@
 lockfileVersion: 5.4
 
+patchedDependencies:
+  yjs@13.5.43:
+    hash: ur4ejz37gappjoavr5hfhlbkly
+    path: patches/yjs@13.5.43.patch
+
 importers:
 
   .:
@@ -192,7 +197,7 @@ importers:
     devDependencies:
       cross-env: 7.0.3
       lit: 2.5.0
-      yjs: 13.5.43
+      yjs: 13.5.43_ur4ejz37gappjoavr5hfhlbkly
 
 packages:
 
@@ -5507,11 +5512,12 @@ packages:
       yargs-parser: 21.1.1
     dev: true
 
-  /yjs/13.5.43:
+  /yjs/13.5.43_ur4ejz37gappjoavr5hfhlbkly:
     resolution: {integrity: sha512-NJqWuiDOseYjkhnSVo55z+FZD6TsOJBZfMbH2I4OCm5vsgY7TESUjUGb7Pt1lljvvdSfBVj8CxQqZAnVxe5Iyg==}
     dependencies:
       lib0: 0.2.58
     dev: true
+    patched: true
 
   /yn/3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}

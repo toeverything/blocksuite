@@ -1,7 +1,7 @@
-import type * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness.js';
 import { AwarenessAdapter, SelectionRange } from './awareness.js';
 import type { RichTextAdapter } from './text-adapter.js';
+import type * as Y from 'yjs';
 
 export interface StackItem {
   meta: Map<'cursor-location', SelectionRange | undefined>;
@@ -23,7 +23,7 @@ export class Space {
     this.awareness = new AwarenessAdapter(this, aware);
   }
 
-  get prefixedId() {
+  get prefixedId(): `space:${string}` {
     return `space:${this.id}`;
   }
 

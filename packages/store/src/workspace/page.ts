@@ -20,7 +20,6 @@ import {
   matchFlavours,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
-import type { EnhancedYMap } from '../utils/yjs/proxy.js';
 import { createYMap } from '../utils/yjs/index.js';
 
 export interface YBlockData {
@@ -31,8 +30,8 @@ export interface YBlockData {
   [key: string]: unknown;
 }
 
-export type YBlock = EnhancedYMap<YBlockData>;
-export type YBlocks = EnhancedYMap<Record<string, YBlock>>;
+export type YBlock = Y.Map<YBlockData>;
+export type YBlocks = Y.Map<Record<string, YBlock>>;
 
 /** JSON-serializable properties of a block */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -363,7 +362,7 @@ export class Page extends Space {
 
     this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this.doc.clientID]),
-      doc: this.doc,
+      doc: this.doc as Y.Doc,
     });
 
     this._history.on('stack-cleared', this._historyObserver);
@@ -483,7 +482,7 @@ export class Page extends Space {
     this._blockMap.delete(id);
   }
 
-  private _handleYBlockUpdate(event: Y.YMapEvent<unknown>) {
+  private _handleYBlockUpdate(event: Y.YMapEvent<any>) {
     const id = event.target.get('sys:id') as string;
     const model = this.getBlockById(id);
     if (!model) return;
@@ -498,7 +497,9 @@ export class Page extends Space {
     model.propsUpdated.emit();
   }
 
-  private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
+  private _handleYEvent(
+    event: Y.YEvent<YBlocks | YBlock | Y.Text | Y.Array<unknown>>
+  ) {
     // event on top-level block store
     if (event.target === this._yBlocks) {
       const visited = new Set<string>();

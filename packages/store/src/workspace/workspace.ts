@@ -7,7 +7,7 @@ import { Indexer, QueryContent } from './search.js';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
-import { createYMapProxy, EnhancedYMap } from '../utils/yjs/proxy.js';
+import { createYMapProxy } from '../utils/yjs/proxy.js';
 import { createYMap } from '../utils/yjs/index.js';
 
 export interface PageMeta {
@@ -17,9 +17,9 @@ export interface PageMeta {
   [key: string]: string | number | boolean;
 }
 
-type WorkspaceMetaData = {
-  pages: Y.Array<EnhancedYMap<PageMeta>>;
-  versions: EnhancedYMap<Record<string, Y.Array<number>>>;
+export type WorkspaceMetaData = {
+  pages: Y.Array<Y.Map<PageMeta>>;
+  versions: Y.Map<Record<string, Y.Array<number>>>;
   name: string;
   avatar?: string;
 };
@@ -34,12 +34,13 @@ class WorkspaceMeta extends Space {
 
   constructor(id: string, workspace: Workspace, awareness: Awareness) {
     super(id, workspace.doc, awareness);
+    workspace.doc;
     this._workspace = workspace;
     this._yMetaRoot.observeDeep(this._handleEvents);
   }
 
   private get _yMetaRoot() {
-    return this.doc.getMap(this.id) as EnhancedYMap<WorkspaceMetaData>;
+    return this.doc.getMap(this.id) as Y.Map<WorkspaceMetaData>;
   }
 
   private get _yMetaRootProxy() {
@@ -54,12 +55,12 @@ class WorkspaceMeta extends Space {
     return this._yMetaRoot.get('pages');
   }
 
-  private get _yVersions() {
+  private get _yVersions(): Y.Map<Record<string, Y.Array<number>>> {
     if (!this._yMetaRoot.has('versions')) {
       this._yMetaRoot.set('versions', new Y.Map());
     }
 
-    return this._yMetaRoot.get('versions') as Y.Map<unknown>;
+    return this._yMetaRoot.get('versions');
   }
 
   get name() {
@@ -145,7 +146,7 @@ class WorkspaceMeta extends Space {
   writeVersion() {
     const { _yVersions, _workspace } = this;
     _workspace.flavourMap.forEach((model, flavour) => {
-      const yVersion = new Y.Array();
+      const yVersion = new Y.Array<number>();
       const [major, minor] = model.version;
       yVersion.push([major, minor]);
       _yVersions.set(flavour, yVersion);
@@ -193,7 +194,7 @@ class WorkspaceMeta extends Space {
   }
 
   private _handleEvents = (
-    events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<unknown>>[]
+    events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<any>>[]
   ) => {
     events.forEach(e => {
       const hasKey = (k: string) =>
