@@ -1,21 +1,5 @@
 import { Map as YMap } from 'yjs';
-
-export interface EnhancedYMap<
-  Data extends object = Record<string, unknown>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-> extends YMap<any> {
-  clone(): EnhancedYMap<Data>;
-
-  delete(key: keyof Data & string): void;
-
-  set<Key extends keyof Data & string>(key: Key, value: Data[Key]): Data[Key];
-
-  get<Key extends keyof Data & string>(key: Key): Data[Key];
-
-  has<Key extends keyof Data & string>(key: Key): boolean;
-
-  clear(): void;
-}
+import type { EnhancedYMap } from './index.js';
 
 export type ProxyConfig = {
   readonly?: boolean;

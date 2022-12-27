@@ -1,6 +1,23 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, assertType } from 'vitest';
 import * as Y from 'yjs';
 import { createYMapProxy } from '../yjs/proxy.js';
+import type { EnhancedYDoc, EnhancedYMap } from '../yjs/index.js';
+
+describe('doc', () => {
+  it('enhanced doc', () => {
+    const doc = new Y.Doc() as EnhancedYDoc<{
+      a: EnhancedYMap<{ x: number }>;
+      b: Y.Array<string>;
+    }>;
+    // @ts-expect-error
+    doc.getMap('x');
+    const goodB = doc.getArray('b');
+    assertType<Y.Array<string>>(goodB);
+    assertType<EnhancedYMap<{ x: number }>>(doc.getMap('a'));
+    const a = doc.getMap('a');
+    a.get('x');
+  });
+});
 
 describe('proxy', () => {
   it('set y proxy', () => {
