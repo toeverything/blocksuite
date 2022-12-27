@@ -86,6 +86,10 @@ class WorkspaceMeta extends Space {
     });
   }
 
+  get pageMetas() {
+    return this._yPages.toJSON() as PageMeta[];
+  }
+
   getPageMeta(id: string): PageMeta | null {
     const pageMeta = this._yPages.toArray().find(page => page.get('id') === id);
     if (pageMeta) {
