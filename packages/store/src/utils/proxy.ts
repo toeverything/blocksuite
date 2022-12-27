@@ -26,6 +26,8 @@ export function createYMapProxy<
   Data extends object,
   Keys extends keyof Data & string = keyof Data & string
 >(yMap: EnhancedYMap<Data, Keys>, config?: ProxyConfig): Data;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createYMapProxy(yMap: YMap<any>, config?: ProxyConfig): any;
 export function createYMapProxy<
   Data extends Record<string, unknown>,
   Keys extends keyof Data & string = keyof Data & string
