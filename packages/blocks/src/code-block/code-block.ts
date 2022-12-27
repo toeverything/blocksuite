@@ -4,7 +4,6 @@ import type { CodeBlockModel } from './code-model.js';
 import codeBlockStyle from './style.css?inline';
 import codeTheme from 'highlight.js/styles/color-brewer.css?inline';
 import { toolTipStyle } from '../components/tooltip.js';
-import { until } from 'lit/directives/until.js';
 import {
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
@@ -51,24 +50,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   @state()
   highlight: unknown;
-
-  @state()
-  // @ts-ignore highlight.js has no types
-  richTextWithHighlight = import('highlight.js').then(highlightModule => {
-    return html` <rich-text
-      .host=${this.host}
-      .model=${this.model}
-      .modules=${{
-        syntax: {
-          highlight: highlightModule.default.highlight,
-          codeBlockElement: this,
-          language: this.model.language,
-        },
-      }}
-    >
-      <div id="line-number"></div>
-    </rich-text>`;
-  });
 
   connectedCallback() {
     super.connectedCallback();
@@ -117,11 +98,22 @@ export class CodeBlockComponent extends NonShadowLitElement {
             }}
           ></lang-list>
         </div>
-        ${until(
-          this.richTextWithHighlight,
-          // TODO update loading state
-          `Loading coding block...`
-        )}
+        ${this.highlight
+          ? html`<rich-text
+              .host=${this.host}
+              .model=${this.model}
+              .modules=${{
+                syntax: {
+                  highlight: this.highlight,
+                  codeBlockElement: this,
+                  language: this.model.language,
+                },
+              }}
+            >
+              <div id="line-number"></div>
+            </rich-text>`
+          : // TODO update loading state
+            `Loading coding block...`}
         ${childrenContainer}
       </div>
     `;
