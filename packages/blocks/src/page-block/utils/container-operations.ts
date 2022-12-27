@@ -4,6 +4,7 @@ import {
   assertExists,
   assertFlavours,
   ExtendedModel,
+  matchFlavours,
   RootBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
@@ -426,7 +427,7 @@ export function tryUpdateGroupSize(page: Page, zoom: number) {
     let offset = 0;
     groups.forEach(model => {
       // DO NOT resize shape block
-      if (model.flavour === 'affine:shape') return;
+      if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();

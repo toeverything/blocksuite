@@ -328,7 +328,7 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-  if (model.flavour === 'affine:code') {
+  if (matchFlavours(model, ['affine:code'])) {
     return ALLOW_DEFAULT;
   }
   let isConverted = false;

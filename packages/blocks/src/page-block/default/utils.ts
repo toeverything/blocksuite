@@ -220,7 +220,7 @@ export function handleDown(
   if (!selection.state.selectedBlocks.length) {
     const nativeSelection = window.getSelection();
     const model = getStartModelBySelection();
-    if (model.flavour === 'affine:code') {
+    if (matchFlavours(model, ['affine:code'])) {
       return;
     }
     assertExists(nativeSelection);
