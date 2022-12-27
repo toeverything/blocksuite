@@ -328,6 +328,9 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
+  if (matchFlavours(model, ['affine:code'])) {
+    return ALLOW_DEFAULT;
+  }
   let isConverted = false;
   switch (prefix.trim()) {
     case '[]':
