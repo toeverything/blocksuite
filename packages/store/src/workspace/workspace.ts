@@ -7,7 +7,7 @@ import { Indexer, QueryContent } from './search.js';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
-import { createYMapProxy, EnhancedYMap } from '../utils/proxy.js';
+import { createYMapProxy, EnhancedYMap } from '../utils/yjs/proxy.js';
 
 export interface PageMeta {
   id: string;

@@ -14,21 +14,30 @@ import type { IdGenerator } from '../utils/id-generator.js';
 import { Signal } from '../utils/signal.js';
 import {
   assertValidChildren,
-  initSysProps,
   syncBlockProps,
   trySyncTextProp,
   toBlockProps,
   matchFlavours,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
+import type { EnhancedYMap } from '../utils/yjs/proxy.js';
+import { createYMap } from '../utils/yjs/index.js';
 
-export type YBlock = Y.Map<unknown>;
-export type YBlocks = Y.Map<YBlock>;
+export interface YBlockData {
+  'sys:id': string;
+  'sys:flavour': string;
+  'sys:children': Y.Array<string>;
+
+  [key: string]: unknown;
+}
+
+export type YBlock = EnhancedYMap<YBlockData>;
+export type YBlocks = EnhancedYMap<Record<string, YBlock>>;
 
 /** JSON-serializable properties of a block */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BlockProps = Record<string, any> & {
-  id: string;
+  // id: string;
   flavour: string;
   text?: void | TextType;
   children?: BaseBlockModel[];
@@ -180,25 +189,36 @@ export class Page extends Space {
     parent?: BaseBlockModel | string,
     parentIndex?: number
   ): string {
-    if (!blockProps.flavour) {
+    const flavour = blockProps.flavour;
+    if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
 
-    if (blockProps.flavour === 'affine:shape') {
+    if (flavour === 'affine:shape') {
       if (parent != null || parentIndex != null) {
         throw new Error('Shape block should only be appear under page');
       }
     }
 
-    const clonedProps: Partial<BlockProps> = { ...blockProps };
     const id = this._idGenerator();
-    clonedProps.id = id;
+    const clonedProps: Partial<BlockProps> & {
+      id: string;
+      flavour: string;
+    } = { ...blockProps, id, flavour };
 
     this.transact(() => {
-      const yBlock = new Y.Map() as YBlock;
+      const yChildren = new Y.Array<string>();
+      const yBlock = createYMap<YBlockData>({
+        'sys:id': id,
+        'sys:flavour': flavour,
+        'sys:children': yChildren,
+      });
 
       assertValidChildren(this._yBlocks, clonedProps);
-      initSysProps(yBlock, clonedProps);
+      if (Array.isArray(clonedProps.children)) {
+        clonedProps.children.forEach(child => yChildren.push([child.id]));
+      }
+
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
@@ -209,8 +229,8 @@ export class Page extends Space {
       const parentId = parent?.id ?? this._root?.id;
 
       if (parentId) {
-        const yParent = this._yBlocks.get(parentId) as YBlock;
-        const yChildren = yParent.get('sys:children') as Y.Array<string>;
+        const yParent = this._yBlocks.get(parentId);
+        const yChildren = yParent.get('sys:children');
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }

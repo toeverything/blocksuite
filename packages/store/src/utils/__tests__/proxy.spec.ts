@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
-import { createYMapProxy } from '../proxy.js';
+import { createYMapProxy } from '../yjs/proxy.js';
 
 describe('proxy', () => {
   it('set y proxy', () => {
