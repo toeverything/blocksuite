@@ -1,7 +1,7 @@
 import { Map as YMap } from 'yjs';
 
 export interface EnhancedYMap<
-  Data extends Record<string, unknown>,
+  Data extends object = Record<string, unknown>,
   Keys extends keyof Data & string = keyof Data & string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > extends YMap<any> {
@@ -23,7 +23,7 @@ export type ProxyConfig = {
 };
 
 export function createYMapProxy<
-  Data extends Record<string, unknown>,
+  Data extends object,
   Keys extends keyof Data & string = keyof Data & string
 >(yMap: EnhancedYMap<Data, Keys>, config?: ProxyConfig): Data;
 export function createYMapProxy<

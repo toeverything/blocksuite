@@ -7,13 +7,20 @@ import { Indexer, QueryContent } from './search.js';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
-import { createYMapProxy } from '../utils/proxy.js';
+import { createYMapProxy, EnhancedYMap } from '../utils/proxy.js';
 
 export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
   [key: string]: string | number | boolean;
+}
+
+interface WorkspaceMetaData {
+  pages: Y.Array<EnhancedYMap<PageMeta>>;
+  versions: EnhancedYMap<Record<string, Y.Array<number>>>;
+  name: string;
+  avatar?: string;
 }
 
 class WorkspaceMeta extends Space {
@@ -31,7 +38,11 @@ class WorkspaceMeta extends Space {
   }
 
   private get _yMetaRoot() {
-    return this.doc.getMap(this.id);
+    return this.doc.getMap(this.id) as EnhancedYMap<WorkspaceMetaData>;
+  }
+
+  private get _yMetaRootProxy() {
+    return createYMapProxy(this._yMetaRoot);
   }
 
   private get _yPages() {
@@ -39,7 +50,7 @@ class WorkspaceMeta extends Space {
       this._yMetaRoot.set('pages', new Y.Array());
     }
 
-    return this._yMetaRoot.get('pages') as Y.Array<unknown>;
+    return this._yMetaRoot.get('pages');
   }
 
   private get _yVersions() {
@@ -50,20 +61,14 @@ class WorkspaceMeta extends Space {
     return this._yMetaRoot.get('versions') as Y.Map<unknown>;
   }
 
-  private get _yName() {
-    return createYMapProxy(this._yMetaRoot).name;
-  }
-
-  private get _yAvatar() {
-    return createYMapProxy(this._yMetaRoot).avatar;
-  }
-
   get name() {
-    return this._yName ? this._yName.toString() : '';
+    return this._yMetaRootProxy.name ? this._yMetaRootProxy.toString() : '';
   }
 
   get avatar() {
-    return this._yAvatar ? this._yAvatar.toString() : '';
+    return this._yMetaRootProxy.avatar
+      ? this._yMetaRootProxy.avatar.toString()
+      : '';
   }
 
   setName(val: string) {
@@ -79,7 +84,7 @@ class WorkspaceMeta extends Space {
   }
 
   get pageMetas() {
-    return this._yPages.toJSON() as PageMeta[];
+    return this._yPages.toJSON();
   }
 
   getPageMeta(id: string) {
@@ -87,7 +92,7 @@ class WorkspaceMeta extends Space {
   }
 
   addPage(page: PageMeta, index?: number) {
-    const yPage = new Y.Map();
+    const yPage = new Y.Map() as EnhancedYMap<PageMeta>;
     this.doc.transact(() => {
       if (index === undefined) {
         this._yPages.push([yPage]);
