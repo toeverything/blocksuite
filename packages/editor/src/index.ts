@@ -1,6 +1,3 @@
-import type { Page, Workspace } from '@blocksuite/store';
-import type { EditorContainer } from './components/index.js';
-
 export * from './components/index.js';
 export * from './managers/index.js';
 const env =
@@ -22,16 +19,3 @@ if (env[importIdentifier] === true) {
 }
 // @ts-ignore
 env[importIdentifier] = true;
-
-export function createEditor(page: Page): EditorContainer {
-  const editor = document.createElement('editor-container');
-  editor.page = page;
-  return editor;
-}
-
-export function createDebugMenu(workspace: Workspace, editor: EditorContainer) {
-  const debugMenu = document.createElement('debug-menu');
-  debugMenu.workspace = workspace;
-  debugMenu.editor = editor;
-  return debugMenu;
-}
