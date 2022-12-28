@@ -7,6 +7,7 @@ import { Indexer, QueryContent } from './search.js';
 import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
+import type { BlockSuiteDoc } from '../yjs/index.js';
 
 export interface PageMeta {
   id: string;
@@ -15,76 +16,58 @@ export interface PageMeta {
   [key: string]: string | number | boolean;
 }
 
-class WorkspaceMeta extends Space {
-  private _workspace: Workspace;
+type WorkspaceMetaData = {
+  pages: Y.Array<unknown>;
+  versions: Y.Map<unknown>;
+  name: string;
+  avatar: string;
+};
+
+class WorkspaceMeta extends Space<WorkspaceMetaData> {
   private _prevPages = new Set<string>();
   pageAdded = new Signal<string>();
   pageRemoved = new Signal<string>();
   pagesUpdated = new Signal();
   commonFieldsUpdated = new Signal();
 
-  constructor(id: string, workspace: Workspace, awareness: Awareness) {
-    super(id, workspace.doc, awareness);
-    this._workspace = workspace;
-    this._yMetaRoot.observeDeep(this._handleEvents);
+  constructor(id: string, doc: BlockSuiteDoc, awareness: Awareness) {
+    super(id, doc, awareness, {
+      valueInitializer: {
+        pages: () => new Y.Array(),
+        versions: () => new Y.Map(),
+        avatar: () => '',
+        name: () => '',
+      },
+    });
+    this.origin.observeDeep(this._handleEvents);
   }
 
-  private get _yMetaRoot() {
-    return this.doc.getMap(this.id);
-  }
-
-  private get _yPages() {
-    if (!this._yMetaRoot.has('pages')) {
-      this._yMetaRoot.set('pages', new Y.Array());
-    }
-
-    return this._yMetaRoot.get('pages') as Y.Array<unknown>;
-  }
-
-  private get _yVersions() {
-    if (!this._yMetaRoot.has('versions')) {
-      this._yMetaRoot.set('versions', new Y.Map());
-    }
-
-    return this._yMetaRoot.get('versions') as Y.Map<unknown>;
-  }
-
-  private get _yName() {
-    if (!this._yMetaRoot.has('name')) {
-      return null;
-    }
-    return this._yMetaRoot.get('name') as string;
-  }
-
-  private get _yAvatar() {
-    if (!this._yMetaRoot.has('avatar')) {
-      return null;
-    }
-    return this._yMetaRoot.get('avatar') as Y.Text;
+  get pages() {
+    return this.proxy.pages;
   }
 
   get name() {
-    return this._yName ? this._yName.toString() : '';
+    return this.proxy.name;
   }
 
   get avatar() {
-    return this._yAvatar ? this._yAvatar.toString() : '';
+    return this.proxy.avatar;
   }
 
-  setName(val: string) {
+  setName(name: string) {
     this.doc.transact(() => {
-      this._yMetaRoot.set('name', val);
+      this.proxy.name = name;
     });
   }
 
-  setAvatar(val: string) {
+  setAvatar(avatar: string) {
     this.doc.transact(() => {
-      this._yMetaRoot.set('avatar', val);
+      this.proxy.avatar = avatar;
     });
   }
 
   get pageMetas() {
-    return this._yPages.toJSON() as PageMeta[];
+    return this.proxy.pages.toJSON() as PageMeta[];
   }
 
   getPageMeta(id: string) {
@@ -98,21 +81,21 @@ class WorkspaceMeta extends Space {
         yPage.set(key, value);
       });
       if (index === undefined) {
-        this._yPages.push([yPage]);
+        this.pages.push([yPage]);
       } else {
-        this._yPages.insert(index, [yPage]);
+        this.pages.insert(index, [yPage]);
       }
     });
   }
 
   setPageMeta(id: string, props: Partial<PageMeta>) {
-    const pages = this._yPages.toJSON() as PageMeta[];
+    const pages = this.pages.toJSON() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
     this.doc.transact(() => {
       if (index === -1) return;
 
-      const yPage = this._yPages.get(index) as Y.Map<unknown>;
+      const yPage = this.pages.get(index) as Y.Map<unknown>;
       Object.entries(props).forEach(([key, value]) => {
         yPage.set(key, value);
       });
@@ -120,12 +103,12 @@ class WorkspaceMeta extends Space {
   }
 
   removePage(id: string) {
-    const pages = this._yPages.toJSON() as PageMeta[];
+    const pages = this.pages.toJSON() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
     this.doc.transact(() => {
       if (index !== -1) {
-        this._yPages.delete(index, 1);
+        this.pages.delete(index, 1);
       }
     });
   }
@@ -133,13 +116,13 @@ class WorkspaceMeta extends Space {
   /**
    * @internal Only for page initialization
    */
-  writeVersion() {
-    const { _yVersions, _workspace } = this;
-    _workspace.flavourMap.forEach((model, flavour) => {
+  writeVersion(workspace: Workspace) {
+    const versions = this.proxy.versions;
+    workspace.flavourMap.forEach((model, flavour) => {
       const yVersion = new Y.Array();
       const [major, minor] = model.version;
       yVersion.push([major, minor]);
-      _yVersions.set(flavour, yVersion);
+      versions.set(flavour, yVersion);
     });
   }
 
@@ -186,11 +169,11 @@ class WorkspaceMeta extends Space {
   ) => {
     events.forEach(e => {
       const hasKey = (k: string) =>
-        e.target === this._yMetaRoot && e.changes.keys.has(k);
+        e.target === this.origin && e.changes.keys.has(k);
 
       if (
-        e.target === this._yPages ||
-        e.target.parent === this._yPages ||
+        e.target === this.pages ||
+        e.target.parent === this.pages ||
         hasKey('pages')
       ) {
         this._handlePageEvent();
@@ -230,7 +213,11 @@ export class Workspace {
     }
     this.room = options.room;
 
-    this.meta = new WorkspaceMeta('space:meta', this, this._store.awareness);
+    this.meta = new WorkspaceMeta(
+      'space:meta',
+      this.doc,
+      this._store.awareness
+    );
 
     this.signals = {
       pagesUpdated: this.meta.pagesUpdated,
