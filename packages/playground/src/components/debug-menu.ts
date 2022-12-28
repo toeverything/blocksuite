@@ -1,5 +1,12 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
+import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 
 import {
   assertExists,
@@ -14,6 +21,8 @@ import {
 import { Utils } from '@blocksuite/store';
 import type { Workspace, BaseBlockModel } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
+
+setBasePath('/node_modules/@shoelace-style/shoelace/dist');
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {
@@ -348,15 +357,17 @@ export class DebugMenu extends LitElement {
       <style>
         .debug-menu {
           display: flex;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
           position: fixed;
           top: 0;
           left: 0;
           width: 100%;
+          overflow: auto;
           z-index: 1000; /* for debug visibility */
         }
         .debug-menu > button {
           display: flex;
+          flex-shrink: 0;
           justify-content: center;
           align-items: center;
           margin-left: 2px;
@@ -385,26 +396,46 @@ export class DebugMenu extends LitElement {
         .debug-menu > button > * {
           flex: 1;
         }
+
+        .button-group-toolbar {
+          padding: 8px;
+        }
+
+        .button-group-toolbar sl-button-group:not(:last-of-type) {
+          margin-right: var(--sl-spacing-x-small);
+        }
       </style>
       <div class="debug-menu">
-        <button
-          aria-label="undo"
-          title="undo"
-          .disabled=${!this.canUndo}
-          tabindex="-1"
-          @click=${() => this.page.undo()}
-        >
-          ${icons.undo}
-        </button>
-        <button
-          aria-label="redo"
-          title="redo"
-          .disabled=${!this.canRedo}
-          tabindex="-1"
-          @click=${() => this.page.redo()}
-        >
-          ${icons.redo}
-        </button>
+        <div class="button-group-toolbar">
+          <!-- undo/redo group -->
+          <sl-button-group label="History">
+            <!-- undo -->
+            <sl-tooltip content="Undo" placement="bottom" hoist>
+              <sl-button
+                size="small"
+                content="Undo"
+                .disabled=${!this.canUndo}
+                tabindex="-1"
+                @click=${() => this.page.undo()}
+              >
+                <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
+              </sl-button>
+            </sl-tooltip>
+            <!-- redo -->
+            <sl-tooltip content="Redo" placement="bottom" hoist>
+              <sl-button
+                size="small"
+                content="Redo"
+                .disabled=${!this.canRedo}
+                tabindex="-1"
+                @click=${() => this.page.redo()}
+              >
+                <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
+              </sl-button>
+            </sl-tooltip>
+          </sl-button-group>
+        </div>
+
         <button
           aria-label="heading-1"
           title="heading-1"

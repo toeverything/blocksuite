@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test';
 
 export async function undoByClick(page: Page) {
-  await page.click('button[aria-label="undo"]');
+  await page.click('sl-button[content="Undo"]');
 }
 
 export async function redoByClick(page: Page) {
-  await page.click('button[aria-label="redo"]');
+  await page.click('sl-button[content="Redo"]');
 }
 
 export async function disconnectByClick(page: Page) {
