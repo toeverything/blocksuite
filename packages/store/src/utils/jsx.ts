@@ -76,7 +76,7 @@ export const serializeYDoc = (doc: Doc) => {
   return json;
 };
 
-const serializeYMap = (map: Map<unknown>): unknown => {
+const serializeYMap = (map: Map): unknown => {
   const json: Record<string, unknown> = {};
   map.forEach((value, key) => {
     if (value instanceof Map) {
