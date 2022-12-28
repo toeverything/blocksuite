@@ -5,7 +5,6 @@ code-block {
 
 .affine-code-block-container {
   font-size: calc(var(--affine-font-base) - 4px);
-  font-family: var(--affine-font-family2);
   line-height: calc(var(--affine-line-height-base) - 6px);
   position: relative;
   width: 720px;
@@ -13,6 +12,10 @@ code-block {
   background: var(--affine-code-block-background);
   border-radius: 10px;
   margin-top: calc(var(--affine-paragraph-space) + 3px);
+}
+
+.affine-code-block-container pre {
+  font-family: var(--affine-font-family2);
 }
 
 .affine-code-block-container .container {

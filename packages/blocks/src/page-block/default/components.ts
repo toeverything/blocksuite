@@ -21,7 +21,7 @@ import type {
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block.js';
-import { assertExists, BLOCK_ID_ATTR } from '../../__internal__/index.js';
+import { BLOCK_ID_ATTR } from '../../__internal__/index.js';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -188,7 +188,9 @@ export function CodeBlockOptionContainer(
     const syntaxElem = document.querySelector(
       `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
     );
-    assertExists(syntaxElem);
+    if (!syntaxElem) {
+      return html``;
+    }
     const isWrapped = syntaxElem.classList.contains('wrap');
     return html`
       <style>

@@ -112,6 +112,20 @@ export async function initEmptyParagraphState(page: Page) {
   return ids;
 }
 
+export async function initEmptyCodeBlockState(page: Page) {
+  const ids = await page.evaluate(() => {
+    const { page } = window;
+    page.captureSync();
+    const pageId = page.addBlock({ flavour: 'affine:page' });
+    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, groupId);
+    page.captureSync();
+    return { pageId, groupId, codeBlockId };
+  });
+  await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
+  return ids;
+}
+
 export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);

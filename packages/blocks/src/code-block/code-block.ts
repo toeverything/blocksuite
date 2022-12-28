@@ -8,6 +8,7 @@ import {
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
   BlockHost,
+  getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
@@ -76,28 +77,31 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   render() {
+    const page = getDefaultPageBlock(this.model);
+    const codeBlockOption = page.codeBlockOption;
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
       <div class="affine-code-block-container">
-        <div class="container">
-          <div class="lang-container" @click=${this._onClick}>
-            <code-block-button width="101px" height="24px">
-              ${this.model.language} ${ArrowDownIcon}
-            </code-block-button>
-          </div>
-          <lang-list
-            showLangList=${this.showLangList}
-            id=${this.model.id}
-            @selected-language-changed=${(e: CustomEvent) => {
-              this.model.setLang(e.detail.language);
-            }}
-            @dispose=${() => {
-              this.showLangList = 'hidden';
-              this.langSelectionButton.classList.remove('clicked');
-            }}
-          ></lang-list>
-        </div>
+        ${codeBlockOption || this.showLangList !== 'hidden'
+          ? html`<div class="container">
+              <div class="lang-container" @click=${this._onClick}>
+                <code-block-button width="101px" height="24px">
+                  ${this.model.language} ${ArrowDownIcon}
+                </code-block-button>
+              </div>
+              <lang-list
+                showLangList=${this.showLangList}
+                id=${this.model.id}
+                @selected-language-changed=${(e: CustomEvent) => {
+                  this.model.setLang(e.detail.language);
+                }}
+                @dispose=${() => {
+                  this.showLangList = 'hidden';
+                }}
+              ></lang-list>
+            </div>`
+          : html``}
         ${this.highlight
           ? html`<rich-text
               .host=${this.host}
@@ -112,8 +116,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
             >
               <div id="line-number"></div>
             </rich-text>`
-          : // TODO update loading state
-            `Loading coding block...`}
+          : html`<loader-element />`}
         ${childrenContainer}
       </div>
     `;
