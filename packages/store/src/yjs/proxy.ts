@@ -13,11 +13,9 @@ export type ProxyConfig<Data extends Record<string, unknown>> = {
 
 export function createYMapProxy<Data extends Record<string, unknown>>(
   yMap: YMap<unknown>,
-  config: ProxyConfig<Data> = {
-    readonly: false,
-  }
+  config: ProxyConfig<Data> = {}
 ): Data {
-  const { readonly = false } = config;
+  const { readonly = false, initializer } = config;
   if (!(yMap instanceof YMap)) {
     throw new TypeError();
   }
@@ -38,9 +36,9 @@ export function createYMapProxy<Data extends Record<string, unknown>>(
       const get = Reflect.get(target, 'get', receiver);
       const has = Reflect.get(target, 'has');
       if (!Reflect.apply(has, target, [p])) {
-        if (typeof p === 'string' && config.initializer?.[p]) {
+        if (typeof p === 'string' && initializer?.[p]) {
           const set = Reflect.get(target, 'set', receiver);
-          const defaultValue = (config.initializer[p] as () => unknown)();
+          const defaultValue = (initializer[p] as () => unknown)();
           Reflect.apply(set, target, [p, defaultValue]);
           return defaultValue;
         }
