@@ -10,10 +10,6 @@ export type BlockSuiteDocData = Record<string, BlockSuiteDocAllowedValue>;
 export class BlockSuiteDoc<
   Data extends BlockSuiteDocData = BlockSuiteDocData
 > extends Y.Doc {
-  constructor() {
-    super();
-  }
-
   getMapProxy<
     Key extends keyof Data & string,
     Value extends Record<string, unknown> = Data[Key] extends Record<
