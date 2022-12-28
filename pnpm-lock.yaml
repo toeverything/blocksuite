@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 patchedDependencies:
   yjs@13.5.43:
-    hash: ur4ejz37gappjoavr5hfhlbkly
+    hash: gywskwkb4t2tcjibyruuexqqm4
     path: patches/yjs@13.5.43.patch
 
 importers:
