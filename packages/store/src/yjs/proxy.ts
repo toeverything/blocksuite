@@ -11,13 +11,13 @@ export type ProxyConfig<Data extends Record<string, unknown>> = {
   initializer?: DataInitializer<Partial<Data>>;
 };
 
-function initialize(object: any, yMap: YMap<unknown>) {
+function initialize(object: Record<string, unknown>, yMap: YMap<unknown>) {
   yMap.forEach((value, key) => {
     object[key] = value;
   });
 }
 
-function subscribe(object: any, yMap: YMap<unknown>) {
+function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
   yMap.observe(event => {
     event.keysChanged.forEach(key => {
       const type = event.changes.keys.get(key);
