@@ -28,9 +28,80 @@ export const heavy = (workspace: Workspace) => {
 export const basic = (workspace: Workspace) => {
   workspace.signals.pageAdded.once(id => {
     const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlock({ flavour: 'affine:page' });
+    const pageBlockId = page.addBlock({
+      flavour: 'affine:page',
+      title: 'Welcome to BlockSuite playground',
+    });
     const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
-    page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    page.addBlock(
+      {
+        flavour: 'affine:paragraph',
+        text: new Text(
+          page,
+          'This playground is a demo environment built with BlockSuite.'
+        ),
+      },
+      groupId
+    );
+    page.addBlock(
+      {
+        flavour: 'affine:paragraph',
+        text: Text.fromDelta(page, [
+          {
+            insert: 'Try ',
+          },
+          {
+            insert: 'typing',
+            attributes: {
+              bold: true,
+            },
+          },
+          {
+            insert: ', ',
+          },
+          {
+            insert: 'formatting',
+            attributes: {
+              italic: true,
+            },
+          },
+          {
+            insert: ', and ',
+          },
+          {
+            insert: 'dragging',
+            attributes: {
+              underline: true,
+              strike: false,
+            },
+          },
+          {
+            insert: ' here!',
+          },
+        ]),
+      },
+      groupId
+    );
+    page.addBlock(
+      {
+        flavour: 'affine:paragraph',
+        text: Text.fromDelta(page, [
+          {
+            insert: 'A quick tip 💡: Try removing the ',
+          },
+          {
+            insert: '?init',
+            attributes: {
+              code: true,
+            },
+          },
+          {
+            insert: ' part in the URL and open it in another tab!',
+          },
+        ]),
+      },
+      groupId
+    );
     page.resetHistory();
   });
 
