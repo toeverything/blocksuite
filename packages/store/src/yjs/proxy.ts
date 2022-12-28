@@ -40,7 +40,7 @@ export function createYMapProxy<Data extends Record<string, unknown>>(
       if (!Reflect.apply(has, target, [p])) {
         if (typeof p === 'string' && config.initializer?.[p]) {
           const set = Reflect.get(target, 'set', receiver);
-          const defaultValue = config.initializer[p];
+          const defaultValue = (config.initializer[p] as () => unknown)();
           Reflect.apply(set, target, [p, defaultValue]);
           return defaultValue;
         }
