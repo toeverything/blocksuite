@@ -40,10 +40,6 @@ export async function clickBlockTypeMenuItem(page: Page, name: string) {
   await menuItem.waitFor({ state: 'hidden' });
 }
 
-export async function switchEditorMode(page: Page) {
-  await clickTestOperationsMenuItem(page, 'Switch Mode');
-}
-
 export async function addCodeBlock(page: Page) {
   await clickBlockTypeMenuItem(page, 'Code');
   await page.waitForFunction(() => {
@@ -52,9 +48,12 @@ export async function addCodeBlock(page: Page) {
   });
 }
 
+export async function switchEditorMode(page: Page) {
+  await page.click('sl-button[content="Switch Editor Mode"]');
+}
+
 export async function switchMouseMode(page: Page) {
-  const button = page.getByRole('button', { name: 'Switch Mouse Mode' });
-  await button.click();
+  await page.click('sl-button[content="Switch Mouse Mode"]');
 }
 
 export async function switchShapeColor(page: Page, color: string) {

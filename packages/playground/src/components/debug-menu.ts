@@ -148,8 +148,9 @@ export class DebugMenu extends LitElement {
     updateSelectedTextType('affine:paragraph', type, this.page);
   }
 
-  private _switchMode() {
-    this.editor.mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
+  private _switchEditorMode() {
+    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
+    this.mode = this.editor.mode = mode;
   }
 
   private _addGroup() {
@@ -169,7 +170,7 @@ export class DebugMenu extends LitElement {
     this.page.addBlock({ flavour: 'affine:paragraph' }, groupId);
   }
 
-  private _onSwitchMouseMode() {
+  private _switchMouseMode() {
     this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
   }
 
@@ -225,49 +226,19 @@ export class DebugMenu extends LitElement {
           overflow: auto;
           z-index: 1000; /* for debug visibility */
         }
-        .debug-menu > button {
-          display: flex;
-          flex-shrink: 0;
-          justify-content: center;
-          align-items: center;
-          margin-left: 2px;
-          margin-top: 2px;
-          width: 26px;
-          height: 22px;
-          border: 0;
-          border-radius: 2px;
-          background-color: var(--affine-border-color);
-          color: var(--affine-text-color);
-          transition: all 0.3s;
-          cursor: pointer;
-        }
-        .debug-menu > button:hover {
-          background-color: var(--affine-hover-background);
-        }
-        .debug-menu > button:disabled,
-        .debug-menu > button:disabled:hover {
-          opacity: 0.5;
-          background-color: var(--affine-border-color);
-          cursor: default;
-        }
-        .debug-menu > button path {
-          fill: var(--affine-text-color);
-        }
-        .debug-menu > button > * {
-          flex: 1;
-        }
 
         .default-toolbar {
           padding: 8px;
           width: 100%;
-          min-width: 340px;
+          min-width: 390px;
         }
 
         .edgeless-toolbar {
           display: flex;
           align-items: center;
         }
-        .edgeless-toolbar sl-select {
+        .edgeless-toolbar sl-select,
+        .edgeless-toolbar sl-button {
           margin-right: 4px;
         }
       </style>
@@ -281,7 +252,6 @@ export class DebugMenu extends LitElement {
                 size="small"
                 content="Undo"
                 .disabled=${!this.canUndo}
-                tabindex="-1"
                 @click=${() => this.page.undo()}
               >
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
@@ -293,7 +263,6 @@ export class DebugMenu extends LitElement {
                 size="small"
                 content="Redo"
                 .disabled=${!this.canRedo}
-                tabindex="-1"
                 @click=${() => this.page.redo()}
               >
                 <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
@@ -382,9 +351,6 @@ export class DebugMenu extends LitElement {
               Test Operations
             </sl-button>
             <sl-menu>
-              <sl-menu-item @click=${this._switchMode}>
-                Switch Mode
-              </sl-menu-item>
               <sl-menu-item @click=${this._toggleConnection}>
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
@@ -401,15 +367,36 @@ export class DebugMenu extends LitElement {
               <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
+
+          <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Switch Editor Mode"
+              @click=${this._switchEditorMode}
+            >
+              <sl-icon name="phone-flip"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
         </div>
 
-        <div class="edgeless-toolbar">
-          <sl-icon-button
-            label="Switch Mouse Mode"
-            name=${this.mouseMode.type === 'default' ? 'cursor' : 'pentagon'}
-            @click=${this._onSwitchMouseMode}
-            style="font-size: 1.2rem;"
-          >
+        <div class="edgeless-toolbar" style=${
+          'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')
+        }>
+          <sl-tooltip content="Switch Mouse Mode" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Switch Mouse Mode"
+              @click=${this._switchMouseMode}
+            >
+              <sl-icon
+                name=${
+                  this.mouseMode.type === 'default' ? 'cursor' : 'pentagon'
+                }
+              >
+              </sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
           </sl-icon-button>
           <sl-select
             placeholder="Shape Color"
