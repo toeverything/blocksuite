@@ -11,7 +11,7 @@ import {
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import {
-  clickMenuButton,
+  clickBlockTypeMenuItem,
   enterPlaygroundRoom,
   focusRichText,
   pressEnter,
@@ -277,13 +277,13 @@ test('switch between paragraph types', async ({ page }) => {
 
   const selector = '.affine-paragraph-block-container';
 
-  await clickMenuButton(page, 'heading-1');
+  await clickBlockTypeMenuItem(page, 'H1');
   await assertClassName(page, selector, /h1/);
 
-  await clickMenuButton(page, 'heading-2');
+  await clickBlockTypeMenuItem(page, 'H2');
   await assertClassName(page, selector, /h2/);
 
-  await clickMenuButton(page, 'heading-3');
+  await clickBlockTypeMenuItem(page, 'H3');
   await assertClassName(page, selector, /h3/);
 
   await undoByClick(page);
@@ -302,7 +302,7 @@ test('delete at start of paragraph block', async ({ page }) => {
   await pressEnter(page);
   await page.keyboard.type('a');
 
-  await clickMenuButton(page, 'heading-1');
+  await clickBlockTypeMenuItem(page, 'H1');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '3', 'h1');
@@ -330,7 +330,7 @@ test('delete at start of paragraph immediately following list', async ({
   await pressEnter(page);
   await page.keyboard.type('a');
 
-  await clickMenuButton(page, 'convert to bulleted list');
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'bulleted');
@@ -345,7 +345,7 @@ test('delete at start of paragraph immediately following list', async ({
 
   await undoByClick(page);
   await undoByClick(page);
-  await clickMenuButton(page, 'convert to numbered list');
+  await clickBlockTypeMenuItem(page, 'Numbered List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'numbered');
@@ -359,7 +359,7 @@ test('delete at start of paragraph immediately following list', async ({
 
   await undoByClick(page);
   await undoByClick(page);
-  await clickMenuButton(page, 'convert to todo list');
+  await clickBlockTypeMenuItem(page, 'Todo List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'todo');

@@ -47,6 +47,9 @@
   --affine-tooltip-color: #fff;
   --affine-tooltip-background: var(--affine-primary-color);
   --affine-tooltip-shadow: 1px 1px 4px rgba(0, 0, 0, 0.14);
+
+  --sl-font-size-medium: var(--affine-font-xs);
+  --sl-input-font-size-small: var(--affine-font-xs);
 }
 
 html,

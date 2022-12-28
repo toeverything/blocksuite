@@ -13,8 +13,8 @@ import {
   initThreeParagraphs,
   dragBetweenIndices,
   initEmptyParagraphState,
-  convertToBulletedListByClick,
   formatType,
+  clickBlockTypeMenuItem,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -232,7 +232,7 @@ test('format list to h1', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
-  await convertToBulletedListByClick(page);
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await page.keyboard.type('aa');
   await focusRichText(page, 0);
   await formatType(page);
