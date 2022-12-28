@@ -91,21 +91,21 @@ class WorkspaceMeta extends Space {
     return this.pageMetas.find(page => page.id === id);
   }
 
-  addPage(page: PageMeta, index?: number) {
+  addPageMeta(page: PageMeta, index?: number) {
     const yPage = new Y.Map();
     this.doc.transact(() => {
+      Object.entries(page).forEach(([key, value]) => {
+        yPage.set(key, value);
+      });
       if (index === undefined) {
         this._yPages.push([yPage]);
-        Object.entries(page).forEach(([key, value]) => {
-          yPage.set(key, value);
-        });
       } else {
         this._yPages.insert(index, [yPage]);
       }
     });
   }
 
-  setPage(id: string, props: Partial<PageMeta>) {
+  setPageMeta(id: string, props: Partial<PageMeta>) {
     const pages = this._yPages.toJSON() as PageMeta[];
     const index = pages.findIndex((page: PageMeta) => id === page.id);
 
@@ -305,7 +305,7 @@ export class Workspace {
       throw new Error('page already exists');
     }
 
-    this.meta.addPage({
+    this.meta.addPageMeta({
       id: pageId,
       title: '',
       createDate: +new Date(),
@@ -314,7 +314,7 @@ export class Workspace {
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
   setPageMeta(pageId: string, props: Partial<PageMeta>) {
-    this.meta.setPage(pageId, props);
+    this.meta.setPageMeta(pageId, props);
   }
 
   removePage(pageId: string) {
