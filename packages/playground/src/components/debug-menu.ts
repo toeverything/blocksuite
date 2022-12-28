@@ -25,10 +25,9 @@ import { Utils } from '@blocksuite/store';
 import type { Workspace, BaseBlockModel } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
 
-const basePath = new URL(
-  '../../node_modules/@shoelace-style/shoelace/dist',
-  import.meta.url
-).href;
+const basePath = import.meta.env.DEV
+  ? 'node_modules/@shoelace-style/shoelace/dist'
+  : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
