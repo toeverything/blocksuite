@@ -78,9 +78,11 @@ export class FormatQuickBar extends LitElement {
     const startModel = models[0];
     this.paragraphType = startModel.type;
     this.page = startModel.page as Page;
-    if (models.length > 1) {
-      // Select multiple models
-    }
+
+    this.addEventListener('mousedown', (e: MouseEvent) => {
+      // Prevent click event from making selection lost
+      e.preventDefault();
+    });
   }
 
   private _onHover() {

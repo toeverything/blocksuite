@@ -22,7 +22,17 @@ test('should format quick bar show when select text', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
-  page.mouse.click(0, 0);
+
+  const box = await formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  // Click the edge of the format quick bar
+  await page.mouse.click(box.x + 4, box.y + box.height / 2);
+  // Even not any button is clicked, the format quick bar should't be hidden
+  await expect(formatQuickBar).toBeVisible();
+
+  await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();
 });
 
