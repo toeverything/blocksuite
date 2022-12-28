@@ -11,39 +11,64 @@ export type ProxyConfig<Data extends Record<string, unknown>> = {
   initializer?: DataInitializer<Partial<Data>>;
 };
 
+function initialize(object: Record<string, unknown>, yMap: YMap<unknown>) {
+  yMap.forEach((value, key) => {
+    object[key] = value;
+  });
+}
+
+function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
+  yMap.observe(event => {
+    event.keysChanged.forEach(key => {
+      const type = event.changes.keys.get(key);
+      if (!type) {
+        console.error('no possible');
+        return;
+      }
+      if (type.action === 'delete') {
+        delete object[key];
+      } else if (type.action === 'add') {
+        object[key] = yMap.get(key);
+      } else if (type.action === 'update') {
+        object[key] = yMap.get(key);
+      }
+    });
+  });
+}
+
 export function createYMapProxy<Data extends Record<string, unknown>>(
   yMap: YMap<unknown>,
   config: ProxyConfig<Data> = {}
 ): Data {
   const { readonly = false, initializer } = config;
+  const object = {} as Data;
   if (!(yMap instanceof YMap)) {
     throw new TypeError();
   }
-  return new Proxy(yMap, {
+  initialize(object, yMap);
+  subscribe(object, yMap);
+  return new Proxy(object, {
     has: (target, p) => {
-      const has = Reflect.get(target, 'has');
-      return Reflect.apply(has, target, [p]);
+      return Reflect.has(target, p);
     },
     set: (target, p, value, receiver) => {
       if (readonly) {
         throw new Error('Modify data is not allowed');
       } else {
-        const set = Reflect.get(target, 'set', receiver);
-        return Reflect.apply(set, target, [p, value]);
+        return Reflect.set(target, p, value, receiver);
       }
     },
     get: (target, p, receiver) => {
-      const get = Reflect.get(target, 'get', receiver);
-      const has = Reflect.get(target, 'has');
-      if (!Reflect.apply(has, target, [p])) {
-        if (typeof p === 'string' && typeof initializer?.[p] === 'function') {
-          const set = Reflect.get(target, 'set', receiver);
-          const defaultValue = (initializer[p] as () => unknown)();
-          Reflect.apply(set, target, [p, defaultValue]);
-        }
+      if (
+        typeof p === 'string' &&
+        !yMap.has(p) &&
+        typeof initializer?.[p] === 'function'
+      ) {
+        const value = (initializer[p] as () => unknown)();
+        yMap.set(p, value);
+        return value;
       }
-      return Reflect.apply(get, target, [p]);
+      return Reflect.get(target, p, receiver);
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }) as any;
+  });
 }
