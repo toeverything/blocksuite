@@ -10,9 +10,7 @@ export interface StackItem {
   type: 'undo' | 'redo';
 }
 
-export class Space<
-  Data extends Record<string, unknown> = Record<string, unknown>
-> {
+export class Space<Data extends Record<string, unknown> = Record<string, any>> {
   /** unprefixed id */
   readonly id: string;
   readonly doc: BlockSuiteDoc;
@@ -21,7 +19,7 @@ export class Space<
    * @protected
    */
   protected readonly proxy: Data;
-  protected readonly origin: Y.Map<unknown>;
+  protected readonly origin: Y.Map<Data[keyof Data]>;
   readonly awareness!: AwarenessAdapter;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
@@ -35,15 +33,14 @@ export class Space<
   ) {
     this.id = id;
     this.doc = doc;
-    this.origin = this.doc.getMap(
-      this.id.startsWith('space:') ? this.id : this.prefixedId
-    );
-    this.proxy = this.doc.getMapProxy<string, Data>(this.id, {
+    const targetId = this.id.startsWith('space:') ? this.id : this.prefixedId;
+    this.origin = this.doc.getMap(targetId);
+    this.proxy = this.doc.getMapProxy<string, Data>(targetId, {
       initializer: options?.valueInitializer,
     });
 
     const aware = awareness ?? new Awareness(this.doc);
-    this.awareness = new AwarenessAdapter(this, aware);
+    this.awareness = new AwarenessAdapter(this as Space, aware);
   }
 
   get prefixedId() {

@@ -46,7 +46,11 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-export class Page extends Space {
+export type PageData = {
+  [key: string]: YBlock;
+};
+
+export class Page extends Space<PageData> {
   public workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
@@ -89,8 +93,8 @@ export class Page extends Space {
   }
 
   /** key-value store of blocks */
-  private get _yBlocks() {
-    return this.doc.getMap(this.prefixedId) as YBlocks;
+  private get _yBlocks(): YBlocks {
+    return this.origin;
   }
 
   get root() {
