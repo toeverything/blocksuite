@@ -113,7 +113,6 @@ use fern::{
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await addCodeBlock(page);
-  await page.waitForSelector('rich-text');
   await pasteByKeyboard(page);
 
   const locator = page.locator('affine-paragraph');
@@ -126,7 +125,6 @@ test('drag copy paste', async ({ page }) => {
 
   await focusRichText(page);
   await addCodeBlock(page);
-  await page.waitForSelector('rich-text');
   await page.keyboard.type('use');
 
   const position = await page.evaluate(() => {
@@ -157,7 +155,6 @@ test('keyboard selection and copy paste', async ({ page }) => {
 
   await focusRichText(page);
   await addCodeBlock(page);
-  await page.waitForSelector('rich-text');
 
   await page.keyboard.type('use');
   await page.keyboard.down('Shift');
@@ -208,7 +205,6 @@ test('press enter twice at end of code block can jump out', async ({
 
   await focusRichText(page);
   await addCodeBlock(page);
-  await page.waitForSelector('rich-text');
 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
@@ -224,7 +220,6 @@ test('press backspace after code block can jump into start of code block', async
 
   await focusRichText(page);
   await addCodeBlock(page);
-  await page.waitForSelector('rich-text');
 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
@@ -241,7 +236,6 @@ test('press ArrowUp after code block can jump into start of code block', async (
 
   await focusRichText(page);
   await addCodeBlock(page);
-  await page.waitForSelector('rich-text');
 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
@@ -256,7 +250,6 @@ test('undo and redo works in code block', async ({ page }) => {
 
   await focusRichText(page);
   await addCodeBlock(page);
-  await page.waitForSelector('rich-text');
 
   await page.keyboard.type('const a = 10;');
   await assertRichTexts(page, ['const a = 10;\n']);
