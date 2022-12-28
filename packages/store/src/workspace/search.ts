@@ -104,7 +104,10 @@ export class Indexer {
     }
   }
 
-  private _handlePageIndexing(pageId: string, page?: YMap<YBlock>) {
+  private _handlePageIndexing(
+    pageId: string,
+    page?: YMap<Record<string, YBlock>>
+  ) {
     if (page) {
       page.forEach((_, key) => {
         this._refreshIndex(pageId, key, 'add', page.get(key));
@@ -172,7 +175,7 @@ export class Indexer {
     return undefined;
   }
 
-  private _getPage(key: string): YMap<YBlock> | undefined {
+  private _getPage(key: string): YMap<Record<string, YBlock>> | undefined {
     try {
       if (!key.startsWith('space:')) {
         key = `space:${key}`;
