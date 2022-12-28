@@ -35,7 +35,9 @@ export class Space<
   ) {
     this.id = id;
     this.doc = doc;
-    this.origin = this.doc.getMap(this.id);
+    this.origin = this.doc.getMap(
+      this.id.startsWith('space:') ? this.id : this.prefixedId
+    );
     this.proxy = this.doc.getMapProxy<string, Data>(this.id, {
       initializer: options?.valueInitializer,
     });
