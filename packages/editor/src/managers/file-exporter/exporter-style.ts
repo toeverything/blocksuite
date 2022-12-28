@@ -3,14 +3,11 @@ import { css } from 'lit';
 export const globalCSS = css`
   :root {
     --affine-primary-color: #3a4c5c;
-    --affine-font-family: Avenir Next, apple-system, BlinkMacSystemFont,
+    --affine-font-family: Avenir Next, Poppins, apple-system, BlinkMacSystemFont,
       Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
       Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
       Segoe UI Symbol, Noto Color Emoji;
-    --affine-font-family2: Roboto Mono, apple-system, BlinkMacSystemFont,
-      Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
-      Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-      Segoe UI Symbol, Noto Color Emoji;
+    --affine-font-mono: Space Mono, Consolas, Menlo, Monaco, Courier, monospace;
   }
   body {
     font-family: var(--affine-font-family);

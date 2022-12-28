@@ -15,7 +15,7 @@ code-block {
 }
 
 .affine-code-block-container pre {
-  font-family: var(--affine-font-family2);
+  font-family: var(--affine-font-mono);
 }
 
 .affine-code-block-container .container {
