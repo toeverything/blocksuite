@@ -63,15 +63,11 @@ class WorkspaceMeta extends Space {
   }
 
   get name() {
-    return this._yMetaRootProxy.name
-      ? this._yMetaRootProxy.name.toString()
-      : '';
+    return this._yMetaRootProxy.name;
   }
 
   get avatar() {
-    return this._yMetaRootProxy.avatar
-      ? this._yMetaRootProxy.avatar.toString()
-      : '';
+    return this._yMetaRootProxy.avatar;
   }
 
   setName(val: string) {
