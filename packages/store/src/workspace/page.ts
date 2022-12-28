@@ -482,6 +482,7 @@ export class Page extends Space {
     this._blockMap.delete(id);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _handleYBlockUpdate(event: Y.YMapEvent<any>) {
     const id = event.target.get('sys:id') as string;
     const model = this.getBlockById(id);

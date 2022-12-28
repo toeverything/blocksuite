@@ -194,6 +194,7 @@ class WorkspaceMeta extends Space {
   }
 
   private _handleEvents = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     events: Y.YEvent<Y.Array<unknown> | Y.Text | Y.Map<any>>[]
   ) => {
     events.forEach(e => {
@@ -286,8 +287,7 @@ export class Workspace {
       pageId = 'space:' + pageId;
     }
 
-    const page = this._pages.get(pageId) ?? null;
-    return page;
+    return this._pages.get(pageId) ?? null;
   }
 
   private _handlePageEvent() {
