@@ -55,7 +55,8 @@ export interface StoreOptions extends SSROptions {
 const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
-  readonly doc = new Y.Doc();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly doc = new Y.Doc<any>();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
