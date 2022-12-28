@@ -65,7 +65,7 @@ export async function switchShapeType(page: Page, shapeType: string) {
 }
 
 export async function switchReadonly(page: Page) {
-  await page.click('button[aria-label="toggle readonly"]');
+  await clickTestOperationsMenuItem(page, 'Toggle Readonly');
 }
 
 export async function activeEmbed(page: Page) {
