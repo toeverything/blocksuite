@@ -34,7 +34,6 @@ class WorkspaceMeta extends Space {
 
   constructor(id: string, workspace: Workspace, awareness: Awareness) {
     super(id, workspace.doc, awareness);
-    workspace.doc;
     this._workspace = workspace;
     this._yMetaRoot.observeDeep(this._handleEvents);
   }
