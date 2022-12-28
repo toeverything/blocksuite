@@ -105,6 +105,7 @@ class Syntax extends Module {
       );
     }
     let timer: number | undefined;
+    // TODO Optimize performance when hover
     // @ts-ignore
     this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
       clearTimeout(timer);

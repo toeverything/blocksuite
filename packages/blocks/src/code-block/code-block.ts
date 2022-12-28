@@ -10,9 +10,9 @@ import {
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-// @ts-ignore
-import highlight from 'highlight.js';
 import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
+
+let highlighGlobal: unknown = null;
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
@@ -48,8 +48,22 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @state()
   filterText = '';
 
-  @property()
-  delay = 150;
+  @state()
+  highlight: unknown;
+
+  connectedCallback() {
+    super.connectedCallback();
+    if (highlighGlobal) {
+      this.highlight = highlighGlobal;
+      return;
+    }
+    // @ts-ignore highlight.js has no types
+    import('highlight.js').then(highlightModule => {
+      const highlight = highlightModule.default.highlight;
+      this.highlight = highlight;
+      highlighGlobal = highlight;
+    });
+  }
 
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -84,19 +98,22 @@ export class CodeBlockComponent extends NonShadowLitElement {
             }}
           ></lang-list>
         </div>
-        <rich-text
-          .host=${this.host}
-          .model=${this.model}
-          .modules=${{
-            syntax: {
-              highlight: highlight.highlight,
-              codeBlockElement: this,
-              language: this.model.language,
-            },
-          }}
-        >
-          <div id="line-number"></div>
-        </rich-text>
+        ${this.highlight
+          ? html`<rich-text
+              .host=${this.host}
+              .model=${this.model}
+              .modules=${{
+                syntax: {
+                  highlight: this.highlight,
+                  codeBlockElement: this,
+                  language: this.model.language,
+                },
+              }}
+            >
+              <div id="line-number"></div>
+            </rich-text>`
+          : // TODO update loading state
+            `Loading coding block...`}
         ${childrenContainer}
       </div>
     `;
