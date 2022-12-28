@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { LitElement, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
 import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
+import '@shoelace-style/shoelace/dist/components/divider/divider.js';
 import '@shoelace-style/shoelace/dist/components/menu/menu.js';
 import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
+import type { SlDropdown } from '@shoelace-style/shoelace';
 
 import {
   assertExists,
@@ -32,38 +34,6 @@ setBasePath(basePath);
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {
-  quote: html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 448 512"
-      style="width: 11px;"
-    >
-      <path
-        d="M0 216C0 149.7 53.7 96 120 96h8c17.7 0 32 14.3 32 32s-14.3 32-32 32h-8c-30.9 0-56 25.1-56 56v8h64c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V320 288 216zm256 0c0-66.3 53.7-120 120-120h8c17.7 0 32 14.3 32 32s-14.3 32-32 32h-8c-30.9 0-56 25.1-56 56v8h64c35.3 0 64 28.7 64 64v64c0 35.3-28.7 64-64 64H320c-35.3 0-64-28.7-64-64V320 288 216z"
-      />
-    </svg>
-  `,
-  ul: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-      <path
-        d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"
-      />
-    </svg>
-  `,
-  ol: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-      <path
-        d="M24 56c0-13.3 10.7-24 24-24H80c13.3 0 24 10.7 24 24V176h16c13.3 0 24 10.7 24 24s-10.7 24-24 24H40c-13.3 0-24-10.7-24-24s10.7-24 24-24H56V80H48C34.7 80 24 69.3 24 56zM86.7 341.2c-6.5-7.4-18.3-6.9-24 1.2L51.5 357.9c-7.7 10.8-22.7 13.3-33.5 5.6s-13.3-22.7-5.6-33.5l11.1-15.6c23.7-33.2 72.3-35.6 99.2-4.9c21.3 24.4 20.8 60.9-1.1 84.7L86.8 432H120c13.3 0 24 10.7 24 24s-10.7 24-24 24H32c-9.5 0-18.2-5.6-22-14.4s-2.1-18.9 4.3-25.9l72-78c5.3-5.8 5.4-14.6 .3-20.5zM224 64H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H224c-17.7 0-32-14.3-32-32s14.3-32 32-32zm0 160H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H224c-17.7 0-32-14.3-32-32s14.3-32 32-32zm0 160H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H224c-17.7 0-32-14.3-32-32s14.3-32 32-32z"
-      />
-    </svg>
-  `,
-  checklist: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-      <path
-        d="M211.8 339.8C200.9 350.7 183.1 350.7 172.2 339.8L108.2 275.8C97.27 264.9 97.27 247.1 108.2 236.2C119.1 225.3 136.9 225.3 147.8 236.2L192 280.4L300.2 172.2C311.1 161.3 328.9 161.3 339.8 172.2C350.7 183.1 350.7 200.9 339.8 211.8L211.8 339.8zM0 96C0 60.65 28.65 32 64 32H384C419.3 32 448 60.65 448 96V416C448 451.3 419.3 480 384 480H64C28.65 480 0 451.3 0 416V96zM48 96V416C48 424.8 55.16 432 64 432H384C392.8 432 400 424.8 400 416V96C400 87.16 392.8 80 384 80H64C55.16 80 48 87.16 48 96z"
-      />
-    </svg>
-  `,
   switchMode: html`
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -199,6 +169,9 @@ export class DebugMenu extends LitElement {
   @state()
   readonly = false;
 
+  @query('#block-type-dropdown')
+  blockTypeDropdown!: SlDropdown;
+
   get mouseMode(): MouseMode {
     if (this.mouseModeType === 'default') {
       return {
@@ -241,8 +214,14 @@ export class DebugMenu extends LitElement {
     }
   }
 
-  private _convertToList(listType: 'bulleted' | 'numbered' | 'todo') {
+  private _convertToList(
+    e: PointerEvent,
+    listType: 'bulleted' | 'numbered' | 'todo'
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
     updateSelectedTextType('affine:list', listType, this.page);
+    this.blockTypeDropdown.hide();
   }
 
   private _onAddCodeBlock() {
@@ -272,12 +251,11 @@ export class DebugMenu extends LitElement {
     this.page.addBlock(blockProps, parent, index);
   }
 
-  private _onDelete() {
-    // TODO delete selected block from menu
-  }
-
-  private _convertToParagraph(type: string) {
+  private _convertToParagraph(e: PointerEvent, type: string) {
+    e.preventDefault();
+    e.stopPropagation();
     updateSelectedTextType('affine:paragraph', type, this.page);
+    this.blockTypeDropdown.hide();
   }
 
   private _onSwitchMode() {
@@ -426,107 +404,79 @@ export class DebugMenu extends LitElement {
               </sl-button>
             </sl-tooltip>
           </sl-button-group>
+
+          <!-- block type -->
+          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
+            <sl-button size="small" slot="trigger" caret>
+              Block Type
+            </sl-button>
+            <sl-menu>
+              <sl-menu-item
+                @click=${(e: PointerEvent) =>
+                  this._convertToParagraph(e, 'text')}
+              >
+                Text
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h1')}
+              >
+                H1
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h2')}
+              >
+                H2
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h3')}
+              >
+                H3
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h4')}
+              >
+                H4
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h5')}
+              >
+                H5
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToParagraph(e, 'h6')}
+              >
+                H6
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) =>
+                  this._convertToParagraph(e, 'quote')}
+              >
+                Quote
+              </sl-menu-item>
+              <sl-divider></sl-divider>
+              <sl-menu-item
+                @click=${(e: PointerEvent) =>
+                  this._convertToList(e, 'bulleted')}
+              >
+                Bulleted List
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) =>
+                  this._convertToList(e, 'numbered')}
+              >
+                Numbered List
+              </sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._convertToList(e, 'todo')}
+              >
+                Todo List
+              </sl-menu-item>
+              <sl-divider></sl-divider>
+              <sl-menu-item>Code</sl-menu-item>
+            </sl-menu>
+          </sl-dropdown>
         </div>
 
-        <button
-          aria-label="heading-1"
-          title="heading-1"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('h1')}
-        >
-          𝐇𝟏
-        </button>
-        <button
-          aria-label="heading-2"
-          title="heading-2"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('h2')}
-        >
-          𝐇𝟐
-        </button>
-        <button
-          aria-label="heading-3"
-          title="heading-3"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('h3')}
-        >
-          𝐇𝟑
-        </button>
-        <button
-          aria-label="heading-4"
-          title="heading-4"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('h4')}
-        >
-          𝐇𝟒
-        </button>
-        <button
-          aria-label="heading-5"
-          title="heading-5"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('h5')}
-        >
-          𝐇𝟓
-        </button>
-        <button
-          aria-label="heading-6"
-          title="heading-6"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('h6')}
-        >
-          𝐇𝟔
-        </button>
-        <button
-          aria-label="text"
-          title="text"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('text')}
-        >
-          𝐓
-        </button>
-        <button
-          aria-label="quote"
-          title="quote"
-          tabindex="-1"
-          @click=${() => this._convertToParagraph('quote')}
-        >
-          ${icons.quote}
-        </button>
-        <button
-          aria-label="convert to bulleted list"
-          title="convert to bulleted list"
-          tabindex="-1"
-          @click=${() => this._convertToList('bulleted')}
-        >
-          ${icons.ul}
-        </button>
-        <button
-          aria-label="convert to numbered list"
-          title="convert to numbered list"
-          tabindex="-1"
-          @click=${() => this._convertToList('numbered')}
-        >
-          ${icons.ol}
-        </button>
-        <button
-          aria-label="convert to todo list"
-          title="convert to todo list"
-          tabindex="-1"
-          @click=${() => this._convertToList('todo')}
-        >
-          ${icons.checklist}
-        </button>
-        <!--
-        <button
-          aria-label="delete"
-          title="delete"
-          disabled
-          tabindex="-1"
-          @click=${this._onDelete}
-        >
-          ❌
-        </button>
-        -->
         <button
           aria-label=${this.connected ? 'disconnect' : 'connect'}
           title=${this.connected ? 'disconnect' : 'connect'}

@@ -4,7 +4,7 @@ import type { Page as StorePage } from '../../../packages/store/src/index.js';
 import type { Page } from '@playwright/test';
 import { pressEnter } from './keyboard.js';
 
-const NEXT_FRAME_TIMEOUT = 50;
+const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 

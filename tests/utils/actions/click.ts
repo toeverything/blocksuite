@@ -16,20 +16,17 @@ export async function connectByClick(page: Page) {
   await page.click('button[aria-label="connect"]');
 }
 
-export async function convertToBulletedListByClick(page: Page) {
-  await page.click('button[aria-label="convert to bulleted list"]');
-}
-
-export async function convertToNumberedListByClick(page: Page) {
-  await page.click('button[aria-label="convert to numbered list"]');
-}
-
 export async function addGroupByClick(page: Page) {
   await page.click('button[aria-label="add group"]');
 }
 
-export async function clickMenuButton(page: Page, title: string) {
-  await page.click(`button[aria-label="${title}"]`);
+export async function clickBlockTypeMenuButton(page: Page, name: string) {
+  const menuButton = page.getByRole('button', { name: 'Block Type' });
+  await menuButton.click();
+
+  const menuItem = page.getByRole('menuitem', { name });
+  await menuItem.click();
+  await menuItem.waitFor({ state: 'hidden' });
 }
 
 export async function switchMode(page: Page) {
