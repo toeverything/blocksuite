@@ -36,17 +36,6 @@ setBasePath(basePath);
 
 // Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
 const icons = {
-  switchMode: html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 512 512"
-      style="width: 12px;"
-    >
-      <path
-        d="M0 224c0 17.7 14.3 32 32 32s32-14.3 32-32c0-53 43-96 96-96H320v32c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-9.2-9.2-22.9-11.9-34.9-6.9S320 19.1 320 32V64H160C71.6 64 0 135.6 0 224zm512 64c0-17.7-14.3-32-32-32s-32 14.3-32 32c0 53-43 96-96 96H192V352c0-12.9-7.8-24.6-19.8-29.6s-25.7-2.2-34.9 6.9l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V448H352c88.4 0 160-71.6 160-160z"
-      />
-    </svg>
-  `,
   mouseDefaultMode: html`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
       <path
@@ -58,13 +47,6 @@ const icons = {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
       <path
         d="M315.4 15.5C309.7 5.9 299.2 0 288 0s-21.7 5.9-27.4 15.5l-96 160c-5.9 9.9-6.1 22.2-.4 32.2s16.3 16.2 27.8 16.2H384c11.5 0 22.2-6.2 27.8-16.2s5.5-22.3-.4-32.2l-96-160zM288 312V456c0 22.1 17.9 40 40 40H472c22.1 0 40-17.9 40-40V312c0-22.1-17.9-40-40-40H328c-22.1 0-40 17.9-40 40zM128 512c70.7 0 128-57.3 128-128s-57.3-128-128-128S0 313.3 0 384s57.3 128 128 128z"
-      />
-    </svg>
-  `,
-  addGroup: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-      <path
-        d="M32 119.4C12.9 108.4 0 87.7 0 64C0 28.7 28.7 0 64 0c23.7 0 44.4 12.9 55.4 32H328.6C339.6 12.9 360.3 0 384 0c35.3 0 64 28.7 64 64c0 23.7-12.9 44.4-32 55.4V232.6c19.1 11.1 32 31.7 32 55.4c0 35.3-28.7 64-64 64c-23.7 0-44.4-12.9-55.4-32H119.4c-11.1 19.1-31.7 32-55.4 32c-35.3 0-64-28.7-64-64c0-23.7 12.9-44.4 32-55.4V119.4zM119.4 96c-5.6 9.7-13.7 17.8-23.4 23.4V232.6c9.7 5.6 17.8 13.7 23.4 23.4H328.6c5.6-9.7 13.7-17.8 23.4-23.4V119.4c-9.7-5.6-17.8-13.7-23.4-23.4H119.4zm192 384c-11.1 19.1-31.7 32-55.4 32c-35.3 0-64-28.7-64-64c0-23.7 12.9-44.4 32-55.4V352h64v40.6c9.7 5.6 17.8 13.7 23.4 23.4H520.6c5.6-9.7 13.7-17.8 23.4-23.4V279.4c-9.7-5.6-17.8-13.7-23.4-23.4h-46c-5.4-15.4-14.6-28.9-26.5-39.6V192h72.6c11.1-19.1 31.7-32 55.4-32c35.3 0 64 28.7 64 64c0 23.7-12.9 44.4-32 55.4V392.6c19.1 11.1 32 31.7 32 55.4c0 35.3-28.7 64-64 64c-23.7 0-44.4-12.9-55.4-32H311.4z"
       />
     </svg>
   `,
@@ -83,31 +65,6 @@ const icons = {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
       <path
         d="M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z"
-      />
-    </svg>
-  `,
-  trash: html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 448 512"
-      style="width: 11px;"
-    >
-      <path
-        d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"
-      />
-    </svg>
-  `,
-  connected: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-      <path
-        d="M54.2 202.9C123.2 136.7 216.8 96 320 96s196.8 40.7 265.8 106.9c12.8 12.2 33 11.8 45.2-.9s11.8-33-.9-45.2C549.7 79.5 440.4 32 320 32S90.3 79.5 9.8 156.7C-2.9 169-3.3 189.2 8.9 202s32.5 13.2 45.2 .9zM320 256c56.8 0 108.6 21.1 148.2 56c13.3 11.7 33.5 10.4 45.2-2.8s10.4-33.5-2.8-45.2C459.8 219.2 393 192 320 192s-139.8 27.2-190.5 72c-13.3 11.7-14.5 31.9-2.8 45.2s31.9 14.5 45.2 2.8c39.5-34.9 91.3-56 148.2-56zm64 160c0-35.3-28.7-64-64-64s-64 28.7-64 64s28.7 64 64 64s64-28.7 64-64z"
-      />
-    </svg>
-  `,
-  disconnected: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-      <path
-        d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L440.6 320h73.8c34.2 0 93.7-28 93.7-64c0-35-59.5-64-93.7-64l-116.6 0L297.2 16.1C291.5 6.2 280.9 0 269.4 0H213.2c-10.6 0-18.3 10.2-15.4 20.4l40.3 140.9L38.8 5.1zm2.7 123.6C36 130.6 32 135.9 32 142c0 1.3 .2 2.6 .5 3.9L64 256 32.5 366.1c-.4 1.3-.5 2.6-.5 3.9c0 7.8 6.3 14 14 14H88c5 0 9.8-2.4 12.8-6.4L144 320H246.9l-49 171.6c-2.9 10.2 4.8 20.4 15.4 20.4l56.2 0c11.5 0 22.1-6.2 27.8-16.1l65.3-114.3L41.5 128.7z"
       />
     </svg>
   `,
@@ -200,7 +157,7 @@ export class DebugMenu extends LitElement {
     return this;
   }
 
-  private _onToggleConnection() {
+  private _toggleConnection() {
     if (this.connected) {
       this.workspace.providers.forEach(provider => {
         if (!provider || !provider.disconnect) return;
@@ -251,11 +208,11 @@ export class DebugMenu extends LitElement {
     updateSelectedTextType('affine:paragraph', type, this.page);
   }
 
-  private _onSwitchMode() {
+  private _switchMode() {
     this.editor.mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
   }
 
-  private _onAddGroup() {
+  private _addGroup() {
     const root = this.page.root;
     if (!root) return;
     const pageId = root.id;
@@ -472,32 +429,23 @@ export class DebugMenu extends LitElement {
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
-        </div>
 
-        <button
-          aria-label=${this.connected ? 'disconnect' : 'connect'}
-          title=${this.connected ? 'disconnect' : 'connect'}
-          tabindex="-1"
-          @click=${this._onToggleConnection}
-        >
-          ${this.connected ? icons.connected : icons.disconnected}
-        </button>
-        <button
-          aria-label="switch mode"
-          title="switch mode"
-          tabindex="-1"
-          @click=${this._onSwitchMode}
-        >
-          ${icons.switchMode}
-        </button>
-        <button
-          aria-label="add group"
-          title="add group"
-          tabindex="-1"
-          @click=${this._onAddGroup}
-        >
-          ${icons.addGroup}
-        </button>
+          <!-- test operations -->
+          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
+            <sl-button size="small" slot="trigger" caret>
+              Test Operations
+            </sl-button>
+            <sl-menu>
+              <sl-menu-item @click=${this._switchMode}>
+                Switch Mode
+              </sl-menu-item>
+              <sl-menu-item @click=${this._toggleConnection}>
+                ${this.connected ? 'Disconnect' : 'Connect'}
+              </sl-menu-item>
+              <sl-menu-item @click=${this._addGroup}> Add Group </sl-menu-item>
+            </sl-menu>
+          </sl-dropdown>
+        </div>
         <button
           aria-label="switch mouse mode"
           title="switch mouse mode"
@@ -523,9 +471,6 @@ export class DebugMenu extends LitElement {
           @click=${this._onExportHtml}
         >
           ${icons.html}
-        </button>
-        <button aria-label="clear data" title="clear data" disabled>
-          ${icons.trash}
         </button>
         <button
           aria-label="toggle readonly"

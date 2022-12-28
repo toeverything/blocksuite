@@ -9,18 +9,27 @@ export async function redoByClick(page: Page) {
 }
 
 export async function disconnectByClick(page: Page) {
-  await page.click('button[aria-label="disconnect"]');
+  await clickTestOperationsMenuItem(page, 'Disconnect');
 }
 
 export async function connectByClick(page: Page) {
-  await page.click('button[aria-label="connect"]');
+  await clickTestOperationsMenuItem(page, 'Connect');
 }
 
 export async function addGroupByClick(page: Page) {
-  await page.click('button[aria-label="add group"]');
+  await clickTestOperationsMenuItem(page, 'Add Group');
 }
 
-export async function clickBlockTypeMenuButton(page: Page, name: string) {
+export async function clickTestOperationsMenuItem(page: Page, name: string) {
+  const menuButton = page.getByRole('button', { name: 'Test Operations' });
+  await menuButton.click();
+
+  const menuItem = page.getByRole('menuitem', { name });
+  await menuItem.click();
+  await menuItem.waitFor({ state: 'hidden' });
+}
+
+export async function clickBlockTypeMenuItem(page: Page, name: string) {
   const menuButton = page.getByRole('button', { name: 'Block Type' });
   await menuButton.click();
 
@@ -30,11 +39,11 @@ export async function clickBlockTypeMenuButton(page: Page, name: string) {
 }
 
 export async function switchMode(page: Page) {
-  await page.click('button[aria-label="switch mode"]');
+  await clickTestOperationsMenuItem(page, 'Switch Mode');
 }
 
 export async function addCodeBlock(page: Page) {
-  await clickBlockTypeMenuButton(page, 'Code');
+  await clickBlockTypeMenuItem(page, 'Code');
   await page.waitForFunction(() => {
     const loader = document.querySelector('affine-code loader-element');
     return !loader;

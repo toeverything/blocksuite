@@ -1,6 +1,6 @@
 import { expect, Page, test } from '@playwright/test';
 import {
-  clickBlockTypeMenuButton,
+  clickBlockTypeMenuItem,
   dragBetweenIndices,
   enterPlaygroundRoom,
   initEmptyParagraphState,
@@ -542,7 +542,7 @@ test('should format quick bar follow scroll', async ({ page }) => {
   // should format bar follow scroll after transform text type
   await scrollToTop(page);
   await assertLocatorVisible(page, formatQuickBar);
-  await clickBlockTypeMenuButton(page, 'Bulleted List');
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await scrollToBottom(page);
   await assertLocatorVisible(page, formatQuickBar, false);
 });

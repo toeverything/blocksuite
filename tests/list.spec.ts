@@ -20,7 +20,7 @@ import {
   undoByKeyboard,
   pressTab,
   initEmptyParagraphState,
-  clickBlockTypeMenuButton,
+  clickBlockTypeMenuItem,
 } from './utils/actions/index.js';
 
 test('add new bulleted list', async ({ page }) => {
@@ -28,7 +28,7 @@ test('add new bulleted list', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
-  await clickBlockTypeMenuButton(page, 'Bulleted List');
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await page.keyboard.type('aa');
   await pressEnter(page);
   await page.keyboard.type('aa');
@@ -43,8 +43,8 @@ test('convert to numbered list block', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0); // created 0, 1, 2
-  await clickBlockTypeMenuButton(page, 'Bulleted List'); // replaced 2 to 3
-  await clickBlockTypeMenuButton(page, 'Numbered List');
+  await clickBlockTypeMenuItem(page, 'Bulleted List'); // replaced 2 to 3
+  await clickBlockTypeMenuItem(page, 'Numbered List');
   await focusRichText(page, 0);
 
   const listSelector = '.affine-list-rich-text-wrapper';
