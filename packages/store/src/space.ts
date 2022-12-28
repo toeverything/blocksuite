@@ -10,6 +10,7 @@ export interface StackItem {
   type: 'undo' | 'redo';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class Space<Data extends Record<string, unknown> = Record<string, any>> {
   /** unprefixed id */
   readonly id: string;
