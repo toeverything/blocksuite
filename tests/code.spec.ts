@@ -249,6 +249,7 @@ test('undo and redo works in code block', async ({ page }) => {
   await assertRichTexts(page, ['const a = 10;\n']);
   await undoByKeyboard(page);
   await assertRichTexts(page, ['\n']);
+
   await redoByKeyboard(page);
   await assertRichTexts(page, ['const a = 10;\n']);
 });
