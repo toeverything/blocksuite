@@ -21,6 +21,7 @@ import {
   matchFlavours,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
+import type { BlockSuiteDoc } from '../yjs/index.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -70,7 +71,7 @@ export class Page extends Space {
   constructor(
     workspace: Workspace,
     id: string,
-    doc: Y.Doc,
+    doc: BlockSuiteDoc,
     awareness: Awareness,
     idGenerator: IdGenerator = uuidv4
   ) {
@@ -551,7 +552,7 @@ export class Page extends Space {
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
     if (this._yBlocks.size === 0) {
-      this.workspace.meta.writeVersion();
+      this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.
     else {

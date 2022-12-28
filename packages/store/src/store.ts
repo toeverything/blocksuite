@@ -1,7 +1,6 @@
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import { Awareness } from 'y-protocols/awareness.js';
-import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
@@ -9,6 +8,7 @@ import {
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
 } from './utils/id-generator.js';
+import { BlockSuiteDoc } from './yjs/index.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -55,7 +55,7 @@ export interface StoreOptions extends SSROptions {
 const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
-  readonly doc = new Y.Doc();
+  readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
