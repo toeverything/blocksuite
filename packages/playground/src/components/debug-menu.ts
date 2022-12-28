@@ -17,6 +17,8 @@ import {
   assertExists,
   ColorStyle,
   createEvent,
+  getCurrentRange,
+  getModelsByRange,
   MouseMode,
   ShapeMouseMode,
   TDShapeType,
@@ -24,7 +26,7 @@ import {
   type GroupBlockModel,
 } from '@blocksuite/blocks';
 import { Utils } from '@blocksuite/store';
-import type { Workspace, BaseBlockModel } from '@blocksuite/store';
+import type { Workspace } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
 
 const basePath = import.meta.env.DEV
@@ -219,43 +221,34 @@ export class DebugMenu extends LitElement {
     listType: 'bulleted' | 'numbered' | 'todo'
   ) {
     e.preventDefault();
-    e.stopPropagation();
-    updateSelectedTextType('affine:list', listType, this.page);
     this.blockTypeDropdown.hide();
+
+    updateSelectedTextType('affine:list', listType, this.page);
   }
 
-  private _onAddCodeBlock() {
-    const selection = window.getSelection() as Selection;
-    if (selection.rangeCount === 0) {
-      throw new Error("Can't get start model by selection, rangeCount is 0");
-    }
+  private _addCodeBlock(e: PointerEvent) {
+    e.preventDefault();
+    this.blockTypeDropdown.hide();
 
-    const range = selection.getRangeAt(0);
-    const startContainer =
-      range.startContainer instanceof Text
-        ? (range.startContainer.parentElement as HTMLElement)
-        : (range.startContainer as HTMLElement);
-
-    const startComponent = startContainer.closest(`[data-block-id]`) as {
-      model?: BaseBlockModel;
-    };
-    const startModel = startComponent.model as BaseBlockModel;
+    const range = getCurrentRange();
+    const startModel = getModelsByRange(range)[0];
     const parent = this.page.getParent(startModel);
     const index = parent?.children.indexOf(startModel);
-    assertExists(parent);
     const blockProps = {
       flavour: 'affine:code',
       text: startModel.text?.clone(),
     };
+    assertExists(parent);
+    this.page.captureSync();
     this.page.deleteBlock(startModel);
     this.page.addBlock(blockProps, parent, index);
   }
 
   private _convertToParagraph(e: PointerEvent, type: string) {
     e.preventDefault();
-    e.stopPropagation();
-    updateSelectedTextType('affine:paragraph', type, this.page);
     this.blockTypeDropdown.hide();
+
+    updateSelectedTextType('affine:paragraph', type, this.page);
   }
 
   private _onSwitchMode() {
@@ -472,7 +465,11 @@ export class DebugMenu extends LitElement {
                 Todo List
               </sl-menu-item>
               <sl-divider></sl-divider>
-              <sl-menu-item>Code</sl-menu-item>
+              <sl-menu-item
+                @click=${(e: PointerEvent) => this._addCodeBlock(e)}
+              >
+                Code
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
         </div>
@@ -500,14 +497,6 @@ export class DebugMenu extends LitElement {
           @click=${this._onAddGroup}
         >
           ${icons.addGroup}
-        </button>
-        <button
-          aria-label="code block"
-          title="code block"
-          tabindex="-1"
-          @click=${this._onAddCodeBlock}
-        >
-          <>
         </button>
         <button
           aria-label="switch mouse mode"

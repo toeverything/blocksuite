@@ -34,7 +34,7 @@ export async function switchMode(page: Page) {
 }
 
 export async function addCodeBlock(page: Page) {
-  await page.click('button[aria-label="code block"]');
+  await clickBlockTypeMenuButton(page, 'Code');
   await page.waitForFunction(() => {
     const loader = document.querySelector('affine-code loader-element');
     return !loader;
