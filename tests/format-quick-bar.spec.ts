@@ -36,6 +36,20 @@ test('should format quick bar show when select text', async ({ page }) => {
   await expect(formatQuickBar).not.toBeVisible();
 });
 
+test('should format quick bar can only display one at a time', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 3], [0, 0]);
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
+
+  await dragBetweenIndices(page, [2, 0], [2, 3]);
+  await expect(formatQuickBar).toHaveCount(1);
+});
+
 test('should format quick bar hide when type text', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
