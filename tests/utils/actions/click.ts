@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { waitNextFrame } from './misc.js';
 
 export async function undoByClick(page: Page) {
   await page.click('sl-button[content="Undo"]');
@@ -23,10 +24,11 @@ export async function addGroupByClick(page: Page) {
 export async function clickTestOperationsMenuItem(page: Page, name: string) {
   const menuButton = page.getByRole('button', { name: 'Test Operations' });
   await menuButton.click();
+  await waitNextFrame(page); // wait for animation ended
 
   const menuItem = page.getByRole('menuitem', { name });
   await menuItem.click();
-  await menuItem.waitFor({ state: 'hidden' });
+  await menuItem.waitFor({ state: 'hidden' }); // wait for animation ended
 }
 
 export async function clickBlockTypeMenuItem(page: Page, name: string) {

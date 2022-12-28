@@ -50,50 +50,6 @@ const icons = {
       />
     </svg>
   `,
-  html: html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 384 512"
-      style="width: 11px;"
-    >
-      <path
-        d="M0 32l34.9 395.8L191.5 480l157.6-52.2L384 32H0zm308.2 127.9H124.4l4.1 49.4h175.6l-13.6 148.4-97.9 27v.3h-1.1l-98.7-27.3-6-75.8h47.7L138 320l53.5 14.5 53.7-14.5 6-62.2H84.3L71.5 112.2h241.1l-4.4 47.7z"
-      />
-    </svg>
-  `,
-  markdown: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-      <path
-        d="M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z"
-      />
-    </svg>
-  `,
-  readonly: html` <svg
-    viewBox="0 0 1024 1024"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M791.04 170.666667L853.333333 228.906667 275.626667 853.333333 213.333333 795.093333z"
-      fill="#2E2F30"
-    ></path>
-    <path
-      d="M512 981.333333C252.8 981.333333 42.666667 771.2 42.666667 512S252.8 42.666667 512 42.666667s469.333333 210.133333 469.333333 469.333333-210.133333 469.333333-469.333333 469.333333z m0-85.333333a384 384 0 1 0 0-768 384 384 0 0 0 0 768z"
-      fill="#2E2F30"
-    ></path>
-  </svg>`,
-  unReadonly: html` <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 1024 1024"
-  >
-    <path
-      d="M512 64C264.576 64 64 264.576 64 512s200.576 448 448 448 448-200.576 448-448S759.424 64 512 64zM776 400.576l-316.8 316.8c-9.728 9.728-25.472 9.728-35.2 0l-176-176c-9.728-9.728-9.728-25.472 0-35.2l35.2-35.2c9.728-9.728 25.472-9.728 35.2 0L441.6 594.176l264-264c9.728-9.728 25.472-9.728 35.2 0l35.2 35.2C785.728 375.104 785.728 390.848 776 400.576z"
-    ></path>
-  </svg>`,
-  share: html`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
-    <path
-      d="M352 224H305.5c-45 0-81.5 36.5-81.5 81.5c0 22.3 10.3 34.3 19.2 40.5c6.8 4.7 12.8 12 12.8 20.3c0 9.8-8 17.8-17.8 17.8h-2.5c-2.4 0-4.8-.4-7.1-1.4C210.8 374.8 128 333.4 128 240c0-79.5 64.5-144 144-144h80V34.7C352 15.5 367.5 0 386.7 0c8.6 0 16.8 3.2 23.2 8.9L548.1 133.3c7.6 6.8 11.9 16.5 11.9 26.7s-4.3 19.9-11.9 26.7l-139 125.1c-5.9 5.3-13.5 8.2-21.4 8.2H384c-17.7 0-32-14.3-32-32V224zM80 96c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16H400c8.8 0 16-7.2 16-16V384c0-17.7 14.3-32 32-32s32 14.3 32 32v48c0 44.2-35.8 80-80 80H80c-44.2 0-80-35.8-80-80V112C0 67.8 35.8 32 80 32h48c17.7 0 32 14.3 32 32s-14.3 32-32 32H80z"
-    />
-  </svg> `,
 };
 
 @customElement('debug-menu')
@@ -233,16 +189,16 @@ export class DebugMenu extends LitElement {
     this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
   }
 
-  private _onExportHtml() {
+  private _exportHtml() {
     this.contentParser.onExportHtml();
   }
 
-  private _onToggleReadonly() {
+  private _toggleReadonly() {
     this.editor.readonly = !this.editor.readonly;
     this.readonly = !this.readonly;
   }
 
-  private _onExportMarkDown() {
+  private _exportMarkDown() {
     this.contentParser.onExportMarkdown();
   }
 
@@ -443,6 +399,16 @@ export class DebugMenu extends LitElement {
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
               <sl-menu-item @click=${this._addGroup}> Add Group </sl-menu-item>
+              <sl-menu-item @click=${this._exportMarkDown}>
+                Export Markdown
+              </sl-menu-item>
+              <sl-menu-item @click=${this._exportHtml}>
+                Export HTML
+              </sl-menu-item>
+              <sl-menu-item @click=${this._toggleReadonly}>
+                Toggle Readonly
+              </sl-menu-item>
+              <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
         </div>
@@ -455,38 +421,6 @@ export class DebugMenu extends LitElement {
           ${this.mouseMode.type === 'default'
             ? icons.mouseDefaultMode
             : icons.mouseShapeMode}
-        </button>
-        <button
-          aria-label="export markdown"
-          title="export markdown"
-          tabindex="-1"
-          @click=${this._onExportMarkDown}
-        >
-          ${icons.markdown}
-        </button>
-        <button
-          aria-label="export html"
-          title="export html"
-          tabindex="-1"
-          @click=${this._onExportHtml}
-        >
-          ${icons.html}
-        </button>
-        <button
-          aria-label="toggle readonly"
-          title="toggle readonly"
-          tabindex="-1"
-          @click=${this._onToggleReadonly}
-        >
-          ${this.readonly ? icons.unReadonly : icons.readonly}
-        </button>
-        <button
-          aria-label="share url"
-          title="share url"
-          tabindex="-1"
-          @click=${this._shareUrl}
-        >
-          ${icons.share}
         </button>
         <select
           style="width: 72px"
