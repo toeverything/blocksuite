@@ -40,7 +40,7 @@ export async function clickBlockTypeMenuItem(page: Page, name: string) {
   await menuItem.waitFor({ state: 'hidden' });
 }
 
-export async function switchMode(page: Page) {
+export async function switchEditorMode(page: Page) {
   await clickTestOperationsMenuItem(page, 'Switch Mode');
 }
 
@@ -53,15 +53,22 @@ export async function addCodeBlock(page: Page) {
 }
 
 export async function switchMouseMode(page: Page) {
-  await page.click('button[aria-label="switch mouse mode"]');
+  const button = page.getByRole('button', { name: 'Switch Mouse Mode' });
+  await button.click();
 }
 
 export async function switchShapeColor(page: Page, color: string) {
-  await page.selectOption('select[aria-label="switch shape color"]', color);
+  await page.click('sl-select[aria-label="Shape Color"]');
+
+  const menuItem = page.getByRole('menuitem', { name: color });
+  await menuItem.click();
 }
 
 export async function switchShapeType(page: Page, shapeType: string) {
-  await page.selectOption('select[aria-label="switch shape type"]', shapeType);
+  await page.click('sl-select[aria-label="Shape Type"]');
+
+  const menuItem = page.getByRole('menuitem', { name: shapeType });
+  await menuItem.click();
 }
 
 export async function switchReadonly(page: Page) {

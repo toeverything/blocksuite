@@ -10,8 +10,10 @@ import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
 import '@shoelace-style/shoelace/dist/components/divider/divider.js';
 import '@shoelace-style/shoelace/dist/components/menu/menu.js';
 import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
+import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import type { SlSelect, SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-import type { SlDropdown } from '@shoelace-style/shoelace';
 
 import {
   assertExists,
@@ -33,24 +35,6 @@ const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
-
-// Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
-const icons = {
-  mouseDefaultMode: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
-      <path
-        d="M0 55.2V426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320H297.9c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"
-      />
-    </svg>
-  `,
-  mouseShapeMode: html`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-      <path
-        d="M315.4 15.5C309.7 5.9 299.2 0 288 0s-21.7 5.9-27.4 15.5l-96 160c-5.9 9.9-6.1 22.2-.4 32.2s16.3 16.2 27.8 16.2H384c11.5 0 22.2-6.2 27.8-16.2s5.5-22.3-.4-32.2l-96-160zM288 312V456c0 22.1 17.9 40 40 40H472c22.1 0 40-17.9 40-40V312c0-22.1-17.9-40-40-40H328c-22.1 0-40 17.9-40 40zM128 512c70.7 0 128-57.3 128-128s-57.3-128-128-128S0 313.3 0 384s57.3 128 128 128z"
-      />
-    </svg>
-  `,
-};
 
 @customElement('debug-menu')
 export class DebugMenu extends LitElement {
@@ -273,16 +257,22 @@ export class DebugMenu extends LitElement {
           flex: 1;
         }
 
-        .button-group-toolbar {
+        .default-toolbar {
           padding: 8px;
+          width: 100%;
+          min-width: 340px;
         }
 
-        .button-group-toolbar sl-button-group:not(:last-of-type) {
-          margin-right: var(--sl-spacing-x-small);
+        .edgeless-toolbar {
+          display: flex;
+          align-items: center;
+        }
+        .edgeless-toolbar sl-select {
+          margin-right: 4px;
         }
       </style>
-      <div class="debug-menu">
-        <div class="button-group-toolbar">
+      <div class="debug-menu default">
+        <div class="default-toolbar">
           <!-- undo/redo group -->
           <sl-button-group label="History">
             <!-- undo -->
@@ -399,86 +389,69 @@ export class DebugMenu extends LitElement {
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
               <sl-menu-item @click=${this._addGroup}> Add Group </sl-menu-item>
+              <sl-menu-item @click=${this._toggleReadonly}>
+                Toggle Readonly
+              </sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>
               <sl-menu-item @click=${this._exportHtml}>
                 Export HTML
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleReadonly}>
-                Toggle Readonly
-              </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
         </div>
-        <button
-          aria-label="switch mouse mode"
-          title="switch mouse mode"
-          tabindex="-1"
-          @click=${this._onSwitchMouseMode}
-        >
-          ${this.mouseMode.type === 'default'
-            ? icons.mouseDefaultMode
-            : icons.mouseShapeMode}
-        </button>
-        <select
-          style="width: 72px"
-          aria-label="switch shape color"
-          title="switch shape color"
-          name="switch shape color"
-          tabindex="-1"
-          @change=${(e: Event) => {
-            const target = e.target;
-            if (target instanceof HTMLSelectElement) {
-              const color = target.value as ColorStyle;
-              this.shapeModeColor = color;
-            }
-          }}
-        >
-          <optgroup label="select a shape color">
-            ${Object.entries(ColorStyle).map(([name, style]) => {
-              return html`
-                <option value=${style} ?selected=${style === ColorStyle.Black}>
-                  ${name}
-                </option>
-              `;
-            })}
-          </optgroup>
-        </select>
-        <select
-          style="width: 72px"
-          aria-label="switch shape type"
-          title="switch shape type"
-          name="switch shape type"
-          tabindex="-1"
-          @change=${(e: Event) => {
-            const target = e.target;
-            if (target instanceof HTMLSelectElement) {
-              const shape = target.value as TDShapeType;
-              this.shapeModeShape = shape;
-            }
-          }}
-        >
-          <optgroup label="select a shape color">
-            ${Object.entries(TDShapeType).map(([name, style]) => {
-              if (
-                style === TDShapeType.Triangle ||
-                style === TDShapeType.Rectangle
-              ) {
-                return html`
-                  <option
-                    value=${style}
-                    ?selected=${style === TDShapeType.Rectangle}
-                  >
-                    ${name}
-                  </option>
-                `;
-              }
-              return null;
-            })}
-          </optgroup>
-        </select>
+
+        <div class="edgeless-toolbar">
+          <sl-icon-button
+            label="Switch Mouse Mode"
+            name=${this.mouseMode.type === 'default' ? 'cursor' : 'pentagon'}
+            @click=${this._onSwitchMouseMode}
+            style="font-size: 1.2rem;"
+          >
+          </sl-icon-button>
+          <sl-select
+            placeholder="Shape Color"
+            size="small"
+            value=${this.shapeModeColor}
+            aria-label="Shape Color"
+            hoist
+            style="width: 100px;"
+            @sl-change=${(e: CustomEvent) => {
+              const target = e.target as SlSelect;
+              this.shapeModeColor = target.value as ColorStyle;
+            }}
+          >
+            <sl-menu-item value="white">White</sl-menu-item>
+            <sl-menu-item value="lightGray">LightGray</sl-menu-item>
+            <sl-menu-item value="gray">Gray</sl-menu-item>
+            <sl-menu-item value="black">Black</sl-menu-item>
+            <sl-menu-item value="green">Green</sl-menu-item>
+            <sl-menu-item value="cyan">Cyan</sl-menu-item>
+            <sl-menu-item value="blue">Blue</sl-menu-item>
+            <sl-menu-item value="indigo">Indigo</sl-menu-item>
+            <sl-menu-item value="violet">Violet</sl-menu-item>
+            <sl-menu-item value="red">Red</sl-menu-item>
+            <sl-menu-item value="orange">Orange</sl-menu-item>
+            <sl-menu-item value="yellow">Yellow</sl-menu-item>
+          </sl-select>
+
+          <sl-select
+            placeholder="Shape Type"
+            size="small"
+            value=${this.shapeModeShape}
+            aria-label="Shape Type"
+            hoist
+            @sl-change=${(e: CustomEvent) => {
+              const target = e.target as SlSelect;
+              this.shapeModeShape = target.value as TDShapeType;
+            }}
+          >
+            <sl-menu-item value="rectangle">Rectangle</sl-menu-item>
+            <sl-menu-item value="triangle">Triangle</sl-menu-item>
+          </sl-select>
+        </div>
       </div>
     `;
   }

@@ -11,7 +11,7 @@ import {
   initEmptyParagraphState,
   pressEnter,
   redoByClick,
-  switchMode,
+  switchEditorMode,
   switchMouseMode,
   switchShapeColor,
   switchShapeType,
@@ -68,7 +68,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
   await assertSelection(page, 0, 5, 0);
 
-  await switchMode(page);
+  await switchEditorMode(page);
   const locator = page.locator('.affine-edgeless-page-block-container');
   await expect(locator).toHaveCount(1);
   await assertRichTexts(page, ['hello']);
@@ -88,7 +88,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await assertRichTexts(page, ['hello', '\n', '\n']);
 
   // inactive
-  await switchMode(page);
+  await switchEditorMode(page);
   await undoByClick(page);
   await waitNextFrame(page);
   await assertNativeSelectionRangeCount(page, 0);
@@ -114,7 +114,7 @@ test('resize the block', async ({ page }) => {
   await page.keyboard.type('hello');
   await assertRichTexts(page, ['hello']);
 
-  await switchMode(page);
+  await switchEditorMode(page);
   await page.click('[data-block-id="1"]');
   const oldXywh = await getGroupSize(page, ids);
   const leftHandle = page.locator('[aria-label="handle-left"]');
@@ -134,8 +134,8 @@ test('resize the block', async ({ page }) => {
   expect(w).toBe(oldW - 100);
   expect(h).toBe(oldH);
 
-  await switchMode(page);
-  await switchMode(page);
+  await switchEditorMode(page);
+  await switchEditorMode(page);
   const newXywh = await getGroupSize(page, ids);
   expect(newXywh).toBe(xywh);
 });
@@ -147,7 +147,7 @@ test('add shape blocks', async ({ page }) => {
   await page.keyboard.type('hello');
   await assertRichTexts(page, ['hello']);
 
-  await switchMode(page);
+  await switchEditorMode(page);
   await switchMouseMode(page);
   const box = await page
     .locator('[data-test-id="affine-edgeless-block-child-1-container"]')
@@ -197,7 +197,7 @@ test('delete shape block by keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
-  await switchMode(page);
+  await switchEditorMode(page);
   await switchMouseMode(page);
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
 
