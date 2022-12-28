@@ -8,6 +8,7 @@ import {
   focusRichText,
   getQuillSelectionIndex,
   getQuillSelectionText,
+  initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
   redoByKeyboard,
@@ -52,10 +53,19 @@ test('use shortcut can create code block', async ({ page }) => {
 
 test('change code language can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
+
+  const position = await page.evaluate(() => {
+    const codeBlock = document.querySelector('affine-code');
+    const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
+    return {
+      x: bbox.left + bbox.width / 2,
+      y: bbox.top + bbox.height / 2,
+    };
+  });
+
+  await page.mouse.move(position.x, position.y);
 
   const codeLangSelector = '.lang-container > code-block-button:nth-child(1)';
   await page.click(codeLangSelector);
@@ -68,6 +78,7 @@ test('change code language can work', async ({ page }) => {
   );
   await expect(locator).toBeHidden();
 
+  await page.mouse.move(position.x, position.y);
   await expect(page.locator(codeLangSelector)).toHaveText('Rust');
 });
 
@@ -75,10 +86,8 @@ test('language select list can disappear when click other place', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
 
   const codeLangSelector = '.lang-container > code-block-button:nth-child(1)';
   await page.click(codeLangSelector);
@@ -86,8 +95,8 @@ test('language select list can disappear when click other place', async ({
   await expect(locator).toBeVisible();
 
   const position = await page.evaluate(() => {
-    const paragraph = document.querySelector('.lang-list-button-container');
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    const code = document.querySelector('.lang-list-button-container');
+    const bbox = code?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right + 10, y: bbox.top + 10 };
   });
   await page.mouse.click(position.x, position.y);
@@ -110,9 +119,8 @@ use fern::{
   await copyByKeyboard(page);
 
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
   await pasteByKeyboard(page);
 
   const locator = page.locator('affine-paragraph');
@@ -121,15 +129,13 @@ use fern::{
 
 test('drag copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
-  await page.keyboard.type('use');
 
+  await page.keyboard.type('use');
   const position = await page.evaluate(() => {
-    const paragraph = document.querySelector('pre');
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    const code = document.querySelector('pre');
+    const bbox = code?.getBoundingClientRect() as DOMRect;
     return {
       startX: bbox.left,
       startY: bbox.bottom - bbox.height / 2,
@@ -151,10 +157,8 @@ test('drag copy paste', async ({ page }) => {
 
 test('keyboard selection and copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
 
   await page.keyboard.type('use');
   await page.keyboard.down('Shift');
@@ -170,14 +174,12 @@ test('keyboard selection and copy paste', async ({ page }) => {
 
 test('drag select code block can delete it', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
 
   const position = await page.evaluate(() => {
-    const paragraph = document.querySelector('affine-code');
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    const code = document.querySelector('affine-code');
+    const bbox = code?.getBoundingClientRect() as DOMRect;
     return {
       startX: bbox.left,
       startY: bbox.bottom - bbox.height / 2,
@@ -201,10 +203,8 @@ test('press enter twice at end of code block can jump out', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
@@ -216,10 +216,8 @@ test('press backspace after code block can jump into start of code block', async
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
@@ -232,10 +230,8 @@ test('press ArrowUp after code block can jump into start of code block', async (
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
@@ -246,10 +242,8 @@ test('press ArrowUp after code block can jump into start of code block', async (
 
 test('undo and redo works in code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-
+  await initEmptyCodeBlockState(page);
   await focusRichText(page);
-  await addCodeBlock(page);
 
   await page.keyboard.type('const a = 10;');
   await assertRichTexts(page, ['const a = 10;\n']);

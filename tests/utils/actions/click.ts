@@ -38,7 +38,10 @@ export async function switchMode(page: Page) {
 
 export async function addCodeBlock(page: Page) {
   await page.click('button[aria-label="code block"]');
-  await page.waitForSelector('rich-text');
+  await page.waitForFunction(() => {
+    const loader = document.querySelector('affine-code loader-element');
+    return !loader;
+  });
 }
 
 export async function switchMouseMode(page: Page) {
