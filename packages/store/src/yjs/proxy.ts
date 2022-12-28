@@ -36,11 +36,10 @@ export function createYMapProxy<Data extends Record<string, unknown>>(
       const get = Reflect.get(target, 'get', receiver);
       const has = Reflect.get(target, 'has');
       if (!Reflect.apply(has, target, [p])) {
-        if (typeof p === 'string' && initializer?.[p]) {
+        if (typeof p === 'string' && typeof initializer?.[p] === 'function') {
           const set = Reflect.get(target, 'set', receiver);
           const defaultValue = (initializer[p] as () => unknown)();
           Reflect.apply(set, target, [p, defaultValue]);
-          return defaultValue;
         }
       }
       return Reflect.apply(get, target, [p]);
