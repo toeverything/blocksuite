@@ -132,7 +132,10 @@ export function EmbedEditingContainer(
         <format-bar-button
           class="has-tool-tip"
           width="100%"
-          @click=${() => focusCaption(embedEditingState.model)}
+          @click=${() => {
+            focusCaption(embedEditingState.model);
+            signals.updateEmbedRects.emit([]);
+          }}
         >
           ${CaptionIcon}
           <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
