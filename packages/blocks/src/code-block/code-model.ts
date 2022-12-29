@@ -1,6 +1,5 @@
 import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-import { assertExists, getBlockById } from '../__internal__/index.js';
 
 export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
   static version = [1, 0] as [number, number];
@@ -29,10 +28,18 @@ export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
     begin?: number,
     end?: number
   ): string {
-    const codeBlockElement = getBlockById(this.id);
-    assertExists(codeBlockElement);
-    const codeElement = codeBlockElement.querySelector('pre');
-    assertExists(codeElement);
+    const codeElement = document.querySelector(
+      `[data-block-id="${this.id}"] pre`
+    );
+    if (!codeElement) {
+      return super.block2html(
+        childText,
+        _previousSiblingId,
+        _nextSiblingId,
+        begin,
+        end
+      );
+    }
     codeElement.setAttribute('code-lang', this.language);
     return codeElement.outerHTML;
   }
