@@ -5,6 +5,7 @@ lang-list {
   background: white;
   border-radius: 10px;
   top: 24px;
+  z-index: 1;
 }
 
 .lang-list-container {

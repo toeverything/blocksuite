@@ -70,11 +70,10 @@ export function getDragDirection(e: SelectionEvent): DragDirection {
  *
  * @example
  * ```ts
- * const { selectedType, direction, anchor } = getNativeSelectionMouseDragInfo(e);
+ * const { selectedType, direction } = getNativeSelectionMouseDragInfo(e);
  * if (selectedType === 'Caret') {
  *   return;
  * }
- * const rect = anchor.getBoundingClientRect();
  * ```
  */
 export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
@@ -89,7 +88,7 @@ export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
     // So we need to check the length of the range
     curRange.toString().length === 0;
   const selectedType: SelectedBlockType = isSelectedNothing ? 'Caret' : 'Text';
-  return { selectedType, direction, anchor: curRange };
+  return { selectedType, direction };
 }
 
 export function calcPositionPointByRange(

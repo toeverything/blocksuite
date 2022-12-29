@@ -8,6 +8,7 @@ import {
   caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  matchFlavours,
   noop,
   resetNativeSelection,
   RootBlockModel,
@@ -136,7 +137,10 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
       case 'none':
         break;
       case 'single':
-        if (this.blockSelectionState.active) {
+        if (
+          this.blockSelectionState.active &&
+          !matchFlavours(this.blockSelectionState.selected, ['affine:shape'])
+        ) {
           // TODO reset if drag out of group
           handleNativeRangeDragMove(this._startRange, e);
         }
@@ -172,13 +176,12 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
 
   onContainerDragEnd(e: SelectionEvent): void {
     if (this.isActive) {
-      const { anchor, direction, selectedType } =
-        getNativeSelectionMouseDragInfo(e);
+      const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ anchorEl: anchor, direction });
+      showFormatQuickBar({ direction });
     } else if (this.blockSelectionState.type === 'single') {
       if (!this._frameSelectionState) {
         this._page.captureSync();

@@ -1,9 +1,10 @@
-import type { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
   assertExists,
   assertFlavours,
   ExtendedModel,
+  matchFlavours,
   RootBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
@@ -27,6 +28,7 @@ import {
 } from '../../__internal__/utils/selection.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
+import { CodeBlockModel } from '../../code-block/index.js';
 
 export function deleteModels(page: Page, models: BaseBlockModel[]) {
   const selection = window.getSelection();
@@ -74,7 +76,29 @@ export function deleteModels(page: Page, models: BaseBlockModel[]) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-export function updateSelectedTextType(
+function mergeTextOfBlocks(
+  page: Page,
+  models: BaseBlockModel[],
+  blockProps: Record<string, unknown>
+) {
+  const parent = page.getParent(models[0]);
+  assertExists(parent);
+  const index = parent.children.indexOf(models[0]);
+  const id = page.addBlock(blockProps, parent, index);
+  const codeBlock = page.getBlockById(id) as CodeBlockModel;
+
+  models.forEach(model => {
+    if (model.text instanceof Text) {
+      const text = codeBlock.text;
+      assertExists(text);
+      text.join(model.text);
+      text.insert('\n', text.length);
+    }
+    page.deleteBlock(model);
+  });
+}
+
+export async function updateSelectedTextType(
   flavour: string,
   type: string,
   page: Page
@@ -82,14 +106,33 @@ export function updateSelectedTextType(
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
   page.captureSync();
+  if (flavour === 'affine:code') {
+    mergeTextOfBlocks(page, modelsInRange, { flavour: 'affine:code' });
+    return;
+  }
+  const selectedBlocks = saveBlockSelection();
+  let lastNewId: string | null = null;
   modelsInRange.forEach(model => {
-    assertFlavours(model, ['affine:paragraph', 'affine:list']);
+    assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {
-      transformBlock(page, model, flavour, type);
+      const oldId = model.id;
+      const newId = transformBlock(page, model, flavour, type);
+
+      // Replace selected block id
+      const blocks = selectedBlocks.filter(block => block.id === oldId);
+      // Because selectedBlocks maybe contains same block when only select one block, so we need to replace all of them
+      blocks.forEach(block => {
+        block.id = newId;
+      });
+      lastNewId = newId;
     }
   });
+  if (lastNewId) {
+    await asyncFocusRichText(page, lastNewId);
+  }
+  restoreSelection(selectedBlocks);
 }
 
 export function transformBlock(
@@ -109,7 +152,7 @@ export function transformBlock(
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, parent, index);
-  asyncFocusRichText(page, id);
+  return id;
 }
 
 export function handleBackspace(page: Page, e: KeyboardEvent) {
@@ -163,13 +206,18 @@ export const getFormat = () => {
   const lastFormat = lastRichText.quill.getFormat(0, endIndex);
 
   const formatArr = [];
-  formatArr.push(firstFormat, lastFormat);
+  !(models[0] instanceof CodeBlockModel) && formatArr.push(firstFormat);
+  !(models[models.length - 1] instanceof CodeBlockModel) &&
+    formatArr.push(lastFormat);
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
     assertExists(richText);
     const content = richText.quill.getText();
     if (!content || content === '\n') {
       // empty line should not be included
+      continue;
+    }
+    if (models[i] instanceof CodeBlockModel) {
       continue;
     }
     const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
@@ -236,7 +284,9 @@ export function handleFormat(page: Page, key: string) {
   if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
-    const models = getModelsByRange(getCurrentRange());
+    const models = getModelsByRange(getCurrentRange()).filter(model => {
+      return !(model instanceof CodeBlockModel);
+    });
     if (models.length === 1) {
       const richText = getRichTextByModel(models[0]);
       assertExists(richText);
@@ -299,6 +349,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   resetNativeSelection(null);
 }
 
+// TODO should show format bar after select all
 function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
   nearestCommonAncestor.addEventListener(
     'mousemove',
@@ -376,7 +427,7 @@ export function tryUpdateGroupSize(page: Page, zoom: number) {
     let offset = 0;
     groups.forEach(model => {
       // DO NOT resize shape block
-      if (model.flavour === 'affine:shape') return;
+      if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();

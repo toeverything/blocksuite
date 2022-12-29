@@ -79,9 +79,8 @@ export type SyntaxCodeBlockOptions = {
 SyntaxCodeBlock.className = 'ql-syntax';
 
 class Syntax extends Module {
-  private language = 'javascript';
-
-  private codeBlockElement: HTMLElement;
+  private _language = 'javascript';
+  private _codeBlockElement: HTMLElement;
 
   static register() {
     Quill.register(CodeToken, true);
@@ -89,23 +88,24 @@ class Syntax extends Module {
   }
 
   setLang(lang: string) {
-    if (this.language === lang) {
+    if (this._language === lang) {
       return;
     }
-    this.language = lang;
-    this.highlight(true, this.codeBlockElement);
+    this._language = lang;
+    this.highlight(true, this._codeBlockElement);
   }
 
   constructor(quill: QuillType, options: SyntaxCodeBlockOptions) {
     super(quill, options);
-    this.language = options.language;
-    this.codeBlockElement = options.codeBlockElement;
+    this._language = options.language;
+    this._codeBlockElement = options.codeBlockElement;
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
         'Syntax module requires highlight.js. Please include the library on the page before Quill.'
       );
     }
     let timer: number | undefined;
+    // TODO Optimize performance when hover
     // @ts-ignore
     this.quill.on(Quill.events.SCROLL_OPTIMIZE, () => {
       clearTimeout(timer);
@@ -132,7 +132,7 @@ class Syntax extends Module {
       .forEach((code: SyntaxCodeBlock) => {
         code.refresh(
           (text: string) => {
-            return this.options.highlight(text, { language: this.language })
+            return this.options.highlight(text, { language: this._language })
               .value;
           },
           forceRefresh,

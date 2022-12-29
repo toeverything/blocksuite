@@ -5,6 +5,7 @@ import './button';
 import {
   BoldIcon,
   BulletedListIcon,
+  CodeIcon,
   H1Icon,
   H2Icon,
   H3Icon,
@@ -21,6 +22,7 @@ import {
   TodoIcon,
   UnderlineIcon,
 } from './icons.js';
+import { CodeBlockModel } from '../../code-block/index.js';
 
 export const paragraphButtons = [
   {
@@ -48,7 +50,7 @@ export const paragraphButtons = [
     icon: NumberedIcon,
   },
   { flavour: 'affine:list', type: 'todo', name: 'To-do List', icon: TodoIcon },
-  // { flavour: 'affine:', type: 'code', name: 'Code Block', icon: CodeIcon },
+  { flavour: 'affine:code', type: 'code', name: 'Code Block', icon: CodeIcon },
   {
     flavour: 'affine:paragraph',
     type: 'quote',
@@ -75,6 +77,7 @@ export const formatButtons = [
     name: 'Bold',
     icon: BoldIcon,
     activeWhen: (format: Record<string, unknown>) => 'bold' in format,
+    showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'bold');
     },
@@ -84,6 +87,7 @@ export const formatButtons = [
     name: 'Italic',
     icon: ItalicIcon,
     activeWhen: (format: Record<string, unknown>) => 'italic' in format,
+    showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'italic');
     },
@@ -93,6 +97,7 @@ export const formatButtons = [
     name: 'Underline',
     icon: UnderlineIcon,
     activeWhen: (format: Record<string, unknown>) => 'underline' in format,
+    showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'underline');
     },
@@ -102,6 +107,7 @@ export const formatButtons = [
     name: 'Strikethrough',
     icon: StrikethroughIcon,
     activeWhen: (format: Record<string, unknown>) => 'strike' in format,
+    showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'strike');
     },
@@ -111,6 +117,7 @@ export const formatButtons = [
     name: 'Code',
     icon: InlineCodeIcon,
     activeWhen: (format: Record<string, unknown>) => 'code' in format,
+    showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'code');
     },
@@ -121,7 +128,8 @@ export const formatButtons = [
     icon: LinkIcon,
     activeWhen: (format: Record<string, unknown>) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
-    showWhen: (models: BaseBlockModel[]) => models.length === 1,
+    showWhen: (models: BaseBlockModel[]) =>
+      models.length === 1 && noneCodeBlockSelected(models),
     action: ({ page, abortController, format }: ActionProps) => {
       createLink(page);
       if (!('link' in format)) {
@@ -130,3 +138,7 @@ export const formatButtons = [
     },
   },
 ];
+
+export const noneCodeBlockSelected = (models: BaseBlockModel[]) => {
+  return !models.every(model => model instanceof CodeBlockModel);
+};

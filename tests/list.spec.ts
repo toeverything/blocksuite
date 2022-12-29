@@ -10,8 +10,6 @@ import {
   assertTextContent,
 } from './utils/asserts.js';
 import {
-  convertToBulletedListByClick,
-  convertToNumberedListByClick,
   enterPlaygroundRoom,
   enterPlaygroundWithList,
   focusRichText,
@@ -22,6 +20,7 @@ import {
   undoByKeyboard,
   pressTab,
   initEmptyParagraphState,
+  clickBlockTypeMenuItem,
 } from './utils/actions/index.js';
 
 test('add new bulleted list', async ({ page }) => {
@@ -29,7 +28,7 @@ test('add new bulleted list', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
-  await convertToBulletedListByClick(page);
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await page.keyboard.type('aa');
   await pressEnter(page);
   await page.keyboard.type('aa');
@@ -44,8 +43,8 @@ test('convert to numbered list block', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0); // created 0, 1, 2
-  await convertToBulletedListByClick(page); // replaced 2 to 3
-  await convertToNumberedListByClick(page);
+  await clickBlockTypeMenuItem(page, 'Bulleted List'); // replaced 2 to 3
+  await clickBlockTypeMenuItem(page, 'Numbered List');
   await focusRichText(page, 0);
 
   const listSelector = '.affine-list-rich-text-wrapper';

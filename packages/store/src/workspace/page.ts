@@ -21,6 +21,7 @@ import {
   matchFlavours,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
+import type { BlockSuiteDoc } from '../yjs/index.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -45,7 +46,11 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-export class Page extends Space {
+export type PageData = {
+  [key: string]: YBlock;
+};
+
+export class Page extends Space<PageData> {
   public workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
@@ -70,7 +75,7 @@ export class Page extends Space {
   constructor(
     workspace: Workspace,
     id: string,
-    doc: Y.Doc,
+    doc: BlockSuiteDoc,
     awareness: Awareness,
     idGenerator: IdGenerator = uuidv4
   ) {
@@ -87,13 +92,9 @@ export class Page extends Space {
     return this.workspace.blobs;
   }
 
-  get pageId() {
-    return this.id.replace('space:', '');
-  }
-
   /** key-value store of blocks */
-  private get _yBlocks() {
-    return this.doc.getMap(this.id) as YBlocks;
+  private get _yBlocks(): YBlocks {
+    return this.origin;
   }
 
   get root() {
@@ -555,7 +556,7 @@ export class Page extends Space {
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
     if (this._yBlocks.size === 0) {
-      this.workspace.meta.writeVersion();
+      this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.
     else {

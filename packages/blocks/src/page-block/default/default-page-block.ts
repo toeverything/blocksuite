@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { LitElement, html, css, unsafeCSS, PropertyValueMap } from 'lit';
+import { html, css, unsafeCSS, PropertyValueMap } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
@@ -29,7 +29,8 @@ import {
   isControlledKeyboardEvent,
   removeHotkeys,
 } from './utils.js';
-import style from './style.css';
+import style from './style.css?inline';
+import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -58,7 +59,10 @@ function focusTextEnd(input: HTMLInputElement) {
 }
 
 @customElement('affine-default-page')
-export class DefaultPageBlockComponent extends LitElement implements BlockHost {
+export class DefaultPageBlockComponent
+  extends NonShadowLitElement
+  implements BlockHost
+{
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -169,15 +173,10 @@ export class DefaultPageBlockComponent extends LitElement implements BlockHost {
     this.signals.updateEmbedEditingState.emit(null);
   };
 
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
-
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
-        space: this.page,
+        page: this.page,
         mouseRoot: this.mouseRoot,
         signals: this.signals,
         container: this,

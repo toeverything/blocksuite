@@ -1,7 +1,7 @@
 import { Signal } from '@blocksuite/store';
 import { ClipboardAction } from './types.js';
 
-export class ClipEventDispatch {
+export class ClipboardEventDispatcher {
   readonly signals = {
     [ClipboardAction.copy]: new Signal<ClipboardEvent>(),
     [ClipboardAction.cut]: new Signal<ClipboardEvent>(),
@@ -12,10 +12,10 @@ export class ClipEventDispatch {
     this._copyHandler = this._copyHandler.bind(this);
     this._cutHandler = this._cutHandler.bind(this);
     this._pasteHandler = this._pasteHandler.bind(this);
-    this.initialClipboardTargetEvent(clipboardTarget);
+    this.initClipboardTargetEvent(clipboardTarget);
   }
 
-  initialClipboardTargetEvent(clipboardTarget: HTMLElement) {
+  initClipboardTargetEvent(clipboardTarget: HTMLElement) {
     if (!clipboardTarget) {
       return;
     }
@@ -59,12 +59,12 @@ export class ClipEventDispatch {
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.editorElementActive()) {
+    if (ClipboardEventDispatcher.editorElementActive()) {
       this.signals.cut.emit(e);
     }
   }
   private _pasteHandler(e: ClipboardEvent) {
-    if (ClipEventDispatch.editorElementActive()) {
+    if (ClipboardEventDispatcher.editorElementActive()) {
       this.signals.paste.emit(e);
     }
   }

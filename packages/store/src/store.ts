@@ -1,7 +1,6 @@
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import { Awareness } from 'y-protocols/awareness.js';
-import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
@@ -9,6 +8,7 @@ import {
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
 } from './utils/id-generator.js';
+import { BlockSuiteDoc } from './yjs/index.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -35,7 +35,17 @@ export enum Generator {
   AutoIncrement = 'autoIncrement',
 }
 
-export interface StoreOptions {
+/**
+ * @example
+ *  const workspace = new Workspace({
+ *    isSSR: typeof window === 'undefined'
+ *  })
+ */
+export interface SSROptions {
+  isSSR?: boolean;
+}
+
+export interface StoreOptions extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
   awareness?: Awareness;
@@ -45,7 +55,7 @@ export interface StoreOptions {
 const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
-  readonly doc = new Y.Doc();
+  readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
@@ -83,11 +93,11 @@ export class Store {
   }
 
   addSpace(space: Space) {
-    this.spaces.set(space.id, space);
+    this.spaces.set(space.prefixedId, space);
   }
 
   removeSpace(space: Space) {
-    this.spaces.delete(space.id);
+    this.spaces.delete(space.prefixedId);
   }
 
   /**

@@ -5,7 +5,6 @@ code-block {
 
 .affine-code-block-container {
   font-size: calc(var(--affine-font-base) - 4px);
-  font-family: var(--affine-font-family2);
   line-height: calc(var(--affine-line-height-base) - 6px);
   position: relative;
   width: 720px;
@@ -15,13 +14,16 @@ code-block {
   margin-top: calc(var(--affine-paragraph-space) + 3px);
 }
 
+.affine-code-block-container pre {
+  font-family: var(--affine-font-family2);
+}
+
 .affine-code-block-container .container {
   position: absolute;
   font-size: var(--affine-font-xs);
   line-height: calc(var(--affine-line-height-base) - 10px);
   top: 12px;
-  left: 24px;
-  z-index: 1;
+  left: 9px;
 }
 
 .affine-code-block-container.selected {
@@ -61,6 +63,10 @@ code-block {
   white-space: pre-wrap;
 }
 
+.code-block-option .filled {
+  fill: var(--affine-primary-color);
+}
+
 .lang-container {
   line-height: calc(var(--affine-line-height-base) - 10px);
   text-align: justify;
@@ -72,7 +78,6 @@ code-block {
     0px 3px 16px -6px rgba(24, 39, 75, 0.4);
   border-radius: 10px;
   list-style: none;
-  overflow: hidden;
   padding: 4px;
   width: 40px;
   background-color: var(--affine-page-background);
@@ -83,32 +88,7 @@ code-block {
   /*fill: #6880ff;*/
 }
 
-/*TODO Reuse existing styles*/
-tool-tip {
-  font-family: var(--affine-font-family);
-  position: absolute;
-  left: 0;
-  top: 0;
-  inline-size: max-content;
-  text-align: center;
-  font-size: var(--affine-font-xs);
-  padding: 4px 12px;
-  color: var(--affine-tooltip-color);
-  background: var(--affine-tooltip-background);
-  box-shadow: var(--affine-tooltip-shadow);
-  border-radius: 10px 10px 10px 0;
-
-  opacity: 0;
-  transform: translateX(0) translateY(calc(-100% - 8px));
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  pointer-events: none;
-  user-select: none;
-}
-
-.has-tool-tip {
-  position: relative;
-}
-.has-tool-tip:is(:hover, :focus-visible, :active) > tool-tip {
-  opacity: 1;
-  transition-delay: 200ms;
+.clicked {
+  color: var(--affine-primary-color) !important;
+  background: var(--affine-hover-background) !important;
 }

@@ -16,7 +16,7 @@
   --affine-link-visited-color: #abb8fe;
   --affine-icon-color: #888a94;
   --affine-popover-color: #4c6275;
-  --affine-code-color: #517ea6;
+  --affine-code-color: #48749b;
   --affine-quote-color: #4c6275;
   --affine-selected-color: rgba(104, 128, 255, 0.1);
   --affine-placeholder-color: #c7c7c7;
@@ -47,6 +47,9 @@
   --affine-tooltip-color: #fff;
   --affine-tooltip-background: var(--affine-primary-color);
   --affine-tooltip-shadow: 1px 1px 4px rgba(0, 0, 0, 0.14);
+
+  --sl-font-size-medium: var(--affine-font-xs);
+  --sl-input-font-size-small: var(--affine-font-xs);
 }
 
 html,

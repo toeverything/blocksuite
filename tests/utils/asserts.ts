@@ -390,13 +390,18 @@ export async function assertStoreMatchJSX(
   expect(snapshot.trimStart(), formattedJSX).toEqual(formattedJSX);
 }
 
-export async function assertClipItems(page: Page, key: string, value: unknown) {
+type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
+
+export async function assertClipItems(
+  page: Page,
+  key: MimeType,
+  value: unknown
+) {
   const clipItems = await page.evaluate(() => {
     return document
       .getElementsByTagName('editor-container')[0]
       .clipboard['_copy']['_getClipItems']();
   });
-  // @ts-ignore
   const actual = clipItems.find(item => item.mimeType === key)?.data;
   expect(actual).toEqual(value);
 }

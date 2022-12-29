@@ -1,5 +1,5 @@
 import type { EditorContainer } from '../../components/index.js';
-import { ClipEventDispatch } from './clip-event-dispatch.js';
+import { ClipboardEventDispatcher } from './event-dispatcher.js';
 import { CopyCutManager } from './copy-cut-manager.js';
 import { PasteManager } from './paste-manager.js';
 
@@ -8,7 +8,7 @@ export * from './content-parser/index.js';
 
 export class ClipboardManager {
   private _editor: EditorContainer;
-  private _clipboardEventDispatcher: ClipEventDispatch;
+  private _clipboardEventDispatcher: ClipboardEventDispatcher;
   private _copy: CopyCutManager;
   private _paste: PasteManager;
   private _clipboardTarget: HTMLElement;
@@ -18,7 +18,7 @@ export class ClipboardManager {
     this._clipboardTarget = clipboardTarget;
     this._copy = new CopyCutManager(this._editor);
     this._paste = new PasteManager(this._editor);
-    this._clipboardEventDispatcher = new ClipEventDispatch(
+    this._clipboardEventDispatcher = new ClipboardEventDispatcher(
       this._clipboardTarget
     );
 
@@ -32,7 +32,7 @@ export class ClipboardManager {
       this._clipboardTarget
     );
     this._clipboardTarget = clipboardTarget;
-    this._clipboardEventDispatcher.initialClipboardTargetEvent(
+    this._clipboardEventDispatcher.initClipboardTargetEvent(
       this._clipboardTarget
     );
   }

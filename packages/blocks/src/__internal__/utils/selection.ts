@@ -128,7 +128,7 @@ function setEndRange(editableContainer: Element) {
 }
 
 async function setNewTop(y: number, editableContainer: Element) {
-  const scrollContainer = editableContainer.closest('.affine-editor-container');
+  const scrollContainer = editableContainer.closest('.affine-default-viewport');
   const { top, bottom } = Rect.fromDom(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =

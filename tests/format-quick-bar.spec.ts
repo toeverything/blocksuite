@@ -1,5 +1,6 @@
 import { expect, Page, test } from '@playwright/test';
 import {
+  clickBlockTypeMenuItem,
   dragBetweenIndices,
   enterPlaygroundRoom,
   initEmptyParagraphState,
@@ -8,6 +9,7 @@ import {
   switchReadonly,
 } from './utils/actions/index.js';
 import {
+  assertClipItems,
   assertLocatorVisible,
   assertSelection,
   assertStoreMatchJSX,
@@ -20,7 +22,17 @@ test('should format quick bar show when select text', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
-  page.mouse.click(0, 0);
+
+  const box = await formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  // Click the edge of the format quick bar
+  await page.mouse.click(box.x + 4, box.y + box.height / 2);
+  // Even not any button is clicked, the format quick bar should't be hidden
+  await expect(formatQuickBar).toBeVisible();
+
+  await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();
 });
 
@@ -388,14 +400,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     groupId
   );
 
-  // TODO FIXME: The paragraph transform should not lost selection
-  // Remove next line after fix
-  await dragBetweenIndices(page, [1, 0], [1, 3]);
-  await paragraphBtn.hover();
-  // End of workaround
-
   const textBtn = page.locator(`[data-testid=text]`);
   await textBtn.click();
+
   await assertStoreMatchJSX(
     page,
     `
@@ -417,9 +424,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:group>`,
     groupId
   );
-
-  // TODO FIXME: The paragraph button should prevent selection after click
-  // await assertSelection(page, 1, 0, 3);
+  // The paragraph button should prevent selection after click
+  await assertSelection(page, 1, 0, 3);
 });
 
 test('should format quick bar be able to copy', async ({ page }) => {
@@ -434,7 +440,7 @@ test('should format quick bar be able to copy', async ({ page }) => {
   await assertSelection(page, 1, 0, 3);
   await copyBtn.click();
 
-  // TODO assert clipboard
+  await assertClipItems(page, 'text/plain', '456');
 
   await assertSelection(page, 1, 0, 3);
 });
@@ -510,8 +516,8 @@ test('should format quick bar follow scroll', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
-  for (let i = 0; i < 30; i++) {
-    await page.keyboard.press('Enter');
+  for (let i = 0; i < 20; i++) {
+    await pressEnter(page);
   }
   page.keyboard.type('bottom');
 
@@ -530,7 +536,13 @@ test('should format quick bar follow scroll', async ({ page }) => {
   const boldBtn = formatQuickBar.locator(`[data-testid=bold]`);
   await assertLocatorVisible(page, formatQuickBar);
   await boldBtn.click();
-  await page.mouse.move(0, 0);
+  await scrollToBottom(page);
+  await assertLocatorVisible(page, formatQuickBar, false);
+
+  // should format bar follow scroll after transform text type
+  await scrollToTop(page);
+  await assertLocatorVisible(page, formatQuickBar);
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await scrollToBottom(page);
   await assertLocatorVisible(page, formatQuickBar, false);
 });

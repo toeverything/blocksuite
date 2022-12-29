@@ -54,7 +54,7 @@ export class LinkNodeComponent extends LitElement {
   constructor() {
     super();
     this.addEventListener('mouseover', this.onHover);
-    this.addEventListener('mouseout', this.onHoverEnd);
+    this.addEventListener('mouseout', this._onHoverEnd);
   }
 
   // disable shadow DOM to workaround quill
@@ -93,12 +93,12 @@ export class LinkNodeComponent extends LitElement {
         const newText = linkState.text;
         const isUpdateText = newText !== text;
         assertExists(blot);
-        this.updateLink(blot, link, isUpdateText ? newText : undefined);
+        this._updateLink(blot, link, isUpdateText ? newText : undefined);
         return;
       }
       if (linkState.type === 'remove') {
         assertExists(blot);
-        this.updateLink(blot, false);
+        this._updateLink(blot, false);
         return;
       }
     });
@@ -107,7 +107,7 @@ export class LinkNodeComponent extends LitElement {
   /**
    * If no pass text, use the original text
    */
-  private async updateLink(blot: Blot, link: string | false, text?: string) {
+  private async _updateLink(blot: Blot, link: string | false, text?: string) {
     const model = getModelByElement(this);
     const { page: page } = model;
 
@@ -127,7 +127,7 @@ export class LinkNodeComponent extends LitElement {
     }
   }
 
-  private async onHoverEnd(e: Event) {
+  private async _onHoverEnd(e: Event) {
     clearTimeout(this.popoverTimer);
   }
 

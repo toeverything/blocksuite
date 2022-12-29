@@ -158,7 +158,7 @@ export class LinkPopover extends LitElement {
     }
   }
 
-  private hide() {
+  private _hide() {
     this.dispatchEvent(
       new CustomEvent<LinkDetail>('updateLink', {
         detail: { type: 'cancel' },
@@ -166,7 +166,7 @@ export class LinkPopover extends LitElement {
     );
   }
 
-  private onConfirm() {
+  private _onConfirm() {
     if (this.disableConfirm) {
       return;
     }
@@ -189,23 +189,23 @@ export class LinkPopover extends LitElement {
     return;
   }
 
-  private onCopy(e: MouseEvent) {
+  private _onCopy(e: MouseEvent) {
     navigator.clipboard.writeText(this.previewLink);
     toast('Copied link to clipboard');
   }
 
-  private onUnlink(e: MouseEvent) {
+  private _onUnlink(e: MouseEvent) {
     this.dispatchEvent(createEvent('updateLink', { type: 'remove' }));
   }
 
-  private onEdit(e: MouseEvent) {
+  private _onEdit(e: MouseEvent) {
     this.dispatchEvent(createEvent('editLink', null));
     this.disableConfirm = false;
   }
 
-  private onKeyup(e: KeyboardEvent) {
+  private _onKeyup(e: KeyboardEvent) {
     if (e.key === 'Enter') {
-      this.onConfirm();
+      this._onConfirm();
     }
     if (!this.linkInput) {
       throw new Error('Failed to update link! Link input not found!');
@@ -219,7 +219,7 @@ export class LinkPopover extends LitElement {
     return html`<icon-button
       class="affine-confirm-button"
       ?disabled=${this.disableConfirm}
-      @click=${this.onConfirm}
+      @click=${this._onConfirm}
       >${ConfirmIcon}</icon-button
     >`;
   }
@@ -233,7 +233,7 @@ export class LinkPopover extends LitElement {
         spellcheck="false"
         placeholder="Paste or type a link"
         value=${this.previewLink}
-        @keyup=${this.onKeyup}
+        @keyup=${this._onKeyup}
       />
       <span class="affine-link-popover-dividing-line"></span>
       ${this.confirmBtnTemplate()}
@@ -242,16 +242,16 @@ export class LinkPopover extends LitElement {
 
   previewTemplate() {
     return html`<div class="affine-link-popover">
-      <div class="affine-link-preview has-tool-tip" @click=${this.onCopy}>
+      <div class="affine-link-preview has-tool-tip" @click=${this._onCopy}>
         <tool-tip inert role="tooltip">Click to copy link</tool-tip>
         ${this.previewLink}
       </div>
       <span class="affine-link-popover-dividing-line"></span>
-      <icon-button class="has-tool-tip" @click=${this.onUnlink}>
+      <icon-button class="has-tool-tip" @click=${this._onUnlink}>
         ${UnlinkIcon}
         <tool-tip inert role="tooltip">Remove</tool-tip>
       </icon-button>
-      <icon-button class="has-tool-tip" @click=${this.onEdit}>
+      <icon-button class="has-tool-tip" @click=${this._onEdit}>
         ${EditIcon}
         <tool-tip inert role="tooltip">Edit link</tool-tip>
       </icon-button>
@@ -284,7 +284,7 @@ export class LinkPopover extends LitElement {
           type="text"
           placeholder="Enter text"
           value=${this.text}
-          @keyup=${this.onKeyup}
+          @keyup=${this._onKeyup}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-text-text" for="text-input">Text</label>
@@ -297,7 +297,7 @@ export class LinkPopover extends LitElement {
           spellcheck="false"
           placeholder="Paste or type a link"
           value=${this.previewLink}
-          @keyup=${this.onKeyup}
+          @keyup=${this._onKeyup}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-link-text" for="link-input">Link</label>
@@ -308,7 +308,7 @@ export class LinkPopover extends LitElement {
 
   render() {
     const mask = this.showMask
-      ? html`<div class="overlay-mask" @click="${this.hide}"></div>`
+      ? html`<div class="overlay-mask" @click="${this._hide}"></div>`
       : html``;
 
     const popover =

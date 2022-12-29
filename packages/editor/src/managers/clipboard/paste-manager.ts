@@ -22,10 +22,9 @@ export class PasteManager {
 
   constructor(editor: EditorContainer) {
     this._editor = editor;
-    this.handlePaste = this.handlePaste.bind(this);
   }
 
-  public async handlePaste(e: ClipboardEvent) {
+  public handlePaste = async (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
     if (clipboardData) {
       const isPlainText = PasteManager._isPlainText(clipboardData);
@@ -45,14 +44,15 @@ export class PasteManager {
         }
       }
 
-      const blocks = await this._clipboardEvent2Blocks(e);
-      if (blocks) {
+      const blocksPromise = this._clipboardEvent2Blocks(e);
+      if (blocksPromise instanceof Promise) {
         e.preventDefault();
         e.stopPropagation();
+        const blocks: OpenBlockInfo[] = await blocksPromise;
         this.insertBlocks(blocks);
       }
     }
-  }
+  };
 
   /* FIXME
     private get _selection() {
@@ -63,7 +63,9 @@ export class PasteManager {
     }
     */
 
-  private async _clipboardEvent2Blocks(e: ClipboardEvent) {
+  private _clipboardEvent2Blocks(
+    e: ClipboardEvent
+  ): Promise<OpenBlockInfo[]> | void {
     const clipboardData = e.clipboardData;
     if (!clipboardData) {
       return;

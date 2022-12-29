@@ -15,28 +15,33 @@
     "@blocksuite/store": "workspace:*",
     "@tldraw/intersect": "^1.8.0",
     "highlight.js": "^11.7.0",
-    "hotkeys-js": "^3.10.0",
-    "lit": "^2.3.1",
+    "hotkeys-js": "^3.10.1",
+    "lit": "^2.5.0",
     "perfect-freehand": "^1.2.0",
     "quill": "^1.3.7",
     "quill-cursors": "^4.0.0"
   },
   "exports": {
-    "./style": "./dist/style.css",
+    "./dist/*": "./dist/*",
     ".": "./src/index.ts",
-    "./std": "./src/std.ts"
+    "./std": "./src/std.ts",
+    "./models": "./src/models.ts"
   },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./style": "./dist/style.css",
+      "./dist/*": "./dist/*",
       "./src/*": "./dist/*.js",
       ".": "./dist/index.js",
       "./std": {
         "types": "./dist/std.d.ts",
         "default": "./dist/std.js"
+      },
+      "./models": {
+        "types": "./dist/models.d.ts",
+        "default": "./dist/models.js"
       }
     }
   }

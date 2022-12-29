@@ -8,9 +8,10 @@ import {
   assertBlockType,
   assertTitle,
   assertPageTitleFocus,
+  assertStoreMatchJSX,
 } from './utils/asserts.js';
 import {
-  clickMenuButton,
+  clickBlockTypeMenuItem,
   enterPlaygroundRoom,
   focusRichText,
   pressEnter,
@@ -212,6 +213,62 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 });
 
+// https://github.com/toeverything/blocksuite/issues/364
+test('paragraph with child block should work at enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.type('456');
+
+  await focusRichText(page, 1);
+  await page.keyboard.press('Tab');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,72]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
+  await focusRichText(page, 0);
+  await pressEnter(page);
+  await page.keyboard.type('789');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
+});
+
 test('switch between paragraph types', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -220,13 +277,13 @@ test('switch between paragraph types', async ({ page }) => {
 
   const selector = '.affine-paragraph-block-container';
 
-  await clickMenuButton(page, 'heading-1');
+  await clickBlockTypeMenuItem(page, 'H1');
   await assertClassName(page, selector, /h1/);
 
-  await clickMenuButton(page, 'heading-2');
+  await clickBlockTypeMenuItem(page, 'H2');
   await assertClassName(page, selector, /h2/);
 
-  await clickMenuButton(page, 'heading-3');
+  await clickBlockTypeMenuItem(page, 'H3');
   await assertClassName(page, selector, /h3/);
 
   await undoByClick(page);
@@ -245,7 +302,7 @@ test('delete at start of paragraph block', async ({ page }) => {
   await pressEnter(page);
   await page.keyboard.type('a');
 
-  await clickMenuButton(page, 'heading-1');
+  await clickBlockTypeMenuItem(page, 'H1');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '3', 'h1');
@@ -273,7 +330,7 @@ test('delete at start of paragraph immediately following list', async ({
   await pressEnter(page);
   await page.keyboard.type('a');
 
-  await clickMenuButton(page, 'convert to bulleted list');
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'bulleted');
@@ -288,7 +345,7 @@ test('delete at start of paragraph immediately following list', async ({
 
   await undoByClick(page);
   await undoByClick(page);
-  await clickMenuButton(page, 'convert to numbered list');
+  await clickBlockTypeMenuItem(page, 'Numbered List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'numbered');
@@ -302,7 +359,7 @@ test('delete at start of paragraph immediately following list', async ({
 
   await undoByClick(page);
   await undoByClick(page);
-  await clickMenuButton(page, 'convert to todo list');
+  await clickBlockTypeMenuItem(page, 'Todo List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'todo');

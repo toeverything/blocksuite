@@ -4,7 +4,7 @@ import type { Page as StorePage } from '../../../packages/store/src/index.js';
 import type { Page } from '@playwright/test';
 import { pressEnter } from './keyboard.js';
 
-const NEXT_FRAME_TIMEOUT = 50;
+const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 
@@ -109,6 +109,20 @@ export async function initEmptyParagraphState(page: Page) {
     page.captureSync();
     return { pageId, groupId, paragraphId };
   });
+  return ids;
+}
+
+export async function initEmptyCodeBlockState(page: Page) {
+  const ids = await page.evaluate(() => {
+    const { page } = window;
+    page.captureSync();
+    const pageId = page.addBlock({ flavour: 'affine:page' });
+    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, groupId);
+    page.captureSync();
+    return { pageId, groupId, codeBlockId };
+  });
+  await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
 }
 

@@ -1,13 +1,13 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
-import { createEvent } from '../../__internal__/index.js';
-import style from './style.css';
+import { css, html, unsafeCSS } from 'lit';
+import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
+import style from './style.css?inline';
 import { styleMap } from 'lit/directives/style-map.js';
 import { SearchIcon } from './icons.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
-export class LangList extends LitElement {
+export class LangList extends NonShadowLitElement {
   static get styles() {
     return css`
       ${unsafeCSS(style)}
@@ -36,6 +36,20 @@ export class LangList extends LitElement {
   delay = 150;
 
   static languages = [
+    'TypeScript',
+    'Rust',
+    'Python',
+    'Java',
+    'C',
+    'CPP',
+    'JavaScript',
+    'PHP',
+    'Go',
+    'Bash',
+    'Swift',
+    'Dart',
+    'Delphi',
+    'XML',
     '1c',
     'abnf',
     'accesslog',
@@ -47,7 +61,6 @@ export class LangList extends LitElement {
     'arcade',
     'arduino',
     'armasm',
-    'xml',
     'asciidoc',
     'aspectj',
     'autohotkey',
@@ -55,11 +68,9 @@ export class LangList extends LitElement {
     'avrasm',
     'awk',
     'axapta',
-    'bash',
     'basic',
     'bnf',
     'brainfuck',
-    'c',
     'cal',
     'capnproto',
     'ceylon',
@@ -70,7 +81,6 @@ export class LangList extends LitElement {
     'coffeescript',
     'coq',
     'cos',
-    'cpp',
     'crmsh',
     'crystal',
     'csharp',
@@ -78,8 +88,6 @@ export class LangList extends LitElement {
     'css',
     'd',
     'markdown',
-    'dart',
-    'delphi',
     'diff',
     'django',
     'dns',
@@ -106,7 +114,6 @@ export class LangList extends LitElement {
     'gherkin',
     'glsl',
     'gml',
-    'go',
     'golo',
     'gradle',
     'graphql',
@@ -122,8 +129,6 @@ export class LangList extends LitElement {
     'ini',
     'irpf90',
     'isbl',
-    'java',
-    'javascript',
     'jboss-cli',
     'json',
     'julia',
@@ -166,7 +171,6 @@ export class LangList extends LitElement {
     'parser3',
     'pf',
     'pgsql',
-    'php',
     'php-template',
     'plaintext',
     'pony',
@@ -178,7 +182,6 @@ export class LangList extends LitElement {
     'protobuf',
     'puppet',
     'purebasic',
-    'python',
     'python-repl',
     'q',
     'qml',
@@ -189,7 +192,6 @@ export class LangList extends LitElement {
     'routeros',
     'rsl',
     'ruleslanguage',
-    'rust',
     'sas',
     'scala',
     'scheme',
@@ -206,7 +208,6 @@ export class LangList extends LitElement {
     'step21',
     'stylus',
     'subunit',
-    'swift',
     'taggerscript',
     'yaml',
     'tap',
@@ -214,7 +215,6 @@ export class LangList extends LitElement {
     'thrift',
     'tp',
     'twig',
-    'typescript',
     'vala',
     'vbnet',
     'vbscript',
@@ -230,10 +230,6 @@ export class LangList extends LitElement {
     'zephir',
   ];
 
-  createRenderRoot() {
-    return this;
-  }
-
   protected updated() {
     if (this.showLangList !== 'hidden') {
       this.filterInput.focus();
@@ -242,31 +238,33 @@ export class LangList extends LitElement {
 
   protected firstUpdated() {
     document.addEventListener('click', (e: MouseEvent) => {
-      this.clickHandler(e);
+      this._clickHandler(e);
     });
   }
 
-  private clickHandler(e: MouseEvent) {
+  private _clickHandler(e: MouseEvent) {
     const target = e.target as HTMLElement;
-    if (!target.closest('lang-list')?.closest(`[data-block-id="${this.id}"]`)) {
-      this.dispose();
+    if (
+      !target.closest('.container')?.closest(`[data-block-id="${this.id}"]`)
+    ) {
+      this._dispose();
     }
   }
 
-  private dispose() {
+  private _dispose() {
     this.dispatchEvent(createEvent('dispose', null));
-    document.removeEventListener('click', this.clickHandler);
+    document.removeEventListener('click', this._clickHandler);
     this.filterText = '';
   }
 
-  onLanguageClicked(language: string) {
+  private _onLanguageClicked(language: string) {
     this.selectedLanguage = language;
     this.dispatchEvent(
       createEvent('selected-language-changed', {
-        language: this.selectedLanguage ?? 'javascript',
+        language: this.selectedLanguage ?? 'JavaScript',
       })
     );
-    this.dispose();
+    this._dispose();
   }
 
   render() {
@@ -288,32 +286,32 @@ export class LangList extends LitElement {
     });
 
     return html`
-            <div class="lang-list-container">
-                <div style=${styles}">
-                    <div class="search-icon">
-                        ${SearchIcon}
-                    </div>
-                    <input id="filter-input" type="text"
-                           placeholder="Search" value=${this.filterText}
-                           @keyup=${() =>
-                             (this.filterText = this.filterInput?.value)}
-                    />
-                </div>
-                <div class="lang-list-button-container">
-                    ${filteredLanguages.map(
-                      language => html`
-                        <code-block-button
-                          width="100%"
-                          @click="${() => this.onLanguageClicked(language)}"
-                          class="lang-item"
-                        >
-                          ${language}
-                        </code-block-button>
-                      `
-                    )}
-                </div>
-            </div>
-        `;
+      <div class="lang-list-container">
+        <div style="${styles}">
+          <div class="search-icon">${SearchIcon}</div>
+          <input
+            id="filter-input"
+            type="text"
+            placeholder="Search"
+            value=${this.filterText}
+            @keyup=${() => (this.filterText = this.filterInput?.value)}
+          />
+        </div>
+        <div class="lang-list-button-container">
+          ${filteredLanguages.map(
+            language => html`
+              <code-block-button
+                width="100%"
+                @click="${() => this._onLanguageClicked(language)}"
+                class="lang-item"
+              >
+                ${language}
+              </code-block-button>
+            `
+          )}
+        </div>
+      </div>
+    `;
   }
 }
 

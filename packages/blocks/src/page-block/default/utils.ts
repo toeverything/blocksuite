@@ -220,7 +220,7 @@ export function handleDown(
   if (!selection.state.selectedBlocks.length) {
     const nativeSelection = window.getSelection();
     const model = getStartModelBySelection();
-    if (model.flavour === 'affine:code') {
+    if (matchFlavours(model, ['affine:code'])) {
       return;
     }
     assertExists(nativeSelection);
@@ -410,33 +410,33 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
-  hotkey.addListener(H1, () =>
-    updateSelectedTextType('affine:paragraph', 'h1', page)
-  );
-  hotkey.addListener(H2, () =>
-    updateSelectedTextType('affine:paragraph', 'h2', page)
-  );
-  hotkey.addListener(H3, () =>
-    updateSelectedTextType('affine:paragraph', 'h3', page)
-  );
-  hotkey.addListener(H4, () =>
-    updateSelectedTextType('affine:paragraph', 'h4', page)
-  );
-  hotkey.addListener(H5, () =>
-    updateSelectedTextType('affine:paragraph', 'h5', page)
-  );
-  hotkey.addListener(H6, () =>
-    updateSelectedTextType('affine:paragraph', 'h6', page)
-  );
-  hotkey.addListener(NUMBERED_LIST, () =>
-    updateSelectedTextType('affine:list', 'numbered', page)
-  );
-  hotkey.addListener(BULLETED, () =>
-    updateSelectedTextType('affine:list', 'bulleted', page)
-  );
-  hotkey.addListener(TEXT, () =>
-    updateSelectedTextType('affine:paragraph', 'text', page)
-  );
+  hotkey.addListener(H1, () => {
+    updateSelectedTextType('affine:paragraph', 'h1', page);
+  });
+  hotkey.addListener(H2, () => {
+    updateSelectedTextType('affine:paragraph', 'h2', page);
+  });
+  hotkey.addListener(H3, () => {
+    updateSelectedTextType('affine:paragraph', 'h3', page);
+  });
+  hotkey.addListener(H4, () => {
+    updateSelectedTextType('affine:paragraph', 'h4', page);
+  });
+  hotkey.addListener(H5, () => {
+    updateSelectedTextType('affine:paragraph', 'h5', page);
+  });
+  hotkey.addListener(H6, () => {
+    updateSelectedTextType('affine:paragraph', 'h6', page);
+  });
+  hotkey.addListener(NUMBERED_LIST, () => {
+    updateSelectedTextType('affine:list', 'numbered', page);
+  });
+  hotkey.addListener(BULLETED, () => {
+    updateSelectedTextType('affine:list', 'bulleted', page);
+  });
+  hotkey.addListener(TEXT, () => {
+    updateSelectedTextType('affine:paragraph', 'text', page);
+  });
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
   });
@@ -496,10 +496,6 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.shiftKey;
 }
 
-function removeCodeBlockOptionMenu() {
-  document.querySelector(`.affine-codeblock-option-container`)?.remove();
-}
-
 export function copyCode(codeBlockOption: CodeBlockOption) {
   const richText = getRichTextByModel(codeBlockOption.model);
   assertExists(richText);
@@ -508,13 +504,11 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   document.dispatchEvent(new ClipboardEvent('copy'));
   resetNativeSelection(null);
   toast('Copied to clipboard');
-  removeCodeBlockOptionMenu();
 }
 
 export function deleteCodeBlock(codeBlockOption: CodeBlockOption) {
   const model = codeBlockOption.model;
   model.page.deleteBlock(model);
-  removeCodeBlockOptionMenu();
 }
 
 export function toggleWrap(codeBlockOption: CodeBlockOption) {
@@ -523,5 +517,4 @@ export function toggleWrap(codeBlockOption: CodeBlockOption) {
   );
   assertExists(syntaxElem);
   syntaxElem.classList.toggle('wrap');
-  removeCodeBlockOptionMenu();
 }
