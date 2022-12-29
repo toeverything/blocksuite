@@ -1,10 +1,11 @@
 import { html } from 'lit/static-html.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost, Service } from './types.js';
+import type { BlockHost } from './types.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
-import { BlockService } from '../../models.js';
+import { blockService } from '../../models.js';
 import '../../components/loader.js';
+import { hasService, registerService } from '../service.js';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -59,44 +60,19 @@ function BlockElementWithService(
   host: BlockHost,
   onLoaded: () => void
 ) {
-  const serviceMap = host.serviceMap;
-  if (
-    serviceMap.has(model.flavour) &&
-    serviceMap.get(model.flavour)?.isLoaded === true
-  ) {
+  if (hasService(model.flavour)) {
     return BlockElement(model, host);
   } else {
     const loadOrService =
-      BlockService[model.flavour as keyof typeof BlockService];
-    if (
-      loadOrService !== undefined &&
-      loadOrService.constructor.name === 'AsyncFunction'
-    ) {
-      const load = loadOrService as unknown as () => Promise<{
-        default: {
-          new (): Service;
-        };
-      }>;
-      load().then(({ default: Service }) => {
-        const service = new Service();
-        serviceMap.set(model.flavour, service);
-        if ('load' in service) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          service.load!().then(() => {
-            service.isLoaded = true;
-            onLoaded();
-          });
-        } else {
-          service.isLoaded = true;
+      blockService[model.flavour as keyof typeof blockService];
+    if (loadOrService) {
+      const state = registerService(model.flavour, loadOrService);
+      if (state instanceof Promise) {
+        state.then(() => {
           onLoaded();
-        }
-      });
-      return html`<loader-element />`;
-    } else if (loadOrService !== undefined) {
-      const service = new (loadOrService as {
-        new (): Service;
-      })();
-      serviceMap.set(model.flavour, service);
+        });
+        return html`<loader-element />`;
+      }
     }
     return BlockElement(model, host);
   }

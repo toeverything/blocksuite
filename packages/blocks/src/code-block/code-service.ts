@@ -1,6 +1,6 @@
-import type { Service } from '../__internal__/index.js';
+import type { AsyncService } from '../__internal__/index.js';
 
-export class CodeBlockService implements Service {
+export class CodeBlockService implements AsyncService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hljs: any;
   isLoaded = false;

@@ -14,7 +14,6 @@ import {
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
-  Service,
 } from '../../__internal__/index.js';
 import { DefaultSelectionManager } from './selection-manager.js';
 import { deleteModels, tryUpdateGroupSize } from '../utils/index.js';
@@ -32,6 +31,7 @@ import {
 } from './utils.js';
 import style from './style.css?inline';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import { getService } from '../../__internal__/service.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -77,9 +77,7 @@ export class DefaultPageBlockComponent
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
-
-  serviceMap = new Map<string, Service>();
-  service = (flavour: string) => this.serviceMap.get(flavour) as Service;
+  getService = getService;
 
   lastSelectionPosition: SelectionPosition = 'start';
 
