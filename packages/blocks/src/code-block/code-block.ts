@@ -80,11 +80,18 @@ export class CodeBlockComponent extends NonShadowLitElement {
   render() {
     const page = getDefaultPageBlock(this.model);
     const codeBlockOption = page.codeBlockOption;
+    const boundingClientRect = this.getBoundingClientRect();
+    // when there are multiple code blocks, decide whether mouse is hovering on the current code block
+    const isHovering = !codeBlockOption
+      ? false
+      : codeBlockOption.position.y + boundingClientRect.height >
+          boundingClientRect.top &&
+        codeBlockOption.position.y < boundingClientRect.bottom;
     const childrenContainer = BlockChildrenContainer(this.model, this.host);
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
       <div class="affine-code-block-container">
-        ${codeBlockOption || this.showLangList !== 'hidden'
+        ${isHovering || this.showLangList !== 'hidden'
           ? html`<div class="container">
               <div class="lang-container" @click=${this._onClick}>
                 <code-block-button width="101px" height="24px">

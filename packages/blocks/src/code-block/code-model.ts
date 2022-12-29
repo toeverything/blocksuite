@@ -20,4 +20,27 @@ export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
   }
 
   // TODO block2html
+
+  block2html(
+    childText: string,
+    _previousSiblingId: string,
+    _nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ): string {
+    const codeElement = document.querySelector(
+      `[data-block-id="${this.id}"] pre`
+    );
+    if (!codeElement) {
+      return super.block2html(
+        childText,
+        _previousSiblingId,
+        _nextSiblingId,
+        begin,
+        end
+      );
+    }
+    codeElement.setAttribute('code-lang', this.language);
+    return codeElement.outerHTML;
+  }
 }

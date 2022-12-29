@@ -1,4 +1,5 @@
 import TurndownService from 'turndown';
+import { globalCSS, highlightCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
@@ -62,6 +63,19 @@ export const FileExporter = {
           : '[x] ';
       },
     });
+    turndownService.addRule('codeBlock', {
+      filter: ['pre'],
+      replacement: function (content, node: Node) {
+        const element = node as Element;
+        return (
+          '```' +
+          element.getAttribute('code-lang') +
+          '\n' +
+          node.textContent +
+          '```\n'
+        );
+      },
+    });
     const markdown = turndownService.turndown(htmlContent);
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
@@ -73,15 +87,8 @@ function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
   // Question: Why not embed css directly into html?
   const htmlCss = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
 <style>
-  :root {
-    --affine-primary-color: #3a4c5c;
-    --affine-font-family: Avenir Next, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-    --affine-font-family2: Roboto Mono, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-  }
-  body {
-    font-family: var(--affine-font-family);
-    color: var(--affine-primary-color);
-  }
+  ${globalCSS}
+  ${highlightCSS}
 </style>`;
   // Question: Do we really need the extra div container?
   return `<!DOCTYPE html>
