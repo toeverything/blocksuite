@@ -10,8 +10,15 @@ export type SelectionOptions = {
   from?: 'previous' | 'next';
 };
 
+export interface Service {
+  isLoaded: boolean;
+  load: () => Promise<unknown>;
+}
+
 /** Common context interface definition for block models. */
 export interface BlockHost {
+  service: (flavour: string) => Service;
+  serviceMap: Map<string, Service>;
   page: Page;
   flavour: string;
   readonly: boolean;

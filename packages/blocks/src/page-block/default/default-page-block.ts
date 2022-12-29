@@ -7,13 +7,14 @@ import {
   assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
-  BlockChildrenContainer,
+  BlockChildrenContainerWithService,
   type BlockHost,
   getCurrentRange,
   getModelsByRange,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
+  Service,
 } from '../../__internal__/index.js';
 import { DefaultSelectionManager } from './selection-manager.js';
 import { deleteModels, tryUpdateGroupSize } from '../utils/index.js';
@@ -76,6 +77,9 @@ export class DefaultPageBlockComponent
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
+
+  serviceMap = new Map<string, Service>();
+  service = (flavour: string) => this.serviceMap.get(flavour) as Service;
 
   lastSelectionPosition: SelectionPosition = 'start';
 
@@ -313,7 +317,11 @@ export class DefaultPageBlockComponent
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = BlockChildrenContainer(this.model, this);
+    const childrenContainer = BlockChildrenContainerWithService(
+      this.model,
+      this,
+      () => this.requestUpdate()
+    );
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
     const selectedEmbedContainer = EmbedSelectedRectsContainer(

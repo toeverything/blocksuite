@@ -3,6 +3,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from './types.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
+import { BlockService } from '../../models.js';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -52,8 +53,6 @@ function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
   }
 }
 
-// Naming convention borrowed from
-// https://codelabs.developers.google.com/codelabs/lit-2-for-react-devs#4
 export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
   return html`
     <style>
@@ -66,6 +65,53 @@ export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
         model.children,
         child => child.id,
         child => BlockElement(child, host)
+      )}
+    </div>
+  `;
+}
+
+// Naming convention borrowed from
+// https://codelabs.developers.google.com/codelabs/lit-2-for-react-devs#4
+export function BlockChildrenContainerWithService(
+  model: BaseBlockModel,
+  host: BlockHost,
+  onLoaded: () => void
+) {
+  const serviceMap = host.serviceMap;
+  function BlockElementWithService(model: BaseBlockModel, host: BlockHost) {
+    if (
+      serviceMap.has(model.flavour) &&
+      serviceMap.get(model.flavour)?.isLoaded === true
+    ) {
+      return BlockElement(model, host);
+    } else {
+      const load = BlockService[model.flavour as keyof typeof BlockService];
+      if (typeof load === 'function') {
+        console.log('loading', model.flavour);
+        load().then(({ default: Service }) => {
+          const service = new Service();
+          serviceMap.set(model.flavour, service);
+          service.load().then(() => {
+            service.isLoaded = true;
+            onLoaded();
+          });
+        });
+        return html`<div>loading ${model.flavour} service ...</div>`;
+      }
+      return BlockElement(model, host);
+    }
+  }
+  return html`
+    <style>
+      .affine-block-children-container {
+        padding-left: 26px;
+      }
+    </style>
+    <div class="affine-block-children-container">
+      ${repeat(
+        model.children,
+        child => child.id,
+        child => BlockElementWithService(child, host)
       )}
     </div>
   `;
