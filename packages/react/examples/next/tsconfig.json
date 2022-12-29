@@ -1,7 +1,6 @@
 {
   "extends": "../../../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "composite": true,
     "strict": true,
     "jsx": "preserve",
