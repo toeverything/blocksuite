@@ -213,9 +213,6 @@ export class DebugMenu extends LitElement {
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
-      const url = new URL(window.location.href);
-      url.searchParams.set('mode', mode);
-      window.history.pushState(null, '', url);
     }
     super.update(changedProperties);
   }
