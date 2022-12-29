@@ -20,9 +20,13 @@ function subscribePage(workspace: Workspace) {
     editor.page = page;
     document.body.appendChild(editor);
 
+    const url = new URL(window.location.href);
+    const mode = url.searchParams.get('mode');
+
     const debugMenu = new DebugMenu();
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
+    debugMenu.mode = mode ? (mode === 'page' ? 'page' : 'edgeless') : 'page';
     document.body.appendChild(debugMenu);
 
     initButton.disabled = true;

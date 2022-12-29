@@ -150,7 +150,7 @@ export class DebugMenu extends LitElement {
 
   private _switchEditorMode() {
     const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-    this.mode = this.editor.mode = mode;
+    this.mode = mode;
   }
 
   private _addGroup() {
@@ -209,6 +209,13 @@ export class DebugMenu extends LitElement {
     ) {
       const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
       window.dispatchEvent(event);
+    }
+    if (changedProperties.has('mode')) {
+      const mode = this.mode;
+      this.editor.mode = mode;
+      const url = new URL(window.location.href);
+      url.searchParams.set('mode', mode);
+      window.history.pushState(null, '', url); // or pushState
     }
     super.update(changedProperties);
   }
