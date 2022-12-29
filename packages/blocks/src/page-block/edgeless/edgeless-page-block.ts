@@ -209,6 +209,7 @@ export class EdgelessPageBlockComponent
     this.signals.shapeUpdated.on(() => this.requestUpdate());
     this._historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
+      this.requestUpdate();
     });
 
     this._bindHotkeys();
