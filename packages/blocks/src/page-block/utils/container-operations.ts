@@ -28,7 +28,7 @@ import {
 } from '../../__internal__/utils/selection.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
-import { CodeBlockModel } from '../../code-block/index.js';
+import type { CodeBlockModel } from '../../code-block/index.js';
 
 export function deleteModels(page: Page, models: BaseBlockModel[]) {
   const selection = window.getSelection();
@@ -206,8 +206,8 @@ export const getFormat = () => {
   const lastFormat = lastRichText.quill.getFormat(0, endIndex);
 
   const formatArr = [];
-  !(models[0] instanceof CodeBlockModel) && formatArr.push(firstFormat);
-  !(models[models.length - 1] instanceof CodeBlockModel) &&
+  !(models[0].flavour === 'affine:code') && formatArr.push(firstFormat);
+  !(models[models.length - 1].flavour === 'affine:code') &&
     formatArr.push(lastFormat);
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
@@ -217,7 +217,7 @@ export const getFormat = () => {
       // empty line should not be included
       continue;
     }
-    if (models[i] instanceof CodeBlockModel) {
+    if (models[i].flavour === 'affine:code') {
       continue;
     }
     const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
@@ -285,7 +285,7 @@ export function handleFormat(page: Page, key: string) {
 
   if (isRangeSelection()) {
     const models = getModelsByRange(getCurrentRange()).filter(model => {
-      return !(model instanceof CodeBlockModel);
+      return !(model.flavour === 'affine:code');
     });
     if (models.length === 1) {
       const richText = getRichTextByModel(models[0]);
