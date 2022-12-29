@@ -3,6 +3,7 @@ import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
+  BlockChildrenContainer,
   BlockHost,
   getBlockElementByModel,
   getDefaultPageBlock,
@@ -13,7 +14,6 @@ import '../__internal__/rich-text/rich-text.js';
 import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
-import { BlockChildrenContainer } from '../__internal__/index.js';
 import style from './style.css?inline';
 
 function selectList(model: ListBlockModel) {
@@ -67,7 +67,11 @@ export class ListBlockComponent extends NonShadowLitElement {
         });
       },
     });
-    const childrenContainer = BlockChildrenContainer(this.model, this.host);
+    const childrenContainer = BlockChildrenContainer(
+      this.model,
+      this.host,
+      () => this.requestUpdate()
+    );
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
 

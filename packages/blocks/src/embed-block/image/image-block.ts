@@ -4,9 +4,9 @@ import type { EmbedBlockModel } from '../index.js';
 import {
   BLOCK_ID_ATTR,
   type BlockHost,
-  BlockChildrenContainer,
   assertExists,
   NonShadowLitElement,
+  BlockChildrenContainer,
 } from '../../__internal__/index.js';
 import style from './style.css?inline';
 
@@ -46,7 +46,11 @@ export class ImageBlockComponent extends NonShadowLitElement {
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    const childrenContainer = BlockChildrenContainer(this.model, this.host);
+    const childrenContainer = BlockChildrenContainer(
+      this.model,
+      this.host,
+      () => this.requestUpdate()
+    );
     const { width, height } = this.model;
 
     if (width && height && this._resizeImg) {

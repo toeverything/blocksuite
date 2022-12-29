@@ -3,6 +3,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from './types.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
+import { BlockService } from '../../models.js';
+import '../../components/loader.js';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -52,9 +54,41 @@ function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
   }
 }
 
+function BlockElementWithService(
+  model: BaseBlockModel,
+  host: BlockHost,
+  onLoaded: () => void
+) {
+  const serviceMap = host.serviceMap;
+  if (
+    serviceMap.has(model.flavour) &&
+    serviceMap.get(model.flavour)?.isLoaded === true
+  ) {
+    return BlockElement(model, host);
+  } else {
+    const load = BlockService[model.flavour as keyof typeof BlockService];
+    if (typeof load === 'function') {
+      load().then(({ default: Service }) => {
+        const service = new Service();
+        serviceMap.set(model.flavour, service);
+        service.load().then(() => {
+          service.isLoaded = true;
+          onLoaded();
+        });
+      });
+      return html`<loader-element />`;
+    }
+    return BlockElement(model, host);
+  }
+}
+
 // Naming convention borrowed from
 // https://codelabs.developers.google.com/codelabs/lit-2-for-react-devs#4
-export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
+export function BlockChildrenContainer(
+  model: BaseBlockModel,
+  host: BlockHost,
+  onLoaded: () => void
+) {
   return html`
     <style>
       .affine-block-children-container {
@@ -65,7 +99,7 @@ export function BlockChildrenContainer(model: BaseBlockModel, host: BlockHost) {
       ${repeat(
         model.children,
         child => child.id,
-        child => BlockElement(child, host)
+        child => BlockElementWithService(child, host, onLoaded)
       )}
     </div>
   `;

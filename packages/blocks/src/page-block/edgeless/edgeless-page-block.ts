@@ -6,6 +6,7 @@ import type {
   GroupBlockModel,
   MouseMode,
   PageBlockModel,
+  Service,
 } from '../../index.js';
 import {
   EdgelessBlockChildrenContainer,
@@ -76,6 +77,9 @@ export class EdgelessPageBlockComponent
     },
   })
   model!: PageBlockModel;
+
+  serviceMap = new Map<string, Service>();
+  service = (flavour: string) => this.serviceMap.get(flavour) as Service;
 
   @state()
   viewport = new ViewportState();

@@ -30,3 +30,7 @@ export const BlockSchema = {
   'affine:embed': EmbedBlockModel,
   'affine:shape': ShapeBlockModel,
 };
+
+export const BlockService = {
+  'affine:code': () => import('./code-block/code-service.js'),
+};

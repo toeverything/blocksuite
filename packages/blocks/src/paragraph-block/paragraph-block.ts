@@ -3,13 +3,13 @@ import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
+  BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import '../__internal__/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-import { BlockChildrenContainer } from '../__internal__/index.js';
 import style from './style.css?inline';
 
 const getPlaceholder = (model: ParagraphBlockModel) => {
@@ -56,7 +56,11 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const { type } = this.model;
-    const childrenContainer = BlockChildrenContainer(this.model, this.host);
+    const childrenContainer = BlockChildrenContainer(
+      this.model,
+      this.host,
+      () => this.requestUpdate()
+    );
     const placeholder = getPlaceholder(this.model);
 
     return html`

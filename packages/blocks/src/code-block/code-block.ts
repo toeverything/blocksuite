@@ -12,9 +12,8 @@ import {
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
+import type CodeBlockService from './code-service.js';
 import '../__internal__/rich-text/rich-text.js';
-
-let highlighGlobal: unknown = null;
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
@@ -50,21 +49,9 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @state()
   filterText = '';
 
-  @state()
-  highlight: unknown;
-
-  connectedCallback() {
-    super.connectedCallback();
-    if (highlighGlobal) {
-      this.highlight = highlighGlobal;
-      return;
-    }
-    // @ts-ignore highlight.js has no types
-    import('highlight.js').then(highlightModule => {
-      const highlight = highlightModule.default.highlight;
-      this.highlight = highlight;
-      highlighGlobal = highlight;
-    });
+  get highlight() {
+    const service = this.host.service(this.model.flavour) as CodeBlockService;
+    return service.hljs.default.highlight;
   }
 
   firstUpdated() {
@@ -87,7 +74,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
       : codeBlockOption.position.y + boundingClientRect.height >
           boundingClientRect.top &&
         codeBlockOption.position.y < boundingClientRect.bottom;
-    const childrenContainer = BlockChildrenContainer(this.model, this.host);
+    const childrenContainer = BlockChildrenContainer(
+      this.model,
+      this.host,
+      () => this.requestUpdate()
+    );
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     return html`
       <div class="affine-code-block-container">
@@ -110,21 +101,19 @@ export class CodeBlockComponent extends NonShadowLitElement {
               ></lang-list>
             </div>`
           : html``}
-        ${this.highlight
-          ? html`<rich-text
-              .host=${this.host}
-              .model=${this.model}
-              .modules=${{
-                syntax: {
-                  highlight: this.highlight,
-                  codeBlockElement: this,
-                  language: this.model.language,
-                },
-              }}
-            >
-              <div id="line-number"></div>
-            </rich-text>`
-          : html`<loader-element />`}
+        <rich-text
+          .host=${this.host}
+          .model=${this.model}
+          .modules=${{
+            syntax: {
+              highlight: this.highlight,
+              codeBlockElement: this,
+              language: this.model.language,
+            },
+          }}
+        >
+          <div id="line-number"></div>
+        </rich-text>
         ${childrenContainer}
       </div>
     `;
