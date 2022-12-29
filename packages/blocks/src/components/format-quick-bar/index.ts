@@ -14,6 +14,8 @@ import {
 import './button.js';
 import './format-bar-node.js';
 
+let globalAbortController = new AbortController();
+
 export const showFormatQuickBar = async ({
   anchorEl,
   direction = 'right-bottom',
@@ -30,6 +32,10 @@ export const showFormatQuickBar = async ({
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
+  // Abort previous format quick bar
+  globalAbortController.abort();
+  globalAbortController = abortController;
+
   // Init format quick bar
 
   const formatQuickBar = document.createElement('format-quick-bar');
