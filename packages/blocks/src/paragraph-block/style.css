@@ -93,7 +93,7 @@ strong {
 code {
   background: var(--affine-code-background);
   color: var(--affine-code-color);
-  font-family: var(--affine-font-family2);
+  font-family: var(--affine-font-mono);
   padding: 0 5px;
   border-radius: 5px;
   font-size: calc(var(--affine-font-base) - 4px);
