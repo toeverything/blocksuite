@@ -22,7 +22,6 @@ import {
   TodoIcon,
   UnderlineIcon,
 } from './icons.js';
-import { CodeBlockModel } from '../../code-block/index.js';
 
 export const paragraphButtons = [
   {
@@ -140,5 +139,5 @@ export const formatButtons = [
 ];
 
 export const noneCodeBlockSelected = (models: BaseBlockModel[]) => {
-  return !models.every(model => model instanceof CodeBlockModel);
+  return !models.every(model => model.flavour === 'affine:code');
 };

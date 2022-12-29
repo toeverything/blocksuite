@@ -97,6 +97,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
                 }}
                 @dispose=${() => {
                   this.showLangList = 'hidden';
+                  this.langSelectionButton.classList.remove('clicked');
                 }}
               ></lang-list>
             </div>`
