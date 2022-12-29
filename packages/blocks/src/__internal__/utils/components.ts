@@ -4,6 +4,7 @@ import type { BlockHost } from './types.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { BlockService } from '../../models.js';
+import '../../components/loader.js';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -76,7 +77,7 @@ function BlockElementWithService(
           onLoaded();
         });
       });
-      return html`<div>loading ${model.flavour} service ...</div>`;
+      return html`<loader-element />`;
     }
     return BlockElement(model, host);
   }
