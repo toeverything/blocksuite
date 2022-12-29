@@ -154,102 +154,99 @@ export async function handleUnindent(
 }
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
-  // When deleting at line start of a paragraph block,
-  // firstly switch it to normal text, then delete this empty block.
-
-  const container = getContainerByModel(model);
-  const previousSibling = getPreviousBlock(container, model.id);
-  const nextSibling = getNextBlock(model.id);
-  if (matchFlavours(model, ['affine:paragraph'])) {
-    if (model.type !== 'text') {
-      page.captureSync();
-      page.updateBlock(model, { type: 'text' });
-    } else {
-      const parent = page.getParent(model);
-      if (!parent || matchFlavours(parent, ['affine:group'])) {
-        if (
-          previousSibling &&
-          matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
-        ) {
-          page.captureSync();
-          const preTextLength = previousSibling.text?.length || 0;
-          model.text?.length && previousSibling.text?.join(model.text as Text);
-          page.deleteBlock(model);
-          const richText = getRichTextByModel(previousSibling);
-          richText?.quill?.setSelection(preTextLength, 0);
-        } else if (
-          previousSibling &&
-          matchFlavours(previousSibling, [
-            'affine:embed',
-            'affine:divider',
-            'affine:code',
-          ]) &&
-          nextSibling &&
-          matchFlavours(nextSibling, [
-            'affine:embed',
-            'affine:divider',
-            'affine:code',
-          ])
-        ) {
-          page.captureSync();
-          window.requestAnimationFrame(() => {
-            focusPreviousBlock(model, 'start');
-            page.deleteBlock(model);
-          });
-        } else if (
-          previousSibling &&
-          matchFlavours(previousSibling, [
-            'affine:embed',
-            'affine:divider',
-            'affine:code',
-          ])
-        ) {
-          window.requestAnimationFrame(() => {
-            focusPreviousBlock(model, 'start');
-          });
-        }
-      } else {
-        const grandParent = page.getParent(parent);
-        if (!grandParent) return;
-        const index = grandParent.children.indexOf(parent);
-        const blockProps = {
-          flavour: model.flavour,
-          text: model?.text?.clone(), // should clone before `deleteBlock`
-          children: model.children,
-          type: model.type,
-        };
-
-        page.captureSync();
-        page.deleteBlock(model);
-        page.addBlock(blockProps, grandParent, index + 1);
-      }
-    }
+  // Select the code block
+  if (matchFlavours(model, ['affine:code'])) {
+    const selectionManager = getDefaultPageBlock(model).selection;
+    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
+    const blockRect = codeBlockElement.getBoundingClientRect();
+    selectionManager.resetSelectedBlockByRect(blockRect, 'focus');
+    resetNativeSelection(null);
+    return;
   }
+
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
-  else if (matchFlavours(model, ['affine:list'])) {
+  if (matchFlavours(model, ['affine:list'])) {
     const parent = page.getParent(model);
     if (!parent) return;
 
     const index = parent.children.indexOf(model);
-    page.captureSync();
-
     const blockProps = {
       flavour: 'affine:paragraph',
       type: 'text',
       text: model?.text?.clone(),
       children: model.children,
     };
+    page.captureSync();
     page.deleteBlock(model);
     const id = page.addBlock(blockProps, parent, index);
     asyncFocusRichText(page, id);
-  } else if (matchFlavours(model, ['affine:code'])) {
-    const selectionManager = getDefaultPageBlock(model).selection;
-    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
-    const blockRect = codeBlockElement.getBoundingClientRect();
-    selectionManager.resetSelectedBlockByRect(blockRect, 'focus');
-    resetNativeSelection(null);
+    return;
   }
+
+  // When deleting at line start of a paragraph block,
+  // firstly switch it to normal text, then delete this empty block.
+  if (matchFlavours(model, ['affine:paragraph'])) {
+    if (model.type !== 'text') {
+      page.captureSync();
+      page.updateBlock(model, { type: 'text' });
+      return;
+    }
+
+    const parent = page.getParent(model);
+    if (!parent || matchFlavours(parent, ['affine:group'])) {
+      const container = getContainerByModel(model);
+      const previousSibling = getPreviousBlock(container, model.id);
+      if (
+        previousSibling &&
+        matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
+      ) {
+        page.captureSync();
+        const preTextLength = previousSibling.text?.length || 0;
+        model.text?.length && previousSibling.text?.join(model.text as Text);
+        page.deleteBlock(model);
+        const richText = getRichTextByModel(previousSibling);
+        richText?.quill?.setSelection(preTextLength, 0);
+      } else if (
+        previousSibling &&
+        matchFlavours(previousSibling, [
+          'affine:embed',
+          'affine:divider',
+          'affine:code',
+        ])
+      ) {
+        window.requestAnimationFrame(() => {
+          focusPreviousBlock(model, 'start');
+          page.captureSync();
+          if (!model.text?.length) {
+            page.deleteBlock(model);
+          }
+        });
+      }
+      return;
+    }
+
+    const grandParent = page.getParent(parent);
+    if (!grandParent) return;
+    const index = grandParent.children.indexOf(parent);
+    const blockProps = {
+      flavour: model.flavour,
+      text: model?.text?.clone(), // should clone before `deleteBlock`
+      children: model.children,
+      type: model.type,
+    };
+
+    page.captureSync();
+    page.deleteBlock(model);
+    const id = page.addBlock(blockProps, grandParent, index + 1);
+    asyncFocusRichText(page, id);
+    return;
+  }
+
+  throw new Error(
+    'Failed to handle backspace! Unknown block flavours! flavour:' +
+      model.flavour
+  );
 }
 
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
