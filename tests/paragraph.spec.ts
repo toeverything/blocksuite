@@ -269,6 +269,38 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   );
 });
 
+test('should indent paragraph block can delete and hold cursor', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(10);
+  await page.keyboard.press('Backspace');
+  await page.waitForTimeout(10);
+  await page.keyboard.press('Backspace');
+
+  // TODO FIXME wait for group bounding box update
+  await page.waitForTimeout(20);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
+});
+
 test('switch between paragraph types', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);

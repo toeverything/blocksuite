@@ -595,3 +595,20 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await assertDivider(page, 2);
   await assertRichTexts(page, ['\n']);
 });
+
+test('should delete line with content after divider should not lost content', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('--- ');
+  await page.keyboard.type('123');
+  // Jump to line start
+  await withCtrlOrMeta(page, () => page.keyboard.press('ArrowLeft'));
+  await page.keyboard.press('Backspace');
+  await page.waitForTimeout(10);
+  await page.keyboard.press('Backspace');
+  await assertDivider(page, 0);
+  await assertRichTexts(page, ['\n', '123']);
+});
