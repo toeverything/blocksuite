@@ -68,7 +68,11 @@ export const FileExporter = {
       replacement: function (content, node: Node) {
         const element = node as Element;
         return (
-          '```' + element.getAttribute('code-lang') + '\n' + content + '```'
+          '```' +
+          element.getAttribute('code-lang') +
+          '\n' +
+          node.textContent +
+          '```\n'
         );
       },
     });
