@@ -6,7 +6,7 @@ import {
   BLOCK_ID_ATTR,
   type BlockHost,
   NonShadowLitElement,
-  BlockChildrenContainerWithService,
+  BlockChildrenContainer,
 } from '../__internal__/index.js';
 import style from './style.css?inline';
 
@@ -34,7 +34,7 @@ export class GroupBlockComponent extends NonShadowLitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = BlockChildrenContainerWithService(
+    const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
       () => this.requestUpdate()

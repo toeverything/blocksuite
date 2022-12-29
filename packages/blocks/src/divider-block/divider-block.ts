@@ -3,7 +3,7 @@ import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
-  BlockChildrenContainerWithService,
+  BlockChildrenContainer,
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
@@ -35,7 +35,7 @@ export class DividerBlockComponent extends NonShadowLitElement {
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    const childrenContainer = BlockChildrenContainerWithService(
+    const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
       () => this.requestUpdate()

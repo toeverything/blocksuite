@@ -3,7 +3,7 @@ import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
-  BlockChildrenContainerWithService,
+  BlockChildrenContainer,
   BlockHost,
   getBlockElementByModel,
   getDefaultPageBlock,
@@ -67,7 +67,7 @@ export class ListBlockComponent extends NonShadowLitElement {
         });
       },
     });
-    const childrenContainer = BlockChildrenContainerWithService(
+    const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
       () => this.requestUpdate()

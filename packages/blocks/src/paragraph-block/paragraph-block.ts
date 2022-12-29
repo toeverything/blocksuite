@@ -3,7 +3,7 @@ import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
-  BlockChildrenContainerWithService,
+  BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
@@ -56,7 +56,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const { type } = this.model;
-    const childrenContainer = BlockChildrenContainerWithService(
+    const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
       () => this.requestUpdate()

@@ -7,7 +7,7 @@ import {
   assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
-  BlockChildrenContainerWithService,
+  BlockChildrenContainer,
   type BlockHost,
   getCurrentRange,
   getModelsByRange,
@@ -317,10 +317,8 @@ export class DefaultPageBlockComponent
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const childrenContainer = BlockChildrenContainerWithService(
-      this.model,
-      this,
-      () => this.requestUpdate()
+    const childrenContainer = BlockChildrenContainer(this.model, this, () =>
+      this.requestUpdate()
     );
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
