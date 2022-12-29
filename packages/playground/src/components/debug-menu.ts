@@ -22,7 +22,6 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 
 import {
   assertExists,
-  ColorStyle,
   createEvent,
   getCurrentRange,
   getModelsByRange,
@@ -65,7 +64,7 @@ export class DebugMenu extends LitElement {
   mouseModeType: MouseMode['type'] = 'default';
 
   @state()
-  shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
+  shapeModeColor: ShapeMouseMode['color'] = '#000000';
 
   @state()
   shapeModeShape: ShapeMouseMode['shape'] = TDShapeType.Rectangle;
@@ -413,40 +412,14 @@ export class DebugMenu extends LitElement {
 
           <sl-color-picker
             size="small"
+            value="#000000"
             hoist
             label="Shape Color"
             @sl-change=${(e: CustomEvent) => {
               const target = e.target as SlColorPicker;
-              console.log(target.value);
+              this.shapeModeColor = target.value as `#${string}`;
             }}
           ></sl-color-picker>
-
-          <sl-select
-            placeholder="Shape Color"
-            size="small"
-            value=${this.shapeModeColor}
-            aria-label="Shape Color"
-            hoist
-            style="width: 100px;"
-            @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlSelect;
-              this.shapeModeColor = target.value as ColorStyle;
-            }}
-          >
-            <sl-menu-item value="white">White</sl-menu-item>
-            <sl-menu-item value="lightGray">LightGray</sl-menu-item>
-            <sl-menu-item value="gray">Gray</sl-menu-item>
-            <sl-menu-item value="black">Black</sl-menu-item>
-            <sl-menu-item value="green">Green</sl-menu-item>
-            <sl-menu-item value="cyan">Cyan</sl-menu-item>
-            <sl-menu-item value="blue">Blue</sl-menu-item>
-            <sl-menu-item value="indigo">Indigo</sl-menu-item>
-            <sl-menu-item value="violet">Violet</sl-menu-item>
-            <sl-menu-item value="red">Red</sl-menu-item>
-            <sl-menu-item value="orange">Orange</sl-menu-item>
-            <sl-menu-item value="yellow">Yellow</sl-menu-item>
-          </sl-select>
-
           <sl-select
             placeholder="Shape Type"
             size="small"
