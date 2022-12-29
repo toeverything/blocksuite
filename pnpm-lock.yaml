@@ -103,6 +103,7 @@ importers:
       lit: ^2.5.0
       react: ^18.2.0
       react-dom: ^18.2.0
+      web-vitals: ^3.1.0
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/editor': link:../editor
@@ -112,6 +113,7 @@ importers:
       lit: 2.5.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      web-vitals: 3.1.0
 
   packages/react:
     specifiers:
@@ -5368,6 +5370,10 @@ packages:
     dependencies:
       defaults: 1.0.4
     dev: true
+
+  /web-vitals/3.1.0:
+    resolution: {integrity: sha512-zCeQ+bOjWjJbXv5ZL0r8Py3XP2doCQMZXNKlBGfUjPAVZWokApdeF/kFlK1peuKlCt8sL9TFkKzyXE9/cmNJQA==}
+    dev: false
 
   /which-boxed-primitive/1.0.2:
     resolution: {integrity: sha512-bwZdv0AKLpplFY2KZRX6TvyuN7ojjr7lwkg6ml0roIy9YeuSr7JS372qlNW18UQYzgYK9ziGcerWqZOmEn9VNg==}

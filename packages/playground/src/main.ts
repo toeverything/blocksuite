@@ -13,9 +13,15 @@ import {
   isE2E,
 } from './utils.js';
 import './style.css';
+import reportWebVitals from './reportWebVitals';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
+
+const start = performance.now();
+reportWebVitals(metric => {
+  console.log(metric.name, (performance.now() - start).toFixed(2) + 'ms');
+});
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
