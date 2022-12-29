@@ -93,7 +93,9 @@ function BlockElementWithService(
       });
       return html`<loader-element />`;
     } else if (loadOrService !== undefined) {
-      const service = new (loadOrService as any)();
+      const service = new (loadOrService as {
+        new (): Service;
+      })();
       serviceMap.set(model.flavour, service);
     }
     return BlockElement(model, host);
