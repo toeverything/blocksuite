@@ -64,7 +64,7 @@ export class DebugMenu extends LitElement {
   mouseModeType: MouseMode['type'] = 'default';
 
   @state()
-  shapeModeColor: ShapeMouseMode['color'] = '#000000';
+  shapeModeColor: ShapeMouseMode['color'] = 'black';
 
   @state()
   shapeModeShape: ShapeMouseMode['shape'] = TDShapeType.Rectangle;
