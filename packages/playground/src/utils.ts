@@ -8,6 +8,9 @@ import {
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? 'playground';
+const url = new URL(window.location.href);
+export const defaultMode =
+  url.searchParams.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 export const initParam = params.get('init');
 export const isE2E = params.get('room')?.includes('playwright');
 export const isBase64 =
