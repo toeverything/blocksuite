@@ -21,7 +21,7 @@ export {
 };
 
 // TODO support dynamic register
-export const blockSchema = {
+export const BlockSchema = {
   'affine:paragraph': ParagraphBlockModel,
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
@@ -32,9 +32,9 @@ export const blockSchema = {
   'affine:shape': ShapeBlockModel,
 };
 
-export type BlockSchema = typeof blockSchema;
+export type BlockSchemaType = typeof BlockSchema;
 
-export type Flavour = keyof BlockSchema;
+export type Flavour = keyof BlockSchemaType;
 
 export const blockService = {
   'affine:code': async () => import('./code-block/code-service.js'),
