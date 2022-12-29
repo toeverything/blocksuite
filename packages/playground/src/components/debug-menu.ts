@@ -215,7 +215,7 @@ export class DebugMenu extends LitElement {
       this.editor.mode = mode;
       const url = new URL(window.location.href);
       url.searchParams.set('mode', mode);
-      window.history.pushState(null, '', url); // or pushState
+      window.history.pushState(null, '', url);
     }
     super.update(changedProperties);
   }
