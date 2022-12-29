@@ -1,6 +1,6 @@
 import { html } from 'lit/static-html.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost } from './types.js';
+import type { BlockHost, Service } from './types.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { BlockService } from '../../models.js';
@@ -66,17 +66,37 @@ function BlockElementWithService(
   ) {
     return BlockElement(model, host);
   } else {
-    const load = BlockService[model.flavour as keyof typeof BlockService];
-    if (typeof load === 'function') {
+    const loadOrService =
+      BlockService[model.flavour as keyof typeof BlockService];
+    if (
+      loadOrService !== undefined &&
+      loadOrService.constructor.name === 'AsyncFunction'
+    ) {
+      const load = loadOrService as unknown as () => Promise<{
+        default: {
+          new (): Service;
+        };
+      }>;
       load().then(({ default: Service }) => {
         const service = new Service();
         serviceMap.set(model.flavour, service);
-        service.load().then(() => {
+        if ('load' in service) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          service.load!().then(() => {
+            service.isLoaded = true;
+            onLoaded();
+          });
+        } else {
           service.isLoaded = true;
           onLoaded();
-        });
+        }
       });
       return html`<loader-element />`;
+    } else if (loadOrService !== undefined) {
+      const service = new (loadOrService as {
+        new (): Service;
+      })();
+      serviceMap.set(model.flavour, service);
     }
     return BlockElement(model, host);
   }

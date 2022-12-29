@@ -7,6 +7,7 @@ import { ListBlockModel } from './list-block/list-model.js';
 import { PageBlockModel } from './page-block/page-model.js';
 import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ShapeBlockModel } from './shape-block/shape-model.js';
+import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 
 export {
   CodeBlockModel,
@@ -32,5 +33,6 @@ export const BlockSchema = {
 };
 
 export const BlockService = {
-  'affine:code': () => import('./code-block/code-service.js'),
+  'affine:code': async () => import('./code-block/code-service.js'),
+  'affine:paragraph': ParagraphBlockService,
 };

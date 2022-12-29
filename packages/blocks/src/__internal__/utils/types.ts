@@ -12,7 +12,7 @@ export type SelectionOptions = {
 
 export interface Service {
   isLoaded: boolean;
-  load: () => Promise<unknown>;
+  load?: () => Promise<unknown>;
 }
 
 /** Common context interface definition for block models. */
