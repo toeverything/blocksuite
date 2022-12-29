@@ -5,7 +5,7 @@ import { literal } from 'lit/static-html.js';
 
 export interface ShapeBlockProps extends IBaseBlockProps {
   flavor: 'affine:shape';
-  color: ColorStyle;
+  color: ColorStyle | `#${string}`;
   type: TDShapeType;
 
   xywh: string;
@@ -16,7 +16,7 @@ export class ShapeBlockModel extends BaseBlockModel {
   flavour = 'affine:shape' as const;
   tag = literal`affine-shape`;
 
-  color: ColorStyle;
+  color: ColorStyle | `#${string}`;
   type: TDShapeType;
   xywh: string;
 

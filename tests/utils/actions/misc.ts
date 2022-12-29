@@ -28,6 +28,7 @@ async function initEmptyEditor(page: Page) {
       document.body.appendChild(editor);
       document.body.appendChild(debugMenu);
 
+      window.debugMenu = debugMenu;
       window.editor = editor;
       window.page = page;
     });

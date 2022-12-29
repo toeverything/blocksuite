@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -12,7 +12,12 @@ import '@shoelace-style/shoelace/dist/components/menu/menu.js';
 import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
-import type { SlSelect, SlDropdown } from '@shoelace-style/shoelace';
+import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
+import type {
+  SlColorPicker,
+  SlDropdown,
+  SlSelect,
+} from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 
 import {
@@ -21,14 +26,14 @@ import {
   createEvent,
   getCurrentRange,
   getModelsByRange,
+  type GroupBlockModel,
   MouseMode,
   ShapeMouseMode,
   TDShapeType,
   updateSelectedTextType,
-  type GroupBlockModel,
 } from '@blocksuite/blocks';
-import { Utils } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
+import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
 
 const basePath = import.meta.env.DEV
@@ -242,6 +247,7 @@ export class DebugMenu extends LitElement {
           align-items: center;
         }
         .edgeless-toolbar sl-select,
+        .edgeless-toolbar sl-color-picker,
         .edgeless-toolbar sl-button {
           margin-right: 4px;
         }
@@ -383,9 +389,10 @@ export class DebugMenu extends LitElement {
           </sl-tooltip>
         </div>
 
-        <div class="edgeless-toolbar" style=${
-          'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')
-        }>
+        <div
+          class="edgeless-toolbar"
+          style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
+        >
           <sl-tooltip content="Switch Mouse Mode" placement="bottom" hoist>
             <sl-button
               size="small"
@@ -393,41 +400,24 @@ export class DebugMenu extends LitElement {
               @click=${this._switchMouseMode}
             >
               <sl-icon
-                name=${
-                  this.mouseMode.type === 'default' ? 'cursor' : 'pentagon'
-                }
+                name=${this.mouseMode.type === 'default'
+                  ? 'cursor'
+                  : 'pentagon'}
               >
               </sl-icon>
             </sl-button>
           </sl-tooltip>
 
-          </sl-icon-button>
-          <sl-select
-            placeholder="Shape Color"
+          <sl-color-picker
             size="small"
-            value=${this.shapeModeColor}
-            aria-label="Shape Color"
+            value="#000000"
             hoist
-            style="width: 100px;"
+            label="Shape Color"
             @sl-change=${(e: CustomEvent) => {
-              const target = e.target as SlSelect;
-              this.shapeModeColor = target.value as ColorStyle;
+              const target = e.target as SlColorPicker;
+              this.shapeModeColor = target.value as `#${string}`;
             }}
-          >
-            <sl-menu-item value="white">White</sl-menu-item>
-            <sl-menu-item value="lightGray">LightGray</sl-menu-item>
-            <sl-menu-item value="gray">Gray</sl-menu-item>
-            <sl-menu-item value="black">Black</sl-menu-item>
-            <sl-menu-item value="green">Green</sl-menu-item>
-            <sl-menu-item value="cyan">Cyan</sl-menu-item>
-            <sl-menu-item value="blue">Blue</sl-menu-item>
-            <sl-menu-item value="indigo">Indigo</sl-menu-item>
-            <sl-menu-item value="violet">Violet</sl-menu-item>
-            <sl-menu-item value="red">Red</sl-menu-item>
-            <sl-menu-item value="orange">Orange</sl-menu-item>
-            <sl-menu-item value="yellow">Yellow</sl-menu-item>
-          </sl-select>
-
+          ></sl-color-picker>
           <sl-select
             placeholder="Shape Type"
             size="small"

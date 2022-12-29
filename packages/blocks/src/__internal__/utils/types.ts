@@ -61,7 +61,7 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: TDShapeType;
-  color: ColorStyle;
+  color: ColorStyle | `#${string}`;
 };
 
 export type MouseMode = DefaultMouseMode | ShapeMouseMode;

@@ -57,10 +57,10 @@ export async function switchMouseMode(page: Page) {
 }
 
 export async function switchShapeColor(page: Page, color: string) {
-  await page.click('sl-select[aria-label="Shape Color"]');
-
-  const menuItem = page.getByRole('menuitem', { name: color });
-  await menuItem.click();
+  await page.evaluate(color => {
+    window.debugMenu.shapeModeColor =
+      color as typeof window.debugMenu.shapeModeColor;
+  }, color);
 }
 
 export async function switchShapeType(page: Page, shapeType: string) {

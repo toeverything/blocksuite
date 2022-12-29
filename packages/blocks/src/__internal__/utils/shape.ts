@@ -65,7 +65,7 @@ export enum FontStyle {
 }
 
 export type ShapeStyles = {
-  color: ColorStyle;
+  color: ColorStyle | `#${string}`;
   size: SizeStyle;
   dash: DashStyle;
   font?: FontStyle;
