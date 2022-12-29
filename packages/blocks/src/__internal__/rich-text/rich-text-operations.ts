@@ -159,6 +159,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
   const container = getContainerByModel(model);
   const previousSibling = getPreviousBlock(container, model.id);
+  const nextSibling = getNextBlock(model.id);
   if (matchFlavours(model, ['affine:paragraph'])) {
     if (model.type !== 'text') {
       page.captureSync();
@@ -176,6 +177,25 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           page.deleteBlock(model);
           const richText = getRichTextByModel(previousSibling);
           richText?.quill?.setSelection(preTextLength, 0);
+        } else if (
+          previousSibling &&
+          matchFlavours(previousSibling, [
+            'affine:embed',
+            'affine:divider',
+            'affine:code',
+          ]) &&
+          nextSibling &&
+          matchFlavours(nextSibling, [
+            'affine:embed',
+            'affine:divider',
+            'affine:code',
+          ])
+        ) {
+          page.captureSync();
+          window.requestAnimationFrame(() => {
+            focusPreviousBlock(model, 'start');
+            page.deleteBlock(model);
+          });
         } else if (
           previousSibling &&
           matchFlavours(previousSibling, [
