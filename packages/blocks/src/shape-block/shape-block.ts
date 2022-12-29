@@ -76,8 +76,8 @@ export class ShapeBlockComponent extends LitElement {
         return html`
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
+              <path class="affine-shape-block-hit-box" d=${innerPath} />
               <path
-                class="affine-shape-block-hit-box"
                 d=${getTrianglePath(id, size, shapeStyles)}
                 fill=${stroke}
                 stroke=${stroke}
