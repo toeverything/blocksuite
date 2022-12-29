@@ -57,7 +57,6 @@ export async function switchMouseMode(page: Page) {
 }
 
 export async function switchShapeColor(page: Page, color: string) {
-  await page.click('sl-select[aria-label="Shape Color"]');
   await page.evaluate(color => {
     window.debugMenu.shapeModeColor =
       color as typeof window.debugMenu.shapeModeColor;
