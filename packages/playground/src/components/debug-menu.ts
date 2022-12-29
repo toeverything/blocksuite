@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -14,25 +14,26 @@ import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
 import type {
-  SlSelect,
-  SlDropdown,
   SlColorPicker,
+  SlDropdown,
+  SlSelect,
 } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 
 import {
   assertExists,
+  ColorStyle,
   createEvent,
   getCurrentRange,
   getModelsByRange,
+  type GroupBlockModel,
   MouseMode,
   ShapeMouseMode,
   TDShapeType,
   updateSelectedTextType,
-  type GroupBlockModel,
 } from '@blocksuite/blocks';
-import { Utils } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
+import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
 
 const basePath = import.meta.env.DEV
@@ -64,7 +65,7 @@ export class DebugMenu extends LitElement {
   mouseModeType: MouseMode['type'] = 'default';
 
   @state()
-  shapeModeColor: ShapeMouseMode['color'] = 'black';
+  shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
 
   @state()
   shapeModeShape: ShapeMouseMode['shape'] = TDShapeType.Rectangle;
