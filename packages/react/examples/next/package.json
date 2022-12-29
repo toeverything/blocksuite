@@ -1,6 +1,5 @@
 {
-  "name": "next",
-  "version": "0.1.0",
+  "name": "@blocksuite/next-example",
   "private": true,
   "scripts": {
     "dev": "next dev",
