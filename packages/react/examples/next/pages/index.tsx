@@ -5,7 +5,6 @@ import { PageManger } from '../components/PageManger';
 import { Layout } from '../layouts/Layout';
 import { Navbar, Text } from '@nextui-org/react';
 import { WorkspacesDropdown } from '../components/WorkspacesDropdown';
-import { SwitchButton } from '../components/SwitchButton';
 
 export default function Home() {
   const workspace = useBlockSuiteStore(store => store.currentWorkspace);
@@ -26,7 +25,6 @@ export default function Home() {
           </Text>
         </Navbar.Brand>
         <Navbar.Content>
-          <SwitchButton />
           <WorkspacesDropdown />
         </Navbar.Content>
       </Navbar>
