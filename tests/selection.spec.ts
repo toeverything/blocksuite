@@ -580,3 +580,18 @@ test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await pasteByKeyboard(page);
   await assertDivider(page, 2);
 });
+
+test('Delete the blank line between two dividers', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('--- ');
+  await assertDivider(page, 1);
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('--- ');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('Backspace');
+  await assertDivider(page, 2);
+  await assertRichTexts(page, ['\n']);
+});
