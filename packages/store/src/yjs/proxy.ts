@@ -19,10 +19,14 @@ function initialize(object: Record<string, unknown>, yMap: YMap<unknown>) {
 
 function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
   yMap.observe(event => {
+    if (event.changes.keys.size === 0) {
+      // skip empty event
+      return;
+    }
     event.keysChanged.forEach(key => {
       const type = event.changes.keys.get(key);
       if (!type) {
-        console.error('no possible');
+        console.error('impossible event', event);
         return;
       }
       if (type.action === 'delete') {
