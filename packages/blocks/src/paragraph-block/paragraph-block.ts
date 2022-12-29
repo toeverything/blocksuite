@@ -6,6 +6,7 @@ import {
   type BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
+import '../__internal__/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 import { BlockChildrenContainer } from '../__internal__/index.js';

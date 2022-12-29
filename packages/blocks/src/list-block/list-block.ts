@@ -8,6 +8,7 @@ import {
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
+import '../__internal__/rich-text/rich-text.js';
 
 import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';

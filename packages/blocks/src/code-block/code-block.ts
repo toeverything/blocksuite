@@ -12,6 +12,7 @@ import {
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
+import '../__internal__/rich-text/rich-text.js';
 
 let highlighGlobal: unknown = null;
 
