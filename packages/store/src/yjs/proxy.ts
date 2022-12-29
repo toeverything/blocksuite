@@ -19,7 +19,7 @@ function initialize(object: Record<string, unknown>, yMap: YMap<unknown>) {
 
 function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
   yMap.observe(event => {
-    if (event.delta.length === 0) {
+    if (event.changes.keys.size === 0) {
       // skip empty event
       return;
     }
