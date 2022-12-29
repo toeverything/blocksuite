@@ -19,18 +19,26 @@ function initialize(object: Record<string, unknown>, yMap: YMap<unknown>) {
 
 function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
   yMap.observe(event => {
-    event.keysChanged.forEach(key => {
+    const totalKeys = new Set<string>(event.keysChanged);
+    totalKeys.forEach(key => {
       const type = event.changes.keys.get(key);
       if (!type) {
-        console.error('no possible');
         return;
       }
+      totalKeys.delete(key);
       if (type.action === 'delete') {
         delete object[key];
       } else if (type.action === 'add') {
         object[key] = yMap.get(key);
       } else if (type.action === 'update') {
         object[key] = yMap.get(key);
+      }
+    });
+    totalKeys.forEach(key => {
+      if (yMap.has(key)) {
+        object[key] = yMap.get(key);
+      } else {
+        delete object[key];
       }
     });
   });
