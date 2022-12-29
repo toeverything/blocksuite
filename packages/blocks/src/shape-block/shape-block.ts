@@ -14,7 +14,10 @@ import {
   getRectanglePath,
 } from './utils/rectangle-helpers.js';
 import { getShapeStyle } from './utils/shape-style.js';
-import { getTrianglePath } from './utils/triangle-helpers.js';
+import {
+  getTriangleIndicatorPathTDSnapshot,
+  getTrianglePath,
+} from './utils/triangle-helpers.js';
 import style from './style.css?inline';
 
 export const SHAPE_PADDING = 48;
@@ -51,17 +54,15 @@ export class ShapeBlockComponent extends LitElement {
 
     const size = [modelW, modelH];
     const { stroke, strokeWidth } = getShapeStyle(shapeStyles, false);
-    const innerPath = getRectangleIndicatorPathTDSnapshot(
-      id,
-      shapeStyles,
-      size
-    );
     switch (this.model.type) {
       case TDShapeType.Rectangle: {
         return html`
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
-              <path class="affine-shape-block-hit-box" d=${innerPath} />
+              <path
+                class="affine-shape-block-hit-box"
+                d=${getRectangleIndicatorPathTDSnapshot(id, shapeStyles, size)}
+              />
               <path
                 d=${getRectanglePath(id, shapeStyles, size)}
                 fill=${stroke}
@@ -76,7 +77,10 @@ export class ShapeBlockComponent extends LitElement {
         return html`
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
-              <path class="affine-shape-block-hit-box" d=${innerPath} />
+              <path
+                class="affine-shape-block-hit-box"
+                d=${getTriangleIndicatorPathTDSnapshot(id, size, shapeStyles)}
+              />
               <path
                 d=${getTrianglePath(id, size, shapeStyles)}
                 fill=${stroke}
