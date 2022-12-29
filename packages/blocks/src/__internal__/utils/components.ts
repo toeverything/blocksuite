@@ -68,7 +68,6 @@ function BlockElementWithService(
   } else {
     const load = BlockService[model.flavour as keyof typeof BlockService];
     if (typeof load === 'function') {
-      console.log('loading', model.flavour);
       load().then(({ default: Service }) => {
         const service = new Service();
         serviceMap.set(model.flavour, service);
