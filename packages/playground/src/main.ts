@@ -5,7 +5,13 @@ import { BlockSchema } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 import { Page, Workspace, Utils } from '@blocksuite/store';
 import { DebugMenu } from './components/debug-menu.js';
-import { getOptions, initParam, isBase64, isE2E } from './utils.js';
+import {
+  defaultMode,
+  getOptions,
+  initParam,
+  isBase64,
+  isE2E,
+} from './utils.js';
 import './style.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
@@ -26,7 +32,7 @@ function subscribePage(workspace: Workspace) {
     const debugMenu = new DebugMenu();
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
-    debugMenu.mode = mode ? (mode === 'page' ? 'page' : 'edgeless') : 'page';
+    debugMenu.mode = defaultMode;
     document.body.appendChild(debugMenu);
 
     initButton.disabled = true;
