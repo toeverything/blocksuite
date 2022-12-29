@@ -3,6 +3,7 @@ import { BlockSuiteProvider, createBlockSuiteStore } from '@blocksuite/react';
 import { Workspace } from '@blocksuite/store';
 import { IndexedDBDocProvider } from '@blocksuite/store';
 import { BlockSchema } from '@blocksuite/blocks/models';
+import { NextUIProvider } from '@nextui-org/react';
 
 const localWorkspace = new Workspace({
   room: 'local-room',
@@ -17,7 +18,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <BlockSuiteProvider
       createStore={() => createBlockSuiteStore(localWorkspace)}
     >
-      <Component {...pageProps} />
+      <NextUIProvider>
+        <Component {...pageProps} />
+      </NextUIProvider>
     </BlockSuiteProvider>
   );
 }
