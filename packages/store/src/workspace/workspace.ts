@@ -119,10 +119,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
   writeVersion(workspace: Workspace) {
     const versions = this.proxy.versions;
     workspace.flavourMap.forEach((model, flavour) => {
-      const yVersion = new Y.Array();
-      const [major, minor] = model.version;
-      yVersion.push([major, minor]);
-      versions.set(flavour, yVersion);
+      versions.set(flavour, model.version);
     });
   }
 

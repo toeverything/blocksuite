@@ -19,7 +19,7 @@ export interface IBaseBlockProps {
 }
 
 export class BaseBlockModel implements IBaseBlockProps {
-  static version: [number, number];
+  static version: number;
   flavour!: string;
   tag!: StaticValue;
   id: string;

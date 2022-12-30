@@ -1,7 +1,7 @@
 import { BaseBlockModel, Page } from '@blocksuite/store';
 
 export class PageBlockModel extends BaseBlockModel {
-  static version = [1, 0] as [number, number];
+  static version = 1 as number;
   flavour = 'affine:page' as const;
 
   title = '';
