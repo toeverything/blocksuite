@@ -8,19 +8,19 @@ export function bindCommonHotkey(page: Page) {
   hotkey.addListener(INLINE_CODE, e => {
     // workaround page title
     e.preventDefault();
-    if (e.target instanceof HTMLInputElement) return;
+    if (e.target instanceof HTMLTextAreaElement) return;
     handleFormat(page, 'code');
   });
   hotkey.addListener(STRIKE, e => {
     // workaround page title
     e.preventDefault();
-    if (e.target instanceof HTMLInputElement) return;
+    if (e.target instanceof HTMLTextAreaElement) return;
     handleFormat(page, 'strike');
   });
   hotkey.addListener(LINK, e => {
     // Prevent conflict with browser's search hotkey at windows
     e.preventDefault();
-    if (e.target instanceof HTMLInputElement) return;
+    if (e.target instanceof HTMLTextAreaElement) return;
     createLink(page);
   });
   hotkey.addListener(UNDO, () => page.undo());

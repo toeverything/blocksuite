@@ -182,7 +182,7 @@ export async function pasteByKeyboard(page: Page) {
  */
 export async function focusLine(page: Page, line = 0, end = true) {
   // Focus on the title
-  await page.click('input.affine-default-page-block-title');
+  await page.click('.affine-default-page-block-title');
   if (!line) {
     if (end) {
       await page.keyboard.press('End');

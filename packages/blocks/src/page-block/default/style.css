@@ -31,6 +31,7 @@
   line-height: 50px;
   font-weight: 700;
   outline: none;
+  resize: none;
   border: 0;
   font-family: inherit;
   color: inherit;

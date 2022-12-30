@@ -157,7 +157,7 @@ export function transformBlock(
 
 export function handleBackspace(page: Page, e: KeyboardEvent) {
   // workaround page title
-  if (e.target instanceof HTMLInputElement) return;
+  if (e.target instanceof HTMLTextAreaElement) return;
   if (isNoneSelection()) return;
   if (!isCollapsedSelection() && isRangeSelection()) {
     const range = getCurrentRange();

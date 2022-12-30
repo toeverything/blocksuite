@@ -188,7 +188,7 @@ export function handleUp(
         (
           document.querySelector(
             '.affine-default-page-block-title'
-          ) as HTMLInputElement
+          ) as HTMLTextAreaElement
         ).focus();
       } else {
         focusPreviousBlock(model, new Point(left, top));
@@ -329,7 +329,7 @@ export function bindHotkeys(
       return;
     }
     if (isPageTitle(e)) {
-      const target = e.target as HTMLInputElement;
+      const target = e.target as HTMLTextAreaElement;
       // range delete
       if (target.selectionStart !== target.selectionEnd) {
         e.preventDefault();
@@ -379,6 +379,12 @@ export function bindHotkeys(
     model && focusPreviousBlock(model, 'end');
   });
   hotkey.addListener(RIGHT, e => {
+    if (
+      e.target instanceof HTMLTextAreaElement &&
+      e.target.classList.contains('affine-default-page-block-title')
+    ) {
+      return;
+    }
     let model: BaseBlockModel | null = null;
     const {
       state: { selectedBlocks, type },

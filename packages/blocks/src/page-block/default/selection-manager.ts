@@ -375,7 +375,7 @@ export class DefaultSelectionManager {
       this.state.selectedBlocks.push(this.state.activeComponent);
       return;
     }
-    if (e.raw.target instanceof HTMLInputElement) return;
+    if (e.raw.target instanceof HTMLTextAreaElement) return;
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
@@ -384,7 +384,7 @@ export class DefaultSelectionManager {
     this.state.clear();
     this._signals.updateSelectedRects.emit([]);
     if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
-    if (e.raw.target instanceof HTMLInputElement) return;
+    if (e.raw.target instanceof HTMLTextAreaElement) return;
     const range = handleNativeRangeDblClick(this.page, e);
     if (!range || range.collapsed) {
       return;

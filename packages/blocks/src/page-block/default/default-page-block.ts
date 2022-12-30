@@ -32,6 +32,7 @@ import {
 import style from './style.css?inline';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
+import autosize from 'autosize';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -52,7 +53,7 @@ export interface DefaultPageSignals {
 }
 
 // https://stackoverflow.com/a/2345915
-function focusTextEnd(input: HTMLInputElement) {
+function focusTextEnd(input: HTMLTextAreaElement) {
   const current = input.value;
   input.focus();
   input.value = '';
@@ -125,7 +126,7 @@ export class DefaultPageBlockComponent
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
-  private _title!: HTMLInputElement;
+  private _title!: HTMLTextAreaElement;
 
   private _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = !this.page.isEmpty;
@@ -145,6 +146,7 @@ export class DefaultPageBlockComponent
       const newFirstParagraphId = page.addBlock(props, defaultGroup, 0);
       page.updateBlock(model, { title: contentLeft });
       page.workspace.setPageMeta(page.id, { title: contentLeft });
+      autosize.update(this._title);
       asyncFocusRichText(this.page, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
@@ -156,14 +158,14 @@ export class DefaultPageBlockComponent
     const { page } = this;
 
     if (!this.model.id) {
-      const title = (e.target as HTMLInputElement).value;
+      const title = (e.target as HTMLTextAreaElement).value;
       const pageId = page.addBlock({ flavour: 'affine:page', title });
       const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
       page.addBlock({ flavour: 'affine:paragraph' }, groupId);
       return;
     }
 
-    const title = (e.target as HTMLInputElement).value;
+    const title = (e.target as HTMLTextAreaElement).value;
     page.updateBlock(this.model, { title });
     page.workspace.setPageMeta(page.id, { title });
   }
@@ -236,6 +238,7 @@ export class DefaultPageBlockComponent
   };
 
   firstUpdated() {
+    autosize(this._title);
     bindHotkeys(this.page, this.selection, this.signals, this.model);
 
     hotkey.enableHotkey();
@@ -334,13 +337,13 @@ export class DefaultPageBlockComponent
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
           <div class="affine-default-page-block-title-container">
-            <input
-              placeholder="Title"
+            <textarea
               class="affine-default-page-block-title"
-              value=${this.model.title}
               @keydown=${this._onTitleKeyDown}
               @input=${this._onTitleInput}
-            />
+            >
+${this.model.title}</textarea
+            >
           </div>
           ${childrenContainer}
         </div>
