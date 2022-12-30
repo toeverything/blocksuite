@@ -32,6 +32,17 @@ jobs:
       - name: Run tests
         run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
 
+      - name: Check Store Change
+        id: check-store-change
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            packages/store/**
+
+      - name: Run store tests
+        if: steps.check-store-change.outputs.any_changed == 'true'
+        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test:store -- --forbid-only
+
       - name: Upload test results
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
