@@ -70,12 +70,12 @@ function toSelectionEvent(
 
 export function isPageTitle(e: Event) {
   return (
-    e.target instanceof HTMLInputElement &&
+    e.target instanceof HTMLTextAreaElement &&
     e.target.classList.contains('affine-default-page-block-title')
   );
 }
 export function isInput(e: Event) {
-  return e.target instanceof HTMLInputElement;
+  return e.target instanceof HTMLTextAreaElement;
 }
 
 function tryPreventDefault(e: MouseEvent) {

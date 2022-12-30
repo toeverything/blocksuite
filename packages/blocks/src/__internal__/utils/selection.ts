@@ -208,7 +208,7 @@ function focusRichTextByModel(
     defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
     defaultPageBlock.selection.state.type = 'block';
     window.getSelection()?.removeAllRanges();
-    (document.activeElement as HTMLInputElement).blur();
+    (document.activeElement as HTMLTextAreaElement).blur();
   } else {
     const element = getBlockElementByModel(model);
     const editableContainer = element?.querySelector('[contenteditable]');
@@ -758,7 +758,7 @@ export function getFirstTextNode(node: Node) {
   return leftFirstSearchLeafNodes(node)[0];
 }
 
-export function getSplicedTitle(title: HTMLInputElement) {
+export function getSplicedTitle(title: HTMLTextAreaElement) {
   const text = [...title.value];
   assertExists(title.selectionStart);
   assertExists(title.selectionEnd);
