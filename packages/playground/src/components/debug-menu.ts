@@ -431,6 +431,7 @@ export class DebugMenu extends LitElement {
           >
             <sl-menu-item value="rectangle">Rectangle</sl-menu-item>
             <sl-menu-item value="triangle">Triangle</sl-menu-item>
+            <sl-menu-item value="ellipse">Ellipse</sl-menu-item>
           </sl-select>
         </div>
       </div>

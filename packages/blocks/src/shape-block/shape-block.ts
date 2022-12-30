@@ -2,8 +2,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import type { ShapeBlockModel } from './shape-model.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager.js';
-import { BLOCK_ID_ATTR } from '../__internal__/index.js';
 import {
+  BLOCK_ID_ATTR,
   DashStyle,
   ShapeStyles,
   SizeStyle,
@@ -19,6 +19,10 @@ import {
   getTrianglePath,
 } from './utils/triangle-helpers.js';
 import style from './style.css?inline';
+import {
+  getEllipseIndicatorPath,
+  getEllipsePath,
+} from './utils/ellpse-helpers.js';
 
 export const SHAPE_PADDING = 48;
 
@@ -83,6 +87,25 @@ export class ShapeBlockComponent extends LitElement {
               />
               <path
                 d=${getTrianglePath(id, size, shapeStyles)}
+                fill=${stroke}
+                stroke=${stroke}
+                stroke-width=${strokeWidth}
+              />
+            </g>
+          </svg>
+        `;
+      }
+      case TDShapeType.Ellipse: {
+        const radius = [size[0] / 2, size[1] / 2];
+        return html`
+          <svg class="affine-shape-block">
+            <g class="affine-shape-block-g">
+              <path
+                class="affine-shape-block-hit-box"
+                d=${getEllipseIndicatorPath(id, radius, shapeStyles)}
+              />
+              <path
+                d=${getEllipsePath(id, radius, shapeStyles)}
                 fill=${stroke}
                 stroke=${stroke}
                 stroke-width=${strokeWidth}
