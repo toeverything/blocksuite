@@ -18,9 +18,7 @@ import {
   convertToDivider,
   matchFlavours,
   focusPreviousBlock,
-  getDefaultPageBlock,
-  getBlockElementByModel,
-  resetNativeSelection,
+  focusBlockByModel,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -154,13 +152,10 @@ export async function handleUnindent(
 }
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
-  // Select the code block
+  // When deleting at line start of a code block,
+  // select the code block itself
   if (matchFlavours(model, ['affine:code'])) {
-    const selectionManager = getDefaultPageBlock(model).selection;
-    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
-    const blockRect = codeBlockElement.getBoundingClientRect();
-    selectionManager.resetSelectedBlockByRect(blockRect, 'focus');
-    resetNativeSelection(null);
+    focusBlockByModel(model);
     return;
   }
 
@@ -188,6 +183,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // firstly switch it to normal text, then delete this empty block.
   if (matchFlavours(model, ['affine:paragraph'])) {
     if (model.type !== 'text') {
+      // Try to switch to normal text
       page.captureSync();
       page.updateBlock(model, { type: 'text' });
       return;
@@ -217,8 +213,9 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
       ) {
         window.requestAnimationFrame(() => {
           focusPreviousBlock(model, 'start');
-          page.captureSync();
+          // We can not delete block if the block has content
           if (!model.text?.length) {
+            page.captureSync();
             page.deleteBlock(model);
           }
         });
