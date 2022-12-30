@@ -101,9 +101,7 @@ export class ShapeBlockComponent extends LitElement {
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
               <path
-                class=${this.selected
-                  ? 'affine-shape-block-hit-box-fill'
-                  : 'affine-shape-block-hit-box'}
+                class="affine-shape-block-hit-box"
                 d=${getEllipseIndicatorPath(id, radius, shapeStyles)}
               />
               <path
