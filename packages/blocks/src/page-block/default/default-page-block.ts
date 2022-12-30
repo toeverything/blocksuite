@@ -341,6 +341,7 @@ export class DefaultPageBlockComponent
         <div class="affine-default-page-block-container">
           <div class="affine-default-page-block-title-container">
             <textarea
+              placeholder="Title"
               class="affine-default-page-block-title"
               @keydown=${this._onTitleKeyDown}
               @input=${this._onTitleInput}
