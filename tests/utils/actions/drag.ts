@@ -68,13 +68,12 @@ export async function dragOverTitle(page: Page) {
   const { from, to } = await page.evaluate(() => {
     const titleInput = document.querySelector(
       '.affine-default-page-block-title'
-    ) as HTMLInputElement;
+    ) as HTMLTextAreaElement;
     const titleBound = titleInput.getBoundingClientRect();
-    const y = titleBound.top + titleBound.height / 2;
 
     return {
-      from: { x: titleBound.left, y },
-      to: { x: titleBound.right, y },
+      from: { x: titleBound.left, y: titleBound.top },
+      to: { x: titleBound.right, y: titleBound.bottom },
     };
   });
   await dragBetweenCoords(page, from, to, {

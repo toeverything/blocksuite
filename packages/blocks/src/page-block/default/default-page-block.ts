@@ -165,7 +165,10 @@ export class DefaultPageBlockComponent
       return;
     }
 
-    const title = (e.target as HTMLTextAreaElement).value;
+    let title = (e.target as HTMLTextAreaElement).value;
+    if (title.endsWith('\n')) {
+      title = title.slice(0, -1);
+    }
     page.updateBlock(this.model, { title });
     page.workspace.setPageMeta(page.id, { title });
   }
