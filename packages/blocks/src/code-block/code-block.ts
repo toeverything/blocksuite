@@ -37,9 +37,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
   @query('lang-list')
   langListElement!: HTMLElement;
 
-  @query('.lang-container code-block-button')
-  langSelectionButton!: HTMLElement;
-
   @state()
   showLangList = 'hidden';
 
@@ -61,7 +58,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
   private _onClick() {
     this.showLangList = 'visible';
-    this.langSelectionButton.classList.add('clicked');
   }
 
   render() {
@@ -85,7 +81,11 @@ export class CodeBlockComponent extends NonShadowLitElement {
         ${isHovering || this.showLangList !== 'hidden'
           ? html`<div class="container">
               <div class="lang-container" @click=${this._onClick}>
-                <code-block-button width="101px" height="24px">
+                <code-block-button
+                  width="101px"
+                  height="24px"
+                  class="${this.showLangList === 'hidden' ? '' : 'clicked'}"
+                >
                   ${this.model.language} ${ArrowDownIcon}
                 </code-block-button>
               </div>
@@ -97,7 +97,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
                 }}
                 @dispose=${() => {
                   this.showLangList = 'hidden';
-                  this.langSelectionButton.classList.remove('clicked');
                 }}
               ></lang-list>
             </div>`
