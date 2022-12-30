@@ -560,7 +560,7 @@ export class Page extends Space<PageData> {
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.
     else {
-      this.workspace.meta.validateVersion();
+      this.workspace.meta.validateVersion(this.workspace);
     }
   }
 }

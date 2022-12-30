@@ -20,7 +20,7 @@ export class ParagraphBlockModel
   extends BaseBlockModel
   implements ParagraphBlockProps
 {
-  static version = 1 as number;
+  static version = 1;
   flavour = 'affine:paragraph' as const;
   tag = literal`affine-paragraph`;
 

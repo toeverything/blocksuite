@@ -12,7 +12,7 @@ export interface EmbedBlockProps extends IBaseBlockProps {
 }
 
 export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
-  static version = 1 as number;
+  static version = 1;
   flavour = 'affine:embed' as const;
   tag = literal`affine-embed`;
 

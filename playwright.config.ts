@@ -15,7 +15,7 @@ const config: PlaywrightTestConfig = {
     video: 'on-first-retry',
   },
   workers: '100%',
-  retries: 2,
+  retries: 1,
 };
 
 if (process.env.CI) {
@@ -23,7 +23,7 @@ if (process.env.CI) {
     command: 'pnpm dev',
     port: 5173,
   };
-  config.retries = 3;
+  config.retries = 2;
   // config.workers = 2;
 }
 

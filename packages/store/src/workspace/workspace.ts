@@ -126,8 +126,34 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
   /**
    * @internal Only for page initialization
    */
-  validateVersion() {
-    // TODO: validate version
+  validateVersion(workspace: Workspace) {
+    const versions = this.proxy.versions.toJSON();
+    const dataFlavours = Object.keys(versions);
+
+    // TODO: emit data validation error signals
+    if (dataFlavours.length === 0) {
+      throw new Error(
+        'Invalid workspace data, missing versions field. Please make sure the data is valid.'
+      );
+    }
+
+    dataFlavours.forEach(dataFlavour => {
+      const dataVersion = versions[dataFlavour] as number;
+      const editorVersion = workspace.flavourMap.get(dataFlavour)?.version;
+      if (!editorVersion) {
+        throw new Error(
+          `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`
+        );
+      } else if (dataVersion > editorVersion) {
+        throw new Error(
+          `Editor doesn't support ${dataFlavour}@${dataVersion}. Please upgrade the editor.`
+        );
+      } else if (dataVersion < editorVersion) {
+        throw new Error(
+          `In workspace data, the block flavour ${dataFlavour}@${dataVersion} is outdated. Please downgrade the editor or try data migration.`
+        );
+      }
+    });
   }
 
   private _handlePageEvent() {

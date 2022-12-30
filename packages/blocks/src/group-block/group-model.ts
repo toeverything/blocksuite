@@ -8,7 +8,7 @@ export interface GroupBlockProps extends IBaseBlockProps {
 }
 
 export class GroupBlockModel extends BaseBlockModel implements GroupBlockProps {
-  static version = 1 as number;
+  static version = 1;
   flavour = 'affine:group' as const;
   tag = literal`affine-group`;
 

@@ -2,7 +2,7 @@ import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
-  static version = 1 as number;
+  static version = 1;
   flavour = 'affine:code' as const;
   type = 'code' as const;
   tag = literal`affine-code`;
