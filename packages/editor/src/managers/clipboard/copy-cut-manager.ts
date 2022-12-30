@@ -117,8 +117,8 @@ export class CopyCutManager {
       type = 'text';
       const text = model.block2Text(
         '',
-        selectedBlock?.startPos,
-        selectedBlock?.endPos
+        selectedBlock.startPos,
+        selectedBlock.endPos
       );
       delta = [
         {
@@ -135,9 +135,9 @@ export class CopyCutManager {
         },
       ];
     } else {
-      delta = model?.text?.sliceToDelta(
-        selectedBlock?.startPos || 0,
-        selectedBlock?.endPos
+      delta = model.text?.sliceToDelta(
+        selectedBlock.startPos || 0,
+        selectedBlock.endPos
       );
     }
 
