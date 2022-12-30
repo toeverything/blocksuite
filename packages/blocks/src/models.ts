@@ -32,7 +32,27 @@ export const BlockSchema = {
   'affine:shape': ShapeBlockModel,
 };
 
-export const BlockService = {
+export type BlockSchemaType = typeof BlockSchema;
+
+export type Flavour = keyof BlockSchemaType;
+
+export const blockService = {
   'affine:code': async () => import('./code-block/code-service.js'),
   'affine:paragraph': ParagraphBlockService,
+};
+
+export type BlockService = typeof blockService;
+
+export type ServiceFlavour = keyof BlockService;
+
+export type BlockServiceInstance = {
+  [Key in keyof BlockService]: BlockService[Key] extends () => infer ServicePromise
+    ? Awaited<ServicePromise> extends {
+        default: { new (): unknown };
+      }
+      ? InstanceType<Awaited<ServicePromise>['default']>
+      : never
+    : BlockService[Key] extends { new (): unknown }
+    ? InstanceType<BlockService[Key]>
+    : never;
 };

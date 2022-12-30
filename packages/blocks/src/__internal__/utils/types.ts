@@ -3,6 +3,7 @@ import type { Point } from './rect.js';
 import type { GroupBlockModel } from '../../group-block/index.js';
 import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { ColorStyle, TDShapeType } from './shape.js';
+import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {
@@ -10,15 +11,32 @@ export type SelectionOptions = {
   from?: 'previous' | 'next';
 };
 
-export interface Service {
+export interface BaseService {
   isLoaded: boolean;
-  load?: () => Promise<unknown>;
 }
 
+export interface AsyncService extends BaseService {
+  load: () => Promise<void>;
+}
+
+export interface SyncService extends BaseService {
+  isLoaded: true;
+}
+
+export type Service = SyncService | AsyncService;
+
 /** Common context interface definition for block models. */
-export interface BlockHost {
-  service: (flavour: string) => Service;
-  serviceMap: Map<string, Service>;
+
+/**
+ * Functions that a block host provides
+ */
+export interface BlockHostContext {
+  getService: <Key extends ServiceFlavour>(
+    flavour: Key
+  ) => BlockServiceInstance[Key];
+}
+
+export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   readonly: boolean;

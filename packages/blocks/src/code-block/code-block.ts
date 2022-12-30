@@ -12,7 +12,6 @@ import {
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
-import type CodeBlockService from './code-service.js';
 import '../__internal__/rich-text/rich-text.js';
 
 @customElement('affine-code')
@@ -47,7 +46,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   filterText = '';
 
   get highlight() {
-    const service = this.host.service(this.model.flavour) as CodeBlockService;
+    const service = this.host.getService(this.model.flavour);
     return service.hljs.default.highlight;
   }
 

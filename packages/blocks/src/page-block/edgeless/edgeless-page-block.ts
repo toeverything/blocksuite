@@ -6,7 +6,6 @@ import type {
   GroupBlockModel,
   MouseMode,
   PageBlockModel,
-  Service,
 } from '../../index.js';
 import {
   EdgelessBlockChildrenContainer,
@@ -35,6 +34,7 @@ import {
 } from '../utils/index.js';
 import style from './style.css?inline';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import { getService } from '../../__internal__/service.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -77,9 +77,7 @@ export class EdgelessPageBlockComponent
     },
   })
   model!: PageBlockModel;
-
-  serviceMap = new Map<string, Service>();
-  service = (flavour: string) => this.serviceMap.get(flavour) as Service;
+  getService = getService;
 
   @state()
   viewport = new ViewportState();
