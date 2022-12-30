@@ -62,7 +62,7 @@ export function convertToList(
 export function convertToParagraph(
   page: Page,
   model: ExtendedModel,
-  type: 'affine:paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  type: 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
 ): boolean {
   if (matchFlavours(model, ['affine:paragraph']) && model['type'] === type) {
