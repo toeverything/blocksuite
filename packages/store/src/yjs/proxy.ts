@@ -59,7 +59,12 @@ export function createYMapProxy<Data extends Record<string, unknown>>(
       if (readonly) {
         throw new Error('Modify data is not allowed');
       } else {
-        return Reflect.set(target, p, value, receiver);
+        if (typeof p === 'string') {
+          yMap.set(p, value);
+          return Reflect.set(target, p, value, receiver);
+        } else {
+          throw new Error('key cannot be a symbol');
+        }
       }
     },
     get: (target, p, receiver) => {
