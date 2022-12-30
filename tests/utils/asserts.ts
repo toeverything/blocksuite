@@ -62,7 +62,7 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const locator = page.locator('input').nth(0);
+  const locator = page.locator('.affine-default-page-block-title').nth(0);
   const actual = await locator.inputValue();
   expect(actual).toBe(text);
 }
@@ -115,7 +115,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('input').nth(0);
+  const locator = page.locator('.affine-default-page-block-title').nth(0);
   await expect(locator).toBeFocused();
 }
 
