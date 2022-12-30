@@ -1,4 +1,4 @@
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import type { ShapeBlockModel } from './shape-model.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager.js';
@@ -46,6 +46,9 @@ export class ShapeBlockComponent extends LitElement {
   })
   model!: ShapeBlockModel;
 
+  @state()
+  selected = false;
+
   render() {
     const id = this.model.id;
     this.setAttribute(BLOCK_ID_ATTR, id);
@@ -64,7 +67,9 @@ export class ShapeBlockComponent extends LitElement {
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
               <path
-                class="affine-shape-block-hit-box"
+                class=${this.selected
+                  ? 'affine-shape-block-hit-box-fill'
+                  : 'affine-shape-block-hit-box'}
                 d=${getRectangleIndicatorPathTDSnapshot(id, shapeStyles, size)}
               />
               <path
@@ -82,7 +87,9 @@ export class ShapeBlockComponent extends LitElement {
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
               <path
-                class="affine-shape-block-hit-box"
+                class=${this.selected
+                  ? 'affine-shape-block-hit-box-fill'
+                  : 'affine-shape-block-hit-box'}
                 d=${getTriangleIndicatorPathTDSnapshot(id, size, shapeStyles)}
               />
               <path
