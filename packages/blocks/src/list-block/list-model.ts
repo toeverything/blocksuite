@@ -10,7 +10,7 @@ export interface ListBlockProps extends IBaseBlockProps {
 }
 
 export class ListBlockModel extends BaseBlockModel implements ListBlockProps {
-  static version = 1 as number;
+  static version = 1;
   flavour = 'affine:list' as const;
   tag = literal`affine-list`;
 
