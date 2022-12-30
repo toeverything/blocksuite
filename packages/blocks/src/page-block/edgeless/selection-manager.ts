@@ -3,6 +3,8 @@ import {
   initMouseEventHandlers,
   MouseMode,
   RootBlockModel,
+  matchFlavours,
+  getBlockById,
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -12,6 +14,8 @@ import type {
   HoverState,
   SelectionController,
 } from './selection-manager/index.js';
+import type { ShapeBlockModel } from '../../shape-block/index.js';
+import type { Disposable } from '@blocksuite/store';
 
 export { HoverState };
 
@@ -129,7 +133,10 @@ export class EdgelessSelectionManager {
   private _selectionManagers: Record<MouseMode['type'], SelectionController>;
 
   private _mouseDisposeCallback: () => void;
+  private _selectionUpdateCallback: Disposable;
   private _wheelDisposeCallback: () => void;
+
+  private _previousSelectedShape: ShapeBlockModel | null = null;
 
   get isActive() {
     return this.currentController.isActive;
@@ -190,6 +197,28 @@ export class EdgelessSelectionManager {
       this._onContainerMouseOut,
       this._onContainerContextMenu
     );
+    this._selectionUpdateCallback = this._container.signals.updateSelection.on(
+      state => {
+        if (this._previousSelectedShape) {
+          const element = getBlockById<'affine-shape'>(
+            this._previousSelectedShape.id
+          );
+          if (element) {
+            element.selected = false;
+          }
+          this._previousSelectedShape = null;
+        }
+        if (state.type === 'single') {
+          if (matchFlavours(state.selected, ['affine:shape'])) {
+            const element = getBlockById<'affine-shape'>(state.selected.id);
+            if (element) {
+              element.selected = true;
+            }
+            this._previousSelectedShape = state.selected as ShapeBlockModel;
+          }
+        }
+      }
+    );
     this._wheelDisposeCallback = initWheelEventHandlers(container);
   }
 
@@ -243,5 +272,6 @@ export class EdgelessSelectionManager {
   dispose() {
     this._mouseDisposeCallback();
     this._wheelDisposeCallback();
+    this._selectionUpdateCallback.dispose();
   }
 }

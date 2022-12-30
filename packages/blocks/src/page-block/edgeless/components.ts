@@ -29,7 +29,12 @@ import {
 } from './utils.js';
 import { SHAPE_PADDING } from '../../index.js';
 
-function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
+function getCommonRectStyle(
+  rect: DOMRect,
+  zoom: number,
+  isShape = false,
+  selected = false
+) {
   return {
     position: 'absolute',
     left: rect.x + 'px',
@@ -39,6 +44,7 @@ function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
     borderRadius: `${10 * zoom}px`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
+    backgroundColor: isShape && selected ? 'var(--affine-selected-color)' : '',
   };
 }
 
@@ -352,7 +358,7 @@ export class EdgelessSelectedRect extends LitElement {
       let newY = y;
       let newW = w;
       let newH = h;
-      let isShape = false;
+      const isShape = selected.flavour === 'affine:shape';
       const deltaX = this._dragStartInfo.startMouseX - e.clientX;
       const deltaY = this._dragStartInfo.startMouseY - e.clientY;
       const direction = this._dragStartInfo.direction;
@@ -361,25 +367,21 @@ export class EdgelessSelectedRect extends LitElement {
           newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
           newW = (this._dragStartInfo.width - deltaX) / this.zoom;
           newH = (this._dragStartInfo.height + deltaY) / this.zoom;
-          isShape = true;
           break;
         case HandleDirection.LeftBottom:
           newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
           newW = (this._dragStartInfo.width + deltaX) / this.zoom;
           newH = (this._dragStartInfo.height - deltaY) / this.zoom;
-          isShape = true;
           break;
         case HandleDirection.RightBottom:
           newW = (this._dragStartInfo.width - deltaX) / this.zoom;
           newH = (this._dragStartInfo.height - deltaY) / this.zoom;
-          isShape = true;
           break;
         case HandleDirection.LeftTop: {
           newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
           newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
           newW = (this._dragStartInfo.width + deltaX) / this.zoom;
           newH = (this._dragStartInfo.height + deltaY) / this.zoom;
-          isShape = true;
           break;
         }
         case HandleDirection.Left: {
@@ -458,7 +460,8 @@ export class EdgelessSelectedRect extends LitElement {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      ...getCommonRectStyle(this.rect, this.zoom, isShape),
+      zIndex: '3',
+      ...getCommonRectStyle(this.rect, this.zoom, isShape, true),
     };
     const handlers = this._getHandles(this.rect, isShape);
     return html`
