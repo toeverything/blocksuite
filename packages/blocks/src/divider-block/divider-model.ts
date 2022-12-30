@@ -9,7 +9,7 @@ export class DividerBlockModel
   extends BaseBlockModel
   implements DividerBlockProps
 {
-  static version = [1, 0] as [number, number];
+  static version = 1 as number;
   flavour = 'affine:divider' as const;
   tag = literal`affine-divider`;
 
