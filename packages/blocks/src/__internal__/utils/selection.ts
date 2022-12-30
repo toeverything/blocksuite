@@ -490,17 +490,14 @@ export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
     const editableContainer =
       selection.anchorNode.parentElement?.closest('[contenteditable]');
     if (editableContainer) {
-      return expandRangesByCharacter(selection, editableContainer);
+      return expandRangeByCharacter(selection, editableContainer);
     }
     return null;
   }
   return null;
 }
 
-function expandRangesByCharacter(
-  selection: Selection,
-  editableContainer: Node
-) {
+function expandRangeByCharacter(selection: Selection, editableContainer: Node) {
   const leafNodes = leftFirstSearchLeafNodes(editableContainer);
   if (!leafNodes.length) {
     return null;
@@ -517,7 +514,12 @@ function expandRangesByCharacter(
     leafNodes,
     currentNodeIndex
   );
-  resetNativeSelection(extendRange);
+
+  // don't mutate selection if it's not changed
+  if (extendRange) {
+    resetNativeSelection(extendRange);
+  }
+
   return extendRange;
 }
 
@@ -643,6 +645,8 @@ function trySelectBySegmenter(
       selection,
       currentChar
     );
+    if (currentCharIndex === -1) return null;
+
     // length for expand left
     let leftLength = currentCharIndex;
     // length for expand right
@@ -691,6 +695,11 @@ function getCurrentCharIndex(
   const segmenter = new Intl.Segmenter([], { granularity: 'word' });
   const wordsIterator = segmenter.segment(rangeString)[Symbol.iterator]();
   const words = Array.from(wordsIterator);
+
+  if (words.length === 0) {
+    return [-1, ''] as const;
+  }
+
   let absoluteOffset = 0;
   let started = false;
   // get absolute offset of current cursor
