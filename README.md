@@ -41,6 +41,7 @@ As an example, in the BlockSuite based [AFFiNE Alpha](https://pathfinder.affine.
 - 🚧 Examples
   - [Latest Playground](https://block-suite.pages.dev/?init)
   - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/)
+  - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/)
 - 🚧 API Reference
 - 🚧 Troubleshooting
 - 🚧 [Releases](https://github.com/toeverything/blocksuite/releases)
