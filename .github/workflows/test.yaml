@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  test:
-    name: test
+  main-test:
+    name: Unit test for main packages
     runs-on: ubuntu-latest
 
     steps:
@@ -32,6 +32,31 @@ jobs:
       - name: Run tests
         run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
 
+      - name: Upload test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-main
+          path: ./test-results
+          if-no-files-found: ignore
+
+  store-test:
+    name: Unit test for Store
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Check Store Change
         id: check-store-change
         uses: tj-actions/changed-files@v35
@@ -39,9 +64,11 @@ jobs:
           files: |
             packages/store/**
 
-      - name: Run store tests
+      - name: Install Playwright browsers & Run store test
         if: steps.check-store-change.outputs.any_changed == 'true'
-        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test:store -- --forbid-only
+        run: |
+          PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+          PLAYWRIGHT_BROWSERS_PATH=0 pnpm test:store -- --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}
