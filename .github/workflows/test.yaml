@@ -68,7 +68,7 @@ jobs:
         # if: steps.check-store-change.outputs.any_changed == 'true'
         run: |
           npx playwright install chromium
-          pnpm test:store --forbid-only
+          pnpm test:store -- --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}
