@@ -530,6 +530,7 @@ export class Page extends Space<PageData> {
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
+      // TODO use schema
       if (key === 'prop:text') continue;
       // Update children
       if (key === 'sys:children') {

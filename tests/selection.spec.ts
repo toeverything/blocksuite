@@ -604,6 +604,7 @@ test('should delete line with content after divider should not lost content', as
   await focusRichText(page);
   await page.keyboard.type('--- ');
   await page.keyboard.type('123');
+  await assertDivider(page, 1);
   // Jump to line start
   await withCtrlOrMeta(page, () => page.keyboard.press('ArrowLeft'));
   await page.keyboard.press('Backspace');
