@@ -27,10 +27,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+        run: npx playwright install chromium
 
       - name: Run tests
-        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
+        run: pnpm test -- --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}
@@ -57,18 +57,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check Store Change
-        id: check-store-change
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            packages/store/**
+      # - name: Check Store Change
+      #   id: check-store-change
+      #   uses: tj-actions/changed-files@v35
+      #   with:
+      #     files: |
+      #       packages/store/**
 
       - name: Install Playwright browsers & Run store test
-        if: steps.check-store-change.outputs.any_changed == 'true'
+        # if: steps.check-store-change.outputs.any_changed == 'true'
         run: |
-          PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
-          PLAYWRIGHT_BROWSERS_PATH=0 pnpm test:store -- --forbid-only
+          npx playwright install chromium
+          pnpm test:store --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}
