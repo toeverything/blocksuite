@@ -1,3 +1,4 @@
+/* eslint-disable lit/binding-positions, lit/no-invalid-html */
 import { html } from 'lit/static-html.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BlockHost } from './types.js';
