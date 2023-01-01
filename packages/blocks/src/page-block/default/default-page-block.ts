@@ -341,13 +341,12 @@ export class DefaultPageBlockComponent
         <div class="affine-default-page-block-container">
           <div class="affine-default-page-block-title-container">
             <textarea
+              .value=${this.model.title}
               placeholder="Title"
               class="affine-default-page-block-title"
               @keydown=${this._onTitleKeyDown}
               @input=${this._onTitleInput}
-            >
-${this.model.title}</textarea
-            >
+            ></textarea>
           </div>
           ${childrenContainer}
         </div>
