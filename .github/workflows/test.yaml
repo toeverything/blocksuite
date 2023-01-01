@@ -10,7 +10,7 @@ on:
 
 jobs:
   main-test:
-    name: Unit test for main packages
+    name: E2E test for common features
     runs-on: ubuntu-latest
 
     steps:
@@ -57,23 +57,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check Store Change
-        id: check-store-change
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            packages/store/**
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
 
-      - name: Install Playwright browsers & Run store test
-        if: steps.check-store-change.outputs.any_changed == 'true'
-        run: |
-          npx playwright install chromium
-          pnpm test:store -- --forbid-only
-
-      - name: Upload test results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results
-          path: ./test-results
-          if-no-files-found: ignore
+      - name: Run tests
+        run: pnpm test:store -- --forbid-only
