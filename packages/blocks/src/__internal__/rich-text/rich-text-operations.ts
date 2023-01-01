@@ -118,26 +118,57 @@ export function handleIndent(page: Page, model: ExtendedModel, offset: number) {
   }
 }
 
-export async function handleUnindent(
-  page: Page,
-  model: ExtendedModel,
-  offset: number
-) {
+/**
+ * Move up
+ * @example
+ * ```
+ * [ ]
+ *  ├─ [ ]
+ *  ├─ [x] <- shift + tab
+ *  └─ [ ]
+ *
+ * ↓
+ *
+ * [ ]
+ *  └─ [ ]
+ * [x]     <-
+ *  └─ [ ]
+ * ```
+ * Refer to https://github.com/toeverything/AFFiNE/blob/b59b010decb9c5decd9e3090f1a417696ce86f54/libs/components/editor-blocks/src/utils/indent.ts#L23-L122
+ */
+export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:group'])) return;
+  if (!parent || matchFlavours(parent, ['affine:group'])) {
+    // Topmost, do nothing
+    return;
+  }
 
   const grandParent = page.getParent(parent);
   if (!grandParent) return;
+  page.captureSync();
 
+  // 1. save child blocks of the parent block
+  const previousSiblings = page.getPreviousSiblings(model);
+  const nextSiblings = page.getNextSiblings(model);
+  // 2. remove all child blocks after the target block from the parent block
+  page.updateBlock(parent, {
+    children: previousSiblings,
+  });
+  // 3. backup current block
+  const text = model?.text?.clone(); // should clone before `deleteBlock`
+  // 4. append next siblings to target block
+  const children = [...model.children, ...nextSiblings];
+
+  // 5. append block after parent
   const index = grandParent.children.indexOf(parent);
   const blockProps = {
     flavour: model.flavour,
-    text: model?.text?.clone(), // should clone before `deleteBlock`
-    children: model.children,
     type: model.type,
+    text,
+    children,
+    // TODO fix todo or other properties will be lost
   };
-
-  page.captureSync();
+  // TODO move block instead of add new block
   page.deleteBlock(model);
   const id = page.addBlock(blockProps, grandParent, index + 1);
 
@@ -223,20 +254,16 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
       return;
     }
 
-    const grandParent = page.getParent(parent);
-    if (!grandParent) return;
-    const index = grandParent.children.indexOf(parent);
-    const blockProps = {
-      flavour: model.flavour,
-      text: model?.text?.clone(), // should clone before `deleteBlock`
-      children: model.children,
-      type: model.type,
-    };
-
-    page.captureSync();
-    page.deleteBlock(model);
-    const id = page.addBlock(blockProps, grandParent, index + 1);
-    asyncFocusRichText(page, id);
+    // Before
+    // - line1
+    //   - | <- cursor here, press backspace
+    //   - line3
+    //
+    // After
+    // - line1
+    // - | <- cursor here
+    //   - line3
+    handleUnindent(page, model);
     return;
   }
 

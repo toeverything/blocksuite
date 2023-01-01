@@ -123,6 +123,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     ) {
       handleLineStartBackspace(page, model);
     } else if (isEmptyList && isLastChild) {
+      // Before
+      // - line1
+      //   - ↩ <-- press Enter
+      //
+      // After
+      // - line1
+      // - | <-- will unindent the block
       handleUnindent(page, model, index);
     } else if (isEnd) {
       const isSoftEnterBlock = shouldSoftEnterFirstBlocks.find(
