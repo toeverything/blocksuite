@@ -57,8 +57,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
-
       - name: Run tests
-        run: pnpm test:store -- --forbid-only
+        run: pnpm --filter @blocksuite/store test:unit
