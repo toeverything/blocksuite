@@ -36,7 +36,10 @@ export function getParentBlockById<T extends ElementTagName>(
   return currentBlock?.parentElement?.closest<T>(`[${ATTR}]` as T) || null;
 }
 
-export function getSiblingsById(id: string, ele: Element = document.body) {
+/**
+ * @deprecated use methods in page instead
+ */
+function getSiblingsById(id: string, ele: Element = document.body) {
   // TODO : resolve BaseBlockModel type relay
   const parentBlock = getParentBlockById(id, ele) as ContainerBlock;
   const children = parentBlock?.model?.children;
@@ -47,6 +50,9 @@ export function getSiblingsById(id: string, ele: Element = document.body) {
   return [];
 }
 
+/**
+ * @deprecated use {@link page.getPreviousSibling} instead
+ */
 export function getPreviousSiblingById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
@@ -60,6 +66,9 @@ export function getPreviousSiblingById<T extends ElementTagName>(
   return null;
 }
 
+/**
+ * @deprecated use {@link page.getNextSibling} instead
+ */
 export function getNextSiblingById<T extends ElementTagName>(
   id: string,
   ele: HTMLElement = document.body

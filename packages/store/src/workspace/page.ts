@@ -167,17 +167,58 @@ export class Page extends Space<PageData> {
 
   getPreviousSibling(block: BaseBlockModel) {
     const parent = this.getParent(block);
-    const index = parent?.children.indexOf(block) ?? -1;
-    return parent?.children[index - 1] ?? null;
+    if (!parent) {
+      return null;
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children[index - 1] ?? null;
+  }
+
+  getPreviousSiblings(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children.slice(0, index);
   }
 
   getNextSibling(block: BaseBlockModel) {
     const parent = this.getParent(block);
-    const index = parent?.children.indexOf(block) ?? -1;
-    if (index === -1) {
+    if (!parent) {
       return null;
     }
-    return parent?.children[index + 1] ?? null;
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children[index + 1] ?? null;
+  }
+
+  getNextSiblings(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getNextSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children.slice(index + 1);
   }
 
   addBlock<T extends BlockProps>(
