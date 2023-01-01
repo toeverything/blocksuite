@@ -10,7 +10,7 @@ on:
 
 jobs:
   main-test:
-    name: E2E test for common features
+    name: Playground E2E test
     runs-on: ubuntu-latest
 
     steps:
@@ -26,10 +26,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
+      - name: Install playwright browsers
         run: npx playwright install chromium
 
-      - name: Run tests
+      - name: Run playwright tests
         run: pnpm test -- --forbid-only
 
       - name: Upload test results
@@ -41,7 +41,7 @@ jobs:
           if-no-files-found: ignore
 
   store-test:
-    name: Unit test for Store
+    name: Store unit test
     runs-on: ubuntu-latest
 
     steps:
