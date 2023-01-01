@@ -27,7 +27,9 @@ const env =
 const importIdentifier = '__ $BLOCKSUITE_STORE$ __';
 
 // @ts-ignore
-if (env[importIdentifier] === true) {
+const HMR = import.meta.hot || import.meta.webpackHot;
+// @ts-ignore
+if (env[importIdentifier] === true && !HMR) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
     '@blocksuite/store was already imported. This breaks constructor checks and will lead to issues!'
