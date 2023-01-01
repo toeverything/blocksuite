@@ -57,15 +57,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # - name: Check Store Change
-      #   id: check-store-change
-      #   uses: tj-actions/changed-files@v35
-      #   with:
-      #     files: |
-      #       packages/store/**
+      - name: Check Store Change
+        id: check-store-change
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            packages/store/**
 
       - name: Install Playwright browsers & Run store test
-        # if: steps.check-store-change.outputs.any_changed == 'true'
+        if: steps.check-store-change.outputs.any_changed == 'true'
         run: |
           npx playwright install chromium
           pnpm test:store -- --forbid-only
