@@ -163,8 +163,8 @@ async function setNewTop(y: number, editableContainer: Element) {
 }
 
 export async function focusRichText(
-  position: SelectionPosition,
-  editableContainer: Element
+  editableContainer: Element,
+  position: SelectionPosition = 'end'
 ) {
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDom(editableContainer);
@@ -194,9 +194,9 @@ export async function focusRichText(
   resetNativeSelection(range);
 }
 
-function focusRichTextByModel(
-  position: SelectionPosition,
-  model: BaseBlockModel
+export function focusBlockByModel(
+  model: BaseBlockModel,
+  position: SelectionPosition = 'end'
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
   if (matchFlavours(model, ['affine:embed', 'affine:divider'])) {
@@ -207,15 +207,25 @@ function focusRichTextByModel(
     assertExists(embedElement);
     defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
     defaultPageBlock.selection.state.type = 'block';
-    window.getSelection()?.removeAllRanges();
+    resetNativeSelection(null);
     (document.activeElement as HTMLTextAreaElement).blur();
-  } else {
-    const element = getBlockElementByModel(model);
-    const editableContainer = element?.querySelector('[contenteditable]');
-    defaultPageBlock.selection.state.clear();
-    if (editableContainer) {
-      focusRichText(position, editableContainer);
-    }
+    return;
+  }
+  // TODO maybe the section can merge to the above
+  if (matchFlavours(model, ['affine:code'])) {
+    const selectionManager = defaultPageBlock.selection;
+    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
+    const blockRect = codeBlockElement.getBoundingClientRect();
+    selectionManager.resetSelectedBlockByRect(blockRect, 'focus');
+    resetNativeSelection(null);
+    return;
+  }
+
+  const element = getBlockElementByModel(model);
+  const editableContainer = element?.querySelector('[contenteditable]');
+  defaultPageBlock.selection.state.clear();
+  if (editableContainer) {
+    focusRichText(editableContainer, position);
   }
 }
 
@@ -235,7 +245,7 @@ export function focusPreviousBlock(
 
   const preNodeModel = getPreviousBlock(container, model.id);
   if (preNodeModel && nextPosition) {
-    focusRichTextByModel(nextPosition, preNodeModel);
+    focusBlockByModel(preNodeModel, nextPosition);
   }
 }
 
@@ -253,7 +263,7 @@ export function focusNextBlock(
   const nextNodeModel = getNextBlock(model.id);
 
   if (nextNodeModel) {
-    focusRichTextByModel(nextPosition, nextNodeModel);
+    focusBlockByModel(nextNodeModel, nextPosition);
   }
 }
 

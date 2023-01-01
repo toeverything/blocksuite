@@ -167,17 +167,58 @@ export class Page extends Space<PageData> {
 
   getPreviousSibling(block: BaseBlockModel) {
     const parent = this.getParent(block);
-    const index = parent?.children.indexOf(block) ?? -1;
-    return parent?.children[index - 1] ?? null;
+    if (!parent) {
+      return null;
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children[index - 1] ?? null;
+  }
+
+  getPreviousSiblings(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children.slice(0, index);
   }
 
   getNextSibling(block: BaseBlockModel) {
     const parent = this.getParent(block);
-    const index = parent?.children.indexOf(block) ?? -1;
-    if (index === -1) {
+    if (!parent) {
       return null;
     }
-    return parent?.children[index + 1] ?? null;
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children[index + 1] ?? null;
+  }
+
+  getNextSiblings(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getNextSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children.slice(index + 1);
   }
 
   addBlock<T extends BlockProps>(
@@ -240,6 +281,18 @@ export class Page extends Space<PageData> {
         model.text = props.text;
         // @ts-ignore
         yBlock.set('prop:text', props.text._yText);
+      }
+
+      // TODO diff children changes
+      // All child nodes will be deleted in the current behavior, then added again.
+      // Through diff children changes, the experience can be improved.
+      if (props.children) {
+        const yChildren = new Y.Array<string>();
+        yChildren.insert(
+          0,
+          props.children.map(child => child.id)
+        );
+        yBlock.set('sys:children', yChildren);
       }
 
       syncBlockProps(yBlock, props, this._ignoredKeys);
@@ -474,13 +527,39 @@ export class Page extends Space<PageData> {
     if (!model) return;
 
     const props: Partial<BlockProps> = {};
+    let hasPropsUpdate = false;
+    let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
       // TODO use schema
       if (key === 'prop:text') continue;
+      // Update children
+      if (key === 'sys:children') {
+        hasChildrenUpdate = true;
+        const yChildren = event.target.get('sys:children');
+        if (!(yChildren instanceof Y.Array)) {
+          console.error(
+            'Failed to update block children!, sys:children is not an Y array',
+            event,
+            yChildren
+          );
+          continue;
+        }
+        model.childMap = createChildMap(yChildren);
+        model.children = yChildren.map(
+          id => this._blockMap.get(id) as BaseBlockModel
+        );
+        continue;
+      }
+      // Update props
+      hasPropsUpdate = true;
       props[key.replace('prop:', '')] = event.target.get(key);
     }
-    Object.assign(model, props);
-    model.propsUpdated.emit();
+
+    if (hasPropsUpdate) {
+      Object.assign(model, props);
+      model.propsUpdated.emit();
+    }
+    hasChildrenUpdate && model.childrenUpdated.emit();
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {

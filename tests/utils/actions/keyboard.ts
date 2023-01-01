@@ -174,33 +174,6 @@ export async function pasteByKeyboard(page: Page) {
   await keyUpCtrlOrMeta(page);
 }
 
-/**
- * Focus on the specified line, the title is line 0 and so on.
- * If line is not specified, focus on the title
- *
- * The implementation is depends on the keyboard behavior.
- */
-export async function focusLine(page: Page, line = 0, end = true) {
-  // Focus on the title
-  await page.click('.affine-default-page-block-title');
-  if (!line) {
-    if (end) {
-      await page.keyboard.press('End');
-    }
-    return;
-  }
-  // Workaround move cursor from title to text only can use Tab, remove it after fixed
-  await page.keyboard.press('Tab');
-  line--;
-  // End of workaround
-  while (line-- > 0) {
-    await page.keyboard.press('ArrowDown');
-  }
-  if (end) {
-    await page.keyboard.press('End');
-  }
-}
-
 export async function createCodeBlock(page: Page) {
   await keyDownCtrlOrMeta(page);
   await page.keyboard.down('Alt');

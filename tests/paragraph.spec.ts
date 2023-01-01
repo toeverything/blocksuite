@@ -23,6 +23,7 @@ import {
   initEmptyParagraphState,
   dragOverTitle,
   resetHistory,
+  initThreeParagraphs,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -213,6 +214,82 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 });
 
+test('should indent and unindent works with children', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await pressEnter(page);
+  await page.keyboard.type('012');
+
+  // Focus 789
+  await focusRichText(page, 2);
+  await page.keyboard.press('Tab');
+  // Focus 456
+  await focusRichText(page, 1);
+  await page.keyboard.press('Tab');
+  // Focus 012
+  await focusRichText(page, 3);
+  await page.keyboard.press('Tab');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,152]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="012"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
+
+  // unindent
+  await focusRichText(page, 2);
+  await pressShiftTab(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,152]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="012"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
+});
+
 // https://github.com/toeverything/blocksuite/issues/364
 test('paragraph with child block should work at enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -259,6 +336,50 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       prop:text="789"
       prop:type="text"
     />
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
+});
+
+test('should delete paragraph block child can hold cursor in correct position', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(10);
+  await page.keyboard.type('456');
+  await focusRichText(page, 0);
+  await pressEnter(page);
+  await page.keyboard.press('Backspace');
+  await page.waitForTimeout(10);
+  await page.keyboard.type('now');
+
+  // TODO FIXME wait for group bounding box update
+  await page.waitForTimeout(20);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="now"
+    prop:type="text"
+  >
     <affine:paragraph
       prop:text="456"
       prop:type="text"

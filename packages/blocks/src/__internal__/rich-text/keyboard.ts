@@ -123,6 +123,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     ) {
       handleLineStartBackspace(page, model);
     } else if (isEmptyList && isLastChild) {
+      // Before
+      // - line1
+      //   - ↩ <-- press Enter
+      //
+      // After
+      // - line1
+      // - | <-- will unindent the block
       handleUnindent(page, model, index);
     } else if (isEnd) {
       const isSoftEnterBlock = shouldSoftEnterFirstBlocks.find(
@@ -168,13 +175,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onIndent(this: KeyboardEventThis) {
-    const index = this.quill.getSelection()?.index || 0;
+    const index = this.quill.getSelection()?.index;
     handleIndent(page, model, index);
     return PREVENT_DEFAULT;
   }
 
   function onUnindent(this: KeyboardEventThis) {
-    const index = this.quill.getSelection()?.index || 0;
+    const index = this.quill.getSelection()?.index;
     handleUnindent(page, model, index);
     return PREVENT_DEFAULT;
   }

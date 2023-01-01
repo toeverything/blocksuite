@@ -285,6 +285,57 @@ test('basic indent and unindent', async ({ page }) => {
   );
 });
 
+// TODO fix indent will lose todo status
+test.skip('should indent todo block preserve todo status', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('text1');
+  await pressEnter(page);
+  await page.keyboard.type('[x] ');
+  await page.waitForTimeout(10);
+  await page.keyboard.type('todo item');
+  await pressTab(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,72]"
+>
+  <affine:paragraph
+    prop:text="text1"
+    prop:type="text"
+  >
+    <affine:list
+      prop:checked={true}
+      prop:text="todo item"
+      prop:type="todo"
+    />
+  </affine:paragraph>
+</affine:group>`,
+    groupId
+  );
+  await pressShiftTab(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,72]"
+>
+  <affine:paragraph
+    prop:text="text1"
+    prop:type="text"
+  />
+  <affine:list
+    prop:checked={true}
+    prop:text="todo item"
+    prop:type="todo"
+  />
+</affine:group>`,
+    groupId
+  );
+});
+
 test('enter list block with empty text', async ({ page }) => {
   await enterPlaygroundWithList(page); // 0(1(2,3,4))
 
