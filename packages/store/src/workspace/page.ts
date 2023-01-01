@@ -283,6 +283,18 @@ export class Page extends Space<PageData> {
         yBlock.set('prop:text', props.text._yText);
       }
 
+      // TODO diff children changes
+      // All child nodes will be deleted in the current behavior, then added again.
+      // Through diff children changes, the experience can be improved.
+      if (props.children) {
+        const yChildren = new Y.Array<string>();
+        yChildren.insert(
+          0,
+          props.children.map(child => child.id)
+        );
+        yBlock.set('sys:children', yChildren);
+      }
+
       syncBlockProps(yBlock, props, this._ignoredKeys);
     });
   }
@@ -515,13 +527,38 @@ export class Page extends Space<PageData> {
     if (!model) return;
 
     const props: Partial<BlockProps> = {};
+    let hasPropsUpdate = false;
+    let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
-      // TODO use schema
       if (key === 'prop:text') continue;
+      // Update children
+      if (key === 'sys:children') {
+        hasChildrenUpdate = true;
+        const yChildren = event.target.get('sys:children');
+        if (!(yChildren instanceof Y.Array)) {
+          console.error(
+            'Failed to update block children!, sys:children is not an Y array',
+            event,
+            yChildren
+          );
+          continue;
+        }
+        model.childMap = createChildMap(yChildren);
+        model.children = yChildren.map(
+          id => this._blockMap.get(id) as BaseBlockModel
+        );
+        continue;
+      }
+      // Update props
+      hasPropsUpdate = true;
       props[key.replace('prop:', '')] = event.target.get(key);
     }
-    Object.assign(model, props);
-    model.propsUpdated.emit();
+
+    if (hasPropsUpdate) {
+      Object.assign(model, props);
+      model.propsUpdated.emit();
+    }
+    hasChildrenUpdate && model.childrenUpdated.emit();
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
