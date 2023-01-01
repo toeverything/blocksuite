@@ -95,27 +95,61 @@ export function handleBlockSplit(
   asyncFocusRichText(page, id);
 }
 
-export function handleIndent(page: Page, model: ExtendedModel, offset: number) {
+/**
+ * Move down
+ * @example
+ * ```
+ * [ ]
+ *  └─ [ ]
+ * [x]     <- tab
+ *  └─ [ ]
+ *
+ * ↓
+ *
+ * [ ]
+ *  ├─ [ ]
+ *  ├─ [x] <-
+ *  └─ [ ]
+ * ```
+ */
+export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   const previousSibling = page.getPreviousSibling(model);
-  if (previousSibling) {
-    page.captureSync();
-
-    const blockProps = {
-      flavour: model.flavour,
-      type: model.type,
-      text: model?.text?.clone(), // should clone before `deleteBlock`
-      children: model.children,
-    };
-    page.deleteBlock(model);
-    const id = page.addBlock(blockProps, previousSibling);
-    // FIXME: after quill onload
-    requestAnimationFrame(() => {
-      const block = page.getBlockById(id);
-      assertExists(block);
-      const richText = getRichTextByModel(block);
-      richText?.quill.setSelection(offset, 0);
-    });
+  if (!previousSibling) {
+    // Bottom, can not indent, do nothing
+    return;
   }
+  page.captureSync();
+
+  const blockProps = {
+    flavour: model.flavour,
+    type: model.type,
+    text: model?.text?.clone(), // should clone before `deleteBlock`
+    // children: model.children,
+  };
+
+  // backup block children
+  const children = model.children;
+
+  // TODO update block instead of delete block and add a new block
+  // page.updateBlock(model, {
+  //   children: [],
+  // });
+
+  page.deleteBlock(model);
+  const id = page.addBlock(blockProps, previousSibling);
+
+  // append target block and children to previous node
+  page.updateBlock(previousSibling, {
+    children: [...previousSibling.children, ...children],
+  });
+
+  // FIXME: after quill onload
+  requestAnimationFrame(() => {
+    const block = page.getBlockById(id);
+    assertExists(block);
+    const richText = getRichTextByModel(block);
+    richText?.quill.setSelection(offset, 0);
+  });
 }
 
 /**
