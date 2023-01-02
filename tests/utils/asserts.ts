@@ -354,7 +354,7 @@ export async function assertStoreMatchJSX(
   id?: string
 ) {
   const element = (await page.evaluate(
-    id => window.workspace.toJSXElement(id),
+    id => window.workspace.exportJSX(id),
     id
   )) as JSXElement;
 

@@ -192,6 +192,10 @@ export class DebugMenu extends LitElement {
     this.contentParser.onExportMarkdown();
   }
 
+  private _exportYDoc() {
+    this.workspace.exportYDoc();
+  }
+
   private _shareUrl() {
     const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
@@ -373,6 +377,9 @@ export class DebugMenu extends LitElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._exportHtml}>
                 Export HTML
+              </sl-menu-item>
+              <sl-menu-item @click=${this._exportYDoc}>
+                Export YDoc
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
             </sl-menu>

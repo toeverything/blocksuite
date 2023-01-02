@@ -101,17 +101,10 @@ export class Store {
   }
 
   /**
-   * @internal Only for testing
-   */
-  serializeDoc() {
-    return serializeYDoc(this.doc) as unknown as SerializedStore;
-  }
-
-  /**
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
    */
-  toJSXElement(id = '0') {
-    const json = this.serializeDoc();
+  exportJSX(id = '0') {
+    const json = serializeYDoc(this.doc) as unknown as SerializedStore;
     if (!('space:page0' in json)) {
       throw new Error("Failed to convert to JSX: 'space:page0' not found");
     }
