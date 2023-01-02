@@ -187,7 +187,7 @@ importers:
       lit: ^2.5.0
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
-      yjs: ^13.5.43
+      yjs: ^13.5.44
     dependencies:
       '@types/flexsearch': 0.7.3
       '@types/quill': 1.3.10
@@ -201,7 +201,7 @@ importers:
     devDependencies:
       cross-env: 7.0.3
       lit: 2.5.0
-      yjs: 13.5.43
+      yjs: 13.5.44
 
 packages:
 
@@ -6363,8 +6363,8 @@ packages:
       yargs-parser: 21.1.1
     dev: true
 
-  /yjs/13.5.43:
-    resolution: {integrity: sha512-NJqWuiDOseYjkhnSVo55z+FZD6TsOJBZfMbH2I4OCm5vsgY7TESUjUGb7Pt1lljvvdSfBVj8CxQqZAnVxe5Iyg==}
+  /yjs/13.5.44:
+    resolution: {integrity: sha512-UL+abIh2lQonqXfaJ+en7z9eGshpY11j1zNLc2kDYs0vrTjee4gZJUXC3ZsuhP6geQt0IRU04epCGRaVPQAVCA==}
     dependencies:
       lib0: 0.2.58
     dev: true
