@@ -331,15 +331,30 @@ export class Workspace {
     this.meta.removePage(pageId);
   }
 
-  serializeDoc() {
-    return this._store.serializeDoc();
-  }
-
   search(query: QueryContent) {
     return this._indexer.search(query);
   }
 
-  toJSXElement(id = '0') {
-    return this._store.toJSXElement(id);
+  /**
+   * @internal Only for testing
+   */
+  exportYDoc() {
+    const binary = Y.encodeStateAsUpdate(this.doc);
+    const file = new Blob([binary], { type: 'application/octet-stream' });
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'workspace.ydoc';
+    link.click();
+
+    URL.revokeObjectURL(fileUrl);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  exportJSX(id = '0') {
+    return this._store.exportJSX(id);
   }
 }
