@@ -94,6 +94,7 @@ code {
   background: var(--affine-code-background);
   color: var(--affine-code-color);
   font-family: var(--affine-font-mono);
+  font-variant-ligatures: none;
   padding: 0 5px;
   border-radius: 5px;
   font-size: calc(var(--affine-font-base) - 4px);
