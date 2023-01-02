@@ -7,7 +7,9 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended"
+    "plugin:react-hooks/recommended",
+    "plugin:wc/recommended",
+    "plugin:lit/recommended"
   ],
   "ignorePatterns": [
     "packages/store/dist/*",

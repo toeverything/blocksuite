@@ -70,7 +70,6 @@ export class IconButton extends LitElement {
 
   constructor() {
     super();
-    this.tabIndex = 0;
     this.addEventListener('keypress', event => {
       if (this.disabled) {
         return;
@@ -83,6 +82,7 @@ export class IconButton extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
+    this.tabIndex = 0;
 
     this.style.setProperty(
       '--button-size',
