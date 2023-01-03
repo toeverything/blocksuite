@@ -37,7 +37,7 @@ import {
 import type { DefaultPageSignals } from './default-page-block.js';
 import type { DefaultSelectionManager } from './selection-manager.js';
 import type { CodeBlockOption } from './default-page-block.js';
-import type { EmbedBlockModel } from '@blocksuite/blocks/models.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],

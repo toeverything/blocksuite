@@ -22,6 +22,7 @@ import type {
   EmbedEditingState,
 } from './default-page-block.js';
 import { BLOCK_ID_ATTR } from '../../__internal__/index.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -156,7 +157,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            copyImgToClip(embedEditingState.model);
+            copyImgToClip(embedEditingState.model as EmbedBlockModel);
           }}
         >
           ${CopyIcon}
