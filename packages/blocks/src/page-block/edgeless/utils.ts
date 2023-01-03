@@ -6,12 +6,12 @@ import type { SelectionEvent } from '../../__internal__/index.js';
 
 export const DEFAULT_SPACING = 64;
 
-// XXX: edgeless group container padding
+// XXX: edgeless frame container padding
 export const PADDING_X = 48;
 export const PADDING_Y = 48;
 
-// XXX: edgeless group min length
-export const GROUP_MIN_LENGTH = 20;
+// XXX: edgeless frame min length
+export const FRAME_MIN_LENGTH = 20;
 
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
   const a = JSON.parse(block.xywh) as [number, number, number, number];

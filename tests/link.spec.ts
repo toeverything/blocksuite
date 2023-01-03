@@ -70,7 +70,7 @@ test('basic link', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:group
+  <affine:frame
     prop:xywh="[0,0,720,32]"
   >
     <affine:paragraph
@@ -84,7 +84,7 @@ test('basic link', async ({ page }) => {
       }
       prop:type="text"
     />
-  </affine:group>
+  </affine:frame>
 </affine:page>`
   );
 });
@@ -97,7 +97,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
         flavour: 'affine:page',
         title: 'title',
       });
-      const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
 
       const text = page.Text.fromDelta(page, [
         { insert: 'Hello' },
@@ -105,7 +105,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       ]);
       const id = page.addBlock(
         { flavour: 'affine:paragraph', type: 'text', text: text },
-        groupId
+        frameId
       );
       return id;
     },

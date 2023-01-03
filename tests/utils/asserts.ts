@@ -28,7 +28,7 @@ export const defaultStore: SerializedStore = {
       'affine:paragraph': 1,
       'affine:page': 1,
       'affine:list': 1,
-      'affine:group': 1,
+      'affine:frame': 1,
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:shape': 1,
@@ -42,7 +42,7 @@ export const defaultStore: SerializedStore = {
       'sys:children': ['1'],
     },
     '1': {
-      'sys:flavour': 'affine:group',
+      'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,32]',

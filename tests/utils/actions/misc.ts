@@ -92,9 +92,9 @@ export async function enterPlaygroundWithList(page: Page) {
   await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
     for (let i = 0; i < 3; i++) {
-      page.addBlock({ flavour: 'affine:list' }, groupId);
+      page.addBlock({ flavour: 'affine:list' }, frameId);
     }
   });
   await waitNextFrame(page);
@@ -105,10 +105,10 @@ export async function initEmptyParagraphState(page: Page) {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, frameId);
     page.captureSync();
-    return { pageId, groupId, paragraphId };
+    return { pageId, frameId, paragraphId };
   });
   return ids;
 }
@@ -118,10 +118,10 @@ export async function initEmptyCodeBlockState(page: Page) {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, groupId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, frameId);
     page.captureSync();
-    return { pageId, groupId, codeBlockId };
+    return { pageId, frameId, codeBlockId };
   });
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;

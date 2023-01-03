@@ -26,7 +26,7 @@ import {
   createEvent,
   getCurrentRange,
   getModelsByRange,
-  type GroupBlockModel,
+  type FrameBlockModel,
   MouseMode,
   ShapeMouseMode,
   TDShapeType,
@@ -161,7 +161,7 @@ export class DebugMenu extends LitElement {
     this.mode = mode;
   }
 
-  private _addGroup() {
+  private _addFrame() {
     const root = this.page.root;
     if (!root) return;
     const pageId = root.id;
@@ -171,11 +171,11 @@ export class DebugMenu extends LitElement {
     const count = root.children.length;
     const xywh = `[0,${count * 60},720,480]`;
 
-    const groupId = this.page.addBlock<GroupBlockModel>(
-      { flavour: 'affine:group', xywh },
+    const frameId = this.page.addBlock<FrameBlockModel>(
+      { flavour: 'affine:frame', xywh },
       pageId
     );
-    this.page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    this.page.addBlock({ flavour: 'affine:paragraph' }, frameId);
   }
 
   private _switchMouseMode() {
@@ -380,7 +380,7 @@ export class DebugMenu extends LitElement {
               <sl-menu-item @click=${this._toggleConnection}>
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._addGroup}> Add Group </sl-menu-item>
+              <sl-menu-item @click=${this._addFrame}> Add Frame </sl-menu-item>
               <sl-menu-item @click=${this._toggleReadonly}>
                 Toggle Readonly
               </sl-menu-item>

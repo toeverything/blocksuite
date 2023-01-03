@@ -16,7 +16,7 @@ import {
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { DefaultSelectionManager } from './selection-manager.js';
-import { deleteModels, tryUpdateGroupSize } from '../utils/index.js';
+import { deleteModels, tryUpdateFrameSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
   EmbedEditingContainer,
@@ -138,12 +138,12 @@ export class DefaultPageBlockComponent
       const contentLeft = _title.value.slice(0, titleCursorIndex);
       const contentRight = _title.value.slice(titleCursorIndex);
 
-      const defaultGroup = model.children[0];
+      const defaultFrame = model.children[0];
       const props = {
         flavour: 'affine:paragraph',
         text: new Text(page, contentRight),
       };
-      const newFirstParagraphId = page.addBlock(props, defaultGroup, 0);
+      const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       page.updateBlock(model, { title: contentLeft });
       page.workspace.setPageMeta(page.id, { title: contentLeft });
       autosize.update(this._title);
@@ -160,8 +160,8 @@ export class DefaultPageBlockComponent
     if (!this.model.id) {
       const title = (e.target as HTMLTextAreaElement).value;
       const pageId = page.addBlock({ flavour: 'affine:page', title });
-      const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-      page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+      page.addBlock({ flavour: 'affine:paragraph' }, frameId);
       return;
     }
 
@@ -281,10 +281,10 @@ export class DefaultPageBlockComponent
       }
     });
 
-    tryUpdateGroupSize(this.page, 1);
+    tryUpdateFrameSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.page, 1);
+      tryUpdateFrameSize(this.page, 1);
     });
 
     // TMP: clear selected rects on scroll

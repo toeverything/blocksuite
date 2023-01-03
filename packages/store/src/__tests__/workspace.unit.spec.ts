@@ -14,7 +14,7 @@ import {
 import { PageBlockModel } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import { ListBlockModel } from '../../../blocks/src/list-block/list-model.js';
-import { GroupBlockModel } from '../../../blocks/src/group-block/group-model.js';
+import { FrameBlockModel } from '../../../blocks/src/frame-block/frame-model.js';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model.js';
 import type { PageMeta } from '../workspace/index.js';
 import { assertExists } from '../utils/utils.js';
@@ -29,7 +29,7 @@ export const BlockSchema = {
   'affine:paragraph': ParagraphBlockModel,
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
-  'affine:group': GroupBlockModel,
+  'affine:frame': FrameBlockModel,
   'affine:divider': DividerBlockModel,
 } as const;
 

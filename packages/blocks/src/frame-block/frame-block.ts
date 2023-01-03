@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { html, css, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { GroupBlockModel } from './group-model.js';
+import type { FrameBlockModel } from './frame-model.js';
 import {
   BLOCK_ID_ATTR,
   type BlockHost,
@@ -10,8 +10,8 @@ import {
 } from '../__internal__/index.js';
 import style from './style.css?inline';
 
-@customElement('affine-group')
-export class GroupBlockComponent extends NonShadowLitElement {
+@customElement('affine-frame')
+export class FrameBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(style)}
   `;
@@ -21,7 +21,7 @@ export class GroupBlockComponent extends NonShadowLitElement {
       return true;
     },
   })
-  model!: GroupBlockModel;
+  model!: FrameBlockModel;
 
   @property()
   host!: BlockHost;
@@ -41,13 +41,13 @@ export class GroupBlockComponent extends NonShadowLitElement {
     );
 
     return html`
-      <div class="affine-group-block-container">${childrenContainer}</div>
+      <div class="affine-frame-block-container">${childrenContainer}</div>
     `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-group': GroupBlockComponent;
+    'affine-frame': FrameBlockComponent;
   }
 }

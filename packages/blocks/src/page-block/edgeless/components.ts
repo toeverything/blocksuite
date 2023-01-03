@@ -5,7 +5,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type {
-  GroupBlockModel,
+  FrameBlockModel,
   RootBlockModel,
   ShapeBlockModel,
 } from '../../index.js';
@@ -24,7 +24,7 @@ import '../../__internal__/index.js';
 import {
   PADDING_X,
   PADDING_Y,
-  GROUP_MIN_LENGTH,
+  FRAME_MIN_LENGTH,
   getSelectionBoxBound,
 } from './utils.js';
 import { SHAPE_PADDING } from '../../index.js';
@@ -188,7 +188,7 @@ export function EdgelessBlockChildrenContainer(
       child => child.id,
       child =>
         EdgelessBlockChild(
-          child as GroupBlockModel | ShapeBlockModel,
+          child as FrameBlockModel | ShapeBlockModel,
           host,
           viewport
         )
@@ -307,7 +307,7 @@ export class EdgelessSelectedRect extends LitElement {
         startMouseY: e.clientY,
         absoluteX: x,
         absoluteY: y,
-        // the width of the selected group may 0 after init use rect.width instead
+        // the width of the selected frame may 0 after init use rect.width instead
         width: rect.width,
         height: rect.height,
         direction,
@@ -364,26 +364,26 @@ export class EdgelessSelectedRect extends LitElement {
           break;
         }
       }
-      // limit the width of the selected group
-      if (newW < GROUP_MIN_LENGTH) {
-        newW = GROUP_MIN_LENGTH;
+      // limit the width of the selected frame
+      if (newW < FRAME_MIN_LENGTH) {
+        newW = FRAME_MIN_LENGTH;
         newX = x;
       }
-      // limit the height of the selected group
-      if (newH < GROUP_MIN_LENGTH) {
-        newH = GROUP_MIN_LENGTH;
+      // limit the height of the selected frame
+      if (newH < FRAME_MIN_LENGTH) {
+        newH = FRAME_MIN_LENGTH;
         newY = y;
       }
       // if xywh do not change, no need to update
       if (newW === w && newX === x && newY === y && newW === w) {
         return;
       }
-      const groupBlock = getBlockById<'div'>(selected.id);
-      const groupContainer = groupBlock?.parentElement;
-      // first change container`s x/w directly for get groups real height
-      if (groupContainer) {
-        groupContainer.style.width = newW + 'px';
-        groupContainer.style.translate = `translate(${newX}px, ${newY}px) scale(${this.zoom})`;
+      const frameBlock = getBlockById<'div'>(selected.id);
+      const frameContainer = frameBlock?.parentElement;
+      // first change container`s x/w directly for get frames real height
+      if (frameContainer) {
+        frameContainer.style.width = newW + 'px';
+        frameContainer.style.translate = `translate(${newX}px, ${newY}px) scale(${this.zoom})`;
       }
       // reset the width of the container may trigger animation
       requestAnimationFrame(() => {
@@ -402,7 +402,7 @@ export class EdgelessSelectedRect extends LitElement {
           newY,
           newW,
           !isShape
-            ? (groupBlock?.getBoundingClientRect().height || 0) / this.zoom
+            ? (frameBlock?.getBoundingClientRect().height || 0) / this.zoom
             : newH,
         ]);
         selected.xywh = newXywh;

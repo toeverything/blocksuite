@@ -73,7 +73,7 @@ test('type character jump out code node', async ({ page }) => {
 
 test('multi line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyParagraphState(page);
+  const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
@@ -85,7 +85,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -127,8 +127,8 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     }
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 
   await undoByClick(page);
@@ -136,7 +136,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -151,8 +151,8 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     prop:text="789"
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 
   await redoByClick(page);
@@ -160,7 +160,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -202,8 +202,8 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     }
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 });
 

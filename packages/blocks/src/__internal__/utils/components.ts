@@ -17,7 +17,7 @@ export function BlockElement(
   switch (model.flavour) {
     case 'affine:paragraph':
     case 'affine:list':
-    case 'affine:group':
+    case 'affine:frame':
     case 'affine:divider':
     case 'affine:code':
       return html`
