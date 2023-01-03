@@ -408,7 +408,12 @@ export class DefaultSelectionManager {
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     if (hoverEditingState?.model.type === 'image') {
-      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      const { position } = hoverEditingState;
+      if (position.width > 680) {
+        hoverEditingState.position.x = hoverEditingState.position.right - 50;
+      } else {
+        hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      }
       this._signals.updateEmbedEditingState.emit(hoverEditingState);
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
