@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { html, css, unsafeCSS, PropertyValueMap } from 'lit';
+import { html, css, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
