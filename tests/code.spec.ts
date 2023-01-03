@@ -63,7 +63,6 @@ test('use more than three backticks can not create code block', async ({
   await focusRichText(page);
   await page.keyboard.type('`````');
   await page.keyboard.type(' ');
-  await page.pause();
 
   const codeBlockLocator = page.locator('affine-code');
   await expect(codeBlockLocator).toBeHidden();
