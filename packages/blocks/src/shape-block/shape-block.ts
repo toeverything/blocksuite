@@ -5,6 +5,7 @@ import type { XYWH } from '../page-block/edgeless/selection-manager.js';
 import {
   BLOCK_ID_ATTR,
   DashStyle,
+  NonShadowLitElement,
   ShapeStyles,
   SizeStyle,
   TDShapeType,
@@ -29,7 +30,7 @@ export const SHAPE_PADDING = 48;
 export const ShapeBlockTag = 'affine-shape';
 
 @customElement(ShapeBlockTag)
-export class ShapeBlockComponent extends LitElement {
+export class ShapeBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(style)}
 
