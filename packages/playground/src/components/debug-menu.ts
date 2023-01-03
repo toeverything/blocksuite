@@ -24,7 +24,6 @@ import {
   assertExists,
   ColorStyle,
   createEvent,
-  EdgelessDisplayMode,
   getCurrentRange,
   getModelsByRange,
   type GroupBlockModel,
@@ -66,7 +65,7 @@ export class DebugMenu extends LitElement {
   mouseModeType: MouseMode['type'] = 'default';
 
   @state()
-  edgelessDisplayMode: EdgelessDisplayMode = 'default';
+  showGrid = false;
 
   @state()
   shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
@@ -183,9 +182,8 @@ export class DebugMenu extends LitElement {
     this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
   }
 
-  private _switchDisplayMode() {
-    this.edgelessDisplayMode =
-      this.edgelessDisplayMode === 'default' ? 'grid' : 'default';
+  private _switchShowGrid() {
+    this.showGrid = !this.showGrid;
   }
 
   private _exportHtml() {
@@ -228,12 +226,9 @@ export class DebugMenu extends LitElement {
       const mode = this.mode;
       this.editor.mode = mode;
     }
-    if (changedProperties.has('edgelessDisplayMode')) {
+    if (changedProperties.has('showGrid')) {
       window.dispatchEvent(
-        createEvent(
-          'affine:switch-edgeless-display-mode',
-          this.edgelessDisplayMode
-        )
+        createEvent('affine:switch-edgeless-display-mode', this.showGrid)
       );
     }
     super.update(changedProperties);
@@ -410,17 +405,13 @@ export class DebugMenu extends LitElement {
           class="edgeless-toolbar"
           style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
         >
-          <sl-tooltip content="Switch Display Mode" placement="bottom" hoist>
+          <sl-tooltip content="Show Grid" placement="bottom" hoist>
             <sl-button
               size="small"
-              content="Switch Display Mode"
-              @click=${this._switchDisplayMode}
+              content="Show Grid"
+              @click=${this._switchShowGrid}
             >
-              <sl-icon
-                name=${this.edgelessDisplayMode === 'default'
-                  ? 'square'
-                  : 'grid-3x3'}
-              >
+              <sl-icon name=${!this.showGrid ? 'square' : 'grid-3x3'}>
               </sl-icon>
             </sl-button>
           </sl-tooltip>

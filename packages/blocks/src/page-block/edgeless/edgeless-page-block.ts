@@ -59,7 +59,7 @@ export class EdgelessPageBlockComponent
   `;
 
   @property()
-  displayMode: 'default' | 'grid' = 'default';
+  showGrid = false;
 
   @property()
   page!: Page;
@@ -271,7 +271,7 @@ export class EdgelessPageBlockComponent
         'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
     };
     const defaultStyle = {};
-    const style = this.displayMode === 'grid' ? gridStyle : defaultStyle;
+    const style = this.showGrid ? gridStyle : defaultStyle;
 
     return html`
       <style></style>
