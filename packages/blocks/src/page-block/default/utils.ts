@@ -32,7 +32,6 @@ import {
   handleBlockSelectionBatchDelete,
   handleSelectAll,
   removeCommonHotKey,
-  updateSelectedTextType,
 } from '../utils/index.js';
 import type { DefaultPageSignals } from './default-page-block.js';
 import type { DefaultSelectionManager } from './selection-manager.js';
@@ -293,23 +292,15 @@ export function bindHotkeys(
   const {
     BACKSPACE,
     SELECT_ALL,
-    H1,
-    H2,
-    H3,
-    H4,
-    H5,
-    H6,
+
     SHIFT_UP,
     SHIFT_DOWN,
-    NUMBERED_LIST,
-    BULLETED,
-    TEXT,
+
     UP,
     DOWN,
     LEFT,
     RIGHT,
     ENTER,
-    CODE_BLOCK,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -454,50 +445,11 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
-  hotkey.addListener(H1, () => {
-    updateSelectedTextType('affine:paragraph', 'h1', page);
-  });
-  hotkey.addListener(H2, () => {
-    updateSelectedTextType('affine:paragraph', 'h2', page);
-  });
-  hotkey.addListener(H3, () => {
-    updateSelectedTextType('affine:paragraph', 'h3', page);
-  });
-  hotkey.addListener(H4, () => {
-    updateSelectedTextType('affine:paragraph', 'h4', page);
-  });
-  hotkey.addListener(H5, () => {
-    updateSelectedTextType('affine:paragraph', 'h5', page);
-  });
-  hotkey.addListener(H6, () => {
-    updateSelectedTextType('affine:paragraph', 'h6', page);
-  });
-  hotkey.addListener(NUMBERED_LIST, () => {
-    updateSelectedTextType('affine:list', 'numbered', page);
-  });
-  hotkey.addListener(BULLETED, () => {
-    updateSelectedTextType('affine:list', 'bulleted', page);
-  });
-  hotkey.addListener(TEXT, () => {
-    updateSelectedTextType('affine:paragraph', 'text', page);
-  });
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
   });
   hotkey.addListener(SHIFT_DOWN, e => {
     // TODO expand selection down
-  });
-  hotkey.addListener(CODE_BLOCK, e => {
-    const startModel = getStartModelBySelection();
-    const parent = page.getParent(startModel);
-    const index = parent?.children.indexOf(startModel);
-    assertExists(parent);
-    const blockProps = {
-      flavour: 'affine:code',
-      text: startModel.text?.clone(),
-    };
-    page.deleteBlock(startModel);
-    page.addBlock(blockProps, parent, index);
   });
 
   // !!!
@@ -509,22 +461,14 @@ export function removeHotkeys() {
   hotkey.removeListener([
     HOTKEYS.BACKSPACE,
     HOTKEYS.SELECT_ALL,
-    HOTKEYS.H1,
-    HOTKEYS.H2,
-    HOTKEYS.H3,
-    HOTKEYS.H4,
-    HOTKEYS.H5,
-    HOTKEYS.H6,
+
     HOTKEYS.SHIFT_UP,
     HOTKEYS.SHIFT_DOWN,
-    HOTKEYS.BULLETED,
-    HOTKEYS.NUMBERED_LIST,
-    HOTKEYS.TEXT,
+
     HOTKEYS.UP,
     HOTKEYS.DOWN,
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
-    HOTKEYS.CODE_BLOCK,
     HOTKEYS.ENTER,
   ]);
 }
