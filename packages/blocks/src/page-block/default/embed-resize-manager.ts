@@ -51,7 +51,7 @@ export class EmbedResizeManager {
       width =
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
-    if (width <= 700) {
+    if (width <= 700 && width >= 50) {
       if (this._dragMoveTarget === 'right') {
         left =
           this._dropContainerSize.left -

@@ -55,7 +55,7 @@ export function EmbedSelectedRectsContainer(
     <style>
       .affine-page-selected-embed-rects-container > div {
         position: fixed;
-        border: 3px solid var(--affine-primary-color);
+        border: 2px solid var(--affine-primary-color);
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable">
