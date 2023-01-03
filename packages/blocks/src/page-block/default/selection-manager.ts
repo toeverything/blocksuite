@@ -409,6 +409,7 @@ export class DefaultSelectionManager {
 
     if (hoverEditingState?.model.type === 'image') {
       const { position } = hoverEditingState;
+      // when image size is too large, the option popup should show inside
       if (position.width > 680) {
         hoverEditingState.position.x = hoverEditingState.position.right - 50;
       } else {
