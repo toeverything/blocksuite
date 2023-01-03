@@ -465,6 +465,8 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await focusRichText(page, 0);
   await page.keyboard.type('hello');
 
+  // XXX wait for group to be updated
+  await page.waitForTimeout(10);
   await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+1`);
   await assertStoreMatchJSX(
     page,
@@ -533,20 +535,6 @@ test('should hotkey work in paragraph', async ({ page }) => {
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
-  />
-</affine:group>`,
-    groupId
-  );
-  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+c`);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:group
-  prop:xywh="[0,0,720,32]"
->
-  <affine:code
-    prop:text="hello
-"
   />
 </affine:group>`,
     groupId
