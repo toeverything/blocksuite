@@ -10,6 +10,9 @@ export const heavy = (workspace: Workspace) => {
   workspace.signals.pageAdded.once(id => {
     const page = workspace.getPage(id) as Page;
     const pageBlockId = page.addBlock({ flavour: 'affine:page' });
+    page.addBlock({
+      flavour: 'affine:surface',
+    });
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
     for (let i = 0; i < 1000; i++) {
       page.addBlock(
@@ -31,6 +34,9 @@ export const basic = (workspace: Workspace) => {
     const pageBlockId = page.addBlock({
       flavour: 'affine:page',
       title: 'Welcome to BlockSuite playground',
+    });
+    page.addBlock({
+      flavour: 'affine:surface',
     });
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
     page.addBlock(

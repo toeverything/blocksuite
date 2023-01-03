@@ -38,6 +38,8 @@ export function BlockElement(
       else return null;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
+    case 'affine:surface':
+      return null;
   }
   return html`<div>Unknown block flavour: "${model.flavour}"</div>`;
 }

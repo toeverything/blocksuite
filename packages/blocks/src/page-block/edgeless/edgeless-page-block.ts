@@ -34,6 +34,7 @@ import {
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -89,6 +90,14 @@ export class EdgelessPageBlockComponent
     },
   })
   model!: PageBlockModel;
+
+  @property({
+    hasChanged() {
+      return true;
+    },
+  })
+  surfaceModel!: SurfaceBlockModel;
+
   getService = getService;
 
   @state()

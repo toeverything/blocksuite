@@ -2,7 +2,7 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { Page, Signal } from '@blocksuite/store';
+import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
 import { NonShadowLitElement } from '@blocksuite/blocks';
@@ -35,7 +35,18 @@ export class EditorContainer extends NonShadowLitElement {
   contentParser = new ContentParser(this);
 
   get model() {
-    return this.page.root as PageBlockModel;
+    return this.page.root as
+      | PageBlockModel
+      | [PageBlockModel, BaseBlockModel]
+      | null;
+  }
+
+  get pageBlockModel(): PageBlockModel | null {
+    return Array.isArray(this.model) ? this.model[0] : this.model;
+  }
+
+  get surfaceBlockModel(): SurfaceBlockModel | null {
+    return Array.isArray(this.model) ? this.model[1] : null;
   }
 
   @query('.affine-block-placeholder-input')
@@ -102,7 +113,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.model}
+        .model=${this.pageBlockModel}
         .readonly=${this.readonly}
       ></affine-default-page>
     `;
@@ -111,7 +122,8 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.model}
+        .model=${this.pageBlockModel}
+        .surfaceModel=${this.surfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
         .showGrid=${this.showGrid}
