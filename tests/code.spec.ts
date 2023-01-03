@@ -40,6 +40,38 @@ test('use markdown syntax can create code block', async ({ page }) => {
   await expect(locator).toBeVisible();
 });
 
+test('use markdown syntax with trailing characters can create code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.type('```JavaScript');
+  await page.keyboard.type(' ');
+
+  const locator = page.locator('affine-code');
+  await expect(locator).toBeVisible();
+});
+
+test('use more than three backticks can not create code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.type('`````');
+  await page.keyboard.type(' ');
+
+  const codeBlockLocator = page.locator('affine-code');
+  await expect(codeBlockLocator).toBeHidden();
+  const inlineCodelocator = page.locator('code');
+  await expect(inlineCodelocator).toBeVisible();
+  const codes = await inlineCodelocator.innerText();
+  expect(codes).toEqual('```');
+});
+
 test('use shortcut can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);

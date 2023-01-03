@@ -230,7 +230,7 @@ export class Shortcuts {
     },
     {
       name: 'code',
-      pattern: /(?:`)([^`]+?)(?:`)$/g,
+      pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
       action: (
         model: BaseBlockModel,
         quill: Quill,
@@ -266,7 +266,7 @@ export class Shortcuts {
     },
     {
       name: 'codeblock',
-      pattern: /^```/g,
+      pattern: /^```[a-zA-Z0-9]*$/g,
       action: (
         model: BaseBlockModel,
         quill: Quill,
