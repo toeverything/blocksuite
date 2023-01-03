@@ -1,5 +1,5 @@
 import { customElement, property, state } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, unsafeCSS } from 'lit';
 import type { ShapeBlockModel } from './shape-model.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager.js';
 import {
