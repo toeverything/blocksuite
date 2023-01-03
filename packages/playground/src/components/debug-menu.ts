@@ -24,6 +24,7 @@ import {
   assertExists,
   ColorStyle,
   createEvent,
+  EdgelessDisplayMode,
   getCurrentRange,
   getModelsByRange,
   type GroupBlockModel,
@@ -63,6 +64,9 @@ export class DebugMenu extends LitElement {
 
   @state()
   mouseModeType: MouseMode['type'] = 'default';
+
+  @state()
+  edgelessDisplayMode: EdgelessDisplayMode = 'default';
 
   @state()
   shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
@@ -179,6 +183,11 @@ export class DebugMenu extends LitElement {
     this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
   }
 
+  private _switchDisplayMode() {
+    this.edgelessDisplayMode =
+      this.edgelessDisplayMode === 'default' ? 'grid' : 'default';
+  }
+
   private _exportHtml() {
     this.contentParser.onExportHtml();
   }
@@ -218,6 +227,14 @@ export class DebugMenu extends LitElement {
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
+    }
+    if (changedProperties.has('edgelessDisplayMode')) {
+      window.dispatchEvent(
+        createEvent(
+          'affine:switch-edgeless-display-mode',
+          this.edgelessDisplayMode
+        )
+      );
     }
     super.update(changedProperties);
   }
@@ -393,6 +410,20 @@ export class DebugMenu extends LitElement {
           class="edgeless-toolbar"
           style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
         >
+          <sl-tooltip content="Switch Display Mode" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Switch Display Mode"
+              @click=${this._switchDisplayMode}
+            >
+              <sl-icon
+                name=${this.edgelessDisplayMode === 'default'
+                  ? 'square'
+                  : 'grid-3x3'}
+              >
+              </sl-icon>
+            </sl-button>
+          </sl-tooltip>
           <sl-tooltip content="Switch Mouse Mode" placement="bottom" hoist>
             <sl-button
               size="small"

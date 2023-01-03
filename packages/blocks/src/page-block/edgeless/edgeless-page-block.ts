@@ -35,6 +35,7 @@ import {
 import style from './style.css?inline';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -56,6 +57,9 @@ export class EdgelessPageBlockComponent
   static styles = css`
     ${unsafeCSS(style)}
   `;
+
+  @property()
+  displayMode: 'default' | 'grid' = 'default';
 
   @property()
   page!: Page;
@@ -255,16 +259,47 @@ export class EdgelessPageBlockComponent
     const { _selection } = this;
     const { frameSelectionRect } = _selection;
     const selectionState = this._selection.blockSelectionState;
-    const { zoom } = this.viewport;
+    const { zoom, viewportX, viewportY } = this.viewport;
     const selectionRect = EdgelessFrameSelectionRect(frameSelectionRect);
     const hoverRect = EdgelessHoverRect(_selection.hoverState, zoom);
+
+    const translateX = -viewportX * zoom;
+    const translateY = -viewportY * zoom;
+
+    const gridStyle = {
+      backgroundImage:
+        'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
+    };
+    const defaultStyle = {};
+    const style = this.displayMode === 'grid' ? gridStyle : defaultStyle;
 
     return html`
       <style></style>
       <div class="affine-edgeless-page-block-container">
-        ${childrenContainer} ${hoverRect} ${selectionRect}
+        <style>
+          .affine-block-children-container.edgeless {
+            padding-left: 0;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+
+            /* background-image: linear-gradient(#cccccc66 1px, transparent 1px),
+                            linear-gradient(90deg, #cccccc66 1px, transparent 1px); */
+            background-size: ${20 * this.viewport.zoom}px
+              ${20 * this.viewport.zoom}px;
+            background-position: ${translateX}px ${translateY}px;
+            background-color: #fff;
+          }
+        </style>
+        <div
+          class="affine-block-children-container edgeless"
+          style=${styleMap(style)}
+        >
+          ${childrenContainer}
+        </div>
+        ${hoverRect} ${selectionRect}
         ${selectionState.type !== 'none'
-          ? html`<edgeless-selected-rect
+          ? html` <edgeless-selected-rect
               .state=${selectionState}
               .rect=${selectionState.rect}
               .zoom=${zoom}

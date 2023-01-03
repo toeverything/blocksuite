@@ -4,7 +4,11 @@ import { choose } from 'lit/directives/choose.js';
 
 import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
-import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
+import type {
+  EdgelessDisplayMode,
+  MouseMode,
+  PageBlockModel,
+} from '@blocksuite/blocks';
 import { NonShadowLitElement } from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
 
@@ -23,6 +27,9 @@ export class EditorContainer extends NonShadowLitElement {
   mouseMode: MouseMode = {
     type: 'default',
   };
+
+  @state()
+  edgelessDisplayMode: EdgelessDisplayMode = 'default';
 
   // TODO only select block
   @state()
@@ -68,6 +75,14 @@ export class EditorContainer extends NonShadowLitElement {
       })
     );
 
+    this._disposables.add(
+      Signal.fromEvent(window, 'affine:switch-edgeless-display-mode').on(
+        ({ detail }) => {
+          this.edgelessDisplayMode = detail;
+        }
+      )
+    );
+
     // subscribe store
     this._disposables.add(
       this.page.signals.rootAdded.on(() => {
@@ -103,6 +118,7 @@ export class EditorContainer extends NonShadowLitElement {
         .model=${this.model}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
+        .displayMode=${this.edgelessDisplayMode}
       ></affine-edgeless-page>
     `;
 

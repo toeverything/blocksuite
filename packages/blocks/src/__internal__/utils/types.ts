@@ -90,10 +90,12 @@ export type ShapeMouseMode = {
 };
 
 export type MouseMode = DefaultMouseMode | ShapeMouseMode;
+export type EdgelessDisplayMode = 'default' | 'grid';
 
 declare global {
   interface WindowEventMap {
     'affine.switch-mouse-mode': CustomEvent<MouseMode>;
+    'affine:switch-edgeless-display-mode': CustomEvent<EdgelessDisplayMode>;
   }
 }
 
