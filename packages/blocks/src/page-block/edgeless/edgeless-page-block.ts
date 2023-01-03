@@ -30,7 +30,6 @@ import {
   handleBackspace,
   removeCommonHotKey,
   tryUpdateFrameSize,
-  updateSelectedTextType,
 } from '../utils/index.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
