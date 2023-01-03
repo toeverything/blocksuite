@@ -180,6 +180,7 @@ export const linkPopoverStyle = css`
     align-items: center;
     user-select: none;
     cursor: pointer;
+    white-space: nowrap;
     overflow: hidden;
   }
 
