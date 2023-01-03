@@ -292,6 +292,7 @@ export class DefaultPageBlockComponent
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     focusTextEnd(this._title);
   }
 
@@ -308,19 +309,7 @@ export class DefaultPageBlockComponent
     document.removeEventListener('wheel', this._clearSelection);
   }
 
-  protected updated(changedProperties: PropertyValueMap<this>) {
-    const titleInput = this.querySelector('.affine-default-page-block-title');
-
-    if (this.readonly) {
-      titleInput?.setAttribute('disabled', 'disabled');
-    } else {
-      titleInput?.removeAttribute('disabled');
-    }
-  }
-
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
@@ -341,6 +330,7 @@ export class DefaultPageBlockComponent
         <div class="affine-default-page-block-container">
           <div class="affine-default-page-block-title-container">
             <textarea
+              ?disabled=${this.readonly}
               .value=${this.model.title}
               placeholder="Title"
               class="affine-default-page-block-title"

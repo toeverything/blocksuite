@@ -183,64 +183,61 @@ export function EmbedEditingContainer(
 export function CodeBlockOptionContainer(
   codeBlockOption: CodeBlockOption | null
 ) {
-  if (codeBlockOption) {
-    const style = {
-      left: codeBlockOption.position.x + 'px',
-      top: codeBlockOption.position.y + 'px',
-    };
-    const syntaxElem = document.querySelector(
-      `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
-    );
-    if (!syntaxElem) {
-      return html``;
-    }
-    const isWrapped = syntaxElem.classList.contains('wrap');
-    return html`
-      <style>
-        .affine-codeblock-option-container > div {
-            position: fixed;
-            z-index: 1;
-        }
-
-        ${toolTipStyle}
-      </style>
-
-      <div class="affine-codeblock-option-container">
-        <div style=${styleMap(style)} class="code-block-option">
-          <format-bar-button
-            class="has-tool-tip"
-            width="100%"
-            @click=${() => copyCode(codeBlockOption)}
-          >
-            ${CopyIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Copy to Clipboard
-            </tool-tip>
-          </format-bar-button>
-          <format-bar-button
-            class="has-tool-tip ${isWrapped ? 'filled' : ''}"
-            width="100%"
-            @click=${() => toggleWrap(codeBlockOption)}
-          >
-            ${LineWrapIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Wrap code
-            </tool-tip>
-          </format-bar-button>
-          <format-bar-button
-            class="has-tool-tip"
-            width="100%"
-            @click=${() => deleteCodeBlock(codeBlockOption)}
-          >
-            ${DeleteIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Delete
-            </tool-tip>
-          </format-bar-button>
-        </div>
-      </div>
-    `;
-  } else {
+  if (!codeBlockOption) {
     return html``;
   }
+  const style = {
+    left: codeBlockOption.position.x + 'px',
+    top: codeBlockOption.position.y + 'px',
+  };
+  const syntaxElem = document.querySelector(
+    `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
+  );
+  if (!syntaxElem) {
+    return html``;
+  }
+  const isWrapped = syntaxElem.classList.contains('wrap');
+  return html`
+    <style>
+      .affine-codeblock-option-container > div {
+          position: fixed;
+          z-index: 1;
+      }
+
+      ${toolTipStyle}
+    </style>
+
+    <div class="affine-codeblock-option-container">
+      <div style=${styleMap(style)} class="code-block-option">
+        <format-bar-button
+          class="has-tool-tip"
+          width="100%"
+          @click=${() => copyCode(codeBlockOption)}
+        >
+          ${CopyIcon}
+          <tool-tip inert tip-position="right" role="tooltip"
+            >Copy to Clipboard
+          </tool-tip>
+        </format-bar-button>
+        <format-bar-button
+          class="has-tool-tip ${isWrapped ? 'filled' : ''}"
+          width="100%"
+          @click=${() => toggleWrap(codeBlockOption)}
+        >
+          ${LineWrapIcon}
+          <tool-tip inert tip-position="right" role="tooltip"
+            >Wrap code
+          </tool-tip>
+        </format-bar-button>
+        <format-bar-button
+          class="has-tool-tip"
+          width="100%"
+          @click=${() => deleteCodeBlock(codeBlockOption)}
+        >
+          ${DeleteIcon}
+          <tool-tip inert tip-position="right" role="tooltip">Delete </tool-tip>
+        </format-bar-button>
+      </div>
+    </div>
+  `;
 }
