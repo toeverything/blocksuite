@@ -248,11 +248,31 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   const keyboardBindings: KeyboardBindings = {
+    // Note: Since Quill’s default handlers are added at initialization,
+    // the only way to prevent them is to add yours in the configuration.
+    // See https://quilljs.com/docs/modules/keyboard/#configuration
+    // The defaultOptions can found at https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L334-L607
     'code exit': {
       key: 'enter',
       // override default quill behavior
       handler: () => ALLOW_DEFAULT,
     },
+    bold: {
+      key: 'b',
+      shortKey: true,
+      handler: () => ALLOW_DEFAULT,
+    },
+    italic: {
+      key: 'i',
+      shortKey: true,
+      handler: () => ALLOW_DEFAULT,
+    },
+    underline: {
+      key: 'u',
+      shortKey: true,
+      handler: () => ALLOW_DEFAULT,
+    },
+
     enterMarkdownMatch: {
       key: 'enter',
       handler: enterMarkdownMatch,
