@@ -182,48 +182,17 @@ export function EdgelessBlockChildrenContainer(
   host: BlockHost,
   viewport: ViewportState
 ) {
-  const { zoom, viewportX, viewportY } = viewport;
-  const translateX = -viewportX * zoom;
-  const translateY = -viewportY * zoom;
-
-  const gridStyle = {
-    backgroundImage:
-      'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
-  };
-  const defaultStyle = {};
-  const USE_GRID = location.href.includes('grid');
-  const style = USE_GRID ? gridStyle : defaultStyle;
-
   return html`
-    <style>
-      .affine-block-children-container.edgeless {
-        padding-left: 0;
-        position: relative;
-        overflow: hidden;
-        height: 100%;
-
-        /* background-image: linear-gradient(#cccccc66 1px, transparent 1px),
-                linear-gradient(90deg, #cccccc66 1px, transparent 1px); */
-        background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
-        background-position: ${translateX}px ${translateY}px;
-        background-color: #fff;
-      }
-    </style>
-    <div
-      class="affine-block-children-container edgeless"
-      style=${styleMap(style)}
-    >
-      ${repeat(
-        model.children,
-        child => child.id,
-        child =>
-          EdgelessBlockChild(
-            child as GroupBlockModel | ShapeBlockModel,
-            host,
-            viewport
-          )
-      )}
-    </div>
+    ${repeat(
+      model.children,
+      child => child.id,
+      child =>
+        EdgelessBlockChild(
+          child as GroupBlockModel | ShapeBlockModel,
+          host,
+          viewport
+        )
+    )}
   `;
 }
 

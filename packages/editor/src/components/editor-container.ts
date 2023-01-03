@@ -24,6 +24,9 @@ export class EditorContainer extends NonShadowLitElement {
     type: 'default',
   };
 
+  @state()
+  showGrid = false;
+
   // TODO only select block
   @state()
   clipboard = new ClipboardManager(this, this);
@@ -68,6 +71,14 @@ export class EditorContainer extends NonShadowLitElement {
       })
     );
 
+    this._disposables.add(
+      Signal.fromEvent(window, 'affine:switch-edgeless-display-mode').on(
+        ({ detail }) => {
+          this.showGrid = detail;
+        }
+      )
+    );
+
     // subscribe store
     this._disposables.add(
       this.page.signals.rootAdded.on(() => {
@@ -103,6 +114,7 @@ export class EditorContainer extends NonShadowLitElement {
         .model=${this.model}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
+        .showGrid=${this.showGrid}
       ></affine-edgeless-page>
     `;
 

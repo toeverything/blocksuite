@@ -65,6 +65,9 @@ export class DebugMenu extends LitElement {
   mouseModeType: MouseMode['type'] = 'default';
 
   @state()
+  showGrid = false;
+
+  @state()
   shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
 
   @state()
@@ -179,6 +182,10 @@ export class DebugMenu extends LitElement {
     this.mouseModeType = this.mouseModeType === 'default' ? 'shape' : 'default';
   }
 
+  private _switchShowGrid() {
+    this.showGrid = !this.showGrid;
+  }
+
   private _exportHtml() {
     this.contentParser.onExportHtml();
   }
@@ -222,6 +229,11 @@ export class DebugMenu extends LitElement {
     if (changedProperties.has('mode')) {
       const mode = this.mode;
       this.editor.mode = mode;
+    }
+    if (changedProperties.has('showGrid')) {
+      window.dispatchEvent(
+        createEvent('affine:switch-edgeless-display-mode', this.showGrid)
+      );
     }
     super.update(changedProperties);
   }
@@ -400,6 +412,16 @@ export class DebugMenu extends LitElement {
           class="edgeless-toolbar"
           style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
         >
+          <sl-tooltip content="Show Grid" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Show Grid"
+              @click=${this._switchShowGrid}
+            >
+              <sl-icon name=${!this.showGrid ? 'square' : 'grid-3x3'}>
+              </sl-icon>
+            </sl-button>
+          </sl-tooltip>
           <sl-tooltip content="Switch Mouse Mode" placement="bottom" hoist>
             <sl-button
               size="small"
