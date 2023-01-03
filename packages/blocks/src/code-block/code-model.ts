@@ -1,13 +1,17 @@
 import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
+export interface CodeBlockProps extends IBaseBlockProps {
+  language: string;
+}
+
 export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
   static version = 1;
   flavour = 'affine:code' as const;
   type = 'code' as const;
   tag = literal`affine-code`;
 
-  language = 'JavaScript';
+  language: string;
 
   setLang(lang: string) {
     this.page.updateBlockById(this.id, {
@@ -15,8 +19,9 @@ export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
     });
   }
 
-  constructor(page: Page, props: Partial<IBaseBlockProps>) {
+  constructor(page: Page, props: Partial<CodeBlockProps>) {
     super(page, props);
+    this.language = props.language ?? 'JavaScript';
   }
 
   // TODO block2html
