@@ -12,7 +12,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
 import './button';
-import { formatButtons, paragraphButtons } from './config.js';
+import { formatConfig, paragraphConfig } from './config.js';
 import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
 
@@ -128,7 +128,7 @@ export class FormatQuickBar extends LitElement {
       @mouseover=${this._onHover}
       @mouseout=${this._onHoverEnd}
     >
-      ${paragraphButtons.map(
+      ${paragraphConfig.map(
         ({ flavour, type, name, icon }) => html`<format-bar-button
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
@@ -141,7 +141,7 @@ export class FormatQuickBar extends LitElement {
             if (this.paragraphType === type) {
               // Already in the target format, convert back to text
               const { flavour: defaultFlavour, type: defaultType } =
-                paragraphButtons[0];
+                paragraphConfig[0];
               updateSelectedTextType(defaultFlavour, defaultType, this.page);
               this.paragraphType = defaultType;
               return;
@@ -169,8 +169,8 @@ export class FormatQuickBar extends LitElement {
       return html``;
     }
     const paragraphIcon =
-      paragraphButtons.find(btn => btn.type === this.paragraphType)?.icon ??
-      paragraphButtons[0].icon;
+      paragraphConfig.find(btn => btn.type === this.paragraphType)?.icon ??
+      paragraphConfig[0].icon;
     const paragraphItems = html`<format-bar-button
       class="paragraph-button"
       width="52px"
@@ -182,7 +182,7 @@ export class FormatQuickBar extends LitElement {
 
     const paragraphPanel = this._paragraphPanelTemplate();
 
-    const formatItems = formatButtons
+    const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
         ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
