@@ -128,7 +128,7 @@ export async function downloadImage(model: BaseBlockModel) {
   };
 }
 
-export async function copyImgToClip(model: EmbedBlockModel) {
+export async function copyImage(model: EmbedBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const text = model.block2Text('', 0, 0);
   const delta = [
@@ -150,17 +150,18 @@ export async function copyImgToClip(model: EmbedBlockModel) {
       },
     ],
   });
-  const copySuccess = _copyToClipboardFromPc([
+  const copySuccess = performNativeCopy([
     { mimeType: copyType, data: copyData },
   ]);
   copySuccess && toast('Copied image to clipboard');
 }
-interface clipItem {
+
+interface ClipboardItem {
   mimeType: string;
   data: string;
 }
 
-function _copyToClipboardFromPc(clips: clipItem[]): boolean {
+function performNativeCopy(items: ClipboardItem[]): boolean {
   let success = false;
   const tempElem = document.createElement('textarea');
   tempElem.value = 'temp';
@@ -168,12 +169,10 @@ function _copyToClipboardFromPc(clips: clipItem[]): boolean {
   tempElem.select();
   tempElem.setSelectionRange(0, tempElem.value.length);
 
-  const listener = function (e: ClipboardEvent) {
+  const listener = (e: ClipboardEvent) => {
     const clipboardData = e.clipboardData;
     if (clipboardData) {
-      clips.forEach(clip => {
-        clipboardData.setData(clip.mimeType, clip.data);
-      });
+      items.forEach(item => clipboardData.setData(item.mimeType, item.data));
     }
 
     e.preventDefault();

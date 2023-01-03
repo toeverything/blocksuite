@@ -9,7 +9,7 @@ import {
 } from '../icons.js';
 import {
   copyCode,
-  copyImgToClip,
+  copyImage,
   deleteCodeBlock,
   downloadImage,
   focusCaption,
@@ -157,7 +157,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            copyImgToClip(embedEditingState.model as EmbedBlockModel);
+            copyImage(embedEditingState.model as EmbedBlockModel);
           }}
         >
           ${CopyIcon}
