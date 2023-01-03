@@ -4,6 +4,9 @@ const IS_MAC = process.platform === 'darwin';
 // const IS_WINDOWS = process.platform === 'win32';
 // const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
+export const SHORT_KEY = IS_MAC ? 'Meta' : 'Control';
+export const SECONDARY_KEY = IS_MAC ? 'Alt' : 'Shift';
+
 async function keyDownCtrlOrMeta(page: Page) {
   if (IS_MAC) {
     await page.keyboard.down('Meta');
