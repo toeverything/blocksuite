@@ -2,6 +2,7 @@ import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { formatConfig, paragraphConfig } from '../../page-block/utils/const.js';
 import {
   getFormat,
   updateSelectedTextType,
@@ -12,7 +13,6 @@ import {
 } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
 import './button';
-import { formatConfig, paragraphConfig } from './config.js';
 import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
 
