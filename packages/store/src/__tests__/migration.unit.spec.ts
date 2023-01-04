@@ -62,7 +62,7 @@ describe('migration', () => {
       'affine:surface': 1,
     });
     const hasSurface = Object.entries(result['space:page0']).some(
-      ([key, value]: [string, unknown]) => {
+      ([_, value]: [string, unknown]) => {
         if (
           (value as Record<string, unknown>)['sys:flavour'] === 'affine:surface'
         ) {
