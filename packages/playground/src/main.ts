@@ -14,8 +14,12 @@ import {
 } from './utils.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import './style.css';
+import { isFSSupported, setRootDirectory } from './utils/fs';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
+const connectButton = <HTMLButtonElement>(
+  document.getElementById('connect-file-btn')
+);
 const options = getOptions();
 
 // Subscribe for page update and create editor after page loaded.
@@ -58,6 +62,22 @@ async function main() {
     (workspace: Workspace) => void
   >;
   initButton.addEventListener('click', () => initFunctions.basic(workspace));
+  connectButton.addEventListener('click', async () => {
+    if (!isFSSupported()) {
+      return window.alert('save to local is not supported!');
+    }
+    setRootDirectory().then(async result => {
+      if (result?.granted) {
+        for await (const handle of result.handle.values()) {
+          if (handle.kind === 'file' && handle.name.endsWith('.affine')) {
+            const file = await handle.getFile();
+            const binary = new Uint8Array(await file.arrayBuffer());
+            Workspace.fromLocal(workspace, binary);
+          }
+        }
+      }
+    });
+  });
 
   if (initParam != null) {
     if (initFunctions[initParam]) {

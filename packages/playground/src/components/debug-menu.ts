@@ -13,6 +13,8 @@ import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
 import type {
   SlColorPicker,
   SlDropdown,
@@ -32,9 +34,18 @@ import {
   TDShapeType,
   updateSelectedTextType,
 } from '@blocksuite/blocks';
-import type { Workspace } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
+import {
+  createFileHandle,
+  getFileHandle,
+  isFSSupported,
+  setRootDirectory,
+  writeContentToFile,
+} from '../utils/fs';
+import type { SlDialog } from '@shoelace-style/shoelace';
+import type { SlInput } from '@shoelace-style/shoelace';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -78,6 +89,9 @@ export class DebugMenu extends LitElement {
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
+
+  dialog!: SlDialog;
+  fsHandle!: FileSystemDirectoryHandle;
 
   get mouseMode(): MouseMode {
     if (this.mouseModeType === 'default') {
@@ -203,6 +217,38 @@ export class DebugMenu extends LitElement {
     this.workspace.exportYDoc();
   }
 
+  private _chooseFileToSave() {
+    if (!isFSSupported()) {
+      return window.alert('save to local is not supported!');
+    }
+    setRootDirectory().then(result => {
+      if (result?.granted) {
+        this.fsHandle = result.handle;
+        this.dialog.show();
+      }
+    });
+  }
+
+  private _saveToLocal() {
+    if (!isFSSupported()) {
+      return window.alert('save to local is not supported!');
+    }
+    const input = <SlInput>document.getElementById('input-file-name');
+    const value = input.value;
+    const filename = value.endsWith('.affine') ? value : `${value}.affine`;
+    getFileHandle(filename, this.fsHandle).then(async handle => {
+      if (!handle) {
+        handle = await createFileHandle(filename, this.fsHandle);
+      }
+      if (handle) {
+        await writeContentToFile(handle, Workspace.toLocal(this.workspace));
+      } else {
+        console.error('cannot find file handle!');
+      }
+      return this.dialog.hide();
+    });
+  }
+
   private _shareUrl() {
     const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
@@ -215,6 +261,8 @@ export class DebugMenu extends LitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
+
+    this.dialog = <SlDialog>document.querySelector('.dialog-fs');
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -393,9 +441,21 @@ export class DebugMenu extends LitElement {
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
               </sl-menu-item>
+              <sl-menu-item @click=${this._chooseFileToSave}>
+                Save to Local
+              </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
+          <sl-dialog label="Save to local" class="dialog-fs">
+            <sl-input id="input-file-name" label="file name"></sl-input>
+            <sl-button
+              slot="footer"
+              variant="primary"
+              @click=${this._saveToLocal}
+              >Close</sl-button
+            >
+          </sl-dialog>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
             <sl-button

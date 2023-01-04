@@ -335,11 +335,19 @@ export class Workspace {
     return this._indexer.search(query);
   }
 
+  static fromLocal(workspace: Workspace, binary: Uint8Array): void {
+    Y.applyUpdateV2(workspace.doc, binary);
+  }
+
+  static toLocal(workspace: Workspace): Uint8Array {
+    return Y.encodeStateAsUpdateV2(workspace.doc);
+  }
+
   /**
    * @internal Only for testing
    */
   exportYDoc() {
-    const binary = Y.encodeStateAsUpdate(this.doc);
+    const binary = Workspace.toLocal(this);
     const file = new Blob([binary], { type: 'application/octet-stream' });
     const fileUrl = URL.createObjectURL(file);
 
