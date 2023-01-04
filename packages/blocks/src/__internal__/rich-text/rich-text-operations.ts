@@ -118,36 +118,31 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     // Bottom, can not indent, do nothing
     return;
   }
+
+  const parent = page.getParent(model);
+  if (!parent) return;
   page.captureSync();
 
-  const blockProps = {
-    flavour: model.flavour,
-    type: model.type,
-    text: model?.text?.clone(), // should clone before `deleteBlock`
-    // children: model.children,
-  };
-
-  // backup block children
+  // 1. backup target block children and remove them from target block
   const children = model.children;
+  page.updateBlock(model, {
+    children: [],
+  });
 
-  // TODO update block instead of delete block and add a new block
-  // page.updateBlock(model, {
-  //   children: [],
-  // });
+  // 2. remove target block from parent block
+  page.updateBlock(parent, {
+    children: parent.children.filter(child => child.id !== model.id),
+  });
 
-  page.deleteBlock(model);
-  const id = page.addBlock(blockProps, previousSibling);
-
-  // append target block and children to previous node
+  // 3. append target block and children to previous sibling block
   page.updateBlock(previousSibling, {
-    children: [...previousSibling.children, ...children],
+    children: [...previousSibling.children, model, ...children],
   });
 
   // FIXME: after quill onload
   requestAnimationFrame(() => {
-    const block = page.getBlockById(id);
-    assertExists(block);
-    const richText = getRichTextByModel(block);
+    assertExists(model);
+    const richText = getRichTextByModel(model);
     richText?.quill.setSelection(offset, 0);
   });
 }
@@ -188,30 +183,26 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
   page.updateBlock(parent, {
     children: previousSiblings,
   });
-  // 3. backup current block
-  const text = model?.text?.clone(); // should clone before `deleteBlock`
-  // 4. append next siblings to target block
-  const children = [...model.children, ...nextSiblings];
 
-  // 5. append block after parent
+  // 3. append child blocks after the target block to the target block
+  page.updateBlock(model, {
+    children: [...model.children, ...nextSiblings],
+  });
+
+  // 4. insert target block to the grand block
   const index = grandParent.children.indexOf(parent);
-  const blockProps = {
-    flavour: model.flavour,
-    type: model.type,
-    text,
-    children,
-    // TODO fix todo or other properties will be lost
-  };
-  // TODO move block instead of add new block
-  page.deleteBlock(model);
-  const id = page.addBlock(blockProps, grandParent, index + 1);
+  page.updateBlock(grandParent, {
+    children: [
+      ...grandParent.children.slice(0, index + 1),
+      model,
+      ...grandParent.children.slice(index + 1),
+    ],
+  });
 
   // FIXME: after quill onload
   requestAnimationFrame(() => {
-    const block = page.getBlockById(id);
-    assertExists(block);
-
-    const richText = getRichTextByModel(block);
+    assertExists(model);
+    const richText = getRichTextByModel(model);
     richText?.quill.setSelection(offset, 0);
   });
 }
