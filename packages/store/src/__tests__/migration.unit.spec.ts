@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { describe, assert, test } from 'vitest';
+import { describe, assert, test, expect } from 'vitest';
 import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
 import { tryMigrate } from '../workspace/migrations.js';
@@ -42,5 +42,34 @@ describe('migration', () => {
       blockIds.findIndex(key => result['space:page0'][key] === 'affine:group'),
       -1
     );
+  });
+
+  test('migrate add surface', async () => {
+    const doc = await loadBinary('legacy-surface');
+    tryMigrate(doc);
+
+    const result = doc.toJSON();
+    assert.deepEqual(result['space:meta']['versions'], {
+      'affine:paragraph': 1,
+      'affine:page': 2,
+      'affine:list': 1,
+      'affine:frame': 1,
+      'affine:divider': 1,
+      'affine:embed': 1,
+      'affine:shape': 1,
+      'affine:code': 1,
+      'affine:surface': 1,
+    });
+    let hasSurface = false;
+    Object.entries(result['space:page0']).map(
+      ([key, value]: [string, unknown]) => {
+        if (
+          (value as Record<string, unknown>)['sys:flavour'] === 'affine:surface'
+        ) {
+          hasSurface = true;
+        }
+      }
+    );
+    expect(hasSurface).toBe(true);
   });
 });
