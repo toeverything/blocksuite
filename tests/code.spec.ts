@@ -159,7 +159,7 @@ use fern::{
   await expect(locator).toBeHidden();
 });
 
-test.only('drag copy paste', async ({ page }) => {
+test('drag copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
