@@ -89,7 +89,7 @@ export class EdgelessPageBlockComponent
       return true;
     },
   })
-  model!: PageBlockModel;
+  pageModel!: PageBlockModel;
 
   @property({
     hasChanged() {
@@ -146,7 +146,7 @@ export class EdgelessPageBlockComponent
     const bound = this.mouseRoot.getBoundingClientRect();
     this.viewport.setSize(bound.width, bound.height);
 
-    const frame = this.model.children[0] as FrameBlockModel;
+    const frame = this.pageModel.children[0] as FrameBlockModel;
     const [modelX, modelY, modelW, modelH] = JSON.parse(frame.xywh) as XYWH;
     this.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
@@ -171,7 +171,7 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     // TODO: listen to new children
-    this.model.children.forEach(frame => {
+    this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
     });
 
@@ -218,10 +218,10 @@ export class EdgelessPageBlockComponent
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
+    this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
 
     const childrenContainer = EdgelessBlockChildrenContainer(
-      this.model,
+      this.pageModel,
       this,
       this.viewport
     );

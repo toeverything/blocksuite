@@ -5,7 +5,7 @@ import { choose } from 'lit/directives/choose.js';
 import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
-import { NonShadowLitElement } from '@blocksuite/blocks';
+import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
 
 @customElement('editor-container')
@@ -46,7 +46,9 @@ export class EditorContainer extends NonShadowLitElement {
   }
 
   get surfaceBlockModel(): SurfaceBlockModel | null {
-    return Array.isArray(this.model) ? this.model[1] : null;
+    return Array.isArray(this.model)
+      ? (this.model[1] as SurfaceBlockModel)
+      : null;
   }
 
   @query('.affine-block-placeholder-input')
@@ -122,7 +124,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.pageBlockModel}
+        .pageModel=${this.pageBlockModel}
         .surfaceModel=${this.surfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
