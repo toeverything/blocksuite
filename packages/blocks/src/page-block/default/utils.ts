@@ -190,7 +190,9 @@ function performNativeCopy(items: ClipboardItem[]): boolean {
 }
 
 export function focusCaption(model: BaseBlockModel) {
-  const dom = getBlockElementByModel(model)?.querySelector(
+  const blockEle = getBlockElementByModel(model);
+  assertExists(blockEle);
+  const dom = blockEle.querySelector(
     '.affine-embed-wrapper-caption'
   ) as HTMLInputElement;
   dom.classList.add('caption-show');
@@ -340,12 +342,25 @@ export function bindHotkeys(
     if (state.type === 'native') {
       handleBackspace(page, e);
       return;
-    } else if (['block', 'divider', 'focus'].includes(state.type)) {
+    }
+
+    // XXX Special case for code block
+    // At the beginning of the code block,
+    // the backspace will selected the block first.
+    // The logic is in the `handleLineStartBackspace` function.
+    if (
+      state.type === 'none' &&
+      state.selectedBlocks.length === 1 &&
+      matchFlavours(getModelByElement(state.selectedBlocks[0]), ['affine:code'])
+    ) {
+      state.type = 'block';
+      return;
+    }
+
+    if (state.type === 'block') {
       const { selectedBlocks } = state;
-      if (state.type === 'focus') {
-        state.type = 'block';
-        return;
-      }
+
+      // delete selected blocks
       handleBlockSelectionBatchDelete(
         page,
         selectedBlocks.map(block => getModelByElement(block))
@@ -487,7 +502,7 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
 export function copyCode(codeBlockOption: CodeBlockOption) {
   const richText = getRichTextByModel(codeBlockOption.model);
   assertExists(richText);
-  const quill = richText?.quill;
+  const quill = richText.quill;
   quill.setSelection(0, quill.getLength());
   document.dispatchEvent(new ClipboardEvent('copy'));
   resetNativeSelection(null);

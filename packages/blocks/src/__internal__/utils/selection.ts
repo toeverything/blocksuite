@@ -199,25 +199,20 @@ export function focusBlockByModel(
   position: SelectionPosition = 'end'
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
-  if (matchFlavours(model, ['affine:embed', 'affine:divider'])) {
+  if (matchFlavours(model, ['affine:embed', 'affine:divider', 'affine:code'])) {
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
-    const embedElement = getBlockElementByModel(model);
-    assertExists(embedElement);
-    defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
-    defaultPageBlock.selection.state.type = 'block';
+    const element = getBlockElementByModel(model);
+    assertExists(element);
+    defaultPageBlock.selection.state.selectedBlocks.push(element);
+
+    // XXX Special case for code block, code block should be selected first
+    if (!matchFlavours(model, ['affine:code'])) {
+      defaultPageBlock.selection.state.type = 'block';
+    }
     resetNativeSelection(null);
     (document.activeElement as HTMLTextAreaElement).blur();
-    return;
-  }
-  // TODO maybe the section can merge to the above
-  if (matchFlavours(model, ['affine:code'])) {
-    const selectionManager = defaultPageBlock.selection;
-    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
-    const blockRect = codeBlockElement.getBoundingClientRect();
-    selectionManager.resetSelectedBlockByRect(blockRect, 'focus');
-    resetNativeSelection(null);
     return;
   }
 
