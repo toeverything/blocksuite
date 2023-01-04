@@ -15,6 +15,8 @@ import {
   initEmptyParagraphState,
   formatType,
   clickBlockTypeMenuItem,
+  SHORT_KEY,
+  SECONDARY_KEY,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -225,6 +227,318 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   // the format should be removed after trigger the hotkey again
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, {});
+});
+
+test('should single line format hotkey work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+  await dragBetweenIndices(page, [0, 1], [0, 4]);
+
+  // bold
+  await page.keyboard.press(`${SHORT_KEY}+b`);
+  // italic
+  await page.keyboard.press(`${SHORT_KEY}+i`);
+  // underline
+  await page.keyboard.press(`${SHORT_KEY}+u`);
+  // strikethrough
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="h"
+        />
+        <text
+          bold={true}
+          insert="ell"
+          italic={true}
+          strike={true}
+          underline={true}
+        />
+        <text
+          insert="o"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
+
+  // bold
+  await page.keyboard.press(`${SHORT_KEY}+b`);
+  // italic
+  await page.keyboard.press(`${SHORT_KEY}+i`);
+  // underline
+  await page.keyboard.press(`${SHORT_KEY}+u`);
+  // strikethrough
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="h"
+        />
+        <text
+          bold={false}
+          insert="ell"
+          italic={false}
+          strike={false}
+          underline={false}
+        />
+        <text
+          insert="o"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
+});
+
+test('should multiple line format hotkey work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  // 0    1   2
+  // 1|23 456 78|9
+  await dragBetweenIndices(page, [0, 1], [2, 2]);
+
+  // bold
+  await page.keyboard.press(`${SHORT_KEY}+b`);
+  // italic
+  await page.keyboard.press(`${SHORT_KEY}+i`);
+  // underline
+  await page.keyboard.press(`${SHORT_KEY}+u`);
+  // strikethrough
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="1"
+        />
+        <text
+          bold={true}
+          insert="23"
+          italic={true}
+          strike={true}
+          underline={true}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="456"
+          italic={true}
+          strike={true}
+          underline={true}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="78"
+          italic={true}
+          strike={true}
+          underline={true}
+        />
+        <text
+          insert="9"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
+
+  // bold
+  await page.keyboard.press(`${SHORT_KEY}+b`);
+  // italic
+  await page.keyboard.press(`${SHORT_KEY}+i`);
+  // underline
+  await page.keyboard.press(`${SHORT_KEY}+u`);
+  // strikethrough
+  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          insert="1"
+        />
+        <text
+          bold={false}
+          insert="23"
+          italic={false}
+          strike={false}
+          underline={false}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={false}
+          insert="456"
+          italic={false}
+          strike={false}
+          underline={false}
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={false}
+          insert="78"
+          italic={false}
+          strike={false}
+          underline={false}
+        />
+        <text
+          insert="9"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
+});
+
+test('should hotkey work in paragraph', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { groupId } = await initEmptyParagraphState(page);
+
+  await focusRichText(page, 0);
+  await page.keyboard.type('hello');
+
+  // XXX wait for group to be updated
+  await page.waitForTimeout(10);
+  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+1`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="h1"
+  />
+</affine:group>`,
+    groupId
+  );
+  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+6`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="h6"
+  />
+</affine:group>`,
+    groupId
+  );
+  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+8`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:list
+    prop:checked={false}
+    prop:text="hello"
+    prop:type="bulleted"
+  />
+</affine:group>`,
+    groupId
+  );
+  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+9`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:list
+    prop:checked={false}
+    prop:text="hello"
+    prop:type="numbered"
+  />
+</affine:group>`,
+    groupId
+  );
+  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+0`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:group
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="text"
+  />
+</affine:group>`,
+    groupId
+  );
 });
 
 test('format list to h1', async ({ page }) => {

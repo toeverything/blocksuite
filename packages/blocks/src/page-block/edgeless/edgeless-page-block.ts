@@ -30,7 +30,6 @@ import {
   handleBackspace,
   removeCommonHotKey,
   tryUpdateFrameSize,
-  updateSelectedTextType,
 } from '../utils/index.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
@@ -109,58 +108,11 @@ export class EdgelessPageBlockComponent
     const { page: space } = this;
 
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    hotkey.addListener(HOTKEYS.H1, () =>
-      this._updateType('affine:paragraph', 'h1', space)
-    );
-    hotkey.addListener(HOTKEYS.H2, () =>
-      this._updateType('affine:paragraph', 'h2', space)
-    );
-    hotkey.addListener(HOTKEYS.H3, () =>
-      this._updateType('affine:paragraph', 'h3', space)
-    );
-    hotkey.addListener(HOTKEYS.H4, () =>
-      this._updateType('affine:paragraph', 'h4', space)
-    );
-    hotkey.addListener(HOTKEYS.H5, () =>
-      this._updateType('affine:paragraph', 'h5', space)
-    );
-    hotkey.addListener(HOTKEYS.H6, () =>
-      this._updateType('affine:paragraph', 'h6', space)
-    );
-    hotkey.addListener(HOTKEYS.NUMBERED_LIST, () =>
-      this._updateType('affine:list', 'numbered', space)
-    );
-    hotkey.addListener(HOTKEYS.BULLETED, () =>
-      this._updateType('affine:list', 'bulleted', space)
-    );
-    hotkey.addListener(HOTKEYS.TEXT, () =>
-      this._updateType('affine:paragraph', 'text', space)
-    );
-
     bindCommonHotkey(space);
   }
 
-  private _updateType(flavour: string, type: string, space: Page): void {
-    updateSelectedTextType(flavour, type, space);
-  }
-
   private _removeHotkeys() {
-    hotkey.removeListener(
-      [
-        HOTKEYS.BACKSPACE,
-        HOTKEYS.H1,
-        HOTKEYS.H2,
-        HOTKEYS.H3,
-        HOTKEYS.H4,
-        HOTKEYS.H5,
-        HOTKEYS.H6,
-        HOTKEYS.SHIFT_DOWN,
-        HOTKEYS.NUMBERED_LIST,
-        HOTKEYS.BULLETED,
-        HOTKEYS.TEXT,
-      ],
-      this.flavour
-    );
+    hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
     removeCommonHotKey();
   }
 
