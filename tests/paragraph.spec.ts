@@ -200,18 +200,18 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await page.keyboard.press('Tab');
   await assertRichTexts(page, ['hello', 'world']);
   await assertBlockChildrenIds(page, '1', ['2']);
-  await assertBlockChildrenIds(page, '2', ['4']);
+  await assertBlockChildrenIds(page, '2', ['3']);
 
   // unindent
   await pressShiftTab(page);
   await assertRichTexts(page, ['hello', 'world']);
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
 
   await undoByKeyboard(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await redoByKeyboard(page);
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
 });
 
 test('should indent and unindent works with children', async ({ page }) => {
