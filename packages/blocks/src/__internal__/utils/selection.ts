@@ -206,11 +206,7 @@ export function focusBlockByModel(
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
-
-    // XXX Special case for code block, code block should be selected first
-    if (!matchFlavours(model, ['affine:code'])) {
-      defaultPageBlock.selection.state.type = 'block';
-    }
+    defaultPageBlock.selection.state.type = 'block';
     resetNativeSelection(null);
     (document.activeElement as HTMLTextAreaElement).blur();
     return;

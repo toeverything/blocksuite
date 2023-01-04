@@ -344,16 +344,25 @@ export function bindHotkeys(
       return;
     }
 
-    // XXX Special case for code block
+    // XXX Ad-hoc for code block
     // At the beginning of the code block,
     // the backspace will selected the block first.
-    // The logic is in the `handleLineStartBackspace` function.
-    if (
-      state.type === 'none' &&
-      state.selectedBlocks.length === 1 &&
-      matchFlavours(getModelByElement(state.selectedBlocks[0]), ['affine:code'])
-    ) {
-      state.type = 'block';
+    // The select logic already processed in the `handleLineStartBackspace` function.
+    // So we need to prevent the default delete behavior.
+    const isDispatchFromCodeBlock = (e: KeyboardEvent) => {
+      if (!e.target || !(e.target instanceof Element)) {
+        return false;
+      }
+      try {
+        // if the target is `body`, it will throw an error
+        const model = getModelByElement(e.target);
+        return matchFlavours(model, ['affine:code']);
+      } catch (error) {
+        // just check failed, no need to handle
+        return false;
+      }
+    };
+    if (isDispatchFromCodeBlock(e)) {
       return;
     }
 
