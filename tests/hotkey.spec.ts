@@ -231,7 +231,7 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
 
 test('should single line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyParagraphState(page);
+  const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('hello');
   await dragBetweenIndices(page, [0, 1], [0, 4]);
@@ -248,7 +248,7 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
@@ -271,8 +271,8 @@ test('should single line format hotkey work', async ({ page }) => {
     }
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 
   // bold
@@ -287,7 +287,7 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
@@ -310,14 +310,14 @@ test('should single line format hotkey work', async ({ page }) => {
     }
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 });
 
 test('should multiple line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyParagraphState(page);
+  const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // 0    1   2
   // 1|23 456 78|9
@@ -335,7 +335,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -386,8 +386,8 @@ test('should multiple line format hotkey work', async ({ page }) => {
     }
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 
   // bold
@@ -402,7 +402,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -453,14 +453,14 @@ test('should multiple line format hotkey work', async ({ page }) => {
     }
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 });
 
 test('should hotkey work in paragraph', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyParagraphState(page);
+  const { frameId } = await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
   await page.keyboard.type('hello');
@@ -471,35 +471,35 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="hello"
     prop:type="h1"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
   await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+6`);
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="hello"
     prop:type="h6"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
   await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+8`);
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,32]"
 >
   <affine:list
@@ -507,14 +507,14 @@ test('should hotkey work in paragraph', async ({ page }) => {
     prop:text="hello"
     prop:type="bulleted"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
   await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+9`);
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,32]"
 >
   <affine:list
@@ -522,22 +522,22 @@ test('should hotkey work in paragraph', async ({ page }) => {
     prop:text="hello"
     prop:type="numbered"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
   await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+0`);
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 });
 
