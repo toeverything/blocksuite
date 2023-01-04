@@ -171,7 +171,7 @@ test('drag copy paste', async ({ page }) => {
     return {
       startX: bbox.left,
       startY: bbox.bottom - bbox.height / 2,
-      endX: bbox.right,
+      endX: bbox.left + 100,
       endY: bbox.bottom - bbox.height / 2,
     };
   });
@@ -215,7 +215,7 @@ test('drag select code block can delete it', async ({ page }) => {
     return {
       startX: bbox.left,
       startY: bbox.bottom - bbox.height / 2,
-      endX: bbox.left + 100,
+      endX: bbox.right,
       endY: bbox.bottom - bbox.height / 2,
     };
   });
