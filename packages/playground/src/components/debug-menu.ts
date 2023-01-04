@@ -241,7 +241,10 @@ export class DebugMenu extends LitElement {
         handle = await createFileHandle(filename, this.fsHandle);
       }
       if (handle) {
-        await writeContentToFile(handle, Workspace.toLocal(this.workspace));
+        await writeContentToFile(
+          handle,
+          await Workspace.toLocal(this.workspace)
+        );
       } else {
         console.error('cannot find file handle!');
       }

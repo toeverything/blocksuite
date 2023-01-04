@@ -8,6 +8,7 @@ import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { decodeWorkspace, encodeWorkspace } from '../fs/index.js';
 
 export interface PageMeta {
   id: string;
@@ -209,13 +210,17 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
 
 export class Workspace {
   static Y = Y;
-  public readonly room: string | undefined;
+  public room: string | undefined;
 
-  private _store: Store;
-  private _indexer: Indexer;
-  private _blobStorage: Promise<BlobStorage | null>;
+  private _store!: Store;
+  private _indexer!: Indexer;
+  private _blobStorage!: Promise<BlobStorage | null>;
 
-  public readonly options: StoreOptions;
+  _options!: StoreOptions;
+
+  get options() {
+    return this._options;
+  }
 
   meta: WorkspaceMeta;
 
@@ -228,16 +233,7 @@ export class Workspace {
   flavourMap = new Map<string, typeof BaseBlockModel>();
 
   constructor(options: StoreOptions) {
-    this.options = Object.assign({}, options);
-    this._store = new Store(options);
-    this._indexer = new Indexer(this.doc);
-    if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.room);
-    } else {
-      // blob storage is not reachable in server side
-      this._blobStorage = Promise.resolve(null);
-    }
-    this.room = options.room;
+    this.setOptions(options);
 
     this.meta = new WorkspaceMeta(
       'space:meta',
@@ -252,6 +248,19 @@ export class Workspace {
     };
 
     this._handlePageEvent();
+  }
+
+  setOptions(options: StoreOptions) {
+    this._options = Object.assign({}, options);
+    this._store = new Store(options);
+    this._indexer = new Indexer(this.doc);
+    if (!options.isSSR) {
+      this._blobStorage = getBlobStorage(options.room);
+    } else {
+      // blob storage is not reachable in server side
+      this._blobStorage = Promise.resolve(null);
+    }
+    this.room = options.room;
   }
 
   get providers() {
@@ -338,19 +347,22 @@ export class Workspace {
     return this._indexer.search(query);
   }
 
-  static fromLocal(workspace: Workspace, binary: Uint8Array): void {
-    Y.applyUpdateV2(workspace.doc, binary);
+  static async fromLocal(
+    binary: Uint8Array,
+    blockSchema: Record<string, typeof BaseBlockModel>
+  ): Promise<Workspace> {
+    return decodeWorkspace(binary, blockSchema);
   }
 
-  static toLocal(workspace: Workspace): Uint8Array {
-    return Y.encodeStateAsUpdateV2(workspace.doc);
+  static async toLocal(workspace: Workspace): Promise<Uint8Array> {
+    return encodeWorkspace(workspace);
   }
 
   /**
    * @internal Only for testing
    */
   exportYDoc() {
-    const binary = Workspace.toLocal(this);
+    const binary = Y.encodeStateAsUpdate(this.doc);
     const file = new Blob([binary], { type: 'application/octet-stream' });
     const fileUrl = URL.createObjectURL(file);
 

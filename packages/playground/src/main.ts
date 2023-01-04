@@ -72,7 +72,26 @@ async function main() {
           if (handle.kind === 'file' && handle.name.endsWith('.affine')) {
             const file = await handle.getFile();
             const binary = new Uint8Array(await file.arrayBuffer());
-            Workspace.fromLocal(workspace, binary);
+            const workspace = await Workspace.fromLocal(binary, BlockSchema);
+            // @ts-ignore
+            window.workspace = workspace;
+            const page = <Page>(
+              workspace.getPage(workspace.meta.pageMetas[0].id)
+            );
+            const editor = new EditorContainer();
+            editor.page = page;
+            document.body.appendChild(editor);
+
+            const debugMenu = new DebugMenu();
+            debugMenu.workspace = workspace;
+            debugMenu.editor = editor;
+            debugMenu.mode = defaultMode;
+            document.body.appendChild(debugMenu);
+
+            initButton.disabled = true;
+
+            // @ts-ignore
+            [window.editor, window.page] = [editor, page];
           }
         }
       }
