@@ -22,10 +22,12 @@
     "idb-keyval": "^6.2.0",
     "ky": "^0.33.0",
     "lib0": "^0.2.58",
+    "sql.js": "^1.8.0",
     "y-protocols": "^1.0.5",
     "y-webrtc": "^10.2.3"
   },
   "devDependencies": {
+    "@types/sql.js": "^1.4.4",
     "cross-env": "^7.0.3",
     "lit": "^2.5.0",
     "yjs": "^13.5.44"
