@@ -65,6 +65,11 @@ export class EdgelessPageBlockComponent
       color: var(--affine-edgeless-text-color);
       font-weight: 400;
     }
+
+    .affine-edgeless-surface-block-container {
+      width: 100%;
+      height: 100%;
+    }
   `;
 
   @property()
@@ -244,7 +249,9 @@ export class EdgelessPageBlockComponent
     const style = this.showGrid ? gridStyle : defaultStyle;
 
     return html`
-      <style></style>
+      <div class="affine-edgeless-surface-block-container">
+        <affine-surface .model=${this.surfaceModel}> </affine-surface>
+      </div>
       <div class="affine-edgeless-page-block-container">
         <style>
           .affine-block-children-container.edgeless {

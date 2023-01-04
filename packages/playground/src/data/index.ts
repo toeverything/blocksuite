@@ -37,7 +37,7 @@ export const basic = (workspace: Workspace) => {
     });
     page.addBlock({
       flavour: 'affine:surface',
-    });
+    }, null);
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
     page.addBlock(
       {

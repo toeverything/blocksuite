@@ -102,6 +102,10 @@ export class Page extends Space<PageData> {
     return Array.isArray(this._root) ? this._root[0] : this._root;
   }
 
+  get rootLayer() {
+    return Array.isArray(this._root) ? this._root[1] : null;
+  }
+
   get isEmpty() {
     return this._yBlocks.size === 0;
   }
@@ -224,7 +228,7 @@ export class Page extends Space<PageData> {
 
   addBlock<T extends BlockProps>(
     blockProps: Partial<T>,
-    parent?: BaseBlockModel | string,
+    parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
     if (!blockProps.flavour) {
@@ -253,10 +257,7 @@ export class Page extends Space<PageData> {
         parent = this._blockMap.get(parent);
       }
 
-      const parentId =
-        blockProps.flavour === 'affine:surface'
-          ? null
-          : parent?.id ?? this.root?.id;
+      const parentId = parent === null ? null : parent?.id ?? this.root?.id;
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;

@@ -35,10 +35,10 @@ export class EditorContainer extends NonShadowLitElement {
   contentParser = new ContentParser(this);
 
   get model() {
-    return this.page.root as
-      | PageBlockModel
-      | [PageBlockModel, BaseBlockModel]
-      | null;
+    return [this.page.root, this.page.rootLayer] as [
+      PageBlockModel | null,
+      BaseBlockModel | null
+    ];
   }
 
   get pageBlockModel(): PageBlockModel | null {
