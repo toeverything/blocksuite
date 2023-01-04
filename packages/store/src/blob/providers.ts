@@ -51,9 +51,17 @@ export class IndexedDBBlobProvider implements BlobProvider {
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
+    const blob = await this.getBlob(id);
+    if (!blob) {
+      return null;
+    }
+    return URL.createObjectURL(new Blob([blob]));
+  }
+
+  async getBlob(id: BlobId): Promise<Blob | null> {
     const blob = await this._database.get(id);
     if (!blob) {
-      const blob = this._cloud?.get(id);
+      const blob = this._cloud?.getData(id);
       if (blob) {
         this.signals.blobAdded.emit(id);
         this.blobs.add(id);
@@ -62,9 +70,7 @@ export class IndexedDBBlobProvider implements BlobProvider {
       }
       return null;
     }
-
-    const result = URL.createObjectURL(new Blob([blob]));
-    return result;
+    return new Blob([blob]);
   }
 
   async set(blob: Blob): Promise<BlobId> {
@@ -198,6 +204,15 @@ export class BlobCloudSync {
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
+    const blob = await this.getData(id);
+    if (blob) {
+      return URL.createObjectURL(blob);
+    } else {
+      return null;
+    }
+  }
+
+  async getData(id: BlobId): Promise<Blob | null> {
     const api = `${this._workspace}/blob/${id}`;
     try {
       const blob = await this._fetcher
@@ -206,7 +221,7 @@ export class BlobCloudSync {
 
       await this._database.set(id, await blob.arrayBuffer());
 
-      return URL.createObjectURL(blob);
+      return blob;
     } catch (e) {
       console.error('Error while getting blob', e);
       return null;

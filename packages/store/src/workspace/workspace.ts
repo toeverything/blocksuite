@@ -215,6 +215,8 @@ export class Workspace {
   private _indexer: Indexer;
   private _blobStorage: Promise<BlobStorage | null>;
 
+  public readonly options: StoreOptions;
+
   meta: WorkspaceMeta;
 
   signals: {
@@ -226,6 +228,7 @@ export class Workspace {
   flavourMap = new Map<string, typeof BaseBlockModel>();
 
   constructor(options: StoreOptions) {
+    this.options = Object.assign({}, options);
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
     if (!options.isSSR) {

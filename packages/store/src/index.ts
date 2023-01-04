@@ -9,6 +9,7 @@ export * from './utils/disposable.js';
 export * from './doc-providers.js';
 export * from './workspace/index.js';
 export * as Utils from './utils/utils.js';
+export * as FS from './fs/index.js';
 export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
