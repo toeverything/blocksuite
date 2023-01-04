@@ -10,6 +10,7 @@ export class SurfaceBlockComponent extends LitElement {
     .affine-surface-block-container {
       width: 100%;
       height: 100%;
+      pointer-events: none;
     }
   `;
 

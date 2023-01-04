@@ -67,6 +67,7 @@ export class EdgelessPageBlockComponent
     }
 
     .affine-edgeless-surface-block-container {
+      position: absolute;
       width: 100%;
       height: 100%;
     }
