@@ -61,14 +61,14 @@ describe('migration', () => {
       'affine:code': 1,
       'affine:surface': 1,
     });
-    let hasSurface = false;
-    Object.entries(result['space:page0']).map(
+    const hasSurface = Object.entries(result['space:page0']).some(
       ([key, value]: [string, unknown]) => {
         if (
           (value as Record<string, unknown>)['sys:flavour'] === 'affine:surface'
         ) {
-          hasSurface = true;
+          return true;
         }
+        return false;
       }
     );
     expect(hasSurface).toBe(true);
