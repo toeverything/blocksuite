@@ -53,7 +53,7 @@ export function tryMigrate(doc: Y.Doc) {
     } catch (err) {
       console.error(err);
       throw new Error(
-        `Migration "${migration.desc}" failed, plaease report to https://github.com/toeverything/blocksuite/issues`
+        `Migration "${migration.desc}" failed, please report to https://github.com/toeverything/blocksuite/issues`
       );
     }
   }
