@@ -2,7 +2,7 @@ import { encode, decode } from 'cbor-x';
 import * as Y from 'yjs';
 import { Workspace } from '../workspace/index.js';
 import type { StoreOptions } from '../store.js';
-import { BaseBlockModel } from '../base.js';
+import type { BaseBlockModel } from '../base.js';
 
 export type FileData = {
   doc: Uint8Array;
