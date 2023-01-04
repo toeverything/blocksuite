@@ -89,7 +89,11 @@ export type ShapeMouseMode = {
   color: ColorStyle | `#${string}`;
 };
 
-export type MouseMode = DefaultMouseMode | ShapeMouseMode;
+export type HandwritingMode = {
+  type: 'handwriting';
+};
+
+export type MouseMode = DefaultMouseMode | ShapeMouseMode | HandwritingMode;
 
 declare global {
   interface WindowEventMap {

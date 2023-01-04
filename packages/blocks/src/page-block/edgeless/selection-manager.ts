@@ -16,6 +16,7 @@ import type {
 } from './selection-manager/index.js';
 import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { Disposable } from '@blocksuite/store';
+import { HandwritingSelectionController } from './selection-manager/handwriting.js';
 
 export { HoverState };
 
@@ -185,6 +186,7 @@ export class EdgelessSelectionManager {
     this._selectionManagers = {
       default: new DefaultSelectionController(this._container),
       shape: new ShapeSelectionController(this._container),
+      handwriting: new HandwritingSelectionController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
