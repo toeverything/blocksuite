@@ -12,6 +12,7 @@ import {
   isBase64,
   isE2E,
 } from './utils.js';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import './style.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');

@@ -1,4 +1,4 @@
-import { html, css, unsafeCSS } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { Quill as QuillType } from 'quill';
 import Q from 'quill';
@@ -7,7 +7,6 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { BlockHost } from '../utils/index.js';
 import { createKeyboardBindings } from './keyboard.js';
 
-import style from './styles.css?inline';
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 
@@ -37,7 +36,50 @@ Quill.register('modules/syntax', Syntax, true);
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    /*
+ * This style is most simple to reset the default styles of the quill editor
+ * User should custom the styles of the block in the block itself
+ */
+    .ql-container {
+      box-sizing: border-box;
+      height: 100%;
+      margin: 0;
+      position: relative;
+    }
+    .ql-container.ql-disabled .ql-tooltip {
+      visibility: hidden;
+    }
+    .ql-clipboard {
+      left: -100000px;
+      height: 1px;
+      overflow-y: hidden;
+      position: absolute;
+      top: 50%;
+    }
+    .ql-container p {
+      margin: 0;
+      padding: 0;
+    }
+    .ql-editor {
+      box-sizing: border-box;
+      height: 100%;
+      outline: none;
+      tab-size: 4;
+      -moz-tab-size: 4;
+      text-align: left;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 3px 0;
+    }
+    .ql-editor > * {
+      cursor: text;
+    }
+    .ql-editor.ql-blank::before {
+      color: var(--affine-disable-color);
+      content: attr(data-placeholder);
+      pointer-events: none;
+      position: absolute;
+    }
   `;
 
   @query('.affine-rich-text.quill-container')
