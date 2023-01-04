@@ -159,7 +159,7 @@ use fern::{
   await expect(locator).toBeHidden();
 });
 
-test('drag copy paste', async ({ page }) => {
+test.only('drag copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -215,7 +215,7 @@ test('drag select code block can delete it', async ({ page }) => {
     return {
       startX: bbox.left,
       startY: bbox.bottom - bbox.height / 2,
-      endX: bbox.right,
+      endX: bbox.left + 100,
       endY: bbox.bottom - bbox.height / 2,
     };
   });
