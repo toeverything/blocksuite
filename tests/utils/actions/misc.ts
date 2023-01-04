@@ -1,12 +1,28 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 import type { Page as StorePage } from '../../../packages/store/src/index.js';
-import type { Page } from '@playwright/test';
+import type { ConsoleMessage, Page } from '@playwright/test';
 import { pressEnter } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
+
+function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
+  const ignoredMessages = [
+    // basic.spec.ts
+    "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
+    // embed.spec.ts
+    'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    // embed.spec.ts
+    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
+    // embed.spec.ts
+    'Element affine-embed scheduled an update (generally because a property was set) after an update completed',
+    // clipboard.spec.ts
+    "TypeError: Cannot read properties of null (reading 'model')",
+  ];
+  return ignoredMessages.some(msg => message.text().startsWith(msg));
+}
 
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
@@ -49,6 +65,10 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
   page.on('console', message => {
+    const ignore = shamefullyIgnoreConsoleMessage(message);
+    if (!ignore) {
+      throw new Error('Unexpected console message: ' + message.text());
+    }
     if (message.type() === 'warning') {
       console.warn(message.text());
     }
