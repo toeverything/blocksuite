@@ -54,6 +54,11 @@
             "group": ["**/src", "**/src/**"],
             "message": "Don't import from src",
             "allowTypeImports": false
+          },
+          {
+            "group": ["**/*.css", "**/*.css?*"],
+            "message": "Don't import CSS directly, see https://github.com/toeverything/blocksuite/issues/525",
+            "allowTypeImports": false
           }
         ]
       }

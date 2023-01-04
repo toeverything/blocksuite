@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { html, unsafeCSS, css } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
@@ -32,7 +32,6 @@ import {
   tryUpdateFrameSize,
   updateSelectedTextType,
 } from '../utils/index.js';
-import style from './style.css?inline';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -55,7 +54,17 @@ export class EdgelessPageBlockComponent
   implements EdgelessContainer, BlockHost
 {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-edgeless-page-block-container {
+      position: relative;
+      box-sizing: border-box;
+      overflow: hidden;
+      height: 100%;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height-base);
+      color: var(--affine-edgeless-text-color);
+      font-weight: 400;
+    }
   `;
 
   @property()

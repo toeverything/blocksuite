@@ -37,6 +37,7 @@ import {
 import type { DefaultPageSignals } from './default-page-block.js';
 import type { DefaultSelectionManager } from './selection-manager.js';
 import type { CodeBlockOption } from './default-page-block.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
@@ -127,29 +128,66 @@ export async function downloadImage(model: BaseBlockModel) {
   };
 }
 
-export async function copyImgToClip(model: BaseBlockModel) {
-  const url = await getUrlByModel(model);
-  assertExists(url);
+export async function copyImage(model: EmbedBlockModel) {
+  const copyType = 'blocksuite/x-c+w';
+  const text = model.block2Text('', 0, 0);
+  const delta = [
+    {
+      insert: text,
+    },
+  ];
+  const copyData = JSON.stringify({
+    data: [
+      {
+        type: model.type,
+        sourceId: model.sourceId,
+        width: model.width,
+        height: model.height,
+        caption: model.caption,
+        flavour: model.flavour,
+        text: delta,
+        children: model.children,
+      },
+    ],
+  });
+  const copySuccess = performNativeCopy([
+    { mimeType: copyType, data: copyData },
+  ]);
+  copySuccess && toast('Copied image to clipboard');
+}
 
-  const newImage = new Image();
-  newImage.src = url;
-  newImage.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = newImage.width;
-    canvas.height = newImage.height;
-    const ctx = canvas.getContext('2d');
-    ctx?.drawImage(newImage, 0, 0);
-    canvas.toBlob(blob => {
-      if (blob) {
-        navigator.clipboard.write([
-          new ClipboardItem({
-            [blob.type]: blob,
-          }),
-        ]);
-      }
-    });
+interface ClipboardItem {
+  mimeType: string;
+  data: string;
+}
+
+function performNativeCopy(items: ClipboardItem[]): boolean {
+  let success = false;
+  const tempElem = document.createElement('textarea');
+  tempElem.value = 'temp';
+  document.body.appendChild(tempElem);
+  tempElem.select();
+  tempElem.setSelectionRange(0, tempElem.value.length);
+
+  const listener = (e: ClipboardEvent) => {
+    const clipboardData = e.clipboardData;
+    if (clipboardData) {
+      items.forEach(item => clipboardData.setData(item.mimeType, item.data));
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+    tempElem.removeEventListener('copy', listener);
   };
-  toast('Copied image to clipboard');
+
+  tempElem.addEventListener('copy', listener);
+  try {
+    success = document.execCommand('copy');
+  } finally {
+    tempElem.removeEventListener('copy', listener);
+    document.body.removeChild(tempElem);
+  }
+  return success;
 }
 
 export function focusCaption(model: BaseBlockModel) {

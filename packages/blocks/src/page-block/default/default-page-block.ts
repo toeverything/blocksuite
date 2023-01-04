@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { html, css, unsafeCSS } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
@@ -29,7 +29,6 @@ import {
   isControlledKeyboardEvent,
   removeHotkeys,
 } from './utils.js';
-import style from './style.css?inline';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import autosize from 'autosize';
@@ -66,7 +65,55 @@ export class DefaultPageBlockComponent
   implements BlockHost
 {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-default-viewport {
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: 100%;
+    }
+    .affine-default-page-block-container {
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height-base);
+      color: var(--affine-text-color);
+      font-weight: 400;
+      width: 720px;
+      margin: 0 auto;
+      /* cursor: crosshair; */
+      cursor: default;
+
+      min-height: calc(100% - 78px);
+      height: auto;
+      overflow: hidden;
+      padding-bottom: 150px;
+    }
+
+    .affine-default-page-block-container > .affine-block-children-container {
+      padding-left: 0;
+    }
+
+    .affine-default-page-block-title {
+      /* autosize will calculate height automatically */
+      height: 0;
+      width: 100%;
+      font-size: 40px;
+      line-height: 50px;
+      font-weight: 700;
+      outline: none;
+      resize: none;
+      border: 0;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .affine-default-page-block-title::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+    .affine-default-page-block-title:disabled {
+      background-color: transparent;
+    }
+    .affine-default-page-block-title-container {
+      margin-top: 78px;
+    }
   `;
 
   @property()

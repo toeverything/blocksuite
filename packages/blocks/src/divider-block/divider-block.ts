@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { html, css, unsafeCSS } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
@@ -10,12 +10,20 @@ import {
 
 import type { DividerBlockModel } from './divider-model.js';
 
-import style from './style.css?inline';
-
 @customElement('affine-divider')
 export class DividerBlockComponent extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-divider-block-container {
+      width: 100%;
+      height: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-top: var(--affine-paragraph-space);
+    }
+    hr {
+      width: 100%;
+    }
   `;
 
   @property({
