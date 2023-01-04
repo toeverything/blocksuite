@@ -1,13 +1,38 @@
-import { html, css, unsafeCSS } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from './embed-model.js';
-import style from './style.css?inline';
 import { NonShadowLitElement } from '../__internal__/index.js';
 
 @customElement('affine-embed')
 export class EmbedBlockComponent extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-embed-wrapper {
+      /* padding: 10px; */
+      text-align: center;
+      height: 24px;
+    }
+    .affine-embed-wrapper-caption {
+      width: 100%;
+      font-size: var(--affine-font-sm);
+      outline: none;
+      border: 0;
+      font-family: inherit;
+      color: inherit;
+      text-align: center;
+      color: var(--affine-icon-color);
+      display: none;
+    }
+    .affine-embed-wrapper-caption::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-embed-wrapper-caption:disabled {
+      background-color: var(--affine-page-background);
+    }
+
+    .affine-embed-wrapper .caption-show {
+      display: inline-block;
+    }
   `;
   @property()
   model!: EmbedBlockModel;
