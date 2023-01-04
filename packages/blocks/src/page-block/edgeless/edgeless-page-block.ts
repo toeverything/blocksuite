@@ -34,6 +34,7 @@ import {
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -64,6 +65,12 @@ export class EdgelessPageBlockComponent
       color: var(--affine-edgeless-text-color);
       font-weight: 400;
     }
+
+    .affine-edgeless-surface-block-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
   `;
 
   @property()
@@ -88,7 +95,15 @@ export class EdgelessPageBlockComponent
       return true;
     },
   })
-  model!: PageBlockModel;
+  pageModel!: PageBlockModel;
+
+  @property({
+    hasChanged() {
+      return true;
+    },
+  })
+  surfaceModel!: SurfaceBlockModel;
+
   getService = getService;
 
   @state()
@@ -137,7 +152,7 @@ export class EdgelessPageBlockComponent
     const bound = this.mouseRoot.getBoundingClientRect();
     this.viewport.setSize(bound.width, bound.height);
 
-    const frame = this.model.children[0] as FrameBlockModel;
+    const frame = this.pageModel.children[0] as FrameBlockModel;
     const [modelX, modelY, modelW, modelH] = JSON.parse(frame.xywh) as XYWH;
     this.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
@@ -162,7 +177,7 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     // TODO: listen to new children
-    this.model.children.forEach(frame => {
+    this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
     });
 
@@ -209,10 +224,10 @@ export class EdgelessPageBlockComponent
   }
 
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
+    this.setAttribute(BLOCK_ID_ATTR, this.pageModel.id);
 
     const childrenContainer = EdgelessBlockChildrenContainer(
-      this.model,
+      this.pageModel,
       this,
       this.viewport
     );
@@ -235,7 +250,9 @@ export class EdgelessPageBlockComponent
     const style = this.showGrid ? gridStyle : defaultStyle;
 
     return html`
-      <style></style>
+      <div class="affine-edgeless-surface-block-container">
+        <affine-surface .model=${this.surfaceModel}> </affine-surface>
+      </div>
       <div class="affine-edgeless-page-block-container">
         <style>
           .affine-block-children-container.edgeless {

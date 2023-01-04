@@ -55,7 +55,7 @@ export class Page extends Space<PageData> {
   public workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
-  private _root: BaseBlockModel | null = null;
+  private _root: BaseBlockModel | BaseBlockModel[] | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
   private _synced = false;
@@ -67,8 +67,8 @@ export class Page extends Space<PageData> {
 
   readonly signals = {
     historyUpdated: new Signal(),
-    rootAdded: new Signal<BaseBlockModel>(),
-    rootDeleted: new Signal<string>(),
+    rootAdded: new Signal<BaseBlockModel | BaseBlockModel[]>(),
+    rootDeleted: new Signal<string | string[]>(),
     textUpdated: new Signal<Y.YTextEvent>(),
     updated: new Signal(),
   };
@@ -99,7 +99,11 @@ export class Page extends Space<PageData> {
   }
 
   get root() {
-    return this._root;
+    return Array.isArray(this._root) ? this._root[0] : this._root;
+  }
+
+  get rootLayer() {
+    return Array.isArray(this._root) ? this._root[1] : null;
   }
 
   get isEmpty() {
@@ -161,9 +165,9 @@ export class Page extends Space<PageData> {
   }
 
   getParent(block: BaseBlockModel) {
-    if (!this._root) return null;
+    if (!this.root) return null;
 
-    return this.getParentById(this._root.id, block);
+    return this.getParentById(this.root.id, block);
   }
 
   getPreviousSibling(block: BaseBlockModel) {
@@ -224,7 +228,7 @@ export class Page extends Space<PageData> {
 
   addBlock<T extends BlockProps>(
     blockProps: Partial<T>,
-    parent?: BaseBlockModel | string,
+    parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
     if (!blockProps.flavour) {
@@ -253,7 +257,7 @@ export class Page extends Space<PageData> {
         parent = this._blockMap.get(parent);
       }
 
-      const parentId = parent?.id ?? this._root?.id;
+      const parentId = parent === null ? null : parent?.id ?? this.root?.id;
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -459,10 +463,14 @@ export class Page extends Space<PageData> {
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
     const isRoot = this._blockMap.size === 0;
+    let isSurface = false;
 
     const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
     const props = toBlockProps(prefixedProps) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
+    if (model.flavour === 'affine:surface') {
+      isSurface = true;
+    }
     this._blockMap.set(props.id, model);
 
     if (
@@ -504,6 +512,9 @@ export class Page extends Space<PageData> {
     if (isRoot) {
       this._root = model;
       this.signals.rootAdded.emit(model);
+    } else if (isSurface) {
+      this._root = [this.root as BaseBlockModel, model];
+      this.signals.rootAdded.emit(this._root);
     } else {
       const parent = this.getParent(model);
       const index = parent?.childMap.get(model.id);

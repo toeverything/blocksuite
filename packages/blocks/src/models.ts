@@ -8,6 +8,7 @@ import { PageBlockModel } from './page-block/page-model.js';
 import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ShapeBlockModel } from './shape-block/shape-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
+import { SurfaceBlockModel } from './surface-block/surface-model.js';
 
 export {
   CodeBlockModel,
@@ -30,6 +31,7 @@ export const BlockSchema = {
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
   'affine:shape': ShapeBlockModel,
+  'affine:surface': SurfaceBlockModel,
 };
 
 export type BlockSchemaType = typeof BlockSchema;
