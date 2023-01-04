@@ -1,7 +1,6 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { css, html, unsafeCSS } from 'lit';
+import { css, html } from 'lit';
 import type { CodeBlockModel } from './code-model.js';
-import codeTheme from 'highlight.js/styles/color-brewer.css?inline';
 import { toolTipStyle } from '../components/tooltip.js';
 import {
   BLOCK_ID_ATTR,
@@ -16,7 +15,73 @@ import '../__internal__/rich-text/rich-text.js';
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(codeTheme)}
+    //<editor-fold desc="highlight.js/styles/color-brewer.css">
+    pre code.hljs {
+      display: block;
+      overflow-x: auto;
+      padding: 1em;
+    }
+
+    code.hljs {
+      padding: 3px 5px;
+    }
+
+    .hljs {
+      color: #000;
+      background: #fff;
+    }
+
+    .hljs-addition,
+    .hljs-meta,
+    .hljs-string,
+    .hljs-symbol,
+    .hljs-template-tag,
+    .hljs-template-variable {
+      color: #756bb1;
+    }
+
+    .hljs-comment,
+    .hljs-quote {
+      color: #636363;
+    }
+
+    .hljs-bullet,
+    .hljs-link,
+    .hljs-literal,
+    .hljs-number,
+    .hljs-regexp {
+      color: #31a354;
+    }
+
+    .hljs-deletion,
+    .hljs-variable {
+      color: #88f;
+    }
+
+    .hljs-built_in,
+    .hljs-doctag,
+    .hljs-keyword,
+    .hljs-name,
+    .hljs-section,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-selector-tag,
+    .hljs-strong,
+    .hljs-tag,
+    .hljs-title,
+    .hljs-type {
+      color: #3182bd;
+    }
+
+    .hljs-emphasis {
+      font-style: italic;
+    }
+
+    .hljs-attribute {
+      color: #e6550d;
+    }
+    //</editor-fold>
+
     code-block {
       position: relative;
       z-index: 1;
@@ -112,6 +177,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       color: var(--affine-primary-color) !important;
       background: var(--affine-hover-background) !important;
     }
+
     ${toolTipStyle}
   `;
 
