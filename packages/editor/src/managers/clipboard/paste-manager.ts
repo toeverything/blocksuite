@@ -193,16 +193,16 @@ export class PasteManager {
       let index = 0;
       if (selectedBlock) {
         if (matchFlavours(selectedBlock, ['affine:page'])) {
-          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
-              { flavour: 'affine:group' },
+              { flavour: 'affine:frame' },
               selectedBlock.id
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
+        } else if (!matchFlavours(selectedBlock, ['affine:frame'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
@@ -282,16 +282,16 @@ export class PasteManager {
       let index = 0;
       if (selectedBlock) {
         if (matchFlavours(selectedBlock, ['affine:page'])) {
-          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
-              { flavour: 'affine:group' },
+              { flavour: 'affine:frame' },
               selectedBlock.id
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
+        } else if (!matchFlavours(selectedBlock, ['affine:frame'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }

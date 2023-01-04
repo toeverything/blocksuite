@@ -167,7 +167,7 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
  */
 export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:group'])) {
+  if (!parent || matchFlavours(parent, ['affine:frame'])) {
     // Topmost, do nothing
     return;
   }
@@ -246,7 +246,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     }
 
     const parent = page.getParent(model);
-    if (!parent || matchFlavours(parent, ['affine:group'])) {
+    if (!parent || matchFlavours(parent, ['affine:frame'])) {
       const container = getContainerByModel(model);
       const previousSibling = getPreviousBlock(container, model.id);
       if (

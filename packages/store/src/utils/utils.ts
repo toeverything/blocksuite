@@ -95,7 +95,7 @@ export function syncBlockProps(
   if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
     yBlock.set('prop:checked', props.checked ?? false);
   }
-  if (props.flavour === 'affine:group' && !yBlock.has('prop:xywh')) {
+  if (props.flavour === 'affine:frame' && !yBlock.has('prop:xywh')) {
     yBlock.set('prop:xywh', props.xywh ?? '[0,0,720,480]');
   }
   if (props.flavour === 'affine:embed' && !yBlock.has('prop:width')) {

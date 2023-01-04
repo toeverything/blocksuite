@@ -424,12 +424,12 @@ export function handleBlockSelectionBatchDelete(
   id && asyncFocusRichText(page, id);
 }
 
-export function tryUpdateGroupSize(page: Page, zoom: number) {
+export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const groups = page.root.children as RootBlockModel[];
+    const frames = page.root.children as RootBlockModel[];
     let offset = 0;
-    groups.forEach(model => {
+    frames.forEach(model => {
       // DO NOT resize shape block
       if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);

@@ -11,8 +11,8 @@ export const Editor = ({ page }: { page: Page }) => {
       editor.page = page;
       if (page.root === null) {
         const pageBlockId = page.addBlock({ flavour: 'affine:page' });
-        const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
-        page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+        const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
+        page.addBlock({ flavour: 'affine:paragraph' }, frameId);
         page.resetHistory();
       }
       container.appendChild(editor);

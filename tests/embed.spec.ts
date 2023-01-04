@@ -21,7 +21,7 @@ async function initImageState(page: Page) {
   await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
     page.addBlock(
       {
         flavour: 'affine:embed',
@@ -30,7 +30,7 @@ async function initImageState(page: Page) {
         width: 200,
         height: 180,
       },
-      groupId
+      frameId
     );
   });
 }

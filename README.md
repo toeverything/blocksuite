@@ -93,8 +93,8 @@ function createInitialPage(workspace: Workspace) {
 
     // Block types are defined and registered in BlockSchema.
     const pageBlockId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
-    page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
+    page.addBlock({ flavour: 'affine:paragraph' }, frameId);
   });
 
   // Create a new page. This will trigger the signal above.

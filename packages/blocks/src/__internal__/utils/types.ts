@@ -1,6 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect.js';
-import type { GroupBlockModel } from '../../group-block/index.js';
+import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { ColorStyle, TDShapeType } from './shape.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
@@ -77,7 +77,7 @@ export interface BlockSelectionInfo {
 }
 
 // blocks that would only appear under the edgeless container root
-export type RootBlockModel = GroupBlockModel | ShapeBlockModel;
+export type RootBlockModel = FrameBlockModel | ShapeBlockModel;
 
 export type DefaultMouseMode = {
   type: 'default';

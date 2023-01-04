@@ -118,7 +118,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     if (
       isEmptyList &&
       parent &&
-      matchFlavours(parent, ['affine:group']) &&
+      matchFlavours(parent, ['affine:frame']) &&
       model.children.length === 0
     ) {
       handleLineStartBackspace(page, model);

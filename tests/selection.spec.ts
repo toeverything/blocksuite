@@ -10,7 +10,7 @@ import {
   pressShiftTab,
   getCursorBlockIdAndHeight,
   fillLine,
-  addGroupByClick,
+  addFrameByClick,
   initThreeParagraphs,
   initEmptyParagraphState,
   undoByKeyboard,
@@ -298,10 +298,10 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test.skip('cursor move up and down through group', async ({ page }) => {
+test.skip('cursor move up and down through frame', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await addGroupByClick(page);
+  await addFrameByClick(page);
   await focusRichText(page, 0);
   let currentId: string | null = null;
   const [id] = await getCursorBlockIdAndHeight(page);

@@ -3,7 +3,7 @@ import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
-  GroupBlockModel,
+  FrameBlockModel,
   MouseMode,
   PageBlockModel,
 } from '../../index.js';
@@ -29,7 +29,7 @@ import {
   bindCommonHotkey,
   handleBackspace,
   removeCommonHotKey,
-  tryUpdateGroupSize,
+  tryUpdateFrameSize,
   updateSelectedTextType,
 } from '../utils/index.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
@@ -185,8 +185,8 @@ export class EdgelessPageBlockComponent
     const bound = this.mouseRoot.getBoundingClientRect();
     this.viewport.setSize(bound.width, bound.height);
 
-    const group = this.model.children[0] as GroupBlockModel;
-    const [modelX, modelY, modelW, modelH] = JSON.parse(group.xywh) as XYWH;
+    const frame = this.model.children[0] as FrameBlockModel;
+    const [modelX, modelY, modelW, modelH] = JSON.parse(frame.xywh) as XYWH;
     this.viewport.setCenter(modelX + modelW / 2, modelY + modelH / 2);
   }
 
@@ -210,8 +210,8 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     // TODO: listen to new children
-    this.model.children.forEach(group => {
-      group.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
+    this.model.children.forEach(frame => {
+      frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
     });
 
     this.signals.viewportUpdated.on(() => {
@@ -229,10 +229,10 @@ export class EdgelessPageBlockComponent
 
     this._bindHotkeys();
 
-    tryUpdateGroupSize(this.page, this.viewport.zoom);
+    tryUpdateFrameSize(this.page, this.viewport.zoom);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.page, this.viewport.zoom);
+      tryUpdateFrameSize(this.page, this.viewport.zoom);
     });
 
     requestAnimationFrame(() => {

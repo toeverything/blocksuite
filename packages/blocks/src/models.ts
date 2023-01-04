@@ -2,7 +2,7 @@
 import { CodeBlockModel } from './code-block/code-model.js';
 import { DividerBlockModel } from './divider-block/divider-model.js';
 import { EmbedBlockModel } from './embed-block/embed-model.js';
-import { GroupBlockModel } from './group-block/group-model.js';
+import { FrameBlockModel } from './frame-block/frame-model.js';
 import { ListBlockModel } from './list-block/list-model.js';
 import { PageBlockModel } from './page-block/page-model.js';
 import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
@@ -13,7 +13,7 @@ export {
   CodeBlockModel,
   DividerBlockModel,
   EmbedBlockModel,
-  GroupBlockModel,
+  FrameBlockModel,
   ListBlockModel,
   PageBlockModel,
   ParagraphBlockModel,
@@ -25,7 +25,7 @@ export const BlockSchema = {
   'affine:paragraph': ParagraphBlockModel,
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
-  'affine:group': GroupBlockModel,
+  'affine:frame': FrameBlockModel,
   'affine:code': CodeBlockModel,
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,

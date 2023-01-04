@@ -221,7 +221,7 @@ export function handleUp(
       // FIXME: Then it will turn the input into the div
       if (
         activePreNodeModel &&
-        matchFlavours(activePreNodeModel, ['affine:group'])
+        matchFlavours(activePreNodeModel, ['affine:frame'])
       ) {
         (
           document.querySelector(

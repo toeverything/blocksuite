@@ -450,12 +450,12 @@ function isBlankAreaBetweenBlocks(startContainer: Node) {
 }
 
 function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
-  return startContainer.tagName === 'AFFINE-GROUP';
+  return startContainer.tagName === 'AFFINE-FRAME';
 }
 
 function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
   if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-group-block-container');
+  return startContainer.className.includes('affine-frame-block-container');
 }
 
 export function isBlankArea(e: SelectionEvent) {

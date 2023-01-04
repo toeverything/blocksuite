@@ -22,6 +22,7 @@ import {
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { tryMigrate } from './migrations.js';
 
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
@@ -362,6 +363,8 @@ export class Page extends Space<PageData> {
     if (this._synced) {
       throw new Error('Cannot sync from existing doc more than once');
     }
+
+    tryMigrate(this.doc);
 
     this._handleVersion();
     this._initYBlocks();

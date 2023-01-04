@@ -10,14 +10,14 @@ export const heavy = (workspace: Workspace) => {
   workspace.signals.pageAdded.once(id => {
     const page = workspace.getPage(id) as Page;
     const pageBlockId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
     for (let i = 0; i < 1000; i++) {
       page.addBlock(
         {
           flavour: 'affine:paragraph',
           text: new Text(page, 'Hello, world! ' + i),
         },
-        groupId
+        frameId
       );
     }
   });
@@ -32,7 +32,7 @@ export const basic = (workspace: Workspace) => {
       flavour: 'affine:page',
       title: 'Welcome to BlockSuite playground',
     });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageBlockId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
     page.addBlock(
       {
         flavour: 'affine:paragraph',
@@ -41,7 +41,7 @@ export const basic = (workspace: Workspace) => {
           'This playground is a demo environment built with BlockSuite.'
         ),
       },
-      groupId
+      frameId
     );
     page.addBlock(
       {
@@ -80,7 +80,7 @@ export const basic = (workspace: Workspace) => {
           },
         ]),
       },
-      groupId
+      frameId
     );
     page.addBlock(
       {
@@ -100,7 +100,7 @@ export const basic = (workspace: Workspace) => {
           },
         ]),
       },
-      groupId
+      frameId
     );
     page.resetHistory();
   });

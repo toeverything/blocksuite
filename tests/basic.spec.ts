@@ -10,7 +10,7 @@ import {
   focusRichText,
   waitDefaultPageLoaded,
   pressEnter,
-  addGroupByClick,
+  addFrameByClick,
   initEmptyParagraphState,
 } from './utils/actions/index.js';
 import {
@@ -40,10 +40,10 @@ test('basic init with external text', async ({ page }) => {
   await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const frame = page.addBlock({ flavour: 'affine:frame' }, pageId);
 
     const text = new page.Text(page, 'world');
-    page.addBlock({ flavour: 'affine:paragraph', text }, groupId);
+    page.addBlock({ flavour: 'affine:paragraph', text }, frame);
 
     const delta = [
       { insert: 'foo ' },
@@ -54,7 +54,7 @@ test('basic init with external text', async ({ page }) => {
         flavour: 'affine:paragraph',
         text: page.Text.fromDelta(page, delta),
       },
-      groupId
+      frame
     );
   });
 
@@ -207,11 +207,11 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test('undo multi groups', async ({ page }) => {
+test('undo multi frames', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await addGroupByClick(page);
+  await addFrameByClick(page);
   await assertRichTexts(page, ['\n', '\n']);
 
   await undoByClick(page);

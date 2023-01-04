@@ -218,7 +218,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
-        blockElement?.tagName !== 'AFFINE-GROUP'
+        blockElement?.tagName !== 'AFFINE-FRAME'
       ) {
         intersectedModels.push(block.model);
       }
@@ -390,7 +390,7 @@ export function getAllBlocks() {
   const blocks = Array.from(document.querySelectorAll(`[${ATTR}]`));
   return blocks.filter(item => {
     return (
-      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-GROUP'
+      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-FRAME'
     );
   });
 }

@@ -159,7 +159,7 @@ test('nested list blocks', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:group
+  <affine:frame
     prop:xywh="[0,0,720,96]"
   >
     <affine:list
@@ -179,7 +179,7 @@ test('nested list blocks', async ({ page }) => {
         />
       </affine:list>
     </affine:list>
-  </affine:group>
+  </affine:frame>
 </affine:page>`
   );
 
@@ -190,7 +190,7 @@ test('nested list blocks', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:group
+  <affine:frame
     prop:xywh="[0,0,720,96]"
   >
     <affine:list
@@ -209,7 +209,7 @@ test('nested list blocks', async ({ page }) => {
         prop:type="bulleted"
       />
     </affine:list>
-  </affine:group>
+  </affine:frame>
 </affine:page>`
   );
 });
@@ -227,7 +227,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:group
+  <affine:frame
     prop:xywh="[0,0,720,72]"
   >
     <affine:paragraph
@@ -238,7 +238,7 @@ test('basic indent and unindent', async ({ page }) => {
       prop:text="text2"
       prop:type="text"
     />
-  </affine:group>
+  </affine:frame>
 </affine:page>`
   );
 
@@ -247,7 +247,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:group
+  <affine:frame
     prop:xywh="[0,0,720,72]"
   >
     <affine:paragraph
@@ -259,7 +259,7 @@ test('basic indent and unindent', async ({ page }) => {
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:group>
+  </affine:frame>
 </affine:page>`
   );
 
@@ -269,7 +269,7 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:group
+  <affine:frame
     prop:xywh="[0,0,720,72]"
   >
     <affine:paragraph
@@ -280,14 +280,14 @@ test('basic indent and unindent', async ({ page }) => {
       prop:text="text2"
       prop:type="text"
     />
-  </affine:group>
+  </affine:frame>
 </affine:page>`
   );
 });
 
 test('should indent todo block preserve todo status', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyParagraphState(page);
+  const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('text1');
   await pressEnter(page);
@@ -298,7 +298,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,72]"
 >
   <affine:paragraph
@@ -311,14 +311,14 @@ test('should indent todo block preserve todo status', async ({ page }) => {
       prop:type="todo"
     />
   </affine:paragraph>
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
   await pressShiftTab(page);
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,72]"
 >
   <affine:paragraph
@@ -330,8 +330,8 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     prop:text="todo item"
     prop:type="todo"
   />
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
 });
 

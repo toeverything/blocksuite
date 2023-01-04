@@ -17,8 +17,8 @@ export async function connectByClick(page: Page) {
   await clickTestOperationsMenuItem(page, 'Connect');
 }
 
-export async function addGroupByClick(page: Page) {
-  await clickTestOperationsMenuItem(page, 'Add Group');
+export async function addFrameByClick(page: Page) {
+  await clickTestOperationsMenuItem(page, 'Add Frame');
 }
 
 export async function clickTestOperationsMenuItem(page: Page, name: string) {

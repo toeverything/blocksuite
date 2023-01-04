@@ -141,10 +141,10 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
           this.blockSelectionState.active &&
           !matchFlavours(this.blockSelectionState.selected, ['affine:shape'])
         ) {
-          // TODO reset if drag out of group
+          // TODO reset if drag out of frame
           handleNativeRangeDragMove(this._startRange, e);
         }
-        // for inactive selection, drag move selected group
+        // for inactive selection, drag move selected frame
         else if (!this._frameSelectionState) {
           const block = this.blockSelectionState.selected;
           const [modelX, modelY, modelW, modelH] = JSON.parse(
