@@ -1,5 +1,5 @@
 import { customElement, property, state } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement } from 'lit';
 import type { ShapeBlockModel } from './shape-model.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager.js';
 import {
@@ -18,7 +18,6 @@ import {
   getTriangleIndicatorPathTDSnapshot,
   getTrianglePath,
 } from './utils/triangle-helpers.js';
-import style from './style.css?inline';
 import {
   getEllipseIndicatorPath,
   getEllipsePath,
@@ -31,7 +30,30 @@ export const ShapeBlockTag = 'affine-shape';
 @customElement(ShapeBlockTag)
 export class ShapeBlockComponent extends LitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-shape-block {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* enable pointer events, otherwise edgeless block cannot detect by mouse event */
+    .affine-shape-block-hit-box {
+      fill: none;
+      stroke: transparent;
+      stroke-width: calc(24px * var(--affine-scale));
+      pointer-events: stroke;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .affine-shape-block-hit-box-fill {
+      fill: transparent;
+      stroke: transparent;
+      stroke-width: calc(24px * var(--affine-scale));
+      pointer-events: all;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
     /* to make it at the center of the container */
     .affine-shape-block-g {

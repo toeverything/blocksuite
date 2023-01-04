@@ -1,7 +1,6 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html, unsafeCSS } from 'lit';
 import type { CodeBlockModel } from './code-model.js';
-import codeBlockStyle from './style.css?inline';
 import codeTheme from 'highlight.js/styles/color-brewer.css?inline';
 import { toolTipStyle } from '../components/tooltip.js';
 import {
@@ -18,8 +17,102 @@ import '../__internal__/rich-text/rich-text.js';
 export class CodeBlockComponent extends NonShadowLitElement {
   static styles = css`
     ${unsafeCSS(codeTheme)}
-    ${unsafeCSS(codeBlockStyle)}
-      ${toolTipStyle}
+    code-block {
+      position: relative;
+      z-index: 1;
+    }
+
+    .affine-code-block-container {
+      font-size: calc(var(--affine-font-base) - 4px);
+      line-height: calc(var(--affine-line-height-base) - 6px);
+      position: relative;
+      width: 720px;
+      padding: 32px 0;
+      background: var(--affine-code-block-background);
+      border-radius: 10px;
+      margin-top: calc(var(--affine-paragraph-space) + 3px);
+    }
+
+    .affine-code-block-container pre {
+      font-family: var(--affine-font-mono);
+      font-variant-ligatures: none;
+    }
+
+    .affine-code-block-container .container {
+      position: absolute;
+      font-size: var(--affine-font-xs);
+      line-height: calc(var(--affine-line-height-base) - 10px);
+      top: 12px;
+      left: 9px;
+    }
+
+    .affine-code-block-container.selected {
+      background-color: var(--affine-selected-color);
+    }
+
+    .affine-code-block-container rich-text {
+      position: relative;
+    }
+
+    #line-number {
+      position: absolute;
+      text-align: right;
+      top: 5.4px;
+      line-height: calc(var(--affine-line-height-base) - 6px);
+      color: var(--affine-line-number-color);
+    }
+
+    .affine-code-block-container .ql-container {
+      left: 40px;
+      border-radius: 5px;
+      padding: 2px 12px;
+    }
+
+    .affine-code-block-container .ql-syntax {
+      width: 660px;
+      margin: 0;
+      overflow: scroll;
+      /*scrollbar-color: #fff0 #fff0;*/
+    }
+
+    .affine-code-block-container .ql-syntax::-webkit-scrollbar {
+      /*background: none;*/
+    }
+
+    .affine-code-block-container .wrap {
+      white-space: pre-wrap;
+    }
+
+    .code-block-option .filled {
+      fill: var(--affine-primary-color);
+    }
+
+    .lang-container {
+      line-height: calc(var(--affine-line-height-base) - 10px);
+      text-align: justify;
+      position: relative;
+    }
+
+    .code-block-option {
+      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),
+        0px 3px 16px -6px rgba(24, 39, 75, 0.4);
+      border-radius: 10px;
+      list-style: none;
+      padding: 4px;
+      width: 40px;
+      background-color: var(--affine-page-background);
+      margin: 0;
+    }
+
+    .code-block-option {
+      /*fill: #6880ff;*/
+    }
+
+    .clicked {
+      color: var(--affine-primary-color) !important;
+      background: var(--affine-hover-background) !important;
+    }
+    ${toolTipStyle}
   `;
 
   @property({

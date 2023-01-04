@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { html, css, unsafeCSS } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { GroupBlockModel } from './group-model.js';
 import {
@@ -8,12 +8,16 @@ import {
   NonShadowLitElement,
   BlockChildrenContainer,
 } from '../__internal__/index.js';
-import style from './style.css?inline';
 
 @customElement('affine-group')
 export class GroupBlockComponent extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-group-block-container > .affine-block-children-container {
+      padding-left: 0;
+    }
+    .affine-group-block-container.selected {
+      background-color: var(--affine-selected-color);
+    }
   `;
 
   @property({
