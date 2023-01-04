@@ -38,7 +38,7 @@ describe('migration', () => {
     );
 
     const blockIds = Object.keys(result['space:page0']);
-    assert.equal(blockIds.length, 5);
+    assert.equal(blockIds.length, 6);
     assert.equal(
       blockIds.findIndex(key => result['space:page0'][key] === 'affine:group'),
       -1
