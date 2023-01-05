@@ -1,6 +1,6 @@
 import { formatConfig, paragraphConfig } from './const.js';
 import type { Page } from '@blocksuite/store';
-import { hotkey, HOTKEYS } from '../../__internal__/index.js';
+import { hotkey, HOTKEYS, isPageTitle } from '../../__internal__/index.js';
 import { updateSelectedTextType } from './container-operations.js';
 
 const { UNDO, REDO } = HOTKEYS;
@@ -25,8 +25,18 @@ export function bindCommonHotkey(page: Page) {
     });
   });
 
-  hotkey.addListener(UNDO, () => page.undo());
-  hotkey.addListener(REDO, () => page.redo());
+  hotkey.addListener(UNDO, e => {
+    if (isPageTitle(e)) {
+      return;
+    }
+    page.undo();
+  });
+  hotkey.addListener(REDO, e => {
+    if (isPageTitle(e)) {
+      return;
+    }
+    page.redo();
+  });
   // !!!
   // Don't forget to remove hotkeys at `_removeHotkeys`
 }

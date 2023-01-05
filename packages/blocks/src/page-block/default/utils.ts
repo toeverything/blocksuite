@@ -360,25 +360,12 @@ export function bindHotkeys(
       signals.updateEmbedEditingState.emit(null);
       return;
     }
-
-    if (isPageTitle(e)) {
-      const target = e.target as HTMLTextAreaElement;
-      // range delete
-      if (target.selectionStart !== target.selectionEnd) {
-        e.preventDefault();
-        const title = getSplicedTitle(target);
-        page.updateBlock(pageModel, { title });
-        page.workspace.setPageMeta(page.id, { title });
-      }
-      // collapsed delete
-      else {
-        noop();
-      }
-      return;
-    }
   });
 
   hotkey.addListener(SELECT_ALL, e => {
+    if (isPageTitle(e)) {
+      return;
+    }
     e.preventDefault();
     handleSelectAll(selection);
     selection.state.type = 'block';
