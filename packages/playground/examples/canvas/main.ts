@@ -1,11 +1,10 @@
-import { Renderer } from '@blocksuite/phasor';
-import { bindWheelEvents, initMockData } from './utils';
+import { Renderer, bindWheelEvents, initMockData } from '@blocksuite/phasor';
 
 function main() {
   const canvas = document.querySelector('canvas') as HTMLCanvasElement;
   const renderer = new Renderer(canvas);
 
-  bindWheelEvents(renderer);
+  bindWheelEvents(renderer, canvas);
   initMockData(renderer, 100, 500, 500);
 }
 
