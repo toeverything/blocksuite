@@ -44,6 +44,7 @@ export function getBlockEditingStateByPosition(
   y: number
 ) {
   for (const [hoverDom, rect] of blocks.entries()) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const model = (hoverDom as any).model as BaseBlockModel;
     if (isPointIn(rect, x, y)) {
       return {

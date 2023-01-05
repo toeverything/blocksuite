@@ -431,7 +431,7 @@ export class DefaultSelectionManager {
         this.clearRects();
         this._dragHandleAbortController = new AbortController();
         const currentModel = hoverEditingState.model;
-        const element = getBlockElementByModel(currentModel)!;
+        const element = getBlockElementByModel(currentModel) as HTMLElement;
         showDragHandle({
           anchorEl: element,
           abortController: this._dragHandleAbortController,
