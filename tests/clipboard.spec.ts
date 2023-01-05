@@ -24,8 +24,7 @@ import {
   assertTextFormats,
 } from './utils/asserts.js';
 
-// TODO fix CI
-test.skip('clipboard copy paste', async ({ page }) => {
+test('clipboard copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -35,7 +34,7 @@ test.skip('clipboard copy paste', async ({ page }) => {
   await copyByKeyboard(page);
   await focusRichText(page);
   await pasteByKeyboard(page);
-  await assertText(page, 'testest');
+  await assertText(page, 'testtes');
 });
 
 test('markdown format parse', async ({ page }) => {
