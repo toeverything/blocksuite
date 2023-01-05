@@ -99,15 +99,21 @@ export const showDragHandle = ({
   onDrop = () => {
     return void 0;
   },
-  getModelByPosition,
+  getModelStateByPosition,
   abortController = new AbortController(),
 }: {
   anchorEl: HTMLElement;
   onMouseDown?: () => void;
-  onDrop?: (e: DragEvent) => void;
+  onDrop?: (
+    e: DragEvent,
+    lastModelState: {
+      position: DOMRect;
+      model: BaseBlockModel;
+    }
+  ) => void;
   container?: HTMLElement;
   abortController?: AbortController;
-  getModelByPosition: (
+  getModelStateByPosition: (
     x: number,
     y: number
   ) => {
@@ -121,6 +127,10 @@ export const showDragHandle = ({
   if (abortController.signal.aborted) {
     return;
   }
+  let lastModelState: {
+    position: DOMRect;
+    model: BaseBlockModel;
+  } | null = null;
 
   const dragHandleEle = createDragHandle(anchorEl);
   const handleMouseDown = () => {
@@ -130,9 +140,10 @@ export const showDragHandle = ({
     document.createElement('affine-drag-indicator')
   );
   const handleDragMove = (e: MouseEvent) => {
-    const model = getModelByPosition(e.pageX, e.pageY)?.model;
-    if (model) {
-      const targetElement = getBlockElementByModel(model);
+    const modelState = getModelStateByPosition(e.pageX, e.pageY);
+    if (modelState) {
+      lastModelState = modelState;
+      const targetElement = getBlockElementByModel(modelState.model);
       if (targetElement) {
         indicator.targetElement = targetElement;
       }
@@ -144,7 +155,9 @@ export const showDragHandle = ({
     // todo
   };
   const handleDragEnd = (e: DragEvent) => {
-    onDrop(e);
+    if (lastModelState) {
+      onDrop(e, lastModelState);
+    }
   };
   dragHandleEle.addEventListener('drag', handleDragMove);
   dragHandleEle.addEventListener('dragend', handleDragEnd);

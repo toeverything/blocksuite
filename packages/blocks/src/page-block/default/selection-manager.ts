@@ -127,15 +127,11 @@ export class PageSelectionState {
   }
 
   refreshBlockBoundsCache(mouseRoot: HTMLElement) {
+    this._blockCache.clear();
     const allBlocks = getAllBlocks().reverse();
-    const rootRect = mouseRoot.getBoundingClientRect();
     for (const block of allBlocks) {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
-      if (rect.top > rootRect.bottom) {
-        // overflow, skip rest of blocks
-        return;
-      }
     }
   }
 
@@ -157,6 +153,7 @@ export class DefaultSelectionManager {
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
+
   constructor({
     page,
     mouseRoot,
@@ -431,45 +428,37 @@ export class DefaultSelectionManager {
       );
       if (hoverEditingState?.model) {
         this._dragHandleAbortController.abort();
+        this.clearRects();
         this._dragHandleAbortController = new AbortController();
         const currentModel = hoverEditingState.model;
         const element = getBlockElementByModel(currentModel)!;
         showDragHandle({
           anchorEl: element,
           abortController: this._dragHandleAbortController,
-          getModelByPosition: (x, y) => {
-            return getBlockEditingStateByPosition(this.state.blockCache, x, y);
-          },
-          onMouseDown: () => {
-            this._setSelectedBlocks([element]);
-          },
-          onDrop: e => {
-            const dropState = getBlockEditingStateByPosition(
-              this.state.blockCache,
-              e.pageX,
-              e.pageY
-            );
-            if (dropState) {
-              const rect = dropState.position;
-              const nextModel = dropState.model;
-              if (
-                recursiveFindParent(this.page, currentModel, nextModel) ||
-                recursiveFindParent(this.page, nextModel, currentModel)
-              ) {
-                return;
-              }
-              if (currentModel === nextModel) {
-                return;
-              }
-              this.page.captureSync();
-              const distanceToTop = Math.abs(rect.top - e.y);
-              const distanceToBottom = Math.abs(rect.bottom - e.y);
-              this.page.moveBlock(
-                currentModel,
-                nextModel,
-                distanceToTop < distanceToBottom
-              );
+          getModelStateByPosition: (x, y) =>
+            getBlockEditingStateByPosition(this.state.blockCache, x, y),
+          onMouseDown: () => this._setSelectedBlocks([element]),
+          onDrop: (e, lastModelState) => {
+            const rect = lastModelState.position;
+            const nextModel = lastModelState.model;
+            if (
+              recursiveFindParent(this.page, currentModel, nextModel) ||
+              recursiveFindParent(this.page, nextModel, currentModel)
+            ) {
+              return;
             }
+            if (currentModel === nextModel) {
+              return;
+            }
+            this.page.captureSync();
+            const distanceToTop = Math.abs(rect.top - e.y);
+            const distanceToBottom = Math.abs(rect.bottom - e.y);
+            this.page.moveBlock(
+              currentModel,
+              nextModel,
+              distanceToTop < distanceToBottom
+            );
+            this.clearRects();
           },
         });
       }
