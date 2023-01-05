@@ -17,24 +17,30 @@ export function isCollapsedAtBlockStart(quill: Quill) {
   );
 }
 
-export function recursiveFindParent(
+export function doesInSamePath(
   page: Page,
   model: BaseBlockModel,
   target: BaseBlockModel
 ): boolean {
   if (model === target) {
-    return false;
+    return true;
   }
-  let parent: BaseBlockModel | null;
-  for (;;) {
-    parent = page.getParent(model);
-    if (parent === null) {
-      return false;
-    } else if (parent.id === target.id) {
-      return true;
+  const doesInSamePathImpl = (
+    model: BaseBlockModel,
+    target: BaseBlockModel
+  ) => {
+    let parent: BaseBlockModel | null;
+    for (;;) {
+      parent = page.getParent(model);
+      if (parent === null) {
+        return false;
+      } else if (parent.id === target.id) {
+        return true;
+      }
+      model = parent;
     }
-    model = parent;
-  }
+  };
+  return doesInSamePathImpl(model, target) || doesInSamePathImpl(target, model);
 }
 
 export function convertToList(

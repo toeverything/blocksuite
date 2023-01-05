@@ -18,7 +18,7 @@ import {
   getDefaultPageBlock,
   isInput,
   IPoint,
-  recursiveFindParent,
+  doesInSamePath,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -443,10 +443,7 @@ export class DefaultSelectionManager {
           onDrop: (e, lastModelState) => {
             const rect = lastModelState.position;
             const nextModel = lastModelState.model;
-            if (
-              recursiveFindParent(this.page, currentModel, nextModel) ||
-              recursiveFindParent(this.page, nextModel, currentModel)
-            ) {
+            if (doesInSamePath(this.page, currentModel, nextModel)) {
               return;
             }
             this.page.captureSync();
