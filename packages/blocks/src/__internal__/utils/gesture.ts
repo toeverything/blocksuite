@@ -116,10 +116,8 @@ export function initMouseEventHandlers(
     startY = e.clientY - rect.top;
     isDragging = false;
     // e.button is 0 means left button
-    console.log('111');
     if (!e.button) {
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
-      console.log('222', last);
     }
     document.addEventListener('mouseup', mouseUpHandler);
     document.addEventListener('mouseout', mouseOutHandler);
