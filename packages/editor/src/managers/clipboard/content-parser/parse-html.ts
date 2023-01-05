@@ -1,5 +1,7 @@
 import type { ContentParser } from './index.js';
 import type { OpenBlockInfo } from '../types.js';
+import type { EditorContainer } from '../../../components/index.js';
+import { assertExists } from '@blocksuite/blocks';
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -25,14 +27,17 @@ const INLINE_TAGS = [
 
 export class ParserHtml {
   private _contentParser: ContentParser;
-  constructor(contentParser: ContentParser) {
+  private _editor: EditorContainer;
+
+  constructor(contentParser: ContentParser, editor: EditorContainer) {
     this._contentParser = contentParser;
+    this._editor = editor;
   }
 
   public registerParsers() {
     this._contentParser.registerParserHtmlText2Block(
       'nodeParser',
-      this._nodePaser.bind(this)
+      this._nodeParser.bind(this)
     );
     this._contentParser.registerParserHtmlText2Block(
       'commonParser',
@@ -46,20 +51,32 @@ export class ParserHtml {
       'blockQuoteParser',
       this._blockQuoteParser.bind(this)
     );
+    this._contentParser.registerParserHtmlText2Block(
+      'codeBlockParser',
+      this._codeBlockParser.bind(this)
+    );
+    this._contentParser.registerParserHtmlText2Block(
+      'embedItemParser',
+      this._embedItemParser.bind(this)
+    );
   }
+
   // TODO parse children block
-  private _nodePaser(node: Element): OpenBlockInfo[] | null {
+  private async _nodeParser(node: Element): Promise<OpenBlockInfo[] | null> {
     let result;
     // custom parser
-    result =
-      this._contentParser.getParserHtmlText2Block('customNodeParser')?.(node);
+    result = await this._contentParser.getParserHtmlText2Block(
+      'customNodeParser'
+    )?.(node);
     if (result && result.length > 0) {
       return result;
     }
 
     const tagName = node.tagName;
     if (node instanceof Text || INLINE_TAGS.includes(tagName)) {
-      result = this._contentParser.getParserHtmlText2Block('commonParser')?.({
+      result = await this._contentParser.getParserHtmlText2Block(
+        'commonParser'
+      )?.({
         element: node,
         flavour: 'affine:paragraph',
         type: 'text',
@@ -72,7 +89,7 @@ export class ParserHtml {
         case 'H4':
         case 'H5':
         case 'H6':
-          result = this._contentParser.getParserHtmlText2Block(
+          result = await this._contentParser.getParserHtmlText2Block(
             'commonParser'
           )?.({
             element: node,
@@ -81,10 +98,9 @@ export class ParserHtml {
           });
           break;
         case 'BLOCKQUOTE':
-          result =
-            this._contentParser.getParserHtmlText2Block('blockQuoteParser')?.(
-              node
-            );
+          result = await this._contentParser.getParserHtmlText2Block(
+            'blockQuoteParser'
+          )?.(node);
           break;
         case 'P':
           if (
@@ -93,12 +109,15 @@ export class ParserHtml {
               node.firstChild.textContent?.startsWith('[ ] ') ||
               node.firstChild.textContent?.startsWith('[x] '))
           ) {
-            result =
-              this._contentParser.getParserHtmlText2Block('listItemParser')?.(
-                node
-              );
+            result = await this._contentParser.getParserHtmlText2Block(
+              'listItemParser'
+            )?.(node);
+          } else if (node.firstChild instanceof HTMLImageElement) {
+            result = await this._contentParser.getParserHtmlText2Block(
+              'embedItemParser'
+            )?.(node.firstChild);
           } else {
-            result = this._contentParser.getParserHtmlText2Block(
+            result = await this._contentParser.getParserHtmlText2Block(
               'commonParser'
             )?.({
               element: node,
@@ -108,7 +127,7 @@ export class ParserHtml {
           }
           break;
         case 'DIV':
-          result = this._contentParser.getParserHtmlText2Block(
+          result = await this._contentParser.getParserHtmlText2Block(
             'commonParser'
           )?.({
             element: node,
@@ -117,18 +136,29 @@ export class ParserHtml {
           });
           break;
         case 'LI':
-          result =
-            this._contentParser.getParserHtmlText2Block('listItemParser')?.(
-              node
-            );
+          result = await this._contentParser.getParserHtmlText2Block(
+            'listItemParser'
+          )?.(node);
           break;
         case 'HR':
-          result = this._contentParser.getParserHtmlText2Block(
+          result = await this._contentParser.getParserHtmlText2Block(
             'commonParser'
           )?.({
             element: node,
             flavour: 'affine:divider',
           });
+          break;
+        case 'PRE':
+          result = await this._contentParser.getParserHtmlText2Block(
+            'codeBlockParser'
+          )?.(node);
+          break;
+        case 'IMG':
+          {
+            result = await this._contentParser.getParserHtmlText2Block(
+              'embedItemParser'
+            )?.(node);
+          }
           break;
         default:
           break;
@@ -138,23 +168,28 @@ export class ParserHtml {
     if (result && result.length > 0) {
       return result;
     }
-    return Array.from(node.children)
-      .map(childElement => {
+    const openBlockPromises = Array.from(node.children).map(
+      async childElement => {
         const clipBlockInfos =
-          this._contentParser.getParserHtmlText2Block('nodeParser')?.(
+          (await this._contentParser.getParserHtmlText2Block('nodeParser')?.(
             childElement
-          ) || [];
+          )) || [];
 
         if (clipBlockInfos && clipBlockInfos.length) {
           return clipBlockInfos;
         }
         return [];
-      })
-      .flat()
-      .filter(v => v);
+      }
+    );
+
+    const results: Array<OpenBlockInfo[]> = [];
+    for (const item of openBlockPromises) {
+      results.push(await item);
+    }
+    return results.flat().filter(v => v);
   }
 
-  private _commonParser({
+  private async _commonParser({
     element,
     flavour,
     type,
@@ -166,8 +201,8 @@ export class ParserHtml {
     type: string;
     checked?: boolean;
     ignoreEmptyElement?: boolean;
-  }): OpenBlockInfo[] | null {
-    const res = this._commonHTML2Block(
+  }): Promise<OpenBlockInfo[] | null> {
+    const res = await this._commonHTML2Block(
       element,
       flavour,
       type,
@@ -177,13 +212,13 @@ export class ParserHtml {
     return res ? [res] : null;
   }
 
-  private _commonHTML2Block(
+  private async _commonHTML2Block(
     element: Element,
     flavour: string,
     type: string,
     checked?: boolean,
     ignoreEmptyElement = true
-  ): OpenBlockInfo | null {
+  ): Promise<OpenBlockInfo | null> {
     const childNodes = element.childNodes;
     let isChildNode = false;
     const textValues: Record<string, unknown>[] = [];
@@ -207,7 +242,7 @@ export class ParserHtml {
         }
       }
       if (node instanceof Element) {
-        const childNode = this._nodePaser(node);
+        const childNode = await this._nodeParser(node);
         childNode && children.push(...childNode);
       }
       isChildNode = true;
@@ -267,7 +302,9 @@ export class ParserHtml {
     return childTexts;
   }
 
-  private _listItemParser(element: Element): OpenBlockInfo[] | null {
+  private async _listItemParser(
+    element: Element
+  ): Promise<OpenBlockInfo[] | null> {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
     let checked;
@@ -309,7 +346,9 @@ export class ParserHtml {
     return result;
   }
 
-  private _blockQuoteParser(element: Element): OpenBlockInfo[] | null {
+  private async _blockQuoteParser(
+    element: Element
+  ): Promise<OpenBlockInfo[] | null> {
     const getText = (list: OpenBlockInfo[]): Record<string, unknown>[] => {
       const result: Record<string, unknown>[] = [];
       list.forEach(item => {
@@ -330,7 +369,7 @@ export class ParserHtml {
       return result;
     };
 
-    const commonResult = this._contentParser.getParserHtmlText2Block(
+    const commonResult = await this._contentParser.getParserHtmlText2Block(
       'commonParser'
     )?.({
       element: element,
@@ -349,6 +388,66 @@ export class ParserHtml {
         children: [],
       },
     ];
+  }
+
+  private async _codeBlockParser(
+    element: Element
+  ): Promise<OpenBlockInfo[] | null> {
+    // code block doesn't parse other nested Markdown syntax, thus is always one layer deep, example:
+    // <pre><code class="language-typescript">code content</code></pre>
+    const content = element.firstChild?.textContent || '';
+    const language =
+      element.children[0]?.getAttribute('class')?.split('-')[1] || 'JavaScript';
+    return [
+      {
+        flavour: 'affine:code',
+        type: 'code',
+        text: [
+          {
+            insert: content,
+            attributes: {
+              'code-block': true,
+            },
+          },
+        ],
+        children: [],
+        language,
+      },
+    ];
+  }
+
+  private async _embedItemParser(
+    element: Element
+  ): Promise<OpenBlockInfo[] | null> {
+    let result: OpenBlockInfo[] | null = [];
+    if (element instanceof HTMLImageElement) {
+      const imgUrl = (element as HTMLImageElement).src;
+      let resp;
+      try {
+        resp = await fetch(imgUrl);
+      } catch (error) {
+        console.error(error);
+        return result;
+      }
+      const imgBlob = await resp.blob();
+      if (!imgBlob.type.startsWith('image/')) {
+        return result;
+      }
+      const storage = await this._editor.page.blobs;
+      assertExists(storage);
+      const id = await storage.set(imgBlob);
+      result = [
+        {
+          flavour: 'affine:embed',
+          type: 'image',
+          sourceId: id,
+          children: [],
+          text: [{ insert: '' }],
+        },
+      ];
+    }
+
+    return result;
   }
 }
 
