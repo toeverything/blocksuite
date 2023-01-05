@@ -4,6 +4,7 @@ import {
   assertExists,
   assertFlavours,
   ExtendedModel,
+  isPageTitle,
   matchFlavours,
   RootBlockModel,
 } from '../../__internal__/index.js';
@@ -157,11 +158,7 @@ export function transformBlock(
 
 export function handleBackspace(page: Page, e: KeyboardEvent) {
   // workaround page title
-  if (
-    e.target instanceof HTMLTextAreaElement &&
-    e.target.classList.contains('affine-default-page-block-title')
-  )
-    return;
+  if (isPageTitle(e)) return;
   if (isNoneSelection()) return;
   if (!isCollapsedSelection() && isRangeSelection()) {
     const range = getCurrentRange();

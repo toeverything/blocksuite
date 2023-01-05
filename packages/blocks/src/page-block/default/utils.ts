@@ -190,7 +190,9 @@ function performNativeCopy(items: ClipboardItem[]): boolean {
 }
 
 export function focusCaption(model: BaseBlockModel) {
-  const dom = getBlockElementByModel(model)?.querySelector(
+  const blockEle = getBlockElementByModel(model);
+  assertExists(blockEle);
+  const dom = blockEle.querySelector(
     '.affine-embed-wrapper-caption'
   ) as HTMLInputElement;
   dom.classList.add('caption-show');
@@ -340,12 +342,34 @@ export function bindHotkeys(
     if (state.type === 'native') {
       handleBackspace(page, e);
       return;
-    } else if (['block', 'divider', 'focus'].includes(state.type)) {
-      const { selectedBlocks } = state;
-      if (state.type === 'focus') {
-        state.type = 'block';
-        return;
+    }
+
+    // XXX Ad-hoc for code block
+    // At the beginning of the code block,
+    // the backspace will selected the block first.
+    // The select logic already processed in the `handleLineStartBackspace` function.
+    // So we need to prevent the default delete behavior.
+    const isDispatchFromCodeBlock = (e: KeyboardEvent) => {
+      if (!e.target || !(e.target instanceof Element)) {
+        return false;
       }
+      try {
+        // if the target is `body`, it will throw an error
+        const model = getModelByElement(e.target);
+        return matchFlavours(model, ['affine:code']);
+      } catch (error) {
+        // just check failed, no need to handle
+        return false;
+      }
+    };
+    if (isDispatchFromCodeBlock(e)) {
+      return;
+    }
+
+    if (state.type === 'block') {
+      const { selectedBlocks } = state;
+
+      // delete selected blocks
       handleBlockSelectionBatchDelete(
         page,
         selectedBlocks.map(block => getModelByElement(block))
@@ -487,7 +511,7 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
 export function copyCode(codeBlockOption: CodeBlockOption) {
   const richText = getRichTextByModel(codeBlockOption.model);
   assertExists(richText);
-  const quill = richText?.quill;
+  const quill = richText.quill;
   quill.setSelection(0, quill.getLength());
   document.dispatchEvent(new ClipboardEvent('copy'));
   resetNativeSelection(null);
