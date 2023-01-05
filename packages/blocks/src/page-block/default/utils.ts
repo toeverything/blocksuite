@@ -81,6 +81,9 @@ export const getHoverBlockOptionByPosition = (
       const hoverTarget = hoverDom?.querySelector(targetSelector);
       const imageRect = hoverTarget?.getBoundingClientRect();
       assertExists(imageRect);
+      if (!imageRect) {
+        return;
+      }
       if (isPointIn(imageRect, x, y)) {
         return {
           position: {
