@@ -276,6 +276,32 @@ export class Page extends Space<PageData> {
     this.updateBlock(model, props);
   }
 
+  moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
+    const currentParentModel = this.getParent(model);
+    const nextParentModel = this.getParent(targetModel);
+    if (currentParentModel === null || nextParentModel === null) {
+      throw new Error('cannot find parent model');
+    }
+    this.transact(() => {
+      const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
+      const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
+      const idx = yChildrenA.toArray().findIndex(id => id === model.id);
+      yChildrenA.delete(idx);
+      const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
+      const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
+      const nextIdx = yChildrenB
+        .toArray()
+        .findIndex(id => id === targetModel.id);
+      if (top) {
+        yChildrenB.insert(nextIdx, [model.id]);
+      } else {
+        yChildrenB.insert(nextIdx + 1, [model.id]);
+      }
+    });
+    currentParentModel.propsUpdated.emit();
+    nextParentModel.propsUpdated.emit();
+  }
+
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
