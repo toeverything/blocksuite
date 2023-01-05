@@ -128,7 +128,7 @@ export class PageSelectionState {
 
   refreshBlockBoundsCache(mouseRoot: HTMLElement) {
     this._blockCache.clear();
-    const allBlocks = getAllBlocks().reverse();
+    const allBlocks = getAllBlocks();
     for (const block of allBlocks) {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
@@ -428,7 +428,6 @@ export class DefaultSelectionManager {
       );
       if (hoverEditingState?.model) {
         this._dragHandleAbortController.abort();
-        this.clearRects();
         this._dragHandleAbortController = new AbortController();
         const currentModel = hoverEditingState.model;
         const element = getBlockElementByModel(currentModel) as HTMLElement;
