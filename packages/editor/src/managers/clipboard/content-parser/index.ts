@@ -28,14 +28,18 @@ export class ContentParser {
   public onExportHtml() {
     const root = this._editor.page.root;
     if (!root) return;
-    const htmlContent = this.block2Html(this._getSelectedBlock(root).children);
+    const htmlContent = this.block2Html(
+      this._getSelectedBlock(root).children[0].children
+    );
     FileExporter.exportHtml((root as PageBlockModel).title, htmlContent);
   }
 
   public onExportMarkdown() {
     const root = this._editor.page.root;
     if (!root) return;
-    const htmlContent = this.block2Html(this._getSelectedBlock(root).children);
+    const htmlContent = this.block2Html(
+      this._getSelectedBlock(root).children[0].children
+    );
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title,
       htmlContent
@@ -161,7 +165,21 @@ export class ContentParser {
       block.endPos
     );
 
-    return text;
+    switch (model.type) {
+      case 'text':
+        return `<p>${text}</p>`;
+      case 'h1':
+      case 'h2':
+      case 'h3':
+      case 'h4':
+      case 'h5':
+      case 'h6':
+        return `<${model.type}>${text}</${model.type}>`;
+      case 'quote':
+        return `<blockquote>${text}</blockquote>`;
+      default:
+        return text;
+    }
   }
 
   private _getTextInfoBySelectionInfo(selectedBlock: SelectedBlock): string {
