@@ -9,6 +9,9 @@ const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
+  if (!process.env.CI) {
+    return true;
+  }
   const ignoredMessages = [
     // basic.spec.ts
     "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
