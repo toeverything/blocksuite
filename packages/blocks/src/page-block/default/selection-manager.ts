@@ -76,7 +76,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'drag';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
 
 export class PageSelectionState {
   type: PageSelectionType;
@@ -275,9 +275,6 @@ export class DefaultSelectionManager {
     if (this.state.type === 'embed') {
       return this._embedResizeManager.onMove(e);
     }
-    if (this.state.type === 'drag') {
-      console.log('dragging');
-    }
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
@@ -287,8 +284,6 @@ export class DefaultSelectionManager {
       this._onBlockSelectionDragEnd(e);
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
-    } else if (this.state.type === 'drag') {
-      this._dragHandleAbortController.abort();
     }
     if (this._container.readonly) {
       return;
@@ -481,7 +476,6 @@ export class DefaultSelectionManager {
             }
           },
         });
-        this.state.type = 'drag';
       }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
