@@ -437,25 +437,38 @@ export class DefaultSelectionManager {
         showDragHandle({
           anchorEl: element,
           abortController: this._dragHandleAbortController,
+          getModelByPosition: (x, y) => {
+            return getBlockEditingStateByPosition(this.state.blockCache, x, y);
+          },
           onMouseDown: () => {
             this._setSelectedBlocks([element]);
           },
           onDrop: e => {
-            const hoverEditingState = getBlockEditingStateByPosition(
+            const dropState = getBlockEditingStateByPosition(
               this.state.blockCache,
               e.pageX,
               e.pageY
             );
-            if (hoverEditingState) {
-              const nextModel = hoverEditingState.model;
+            if (dropState) {
+              const rect = dropState.position;
+              const nextModel = dropState.model;
               if (
                 recursiveFindParent(this.page, currentModel, nextModel) ||
                 recursiveFindParent(this.page, nextModel, currentModel)
               ) {
                 return;
               }
+              if (currentModel === nextModel) {
+                return;
+              }
               this.page.captureSync();
-              this.page.moveBlock(currentModel, nextModel);
+              const distanceToTop = Math.abs(rect.top - e.y);
+              const distanceToBottom = Math.abs(rect.bottom - e.y);
+              this.page.moveBlock(
+                currentModel,
+                nextModel,
+                distanceToTop < distanceToBottom
+              );
             }
           },
         });

@@ -1,5 +1,48 @@
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
+import type { IPoint } from '../__internal__/index.js';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { getBlockElementByModel } from '../__internal__/index.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+@customElement('affine-drag-indicator')
+export class DragIndicator extends LitElement {
+  @property()
+  targetElement!: HTMLElement;
+
+  @property()
+  cursorPosition!: IPoint;
+
+  connectedCallback() {
+    super.connectedCallback();
+  }
+
+  override render() {
+    if (!this.targetElement || !this.cursorPosition) {
+      return null;
+    }
+    const rect = this.targetElement.getBoundingClientRect();
+    const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
+    const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
+    return html`
+      <style>
+        .affine-drag-indicator {
+          position: absolute;
+          width: ${rect.width + 10}px;
+          height: 3px;
+          background: var(--affine-primary-color);
+        }
+      </style>
+      <div
+        class="affine-drag-indicator"
+        style=${styleMap({
+          left: `${rect.left}px`,
+          top: `${distanceToTop < distanceToBottom ? rect.top : rect.bottom}px`,
+        })}
+      ></div>
+    `;
+  }
+}
 
 @customElement('affine-drag-handle')
 export class DragHandle extends LitElement {
@@ -37,18 +80,17 @@ export class DragHandle extends LitElement {
   }
 }
 
-const createDragHandle = (anchorEl: HTMLElement, container: HTMLElement) => {
+const createDragHandle = (anchorEl: HTMLElement) => {
   const rect = anchorEl.getBoundingClientRect();
 
   const ele = <DragHandle>document.createElement('affine-drag-handle');
   ele.style.position = 'absolute';
   ele.style.left = `${rect.left - 20}px`;
   ele.style.top = `${rect.top + 6}px`;
-  container.appendChild(ele);
   return ele;
 };
 
-export const showDragHandle = async ({
+export const showDragHandle = ({
   anchorEl,
   container = document.body,
   onMouseDown = () => {
@@ -57,6 +99,7 @@ export const showDragHandle = async ({
   onDrop = () => {
     return void 0;
   },
+  getModelByPosition,
   abortController = new AbortController(),
 }: {
   anchorEl: HTMLElement;
@@ -64,6 +107,13 @@ export const showDragHandle = async ({
   onDrop?: (e: DragEvent) => void;
   container?: HTMLElement;
   abortController?: AbortController;
+  getModelByPosition: (
+    x: number,
+    y: number
+  ) => {
+    position: DOMRect;
+    model: BaseBlockModel;
+  } | null;
 }) => {
   if (!anchorEl) {
     throw new Error("Can't show drag handle without anchor element!");
@@ -72,34 +122,46 @@ export const showDragHandle = async ({
     return;
   }
 
-  const dragHandleEle = createDragHandle(anchorEl, container);
+  const dragHandleEle = createDragHandle(anchorEl);
   const handleMouseDown = () => {
     onMouseDown();
   };
-  const handleDragStart = (e: Event) => {
-    console.log(e);
-  };
-  const handleDragMove = (e: Event) => {
+  const indicator = <DragIndicator>(
+    document.createElement('affine-drag-indicator')
+  );
+  const handleDragMove = (e: MouseEvent) => {
+    const model = getModelByPosition(e.pageX, e.pageY)?.model;
+    if (model) {
+      const targetElement = getBlockElementByModel(model);
+      if (targetElement) {
+        indicator.targetElement = targetElement;
+      }
+    }
+    indicator.cursorPosition = {
+      x: e.x,
+      y: e.y,
+    };
     // todo
   };
   const handleDragEnd = (e: DragEvent) => {
     onDrop(e);
   };
-  dragHandleEle.addEventListener('dragstart', handleDragStart);
   dragHandleEle.addEventListener('drag', handleDragMove);
   dragHandleEle.addEventListener('dragend', handleDragEnd);
   dragHandleEle.addEventListener('mousedown', handleMouseDown);
   const handleDragOver = (event: MouseEvent) => {
     event.preventDefault();
   };
-  document.addEventListener('dragover', handleDragOver, false);
+  container.addEventListener('dragover', handleDragOver, false);
+  container.appendChild(dragHandleEle);
+  container.appendChild(indicator);
 
   abortController.signal.addEventListener('abort', () => {
-    dragHandleEle.removeEventListener('dragstart', handleDragStart);
     dragHandleEle.removeEventListener('drag', handleDragMove);
     dragHandleEle.removeEventListener('dragend', handleDragEnd);
-    document.removeEventListener('dragover', handleDragOver);
+    container.removeEventListener('dragover', handleDragOver);
     dragHandleEle.removeEventListener('mousedown', handleMouseDown);
+    indicator.remove();
     dragHandleEle.remove();
   });
 };
@@ -107,5 +169,6 @@ export const showDragHandle = async ({
 declare global {
   interface HTMLElementTagNameMap {
     'affine-drag-handle': DragHandle;
+    'affine-drag-indicator': DragIndicator;
   }
 }
