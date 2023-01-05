@@ -276,6 +276,28 @@ export class Page extends Space<PageData> {
     this.updateBlock(model, props);
   }
 
+  moveBlock(
+    model: BaseBlockModel,
+    oldParent: BaseBlockModel,
+    oldIndex: number,
+    newParent: BaseBlockModel,
+    newIndex: number
+  ) {
+    console.log(oldIndex, newIndex);
+    this.transact(() => {
+      const yParentA = this._yBlocks.get(oldParent.id) as YBlock;
+      const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
+      const yParentB = this._yBlocks.get(newParent.id) as YBlock;
+      const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
+      console.log(yChildrenA.toJSON(), yChildrenB.toJSON());
+      yChildrenA.delete(oldIndex);
+      yChildrenB.insert(newIndex, [model.id]);
+      console.log(yChildrenA.toJSON(), yChildrenB.toJSON());
+    });
+    oldParent.propsUpdated.emit();
+    newParent.propsUpdated.emit();
+  }
+
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 

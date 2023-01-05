@@ -2,6 +2,7 @@ import type { Page } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import { matchFlavours, sleep } from './std.js';
 import type { ExtendedModel } from './types.js';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 // XXX: workaround quill lifecycle issue
 export async function asyncFocusRichText(page: Page, id: string) {
@@ -14,6 +15,22 @@ export function isCollapsedAtBlockStart(quill: Quill) {
   return (
     quill.getSelection(true)?.index === 0 && quill.getSelection()?.length === 0
   );
+}
+
+export function recursiveFindParent(
+  page: Page,
+  model: BaseBlockModel,
+  target: BaseBlockModel
+): boolean {
+  let parent: BaseBlockModel | null;
+  for (;;) {
+    parent = page.getParent(model);
+    if (parent === null) {
+      return false;
+    } else if (parent.id === target.id) {
+      return true;
+    }
+  }
 }
 
 export function convertToList(
