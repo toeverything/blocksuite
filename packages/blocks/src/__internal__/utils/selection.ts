@@ -306,7 +306,7 @@ export function isRangeSelection() {
  *
  * Please check the difference between {@link isMultiLineRange} before use this function
  */
-export function isMultiBlockRange(range: Range) {
+export function isMultiBlockRange(range = getCurrentRange()) {
   return getModelsByRange(range).length > 1;
 }
 
@@ -322,7 +322,7 @@ export function isMultiBlockRange(range: Range) {
  * this function will return true,
  * but {@link isMultiBlockRange} will return false.
  */
-export function isMultiLineRange(range: Range) {
+export function isMultiLineRange(range = getCurrentRange()) {
   // Get the selection height
   const { height } = range.getBoundingClientRect();
 

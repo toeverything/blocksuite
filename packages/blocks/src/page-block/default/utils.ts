@@ -28,7 +28,7 @@ import {
 import type { PageBlockModel } from '../page-model.js';
 import {
   bindCommonHotkey,
-  handleBackspace,
+  handleMultiBlockBackspace,
   handleBlockSelectionBatchDelete,
   handleSelectAll,
   removeCommonHotKey,
@@ -312,36 +312,40 @@ export function bindHotkeys(
     }
   });
 
+  const isDispatchFromCodeBlock = (e: KeyboardEvent) => {
+    if (!e.target || !(e.target instanceof Element)) {
+      return false;
+    }
+    try {
+      // if the target is `body`, it will throw an error
+      const model = getModelByElement(e.target);
+      return matchFlavours(model, ['affine:code']);
+    } catch (error) {
+      // just check failed, no need to handle
+      return false;
+    }
+  };
+
   hotkey.addListener(BACKSPACE, e => {
     const { state } = selection;
-    if (state.type === 'native') {
-      handleBackspace(page, e);
+    if (state.type === 'none') {
+      // Will be handled in the `keyboard.onBackspace` function
       return;
     }
-
-    // XXX Ad-hoc for code block
-    // At the beginning of the code block,
-    // the backspace will selected the block first.
-    // The select logic already processed in the `handleLineStartBackspace` function.
-    // So we need to prevent the default delete behavior.
-    const isDispatchFromCodeBlock = (e: KeyboardEvent) => {
-      if (!e.target || !(e.target instanceof Element)) {
-        return false;
-      }
-      try {
-        // if the target is `body`, it will throw an error
-        const model = getModelByElement(e.target);
-        return matchFlavours(model, ['affine:code']);
-      } catch (error) {
-        // just check failed, no need to handle
-        return false;
-      }
-    };
-    if (isDispatchFromCodeBlock(e)) {
+    if (state.type === 'native') {
+      handleMultiBlockBackspace(page, e);
       return;
     }
 
     if (state.type === 'block') {
+      // XXX Ad-hoc for code block
+      // At the beginning of the code block,
+      // the backspace will selected the block first.
+      // The select logic already processed in the `handleLineStartBackspace` function.
+      // So we need to prevent the default delete behavior.
+      if (isDispatchFromCodeBlock(e)) {
+        return;
+      }
       const { selectedBlocks } = state;
 
       // delete selected blocks
@@ -356,6 +360,7 @@ export function bindHotkeys(
       signals.updateEmbedEditingState.emit(null);
       return;
     }
+
     if (isPageTitle(e)) {
       const target = e.target as HTMLTextAreaElement;
       // range delete
