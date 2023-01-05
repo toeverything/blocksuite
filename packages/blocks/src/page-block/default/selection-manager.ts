@@ -27,7 +27,7 @@ import {
 } from '../utils/cursor.js';
 import type { DefaultPageSignals } from './default-page-block.js';
 import { getBlockEditingStateByPosition } from './utils.js';
-import { BaseBlockModel, Utils } from '@blocksuite/store';
+import { Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { showDragHandle } from '../../components/drag-handle.js';
@@ -133,6 +133,7 @@ export class PageSelectionState {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
       if (rect.top > rootRect.bottom) {
+        // overflow, skip rest of blocks
         return;
       }
     }
@@ -425,7 +426,7 @@ export class DefaultSelectionManager {
     } else {
       const hoverEditingState = getBlockEditingStateByPosition(
         this.state.blockCache,
-        e.raw.pageX + 20,
+        e.raw.pageX + 20, // in case of handle cannot be clicked in list block
         e.raw.pageY
       );
       if (hoverEditingState?.model) {
@@ -447,18 +448,6 @@ export class DefaultSelectionManager {
             );
             if (hoverEditingState) {
               const nextModel = hoverEditingState.model;
-              const currentParentModel = this.page.getParent(
-                currentModel
-              ) as BaseBlockModel;
-              const nextParentModel = this.page.getParent(
-                nextModel
-              ) as BaseBlockModel;
-              const idx = currentParentModel.children.findIndex(
-                m => m.id === currentModel.id
-              );
-              const nextIdx = nextParentModel.children.findIndex(
-                m => m.id === nextModel.id
-              );
               if (
                 recursiveFindParent(this.page, currentModel, nextModel) ||
                 recursiveFindParent(this.page, nextModel, currentModel)
@@ -466,13 +455,7 @@ export class DefaultSelectionManager {
                 return;
               }
               this.page.captureSync();
-              this.page.moveBlock(
-                currentModel,
-                currentParentModel,
-                idx,
-                nextParentModel,
-                nextIdx
-              );
+              this.page.moveBlock(currentModel, nextModel);
             }
           },
         });

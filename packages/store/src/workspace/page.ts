@@ -276,26 +276,26 @@ export class Page extends Space<PageData> {
     this.updateBlock(model, props);
   }
 
-  moveBlock(
-    model: BaseBlockModel,
-    oldParent: BaseBlockModel,
-    oldIndex: number,
-    newParent: BaseBlockModel,
-    newIndex: number
-  ) {
-    console.log(oldIndex, newIndex);
+  moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel) {
+    const currentParentModel = this.getParent(model);
+    const nextParentModel = this.getParent(targetModel);
+    if (currentParentModel === null || nextParentModel === null) {
+      return;
+    }
+    const idx = currentParentModel.children.findIndex(m => m.id === model.id);
+    const nextIdx = nextParentModel.children.findIndex(
+      m => m.id === targetModel.id
+    );
     this.transact(() => {
-      const yParentA = this._yBlocks.get(oldParent.id) as YBlock;
+      const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
       const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
-      const yParentB = this._yBlocks.get(newParent.id) as YBlock;
+      const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
-      console.log(yChildrenA.toJSON(), yChildrenB.toJSON());
-      yChildrenA.delete(oldIndex);
-      yChildrenB.insert(newIndex, [model.id]);
-      console.log(yChildrenA.toJSON(), yChildrenB.toJSON());
+      yChildrenA.delete(idx);
+      yChildrenB.insert(nextIdx, [model.id]);
     });
-    oldParent.propsUpdated.emit();
-    newParent.propsUpdated.emit();
+    currentParentModel.propsUpdated.emit();
+    nextParentModel.propsUpdated.emit();
   }
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
