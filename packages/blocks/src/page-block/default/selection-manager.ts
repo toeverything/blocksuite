@@ -450,9 +450,6 @@ export class DefaultSelectionManager {
             ) {
               return;
             }
-            if (currentModel === nextModel) {
-              return;
-            }
             this.page.captureSync();
             const distanceToTop = Math.abs(rect.top - e.y);
             const distanceToBottom = Math.abs(rect.bottom - e.y);

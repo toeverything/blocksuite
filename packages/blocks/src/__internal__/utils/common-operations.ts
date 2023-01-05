@@ -22,6 +22,9 @@ export function recursiveFindParent(
   model: BaseBlockModel,
   target: BaseBlockModel
 ): boolean {
+  if (model === target) {
+    return false;
+  }
   let parent: BaseBlockModel | null;
   for (;;) {
     parent = page.getParent(model);
