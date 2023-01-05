@@ -126,7 +126,7 @@ export class PageSelectionState {
     this._startPoint = { x: e.x, y: e.y };
   }
 
-  refreshBlockBoundsCache(mouseRoot: HTMLElement) {
+  refreshRichTextBoundsCache(mouseRoot: HTMLElement) {
     this._blockCache.clear();
     const allBlocks = getAllBlocks();
     for (const block of allBlocks) {
@@ -208,7 +208,7 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
     this.state.resetStartRange(e);
-    this.state.refreshBlockBoundsCache(this._mouseRoot);
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
     resetNativeSelection(null);
   }
 
@@ -404,7 +404,6 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    this.state.refreshBlockBoundsCache(this._mouseRoot);
     const hoverEditingState = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
@@ -425,15 +424,15 @@ export class DefaultSelectionManager {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
-      const hoverEditingState = getBlockEditingStateByPosition(
+      const clickDragState = getBlockEditingStateByPosition(
         this._blocks,
         e.raw.pageX + 20, // in case of handle cannot be clicked in list block
         e.raw.pageY
       );
-      if (hoverEditingState?.model) {
+      if (clickDragState?.model) {
         this._dragHandleAbortController.abort();
         this._dragHandleAbortController = new AbortController();
-        const currentModel = hoverEditingState.model;
+        const currentModel = clickDragState.model;
         const element = getBlockElementByModel(currentModel) as HTMLElement;
         showDragHandle({
           anchorEl: element,
@@ -491,7 +490,7 @@ export class DefaultSelectionManager {
     pageSelectionType: PageSelectionType = 'block'
   ) {
     this.state.type = pageSelectionType;
-    this.state.refreshBlockBoundsCache(this._mouseRoot);
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const { blockCache } = this.state;
     const { _containerOffset } = this;
     const selectedBlocks = filterSelectedBlock(
@@ -503,7 +502,7 @@ export class DefaultSelectionManager {
   }
 
   selectBlocksByRect(hitRect: DOMRect) {
-    this.state.refreshBlockBoundsCache(this._mouseRoot);
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
 
     const selectedBlocks = filterSelectedBlock(this.state.blockCache, hitRect, {
       x: 0,

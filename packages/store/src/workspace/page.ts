@@ -280,7 +280,7 @@ export class Page extends Space<PageData> {
     const currentParentModel = this.getParent(model);
     const nextParentModel = this.getParent(targetModel);
     if (currentParentModel === null || nextParentModel === null) {
-      return;
+      throw new Error('cannot find parent model');
     }
     this.transact(() => {
       const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;

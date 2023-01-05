@@ -2,13 +2,12 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { getBlockElementByModel } from '../__internal__/index.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
   @property()
-  targetElement!: HTMLElement;
+  targetRect!: DOMRect;
 
   @property()
   cursorPosition!: IPoint;
@@ -18,10 +17,10 @@ export class DragIndicator extends LitElement {
   }
 
   override render() {
-    if (!this.targetElement || !this.cursorPosition) {
+    if (!this.targetRect || !this.cursorPosition) {
       return null;
     }
-    const rect = this.targetElement.getBoundingClientRect();
+    const rect = this.targetRect;
     const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
     const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
     return html`
@@ -94,18 +93,14 @@ const createDragHandle = (anchorEl: HTMLElement) => {
 export const showDragHandle = ({
   anchorEl,
   container = document.body,
-  onMouseDown = () => {
-    return void 0;
-  },
-  onDrop = () => {
-    return void 0;
-  },
+  onMouseDown,
+  onDrop,
   getModelStateByPosition,
   abortController = new AbortController(),
 }: {
   anchorEl: HTMLElement;
-  onMouseDown?: () => void;
-  onDrop?: (
+  onMouseDown: () => void;
+  onDrop: (
     e: DragEvent,
     lastModelState: {
       position: DOMRect;
@@ -144,16 +139,12 @@ export const showDragHandle = ({
     const modelState = getModelStateByPosition(e.pageX, e.pageY);
     if (modelState) {
       lastModelState = modelState;
-      const targetElement = getBlockElementByModel(modelState.model);
-      if (targetElement) {
-        indicator.targetElement = targetElement;
-      }
+      indicator.targetRect = modelState.position;
     }
     indicator.cursorPosition = {
       x: e.x,
       y: e.y,
     };
-    // todo
   };
   const handleDragEnd = (e: DragEvent) => {
     if (lastModelState) {
@@ -164,6 +155,7 @@ export const showDragHandle = ({
   dragHandleEle.addEventListener('dragend', handleDragEnd);
   dragHandleEle.addEventListener('mousedown', handleMouseDown);
   const handleDragOver = (event: MouseEvent) => {
+    // Refs: https://stackoverflow.com/a/65910078
     event.preventDefault();
   };
   container.addEventListener('dragover', handleDragOver, false);
