@@ -39,17 +39,26 @@ import type { CodeBlockOption } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 
 export function getBlockEditingStateByPosition(
-  blocks: Map<Element, DOMRect>,
+  blocks: BaseBlockModel[],
   x: number,
   y: number
 ) {
-  for (const [hoverDom, rect] of [...blocks.entries()].reverse()) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const model = (hoverDom as any).model as BaseBlockModel;
-    if (isPointIn(rect, x, y)) {
+  for (let index = 0; index <= blocks.length - 1; index++) {
+    const hoverDom = getBlockById(blocks[index].id);
+
+    let blockRect;
+    if (blocks[index].type === 'image') {
+      const hoverImage = hoverDom?.querySelector('img');
+      blockRect = hoverImage?.getBoundingClientRect();
+    } else {
+      blockRect = hoverDom?.getBoundingClientRect();
+    }
+
+    assertExists(blockRect);
+    if (isPointIn(blockRect, x, y)) {
       return {
-        position: rect,
-        model: model,
+        position: blockRect,
+        model: blocks[index],
       };
     }
   }

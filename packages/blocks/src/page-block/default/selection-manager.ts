@@ -27,7 +27,7 @@ import {
 } from '../utils/cursor.js';
 import type { DefaultPageSignals } from './default-page-block.js';
 import { getBlockEditingStateByPosition } from './utils.js';
-import { Utils } from '@blocksuite/store';
+import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { showDragHandle } from '../../components/drag-handle.js';
@@ -181,6 +181,10 @@ export class DefaultSelectionManager {
       this._onContainerMouseOut,
       this._onContainerContextMenu
     );
+  }
+
+  private get _blocks(): BaseBlockModel[] {
+    return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
   }
 
   private get _containerOffset() {
@@ -340,7 +344,7 @@ export class DefaultSelectionManager {
     });
 
     const clickBlockInfo = getBlockEditingStateByPosition(
-      this.state.blockCache,
+      this._blocks,
       e.raw.pageX,
       e.raw.pageY
     );
@@ -402,7 +406,7 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this.state.refreshBlockBoundsCache(this._mouseRoot);
     const hoverEditingState = getBlockEditingStateByPosition(
-      this.state.blockCache,
+      this._blocks,
       e.raw.pageX,
       e.raw.pageY
     );
@@ -422,7 +426,7 @@ export class DefaultSelectionManager {
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
       const hoverEditingState = getBlockEditingStateByPosition(
-        this.state.blockCache,
+        this._blocks,
         e.raw.pageX + 20, // in case of handle cannot be clicked in list block
         e.raw.pageY
       );
@@ -435,7 +439,7 @@ export class DefaultSelectionManager {
           anchorEl: element,
           abortController: this._dragHandleAbortController,
           getModelStateByPosition: (x, y) =>
-            getBlockEditingStateByPosition(this.state.blockCache, x, y),
+            getBlockEditingStateByPosition(this._blocks, x, y),
           onMouseDown: () => this._setSelectedBlocks([element]),
           onDrop: (e, lastModelState) => {
             const rect = lastModelState.position;
