@@ -2,15 +2,15 @@ import { marked } from 'marked';
 import type { PageBlockModel } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
 import type {
-  OpenBlockInfo,
   EditorContainer,
+  OpenBlockInfo,
   SelectedBlock,
 } from '../../../index.js';
 import { FileExporter } from '../../file-exporter/file-exporter.js';
-import { ParserHtml } from './parse-html.js';
+import { HtmlParser } from './parse-html.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ParseHtml2BlockFunc = (...args: any[]) => OpenBlockInfo[] | null;
+type ParseHtml2BlockFunc = (...args: any[]) => Promise<OpenBlockInfo[] | null>;
 
 export class ContentParser {
   private _editor: EditorContainer;
@@ -18,11 +18,12 @@ export class ContentParser {
     beforeHtml2Block: new Signal<Element>(),
   };
   private _parsers: Record<string, ParseHtml2BlockFunc> = {};
-  private _parseHtml: ParserHtml;
+  private _htmlParser: HtmlParser;
+
   constructor(editor: EditorContainer) {
     this._editor = editor;
-    this._parseHtml = new ParserHtml(this);
-    this._parseHtml.registerParsers();
+    this._htmlParser = new HtmlParser(this, this._editor);
+    this._htmlParser.registerParsers();
   }
 
   public onExportHtml() {
@@ -66,7 +67,7 @@ export class ContentParser {
     return text;
   }
 
-  public htmlText2Block(html: string): OpenBlockInfo[] {
+  public async htmlText2Block(html: string): Promise<OpenBlockInfo[]> {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
@@ -74,7 +75,7 @@ export class ContentParser {
     return this._convertHtml2Blocks(htmlEl);
   }
 
-  public markdown2Block(text: string): OpenBlockInfo[] {
+  public async markdown2Block(text: string): Promise<OpenBlockInfo[]> {
     const underline = {
       name: 'underline',
       level: 'inline',
@@ -98,7 +99,30 @@ export class ContentParser {
         return `<u>${token.text}</u>`;
       },
     };
-    marked.use({ extensions: [underline] });
+    const inlineCode = {
+      name: 'inlineCode',
+      level: 'inline',
+      start(src: string) {
+        return src.indexOf('`');
+      },
+      tokenizer(src: string) {
+        const rule = /^(?:`)(`{2,}?|[^`]+)(?:`)$/g;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'inlineCode',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderer(token: any) {
+        return `<code>${token.text}</code>`;
+      },
+    };
+    marked.use({ extensions: [underline, inlineCode] });
     const md2html = marked.parse(text);
     return this.htmlText2Block(md2html);
   }
@@ -185,18 +209,26 @@ export class ContentParser {
     return text;
   }
 
-  private _convertHtml2Blocks(element: Element): OpenBlockInfo[] {
-    return Array.from(element.children)
-      .map(childElement => {
+  private async _convertHtml2Blocks(
+    element: Element
+  ): Promise<OpenBlockInfo[]> {
+    const openBlockPromises = Array.from(element.children).map(
+      async childElement => {
         const clipBlockInfos =
-          this.getParserHtmlText2Block('nodeParser')?.(childElement) || [];
-
+          (await this.getParserHtmlText2Block('nodeParser')?.(childElement)) ||
+          [];
         if (clipBlockInfos && clipBlockInfos.length) {
           return clipBlockInfos;
         }
         return [];
-      })
-      .flat()
-      .filter(v => v);
+      }
+    );
+
+    const results: Array<OpenBlockInfo[]> = [];
+    for (const item of openBlockPromises) {
+      results.push(await item);
+    }
+
+    return results.flat().filter(v => v);
   }
 }

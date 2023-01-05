@@ -44,10 +44,15 @@ export function getBlockEditingStateByPosition(
   y: number
 ) {
   for (let index = 0; index <= blocks.length - 1; index++) {
-    const hoverDom = getBlockById(blocks[index].id);
+    const block = blocks[index];
+    const hoverDom = getBlockById(block.id);
+    // code block use async loading
+    if (block.flavour === 'affine:code' && !hoverDom) {
+      continue;
+    }
 
     let blockRect;
-    if (blocks[index].type === 'image') {
+    if (block.type === 'image') {
       const hoverImage = hoverDom?.querySelector('img');
       blockRect = hoverImage?.getBoundingClientRect();
     } else {
@@ -58,42 +63,12 @@ export function getBlockEditingStateByPosition(
     if (isPointIn(blockRect, x, y)) {
       return {
         position: blockRect,
-        model: blocks[index],
+        model: block,
       };
     }
   }
   return null;
 }
-
-export const getHoverBlockOptionByPosition = (
-  blocks: BaseBlockModel[],
-  x: number,
-  y: number,
-  flavours: string[],
-  targetSelector: string
-) => {
-  while (blocks.length) {
-    const blockModel = blocks.shift();
-    assertExists(blockModel);
-    blockModel.children && blocks.push(...blockModel.children);
-    if (matchFlavours(blockModel, flavours)) {
-      const hoverDom = getBlockById(blockModel.id);
-      const hoverTarget = hoverDom?.querySelector(targetSelector);
-      const imageRect = hoverTarget?.getBoundingClientRect();
-      assertExists(imageRect);
-      if (isPointIn(imageRect, x, y)) {
-        return {
-          position: {
-            x: imageRect.right + 10,
-            y: imageRect.top,
-          },
-          model: blockModel,
-        };
-      }
-    }
-  }
-  return null;
-};
 
 function isPointIn(block: DOMRect, x: number, y: number): boolean {
   if (
