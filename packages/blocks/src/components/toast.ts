@@ -1,5 +1,4 @@
 import { css, html, TemplateResult } from 'lit';
-import { sleep } from '../__internal__/utils/index.js';
 
 let ToastContainer: HTMLDivElement | null = null;
 
@@ -92,9 +91,15 @@ export const toast = (message: string, duration = 2500) => {
     element.style.maxHeight = '0';
     element.style.margin = '0';
     element.style.padding = '0';
-    // wait for transition
-    await sleep(230);
-    element.remove();
+    element.addEventListener(
+      'animationend',
+      () => {
+        element.remove();
+      },
+      {
+        once: true,
+      }
+    );
   }, duration);
   return element;
 };
