@@ -7,7 +7,7 @@ import type {
   SelectedBlock,
 } from '../../../index.js';
 import { FileExporter } from '../../file-exporter/file-exporter.js';
-import { ParserHtml } from './parse-html.js';
+import { HtmlParser } from './parse-html.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ParseHtml2BlockFunc = (...args: any[]) => Promise<OpenBlockInfo[] | null>;
@@ -18,12 +18,12 @@ export class ContentParser {
     beforeHtml2Block: new Signal<Element>(),
   };
   private _parsers: Record<string, ParseHtml2BlockFunc> = {};
-  private _parseHtml: ParserHtml;
+  private _htmlParser: HtmlParser;
 
   constructor(editor: EditorContainer) {
     this._editor = editor;
-    this._parseHtml = new ParserHtml(this, this._editor);
-    this._parseHtml.registerParsers();
+    this._htmlParser = new HtmlParser(this, this._editor);
+    this._htmlParser.registerParsers();
   }
 
   public onExportHtml() {

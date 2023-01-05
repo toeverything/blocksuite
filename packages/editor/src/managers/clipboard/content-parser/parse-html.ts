@@ -25,7 +25,7 @@ const INLINE_TAGS = [
   'CITE',
 ];
 
-export class ParserHtml {
+export class HtmlParser {
   private _contentParser: ContentParser;
   private _editor: EditorContainer;
 
@@ -37,32 +37,34 @@ export class ParserHtml {
   public registerParsers() {
     this._contentParser.registerParserHtmlText2Block(
       'nodeParser',
-      this._nodeParser.bind(this)
+      this._nodeParser
     );
     this._contentParser.registerParserHtmlText2Block(
       'commonParser',
-      this._commonParser.bind(this)
+      this._commonParser
     );
     this._contentParser.registerParserHtmlText2Block(
       'listItemParser',
-      this._listItemParser.bind(this)
+      this._listItemParser
     );
     this._contentParser.registerParserHtmlText2Block(
       'blockQuoteParser',
-      this._blockQuoteParser.bind(this)
+      this._blockQuoteParser
     );
     this._contentParser.registerParserHtmlText2Block(
       'codeBlockParser',
-      this._codeBlockParser.bind(this)
+      this._codeBlockParser
     );
     this._contentParser.registerParserHtmlText2Block(
       'embedItemParser',
-      this._embedItemParser.bind(this)
+      this._embedItemParser
     );
   }
 
   // TODO parse children block
-  private async _nodeParser(node: Element): Promise<OpenBlockInfo[] | null> {
+  private _nodeParser = async (
+    node: Element
+  ): Promise<OpenBlockInfo[] | null> => {
     let result;
     // custom parser
     result = await this._contentParser.getParserHtmlText2Block(
@@ -187,9 +189,9 @@ export class ParserHtml {
       results.push(await item);
     }
     return results.flat().filter(v => v);
-  }
+  };
 
-  private async _commonParser({
+  private _commonParser = async ({
     element,
     flavour,
     type,
@@ -201,7 +203,7 @@ export class ParserHtml {
     type: string;
     checked?: boolean;
     ignoreEmptyElement?: boolean;
-  }): Promise<OpenBlockInfo[] | null> {
+  }): Promise<OpenBlockInfo[] | null> => {
     const res = await this._commonHTML2Block(
       element,
       flavour,
@@ -210,7 +212,7 @@ export class ParserHtml {
       ignoreEmptyElement
     );
     return res ? [res] : null;
-  }
+  };
 
   private async _commonHTML2Block(
     element: Element,
@@ -302,9 +304,9 @@ export class ParserHtml {
     return childTexts;
   }
 
-  private async _listItemParser(
+  private _listItemParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> {
+  ): Promise<OpenBlockInfo[] | null> => {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
     let checked;
@@ -344,11 +346,11 @@ export class ParserHtml {
       checked: checked,
     });
     return result;
-  }
+  };
 
-  private async _blockQuoteParser(
+  private _blockQuoteParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> {
+  ): Promise<OpenBlockInfo[] | null> => {
     const getText = (list: OpenBlockInfo[]): Record<string, unknown>[] => {
       const result: Record<string, unknown>[] = [];
       list.forEach(item => {
@@ -388,11 +390,11 @@ export class ParserHtml {
         children: [],
       },
     ];
-  }
+  };
 
-  private async _codeBlockParser(
+  private _codeBlockParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> {
+  ): Promise<OpenBlockInfo[] | null> => {
     // code block doesn't parse other nested Markdown syntax, thus is always one layer deep, example:
     // <pre><code class="language-typescript">code content</code></pre>
     const content = element.firstChild?.textContent || '';
@@ -414,11 +416,11 @@ export class ParserHtml {
         language,
       },
     ];
-  }
+  };
 
-  private async _embedItemParser(
+  private _embedItemParser = async (
     element: Element
-  ): Promise<OpenBlockInfo[] | null> {
+  ): Promise<OpenBlockInfo[] | null> => {
     let result: OpenBlockInfo[] | null = [];
     if (element instanceof HTMLImageElement) {
       const imgUrl = (element as HTMLImageElement).src;
@@ -448,7 +450,7 @@ export class ParserHtml {
     }
 
     return result;
-  }
+  };
 }
 
 const getIsLink = (htmlElement: HTMLElement) => {
