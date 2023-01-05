@@ -423,6 +423,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const hoverEditingState = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
