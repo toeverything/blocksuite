@@ -1,5 +1,5 @@
-import { PathModel, ImageModel, type Model } from '@blocksuite/phasor';
-import type { Renderer } from '@blocksuite/phasor';
+import { PathModel, ImageModel, type Model } from './models.js';
+import type { Renderer } from './renderer.js';
 
 const PATH_POINTS = 10;
 const PATH_MAX = 150;
@@ -57,8 +57,8 @@ export function initMockData(
   renderer.load(models);
 }
 
-export function bindWheelEvents(renderer: Renderer) {
-  renderer.canvas.addEventListener('wheel', e => {
+export function bindWheelEvents(renderer: Renderer, mouseRoot: HTMLElement) {
+  mouseRoot.addEventListener('wheel', e => {
     e.preventDefault();
     // pan
     if (!e.ctrlKey) {

@@ -251,7 +251,11 @@ export class EdgelessPageBlockComponent
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <affine-surface .model=${this.surfaceModel}> </affine-surface>
+        <affine-surface
+          .model=${this.surfaceModel}
+          .mouseRoot=${this.mouseRoot}
+        >
+        </affine-surface>
       </div>
       <div class="affine-edgeless-page-block-container">
         <style>
