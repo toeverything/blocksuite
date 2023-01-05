@@ -12,6 +12,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@tldraw/intersect": "^1.8.0",
     "autosize": "^5.0.2",
