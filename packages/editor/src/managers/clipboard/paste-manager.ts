@@ -209,7 +209,7 @@ export class PasteManager {
       }
       const addBlockIds: string[] = [];
       if (selectedBlock && !matchFlavours(selectedBlock, ['affine:page'])) {
-        const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
+        const endIndex = lastBlock.endPos ?? (selectedBlock?.text?.length || 0);
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
           (len: number, value: Record<string, unknown>) => {
