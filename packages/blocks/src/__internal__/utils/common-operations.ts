@@ -30,6 +30,7 @@ export function recursiveFindParent(
     } else if (parent.id === target.id) {
       return true;
     }
+    model = parent;
   }
 }
 
