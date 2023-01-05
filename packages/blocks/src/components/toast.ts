@@ -92,7 +92,7 @@ export const toast = (message: string, duration = 2500) => {
     element.style.margin = '0';
     element.style.padding = '0';
     element.addEventListener(
-      'animationend',
+      'transitionend',
       () => {
         element.remove();
       },

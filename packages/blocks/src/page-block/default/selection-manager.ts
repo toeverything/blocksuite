@@ -1,6 +1,7 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import type { EmbedBlockComponent } from '../../embed-block/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
+import '../../components/drag-handle.js';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -10,7 +11,6 @@ import {
   initMouseEventHandlers,
   isBlankArea,
   isEmbed,
-  noop,
   resetNativeSelection,
   SelectionEvent,
   getBlockElementByModel,
@@ -18,6 +18,7 @@ import {
   getDefaultPageBlock,
   isInput,
   IPoint,
+  doesInSamePath,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -26,9 +27,10 @@ import {
 } from '../utils/cursor.js';
 import type { DefaultPageSignals } from './default-page-block.js';
 import { getBlockEditingStateByPosition } from './utils.js';
-import { Utils } from '@blocksuite/store';
+import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
+import { showDragHandle } from '../../components/drag-handle.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -125,11 +127,12 @@ export class PageSelectionState {
   }
 
   refreshRichTextBoundsCache(mouseRoot: HTMLElement) {
+    this._blockCache.clear();
     const allBlocks = getAllBlocks();
-    allBlocks.forEach(block => {
+    for (const block of allBlocks) {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
-    });
+    }
   }
 
   clear() {
@@ -149,6 +152,8 @@ export class DefaultSelectionManager {
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
+  private _dragHandleAbortController = new AbortController();
+
   constructor({
     page,
     mouseRoot,
@@ -179,7 +184,26 @@ export class DefaultSelectionManager {
   }
 
   private get _blocks(): BaseBlockModel[] {
-    return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
+    const result: BaseBlockModel[] = [];
+    const queue = this.page.root?.children.slice();
+    if (!queue) {
+      return [];
+    }
+    let layer = 0;
+    while (queue.length) {
+      const length = queue.length;
+      for (let i = 0; i < length; i++) {
+        const blockModel = queue.shift();
+        assertExists(blockModel);
+        blockModel.children && queue.push(...blockModel.children);
+        // ignore level 0, as layer 0 is all affine:frame block
+        if (layer > 0) {
+          result.push(blockModel);
+        }
+      }
+      layer++;
+    }
+    return result;
   }
 
   private get _containerOffset() {
@@ -240,7 +264,6 @@ export class DefaultSelectionManager {
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
     this._signals.nativeSelection.emit(true);
-    noop();
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
@@ -397,6 +420,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const hoverEditingState = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
@@ -417,6 +441,40 @@ export class DefaultSelectionManager {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
+      const clickDragState = getBlockEditingStateByPosition(
+        this._blocks,
+        e.raw.pageX + 20, // in case of handle cannot be clicked in list block
+        e.raw.pageY
+      );
+      if (clickDragState?.model) {
+        this._dragHandleAbortController.abort();
+        this._dragHandleAbortController = new AbortController();
+        const currentModel = clickDragState.model;
+        const element = getBlockElementByModel(currentModel) as HTMLElement;
+        showDragHandle({
+          anchorEl: element,
+          abortController: this._dragHandleAbortController,
+          getModelStateByPosition: (x, y) =>
+            getBlockEditingStateByPosition(this._blocks, x, y),
+          onMouseDown: () => this._setSelectedBlocks([element]),
+          onDrop: (e, lastModelState) => {
+            const rect = lastModelState.position;
+            const nextModel = lastModelState.model;
+            if (doesInSamePath(this.page, currentModel, nextModel)) {
+              return;
+            }
+            this.page.captureSync();
+            const distanceToTop = Math.abs(rect.top - e.y);
+            const distanceToBottom = Math.abs(rect.bottom - e.y);
+            this.page.moveBlock(
+              currentModel,
+              nextModel,
+              distanceToTop < distanceToBottom
+            );
+            this.clearRects();
+          },
+        });
+      }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
     }

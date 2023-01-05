@@ -118,7 +118,7 @@ export class PasteManager {
     }
 
     if (shouldConvertMarkdown) {
-      return this._editor.contentParser.markdown2Block(textClipData);
+      return await this._editor.contentParser.markdown2Block(textClipData);
     }
 
     return this._editor.contentParser.text2blocks(textClipData);
@@ -319,6 +319,7 @@ export class PasteManager {
         caption: block.caption,
         width: block.width,
         height: block.height,
+        language: block.language,
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);
