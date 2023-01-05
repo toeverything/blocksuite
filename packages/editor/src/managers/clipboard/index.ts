@@ -40,8 +40,8 @@ export class ClipboardManager {
     return this._clipboardTarget;
   }
 
-  public importMarkdown(text: string, insertPositionId: string) {
-    const blocks = this._editor.contentParser.markdown2Block(text);
+  public async importMarkdown(text: string, insertPositionId: string) {
+    const blocks = await this._editor.contentParser.markdown2Block(text);
     this._paste.insertBlocks(blocks, {
       type: 'Block',
       selectedBlocks: [{ id: insertPositionId, children: [] }],

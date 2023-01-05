@@ -149,6 +149,7 @@ export class DefaultSelectionManager {
   private _mouseDisposeCallback: () => void;
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
+
   constructor({
     page,
     mouseRoot,
@@ -179,7 +180,26 @@ export class DefaultSelectionManager {
   }
 
   private get _blocks(): BaseBlockModel[] {
-    return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
+    const result: BaseBlockModel[] = [];
+    const queue = this.page.root?.children.slice();
+    if (!queue) {
+      return [];
+    }
+    let layer = 0;
+    while (queue.length) {
+      const length = queue.length;
+      for (let i = 0; i < length; i++) {
+        const blockModel = queue.shift();
+        assertExists(blockModel);
+        blockModel.children && queue.push(...blockModel.children);
+        // ignore level 0, as layer 0 is all affine:frame block
+        if (layer > 0) {
+          result.push(blockModel);
+        }
+      }
+      layer++;
+    }
+    return result;
   }
 
   private get _containerOffset() {

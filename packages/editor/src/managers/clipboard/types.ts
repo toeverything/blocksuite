@@ -36,4 +36,5 @@ export type OpenBlockInfo = {
   caption?: string;
   width?: number;
   height?: number;
+  language?: string;
 };
