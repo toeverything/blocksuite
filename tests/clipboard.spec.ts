@@ -14,6 +14,7 @@ import {
   resetHistory,
   copyByKeyboard,
   pasteByKeyboard,
+  SHORT_KEY,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
@@ -33,7 +34,7 @@ test('clipboard copy paste', async ({ page }) => {
   await setQuillSelection(page, 0, 3);
   await copyByKeyboard(page);
   await focusRichText(page);
-  await pasteByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertText(page, 'testtes');
 });
 
