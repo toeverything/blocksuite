@@ -394,3 +394,8 @@ export function getAllBlocks() {
     );
   });
 }
+
+export const getPageTitle = () =>
+  document.querySelector(
+    '.affine-default-page-block-title'
+  ) as HTMLTextAreaElement;

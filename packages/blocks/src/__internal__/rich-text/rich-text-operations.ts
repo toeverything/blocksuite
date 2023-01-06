@@ -1,6 +1,7 @@
 // operations used in rich-text level
 
 import { Page, Text } from '@blocksuite/store';
+import autosize from 'autosize';
 import type { Quill } from 'quill';
 import {
   ExtendedModel,
@@ -20,7 +21,16 @@ import {
   focusPreviousBlock,
   focusBlockByModel,
   supportsChildren,
+  getPageTitle,
 } from '../utils/index.js';
+
+function focusTextEndAppendText(input: HTMLTextAreaElement, text = '') {
+  const current = input.value + text;
+  input.focus();
+  input.value = '';
+  input.value = current;
+  autosize.update(input);
+}
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -276,8 +286,15 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
             page.deleteBlock(model);
           }
         });
+      } else {
+        const richText = getRichTextByModel(model);
+        if (richText) {
+          page.captureSync();
+          page.deleteBlock(model);
+          const text = richText.quill.getText().trimEnd();
+          focusTextEndAppendText(getPageTitle(), text);
+        }
       }
-      return;
     }
 
     // Before
