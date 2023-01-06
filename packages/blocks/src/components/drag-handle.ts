@@ -186,6 +186,8 @@ export const showDragHandle = ({
     dragHandleEle.removeEventListener('mouseleave', handleMouseLeave);
     indicator.remove();
     dragHandleEle.remove();
+  }, {
+    once: true
   });
 };
 
