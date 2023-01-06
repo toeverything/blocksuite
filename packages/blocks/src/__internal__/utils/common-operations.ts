@@ -65,7 +65,7 @@ export function convertToList(
     const blockProps = {
       flavour: 'affine:list',
       type: listType,
-      text: model?.text?.clone(),
+      text: model.text?.clone(),
       children: model.children,
       ...otherProperties,
     };
@@ -107,7 +107,7 @@ export function convertToParagraph(
     const blockProps = {
       flavour: 'affine:paragraph',
       type: type,
-      text: model?.text?.clone(),
+      text: model.text?.clone(),
       children: model.children,
     };
     page.deleteBlock(model);

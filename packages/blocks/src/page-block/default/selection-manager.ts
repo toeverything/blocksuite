@@ -384,10 +384,7 @@ export class DefaultSelectionManager {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
 
-      assertExists(clickBlockInfo?.model);
-      this.state.activeComponent = getBlockElementByModel(
-        clickBlockInfo?.model
-      );
+      this.state.activeComponent = getBlockElementByModel(clickBlockInfo.model);
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
