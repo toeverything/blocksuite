@@ -225,7 +225,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     const blockProps = {
       flavour: 'affine:paragraph',
       type: 'text',
-      text: model?.text?.clone(),
+      text: model.text?.clone(),
       children: model.children,
     };
     page.captureSync();
