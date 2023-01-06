@@ -9,7 +9,9 @@ import {
 const params = new URLSearchParams(location.search);
 const room =
   params.get('room') ?? typeof window !== 'undefined'
-    ? window.location.origin + window.location.pathname
+    ? import.meta.env.VITE_DEFAULT_ROOM
+      ? import.meta.env.VITE_DEFAULT_ROOM
+      : window.location.origin + window.location.pathname
     : 'playground';
 const url = new URL(window.location.href);
 export const defaultMode =
@@ -18,6 +20,8 @@ export const initParam = params.get('init');
 export const isE2E = params.get('room')?.includes('playwright');
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
+
+console.log('default room:', room);
 
 /**
  * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
