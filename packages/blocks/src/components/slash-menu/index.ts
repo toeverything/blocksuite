@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store/index.js';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Signal } from '@blocksuite/store';
 import {
   calcPositionPointByRange,
