@@ -1,5 +1,9 @@
-import { restoreSelection, saveBlockSelection } from './selection.js';
-import type { SelectedBlock } from './types.js';
+import {
+  getClosestHorizontalEditor,
+  resetNativeSelection,
+  setEndRange,
+  setStartRange,
+} from './selection.js';
 
 export interface IPoint {
   x: number;
@@ -177,12 +181,6 @@ export function initMouseEventHandlers(
   const mouseUpHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
 
-    let selectedBlocks: [SelectedBlock, SelectedBlock] | null = null;
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      selectedBlocks = saveBlockSelection();
-    }
-
     if (!isDragging)
       onContainerClick(
         toSelectionEvent(e, getBoundingClientRect, startX, startY)
@@ -192,8 +190,28 @@ export function initMouseEventHandlers(
         toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
       );
 
-    if (!isInsideBlockContainer(e) && selectedBlocks) {
-      restoreSelection(selectedBlocks);
+    const horizontalElement = getClosestHorizontalEditor(e.clientY);
+    if (!isInsideBlockContainer(e) && horizontalElement) {
+      let containerDom = document.querySelector(
+        '.affine-default-page-block-container'
+      );
+      // TODO adapt edgeless block
+      if (!containerDom) {
+        containerDom = document.querySelector(
+          '.affine-edgeless-page-block-container'
+        );
+      }
+
+      if (containerDom) {
+        const react = containerDom.getBoundingClientRect();
+        if (e.clientX < react.left) {
+          const range = setStartRange(horizontalElement);
+          resetNativeSelection(range);
+        } else {
+          const range = setEndRange(horizontalElement);
+          resetNativeSelection(range);
+        }
+      }
     }
 
     startX = startY = -Infinity;

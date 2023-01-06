@@ -395,7 +395,7 @@ test('select text in the same line with dragging leftward and move outside the e
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -50, y: 0 }
+    { x: -25, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
   await page.keyboard.type('abc');
@@ -436,7 +436,7 @@ test('select text in the same line with dragging rightward and press enter creat
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left - 30, y: bbox.top - 20 };
+    return { x: bbox.left - 20, y: bbox.top - 20 };
   });
   const below789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
@@ -612,4 +612,39 @@ test('should delete line with content after divider should not lost content', as
   await page.keyboard.press('Backspace');
   await assertDivider(page, 0);
   await assertRichTexts(page, ['\n', '123']);
+});
+
+test('the cursor should move to closest editor block when clicking outside container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const rect = await page.evaluate(() => {
+    const secondRichText = document.querySelector(
+      '[data-block-id="3"] .ql-editor'
+    );
+    if (!secondRichText) {
+      throw new Error();
+    }
+
+    return secondRichText.getBoundingClientRect();
+  });
+
+  await page.mouse.move(rect.left - 50, rect.top + 5);
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123456', '789']);
+
+  await undoByKeyboard(page);
+  await page.mouse.move(rect.right + 50, rect.top + 5);
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '45', '789']);
 });
