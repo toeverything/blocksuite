@@ -10,13 +10,12 @@ import {
   BlockChildrenContainer,
   type BlockHost,
   getCurrentRange,
-  getModelsByRange,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { DefaultSelectionManager } from './selection-manager.js';
-import { deleteModels, tryUpdateFrameSize } from '../utils/index.js';
+import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
   EmbedEditingContainer,
@@ -277,8 +276,7 @@ export class DefaultPageBlockComponent
     ) {
       const range = getCurrentRange();
       if (isMultiBlockRange(range)) {
-        const intersectedModels = getModelsByRange(range);
-        deleteModels(this.page, intersectedModels);
+        deleteModelsByRange(this.page);
       }
       window.removeEventListener('keydown', this._handleNativeKeydown);
     } else if (window.getSelection()?.type !== 'Range') {

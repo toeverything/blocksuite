@@ -1,3 +1,4 @@
+import { isPageTitle } from '@blocksuite/blocks/std';
 import { Signal } from '@blocksuite/store';
 import { ClipboardAction } from './types.js';
 
@@ -55,15 +56,24 @@ export class ClipboardEventDispatcher {
   }
 
   private _copyHandler(e: ClipboardEvent) {
+    if (isPageTitle(e)) {
+      return;
+    }
     this.signals.copy.emit(e);
   }
 
   private _cutHandler(e: ClipboardEvent) {
+    if (isPageTitle(e)) {
+      return;
+    }
     if (ClipboardEventDispatcher.editorElementActive()) {
       this.signals.cut.emit(e);
     }
   }
   private _pasteHandler(e: ClipboardEvent) {
+    if (isPageTitle(e)) {
+      return;
+    }
     if (ClipboardEventDispatcher.editorElementActive()) {
       this.signals.paste.emit(e);
     }

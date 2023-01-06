@@ -51,6 +51,21 @@ export class EmbedBlockComponent extends NonShadowLitElement {
     if (this._caption) {
       this._input.classList.add('caption-show');
     }
+
+    // The embed block can not be focused,
+    // so the active element will be the last activated element.
+    // If the active element is the title textarea,
+    // any event will dispatch from it and be ignored. (Most events will ignore title)
+    // so we need to blur it.
+    // See also https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+    this.addEventListener('click', () => {
+      if (
+        document.activeElement &&
+        document.activeElement instanceof HTMLElement
+      ) {
+        document.activeElement.blur();
+      }
+    });
   }
 
   private _onInputChange() {

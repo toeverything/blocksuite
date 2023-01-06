@@ -18,7 +18,7 @@ import {
 } from './utils/asserts.js';
 
 async function initImageState(page: Page) {
-  await page.evaluate(() => {
+  return await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
@@ -32,6 +32,7 @@ async function initImageState(page: Page) {
       },
       frameId
     );
+    return { pageId, frameId };
   });
 }
 
@@ -103,7 +104,7 @@ test('press enter will create new block when click and select image', async ({
   await activeEmbed(page);
   await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.type('aa');
-  await assertRichTexts(page, ['\n', 'aa']);
+  await assertRichTexts(page, ['aa']);
 });
 
 test('enter shortcut on focusing embed block and its caption', async ({

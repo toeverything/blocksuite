@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -17,6 +17,8 @@ import {
   clickBlockTypeMenuItem,
   SHORT_KEY,
   SECONDARY_KEY,
+  resetHistory,
+  readClipboardText,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -555,4 +557,93 @@ test('format list to h1', async ({ page }) => {
   await assertTypeFormat(page, 'bulleted');
   await redoByKeyboard(page);
   await assertTypeFormat(page, 'h1');
+});
+
+test('should cut work single line', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+  await resetHistory(page);
+  await dragBetweenIndices(page, [0, 1], [0, 4]);
+  // cut
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text="ho"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+  await undoByKeyboard(page);
+  const text = await readClipboardText(page);
+  expect(text).toBe('ell');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:xywh="[0,0,720,32]"
+>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+});
+
+test('should cut work multiple line', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await resetHistory(page);
+  // 0    1   2
+  // 1|23 456 78|9
+  await dragBetweenIndices(page, [0, 1], [2, 2]);
+  // cut
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text="19"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
+  await undoByKeyboard(page);
+  const text = await readClipboardText(page);
+  expect(text).toBe('2345678');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
 });

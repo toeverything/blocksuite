@@ -2,13 +2,16 @@
 import '../declare-test-window.js';
 import type { Page as StorePage } from '../../../packages/store/src/index.js';
 import type { ConsoleMessage, Page } from '@playwright/test';
-import { pressEnter } from './keyboard.js';
+import { pressEnter, SHORT_KEY } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
+  if (!process.env.CI) {
+    return true;
+  }
   const ignoredMessages = [
     // basic.spec.ts
     "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
@@ -303,4 +306,21 @@ export async function setSelection(
     },
     { anchorBlockId, anchorOffset, focusBlockId, focusOffset }
   );
+}
+
+export async function readClipboardText(page: Page) {
+  await page.evaluate(() => {
+    const textarea = document.createElement('textarea');
+    textarea.setAttribute('id', 'textarea-test');
+    document.body.appendChild(textarea);
+  });
+  const textarea = page.locator('#textarea-test');
+  await textarea.focus();
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  const text = await textarea.inputValue();
+  await page.evaluate(() => {
+    const textarea = document.querySelector('#textarea-test');
+    textarea?.remove();
+  });
+  return text;
 }

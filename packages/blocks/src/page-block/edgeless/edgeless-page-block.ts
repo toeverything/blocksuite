@@ -27,7 +27,7 @@ import {
 } from './selection-manager.js';
 import {
   bindCommonHotkey,
-  handleBackspace,
+  handleMultiBlockBackspace,
   removeCommonHotKey,
   tryUpdateFrameSize,
 } from '../utils/index.js';
@@ -141,7 +141,7 @@ export class EdgelessPageBlockComponent
           type: 'none',
         });
       } else {
-        handleBackspace(this.page, e);
+        handleMultiBlockBackspace(this.page, e);
       }
     }
   };

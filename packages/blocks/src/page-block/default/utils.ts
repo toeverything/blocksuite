@@ -13,14 +13,12 @@ import {
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
-  getSplicedTitle,
   getStartModelBySelection,
   hotkey,
   HOTKEYS,
   isPageTitle,
   getRichTextByModel,
   matchFlavours,
-  noop,
   Point,
   resetNativeSelection,
   BLOCK_ID_ATTR,
@@ -28,7 +26,7 @@ import {
 import type { PageBlockModel } from '../page-model.js';
 import {
   bindCommonHotkey,
-  handleBackspace,
+  handleMultiBlockBackspace,
   handleBlockSelectionBatchDelete,
   handleSelectAll,
   removeCommonHotKey,
@@ -260,6 +258,20 @@ export function handleDown(
   }
 }
 
+function isDispatchFromCodeBlock(e: KeyboardEvent) {
+  if (!e.target || !(e.target instanceof Element)) {
+    return false;
+  }
+  try {
+    // if the target is `body`, it will throw an error
+    const model = getModelByElement(e.target);
+    return matchFlavours(model, ['affine:code']);
+  } catch (error) {
+    // just check failed, no need to handle
+    return false;
+  }
+}
+
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
@@ -314,34 +326,24 @@ export function bindHotkeys(
 
   hotkey.addListener(BACKSPACE, e => {
     const { state } = selection;
-    if (state.type === 'native') {
-      handleBackspace(page, e);
+    if (state.type === 'none') {
+      // Will be handled in the `keyboard.onBackspace` function
       return;
     }
-
-    // XXX Ad-hoc for code block
-    // At the beginning of the code block,
-    // the backspace will selected the block first.
-    // The select logic already processed in the `handleLineStartBackspace` function.
-    // So we need to prevent the default delete behavior.
-    const isDispatchFromCodeBlock = (e: KeyboardEvent) => {
-      if (!e.target || !(e.target instanceof Element)) {
-        return false;
-      }
-      try {
-        // if the target is `body`, it will throw an error
-        const model = getModelByElement(e.target);
-        return matchFlavours(model, ['affine:code']);
-      } catch (error) {
-        // just check failed, no need to handle
-        return false;
-      }
-    };
-    if (isDispatchFromCodeBlock(e)) {
+    if (state.type === 'native') {
+      handleMultiBlockBackspace(page, e);
       return;
     }
 
     if (state.type === 'block') {
+      // XXX Ad-hoc for code block
+      // At the beginning of the code block,
+      // the backspace will selected the block first.
+      // The select logic already processed in the `handleLineStartBackspace` function.
+      // So we need to prevent the default delete behavior.
+      if (isDispatchFromCodeBlock(e)) {
+        return;
+      }
       const { selectedBlocks } = state;
 
       // delete selected blocks
@@ -356,24 +358,12 @@ export function bindHotkeys(
       signals.updateEmbedEditingState.emit(null);
       return;
     }
-    if (isPageTitle(e)) {
-      const target = e.target as HTMLTextAreaElement;
-      // range delete
-      if (target.selectionStart !== target.selectionEnd) {
-        e.preventDefault();
-        const title = getSplicedTitle(target);
-        page.updateBlock(pageModel, { title });
-        page.workspace.setPageMeta(page.id, { title });
-      }
-      // collapsed delete
-      else {
-        noop();
-      }
-      return;
-    }
   });
 
   hotkey.addListener(SELECT_ALL, e => {
+    if (isPageTitle(e)) {
+      return;
+    }
     e.preventDefault();
     handleSelectAll(selection);
     selection.state.type = 'block';

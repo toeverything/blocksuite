@@ -31,26 +31,35 @@ import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 
-export function deleteModels(page: Page, models: BaseBlockModel[]) {
-  const selection = window.getSelection();
+export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
+  const models = getModelsByRange(range);
+
   const first = models[0];
-  const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
+  const last = models[models.length - 1];
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
-  assertExists(selection);
 
   const firstTextIndex = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset as number,
+    range.startContainer,
+    range.startOffset,
     true
   );
   const endTextIndex = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset as number,
+    range.endContainer,
+    range.endOffset,
     false
   );
+
+  // Only select one block
+  if (models.length === 1) {
+    firstRichText.model.text?.delete(
+      firstTextIndex,
+      endTextIndex - firstTextIndex
+    );
+    return;
+  }
 
   const isFirstRichTextNotEmpty =
     firstRichText.model.text &&
@@ -156,18 +165,18 @@ export function transformBlock(
   return id;
 }
 
-export function handleBackspace(page: Page, e: KeyboardEvent) {
+/**
+ * Do nothing when selection is collapsed or not multi block selected
+ */
+export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   // workaround page title
   if (isPageTitle(e)) return;
   if (isNoneSelection()) return;
-  if (!isCollapsedSelection() && isRangeSelection()) {
-    const range = getCurrentRange();
-    if (isMultiBlockRange(range)) {
-      e.preventDefault();
-      const intersectedModels = getModelsByRange(range);
-      deleteModels(page, intersectedModels);
-    }
-  }
+  if (isCollapsedSelection()) return;
+  if (!isMultiBlockRange()) return;
+
+  e.preventDefault();
+  deleteModelsByRange(page);
 }
 
 export const getFormat = () => {

@@ -1,4 +1,5 @@
 import {
+  deleteModelsByRange,
   EmbedBlockModel,
   getCurrentRange,
   ListBlockModel,
@@ -38,27 +39,7 @@ export class CopyCutManager {
 
   public handleCut(e: ClipboardEvent) {
     this.handleCopy(e);
-    // FIXME
-    /*
-    const { selectionInfo } = this._selection;
-    if (selectionInfo.type == 'Block') {
-      selectionInfo.blocks.forEach(({ id }) =>
-        this._editor.space.deleteBlockById(id)
-      );
-    } else if (
-      selectionInfo.type === 'Range' ||
-      selectionInfo.type === 'Caret'
-    ) {
-      // TODO the selection of  discontinuous and cross blocks are not exist yet
-      this._editor.space.richTextAdapters
-        .get(selectionInfo.anchorBlockId)
-        ?.quill.deleteText(
-          selectionInfo.anchorBlockPosition || 0,
-          (selectionInfo.focusBlockPosition || 0) -
-            (selectionInfo.anchorBlockPosition || 0)
-        );
-    }
-    */
+    deleteModelsByRange(this._editor.page);
   }
 
   private _getClipItems() {
