@@ -7,6 +7,7 @@ import {
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
+// We need to split room between different PR, branches, and local version
 const room =
   params.get('room') ?? typeof window !== 'undefined'
     ? import.meta.env.VITE_DEFAULT_ROOM
