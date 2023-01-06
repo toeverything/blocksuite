@@ -43,7 +43,7 @@ export class SurfaceBlockComponent extends LitElement {
     const params = new URLSearchParams(location.search);
     if (params.get('phasor') !== null) {
       bindWheelEvents(this._renderer, this.mouseRoot);
-      initMockData(this._renderer, 2000, 4000, 4000);
+      initMockData(this._renderer, 1000000, 100000, 100000);
     }
   }
 

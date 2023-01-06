@@ -120,10 +120,8 @@ export class EdgelessPageBlockComponent
   private _selection!: EdgelessSelectionManager;
 
   private _bindHotkeys() {
-    const { page: space } = this;
-
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
-    bindCommonHotkey(space);
+    bindCommonHotkey(this.page);
   }
 
   private _removeHotkeys() {
@@ -197,6 +195,7 @@ export class EdgelessPageBlockComponent
     this._bindHotkeys();
 
     tryUpdateFrameSize(this.page, this.viewport.zoom);
+
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
       tryUpdateFrameSize(this.page, this.viewport.zoom);
@@ -264,9 +263,6 @@ export class EdgelessPageBlockComponent
             position: relative;
             overflow: hidden;
             height: 100%;
-
-            /* background-image: linear-gradient(#cccccc66 1px, transparent 1px),
-                            linear-gradient(90deg, #cccccc66 1px, transparent 1px); */
             background-size: ${20 * this.viewport.zoom}px
               ${20 * this.viewport.zoom}px;
             background-position: ${translateX}px ${translateY}px;

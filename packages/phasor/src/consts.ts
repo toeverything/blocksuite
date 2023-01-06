@@ -1,5 +1,5 @@
-export const MIN_ZOOM = 0.2;
-export const GRID_SIZE = 1000;
+export const MIN_ZOOM = 0.3;
+export const GRID_SIZE = 3000;
 
 export interface Bound {
   x: number;
