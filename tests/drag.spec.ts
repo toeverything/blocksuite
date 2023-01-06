@@ -63,12 +63,12 @@ test('move drag handle', async ({ page }) => {
   await page.mouse.down();
   await page.mouse.move(
     paragraph.x + paragraph.width / 2,
-    paragraph.y + paragraph.height / 2,
+    paragraph.y + paragraph.height - 1,
     {
       steps: 50,
     }
   );
   await page.mouse.up();
 
-  await assertRichTexts(page, ['456', '123', '789']);
+  await assertRichTexts(page, ['456', '789', '123']);
 });
