@@ -30,7 +30,7 @@ export const BlockSchema = {
   'affine:code': CodeBlockModel,
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
-  'affine:shape': ShapeBlockModel,
+  // 'affine:shape': ShapeBlockModel,
   'affine:surface': SurfaceBlockModel,
 };
 

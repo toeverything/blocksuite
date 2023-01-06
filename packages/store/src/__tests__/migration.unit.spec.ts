@@ -22,12 +22,11 @@ describe('migration', () => {
     const result = doc.toJSON();
     assert.deepEqual(result['space:meta']['versions'], {
       'affine:paragraph': 1,
-      'affine:page': 2,
+      'affine:page': 1,
       'affine:list': 1,
       'affine:frame': 1,
       'affine:divider': 1,
       'affine:embed': 1,
-      'affine:shape': 1,
       'affine:code': 1,
       'affine:surface': 1,
     });
@@ -45,32 +44,32 @@ describe('migration', () => {
     );
   });
 
-  test('migrate add surface', async () => {
+  test('migrate to surface block', async () => {
     const doc = await loadBinary('legacy-surface');
     tryMigrate(doc);
 
     const result = doc.toJSON();
     assert.deepEqual(result['space:meta']['versions'], {
       'affine:paragraph': 1,
-      'affine:page': 2,
+      'affine:page': 1,
       'affine:list': 1,
       'affine:frame': 1,
       'affine:divider': 1,
       'affine:embed': 1,
-      'affine:shape': 1,
       'affine:code': 1,
       'affine:surface': 1,
     });
     const hasSurface = Object.entries(result['space:page0']).some(
-      ([_, value]: [string, unknown]) => {
-        if (
-          (value as Record<string, unknown>)['sys:flavour'] === 'affine:surface'
-        ) {
-          return true;
-        }
-        return false;
-      }
+      ([_, value]: [string, unknown]) =>
+        (value as Record<string, unknown>)['sys:flavour'] === 'affine:surface'
     );
+
+    const hasShape = Object.entries(result['space:page0']).some(
+      ([_, value]: [string, unknown]) =>
+        (value as Record<string, unknown>)['sys:flavour'] === 'affine:shape'
+    );
+
     expect(hasSurface).toBe(true);
+    expect(hasShape).toBe(false);
   });
 });

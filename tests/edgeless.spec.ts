@@ -140,7 +140,7 @@ test('resize the block', async ({ page }) => {
   expect(newXywh).toBe(xywh);
 });
 
-test('add shape blocks', async ({ page }) => {
+test.skip('add shape blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -193,7 +193,7 @@ test('add shape blocks', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 });
 
-test('delete shape block by keyboard', async ({ page }) => {
+test.skip('delete shape block by keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
