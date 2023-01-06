@@ -3,7 +3,6 @@ import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { styleMap } from 'lit/directives/style-map.js';
-import { NonShadowLitElement } from '../__internal__/index.js';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
