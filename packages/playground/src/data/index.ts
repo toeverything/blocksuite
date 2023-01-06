@@ -38,12 +38,7 @@ export const basic = (workspace: Workspace) => {
       flavour: 'affine:page',
       title: 'Welcome to BlockSuite playground',
     });
-    page.addBlock(
-      {
-        flavour: 'affine:surface',
-      },
-      null
-    );
+    page.addBlock({ flavour: 'affine:surface' }, null);
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
     page.addBlock(
       {

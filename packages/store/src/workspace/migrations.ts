@@ -11,13 +11,13 @@ interface Migration {
 
 const migrations: Migration[] = [
   {
-    desc: 'add initial affine:surface block',
+    desc: 'add affine:surface',
     condition: doc => {
       const yVersions = doc
         .getMap('space:meta')
         .get('versions') as Y.Map<number>;
       if (!yVersions) return false;
-      return yVersions.get('affine:page') === 1;
+      return yVersions.get('affine:shape') === 1;
     },
     migrate: doc => {
       // @ts-ignore
@@ -28,7 +28,7 @@ const migrations: Migration[] = [
       const yVersions = doc
         .getMap('space:meta')
         .get('versions') as Y.Map<number>;
-      yVersions.set('affine:page', 2);
+      yVersions.delete('affine:shape');
       yVersions.set('affine:surface', 1);
 
       for (const pageId of pageIds) {
@@ -41,6 +41,12 @@ const migrations: Migration[] = [
           flavour: 'affine:surface',
         });
         yBlocks.set(id, yBlock);
+        // @ts-ignore
+        yBlocks.forEach((yBlock: Y.Map<unknown>, id) => {
+          if (yBlock.get('sys:flavour') === 'affine:shape') {
+            yBlocks.delete(id);
+          }
+        });
       }
     },
   },
