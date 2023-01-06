@@ -41,7 +41,7 @@ export function getBlockEditingStateByPosition(
   x: number,
   y: number
 ) {
-  for (let index = 0; index <= blocks.length - 1; index++) {
+  for (let index = blocks.length - 1; index >= 0; index--) {
     const block = blocks[index];
     const hoverDom = getBlockById(block.id);
     // code block use async loading
