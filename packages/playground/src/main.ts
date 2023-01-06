@@ -53,21 +53,27 @@ async function main() {
 
   subscribePage(workspace);
 
-  const initFunctions = (await import('./data/index.js')) as Record<
-    string,
-    (workspace: Workspace) => void
-  >;
-  initButton.addEventListener('click', () => initFunctions.basic(workspace));
+  const initFunctions = new Map(
+    Object.entries(
+      (await import('./data/index.js')) as Record<
+        string,
+        (workspace: Workspace) => void
+      >
+    )
+  );
+  initButton.addEventListener('click', () =>
+    initFunctions.get('basic')?.(workspace)
+  );
 
   if (initParam != null) {
-    if (initFunctions[initParam]) {
-      initFunctions[initParam]?.(workspace);
+    if (initFunctions.has(initParam)) {
+      initFunctions.get(initParam)?.(workspace);
     } else {
       if (initParam !== '' && isBase64.test(initParam)) {
         Utils.applyYjsUpdateV2(workspace, initParam);
       } else {
         // fallback
-        initFunctions.basic(workspace);
+        initFunctions.get('basic')?.(workspace);
       }
     }
   }

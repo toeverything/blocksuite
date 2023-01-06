@@ -16,7 +16,8 @@
     "@blocksuite/store": "workspace:*",
     "lit": "^2.5.0",
     "marked": "^4.2.5",
-    "turndown": "^7.1.1"
+    "turndown": "^7.1.1",
+    "xss": "^1.0.14"
   },
   "devDependencies": {
     "@types/marked": "^4.0.8",
