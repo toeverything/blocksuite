@@ -1,3 +1,0 @@
-# @blocksuite/editor
-
-TODO

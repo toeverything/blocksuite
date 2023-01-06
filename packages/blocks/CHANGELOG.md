@@ -1,3 +1,0 @@
-# @blocksuite/blocks
-
-TODO
