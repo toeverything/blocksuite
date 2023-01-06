@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 import {
+  dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   initEmptyParagraphState,
+  initThreeLists,
   initThreeParagraphs,
 } from './utils/actions/index.js';
 import { assertRichTexts } from './utils/asserts.js';
@@ -42,33 +44,20 @@ test('only have one drag handle in screen', async ({ page }) => {
   expect(length2).toBe(1);
 });
 
-test('move drag handle', async ({ page }) => {
+test('move drag handle in paragraphs', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  const handle = await page.locator('affine-drag-handle').boundingBox();
-  const paragraph = await page.locator('[data-block-id="4"]').boundingBox();
-  if (!handle || !paragraph) {
-    throw new Error();
-  }
-  await page.mouse.click(
-    handle.x + handle.width / 2,
-    handle.y + handle.height / 2
-  );
-  await page.mouse.move(
-    handle.x + handle.width / 2,
-    handle.y + handle.height / 2
-  );
-  await page.mouse.down();
-  await page.mouse.move(
-    paragraph.x + paragraph.width / 2,
-    paragraph.y + paragraph.height - 1,
-    {
-      steps: 50,
-    }
-  );
-  await page.mouse.up();
-
+  await dragHandleFromBlockToBlockBottomById(page, '2', '4');
   await assertRichTexts(page, ['456', '789', '123']);
+});
+
+test('move drag handle in list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await dragHandleFromBlockToBlockBottomById(page, '5', '3', false);
+  await assertRichTexts(page, ['789', '123', '456']);
 });
