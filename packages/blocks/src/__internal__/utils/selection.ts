@@ -101,7 +101,7 @@ function fixCurrentRangeToText(
   return range;
 }
 
-function setStartRange(editableContainer: Element) {
+export function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
   let firstNode = editableContainer.firstChild;
   while (firstNode?.firstChild) {
@@ -114,7 +114,7 @@ function setStartRange(editableContainer: Element) {
   return newRange;
 }
 
-function setEndRange(editableContainer: Element) {
+export function setEndRange(editableContainer: Element) {
   const newRange = document.createRange();
   let lastNode = editableContainer.lastChild;
   while (lastNode?.lastChild) {
@@ -828,4 +828,39 @@ export function restoreSelection(selectedBlocks: SelectedBlock[]) {
   range.setEnd(endNode, endOffset);
   resetNativeSelection(range);
   return range;
+}
+
+/**
+ * Get the closest editor element in the horizontal position
+ */
+export function getClosestHorizontalEditor(clientY: number) {
+  // sort for binary search (In fact, it is generally orderly, just in case)
+  const editorsElements = Array.from(
+    document.querySelectorAll('.ql-editor')
+  ).sort((a, b) =>
+    // getBoundingClientRect here actually run so fast because of the browser cache
+    a.getBoundingClientRect().top > b.getBoundingClientRect().top ? 1 : -1
+  );
+
+  // binary search
+  let left = 0;
+  let right = editorsElements.length - 1;
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const minElement = editorsElements[mid];
+    if (
+      clientY <= minElement.getBoundingClientRect().bottom &&
+      (mid === 0 ||
+        clientY > editorsElements[mid - 1].getBoundingClientRect().bottom)
+    ) {
+      return editorsElements[mid];
+    }
+    if (minElement.getBoundingClientRect().top > clientY) {
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
+  }
+
+  return null;
 }
