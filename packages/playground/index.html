@@ -36,10 +36,50 @@
       #init-btn:not(:disabled) {
         cursor: pointer;
       }
+
+      #router {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+      }
     </style>
   </head>
   <body>
+    <div id="router">
+      <p>Example list</p>
+      <sl-button id="blob-router">Blob</sl-button>
+      <sl-button id="canvas-router">Canvas</sl-button>
+      <sl-button id="counter-router">Counter</sl-button>
+      <sl-button id="workspace-router">Workspace</sl-button>
+    </div>
     <button id="init-btn">Init Editor</button>
     <script type="module" src="./src/main.ts"></script>
+    <script type="module">
+      const blobRouter = document.getElementById('blob-router');
+      blobRouter.addEventListener('click', () => {
+        window.location = new URL('/examples/blob/index.html', window.location);
+      });
+      const canvasRouter = document.getElementById('canvas-router');
+      canvasRouter.addEventListener('click', () => {
+        window.location = new URL(
+          '/examples/canvas/index.html',
+          window.location
+        );
+      });
+      const counterRouter = document.getElementById('counter-router');
+      counterRouter.addEventListener('click', () => {
+        window.location = new URL(
+          '/examples/counter/index.html',
+          window.location
+        );
+      });
+      const workspaceRouter = document.getElementById('workspace-router');
+      workspaceRouter.addEventListener('click', () => {
+        window.location = new URL(
+          '/examples/workspace/index.html',
+          window.location
+        );
+      });
+    </script>
   </body>
 </html>

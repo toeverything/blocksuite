@@ -21,6 +21,8 @@ const options = getOptions();
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
+    const routerElement = document.getElementById('router');
+    routerElement?.remove();
     const page = workspace.getPage(pageId) as Page;
 
     const editor = new EditorContainer();
