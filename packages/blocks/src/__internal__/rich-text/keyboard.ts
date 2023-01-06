@@ -342,6 +342,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       // Slash '/'
       key: 191,
       handler() {
+        // TODO remove feature flag after slash menu is stable
         const params = new URLSearchParams(location.search);
         const flag = params.get('slash');
         if (flag === null) {
