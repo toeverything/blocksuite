@@ -19,11 +19,9 @@ const initButton = document.getElementById('init-btn') as HTMLButtonElement;
 
 // Subscribe for page update and create editor after page loaded.
 if (!isE2E) {
-  const initFunctions = (await import('./data/index.js')) as Record<
-    string,
-    (workspace: Workspace) => void
-  >;
-  initButton.addEventListener('click', () => initFunctions.basic(workspace));
+  import('./data/index.js').then(({ basic }) => {
+    initButton.addEventListener('click', () => basic(workspace));
+  });
 }
 
 export const App = () => {
