@@ -457,6 +457,7 @@ export class DefaultSelectionManager {
           getModelStateByPosition: (x, y) =>
             getBlockEditingStateByPosition(this._blocks, x, y),
           onMouseDown: () => this._setSelectedBlocks([element]),
+          onMouseLeave: () => this._setSelectedBlocks([]),
           onDrop: (e, lastModelState) => {
             const rect = lastModelState.position;
             const nextModel = lastModelState.model;
