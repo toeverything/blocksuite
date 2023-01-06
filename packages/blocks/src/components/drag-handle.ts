@@ -12,10 +12,6 @@ export class DragIndicator extends LitElement {
   @property()
   cursorPosition!: IPoint;
 
-  connectedCallback() {
-    super.connectedCallback();
-  }
-
   override render() {
     if (!this.targetRect || !this.cursorPosition) {
       return null;
@@ -65,7 +61,7 @@ export class DragHandle extends LitElement {
 
   override render() {
     return html`
-      <div>
+      <div class="affine-drag-handle">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 128 512"
