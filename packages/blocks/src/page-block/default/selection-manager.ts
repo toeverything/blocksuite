@@ -19,6 +19,8 @@ import {
   isInput,
   IPoint,
   doesInSamePath,
+  getCurrentRange,
+  debounce,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -179,7 +181,8 @@ export class DefaultSelectionManager {
       this._onContainerDblClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
-      this._onContainerContextMenu
+      this._onContainerContextMenu,
+      this._onSelectionChange
     );
   }
 
@@ -482,6 +485,20 @@ export class DefaultSelectionManager {
 
   private _onContainerMouseOut = (e: SelectionEvent) => {
     // console.log('mouseout', e);
+  };
+
+  private _onSelectionChange = (e: Event) => {
+    const range = getCurrentRange();
+
+    if (range.startOffset === range.endOffset) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      showFormatQuickBar({
+        direction: 'right-bottom',
+      });
+    });
   };
 
   clearRects() {
