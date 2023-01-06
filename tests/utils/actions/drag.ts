@@ -72,8 +72,8 @@ export async function dragOverTitle(page: Page) {
     const titleBound = titleInput.getBoundingClientRect();
 
     return {
-      from: { x: titleBound.left, y: titleBound.top },
-      to: { x: titleBound.right, y: titleBound.bottom },
+      from: { x: titleBound.left + 1, y: titleBound.top + 1 },
+      to: { x: titleBound.right - 1, y: titleBound.bottom - 1 },
     };
   });
   await dragBetweenCoords(page, from, to, {

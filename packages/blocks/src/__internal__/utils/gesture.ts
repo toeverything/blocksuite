@@ -1,3 +1,6 @@
+import { restoreSelection, saveBlockSelection } from './selection.js';
+import type { SelectedBlock } from './types.js';
+
 export interface IPoint {
   x: number;
   y: number;
@@ -76,6 +79,22 @@ export function isPageTitle(e: Event) {
 }
 export function isInput(e: Event) {
   return e.target instanceof HTMLTextAreaElement;
+}
+export function isInsideBlockContainer(e: Event) {
+  const defaultBlockContainer = document.querySelector(
+    '.affine-default-page-block-container'
+  );
+  const edgelessBlockContainer = document.querySelector(
+    '.affine-edgeless-page-block-container'
+  );
+  return (
+    (e.target instanceof Node &&
+      defaultBlockContainer &&
+      defaultBlockContainer.contains(e.target)) ||
+    (e.target instanceof Node &&
+      edgelessBlockContainer &&
+      edgelessBlockContainer.contains(e.target))
+  );
 }
 
 function tryPreventDefault(e: MouseEvent) {
@@ -158,6 +177,12 @@ export function initMouseEventHandlers(
   const mouseUpHandler = (e: MouseEvent) => {
     tryPreventDefault(e);
 
+    let selectedBlocks: [SelectedBlock, SelectedBlock] | null = null;
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      selectedBlocks = saveBlockSelection();
+    }
+
     if (!isDragging)
       onContainerClick(
         toSelectionEvent(e, getBoundingClientRect, startX, startY)
@@ -166,6 +191,10 @@ export function initMouseEventHandlers(
       onContainerDragEnd(
         toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
       );
+
+    if (!isInsideBlockContainer(e) && selectedBlocks) {
+      restoreSelection(selectedBlocks);
+    }
 
     startX = startY = -Infinity;
     isDragging = false;
