@@ -19,28 +19,22 @@ export function isCollapsedAtBlockStart(quill: Quill) {
 
 export function doesInSamePath(
   page: Page,
-  model: BaseBlockModel,
-  target: BaseBlockModel
+  children: BaseBlockModel,
+  father: BaseBlockModel
 ): boolean {
-  if (model === target) {
+  if (children === father) {
     return true;
   }
-  const doesInSamePathImpl = (
-    model: BaseBlockModel,
-    target: BaseBlockModel
-  ) => {
-    let parent: BaseBlockModel | null;
-    for (;;) {
-      parent = page.getParent(model);
-      if (parent === null) {
-        return false;
-      } else if (parent.id === target.id) {
-        return true;
-      }
-      model = parent;
+  let parent: BaseBlockModel | null;
+  for (;;) {
+    parent = page.getParent(children);
+    if (parent === null) {
+      return false;
+    } else if (parent.id === father.id) {
+      return true;
     }
-  };
-  return doesInSamePathImpl(model, target) || doesInSamePathImpl(target, model);
+    children = parent;
+  }
 }
 
 export function convertToList(

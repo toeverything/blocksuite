@@ -460,7 +460,7 @@ export class DefaultSelectionManager {
           onDrop: (e, lastModelState) => {
             const rect = lastModelState.position;
             const nextModel = lastModelState.model;
-            if (doesInSamePath(this.page, currentModel, nextModel)) {
+            if (doesInSamePath(this.page, nextModel, currentModel)) {
               return;
             }
             this.page.captureSync();
