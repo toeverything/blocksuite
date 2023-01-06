@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { execSync } from 'node:child_process';
-let DEFAULT_ROOM: string;
+let DEFAULT_ROOM = '';
 // Refs: https://vercel.com/docs/concepts/projects/environment-variables#system-environment-variables
 if (process.env.VERCEL === '1') {
   DEFAULT_ROOM = `${process.env.VERCEL_GIT_COMMIT_REF}-${process.env.VERCEL_GIT_COMMIT_SHA}`;
