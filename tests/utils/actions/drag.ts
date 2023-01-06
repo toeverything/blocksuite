@@ -115,6 +115,48 @@ export async function dragEmbedResizeByBottomLeft(page: Page) {
   });
 }
 
+export async function dragHandleFromBlockToBlockBottomById(
+  page: Page,
+  sourceId: string,
+  targetId: string,
+  bottom = true
+) {
+  const sourceBlock = await page
+    .locator(`[data-block-id="${sourceId}"]`)
+    .boundingBox();
+  const targetBlock = await page
+    .locator(`[data-block-id="${targetId}"]`)
+    .boundingBox();
+  if (!sourceBlock || !targetBlock) {
+    throw new Error();
+  }
+  await page.mouse.move(
+    sourceBlock.x + sourceBlock.width / 2,
+    sourceBlock.y + sourceBlock.height / 2
+  );
+  const handle = await page.locator('affine-drag-handle').boundingBox();
+  if (!handle) {
+    throw new Error();
+  }
+  await page.mouse.click(
+    handle.x + handle.width / 2,
+    handle.y + handle.height / 2
+  );
+  await page.mouse.move(
+    handle.x + handle.width / 2,
+    handle.y + handle.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    targetBlock.x + targetBlock.width / 2,
+    targetBlock.y + (bottom ? targetBlock.height - 1 : 1),
+    {
+      steps: 50,
+    }
+  );
+  await page.mouse.up();
+}
+
 export async function moveToImage(page: Page) {
   const { x, y } = await page.evaluate(() => {
     const bottomRightButton = document.querySelector('img') as HTMLElement;
