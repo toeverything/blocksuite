@@ -20,7 +20,6 @@ import {
   IPoint,
   doesInSamePath,
   getCurrentRange,
-  debounce,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
