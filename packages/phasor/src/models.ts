@@ -55,18 +55,17 @@ export class PathModel extends BaseModel {
   }
 }
 
-export class ImageModel extends BaseModel {
+export class RectModel extends BaseModel {
   type = TYPE_IMAGE;
-  index: number;
-  constructor(id: number, index: number) {
+  color = BLACK;
+  constructor(id: number) {
     super(id);
-    this.index = index;
   }
 
   render(ctx: CanvasRenderingContext2D): void {
+    ctx.strokeStyle = this.color;
     ctx.strokeRect(0, 0, this.w, this.h);
-    // ctx.drawImage(bitmap, 0, 0, this.w, this.h);
   }
 }
 
-export type Model = PathModel | ImageModel;
+export type Model = PathModel | RectModel;

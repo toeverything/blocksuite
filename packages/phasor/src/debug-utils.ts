@@ -1,4 +1,4 @@
-import { PathModel, ImageModel, type Model } from './models.js';
+import { PathModel, RectModel, type Model } from './models.js';
 import type { Renderer } from './renderer.js';
 
 const PATH_POINTS = 10;
@@ -37,7 +37,8 @@ function createMockModel(id: number, rangeX: number, rangeY: number) {
     return model;
   } else {
     const size = randomInt(IMAGE_MAX, IMAGE_MIN);
-    const model = new ImageModel(id, 0);
+    const model = new RectModel(id);
+    model.color = randomColor();
     model.setBound(x, y, size, size);
     return model;
   }
