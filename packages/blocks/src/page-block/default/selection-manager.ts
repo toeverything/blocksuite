@@ -492,6 +492,7 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
+    this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
