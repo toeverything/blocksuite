@@ -6,6 +6,16 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
+  static styles = css`
+    .affine-drag-indicator {
+      position: fixed;
+      height: 3px;
+      background: var(--affine-primary-color);
+      transition: top, left 300ms, 100ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+        transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    }
+  `;
+
   @property()
   targetRect!: DOMRect;
 
@@ -20,17 +30,10 @@ export class DragIndicator extends LitElement {
     const distanceToTop = Math.abs(rect.top - this.cursorPosition.y);
     const distanceToBottom = Math.abs(rect.bottom - this.cursorPosition.y);
     return html`
-      <style>
-        .affine-drag-indicator {
-          position: absolute;
-          width: ${rect.width + 10}px;
-          height: 3px;
-          background: var(--affine-primary-color);
-        }
-      </style>
       <div
         class="affine-drag-indicator"
         style=${styleMap({
+          width: `${rect.width + 10}px`,
           left: `${rect.left}px`,
           top: `${distanceToTop < distanceToBottom ? rect.top : rect.bottom}px`,
         })}
@@ -131,6 +134,13 @@ export const showDragHandle = ({
   const indicator = <DragIndicator>(
     document.createElement('affine-drag-indicator')
   );
+
+  const handleDragStart = (e: DragEvent) => {
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  };
+
   const handleDragMove = (e: MouseEvent) => {
     const modelState = getModelStateByPosition(e.pageX, e.pageY);
     if (modelState) {
@@ -142,11 +152,14 @@ export const showDragHandle = ({
       y: e.y,
     };
   };
+
   const handleDragEnd = (e: DragEvent) => {
     if (lastModelState) {
       onDrop(e, lastModelState);
     }
   };
+
+  dragHandleEle.addEventListener('dragstart', handleDragStart);
   dragHandleEle.addEventListener('drag', handleDragMove);
   dragHandleEle.addEventListener('dragend', handleDragEnd);
   dragHandleEle.addEventListener('mousedown', handleMouseDown);
@@ -159,6 +172,7 @@ export const showDragHandle = ({
   container.appendChild(indicator);
 
   abortController.signal.addEventListener('abort', () => {
+    dragHandleEle.removeEventListener('dragstart', handleDragStart);
     dragHandleEle.removeEventListener('drag', handleDragMove);
     dragHandleEle.removeEventListener('dragend', handleDragEnd);
     container.removeEventListener('dragover', handleDragOver);
