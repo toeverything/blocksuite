@@ -11,6 +11,7 @@ export const Editor = ({ page }: { page: Page }) => {
       editor.page = page;
       if (page.root === null) {
         const pageBlockId = page.addBlock({ flavour: 'affine:page' });
+        page.addBlock({ flavour: 'affine:surface' });
         const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
         page.addBlock({ flavour: 'affine:paragraph' }, frameId);
         page.resetHistory();
