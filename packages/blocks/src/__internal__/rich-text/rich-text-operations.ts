@@ -19,6 +19,7 @@ import {
   matchFlavours,
   focusPreviousBlock,
   focusBlockByModel,
+  supportsChildren,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -114,7 +115,7 @@ export function handleBlockSplit(
  */
 export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   const previousSibling = page.getPreviousSibling(model);
-  if (!previousSibling) {
+  if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
   }
