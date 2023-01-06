@@ -12,14 +12,20 @@ test('only have one drag handle in screen', async ({ page }) => {
   await initThreeParagraphs(page);
   const topLeft = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"]');
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top + 2 };
+    const box = paragraph?.getBoundingClientRect();
+    if (!box) {
+      throw new Error();
+    }
+    return { x: box.left, y: box.top + 2 };
   }, []);
 
   const rightBottom = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"]');
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right, y: bbox.bottom - 2 };
+    const box = paragraph?.getBoundingClientRect();
+    if (!box) {
+      throw new Error();
+    }
+    return { x: box.right, y: box.bottom - 2 };
   }, []);
 
   await page.mouse.move(topLeft.x, topLeft.y);
