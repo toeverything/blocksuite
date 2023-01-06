@@ -258,6 +258,20 @@ export function handleDown(
   }
 }
 
+function isDispatchFromCodeBlock(e: KeyboardEvent) {
+  if (!e.target || !(e.target instanceof Element)) {
+    return false;
+  }
+  try {
+    // if the target is `body`, it will throw an error
+    const model = getModelByElement(e.target);
+    return matchFlavours(model, ['affine:code']);
+  } catch (error) {
+    // just check failed, no need to handle
+    return false;
+  }
+}
+
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
@@ -309,20 +323,6 @@ export function bindHotkeys(
       return;
     }
   });
-
-  const isDispatchFromCodeBlock = (e: KeyboardEvent) => {
-    if (!e.target || !(e.target instanceof Element)) {
-      return false;
-    }
-    try {
-      // if the target is `body`, it will throw an error
-      const model = getModelByElement(e.target);
-      return matchFlavours(model, ['affine:code']);
-    } catch (error) {
-      // just check failed, no need to handle
-      return false;
-    }
-  };
 
   hotkey.addListener(BACKSPACE, e => {
     const { state } = selection;
