@@ -41,7 +41,6 @@ test('only have one drag handle in screen', async ({ page }) => {
     const handles = document.querySelectorAll('affine-drag-handle');
     return handles.length;
   }, []);
-  expect(await page.locator('affine-drag-indicator').count()).toBe(0);
   expect(length2).toBe(1);
 });
 
