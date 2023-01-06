@@ -342,6 +342,11 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       // Slash '/'
       key: 191,
       handler() {
+        const params = new URLSearchParams(location.search);
+        const flag = params.get('slash');
+        if (flag === null) {
+          return ALLOW_DEFAULT;
+        }
         showSlashMenu({ page, model });
         return ALLOW_DEFAULT;
       },
