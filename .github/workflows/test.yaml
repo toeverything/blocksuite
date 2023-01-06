@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
 
 jobs:
   main-test:
