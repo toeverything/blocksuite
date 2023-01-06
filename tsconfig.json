@@ -6,6 +6,7 @@
     "experimentalDecorators": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
+    "types": ["wicg-file-system-access"],
     "moduleResolution": "NodeNext",
     "strict": true,
     "sourceMap": true,

@@ -9,6 +9,7 @@ export interface BlobProvider {
     blobAdded: Signal<BlobId>;
   };
   get(id: BlobId): Promise<BlobURL | null>;
+  getBlob(id: BlobId): Promise<Blob | null>;
   set(blob: Blob): Promise<BlobId>;
   delete(id: BlobId): Promise<void>;
   clear(): Promise<void>;

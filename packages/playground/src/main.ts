@@ -14,8 +14,12 @@ import {
 } from './utils.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import './style.css';
+import { isFSSupported, setRootDirectory } from './utils/fs';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
+const connectButton = <HTMLButtonElement>(
+  document.getElementById('connect-file-btn')
+);
 const options = getOptions();
 
 // Subscribe for page update and create editor after page loaded.
@@ -58,6 +62,41 @@ async function main() {
     (workspace: Workspace) => void
   >;
   initButton.addEventListener('click', () => initFunctions.basic(workspace));
+  connectButton.addEventListener('click', async () => {
+    if (!isFSSupported()) {
+      return window.alert('save to local is not supported!');
+    }
+    setRootDirectory().then(async result => {
+      if (result?.granted) {
+        for await (const handle of result.handle.values()) {
+          if (handle.kind === 'file' && handle.name.endsWith('.affine')) {
+            const file = await handle.getFile();
+            const binary = new Uint8Array(await file.arrayBuffer());
+            const workspace = await Workspace.fromLocal(binary, BlockSchema);
+            // @ts-ignore
+            window.workspace = workspace;
+            const page = <Page>(
+              workspace.getPage(workspace.meta.pageMetas[0].id)
+            );
+            const editor = new EditorContainer();
+            editor.page = page;
+            document.body.appendChild(editor);
+
+            const debugMenu = new DebugMenu();
+            debugMenu.workspace = workspace;
+            debugMenu.editor = editor;
+            debugMenu.mode = defaultMode;
+            document.body.appendChild(debugMenu);
+
+            initButton.disabled = true;
+
+            // @ts-ignore
+            [window.editor, window.page] = [editor, page];
+          }
+        }
+      }
+    });
+  });
 
   if (initParam != null) {
     if (initFunctions[initParam]) {

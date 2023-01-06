@@ -36,10 +36,29 @@
       #init-btn:not(:disabled) {
         cursor: pointer;
       }
+
+      #connect-file-btn {
+        position: fixed;
+        left: 10px;
+        bottom: 50px;
+        background-color: white;
+        border: none;
+        border-radius: 0.25rem;
+        padding: 8px;
+        font-size: 12px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #d4d4d8;
+        z-index: 10;
+      }
+      #connect-file-btn:not(:disabled) {
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <button id="init-btn">Init Editor</button>
+    <button id="connect-file-btn">Connect Local File</button>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

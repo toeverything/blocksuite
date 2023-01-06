@@ -44,6 +44,17 @@ export class BlobStorage {
     throw new Error(`No provider found for blob ${id}`);
   }
 
+  async getBlob(id: BlobId): Promise<Blob | null> {
+    for (const provider of this._providers) {
+      try {
+        return await provider.getBlob(id);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    throw new Error(`No provider found for blob ${id}`);
+  }
+
   async set(blob: Blob): Promise<BlobId> {
     let result: BlobId | null = null;
     for (const provider of this._providers) {

@@ -33,8 +33,10 @@ const env: Record<string, unknown> =
     ? globalThis
     : typeof window !== 'undefined'
     ? window
-    : typeof global !== 'undefined'
-    ? global
+    : // @ts-ignore
+    typeof global !== 'undefined'
+    ? // @ts-ignore
+      global
     : {};
 const importIdentifier = '__ $BLOCKSUITE_BLOCKS$ __';
 

@@ -9,6 +9,7 @@ export * from './utils/disposable.js';
 export * from './doc-providers.js';
 export * from './workspace/index.js';
 export * as Utils from './utils/utils.js';
+export * as FS from './fs/index.js';
 export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
@@ -21,8 +22,10 @@ const env =
     ? globalThis
     : typeof window !== 'undefined'
     ? window
-    : typeof global !== 'undefined'
-    ? global
+    : // @ts-ignore
+    typeof global !== 'undefined'
+    ? // @ts-ignore
+      global
     : {};
 const importIdentifier = '__ $BLOCKSUITE_STORE$ __';
 
