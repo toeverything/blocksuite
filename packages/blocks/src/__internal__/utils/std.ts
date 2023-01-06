@@ -1,4 +1,4 @@
-import { Utils } from '@blocksuite/store';
+import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { Detail } from './types.js';
 
 // workaround ts(2775)
@@ -9,6 +9,17 @@ export function assertExists<T>(val: T | null | undefined): asserts val is T {
 export const assertFlavours = Utils.assertFlavours;
 
 export const matchFlavours = Utils.matchFlavours;
+
+/**
+ * Whether the block supports rendering its children.
+ */
+export function supportsChildren(model: BaseBlockModel): boolean {
+  return !matchFlavours(model, [
+    'affine:embed',
+    'affine:divider',
+    'affine:code',
+  ]);
+}
 
 const isWeb = typeof window !== 'undefined';
 const isFirefox =

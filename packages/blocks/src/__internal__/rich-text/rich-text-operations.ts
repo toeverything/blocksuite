@@ -1,6 +1,6 @@
 // operations used in rich-text level
 
-import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import { Page, Text } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import {
   ExtendedModel,
@@ -19,6 +19,7 @@ import {
   matchFlavours,
   focusPreviousBlock,
   focusBlockByModel,
+  supportsChildren,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -96,21 +97,6 @@ export function handleBlockSplit(
 }
 
 /**
- * Is the block support render children.
- *
- * @example
- * ```ts
- * const supportChildren = isSupportChildren(block);
- * ```
- */
-export const supportChildren = (model: BaseBlockModel): boolean => {
-  return !matchFlavours(model, [
-    'affine:embed',
-    'affine:divider',
-    'affine:code',
-  ]);
-};
-/**
  * Move down
  * @example
  * ```
@@ -129,7 +115,7 @@ export const supportChildren = (model: BaseBlockModel): boolean => {
  */
 export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   const previousSibling = page.getPreviousSibling(model);
-  if (!previousSibling || !supportChildren(previousSibling)) {
+  if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
   }
