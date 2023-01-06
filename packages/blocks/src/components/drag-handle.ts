@@ -177,16 +177,22 @@ export const showDragHandle = ({
   container.appendChild(dragHandleEle);
   container.appendChild(indicator);
 
-  abortController.signal.addEventListener('abort', () => {
-    dragHandleEle.removeEventListener('dragstart', handleDragStart);
-    dragHandleEle.removeEventListener('drag', handleDragMove);
-    dragHandleEle.removeEventListener('dragend', handleDragEnd);
-    container.removeEventListener('dragover', handleDragOver);
-    dragHandleEle.removeEventListener('mousedown', handleMouseDown);
-    dragHandleEle.removeEventListener('mouseleave', handleMouseLeave);
-    indicator.remove();
-    dragHandleEle.remove();
-  });
+  abortController.signal.addEventListener(
+    'abort',
+    () => {
+      dragHandleEle.removeEventListener('dragstart', handleDragStart);
+      dragHandleEle.removeEventListener('drag', handleDragMove);
+      dragHandleEle.removeEventListener('dragend', handleDragEnd);
+      container.removeEventListener('dragover', handleDragOver);
+      dragHandleEle.removeEventListener('mousedown', handleMouseDown);
+      dragHandleEle.removeEventListener('mouseleave', handleMouseLeave);
+      indicator.remove();
+      dragHandleEle.remove();
+    },
+    {
+      once: true,
+    }
+  );
 };
 
 declare global {

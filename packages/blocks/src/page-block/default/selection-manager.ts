@@ -472,6 +472,7 @@ export class DefaultSelectionManager {
               nextModel,
               distanceToTop < distanceToBottom
             );
+            this._dragHandleAbortController.abort();
             this.clearRects();
           },
         });

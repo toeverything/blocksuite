@@ -50,6 +50,7 @@ test('move drag handle in paragraphs', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await dragHandleFromBlockToBlockBottomById(page, '2', '4');
+  expect(await page.locator('affine-drag-indicator').count()).toBe(0);
   await assertRichTexts(page, ['456', '789', '123']);
 });
 
@@ -59,5 +60,6 @@ test('move drag handle in list', async ({ page }) => {
   await initThreeLists(page);
   await assertRichTexts(page, ['123', '456', '789']);
   await dragHandleFromBlockToBlockBottomById(page, '5', '3', false);
+  expect(await page.locator('affine-drag-indicator').count()).toBe(0);
   await assertRichTexts(page, ['789', '123', '456']);
 });
