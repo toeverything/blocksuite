@@ -7,7 +7,10 @@ import {
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
-const room = params.get('room') ?? 'playground';
+const room =
+  params.get('room') ?? typeof window !== 'undefined'
+    ? window.location.origin + window.location.pathname
+    : 'playground';
 const url = new URL(window.location.href);
 export const defaultMode =
   url.searchParams.get('mode') === 'edgeless' ? 'edgeless' : 'page';
