@@ -3,6 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { styleMap } from 'lit/directives/style-map.js';
+import { NonShadowLitElement } from '../__internal__/index.js';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
@@ -11,10 +12,6 @@ export class DragIndicator extends LitElement {
 
   @property()
   cursorPosition!: IPoint;
-
-  connectedCallback() {
-    super.connectedCallback();
-  }
 
   override render() {
     if (!this.targetRect || !this.cursorPosition) {
@@ -65,7 +62,7 @@ export class DragHandle extends LitElement {
 
   override render() {
     return html`
-      <div>
+      <div class="affine-drag-handle">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 128 512"
