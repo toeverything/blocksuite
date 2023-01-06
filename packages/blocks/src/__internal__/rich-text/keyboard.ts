@@ -1,3 +1,4 @@
+import { showSlashMenu } from '../../components/slash-menu/index.js';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 import {
@@ -337,6 +338,15 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'right',
       shiftKey: false,
       handler: onKeyRight,
+    },
+
+    slash: {
+      // Slash '/'
+      key: 191,
+      handler() {
+        showSlashMenu({ page, model });
+        return ALLOW_DEFAULT;
+      },
     },
   };
 
