@@ -61,6 +61,7 @@ The BlockSuite team now focuses on developing first-party blocks built for AFFiN
 - The `packages/blocks` package holds the default BlockSuite editable blocks.
 - The `packages/editor` package ships a complete BlockSuite-based editor.
 - The `packages/react` package is a components and hooks library for React.js.
+- The `packages/phasor` package is a hybrid canvas renderer library.
 
 This will install the latest BlockSuite packages into your project:
 
