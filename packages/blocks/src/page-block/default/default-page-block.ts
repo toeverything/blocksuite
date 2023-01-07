@@ -294,6 +294,7 @@ export class DefaultPageBlockComponent
       if (this.model.title !== this._title.value) {
         this._title.value = this.model.title || '';
         this.requestUpdate();
+        autosize.update(this._title);
       }
     });
 
