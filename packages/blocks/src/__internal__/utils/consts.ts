@@ -16,3 +16,5 @@ export const HOTKEYS = {
   RIGHT: 'right',
   ENTER: 'enter',
 };
+
+export const SMALL_DISTANCE = 2;

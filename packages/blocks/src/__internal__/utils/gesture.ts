@@ -4,6 +4,7 @@ import {
   setEndRange,
   setStartRange,
 } from './selection.js';
+import { SMALL_DISTANCE } from './consts.js';
 
 export interface IPoint {
   x: number;
@@ -31,7 +32,7 @@ export interface SelectionEvent extends IPoint {
   button?: number;
 }
 
-function isFarEnough(a: IPoint, b: IPoint, d = 2) {
+function isFarEnough(a: IPoint, b: IPoint, d = SMALL_DISTANCE) {
   return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) > d * d;
 }
 
