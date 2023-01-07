@@ -409,7 +409,9 @@ export class DebugMenu extends LitElement {
 
         <div
           class="edgeless-toolbar"
-          style=${'display:' + (this.mode === 'edgeless' ? 'none' : 'none')}
+          style=${
+            'display:none' /*'display:' + (this.mode === 'edgeless' ? 'none' : 'none')*/
+          }
         >
           <sl-tooltip content="Show Grid" placement="bottom" hoist>
             <sl-button
