@@ -2,6 +2,10 @@
   "name": "blocksuite",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=16.9.0"
+  },
+  "packageManager": "pnpm@7.23.0",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
     "dev": "run-p serve dev:playground",
