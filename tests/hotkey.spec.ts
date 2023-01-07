@@ -90,7 +90,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text={
@@ -141,7 +141,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
@@ -165,7 +165,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text={
@@ -338,7 +338,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text={
@@ -405,7 +405,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text={
@@ -613,7 +613,7 @@ test('should cut work multiple line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="19"
@@ -629,7 +629,7 @@ test('should cut work multiple line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
