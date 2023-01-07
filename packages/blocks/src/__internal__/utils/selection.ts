@@ -27,9 +27,7 @@ import type {
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-import { SMALL_DISTANCE } from './consts.js';
-
-const SCROLL_THRESHOLD = 100;
+import { MOVE_DETECT_THRESHOLD, SCROLL_THRESHOLD } from './consts.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -430,7 +428,7 @@ export function handleNativeRangeDragMove(
   assertExists(startBlock);
   const startRect = startBlock.getBoundingClientRect();
 
-  const isDownward = e.y > e.start.y + SMALL_DISTANCE;
+  const isDownward = e.y > e.start.y + MOVE_DETECT_THRESHOLD;
   const ifCrossUpperSideOfCurrentBlock = e.y > startRect.top;
   const isRightward = e.x > e.start.x;
   const isForward =

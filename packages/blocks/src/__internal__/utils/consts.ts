@@ -17,4 +17,5 @@ export const HOTKEYS = {
   ENTER: 'enter',
 };
 
-export const SMALL_DISTANCE = 2;
+export const MOVE_DETECT_THRESHOLD = 2;
+export const SCROLL_THRESHOLD = 100;
