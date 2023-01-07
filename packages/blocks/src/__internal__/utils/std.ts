@@ -132,6 +132,7 @@ export const debounce = <
 
   return function (this: unknown, ...args: Parameters<T>) {
     if (timer) {
+      lastArgs = args;
       clearTimeout(timer);
     }
     if (leading && !timer) {
