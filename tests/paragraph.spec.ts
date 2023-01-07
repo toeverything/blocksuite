@@ -305,7 +305,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,72]"
+  prop:xywh="[0,0,720,80]"
 >
   <affine:paragraph
     prop:text="123"
