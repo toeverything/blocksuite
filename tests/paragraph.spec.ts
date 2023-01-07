@@ -234,7 +234,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,152]"
+  prop:xywh="[0,0,720,160]"
 >
   <affine:paragraph
     prop:text="123"
@@ -265,7 +265,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,152]"
+  prop:xywh="[0,0,720,160]"
 >
   <affine:paragraph
     prop:text="123"
