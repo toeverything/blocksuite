@@ -4,6 +4,7 @@ import {
   setEndRange,
   setStartRange,
 } from './selection.js';
+import { MOVE_DETECT_THRESHOLD } from './consts.js';
 
 export interface IPoint {
   x: number;
@@ -31,7 +32,7 @@ export interface SelectionEvent extends IPoint {
   button?: number;
 }
 
-function isFarEnough(a: IPoint, b: IPoint, d = 2) {
+function isFarEnough(a: IPoint, b: IPoint, d = MOVE_DETECT_THRESHOLD) {
   return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) > d * d;
 }
 
