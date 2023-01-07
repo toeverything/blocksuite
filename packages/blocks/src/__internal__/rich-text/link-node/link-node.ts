@@ -1,7 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { Quill as QuillType } from 'quill';
-import Q from 'quill';
+import Quill from 'quill';
 import {
   ALLOWED_SCHEMES,
   showLinkPopover,
@@ -13,8 +12,6 @@ import {
   hotkey,
 } from '../../utils/index.js';
 import { LinkIcon } from './link-icon.js';
-
-const Quill = Q as unknown as typeof QuillType;
 
 // TODO fix Blot types
 type Blot = {

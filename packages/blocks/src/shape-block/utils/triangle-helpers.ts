@@ -6,12 +6,7 @@ import { Vec } from './vec.js';
 import type { ShapeStyles } from '../../__internal__/index.js';
 import { getShapeStyle } from './shape-style.js';
 import { getOffsetPolygon } from './polygon-utils.js';
-
-import PF from 'perfect-freehand';
-import type { getStroke as getStrokeType } from 'perfect-freehand';
-import * as DPF from 'perfect-freehand';
-const getStrokePoints = DPF.getStrokePoints;
-const getStroke = PF as unknown as typeof getStrokeType;
+import { getStroke, getStrokePoints } from 'perfect-freehand';
 
 export function getTrianglePoints(size: number[], offset = 0, rotation = 0) {
   const [w, h] = size;

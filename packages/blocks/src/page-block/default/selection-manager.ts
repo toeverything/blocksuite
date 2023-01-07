@@ -35,10 +35,10 @@ import { showDragHandle } from '../../components/drag-handle.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
-    rect.left <= selectionRect.right + offset.x &&
-    rect.right >= selectionRect.left + offset.x &&
-    rect.top <= selectionRect.bottom + offset.y &&
-    rect.bottom >= selectionRect.top + offset.y
+    rect.left < selectionRect.right + offset.x &&
+    rect.right > selectionRect.left + offset.x &&
+    rect.top < selectionRect.bottom + offset.y &&
+    rect.bottom > selectionRect.top + offset.y
   );
 }
 
@@ -459,6 +459,7 @@ export class DefaultSelectionManager {
           getModelStateByPosition: (x, y) =>
             getBlockEditingStateByPosition(this._blocks, x, y),
           onMouseDown: () => this._setSelectedBlocks([element]),
+          onMouseLeave: () => this._setSelectedBlocks([]),
           onDrop: (e, lastModelState) => {
             const rect = lastModelState.position;
             const nextModel = lastModelState.model;
@@ -473,6 +474,7 @@ export class DefaultSelectionManager {
               nextModel,
               distanceToTop < distanceToBottom
             );
+            this._dragHandleAbortController.abort();
             this.clearRects();
           },
         });

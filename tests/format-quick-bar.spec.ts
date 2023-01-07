@@ -97,7 +97,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `<affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
@@ -139,7 +139,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `<affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
@@ -187,7 +187,7 @@ test('should format quick bar be able to format text when select multiple line',
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text={
@@ -232,7 +232,7 @@ test('should format quick bar be able to format text when select multiple line',
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text={
@@ -293,7 +293,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
@@ -327,7 +327,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
@@ -372,7 +372,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
@@ -395,7 +395,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"
@@ -421,7 +421,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,112]"
+  prop:xywh="[0,0,720,120]"
 >
   <affine:paragraph
     prop:text="123"

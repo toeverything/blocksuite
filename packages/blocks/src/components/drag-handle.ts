@@ -93,12 +93,14 @@ export const showDragHandle = ({
   anchorEl,
   container = document.body,
   onMouseDown,
+  onMouseLeave,
   onDrop,
   getModelStateByPosition,
   abortController = new AbortController(),
 }: {
   anchorEl: HTMLElement;
   onMouseDown: () => void;
+  onMouseLeave: () => void;
   onDrop: (
     e: DragEvent,
     lastModelState: {
@@ -130,6 +132,9 @@ export const showDragHandle = ({
   const dragHandleEle = createDragHandle(anchorEl);
   const handleMouseDown = () => {
     onMouseDown();
+  };
+  const handleMouseLeave = () => {
+    onMouseLeave();
   };
   const indicator = <DragIndicator>(
     document.createElement('affine-drag-indicator')
@@ -163,6 +168,7 @@ export const showDragHandle = ({
   dragHandleEle.addEventListener('drag', handleDragMove);
   dragHandleEle.addEventListener('dragend', handleDragEnd);
   dragHandleEle.addEventListener('mousedown', handleMouseDown);
+  dragHandleEle.addEventListener('mouseleave', handleMouseLeave);
   const handleDragOver = (event: MouseEvent) => {
     // Refs: https://stackoverflow.com/a/65910078
     event.preventDefault();
@@ -171,15 +177,22 @@ export const showDragHandle = ({
   container.appendChild(dragHandleEle);
   container.appendChild(indicator);
 
-  abortController.signal.addEventListener('abort', () => {
-    dragHandleEle.removeEventListener('dragstart', handleDragStart);
-    dragHandleEle.removeEventListener('drag', handleDragMove);
-    dragHandleEle.removeEventListener('dragend', handleDragEnd);
-    container.removeEventListener('dragover', handleDragOver);
-    dragHandleEle.removeEventListener('mousedown', handleMouseDown);
-    indicator.remove();
-    dragHandleEle.remove();
-  });
+  abortController.signal.addEventListener(
+    'abort',
+    () => {
+      dragHandleEle.removeEventListener('dragstart', handleDragStart);
+      dragHandleEle.removeEventListener('drag', handleDragMove);
+      dragHandleEle.removeEventListener('dragend', handleDragEnd);
+      container.removeEventListener('dragover', handleDragOver);
+      dragHandleEle.removeEventListener('mousedown', handleMouseDown);
+      dragHandleEle.removeEventListener('mouseleave', handleMouseLeave);
+      indicator.remove();
+      dragHandleEle.remove();
+    },
+    {
+      once: true,
+    }
+  );
 };
 
 declare global {

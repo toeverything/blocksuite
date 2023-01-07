@@ -1,6 +1,4 @@
-import type { Quill as QuillType } from 'quill';
-import Q from 'quill';
-const Quill = Q as unknown as typeof QuillType;
+import Quill from 'quill';
 
 const Inline = Quill.import('blots/inline');
 export class MockSelectNode extends Inline {
