@@ -2,6 +2,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
+  getBlockByPoint,
   getBlockElementByModel,
   getContainerByModel,
   getCurrentRange,
@@ -43,6 +44,9 @@ function forwardSelect(newRange: Range, range: Range) {
       newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
     }
   }
+  if (range.comparePoint(newRange.endContainer, newRange.endOffset) === -1) {
+    return;
+  }
   range.setEnd(newRange.endContainer, newRange.endOffset);
 }
 
@@ -68,24 +72,31 @@ function fixCurrentRangeToText(
   const endContainer = isForward ? range.endContainer : range.startContainer;
   let newRange: Range | null = range;
   if (endContainer.nodeType !== Node.TEXT_NODE) {
-    const texts = Array.from(
+    const textBlocks = Array.from(
       (range.commonAncestorContainer as HTMLElement).querySelectorAll(
         '.ql-editor'
       )
-    );
-    if (texts.length) {
-      const text = isForward
-        ? texts.reverse().find(t => {
+    ).map(elem => {
+      const block = elem.closest('[data-block-id]');
+      assertExists(block);
+      return block;
+    });
+
+    if (textBlocks.length) {
+      const textBlock = isForward
+        ? textBlocks.reverse().find(t => {
             const rect = t.getBoundingClientRect();
             return clientY >= rect.top; // handle both drag downward, and rightward
           })
-        : texts.find(t => {
+        : textBlocks.find(t => {
             const rect = t.getBoundingClientRect();
             return clientY <= rect.bottom; // handle both drag upwards and leftward
           });
-      if (!text) {
+      if (!textBlock) {
         throw new Error('Failed to focus text node!');
       }
+      const text = textBlock.querySelector('.ql-editor');
+      assertExists(text);
       const rect = text.getBoundingClientRect();
       const newY = isForward
         ? rect.bottom - offset.y - 6
@@ -414,7 +425,16 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  const isForward = e.x > e.start.x || e.y > e.start.y;
+  const startBlock = getBlockByPoint(e.start);
+  assertExists(startBlock);
+  const startRect = startBlock.getBoundingClientRect();
+
+  const smallDistance = 6;
+  const isDownward = e.y > e.start.y + smallDistance;
+  const ifCrossUpperSideOfCurrentBlock = e.y > startRect.top;
+  const isRightward = e.x > e.start.x;
+  const isForward =
+    isDownward || (ifCrossUpperSideOfCurrentBlock && isRightward);
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
@@ -733,6 +753,7 @@ function getCurrentCharIndex(
   const currentCharIndex = wordText.indexOf(currentChar);
   return [currentCharIndex, wordText] as const;
 }
+
 /**
  * left first search all leaf text nodes
  * @example
