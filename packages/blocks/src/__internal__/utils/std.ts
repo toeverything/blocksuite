@@ -3,7 +3,7 @@ import type { Detail } from './types.js';
 
 // workaround ts(2775)
 export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  Utils.assertExists(val);
+  return Utils.assertExists(val);
 }
 
 export const assertFlavours = Utils.assertFlavours;
