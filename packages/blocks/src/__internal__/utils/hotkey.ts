@@ -1,7 +1,17 @@
 import hotkeys from 'hotkeys-js';
 import type { KeyHandler } from 'hotkeys-js';
 
-hotkeys.filter = () => true;
+hotkeys.filter = (event: KeyboardEvent) => {
+  const target = event.target;
+  if (
+    target &&
+    target instanceof Element &&
+    ['INPUT'].includes(target.tagName)
+  ) {
+    return false;
+  }
+  return true;
+};
 
 const SCOPE = {
   AFFINE_PAGE: 'affine:page',
