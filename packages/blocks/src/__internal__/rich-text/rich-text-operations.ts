@@ -20,6 +20,7 @@ import {
   focusPreviousBlock,
   focusBlockByModel,
   supportsChildren,
+  getModelByElement,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -276,8 +277,28 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
             page.deleteBlock(model);
           }
         });
+      } else {
+        const richText = getRichTextByModel(model);
+        if (richText) {
+          const text = richText.quill.getText().trimEnd();
+          const titleElement = document.querySelector(
+            '.affine-default-page-block-title'
+          ) as HTMLTextAreaElement;
+          const oldTitle = titleElement.value;
+          const title = oldTitle + text;
+          page.captureSync();
+          page.deleteBlock(model);
+          // model.text?.delete(0, model.text.length);
+          const titleModel = getModelByElement(titleElement);
+          page.updateBlock(titleModel, { title });
+          const oldTitleTextLength = oldTitle.length;
+          titleElement.setSelectionRange(
+            oldTitleTextLength,
+            oldTitleTextLength
+          );
+          titleElement.focus();
+        }
       }
-      return;
     }
 
     // Before

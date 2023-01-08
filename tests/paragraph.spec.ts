@@ -24,6 +24,7 @@ import {
   dragOverTitle,
   resetHistory,
   initThreeParagraphs,
+  redoByClick,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -88,6 +89,39 @@ test('backspace and arrow on title', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertTitle(page, 'hll');
+});
+
+test('backspace on line start of the first block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await page.keyboard.type('hello');
+  await assertTitle(page, 'hello');
+  await resetHistory(page);
+
+  await focusRichText(page, 0);
+  await page.keyboard.type('abc');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 0, 0);
+
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, 'helloabc');
+
+  await pressEnter(page);
+  await assertTitle(page, 'hello');
+  await assertRichTexts(page, ['abc']);
+
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, 'helloabc');
+  await assertRichTexts(page, []);
+  await undoByClick(page);
+  await assertTitle(page, 'hello');
+  await assertRichTexts(page, ['abc']);
+
+  await redoByClick(page);
+  await assertTitle(page, 'helloabc');
+  await assertRichTexts(page, []);
 });
 
 test('append new paragraph block by enter', async ({ page }) => {
