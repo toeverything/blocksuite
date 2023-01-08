@@ -24,9 +24,9 @@ export function getShapeBlockHitBox(id: string): SVGPathElement | null {
 
 export function getBlockById<T extends ElementTagName>(
   id: string,
-  ele: Element = document.body
+  container: Element = document.body
 ) {
-  return ele.querySelector<T>(`[${ATTR}="${id}"]` as T);
+  return container.querySelector<T>(`[${ATTR}="${id}"]` as T);
 }
 
 export function getBlockByPoint(point: IPoint): Element | null | undefined {
