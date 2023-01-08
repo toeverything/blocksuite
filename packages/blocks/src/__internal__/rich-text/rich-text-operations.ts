@@ -1,7 +1,6 @@
 // operations used in rich-text level
 
 import { Page, Text } from '@blocksuite/store';
-import autosize from 'autosize';
 import type { Quill } from 'quill';
 import {
   ExtendedModel,
@@ -21,16 +20,8 @@ import {
   focusPreviousBlock,
   focusBlockByModel,
   supportsChildren,
-  getPageTitle,
+  getModelByElement,
 } from '../utils/index.js';
-
-function focusTextEndAppendText(input: HTMLTextAreaElement, text = '') {
-  const current = input.value + text;
-  input.focus();
-  input.value = '';
-  input.value = current;
-  autosize.update(input);
-}
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -289,10 +280,23 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
       } else {
         const richText = getRichTextByModel(model);
         if (richText) {
+          const text = richText.quill.getText().trimEnd();
+          const titleElement = document.querySelector(
+            '.affine-default-page-block-title'
+          ) as HTMLTextAreaElement;
+          const oldTitle = titleElement.value;
+          const title = oldTitle + text;
           page.captureSync();
           page.deleteBlock(model);
-          const text = richText.quill.getText().trimEnd();
-          focusTextEndAppendText(getPageTitle(), text);
+          // model.text?.delete(0, model.text.length);
+          const titleModel = getModelByElement(titleElement);
+          page.updateBlock(titleModel, { title });
+          const oldTitleTextLength = oldTitle.length;
+          titleElement.setSelectionRange(
+            oldTitleTextLength,
+            oldTitleTextLength
+          );
+          titleElement.focus();
         }
       }
     }

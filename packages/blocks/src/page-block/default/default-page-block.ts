@@ -192,7 +192,6 @@ export class DefaultPageBlockComponent
       const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       page.updateBlock(model, { title: contentLeft });
       page.workspace.setPageMeta(page.id, { title: contentLeft });
-      autosize.update(this._title);
       asyncFocusRichText(this.page, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
