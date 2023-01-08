@@ -6,16 +6,13 @@ import {
   focusRichText,
   initEmptyParagraphState,
   pressEnter,
+  SHORT_KEY,
   switchReadonly,
-  withCtrlOrMeta,
 } from './utils/actions/index.js';
 import { assertStoreMatchJSX } from './utils/asserts.js';
 
 const pressCreateLinkShortCut = async (page: Page) => {
-  await withCtrlOrMeta(page, async () => {
-    await page.keyboard.press('k');
-    await page.keyboard.up('k');
-  });
+  await page.keyboard.press(`${SHORT_KEY}+k`);
 };
 
 test('basic link', async ({ page }) => {
@@ -198,4 +195,39 @@ test('readonly mode should not trigger link hover', async ({ page }) => {
 
   await linkLocator.hover();
   await expect(linkPopoverLocator).not.toBeVisible();
+});
+
+test('should mock selection works', async ({ page }) => {
+  const linkText = 'linkText';
+  const link = 'http://example.com';
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type(linkText);
+
+  // Create link
+  await dragBetweenIndices(page, [0, 0], [0, 8]);
+  await pressCreateLinkShortCut(page);
+
+  const mockSelectNode = page.locator('.affine-mock-select');
+  await expect(mockSelectNode).toHaveCount(1);
+  await expect(mockSelectNode).toBeVisible();
+
+  // the mock select node should not be stored in the Y doc
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="linkText"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+
+  await page.keyboard.type(link);
+  await pressEnter(page);
+
+  // the mock select node should be removed after link created
+  await expect(mockSelectNode).not.toBeVisible();
+  await expect(mockSelectNode).toHaveCount(0);
 });
