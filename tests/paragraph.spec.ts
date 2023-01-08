@@ -107,15 +107,21 @@ test('backspace on line start of the first block', async ({ page }) => {
 
   await page.keyboard.press('Backspace', { delay: 50 });
   await assertTitle(page, 'helloabc');
-  await assertRichTexts(page, ['\n']);
 
+  await pressEnter(page);
+  await assertTitle(page, 'hello');
+  await assertRichTexts(page, ['abc']);
+
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, 'helloabc');
+  await assertRichTexts(page, []);
   await undoByClick(page);
   await assertTitle(page, 'hello');
   await assertRichTexts(page, ['abc']);
 
   await redoByClick(page);
   await assertTitle(page, 'helloabc');
-  await assertRichTexts(page, ['\n']);
+  await assertRichTexts(page, []);
 });
 
 test('append new paragraph block by enter', async ({ page }) => {
