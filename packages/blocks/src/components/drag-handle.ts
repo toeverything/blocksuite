@@ -168,7 +168,11 @@ export class DragHandle extends LitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
-    const modelState = this._getBlockEditingStateByPosition?.(e.pageX, e.pageY);
+    const modelState = this._getBlockEditingStateByPosition?.(
+      e.pageX,
+      e.pageY,
+      true
+    );
     if (modelState) {
       this._lastModelState = modelState;
       this._indicator.targetRect = modelState.position;
