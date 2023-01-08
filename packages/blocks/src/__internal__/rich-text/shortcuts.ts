@@ -286,6 +286,7 @@ export class Shortcuts {
         };
         page.deleteBlock(model);
         page.addBlock(blockProps, parent, index);
+        page.captureSync();
         return ALLOW_DEFAULT;
       },
     },
