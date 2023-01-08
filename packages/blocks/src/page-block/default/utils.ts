@@ -58,6 +58,7 @@ export function getBlockEditingStateByPosition(
     }
 
     assertExists(blockRect);
+
     if (isPointIn(blockRect, x, y)) {
       return {
         position: blockRect,
