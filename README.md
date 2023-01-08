@@ -3,7 +3,7 @@
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 
-💠 BlockSuite is an open-source editor project behind the AFFiNE knowledge base. It was created initially for [AFFiNE](https://github.com/toeverything/AFFiNE), an open-source knowledge base that attempts to combine the best of Notion and Miro altogether. In this monorepo, we maintain multiple abstraction layers of the editor and some core modules that can be reused externally.
+💠 BlockSuite is an open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE), an open-source knowledge base that attempts to combine the best of Notion and Miro altogether. In this monorepo, we maintain multiple abstraction layers of the editor and some core modules that can be reused externally.
 
 [Try BlockSuite-based AFFiNE Alpha editor](https://pathfinder.affine.pro/)
 
