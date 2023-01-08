@@ -30,7 +30,7 @@ import { getBlockEditingStateByPosition } from './utils.js';
 import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
-import { showDragHandle } from '../../components/drag-handle.js';
+import { DragHandle } from '../../components/drag-handle.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -144,6 +144,11 @@ export class PageSelectionState {
   }
 }
 
+const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
+  // Refs: https://stackoverflow.com/a/65910078
+  event.preventDefault();
+};
+
 export class DefaultSelectionManager {
   page: Page;
   state = new PageSelectionState('none');
@@ -153,9 +158,8 @@ export class DefaultSelectionManager {
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
-  private _dragHandleCallbacks: {
-    onMouseMove: (e: SelectionEvent) => void;
-  } | null = null;
+
+  private _dragHandle: DragHandle;
 
   constructor({
     page,
@@ -172,6 +176,37 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
+    this._dragHandle = new DragHandle({
+      setSelectedBlocks: this._setSelectedBlocks,
+      onDropCallback: (e, start, end) => {
+        const startModel = start.model;
+        const rect = end.position;
+        const nextModel = end.model;
+        if (doesInSamePath(this.page, nextModel, startModel)) {
+          return;
+        }
+        this.page.captureSync();
+        const distanceToTop = Math.abs(rect.top - e.y);
+        const distanceToBottom = Math.abs(rect.bottom - e.y);
+        this.page.moveBlock(
+          startModel,
+          nextModel,
+          distanceToTop < distanceToBottom
+        );
+        this.clearRects();
+      },
+      getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+        return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+          skipX,
+        });
+      },
+    });
+    document.body.addEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay,
+      false
+    );
+    document.body.appendChild(this._dragHandle);
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._mouseRoot,
@@ -218,14 +253,14 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks(selectedBlocks: Element[]) {
+  private _setSelectedBlocks = (selectedBlocks: Element[]) => {
     this.state.selectedBlocks = selectedBlocks;
     const { blockCache } = this.state;
     const selectedRects = selectedBlocks.map(block => {
       return blockCache.get(block) as DOMRect;
     });
     this._signals.updateSelectedRects.emit(selectedRects);
-  }
+  };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
@@ -446,43 +481,14 @@ export class DefaultSelectionManager {
     } else {
       const clickDragState = getBlockEditingStateByPosition(
         this._blocks,
-        e.raw.pageX + 20, // in case of handle cannot be clicked in list block
-        e.raw.pageY
+        e.raw.pageX,
+        e.raw.pageY,
+        {
+          skipX: true,
+        }
       );
       if (clickDragState?.model) {
-        this._dragHandleAbortController.abort();
-        this._dragHandleAbortController = new AbortController();
-        const currentModel = clickDragState.model;
-        const element = getBlockElementByModel(currentModel) as HTMLElement;
-        this._dragHandleCallbacks = showDragHandle({
-          anchorEl: element,
-          abortController: this._dragHandleAbortController,
-          getModelStateByPosition: (x, y) =>
-            getBlockEditingStateByPosition(this._blocks, x, y, {
-              skipX: true,
-            }),
-          onMouseDown: () => this._setSelectedBlocks([element]),
-          onMouseLeave: () => this._setSelectedBlocks([]),
-          onDrop: (e, lastModelState) => {
-            const rect = lastModelState.position;
-            const nextModel = lastModelState.model;
-            if (doesInSamePath(this.page, nextModel, currentModel)) {
-              return;
-            }
-            this.page.captureSync();
-            const distanceToTop = Math.abs(rect.top - e.y);
-            const distanceToBottom = Math.abs(rect.bottom - e.y);
-            this.page.moveBlock(
-              currentModel,
-              nextModel,
-              distanceToTop < distanceToBottom
-            );
-            this._dragHandleAbortController.abort();
-            this.clearRects();
-          },
-        });
-      } else if (this._dragHandleCallbacks) {
-        this._dragHandleCallbacks.onMouseMove(e);
+        this._dragHandle.show(clickDragState);
       }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
@@ -501,6 +507,11 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
+    this._dragHandle.remove();
+    document.body.removeEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay
+    );
     this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
