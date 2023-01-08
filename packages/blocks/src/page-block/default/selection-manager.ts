@@ -153,6 +153,9 @@ export class DefaultSelectionManager {
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
+  private _dragHandleCallbacks: {
+    onMouseMove: (e: SelectionEvent) => void;
+  } | null = null;
 
   constructor({
     page,
@@ -451,11 +454,13 @@ export class DefaultSelectionManager {
         this._dragHandleAbortController = new AbortController();
         const currentModel = clickDragState.model;
         const element = getBlockElementByModel(currentModel) as HTMLElement;
-        showDragHandle({
+        this._dragHandleCallbacks = showDragHandle({
           anchorEl: element,
           abortController: this._dragHandleAbortController,
           getModelStateByPosition: (x, y) =>
-            getBlockEditingStateByPosition(this._blocks, x, y),
+            getBlockEditingStateByPosition(this._blocks, x, y, {
+              skipX: true,
+            }),
           onMouseDown: () => this._setSelectedBlocks([element]),
           onMouseLeave: () => this._setSelectedBlocks([]),
           onDrop: (e, lastModelState) => {
@@ -476,6 +481,8 @@ export class DefaultSelectionManager {
             this.clearRects();
           },
         });
+      } else if (this._dragHandleCallbacks) {
+        this._dragHandleCallbacks.onMouseMove(e);
       }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
