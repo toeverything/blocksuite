@@ -52,15 +52,16 @@ export function getBlockEditingStateByPosition(
       continue;
     }
 
-    let blockRect;
+    let blockRect: DOMRect | null = null;
     if (block.type === 'image') {
       const hoverImage = hoverDom?.querySelector('img');
-      blockRect = hoverImage?.getBoundingClientRect();
+      blockRect = hoverImage?.getBoundingClientRect() ?? null;
     } else {
-      blockRect = hoverDom?.getBoundingClientRect();
+      blockRect = hoverDom?.getBoundingClientRect() ?? null;
     }
 
     assertExists(blockRect);
+
     if (options?.skipX) {
       if (!(y < blockRect.top || y > blockRect.top + blockRect.height)) {
         return {

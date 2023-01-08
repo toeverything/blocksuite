@@ -7,15 +7,9 @@ import {
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
-// We need to split room between different PR, branches, and local version
-const room: string =
-  params.get('room') ??
-  (import.meta.env.VITE_DEFAULT_ROOM
-    ? import.meta.env.VITE_DEFAULT_ROOM
-    : window.location.origin + window.location.pathname);
-const url = new URL(window.location.href);
+const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
 export const defaultMode =
-  url.searchParams.get('mode') === 'edgeless' ? 'edgeless' : 'page';
+  params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 export const isBase64 =
