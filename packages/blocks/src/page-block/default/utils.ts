@@ -58,27 +58,28 @@ export function getBlockEditingStateByPosition(
     }
 
     let blockRect: DOMRect | null = null;
+    let detectRect: DOMRect | null = null;
     if (block.type === 'image') {
       const hoverImage = hoverDom?.querySelector('img');
-      blockRect = hoverImage?.getBoundingClientRect() ?? null;
-      if (blockRect) {
-        // there is a `affine-embed-editing-state-container` on the right side
-        blockRect.width += 50;
-      }
+      blockRect = hoverImage?.getBoundingClientRect() as DOMRect;
+      detectRect = { ...blockRect } satisfies DOMRect;
+      // there is a `affine-embed-editing-state-container` on the right side
+      detectRect.width += 50;
     } else {
-      blockRect = hoverDom?.getBoundingClientRect() ?? null;
+      blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
+      detectRect = blockRect;
     }
 
     assertExists(blockRect);
 
     if (options?.skipX) {
-      if (!(y < blockRect.top || y > blockRect.top + blockRect.height)) {
+      if (!(y < detectRect.top || y > detectRect.top + detectRect.height)) {
         return {
           position: blockRect,
           model: block,
         };
       }
-    } else if (isPointIn(blockRect, x, y)) {
+    } else if (isPointIn(detectRect, x, y)) {
       return {
         position: blockRect,
         model: block,
