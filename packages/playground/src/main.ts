@@ -1,7 +1,8 @@
+/// <reference types="./env" />
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
-import { BlockSchema, type BlockSchemaType } from '@blocksuite/blocks/models';
+import { BlockSchema } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 import { Page, Workspace, Utils } from '@blocksuite/store';
 import { DebugMenu } from './components/debug-menu.js';
@@ -17,17 +18,6 @@ import './style.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
-
-declare global {
-  interface Window {
-    editor?: EditorContainer;
-    page?: Page;
-    workspace?: Workspace;
-    blockSchema?: BlockSchemaType;
-    Y?: typeof Workspace.Y;
-    std?: typeof std;
-  }
-}
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
