@@ -3,6 +3,8 @@ import { customElement, property } from 'lit/decorators.js';
 import type { IPoint, SelectionEvent } from '../__internal__/index.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { styleMap } from 'lit/directives/style-map.js';
+import type { EditingState } from '../page-block/default/utils.js';
+import type { getBlockEditingStateByPosition } from '../page-block/default/utils.js';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
@@ -58,8 +60,59 @@ export class DragHandle extends LitElement {
     }
   `;
 
+  private _getBlockEditingStateByPosition:
+    | typeof getBlockEditingStateByPosition
+    | null = null;
+
   protected firstUpdated() {
     this.setAttribute('draggable', 'true');
+    this.style.position = 'absolute';
+    this.style.display = 'none';
+  }
+
+  public show(
+    targetModelState: EditingState,
+    options: {
+      getBlockEditingStateByPosition: typeof getBlockEditingStateByPosition;
+    }
+  ) {
+    const rect = targetModelState.position;
+    this._getBlockEditingStateByPosition =
+      options.getBlockEditingStateByPosition;
+    this.style.display = 'block';
+    this.style.left = `${rect.left - 20}px`;
+    this.style.top = `${rect.top + 8}px`;
+  }
+
+  public hide() {
+    this.style.display = 'none';
+  }
+
+  public connectedCallback() {
+    this.addEventListener('dragstart', this._onDragStart);
+    this.addEventListener('drag', this._onDrag);
+  }
+
+  public disconnectedCallback() {
+    this.removeEventListener('dragstart', this._onDragStart);
+  }
+
+  private _onDragStart(e: DragEvent) {
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  }
+
+  private _onDrag(e: DragEvent) {
+    // const modelState = this._getBlockEditingStateByPosition?.(e.pageX, e.pageY);
+    // if (modelState) {
+    //   lastModelState = modelState;
+    //   indicator.targetRect = modelState.position;
+    // }
+    // indicator.cursorPosition = {
+    //   x: e.x,
+    //   y: e.y,
+    // };
   }
 
   override render() {
@@ -110,13 +163,7 @@ export const showDragHandle = ({
   ) => void;
   container?: HTMLElement;
   abortController?: AbortController;
-  getModelStateByPosition: (
-    x: number,
-    y: number
-  ) => {
-    position: DOMRect;
-    model: BaseBlockModel;
-  } | null;
+  getModelStateByPosition: (x: number, y: number) => EditingState | null;
 }) => {
   if (!anchorEl) {
     throw new Error("Can't show drag handle without anchor element!");

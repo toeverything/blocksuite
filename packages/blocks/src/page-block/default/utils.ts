@@ -36,6 +36,11 @@ import type { DefaultSelectionManager } from './selection-manager.js';
 import type { CodeBlockOption } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 
+export interface EditingState {
+  model: BaseBlockModel;
+  position: DOMRect;
+}
+
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
   x: number,
