@@ -1,10 +1,9 @@
 import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { Detail } from './types.js';
 
+// workaround ts(2775)
 export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
+  Utils.assertExists(val);
 }
 
 export const assertFlavours = Utils.assertFlavours;
