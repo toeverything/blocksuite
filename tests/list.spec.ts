@@ -160,7 +160,7 @@ test('nested list blocks', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:xywh="[0,0,720,96]"
+    prop:xywh="[0,0,720,104]"
   >
     <affine:list
       prop:checked={false}
@@ -191,7 +191,7 @@ test('nested list blocks', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:xywh="[0,0,720,96]"
+    prop:xywh="[0,0,720,104]"
   >
     <affine:list
       prop:checked={false}
@@ -228,7 +228,7 @@ test('basic indent and unindent', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:xywh="[0,0,720,72]"
+    prop:xywh="[0,0,720,80]"
   >
     <affine:paragraph
       prop:text="text1"
@@ -248,7 +248,7 @@ test('basic indent and unindent', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:xywh="[0,0,720,72]"
+    prop:xywh="[0,0,720,80]"
   >
     <affine:paragraph
       prop:text="text1"
@@ -270,7 +270,7 @@ test('basic indent and unindent', async ({ page }) => {
     /*xml*/ `
 <affine:page>
   <affine:frame
-    prop:xywh="[0,0,720,72]"
+    prop:xywh="[0,0,720,80]"
   >
     <affine:paragraph
       prop:text="text1"
@@ -299,7 +299,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,72]"
+  prop:xywh="[0,0,720,80]"
 >
   <affine:paragraph
     prop:text="text1"
@@ -319,7 +319,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,72]"
+  prop:xywh="[0,0,720,80]"
 >
   <affine:paragraph
     prop:text="text1"

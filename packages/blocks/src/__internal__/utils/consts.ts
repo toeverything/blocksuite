@@ -16,3 +16,6 @@ export const HOTKEYS = {
   RIGHT: 'right',
   ENTER: 'enter',
 };
+
+export const MOVE_DETECT_THRESHOLD = 2;
+export const SCROLL_THRESHOLD = 100;

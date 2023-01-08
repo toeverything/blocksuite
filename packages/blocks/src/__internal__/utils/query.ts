@@ -1,9 +1,10 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
+import { ShapeBlockTag } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { BLOCK_ID_ATTR as ATTR } from './consts.js';
 import { assertExists, matchFlavours } from './std.js';
-import { ShapeBlockTag } from '../../index.js';
+import type { IPoint } from './gesture.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -26,6 +27,12 @@ export function getBlockById<T extends ElementTagName>(
   ele: Element = document.body
 ) {
   return ele.querySelector<T>(`[${ATTR}="${id}"]` as T);
+}
+
+export function getBlockByPoint(point: IPoint): Element | null | undefined {
+  return document
+    .elementFromPoint(point.x, point.y)
+    ?.closest('[data-block-id]');
 }
 
 export function getParentBlockById<T extends ElementTagName>(

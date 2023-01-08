@@ -39,7 +39,10 @@ import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
   x: number,
-  y: number
+  y: number,
+  options?: {
+    skipX?: boolean;
+  }
 ) {
   for (let index = blocks.length - 1; index >= 0; index--) {
     const block = blocks[index];
@@ -49,16 +52,24 @@ export function getBlockEditingStateByPosition(
       continue;
     }
 
-    let blockRect;
+    let blockRect: DOMRect | null = null;
     if (block.type === 'image') {
       const hoverImage = hoverDom?.querySelector('img');
-      blockRect = hoverImage?.getBoundingClientRect();
+      blockRect = hoverImage?.getBoundingClientRect() ?? null;
     } else {
-      blockRect = hoverDom?.getBoundingClientRect();
+      blockRect = hoverDom?.getBoundingClientRect() ?? null;
     }
 
     assertExists(blockRect);
-    if (isPointIn(blockRect, x, y)) {
+
+    if (options?.skipX) {
+      if (!(y < blockRect.top || y > blockRect.top + blockRect.height)) {
+        return {
+          position: blockRect,
+          model: block,
+        };
+      }
+    } else if (isPointIn(blockRect, x, y)) {
       return {
         position: blockRect,
         model: block,

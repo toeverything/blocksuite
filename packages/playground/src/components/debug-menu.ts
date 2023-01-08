@@ -259,7 +259,6 @@ export class DebugMenu extends LitElement {
         }
 
         .edgeless-toolbar {
-          display: flex;
           align-items: center;
         }
         .edgeless-toolbar sl-select,
@@ -410,7 +409,9 @@ export class DebugMenu extends LitElement {
 
         <div
           class="edgeless-toolbar"
-          style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
+          style=${
+            'display:none' /*'display:' + (this.mode === 'edgeless' ? 'none' : 'none')*/
+          }
         >
           <sl-tooltip content="Show Grid" placement="bottom" hoist>
             <sl-button

@@ -71,7 +71,7 @@ test('basic link', async ({ page }) => {
     `
 <affine:page>
   <affine:frame
-    prop:xywh="[0,0,720,32]"
+    prop:xywh="[0,0,720,40]"
   >
     <affine:paragraph
       prop:text={
