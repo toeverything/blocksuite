@@ -87,6 +87,7 @@ export function getBlockEditingStateByPosition(
 function isPointIn(block: DOMRect, x: number, y: number): boolean {
   if (
     x < block.left ||
+    // fixme: don't use `+50` here
     x > block.left + block.width + 50 ||
     y < block.top ||
     y > block.top + block.height
