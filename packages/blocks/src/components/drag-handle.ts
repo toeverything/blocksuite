@@ -54,6 +54,14 @@ export type DragHandleGetModelStateCallback = (
   skipX?: boolean
 ) => EditingState | null;
 
+export type DragHandleGetModelStateWithCursorCallback = (
+  pageX: number,
+  pageY: number,
+  cursor: number,
+  size?: number,
+  skipX?: boolean
+) => EditingState | null;
+
 @customElement('affine-drag-handle')
 export class DragHandle extends LitElement {
   static styles = css`
@@ -77,6 +85,7 @@ export class DragHandle extends LitElement {
       lastModelState: EditingState
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
+    getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
     setSelectedBlocks: (selectedBlocks: Element[]) => void;
   }) {
     super();
@@ -84,6 +93,7 @@ export class DragHandle extends LitElement {
     this.setSelectedBlocks = options.setSelectedBlocks;
     this._getBlockEditingStateByPosition =
       options.getBlockEditingStateByPosition;
+    this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
     document.body.appendChild(this);
   }
 
@@ -101,8 +111,12 @@ export class DragHandle extends LitElement {
 
   private _lastModelState: EditingState | null = null;
   private _indicator!: DragIndicator;
+  private _cursor: number | null = 0;
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
+    null;
+
+  private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
 
   protected firstUpdated() {
@@ -112,6 +126,7 @@ export class DragHandle extends LitElement {
 
   public show(startModelState: EditingState) {
     this._startModelState = startModelState;
+    this._cursor = startModelState.index;
     const rect = this._startModelState.position;
     this.style.position = 'absolute';
     this.style.display = 'block';
@@ -121,6 +136,7 @@ export class DragHandle extends LitElement {
 
   public hide() {
     this.style.display = 'none';
+    this._cursor = null;
     this._startModelState = null;
     this._lastModelState = null;
     this._indicator.cursorPosition = null;
@@ -172,6 +188,7 @@ export class DragHandle extends LitElement {
       true
     );
     if (clickDragState) {
+      this._cursor = clickDragState.index;
       this.setSelectedBlocks([
         getBlockElementByModel(clickDragState.model) as HTMLElement,
       ]);
@@ -189,12 +206,18 @@ export class DragHandle extends LitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
-    const modelState = this._getBlockEditingStateByPosition?.(
+    if (this._cursor === null) {
+      return;
+    }
+    const modelState = this._getBlockEditingStateByCursor?.(
       e.pageX,
       e.pageY,
+      this._cursor,
+      5,
       true
     );
     if (modelState) {
+      this._cursor = modelState.index;
       this._lastModelState = modelState;
       this._indicator.targetRect = modelState.position;
     }

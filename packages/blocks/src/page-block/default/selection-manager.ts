@@ -26,7 +26,10 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor.js';
 import type { DefaultPageSignals } from './default-page-block.js';
-import { getBlockEditingStateByPosition } from './utils.js';
+import {
+  getBlockEditingStateByPosition,
+  getBlockEditingStateByCursor,
+} from './utils.js';
 import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
@@ -194,6 +197,18 @@ export class DefaultSelectionManager {
         return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
           skipX,
         });
+      },
+      getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
+        return getBlockEditingStateByCursor(
+          this._blocks,
+          pageX,
+          pageY,
+          cursor,
+          {
+            size,
+            skipX,
+          }
+        );
       },
     });
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);

@@ -39,6 +39,7 @@ import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 export interface EditingState {
   model: BaseBlockModel;
   position: DOMRect;
+  index: number;
 }
 
 export function getBlockEditingStateByPosition(
@@ -49,12 +50,73 @@ export function getBlockEditingStateByPosition(
     skipX?: boolean;
   }
 ) {
-  for (let index = blocks.length - 1; index >= 0; index--) {
-    const block = blocks[index];
+  const start = 0;
+  const end = blocks.length - 1;
+  return binarySearchBlockEditingState(blocks, x, y, start, end, options);
+}
+
+export function getBlockEditingStateByCursor(
+  blocks: BaseBlockModel[],
+  x: number,
+  y: number,
+  cursor: number,
+  options?: {
+    size?: number;
+    skipX?: boolean;
+  }
+) {
+  const size = options?.size || 5;
+  const start = Math.max(cursor - size, 0);
+  const end = Math.min(cursor + size, blocks.length - 1);
+  return binarySearchBlockEditingState(blocks, x, y, start, end, options);
+}
+
+// seek range: [start, end]
+function binarySearchBlockEditingState(
+  blocks: BaseBlockModel[],
+  x: number,
+  y: number,
+  start: number,
+  end: number,
+  options?: {
+    skipX?: boolean;
+  }
+): EditingState | null {
+  while (start <= end) {
+    const mid = start + Math.floor((end - start) / 2);
+    const block = blocks[mid];
     const hoverDom = getBlockById(block.id);
     // code block use async loading
     if (block.flavour === 'affine:code' && !hoverDom) {
-      continue;
+      if (mid === end) {
+        return null;
+      }
+      // may have consecutive code blocks
+      let result = binarySearchBlockEditingState(
+        blocks,
+        x,
+        y,
+        mid + 1,
+        end,
+        options
+      );
+      if (result) {
+        return result;
+      }
+      if (mid === start) {
+        return null;
+      }
+      result = binarySearchBlockEditingState(
+        blocks,
+        x,
+        y,
+        start,
+        mid - 1,
+        options
+      );
+      if (result) {
+        return result;
+      }
     }
 
     let blockRect: DOMRect | null = null;
@@ -72,33 +134,33 @@ export function getBlockEditingStateByPosition(
 
     assertExists(blockRect);
 
+    if (y < detectRect.top) {
+      end = mid - 1;
+      continue;
+    } else if (y > detectRect.top + detectRect.height) {
+      start = mid + 1;
+      continue;
+    }
+
     if (options?.skipX) {
-      if (!(y < detectRect.top || y > detectRect.top + detectRect.height)) {
+      return {
+        index: mid,
+        position: blockRect,
+        model: block,
+      };
+    } else {
+      if (x < detectRect.left || x > detectRect.left + detectRect.width) {
+        return null;
+      } else {
         return {
+          index: mid,
           position: blockRect,
           model: block,
         };
       }
-    } else if (isPointIn(detectRect, x, y)) {
-      return {
-        position: blockRect,
-        model: block,
-      };
     }
   }
   return null;
-}
-
-function isPointIn(block: DOMRect, x: number, y: number): boolean {
-  if (
-    x < block.left ||
-    x > block.left + block.width ||
-    y < block.top ||
-    y > block.top + block.height
-  ) {
-    return false;
-  }
-  return true;
 }
 
 export async function downloadImage(model: BaseBlockModel) {
