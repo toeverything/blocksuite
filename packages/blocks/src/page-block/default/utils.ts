@@ -61,6 +61,10 @@ export function getBlockEditingStateByPosition(
     if (block.type === 'image') {
       const hoverImage = hoverDom?.querySelector('img');
       blockRect = hoverImage?.getBoundingClientRect() ?? null;
+      if (blockRect) {
+        // there is a `affine-embed-editing-state-container` on the right side
+        blockRect.width += 50;
+      }
     } else {
       blockRect = hoverDom?.getBoundingClientRect() ?? null;
     }
@@ -87,7 +91,7 @@ export function getBlockEditingStateByPosition(
 function isPointIn(block: DOMRect, x: number, y: number): boolean {
   if (
     x < block.left ||
-    x > block.left + block.width + 50 ||
+    x > block.left + block.width ||
     y < block.top ||
     y > block.top + block.height
   ) {
