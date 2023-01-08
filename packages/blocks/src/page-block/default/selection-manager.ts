@@ -144,11 +144,6 @@ export class PageSelectionState {
   }
 }
 
-const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
-  // Refs: https://stackoverflow.com/a/65910078
-  event.preventDefault();
-};
-
 export class DefaultSelectionManager {
   page: Page;
   state = new PageSelectionState('none');
@@ -201,12 +196,6 @@ export class DefaultSelectionManager {
         });
       },
     });
-    document.body.addEventListener(
-      'dragover',
-      handlePreventDocumentDragOverDelay,
-      false
-    );
-    document.body.appendChild(this._dragHandle);
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._mouseRoot,
@@ -508,10 +497,6 @@ export class DefaultSelectionManager {
 
   dispose() {
     this._dragHandle.remove();
-    document.body.removeEventListener(
-      'dragover',
-      handlePreventDocumentDragOverDelay
-    );
     this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();

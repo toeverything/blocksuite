@@ -5,6 +5,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
 
+const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
+  // Refs: https://stackoverflow.com/a/65910078
+  event.preventDefault();
+};
+
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
   static styles = css`
@@ -79,6 +84,7 @@ export class DragHandle extends LitElement {
     this.setSelectedBlocks = options.setSelectedBlocks;
     this._getBlockEditingStateByPosition =
       options.getBlockEditingStateByPosition;
+    document.body.appendChild(this);
   }
 
   @property()
@@ -123,6 +129,12 @@ export class DragHandle extends LitElement {
 
   public connectedCallback() {
     super.connectedCallback();
+    document.body.addEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay,
+      false
+    );
+    document.body.addEventListener('wheel', this._onWheel);
     this._indicator = <DragIndicator>(
       document.createElement('affine-drag-indicator')
     );
@@ -137,12 +149,21 @@ export class DragHandle extends LitElement {
   public disconnectedCallback() {
     super.disconnectedCallback();
     this._indicator.remove();
+    document.body.removeEventListener('wheel', this._onWheel);
+    document.body.removeEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay
+    );
     this.removeEventListener('mousedown', this._onMouseDown);
     this.removeEventListener('mouseleave', this._onMouseLeave);
     this.removeEventListener('dragstart', this._onDragStart);
     this.removeEventListener('drag', this._onDrag);
     this.removeEventListener('dragend', this._onDragEnd);
   }
+
+  private _onWheel = (e: MouseEvent) => {
+    this.hide();
+  };
 
   private _onMouseDown = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
