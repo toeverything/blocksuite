@@ -1,6 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { IPoint } from '../__internal__/index.js';
+import type { IPoint, SelectionEvent } from '../__internal__/index.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -122,7 +122,7 @@ export const showDragHandle = ({
     throw new Error("Can't show drag handle without anchor element!");
   }
   if (abortController.signal.aborted) {
-    return;
+    return null;
   }
   let lastModelState: {
     position: DOMRect;
@@ -193,6 +193,17 @@ export const showDragHandle = ({
       once: true,
     }
   );
+  return {
+    onMouseMove: (e: SelectionEvent) => {
+      const modelState = getModelStateByPosition(e.raw.pageX, e.raw.pageY);
+      if (modelState) {
+        const rect = modelState.position;
+        dragHandleEle.style.position = 'absolute';
+        dragHandleEle.style.left = `${rect.left - 20}px`;
+        dragHandleEle.style.top = `${rect.top + 8}px`;
+      }
+    },
+  };
 };
 
 declare global {
