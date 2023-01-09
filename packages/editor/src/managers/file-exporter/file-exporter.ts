@@ -1,6 +1,6 @@
+/* eslint-disable no-control-regex */
 import TurndownService from 'turndown';
 import { globalCSS, highlightCSS } from './exporter-style.js';
-import filenamify from 'filenamify';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
@@ -105,9 +105,37 @@ ${htmlContent}
 `;
 }
 
-function getSafeFileName(filename: string) {
-  const dot = filename.lastIndexOf('.');
-  const name = filename.slice(0, dot);
-  const ext = filename.slice(dot);
-  return filenamify(name, { replacement: ' ' }).trim() + ext;
+function getSafeFileName(string: string) {
+  const replacement = ' ';
+  const filenameReservedRegex = /[<>:"/\\|?*\u0000-\u001F]/g;
+  const windowsReservedNameRegex = /^(con|prn|aux|nul|com\d|lpt\d)$/i;
+  const reControlChars = /[\u0000-\u001F\u0080-\u009F]/g;
+  const reTrailingPeriods = /\.+$/;
+  const allowedLength = 50;
+
+  function trimRepeated(string: string, target: string) {
+    const escapeStringRegexp = target
+      .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+      .replace(/-/g, '\\x2d');
+    const regex = new RegExp(`(?:${escapeStringRegexp}){2,}`, 'g');
+    return string.replace(regex, target);
+  }
+
+  string = string
+    .normalize('NFD')
+    .replace(filenameReservedRegex, replacement)
+    .replace(reControlChars, replacement)
+    .replace(reTrailingPeriods, '');
+
+  string = trimRepeated(string, replacement);
+  string = windowsReservedNameRegex.test(string)
+    ? string + replacement
+    : string;
+  const extIndex = string.lastIndexOf('.');
+  const filename = string.slice(0, extIndex).trim();
+  const extension = string.slice(extIndex);
+  string =
+    filename.slice(0, Math.max(1, allowedLength - extension.length)) +
+    extension;
+  return string;
 }
