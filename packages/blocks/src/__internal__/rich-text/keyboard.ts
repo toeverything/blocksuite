@@ -10,6 +10,7 @@ import {
   noop,
   PREVENT_DEFAULT,
 } from '../utils/index.js';
+import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import {
   handleLineStartBackspace,
   handleUnindent,
@@ -37,7 +38,7 @@ interface BindingContext {
   format: Record<string, unknown>;
 }
 
-type KeyboardBindings = Record<
+export type KeyboardBindings = Record<
   string,
   {
     key: string | number;
@@ -336,6 +337,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       shiftKey: false,
       handler: onKeyRight,
     },
+
+    ...createBracketAutoCompleteBindings(model),
   };
 
   return keyboardBindings;
