@@ -1,12 +1,7 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import type { RangeStatic } from 'quill';
-import {
-  ALLOW_DEFAULT,
-  assertExists,
-  getDefaultPageBlock,
-  PREVENT_DEFAULT,
-} from '../index.js';
+import { ALLOW_DEFAULT, assertExists, PREVENT_DEFAULT } from '../index.js';
 
 type Match = {
   name: string;
@@ -277,7 +272,8 @@ export class Shortcuts {
         if (model.flavour === 'affine:paragraph' && model.type === 'quote') {
           return PREVENT_DEFAULT;
         }
-        const page = getDefaultPageBlock(model).page;
+        const page = model.page;
+        page.captureSync();
         const parent = page.getParent(model);
         assertExists(parent);
         const index = parent.children.indexOf(model);
