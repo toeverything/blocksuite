@@ -4,11 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type {
-  FrameBlockModel,
-  RootBlockModel,
-  ShapeBlockModel,
-} from '../../index.js';
+import type { FrameBlockModel, RootBlockModel } from '../../index.js';
 import type {
   BlockSelectionState,
   HoverState,
@@ -51,10 +47,10 @@ function getCommonRectStyle(
 export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
-  const isShape = hoverState.block.flavour === 'affine:shape';
+  // const isShape = hoverState.block.flavour === 'affine:shape';
 
   const style = {
-    ...getCommonRectStyle(rect, zoom, isShape),
+    ...getCommonRectStyle(rect, zoom, false),
     border: '1px solid var(--affine-primary-color)',
   };
 
@@ -144,8 +140,8 @@ function EdgelessBlockChild(
   host: BlockHost,
   viewport: ViewportState
 ) {
-  const { xywh, flavour } = model;
-  const isShape = flavour === 'affine:shape';
+  const { xywh } = model;
+  const isShape = false;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
   const translateX =
@@ -186,12 +182,7 @@ export function EdgelessBlockChildrenContainer(
     ${repeat(
       model.children,
       child => child.id,
-      child =>
-        EdgelessBlockChild(
-          child as FrameBlockModel | ShapeBlockModel,
-          host,
-          viewport
-        )
+      child => EdgelessBlockChild(child as FrameBlockModel, host, viewport)
     )}
   `;
 }
@@ -327,7 +318,7 @@ export class EdgelessSelectedRect extends LitElement {
       let newY = y;
       let newW = w;
       let newH = h;
-      const isShape = selected.flavour === 'affine:shape';
+      const isShape = false;
       const deltaX = this._dragStartInfo.startMouseX - e.clientX;
       const deltaY = this._dragStartInfo.startMouseY - e.clientY;
       const direction = this._dragStartInfo.direction;
@@ -424,15 +415,15 @@ export class EdgelessSelectedRect extends LitElement {
 
   render() {
     if (this.state.type === 'none') return html``;
-    const isShape = this.state.selected.flavour === 'affine:shape';
+    // const isShape = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
       zIndex: '3',
-      ...getCommonRectStyle(this.rect, this.zoom, isShape, true),
+      ...getCommonRectStyle(this.rect, this.zoom, false, true),
     };
-    const handlers = this._getHandles(this.rect, isShape);
+    const handlers = this._getHandles(this.rect, false);
     return html`
       ${this.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>

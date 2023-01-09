@@ -1,7 +1,6 @@
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { ViewportState, XYWH } from './selection-manager.js';
 import type { RootBlockModel } from '../../__internal__/index.js';
-import { ShapeBlockComponent } from '../../shape-block/index.js';
 import type { SelectionEvent } from '../../__internal__/index.js';
 
 export const DEFAULT_SPACING = 64;
@@ -28,22 +27,21 @@ export function pick(
   container: EdgelessContainer,
   e: SelectionEvent
 ): RootBlockModel | null {
-  const target = e.raw.target;
-  const isShapeBlock = target instanceof ShapeBlockComponent;
   for (let i = blocks.length - 1; i >= 0; i--) {
     const block = blocks[i];
     if (isPointIn(block, modelX, modelY)) {
-      if (
-        isShapeBlock &&
-        block.flavour === 'affine:shape' &&
-        (target as ShapeBlockComponent).model === block
-      ) {
-        return block;
-      } else if (!isShapeBlock && block.flavour !== 'affine:shape') {
-        return block;
-      } else {
-        continue;
-      }
+      // if (
+      //   isShapeBlock &&
+      //   block.flavour === 'affine:shape' &&
+      //   (target as ShapeBlockComponent).model === block
+      // ) {
+      //   return block;
+      // } else if (!isShapeBlock && block.flavour !== 'affine:shape') {
+      //   return block;
+      // } else {
+      //   continue;
+      // }
+      return block;
     }
   }
   return null;
