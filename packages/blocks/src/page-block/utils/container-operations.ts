@@ -437,7 +437,8 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
     let offset = 0;
     frames.forEach(model => {
       // DO NOT resize shape block
-      if (matchFlavours(model, ['affine:shape'])) return;
+      // FIXME: we don't have shape block for now.
+      // if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();

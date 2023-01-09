@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import type { BaseBlockModel } from '../base.js';
+import type { BaseBlockModel, BlockModels } from '../base.js';
 import type {
   BlockProps,
   PrefixedBlockProps,
@@ -25,13 +25,17 @@ export function assertExists<T>(val: T | null | undefined): asserts val is T {
   }
 }
 
-export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
+export function assertFlavours<
+  Key extends keyof BlockModels & string = keyof BlockModels & string
+>(model: BaseBlockModel, allowed: Key[]) {
   if (!allowed.includes(model.flavour)) {
     throw new Error(`model flavour ${model.flavour} is not allowed`);
   }
 }
 
-export function matchFlavours(model: BaseBlockModel, expected: string[]) {
+export function matchFlavours<
+  Key extends keyof BlockModels & string = keyof BlockModels & string
+>(model: BaseBlockModel, expected: Key[]) {
   return expected.includes(model.flavour);
 }
 

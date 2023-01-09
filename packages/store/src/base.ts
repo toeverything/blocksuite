@@ -18,9 +18,12 @@ export interface IBaseBlockProps {
   text?: TextType;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface BlockModels {}
+
 export class BaseBlockModel implements IBaseBlockProps {
   static version: number;
-  flavour!: string;
+  flavour!: keyof BlockModels & string;
   tag!: StaticValue;
   id: string;
 
