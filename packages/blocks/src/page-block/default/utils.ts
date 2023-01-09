@@ -84,13 +84,17 @@ function binarySearchBlockEditingState(
 ): EditingState | null {
   while (start <= end) {
     const mid = start + Math.floor((end - start) / 2);
-    const block = blocks[mid];
-    const hoverDom = getBlockById(block.id);
+    const { block, blockRect, detectRect, hoverDom } = getBlockAndRect(
+      blocks,
+      mid
+    );
+
     // code block use async loading
     if (block.flavour === 'affine:code' && !hoverDom) {
       if (mid === end) {
         return null;
       }
+      // @TODO: need more tests
       // may have consecutive code blocks
       let result = binarySearchBlockEditingState(
         blocks,
@@ -119,39 +123,24 @@ function binarySearchBlockEditingState(
       }
     }
 
-    let blockRect: DOMRect | null = null;
-    let detectRect: DOMRect | null = null;
-    if (block.type === 'image') {
-      const hoverImage = hoverDom?.querySelector('img');
-      blockRect = hoverImage?.getBoundingClientRect() as DOMRect;
-      detectRect = { ...blockRect } satisfies DOMRect;
-      // there is a `affine-embed-editing-state-container` on the right side
-      detectRect.width += 50;
-    } else {
-      blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
-      detectRect = blockRect;
-    }
+    let in_block = y <= detectRect.bottom;
+    if (in_block) {
+      if (mid !== 0) {
+        const {
+          detectRect: { bottom },
+        } = getBlockAndRect(blocks, mid - 1);
+        in_block &&= y > bottom;
+      }
 
-    assertExists(blockRect);
+      if (in_block) {
+        assertExists(blockRect);
 
-    if (y < detectRect.top) {
-      end = mid - 1;
-      continue;
-    } else if (y > detectRect.top + detectRect.height) {
-      start = mid + 1;
-      continue;
-    }
+        if (!options?.skipX) {
+          if (x < detectRect.left || x > detectRect.left + detectRect.width) {
+            return null;
+          }
+        }
 
-    if (options?.skipX) {
-      return {
-        index: mid,
-        position: blockRect,
-        model: block,
-      };
-    } else {
-      if (x < detectRect.left || x > detectRect.left + detectRect.width) {
-        return null;
-      } else {
         return {
           index: mid,
           position: blockRect,
@@ -159,8 +148,46 @@ function binarySearchBlockEditingState(
         };
       }
     }
+
+    if (detectRect.top > y) {
+      end = mid - 1;
+    } else {
+      start = mid + 1;
+    }
   }
+
   return null;
+}
+
+function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
+  const block = blocks[mid];
+  const hoverDom = getBlockById(block.id);
+  let blockRect: DOMRect | null = null;
+  let detectRect: DOMRect | null = null;
+  if (block.type === 'image') {
+    const hoverImage = hoverDom?.querySelector('img');
+    blockRect = hoverImage?.getBoundingClientRect() as DOMRect;
+    detectRect = { ...blockRect } satisfies DOMRect;
+    // there is a `affine-embed-editing-state-container` on the right side
+    detectRect.width += 50;
+  } else {
+    blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
+    // in a nested block, we should get `.ql-editor` which is its own editing area
+    if (block.children.length) {
+      detectRect = hoverDom
+        ?.querySelector('.ql-editor')
+        ?.getBoundingClientRect() as DOMRect;
+    } else {
+      detectRect = blockRect;
+    }
+  }
+
+  return {
+    block,
+    hoverDom,
+    blockRect,
+    detectRect,
+  };
 }
 
 export async function downloadImage(model: BaseBlockModel) {

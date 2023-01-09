@@ -237,8 +237,8 @@ export class DefaultSelectionManager {
       for (let i = 0; i < length; i++) {
         const blockModel = queue.shift();
         assertExists(blockModel);
-        blockModel.children && queue.push(...blockModel.children);
         // ignore level 0, as layer 0 is all affine:frame block
+        blockModel.children && queue.unshift(...blockModel.children);
         if (layer > 0) {
           result.push(blockModel);
         }
