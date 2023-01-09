@@ -6,11 +6,17 @@ hotkeys.filter = (event: KeyboardEvent) => {
   if (
     target &&
     target instanceof Element &&
-    ['INPUT'].includes(target.tagName)
+    ['INPUT'].includes(target.tagName) &&
+    isUndoOrRedo(event)
   ) {
     return false;
   }
   return true;
+};
+
+const isUndoOrRedo = (event: KeyboardEvent) => {
+  // when event.shiftKey is false => undo, when event.shiftKey is true => redo
+  return event.metaKey && !event.altKey && event.key === 'z';
 };
 
 const SCOPE = {
