@@ -5,6 +5,7 @@
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "Node",
+    "types": ["blocksuite__global-types"],
     "noEmit": false,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true
