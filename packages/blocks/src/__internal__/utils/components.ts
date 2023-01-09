@@ -26,16 +26,16 @@ export function BlockElement(
           .host=${host}
         ></${model.tag}>
       `;
-    case 'affine:shape':
-      // only render shape block in edgeless mode
-      if (edgeless)
-        return html`
-          <${model.tag}
-            .model=${model}
-            .host=${host}
-          ></${model.tag}>
-        `;
-      else return null;
+    // case 'affine:shape':
+    //   // only render shape block in edgeless mode
+    //   if (edgeless)
+    //     return html`
+    //       <${model.tag}
+    //         .model=${model}
+    //         .host=${host}
+    //       ></${model.tag}>
+    //     `;
+    //   else return null;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
     case 'affine:surface':
