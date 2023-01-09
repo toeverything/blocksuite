@@ -4,4 +4,4 @@ BlockSuite data store built for general purpose state management.
 
 ## Documentation
 
-WIP
+TBD

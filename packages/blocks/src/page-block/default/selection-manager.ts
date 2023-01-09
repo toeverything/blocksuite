@@ -392,8 +392,6 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
 
-    if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
-
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
       document.querySelectorAll('.affine-embed-wrapper-caption')
@@ -445,7 +443,6 @@ export class DefaultSelectionManager {
   private _onContainerDblClick = (e: SelectionEvent) => {
     this.state.clear();
     this._signals.updateSelectedRects.emit([]);
-    if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
     if (e.raw.target instanceof HTMLTextAreaElement) return;
     const range = handleNativeRangeDblClick(this.page, e);
     if (!range || range.collapsed) {

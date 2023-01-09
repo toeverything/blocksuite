@@ -27,7 +27,11 @@ import type {
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-import { MOVE_DETECT_THRESHOLD, SCROLL_THRESHOLD } from './consts.js';
+import {
+  BLOCK_ID_ATTR,
+  MOVE_DETECT_THRESHOLD,
+  SCROLL_THRESHOLD,
+} from './consts.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -76,7 +80,7 @@ function fixCurrentRangeToText(
         '.ql-editor'
       )
     ).map(elem => {
-      const block = elem.closest('[data-block-id]');
+      const block = elem.closest(`[${BLOCK_ID_ATTR}]`);
       assertExists(block);
       return block;
     });

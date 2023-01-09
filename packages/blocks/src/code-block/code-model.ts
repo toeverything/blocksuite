@@ -1,5 +1,6 @@
 import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
+import { BLOCK_ID_ATTR } from '../__internal__/utils/consts.js';
 
 export interface CodeBlockProps extends IBaseBlockProps {
   language: string;
@@ -34,7 +35,7 @@ export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
     end?: number
   ): string {
     const codeElement = document.querySelector(
-      `[data-block-id="${this.id}"] pre`
+      `[${BLOCK_ID_ATTR}="${this.id}"] pre`
     );
     if (!codeElement) {
       return super.block2html(

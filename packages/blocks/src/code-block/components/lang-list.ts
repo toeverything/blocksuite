@@ -1,6 +1,10 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html } from 'lit';
-import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
+import {
+  BLOCK_ID_ATTR,
+  createEvent,
+  NonShadowLitElement,
+} from '../../__internal__/index.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { SearchIcon } from './icons.js';
 
@@ -324,7 +328,7 @@ export class LangList extends NonShadowLitElement {
   private _clickHandler(e: MouseEvent) {
     const target = e.target as HTMLElement;
     if (
-      !target.closest('.container')?.closest(`[data-block-id="${this.id}"]`)
+      !target.closest('.container')?.closest(`[${BLOCK_ID_ATTR}="${this.id}"]`)
     ) {
       this._dispose();
     }
