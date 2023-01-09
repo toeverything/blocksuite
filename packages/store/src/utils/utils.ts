@@ -31,8 +31,14 @@ export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
   }
 }
 
-export function matchFlavours(model: BaseBlockModel, expected: string[]) {
-  return expected.includes(model.flavour);
+export function matchFlavours<
+  Models extends Record<
+    string,
+    BaseBlockModel
+  > = BlockSuiteInternal.BlockModels,
+  Key extends keyof Models & string = keyof Models & string
+>(model: Models[Key], expected: Key[]) {
+  return expected.includes(model.flavour as Key);
 }
 
 export function assertValidChildren(

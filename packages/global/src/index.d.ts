@@ -6,3 +6,28 @@ declare module NodeJS {
     readonly engine: 'chromium' | 'firefox' | 'safari';
   }
 }
+
+declare namespace BlockSuiteInternal {
+  import {
+    CodeBlockModel,
+    DividerBlockModel,
+    EmbedBlockModel,
+    FrameBlockModel,
+    ListBlockModel,
+    PageBlockModel,
+    ParagraphBlockModel,
+    SurfaceBlockModel,
+  } from '@blocksuite/blocks';
+
+  export type BlockModels = {
+    'affine:paragraph': ParagraphBlockModel;
+    'affine:page': PageBlockModel;
+    'affine:list': ListBlockModel;
+    'affine:frame': FrameBlockModel;
+    'affine:code': CodeBlockModel;
+    'affine:divider': DividerBlockModel;
+    'affine:embed': EmbedBlockModel;
+    // 'affine:shape': ShapeBlockModel,
+    'affine:surface': SurfaceBlockModel;
+  };
+}
