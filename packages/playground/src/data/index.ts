@@ -51,7 +51,7 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
 export function basic(workspace: Workspace) {
-  workspace.signals.pageAdded.once(id => {
+  workspace.signals.pageAdded.once(async id => {
     const page = workspace.getPage(id) as Page;
     const pageBlockId = page.addBlock({
       flavour: 'affine:page',
@@ -60,8 +60,9 @@ export function basic(workspace: Workspace) {
     page.addBlock({ flavour: 'affine:surface' }, null);
 
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
-    window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
-    page.resetHistory();
+    await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+
+    requestAnimationFrame(() => page.resetHistory());
   });
 
   workspace.createPage('page0');
