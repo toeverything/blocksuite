@@ -8,17 +8,9 @@ interface StaticValue {
   r: unknown;
 }
 
-export interface IBaseBlockProps {
-  flavour: string;
-  type: string;
-  id: string;
-  children: IBaseBlockProps[];
-
-  // TODO use schema
-  text?: TextType;
-}
-
-export class BaseBlockModel implements IBaseBlockProps {
+export class BaseBlockModel<Props = unknown>
+  implements BlockSuiteInternal.IBaseBlockProps
+{
   static version: number;
   flavour!: keyof BlockSuiteInternal.BlockModels & string;
   tag!: StaticValue;
@@ -35,9 +27,12 @@ export class BaseBlockModel implements IBaseBlockProps {
   text?: TextType;
   sourceId?: string;
 
-  constructor(page: Page, props: Partial<IBaseBlockProps>) {
+  constructor(
+    page: Page,
+    props: Pick<BlockSuiteInternal.IBaseBlockProps, 'id'>
+  ) {
     this.page = page;
-    this.id = props.id as string;
+    this.id = props.id;
     this.children = [];
   }
 

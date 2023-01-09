@@ -62,7 +62,8 @@ export class Page extends Space<PageData> {
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
-    Object.keys(new BaseBlockModel(this, {}))
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    Object.keys(new BaseBlockModel(this, { id: null! }))
   );
 
   readonly signals = {
@@ -226,6 +227,27 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  public addBlockByFlavour<
+    Flavour extends keyof BlockSuiteProps.ALL = keyof BlockSuiteProps.ALL
+  >(
+    flavour: Flavour,
+    blockProps: Partial<
+      BlockSuiteProps.ALL[Flavour] &
+        Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
+    > = {},
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ) {
+    return this.addBlock(
+      {
+        flavour,
+        ...blockProps,
+      },
+      parent,
+      parentIndex
+    );
+  }
+
   addBlock<T extends BlockProps>(
     blockProps: Partial<T>,
     parent?: BaseBlockModel | string | null,
@@ -235,11 +257,11 @@ export class Page extends Space<PageData> {
       throw new Error('Block props must contain flavour');
     }
 
-    if (blockProps.flavour === 'affine:shape') {
-      if (parent != null || parentIndex != null) {
-        throw new Error('Shape block should only be appear under page');
-      }
-    }
+    // if (blockProps.flavour === 'affine:shape') {
+    //   if (parent != null || parentIndex != null) {
+    //     throw new Error('Shape block should only be appear under page');
+    //   }
+    // }
 
     const clonedProps: Partial<BlockProps> = { ...blockProps };
     const id = this._idGenerator();
@@ -480,9 +502,14 @@ export class Page extends Space<PageData> {
     const BlockModelCtor = this.workspace.flavourMap.get(props.flavour);
     if (!BlockModelCtor) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
+    } else if (!props.id) {
+      throw new Error('Block id is not defined');
     }
 
-    const blockModel = new BlockModelCtor(this, props);
+    const blockModel = new BlockModelCtor(
+      this,
+      props as PropsWithId<Omit<BlockProps, 'children'>>
+    );
     return blockModel;
   }
 

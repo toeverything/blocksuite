@@ -1,19 +1,18 @@
-import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Page, BaseBlockModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-
-export interface DividerBlockProps extends IBaseBlockProps {
-  flavour: 'affine:divider';
-}
 
 export class DividerBlockModel
   extends BaseBlockModel
-  implements DividerBlockProps
+  implements BlockSuiteProps.DividerBlockModel
 {
   static version = 1;
   flavour = 'affine:divider' as const;
   tag = literal`affine-divider`;
 
-  constructor(page: Page, props: Partial<DividerBlockProps>) {
+  constructor(
+    page: Page,
+    props: PropsWithId<Partial<BlockSuiteProps.DividerBlockModel>>
+  ) {
     super(page, props);
   }
 

@@ -1,24 +1,9 @@
-import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { Page, BaseBlockModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-
-export type ParagraphType =
-  | 'text'
-  | 'quote'
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'h4'
-  | 'h5'
-  | 'h6';
-
-export interface ParagraphBlockProps extends IBaseBlockProps {
-  flavour: 'affine:paragraph';
-  type: ParagraphType;
-}
 
 export class ParagraphBlockModel
   extends BaseBlockModel
-  implements ParagraphBlockProps
+  implements BlockSuiteProps.ParagraphBlockModel
 {
   static version = 1;
   flavour = 'affine:paragraph' as const;
@@ -26,7 +11,10 @@ export class ParagraphBlockModel
 
   type: ParagraphType = 'text';
 
-  constructor(page: Page, props: Partial<ParagraphBlockProps>) {
+  constructor(
+    page: Page,
+    props: PropsWithId<Partial<BlockSuiteProps.ParagraphBlockModel>>
+  ) {
     super(page, props);
     this.type = props.type ?? 'text';
   }

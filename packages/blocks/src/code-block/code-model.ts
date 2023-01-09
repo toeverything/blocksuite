@@ -1,12 +1,11 @@
-import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
+import { BaseBlockModel, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 import { BLOCK_ID_ATTR } from '../__internal__/utils/consts.js';
 
-export interface CodeBlockProps extends IBaseBlockProps {
-  language: string;
-}
-
-export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
+export class CodeBlockModel
+  extends BaseBlockModel<BlockSuiteProps.CodeBlockModel>
+  implements BlockSuiteProps.CodeBlockModel
+{
   static version = 1;
   flavour = 'affine:code' as const;
   type = 'code' as const;
@@ -20,7 +19,10 @@ export class CodeBlockModel extends BaseBlockModel implements IBaseBlockProps {
     });
   }
 
-  constructor(page: Page, props: Partial<CodeBlockProps>) {
+  constructor(
+    page: Page,
+    props: PropsWithId<Partial<BlockSuiteProps.CodeBlockModel>>
+  ) {
     super(page, props);
     this.language = props.language ?? 'JavaScript';
   }
