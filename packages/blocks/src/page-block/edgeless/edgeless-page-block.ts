@@ -108,6 +108,9 @@ export class EdgelessPageBlockComponent
   @query('.affine-surface-canvas')
   private _canvas!: HTMLCanvasElement;
 
+  @state()
+  showToolbar = true;
+
   signals = {
     viewportUpdated: new Signal(),
     updateSelection: new Signal<BlockSelectionState>(),
@@ -235,6 +238,9 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
+
+    const params = new URLSearchParams(location.search);
+    this.showToolbar = params.get('toolbar') !== null;
   }
 
   disconnectedCallback() {
@@ -310,6 +316,9 @@ export class EdgelessPageBlockComponent
               ></edgeless-selected-rect>
             `
           : null}
+        ${this.showToolbar
+          ? html` <edgeless-toolbar .page=${this.page}></edgeless-toolbar>`
+          : ''}
       </div>
     `;
   }

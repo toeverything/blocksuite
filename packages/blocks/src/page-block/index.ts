@@ -1,5 +1,5 @@
 export * from './default/default-page-block.js';
-export * from './edgeless/edgeless-page-block.js';
+export * from './edgeless/index.js';
 export * from './page-model.js';
 export { copyCode } from './default/utils.js';
 export { deleteCodeBlock } from './default/utils.js';
