@@ -258,7 +258,7 @@ test('press backspace after code block can jump into start of code block', async
   expect(index).toBe(0);
 });
 
-test.only('press ArrowUp after code block can select code block', async ({
+test('press ArrowUp after code block can select code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -269,10 +269,10 @@ test.only('press ArrowUp after code block can select code block', async ({
   await page.keyboard.press('Enter');
   await page.keyboard.press('ArrowUp');
 
-  const IfSelectRectExist = await page.evaluate(() => {
+  const selectedRectsExist = await page.evaluate(() => {
     return !!document.querySelector('.affine-page-selected-rects-container');
   });
-  expect(IfSelectRectExist).toEqual(true);
+  expect(selectedRectsExist).toEqual(true);
 });
 
 test('undo and redo works in code block', async ({ page }) => {
