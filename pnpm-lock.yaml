@@ -123,7 +123,6 @@ importers:
       lit: ^2.5.0
       react: ^18.2.0
       react-dom: ^18.2.0
-      vite-plugin-web-components-hmr: ^0.0.2
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/editor': link:../editor
@@ -134,8 +133,6 @@ importers:
       lit: 2.5.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-    devDependencies:
-      vite-plugin-web-components-hmr: 0.0.2
 
   packages/react:
     specifiers:
@@ -6189,20 +6186,6 @@ packages:
 
   /vite-plugin-banner/0.7.0:
     resolution: {integrity: sha512-g0cm0wbrR6b6wR8FWtfD1RSDPacdumKEOAnneXv+NpJ9ez+j6rklRv6lMOO+aPf+Y6Zb8OzgIk0FXBZ6h+DeZQ==}
-    dev: true
-
-  /vite-plugin-web-components-hmr/0.0.2:
-    resolution: {integrity: sha512-zqU9UCgJ1pfxgNhQ8a7Aa0MJ0Mfgu/Fb0xvGehEIb2FY2Mmb8XRc0PNtHzD3vslYr/yw7hCctIGy17HqURFT9Q==}
-    peerDependencies:
-      vite: '>=2'
-    dependencies:
-      '@babel/core': 7.20.7
-      '@babel/plugin-syntax-class-properties': 7.12.13_@babel+core@7.20.7
-      '@babel/plugin-syntax-import-assertions': 7.20.0_@babel+core@7.20.7
-      '@babel/plugin-syntax-top-level-await': 7.14.5_@babel+core@7.20.7
-      picomatch: 2.3.1
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /vite-plugin-web-components-hmr/0.0.2_vite@4.0.4:
