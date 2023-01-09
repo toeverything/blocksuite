@@ -228,11 +228,13 @@ export class Page extends Space<PageData> {
   }
 
   public addBlockByFlavour<
-    Flavour extends keyof BlockSuiteModelProps.ALL = keyof BlockSuiteModelProps.ALL
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+    Flavour extends keyof ALLProps & string = keyof ALLProps & string
   >(
     flavour: Flavour,
     blockProps: Partial<
-      BlockSuiteModelProps.ALL[Flavour] &
+      ALLProps[Flavour] &
         Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
     > = {},
     parent?: BaseBlockModel | string | null,
