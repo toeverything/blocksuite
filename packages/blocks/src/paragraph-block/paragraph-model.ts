@@ -3,7 +3,7 @@ import { literal } from 'lit/static-html.js';
 
 export class ParagraphBlockModel
   extends BaseBlockModel
-  implements BlockSuiteProps.ParagraphBlockModel
+  implements BlockSuiteModelProps.ParagraphBlockModel
 {
   static version = 1;
   flavour = 'affine:paragraph' as const;
@@ -13,7 +13,7 @@ export class ParagraphBlockModel
 
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.ParagraphBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.ParagraphBlockModel>>
   ) {
     super(page, props);
     this.type = props.type ?? 'text';

@@ -228,11 +228,11 @@ export class Page extends Space<PageData> {
   }
 
   public addBlockByFlavour<
-    Flavour extends keyof BlockSuiteProps.ALL = keyof BlockSuiteProps.ALL
+    Flavour extends keyof BlockSuiteModelProps.ALL = keyof BlockSuiteModelProps.ALL
   >(
     flavour: Flavour,
     blockProps: Partial<
-      BlockSuiteProps.ALL[Flavour] &
+      BlockSuiteModelProps.ALL[Flavour] &
         Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
     > = {},
     parent?: BaseBlockModel | string | null,

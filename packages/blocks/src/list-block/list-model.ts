@@ -3,7 +3,7 @@ import { literal } from 'lit/static-html.js';
 
 export class ListBlockModel
   extends BaseBlockModel
-  implements BlockSuiteProps.ListBlockModel
+  implements BlockSuiteModelProps.ListBlockModel
 {
   static version = 1;
   flavour = 'affine:list' as const;
@@ -14,7 +14,7 @@ export class ListBlockModel
 
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.ListBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.ListBlockModel>>
   ) {
     super(page, props);
     this.type = props.type ?? 'bulleted';

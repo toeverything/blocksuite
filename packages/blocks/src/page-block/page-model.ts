@@ -2,7 +2,7 @@ import { BaseBlockModel, Page } from '@blocksuite/store';
 
 export class PageBlockModel
   extends BaseBlockModel
-  implements BlockSuiteProps.PageBlockModel
+  implements BlockSuiteModelProps.PageBlockModel
 {
   static version = 1;
   flavour = 'affine:page' as const;
@@ -10,7 +10,7 @@ export class PageBlockModel
   title = '';
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.PageBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.PageBlockModel>>
   ) {
     super(page, props);
     this.title = props.title ?? '';

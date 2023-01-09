@@ -3,7 +3,7 @@ import { literal } from 'lit/static-html.js';
 
 export class EmbedBlockModel
   extends BaseBlockModel
-  implements BlockSuiteProps.EmbedBlockModel
+  implements BlockSuiteModelProps.EmbedBlockModel
 {
   static version = 1;
   flavour = 'affine:embed' as const;
@@ -17,7 +17,7 @@ export class EmbedBlockModel
 
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.EmbedBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.EmbedBlockModel>>
   ) {
     super(page, props);
     this.type = props.type ?? 'image';

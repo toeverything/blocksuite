@@ -5,7 +5,7 @@ import { literal } from 'lit/static-html.js';
 
 export class ShapeBlockModel
   extends BaseBlockModel
-  implements BlockSuiteProps.ShapeBlockModel
+  implements BlockSuiteModelProps.ShapeBlockModel
 {
   static version = 1;
   // FIXME
@@ -19,7 +19,7 @@ export class ShapeBlockModel
 
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.ShapeBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.ShapeBlockModel>>
   ) {
     super(page, props);
     this.xywh = props.xywh ?? '[0,0,100,100]';

@@ -3,8 +3,8 @@ import { literal } from 'lit/static-html.js';
 import { BLOCK_ID_ATTR } from '../__internal__/utils/consts.js';
 
 export class CodeBlockModel
-  extends BaseBlockModel<BlockSuiteProps.CodeBlockModel>
-  implements BlockSuiteProps.CodeBlockModel
+  extends BaseBlockModel<BlockSuiteModelProps.CodeBlockModel>
+  implements BlockSuiteModelProps.CodeBlockModel
 {
   static version = 1;
   flavour = 'affine:code' as const;
@@ -21,7 +21,7 @@ export class CodeBlockModel
 
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.CodeBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.CodeBlockModel>>
   ) {
     super(page, props);
     this.language = props.language ?? 'JavaScript';

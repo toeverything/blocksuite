@@ -3,7 +3,7 @@ import { literal } from 'lit/static-html.js';
 
 export class DividerBlockModel
   extends BaseBlockModel
-  implements BlockSuiteProps.DividerBlockModel
+  implements BlockSuiteModelProps.DividerBlockModel
 {
   static version = 1;
   flavour = 'affine:divider' as const;
@@ -11,7 +11,7 @@ export class DividerBlockModel
 
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.DividerBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.DividerBlockModel>>
   ) {
     super(page, props);
   }

@@ -3,7 +3,7 @@ import { literal } from 'lit/static-html.js';
 
 export class FrameBlockModel
   extends BaseBlockModel
-  implements BlockSuiteProps.FrameBlockModel
+  implements BlockSuiteModelProps.FrameBlockModel
 {
   static version = 1;
   flavour = 'affine:frame' as const;
@@ -13,7 +13,7 @@ export class FrameBlockModel
 
   constructor(
     page: Page,
-    props: PropsWithId<Partial<BlockSuiteProps.FrameBlockModel>>
+    props: PropsWithId<Partial<BlockSuiteModelProps.FrameBlockModel>>
   ) {
     super(page, props);
     this.xywh = props.xywh ?? '[0,0,720,480]';
