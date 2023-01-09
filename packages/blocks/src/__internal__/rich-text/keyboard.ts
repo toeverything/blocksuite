@@ -25,10 +25,10 @@ import {
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 
-interface QuillRange {
-  index: number;
-  length: number;
-}
+// Type definitions is ported from quill
+// https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46
+
+type QuillRange = RangeStatic;
 
 interface BindingContext {
   collapsed: boolean;
