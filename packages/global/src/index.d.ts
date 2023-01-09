@@ -11,7 +11,7 @@ type PropsWithId<Props> = Props & { id: string };
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
-  export interface IBaseBlockProps {
+  interface IBaseBlockProps {
     flavour: string;
     type: string;
     id: string;
