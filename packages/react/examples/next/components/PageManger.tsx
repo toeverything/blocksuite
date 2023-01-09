@@ -1,3 +1,5 @@
+// FIXME: tsconfig might incorrect for the alias
+// @ts-ignore
 import { useBlockSuiteStore } from '@blocksuite/react';
 import dynamic from 'next/dynamic';
 import type { Page } from '@blocksuite/store';
