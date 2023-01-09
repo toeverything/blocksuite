@@ -18,8 +18,5 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "license": "MPL-2.0",
-  "devDependencies": {
-    "vite-plugin-web-components-hmr": "^0.0.2"
-  }
+  "license": "MPL-2.0"
 }

@@ -1,8 +1,5 @@
 lockfileVersion: 5.4
 
-overrides:
-  vite-plugin-web-components-hmr1: link:../vite-plugin-web-components-hmr
-
 importers:
 
   .:
@@ -31,6 +28,7 @@ importers:
       typescript: ^4.9.4
       vite: ^4.0.4
       vite-plugin-banner: ^0.7.0
+      vite-plugin-web-components-hmr: ^0.0.2
       vitest: ^0.26.3
     devDependencies:
       '@changesets/cli': 2.26.0
@@ -57,6 +55,7 @@ importers:
       typescript: 4.9.4
       vite: 4.0.4_@types+node@18.11.18
       vite-plugin-banner: 0.7.0
+      vite-plugin-web-components-hmr: 0.0.2_vite@4.0.4
       vitest: 0.26.3
 
   packages/blocks:
@@ -6202,6 +6201,21 @@ packages:
       '@babel/plugin-syntax-import-assertions': 7.20.0_@babel+core@7.20.7
       '@babel/plugin-syntax-top-level-await': 7.14.5_@babel+core@7.20.7
       picomatch: 2.3.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /vite-plugin-web-components-hmr/0.0.2_vite@4.0.4:
+    resolution: {integrity: sha512-zqU9UCgJ1pfxgNhQ8a7Aa0MJ0Mfgu/Fb0xvGehEIb2FY2Mmb8XRc0PNtHzD3vslYr/yw7hCctIGy17HqURFT9Q==}
+    peerDependencies:
+      vite: '>=2'
+    dependencies:
+      '@babel/core': 7.20.7
+      '@babel/plugin-syntax-class-properties': 7.12.13_@babel+core@7.20.7
+      '@babel/plugin-syntax-import-assertions': 7.20.0_@babel+core@7.20.7
+      '@babel/plugin-syntax-top-level-await': 7.14.5_@babel+core@7.20.7
+      picomatch: 2.3.1
+      vite: 4.0.4_@types+node@18.11.18
     transitivePeerDependencies:
       - supports-color
     dev: true
