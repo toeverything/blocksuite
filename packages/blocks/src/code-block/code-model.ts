@@ -1,6 +1,6 @@
 import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-import { BLOCK_ID_ATTR } from '../__internal__/index.js';
+import { BLOCK_ID_ATTR } from '../__internal__/utils/consts.js';
 
 export interface CodeBlockProps extends IBaseBlockProps {
   language: string;
