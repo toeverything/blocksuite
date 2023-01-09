@@ -17,7 +17,7 @@ BlockSuite works very differently from traditional rich text editors:
 
 BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building different collaborative applications directly through whatever UI framework you're comfortable with**. To that end, we will try to open-source more basic modules for this in the BlockSuite project.
 
-Although BlockSuite is still in its early stage, you can already use the `@blocksuite/editor` package, the collaborative editor AFFiNE Alpha used.
+Although BlockSuite is still in its early stage, you can already use the `@blocksuite/editor` package, the collaborative editor AFFiNE Alpha used. Note that this editor is also a Web Component and is totally framework-agnostic!
 
 ## Current Status (`@blocksuite/editor`)
 
