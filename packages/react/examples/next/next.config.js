@@ -6,6 +6,8 @@ const nextConfig = {
     '@blocksuite/blocks',
     '@blocksuite/store',
     '@blocksuite/react',
+    '@blocksuite/global',
+    '@blocksuite/phasor',
   ],
   webpack: config => {
     config.resolve.extensionAlias = {
