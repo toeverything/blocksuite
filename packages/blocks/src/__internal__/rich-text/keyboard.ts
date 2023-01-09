@@ -343,13 +343,24 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     slash: {
       // Slash '/'
       key: 191,
-      handler() {
+      // prefix non digit
+      prefix: /[^\d]$/,
+      handler(range, context) {
         // TODO remove feature flag after slash menu is stable
         const params = new URLSearchParams(location.search);
         const flag = params.get('slash');
         if (flag === null) {
           return ALLOW_DEFAULT;
         }
+        // End of feature flag
+
+        if (matchFlavours(model, ['affine:code'])) {
+          return ALLOW_DEFAULT;
+        }
+        if (context.format['code'] === true) {
+          return ALLOW_DEFAULT;
+        }
+
         showSlashMenu({ page, model });
         return ALLOW_DEFAULT;
       },
