@@ -9,7 +9,7 @@
     "jsx": "react-jsx",
     "noEmit": false
   },
-  "include": ["./src"],
+  "include": ["./src", "env.d.ts"],
   "references": [
     {
       "path": "./examples/next"
