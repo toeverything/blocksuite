@@ -28,15 +28,15 @@ export function assertExists<T>(val: T | null | undefined): asserts val is T {
 export function assertFlavours<
   Key extends keyof BlockModels & string = keyof BlockModels & string
 >(model: BaseBlockModel, allowed: Key[]) {
-  if (!allowed.includes(model.flavour)) {
+  if (!allowed.includes(model.flavour as Key)) {
     throw new Error(`model flavour ${model.flavour} is not allowed`);
   }
 }
 
 export function matchFlavours<
   Key extends keyof BlockModels & string = keyof BlockModels & string
->(model: BaseBlockModel, expected: Key[]) {
-  return expected.includes(model.flavour);
+>(model: BaseBlockModel, expected: Key[]): model is BlockModels[Key] {
+  return expected.includes(model.flavour as Key);
 }
 
 export function assertValidChildren(

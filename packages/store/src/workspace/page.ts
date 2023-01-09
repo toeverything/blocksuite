@@ -505,7 +505,7 @@ export class Page extends Space<PageData> {
         'affine:paragraph',
         'affine:list',
         'affine:code',
-      ]) &&
+      ] as never) &&
       !yBlock.get('prop:text')
     ) {
       this.transact(() => yBlock.set('prop:text', new Y.Text()));
