@@ -166,6 +166,7 @@ importers:
       '@blocksuite/store': workspace:*
       '@next/font': 13.1.1
       '@nextui-org/react': 1.0.0-beta.11
+      '@types/blocksuite__global-types': workspace:*
       '@types/node': ^18.11.18
       '@types/react': ^18.0.26
       '@types/react-dom': ^18.0.10
@@ -182,6 +183,7 @@ importers:
       '@blocksuite/store': link:../../../store
       '@next/font': 13.1.1
       '@nextui-org/react': 1.0.0-beta.11_biqbaboplfbrettd7655fr4n2y
+      '@types/blocksuite__global-types': link:../../../global
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
