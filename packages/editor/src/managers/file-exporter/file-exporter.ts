@@ -33,7 +33,8 @@ export const FileExporter = {
       'href',
       'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
     );
-    const safeFilename = filenamify(filename, { replacement: ' ' }).trim();
+    const safeFilename = getSafeFileName(filename);
+    console.log(safeFilename);
     element.setAttribute('download', safeFilename);
 
     element.style.display = 'none';
@@ -103,4 +104,11 @@ ${htmlContent}
 </body>
 </html>
 `;
+}
+
+function getSafeFileName(filename: string) {
+  const dot = filename.lastIndexOf('.');
+  const name = filename.slice(0, dot);
+  const ext = filename.slice(dot);
+  return filenamify(name, { replacement: ' ' }).trim() + ext;
 }
