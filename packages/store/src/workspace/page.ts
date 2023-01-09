@@ -248,6 +248,9 @@ export class Page extends Space<PageData> {
     );
   }
 
+  /**
+   * @deprecated use `addBlockByFlavour`
+   */
   addBlock<T extends BlockProps>(
     blockProps: Partial<T>,
     parent?: BaseBlockModel | string | null,
