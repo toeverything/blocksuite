@@ -1,7 +1,31 @@
 import hotkeys from 'hotkeys-js';
 import type { KeyHandler } from 'hotkeys-js';
 
-hotkeys.filter = () => true;
+hotkeys.filter = (event: KeyboardEvent) => {
+  const target = event.target;
+  if (
+    target &&
+    target instanceof Element &&
+    ['INPUT'].includes(target.tagName) &&
+    shouldFilter(event)
+  ) {
+    return false;
+  }
+  return true;
+};
+
+const shouldFilter = (event: KeyboardEvent) => {
+  // If undo or redo: when event.shiftKey is false => undo, when event.shiftKey is true => redo
+  if (event.metaKey && !event.altKey && event.key === 'z') {
+    return true;
+  }
+
+  if (event.key === 'Backspace') {
+    return true;
+  }
+
+  return false;
+};
 
 const SCOPE = {
   AFFINE_PAGE: 'affine:page',

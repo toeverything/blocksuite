@@ -20,7 +20,7 @@ export interface IBaseBlockProps {
 
 export class BaseBlockModel implements IBaseBlockProps {
   static version: number;
-  flavour!: string;
+  flavour!: keyof BlockSuiteInternal.BlockModels & string;
   tag!: StaticValue;
   id: string;
 

@@ -13,6 +13,8 @@ export interface ShapeBlockProps extends IBaseBlockProps {
 
 export class ShapeBlockModel extends BaseBlockModel {
   static version = 1;
+  // FIXME
+  // @ts-ignore
   flavour = 'affine:shape' as const;
   tag = literal`affine-shape`;
 
