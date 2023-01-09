@@ -1,0 +1,6 @@
+{
+  "name": "@types/blocksuite__global-types",
+  "private": true,
+  "types": "./src/index.d.ts",
+  "type": "module"
+}
