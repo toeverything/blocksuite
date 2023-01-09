@@ -17,10 +17,23 @@ import {
   NumberedIcon,
   QuoteIcon,
   StrikethroughIcon,
-  TextIcon,
   TodoIcon,
   UnderlineIcon,
 } from './icons.js';
+import {
+  ConnectorIcon,
+  GridIcon,
+  penIcon,
+  RectIcon,
+  RedoIcon,
+  SelectIcon,
+  ShapeIcon,
+  StickerIcon,
+  TextIcon,
+  UndoIcon,
+} from '../icons.js';
+import { createEvent } from '../../__internal__/utils/std.js';
+import type { EdgelessToolBar } from '../edgeless/components.js';
 
 export const paragraphConfig = [
   {
@@ -195,6 +208,89 @@ export const formatConfig = [
       if (format && abortController && !('link' in format)) {
         abortController.abort();
       }
+    },
+  },
+];
+
+export const toolbarDrawConfig = [
+  {
+    id: 'select',
+    name: 'select',
+    icon: SelectIcon,
+    tooltip: 'Select',
+    disabled: true,
+  },
+  {
+    id: 'text',
+    name: 'text',
+    icon: TextIcon,
+    tooltip: 'Text',
+    disabled: true,
+  },
+  {
+    id: 'shape',
+    name: 'shape',
+    icon: ShapeIcon,
+    tooltip: 'Shape',
+    disabled: true,
+  },
+  {
+    id: 'Sticky',
+    name: 'Sticky',
+    icon: StickerIcon,
+    tooltip: 'Sticky',
+    disabled: true,
+  },
+  {
+    id: 'pen',
+    name: 'pen',
+    icon: penIcon,
+    tooltip: 'Pen',
+    disabled: true,
+  },
+  {
+    id: 'connector',
+    name: 'connector',
+    icon: ConnectorIcon,
+    tooltip: 'Connector',
+    disabled: true,
+  },
+];
+
+export const toolbarActionConfig = [
+  {
+    id: 'undo',
+    name: 'undo',
+    icon: UndoIcon,
+    tooltip: 'Undo',
+    disabled: false,
+    action: (page: Page) => {
+      page.undo();
+    },
+  },
+  {
+    id: 'redo',
+    name: 'redo',
+    icon: RedoIcon,
+    tooltip: 'Redo',
+    disabled: false,
+    action: (page: Page) => {
+      page.redo();
+    },
+  },
+  {
+    id: 'grid',
+    name: 'grid',
+    icon: (toolbar: EdgelessToolBar) => {
+      return toolbar.showGrid ? GridIcon : RectIcon;
+    },
+    disabled: false,
+    tooltip: 'Show Grid',
+    action: (page: Page, toolbar: EdgelessToolBar) => {
+      toolbar.showGrid = !toolbar.showGrid;
+      window.dispatchEvent(
+        createEvent('affine:switch-edgeless-display-mode', toolbar.showGrid)
+      );
     },
   },
 ];

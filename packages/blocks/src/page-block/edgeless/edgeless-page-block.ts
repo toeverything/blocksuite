@@ -109,6 +109,9 @@ export class EdgelessPageBlockComponent
   @state()
   viewport = new ViewportState();
 
+  @state()
+  showToolbar = true;
+
   signals = {
     viewportUpdated: new Signal(),
     updateSelection: new Signal<BlockSelectionState>(),
@@ -209,6 +212,9 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
+
+    const params = new URLSearchParams(location.search);
+    this.showToolbar = params.get('toolbar') !== null;
   }
 
   override disconnectedCallback() {
@@ -278,13 +284,16 @@ export class EdgelessPageBlockComponent
         </div>
         ${hoverRect} ${selectionRect}
         ${selectionState.type !== 'none'
-          ? html` <edgeless-selected-rect
+          ? html`<edgeless-selected-rect
               .state=${selectionState}
               .rect=${selectionState.rect}
               .zoom=${zoom}
               .readonly=${this.readonly}
             ></edgeless-selected-rect>`
           : null}
+        ${this.showToolbar
+          ? html` <edgeless-toolbar .page=${this.page}></edgeless-toolbar>`
+          : ''}
       </div>
     `;
   }
