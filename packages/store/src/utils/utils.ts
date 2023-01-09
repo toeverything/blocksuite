@@ -35,7 +35,10 @@ export function assertFlavours<
 
 export function matchFlavours<
   Key extends keyof BlockModels & string = keyof BlockModels & string
->(model: BaseBlockModel, expected: Key[]): model is BlockModels[Key] {
+>(
+  model: BaseBlockModel,
+  expected: Key[]
+): boolean /* model is BlockModels[Key] */ {
   return expected.includes(model.flavour as Key);
 }
 

@@ -1,7 +1,6 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { ColorStyle, TDShapeType } from './shape.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
 export type SelectionPosition = 'start' | 'end' | Point;
