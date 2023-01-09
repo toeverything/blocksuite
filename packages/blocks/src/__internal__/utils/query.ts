@@ -15,7 +15,7 @@ interface ContainerBlock {
 export function getShapeBlockHitBox(id: string): SVGPathElement | null {
   const shapeBlock = getBlockById<'affine-shape'>(id);
   if (shapeBlock?.tagName !== ShapeBlockTag.toUpperCase()) {
-    throw new Error(`data-block-id: ${id} is not shape block`);
+    throw new Error(`${ATTR}: ${id} is not shape block`);
   }
   return (
     shapeBlock.shadowRoot?.querySelector('.affine-shape-block-hit-box') ?? null
@@ -30,9 +30,7 @@ export function getBlockById<T extends ElementTagName>(
 }
 
 export function getBlockByPoint(point: IPoint): Element | null | undefined {
-  return document
-    .elementFromPoint(point.x, point.y)
-    ?.closest('[data-block-id]');
+  return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
 }
 
 export function getParentBlockById<T extends ElementTagName>(
@@ -335,7 +333,7 @@ export function getQuillIndexByNativeSelection(
       // @ts-ignore
       !lastNode.getAttributeNode('contenteditable'))
   ) {
-    if (ele instanceof Element && ele.hasAttribute('data-block-id')) {
+    if (ele instanceof Element && ele.hasAttribute(ATTR)) {
       offset = 0;
       break;
     }
