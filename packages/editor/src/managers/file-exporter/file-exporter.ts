@@ -1,5 +1,6 @@
 import TurndownService from 'turndown';
 import { globalCSS, highlightCSS } from './exporter-style.js';
+import filenamify from 'filenamify';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
@@ -32,11 +33,8 @@ export const FileExporter = {
       'href',
       'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
     );
-    // Consider if we should replace invalid characters in filenames before downloading, or if the browser
-    // will do that for us automatically...
-    // // replace illegal characters that cannot appear in file names
-    // const safeFilename = filename.replace(/[ <>:/|?*]+/g, " ")
-    element.setAttribute('download', filename);
+    const safeFilename = filenamify(filename, { replacement: ' ' }).trim();
+    element.setAttribute('download', safeFilename);
 
     element.style.display = 'none';
     document.body.appendChild(element);

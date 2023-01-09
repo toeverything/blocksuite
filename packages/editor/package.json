@@ -14,6 +14,7 @@
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "filenamify": "^5.1.1",
     "lit": "^2.5.0",
     "marked": "^4.2.5",
     "turndown": "^7.1.1"
