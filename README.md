@@ -3,25 +3,25 @@
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 
-💠 BlockSuite is an open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE), an open-source knowledge base that attempts to combine the best of Notion and Miro altogether. In this monorepo, we maintain multiple abstraction layers of the editor and some core modules that can be reused externally.
+💠 BlockSuite is an open-source collaborative editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE), an open-source knowledge base that attempts to combine the best of Notion and Miro altogether. In this monorepo, we maintain multiple abstraction layers of the editor and some core modules that can be reused externally.
 
 [Try BlockSuite-based AFFiNE Alpha editor](https://pathfinder.affine.pro/)
-
-> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
 
 ## Introduction
 
 BlockSuite works very differently from traditional rich text editors:
 
 - For the data model, BlockSuite does not implement the [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html) pattern but instead provides a CRDT-based block tree based directly on [Yjs](https://github.com/yjs/yjs), supporting zero-cost time travel and real-time collaboration out of the box. Its data persistence layer is also designed to be [local-first](https://martin.kleppmann.com/papers/local-first.pdf).
-- For rich text editing, multiple different nodes in the BlockSuite block tree can be connected to different rich text editing components, thus modeling rich text content as multiple _UI components_ instead of a single _UI container_, eliminating the use of the dangerous monolith `contenteditale`.
-- For the rendering layer, BlockSuite does not assume that content can only be rendered via the DOM. Not only does it implement a basic document editing UI based on Web Components, but it is also developing a hybrid canvas-based renderer for parts of the whiteboard content. Both renderers can co-exist on the same page and get updated through the same store.
+- For rich text editing, multiple different nodes in the BlockSuite block tree can be connected to different rich text editing components, thus modeling rich text content as multiple _UI components_ instead of a single _UI container_, eliminating the use of the dangerous monolith [`contenteditale`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable).
+- For the rendering layer, BlockSuite does not assume that content can only be rendered via the DOM. Not only does it implement a basic document editing UI based on [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but it is also developing a hybrid canvas-based renderer for parts of the whiteboard content. Both renderers can co-exist on the same page and get updated through the same store.
 
 BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building different collaborative applications directly through whatever UI framework you're comfortable with**. To that end, we will try to open-source more basic modules for this in the BlockSuite project.
 
 Although BlockSuite is still in its early stage, you can already use the `@blocksuite/editor` package, the collaborative editor AFFiNE Alpha used.
 
 ## Current Status (`@blocksuite/editor`)
+
+> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
 
 - Basic text editing
   - ✅ Paragraph with inline style
@@ -64,13 +64,14 @@ Icons above correspond to the following meanings:
 
 ## Resources
 
-- Examples
+- 🎁 Examples
   - [Latest Playground](https://block-suite.pages.dev/?init)
   - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/)
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/)
-- [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
-- [AFFiNE Community](https://community.affine.pro/c/open-development/)
-- [Releases](https://github.com/toeverything/blocksuite/releases)
+- 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
+- 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
+- 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
+- 🚀 [Releases](https://github.com/toeverything/blocksuite/releases)
 
 ## Getting Started with the Prebuilt Editor
 
