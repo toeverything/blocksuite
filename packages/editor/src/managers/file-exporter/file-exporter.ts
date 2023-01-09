@@ -34,7 +34,6 @@ export const FileExporter = {
       'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
     );
     const safeFilename = getSafeFileName(filename);
-    console.log(safeFilename);
     element.setAttribute('download', safeFilename);
 
     element.style.display = 'none';
