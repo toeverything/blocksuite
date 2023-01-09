@@ -1,9 +1,9 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { ColorStyle, TDShapeType } from './shape.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type { SurfaceBlockModel } from '../../surface-block/index.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {
@@ -77,7 +77,7 @@ export interface BlockSelectionInfo {
 }
 
 // blocks that would only appear under the edgeless container root
-export type RootBlockModel = FrameBlockModel | ShapeBlockModel;
+export type RootBlockModel = FrameBlockModel | SurfaceBlockModel;
 
 export type DefaultMouseMode = {
   type: 'default';
