@@ -278,6 +278,7 @@ export class Shortcuts {
           return PREVENT_DEFAULT;
         }
         const page = getDefaultPageBlock(model).page;
+        page.captureSync();
         const parent = page.getParent(model);
         assertExists(parent);
         const index = parent.children.indexOf(model);
@@ -286,7 +287,6 @@ export class Shortcuts {
         };
         page.deleteBlock(model);
         page.addBlock(blockProps, parent, index);
-        page.captureSync();
         return ALLOW_DEFAULT;
       },
     },

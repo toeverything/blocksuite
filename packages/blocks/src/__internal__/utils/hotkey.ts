@@ -7,16 +7,24 @@ hotkeys.filter = (event: KeyboardEvent) => {
     target &&
     target instanceof Element &&
     ['INPUT'].includes(target.tagName) &&
-    isUndoOrRedo(event)
+    shouldFilter(event)
   ) {
     return false;
   }
   return true;
 };
 
-const isUndoOrRedo = (event: KeyboardEvent) => {
-  // when event.shiftKey is false => undo, when event.shiftKey is true => redo
-  return event.metaKey && !event.altKey && event.key === 'z';
+const shouldFilter = (event: KeyboardEvent) => {
+  // If undo or redo: when event.shiftKey is false => undo, when event.shiftKey is true => redo
+  if (event.metaKey && !event.altKey && event.key === 'z') {
+    return true;
+  }
+
+  if (event.key === 'Backspace') {
+    return true;
+  }
+
+  return false;
 };
 
 const SCOPE = {
