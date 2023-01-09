@@ -16,6 +16,8 @@
     "packages/blocks/dist/*",
     "packages/editor/dist/*",
     "packages/react/dist/*",
+    "packages/react/examples/next/.next/*",
+    "packages/phasor/dist/*",
     "packages/playground/dist/assets/*"
   ],
   "overrides": [
