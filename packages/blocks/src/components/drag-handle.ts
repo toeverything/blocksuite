@@ -135,6 +135,7 @@ export class DragHandle extends LitElement {
       false
     );
     document.body.addEventListener('wheel', this._onWheel);
+    window.addEventListener('resize', this._onResize);
     this._indicator = <DragIndicator>(
       document.createElement('affine-drag-indicator')
     );
@@ -149,6 +150,7 @@ export class DragHandle extends LitElement {
   public disconnectedCallback() {
     super.disconnectedCallback();
     this._indicator.remove();
+    window.removeEventListener('resize', this._onResize);
     document.body.removeEventListener('wheel', this._onWheel);
     document.body.removeEventListener(
       'dragover',
@@ -160,6 +162,19 @@ export class DragHandle extends LitElement {
     this.removeEventListener('drag', this._onDrag);
     this.removeEventListener('dragend', this._onDragEnd);
   }
+
+  private _onResize = (e: UIEvent) => {
+    if (this._startModelState) {
+      const newModelState = this._getBlockEditingStateByPosition?.(
+        this._startModelState.position.x,
+        this._startModelState.position.y,
+        true
+      );
+      if (newModelState) {
+        this.show(newModelState);
+      }
+    }
+  };
 
   private _onWheel = (e: MouseEvent) => {
     this.hide();
