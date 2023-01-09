@@ -11,6 +11,7 @@ import {
   isMultiBlockRange,
   noop,
 } from '../utils/index.js';
+import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import { markdownConvert } from './markdown-convert.js';
 import {
   handleBlockEndEnter,
@@ -54,7 +55,7 @@ type KeyboardBinding = {
   ctrlKey?: boolean | null;
 };
 
-type KeyboardBindings = Record<string, KeyboardBinding>;
+export type KeyboardBindings = Record<string, KeyboardBinding>;
 
 interface KeyboardEventThis {
   quill: Quill;
@@ -361,6 +362,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         return ALLOW_DEFAULT;
       },
     },
+    ...createBracketAutoCompleteBindings(model),
   };
 
   return keyboardBindings;
