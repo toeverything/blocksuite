@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "composite": true,
+    "incremental": true,
     "jsx": "react",
     "target": "ES2020",
     "useDefineForClassFields": false,
@@ -20,7 +22,7 @@
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "incremental": true,
+    "stripInternal": true, // skip type emit for @internal types
     "paths": {
       // Why? See https://github.com/DimensionDev/Maskbook/blob/2a042633c5bde18dd97a21d34e4943c8c4efa514/tsconfig.json#L33-L67
       "@blocksuite/editor": ["./packages/editor/src"],
