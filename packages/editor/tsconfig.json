@@ -5,7 +5,7 @@
     "outDir": "./dist/",
     "noEmit": false
   },
-  "include": ["./src"],
+  "include": ["./src", "env.d.ts"],
   "exclude": [""],
   "references": []
 }
