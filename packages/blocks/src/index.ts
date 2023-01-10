@@ -9,6 +9,7 @@ import './__internal__/rich-text/link-node';
 import './embed-block';
 import './embed-block/image';
 import './surface-block';
+import './components/slash-menu';
 export * from './counter-block/index.js';
 export * from './embed-block/index.js';
 export * from './paragraph-block/index.js';

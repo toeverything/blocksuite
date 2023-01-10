@@ -1,39 +1,43 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { InlineBlot } from 'parchment';
 import {
   calcSafeCoordinate,
   DragDirection,
 } from '../../page-block/utils/cursor.js';
 import {
-  assertExists,
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
   getRichTextByModel,
   getStartModelBySelection,
-  sleep,
   throttle,
 } from '../../__internal__/utils/index.js';
 import './slash-menu-node.js';
-import { SlashTextNode } from './slash-text-node.js';
-
-const ABORT_REASON = 'ABORT';
+import './slash-text-node.js';
 
 let globalAbortController = new AbortController();
 
-export const showSlashMenu = async ({
-  page,
+export const showSlashMenu = ({
+  blot,
   model,
+  anchorEl,
   container = document.body,
   abortController = new AbortController(),
 }: {
-  page: Page;
+  blot: InlineBlot;
   model: BaseBlockModel;
+  anchorEl:
+    | {
+        getBoundingClientRect: () => DOMRect;
+        // contextElement?: Element;
+      }
+    | Range;
   direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
   // Abort previous format quick bar
-  globalAbortController.abort(ABORT_REASON);
+  globalAbortController.abort('ABORT');
   globalAbortController = abortController;
 
   const slashMenu = document.createElement('slash-menu');
@@ -46,31 +50,15 @@ export const showSlashMenu = async ({
     return;
   }
   const { quill } = richText;
-  const range = quill.getSelection();
-  assertExists(range);
-  // Format the slash char
-  range.index--;
-  range.length = 1;
-  quill.formatText(range, { 'slash-text': true });
-
-  // TODO fix Blot types
-  // @ts-expect-error see https://github.com/quilljs/parchment/blob/main/src/blot/scroll.ts
-  const [node, offset] = quill.scroll.descendant(SlashTextNode, range.index);
-  if (!node) {
-    throw new Error('Failed to create slash menu! slash text node not found');
-  }
-  console.log('node', node, offset);
 
   // Handle position
 
   const updatePos = throttle(() => {
-    const positioningEl = node.domNode as Element;
-    const positioningElRect = positioningEl.getBoundingClientRect();
-
+    const positioningElRect = anchorEl.getBoundingClientRect();
     // TODO update direction and position
     const direction = 'right-bottom';
     const positioningPoint = {
-      x: positioningElRect.x + positioningElRect.width,
+      x: positioningElRect.x,
       y: positioningElRect.y + positioningElRect.height,
     };
 
@@ -90,7 +78,7 @@ export const showSlashMenu = async ({
 
     slashMenu.left = `${safeCoordinate.x}px`;
     slashMenu.top = `${safeCoordinate.y}px`;
-    slashMenu.page = page;
+    slashMenu.page = model.page;
   }, 10);
 
   const models = getModelsByRange(getCurrentRange());
@@ -111,45 +99,27 @@ export const showSlashMenu = async ({
   // Mount
   container.appendChild(slashMenu);
   // Wait for the format quick bar to be mounted
-  await sleep();
-  updatePos();
+  requestAnimationFrame(() => {
+    updatePos();
+  });
 
-  // Handle click outside
+  // Handle dispose
+  abortController.signal.addEventListener('abort', e => {
+    slashMenu.remove();
+    scrollContainer?.removeEventListener('scroll', updatePos);
+    window.removeEventListener('resize', updatePos);
 
-  const clickAwayListener = (e: MouseEvent) => {
-    if (e.target === slashMenu) {
+    // Clean slash text
+
+    if (e.target instanceof AbortSignal && e.target.reason === 'ABORT') {
+      // Should not clean slash text when click away or abort
+      quill.formatText(blot.offset(), blot.length(), {
+        'slash-text': false,
+      });
       return;
     }
-    abortController.abort(ABORT_REASON);
-    window.removeEventListener('mousedown', clickAwayListener);
-  };
-  window.addEventListener('mousedown', clickAwayListener);
-
-  return new Promise<void>(res => {
-    abortController.signal.addEventListener('abort', e => {
-      slashMenu.remove();
-      scrollContainer?.removeEventListener('scroll', updatePos);
-      window.removeEventListener('resize', updatePos);
-
-      // Clean slash text
-
-      // @ts-expect-error see https://github.com/quilljs/parchment/blob/main/src/blot/scroll.ts
-      const [node, offset] = quill.scroll.descendant(
-        SlashTextNode,
-        range.index
-      );
-      if (!node) {
-        console.warn('Failed to clean slash text! slash text node not found');
-        return;
-      }
-
-      if ((e.target as AbortSignal).reason === ABORT_REASON) {
-        // Should not clean slash text when click away or abort
-        quill.formatText(node.offset(), node.length(), { 'slash-text': false });
-        return;
-      }
-      quill.deleteText(node.offset(), node.length());
-      res();
-    });
+    model.text?.delete(blot.offset(), blot.length());
   });
+
+  return slashMenu;
 };

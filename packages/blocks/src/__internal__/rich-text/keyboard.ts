@@ -1,4 +1,3 @@
-import { showSlashMenu } from '../../components/slash-menu/index.js';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 import {
@@ -341,8 +340,9 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     slash: {
       // Slash '/'
       key: 191,
-      // prefix non digit
-      prefix: /[^\d]$/,
+      // prefix non digit or empty string
+      // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
+      prefix: /[^\d]$|^(?![\s\S])/,
       handler(range, context) {
         // TODO remove feature flag after slash menu is stable
         const params = new URLSearchParams(location.search);
@@ -360,7 +360,10 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         }
         // Wait for the slash input
         requestAnimationFrame(() => {
-          showSlashMenu({ page, model });
+          // showSlashMenu({ model });
+          // Format the slash char
+          range.length = 1;
+          this.quill.formatText(range, { 'slash-text': true });
         });
         return ALLOW_DEFAULT;
       },
