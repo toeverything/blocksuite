@@ -48,6 +48,7 @@ function hasOptionBar(block: BaseBlockModel) {
 }
 
 // Workaround native DOMRect clone issue in #632
+// See https://stackoverflow.com/questions/42713229/getboundingclientrect-object-properties-cannot-be-copied
 function copyRect(rect: DOMRect): DOMRect {
   const { top, right, bottom, left, width, height, x, y } = rect;
   return { top, right, bottom, left, width, height, x, y } as DOMRect;
