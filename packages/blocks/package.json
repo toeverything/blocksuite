@@ -24,22 +24,10 @@
     "quill-cursors": "^4.0.0"
   },
   "exports": {
-    "./dist/*": {
-      "development": "./src/*",
-      "import": "./dist/*"
-    },
-    ".": {
-      "development": "./src/index.ts",
-      "import": "./dist/index.js"
-    },
-    "./std": {
-      "development": "./src/std.ts",
-      "import": "./dist/std.js"
-    },
-    "./models": {
-      "development": "./src/models.ts",
-      "import": "./dist/models.js"
-    }
+    "./dist/*": "./dist/*",
+    ".": "./src/index.ts",
+    "./std": "./src/std.ts",
+    "./models": "./src/models.ts"
   },
   "publishConfig": {
     "access": "public",
