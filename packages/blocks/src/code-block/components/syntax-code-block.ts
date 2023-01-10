@@ -80,25 +80,14 @@ SyntaxCodeBlock.className = 'ql-syntax';
 
 class Syntax extends Module {
   private _language = 'javascript';
-  private _codeBlockElement: HTMLElement;
-
   static register() {
     Quill.register(CodeToken, true);
     Quill.register(SyntaxCodeBlock, true);
   }
 
-  setLang(lang: string) {
-    if (this._language === lang) {
-      return;
-    }
-    this._language = lang;
-    this.highlight(true, this._codeBlockElement);
-  }
-
   constructor(quill: QuillType, options: SyntaxCodeBlockOptions) {
     super(quill, options);
     this._language = options.language;
-    this._codeBlockElement = options.codeBlockElement;
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
         'Syntax module requires highlight.js. Please include the library on the page before Quill.'
