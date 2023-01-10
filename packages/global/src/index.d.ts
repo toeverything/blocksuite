@@ -3,7 +3,11 @@
 
 declare module 'hotkeys-js' {
   import hotkeys = require('hotkeys-js/index');
-  export type * from 'hotkeys-js/index' assert { 'resolution-mode': 'require' };
+  export type {
+    KeyHandler,
+    HotkeysEvent,
+    Hotkeys,
+  } from 'hotkeys-js/index' assert { 'resolution-mode': 'require' };
   declare const hotkeysDefault: typeof hotkeys.default;
   export default hotkeysDefault;
 }
