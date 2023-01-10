@@ -290,6 +290,20 @@ export function handleDown(
   }
 }
 
+function isDispatchFromCodeBlock(e: KeyboardEvent) {
+  if (!e.target || !(e.target instanceof Element)) {
+    return false;
+  }
+  try {
+    // if the target is `body`, it will throw an error
+    const model = getModelByElement(e.target);
+    return matchFlavours(model, ['affine:code']);
+  } catch (error) {
+    // just check failed, no need to handle
+    return false;
+  }
+}
+
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
@@ -355,6 +369,14 @@ export function bindHotkeys(
     }
 
     if (state.type === 'block') {
+      // XXX Ad-hoc for code block
+      // At the beginning of the code block,
+      // the backspace will selected the block first.
+      // The select logic already processed in the `handleLineStartBackspace` function.
+      // So we need to prevent the default delete behavior.
+      if (isDispatchFromCodeBlock(e)) {
+        return;
+      }
       const { selectedBlocks } = state;
 
       // delete selected blocks
