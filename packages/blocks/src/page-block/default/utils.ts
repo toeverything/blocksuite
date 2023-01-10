@@ -48,6 +48,20 @@ function hasOptionBar(block: BaseBlockModel) {
   return false;
 }
 
+function getBlockWithOptionBarRect(
+  hoverDom: HTMLElement,
+  block: BaseBlockModel
+): HTMLElement {
+  if (block.flavour === 'affine:code') {
+    return hoverDom;
+  } else if (block.flavour === 'affine:embed' && block.type === 'image') {
+    const imgElement = hoverDom.querySelector('img');
+    assertExists(imgElement);
+    return imgElement;
+  }
+  throw new Error('unreachable');
+}
+
 // Workaround native DOMRect clone issue in #632
 // See https://stackoverflow.com/questions/42713229/getboundingclientrect-object-properties-cannot-be-copied
 function copyRect(rect: DOMRect): DOMRect {
@@ -171,21 +185,19 @@ function binarySearchBlockEditingState(
 function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   const block = blocks[mid];
   const hoverDom = getBlockById(block.id);
+  assertExists(hoverDom);
   let blockRect: DOMRect | null = null;
   let detectRect: DOMRect | null = null;
   if (hasOptionBar(block)) {
-    let hoverTargetElement: HTMLElement | undefined | null;
-    if (block.flavour === 'affine:embed' && block.type === 'image') {
-      hoverTargetElement = hoverDom?.querySelector('img');
-    } else if (block.flavour === 'affine:code') {
-      hoverTargetElement = hoverDom;
-    }
-    blockRect = hoverTargetElement?.getBoundingClientRect() as DOMRect;
+    blockRect = getBlockWithOptionBarRect(
+      hoverDom,
+      block
+    ).getBoundingClientRect();
     detectRect = copyRect(blockRect);
     // there is a optionBar on the right side
     detectRect.width += 50;
   } else {
-    blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
+    blockRect = hoverDom.getBoundingClientRect() as DOMRect;
     // in a nested block, we should get `rich-text` which is its own editing area
     if (block.children.length) {
       detectRect = hoverDom
