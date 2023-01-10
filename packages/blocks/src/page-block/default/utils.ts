@@ -160,7 +160,7 @@ function binarySearchBlockEditingState(
 
     if (detectRect.top > y) {
       end = mid - 1;
-    } else {
+    } else if (detectRect.bottom < y) {
       start = mid + 1;
     }
   }
@@ -181,10 +181,10 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
     detectRect.width += 50;
   } else {
     blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
-    // in a nested block, we should get `.ql-editor` which is its own editing area
+    // in a nested block, we should get `rich-text` which is its own editing area
     if (block.children.length) {
       detectRect = hoverDom
-        ?.querySelector('.ql-editor')
+        ?.querySelector('rich-text')
         ?.getBoundingClientRect() as DOMRect;
     } else {
       detectRect = blockRect;
