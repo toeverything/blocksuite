@@ -44,7 +44,7 @@ export interface EditingState {
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
-  if (block.type === 'image') return true;
+  if (block.flavour === 'affine:embed' && block.type === 'image') return true;
   return false;
 }
 
@@ -77,7 +77,7 @@ export function getBlockEditingStateByCursor(
     size?: number;
     skipX?: boolean;
   }
-) {
+): EditingState | null {
   const size = options?.size || 5;
   const start = Math.max(cursor - size, 0);
   const end = Math.min(cursor + size, blocks.length - 1);
@@ -174,8 +174,13 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   let blockRect: DOMRect | null = null;
   let detectRect: DOMRect | null = null;
   if (hasOptionBar(block)) {
-    const hoverImage = hoverDom?.querySelector('img');
-    blockRect = hoverImage?.getBoundingClientRect() as DOMRect;
+    let hoverTargetElement: HTMLElement | undefined | null;
+    if (block.flavour === 'affine:embed' && block.type === 'image') {
+      hoverTargetElement = hoverDom?.querySelector('img');
+    } else if (block.flavour === 'affine:code') {
+      hoverTargetElement = hoverDom;
+    }
+    blockRect = hoverTargetElement?.getBoundingClientRect() as DOMRect;
     detectRect = copyRect(blockRect);
     // there is a optionBar on the right side
     detectRect.width += 50;
