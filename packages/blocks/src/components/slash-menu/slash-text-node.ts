@@ -1,6 +1,6 @@
-import { getModelByElement } from '@blocksuite/blocks/std.js';
 import type { InlineBlot } from 'parchment';
 import Quill from 'quill';
+import { getModelByElement } from '../../__internal__/index.js';
 import { showSlashMenu } from './index.js';
 import type { SlashMenu } from './slash-menu-node.js';
 
