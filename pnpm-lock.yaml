@@ -1,5 +1,10 @@
 lockfileVersion: 5.4
 
+patchedDependencies:
+  hotkeys-js@3.10.1:
+    hash: otx73r74oyscqvo3amwccrzngy
+    path: patches/hotkeys-js@3.10.1.patch
+
 importers:
 
   .:

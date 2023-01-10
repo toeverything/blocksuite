@@ -1,0 +1,10 @@
+diff --git a/index.d.ts b/index.d.ts
+index 749f1a8b80bf949990bee98301b7caa9bd4c1f4a..878b6dd87c88abcd819aa39ae5b00a8a55872988 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -57,4 +57,4 @@ export interface Hotkeys {
+ }
+ // https://github.com/eiriklv/react-masonry-component/issues/57
+ declare var hotkeys: Hotkeys;
+-export default hotkeys;
++export = hotkeys;
