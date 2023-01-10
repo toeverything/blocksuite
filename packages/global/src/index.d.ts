@@ -1,3 +1,4 @@
+/// <reference types="./shims.d.ts" />
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
 declare module NodeJS {
   interface ProcessEnv {
