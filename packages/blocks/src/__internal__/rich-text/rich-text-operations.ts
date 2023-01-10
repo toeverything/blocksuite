@@ -224,15 +224,18 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     if (!parent) return;
 
     const index = parent.children.indexOf(model);
-    const blockProps = {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: model.text?.clone(),
-      children: model.children,
-    };
     page.captureSync();
     page.deleteBlock(model);
-    const id = page.addBlock(blockProps, parent, index);
+    const id = page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        type: 'text',
+        text: model.text?.clone(),
+        children: model.children,
+      },
+      parent,
+      index
+    );
     asyncFocusRichText(page, id);
     return;
   }
