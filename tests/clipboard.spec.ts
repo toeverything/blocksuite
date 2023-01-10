@@ -218,6 +218,52 @@ test('copy clipItems format', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 });
 
+test('copy more than one delta op on a block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await resetHistory(page);
+
+  const clipData = 'You `talking` to me?';
+
+  await importMarkdown(page, clipData, '0');
+  await setSelection(page, 3, 0, 3, 1);
+  await setQuillSelection(page, 0, 14);
+  await assertClipItems(page, 'text/plain', 'You talking to');
+  await assertClipItems(
+    page,
+    'blocksuite/x-c+w',
+    JSON.stringify({
+      data: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: 'You ',
+            },
+            {
+              insert: 'talking',
+              attributes: {
+                code: true,
+              },
+            },
+            {
+              insert: ' to',
+            },
+          ],
+          children: [],
+        },
+      ],
+    })
+  );
+  await assertClipItems(
+    page,
+    'text/html',
+    '<p>You <code>talking</code> to</p>'
+  );
+});
+
 test('copy & paste outside editor', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
