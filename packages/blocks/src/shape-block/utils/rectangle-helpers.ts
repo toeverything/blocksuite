@@ -6,7 +6,11 @@ import { Vec } from './vec.js';
 import { getShapeStyle } from './shape-style.js';
 import type { ShapeStyles } from '../../__internal__/index.js';
 
-import { getStroke, getStrokePoints } from 'perfect-freehand';
+import PF from 'perfect-freehand';
+import type { getStroke as getStrokeType } from 'perfect-freehand';
+import * as DPF from 'perfect-freehand';
+const getStrokePoints = DPF.getStrokePoints;
+const getStroke = PF as unknown as typeof getStrokeType;
 
 function getRectangleDrawPoints(
   id: string,

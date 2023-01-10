@@ -1,7 +1,7 @@
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import Quill from 'quill';
 import type { Quill as QuillType } from 'quill';
+import Q from 'quill';
 import QuillCursors from 'quill-cursors';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { BlockHost } from '../utils/index.js';
@@ -9,6 +9,8 @@ import { createKeyboardBindings } from './keyboard.js';
 
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import { NonShadowLitElement } from '../utils/lit.js';
+
+const Quill = Q as unknown as typeof QuillType;
 
 Quill.register('modules/cursors', QuillCursors);
 const Clipboard = Quill.import('modules/clipboard');
