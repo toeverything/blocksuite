@@ -1,19 +1,12 @@
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import { Page, Signal } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { paragraphConfig } from '../../page-block/utils/const.js';
 import { updateSelectedTextType } from '../../page-block/utils/index.js';
 
-const paragraphPanelStyle = css`
-  .paragraph-button > svg:nth-child(2) {
-    transition-duration: 0.3s;
-  }
-  .paragraph-button:is(:hover, :focus-visible, :active) > svg:nth-child(2) {
-    transform: rotate(180deg);
-  }
-
-  .paragraph-panel {
+const slashMenuStyle = css`
+  .slash-menu {
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     position: absolute;
@@ -33,7 +26,7 @@ const paragraphPanelStyle = css`
 @customElement('slash-menu')
 export class SlashMenu extends LitElement {
   static styles = css`
-    .slash-menu {
+    .slash-menu-container {
       box-sizing: border-box;
       position: fixed;
       display: flex;
@@ -44,7 +37,7 @@ export class SlashMenu extends LitElement {
       box-shadow: var(--affine-popover-shadow);
       z-index: var(--affine-z-index-popover);
     }
-    ${paragraphPanelStyle}
+    ${slashMenuStyle}
   `;
 
   @property()
@@ -66,24 +59,22 @@ export class SlashMenu extends LitElement {
   @property()
   positionUpdated = new Signal();
 
-  @state()
-  models: BaseBlockModel[] = [];
-
   @query('.slash-menu')
   slashMenuElement!: HTMLElement;
 
   override connectedCallback(): void {
     super.connectedCallback();
-
-    this.addEventListener('mousedown', (e: MouseEvent) => {
-      // Prevent click event from making selection lost
-      e.preventDefault();
-    });
   }
 
-  private _paragraphPanelTemplate() {
+  override render() {
+    const containerStyles = styleMap({
+      left: this.left,
+      top: this.top,
+      bottom: this.bottom,
+    });
+
     const showParagraphPanel = 'bottom';
-    const styles = styleMap({
+    const slashMenuStyles = styleMap({
       left: '0',
       top: showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
       bottom: showParagraphPanel !== 'bottom' ? 'calc(100% + 4px)' : null,
@@ -91,38 +82,27 @@ export class SlashMenu extends LitElement {
       flexDirection:
         showParagraphPanel === 'bottom' ? 'column' : 'column-reverse',
     });
-    return html`<div class="paragraph-panel" style="${styles}">
-      ${paragraphConfig.map(
-        ({ flavour, type, name, icon }) => html`<format-bar-button
-          width="100%"
-          style="padding-left: 12px; justify-content: flex-start;"
-          text="${name}"
-          data-testid="${type}"
-          @click=${() => {
-            if (!this.page) {
-              throw new Error('Failed to format paragraph! Page not found.');
-            }
 
-            updateSelectedTextType(flavour, type, this.page);
-            this.remove();
-          }}
-        >
-          ${icon}
-        </format-bar-button>`
-      )}
-    </div>`;
-  }
-
-  override render() {
-    const paragraphPanel = this._paragraphPanelTemplate();
-
-    const styles = styleMap({
-      left: this.left,
-      top: this.top,
-      bottom: this.bottom,
-    });
-    return html`<div class="slash-menu" style="${styles}">
-      ${paragraphPanel}
+    return html`<div class="slash-menu-container" style="${containerStyles}">
+      <div class="slash-menu" style="${slashMenuStyles}">
+        ${paragraphConfig.map(
+          ({ flavour, type, name, icon }) => html`<format-bar-button
+            width="100%"
+            style="padding-left: 12px; justify-content: flex-start;"
+            text="${name}"
+            data-testid="${type}"
+            @click=${() => {
+              if (!this.page) {
+                throw new Error('Failed to format paragraph! Page not found.');
+              }
+              this.abortController.abort();
+              updateSelectedTextType(flavour, type, this.page);
+            }}
+          >
+            ${icon}
+          </format-bar-button>`
+        )}
+      </div>
     </div>`;
   }
 }

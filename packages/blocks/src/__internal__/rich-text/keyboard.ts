@@ -360,8 +360,10 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         if (context.format['code'] === true) {
           return ALLOW_DEFAULT;
         }
-
-        showSlashMenu({ page, model });
+        // Wait for the slash input
+        requestAnimationFrame(() => {
+          showSlashMenu({ page, model });
+        });
         return ALLOW_DEFAULT;
       },
     },
