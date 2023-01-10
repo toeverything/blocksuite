@@ -1,14 +1,21 @@
+import { getModelByElement } from '@blocksuite/blocks/std.js';
+import type { InlineBlot } from 'parchment';
 import Quill from 'quill';
+import { showSlashMenu } from './index.js';
+import type { SlashMenu } from './slash-menu-node.js';
 
-const Inline = Quill.import('blots/inline');
+// See https://github.com/quilljs/quill/blob/develop/blots/inline.ts
 // See https://github.com/quilljs/parchment
+const Inline: typeof InlineBlot = Quill.import('blots/inline');
 export class SlashTextNode extends Inline {
-  static blotName = 'slash-text';
-  static tagName = 'span';
-  static className = 'affine-slash-text';
+  static override blotName = 'slash-text';
+  static override tagName = 'span';
+  static override className = 'affine-slash-text';
+  private abortController = new AbortController();
+  private slashMenu: SlashMenu | undefined;
 
-  static create(value: boolean) {
-    const node = super.create() as HTMLElement;
+  static override create(value: boolean) {
+    const node = super.create(value) as HTMLElement;
     // TODO for debug, remove after stable
     node.style.backgroundColor = 'rgba(35, 131, 226, 0.28)';
     return node;
@@ -16,12 +23,12 @@ export class SlashTextNode extends Inline {
 
   // Returns format values represented by domNode if it is this Blot's type
   // No checking that domNode is this Blot's type is required.
-  static formats(node: HTMLElement) {
+  static override formats(node: HTMLElement) {
     return true;
   }
 
   // Apply format to blot. Should not pass onto child or other blot.
-  format(name: string, value: boolean) {
+  override format(name: string, value: boolean) {
     const node = this.domNode as HTMLElement;
     if (!value) {
       node.style.backgroundColor = '';
@@ -32,6 +39,43 @@ export class SlashTextNode extends Inline {
     if (name !== this.statics.blotName || !value) {
       super.format(name, value);
     }
+  }
+
+  // Called after update cycle completes. Cannot change the value or length
+  // of the document, and any DOM operation must reduce complexity of the DOM
+  // tree. A shared context object is passed through all blots.
+  override optimize(context: { [key: string]: unknown }): void {
+    super.optimize(context);
+    const children = this.children;
+    if (
+      !children.head ||
+      !('value' in children.head) ||
+      !(children.head.value instanceof Function)
+    ) {
+      console.error('slash text search error', context, this, children);
+      return;
+    }
+    const value = children.head.value();
+    if (this.slashMenu) {
+      this.slashMenu.searchString = value;
+    }
+  }
+
+  override attach(): void {
+    super.attach();
+
+    const model = getModelByElement(this.domNode);
+    this.slashMenu = showSlashMenu({
+      blot: this,
+      model,
+      anchorEl: this.domNode,
+      abortController: this.abortController,
+    });
+  }
+
+  override detach(): void {
+    super.detach();
+    this.abortController.abort();
   }
 }
 

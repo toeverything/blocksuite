@@ -1,4 +1,4 @@
-import { Page, Signal } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -47,45 +47,75 @@ export class SlashMenu extends LitElement {
   top: string | null = null;
 
   @property()
-  bottom: string | null = null;
-
-  @property()
   page: Page | null = null;
 
   @property()
   abortController = new AbortController();
 
-  // Sometimes the quick bar need to update position
   @property()
-  positionUpdated = new Signal();
+  searchString = '';
 
   @query('.slash-menu')
   slashMenuElement!: HTMLElement;
 
   override connectedCallback(): void {
     super.connectedCallback();
+
+    // Handle click outside
+    const clickAwayListener = (e: MouseEvent) => {
+      if (e.target === this) {
+        return;
+      }
+      this.abortController.abort('ABORT');
+      window.removeEventListener('mousedown', clickAwayListener);
+    };
+    window.addEventListener('mousedown', clickAwayListener);
+  }
+
+  filterConfig() {
+    const normalizeString = this.searchString.slice(1).trim().toLowerCase();
+
+    if (!normalizeString) {
+      return paragraphConfig;
+    }
+    return paragraphConfig.filter(({ name, type }) => {
+      if (name.toLowerCase().includes(normalizeString)) {
+        return true;
+      }
+      if (type.toLowerCase().includes(normalizeString)) {
+        return true;
+      }
+      return false;
+    });
   }
 
   override render() {
     const containerStyles = styleMap({
       left: this.left,
       top: this.top,
-      bottom: this.bottom,
     });
 
-    const showParagraphPanel = 'bottom';
+    const position = 'bottom';
     const slashMenuStyles = styleMap({
       left: '0',
-      top: showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
-      bottom: showParagraphPanel !== 'bottom' ? 'calc(100% + 4px)' : null,
+      top: position === 'bottom' ? 'calc(100% + 4px)' : null,
+      bottom: position !== 'bottom' ? 'calc(100% + 4px)' : null,
       display: 'flex',
-      flexDirection:
-        showParagraphPanel === 'bottom' ? 'column' : 'column-reverse',
+      flexDirection: position === 'bottom' ? 'column' : 'column-reverse',
     });
+
+    const filterConfig = this.filterConfig();
+    if (!filterConfig.length) {
+      return html`
+        <div class="slash-menu-container" style="${containerStyles}">
+          <div class="slash-menu" style="${slashMenuStyles}">No results</div>
+        </div>
+      `;
+    }
 
     return html`<div class="slash-menu-container" style="${containerStyles}">
       <div class="slash-menu" style="${slashMenuStyles}">
-        ${paragraphConfig.map(
+        ${filterConfig.map(
           ({ flavour, type, name, icon }) => html`<format-bar-button
             width="100%"
             style="padding-left: 12px; justify-content: flex-start;"
