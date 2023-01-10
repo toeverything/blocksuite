@@ -128,7 +128,7 @@ function binarySearchBlockEditingState(
         mid - 1,
         options
       );
-      return null;
+      return result;
     }
 
     let in_block = y <= detectRect.bottom;
