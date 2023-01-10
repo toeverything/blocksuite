@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
+import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
@@ -109,6 +110,9 @@ export class DragHandle extends LitElement {
   @property()
   public setSelectedBlocks: (selectedBlocks: Element[]) => void;
 
+  private _currentPageX = 0;
+  private _currentPageY = 0;
+
   private _startModelState: EditingState | null = null;
 
   private _lastModelState: EditingState | null = null;
@@ -159,6 +163,8 @@ export class DragHandle extends LitElement {
     );
     document.body.appendChild(this._indicator);
     this.addEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.addEventListener('dragover', this._onDragOverDocument);
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('dragstart', this._onDragStart);
     this.addEventListener('drag', this._onDrag);
@@ -175,6 +181,8 @@ export class DragHandle extends LitElement {
       handlePreventDocumentDragOverDelay
     );
     this.removeEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.removeEventListener('dragover', this._onDragOverDocument);
     this.removeEventListener('mouseleave', this._onMouseLeave);
     this.removeEventListener('dragstart', this._onDragStart);
     this.removeEventListener('drag', this._onDrag);
@@ -212,6 +220,14 @@ export class DragHandle extends LitElement {
     }
   };
 
+  private _onDragOverDocument = (e: DragEvent) => {
+    if (!isFirefox) {
+      throw new Error('FireFox only');
+    }
+    this._currentPageX = e.pageX;
+    this._currentPageY = e.pageY;
+  };
+
   private _onMouseLeave = (_: MouseEvent) => {
     this.setSelectedBlocks([]);
   };
@@ -222,15 +238,21 @@ export class DragHandle extends LitElement {
     }
   };
 
-  // FiXME: in Firefox, `pageX` and `pageY` are always set to 0.
-  // https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
   private _onDrag = (e: DragEvent) => {
+    let x = e.pageX;
+    let y = e.pageY;
+    if (isFirefox) {
+      // In Firefox, `pageX` and `pageY` are always set to 0.
+      // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
+      x = this._currentPageX;
+      y = this._currentPageY;
+    }
     if (this._cursor === null) {
       return;
     }
     const modelState = this._getBlockEditingStateByCursor?.(
-      e.pageX,
-      e.pageY,
+      x,
+      y,
       this._cursor,
       5,
       true
@@ -241,8 +263,8 @@ export class DragHandle extends LitElement {
       this._indicator.targetRect = modelState.position;
     }
     this._indicator.cursorPosition = {
-      x: e.clientX,
-      y: e.clientY,
+      x,
+      y,
     };
   };
 
