@@ -29,9 +29,6 @@ export function getBlockById<T extends ElementTagName>(
   return container.querySelector<T>(`[${ATTR}="${id}"]` as T);
 }
 
-/*
-Be cautious!! If BlockSuite is embedded in other container, MouseEvent.clientX, MouseEvent.clientY will change
- */
 export function getBlockByPoint(point: IPoint): Element | null | undefined {
   return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
 }
