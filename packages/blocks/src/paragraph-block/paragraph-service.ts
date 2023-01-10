@@ -1,7 +1,11 @@
-import type { SyncService } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
+import { BaseService } from '../__internal__/service.js';
+import type { SyncServiceProtocol } from '../__internal__/index.js';
 
-export class ParagraphBlockService implements SyncService {
+export class ParagraphBlockService
+  extends BaseService
+  implements SyncServiceProtocol
+{
   isLoaded = true as const;
   block2html(
     model: ParagraphBlockModel,
@@ -11,7 +15,8 @@ export class ParagraphBlockService implements SyncService {
     begin?: number,
     end?: number
   ) {
-    const text = model.block2html(
+    const text = super.block2html(
+      model,
       childText,
       previousSiblingId,
       nextSiblingId,

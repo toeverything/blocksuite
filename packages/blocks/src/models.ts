@@ -9,6 +9,13 @@ import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ShapeBlockModel } from './shape-block/shape-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import { SurfaceBlockModel } from './surface-block/surface-model.js';
+import { ListBlockService } from './list-block/list-service.js';
+import { PageBlockService } from './page-block/page-service.js';
+import { DividerBlockService } from './divider-block/divider-service.js';
+import type {
+  AsyncServiceProtocol,
+  SyncServiceProtocol,
+} from './__internal__/index.js';
 
 export {
   CodeBlockModel,
@@ -41,6 +48,15 @@ export type Flavour = keyof BlockSchemaType;
 export const blockService = {
   'affine:code': async () => import('./code-block/code-service.js'),
   'affine:paragraph': ParagraphBlockService,
+  'affine:list': ListBlockService,
+  'affine:page': PageBlockService,
+  'affine:divider': DividerBlockService,
+} satisfies {
+  [Key in Flavour]?:
+    | { new (): SyncServiceProtocol }
+    | (() => Promise<{
+        default: { new (): AsyncServiceProtocol };
+      }>);
 };
 
 export type BlockService = typeof blockService;

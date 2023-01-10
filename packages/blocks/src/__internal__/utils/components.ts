@@ -6,7 +6,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
 import '../../components/loader.js';
-import { hasService, registerService } from '../service.js';
+import { hasService, registerService, SyncBaseService } from '../service.js';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -67,7 +67,8 @@ function BlockElementWithService(
     return BlockElement(model, host);
   } else {
     const loadOrService =
-      blockService[model.flavour as keyof typeof blockService];
+      blockService[model.flavour as keyof typeof blockService] ??
+      SyncBaseService;
     if (loadOrService) {
       const state = registerService(model.flavour, loadOrService);
       if (state instanceof Promise) {

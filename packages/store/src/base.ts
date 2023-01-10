@@ -51,55 +51,6 @@ export class BaseBlockModel<Props = unknown>
     return this.children[this.children.length - 1].lastChild();
   }
 
-  block2html(
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
-    const delta = this.text?.sliceToDelta(begin || 0, end);
-    const text = delta.reduce((html: string, item: Record<string, unknown>) => {
-      return html + this._deltaLeaf2Html(item);
-    }, '');
-    return `${text}${childText}`;
-  }
-
-  block2Text(childText: string, begin?: number, end?: number) {
-    const text = (this.text?.toString() || '').slice(begin || 0, end);
-    return `${text}${childText}`;
-  }
-
-  _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
-    let text = deltaLeaf.insert;
-    const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
-      string,
-      boolean
-    >;
-    if (!attributes) {
-      return text;
-    }
-    if (attributes.code) {
-      text = `<code>${text}</code>`;
-    }
-    if (attributes.bold) {
-      text = `<strong>${text}</strong>`;
-    }
-    if (attributes.italic) {
-      text = `<em>${text}</em>`;
-    }
-    if (attributes.underline) {
-      text = `<u>${text}</u>`;
-    }
-    if (attributes.strikethrough) {
-      text = `<s>${text}</s>`;
-    }
-    if (attributes.link) {
-      text = `<a href='${attributes.link}'>${text}</a>`;
-    }
-    return text;
-  }
-
   dispose() {
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
