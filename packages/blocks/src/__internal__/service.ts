@@ -1,5 +1,6 @@
 import type { Service, SyncServiceProtocol } from './utils/index.js';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockServiceInstance } from '../models.js';
 
 export class BaseService {
   public block2html(
@@ -122,9 +123,18 @@ export function registerService(
   }
 }
 
-export function getService(flavour: string, strict: false): Service | undefined;
-export function getService(flavour: string, strict?: true): Service;
-export function getService(flavour: string, strict = true) {
+export function getService<
+  Flavour extends string,
+  Services extends Record<string, unknown> = BlockServiceInstance
+>(flavour: Flavour, strict: false): Services[Flavour] | undefined;
+export function getService<
+  Flavour extends string,
+  Services extends Record<string, unknown> = BlockServiceInstance
+>(flavour: Flavour, strict?: true): Services[Flavour];
+export function getService<
+  Flavour extends string,
+  Services extends Record<string, unknown> = BlockServiceInstance
+>(flavour: Flavour, strict = true) {
   const service = services.get(flavour);
   if (strict && !service) {
     throw new Error(`cannot find service '${flavour}'`);

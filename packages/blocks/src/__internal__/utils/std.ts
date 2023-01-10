@@ -6,7 +6,7 @@ export function assertExists<T>(val: T | null | undefined): asserts val is T {
   Utils.assertExists(val);
 }
 
-export const assertFlavours = Utils.assertFlavours;
+export { Utils };
 
 export const matchFlavours = Utils.matchFlavours;
 

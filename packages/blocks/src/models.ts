@@ -16,6 +16,7 @@ import type {
   AsyncServiceProtocol,
   SyncServiceProtocol,
 } from './__internal__/index.js';
+import type { BaseService } from './__internal__/service.js';
 
 export {
   CodeBlockModel,
@@ -64,13 +65,15 @@ export type BlockService = typeof blockService;
 export type ServiceFlavour = keyof BlockService;
 
 export type BlockServiceInstance = {
-  [Key in keyof BlockService]: BlockService[Key] extends () => infer ServicePromise
-    ? Awaited<ServicePromise> extends {
-        default: { new (): unknown };
-      }
-      ? InstanceType<Awaited<ServicePromise>['default']>
+  [Key in Flavour]: Key extends ServiceFlavour
+    ? BlockService[Key] extends () => infer ServicePromise
+      ? Awaited<ServicePromise> extends {
+          default: { new (): unknown };
+        }
+        ? InstanceType<Awaited<ServicePromise>['default']>
+        : never
+      : BlockService[Key] extends { new (): unknown }
+      ? InstanceType<BlockService[Key]>
       : never
-    : BlockService[Key] extends { new (): unknown }
-    ? InstanceType<BlockService[Key]>
-    : never;
+    : InstanceType<typeof BaseService>;
 };

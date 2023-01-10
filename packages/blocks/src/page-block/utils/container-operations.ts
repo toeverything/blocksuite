@@ -2,7 +2,7 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
   assertExists,
-  assertFlavours,
+  Utils,
   ExtendedModel,
   isPageTitle,
   RootBlockModel,
@@ -122,7 +122,11 @@ export async function updateSelectedTextType(
   const selectedBlocks = saveBlockSelection();
   let lastNewId: string | null = null;
   modelsInRange.forEach(model => {
-    assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
+    Utils.assertFlavours(model, [
+      'affine:paragraph',
+      'affine:list',
+      'affine:code',
+    ]);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {

@@ -25,8 +25,14 @@ export function assertExists<T>(val: T | null | undefined): asserts val is T {
   }
 }
 
-export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
-  if (!allowed.includes(model.flavour)) {
+export function assertFlavours<
+  Key extends keyof BlockSuiteInternal.BlockModels &
+    string = keyof BlockSuiteInternal.BlockModels & string
+>(
+  model: BaseBlockModel,
+  allowed: Key[]
+): asserts model is BlockSuiteInternal.BlockModels[Key] {
+  if (!allowed.includes(model.flavour as Key)) {
     throw new Error(`model flavour ${model.flavour} is not allowed`);
   }
 }
