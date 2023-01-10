@@ -59,11 +59,22 @@ export function getBlockEditingStateByPosition(
 
     let blockRect: DOMRect | null = null;
     let detectRect: DOMRect | null = null;
-    if (block.type === 'image') {
-      const hoverImage = hoverDom?.querySelector('img');
-      blockRect = hoverImage?.getBoundingClientRect() as DOMRect;
+    const hasOptionBar = (block: BaseBlockModel) => {
+      if (block.flavour === 'affine:code') {
+        return true;
+      }
+      if (block.type === 'image') {
+        return true;
+      }
+      return false;
+    };
+
+    if (hasOptionBar(block)) {
+      const currentHoverDom =
+        block.type === 'image' ? hoverDom?.querySelector('img') : hoverDom;
+      blockRect = currentHoverDom?.getBoundingClientRect() as DOMRect;
       detectRect = { ...blockRect } satisfies DOMRect;
-      // there is a `affine-embed-editing-state-container` on the right side
+      // there is a optionBar on the right side
       detectRect.width += 50;
     } else {
       blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
