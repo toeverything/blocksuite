@@ -73,7 +73,8 @@ export class ContentParser {
 
   public async htmlText2Block(html: string): Promise<OpenBlockInfo[]> {
     const htmlEl = document.createElement('html');
-    htmlEl.innerHTML = html;
+    const { default: xss } = await import('xss');
+    htmlEl.innerHTML = xss(html);
     htmlEl.querySelector('head')?.remove();
     this.signals.beforeHtml2Block.emit(htmlEl);
     return this._convertHtml2Blocks(htmlEl);
