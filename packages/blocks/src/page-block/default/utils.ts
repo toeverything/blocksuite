@@ -42,6 +42,19 @@ export interface EditingState {
   index: number;
 }
 
+function hasOptionBar(block: BaseBlockModel) {
+  if (block.flavour === 'affine:code') return true;
+  if (block.type === 'image') return true;
+  return false;
+}
+
+// Workaround native DOMRect clone issue in #632
+// See https://stackoverflow.com/questions/42713229/getboundingclientrect-object-properties-cannot-be-copied
+function copyRect(rect: DOMRect): DOMRect {
+  const { top, right, bottom, left, width, height, x, y } = rect;
+  return { top, right, bottom, left, width, height, x, y } as DOMRect;
+}
+
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
   x: number,
@@ -121,10 +134,11 @@ function binarySearchBlockEditingState(
     let in_block = y <= detectRect.bottom;
     if (in_block) {
       if (mid !== 0) {
-        const {
-          detectRect: { bottom },
-        } = getBlockAndRect(blocks, mid - 1);
-        in_block &&= y > bottom;
+        // const {
+        //   detectRect: { bottom },
+        // } = getBlockAndRect(blocks, mid - 1);
+        // in_block &&= y >= bottom;
+        in_block &&= y >= detectRect.top;
       }
 
       if (in_block) {
@@ -162,7 +176,7 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   if (hasOptionBar(block)) {
     const hoverImage = hoverDom?.querySelector('img');
     blockRect = hoverImage?.getBoundingClientRect() as DOMRect;
-    detectRect = { ...blockRect } satisfies DOMRect;
+    detectRect = copyRect(blockRect);
     // there is a optionBar on the right side
     detectRect.width += 50;
   } else {
@@ -183,16 +197,6 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
     blockRect,
     detectRect,
   };
-}
-
-function hasOptionBar(block: BaseBlockModel) {
-  if (block.flavour === 'affine:code') {
-    return true;
-  }
-  if (block.type === 'image') {
-    return true;
-  }
-  return false;
 }
 
 export async function downloadImage(model: BaseBlockModel) {

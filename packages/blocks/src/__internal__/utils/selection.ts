@@ -2,7 +2,6 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
-  getBlockByPoint,
   getBlockElementByModel,
   getContainerByModel,
   getCurrentRange,
@@ -428,15 +427,9 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  const startBlock = getBlockByPoint(e.start);
-  assertExists(startBlock);
-  const startRect = startBlock.getBoundingClientRect();
-
   const isDownward = e.y > e.start.y + MOVE_DETECT_THRESHOLD;
-  const ifCrossUpperSideOfCurrentBlock = e.y > startRect.top;
   const isRightward = e.x > e.start.x;
-  const isForward =
-    isDownward || (ifCrossUpperSideOfCurrentBlock && isRightward);
+  const isForward = isDownward || (e.y === e.start.y && isRightward);
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);

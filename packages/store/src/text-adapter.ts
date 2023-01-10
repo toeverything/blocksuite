@@ -231,28 +231,31 @@ export class Text {
   }
 
   sliceToDelta(begin: number, end?: number) {
+    const result: DeltaOperation[] = [];
     if (end && begin >= end) {
-      return [];
+      return result;
     }
 
     const delta = this.toDelta();
     if (begin < 1 && !end) {
       return delta;
     }
-    const result = [];
+
     if (delta && delta instanceof Array) {
       let charNum = 0;
       for (let i = 0; i < delta.length; i++) {
-        const content = delta[i];
-        let contentText = content.insert || '';
+        const content: DeltaOperation = delta[i];
+        let contentText: string = content.insert || '';
         const contentLen = contentText.length;
-        if (end && charNum + contentLen > end) {
-          contentText = contentText.slice(0, end - charNum);
-        }
-        if (charNum + contentLen > begin && result.length === 0) {
-          contentText = contentText.slice(begin - charNum);
-        }
-        if (charNum + contentLen > begin && result.length === 0) {
+
+        const isLastOp = end && charNum + contentLen > end;
+        const isFirstOp = charNum + contentLen > begin && result.length === 0;
+
+        if (isFirstOp || isLastOp) {
+          contentText = isLastOp
+            ? contentText.slice(0, end - charNum)
+            : contentText.slice(begin - charNum);
+
           result.push({
             ...content,
             insert: contentText,
@@ -260,9 +263,11 @@ export class Text {
         } else {
           result.length > 0 && result.push(content);
         }
+
         if (end && charNum + contentLen > end) {
           break;
         }
+
         charNum = charNum + contentLen;
       }
     }
