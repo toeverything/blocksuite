@@ -41,6 +41,19 @@ export interface EditingState {
   position: DOMRect;
 }
 
+function hasOptionBar(block: BaseBlockModel) {
+  if (block.flavour === 'affine:code') return true;
+  if (block.type === 'image') return true;
+  return false;
+}
+
+// Workaround native DOMRect clone issue in #632
+// See https://stackoverflow.com/questions/42713229/getboundingclientrect-object-properties-cannot-be-copied
+function copyRect(rect: DOMRect): DOMRect {
+  const { top, right, bottom, left, width, height, x, y } = rect;
+  return { top, right, bottom, left, width, height, x, y } as DOMRect;
+}
+
 export function getBlockEditingStateByPosition(
   blocks: BaseBlockModel[],
   x: number,
@@ -59,21 +72,12 @@ export function getBlockEditingStateByPosition(
 
     let blockRect: DOMRect | null = null;
     let detectRect: DOMRect | null = null;
-    const hasOptionBar = (block: BaseBlockModel) => {
-      if (block.flavour === 'affine:code') {
-        return true;
-      }
-      if (block.type === 'image') {
-        return true;
-      }
-      return false;
-    };
 
     if (hasOptionBar(block)) {
       const currentHoverDom =
         block.type === 'image' ? hoverDom?.querySelector('img') : hoverDom;
       blockRect = currentHoverDom?.getBoundingClientRect() as DOMRect;
-      detectRect = { ...blockRect } satisfies DOMRect;
+      detectRect = copyRect(blockRect);
       // there is a optionBar on the right side
       detectRect.width += 50;
     } else {
