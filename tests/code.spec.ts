@@ -306,3 +306,32 @@ test('undo and redo works in code block', async ({ page }) => {
   await redoByKeyboard(page);
   await assertRichTexts(page, ['const a = 10;\n']);
 });
+
+test('code block option will not disappear when hovering on it', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const getCenterPosition: (
+    selector: string
+  ) => Promise<{ x: number; y: number }> = async (selector: string) => {
+    return await page.evaluate((selector: string) => {
+      const codeBlock = document.querySelector(selector);
+      const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
+      return {
+        x: bbox.left + bbox.width / 2,
+        y: bbox.top + bbox.height / 2,
+      };
+    }, selector);
+  };
+
+  const position = await getCenterPosition('affine-code');
+  await page.mouse.move(position.x, position.y);
+
+  const optionPosition = await getCenterPosition('.code-block-option');
+  await page.mouse.move(optionPosition.x, optionPosition.y);
+  const locator = page.locator('.code-block-option');
+  await expect(locator).toBeVisible();
+});
