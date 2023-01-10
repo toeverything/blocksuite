@@ -226,11 +226,11 @@ export class Text {
     });
   }
 
-  toDelta() {
+  toDelta(): DeltaOperation[] {
     return this._yText?.toDelta() || [];
   }
 
-  sliceToDelta(begin: number, end?: number) {
+  sliceToDelta(begin: number, end?: number): DeltaOperation[] {
     const result: DeltaOperation[] = [];
     if (end && begin >= end) {
       return result;
@@ -244,7 +244,7 @@ export class Text {
     if (delta && delta instanceof Array) {
       let charNum = 0;
       for (let i = 0; i < delta.length; i++) {
-        const content: DeltaOperation = delta[i];
+        const content = delta[i];
         let contentText: string = content.insert || '';
         const contentLen = contentText.length;
 
