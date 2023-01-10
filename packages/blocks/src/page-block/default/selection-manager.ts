@@ -256,6 +256,8 @@ export class DefaultSelectionManager {
     this.state.resetStartRange(e);
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     resetNativeSelection(null);
+    // deactivate quill keyboard event handler
+    (document.activeElement as HTMLDivElement).blur();
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
