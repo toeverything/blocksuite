@@ -68,12 +68,15 @@ export function getBlockEditingStateByPosition(
       }
       return false;
     };
-
+    const copyRect = (rect: DOMRect) => {
+      const { top, right, bottom, left, width, height, x, y } = rect;
+      return { top, right, bottom, left, width, height, x, y };
+    };
     if (hasOptionBar(block)) {
       const currentHoverDom =
         block.type === 'image' ? hoverDom?.querySelector('img') : hoverDom;
       blockRect = currentHoverDom?.getBoundingClientRect() as DOMRect;
-      detectRect = { ...blockRect } satisfies DOMRect;
+      detectRect = copyRect(blockRect) as DOMRect;
       // there is a optionBar on the right side
       detectRect.width += 50;
     } else {
