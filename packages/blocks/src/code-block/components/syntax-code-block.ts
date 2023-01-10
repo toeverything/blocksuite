@@ -1,10 +1,10 @@
-import Q from 'quill';
+import Quill from 'quill';
 import type { Quill as QuillType } from 'quill';
+
 // @ts-ignore
 import type hljs from 'highlight.js';
 import { assertExists } from '../../__internal__/index.js';
 
-const Quill = Q as unknown as typeof QuillType;
 const Module = Quill.import('core/module');
 const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');

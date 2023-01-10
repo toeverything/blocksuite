@@ -1,6 +1,5 @@
-import Hotkeys from 'hotkeys-js';
-import type { Hotkeys as HotkeysType, KeyHandler } from 'hotkeys-js';
-const hotkeys = Hotkeys as unknown as HotkeysType;
+import hotkeys from 'hotkeys-js';
+import type { KeyHandler } from 'hotkeys-js';
 
 hotkeys.filter = (event: KeyboardEvent) => {
   const target = event.target;
