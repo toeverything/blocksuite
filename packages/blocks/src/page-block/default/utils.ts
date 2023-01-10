@@ -39,11 +39,12 @@ import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 export interface EditingState {
   model: BaseBlockModel;
   position: DOMRect;
+  index: number;
 }
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
-  if (block.type === 'image') return true;
+  if (block.flavour === 'affine:embed' && block.type === 'image') return true;
   return false;
 }
 
@@ -62,58 +63,145 @@ export function getBlockEditingStateByPosition(
     skipX?: boolean;
   }
 ) {
-  for (let index = blocks.length - 1; index >= 0; index--) {
-    const block = blocks[index];
-    const hoverDom = getBlockById(block.id);
+  const start = 0;
+  const end = blocks.length - 1;
+  return binarySearchBlockEditingState(blocks, x, y, start, end, options);
+}
+
+export function getBlockEditingStateByCursor(
+  blocks: BaseBlockModel[],
+  x: number,
+  y: number,
+  cursor: number,
+  options?: {
+    size?: number;
+    skipX?: boolean;
+  }
+): EditingState | null {
+  const size = options?.size || 5;
+  const start = Math.max(cursor - size, 0);
+  const end = Math.min(cursor + size, blocks.length - 1);
+  return binarySearchBlockEditingState(blocks, x, y, start, end, options);
+}
+
+// seek range: [start, end]
+function binarySearchBlockEditingState(
+  blocks: BaseBlockModel[],
+  x: number,
+  y: number,
+  start: number,
+  end: number,
+  options?: {
+    skipX?: boolean;
+  }
+): EditingState | null {
+  while (start <= end) {
+    const mid = start + Math.floor((end - start) / 2);
+    const { block, blockRect, detectRect, hoverDom } = getBlockAndRect(
+      blocks,
+      mid
+    );
+
     // code block use async loading
     if (block.flavour === 'affine:code' && !hoverDom) {
-      continue;
+      // @TODO: need more tests
+      if (mid === start || mid === end) {
+        return null;
+      }
+      // may have consecutive code blocks
+      let result = binarySearchBlockEditingState(
+        blocks,
+        x,
+        y,
+        mid + 1,
+        end,
+        options
+      );
+      if (result) {
+        return result;
+      }
+      result = binarySearchBlockEditingState(
+        blocks,
+        x,
+        y,
+        start,
+        mid - 1,
+        options
+      );
+      return result;
     }
 
-    let blockRect: DOMRect | null = null;
-    let detectRect: DOMRect | null = null;
+    let in_block = y <= detectRect.bottom;
+    if (in_block) {
+      if (mid !== 0) {
+        // const {
+        //   detectRect: { bottom },
+        // } = getBlockAndRect(blocks, mid - 1);
+        // in_block &&= y >= bottom;
+        in_block &&= y >= detectRect.top;
+      }
 
-    if (hasOptionBar(block)) {
-      const currentHoverDom =
-        block.type === 'image' ? hoverDom?.querySelector('img') : hoverDom;
-      blockRect = currentHoverDom?.getBoundingClientRect() as DOMRect;
-      detectRect = copyRect(blockRect);
-      // there is a optionBar on the right side
-      detectRect.width += 50;
-    } else {
-      blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
-      detectRect = blockRect;
-    }
+      if (in_block) {
+        assertExists(blockRect);
 
-    assertExists(blockRect);
+        if (!options?.skipX) {
+          if (x < detectRect.left || x > detectRect.left + detectRect.width) {
+            return null;
+          }
+        }
 
-    if (options?.skipX) {
-      if (!(y < detectRect.top || y > detectRect.top + detectRect.height)) {
         return {
+          index: mid,
           position: blockRect,
           model: block,
         };
       }
-    } else if (isPointIn(detectRect, x, y)) {
-      return {
-        position: blockRect,
-        model: block,
-      };
+    }
+
+    if (detectRect.top > y) {
+      end = mid - 1;
+    } else if (detectRect.bottom < y) {
+      start = mid + 1;
     }
   }
+
   return null;
 }
 
-function isPointIn(block: DOMRect, x: number, y: number): boolean {
-  if (
-    x < block.left ||
-    x > block.left + block.width ||
-    y < block.top ||
-    y > block.top + block.height
-  ) {
-    return false;
+function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
+  const block = blocks[mid];
+  const hoverDom = getBlockById(block.id);
+  let blockRect: DOMRect | null = null;
+  let detectRect: DOMRect | null = null;
+  if (hasOptionBar(block)) {
+    let hoverTargetElement: HTMLElement | undefined | null;
+    if (block.flavour === 'affine:embed' && block.type === 'image') {
+      hoverTargetElement = hoverDom?.querySelector('img');
+    } else if (block.flavour === 'affine:code') {
+      hoverTargetElement = hoverDom;
+    }
+    blockRect = hoverTargetElement?.getBoundingClientRect() as DOMRect;
+    detectRect = copyRect(blockRect);
+    // there is a optionBar on the right side
+    detectRect.width += 50;
+  } else {
+    blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
+    // in a nested block, we should get `rich-text` which is its own editing area
+    if (block.children.length) {
+      detectRect = hoverDom
+        ?.querySelector('rich-text')
+        ?.getBoundingClientRect() as DOMRect;
+    } else {
+      detectRect = blockRect;
+    }
   }
-  return true;
+
+  return {
+    block,
+    hoverDom,
+    blockRect,
+    detectRect,
+  };
 }
 
 export async function downloadImage(model: BaseBlockModel) {

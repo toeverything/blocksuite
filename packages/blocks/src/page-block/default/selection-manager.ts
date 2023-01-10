@@ -26,7 +26,10 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor.js';
 import type { DefaultPageSignals } from './default-page-block.js';
-import { getBlockEditingStateByPosition } from './utils.js';
+import {
+  getBlockEditingStateByPosition,
+  getBlockEditingStateByCursor,
+} from './utils.js';
 import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
@@ -195,6 +198,18 @@ export class DefaultSelectionManager {
           skipX,
         });
       },
+      getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
+        return getBlockEditingStateByCursor(
+          this._blocks,
+          pageX,
+          pageY,
+          cursor,
+          {
+            size,
+            skipX,
+          }
+        );
+      },
     });
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._mouseDisposeCallback = initMouseEventHandlers(
@@ -222,7 +237,7 @@ export class DefaultSelectionManager {
       for (let i = 0; i < length; i++) {
         const blockModel = queue.shift();
         assertExists(blockModel);
-        blockModel.children && queue.push(...blockModel.children);
+        blockModel.children && queue.unshift(...blockModel.children);
         // ignore level 0, as layer 0 is all affine:frame block
         if (layer > 0) {
           result.push(blockModel);
