@@ -327,7 +327,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       handler: onKeyDown,
     },
     left: {
-      key: 37,
+      key: 'left',
       shiftKey: false,
       handler: onKeyLeft,
     },
@@ -335,6 +335,38 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'right',
       shiftKey: false,
       handler: onKeyRight,
+    },
+
+    slash: {
+      // Slash '/'
+      key: 191,
+      // prefix non digit or empty string
+      // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
+      prefix: /[^\d]$|^(?![\s\S])/,
+      handler(range, context) {
+        // TODO remove feature flag after slash menu is stable
+        const params = new URLSearchParams(location.search);
+        const flag = params.get('slash');
+        if (flag === null) {
+          return ALLOW_DEFAULT;
+        }
+        // End of feature flag
+
+        if (matchFlavours(model, ['affine:code'])) {
+          return ALLOW_DEFAULT;
+        }
+        if (context.format['code'] === true) {
+          return ALLOW_DEFAULT;
+        }
+        // Wait for the slash input
+        requestAnimationFrame(() => {
+          // showSlashMenu({ model });
+          // Format the slash char
+          range.length = 1;
+          this.quill.formatText(range, { 'slash-text': true });
+        });
+        return ALLOW_DEFAULT;
+      },
     },
   };
 
