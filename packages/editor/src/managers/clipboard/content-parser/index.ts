@@ -29,18 +29,14 @@ export class ContentParser {
   public onExportHtml() {
     const root = this._editor.page.root;
     if (!root) return;
-    const htmlContent = this.block2Html(
-      this._getSelectedBlock(root).children[0].children
-    );
+    const htmlContent = this.block2Html(this._getSelectedBlock(root).children);
     FileExporter.exportHtml((root as PageBlockModel).title, htmlContent);
   }
 
   public onExportMarkdown() {
     const root = this._editor.page.root;
     if (!root) return;
-    const htmlContent = this.block2Html(
-      this._getSelectedBlock(root).children[0].children
-    );
+    const htmlContent = this.block2Html(this._getSelectedBlock(root).children);
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title,
       htmlContent
