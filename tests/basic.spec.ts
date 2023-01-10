@@ -39,11 +39,11 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const frame = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const pageId = page.addBlockByFlavour('affine:page', { title: 'hello' });
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
 
     const text = new page.Text(page, 'world');
-    page.addBlock({ flavour: 'affine:paragraph', text }, frame);
+    page.addBlockByFlavour('affine:paragraph', { text }, frame);
 
     const delta = [
       { insert: 'foo ' },

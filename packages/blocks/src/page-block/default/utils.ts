@@ -91,10 +91,10 @@ function binarySearchBlockEditingState(
 
     // code block use async loading
     if (block.flavour === 'affine:code' && !hoverDom) {
-      if (mid === end) {
+      // @TODO: need more tests
+      if (mid === start || mid === end) {
         return null;
       }
-      // @TODO: need more tests
       // may have consecutive code blocks
       let result = binarySearchBlockEditingState(
         blocks,
@@ -107,9 +107,6 @@ function binarySearchBlockEditingState(
       if (result) {
         return result;
       }
-      if (mid === start) {
-        return null;
-      }
       result = binarySearchBlockEditingState(
         blocks,
         x,
@@ -118,9 +115,7 @@ function binarySearchBlockEditingState(
         mid - 1,
         options
       );
-      if (result) {
-        return result;
-      }
+      return null;
     }
 
     let in_block = y <= detectRect.bottom;
@@ -164,11 +159,11 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   const hoverDom = getBlockById(block.id);
   let blockRect: DOMRect | null = null;
   let detectRect: DOMRect | null = null;
-  if (block.type === 'image') {
+  if (hasOptionBar(block)) {
     const hoverImage = hoverDom?.querySelector('img');
     blockRect = hoverImage?.getBoundingClientRect() as DOMRect;
     detectRect = { ...blockRect } satisfies DOMRect;
-    // there is a `affine-embed-editing-state-container` on the right side
+    // there is a optionBar on the right side
     detectRect.width += 50;
   } else {
     blockRect = hoverDom?.getBoundingClientRect() as DOMRect;
@@ -188,6 +183,16 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
     blockRect,
     detectRect,
   };
+}
+
+function hasOptionBar(block: BaseBlockModel) {
+  if (block.flavour === 'affine:code') {
+    return true;
+  }
+  if (block.type === 'image') {
+    return true;
+  }
+  return false;
 }
 
 export async function downloadImage(model: BaseBlockModel) {
@@ -422,8 +427,9 @@ export function bindHotkeys(
       const index = parentModel?.children.indexOf(model);
       assertExists(index);
       assertExists(parentModel);
-      const id = page.addBlock(
-        { flavour: 'affine:paragraph', type: 'text' },
+      const id = page.addBlockByFlavour(
+        'affine:paragraph',
+        { type: 'text' },
         parentModel,
         index + 1
       );

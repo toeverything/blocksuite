@@ -17,7 +17,7 @@
     "format": "prettier --write packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
-    "clean": "rm -rf dist packages/{blocks,editor,playground,store}/dist",
+    "clean": "rm -rf dist packages/{blocks,editor,playground,store,react}/dist",
     "changeset": "changeset",
     "release": "pnpm build && changeset publish",
     "preinstall": "npx only-allow pnpm",
