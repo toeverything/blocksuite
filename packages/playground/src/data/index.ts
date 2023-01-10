@@ -9,14 +9,14 @@ import { Page, Text, Workspace } from '@blocksuite/store';
 export function heavy(workspace: Workspace) {
   workspace.signals.pageAdded.once(id => {
     const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlock({ flavour: 'affine:page' });
+    const pageBlockId = page.addBlockByFlavour('affine:page');
     page.addBlock(
       {
         flavour: 'affine:surface',
       },
       null
     );
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
     for (let i = 0; i < 1000; i++) {
       page.addBlock(
         {

@@ -333,8 +333,9 @@ export function bindHotkeys(
       const index = parentModel?.children.indexOf(model);
       assertExists(index);
       assertExists(parentModel);
-      const id = page.addBlock(
-        { flavour: 'affine:paragraph', type: 'text' },
+      const id = page.addBlockByFlavour(
+        'affine:paragraph',
+        { type: 'text' },
         parentModel,
         index + 1
       );
