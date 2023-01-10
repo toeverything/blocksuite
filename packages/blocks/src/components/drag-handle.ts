@@ -1,13 +1,12 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
+import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
 
 const IS_PROD = location.href.includes('pathfinder');
-
-const isFireFox = navigator.userAgent.indexOf('Firefox') > 0;
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
@@ -164,7 +163,7 @@ export class DragHandle extends LitElement {
     );
     document.body.appendChild(this._indicator);
     this.addEventListener('mousedown', this._onMouseDown);
-    isFireFox &&
+    isFirefox &&
       document.addEventListener('dragover', this._onDragOverDocument);
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('dragstart', this._onDragStart);
@@ -182,7 +181,7 @@ export class DragHandle extends LitElement {
       handlePreventDocumentDragOverDelay
     );
     this.removeEventListener('mousedown', this._onMouseDown);
-    isFireFox &&
+    isFirefox &&
       document.removeEventListener('dragover', this._onDragOverDocument);
     this.removeEventListener('mouseleave', this._onMouseLeave);
     this.removeEventListener('dragstart', this._onDragStart);
@@ -222,7 +221,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragOverDocument = (e: DragEvent) => {
-    if (!isFireFox) {
+    if (!isFirefox) {
       throw new Error('FireFox only');
     }
     this._currentPageX = e.pageX;
@@ -242,7 +241,7 @@ export class DragHandle extends LitElement {
   private _onDrag = (e: DragEvent) => {
     let x = e.pageX;
     let y = e.pageY;
-    if (isFireFox) {
+    if (isFirefox) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
       x = this._currentPageX;
