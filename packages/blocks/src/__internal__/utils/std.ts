@@ -22,6 +22,10 @@ export function getCurrentVersion(): Version {
   return Number(env[importIdentifier]);
 }
 
+export function setVersion(version: Version) {
+  env[importIdentifier] = `${version}`;
+}
+
 // workaround ts(2775)
 export function assertExists<T>(val: T | null | undefined): asserts val is T {
   Utils.assertExists(val);

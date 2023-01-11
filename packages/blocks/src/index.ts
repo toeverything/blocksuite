@@ -9,7 +9,13 @@ import './__internal__/rich-text/link-node';
 import './embed-block';
 import './embed-block/image';
 import './surface-block';
-import { env, importIdentifier, Version } from './__internal__/index.js';
+import {
+  env,
+  importIdentifier,
+  setVersion,
+  Version,
+} from './__internal__/index.js';
+
 export * from './counter-block/index.js';
 export * from './embed-block/index.js';
 export * from './paragraph-block/index.js';
@@ -37,8 +43,8 @@ if (env[importIdentifier] !== undefined) {
 } else {
   const isAbbeyWood = location.href.includes('pathfinder');
   if (isAbbeyWood) {
-    env[importIdentifier] = `${Version.AbbeyWood}`;
+    setVersion(Version.AbbeyWood);
   } else {
-    env[importIdentifier] = `${Version.LATEST}`;
+    setVersion(Version.LATEST);
   }
 }
