@@ -80,7 +80,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
     .hljs-attribute {
       color: #e6550d;
     }
-    //</editor-fold>
 
     code-block {
       position: relative;
@@ -91,7 +90,6 @@ export class CodeBlockComponent extends NonShadowLitElement {
       font-size: calc(var(--affine-font-base) - 4px);
       line-height: calc(var(--affine-line-height-base) - 6px);
       position: relative;
-      width: 720px;
       padding: 32px 0;
       background: var(--affine-code-block-background);
       border-radius: 10px;
@@ -108,7 +106,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       font-size: var(--affine-font-xs);
       line-height: calc(var(--affine-line-height-base) - 10px);
       top: 12px;
-      left: 9px;
+      left: 12px;
     }
 
     .affine-code-block-container.selected {
@@ -134,7 +132,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container .ql-syntax {
-      width: 660px;
+      width: 620px;
       margin: 0;
       overflow: scroll;
       /*scrollbar-color: #fff0 #fff0;*/
@@ -158,9 +156,14 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: relative;
     }
 
+    .lang-container code-block-button {
+      padding: 4px 0 0 12px;
+      justify-content: flex-start;
+    }
+
     .code-block-option {
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.4);
+      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
+        0px 3px 16px -6px rgba(24, 39, 75, 0.04);
       border-radius: 10px;
       list-style: none;
       padding: 4px;
@@ -242,6 +245,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
                 <code-block-button
                   width="101px"
                   height="24px"
+                  fontSize="14px"
                   class="${this.showLangList === 'hidden' ? '' : 'clicked'}"
                 >
                   ${this.model.language} ${ArrowDownIcon}

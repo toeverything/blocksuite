@@ -479,7 +479,7 @@ export class DefaultSelectionManager {
       }
       this._signals.updateEmbedEditingState.emit(hoverEditingState);
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
-      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
       const clickDragState = getBlockEditingStateByPosition(

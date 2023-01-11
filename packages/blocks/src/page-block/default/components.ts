@@ -212,7 +212,6 @@ export function CodeBlockOptionContainer(
       <div style=${styleMap(style)} class="code-block-option">
         <format-bar-button
           class="has-tool-tip"
-          width="100%"
           @click=${() => copyCode(codeBlockOption)}
         >
           ${CopyIcon}
@@ -222,7 +221,6 @@ export function CodeBlockOptionContainer(
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip ${isWrapped ? 'filled' : ''}"
-          width="100%"
           @click=${() => toggleWrap(codeBlockOption)}
         >
           ${LineWrapIcon}
@@ -232,7 +230,6 @@ export function CodeBlockOptionContainer(
         </format-bar-button>
         <format-bar-button
           class="has-tool-tip"
-          width="100%"
           @click=${() => deleteCodeBlock(codeBlockOption)}
         >
           ${DeleteIcon}
