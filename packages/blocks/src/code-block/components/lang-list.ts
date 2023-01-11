@@ -70,7 +70,7 @@ export class LangList extends NonShadowLitElement {
         width: 192px;
         border: 1px solid #d0d7e3;
         border-radius: 10px;
-        padding-left: 20.25%;
+        padding-left: 44px;
         padding-top: 4px;
 
         font-family: var(--affine-font-family);
@@ -90,7 +90,7 @@ export class LangList extends NonShadowLitElement {
       }
 
       .search-icon {
-        left: 8.25%;
+        left: 13.65px;
         position: absolute;
         top: 16px;
       }

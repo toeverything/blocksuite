@@ -59,7 +59,7 @@ class SyntaxCodeBlock extends CodeBlock {
 
     // adjust position according to line number digits
     const lineNumberDigits = lineNum.toString().length;
-    container.style.left = 25 - lineNumberDigits * 8 + 'px';
+    container.style.left = 32 - lineNumberDigits * 8 + 'px';
 
     for (let i = 1; i <= lineNum; i++) {
       const node = document.createElement('div');

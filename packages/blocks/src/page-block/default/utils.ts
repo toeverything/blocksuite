@@ -53,13 +53,28 @@ function getBlockWithOptionBarRect(
   block: BaseBlockModel
 ): HTMLElement {
   if (block.flavour === 'affine:code') {
-    return hoverDom;
+    const codeBlockDom = hoverDom.querySelector(
+      '.affine-code-block-container'
+    ) as HTMLElement;
+    assertExists(codeBlockDom);
+    return codeBlockDom;
   } else if (block.flavour === 'affine:embed' && block.type === 'image') {
     const imgElement = hoverDom.querySelector('img');
     assertExists(imgElement);
     return imgElement;
   }
   throw new Error('unreachable');
+}
+
+function getDetectRect(block: BaseBlockModel, blockRect: DOMRect): DOMRect {
+  const detectRect = copyRect(blockRect);
+  // there is a optionBar on the right side
+  if (block.flavour === 'affine:code') {
+    detectRect.width += 52;
+  } else if (block.flavour === 'affine:embed' && block.type === 'image') {
+    detectRect.width += 50;
+  }
+  return detectRect;
 }
 
 // Workaround native DOMRect clone issue in #632
@@ -193,9 +208,7 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
       hoverDom,
       block
     ).getBoundingClientRect();
-    detectRect = copyRect(blockRect);
-    // there is a optionBar on the right side
-    detectRect.width += 50;
+    detectRect = getDetectRect(block, blockRect);
   } else {
     blockRect = hoverDom.getBoundingClientRect() as DOMRect;
     // in a nested block, we should get `rich-text` which is its own editing area
