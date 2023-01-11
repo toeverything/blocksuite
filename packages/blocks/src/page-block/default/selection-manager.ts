@@ -219,6 +219,7 @@ export class DefaultSelectionManager {
           return;
         }
         if (msg.state?.flags.enable_drag_handle) {
+          // todo: implement subscribe with selector
           if (!this._dragHandle) {
             createDragHandle();
           }
