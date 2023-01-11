@@ -36,20 +36,9 @@
       #init-btn:not(:disabled) {
         cursor: pointer;
       }
-
-      #version-select {
-        position: fixed;
-        left: 10px;
-        bottom: 50px;
-      }
     </style>
   </head>
   <body>
-    <sl-select id="version-select" value="LATEST" placeholder="Feature Flag">
-      <sl-menu-item value="AbbeyWood">AbbeyWood</sl-menu-item>
-      <sl-menu-item value="Downhills">Downhills</sl-menu-item>
-      <sl-menu-item value="LATEST">LATEST</sl-menu-item>
-    </sl-select>
     <button id="init-btn">Init Editor</button>
     <script type="module" src="./src/main.ts"></script>
   </body>

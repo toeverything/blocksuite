@@ -3,7 +3,7 @@ import type { Point } from './rect.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ColorStyle, TDShapeType } from './shape.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
-import type { Flags } from '../flags.js';
+import type { Flags, FlagsContext } from '../flags.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {
@@ -40,7 +40,7 @@ export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   readonly: boolean;
-  flags: Flags;
+  flagsContext: FlagsContext;
 }
 
 export interface CommonBlockElement extends HTMLElement {
@@ -94,6 +94,7 @@ export type MouseMode = DefaultMouseMode | ShapeMouseMode;
 
 declare global {
   interface WindowEventMap {
+    'affine.set-flags': CustomEvent<{ flag: keyof Flags; value: boolean }>;
     'affine.switch-mouse-mode': CustomEvent<MouseMode>;
     'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
   }

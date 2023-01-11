@@ -9,13 +9,12 @@ import {
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
   type BlockHost,
-  createFlags,
-  Flags,
+  createFlagsContext,
   getCurrentRange,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
-  Preset,
+  FlagsContext,
 } from '../../__internal__/index.js';
 import { DefaultSelectionManager } from './selection-manager.js';
 import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
@@ -124,13 +123,9 @@ export class DefaultPageBlockComponent
   @property()
   readonly = false;
 
-  @property()
-  preset: Preset = Preset.LATEST;
-
   flavour = 'affine:page' as const;
 
-  flags: Flags;
-  usePreset: (version: Preset) => void;
+  flagsContext = createFlagsContext();
 
   selection!: DefaultSelectionManager;
   getService = getService;
@@ -172,13 +167,6 @@ export class DefaultPageBlockComponent
   };
 
   public isCompositionStart = false;
-
-  constructor() {
-    super();
-    const flagsContext = createFlags();
-    this.flags = flagsContext.flags;
-    this.usePreset = flagsContext.usePreset;
-  }
 
   @property({
     hasChanged() {
@@ -242,9 +230,6 @@ export class DefaultPageBlockComponent
   };
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('preset')) {
-      this.usePreset(this.preset);
-    }
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
         page: this.page,
@@ -364,6 +349,7 @@ export class DefaultPageBlockComponent
     super.disconnectedCallback();
 
     removeHotkeys();
+    this.flagsContext.dispose();
     this.selection.dispose();
     window.removeEventListener(
       'compositionstart',

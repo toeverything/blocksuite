@@ -152,7 +152,7 @@ export class DefaultSelectionManager {
   state = new PageSelectionState('none');
   private _mouseRoot: HTMLElement;
   private _container: DefaultPageBlockComponent;
-  private _mouseDisposeCallback: () => void;
+  private _disposeCallbacks: (() => void)[] = [];
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
@@ -174,7 +174,19 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    if (this._container.flags.enable_drag_handle) {
+    if (this._container.flagsContext.flags.enable_drag_handle) {
+      this._disposeCallbacks.push(
+        this._container.flagsContext.switchSignal.on(flag => {
+          if (flag === 'enable_drag_handle') {
+            const enable =
+              this._container.flagsContext.flags.enable_drag_handle;
+            if (!enable) {
+              this._dragHandle?.remove();
+              this._dragHandle = null;
+            }
+          }
+        }).dispose
+      );
       this._dragHandle = new DragHandle({
         setSelectedBlocks: this._setSelectedBlocks,
         onDropCallback: (e, start, end) => {
@@ -214,16 +226,18 @@ export class DefaultSelectionManager {
       });
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
-    this._mouseDisposeCallback = initMouseEventHandlers(
-      this._mouseRoot,
-      this._onContainerDragStart,
-      this._onContainerDragMove,
-      this._onContainerDragEnd,
-      this._onContainerClick,
-      this._onContainerDblClick,
-      this._onContainerMouseMove,
-      this._onContainerMouseOut,
-      this._onContainerContextMenu
+    this._disposeCallbacks.push(
+      initMouseEventHandlers(
+        this._mouseRoot,
+        this._onContainerDragStart,
+        this._onContainerDragMove,
+        this._onContainerDragEnd,
+        this._onContainerClick,
+        this._onContainerDblClick,
+        this._onContainerMouseMove,
+        this._onContainerMouseOut,
+        this._onContainerContextMenu
+      )
     );
   }
 
@@ -522,7 +536,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
-    this._mouseDisposeCallback();
+    this._disposeCallbacks.forEach(callback => callback());
   }
 
   resetSelectedBlockByRect(

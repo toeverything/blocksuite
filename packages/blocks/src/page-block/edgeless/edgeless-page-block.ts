@@ -3,6 +3,7 @@ import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
+  FlagsContext,
   FrameBlockModel,
   MouseMode,
   PageBlockModel,
@@ -18,9 +19,7 @@ import {
   hotkey,
   HOTKEYS,
   resetNativeSelection,
-  createFlags,
-  Flags,
-  Preset,
+  createFlagsContext,
 } from '../../__internal__/index.js';
 import {
   EdgelessSelectionManager,
@@ -107,11 +106,7 @@ export class EdgelessPageBlockComponent
   })
   surfaceModel!: SurfaceBlockModel;
 
-  @property()
-  preset: Preset = Preset.LATEST;
-
-  flags: Flags;
-  usePreset: (version: Preset) => void;
+  flagsContext = createFlagsContext();
 
   getService = getService;
 
@@ -127,13 +122,6 @@ export class EdgelessPageBlockComponent
 
   private _historyDisposable!: Disposable;
   private _selection!: EdgelessSelectionManager;
-
-  constructor() {
-    super();
-    const flagsContext = createFlags();
-    this.flags = flagsContext.flags;
-    this.usePreset = flagsContext.usePreset;
-  }
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
@@ -181,9 +169,6 @@ export class EdgelessPageBlockComponent
   }
 
   update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('preset')) {
-      this.usePreset(changedProperties.get('preset') as Preset);
-    }
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
     }
@@ -239,6 +224,7 @@ export class EdgelessPageBlockComponent
     this.signals.shapeUpdated.dispose();
     this._historyDisposable.dispose();
     this._selection.dispose();
+    this.flagsContext.dispose();
     this._removeHotkeys();
   }
 
