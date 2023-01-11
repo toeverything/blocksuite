@@ -10,7 +10,6 @@ import './embed-block';
 import './embed-block/image';
 import './surface-block';
 import { env, importIdentifier, Version } from './__internal__/index.js';
-import * as process from 'process';
 export * from './counter-block/index.js';
 export * from './embed-block/index.js';
 export * from './paragraph-block/index.js';
