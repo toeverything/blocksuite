@@ -1,11 +1,16 @@
 import {
+  BaseService,
   deleteModelsByRange,
   EmbedBlockModel,
   getCurrentRange,
+  getService,
+  hasService,
   ListBlockModel,
   matchFlavours,
+  registerService,
   SelectionUtils,
 } from '@blocksuite/blocks';
+import { BlockService, blockService } from '@blocksuite/blocks/models';
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
@@ -29,12 +34,12 @@ export class CopyCutManager {
   */
 
   public handleCopy(e: ClipboardEvent) {
-    const clips = this._getClipItems();
-    if (!clips.length) {
-      return;
-    }
-
-    this._copyToClipboard(e, clips);
+    this._getClipItems().then(clips => {
+      if (!clips.length) {
+        return;
+      }
+      this._copyToClipboard(e, clips);
+    });
   }
 
   public handleCut(e: ClipboardEvent) {
@@ -42,7 +47,15 @@ export class CopyCutManager {
     deleteModelsByRange(this._editor.page);
   }
 
-  private _getClipItems() {
+  private async _getClipItems() {
+    await Promise.all(
+      Object.entries(blockService)
+        .map(
+          (flavour, service) =>
+            !hasService(flavour) && registerService(flavour, service)
+        )
+        .filter((v): v is Promise<unknown> => v instanceof Promise)
+    );
     const clips: ClipboardItem[] = [];
     const selectionInfo = SelectionUtils.getSelectInfo(this._editor.page);
     const selectedBlocks = selectionInfo.selectedBlocks;
@@ -90,13 +103,19 @@ export class CopyCutManager {
     if (!model) {
       return null;
     }
+    const blockService = getService<BlockService>(model.flavour, true);
+    if (!(blockService instanceof BaseService)) {
+      console.error('model service is not a base service', model);
+      return null;
+    }
 
     let { flavour, type } = model;
     let delta = [];
     if (matchFlavours(model, ['affine:page'])) {
       flavour = 'affine:paragraph';
       type = 'text';
-      const text = model.block2Text(
+      const text = blockService.block2Text(
+        model,
         '',
         selectedBlock.startPos,
         selectedBlock.endPos
@@ -109,7 +128,7 @@ export class CopyCutManager {
     } else if (matchFlavours(model, ['affine:embed'])) {
       flavour = 'affine:embed';
       type = 'image';
-      const text = model.block2Text('', 0, 0);
+      const text = blockService.block2Text(model, '', 0, 0);
       delta = [
         {
           insert: text,
@@ -127,6 +146,7 @@ export class CopyCutManager {
       const childInfo = this._getClipInfoBySelectionInfo(child);
       childInfo && children.push(childInfo);
     });
+    matchFlavours();
     const result = {
       flavour: flavour,
       type: type,

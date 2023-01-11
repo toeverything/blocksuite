@@ -1,4 +1,70 @@
-import type { Service } from './utils/index.js';
+import type { Service, SyncServiceProtocol } from './utils/index.js';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { BlockServiceInstance } from '../models.js';
+
+export class BaseService {
+  public block2html(
+    model: BaseBlockModel,
+    childText: string,
+    _previousSiblingId: string,
+    _nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ) {
+    const delta = model.text?.sliceToDelta(begin || 0, end);
+    const text = delta.reduce((html: string, item: Record<string, unknown>) => {
+      return html + this._deltaLeaf2Html(item);
+    }, '');
+    return `${text}${childText}`;
+  }
+
+  public block2Text(
+    model: BaseBlockModel,
+    childText: string,
+    begin?: number,
+    end?: number
+  ) {
+    const text = (model.text?.toString() || '').slice(begin || 0, end);
+    return `${text}${childText}`;
+  }
+
+  private _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
+    let text = deltaLeaf.insert;
+    const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
+      string,
+      boolean
+    >;
+    if (!attributes) {
+      return text;
+    }
+    if (attributes.code) {
+      text = `<code>${text}</code>`;
+    }
+    if (attributes.bold) {
+      text = `<strong>${text}</strong>`;
+    }
+    if (attributes.italic) {
+      text = `<em>${text}</em>`;
+    }
+    if (attributes.underline) {
+      text = `<u>${text}</u>`;
+    }
+    if (attributes.strikethrough) {
+      text = `<s>${text}</s>`;
+    }
+    if (attributes.link) {
+      text = `<a href='${attributes.link}'>${text}</a>`;
+    }
+    return text;
+  }
+}
+
+export class SyncBaseService
+  extends BaseService
+  implements SyncServiceProtocol
+{
+  isLoaded = true as const;
+}
 
 const services = new Map<string, Service>();
 
@@ -57,9 +123,18 @@ export function registerService(
   }
 }
 
-export function getService(flavour: string, strict: false): Service | undefined;
-export function getService(flavour: string, strict?: true): Service;
-export function getService(flavour: string, strict = true) {
+export function getService<
+  Flavour extends string,
+  Services extends Record<string, unknown> = BlockServiceInstance
+>(flavour: Flavour, strict: false): Services[Flavour] | undefined;
+export function getService<
+  Flavour extends string,
+  Services extends Record<string, unknown> = BlockServiceInstance
+>(flavour: Flavour, strict?: true): Services[Flavour];
+export function getService<
+  Flavour extends string,
+  Services extends Record<string, unknown> = BlockServiceInstance
+>(flavour: Flavour, strict = true) {
   const service = services.get(flavour);
   if (strict && !service) {
     throw new Error(`cannot find service '${flavour}'`);

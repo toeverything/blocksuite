@@ -15,8 +15,4 @@ export class DividerBlockModel
   ) {
     super(page, props);
   }
-
-  override block2html(_previousSiblingId: string, _nextSiblingId: string) {
-    return `<hr/>`;
-  }
 }
