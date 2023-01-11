@@ -1,3 +1,4 @@
+/// <reference types="@blocksuite/global" />
 export * from './space.js';
 export * from './store.js';
 export * from './base.js';

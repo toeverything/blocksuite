@@ -1,6 +1,9 @@
 {
-  "name": "@types/blocksuite__global-types",
-  "private": true,
+  "name": "@blocksuite/global",
+  "version": "0.4.0-alpha.0",
   "types": "./src/index.d.ts",
-  "type": "module"
+  "type": "module",
+  "files": [
+    "src"
+  ]
 }
