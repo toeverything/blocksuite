@@ -55,6 +55,7 @@
     "typescript": "^4.9.4",
     "vite": "^4.0.4",
     "vite-plugin-banner": "^0.7.0",
+    "vite-plugin-web-components-hmr": "^0.0.2",
     "vitest": "^0.26.3"
   },
   "pnpm": {
