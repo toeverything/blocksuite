@@ -1,4 +1,5 @@
 import type { Page } from '@blocksuite/store';
+import type { ParentBlot } from 'parchment';
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
   assertExists,
@@ -38,16 +39,18 @@ export const createLink = hotkey.withDisabledHotkeyFn(async (page: Page) => {
   // Note: Just mock a selection style, this operation should not be recorded to store
   quill.format('mock-select', true);
 
-  // TODO fix Blot types
   // See https://github.com/quilljs/parchment/blob/main/src/blot/scroll.ts
-  // @ts-expect-error
-  const [node, offset] = quill.scroll.descendant(MockSelectNode, range.index);
+  const [node, offset] = (quill.scroll as unknown as ParentBlot).descendant(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/quilljs/parchment/issues/121
+    MockSelectNode as any,
+    range.index
+  );
   if (!node) {
     console.error('Error on getBlotNode', MockSelectNode, quill, range);
     throw new Error('Failed to getBlotNode, node not found!');
   }
 
-  const mockSelectBlot: MockSelectNode = node;
+  const mockSelectBlot = node as MockSelectNode;
   const mockSelectDom = mockSelectBlot?.domNode as HTMLElement | undefined;
   if (!mockSelectDom) {
     console.error('Error on createLink', mockSelectBlot, quill, range);

@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import type { InlineBlot } from 'parchment';
 import Quill from 'quill';
 import {
   ALLOWED_SCHEMES,
@@ -12,13 +13,6 @@ import {
   hotkey,
 } from '../../utils/index.js';
 import { LinkIcon } from './link-icon.js';
-
-// TODO fix Blot types
-type Blot = {
-  domNode: HTMLElement;
-  offset: () => number;
-  length: () => number;
-};
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {
@@ -73,7 +67,8 @@ export class LinkNodeComponent extends LitElement {
   }
 
   async onDelayHover(e: MouseEvent) {
-    const blot: Blot = Quill.find(this);
+    // The link blot extends inline blot
+    const blot: InlineBlot = Quill.find(this);
     assertExists(blot);
     const text = blot.domNode.textContent ?? undefined;
 
@@ -104,7 +99,11 @@ export class LinkNodeComponent extends LitElement {
   /**
    * If no pass text, use the original text
    */
-  private async _updateLink(blot: Blot, link: string | false, text?: string) {
+  private async _updateLink(
+    blot: InlineBlot,
+    link: string | false,
+    text?: string
+  ) {
     const model = getModelByElement(this);
     const { page: page } = model;
 
@@ -134,6 +133,8 @@ export class LinkNodeComponent extends LitElement {
     ></a>`;
   }
 }
+
+// See https://github.com/quilljs/quill/blob/develop/formats/link.ts
 const Link = Quill.import('formats/link');
 Link.tagName = 'link-node'; // Quill uses <a> by default
 Link.PROTOCOL_WHITELIST = ALLOWED_SCHEMES;
