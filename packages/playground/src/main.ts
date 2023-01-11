@@ -35,6 +35,10 @@ function subscribePage(workspace: Workspace) {
     document.body.appendChild(debugMenu);
 
     initButton.disabled = true;
+    const selectButton = document.getElementById('version-select');
+    if (selectButton) {
+      selectButton.remove();
+    }
 
     [window.editor, window.page] = [editor, page];
   });
