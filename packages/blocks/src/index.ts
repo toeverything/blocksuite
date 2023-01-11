@@ -9,6 +9,8 @@ import './__internal__/rich-text/link-node';
 import './embed-block';
 import './embed-block/image';
 import './surface-block';
+import { env, importIdentifier, Version } from './__internal__/index.js';
+import * as process from 'process';
 export * from './counter-block/index.js';
 export * from './embed-block/index.js';
 export * from './paragraph-block/index.js';
@@ -28,23 +30,16 @@ export * from './__internal__/utils/query.js';
 export * from './__internal__/utils/shape.js';
 export * from './__internal__/utils/lit.js';
 
-const env: Record<string, unknown> =
-  typeof globalThis !== 'undefined'
-    ? globalThis
-    : typeof window !== 'undefined'
-    ? window
-    : // @ts-ignore
-    typeof global !== 'undefined'
-    ? // @ts-ignore
-      global
-    : {};
-const importIdentifier = '__ $BLOCKSUITE_BLOCKS$ __';
-
-if (env[importIdentifier] === true) {
+if (env[importIdentifier] !== undefined) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
     '@blocksuite/blocks was already imported. This breaks constructor checks and will lead to issues!'
   );
+} else {
+  const isAbbeyWood = location.href.includes('pathfinder');
+  if (isAbbeyWood) {
+    env[importIdentifier] = `${Version.AbbeyWood}`;
+  } else {
+    env[importIdentifier] = `${Version.LATEST}`;
+  }
 }
-
-env[importIdentifier] = true;

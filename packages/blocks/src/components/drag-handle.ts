@@ -4,9 +4,12 @@ import type { IPoint } from '../__internal__/index.js';
 import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
-
-const IS_PROD = location.href.includes('pathfinder');
+import {
+  assertExists,
+  getBlockElementByModel,
+  getCurrentVersion,
+  Version,
+} from '../__internal__/index.js';
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
@@ -278,7 +281,7 @@ export class DragHandle extends LitElement {
   };
 
   override render() {
-    if (IS_PROD) return null;
+    if (getCurrentVersion() <= Version.AbbeyWood) return null;
 
     return html`
       <div class="affine-drag-handle">
