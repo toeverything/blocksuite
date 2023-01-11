@@ -74,13 +74,7 @@ export const FileExporter = {
         );
       },
     });
-    turndownService.addRule('unsupported tag', {
-      filter: ['u', 'del'],
-      replacement: function (content, node: Node) {
-        const { tagName } = node as HTMLElement;
-        return `<${tagName}>${content}</${tagName}>`;
-      },
-    });
+    turndownService.keep(['del', 'u']);
     const markdown = turndownService.turndown(htmlContent);
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
