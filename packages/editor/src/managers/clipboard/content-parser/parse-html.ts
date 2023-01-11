@@ -171,6 +171,26 @@ export class HtmlParser {
     if (result && result.length > 0) {
       return result;
     }
+
+    // if node.children all is inline element, merage them to a paragraph
+    if (
+      node.children.length > 0 &&
+      Array.from(node.children).every(
+        child =>
+          INLINE_TAGS.includes(child.tagName) ||
+          (child.tagName.includes('-') && checkWebComponentIfInline(child))
+      )
+    ) {
+      const allInlineResult = await this._commonHTML2Block(
+        node,
+        'affine:paragraph',
+        'text'
+      );
+      if (allInlineResult) {
+        return [allInlineResult];
+      }
+    }
+
     const openBlockPromises = Array.from(node.children).map(
       async childElement => {
         const clipBlockInfos =
@@ -229,6 +249,7 @@ export class HtmlParser {
     for (let i = 0; i < childNodes.length; i++) {
       const node = childNodes.item(i);
       if (!node) continue;
+      if (node.nodeName === '#comment') continue;
       if (!isChildNode) {
         if (node instanceof Text) {
           textValues.push(
@@ -237,7 +258,11 @@ export class HtmlParser {
           continue;
         }
         const htmlElement = node as HTMLElement;
-        if (INLINE_TAGS.includes(htmlElement.tagName)) {
+        if (
+          INLINE_TAGS.includes(htmlElement.tagName) ||
+          (htmlElement.tagName.includes('-') &&
+            checkWebComponentIfInline(htmlElement))
+        ) {
           textValues.push(
             ...this._commonHTML2Text(node, {}, ignoreEmptyElement)
           );
@@ -513,4 +538,13 @@ const getTextStyle = (htmlElement: HTMLElement) => {
   }
 
   return textStyle;
+};
+
+const checkWebComponentIfInline = (element: Element) => {
+  const style = window.getComputedStyle(element);
+
+  return (
+    style.display.includes('inline') ||
+    (element as HTMLElement).style.display.includes('inline')
+  );
 };
