@@ -174,45 +174,6 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    const createDragHandle = () => {
-      this._dragHandle = new DragHandle({
-        setSelectedBlocks: this._setSelectedBlocks,
-        onDropCallback: (e, start, end) => {
-          const startModel = start.model;
-          const rect = end.position;
-          const nextModel = end.model;
-          if (doesInSamePath(this.page, nextModel, startModel)) {
-            return;
-          }
-          this.page.captureSync();
-          const distanceToTop = Math.abs(rect.top - e.y);
-          const distanceToBottom = Math.abs(rect.bottom - e.y);
-          this.page.moveBlock(
-            startModel,
-            nextModel,
-            distanceToTop < distanceToBottom
-          );
-          this.clearRects();
-        },
-        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
-            skipX,
-          });
-        },
-        getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
-          return getBlockEditingStateByCursor(
-            this._blocks,
-            pageX,
-            pageY,
-            cursor,
-            {
-              size,
-              skipX,
-            }
-          );
-        },
-      });
-    };
     this._disposeCallbacks.push(
       this.page.awareness.signals.update.on(msg => {
         if (msg.id !== this.page.doc.clientID) {
@@ -221,7 +182,54 @@ export class DefaultSelectionManager {
         if (msg.state?.flags.enable_drag_handle) {
           // todo: implement subscribe with selector
           if (!this._dragHandle) {
-            createDragHandle();
+            this._dragHandle = new DragHandle({
+              setSelectedBlocks: this._setSelectedBlocks,
+              onDropCallback: (e, start, end) => {
+                const startModel = start.model;
+                const rect = end.position;
+                const nextModel = end.model;
+                if (doesInSamePath(this.page, nextModel, startModel)) {
+                  return;
+                }
+                this.page.captureSync();
+                const distanceToTop = Math.abs(rect.top - e.y);
+                const distanceToBottom = Math.abs(rect.bottom - e.y);
+                this.page.moveBlock(
+                  startModel,
+                  nextModel,
+                  distanceToTop < distanceToBottom
+                );
+                this.clearRects();
+              },
+              getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+                return getBlockEditingStateByPosition(
+                  this._blocks,
+                  pageX,
+                  pageY,
+                  {
+                    skipX,
+                  }
+                );
+              },
+              getBlockEditingStateByCursor: (
+                pageX,
+                pageY,
+                cursor,
+                size,
+                skipX
+              ) => {
+                return getBlockEditingStateByCursor(
+                  this._blocks,
+                  pageX,
+                  pageY,
+                  cursor,
+                  {
+                    size,
+                    skipX,
+                  }
+                );
+              },
+            });
           }
         } else {
           this._dragHandle?.remove();
