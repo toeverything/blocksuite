@@ -54,15 +54,13 @@ export class AwarenessAdapter<
   constructor(
     space: Space,
     awareness: Awareness,
-    defaultFlags?: Record<string, unknown>
+    defaultFlags: Record<string, unknown> = {}
   ) {
     this.space = space;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
     this.signals.update.on(this._onAwarenessMessage);
-    if (defaultFlags) {
-      this.awareness.setLocalState({ flags: { ...defaultFlags } });
-    }
+    this.awareness.setLocalState({ flags: { ...defaultFlags } });
   }
 
   public setLocalCursor(range: SelectionRange) {
