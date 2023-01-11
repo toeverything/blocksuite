@@ -60,6 +60,8 @@ export class AwarenessAdapter<
   ) {
     this.space = space;
     this.awareness = awareness;
+    this.awareness.on('change', this._onAwarenessChange);
+    this.signals.update.on(this._onAwarenessMessage);
     const upstreamFlags = awareness.getLocalState()?.flags;
     if (upstreamFlags) {
       this.awareness.setLocalStateField('flags', {
@@ -69,8 +71,6 @@ export class AwarenessAdapter<
     } else {
       this.awareness.setLocalStateField('flags', { ...defaultFlags });
     }
-    this.awareness.on('change', this._onAwarenessChange);
-    this.signals.update.on(this._onAwarenessMessage);
   }
 
   public setLocalCursor(range: SelectionRange) {
@@ -172,7 +172,7 @@ export class AwarenessAdapter<
   }
 
   public updateLocalCursor() {
-    const localCursor = this.space.awareness.getLocalCursor();
+    const localCursor = this.getLocalCursor();
     if (!localCursor) {
       return;
     }

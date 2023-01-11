@@ -212,20 +212,22 @@ export class DefaultSelectionManager {
           );
         },
       });
-      this._disposeCallbacks.push(
-        this.page.awareness.signals.update.on(({ state }) => {
-          if (state?.flags.enable_drag_handle) {
-            createDragHandle();
-          } else {
-            this._dragHandle?.remove();
-            this._dragHandle = null;
-          }
-        }).dispose
-      );
     };
-    if (this.page.awareness.getFlag('enable_drag_handle')) {
-      createDragHandle();
-    }
+    this._disposeCallbacks.push(
+      this.page.awareness.signals.update.on(msg => {
+        if (msg.id !== this.page.doc.clientID) {
+          return;
+        }
+        if (msg.state?.flags.enable_drag_handle) {
+          if (!this._dragHandle) {
+            createDragHandle();
+          }
+        } else {
+          this._dragHandle?.remove();
+          this._dragHandle = null;
+        }
+      }).dispose
+    );
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposeCallbacks.push(
       initMouseEventHandlers(
