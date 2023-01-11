@@ -2,7 +2,7 @@ const BLACK = '#000000';
 const TYPE_PATH = 'path';
 const TYPE_IMAGE = 'image';
 
-abstract class BaseModel {
+abstract class BaseElement {
   x = 0;
   y = 0;
   w = 0;
@@ -30,7 +30,7 @@ abstract class BaseModel {
   abstract render(_: CanvasRenderingContext2D): void;
 }
 
-export class PathModel extends BaseModel {
+export class PathElement extends BaseElement {
   type = TYPE_PATH;
   path: Path2D;
   color = BLACK;
@@ -55,7 +55,7 @@ export class PathModel extends BaseModel {
   }
 }
 
-export class RectModel extends BaseModel {
+export class RectElement extends BaseElement {
   type = TYPE_IMAGE;
   color = BLACK;
   constructor(id: number) {
@@ -68,4 +68,4 @@ export class RectModel extends BaseModel {
   }
 }
 
-export type Model = PathModel | RectModel;
+export type Element = PathElement | RectElement;
