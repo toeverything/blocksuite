@@ -13,8 +13,9 @@ import {
 } from '../../__internal__/utils/index.js';
 import './button.js';
 import './format-bar-node.js';
+import type { FormatQuickBar } from './format-bar-node.js';
 
-let globalAbortController = new AbortController();
+let formatQuickBarInstance: FormatQuickBar | null = null;
 
 export const showFormatQuickBar = async ({
   anchorEl,
@@ -32,9 +33,11 @@ export const showFormatQuickBar = async ({
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
-  // Abort previous format quick bar
-  globalAbortController.abort();
-  globalAbortController = abortController;
+  // Reuse previous format quick bar
+  if (formatQuickBarInstance) {
+    formatQuickBarInstance.direction = direction;
+    return;
+  }
 
   // Init format quick bar
 
@@ -42,16 +45,23 @@ export const showFormatQuickBar = async ({
   formatQuickBar.abortController = abortController;
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;
+  formatQuickBar.direction = direction;
+
+  formatQuickBarInstance = formatQuickBar;
+  abortController.signal.addEventListener('abort', () => {
+    formatQuickBarInstance = null;
+  });
 
   // Handle Scroll
 
   // Once performance problems occur, it can be mitigated increasing throttle limit
   const updatePos = throttle(() => {
     const positioningEl = anchorEl ?? getCurrentRange();
+    const dir = formatQuickBar.direction;
 
     const positioningPoint =
       positioningEl instanceof Range
-        ? calcPositionPointByRange(positioningEl, direction)
+        ? calcPositionPointByRange(positioningEl, dir)
         : positioningEl.getBoundingClientRect();
 
     // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
@@ -60,7 +70,7 @@ export const showFormatQuickBar = async ({
       formatQuickBar.formatQuickBarElement.getBoundingClientRect();
     // Add offset to avoid the quick bar being covered by the window border
     const gapY = 5;
-    const isBottom = direction.includes('bottom');
+    const isBottom = dir.includes('bottom');
     const safeCoordinate = calcSafeCoordinate({
       positioningPoint,
       objRect: formatBarRect,
@@ -97,7 +107,9 @@ export const showFormatQuickBar = async ({
     const selection = document.getSelection();
     if (!selection || selection.type === 'Caret') {
       abortController.abort();
+      return;
     }
+    updatePos();
   };
   document.addEventListener('selectionchange', selectionChangeHandler);
 
@@ -107,15 +119,11 @@ export const showFormatQuickBar = async ({
   await sleep();
   updatePos();
 
-  return new Promise<void>(res => {
-    abortController.signal.addEventListener('abort', () => {
-      // TODO add transition
-      formatQuickBar.remove();
-      scrollContainer?.removeEventListener('scroll', updatePos);
-      window.removeEventListener('resize', updatePos);
-      document.removeEventListener('selectionchange', selectionChangeHandler);
-      positionUpdatedSignal.dispose();
-      res();
-    });
+  abortController.signal.addEventListener('abort', () => {
+    scrollContainer?.removeEventListener('scroll', updatePos);
+    window.removeEventListener('resize', updatePos);
+    document.removeEventListener('selectionchange', selectionChangeHandler);
+    positionUpdatedSignal.dispose();
   });
+  return formatQuickBar;
 };

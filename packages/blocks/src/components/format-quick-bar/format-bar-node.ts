@@ -4,6 +4,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { formatConfig, paragraphConfig } from '../../page-block/utils/const.js';
 import {
+  DragDirection,
   getFormat,
   updateSelectedTextType,
 } from '../../page-block/utils/index.js';
@@ -34,13 +35,15 @@ export class FormatQuickBar extends LitElement {
 
   @property()
   bottom: string | null = null;
-
   @property()
   abortController = new AbortController();
 
   // Sometimes the quick bar need to update position
   @property()
   positionUpdated = new Signal();
+
+  @property()
+  direction!: DragDirection;
 
   @state()
   models: BaseBlockModel[] = [];
@@ -51,7 +54,7 @@ export class FormatQuickBar extends LitElement {
   @state()
   paragraphType = 'text';
 
-  @property()
+  @state()
   paragraphPanelHoverDelay = 150;
 
   @state()
@@ -83,6 +86,10 @@ export class FormatQuickBar extends LitElement {
       // Prevent click event from making selection lost
       e.preventDefault();
     });
+    // TODO add transition
+    this.abortController.signal.addEventListener('abort', () => {
+      this.remove();
+    });
   }
 
   private _onHover() {
@@ -104,7 +111,7 @@ export class FormatQuickBar extends LitElement {
       // Prepare to disappear
       this.paragraphPanelTimer = window.setTimeout(async () => {
         this.showParagraphPanel = 'hidden';
-      }, this.paragraphPanelHoverDelay);
+      }, this.paragraphPanelHoverDelay * 2);
       return;
     }
     clearTimeout(this.paragraphPanelTimer);
