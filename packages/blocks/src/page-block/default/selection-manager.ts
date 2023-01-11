@@ -491,14 +491,16 @@ export class DefaultSelectionManager {
   private _onSelectionChange = (e: Event) => {
     const range = getCurrentRange();
 
-    if (range.startOffset === range.endOffset) {
+    if (range.collapsed) {
+      return;
+    }
+    if (this._container.readonly) {
       return;
     }
 
-    requestAnimationFrame(() => {
-      showFormatQuickBar({
-        direction: 'right-bottom',
-      });
+    // TODO fix direction
+    showFormatQuickBar({
+      direction: 'right-bottom',
     });
   };
 

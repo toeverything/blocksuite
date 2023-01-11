@@ -245,7 +245,7 @@ export function initMouseEventHandlers(
     }
 
     onSelectionChange(e as Event);
-  }, 100);
+  }, 300);
 
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);

@@ -35,6 +35,7 @@ export class FormatQuickBar extends LitElement {
 
   @property()
   bottom: string | null = null;
+
   @property()
   abortController = new AbortController();
 
@@ -149,6 +150,7 @@ export class FormatQuickBar extends LitElement {
               // Already in the target format, convert back to text
               const { flavour: defaultFlavour, type: defaultType } =
                 paragraphConfig[0];
+              if (this.paragraphType === defaultType) return;
               updateSelectedTextType(defaultFlavour, defaultType, this.page);
               this.paragraphType = defaultType;
               return;
