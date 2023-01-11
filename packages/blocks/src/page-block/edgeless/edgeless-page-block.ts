@@ -3,7 +3,6 @@ import { html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
-  FlagsContext,
   FrameBlockModel,
   MouseMode,
   PageBlockModel,
