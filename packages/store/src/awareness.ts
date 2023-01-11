@@ -21,7 +21,7 @@ interface AwarenessState<
   Flags extends Record<string, boolean> = BlockSuiteFlags
 > {
   cursor?: SelectionRange;
-  user: UserInfo;
+  user?: UserInfo;
   flags: Flags;
 }
 
@@ -71,6 +71,11 @@ export class AwarenessAdapter<
     } else {
       this.awareness.setLocalStateField('flags', { ...defaultFlags });
     }
+    this.signals.update.emit({
+      id: this.awareness.clientID,
+      type: 'update',
+      state: this.awareness.getLocalState() as AwarenessState<Flags>,
+    });
   }
 
   public setLocalCursor(range: SelectionRange) {
@@ -154,7 +159,7 @@ export class AwarenessAdapter<
           awState.cursor.id || ''
         );
         if (anchor && focus && textAdapter) {
-          const user = awState.user || {};
+          const user: Partial<UserInfo> = awState.user || {};
           const color = user.color || '#ffa500';
           const name = user.name || 'other';
           textAdapter.quillCursors.createCursor(
