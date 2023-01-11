@@ -9,6 +9,7 @@ import {
   assertExists,
   getStartModelBySelection,
 } from '@blocksuite/blocks';
+import type { DeltaOperation } from 'quill';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -212,7 +213,7 @@ export class PasteManager {
         const endIndex = lastBlock.endPos ?? (selectedBlock?.text?.length || 0);
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
-          (len: number, value: Record<string, unknown>) => {
+          (len: number, value: DeltaOperation) => {
             return len + ((value.insert as string) || '').length;
           },
           0
@@ -245,9 +246,8 @@ export class PasteManager {
         let lastId = selectedBlock?.id;
         let position = endIndex + insertLen;
         if (addBlockIds.length > 0) {
-          const endtexts = selectedBlock?.text?.sliceToDelta(
-            endIndex + insertLen
-          );
+          const endtexts =
+            selectedBlock?.text?.sliceToDelta(endIndex + insertLen) || [];
           lastId = addBlockIds[addBlockIds.length - 1];
           const lastBlock = this._editor.page.getBlockById(lastId);
           if (

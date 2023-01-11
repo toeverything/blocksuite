@@ -2,6 +2,7 @@ import type { ContentParser } from './index.js';
 import type { OpenBlockInfo } from '../types.js';
 import type { EditorContainer } from '../../../components/index.js';
 import { assertExists } from '@blocksuite/blocks';
+import type { DeltaOperation } from 'quill';
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -223,7 +224,7 @@ export class HtmlParser {
   ): Promise<OpenBlockInfo | null> {
     const childNodes = element.childNodes;
     let isChildNode = false;
-    const textValues: Record<string, unknown>[] = [];
+    const textValues: DeltaOperation[] = [];
     const children = [];
     for (let i = 0; i < childNodes.length; i++) {
       const node = childNodes.item(i);
@@ -263,7 +264,7 @@ export class HtmlParser {
     element: Element | Node,
     textStyle: { [key: string]: unknown } = {},
     ignoreEmptyText = true
-  ): Record<string, unknown>[] {
+  ): DeltaOperation[] {
     if (element instanceof Text) {
       return (element.textContent || '').split('\n').map(text => {
         return {
@@ -299,7 +300,7 @@ export class HtmlParser {
         );
         result.push(...textBlocks);
         return result;
-      }, [] as Record<string, unknown>[])
+      }, [] as DeltaOperation[])
       .filter(v => v);
     return childTexts;
   }
@@ -351,12 +352,10 @@ export class HtmlParser {
   private _blockQuoteParser = async (
     element: Element
   ): Promise<OpenBlockInfo[] | null> => {
-    const getText = (list: OpenBlockInfo[]): Record<string, unknown>[] => {
-      const result: Record<string, unknown>[] = [];
+    const getText = (list: OpenBlockInfo[]): OpenBlockInfo['text'] => {
+      const result: OpenBlockInfo['text'] = [];
       list.forEach(item => {
-        const texts: Record<string, unknown>[] = item.text.filter(
-          textItem => textItem.insert
-        );
+        const texts = item.text.filter(textItem => textItem.insert);
         if (result.length > 0 && texts.length > 0) {
           result.push({ insert: '\n' });
         }

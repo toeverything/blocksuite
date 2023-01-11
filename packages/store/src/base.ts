@@ -1,6 +1,7 @@
 import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
 import { Signal } from './utils/signal.js';
+import type { DeltaOperation } from 'quill';
 
 // ported from lit
 interface StaticValue {
@@ -58,8 +59,8 @@ export class BaseBlockModel<Props = unknown>
     begin?: number,
     end?: number
   ) {
-    const delta = this.text?.sliceToDelta(begin || 0, end);
-    const text = delta.reduce((html: string, item: Record<string, unknown>) => {
+    const delta = this.text?.sliceToDelta(begin || 0, end) || [];
+    const text = delta.reduce((html: string, item: DeltaOperation) => {
       return html + this._deltaLeaf2Html(item);
     }, '');
     return `${text}${childText}`;
@@ -70,12 +71,9 @@ export class BaseBlockModel<Props = unknown>
     return `${text}${childText}`;
   }
 
-  _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
-    let text = deltaLeaf.insert;
-    const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
-      string,
-      boolean
-    >;
+  _deltaLeaf2Html(deltaLeaf: DeltaOperation) {
+    let text: string = deltaLeaf.insert;
+    const attributes = deltaLeaf.attributes;
     if (!attributes) {
       return text;
     }
