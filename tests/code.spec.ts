@@ -6,7 +6,6 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  getQuillSelectionIndex,
   getQuillSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
@@ -183,8 +182,9 @@ test('drag copy paste', async ({ page }) => {
   );
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
-  const sdf = await getQuillSelectionText(page);
-  expect(sdf).toBe('useuse\n');
+
+  const content = await getQuillSelectionText(page);
+  expect(content).toBe('useuse\n');
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {
@@ -200,6 +200,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await page.keyboard.up('Shift');
   await copyByKeyboard(page);
   await pasteByKeyboard(page);
+
   const content = await getQuillSelectionText(page);
   expect(content).toBe('useuse\n');
 });
@@ -227,6 +228,7 @@ test('drag select code block can delete it', async ({ page }) => {
   );
   await page.locator('.ql-syntax').evaluate(e => e.blur());
   await page.keyboard.press('Backspace');
+
   const locator = page.locator('affine-code');
   await expect(locator).toBeHidden();
 });
@@ -240,11 +242,28 @@ test('press enter twice at end of code block can jump out', async ({
 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
+
   const locator = page.locator('affine-paragraph');
   await expect(locator).toBeVisible();
 });
 
-test('press backspace after code block can jump into start of code block', async ({
+test('press ArrowDown before code block can select code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await page.keyboard.press('Enter');
+  await addCodeBlock(page);
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowDown');
+
+  const locator = page.locator('.affine-page-selected-rects-container');
+  await expect(locator).toHaveCount(1);
+});
+
+test('press backspace after code block can select code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -254,11 +273,12 @@ test('press backspace after code block can jump into start of code block', async
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
   await page.keyboard.press('Backspace');
-  const index = await getQuillSelectionIndex(page);
-  expect(index).toBe(0);
+
+  const locator = page.locator('.affine-page-selected-rects-container');
+  await expect(locator).toHaveCount(1);
 });
 
-test('press ArrowUp after code block can jump into start of code block', async ({
+test('press ArrowUp after code block can select code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -268,8 +288,9 @@ test('press ArrowUp after code block can jump into start of code block', async (
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
   await page.keyboard.press('ArrowUp');
-  const index = await getQuillSelectionIndex(page);
-  expect(index).toBe(0);
+
+  const locator = page.locator('.affine-page-selected-rects-container');
+  await expect(locator).toHaveCount(1);
 });
 
 test('undo and redo works in code block', async ({ page }) => {
@@ -284,4 +305,33 @@ test('undo and redo works in code block', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['const a = 10;\n']);
+});
+
+test('code block option will not disappear when hovering on it', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const getCenterPosition: (
+    selector: string
+  ) => Promise<{ x: number; y: number }> = async (selector: string) => {
+    return await page.evaluate((selector: string) => {
+      const codeBlock = document.querySelector(selector);
+      const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
+      return {
+        x: bbox.left + bbox.width / 2,
+        y: bbox.top + bbox.height / 2,
+      };
+    }, selector);
+  };
+
+  const position = await getCenterPosition('affine-code');
+  await page.mouse.move(position.x, position.y);
+
+  const optionPosition = await getCenterPosition('.code-block-option');
+  await page.mouse.move(optionPosition.x, optionPosition.y);
+  const locator = page.locator('.code-block-option');
+  await expect(locator).toBeVisible();
 });

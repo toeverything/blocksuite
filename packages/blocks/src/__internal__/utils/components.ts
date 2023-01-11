@@ -26,16 +26,16 @@ export function BlockElement(
           .host=${host}
         ></${model.tag}>
       `;
-    case 'affine:shape':
-      // only render shape block in edgeless mode
-      if (edgeless)
-        return html`
-          <${model.tag}
-            .model=${model}
-            .host=${host}
-          ></${model.tag}>
-        `;
-      else return null;
+    // case 'affine:shape':
+    //   // only render shape block in edgeless mode
+    //   if (edgeless)
+    //     return html`
+    //       <${model.tag}
+    //         .model=${model}
+    //         .host=${host}
+    //       ></${model.tag}>
+    //     `;
+    //   else return null;
     case 'affine:embed':
       return EmbedBlock(model as EmbedBlockModel, host);
     case 'affine:surface':
@@ -74,7 +74,7 @@ function BlockElementWithService(
         state.then(() => {
           onLoaded();
         });
-        return html`<loader-element />`;
+        return html` <loader-element .hostModel=${model}> </loader-element> `;
       }
     }
     return BlockElement(model, host);

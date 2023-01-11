@@ -59,7 +59,7 @@ class SyntaxCodeBlock extends CodeBlock {
 
     // adjust position according to line number digits
     const lineNumberDigits = lineNum.toString().length;
-    container.style.left = 25 - lineNumberDigits * 8 + 'px';
+    container.style.left = 32 - lineNumberDigits * 8 + 'px';
 
     for (let i = 1; i <= lineNum; i++) {
       const node = document.createElement('div');
@@ -80,25 +80,14 @@ SyntaxCodeBlock.className = 'ql-syntax';
 
 class Syntax extends Module {
   private _language = 'javascript';
-  private _codeBlockElement: HTMLElement;
-
   static register() {
     Quill.register(CodeToken, true);
     Quill.register(SyntaxCodeBlock, true);
   }
 
-  setLang(lang: string) {
-    if (this._language === lang) {
-      return;
-    }
-    this._language = lang;
-    this.highlight(true, this._codeBlockElement);
-  }
-
   constructor(quill: QuillType, options: SyntaxCodeBlockOptions) {
     super(quill, options);
     this._language = options.language;
-    this._codeBlockElement = options.codeBlockElement;
     if (typeof this.options.highlight !== 'function') {
       throw new Error(
         'Syntax module requires highlight.js. Please include the library on the page before Quill.'

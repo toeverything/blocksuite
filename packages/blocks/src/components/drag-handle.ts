@@ -1,8 +1,15 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import type { EditingState } from '../page-block/default/utils.js';
+import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
+
+const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
+  // Refs: https://stackoverflow.com/a/65910078
+  event.preventDefault();
+};
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {
@@ -17,10 +24,10 @@ export class DragIndicator extends LitElement {
   `;
 
   @property()
-  targetRect!: DOMRect;
+  targetRect: DOMRect | null = null;
 
   @property()
-  cursorPosition!: IPoint;
+  cursorPosition: IPoint | null = null;
 
   override render() {
     if (!this.targetRect || !this.cursorPosition) {
@@ -42,6 +49,20 @@ export class DragIndicator extends LitElement {
   }
 }
 
+export type DragHandleGetModelStateCallback = (
+  pageX: number,
+  pageY: number,
+  skipX?: boolean
+) => EditingState | null;
+
+export type DragHandleGetModelStateWithCursorCallback = (
+  pageX: number,
+  pageY: number,
+  cursor: number,
+  size?: number,
+  skipX?: boolean
+) => EditingState | null;
+
 @customElement('affine-drag-handle')
 export class DragHandle extends LitElement {
   static styles = css`
@@ -58,9 +79,201 @@ export class DragHandle extends LitElement {
     }
   `;
 
+  constructor(options: {
+    onDropCallback: (
+      e: DragEvent,
+      startModelState: EditingState,
+      lastModelState: EditingState
+    ) => void;
+    getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
+    getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
+    setSelectedBlocks: (selectedBlocks: Element[]) => void;
+  }) {
+    super();
+    this.onDropCallback = options.onDropCallback;
+    this.setSelectedBlocks = options.setSelectedBlocks;
+    this._getBlockEditingStateByPosition =
+      options.getBlockEditingStateByPosition;
+    this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
+    document.body.appendChild(this);
+  }
+
+  @property()
+  public onDropCallback: (
+    e: DragEvent,
+    startModelState: EditingState,
+    lastModelState: EditingState
+  ) => void;
+
+  @property()
+  public setSelectedBlocks: (selectedBlocks: Element[]) => void;
+
+  private _currentPageX = 0;
+  private _currentPageY = 0;
+
+  private _startModelState: EditingState | null = null;
+
+  private _lastModelState: EditingState | null = null;
+  private _indicator!: DragIndicator;
+  private _cursor: number | null = 0;
+
+  private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
+    null;
+
+  private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
+    null;
+
   protected firstUpdated() {
     this.setAttribute('draggable', 'true');
+    this.style.display = 'none';
   }
+
+  public show(startModelState: EditingState) {
+    this._startModelState = startModelState;
+    this._cursor = startModelState.index;
+    const rect = this._startModelState.position;
+    this.style.position = 'absolute';
+    this.style.display = 'block';
+    this.style.left = `${rect.left - 20}px`;
+    this.style.top = `${rect.top + 8}px`;
+  }
+
+  public hide() {
+    this.style.display = 'none';
+    this._cursor = null;
+    this._startModelState = null;
+    this._lastModelState = null;
+    this._indicator.cursorPosition = null;
+    this._indicator.targetRect = null;
+  }
+
+  public connectedCallback() {
+    super.connectedCallback();
+    document.body.addEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay,
+      false
+    );
+    document.body.addEventListener('wheel', this._onWheel);
+    window.addEventListener('resize', this._onResize);
+    this._indicator = <DragIndicator>(
+      document.createElement('affine-drag-indicator')
+    );
+    document.body.appendChild(this._indicator);
+    this.addEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.addEventListener('dragover', this._onDragOverDocument);
+    this.addEventListener('mouseleave', this._onMouseLeave);
+    this.addEventListener('dragstart', this._onDragStart);
+    this.addEventListener('drag', this._onDrag);
+    this.addEventListener('dragend', this._onDragEnd);
+  }
+
+  public disconnectedCallback() {
+    super.disconnectedCallback();
+    this._indicator.remove();
+    window.removeEventListener('resize', this._onResize);
+    document.body.removeEventListener('wheel', this._onWheel);
+    document.body.removeEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay
+    );
+    this.removeEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.removeEventListener('dragover', this._onDragOverDocument);
+    this.removeEventListener('mouseleave', this._onMouseLeave);
+    this.removeEventListener('dragstart', this._onDragStart);
+    this.removeEventListener('drag', this._onDrag);
+    this.removeEventListener('dragend', this._onDragEnd);
+  }
+
+  private _onResize = (e: UIEvent) => {
+    if (this._startModelState) {
+      const newModelState = this._getBlockEditingStateByPosition?.(
+        this._startModelState.position.x,
+        this._startModelState.position.y,
+        true
+      );
+      if (newModelState) {
+        this.show(newModelState);
+      }
+    }
+  };
+
+  private _onWheel = (e: MouseEvent) => {
+    this.hide();
+  };
+
+  private _onMouseDown = (e: MouseEvent) => {
+    const clickDragState = this._getBlockEditingStateByPosition?.(
+      e.pageX,
+      e.pageY,
+      true
+    );
+    if (clickDragState) {
+      this._cursor = clickDragState.index;
+      this.setSelectedBlocks([
+        getBlockElementByModel(clickDragState.model) as HTMLElement,
+      ]);
+    }
+  };
+
+  private _onDragOverDocument = (e: DragEvent) => {
+    if (!isFirefox) {
+      throw new Error('FireFox only');
+    }
+    this._currentPageX = e.pageX;
+    this._currentPageY = e.pageY;
+  };
+
+  private _onMouseLeave = (_: MouseEvent) => {
+    this.setSelectedBlocks([]);
+  };
+
+  private _onDragStart = (e: DragEvent) => {
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  };
+
+  private _onDrag = (e: DragEvent) => {
+    let x = e.pageX;
+    let y = e.pageY;
+    if (isFirefox) {
+      // In Firefox, `pageX` and `pageY` are always set to 0.
+      // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
+      x = this._currentPageX;
+      y = this._currentPageY;
+    }
+    if (this._cursor === null) {
+      return;
+    }
+    const modelState = this._getBlockEditingStateByCursor?.(
+      x,
+      y,
+      this._cursor,
+      5,
+      true
+    );
+    if (modelState) {
+      this._cursor = modelState.index;
+      this._lastModelState = modelState;
+      this._indicator.targetRect = modelState.position;
+    }
+    this._indicator.cursorPosition = {
+      x,
+      y,
+    };
+  };
+
+  private _onDragEnd = (e: DragEvent) => {
+    assertExists(this._lastModelState);
+    assertExists(this._startModelState);
+
+    this.onDropCallback?.(e, this._startModelState, this._lastModelState);
+
+    this.hide();
+  };
 
   override render() {
     return html`
@@ -78,122 +291,6 @@ export class DragHandle extends LitElement {
     `;
   }
 }
-
-const createDragHandle = (anchorEl: HTMLElement) => {
-  const rect = anchorEl.getBoundingClientRect();
-
-  const ele = <DragHandle>document.createElement('affine-drag-handle');
-  ele.style.position = 'absolute';
-  ele.style.left = `${rect.left - 20}px`;
-  ele.style.top = `${rect.top + 8}px`;
-  return ele;
-};
-
-export const showDragHandle = ({
-  anchorEl,
-  container = document.body,
-  onMouseDown,
-  onMouseLeave,
-  onDrop,
-  getModelStateByPosition,
-  abortController = new AbortController(),
-}: {
-  anchorEl: HTMLElement;
-  onMouseDown: () => void;
-  onMouseLeave: () => void;
-  onDrop: (
-    e: DragEvent,
-    lastModelState: {
-      position: DOMRect;
-      model: BaseBlockModel;
-    }
-  ) => void;
-  container?: HTMLElement;
-  abortController?: AbortController;
-  getModelStateByPosition: (
-    x: number,
-    y: number
-  ) => {
-    position: DOMRect;
-    model: BaseBlockModel;
-  } | null;
-}) => {
-  if (!anchorEl) {
-    throw new Error("Can't show drag handle without anchor element!");
-  }
-  if (abortController.signal.aborted) {
-    return;
-  }
-  let lastModelState: {
-    position: DOMRect;
-    model: BaseBlockModel;
-  } | null = null;
-
-  const dragHandleEle = createDragHandle(anchorEl);
-  const handleMouseDown = () => {
-    onMouseDown();
-  };
-  const handleMouseLeave = () => {
-    onMouseLeave();
-  };
-  const indicator = <DragIndicator>(
-    document.createElement('affine-drag-indicator')
-  );
-
-  const handleDragStart = (e: DragEvent) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = 'move';
-    }
-  };
-
-  const handleDragMove = (e: MouseEvent) => {
-    const modelState = getModelStateByPosition(e.pageX, e.pageY);
-    if (modelState) {
-      lastModelState = modelState;
-      indicator.targetRect = modelState.position;
-    }
-    indicator.cursorPosition = {
-      x: e.x,
-      y: e.y,
-    };
-  };
-
-  const handleDragEnd = (e: DragEvent) => {
-    if (lastModelState) {
-      onDrop(e, lastModelState);
-    }
-  };
-
-  dragHandleEle.addEventListener('dragstart', handleDragStart);
-  dragHandleEle.addEventListener('drag', handleDragMove);
-  dragHandleEle.addEventListener('dragend', handleDragEnd);
-  dragHandleEle.addEventListener('mousedown', handleMouseDown);
-  dragHandleEle.addEventListener('mouseleave', handleMouseLeave);
-  const handleDragOver = (event: MouseEvent) => {
-    // Refs: https://stackoverflow.com/a/65910078
-    event.preventDefault();
-  };
-  container.addEventListener('dragover', handleDragOver, false);
-  container.appendChild(dragHandleEle);
-  container.appendChild(indicator);
-
-  abortController.signal.addEventListener(
-    'abort',
-    () => {
-      dragHandleEle.removeEventListener('dragstart', handleDragStart);
-      dragHandleEle.removeEventListener('drag', handleDragMove);
-      dragHandleEle.removeEventListener('dragend', handleDragEnd);
-      container.removeEventListener('dragover', handleDragOver);
-      dragHandleEle.removeEventListener('mousedown', handleMouseDown);
-      dragHandleEle.removeEventListener('mouseleave', handleMouseLeave);
-      indicator.remove();
-      dragHandleEle.remove();
-    },
-    {
-      once: true,
-    }
-  );
-};
 
 declare global {
   interface HTMLElementTagNameMap {

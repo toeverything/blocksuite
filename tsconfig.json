@@ -54,6 +54,9 @@
       "path": "./packages/phasor"
     },
     {
+      "path": "./packages/global"
+    },
+    {
       "path": "./tests"
     }
   ]

@@ -20,6 +20,9 @@ export class CodeBlockButton extends IconButton {
   @property()
   height: string | number = '32px';
 
+  @property()
+  fontSize: string | number = '16px';
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -30,6 +33,10 @@ export class CodeBlockButton extends IconButton {
     this.style.setProperty(
       '--button-height',
       typeof this.height === 'string' ? this.height : `${this.height}px`
+    );
+    this.style.setProperty(
+      'font-size',
+      typeof this.fontSize === 'string' ? this.fontSize : `${this.fontSize}px`
     );
   }
 

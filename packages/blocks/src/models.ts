@@ -1,3 +1,4 @@
+/// <reference types="@blocksuite/global" />
 // Import models only, the bundled file should not include anything else.
 import { CodeBlockModel } from './code-block/code-model.js';
 import { DividerBlockModel } from './divider-block/divider-model.js';

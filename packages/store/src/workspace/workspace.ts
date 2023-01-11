@@ -30,7 +30,12 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
   pagesUpdated = new Signal();
   commonFieldsUpdated = new Signal();
 
-  constructor(id: string, doc: BlockSuiteDoc, awareness: Awareness) {
+  constructor(
+    id: string,
+    doc: BlockSuiteDoc,
+    awareness: Awareness,
+    defaultFlags?: Record<string, boolean>
+  ) {
     super(id, doc, awareness, {
       valueInitializer: {
         pages: () => new Y.Array(),
@@ -38,6 +43,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
         avatar: () => '',
         name: () => '',
       },
+      defaultFlags,
     });
     this.origin.observeDeep(this._handleEvents);
   }
@@ -239,7 +245,8 @@ export class Workspace {
     this.meta = new WorkspaceMeta(
       'space:meta',
       this.doc,
-      this._store.awareness
+      this._store.awareness,
+      options.defaultFlags
     );
 
     this.signals = {

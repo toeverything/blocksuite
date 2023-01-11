@@ -131,18 +131,19 @@ export class EdgelessPageBlockComponent
 
   private _handleBackspace = (e: KeyboardEvent) => {
     if (this._selection.blockSelectionState.type === 'single') {
-      const selectedBlock = this._selection.blockSelectionState.selected;
-      if (selectedBlock.flavour === 'affine:shape') {
-        this.page.captureSync();
-        this.page.deleteBlock(selectedBlock);
-        // TODO: cleanup state instead of create a instance
-        this._selection = new EdgelessSelectionManager(this);
-        this.signals.updateSelection.emit({
-          type: 'none',
-        });
-      } else {
-        handleMultiBlockBackspace(this.page, e);
-      }
+      // const selectedBlock = this._selection.blockSelectionState.selected;
+      // if (selectedBlock.flavour === 'affine:shape') {
+      //   this.page.captureSync();
+      //   this.page.deleteBlock(selectedBlock);
+      //   // TODO: cleanup state instead of create a instance
+      //   this._selection = new EdgelessSelectionManager(this);
+      //   this.signals.updateSelection.emit({
+      //     type: 'none',
+      //   });
+      // } else {
+      //   handleMultiBlockBackspace(this.page, e);
+      // }
+      handleMultiBlockBackspace(this.page, e);
     }
   };
 

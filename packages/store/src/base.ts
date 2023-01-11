@@ -1,6 +1,7 @@
 import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
 import { Signal } from './utils/signal.js';
+import type { DeltaOperation } from 'quill';
 
 // ported from lit
 interface StaticValue {
@@ -8,19 +9,11 @@ interface StaticValue {
   r: unknown;
 }
 
-export interface IBaseBlockProps {
-  flavour: string;
-  type: string;
-  id: string;
-  children: IBaseBlockProps[];
-
-  // TODO use schema
-  text?: TextType;
-}
-
-export class BaseBlockModel implements IBaseBlockProps {
+export class BaseBlockModel<Props = unknown>
+  implements BlockSuiteInternal.IBaseBlockProps
+{
   static version: number;
-  flavour!: string;
+  flavour!: keyof BlockSuiteInternal.BlockModels & string;
   tag!: StaticValue;
   id: string;
 
@@ -35,9 +28,12 @@ export class BaseBlockModel implements IBaseBlockProps {
   text?: TextType;
   sourceId?: string;
 
-  constructor(page: Page, props: Partial<IBaseBlockProps>) {
+  constructor(
+    page: Page,
+    props: Pick<BlockSuiteInternal.IBaseBlockProps, 'id'>
+  ) {
     this.page = page;
-    this.id = props.id as string;
+    this.id = props.id;
     this.children = [];
   }
 
@@ -63,8 +59,8 @@ export class BaseBlockModel implements IBaseBlockProps {
     begin?: number,
     end?: number
   ) {
-    const delta = this.text?.sliceToDelta(begin || 0, end);
-    const text = delta.reduce((html: string, item: Record<string, unknown>) => {
+    const delta = this.text?.sliceToDelta(begin || 0, end) || [];
+    const text = delta.reduce((html: string, item: DeltaOperation) => {
       return html + this._deltaLeaf2Html(item);
     }, '');
     return `${text}${childText}`;
@@ -75,12 +71,9 @@ export class BaseBlockModel implements IBaseBlockProps {
     return `${text}${childText}`;
   }
 
-  _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
-    let text = deltaLeaf.insert;
-    const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
-      string,
-      boolean
-    >;
+  _deltaLeaf2Html(deltaLeaf: DeltaOperation) {
+    let text: string = deltaLeaf.insert;
+    const attributes = deltaLeaf.attributes;
     if (!attributes) {
       return text;
     }

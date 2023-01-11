@@ -6,6 +6,7 @@ import {
   matchFlavours,
   SelectionUtils,
 } from '@blocksuite/blocks';
+import type { DeltaOperation } from 'quill';
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
@@ -92,7 +93,7 @@ export class CopyCutManager {
     }
 
     let { flavour, type } = model;
-    let delta = [];
+    let delta: DeltaOperation[] = [];
     if (matchFlavours(model, ['affine:page'])) {
       flavour = 'affine:paragraph';
       type = 'text';
@@ -116,10 +117,11 @@ export class CopyCutManager {
         },
       ];
     } else {
-      delta = model.text?.sliceToDelta(
-        selectedBlock.startPos || 0,
-        selectedBlock.endPos
-      );
+      delta =
+        model.text?.sliceToDelta(
+          selectedBlock.startPos || 0,
+          selectedBlock.endPos
+        ) || [];
     }
 
     const children: OpenBlockInfo[] = [];

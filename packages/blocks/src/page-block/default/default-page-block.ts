@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
+import { BaseBlockModel, Page, Signal, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
 import {
   assertExists,
@@ -192,7 +192,6 @@ export class DefaultPageBlockComponent
       const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       page.updateBlock(model, { title: contentLeft });
       page.workspace.setPageMeta(page.id, { title: contentLeft });
-      autosize.update(this._title);
       asyncFocusRichText(this.page, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();

@@ -10,7 +10,7 @@ import { createKeyboardBindings } from './keyboard.js';
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 
-Quill.register('modules/cursors', QuillCursors);
+Quill.register('modules/cursors', QuillCursors, true);
 const Clipboard = Quill.import('modules/clipboard');
 
 class EmptyClipboard extends Clipboard {
@@ -130,9 +130,8 @@ export class RichText extends NonShadowLitElement {
     page.awareness.updateLocalCursor();
     this.model.propsUpdated.on(() => this.requestUpdate());
 
-    if (this.modules.syntax) {
-      this.quill.formatText(0, this.quill.getLength(), 'code-block', true);
-      this.quill.format('code-block', true);
+    if (this.modules.syntax && this.quill.getText() === '\n') {
+      this.quill.focus();
     }
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
@@ -202,10 +201,6 @@ export class RichText extends NonShadowLitElement {
     // Update placeholder if block`s type changed
     this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
     this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
-    if (this.modules.syntax) {
-      //@ts-ignore
-      this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);
-    }
   }
 
   render() {

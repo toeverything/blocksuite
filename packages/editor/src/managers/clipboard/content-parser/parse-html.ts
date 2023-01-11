@@ -2,6 +2,7 @@ import type { ContentParser } from './index.js';
 import type { OpenBlockInfo } from '../types.js';
 import type { EditorContainer } from '../../../components/index.js';
 import { assertExists } from '@blocksuite/blocks';
+import type { DeltaOperation } from 'quill';
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -170,6 +171,26 @@ export class HtmlParser {
     if (result && result.length > 0) {
       return result;
     }
+
+    // if node.children all is inline element, merage them to a paragraph
+    if (
+      node.children.length > 0 &&
+      Array.from(node.children).every(
+        child =>
+          INLINE_TAGS.includes(child.tagName) ||
+          (child.tagName.includes('-') && checkWebComponentIfInline(child))
+      )
+    ) {
+      const allInlineResult = await this._commonHTML2Block(
+        node,
+        'affine:paragraph',
+        'text'
+      );
+      if (allInlineResult) {
+        return [allInlineResult];
+      }
+    }
+
     const openBlockPromises = Array.from(node.children).map(
       async childElement => {
         const clipBlockInfos =
@@ -223,11 +244,12 @@ export class HtmlParser {
   ): Promise<OpenBlockInfo | null> {
     const childNodes = element.childNodes;
     let isChildNode = false;
-    const textValues: Record<string, unknown>[] = [];
+    const textValues: DeltaOperation[] = [];
     const children = [];
     for (let i = 0; i < childNodes.length; i++) {
       const node = childNodes.item(i);
       if (!node) continue;
+      if (node.nodeName === '#comment') continue;
       if (!isChildNode) {
         if (node instanceof Text) {
           textValues.push(
@@ -236,7 +258,11 @@ export class HtmlParser {
           continue;
         }
         const htmlElement = node as HTMLElement;
-        if (INLINE_TAGS.includes(htmlElement.tagName)) {
+        if (
+          INLINE_TAGS.includes(htmlElement.tagName) ||
+          (htmlElement.tagName.includes('-') &&
+            checkWebComponentIfInline(htmlElement))
+        ) {
           textValues.push(
             ...this._commonHTML2Text(node, {}, ignoreEmptyElement)
           );
@@ -263,7 +289,7 @@ export class HtmlParser {
     element: Element | Node,
     textStyle: { [key: string]: unknown } = {},
     ignoreEmptyText = true
-  ): Record<string, unknown>[] {
+  ): DeltaOperation[] {
     if (element instanceof Text) {
       return (element.textContent || '').split('\n').map(text => {
         return {
@@ -299,7 +325,7 @@ export class HtmlParser {
         );
         result.push(...textBlocks);
         return result;
-      }, [] as Record<string, unknown>[])
+      }, [] as DeltaOperation[])
       .filter(v => v);
     return childTexts;
   }
@@ -351,12 +377,10 @@ export class HtmlParser {
   private _blockQuoteParser = async (
     element: Element
   ): Promise<OpenBlockInfo[] | null> => {
-    const getText = (list: OpenBlockInfo[]): Record<string, unknown>[] => {
-      const result: Record<string, unknown>[] = [];
+    const getText = (list: OpenBlockInfo[]): OpenBlockInfo['text'] => {
+      const result: OpenBlockInfo['text'] = [];
       list.forEach(item => {
-        const texts: Record<string, unknown>[] = item.text.filter(
-          textItem => textItem.insert
-        );
+        const texts = item.text.filter(textItem => textItem.insert);
         if (result.length > 0 && texts.length > 0) {
           result.push({ insert: '\n' });
         }
@@ -514,4 +538,13 @@ const getTextStyle = (htmlElement: HTMLElement) => {
   }
 
   return textStyle;
+};
+
+const checkWebComponentIfInline = (element: Element) => {
+  const style = window.getComputedStyle(element);
+
+  return (
+    style.display.includes('inline') ||
+    (element as HTMLElement).style.display.includes('inline')
+  );
 };

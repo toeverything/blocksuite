@@ -3,7 +3,6 @@ import {
   initMouseEventHandlers,
   MouseMode,
   RootBlockModel,
-  matchFlavours,
   getBlockById,
   noop,
 } from '../../__internal__/index.js';
@@ -167,7 +166,7 @@ export class EdgelessSelectionManager {
   }
 
   get isHoveringShape(): boolean {
-    return this.currentController.hoverState?.block.flavour === 'affine:shape';
+    return false;
   }
 
   get frameSelectionRect() {
@@ -211,13 +210,13 @@ export class EdgelessSelectionManager {
           this._previousSelectedShape = null;
         }
         if (state.type === 'single') {
-          if (matchFlavours(state.selected, ['affine:shape'])) {
-            const element = getBlockById<'affine-shape'>(state.selected.id);
-            if (element) {
-              element.selected = true;
-            }
-            this._previousSelectedShape = state.selected as ShapeBlockModel;
-          }
+          // if (matchFlavours(state.selected, ['affine:shape'])) {
+          //   const element = getBlockById<'affine-shape'>(state.selected.id);
+          //   if (element) {
+          //     element.selected = true;
+          //   }
+          //   this._previousSelectedShape = state.selected as ShapeBlockModel;
+          // }
         }
       }
     );

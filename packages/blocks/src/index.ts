@@ -1,3 +1,4 @@
+/// <reference types="@blocksuite/global" />
 // manual import to avoid being tree-shaked
 import './page-block';
 import './counter-block';
@@ -9,6 +10,7 @@ import './__internal__/rich-text/link-node';
 import './embed-block';
 import './embed-block/image';
 import './surface-block';
+
 export * from './counter-block/index.js';
 export * from './embed-block/index.js';
 export * from './paragraph-block/index.js';
@@ -33,8 +35,10 @@ const env: Record<string, unknown> =
     ? globalThis
     : typeof window !== 'undefined'
     ? window
-    : typeof global !== 'undefined'
-    ? global
+    : // @ts-ignore
+    typeof global !== 'undefined'
+    ? // @ts-ignore
+      global
     : {};
 const importIdentifier = '__ $BLOCKSUITE_BLOCKS$ __';
 

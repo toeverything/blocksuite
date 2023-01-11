@@ -13,8 +13,8 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@lit-labs/react": "^1.1.1",
-    "@shoelace-style/shoelace": "2.0.0-beta.87",
-    "lit": "^2.5.0",
+    "@shoelace-style/shoelace": "2.0.0-beta.88",
+    "lit": "^2.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

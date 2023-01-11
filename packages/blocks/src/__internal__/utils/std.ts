@@ -22,7 +22,7 @@ export function supportsChildren(model: BaseBlockModel): boolean {
 }
 
 const isWeb = typeof window !== 'undefined';
-const isFirefox =
+export const isFirefox =
   isWeb && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 export function caretRangeFromPoint(

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {

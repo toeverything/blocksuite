@@ -2,7 +2,6 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
-  getBlockByPoint,
   getBlockElementByModel,
   getContainerByModel,
   getCurrentRange,
@@ -27,7 +26,11 @@ import type {
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-import { MOVE_DETECT_THRESHOLD, SCROLL_THRESHOLD } from './consts.js';
+import {
+  BLOCK_ID_ATTR,
+  MOVE_DETECT_THRESHOLD,
+  SCROLL_THRESHOLD,
+} from './consts.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -76,7 +79,7 @@ function fixCurrentRangeToText(
         '.ql-editor'
       )
     ).map(elem => {
-      const block = elem.closest('[data-block-id]');
+      const block = elem.closest(`[${BLOCK_ID_ATTR}]`);
       assertExists(block);
       return block;
     });
@@ -424,15 +427,9 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  const startBlock = getBlockByPoint(e.start);
-  assertExists(startBlock);
-  const startRect = startBlock.getBoundingClientRect();
-
   const isDownward = e.y > e.start.y + MOVE_DETECT_THRESHOLD;
-  const ifCrossUpperSideOfCurrentBlock = e.y > startRect.top;
   const isRightward = e.x > e.start.x;
-  const isForward =
-    isDownward || (ifCrossUpperSideOfCurrentBlock && isRightward);
+  const isForward = isDownward || (e.y === e.start.y && isRightward);
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);

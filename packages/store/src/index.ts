@@ -1,3 +1,4 @@
+/// <reference types="@blocksuite/global" />
 export * from './space.js';
 export * from './store.js';
 export * from './base.js';
@@ -21,8 +22,10 @@ const env =
     ? globalThis
     : typeof window !== 'undefined'
     ? window
-    : typeof global !== 'undefined'
-    ? global
+    : // @ts-ignore
+    typeof global !== 'undefined'
+    ? // @ts-ignore
+      global
     : {};
 const importIdentifier = '__ $BLOCKSUITE_STORE$ __';
 

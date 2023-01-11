@@ -1,17 +1,10 @@
-import { BaseBlockModel, IBaseBlockProps, Page } from '@blocksuite/store';
+import { BaseBlockModel, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-type EmbedType = 'image' | 'video' | 'audio' | 'file';
-export interface EmbedBlockProps extends IBaseBlockProps {
-  flavour: string;
-  type: EmbedType;
-  sourceId: string;
-  width?: number;
-  height?: number;
-  caption?: string;
-}
-
-export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
+export class EmbedBlockModel
+  extends BaseBlockModel
+  implements BlockSuiteModelProps.EmbedBlockModel
+{
   static version = 1;
   flavour = 'affine:embed' as const;
   tag = literal`affine-embed`;
@@ -22,7 +15,10 @@ export class EmbedBlockModel extends BaseBlockModel implements EmbedBlockProps {
   sourceId: string;
   caption: string;
 
-  constructor(page: Page, props: Partial<EmbedBlockProps>) {
+  constructor(
+    page: Page,
+    props: PropsWithId<Partial<BlockSuiteModelProps.EmbedBlockModel>>
+  ) {
     super(page, props);
     this.type = props.type ?? 'image';
     this.caption = props.caption ?? 'image';

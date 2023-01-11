@@ -16,7 +16,7 @@ import {
   formatType,
   clickBlockTypeMenuItem,
   SHORT_KEY,
-  SECONDARY_KEY,
+  MODIFIER_KEY,
   resetHistory,
   readClipboardText,
 } from './utils/actions/index.js';
@@ -469,7 +469,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 
   // XXX wait for group to be updated
   await page.waitForTimeout(10);
-  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+1`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`);
   await assertStoreMatchJSX(
     page,
     `
@@ -483,7 +483,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
-  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+6`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+6`);
   await assertStoreMatchJSX(
     page,
     `
@@ -497,7 +497,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
-  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+8`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+8`);
   await assertStoreMatchJSX(
     page,
     `
@@ -512,7 +512,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
-  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+9`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+9`);
   await assertStoreMatchJSX(
     page,
     `
@@ -527,7 +527,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 </affine:frame>`,
     frameId
   );
-  await page.keyboard.press(`${SHORT_KEY}+${SECONDARY_KEY}+0`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+0`);
   await assertStoreMatchJSX(
     page,
     `

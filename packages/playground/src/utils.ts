@@ -7,66 +7,36 @@ import {
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
-// We need to split room between different PR, branches, and local version
-const room: string =
-  params.get('room') ??
-  (import.meta.env.VITE_DEFAULT_ROOM
-    ? import.meta.env.VITE_DEFAULT_ROOM
-    : window.location.origin + window.location.pathname);
-const url = new URL(window.location.href);
+const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
+const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+
 export const defaultMode =
-  url.searchParams.get('mode') === 'edgeless' ? 'edgeless' : 'page';
+  params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
-console.log('default room:', room);
-
 /**
- * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
- * Default is debug (using webrtc)
+ * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
+ * We use webrtcDocProvider by default if the `providers` param is missing.
  */
 export function getOptions(): Pick<
   StoreOptions,
-  'providers' | 'idGenerator' | 'room'
+  'providers' | 'idGenerator' | 'room' | 'defaultFlags'
 > {
   const providers: DocProviderConstructor[] = [];
+  let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
-  /**
-   * Specified using "uuidv4" when providers have indexeddb.
-   * Because when persistent data applied to ydoc, we need generator different id for block.
-   * Otherwise, the block id will conflict.
-   */
-  let forceUUIDv4 = false;
+  if (providerArgs.includes('webrtc')) {
+    providers.push(DebugDocProvider);
+    idGenerator = Generator.AutoIncrementByClientId; // works in multi-user mode
+  }
 
-  const modes = (params.get('syncModes') ?? 'debug').split(',');
-
-  modes.forEach(mode => {
-    switch (mode) {
-      case 'debug':
-        providers.push(DebugDocProvider);
-        break;
-      case 'indexeddb':
-        providers.push(IndexedDBDocProvider);
-        forceUUIDv4 = true;
-        break;
-      case 'websocket': {
-        console.warn(
-          'Websocket provider is not maintained in BlockSuite currently.'
-        );
-        break;
-      }
-      default:
-        throw new TypeError(
-          `Unknown provider ("${mode}") supplied in search param ?syncModes=... (for example "debug" and "indexeddb")`
-        );
-    }
-  });
-
-  let idGenerator = forceUUIDv4
-    ? Generator.UUIDv4
-    : Generator.AutoIncrementByClientId;
+  if (providerArgs.includes('indexeddb')) {
+    providers.push(IndexedDBDocProvider);
+    idGenerator = Generator.UUIDv4; // works in production
+  }
 
   if (isE2E) {
     // We need a predictable id generator in single page test environment.
@@ -79,5 +49,8 @@ export function getOptions(): Pick<
     room,
     providers,
     idGenerator,
+    defaultFlags: {
+      enable_drag_handle: true,
+    },
   };
 }
