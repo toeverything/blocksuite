@@ -4,7 +4,6 @@
     "composite": true,
     "strict": true,
     "jsx": "preserve",
-    "types": ["blocksuite__global-types"],
     "moduleResolution": "Node",
     "noEmit": false,
     "allowJs": true,
