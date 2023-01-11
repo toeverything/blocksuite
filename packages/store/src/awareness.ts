@@ -71,11 +71,6 @@ export class AwarenessAdapter<
     } else {
       this.awareness.setLocalStateField('flags', { ...defaultFlags });
     }
-    this.signals.update.emit({
-      id: this.awareness.clientID,
-      type: 'update',
-      state: this.awareness.getLocalState() as AwarenessState<Flags>,
-    });
   }
 
   public setLocalCursor(range: SelectionRange) {

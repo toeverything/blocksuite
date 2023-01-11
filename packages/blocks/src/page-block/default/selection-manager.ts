@@ -174,6 +174,45 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
+    const createHandle = () => {
+      this._dragHandle = new DragHandle({
+        setSelectedBlocks: this._setSelectedBlocks,
+        onDropCallback: (e, start, end) => {
+          const startModel = start.model;
+          const rect = end.position;
+          const nextModel = end.model;
+          if (doesInSamePath(this.page, nextModel, startModel)) {
+            return;
+          }
+          this.page.captureSync();
+          const distanceToTop = Math.abs(rect.top - e.y);
+          const distanceToBottom = Math.abs(rect.bottom - e.y);
+          this.page.moveBlock(
+            startModel,
+            nextModel,
+            distanceToTop < distanceToBottom
+          );
+          this.clearRects();
+        },
+        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+            skipX,
+          });
+        },
+        getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
+          return getBlockEditingStateByCursor(
+            this._blocks,
+            pageX,
+            pageY,
+            cursor,
+            {
+              size,
+              skipX,
+            }
+          );
+        },
+      });
+    };
     this._disposeCallbacks.push(
       this.page.awareness.signals.update.on(msg => {
         if (msg.id !== this.page.doc.clientID) {
@@ -182,54 +221,7 @@ export class DefaultSelectionManager {
         if (msg.state?.flags.enable_drag_handle) {
           // todo: implement subscribe with selector
           if (!this._dragHandle) {
-            this._dragHandle = new DragHandle({
-              setSelectedBlocks: this._setSelectedBlocks,
-              onDropCallback: (e, start, end) => {
-                const startModel = start.model;
-                const rect = end.position;
-                const nextModel = end.model;
-                if (doesInSamePath(this.page, nextModel, startModel)) {
-                  return;
-                }
-                this.page.captureSync();
-                const distanceToTop = Math.abs(rect.top - e.y);
-                const distanceToBottom = Math.abs(rect.bottom - e.y);
-                this.page.moveBlock(
-                  startModel,
-                  nextModel,
-                  distanceToTop < distanceToBottom
-                );
-                this.clearRects();
-              },
-              getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-                return getBlockEditingStateByPosition(
-                  this._blocks,
-                  pageX,
-                  pageY,
-                  {
-                    skipX,
-                  }
-                );
-              },
-              getBlockEditingStateByCursor: (
-                pageX,
-                pageY,
-                cursor,
-                size,
-                skipX
-              ) => {
-                return getBlockEditingStateByCursor(
-                  this._blocks,
-                  pageX,
-                  pageY,
-                  cursor,
-                  {
-                    size,
-                    skipX,
-                  }
-                );
-              },
-            });
+            createHandle();
           }
         } else {
           this._dragHandle?.remove();
@@ -237,6 +229,9 @@ export class DefaultSelectionManager {
         }
       }).dispose
     );
+    if (this.page.awareness.getFlag('enable_drag_handle')) {
+      createHandle();
+    }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposeCallbacks.push(
       initMouseEventHandlers(
