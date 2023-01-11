@@ -31,15 +31,14 @@ function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
 
-async function initEmptyEditor(page: Page, preset: number) {
-  await page.evaluate(preset => {
+async function initEmptyEditor(page: Page) {
+  await page.evaluate(() => {
     const { workspace } = window;
 
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as StorePage;
       const editor = document.createElement('editor-container');
       editor.page = page;
-      editor.preset = preset;
 
       const debugMenu = document.createElement('debug-menu');
       debugMenu.workspace = workspace;
@@ -54,15 +53,11 @@ async function initEmptyEditor(page: Page, preset: number) {
     });
 
     workspace.createPage('page0');
-  }, preset);
+  });
   await waitNextFrame(page);
 }
 
-export async function enterPlaygroundRoom(
-  page: Page,
-  room?: string,
-  preset = 0xffff
-) {
+export async function enterPlaygroundRoom(page: Page, room?: string) {
   const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
@@ -85,7 +80,7 @@ export async function enterPlaygroundRoom(
     }
   });
 
-  await initEmptyEditor(page, preset);
+  await initEmptyEditor(page);
   return room;
 }
 
@@ -112,10 +107,10 @@ export async function resetHistory(page: Page) {
   });
 }
 
-export async function enterPlaygroundWithList(page: Page, preset = 0xffff) {
+export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
-  await initEmptyEditor(page, preset);
+  await initEmptyEditor(page);
 
   await page.evaluate(() => {
     const { page } = window;
