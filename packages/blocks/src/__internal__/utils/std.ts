@@ -1,30 +1,5 @@
 import { BaseBlockModel, Utils } from '@blocksuite/store';
 import type { Detail } from './types.js';
-export enum Version {
-  AbbeyWood = 0x1,
-  Downhills = 0x2,
-  LATEST = 0xffff,
-}
-
-export const env: Record<string, unknown> =
-  typeof globalThis !== 'undefined'
-    ? globalThis
-    : typeof window !== 'undefined'
-    ? window
-    : // @ts-ignore
-    typeof global !== 'undefined'
-    ? // @ts-ignore
-      global
-    : {};
-export const importIdentifier = '__ $BLOCKSUITE_BLOCKS$ __';
-
-export function getCurrentVersion(): Version {
-  return Number(env[importIdentifier]);
-}
-
-export function setVersion(version: Version) {
-  env[importIdentifier] = `${version}`;
-}
 
 // workaround ts(2775)
 export function assertExists<T>(val: T | null | undefined): asserts val is T {

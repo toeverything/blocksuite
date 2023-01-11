@@ -53,14 +53,4 @@
     <button id="init-btn">Init Editor</button>
     <script type="module" src="./src/main.ts"></script>
   </body>
-  <script type="module">
-    import { Version, setVersion } from '@blocksuite/blocks';
-
-    document
-      .getElementById('version-select')
-      .addEventListener('sl-change', e => {
-        const version = Version[e.target.value];
-        setVersion(version);
-      });
-  </script>
 </html>

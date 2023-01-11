@@ -15,16 +15,25 @@ import {
 } from './utils.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import './style.css';
+import type { SlSelect } from '@shoelace-style/shoelace';
+import { Preset } from '@blocksuite/blocks';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
 
+let preset = Preset.LATEST;
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
+    const selectButton = <SlSelect>document.getElementById('version-select');
+    preset = Preset[selectButton.value as keyof typeof Preset];
+    if (selectButton) {
+      selectButton.remove();
+    }
     const page = workspace.getPage(pageId) as Page;
 
     const editor = new EditorContainer();
+    editor.preset = preset;
     editor.page = page;
     document.body.appendChild(editor);
 
@@ -35,10 +44,6 @@ function subscribePage(workspace: Workspace) {
     document.body.appendChild(debugMenu);
 
     initButton.disabled = true;
-    const selectButton = document.getElementById('version-select');
-    if (selectButton) {
-      selectButton.remove();
-    }
 
     [window.editor, window.page] = [editor, page];
   });

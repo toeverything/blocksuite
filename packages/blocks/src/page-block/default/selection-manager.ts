@@ -157,7 +157,7 @@ export class DefaultSelectionManager {
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
 
-  private _dragHandle: DragHandle;
+  private _dragHandle: DragHandle | null = null;
 
   constructor({
     page,
@@ -174,43 +174,45 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    this._dragHandle = new DragHandle({
-      setSelectedBlocks: this._setSelectedBlocks,
-      onDropCallback: (e, start, end) => {
-        const startModel = start.model;
-        const rect = end.position;
-        const nextModel = end.model;
-        if (doesInSamePath(this.page, nextModel, startModel)) {
-          return;
-        }
-        this.page.captureSync();
-        const distanceToTop = Math.abs(rect.top - e.y);
-        const distanceToBottom = Math.abs(rect.bottom - e.y);
-        this.page.moveBlock(
-          startModel,
-          nextModel,
-          distanceToTop < distanceToBottom
-        );
-        this.clearRects();
-      },
-      getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-        return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
-          skipX,
-        });
-      },
-      getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
-        return getBlockEditingStateByCursor(
-          this._blocks,
-          pageX,
-          pageY,
-          cursor,
-          {
-            size,
-            skipX,
+    if (this._container.flags.enable_drag_handle) {
+      this._dragHandle = new DragHandle({
+        setSelectedBlocks: this._setSelectedBlocks,
+        onDropCallback: (e, start, end) => {
+          const startModel = start.model;
+          const rect = end.position;
+          const nextModel = end.model;
+          if (doesInSamePath(this.page, nextModel, startModel)) {
+            return;
           }
-        );
-      },
-    });
+          this.page.captureSync();
+          const distanceToTop = Math.abs(rect.top - e.y);
+          const distanceToBottom = Math.abs(rect.bottom - e.y);
+          this.page.moveBlock(
+            startModel,
+            nextModel,
+            distanceToTop < distanceToBottom
+          );
+          this.clearRects();
+        },
+        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+            skipX,
+          });
+        },
+        getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
+          return getBlockEditingStateByCursor(
+            this._blocks,
+            pageX,
+            pageY,
+            cursor,
+            {
+              size,
+              skipX,
+            }
+          );
+        },
+      });
+    }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._mouseRoot,
@@ -482,16 +484,18 @@ export class DefaultSelectionManager {
       hoverEditingState.position.x = hoverEditingState.position.right + 10;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
-      const clickDragState = getBlockEditingStateByPosition(
-        this._blocks,
-        e.raw.pageX,
-        e.raw.pageY,
-        {
-          skipX: true,
+      if (this._dragHandle) {
+        const clickDragState = getBlockEditingStateByPosition(
+          this._blocks,
+          e.raw.pageX,
+          e.raw.pageY,
+          {
+            skipX: true,
+          }
+        );
+        if (clickDragState?.model) {
+          this._dragHandle.show(clickDragState);
         }
-      );
-      if (clickDragState?.model) {
-        this._dragHandle.show(clickDragState);
       }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
@@ -510,7 +514,9 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
-    this._dragHandle.remove();
+    if (this._dragHandle) {
+      this._dragHandle.remove();
+    }
     this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();

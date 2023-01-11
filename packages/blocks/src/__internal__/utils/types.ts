@@ -3,6 +3,7 @@ import type { Point } from './rect.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ColorStyle, TDShapeType } from './shape.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type { Flags } from '../flags.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {
@@ -39,6 +40,7 @@ export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   readonly: boolean;
+  flags: Flags;
 }
 
 export interface CommonBlockElement extends HTMLElement {

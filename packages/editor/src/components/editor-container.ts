@@ -5,7 +5,11 @@ import { choose } from 'lit/directives/choose.js';
 import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
-import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
+import {
+  NonShadowLitElement,
+  Preset,
+  SurfaceBlockModel,
+} from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
 
 @customElement('editor-container')
@@ -23,6 +27,9 @@ export class EditorContainer extends NonShadowLitElement {
   mouseMode: MouseMode = {
     type: 'default',
   };
+
+  @property()
+  preset: Preset = Preset.LATEST;
 
   @state()
   showGrid = false;
@@ -117,6 +124,7 @@ export class EditorContainer extends NonShadowLitElement {
         .page=${this.page}
         .model=${this.pageBlockModel}
         .readonly=${this.readonly}
+        .preset=${this.preset}
       ></affine-default-page>
     `;
 
@@ -129,6 +137,7 @@ export class EditorContainer extends NonShadowLitElement {
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
         .showGrid=${this.showGrid}
+        .preset=${this.preset}
       ></affine-edgeless-page>
     `;
 

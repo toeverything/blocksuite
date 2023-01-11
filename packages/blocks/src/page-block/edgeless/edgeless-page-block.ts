@@ -18,6 +18,9 @@ import {
   hotkey,
   HOTKEYS,
   resetNativeSelection,
+  createFlags,
+  Flags,
+  Preset,
 } from '../../__internal__/index.js';
 import {
   EdgelessSelectionManager,
@@ -104,6 +107,12 @@ export class EdgelessPageBlockComponent
   })
   surfaceModel!: SurfaceBlockModel;
 
+  @property()
+  preset: Preset = Preset.LATEST;
+
+  flags: Flags;
+  usePreset: (version: Preset) => void;
+
   getService = getService;
 
   @state()
@@ -118,6 +127,13 @@ export class EdgelessPageBlockComponent
 
   private _historyDisposable!: Disposable;
   private _selection!: EdgelessSelectionManager;
+
+  constructor() {
+    super();
+    const flagsContext = createFlags();
+    this.flags = flagsContext.flags;
+    this.usePreset = flagsContext.usePreset;
+  }
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
@@ -165,6 +181,9 @@ export class EdgelessPageBlockComponent
   }
 
   update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('preset')) {
+      this.usePreset(changedProperties.get('preset') as Preset);
+    }
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
     }
