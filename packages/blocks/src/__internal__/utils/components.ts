@@ -74,7 +74,7 @@ function BlockElementWithService(
         state.then(() => {
           onLoaded();
         });
-        return html`<loader-element />`;
+        return html` <loader-element .hostModel=${model}> </loader-element> `;
       }
     }
     return BlockElement(model, host);

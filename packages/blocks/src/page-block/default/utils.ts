@@ -22,6 +22,7 @@ import {
   Point,
   resetNativeSelection,
   BLOCK_ID_ATTR,
+  BLOCK_SERVICE_LOADING_ATTR,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -52,6 +53,9 @@ function getBlockWithOptionBarRect(
   hoverDom: HTMLElement,
   block: BaseBlockModel
 ): HTMLElement {
+  if (hoverDom.hasAttribute(BLOCK_SERVICE_LOADING_ATTR)) {
+    return hoverDom;
+  }
   if (block.flavour === 'affine:code') {
     const codeBlockDom = hoverDom.querySelector(
       '.affine-code-block-container'
