@@ -162,7 +162,7 @@ export class Text {
     });
   }
 
-  insertList(insertTexts: Record<string, unknown>[], index: number) {
+  insertList(insertTexts: DeltaOperation[], index: number) {
     this._transact(() => {
       for (let i = insertTexts.length - 1; i >= 0; i--) {
         this._yText.insert(
