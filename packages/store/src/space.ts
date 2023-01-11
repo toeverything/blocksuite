@@ -10,8 +10,11 @@ export interface StackItem {
   type: 'undo' | 'redo';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class Space<Data extends Record<string, unknown> = Record<string, any>> {
+export class Space<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Data extends Record<string, unknown> = Record<string, any>,
+  Flags extends Record<string, boolean> = BlockSuiteFlags
+> {
   /** unprefixed id */
   readonly id: string;
   readonly doc: BlockSuiteDoc;
@@ -21,7 +24,7 @@ export class Space<Data extends Record<string, unknown> = Record<string, any>> {
    */
   protected readonly proxy: Data;
   protected readonly origin: Y.Map<Data[keyof Data]>;
-  readonly awareness!: AwarenessAdapter;
+  readonly awareness!: AwarenessAdapter<Flags>;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
   constructor(
@@ -30,7 +33,7 @@ export class Space<Data extends Record<string, unknown> = Record<string, any>> {
     awareness: Awareness,
     options?: {
       valueInitializer?: DataInitializer<Partial<Data>>;
-      defaultFlags?: Record<string, boolean>;
+      defaultFlags?: Partial<Flags>;
     }
   ) {
     this.id = id;
@@ -42,11 +45,7 @@ export class Space<Data extends Record<string, unknown> = Record<string, any>> {
     });
 
     const aware = awareness ?? new Awareness(this.doc);
-    this.awareness = new AwarenessAdapter(
-      this as Space,
-      aware,
-      options?.defaultFlags
-    );
+    this.awareness = new AwarenessAdapter(this, aware, options?.defaultFlags);
   }
 
   get prefixedId() {

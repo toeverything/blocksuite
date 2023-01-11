@@ -23,7 +23,7 @@ export const isBase64 =
  */
 export function getOptions(): Pick<
   StoreOptions,
-  'providers' | 'idGenerator' | 'room'
+  'providers' | 'idGenerator' | 'room' | 'defaultFlags'
 > {
   const providers: DocProviderConstructor[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
@@ -49,5 +49,8 @@ export function getOptions(): Pick<
     room,
     providers,
     idGenerator,
+    defaultFlags: {
+      enable_drag_handle: true,
+    },
   };
 }

@@ -44,7 +44,8 @@ export interface AwarenessMetadataMessage<
 export class AwarenessAdapter<
   Flags extends Record<string, boolean> = BlockSuiteFlags
 > {
-  readonly space: Space;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly space: Space<any, Flags>;
   readonly awareness: Awareness;
 
   readonly signals = {
@@ -52,15 +53,24 @@ export class AwarenessAdapter<
   };
 
   constructor(
-    space: Space,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    space: Space<any, Flags>,
     awareness: Awareness,
-    defaultFlags: Record<string, unknown> = {}
+    defaultFlags: Partial<Flags> = {}
   ) {
     this.space = space;
     this.awareness = awareness;
+    const upstreamFlags = awareness.getLocalState()?.flags;
+    if (upstreamFlags) {
+      this.awareness.setLocalStateField('flags', {
+        ...defaultFlags,
+        ...upstreamFlags,
+      });
+    } else {
+      this.awareness.setLocalStateField('flags', { ...defaultFlags });
+    }
     this.awareness.on('change', this._onAwarenessChange);
     this.signals.update.on(this._onAwarenessMessage);
-    this.awareness.setLocalState({ flags: { ...defaultFlags } });
   }
 
   public setLocalCursor(range: SelectionRange) {
@@ -119,9 +129,6 @@ export class AwarenessAdapter<
   };
 
   private _onAwarenessMessage = (awMsg: AwarenessMessage<Flags>) => {
-    if (!awMsg.state?.cursor) {
-      return;
-    }
     if (awMsg.id === this.awareness.clientID) {
       this.updateLocalCursor();
     } else {

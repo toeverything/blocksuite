@@ -45,12 +45,14 @@ export interface SSROptions {
   isSSR?: boolean;
 }
 
-export interface StoreOptions extends SSROptions {
+export interface StoreOptions<
+  Flags extends Record<string, boolean> = BlockSuiteFlags
+> extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
   awareness?: Awareness;
   idGenerator?: Generator;
-  defaultFlags?: Record<string, boolean>;
+  defaultFlags?: Flags;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
