@@ -40,7 +40,7 @@ export const createLink = hotkey.withDisabledHotkeyFn(async (page: Page) => {
   quill.format('mock-select', true);
 
   // See https://github.com/quilljs/parchment/blob/main/src/blot/scroll.ts
-  const [node, offset] = (quill.scroll as unknown as ParentBlot).descendant(
+  const [node] = (quill.scroll as unknown as ParentBlot).descendant(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/quilljs/parchment/issues/121
     MockSelectNode as any,
     range.index
