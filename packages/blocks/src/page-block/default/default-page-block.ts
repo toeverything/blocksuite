@@ -9,7 +9,6 @@ import {
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
   type BlockHost,
-  createFlagsContext,
   getCurrentRange,
   hotkey,
   isMultiBlockRange,
@@ -123,8 +122,6 @@ export class DefaultPageBlockComponent
   readonly = false;
 
   flavour = 'affine:page' as const;
-
-  flagsContext = createFlagsContext();
 
   selection!: DefaultSelectionManager;
   getService = getService;
@@ -348,7 +345,6 @@ export class DefaultPageBlockComponent
     super.disconnectedCallback();
 
     removeHotkeys();
-    this.flagsContext.dispose();
     this.selection.dispose();
     window.removeEventListener(
       'compositionstart',

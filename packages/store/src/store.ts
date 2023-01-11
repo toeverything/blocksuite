@@ -50,6 +50,7 @@ export interface StoreOptions extends SSROptions {
   providers?: DocProviderConstructor[];
   awareness?: Awareness;
   idGenerator?: Generator;
+  defaultFlags?: Record<string, boolean>;
 }
 
 const DEFAULT_ROOM = 'virgo-default';

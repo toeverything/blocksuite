@@ -30,6 +30,7 @@ export class Space<Data extends Record<string, unknown> = Record<string, any>> {
     awareness: Awareness,
     options?: {
       valueInitializer?: DataInitializer<Partial<Data>>;
+      defaultFlags?: Record<string, boolean>;
     }
   ) {
     this.id = id;
@@ -41,7 +42,11 @@ export class Space<Data extends Record<string, unknown> = Record<string, any>> {
     });
 
     const aware = awareness ?? new Awareness(this.doc);
-    this.awareness = new AwarenessAdapter(this as Space, aware);
+    this.awareness = new AwarenessAdapter(
+      this as Space,
+      aware,
+      options?.defaultFlags
+    );
   }
 
   get prefixedId() {

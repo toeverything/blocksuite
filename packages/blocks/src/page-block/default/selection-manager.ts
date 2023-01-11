@@ -174,7 +174,7 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    if (this._container.flagsContext.flags.enable_drag_handle) {
+    if (this.page.awareness.getFlag('enable_drag_handle')) {
       const createDragHandle = () => {
         this._dragHandle = new DragHandle({
           setSelectedBlocks: this._setSelectedBlocks,
@@ -214,17 +214,13 @@ export class DefaultSelectionManager {
           },
         });
       };
-      createDragHandle();
       this._disposeCallbacks.push(
-        this._container.flagsContext.switchSignal.on(flag => {
-          if (flag === 'enable_drag_handle') {
-            const enable =
-              this._container.flagsContext.flags.enable_drag_handle;
+        this.page.awareness.signals.update.on(({ state }) => {
+          if (state?.flags.enable_drag_handle) {
+            createDragHandle();
+          } else {
             this._dragHandle?.remove();
             this._dragHandle = null;
-            if (enable) {
-              createDragHandle();
-            }
           }
         }).dispose
       );

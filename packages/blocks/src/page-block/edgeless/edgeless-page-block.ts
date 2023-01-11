@@ -18,7 +18,6 @@ import {
   hotkey,
   HOTKEYS,
   resetNativeSelection,
-  createFlagsContext,
 } from '../../__internal__/index.js';
 import {
   EdgelessSelectionManager,
@@ -104,8 +103,6 @@ export class EdgelessPageBlockComponent
     },
   })
   surfaceModel!: SurfaceBlockModel;
-
-  flagsContext = createFlagsContext();
 
   getService = getService;
 
@@ -223,7 +220,6 @@ export class EdgelessPageBlockComponent
     this.signals.shapeUpdated.dispose();
     this._historyDisposable.dispose();
     this._selection.dispose();
-    this.flagsContext.dispose();
     this._removeHotkeys();
   }
 
