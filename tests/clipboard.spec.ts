@@ -38,6 +38,29 @@ test('clipboard copy paste', async ({ page }) => {
   await assertText(page, 'testtes');
 });
 
+test('clipboard paste html', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  // set up clipboard data using html
+  const clipData = {
+    'text/html': `<span>aaa</span><span>bbb</span><span>ccc</span>`,
+  };
+  await page.evaluate(
+    ({ clipData }) => {
+      const dT = new DataTransfer();
+      const e = new ClipboardEvent('paste', { clipboardData: dT });
+      e.clipboardData?.setData('text/html', clipData['text/html']);
+      document
+        .getElementsByTagName('editor-container')[0]
+        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](e);
+    },
+    { clipData }
+  );
+  await assertText(page, 'aaabbbccc');
+});
+
 test('markdown format parse', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
