@@ -10,6 +10,7 @@ import {
   noop,
   PREVENT_DEFAULT,
 } from '../utils/index.js';
+import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import {
   handleLineStartBackspace,
   handleUnindent,
@@ -23,10 +24,10 @@ import {
 } from './rich-text-operations.js';
 import { Shortcuts } from './shortcuts.js';
 
-interface QuillRange {
-  index: number;
-  length: number;
-}
+// Type definitions is ported from quill
+// https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46
+
+type QuillRange = RangeStatic;
 
 interface BindingContext {
   collapsed: boolean;
@@ -37,7 +38,7 @@ interface BindingContext {
   format: Record<string, unknown>;
 }
 
-type KeyboardBindings = Record<
+export type KeyboardBindings = Record<
   string,
   {
     key: string | number;
@@ -49,6 +50,8 @@ type KeyboardBindings = Record<
     altKey?: boolean;
     metaKey?: boolean;
     ctrlKey?: boolean;
+    collapsed?: boolean;
+    format?: Record<string, unknown> | string[];
   }
 >;
 
@@ -336,6 +339,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       shiftKey: false,
       handler: onKeyRight,
     },
+
+    ...createBracketAutoCompleteBindings(model),
   };
 
   return keyboardBindings;
