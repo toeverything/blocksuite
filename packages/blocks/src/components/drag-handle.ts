@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
+import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
@@ -56,6 +57,14 @@ export type DragHandleGetModelStateCallback = (
   skipX?: boolean
 ) => EditingState | null;
 
+export type DragHandleGetModelStateWithCursorCallback = (
+  pageX: number,
+  pageY: number,
+  cursor: number,
+  size?: number,
+  skipX?: boolean
+) => EditingState | null;
+
 @customElement('affine-drag-handle')
 export class DragHandle extends LitElement {
   static styles = css`
@@ -79,6 +88,7 @@ export class DragHandle extends LitElement {
       lastModelState: EditingState
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
+    getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
     setSelectedBlocks: (selectedBlocks: Element[]) => void;
   }) {
     super();
@@ -86,6 +96,7 @@ export class DragHandle extends LitElement {
     this.setSelectedBlocks = options.setSelectedBlocks;
     this._getBlockEditingStateByPosition =
       options.getBlockEditingStateByPosition;
+    this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
     document.body.appendChild(this);
   }
 
@@ -99,12 +110,19 @@ export class DragHandle extends LitElement {
   @property()
   public setSelectedBlocks: (selectedBlocks: Element[]) => void;
 
+  private _currentPageX = 0;
+  private _currentPageY = 0;
+
   private _startModelState: EditingState | null = null;
 
   private _lastModelState: EditingState | null = null;
   private _indicator!: DragIndicator;
+  private _cursor: number | null = 0;
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
+    null;
+
+  private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
 
   protected firstUpdated() {
@@ -114,6 +132,7 @@ export class DragHandle extends LitElement {
 
   public show(startModelState: EditingState) {
     this._startModelState = startModelState;
+    this._cursor = startModelState.index;
     const rect = this._startModelState.position;
     this.style.position = 'absolute';
     this.style.display = 'block';
@@ -123,6 +142,7 @@ export class DragHandle extends LitElement {
 
   public hide() {
     this.style.display = 'none';
+    this._cursor = null;
     this._startModelState = null;
     this._lastModelState = null;
     this._indicator.cursorPosition = null;
@@ -143,6 +163,8 @@ export class DragHandle extends LitElement {
     );
     document.body.appendChild(this._indicator);
     this.addEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.addEventListener('dragover', this._onDragOverDocument);
     this.addEventListener('mouseleave', this._onMouseLeave);
     this.addEventListener('dragstart', this._onDragStart);
     this.addEventListener('drag', this._onDrag);
@@ -159,6 +181,8 @@ export class DragHandle extends LitElement {
       handlePreventDocumentDragOverDelay
     );
     this.removeEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.removeEventListener('dragover', this._onDragOverDocument);
     this.removeEventListener('mouseleave', this._onMouseLeave);
     this.removeEventListener('dragstart', this._onDragStart);
     this.removeEventListener('drag', this._onDrag);
@@ -189,10 +213,19 @@ export class DragHandle extends LitElement {
       true
     );
     if (clickDragState) {
+      this._cursor = clickDragState.index;
       this.setSelectedBlocks([
         getBlockElementByModel(clickDragState.model) as HTMLElement,
       ]);
     }
+  };
+
+  private _onDragOverDocument = (e: DragEvent) => {
+    if (!isFirefox) {
+      throw new Error('FireFox only');
+    }
+    this._currentPageX = e.pageX;
+    this._currentPageY = e.pageY;
   };
 
   private _onMouseLeave = (_: MouseEvent) => {
@@ -206,18 +239,32 @@ export class DragHandle extends LitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
-    const modelState = this._getBlockEditingStateByPosition?.(
-      e.pageX,
-      e.pageY,
+    let x = e.pageX;
+    let y = e.pageY;
+    if (isFirefox) {
+      // In Firefox, `pageX` and `pageY` are always set to 0.
+      // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
+      x = this._currentPageX;
+      y = this._currentPageY;
+    }
+    if (this._cursor === null) {
+      return;
+    }
+    const modelState = this._getBlockEditingStateByCursor?.(
+      x,
+      y,
+      this._cursor,
+      5,
       true
     );
     if (modelState) {
+      this._cursor = modelState.index;
       this._lastModelState = modelState;
       this._indicator.targetRect = modelState.position;
     }
     this._indicator.cursorPosition = {
-      x: e.clientX,
-      y: e.clientY,
+      x,
+      y,
     };
   };
 

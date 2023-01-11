@@ -57,5 +57,10 @@
     "vite": "^4.0.4",
     "vite-plugin-banner": "^0.7.0",
     "vitest": "^0.26.3"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "hotkeys-js@3.10.1": "patches/hotkeys-js@3.10.1.patch"
+    }
   }
 }

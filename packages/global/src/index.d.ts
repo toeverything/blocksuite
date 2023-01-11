@@ -1,3 +1,12 @@
+// type shims for https://github.com/toeverything/blocksuite/issues/398
+// remove this until quill turned to `type: "module"`
+declare module 'quill' {
+  import quill = require('quill/index');
+  export type * from 'quill/index' assert { 'resolution-mode': 'require' };
+  declare const quillDefault: typeof quill.default;
+  export default quillDefault;
+}
+
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
 declare module NodeJS {
   interface ProcessEnv {
