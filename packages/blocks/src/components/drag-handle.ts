@@ -6,8 +6,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
 
-const IS_PROD = location.href.includes('pathfinder');
-
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
   event.preventDefault();
@@ -278,8 +276,6 @@ export class DragHandle extends LitElement {
   };
 
   override render() {
-    if (IS_PROD) return null;
-
     return html`
       <div class="affine-drag-handle">
         <svg

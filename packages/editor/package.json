@@ -14,7 +14,7 @@
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "lit": "^2.5.0",
+    "lit": "^2.6.0",
     "marked": "^4.2.5",
     "turndown": "^7.1.1"
   },

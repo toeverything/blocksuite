@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
+import { BaseBlockModel, Page, Signal, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
 import {
   assertExists,

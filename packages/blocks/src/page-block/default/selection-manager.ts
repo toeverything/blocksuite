@@ -152,12 +152,12 @@ export class DefaultSelectionManager {
   state = new PageSelectionState('none');
   private _mouseRoot: HTMLElement;
   private _container: DefaultPageBlockComponent;
-  private _mouseDisposeCallback: () => void;
+  private _disposeCallbacks: (() => void)[] = [];
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
 
-  private _dragHandle: DragHandle;
+  private _dragHandle: DragHandle | null = null;
 
   constructor({
     page,
@@ -174,54 +174,77 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    this._dragHandle = new DragHandle({
-      setSelectedBlocks: this._setSelectedBlocks,
-      onDropCallback: (e, start, end) => {
-        const startModel = start.model;
-        const rect = end.position;
-        const nextModel = end.model;
-        if (doesInSamePath(this.page, nextModel, startModel)) {
+    const createHandle = () => {
+      this._dragHandle = new DragHandle({
+        setSelectedBlocks: this._setSelectedBlocks,
+        onDropCallback: (e, start, end) => {
+          const startModel = start.model;
+          const rect = end.position;
+          const nextModel = end.model;
+          if (doesInSamePath(this.page, nextModel, startModel)) {
+            return;
+          }
+          this.page.captureSync();
+          const distanceToTop = Math.abs(rect.top - e.y);
+          const distanceToBottom = Math.abs(rect.bottom - e.y);
+          this.page.moveBlock(
+            startModel,
+            nextModel,
+            distanceToTop < distanceToBottom
+          );
+          this.clearRects();
+        },
+        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+            skipX,
+          });
+        },
+        getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
+          return getBlockEditingStateByCursor(
+            this._blocks,
+            pageX,
+            pageY,
+            cursor,
+            {
+              size,
+              skipX,
+            }
+          );
+        },
+      });
+    };
+    this._disposeCallbacks.push(
+      this.page.awareness.signals.update.on(msg => {
+        if (msg.id !== this.page.doc.clientID) {
           return;
         }
-        this.page.captureSync();
-        const distanceToTop = Math.abs(rect.top - e.y);
-        const distanceToBottom = Math.abs(rect.bottom - e.y);
-        this.page.moveBlock(
-          startModel,
-          nextModel,
-          distanceToTop < distanceToBottom
-        );
-        this.clearRects();
-      },
-      getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-        return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
-          skipX,
-        });
-      },
-      getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
-        return getBlockEditingStateByCursor(
-          this._blocks,
-          pageX,
-          pageY,
-          cursor,
-          {
-            size,
-            skipX,
+        if (msg.state?.flags.enable_drag_handle) {
+          // todo: implement subscribe with selector
+          if (!this._dragHandle) {
+            createHandle();
           }
-        );
-      },
-    });
+        } else {
+          this._dragHandle?.remove();
+          this._dragHandle = null;
+        }
+      }).dispose
+    );
+    if (this.page.awareness.getFlag('enable_drag_handle')) {
+      createHandle();
+    }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
-    this._mouseDisposeCallback = initMouseEventHandlers(
-      this._mouseRoot,
-      this._onContainerDragStart,
-      this._onContainerDragMove,
-      this._onContainerDragEnd,
-      this._onContainerClick,
-      this._onContainerDblClick,
-      this._onContainerMouseMove,
-      this._onContainerMouseOut,
-      this._onContainerContextMenu
+    this._disposeCallbacks.push(
+      initMouseEventHandlers(
+        this._mouseRoot,
+        this._onContainerDragStart,
+        this._onContainerDragMove,
+        this._onContainerDragEnd,
+        this._onContainerClick,
+        this._onContainerDblClick,
+        this._onContainerMouseMove,
+        this._onContainerMouseOut,
+        this._onContainerContextMenu
+      )
     );
   }
 
@@ -482,16 +505,18 @@ export class DefaultSelectionManager {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
-      const clickDragState = getBlockEditingStateByPosition(
-        this._blocks,
-        e.raw.pageX,
-        e.raw.pageY,
-        {
-          skipX: true,
+      if (this._dragHandle) {
+        const clickDragState = getBlockEditingStateByPosition(
+          this._blocks,
+          e.raw.pageX,
+          e.raw.pageY,
+          {
+            skipX: true,
+          }
+        );
+        if (clickDragState?.model) {
+          this._dragHandle.show(clickDragState);
         }
-      );
-      if (clickDragState?.model) {
-        this._dragHandle.show(clickDragState);
       }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
@@ -510,13 +535,15 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
-    this._dragHandle.remove();
+    if (this._dragHandle) {
+      this._dragHandle.remove();
+    }
     this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
-    this._mouseDisposeCallback();
+    this._disposeCallbacks.forEach(callback => callback());
   }
 
   resetSelectedBlockByRect(

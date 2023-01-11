@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "lit": "^2.5.0",
+    "lit": "^2.6.0",
     "yjs": "^13.5.44"
   },
   "peerDependencies": {

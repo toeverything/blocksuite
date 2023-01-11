@@ -18,6 +18,10 @@ declare module NodeJS {
 
 type PropsWithId<Props> = Props & { id: string };
 
+type BlockSuiteFlags = {
+  enable_drag_handle: boolean;
+};
+
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
   interface IBaseBlockProps {
