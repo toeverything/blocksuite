@@ -10,7 +10,7 @@ import { createKeyboardBindings } from './keyboard.js';
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 
-Quill.register('modules/cursors', QuillCursors);
+Quill.register('modules/cursors', QuillCursors, true);
 const Clipboard = Quill.import('modules/clipboard');
 
 class EmptyClipboard extends Clipboard {
