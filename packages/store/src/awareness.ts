@@ -119,7 +119,7 @@ export class AwarenessAdapter<
   };
 
   private _onAwarenessMessage = (awMsg: AwarenessMessage<Flags>) => {
-    if (awMsg.state?.flags) {
+    if (!awMsg.state?.cursor) {
       return;
     }
     if (awMsg.id === this.awareness.clientID) {
