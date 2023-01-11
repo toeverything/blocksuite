@@ -119,6 +119,9 @@ export class AwarenessAdapter<
   };
 
   private _onAwarenessMessage = (awMsg: AwarenessMessage<Flags>) => {
+    if (awMsg.state?.flags) {
+      return;
+    }
     if (awMsg.id === this.awareness.clientID) {
       this.updateLocalCursor();
     } else {
