@@ -8,7 +8,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/blocksuite__global-types": "workspace:*",
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/react": "workspace:*",

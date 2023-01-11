@@ -6,7 +6,6 @@
     "experimentalDecorators": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "types": ["blocksuite__global-types"],
     "moduleResolution": "NodeNext",
     "strict": true,
     "sourceMap": true,
