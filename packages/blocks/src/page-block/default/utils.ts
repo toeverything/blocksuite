@@ -109,6 +109,7 @@ export function getBlockEditingStateByCursor(
   options?: {
     size?: number;
     skipX?: boolean;
+    dragging?: boolean;
   }
 ): EditingState | null {
   const size = options?.size || 5;
@@ -126,8 +127,10 @@ function binarySearchBlockEditingState(
   end: number,
   options?: {
     skipX?: boolean;
+    dragging?: boolean;
   }
 ): EditingState | null {
+  const dragging = Boolean(options?.dragging);
   while (start <= end) {
     const mid = start + Math.floor((end - start) / 2);
     const { block, blockRect, detectRect, hoverDom } = getBlockAndRect(
@@ -178,8 +181,32 @@ function binarySearchBlockEditingState(
         assertExists(blockRect);
 
         if (!options?.skipX) {
-          if (x < detectRect.left || x > detectRect.left + detectRect.width) {
-            return null;
+          if (dragging) {
+            if (block.parentIndex && block.depth) {
+              let depth = Math.floor((blockRect.left - x) / 26);
+              if (depth > 0) {
+                let item = getBlockAndRect(blocks, block.parentIndex);
+
+                while (
+                  depth > 1 &&
+                  item.block.parentIndex &&
+                  item.block.depth
+                ) {
+                  item = getBlockAndRect(blocks, item.block.parentIndex);
+                  depth -= 1;
+                }
+
+                return {
+                  index: mid,
+                  position: item.blockRect,
+                  model: item.block,
+                };
+              }
+            }
+          } else {
+            if (x < detectRect.left || x > detectRect.left + detectRect.width) {
+              return null;
+            }
           }
         }
 

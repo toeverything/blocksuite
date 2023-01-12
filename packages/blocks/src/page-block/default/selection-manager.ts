@@ -199,7 +199,14 @@ export class DefaultSelectionManager {
             skipX,
           });
         },
-        getBlockEditingStateByCursor: (pageX, pageY, cursor, size, skipX) => {
+        getBlockEditingStateByCursor: (
+          pageX,
+          pageY,
+          cursor,
+          size,
+          skipX,
+          dragging
+        ) => {
           return getBlockEditingStateByCursor(
             this._blocks,
             pageX,
@@ -208,6 +215,7 @@ export class DefaultSelectionManager {
             {
               size,
               skipX,
+              dragging,
             }
           );
         },
@@ -255,15 +263,29 @@ export class DefaultSelectionManager {
       return [];
     }
     let layer = 0;
+    let index = 0;
+    let depth = -1;
     while (queue.length) {
       const length = queue.length;
       for (let i = 0; i < length; i++) {
         const blockModel = queue.shift();
         assertExists(blockModel);
-        blockModel.children && queue.unshift(...blockModel.children);
+        const children = blockModel.children.length
+          ? [...blockModel.children]
+          : [];
         // ignore level 0, as layer 0 is all affine:frame block
         if (layer > 0) {
-          result.push(blockModel);
+          depth = blockModel.depth || 0;
+          index = result.push(blockModel) - 1;
+        }
+        if (children.length) {
+          queue.unshift(
+            ...children.map(block => {
+              block.depth = depth + 1;
+              block.parentIndex = index;
+              return block;
+            })
+          );
         }
       }
       layer++;

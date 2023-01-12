@@ -28,6 +28,9 @@ export class BaseBlockModel<Props = unknown>
   text?: TextType;
   sourceId?: string;
 
+  parentIndex?: number;
+  depth?: number;
+
   constructor(
     page: Page,
     props: Pick<BlockSuiteInternal.IBaseBlockProps, 'id'>
