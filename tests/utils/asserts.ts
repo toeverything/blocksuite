@@ -32,6 +32,7 @@ export const defaultStore: SerializedStore = {
     ],
     versions: {
       'affine:paragraph': 1,
+      'affine:database': 1,
       'affine:page': 1,
       'affine:list': 1,
       'affine:frame': 1,
@@ -39,6 +40,7 @@ export const defaultStore: SerializedStore = {
       'affine:embed': 1,
       // 'affine:shape': 1,
       'affine:code': 1,
+      'affine:row': 1,
       'affine:surface': 1,
     },
   },
@@ -47,6 +49,7 @@ export const defaultStore: SerializedStore = {
       'sys:id': '0',
       'sys:flavour': 'affine:page',
       'sys:children': ['1'],
+      'sys:tags': {},
     },
     '1': {
       'sys:flavour': 'affine:frame',

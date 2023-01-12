@@ -27,6 +27,7 @@
     "y-webrtc": "^10.2.3"
   },
   "devDependencies": {
+    "@vitest/ui": "^0.27.1",
     "cross-env": "^7.0.3",
     "lit": "^2.6.1",
     "yjs": "^13.5.44"

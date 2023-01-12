@@ -102,6 +102,7 @@ describe.concurrent('addBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:tags': {},
       },
     });
   });
@@ -115,6 +116,7 @@ describe.concurrent('addBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:tags': {},
         'prop:title': 'hello',
       },
     });
@@ -130,6 +132,7 @@ describe.concurrent('addBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:tags': {},
       },
       '1': {
         'sys:children': [],
@@ -251,6 +254,7 @@ describe.concurrent('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:tags': {},
       },
     });
 
@@ -270,6 +274,7 @@ describe.concurrent('deleteBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:tags': {},
       },
       '1': {
         'sys:children': [],
@@ -288,6 +293,7 @@ describe.concurrent('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'sys:tags': {},
       },
     });
     assert.equal(root.children.length, 0);

@@ -219,6 +219,7 @@ class WorkspaceMeta<
 const flagsPreset = {
   enable_set_remote_flag: true,
   enable_drag_handle: true,
+  enable_database: false,
   enable_surface: false,
   readonly: {},
 } satisfies BlockSuiteFlags;

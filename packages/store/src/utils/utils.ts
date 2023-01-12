@@ -8,6 +8,7 @@ import type {
 import { PrelimText, Text, TextType } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
+import { createYArrayProxy } from '../yjs/proxy.js';
 import { isPrimitive, SYS_KEYS } from '@blocksuite/global/utils';
 
 export function assertValidChildren(
@@ -26,6 +27,9 @@ export function assertValidChildren(
 export function initSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
+  if (props.flavour === 'affine:page') {
+    yBlock.set('sys:tags', new Y.Map());
+  }
 
   const yChildren = new Y.Array();
   yBlock.set('sys:children', yChildren);
@@ -45,13 +49,19 @@ export function syncBlockProps(
     // TODO use schema
     if (key === 'text') return;
 
-    if (!isPrimitive(props[key])) {
+    // fixme: check array is valid
+    if (!isPrimitive(props[key]) && !Array.isArray(props[key])) {
       throw new Error('Only top level primitives are supported for now');
     }
 
     // TODO compare with current yBlock value
     if (props[key] !== undefined) {
-      yBlock.set('prop:' + key, props[key]);
+      if (props.flavour === 'affine:database' && key === 'columns') {
+        const columns = Y.Array.from(props.columns ?? []);
+        yBlock.set('prop:columns', columns);
+      } else {
+        yBlock.set('prop:' + key, props[key]);
+      }
     }
   });
 
@@ -91,6 +101,15 @@ export function syncBlockProps(
     }
     if (!yBlock.has('prop:color')) {
       yBlock.set('prop:color', props.color ?? 'black');
+    }
+  }
+  if (props.flavour === 'affine:database') {
+    if (!yBlock.has('prop:columns')) {
+      const columns = Y.Array.from(props.columns ?? []);
+      yBlock.set('prop:columns', columns);
+    }
+    if (!yBlock.has('prop:title')) {
+      yBlock.set('prop:title', '');
     }
   }
 }
@@ -150,9 +169,8 @@ export function trySyncTextProp(
   }
 }
 
-export function toBlockProps(
-  prefixedProps: PrefixedBlockProps
-): Partial<BlockProps> {
+export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
+  const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
   Object.keys(prefixedProps).forEach(key => {
     if (prefixedProps[key]) {
@@ -164,7 +182,15 @@ export function toBlockProps(
     if (SYS_KEYS.has(prefixedKey)) return;
 
     const key = prefixedKey.replace('prop:', '');
-    props[key] = prefixedProps[prefixedKey];
+    const realValue = yBlock.get(prefixedKey);
+    if (realValue instanceof Y.Array) {
+      props[key] = createYArrayProxy(realValue, {
+        // downstream model shouldn't modify the data
+        readonly: true,
+      });
+    } else {
+      props[key] = prefixedProps[prefixedKey];
+    }
   });
 
   return props;

@@ -10,6 +10,8 @@ import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ShapeBlockModel } from './shape-block/shape-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import { SurfaceBlockModel } from './surface-block/surface-model.js';
+import { DatabaseBlockModel } from './database-block/database-model.js';
+import { RowBlockModel } from './row-block/row-model.js';
 
 export {
   CodeBlockModel,
@@ -20,6 +22,8 @@ export {
   PageBlockModel,
   ParagraphBlockModel,
   ShapeBlockModel,
+  DatabaseBlockModel,
+  RowBlockModel,
 };
 
 // TODO support dynamic register
@@ -33,6 +37,8 @@ export const BlockSchema = {
   'affine:embed': EmbedBlockModel,
   // 'affine:shape': ShapeBlockModel,
   'affine:surface': SurfaceBlockModel,
+  'affine:database': DatabaseBlockModel,
+  'affine:row': RowBlockModel,
 };
 
 export type BlockSchemaType = typeof BlockSchema;

@@ -415,6 +415,9 @@ export function handleBlockSelectionBatchDelete(
   const parentModel = getModelByElement(parent);
   const index = parentModel?.children.indexOf(models[0]);
   for (let i = 0; i < models.length; i++) {
+    if (models[i].flavour === 'affine:database') {
+      models[i].children.slice().forEach(model => page.deleteBlock(model));
+    }
     page.deleteBlock(models[i]);
   }
   const id = page.addBlock(

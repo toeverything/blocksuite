@@ -26,7 +26,11 @@ import {
   MOVE_DETECT_THRESHOLD,
   SCROLL_THRESHOLD,
 } from './consts.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  isNonTextBlock,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -208,7 +212,8 @@ export function focusBlockByModel(
   position: SelectionPosition = 'end'
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
-  if (matchFlavours(model, ['affine:embed', 'affine:divider', 'affine:code'])) {
+
+  if (isNonTextBlock(model)) {
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
@@ -492,13 +497,13 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
-    } else if (matchFlavours(lastChild, ['affine:code', 'affine:embed'])) {
+    } else if (isNonTextBlock(lastChild)) {
       page.addBlockByFlavour(
         'affine:paragraph',
         {
           text: new page.Text(page, ''),
         },
-        page.getParent(lastChild)
+        page.getFrameParent(lastChild)
       );
     }
   }

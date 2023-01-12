@@ -5,6 +5,7 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
+import BlockTag = BlockSuiteInternal.BlockTag;
 
 export function heavy(workspace: Workspace) {
   workspace.signals.pageAdded.once(id => {
@@ -57,10 +58,73 @@ export function basic(workspace: Workspace) {
       flavour: 'affine:page',
       title: 'Welcome to BlockSuite playground',
     });
-    page.addBlock({ flavour: 'affine:surface' }, null);
+    page.addBlockByFlavour('affine:surface', {}, null);
 
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
     await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+
+    requestAnimationFrame(() => page.resetHistory());
+  });
+
+  workspace.createPage('page0');
+}
+
+export function database(workspace: Workspace) {
+  workspace.signals.pageAdded.once(async id => {
+    const page = workspace.getPage(id) as Page;
+    const pageBlockId = page.addBlock({
+      flavour: 'affine:page',
+      title: 'Welcome to BlockSuite playground',
+    });
+    page.addBlockByFlavour('affine:surface', {}, null);
+
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+    type Option = 'Done' | 'TODO' | 'WIP';
+    const selection = ['Done', 'TODO', 'WIP'] as Option[];
+    const databaseId = page.addBlockByFlavour(
+      'affine:database',
+      {
+        columns: [
+          {
+            id: '1',
+            type: 'affine-tag:text',
+            name: 'Name',
+            metadata: {
+              color: '#FA851E',
+              width: 100,
+              hide: false,
+            },
+          },
+          {
+            id: '2',
+            type: 'affine-tag:select',
+            name: 'Select',
+            selection,
+            metadata: {
+              color: '#C7BAF3',
+              width: 100,
+              hide: false,
+            },
+          },
+        ],
+      },
+      frameId
+    );
+    const row1Id = page.addBlockByFlavour('affine:row', {}, databaseId);
+    const row2Id = page.addBlockByFlavour('affine:row', {}, databaseId);
+
+    page.updateBlockTag(row1Id, {
+      type: '1',
+      value: 'text1',
+    });
+
+    page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagType<Option>>>(
+      row2Id,
+      {
+        type: '2',
+        value: 'TODO',
+      }
+    );
 
     requestAnimationFrame(() => page.resetHistory());
   });

@@ -2,6 +2,7 @@ import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
 import { Signal } from './utils/signal.js';
 import type { DeltaOperation } from 'quill';
+import type * as Y from 'yjs';
 
 // ported from lit
 interface StaticValue {
@@ -25,6 +26,7 @@ export class BaseBlockModel<Props = unknown>
   type!: string;
   children: BaseBlockModel[];
   // TODO use schema
+  tags?: Y.Map<Y.Map<unknown>>;
   text?: TextType;
   sourceId?: string;
 

@@ -251,9 +251,11 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
     blockRect = hoverDom.getBoundingClientRect() as DOMRect;
     // in a nested block, we should get `rich-text` which is its own editing area
     if (block.children.length) {
-      detectRect = hoverDom
-        ?.querySelector('rich-text')
-        ?.getBoundingClientRect() as DOMRect;
+      detectRect =
+        hoverDom?.querySelector('rich-text')?.getBoundingClientRect() ?? null;
+      if (!detectRect) {
+        detectRect = hoverDom.getBoundingClientRect();
+      }
     } else {
       detectRect = blockRect;
     }

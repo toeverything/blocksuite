@@ -23,6 +23,9 @@ import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import BlockTag = BlockSuiteInternal.BlockTag;
+import TagType = BlockSuiteInternal.BaseTagType;
+
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -47,8 +50,8 @@ function createChildMap(yChildIds: Y.Array<string>) {
 }
 
 export type PageData = {
-  [key: string]: YBlock;
-};
+  tags: Y.Map<Y.Map<unknown>>;
+} & Record<string, YBlock>;
 
 export class Page extends Space<PageData> {
   public workspace: Workspace;
@@ -100,6 +103,12 @@ export class Page extends Space<PageData> {
 
   get root() {
     return Array.isArray(this._root) ? this._root[0] : this._root;
+  }
+
+  get tags() {
+    assertExists(this.root);
+    assertExists(this.root.tags);
+    return this.root.tags;
   }
 
   get rootLayer() {
@@ -169,6 +178,36 @@ export class Page extends Space<PageData> {
     return this._blockMap.get(id) ?? null;
   }
 
+  updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
+    const already = this.tags.has(id);
+    let tags: Y.Map<unknown>;
+    if (!already) {
+      tags = new Y.Map();
+    } else {
+      tags = this.tags.get(id) as Y.Map<unknown>;
+    }
+    this.transact(() => {
+      if (!already) {
+        this.tags.set(id, tags);
+      }
+      tags.set(tag.type, tag);
+    });
+  }
+
+  getBlockTags(model: BaseBlockModel): Record<string, BlockTag> {
+    const tags = this.tags.get(model.id);
+    if (!tags) {
+      return {};
+    }
+    // fixme: performance issue
+    return tags.toJSON();
+  }
+
+  getBlockTagByType(model: BaseBlockModel, type: TagType): BlockTag | null {
+    const tags = this.getBlockTags(model);
+    return tags[type.id] ?? null;
+  }
+
   getBlockByFlavour(blockFlavour: string) {
     return [...this._blockMap.values()].filter(
       ({ flavour }) => flavour === blockFlavour
@@ -188,6 +227,15 @@ export class Page extends Space<PageData> {
       if (parent !== null) return parent;
     }
     return null;
+  }
+
+  getFrameParent(block: BaseBlockModel): BaseBlockModel | null {
+    const parent = this.getParent(block);
+    if (parent !== null && parent.flavour !== 'affine:frame') {
+      return this.getFrameParent(parent);
+    } else {
+      return parent;
+    }
   }
 
   getParent(block: BaseBlockModel) {
@@ -409,7 +457,7 @@ export class Page extends Space<PageData> {
   deleteBlock(
     model: BaseBlockModel,
     options: {
-      bringChildrenTo: 'parent' | BaseBlockModel;
+      bringChildrenTo: 'parent' | BaseBlockModel | false;
     } = {
       bringChildrenTo: 'parent',
     }
@@ -591,8 +639,7 @@ export class Page extends Space<PageData> {
     const isRoot = this._blockMap.size === 0;
     let isSurface = false;
 
-    const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-    const props = toBlockProps(prefixedProps) as BlockProps;
+    const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
     if (model.flavour === 'affine:surface') {
       isSurface = true;
@@ -614,6 +661,9 @@ export class Page extends Space<PageData> {
     const yText = yBlock.get('prop:text') as Y.Text;
     const text = new Text(this, yText);
     model.text = text;
+    if (props.flavour === 'affine:page') {
+      model.tags = yBlock.get('sys:tags') as Y.Map<Y.Map<unknown>>;
+    }
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {

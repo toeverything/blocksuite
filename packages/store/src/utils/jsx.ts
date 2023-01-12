@@ -29,7 +29,7 @@ function isValidRecord(data: unknown): data is DocRecord {
   return true;
 }
 
-const IGNORE_PROPS = ['sys:id', 'sys:flavour', 'sys:children'];
+const IGNORE_PROPS = ['sys:id', 'sys:flavour', 'sys:children', 'sys:tags'];
 
 export function yDocToJSXNode(
   serializedDoc: Record<string, unknown>,
