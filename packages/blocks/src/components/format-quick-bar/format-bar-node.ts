@@ -34,9 +34,6 @@ export class FormatQuickBar extends LitElement {
   top: string | null = null;
 
   @property()
-  bottom: string | null = null;
-
-  @property()
   abortController = new AbortController();
 
   // Sometimes the quick bar need to update position
@@ -226,7 +223,6 @@ export class FormatQuickBar extends LitElement {
     const styles = styleMap({
       left: this.left,
       top: this.top,
-      bottom: this.bottom,
     });
     return html`<div class="format-quick-bar" style="${styles}">
       ${paragraphItems}
