@@ -211,6 +211,10 @@ export class DragHandle extends LitElement {
       e.pageY,
       true
     );
+    if (isFirefox) {
+      this._currentPageX = e.pageX;
+      this._currentPageY = e.pageY;
+    }
     if (clickDragState) {
       this._cursor = clickDragState.index;
       this.setSelectedBlocks([
