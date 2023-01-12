@@ -1,10 +1,11 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
 import { ShapeBlockTag } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { BLOCK_ID_ATTR as ATTR } from './consts.js';
-import { assertExists, matchFlavours } from './std.js';
 import type { IPoint } from './gesture.js';
+import { assertExists, matchFlavours } from './std.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -381,13 +382,7 @@ export function getTextNodeBySelectedBlock(selectedBlock: SelectedBlock) {
   }
   const quill = richText.quill;
 
-  const [leaf, leafOffset]: [
-    {
-      // Blot
-      domNode: HTMLElement;
-    },
-    number
-  ] = quill.getLeaf(offset);
+  const [leaf, leafOffset]: [LeafBlot, number] = quill.getLeaf(offset);
   return [leaf.domNode, leafOffset] as const;
 }
 
