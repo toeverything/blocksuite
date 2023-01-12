@@ -207,8 +207,8 @@ export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
     const realValue = yBlock.get(prefixedKey);
     if (realValue instanceof Y.Array) {
       props[key] = createYArrayProxy(realValue, {
-        // TODO: we could control readonly mode in this level.
-        readonly: false,
+        // downstream model shouldn't modify the data
+        readonly: true,
       });
     } else {
       props[key] = prefixedProps[prefixedKey];
