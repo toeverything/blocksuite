@@ -77,15 +77,50 @@ export class AwarenessAdapter<
     this.awareness.setLocalStateField('cursor', range);
   }
 
-  public setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
-    const oldFlags = this.awareness.getLocalState()?.flags ?? {};
-    this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
+  public setFlag<Key extends keyof Flags>(
+    field: Key,
+    value: Flags[Key],
+    options?: {
+      client: number;
+    }
+  ) {
+    if (options?.client) {
+      const states = this.awareness.getStates();
+      const state = states.get(options.client);
+      const oldFlags = state?.flags ?? {};
+      states.set(options.client, {
+        ...state,
+        flags: {
+          ...oldFlags,
+          [field]: value,
+        },
+      });
+    } else {
+      const oldFlags = this.awareness.getLocalState()?.flags ?? {};
+      this.awareness.setLocalStateField('flags', {
+        ...oldFlags,
+        [field]: value,
+      });
+    }
   }
 
-  public getFlag<Key extends keyof Flags>(field: Key) {
-    const flags = this.awareness.getLocalState()?.flags;
-    assertExists(flags);
-    return flags[field];
+  public getFlag<Key extends keyof Flags>(
+    field: Key,
+    options?: {
+      client: number;
+    }
+  ) {
+    if (options?.client) {
+      const flag = this.awareness.getStates().get(options.client)?.flags?.[
+        field
+      ];
+      assertExists(flag);
+      return flag;
+    } else {
+      const flags = this.awareness.getLocalState()?.flags;
+      assertExists(flags);
+      return flags[field];
+    }
   }
 
   public getLocalCursor(): SelectionRange | undefined {
