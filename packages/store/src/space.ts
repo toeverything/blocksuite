@@ -13,7 +13,7 @@ export interface StackItem {
 export class Space<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Data extends Record<string, unknown> = Record<string, any>,
-  Flags extends Record<string, boolean> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
   /** unprefixed id */
   readonly id: string;
