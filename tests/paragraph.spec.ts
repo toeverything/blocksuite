@@ -268,7 +268,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,160]"
+  prop:xywh="[0,0,720,152]"
 >
   <affine:paragraph
     prop:text="123"
@@ -299,7 +299,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,160]"
+  prop:xywh="[0,0,720,152]"
 >
   <affine:paragraph
     prop:text="123"
@@ -339,7 +339,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,80]"
+  prop:xywh="[0,0,720,72]"
 >
   <affine:paragraph
     prop:text="123"
@@ -360,7 +360,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text="123"
@@ -404,7 +404,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text="123"
