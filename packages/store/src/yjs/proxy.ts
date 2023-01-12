@@ -1,4 +1,4 @@
-import { Map as YMap } from 'yjs';
+import { Map as YMap, Array as YArray } from 'yjs';
 
 export type DataInitializer<Data extends Record<string, unknown>> = {
   [Key in keyof Data]: Data[Key] extends Record<string, unknown>
@@ -6,18 +6,23 @@ export type DataInitializer<Data extends Record<string, unknown>> = {
     : () => Data[Key];
 };
 
-export type ProxyConfig<Data extends Record<string, unknown>> = {
+export type MapProxyConfig<Data extends Record<string, unknown>> = {
   readonly?: boolean;
   initializer?: DataInitializer<Partial<Data>>;
 };
 
-function initialize(object: Record<string, unknown>, yMap: YMap<unknown>) {
+export type ArrayProxyConfig<Value> = {
+  readonly?: boolean;
+};
+
+function initializeMap(object: Record<string, unknown>, yMap: YMap<unknown>) {
   yMap.forEach((value, key) => {
     object[key] = value;
   });
 }
 
-function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
+function subscribeMap(object: Record<string, unknown>, yMap: YMap<unknown>) {
+  // fixme: cleanup the side effect
   yMap.observe(event => {
     if (event.changes.keys.size === 0) {
       // skip empty event
@@ -40,24 +45,69 @@ function subscribe(object: Record<string, unknown>, yMap: YMap<unknown>) {
   });
 }
 
+function initializeArray(array: unknown[], yArray: YArray<unknown>) {
+  array.push(...yArray.toArray());
+}
+
+function subscribeArray(array: unknown[], yArray: YArray<unknown>) {
+  yArray.observe(event => {
+    // todo
+  });
+}
+
+export function createYArrayProxy<Value = unknown>(
+  yArray: YArray<unknown>,
+  config: ArrayProxyConfig<Value> = {}
+) {
+  const { readonly = false } = config;
+  const array: Value[] = [];
+  if (!(yArray instanceof YArray)) {
+    throw new TypeError();
+  }
+  initializeArray(array, yArray);
+  subscribeArray(array, yArray);
+  return new Proxy(array, {
+    has: (target, p) => {
+      return Reflect.has(target, p);
+    },
+    set: (target, p, newValue, receiver) => {
+      if (readonly) {
+        throw new Error('modify data is not allowed');
+      } else {
+        if (typeof p === 'string') {
+          const idx = Number(p);
+          if (Number.isFinite(idx) || Number.isNaN(idx)) {
+            throw new Error('p is not a number');
+          }
+          yArray.delete(idx);
+          yArray.insert(idx, newValue);
+          return Reflect.set(target, p, newValue, receiver);
+        } else {
+          throw new Error('key cannot be a symbol');
+        }
+      }
+    },
+  });
+}
+
 export function createYMapProxy<Data extends Record<string, unknown>>(
   yMap: YMap<unknown>,
-  config: ProxyConfig<Data> = {}
+  config: MapProxyConfig<Data> = {}
 ): Data {
   const { readonly = false, initializer } = config;
   const object = {} as Data;
   if (!(yMap instanceof YMap)) {
     throw new TypeError();
   }
-  initialize(object, yMap);
-  subscribe(object, yMap);
+  initializeMap(object, yMap);
+  subscribeMap(object, yMap);
   return new Proxy(object, {
     has: (target, p) => {
       return Reflect.has(target, p);
     },
     set: (target, p, value, receiver) => {
       if (readonly) {
-        throw new Error('Modify data is not allowed');
+        throw new Error('modify data is not allowed');
       } else {
         if (typeof p === 'string') {
           yMap.set(p, value);
