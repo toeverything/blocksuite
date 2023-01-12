@@ -530,6 +530,14 @@ export class DefaultSelectionManager {
   };
 
   private _onSelectionChange = (e: Event) => {
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+    if (!selection.containsNode(this._container, true)) {
+      return;
+    }
+
     const range = getCurrentRange();
 
     if (range.collapsed) {
@@ -539,9 +547,9 @@ export class DefaultSelectionManager {
       return;
     }
 
-    // TODO fix direction
     showFormatQuickBar({
-      direction: 'right-bottom',
+      direction:
+        range.direction === 'left-right' ? 'left-bottom' : 'right-bottom',
     });
   };
 
