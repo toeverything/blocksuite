@@ -3,6 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import type { FrameBlockModel, RootBlockModel } from '../../index.js';
 import type {
@@ -24,6 +25,8 @@ import {
   getSelectionBoxBound,
 } from './utils.js';
 import { SHAPE_PADDING } from '../../index.js';
+import { toolbarDrawConfig, toolbarActionConfig } from '../utils/const.js';
+import { toolbarStyle } from './styles.js';
 
 function getCommonRectStyle(
   rect: DOMRect,
@@ -185,6 +188,64 @@ export function EdgelessBlockChildrenContainer(
       child => EdgelessBlockChild(child as FrameBlockModel, host, viewport)
     )}
   `;
+}
+
+@customElement('edgeless-toolbar')
+export class EdgelessToolBar extends LitElement {
+  static styles = toolbarStyle;
+
+  @property()
+  page!: Page;
+
+  showGrid = false;
+
+  private _showToolBar(
+    config: {
+      id: string;
+      name: string;
+      icon: TemplateResult | ((toolbar: EdgelessToolBar) => TemplateResult);
+      tooltip: string;
+      disabled: boolean;
+      action?: (page: Page, toolbar: EdgelessToolBar) => void;
+    }[]
+  ) {
+    return html`
+      <div>
+        ${config.map(({ id, icon, tooltip, disabled, action }) => {
+          if (icon instanceof Function) {
+            icon = icon(this);
+          }
+          return html`<div
+            class="toolbar-basic ${disabled
+              ? 'toolbar-disabled'
+              : 'toolbar'} has-tool-tip"
+            @click=${() => {
+              action?.(this.page, this);
+              this.requestUpdate();
+            }}
+          >
+            ${icon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >${tooltip}</tool-tip
+            >
+          </div>`;
+        })}
+      </div>
+    `;
+  }
+
+  render() {
+    return html`
+      <div class="edgeless-toolbar-container">
+        <div class="styled-toolbar-wrapper">
+          ${this._showToolBar(toolbarDrawConfig)}
+        </div>
+        <div class="styled-toolbar-wrapper">
+          ${this._showToolBar(toolbarActionConfig)}
+        </div>
+      </div>
+    `;
+  }
 }
 
 @customElement('edgeless-selected-rect')
@@ -434,5 +495,6 @@ export class EdgelessSelectedRect extends LitElement {
 declare global {
   interface HTMLElementTagNameMap {
     'edgeless-selected-rect': EdgelessSelectedRect;
+    'edgeless-toolbar': EdgelessToolBar;
   }
 }
