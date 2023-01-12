@@ -90,7 +90,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text={
@@ -141,7 +141,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text="123"
@@ -165,7 +165,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text={
@@ -251,7 +251,7 @@ test('should single line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text={
@@ -290,7 +290,7 @@ test('should single line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text={
@@ -338,7 +338,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text={
@@ -405,7 +405,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text={
@@ -474,7 +474,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="hello"
@@ -488,7 +488,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="hello"
@@ -502,7 +502,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:list
     prop:checked={false}
@@ -517,7 +517,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:list
     prop:checked={false}
@@ -532,7 +532,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="hello"
@@ -572,7 +572,7 @@ test('should cut work single line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="ho"
@@ -588,7 +588,7 @@ test('should cut work single line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,40]"
+  prop:xywh="[0,0,720,32]"
 >
   <affine:paragraph
     prop:text="hello"
@@ -613,7 +613,7 @@ test('should cut work multiple line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text="19"
@@ -629,7 +629,7 @@ test('should cut work multiple line', async ({ page }) => {
     page,
     `
 <affine:frame
-  prop:xywh="[0,0,720,120]"
+  prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
     prop:text="123"

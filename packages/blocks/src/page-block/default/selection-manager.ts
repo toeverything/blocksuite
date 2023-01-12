@@ -37,10 +37,10 @@ import { DragHandle } from '../../components/drag-handle.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
-    rect.left < selectionRect.right + offset.x &&
-    rect.right > selectionRect.left + offset.x &&
-    rect.top < selectionRect.bottom + offset.y &&
-    rect.bottom > selectionRect.top + offset.y
+    rect.left <= selectionRect.right + offset.x &&
+    rect.right >= selectionRect.left + offset.x &&
+    rect.top <= selectionRect.bottom + offset.y &&
+    rect.bottom >= selectionRect.top + offset.y
   );
 }
 

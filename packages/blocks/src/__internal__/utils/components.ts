@@ -92,8 +92,6 @@ export function BlockChildrenContainer(
     <style>
       .affine-block-children-container {
         padding-left: 26px;
-        display: flex;
-        flex-direction: column;
       }
     </style>
     <div class="affine-block-children-container">

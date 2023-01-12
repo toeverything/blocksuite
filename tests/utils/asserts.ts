@@ -46,7 +46,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,40]',
+      'prop:xywh': '[0,0,720,32]',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
