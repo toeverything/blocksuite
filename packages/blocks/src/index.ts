@@ -22,6 +22,7 @@ export * from './divider-block/index.js';
 export * from './embed-block/image/index.js';
 export * from './shape-block/index.js';
 export * from './surface-block/index.js';
+export * from './database-block/index.js';
 export * as SelectionUtils from './__internal__/utils/selection.js';
 export * from './__internal__/utils/types.js';
 export * from './__internal__/utils/common-operations.js';

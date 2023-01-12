@@ -21,6 +21,7 @@ export function BlockElement(
     case 'affine:frame':
     case 'affine:divider':
     case 'affine:code':
+    case 'affine:database':
       return html`
         <${model.tag}
           .model=${model}
@@ -59,7 +60,7 @@ function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
   }
 }
 
-function BlockElementWithService(
+export function BlockElementWithService(
   model: BaseBlockModel,
   host: BlockHost,
   onLoaded: () => void

@@ -24,6 +24,68 @@ declare type BlockSuiteFlags = {
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
+  /**
+   *  Block | Col 1 | Col 2 | Col 3
+   *  Paragraph | hello | 1 | true
+   *  Block | good | 114514 | false
+   */
+
+  interface TagTypeMetadata {
+    /**
+     * color of the tag
+     */
+    color: `#${string}`;
+    /**
+     * width of a column
+     */
+    width: number; // px
+    /**
+     * whether this display in the table
+     */
+    hide: boolean;
+  }
+
+  // Threat this type as a column type
+  interface TagType<BaseValue = unknown> {
+    /**
+     * each instance of tag type has its own unique uuid
+     */
+    id: string;
+    flavour: string;
+    /**
+     * column name
+     */
+    name: string;
+    metadata: TagTypeMetadata;
+    /**
+     * this value is just for hold the `BaseValue`,
+     *  don't use this value in the runtime.
+     */
+    __$TYPE_HOLDER$__?: BaseValue;
+  }
+
+  interface TextTagType extends TagType<string> {
+    flavour: 'affine-tag:text';
+  }
+
+  interface NumberTagType extends TagType<number> {
+    flavour: 'affine-tag:number';
+    decimal: number;
+  }
+
+  interface OptionTagType extends TagType<string> {
+    flavour: 'affine-tag:option';
+    enum: string[];
+  }
+
+  type TagTypes = OptionTagType | NumberTagType | TextTagType;
+
+  // threat this type as row type
+  interface BlockTag<Type extends TagTypes = TagTypes> {
+    type: Type['id'];
+    value: Type['__$TYPE_HOLDER$__'];
+  }
+
   interface IBaseBlockProps {
     flavour: string;
     type: string;
@@ -44,6 +106,7 @@ declare namespace BlockSuiteInternal {
     PageBlockModel,
     ParagraphBlockModel,
     SurfaceBlockModel,
+    DatabaseBlockModel,
   } from '@blocksuite/blocks';
 
   export type BlockModels = {
@@ -56,6 +119,7 @@ declare namespace BlockSuiteInternal {
     'affine:embed': EmbedBlockModel;
     // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
+    'affine:database': DatabaseBlockModel;
   };
 }
 
@@ -112,10 +176,15 @@ declare namespace BlockSuiteModelProps {
     xywh: string;
   }
 
+  interface DatabaseBlockModel {
+    columns: BlockSuiteInternal.TagTypes[];
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface SurfaceBlockModel {}
 
   export type ALL = {
+    'affine:database': DatabaseBlockModel;
     'affine:paragraph': ParagraphBlockModel;
     'affine:page': PageBlockModel;
     'affine:list': ListBlockModel;

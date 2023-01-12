@@ -271,7 +271,7 @@ export class DefaultSelectionManager {
       parentIndex: number
     ) => {
       for (const block of blocks) {
-        if (block.flavour !== 'affine:frame') {
+        if (!matchFlavours(block, ['affine:frame'])) {
           result.push(block);
         }
         block.depth = depth;

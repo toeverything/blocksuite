@@ -64,6 +64,7 @@ async function createTestPage() {
 
 const defaultPageId = 'page0';
 const spaceId = `space:${defaultPageId}`;
+const tagsId = `tags:${defaultPageId}`;
 const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
@@ -88,6 +89,7 @@ describe.concurrent('basic', () => {
         versions: {},
       },
       [spaceId]: {},
+      [tagsId]: {},
     });
   });
 });

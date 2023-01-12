@@ -8,6 +8,7 @@ import type {
 import { PrelimText, Text, TextType } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
+import { createYArrayProxy } from '../yjs/proxy.js';
 import { isPrimitive, SYS_KEYS } from '@blocksuite/global/utils';
 
 export function assertValidChildren(
@@ -93,6 +94,12 @@ export function syncBlockProps(
       yBlock.set('prop:color', props.color ?? 'black');
     }
   }
+  if (props.flavour === 'affine:database') {
+    if (!yBlock.has('prop:columns')) {
+      const columns = Y.Array.from(props.columns ?? []);
+      yBlock.set('prop:columns', columns);
+    }
+  }
 }
 
 export function trySyncTextProp(
@@ -150,9 +157,8 @@ export function trySyncTextProp(
   }
 }
 
-export function toBlockProps(
-  prefixedProps: PrefixedBlockProps
-): Partial<BlockProps> {
+export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
+  const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
   Object.keys(prefixedProps).forEach(key => {
     if (prefixedProps[key]) {
@@ -164,7 +170,15 @@ export function toBlockProps(
     if (SYS_KEYS.has(prefixedKey)) return;
 
     const key = prefixedKey.replace('prop:', '');
-    props[key] = prefixedProps[prefixedKey];
+    const realValue = yBlock.get(prefixedKey);
+    if (realValue instanceof Y.Array) {
+      props[key] = createYArrayProxy(realValue, {
+        // downstream model shouldn't modify the data
+        readonly: true,
+      });
+    } else {
+      props[key] = prefixedProps[prefixedKey];
+    }
   });
 
   return props;

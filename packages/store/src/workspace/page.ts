@@ -23,6 +23,9 @@ import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { matchFlavours } from '@blocksuite/global/utils';
+import BlockTag = BlockSuiteInternal.BlockTag;
+import TagType = BlockSuiteInternal.TagType;
+
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -58,6 +61,7 @@ export class Page extends Space<PageData> {
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
   private _synced = false;
+  private _tags: Y.Map<Y.Map<unknown>>;
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
@@ -81,6 +85,7 @@ export class Page extends Space<PageData> {
     idGenerator: IdGenerator = uuidv4
   ) {
     super(id, doc, awareness);
+    this._tags = this.doc.getMap(`tags:${this.id}`);
     this.workspace = workspace;
     this._idGenerator = idGenerator;
   }
@@ -155,6 +160,35 @@ export class Page extends Space<PageData> {
 
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
+  }
+
+  updateBlockTag(model: BaseBlockModel, tag: BlockTag) {
+    const already = this._tags.has(model.id);
+    let tags: Y.Map<unknown>;
+    if (!already) {
+      tags = new Y.Map();
+    } else {
+      tags = this._tags.get(model.id) as Y.Map<unknown>;
+    }
+    this.transact(() => {
+      if (!already) {
+        this._tags.set(model.id, tags);
+      }
+      tags.set(tag.type, tag);
+    });
+  }
+
+  getBlockTags(model: BaseBlockModel): Record<string, BlockTag> {
+    const tags = this._tags.get(model.id);
+    if (!tags) {
+      return {};
+    }
+    return tags.toJSON();
+  }
+
+  getBlockTagByType(model: BaseBlockModel, type: TagType): BlockTag | null {
+    const tags = this.getBlockTags(model);
+    return tags[type.id] ?? null;
   }
 
   getBlockByFlavour(blockFlavour: string) {
@@ -579,8 +613,7 @@ export class Page extends Space<PageData> {
     const isRoot = this._blockMap.size === 0;
     let isSurface = false;
 
-    const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-    const props = toBlockProps(prefixedProps) as BlockProps;
+    const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
     if (model.flavour === 'affine:surface') {
       isSurface = true;
