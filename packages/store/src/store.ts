@@ -46,7 +46,7 @@ export interface SSROptions {
 }
 
 export interface StoreOptions<
-  Flags extends Record<string, boolean> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];

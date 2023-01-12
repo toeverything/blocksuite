@@ -18,7 +18,7 @@ interface UserInfo {
 }
 
 interface AwarenessState<
-  Flags extends Record<string, boolean> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
   cursor?: SelectionRange;
   user?: UserInfo;
@@ -26,7 +26,7 @@ interface AwarenessState<
 }
 
 interface AwarenessMessage<
-  Flags extends Record<string, boolean> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
   id: number;
   type: 'add' | 'update' | 'remove';
@@ -34,7 +34,7 @@ interface AwarenessMessage<
 }
 
 export interface AwarenessMetadataMessage<
-  Flags extends Record<string, boolean> = BlockSuiteFlags,
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
   Key extends keyof Flags = keyof Flags
 > {
   field: Key;
@@ -42,7 +42,7 @@ export interface AwarenessMetadataMessage<
 }
 
 export class AwarenessAdapter<
-  Flags extends Record<string, boolean> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly space: Space<any, Flags>;

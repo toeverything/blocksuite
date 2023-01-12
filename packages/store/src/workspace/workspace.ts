@@ -213,6 +213,10 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
   };
 }
 
+const flagsPreset: BlockSuiteFlags = {
+  enable_drag_handle: true,
+} as const;
+
 export class Workspace {
   static Y = Y;
   public readonly room: string | undefined;
@@ -246,7 +250,10 @@ export class Workspace {
       'space:meta',
       this.doc,
       this._store.awareness,
-      options.defaultFlags
+      {
+        ...flagsPreset,
+        ...options.defaultFlags,
+      }
     );
 
     this.signals = {
