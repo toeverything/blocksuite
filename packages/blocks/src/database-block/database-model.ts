@@ -1,6 +1,5 @@
 import { BaseBlockModel, Page } from '@blocksuite/store';
 import TagType = BlockSuiteInternal.TagType;
-import TagTypes = BlockSuiteInternal.TagTypes;
 
 export class DatabaseModel extends BaseBlockModel {
   /**
@@ -13,13 +12,5 @@ export class DatabaseModel extends BaseBlockModel {
   ) {
     super(page, props);
     this.columns = props.columns ?? [];
-  }
-
-  addColumn(tagType: TagTypes) {
-    // todo
-  }
-
-  deleteColumn() {
-    // todo
   }
 }
