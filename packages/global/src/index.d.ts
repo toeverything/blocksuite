@@ -104,6 +104,9 @@ namespace BlockSuiteModelProps {
     xywh: string;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface SurfaceBlockModel {}
+
   export type ALL = {
     'affine:paragraph': ParagraphBlockModel;
     'affine:page': PageBlockModel;
