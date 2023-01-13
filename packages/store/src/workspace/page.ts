@@ -112,10 +112,16 @@ export class Page extends Space<PageData> {
   }
 
   get canUndo() {
+    if (this.awareness.getFlag('readonly')) {
+      return false;
+    }
     return this._history.canUndo();
   }
 
   get canRedo() {
+    if (this.awareness.getFlag('readonly')) {
+      return false;
+    }
     return this._history.canRedo();
   }
 
@@ -124,10 +130,16 @@ export class Page extends Space<PageData> {
   }
 
   undo() {
+    if (this.awareness.getFlag('readonly')) {
+      return;
+    }
     this._history.undo();
   }
 
   redo() {
+    if (this.awareness.getFlag('readonly')) {
+      return;
+    }
     this._history.redo();
   }
 
