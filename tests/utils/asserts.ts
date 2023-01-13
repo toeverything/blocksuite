@@ -412,7 +412,10 @@ export function assertAlmostEqual(
   expected: number,
   precision = 0.001
 ) {
-  expect(Math.abs(actual - expected)).toBeLessThan(precision);
+  expect(
+    Math.abs(actual - expected),
+    `expected: ${expected}, but actual: ${actual}`
+  ).toBeLessThan(precision);
 }
 
 /**
