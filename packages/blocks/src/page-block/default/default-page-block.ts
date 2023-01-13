@@ -235,7 +235,7 @@ export class DefaultPageBlockComponent
       });
     }
     if (changedProperties.has('readonly')) {
-      this.page.awareness.setFlag('readonly', this.readonly);
+      this.page.awareness.setReadonly(this.readonly);
     }
 
     this._tryUpdateMetaTitle();

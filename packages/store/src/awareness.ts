@@ -4,6 +4,7 @@ import type { Awareness } from 'y-protocols/awareness.js';
 import type { Space } from './space.js';
 import { Signal } from './utils/signal.js';
 import { assertExists } from './utils/utils.js';
+import { merge } from 'merge';
 
 export interface SelectionRange {
   id: string;
@@ -64,10 +65,10 @@ export class AwarenessAdapter<
     this.signals.update.on(this._onAwarenessMessage);
     const upstreamFlags = awareness.getLocalState()?.flags;
     if (upstreamFlags) {
-      this.awareness.setLocalStateField('flags', {
-        ...defaultFlags,
-        ...upstreamFlags,
-      });
+      this.awareness.setLocalStateField(
+        'flags',
+        merge(defaultFlags, upstreamFlags)
+      );
     } else {
       this.awareness.setLocalStateField('flags', { ...defaultFlags });
     }
@@ -86,6 +87,15 @@ export class AwarenessAdapter<
     const flags = this.awareness.getLocalState()?.flags;
     assertExists(flags);
     return flags[field];
+  }
+
+  public setReadonly(value: boolean): void {
+    const flags = this.getFlag('readonly');
+    this.setFlag('readonly', { ...flags, [this.space.prefixedId]: value });
+  }
+
+  public isReadonly(): boolean {
+    return this.getFlag('readonly')[this.space.prefixedId] ?? false;
   }
 
   public getLocalCursor(): SelectionRange | undefined {

@@ -214,6 +214,7 @@ importers:
       ky: ^0.33.1
       lib0: ^0.2.58
       lit: ^2.6.0
+      merge: ^2.1.1
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
       yjs: ^13.5.44
@@ -226,6 +227,7 @@ importers:
       idb-keyval: 6.2.0
       ky: 0.33.1
       lib0: 0.2.58
+      merge: 2.1.1
       y-protocols: 1.0.5
       y-webrtc: 10.2.3
     devDependencies:
@@ -4710,6 +4712,10 @@ packages:
   /merge-stream/2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
     dev: true
+
+  /merge/2.1.1:
+    resolution: {integrity: sha512-jz+Cfrg9GWOZbQAnDQ4hlVnQky+341Yk5ru8bZSe6sIDTCIg8n9i/u7hSQGSVOF3C7lH6mGtqjkiT9G4wFLL0w==}
+    dev: false
 
   /merge2/1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}

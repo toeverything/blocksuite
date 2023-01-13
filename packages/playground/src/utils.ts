@@ -51,7 +51,9 @@ export function getOptions(): Pick<
     idGenerator,
     defaultFlags: {
       enable_drag_handle: true,
-      readonly: false,
+      readonly: {
+        'space:page0': false,
+      },
     },
   };
 }
