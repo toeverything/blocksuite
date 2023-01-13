@@ -560,12 +560,7 @@ export class DefaultSelectionManager {
       return;
     }
 
-    if (selection.anchorNode !== selection.focusNode) {
-      // Fix selection direction after support multi-line selection by keyboard
-      console.warn(
-        'format-quick-bar direction may not be correct! selection anchor and focus are not the same node'
-      );
-    }
+    // Fix selection direction after support multi-line selection by keyboard
     // FIXME: if selection produced by mouse, it always be `left-right`
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
     let direction: 'left-right' | 'right-left' | 'none' = 'none';
