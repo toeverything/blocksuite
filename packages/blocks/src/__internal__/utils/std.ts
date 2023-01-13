@@ -109,6 +109,39 @@ export const throttle = <
   } as T;
 };
 
+export const debounce = <
+  Args extends unknown[],
+  T extends (this: unknown, ...args: Args) => void
+>(
+  fn: T,
+  limit: number,
+  { leading = true, trailing = true } = {}
+): T => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let lastArgs: Args | null = null;
+
+  const setTimer = () => {
+    if (lastArgs && trailing) {
+      fn(...lastArgs);
+      lastArgs = null;
+      timer = setTimeout(setTimer, limit);
+    } else {
+      timer = null;
+    }
+  };
+
+  return function (this: unknown, ...args: Parameters<T>) {
+    if (timer) {
+      lastArgs = args;
+      clearTimeout(timer);
+    }
+    if (leading && !timer) {
+      fn.apply(this, args);
+    }
+    timer = setTimeout(setTimer, limit);
+  } as T;
+};
+
 /**
  * This function takes a value value, a minimum value min, and a maximum value max,
  * and returns the value of value clamped to the range [min, max].

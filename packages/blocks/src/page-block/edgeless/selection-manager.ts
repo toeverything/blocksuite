@@ -4,6 +4,7 @@ import {
   MouseMode,
   RootBlockModel,
   getBlockById,
+  noop,
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -194,7 +195,8 @@ export class EdgelessSelectionManager {
       this._onContainerDblClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
-      this._onContainerContextMenu
+      this._onContainerContextMenu,
+      noop
     );
     this._selectionUpdateCallback = this._container.signals.updateSelection.on(
       state => {

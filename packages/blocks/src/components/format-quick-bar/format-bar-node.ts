@@ -4,6 +4,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { formatConfig, paragraphConfig } from '../../page-block/utils/const.js';
 import {
+  DragDirection,
   getFormat,
   updateSelectedTextType,
 } from '../../page-block/utils/index.js';
@@ -39,6 +40,9 @@ export class FormatQuickBar extends LitElement {
   @property()
   positionUpdated = new Signal();
 
+  @property()
+  direction!: DragDirection;
+
   @state()
   models: BaseBlockModel[] = [];
 
@@ -48,7 +52,7 @@ export class FormatQuickBar extends LitElement {
   @state()
   paragraphType = 'text';
 
-  @property()
+  @state()
   paragraphPanelHoverDelay = 150;
 
   @state()
@@ -80,6 +84,10 @@ export class FormatQuickBar extends LitElement {
       // Prevent click event from making selection lost
       e.preventDefault();
     });
+    // TODO add transition
+    this.abortController.signal.addEventListener('abort', () => {
+      this.remove();
+    });
   }
 
   private _onHover() {
@@ -101,7 +109,7 @@ export class FormatQuickBar extends LitElement {
       // Prepare to disappear
       this.paragraphPanelTimer = window.setTimeout(async () => {
         this.showParagraphPanel = 'hidden';
-      }, this.paragraphPanelHoverDelay);
+      }, this.paragraphPanelHoverDelay * 2);
       return;
     }
     clearTimeout(this.paragraphPanelTimer);
@@ -139,6 +147,7 @@ export class FormatQuickBar extends LitElement {
               // Already in the target format, convert back to text
               const { flavour: defaultFlavour, type: defaultType } =
                 paragraphConfig[0];
+              if (this.paragraphType === defaultType) return;
               updateSelectedTextType(defaultFlavour, defaultType, this.page);
               this.paragraphType = defaultType;
               return;

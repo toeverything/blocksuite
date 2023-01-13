@@ -19,6 +19,7 @@ import {
   isInput,
   IPoint,
   doesInSamePath,
+  getCurrentRange,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -243,7 +244,8 @@ export class DefaultSelectionManager {
         this._onContainerDblClick,
         this._onContainerMouseMove,
         this._onContainerMouseOut,
-        this._onContainerContextMenu
+        this._onContainerContextMenu,
+        this._onSelectionChange
       )
     );
   }
@@ -525,6 +527,30 @@ export class DefaultSelectionManager {
 
   private _onContainerMouseOut = (e: SelectionEvent) => {
     // console.log('mouseout', e);
+  };
+
+  private _onSelectionChange = (e: Event) => {
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+    if (!selection.containsNode(this._container, true)) {
+      return;
+    }
+
+    const range = getCurrentRange();
+
+    if (range.collapsed) {
+      return;
+    }
+    if (this._container.readonly) {
+      return;
+    }
+
+    showFormatQuickBar({
+      direction:
+        range.direction === 'left-right' ? 'left-bottom' : 'right-bottom',
+    });
   };
 
   clearRects() {

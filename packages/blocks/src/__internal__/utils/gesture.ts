@@ -4,6 +4,7 @@ import {
   setEndRange,
   setStartRange,
 } from './selection.js';
+import { debounce } from './std.js';
 import { MOVE_DETECT_THRESHOLD } from './consts.js';
 
 export interface IPoint {
@@ -118,7 +119,8 @@ export function initMouseEventHandlers(
   onContainerDblClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
-  onContainerContextMenu: (e: SelectionEvent) => void
+  onContainerContextMenu: (e: SelectionEvent) => void,
+  onSelectionChange: (e: Event) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
@@ -237,16 +239,26 @@ export function initMouseEventHandlers(
     );
   };
 
+  const selectionChangeHandler = debounce(e => {
+    if (isDragging) {
+      return;
+    }
+
+    onSelectionChange(e as Event);
+  }, 300);
+
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
+  document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
+    document.removeEventListener('selectionchange', selectionChangeHandler);
   };
   return dispose;
 }
