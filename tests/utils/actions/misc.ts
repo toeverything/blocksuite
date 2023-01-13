@@ -23,6 +23,8 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     'Element affine-embed scheduled an update (generally because a property was set) after an update completed',
     // clipboard.spec.ts
     "TypeError: Cannot read properties of null (reading 'model')",
+    // basic.spec.ts › should readonly mode not be able to modify text
+    'cannot modify data in readonly mode',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
