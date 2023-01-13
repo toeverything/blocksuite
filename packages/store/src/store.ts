@@ -52,7 +52,7 @@ export interface StoreOptions<
   providers?: DocProviderConstructor[];
   awareness?: Awareness;
   idGenerator?: Generator;
-  defaultFlags?: Flags;
+  defaultFlags?: Partial<Flags>;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
