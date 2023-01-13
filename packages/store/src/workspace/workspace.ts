@@ -215,6 +215,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
 
 const flagsPreset: BlockSuiteFlags = {
   enable_drag_handle: true,
+  readonly: false,
 } as const;
 
 export class Workspace {

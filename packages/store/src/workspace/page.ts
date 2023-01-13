@@ -258,6 +258,9 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
+    if (this.awareness.getFlag('readonly')) {
+      throw new Error('cannot create block in readonly mode');
+    }
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
     }
@@ -299,11 +302,17 @@ export class Page extends Space<PageData> {
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
+    if (this.awareness.getFlag('readonly')) {
+      return;
+    }
     const model = this._blockMap.get(id) as BaseBlockModel;
     this.updateBlock(model, props);
   }
 
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
+    if (this.awareness.getFlag('readonly')) {
+      return;
+    }
     const currentParentModel = this.getParent(model);
     const nextParentModel = this.getParent(targetModel);
     if (currentParentModel === null || nextParentModel === null) {
@@ -330,6 +339,9 @@ export class Page extends Space<PageData> {
   }
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
+    if (this.awareness.getFlag('readonly')) {
+      return;
+    }
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
     this.transact(() => {
