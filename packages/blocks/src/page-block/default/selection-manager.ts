@@ -264,26 +264,41 @@ export class DefaultSelectionManager {
     if (!blocks) {
       return [];
     }
-
-    const dfs = (
-      blocks: BaseBlockModel[],
-      depth: number,
-      parentBlock: BaseBlockModel | null,
-      parentIndex: number
-    ) => {
-      for (const block of blocks) {
+    type Item = {
+      parent: BaseBlockModel | null;
+      parentIndex: number;
+      blocks: BaseBlockModel[];
+      depth: number;
+    };
+    const queue: Item[] = [
+      {
+        parent: null,
+        parentIndex: 0,
+        blocks,
+        depth: 0,
+      },
+    ];
+    while (queue.length > 0) {
+      const { blocks, depth, parent, parentIndex } = queue.shift() as Item;
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
         if (block.flavour !== 'affine:frame') {
           result.push(block);
         }
         block.depth = depth;
-        if (parentBlock) {
+        if (parent) {
           block.parentIndex = parentIndex;
         }
-        block.children && dfs(block.children, depth + 1, block, result.length);
+        if (block.children) {
+          queue.push({
+            parent: block,
+            parentIndex: result.length,
+            blocks: block.children,
+            depth: depth + 1,
+          });
+        }
       }
-    };
-
-    dfs(blocks, 0, null, 0);
+    }
     return result;
   }
 
