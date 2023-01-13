@@ -9,10 +9,25 @@ const Module = Quill.import('core/module');
 const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
 
+function addLineNumber(
+  container: HTMLElement,
+  lineHeight: string,
+  i: number | null
+) {
+  const node = document.createElement('div');
+  if (i) {
+    node.innerHTML = `${i}`;
+  } else {
+    node.innerHTML = '';
+    node.style.height = lineHeight;
+  }
+  container.appendChild(node);
+}
+
 class SyntaxCodeBlock extends CodeBlock {
-  private domNode!: HTMLElement;
-  private observer: MutationObserver | null = null;
-  private lastHasWrap = false;
+  private _domNode!: HTMLElement;
+  private _observer: MutationObserver | null = null;
+  private _lastHasWrap = false;
 
   constructor(domNode: HTMLElement) {
     super(domNode);
@@ -28,59 +43,58 @@ class SyntaxCodeBlock extends CodeBlock {
     forceRefresh: boolean,
     codeBlockElement: HTMLElement
   ) {
-    if (!this.observer) {
-      this.initObserver(codeBlockElement);
+    if (!this._observer) {
+      this._initObserver(codeBlockElement);
     }
     this.highlight(highlight, forceRefresh);
     this.updateLineNumber(codeBlockElement);
   }
 
-  private initObserver(codeBlockElement: HTMLElement) {
-    this.observer = new MutationObserver(e => {
+  private _initObserver(codeBlockElement: HTMLElement) {
+    this._observer = new MutationObserver(e => {
       this.updateLineNumber(codeBlockElement, true);
     });
-    this.observer.observe(this.domNode, { attributes: true });
+    this._observer.observe(this._domNode, { attributes: true });
   }
 
   highlight(highlight: (text: string) => string, forceRefresh: boolean) {
-    const text = this.domNode.textContent;
+    const text = this._domNode.textContent;
     assertExists(text);
     if (this.cachedText !== text || forceRefresh) {
       if (text.trim().length > 0 || this.cachedText == null) {
-        this.domNode.innerHTML = highlight(text);
-        this.domNode.normalize();
+        this._domNode.innerHTML = highlight(text);
+        this._domNode.normalize();
         this.attach();
       }
       this.cachedText = text;
     }
   }
 
-  private getCtx() {
-    const fontSize = window.getComputedStyle(this.domNode).fontSize;
+  private _getCtx() {
+    const fontSize = window.getComputedStyle(this._domNode).fontSize;
     const fontFamily = window
-      .getComputedStyle(this.domNode)
+      .getComputedStyle(this._domNode)
       .fontFamily.split(',')[0];
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    assertExists(ctx);
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.font = `${fontSize} ${fontFamily}`;
     return ctx;
   }
 
   updateLineNumber(codeBlockElement: HTMLElement, forceRefresh = false) {
-    const text = this.domNode.textContent;
+    const text = this._domNode.textContent;
     assertExists(text);
-    const ctx = this.getCtx();
-    const hasWrap = this.domNode.classList.contains('wrap');
+    const ctx = this._getCtx();
+    const hasWrap = this._domNode.classList.contains('wrap');
 
     if (
       text === this.cachedTextLineNumber &&
-      !(forceRefresh && hasWrap !== this.lastHasWrap)
+      !(forceRefresh && hasWrap !== this._lastHasWrap)
     ) {
       return;
     }
 
-    this.lastHasWrap = hasWrap;
+    this._lastHasWrap = hasWrap;
     const container = codeBlockElement.querySelector(
       '#line-number'
     ) as HTMLDivElement | null;
@@ -90,8 +104,8 @@ class SyntaxCodeBlock extends CodeBlock {
     }
 
     const lines = text.split('\n');
-    const clientWidth = this.domNode.clientWidth;
-    const lineHeight = window.getComputedStyle(this.domNode).lineHeight;
+    const clientWidth = this._domNode.clientWidth;
+    const lineHeight = window.getComputedStyle(this._domNode).lineHeight;
     let lineNum = 0;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -101,10 +115,10 @@ class SyntaxCodeBlock extends CodeBlock {
       }
       const width = ctx.measureText(line).width;
       const lineWrap = width == 0 ? 1 : Math.ceil(width / clientWidth);
-      addLineNumber(++lineNum, container);
+      addLineNumber(container, lineHeight, ++lineNum);
       if (hasWrap) {
         for (let i = 1; i < lineWrap; i++) {
-          addLineNumber(null, container);
+          addLineNumber(container, lineHeight, null);
         }
       }
     }
@@ -112,17 +126,6 @@ class SyntaxCodeBlock extends CodeBlock {
     // adjust position according to line number digits
     const lineNumberDigits = lineNum.toString().length;
     container.style.left = 32 - lineNumberDigits * 8 + 'px';
-
-    function addLineNumber(i: number | null, container: HTMLElement) {
-      const node = document.createElement('div');
-      if (i) {
-        node.innerHTML = `${i}`;
-      } else {
-        node.innerHTML = '';
-        node.style.height = lineHeight;
-      }
-      container.appendChild(node);
-    }
 
     this.cachedTextLineNumber = text;
   }
