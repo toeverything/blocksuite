@@ -140,6 +140,9 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
+    if (this._space.awareness.getFlag('readonly')) {
+      return;
+    }
     const { _space, _shouldTransact } = this;
     _shouldTransact ? _space.transact(callback) : callback();
   }
