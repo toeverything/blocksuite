@@ -102,6 +102,7 @@ declare namespace BlockSuiteInternal {
     PageBlockModel,
     ParagraphBlockModel,
     SurfaceBlockModel,
+    DatabaseBlockModel,
   } from '@blocksuite/blocks';
 
   export type BlockModels = {
@@ -114,6 +115,7 @@ declare namespace BlockSuiteInternal {
     'affine:embed': EmbedBlockModel;
     // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
+    'affine:database': DatabaseBlockModel;
   };
 }
 

@@ -127,10 +127,7 @@ export function syncBlockProps(
   }
   if (props.flavour === 'affine:database') {
     if (!yBlock.has('prop:columns')) {
-      if (!Array.isArray(props.columns)) {
-        throw new TypeError();
-      }
-      const columns = Y.Array.from(props.columns);
+      const columns = Y.Array.from(props.columns ?? []);
       yBlock.set('prop:columns', columns);
     }
   }

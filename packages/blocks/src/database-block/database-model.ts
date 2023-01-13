@@ -1,5 +1,6 @@
 import { BaseBlockModel, Page } from '@blocksuite/store';
 import TagType = BlockSuiteInternal.TagType;
+import { literal } from 'lit/static-html.js';
 
 export enum DatabaseBlockDisplayMode {
   Text,
@@ -8,6 +9,8 @@ export enum DatabaseBlockDisplayMode {
 }
 
 export class DatabaseBlockModel extends BaseBlockModel {
+  flavour = 'affine:database' as const;
+  tag = literal`affine-database`;
   /**
    * Tip: this is a yArray proxy from upstream
    */
