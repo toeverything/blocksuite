@@ -16,9 +16,9 @@ function addLineNumber(
 ) {
   const node = document.createElement('div');
   if (i) {
-    node.innerHTML = `${i}`;
+    node.textContent = `${i}`;
   } else {
-    node.innerHTML = '';
+    node.textContent = '';
     node.style.height = lineHeight;
   }
   container.appendChild(node);
@@ -70,21 +70,9 @@ class SyntaxCodeBlock extends CodeBlock {
     }
   }
 
-  private _getCtx() {
-    const fontSize = window.getComputedStyle(this.domNode).fontSize;
-    const fontFamily = window
-      .getComputedStyle(this.domNode)
-      .fontFamily.split(',')[0];
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    ctx.font = `${fontSize} ${fontFamily}`;
-    return ctx;
-  }
-
   updateLineNumber(codeBlockElement: HTMLElement, forceRefresh = false) {
     const text = this.domNode.textContent;
     assertExists(text);
-    const ctx = this._getCtx();
     const hasWrap = this.domNode.classList.contains('wrap');
 
     if (
@@ -106,28 +94,45 @@ class SyntaxCodeBlock extends CodeBlock {
     const lines = text.split('\n');
     const clientWidth = this.domNode.clientWidth;
     const lineHeight = window.getComputedStyle(this.domNode).lineHeight;
-    let lineNum = 0;
+    let codeBlockLineNum = 0;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       // quill specifies to end with a newline, it's redundant for line number see https://quilljs.com/docs/delta/#line-formatting
       if (i === lines.length - 1 && line === '') {
         break;
       }
-      const width = ctx.measureText(line).width;
-      const lineWrap = width == 0 ? 1 : Math.ceil(width / clientWidth);
-      addLineNumber(container, lineHeight, ++lineNum);
+
+      const width = this.getLineWidth(line);
+      const lineNumOfOneLine = width == 0 ? 1 : Math.ceil(width / clientWidth);
+      addLineNumber(container, lineHeight, ++codeBlockLineNum);
       if (hasWrap) {
-        for (let i = 1; i < lineWrap; i++) {
+        for (let i = 1; i < lineNumOfOneLine; i++) {
           addLineNumber(container, lineHeight, null);
         }
       }
     }
 
     // adjust position according to line number digits
-    const lineNumberDigits = lineNum.toString().length;
+    const lineNumberDigits = codeBlockLineNum.toString().length;
     container.style.left = 32 - lineNumberDigits * 8 + 'px';
 
     this.cachedTextLineNumber = text;
+  }
+
+  private getLineWidth(line: string) {
+    const tempEle = document.createElement('div');
+    tempEle.classList.add('.affine-code-block-container');
+    // HTMLElement should append to DOM in order to get scrollWidth, which is 0px otherwise
+    this.domNode.appendChild(tempEle);
+    tempEle.textContent = line;
+    tempEle.style.width = '0px';
+    tempEle.style.whiteSpace = 'pre';
+    tempEle.style.position = 'fixed';
+    // hide temp element
+    tempEle.style.left = '-100px';
+    const width = tempEle.scrollWidth;
+    tempEle.remove();
+    return width;
   }
 }
 
