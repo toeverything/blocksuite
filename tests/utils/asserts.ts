@@ -56,6 +56,7 @@ export const defaultStore: SerializedStore = {
       'prop:type': 'text',
     },
   },
+  'tags:page0': {},
 };
 
 export async function assertEmpty(page: Page) {

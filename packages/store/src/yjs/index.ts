@@ -1,5 +1,10 @@
 import * as Y from 'yjs';
-import { createYMapProxy, ProxyConfig } from './proxy.js';
+import {
+  ArrayProxyConfig,
+  createYArrayProxy,
+  createYMapProxy,
+  MapProxyConfig,
+} from './proxy.js';
 
 export type BlockSuiteDocAllowedValue =
   | Record<string, unknown>
@@ -18,8 +23,16 @@ export class BlockSuiteDoc<
     >
       ? Data[Key]
       : never
-  >(key: Key, config?: ProxyConfig<Value>): Value {
+  >(key: Key, config?: MapProxyConfig<Value>): Value {
     const map = super.getMap(key);
-    return createYMapProxy(map, config);
+    return createYMapProxy<Value>(map, config);
+  }
+
+  getArrayProxy<
+    Key extends keyof Data & string,
+    Value = Data[Key] extends Array<infer InferValue> ? InferValue : never
+  >(key: Key, config?: ArrayProxyConfig<Value>): Value[] {
+    const array = super.getArray(key);
+    return createYArrayProxy<Value>(array, config);
   }
 }
