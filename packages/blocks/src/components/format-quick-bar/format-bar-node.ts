@@ -40,6 +40,7 @@ export class FormatQuickBar extends LitElement {
   @property()
   positionUpdated = new Signal();
 
+  // for update position
   @property()
   direction!: DragDirection;
 

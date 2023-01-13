@@ -547,12 +547,12 @@ export class DefaultSelectionManager {
     if (!selection) {
       return;
     }
+    // Exclude selection change outside the editor
     if (!selection.containsNode(this._container, true)) {
       return;
     }
 
-    const range = getCurrentRange();
-
+    const range = getCurrentRange(selection);
     if (range.collapsed) {
       return;
     }
@@ -560,9 +560,23 @@ export class DefaultSelectionManager {
       return;
     }
 
+    if (selection.anchorNode === selection.focusNode) {
+      // Fix selection direction after support multi-line selection by keyboard
+      console.warn(
+        'format-quick-bar direction may not be correct! selection anchor and focus are same node'
+      );
+    }
+    // FIXME: if selection produced by mouse, it always be `left-right`
+    const offsetDelta = selection.anchorOffset - selection.focusOffset;
+    let direction: 'left-right' | 'right-left' | 'none' = 'none';
+
+    if (offsetDelta > 0) {
+      direction = 'right-left';
+    } else if (offsetDelta < 0) {
+      direction = 'left-right';
+    }
     showFormatQuickBar({
-      direction:
-        range.direction === 'left-right' ? 'left-bottom' : 'right-bottom',
+      direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
     });
   };
 

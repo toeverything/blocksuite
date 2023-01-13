@@ -290,19 +290,7 @@ export function getCurrentRange(selection = window.getSelection()) {
   if (selection.rangeCount > 1) {
     console.warn('getCurrentRange may be wrong, rangeCount > 1');
   }
-
-  // FIXME: if selection produced by mouse, it always be `left-right`
-  const offsetDelta = selection.anchorOffset - selection.focusOffset;
-  let direction: 'left-right' | 'right-left' | 'none' = 'none';
-
-  if (offsetDelta > 0) {
-    direction = 'right-left';
-  } else if (offsetDelta < 0) {
-    direction = 'left-right';
-  }
-  return Object.assign(selection.getRangeAt(0), {
-    direction,
-  });
+  return selection.getRangeAt(0);
 }
 
 function textWithoutNode(parentNode: Node, currentNode: Node) {
