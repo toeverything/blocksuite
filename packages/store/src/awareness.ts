@@ -39,10 +39,6 @@ interface AwarenessState<
   cursor?: SelectionRange;
   user?: UserInfo;
   flags: Flags;
-  /**
-   * flag request to others
-   * debug use only.
-   */
   changeRequest?: Request<Flags>[];
   changeResponse?: Response[];
 }
@@ -124,6 +120,10 @@ export class AwarenessAdapter<
     field: Key,
     value: Flags[Key]
   ) {
+    if (!this.getFlag('enable_set_remote_flag')) {
+      console.error('set remote flag feature disabled');
+      return;
+    }
     const oldRequest = this.awareness.getLocalState()?.request ?? [];
     this.awareness.setLocalStateField('request', [
       ...oldRequest,
@@ -182,7 +182,9 @@ export class AwarenessAdapter<
     } else {
       this._resetRemoteCursor();
     }
-    this._handleRemoteFlags();
+    if (this.getFlag('enable_set_remote_flag')) {
+      this._handleRemoteFlags();
+    }
   };
 
   private _handleRemoteFlags() {
