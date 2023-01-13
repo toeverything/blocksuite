@@ -268,7 +268,6 @@ export class DefaultSelectionManager {
     const dfs = (
       blocks: BaseBlockModel[],
       depth: number,
-      parentBlock: BaseBlockModel | null,
       parentIndex: number
     ) => {
       for (const block of blocks) {
@@ -276,14 +275,14 @@ export class DefaultSelectionManager {
           result.push(block);
         }
         block.depth = depth;
-        if (parentBlock) {
+        if (parentIndex !== -1) {
           block.parentIndex = parentIndex;
         }
-        block.children && dfs(block.children, depth + 1, block, result.length);
+        block.children && dfs(block.children, depth + 1, result.length);
       }
     };
 
-    dfs(blocks, 0, null, 0);
+    dfs(blocks, 0, -1);
     return result;
   }
 
