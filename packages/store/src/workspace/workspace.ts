@@ -8,6 +8,7 @@ import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { merge } from 'merge';
 
 export interface PageMeta {
   id: string;
@@ -254,10 +255,7 @@ export class Workspace {
       'space:meta',
       this.doc,
       this._store.awareness,
-      {
-        ...flagsPreset,
-        ...options.defaultFlags,
-      }
+      merge(flagsPreset, options.defaultFlags)
     );
 
     this.signals = {
