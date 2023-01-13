@@ -60,7 +60,8 @@ export type DragHandleGetModelStateWithCursorCallback = (
   pageY: number,
   cursor: number,
   size?: number,
-  skipX?: boolean
+  skipX?: boolean,
+  dragging?: boolean
 ) => EditingState | null;
 
 @customElement('affine-drag-handle')
@@ -210,6 +211,10 @@ export class DragHandle extends LitElement {
       e.pageY,
       true
     );
+    if (isFirefox) {
+      this._currentPageX = e.pageX;
+      this._currentPageY = e.pageY;
+    }
     if (clickDragState) {
       this._cursor = clickDragState.index;
       this.setSelectedBlocks([
@@ -253,6 +258,7 @@ export class DragHandle extends LitElement {
       y,
       this._cursor,
       5,
+      false,
       true
     );
     if (modelState) {
