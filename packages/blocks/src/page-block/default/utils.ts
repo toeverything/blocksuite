@@ -183,16 +183,18 @@ function binarySearchBlockEditingState(
 
         if (!options?.skipX) {
           if (dragging) {
-            if (block.depth) {
+            if (block.depth && block.parentIndex !== undefined) {
               let depth = Math.floor(
                 (blockRect.left - x) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
               );
               if (depth > 0) {
-                assertExists(block.parentIndex);
                 let result = getBlockAndRect(blocks, block.parentIndex);
 
-                while (depth > 1 && result.block.depth) {
-                  assertExists(result.block.parentIndex);
+                while (
+                  depth > 1 &&
+                  result.block.depth &&
+                  result.block.parentIndex !== undefined
+                ) {
                   result = getBlockAndRect(blocks, result.block.parentIndex);
                   depth -= 1;
                 }
