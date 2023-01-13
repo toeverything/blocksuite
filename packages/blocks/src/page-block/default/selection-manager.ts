@@ -260,38 +260,30 @@ export class DefaultSelectionManager {
 
   private get _blocks(): BaseBlockModel[] {
     const result: BaseBlockModel[] = [];
-    const queue = this.page.root?.children.slice();
-    if (!queue) {
+    const blocks = this.page.root?.children.slice();
+    if (!blocks) {
       return [];
     }
-    let layer = 0;
-    let index = 0;
-    let depth = -1;
-    while (queue.length) {
-      const length = queue.length;
-      for (let i = 0; i < length; i++) {
-        const blockModel = queue.shift();
-        assertExists(blockModel);
-        const children = blockModel.children.length
-          ? [...blockModel.children]
-          : [];
-        // ignore level 0, as layer 0 is all affine:frame block
-        if (layer > 0) {
-          depth = blockModel.depth || 0;
-          index = result.push(blockModel) - 1;
+
+    const dfs = (
+      blocks: BaseBlockModel[],
+      depth: number,
+      parentBlock: BaseBlockModel | null,
+      parentIndex: number
+    ) => {
+      for (const block of blocks) {
+        if (block.flavour !== 'affine:frame') {
+          result.push(block);
         }
-        if (children.length) {
-          queue.unshift(
-            ...children.map(block => {
-              block.depth = depth + 1;
-              block.parentIndex = index;
-              return block;
-            })
-          );
+        block.depth = depth;
+        if (parentBlock) {
+          block.parentIndex = parentIndex;
         }
+        block.children && dfs(block.children, depth + 1, block, result.length);
       }
-      layer++;
-    }
+    };
+
+    dfs(blocks, 0, null, 0);
     return result;
   }
 
