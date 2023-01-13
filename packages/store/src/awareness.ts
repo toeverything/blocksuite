@@ -5,6 +5,7 @@ import type { Space } from './space.js';
 import { Signal } from './utils/signal.js';
 import { assertExists } from './utils/utils.js';
 import { merge } from 'merge';
+import { uuidv4 } from './utils/id-generator.js';
 
 export interface SelectionRange {
   id: string;
@@ -18,12 +19,32 @@ interface UserInfo {
   color: string;
 }
 
+type Request<
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
+  Key extends keyof Flags = keyof Flags
+> = {
+  id: string;
+  clientId: number;
+  field: Key;
+  value: Flags[Key];
+};
+
+type Response = {
+  id: string;
+};
+
 interface AwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
   cursor?: SelectionRange;
   user?: UserInfo;
   flags: Flags;
+  /**
+   * flag request to others
+   * debug use only.
+   */
+  changeRequest?: Request<Flags>[];
+  changeResponse?: Response[];
 }
 
 interface AwarenessMessage<
@@ -98,14 +119,31 @@ export class AwarenessAdapter<
     return this.getFlag('readonly')[this.space.prefixedId] ?? false;
   }
 
+  setRemoteFlag<Key extends keyof Flags>(
+    clientId: number,
+    field: Key,
+    value: Flags[Key]
+  ) {
+    const oldRequest = this.awareness.getLocalState()?.request ?? [];
+    this.awareness.setLocalStateField('request', [
+      ...oldRequest,
+      {
+        id: uuidv4(),
+        clientId,
+        field,
+        value,
+      },
+    ] satisfies Request<Flags>[]);
+  }
+
   public getLocalCursor(): SelectionRange | undefined {
     const states = this.awareness.getStates();
     const awarenessState = states.get(this.awareness.clientID);
     return awarenessState?.cursor;
   }
 
-  public getStates(): Map<number, AwarenessState> {
-    return this.awareness.getStates() as Map<number, AwarenessState>;
+  public getStates(): Map<number, AwarenessState<Flags>> {
+    return this.awareness.getStates() as Map<number, AwarenessState<Flags>>;
   }
 
   private _onAwarenessChange = (diff: {
@@ -144,7 +182,74 @@ export class AwarenessAdapter<
     } else {
       this._resetRemoteCursor();
     }
+    this._handleRemoteFlags();
   };
+
+  private _handleRemoteFlags() {
+    const nextTick: (() => void)[] = [];
+    const localState = this.awareness.getLocalState();
+    const request = (this.awareness.getLocalState()?.request ??
+      []) as Request<Flags>[];
+    const selfResponse = [] as Response[];
+    const fakeDirtyResponse = [] as Response[];
+    if (localState && Array.isArray(localState.response)) {
+      selfResponse.push(...localState.response);
+      fakeDirtyResponse.push(...localState.response);
+    }
+    const response = [] as Response[];
+    for (const [clientId, state] of this.awareness.getStates()) {
+      if (clientId === this.awareness.clientID) {
+        continue;
+      }
+      if (Array.isArray(state.response)) {
+        response.push(...state.response);
+      }
+      if (Array.isArray(state.request)) {
+        const remoteRequest = state.request as Request<Flags>[];
+        selfResponse.forEach((response, idx) => {
+          if (response === null) {
+            return;
+          }
+          const index = remoteRequest.findIndex(
+            request => request.id === response.id
+          );
+          if (index === -1) {
+            fakeDirtyResponse[idx].id = 'remove';
+          }
+        });
+        remoteRequest.forEach(request => {
+          if (request.clientId === this.awareness.clientID) {
+            // handle request
+            nextTick.push(() => {
+              this.setFlag(request.field, request.value);
+            });
+            selfResponse.push({
+              id: request.id,
+            });
+          }
+        });
+      }
+    }
+    response.forEach(response => {
+      const idx = request.findIndex(request => request.id === response.id);
+      if (idx !== -1) {
+        request.splice(idx, 1);
+      }
+    });
+    nextTick.push(() => {
+      this.awareness.setLocalStateField('request', request);
+      this.awareness.setLocalStateField(
+        'response',
+        selfResponse.filter((response, idx) =>
+          fakeDirtyResponse[idx] ? fakeDirtyResponse[idx].id !== 'remove' : true
+        )
+      );
+    });
+
+    setTimeout(() => {
+      nextTick.forEach(fn => fn());
+    }, 100);
+  }
 
   private _resetRemoteCursor() {
     this.space.richTextAdapters.forEach(textAdapter =>
