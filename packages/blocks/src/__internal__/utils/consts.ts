@@ -20,3 +20,5 @@ export const HOTKEYS = {
 
 export const MOVE_DETECT_THRESHOLD = 2;
 export const SCROLL_THRESHOLD = 100;
+
+export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;

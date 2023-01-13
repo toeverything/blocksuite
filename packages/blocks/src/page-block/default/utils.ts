@@ -23,6 +23,7 @@ import {
   resetNativeSelection,
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -183,7 +184,9 @@ function binarySearchBlockEditingState(
         if (!options?.skipX) {
           if (dragging) {
             if (block.depth) {
-              let depth = Math.floor((blockRect.left - x) / 26);
+              let depth = Math.floor(
+                (blockRect.left - x) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+              );
               if (depth > 0) {
                 assertExists(block.parentIndex);
                 let result = getBlockAndRect(blocks, block.parentIndex);
@@ -202,7 +205,8 @@ function binarySearchBlockEditingState(
               }
             }
           } else {
-            if (x < detectRect.left || x > detectRect.left + detectRect.width) {
+            // y-coord is checked before
+            if (!isPointIn(x, detectRect)) {
               return null;
             }
           }
@@ -224,6 +228,10 @@ function binarySearchBlockEditingState(
   }
 
   return null;
+}
+
+function isPointIn(x: number, detectRect: DOMRect) {
+  return x >= detectRect.left && x <= detectRect.left + detectRect.width;
 }
 
 function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
