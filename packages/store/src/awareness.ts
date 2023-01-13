@@ -113,9 +113,9 @@ export class AwarenessAdapter<
   }
 
   public isReadonly(): boolean {
-    const readonly = this.getFlag('readonly');
-    if (readonly && typeof readonly === 'object') {
-      return (readonly as Record<string, boolean>)[this.space.prefixedId];
+    const rd = this.getFlag('readonly');
+    if (rd && typeof rd === 'object') {
+      return (rd as Record<string, boolean>)[this.space.prefixedId];
     } else {
       return false;
     }
