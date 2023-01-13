@@ -3,7 +3,6 @@ import type { RelativePosition } from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
 import type { Space } from './space.js';
 import { Signal } from './utils/signal.js';
-import { assertExists } from './utils/utils.js';
 import { merge } from 'merge';
 import { uuidv4 } from './utils/id-generator.js';
 
@@ -100,19 +99,26 @@ export class AwarenessAdapter<
     this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
   }
 
-  public getFlag<Key extends keyof Flags>(field: Key) {
+  public getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
     const flags = this.awareness.getLocalState()?.flags;
-    assertExists(flags);
     return flags[field];
   }
 
   public setReadonly(value: boolean): void {
-    const flags = this.getFlag('readonly');
-    this.setFlag('readonly', { ...flags, [this.space.prefixedId]: value });
+    const flags = this.getFlag('readonly') ?? {};
+    this.setFlag('readonly', {
+      ...flags,
+      [this.space.prefixedId]: value,
+    } as Flags['readonly']);
   }
 
   public isReadonly(): boolean {
-    return this.getFlag('readonly')[this.space.prefixedId] ?? false;
+    const readonly = this.getFlag('readonly');
+    if (readonly && typeof readonly === 'object') {
+      return (readonly as Record<string, boolean>)[this.space.prefixedId];
+    } else {
+      return false;
+    }
   }
 
   setRemoteFlag<Key extends keyof Flags>(
@@ -182,7 +188,7 @@ export class AwarenessAdapter<
     } else {
       this._resetRemoteCursor();
     }
-    if (this.getFlag('enable_set_remote_flag')) {
+    if (this.getFlag('enable_set_remote_flag') === true) {
       this._handleRemoteFlags();
     }
   };
