@@ -25,7 +25,7 @@ function addLineNumber(
 }
 
 class SyntaxCodeBlock extends CodeBlock {
-  private _domNode!: HTMLElement;
+  readonly domNode!: HTMLElement;
   private _observer: MutationObserver | null = null;
   private _lastHasWrap = false;
 
@@ -54,16 +54,16 @@ class SyntaxCodeBlock extends CodeBlock {
     this._observer = new MutationObserver(e => {
       this.updateLineNumber(codeBlockElement, true);
     });
-    this._observer.observe(this._domNode, { attributes: true });
+    this._observer.observe(this.domNode, { attributes: true });
   }
 
   highlight(highlight: (text: string) => string, forceRefresh: boolean) {
-    const text = this._domNode.textContent;
+    const text = this.domNode.textContent;
     assertExists(text);
     if (this.cachedText !== text || forceRefresh) {
       if (text.trim().length > 0 || this.cachedText == null) {
-        this._domNode.innerHTML = highlight(text);
-        this._domNode.normalize();
+        this.domNode.innerHTML = highlight(text);
+        this.domNode.normalize();
         this.attach();
       }
       this.cachedText = text;
@@ -71,9 +71,9 @@ class SyntaxCodeBlock extends CodeBlock {
   }
 
   private _getCtx() {
-    const fontSize = window.getComputedStyle(this._domNode).fontSize;
+    const fontSize = window.getComputedStyle(this.domNode).fontSize;
     const fontFamily = window
-      .getComputedStyle(this._domNode)
+      .getComputedStyle(this.domNode)
       .fontFamily.split(',')[0];
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -82,10 +82,10 @@ class SyntaxCodeBlock extends CodeBlock {
   }
 
   updateLineNumber(codeBlockElement: HTMLElement, forceRefresh = false) {
-    const text = this._domNode.textContent;
+    const text = this.domNode.textContent;
     assertExists(text);
     const ctx = this._getCtx();
-    const hasWrap = this._domNode.classList.contains('wrap');
+    const hasWrap = this.domNode.classList.contains('wrap');
 
     if (
       text === this.cachedTextLineNumber &&
@@ -104,8 +104,8 @@ class SyntaxCodeBlock extends CodeBlock {
     }
 
     const lines = text.split('\n');
-    const clientWidth = this._domNode.clientWidth;
-    const lineHeight = window.getComputedStyle(this._domNode).lineHeight;
+    const clientWidth = this.domNode.clientWidth;
+    const lineHeight = window.getComputedStyle(this.domNode).lineHeight;
     let lineNum = 0;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
