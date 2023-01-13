@@ -12,6 +12,9 @@ import {
   pressEnter,
   addFrameByClick,
   initEmptyParagraphState,
+  dragBetweenIndices,
+  switchReadonly,
+  SHORT_KEY,
 } from './utils/actions/index.js';
 import {
   defaultStore,
@@ -21,6 +24,7 @@ import {
   assertText,
   assertRichTexts,
   assertTitle,
+  assertStoreMatchJSX,
 } from './utils/asserts.js';
 
 test('basic input', async ({ page }) => {
@@ -183,6 +187,38 @@ test('undo after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
   await redoByKeyboard(page);
   await assertRichTexts(page, ['hello', 'world']);
+});
+
+test('should readonly mode not be able to modify text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+  await switchReadonly(page);
+
+  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+
+  await undoByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
 });
 
 test('undo/redo twice after adding block twice', async ({ page }) => {
