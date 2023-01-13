@@ -88,6 +88,15 @@ export class AwarenessAdapter<
     return flags[field];
   }
 
+  public setReadonly(value: boolean): void {
+    const flags = this.getFlag('readonly');
+    this.setFlag('readonly', { ...flags, [this.space.prefixedId]: value });
+  }
+
+  public isReadonly(): boolean {
+    return this.getFlag('readonly')[this.space.prefixedId] ?? false;
+  }
+
   public getLocalCursor(): SelectionRange | undefined {
     const states = this.awareness.getStates();
     const awarenessState = states.get(this.awareness.clientID);

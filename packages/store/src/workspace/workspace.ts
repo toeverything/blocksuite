@@ -23,7 +23,9 @@ type WorkspaceMetaData = {
   avatar: string;
 };
 
-class WorkspaceMeta extends Space<WorkspaceMetaData> {
+class WorkspaceMeta<
+  Flags extends Record<string, unknown> = BlockSuiteFlags
+> extends Space<WorkspaceMetaData, Flags> {
   private _prevPages = new Set<string>();
   pageAdded = new Signal<string>();
   pageRemoved = new Signal<string>();
@@ -34,7 +36,7 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
     id: string,
     doc: BlockSuiteDoc,
     awareness: Awareness,
-    defaultFlags?: Record<string, boolean>
+    defaultFlags?: Partial<Flags>
   ) {
     super(id, doc, awareness, {
       valueInitializer: {
@@ -213,10 +215,10 @@ class WorkspaceMeta extends Space<WorkspaceMetaData> {
   };
 }
 
-const flagsPreset: BlockSuiteFlags = {
+const flagsPreset = {
   enable_drag_handle: true,
-  readonly: false,
-} as const;
+  readonly: {},
+} satisfies BlockSuiteFlags;
 
 export class Workspace {
   static Y = Y;

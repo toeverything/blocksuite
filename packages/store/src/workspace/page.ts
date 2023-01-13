@@ -258,8 +258,8 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
-    if (this.awareness.getFlag('readonly')) {
-      throw new Error('cannot create block in readonly mode');
+    if (this.awareness.isReadonly()) {
+      throw new Error('cannot modify data in readonly mode');
     }
     if (!blockProps.flavour) {
       throw new Error('Block props must contain flavour');
@@ -302,7 +302,8 @@ export class Page extends Space<PageData> {
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.awareness.getFlag('readonly')) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
       return;
     }
     const model = this._blockMap.get(id) as BaseBlockModel;
@@ -310,7 +311,8 @@ export class Page extends Space<PageData> {
   }
 
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
-    if (this.awareness.getFlag('readonly')) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
       return;
     }
     const currentParentModel = this.getParent(model);
@@ -339,7 +341,8 @@ export class Page extends Space<PageData> {
   }
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
-    if (this.awareness.getFlag('readonly')) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
       return;
     }
     const yBlock = this._yBlocks.get(model.id) as YBlock;
@@ -370,11 +373,19 @@ export class Page extends Space<PageData> {
   }
 
   deleteBlockById(id: string) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     const model = this._blockMap.get(id) as BaseBlockModel;
     this.deleteBlock(model);
   }
 
   deleteBlock(model: BaseBlockModel) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     const parent = this.getParent(model);
     const index = parent?.children.indexOf(model) ?? -1;
     if (index > -1) {
