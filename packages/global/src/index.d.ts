@@ -20,6 +20,7 @@ type PropsWithId<Props> = Props & { id: string };
 
 type BlockSuiteFlags = {
   enable_drag_handle: boolean;
+  readonly: boolean;
 };
 
 declare namespace BlockSuiteInternal {

@@ -234,6 +234,9 @@ export class DefaultPageBlockComponent
         container: this,
       });
     }
+    if (changedProperties.has('readonly')) {
+      this.page.awareness.setFlag('readonly', this.readonly);
+    }
 
     this._tryUpdateMetaTitle();
     super.update(changedProperties);
