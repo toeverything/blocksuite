@@ -190,8 +190,7 @@ export class AwarenessAdapter<
   private _handleRemoteFlags() {
     const nextTick: (() => void)[] = [];
     const localState = this.awareness.getLocalState();
-    const request = (this.awareness.getLocalState()?.request ??
-      []) as Request<Flags>[];
+    const request = (localState?.request ?? []) as Request<Flags>[];
     const selfResponse = [] as Response[];
     const fakeDirtyResponse = [] as Response[];
     if (localState && Array.isArray(localState.response)) {
