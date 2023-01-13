@@ -140,7 +140,8 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    if (this._space.awareness.getFlag('readonly')) {
+    if (this._space.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
       return;
     }
     const { _space, _shouldTransact } = this;
