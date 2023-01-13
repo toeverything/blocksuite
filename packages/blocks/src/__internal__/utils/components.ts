@@ -7,6 +7,7 @@ import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
 import '../../components/loader.js';
 import { hasService, registerService } from '../service.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../__internal__/utils/consts.js';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -91,7 +92,7 @@ export function BlockChildrenContainer(
   return html`
     <style>
       .affine-block-children-container {
-        padding-left: 26px;
+        padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px;
       }
     </style>
     <div class="affine-block-children-container">

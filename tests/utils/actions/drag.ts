@@ -119,7 +119,8 @@ export async function dragHandleFromBlockToBlockBottomById(
   page: Page,
   sourceId: string,
   targetId: string,
-  bottom = true
+  bottom = true,
+  offset?: number
 ) {
   const sourceBlock = await page
     .locator(`[data-block-id="${sourceId}"]`)
@@ -154,6 +155,17 @@ export async function dragHandleFromBlockToBlockBottomById(
       steps: 50,
     }
   );
+
+  if (offset) {
+    await page.mouse.move(
+      targetBlock.x - offset,
+      targetBlock.y + (bottom ? targetBlock.height - 1 : 1),
+      {
+        steps: 50,
+      }
+    );
+  }
+
   await page.mouse.up();
 }
 
