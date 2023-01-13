@@ -10,6 +10,10 @@ const CodeBlock = Quill.import('formats/code-block');
 const CodeToken = Quill.import('modules/syntax');
 
 class SyntaxCodeBlock extends CodeBlock {
+  private domNode!: HTMLElement;
+  private observer: MutationObserver | null = null;
+  private lastHasWrap = false;
+
   constructor(domNode: HTMLElement) {
     super(domNode);
   }
@@ -24,12 +28,23 @@ class SyntaxCodeBlock extends CodeBlock {
     forceRefresh: boolean,
     codeBlockElement: HTMLElement
   ) {
+    if (!this.observer) {
+      this.initObserver(codeBlockElement);
+    }
     this.highlight(highlight, forceRefresh);
     this.updateLineNumber(codeBlockElement);
   }
 
+  private initObserver(codeBlockElement: HTMLElement) {
+    this.observer = new MutationObserver(e => {
+      this.updateLineNumber(codeBlockElement, true);
+    });
+    this.observer.observe(this.domNode, { attributes: true });
+  }
+
   highlight(highlight: (text: string) => string, forceRefresh: boolean) {
     const text = this.domNode.textContent;
+    assertExists(text);
     if (this.cachedText !== text || forceRefresh) {
       if (text.trim().length > 0 || this.cachedText == null) {
         this.domNode.innerHTML = highlight(text);
@@ -40,11 +55,32 @@ class SyntaxCodeBlock extends CodeBlock {
     }
   }
 
-  updateLineNumber(codeBlockElement: HTMLElement) {
+  private getCtx() {
+    const fontSize = window.getComputedStyle(this.domNode).fontSize;
+    const fontFamily = window
+      .getComputedStyle(this.domNode)
+      .fontFamily.split(',')[0];
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    assertExists(ctx);
+    ctx.font = `${fontSize} ${fontFamily}`;
+    return ctx;
+  }
+
+  updateLineNumber(codeBlockElement: HTMLElement, forceRefresh = false) {
     const text = this.domNode.textContent;
-    if (text === this.cachedTextLineNumber) {
+    assertExists(text);
+    const ctx = this.getCtx();
+    const hasWrap = this.domNode.classList.contains('wrap');
+
+    if (
+      text === this.cachedTextLineNumber &&
+      !(forceRefresh && hasWrap !== this.lastHasWrap)
+    ) {
       return;
     }
+
+    this.lastHasWrap = hasWrap;
     const container = codeBlockElement.querySelector(
       '#line-number'
     ) as HTMLDivElement | null;
@@ -54,16 +90,37 @@ class SyntaxCodeBlock extends CodeBlock {
     }
 
     const lines = text.split('\n');
-    // quill must end with a newline, see https://quilljs.com/docs/delta/#line-formatting
-    const lineNum = text.endsWith('\n') ? lines.length - 1 : lines.length;
+    const clientWidth = this.domNode.clientWidth;
+    const lineHeight = window.getComputedStyle(this.domNode).lineHeight;
+    let lineNum = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // quill specifies to end with a newline, it's redundant for line number see https://quilljs.com/docs/delta/#line-formatting
+      if (i === lines.length - 1 && line === '') {
+        break;
+      }
+      const width = ctx.measureText(line).width;
+      const lineWrap = width == 0 ? 1 : Math.ceil(width / clientWidth);
+      addLineNumber(++lineNum, container);
+      if (hasWrap) {
+        for (let i = 1; i < lineWrap; i++) {
+          addLineNumber(null, container);
+        }
+      }
+    }
 
     // adjust position according to line number digits
     const lineNumberDigits = lineNum.toString().length;
     container.style.left = 32 - lineNumberDigits * 8 + 'px';
 
-    for (let i = 1; i <= lineNum; i++) {
+    function addLineNumber(i: number | null, container: HTMLElement) {
       const node = document.createElement('div');
-      node.innerHTML = `${i}`;
+      if (i) {
+        node.innerHTML = `${i}`;
+      } else {
+        node.innerHTML = '';
+        node.style.height = lineHeight;
+      }
       container.appendChild(node);
     }
 
@@ -80,6 +137,7 @@ SyntaxCodeBlock.className = 'ql-syntax';
 
 class Syntax extends Module {
   private _language = 'javascript';
+
   static register() {
     Quill.register(CodeToken, true);
     Quill.register(SyntaxCodeBlock, true);
