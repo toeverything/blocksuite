@@ -1,14 +1,14 @@
 const BLACK = '#000000';
-const TYPE_PATH = 'path';
-const TYPE_IMAGE = 'image';
 
 abstract class BaseElement {
+  abstract type: string;
+  id: string;
   x = 0;
   y = 0;
   w = 0;
   h = 0;
-  id: number;
-  constructor(id: number) {
+
+  constructor(id: string) {
     this.id = id;
   }
 
@@ -28,14 +28,16 @@ abstract class BaseElement {
   }
 
   abstract render(_: CanvasRenderingContext2D): void;
+
+  abstract serialize(): Record<string, unknown>;
 }
 
 export class PathElement extends BaseElement {
-  type = TYPE_PATH;
+  type = 'path' as const;
   path: Path2D;
   color = BLACK;
   points: number[] = [];
-  constructor(id: number, points: number[]) {
+  constructor(id: string, points: number[]) {
     super(id);
     this.points = points;
     const path = new Path2D();
@@ -53,18 +55,51 @@ export class PathElement extends BaseElement {
     ctx.fill(this.path);
     ctx.strokeRect(0, 0, this.w, this.h);
   }
+
+  serialize(): Record<string, unknown> {
+    return {
+      id: this.id,
+      type: this.type,
+      xywh: `${this.x},${this.y},${this.w},${this.h}`,
+      color: this.color,
+      points: this.points.join(','),
+    };
+  }
+
+  static deserialize<T extends PathElement>(data: Record<string, unknown>): T {
+    const element = new PathElement(data.id as string, []);
+    const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
+    element.setBound(x, y, w, h);
+    element.color = data.color as string;
+    element.points = (data.points as string).split(',').map(v => Number(v));
+    return element as T;
+  }
 }
 
 export class RectElement extends BaseElement {
-  type = TYPE_IMAGE;
+  type = 'rect' as const;
   color = BLACK;
-  constructor(id: number) {
-    super(id);
-  }
 
   render(ctx: CanvasRenderingContext2D): void {
     ctx.strokeStyle = this.color;
     ctx.strokeRect(0, 0, this.w, this.h);
+  }
+
+  serialize(): Record<string, unknown> {
+    return {
+      id: this.id,
+      type: this.type,
+      xywh: `${this.x},${this.y},${this.w},${this.h}`,
+      color: this.color,
+    };
+  }
+
+  static deserialize(data: Record<string, unknown>): RectElement {
+    const element = new RectElement(data.id as string);
+    const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
+    element.setBound(x, y, w, h);
+    element.color = data.color as string;
+    return element;
   }
 }
 

@@ -31,13 +31,13 @@ function createMockElement(id: number, rangeX: number, rangeY: number) {
       if (y > maxY) maxY = y;
       points.push(x, y);
     }
-    const element = new PathElement(id, points);
+    const element = new PathElement(`${id}`, points);
     element.color = randomColor();
     element.setBound(x, y, maxX, maxY);
     return element;
   } else {
     const size = randomInt(IMAGE_MAX, IMAGE_MIN);
-    const element = new RectElement(id);
+    const element = new RectElement(`${id}`);
     element.color = randomColor();
     element.setBound(x, y, size, size);
     return element;
