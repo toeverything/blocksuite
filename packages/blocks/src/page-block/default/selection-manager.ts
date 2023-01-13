@@ -560,10 +560,10 @@ export class DefaultSelectionManager {
       return;
     }
 
-    if (selection.anchorNode === selection.focusNode) {
+    if (selection.anchorNode !== selection.focusNode) {
       // Fix selection direction after support multi-line selection by keyboard
       console.warn(
-        'format-quick-bar direction may not be correct! selection anchor and focus are same node'
+        'format-quick-bar direction may not be correct! selection anchor and focus are not the same node'
       );
     }
     // FIXME: if selection produced by mouse, it always be `left-right`
