@@ -210,6 +210,20 @@ export class DebugMenu extends LitElement {
     window.history.pushState({}, '', url);
   }
 
+  private _setReadonlyOthers() {
+    const clients = [...this.page.awareness.getStates().keys()].filter(
+      id => id !== this.page.workspace.doc.clientID
+    );
+    if (this.page.awareness.getFlag('enable_set_remote_flag')) {
+      clients.forEach(id => {
+        this.page.awareness.setRemoteFlag(id, 'readonly', {
+          ...(this.page.awareness.getFlag('readonly') ?? {}),
+          [this.page.prefixedId]: true,
+        });
+      });
+    }
+  }
+
   firstUpdated() {
     this.page.signals.historyUpdated.on(() => {
       this.canUndo = this.page.canUndo;
@@ -380,6 +394,9 @@ export class DebugMenu extends LitElement {
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
               <sl-menu-item @click=${this._addFrame}> Add Frame </sl-menu-item>
+              <sl-menu-item @click=${this._setReadonlyOthers}>
+                Set Others Readonly
+              </sl-menu-item>
               <sl-menu-item @click=${this._toggleReadonly}>
                 Toggle Readonly
               </sl-menu-item>

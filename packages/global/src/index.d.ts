@@ -19,6 +19,7 @@ declare module NodeJS {
 type PropsWithId<Props> = Props & { id: string };
 
 type BlockSuiteFlags = {
+  enable_set_remote_flag: boolean;
   enable_drag_handle: boolean;
   readonly: Record<string, boolean>;
 };

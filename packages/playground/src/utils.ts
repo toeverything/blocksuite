@@ -50,6 +50,7 @@ export function getOptions(): Pick<
     providers,
     idGenerator,
     defaultFlags: {
+      enable_set_remote_flag: true,
       enable_drag_handle: true,
       readonly: {
         'space:page0': false,
