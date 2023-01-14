@@ -3,13 +3,15 @@ const BLACK = '#000000';
 abstract class BaseElement {
   abstract type: string;
   id: string;
+  index: string;
   x = 0;
   y = 0;
   w = 0;
   h = 0;
 
-  constructor(id: string) {
+  constructor(id: string, index: string) {
     this.id = id;
+    this.index = index;
   }
 
   get centerX() {
@@ -37,8 +39,8 @@ export class PathElement extends BaseElement {
   path: Path2D;
   color = BLACK;
   points: number[] = [];
-  constructor(id: string, points: number[]) {
-    super(id);
+  constructor(id: string, index: string, points: number[]) {
+    super(id, index);
     this.points = points;
     const path = new Path2D();
     path.moveTo(0, 0);
@@ -59,6 +61,7 @@ export class PathElement extends BaseElement {
   serialize(): Record<string, unknown> {
     return {
       id: this.id,
+      index: this.index,
       type: this.type,
       xywh: `${this.x},${this.y},${this.w},${this.h}`,
       color: this.color,
@@ -67,11 +70,15 @@ export class PathElement extends BaseElement {
   }
 
   static deserialize<T extends PathElement>(data: Record<string, unknown>): T {
-    const element = new PathElement(data.id as string, []);
+    const points = (data.points as string).split(',').map(v => Number(v));
+    const element = new PathElement(
+      data.id as string,
+      data.index as string,
+      points
+    );
     const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
     element.setBound(x, y, w, h);
     element.color = data.color as string;
-    element.points = (data.points as string).split(',').map(v => Number(v));
     return element as T;
   }
 }
@@ -88,6 +95,7 @@ export class RectElement extends BaseElement {
   serialize(): Record<string, unknown> {
     return {
       id: this.id,
+      index: this.index,
       type: this.type,
       xywh: `${this.x},${this.y},${this.w},${this.h}`,
       color: this.color,
@@ -95,7 +103,7 @@ export class RectElement extends BaseElement {
   }
 
   static deserialize(data: Record<string, unknown>): RectElement {
-    const element = new RectElement(data.id as string);
+    const element = new RectElement(data.id as string, data.index as string);
     const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
     element.setBound(x, y, w, h);
     element.color = data.color as string;
