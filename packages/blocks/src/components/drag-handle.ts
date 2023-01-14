@@ -87,8 +87,15 @@ export class DragHandle extends LitElement {
       width: ${DRAG_HANDLE_WIDTH}px;
       height: ${DRAG_HANDLE_HEIGHT}px;
       border-radius: 3px;
-      fill: rgba(55, 53, 47, 0.35);
-      background: rgba(55, 53, 47, 0.08);
+    }
+
+    .affine-drag-handle-rect {
+      width: 11px;
+      height: 11px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: rgba(61, 61, 61, 1);
+      transform: rotate(45deg);
     }
   `;
 
@@ -161,6 +168,10 @@ export class DragHandle extends LitElement {
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       this.style.left = `${rect.left - 20}px`;
       this.style.top = `${rect.top}px`;
+      this._dragHandle.style.opacity = `${(
+        1 -
+        (event.raw.pageX - rect.left) / rect.width
+      ).toFixed(2)}`;
       this._dragHandle.style.top = `${Math.min(
         event.raw.pageY - rect.top,
         rect.height - DRAG_HANDLE_HEIGHT
@@ -323,15 +334,7 @@ export class DragHandle extends LitElement {
   override render() {
     return html`
       <div class="affine-drag-handle">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 128 512"
-          style="width: 14px; height: 14px; display: block; flex-shrink: 0; backface-visibility: hidden;"
-        >
-          <path
-            d="M64 360c30.9 0 56 25.1 56 56s-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56zm0-160c30.9 0 56 25.1 56 56s-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56zM120 96c0 30.9-25.1 56-56 56S8 126.9 8 96S33.1 40 64 40s56 25.1 56 56z"
-          />
-        </svg>
+        <div class="affine-drag-handle-rect"></div>
       </div>
     `;
   }
