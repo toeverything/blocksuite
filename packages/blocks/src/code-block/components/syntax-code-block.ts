@@ -95,6 +95,7 @@ class SyntaxCodeBlock extends CodeBlock {
     const clientWidth = this.domNode.clientWidth;
     const lineHeight = window.getComputedStyle(this.domNode).lineHeight;
     let codeBlockLineNum = 0;
+    const tempEle = this.initEle();
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       // quill specifies to end with a newline, it's redundant for line number see https://quilljs.com/docs/delta/#line-formatting
@@ -102,7 +103,7 @@ class SyntaxCodeBlock extends CodeBlock {
         break;
       }
 
-      const width = this.getLineWidth(line);
+      const width = this.getLineWidth(line, tempEle);
       const lineNumOfOneLine = width == 0 ? 1 : Math.ceil(width / clientWidth);
       addLineNumber(container, lineHeight, ++codeBlockLineNum);
       if (hasWrap) {
@@ -111,6 +112,7 @@ class SyntaxCodeBlock extends CodeBlock {
         }
       }
     }
+    tempEle.remove();
 
     // adjust position according to line number digits
     const lineNumberDigits = codeBlockLineNum.toString().length;
@@ -119,19 +121,22 @@ class SyntaxCodeBlock extends CodeBlock {
     this.cachedTextLineNumber = text;
   }
 
-  private getLineWidth(line: string) {
+  private initEle() {
     const tempEle = document.createElement('div');
     tempEle.classList.add('.affine-code-block-container');
     // HTMLElement should append to DOM in order to get scrollWidth, which is 0px otherwise
     this.domNode.appendChild(tempEle);
-    tempEle.textContent = line;
     tempEle.style.width = '0px';
     tempEle.style.whiteSpace = 'pre';
     tempEle.style.position = 'fixed';
     // hide temp element
     tempEle.style.right = '-100px';
+    return tempEle;
+  }
+
+  private getLineWidth(line: string, tempEle: HTMLElement) {
+    tempEle.textContent = line;
     const width = tempEle.scrollWidth;
-    tempEle.remove();
     return width;
   }
 }
