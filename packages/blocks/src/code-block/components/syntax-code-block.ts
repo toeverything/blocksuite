@@ -129,7 +129,7 @@ class SyntaxCodeBlock extends CodeBlock {
     tempEle.style.whiteSpace = 'pre';
     tempEle.style.position = 'fixed';
     // hide temp element
-    tempEle.style.left = '-100px';
+    tempEle.style.right = '-100px';
     const width = tempEle.scrollWidth;
     tempEle.remove();
     return width;
