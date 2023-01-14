@@ -18,12 +18,11 @@ import {
   syncBlockProps,
   trySyncTextProp,
   toBlockProps,
-  matchFlavours,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
-
+import { matchFlavours } from '@blocksuite/global/utils';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 

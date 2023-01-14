@@ -3,7 +3,28 @@
   "version": "0.4.0-alpha.0",
   "types": "./src/index.d.ts",
   "type": "module",
-  "files": [
-    "src"
-  ]
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": "./src/index.d.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@blocksuite/store": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": "./dist/index.js",
+      "./utils": "./dist/utils.js"
+    },
+    "files": [
+      "dist"
+    ]
+  }
 }

@@ -1,14 +1,11 @@
-import { BaseBlockModel, Utils } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { Detail } from './types.js';
-
-// workaround ts(2775)
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  Utils.assertExists(val);
-}
-
-export const assertFlavours = Utils.assertFlavours;
-
-export const matchFlavours = Utils.matchFlavours;
+import { matchFlavours } from '@blocksuite/global/utils';
+export {
+  assertFlavours,
+  assertExists,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 
 /**
  * Whether the block supports rendering its children.
