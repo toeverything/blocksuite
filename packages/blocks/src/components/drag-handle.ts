@@ -147,8 +147,26 @@ export class DragHandle extends LitElement {
     null;
 
   protected firstUpdated() {
-    this.setAttribute('draggable', 'true');
     this.style.display = 'none';
+    this.style.position = 'absolute';
+    document.body.addEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay,
+      false
+    );
+    document.body.addEventListener('wheel', this._onWheel);
+    window.addEventListener('resize', this._onResize);
+    this._indicator = <DragIndicator>(
+      document.createElement('affine-drag-indicator')
+    );
+    document.body.appendChild(this._indicator);
+    this.addEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.addEventListener('dragover', this._onDragOverDocument);
+    this._dragHandle.addEventListener('mouseleave', this._onMouseLeave);
+    this._dragHandle.addEventListener('dragstart', this._onDragStart);
+    this._dragHandle.addEventListener('drag', this._onDrag);
+    this._dragHandle.addEventListener('dragend', this._onDragEnd);
   }
 
   public showBySelectionEvent(event: SelectionEvent) {
@@ -201,29 +219,6 @@ export class DragHandle extends LitElement {
     this._indicator.targetRect = null;
   }
 
-  public connectedCallback() {
-    super.connectedCallback();
-    this.style.position = 'absolute';
-    document.body.addEventListener(
-      'dragover',
-      handlePreventDocumentDragOverDelay,
-      false
-    );
-    document.body.addEventListener('wheel', this._onWheel);
-    window.addEventListener('resize', this._onResize);
-    this._indicator = <DragIndicator>(
-      document.createElement('affine-drag-indicator')
-    );
-    document.body.appendChild(this._indicator);
-    this.addEventListener('mousedown', this._onMouseDown);
-    isFirefox &&
-      document.addEventListener('dragover', this._onDragOverDocument);
-    this.addEventListener('mouseleave', this._onMouseLeave);
-    this.addEventListener('dragstart', this._onDragStart);
-    this.addEventListener('drag', this._onDrag);
-    this.addEventListener('dragend', this._onDragEnd);
-  }
-
   public disconnectedCallback() {
     super.disconnectedCallback();
     this._indicator.remove();
@@ -233,13 +228,13 @@ export class DragHandle extends LitElement {
       'dragover',
       handlePreventDocumentDragOverDelay
     );
-    this.removeEventListener('mousedown', this._onMouseDown);
+    this._dragHandle.removeEventListener('mousedown', this._onMouseDown);
     isFirefox &&
       document.removeEventListener('dragover', this._onDragOverDocument);
-    this.removeEventListener('mouseleave', this._onMouseLeave);
-    this.removeEventListener('dragstart', this._onDragStart);
-    this.removeEventListener('drag', this._onDrag);
-    this.removeEventListener('dragend', this._onDragEnd);
+    this._dragHandle.removeEventListener('mouseleave', this._onMouseLeave);
+    this._dragHandle.removeEventListener('dragstart', this._onDragStart);
+    this._dragHandle.removeEventListener('drag', this._onDrag);
+    this._dragHandle.removeEventListener('dragend', this._onDragEnd);
   }
 
   private _onResize = (e: UIEvent) => {
@@ -338,7 +333,7 @@ export class DragHandle extends LitElement {
   override render() {
     return html`
       <div class="affine-drag-handle">
-        <div class="affine-drag-handle-rect"></div>
+        <div class="affine-drag-handle-rect" draggable="true"></div>
       </div>
     `;
   }
