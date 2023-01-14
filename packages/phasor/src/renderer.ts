@@ -88,6 +88,11 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
+  removeElement(element: Element) {
+    this.gridManager.remove(element);
+    this._shouldUpdate = true;
+  }
+
   invalidateElement(element: Element, newBound: Bound) {
     const { gridManager } = this;
     if (gridManager.boundHasChanged(element, newBound)) {

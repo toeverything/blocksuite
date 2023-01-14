@@ -69,7 +69,7 @@ export class PathElement extends BaseElement {
     };
   }
 
-  static deserialize<T extends PathElement>(data: Record<string, unknown>): T {
+  static deserialize(data: Record<string, unknown>): PathElement {
     const points = (data.points as string).split(',').map(v => Number(v));
     const element = new PathElement(
       data.id as string,
@@ -79,7 +79,7 @@ export class PathElement extends BaseElement {
     const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
     element.setBound(x, y, w, h);
     element.color = data.color as string;
-    return element as T;
+    return element;
   }
 }
 

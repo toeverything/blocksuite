@@ -1,6 +1,13 @@
 import * as Y from 'yjs';
+import type { Bound } from './consts.js';
 import { Element, RectElement, PathElement } from './elements.js';
 import { Renderer } from './renderer.js';
+
+function assertExists<T>(val: T | null | undefined): asserts val is T {
+  if (val === null || val === undefined) {
+    throw new Error('val does not exist');
+  }
+}
 
 export class SurfaceContainer {
   readonly renderer: Renderer;
@@ -26,6 +33,21 @@ export class SurfaceContainer {
     this._yElements.doc?.transact(() => {
       const yElement = this._createYElement(props);
       this._yElements.set(props.id, yElement);
+    });
+  }
+
+  setElementBound(id: string, bound: Bound) {
+    this._yElements.doc?.transact(() => {
+      const yElement = this._yElements.get(id) as Y.Map<unknown>;
+      assertExists(yElement);
+      const xywh = `${bound.x},${bound.y},${bound.w},${bound.h}`;
+      yElement.set('xywh', xywh);
+    });
+  }
+
+  removeElement(id: string) {
+    this._yElements.doc?.transact(() => {
+      this._yElements.delete(id);
     });
   }
 
@@ -57,6 +79,38 @@ export class SurfaceContainer {
             break;
           }
         }
+      } else if (type.action === 'update') {
+        console.error('update event on yElements is not supported', event);
+      } else if (type.action === 'delete') {
+        const element = this._elements.get(id);
+        assertExists(element);
+        this.renderer.removeElement(element);
+        this._elements.delete(id);
+      }
+    });
+  }
+
+  private _handleYElementEvent(event: Y.YMapEvent<unknown>) {
+    const yElement = event.target as Y.Map<unknown>;
+    const id = yElement.get('id') as string;
+
+    event.keysChanged.forEach(key => {
+      const type = event.changes.keys.get(key);
+      if (!type) {
+        console.error('invalid event', event);
+        return;
+      }
+
+      if (type.action === 'update') {
+        const element = this._elements.get(id);
+        assertExists(element);
+
+        if (key === 'xywh') {
+          const xywh = yElement.get(key) as string;
+          const [x, y, w, h] = xywh.split(',').map(Number);
+          // FIXME should update grid here
+          element.setBound(x, y, w, h);
+        }
       }
     });
   }
@@ -67,7 +121,7 @@ export class SurfaceContainer {
     if (event.target === this._yElements) {
       this._handleYElementsEvent(event);
     } else if (event.target.parent === this._yElements) {
-      // TODO
+      this._handleYElementEvent(event);
     }
   }
 
