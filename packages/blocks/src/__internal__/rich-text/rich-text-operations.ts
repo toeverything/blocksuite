@@ -293,10 +293,16 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         previousSibling &&
         matchFlavours(previousSibling, ['affine:database'])
       ) {
-        page.captureSync();
-        page.deleteBlock(model, {
-          bringChildrenTo: previousSibling,
-        });
+        if (previousSibling.children.length === 0) {
+          // delete by two backspace
+          page.captureSync();
+          page.deleteBlock(previousSibling);
+        } else {
+          page.captureSync();
+          page.deleteBlock(model, {
+            bringChildrenTo: previousSibling,
+          });
+        }
       } else {
         const richText = getRichTextByModel(model);
         if (richText) {
