@@ -278,7 +278,8 @@ export class DefaultSelectionManager {
         if (parentIndex !== -1) {
           block.parentIndex = parentIndex;
         }
-        block.children && dfs(block.children, depth + 1, result.length - 1);
+        block.children.length &&
+          dfs(block.children, depth + 1, result.length - 1);
       }
     };
 
