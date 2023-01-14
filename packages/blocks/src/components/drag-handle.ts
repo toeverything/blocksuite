@@ -1,5 +1,5 @@
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
 import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -69,16 +69,22 @@ export type DragHandleGetModelStateWithCursorCallback = (
 ) => EditingState | null;
 
 const DRAG_HANDLE_HEIGHT = 24; // px
+const DRAG_HANDLE_WIDTH = 18; // px
 
 @customElement('affine-drag-handle')
 export class DragHandle extends LitElement {
   static styles = css`
+    :host {
+      overflow: hidden;
+    }
+
     .affine-drag-handle {
+      position: absolute;
       cursor: grab;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 18px;
+      width: ${DRAG_HANDLE_WIDTH}px;
       height: ${DRAG_HANDLE_HEIGHT}px;
       border-radius: 3px;
       fill: rgba(55, 53, 47, 0.35);
@@ -115,6 +121,9 @@ export class DragHandle extends LitElement {
   @property()
   public setSelectedBlocks: (selectedBlocks: Element[]) => void;
 
+  @query('.affine-drag-handle')
+  private _dragHandle!: HTMLDivElement;
+
   private _currentPageX = 0;
   private _currentPageY = 0;
 
@@ -148,8 +157,14 @@ export class DragHandle extends LitElement {
       this._cursor = modelState.index;
       const rect = modelState.position;
       this.style.display = 'block';
+      this.style.height = `${rect.height}px`;
+      this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       this.style.left = `${rect.left - 20}px`;
-      this.style.top = `${event.raw.pageY - DRAG_HANDLE_HEIGHT / 2}px`;
+      this.style.top = `${rect.top}px`;
+      this._dragHandle.style.top = `${Math.min(
+        event.raw.pageY - rect.top,
+        rect.height - DRAG_HANDLE_HEIGHT
+      )}px`;
     }
   }
 
