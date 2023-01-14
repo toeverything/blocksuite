@@ -1,6 +1,6 @@
 declare module 'quill' {
   import quill = require('quill/index');
-  export type * from 'quill/index' assert { 'resolution-mode': 'require' };
+  export * from 'quill/index' assert { 'resolution-mode': 'require' };
   declare const quillDefault: typeof quill.default;
   export default quillDefault;
 }
