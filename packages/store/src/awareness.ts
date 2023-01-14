@@ -38,8 +38,8 @@ interface AwarenessState<
   cursor?: SelectionRange;
   user?: UserInfo;
   flags: Flags;
-  changeRequest?: Request<Flags>[];
-  changeResponse?: Response[];
+  request?: Request<Flags>[];
+  response?: Response[];
 }
 
 interface AwarenessMessage<
@@ -195,7 +195,7 @@ export class AwarenessAdapter<
 
   private _handleRemoteFlags() {
     const nextTick: (() => void)[] = [];
-    const localState = this.awareness.getLocalState();
+    const localState = this.awareness.getLocalState() as AwarenessState<Flags>;
     const request = (localState?.request ?? []) as Request<Flags>[];
     const selfResponse = [] as Response[];
     const fakeDirtyResponse = [] as Response[];
