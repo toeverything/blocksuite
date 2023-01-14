@@ -1,18 +1,18 @@
 # Building BlockSuite
 
-## Table of contents
+## Table of Contents
 
 - [Prerequisites](#prerequisites)
 - [Setup Environment](#setup-environment)
 - [Play with Playground](#play-with-playground)
 - [Build Packages](#build-packages)
-- [Debug using E2E/Unit Test](#debug-using-e2eunit-test)
+- [Testing](#testing)
 
 ## Prerequisites
 
 We suggest develop our product under node.js LTS(Long-term support) version
 
-### Option 1: Manual install node.js
+### Option 1: Manually install node.js
 
 install [Node LTS version](https://nodejs.org/en/download)
 
@@ -22,15 +22,15 @@ install [Node LTS version](https://nodejs.org/en/download)
 
 install [nvm](https://github.com/nvm-sh/nvm)
 
-```shell
+```sh
 nvm install --lts
 nvm use --lts
 ```
 
 ## Setup Environment
 
-```shell
-# to enable built-in pnpm support
+```sh
+# enable built-in pnpm support
 corepack enable
 # install dependencies
 pnpm install
@@ -38,19 +38,19 @@ pnpm install
 
 ## Play with Playground
 
-```shell
-pnpm run dev
+```sh
+pnpm dev
 ```
 
 The playground page should work at [http://localhost:5173/?init](http://localhost:5173/?init)
 
 ## Build Packages
 
-```shell
-pnpm run build
+```sh
+pnpm build
 ```
 
-## Debug using E2E/Unit Test
+## Testing
 
 When you contribute new features and bug fixes, the test cases are encouraged and most time are required.
 
@@ -58,7 +58,7 @@ We use [Playwright](https://playwright.dev/) for E2E test, and [vitest](https://
 
 To test locally, please make sure browser binaries are already installed via `npx playwright install` and Vite playground is started with `pnpm dev`. Then there are multi commands to choose from:
 
-```bash
+```sh
 # run tests in headless mode in another terminal window
 pnpm test
 
