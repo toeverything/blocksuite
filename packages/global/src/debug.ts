@@ -12,8 +12,7 @@ export enum Subsystem {
 }
 
 export const logger = new Log<Subsystem>();
-// @ts-expect-error
-if (import.meta.hot || import.meta.webpackHot) {
+export function enableDebugLog() {
   logger.init(
     {
       [Subsystem.Global]: LogLevel.DEBUG,
@@ -38,4 +37,8 @@ if (import.meta.hot || import.meta.webpackHot) {
       console.log(`${colorMap[level](level)} [${tag}]:`, msg, ...params);
     }
   );
+}
+// @ts-expect-error
+if (import.meta.hot || import.meta.webpackHot) {
+  enableDebugLog();
 }
