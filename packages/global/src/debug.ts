@@ -39,7 +39,3 @@ export function enableDebugLog() {
     }
   );
 }
-// @ts-expect-error
-if (import.meta.hot || import.meta.webpackHot) {
-  enableDebugLog();
-}
