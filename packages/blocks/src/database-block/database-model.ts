@@ -23,6 +23,6 @@ export class DatabaseBlockModel extends BaseBlockModel {
   ) {
     super(page, props);
     this.columns = props.columns ?? [];
-    this.mode = DatabaseBlockDisplayMode.Text;
+    this.mode = DatabaseBlockDisplayMode.Database;
   }
 }
