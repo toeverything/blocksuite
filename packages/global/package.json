@@ -26,6 +26,6 @@
     ]
   },
   "dependencies": {
-    "chalk": "^5.2.0"
+    "ansi-colors": "^4.1.3"
   }
 }

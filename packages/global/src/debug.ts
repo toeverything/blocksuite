@@ -1,5 +1,5 @@
 import { Log, LogLevel } from './log.js';
-import chalk from 'chalk';
+import color from 'ansi-colors';
 
 export enum Subsystem {
   Global = 'global',
@@ -13,6 +13,7 @@ export enum Subsystem {
 
 export const logger = new Log<Subsystem>();
 export function enableDebugLog() {
+  color.enabled = true;
   logger.init(
     {
       [Subsystem.Global]: LogLevel.DEBUG,
@@ -28,11 +29,11 @@ export function enableDebugLog() {
         return;
       }
       const colorMap = {
-        [LogLevel.DEBUG]: chalk.blue,
-        [LogLevel.WARN]: chalk.yellow,
-        [LogLevel.INFO]: chalk.green,
-        [LogLevel.TRACE]: chalk.magenta,
-        [LogLevel.ERROR]: chalk.red,
+        [LogLevel.DEBUG]: color.blue,
+        [LogLevel.WARN]: color.yellow,
+        [LogLevel.INFO]: color.green,
+        [LogLevel.TRACE]: color.magenta,
+        [LogLevel.ERROR]: color.red,
       };
       console.log(`${colorMap[level](level)} [${tag}]:`, msg, ...params);
     }
