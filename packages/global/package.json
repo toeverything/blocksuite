@@ -14,14 +14,14 @@
   "license": "MPL-2.0",
   "publishConfig": {
     "access": "public",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "types": "src/index.d.ts",
     "exports": {
       ".": "./dist/index.js",
       "./utils": "./dist/utils.js"
     },
     "files": [
-      "dist"
+      "dist",
+      "src/index.d.ts"
     ]
   }
 }
