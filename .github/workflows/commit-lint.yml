@@ -5,8 +5,11 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
-  commitlint:
+  lint-commit-message:
     runs-on: ubuntu-latest
     steps:
       - name: Compute number of commits in the PR
@@ -18,4 +21,13 @@ jobs:
         with:
           fetch-depth: ${{ steps.nb-of-commits.outputs.plusOne }}
           persist-credentials: false
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - run: git rev-parse HEAD~${{ steps.nb-of-commits.outputs.minusOne }} | git log -1 --format=%B | commitlint -g ./.commitlintrc.json
