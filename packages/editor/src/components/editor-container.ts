@@ -74,7 +74,9 @@ export class EditorContainer extends NonShadowLitElement {
       this.page.awareness.signals.update.subscribe(
         () => this.page.awareness.isReadonly(),
         rd => (this.readonly = rd),
-        msg => msg.id === this.page.doc.clientID
+        msg =>
+          msg.id === this.page.doc.clientID &&
+          typeof this.page.awareness.isReadonly() === 'boolean'
       )
     );
     // Question: Why do we prevent this?
