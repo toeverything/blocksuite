@@ -15,18 +15,9 @@ permissions:
   contents: read
 
 jobs:
-  lint-commit-message:
+  check-pull-request-title:
     runs-on: ubuntu-latest
     steps:
-      - name: Compute number of commits in the PR
-        id: nb-of-commits
-        run: |
-          echo "plusOne=$((${{ github.event.pull_request.commits }} + 1))" >> $GITHUB_OUTPUT
-          echo "minusOne=$((${{ github.event.pull_request.commits }} - 1))" >> $GITHUB_OUTPUT
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: ${{ steps.nb-of-commits.outputs.plusOne }}
-          persist-credentials: false
       - uses: pnpm/action-setup@v2
         with:
           version: 7.9.5
