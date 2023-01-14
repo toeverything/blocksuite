@@ -41,14 +41,14 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
         type: model.type,
       }
     : {
-        flavour: 'affine:paragraph',
+        flavour: 'affine:paragraph' as const,
         type: 'text',
       };
 
   const id = !model.children.length
-    ? page.addBlock(blockProps, parent, index + 1)
+    ? page.addBlockByFlavour(blockProps.flavour, blockProps, parent, index + 1)
     : // If the block has children, insert a new block as the first child
-      page.addBlock(blockProps, model, 0);
+      page.addBlockByFlavour(blockProps.flavour, blockProps, model, 0);
 
   asyncFocusRichText(page, id);
 }
