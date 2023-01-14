@@ -106,11 +106,8 @@ export class SlashMenu extends LitElement {
 
     const filterConfig = this.filterConfig();
     if (!filterConfig.length) {
-      return html`
-        <div class="slash-menu-container" style="${containerStyles}">
-          <div class="slash-menu" style="${slashMenuStyles}">No results</div>
-        </div>
-      `;
+      this.abortController.abort('ABORT');
+      return html``;
     }
 
     return html`<div class="slash-menu-container" style="${containerStyles}">

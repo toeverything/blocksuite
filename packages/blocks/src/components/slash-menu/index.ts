@@ -112,6 +112,7 @@ export const showSlashMenu = ({
     // Clean slash text
 
     if (e.target instanceof AbortSignal && e.target.reason === 'ABORT') {
+      // TODO Fix slash should not be synced to other clients
       // Should not clean slash text when click away or abort
       quill.formatText(blot.offset(), blot.length(), {
         'slash-text': false,
