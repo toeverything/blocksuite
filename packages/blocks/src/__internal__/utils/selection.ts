@@ -216,7 +216,6 @@ export function focusBlockByModel(
       'affine:database',
     ])
   ) {
-    console.log('1');
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
