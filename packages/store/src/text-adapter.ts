@@ -3,7 +3,6 @@ import * as Y from 'yjs';
 import type { AwarenessAdapter } from './awareness.js';
 import type { DeltaOperation, Quill } from 'quill';
 import type { Space } from './space.js';
-import { BlockSuiteError } from '@blocksuite/global/utils';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';
 
