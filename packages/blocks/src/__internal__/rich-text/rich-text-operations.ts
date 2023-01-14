@@ -289,6 +289,14 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
             page.deleteBlock(model);
           }
         });
+      } else if (
+        previousSibling &&
+        matchFlavours(previousSibling, ['affine:database'])
+      ) {
+        page.captureSync();
+        page.deleteBlock(model, {
+          bringChildrenTo: previousSibling,
+        });
       } else {
         const richText = getRichTextByModel(model);
         if (richText) {
