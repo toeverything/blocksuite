@@ -1,7 +1,7 @@
 import type { ContentParser } from './index.js';
 import type { OpenBlockInfo } from '../types.js';
 import type { EditorContainer } from '../../../components/index.js';
-import { assertExists } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
 
 // There are these uncommon in-line tags that have not been added

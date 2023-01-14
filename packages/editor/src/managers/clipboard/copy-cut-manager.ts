@@ -3,13 +3,13 @@ import {
   EmbedBlockModel,
   getCurrentRange,
   ListBlockModel,
-  matchFlavours,
   SelectionUtils,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
+import { matchFlavours } from '@blocksuite/global/utils';
 
 export class CopyCutManager {
   private _editor: EditorContainer;

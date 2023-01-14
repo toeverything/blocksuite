@@ -2,9 +2,10 @@ import type {
   SelectionEvent,
   ShapeMouseMode,
 } from '../../../__internal__/index.js';
-import { assertExists, noop } from '../../../__internal__/index.js';
+import { noop } from '../../../__internal__/index.js';
 import { SelectionController } from './index.js';
 import type { SelectionArea } from '../selection-manager.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 export class ShapeSelectionController extends SelectionController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{

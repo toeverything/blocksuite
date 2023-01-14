@@ -6,7 +6,6 @@ import {
   getNextBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
-  matchFlavours,
   noop,
   PREVENT_DEFAULT,
 } from '../utils/index.js';
@@ -22,6 +21,7 @@ import {
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 import { Shortcuts } from './shortcuts.js';
+import { matchFlavours } from '@blocksuite/global/utils';
 
 interface QuillRange {
   index: number;

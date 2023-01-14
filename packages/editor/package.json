@@ -12,6 +12,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "lit": "^2.6.0",

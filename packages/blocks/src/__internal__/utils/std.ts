@@ -1,12 +1,6 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Detail } from './types.js';
-import {
-  assertFlavours,
-  assertExists,
-  matchFlavours,
-} from '@blocksuite/global/utils';
-
-export { assertFlavours, assertExists, matchFlavours };
+import { matchFlavours } from '@blocksuite/global/utils';
 
 /**
  * Whether the block supports rendering its children.

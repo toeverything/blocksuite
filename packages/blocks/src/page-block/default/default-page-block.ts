@@ -4,7 +4,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { BaseBlockModel, Page, Signal, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
 import {
-  assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
@@ -31,6 +30,7 @@ import {
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import autosize from 'autosize';
+import { assertExists } from '@blocksuite/global/utils';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };

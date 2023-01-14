@@ -1,7 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import type { RangeStatic } from 'quill';
-import { ALLOW_DEFAULT, assertExists, PREVENT_DEFAULT } from '../index.js';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../index.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 type Match = {
   name: string;
