@@ -172,10 +172,14 @@ export class DragHandle extends LitElement {
         1 -
         (event.raw.pageX - rect.left) / rect.width
       ).toFixed(2)}`;
-      this._dragHandle.style.top = `${Math.min(
-        event.raw.pageY - rect.top,
-        rect.height - DRAG_HANDLE_HEIGHT
-      )}px`;
+      const top = Math.max(
+        0,
+        Math.min(
+          event.raw.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
+          rect.height - DRAG_HANDLE_HEIGHT
+        )
+      );
+      this._dragHandle.style.top = `${top}px`;
     }
   }
 
