@@ -69,6 +69,24 @@ export class Signal<T = void> implements Disposable {
     };
   }
 
+  subscribe<U>(
+    selector: (state: T) => U,
+    callback: (value: U) => void,
+    filter?: (state: T) => boolean
+  ) {
+    let prevState: U | undefined;
+    return this.on(state => {
+      if (filter && !filter(state)) {
+        return;
+      }
+      const nextState = selector(state);
+      if (!Object.is(prevState, nextState)) {
+        callback(nextState);
+        prevState = nextState;
+      }
+    });
+  }
+
   once(callback: (v: T) => unknown): void {
     let dispose: Disposable['dispose'] | undefined = undefined;
     const handler = (v: T) => {

@@ -71,19 +71,12 @@ export class EditorContainer extends NonShadowLitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.page.awareness.signals.update.on(msg => {
-        if (msg.id !== this.page.doc.clientID) {
-          return;
-        }
-        if (
-          typeof this.page.awareness.isReadonly() === 'boolean' &&
-          this.readonly !== this.page.awareness.isReadonly()
-        ) {
-          this.readonly = this.page.awareness.isReadonly();
-        }
-      })
+      this.page.awareness.signals.update.subscribe(
+        () => this.page.awareness.isReadonly(),
+        rd => (this.readonly = rd),
+        msg => msg.id === this.page.doc.clientID
+      )
     );
-
     // Question: Why do we prevent this?
     this._disposables.add(
       Signal.fromEvent(window, 'keydown').on(e => {
