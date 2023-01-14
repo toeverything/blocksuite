@@ -114,10 +114,7 @@ importers:
       '@types/turndown': 5.0.1
 
   packages/global:
-    specifiers:
-      '@blocksuite/store': workspace:*
-    dependencies:
-      '@blocksuite/store': link:../store
+    specifiers: {}
 
   packages/phasor:
     specifiers:

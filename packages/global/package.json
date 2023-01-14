@@ -12,9 +12,6 @@
   },
   "author": "toeverything",
   "license": "MPL-2.0",
-  "dependencies": {
-    "@blocksuite/store": "workspace:*"
-  },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.js",

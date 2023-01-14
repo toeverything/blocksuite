@@ -1,5 +1,3 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 export const kInternalError = Symbol('internalError');
 
@@ -16,7 +14,7 @@ export function assertExists<T>(val: T | null | undefined): asserts val is T {
   }
 }
 
-export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
+export function assertFlavours(model: { flavour: string }, allowed: string[]) {
   if (!allowed.includes(model.flavour)) {
     throw new Error(`model flavour ${model.flavour} is not allowed`);
   }
@@ -26,7 +24,7 @@ export function matchFlavours<
   Key extends keyof BlockSuiteInternal.BlockModels &
     string = keyof BlockSuiteInternal.BlockModels & string
 >(
-  model: BaseBlockModel,
+  model: { flavour: Key },
   expected: Key[]
 ): boolean /* model is BlockModels[Key] */ {
   return expected.includes(model.flavour as Key);
