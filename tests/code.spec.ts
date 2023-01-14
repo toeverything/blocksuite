@@ -10,6 +10,7 @@ import {
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
+  pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
   undoByKeyboard,
@@ -185,6 +186,52 @@ test('drag copy paste', async ({ page }) => {
 
   const content = await getQuillSelectionText(page);
   expect(content).toBe('useuse\n');
+});
+
+test('split code by enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+
+  // he|llo
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+
+  await pressEnter(page);
+  await assertRichTexts(page, ['he\nllo\n']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello\n']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he\nllo\n']);
+});
+
+test('split code with selection by enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+
+  // select 'll'
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.up('Shift');
+
+  await pressEnter(page);
+  await assertRichTexts(page, ['he\no\n']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello\n']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he\no\n']);
 });
 
 test('keyboard selection and copy paste', async ({ page }) => {

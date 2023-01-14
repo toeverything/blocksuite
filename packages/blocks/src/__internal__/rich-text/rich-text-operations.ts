@@ -56,13 +56,15 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
 export function handleSoftEnter(
   page: Page,
   model: ExtendedModel,
-  index: number
+  index: number,
+  length: number
 ) {
   page.captureSync();
   const shouldFormatCode = matchFlavours(model, ['affine:code']);
-  model.text?.insert(
-    '\n',
+  model.text?.replace(
     index,
+    length,
+    '\n',
     shouldFormatCode ? { 'code-block': true } : {}
   );
 }
@@ -70,14 +72,15 @@ export function handleSoftEnter(
 export function handleBlockSplit(
   page: Page,
   model: ExtendedModel,
-  splitIndex: number
+  splitIndex: number,
+  splitLength: number
 ) {
   if (!(model.text instanceof Text)) return;
 
   const parent = page.getParent(model);
   if (!parent) return;
 
-  const [left, right] = model.text.split(splitIndex);
+  const [left, right] = model.text.split(splitIndex, splitLength);
   page.captureSync();
   page.markTextSplit(model.text, left, right);
   page.updateBlock(model, { text: left });

@@ -195,6 +195,37 @@ test('split paragraph block by enter', async ({ page }) => {
   await assertRichTexts(page, ['he', 'llo']);
 });
 
+test('split paragraph block with selected text by enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['hello']);
+
+  // select 'll'
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.up('Shift');
+  await assertSelection(page, 0, 2, 2);
+
+  await pressEnter(page);
+  await assertRichTexts(page, ['he', 'o']);
+  await assertBlockChildrenFlavours(page, '1', [
+    'affine:paragraph',
+    'affine:paragraph',
+  ]);
+  await assertSelection(page, 1, 0, 0);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he', 'o']);
+});
+
 test('add multi line by soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
