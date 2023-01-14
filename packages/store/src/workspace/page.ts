@@ -394,7 +394,14 @@ export class Page extends Space<PageData> {
     this.deleteBlock(model);
   }
 
-  deleteBlock(model: BaseBlockModel) {
+  deleteBlock(
+    model: BaseBlockModel,
+    options: {
+      bringChildrenTo: 'parent' | BaseBlockModel;
+    } = {
+      bringChildrenTo: 'parent',
+    }
+  ) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -404,13 +411,16 @@ export class Page extends Space<PageData> {
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
-    if (parent) {
-      parent.children.push(...model.children);
+    if (options.bringChildrenTo === 'parent' && parent) {
+      parent.children.unshift(...model.children);
+    } else if (options.bringChildrenTo instanceof BaseBlockModel) {
+      options.bringChildrenTo.children.unshift(...model.children);
     }
     this._blockMap.delete(model.id);
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
+      const children = model.children.map(model => model.id);
       model.dispose();
 
       if (parent) {
@@ -420,8 +430,12 @@ export class Page extends Space<PageData> {
         if (index > -1) {
           yChildren.delete(index, 1);
         }
-        if (parent) {
-          yChildren.push(model.children.map(model => model.id));
+        if (options.bringChildrenTo === 'parent' && parent) {
+          yChildren.unshift(children);
+        } else if (options.bringChildrenTo instanceof BaseBlockModel) {
+          this.updateBlockById(options.bringChildrenTo.id, {
+            children: options.bringChildrenTo.children,
+          });
         }
       }
     });
