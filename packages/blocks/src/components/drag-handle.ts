@@ -80,17 +80,16 @@ export class DragHandle extends LitElement {
     }
 
     .affine-drag-handle-line {
-      visibility: hidden;
+      opacity: 0;
       height: 100%;
       position: absolute;
-      z-index: 1;
       left: ${DRAG_HANDLE_WIDTH / 2}px;
       border-right: 1px solid rgba(61, 61, 61, 1);
+      transition: opacity ease-in-out 100ms;
     }
 
     .affine-drag-handle {
       position: absolute;
-      z-index: 2;
       cursor: grab;
       display: flex;
       align-items: center;
@@ -105,6 +104,7 @@ export class DragHandle extends LitElement {
       border-width: 1px;
       border-style: solid;
       border-color: rgba(61, 61, 61, 1);
+      background-color: var(--affine-page-background);
       transform: rotate(45deg);
     }
   `;
@@ -360,6 +360,11 @@ export class DragHandle extends LitElement {
 
   override render() {
     return html`
+      <style>
+        :host(:hover) > .affine-drag-handle-line {
+          opacity: 1;
+        }
+      </style>
       <div class="affine-drag-handle-line"></div>
       <div class="affine-drag-handle">
         <div class="affine-drag-handle-rect" draggable="true"></div>
