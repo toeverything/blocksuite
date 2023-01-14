@@ -30,4 +30,4 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - run: git rev-parse HEAD~${{ steps.nb-of-commits.outputs.minusOne }} | git log -1 --format=%B | commitlint -g ./.commitlintrc.json
+      - run: git rev-parse HEAD~${{ steps.nb-of-commits.outputs.minusOne }} | git log -1 --format=%B | npx commitlint -g ./.commitlintrc.json
