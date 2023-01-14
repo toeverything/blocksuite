@@ -1,4 +1,4 @@
-import { PathModel, RectModel, type Model } from './models.js';
+import { PathElement, RectElement, type Element } from './elements.js';
 import type { Renderer } from './renderer.js';
 
 const PATH_POINTS = 10;
@@ -15,7 +15,7 @@ function randomColor() {
   return '#' + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, '0');
 }
 
-function createMockModel(id: number, rangeX: number, rangeY: number) {
+function createMockElement(id: number, rangeX: number, rangeY: number) {
   const r = randomInt(100);
 
   const x = randomInt(rangeX);
@@ -31,16 +31,16 @@ function createMockModel(id: number, rangeX: number, rangeY: number) {
       if (y > maxY) maxY = y;
       points.push(x, y);
     }
-    const model = new PathModel(id, points);
-    model.color = randomColor();
-    model.setBound(x, y, maxX, maxY);
-    return model;
+    const element = new PathElement(`${id}`, `${id}`, points);
+    element.color = randomColor();
+    element.setBound(x, y, maxX, maxY);
+    return element;
   } else {
     const size = randomInt(IMAGE_MAX, IMAGE_MIN);
-    const model = new RectModel(id);
-    model.color = randomColor();
-    model.setBound(x, y, size, size);
-    return model;
+    const element = new RectElement(`${id}`, `${id}`);
+    element.color = randomColor();
+    element.setBound(x, y, size, size);
+    return element;
   }
 }
 
@@ -50,12 +50,12 @@ export function initMockData(
   rangeX: number,
   rangeY: number
 ) {
-  const models: Model[] = [];
+  const elements: Element[] = [];
   for (let i = 0; i < count; i++) {
-    const model = createMockModel(i, rangeX, rangeY);
-    models.push(model);
+    const element = createMockElement(i, rangeX, rangeY);
+    elements.push(element);
   }
-  renderer.load(models);
+  renderer.load(elements);
 }
 
 export function bindWheelEvents(renderer: Renderer, mouseRoot: HTMLElement) {
