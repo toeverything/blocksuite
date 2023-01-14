@@ -88,8 +88,15 @@ export function handleBlockSplit(
     newParent = model;
     newBlockIndex = 0;
   }
-  const id = page.addBlock(
-    { flavour: model.flavour, text: right, type: model.type },
+  const children = [...model.children];
+  page.updateBlockById(model.id, { children: [] });
+  const id = page.addBlockByFlavour(
+    model.flavour,
+    {
+      text: right,
+      type: model.type,
+      children,
+    },
     newParent,
     newBlockIndex
   );
@@ -261,7 +268,9 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         page.captureSync();
         const preTextLength = previousSibling.text?.length || 0;
         model.text?.length && previousSibling.text?.join(model.text as Text);
-        page.deleteBlock(model);
+        page.deleteBlock(model, {
+          bringChildrenTo: previousSibling,
+        });
         const richText = getRichTextByModel(previousSibling);
         richText?.quill?.setSelection(preTextLength, 0);
       } else if (
