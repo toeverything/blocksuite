@@ -27,13 +27,13 @@ export function bindCommonHotkey(page: Page) {
 
   hotkey.addListener(UNDO, e => {
     if (isPageTitle(e)) {
-      return;
+      e.preventDefault();
     }
     page.undo();
   });
   hotkey.addListener(REDO, e => {
     if (isPageTitle(e)) {
-      return;
+      e.preventDefault();
     }
     page.redo();
   });
