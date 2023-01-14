@@ -170,9 +170,9 @@ export class DragHandle extends LitElement {
       this._cursor = modelState.index;
       const rect = modelState.position;
       this.style.display = 'block';
-      this.style.height = `${rect.height - 8}px`;
+      this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
-      this.style.left = `${rect.left - DRAG_HANDLE_WIDTH - 10}px`;
+      this.style.left = `${rect.left - DRAG_HANDLE_WIDTH}px`;
       this.style.top = `${rect.top}px`;
       this.style.opacity = `${(
         1 -
@@ -182,7 +182,7 @@ export class DragHandle extends LitElement {
         0,
         Math.min(
           event.raw.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
-          rect.height - DRAG_HANDLE_HEIGHT - 6
+          rect.height - DRAG_HANDLE_HEIGHT
         )
       );
       this._dragHandle.style.top = `${top}px`;
@@ -221,11 +221,11 @@ export class DragHandle extends LitElement {
       document.createElement('affine-drag-indicator')
     );
     document.body.appendChild(this._indicator);
-    this.addEventListener('mousedown', this._onMouseDown);
+    this._dragHandle.addEventListener('mousedown', this._onClick);
+    this._dragHandle.addEventListener('click', this._onClick);
     isFirefox &&
       document.addEventListener('dragover', this._onDragOverDocument);
     this.addEventListener('mousemove', this._onMouseMoveOnHost);
-    this.addEventListener('mouseleave', this._onMouseLeave);
     this._dragHandle.addEventListener('dragstart', this._onDragStart);
     this._dragHandle.addEventListener('drag', this._onDrag);
     this._dragHandle.addEventListener('dragend', this._onDragEnd);
@@ -240,17 +240,21 @@ export class DragHandle extends LitElement {
       'dragover',
       handlePreventDocumentDragOverDelay
     );
-    this._dragHandle.removeEventListener('mousedown', this._onMouseDown);
+    this._dragHandle.removeEventListener('mousedown', this._onClick);
+    this._dragHandle.removeEventListener('click', this._onClick);
     isFirefox &&
       document.removeEventListener('dragover', this._onDragOverDocument);
     this.removeEventListener('mousemove', this._onMouseMoveOnHost);
-    this.removeEventListener('mouseleave', this._onMouseLeave);
     this._dragHandle.removeEventListener('dragstart', this._onDragStart);
     this._dragHandle.removeEventListener('drag', this._onDrag);
     this._dragHandle.removeEventListener('dragend', this._onDragEnd);
   }
 
   private _onMouseMoveOnHost(e: MouseEvent) {
+    if (isFirefox) {
+      this._currentPageX = e.pageX;
+      this._currentPageY = e.pageY;
+    }
     if (!this._startModelState) {
       return;
     }
@@ -282,16 +286,12 @@ export class DragHandle extends LitElement {
     this.hide();
   };
 
-  private _onMouseDown = (e: MouseEvent) => {
+  private _onClick = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
       e.pageX,
       e.pageY,
       true
     );
-    if (isFirefox) {
-      this._currentPageX = e.pageX;
-      this._currentPageY = e.pageY;
-    }
     if (clickDragState) {
       this._cursor = clickDragState.index;
       this.setSelectedBlocks([
@@ -306,10 +306,6 @@ export class DragHandle extends LitElement {
     }
     this._currentPageX = e.pageX;
     this._currentPageY = e.pageY;
-  };
-
-  private _onMouseLeave = (_: MouseEvent) => {
-    this.setSelectedBlocks([]);
   };
 
   private _onDragStart = (e: DragEvent) => {
