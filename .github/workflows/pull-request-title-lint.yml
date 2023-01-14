@@ -25,4 +25,4 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - run: npx commitlint -g ./.commitlintrc.json "${{ github.event.pull_request.title }}"
+      - run: echo "${{ github.event.pull_request.title }}" | npx commitlint -g ./.commitlintrc.json
