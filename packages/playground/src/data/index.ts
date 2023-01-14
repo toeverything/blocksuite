@@ -6,7 +6,6 @@
  */
 import { BaseBlockModel, Page, Text, Workspace } from '@blocksuite/store';
 import BlockTag = BlockSuiteInternal.BlockTag;
-import ParagraphBlockModel = BlockSuiteModelProps.ParagraphBlockModel;
 
 export function heavy(workspace: Workspace) {
   workspace.signals.pageAdded.once(id => {
