@@ -436,7 +436,6 @@ export class Page extends Space<PageData> {
       bringChildrenTo: 'parent',
     }
   ) {
-    console.log('debug', model, options, new Error().stack);
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
