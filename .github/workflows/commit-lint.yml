@@ -1,4 +1,4 @@
-name: Lint Commit Messages
+name: First commit message adheres to guidelines
 
 on:
   pull_request:
@@ -9,7 +9,13 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
+      - name: Compute number of commits in the PR
+        id: nb-of-commits
+        run: |
+          echo "plusOne=$((${{ github.event.pull_request.commits }} + 1))" >> $GITHUB_OUTPUT
+          echo "minusOne=$((${{ github.event.pull_request.commits }} - 1))" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      - uses: wagoid/commitlint-github-action@v5
+          fetch-depth: ${{ steps.nb-of-commits.outputs.plusOne }}
+          persist-credentials: false
+      - run: git rev-parse HEAD~${{ steps.nb-of-commits.outputs.minusOne }} | git log -1 --format=%B | commitlint -g ./.commitlintrc.json
