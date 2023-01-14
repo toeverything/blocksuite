@@ -4,8 +4,9 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
-import { Page, Text, Workspace } from '@blocksuite/store';
+import { BaseBlockModel, Page, Text, Workspace } from '@blocksuite/store';
 import BlockTag = BlockSuiteInternal.BlockTag;
+import ParagraphBlockModel = BlockSuiteModelProps.ParagraphBlockModel;
 
 export function heavy(workspace: Workspace) {
   workspace.signals.pageAdded.once(id => {
@@ -134,7 +135,7 @@ export function database(workspace: Workspace) {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     page.updateBlockTag<BlockTag<BlockSuiteInternal.OptionTagType<Option>>>(
-      page.getBlockById(paragraph2Id)!,
+      page.getBlockById(paragraph2Id) as BaseBlockModel,
       {
         type: '2',
         value: 'TODO',
