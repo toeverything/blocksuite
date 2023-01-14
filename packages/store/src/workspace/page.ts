@@ -404,6 +404,9 @@ export class Page extends Space<PageData> {
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
+    if (parent) {
+      parent.children.push(...model.children);
+    }
     this._blockMap.delete(model.id);
 
     this.transact(() => {
@@ -416,6 +419,9 @@ export class Page extends Space<PageData> {
 
         if (index > -1) {
           yChildren.delete(index, 1);
+        }
+        if (parent) {
+          yChildren.push(model.children.map(model => model.id));
         }
       }
     });
