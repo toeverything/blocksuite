@@ -1,4 +1,4 @@
-name: First commit message adheres to guidelines
+name: Pull Request title adheres to guidelines
 
 on:
   pull_request:
@@ -34,4 +34,4 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - run: npx commitlint -g ./.commitlintrc.json ${{ github.event.pull_request.title }}
+      - run: npx commitlint -g ./.commitlintrc.json "${{ github.event.pull_request.title }}"
