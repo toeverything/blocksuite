@@ -2,6 +2,12 @@ name: First commit message adheres to guidelines
 
 on:
   pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - labeled
+      - unlabeled
     branches:
       - master
 
@@ -28,6 +34,4 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - run: git rev-parse HEAD~${{ steps.nb-of-commits.outputs.minusOne }} | git log -1 --format=%B | npx commitlint -g ./.commitlintrc.json
+      - run: npx commitlint -g ./.commitlintrc.json ${{ github.event.pull_request.title }}
