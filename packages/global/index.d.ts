@@ -73,9 +73,9 @@ declare namespace BlockSuiteInternal {
     decimal: number;
   }
 
-  interface OptionTagType extends TagType<string> {
+  interface OptionTagType<Enum extends string> extends TagType<string> {
     flavour: 'affine-tag:option';
-    enum: string[];
+    enum: Enum[];
   }
 
   type TagTypes = OptionTagType | NumberTagType | TextTagType;
@@ -83,7 +83,7 @@ declare namespace BlockSuiteInternal {
   // threat this type as row type
   interface BlockTag<Type extends TagTypes = TagTypes> {
     type: Type['id'];
-    value: Type['__$TYPE_HOLDER$__'];
+    value: Type extends TagType<infer U> ? U : unknown;
   }
 
   interface IBaseBlockProps {

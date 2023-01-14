@@ -162,7 +162,7 @@ export class Page extends Space<PageData> {
     return this._blockMap.get(id) ?? null;
   }
 
-  updateBlockTag(model: BaseBlockModel, tag: BlockTag) {
+  updateBlockTag<Tag extends BlockTag>(model: BaseBlockModel, tag: Tag) {
     const already = this._tags.has(model.id);
     let tags: Y.Map<unknown>;
     if (!already) {

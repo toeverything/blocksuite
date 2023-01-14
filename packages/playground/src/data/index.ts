@@ -5,7 +5,7 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
-import type { ParagraphBlockModel } from '@blocksuite/blocks';
+import BlockTag = BlockSuiteInternal.BlockTag;
 
 export function heavy(workspace: Workspace) {
   workspace.signals.pageAdded.once(id => {
@@ -79,6 +79,8 @@ export function database(workspace: Workspace) {
     page.addBlockByFlavour('affine:surface', {}, null);
 
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+    type Option = 'Done' | 'TODO' | 'WIP';
+    const options = ['Done', 'TODO', 'WIP'] as Option[];
     const databaseId = page.addBlockByFlavour(
       'affine:database',
       {
@@ -97,7 +99,7 @@ export function database(workspace: Workspace) {
             id: '2',
             flavour: 'affine-tag:option',
             name: 'Option',
-            enum: ['Done', 'TODO', 'WIP'],
+            enum: options,
             metadata: {
               color: '#C7BAF3',
               width: 100,
@@ -116,11 +118,28 @@ export function database(workspace: Workspace) {
       databaseId
     );
 
-    const model = page.getBlockById(paragraphId) as ParagraphBlockModel;
-    page.updateBlockTag(model, {
+    const paragraph2Id = page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new Text(page, 'test'),
+      },
+      databaseId
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    page.updateBlockTag(page.getBlockById(paragraphId)!, {
       type: '1',
       value: 'text1',
     });
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    page.updateBlockTag<BlockTag<BlockSuiteInternal.OptionTagType<Option>>>(
+      page.getBlockById(paragraph2Id)!,
+      {
+        type: '2',
+        value: 'TODO',
+      }
+    );
 
     requestAnimationFrame(() => page.resetHistory());
   });
