@@ -69,24 +69,34 @@ export type DragHandleGetModelStateWithCursorCallback = (
 ) => EditingState | null;
 
 const DRAG_HANDLE_HEIGHT = 24; // px
-const DRAG_HANDLE_WIDTH = 18; // px
+const DRAG_HANDLE_WIDTH = 24; // px
 
 @customElement('affine-drag-handle')
 export class DragHandle extends LitElement {
   static styles = css`
     :host {
       overflow: hidden;
+      width: ${DRAG_HANDLE_WIDTH + 8}px;
+    }
+
+    .affine-drag-handle-line {
+      visibility: hidden;
+      height: 100%;
+      position: absolute;
+      z-index: 1;
+      left: ${DRAG_HANDLE_WIDTH / 2}px;
+      border-right: 1px solid rgba(61, 61, 61, 1);
     }
 
     .affine-drag-handle {
       position: absolute;
+      z-index: 2;
       cursor: grab;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: ${DRAG_HANDLE_WIDTH}px;
-      height: ${DRAG_HANDLE_HEIGHT}px;
-      border-radius: 3px;
+      width: ${DRAG_HANDLE_HEIGHT}px;
+      height: ${DRAG_HANDLE_WIDTH}px;
     }
 
     .affine-drag-handle-rect {
@@ -146,47 +156,25 @@ export class DragHandle extends LitElement {
   private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
 
-  protected firstUpdated() {
-    this.style.display = 'none';
-    this.style.position = 'absolute';
-    document.body.addEventListener(
-      'dragover',
-      handlePreventDocumentDragOverDelay,
-      false
-    );
-    document.body.addEventListener('wheel', this._onWheel);
-    window.addEventListener('resize', this._onResize);
-    this._indicator = <DragIndicator>(
-      document.createElement('affine-drag-indicator')
-    );
-    document.body.appendChild(this._indicator);
-    this.addEventListener('mousedown', this._onMouseDown);
-    isFirefox &&
-      document.addEventListener('dragover', this._onDragOverDocument);
-    this._dragHandle.addEventListener('mouseleave', this._onMouseLeave);
-    this._dragHandle.addEventListener('dragstart', this._onDragStart);
-    this._dragHandle.addEventListener('drag', this._onDrag);
-    this._dragHandle.addEventListener('dragend', this._onDragEnd);
-  }
-
   public showBySelectionEvent(event: SelectionEvent) {
     if (!this._getBlockEditingStateByPosition) {
       return;
     }
     const modelState = this._getBlockEditingStateByPosition(
       event.raw.pageX,
-      event.raw.pageY
+      event.raw.pageY,
+      true
     );
     if (modelState) {
       this._startModelState = modelState;
       this._cursor = modelState.index;
       const rect = modelState.position;
       this.style.display = 'block';
-      this.style.height = `${rect.height}px`;
+      this.style.height = `${rect.height - 8}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
-      this.style.left = `${rect.left - 20}px`;
+      this.style.left = `${rect.left - DRAG_HANDLE_WIDTH - 10}px`;
       this.style.top = `${rect.top}px`;
-      this._dragHandle.style.opacity = `${(
+      this.style.opacity = `${(
         1 -
         (event.raw.pageX - rect.left) / rect.width
       ).toFixed(2)}`;
@@ -194,7 +182,7 @@ export class DragHandle extends LitElement {
         0,
         Math.min(
           event.raw.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
-          rect.height - DRAG_HANDLE_HEIGHT
+          rect.height - DRAG_HANDLE_HEIGHT - 6
         )
       );
       this._dragHandle.style.top = `${top}px`;
@@ -219,6 +207,30 @@ export class DragHandle extends LitElement {
     this._indicator.targetRect = null;
   }
 
+  protected firstUpdated() {
+    this.style.display = 'none';
+    this.style.position = 'absolute';
+    document.body.addEventListener(
+      'dragover',
+      handlePreventDocumentDragOverDelay,
+      false
+    );
+    document.body.addEventListener('wheel', this._onWheel);
+    window.addEventListener('resize', this._onResize);
+    this._indicator = <DragIndicator>(
+      document.createElement('affine-drag-indicator')
+    );
+    document.body.appendChild(this._indicator);
+    this.addEventListener('mousedown', this._onMouseDown);
+    isFirefox &&
+      document.addEventListener('dragover', this._onDragOverDocument);
+    this.addEventListener('mousemove', this._onMouseMoveOnHost);
+    this.addEventListener('mouseleave', this._onMouseLeave);
+    this._dragHandle.addEventListener('dragstart', this._onDragStart);
+    this._dragHandle.addEventListener('drag', this._onDrag);
+    this._dragHandle.addEventListener('dragend', this._onDragEnd);
+  }
+
   public disconnectedCallback() {
     super.disconnectedCallback();
     this._indicator.remove();
@@ -231,10 +243,26 @@ export class DragHandle extends LitElement {
     this._dragHandle.removeEventListener('mousedown', this._onMouseDown);
     isFirefox &&
       document.removeEventListener('dragover', this._onDragOverDocument);
-    this._dragHandle.removeEventListener('mouseleave', this._onMouseLeave);
+    this.removeEventListener('mousemove', this._onMouseMoveOnHost);
+    this.removeEventListener('mouseleave', this._onMouseLeave);
     this._dragHandle.removeEventListener('dragstart', this._onDragStart);
     this._dragHandle.removeEventListener('drag', this._onDrag);
     this._dragHandle.removeEventListener('dragend', this._onDragEnd);
+  }
+
+  private _onMouseMoveOnHost(e: MouseEvent) {
+    if (!this._startModelState) {
+      return;
+    }
+    const rect = this._startModelState.position;
+    const top = Math.max(
+      0,
+      Math.min(
+        e.pageY - rect.top - DRAG_HANDLE_HEIGHT / 2,
+        rect.height - DRAG_HANDLE_HEIGHT - 6
+      )
+    );
+    this._dragHandle.style.top = `${top}px`;
   }
 
   private _onResize = (e: UIEvent) => {
@@ -332,6 +360,7 @@ export class DragHandle extends LitElement {
 
   override render() {
     return html`
+      <div class="affine-drag-handle-line"></div>
       <div class="affine-drag-handle">
         <div class="affine-drag-handle-rect" draggable="true"></div>
       </div>
