@@ -22,7 +22,7 @@ import {
   copyByKeyboard,
   pasteByKeyboard,
   getSelectedTextByQuill,
-  withCtrlOrMeta,
+  SHORT_KEY,
 } from './utils/actions/index.js';
 import { expect } from '@playwright/test';
 import {
@@ -491,9 +491,9 @@ test('drag to select tagged text, and copy', async ({ page }) => {
   await assertRichTexts(page, ['123456789']);
 
   await dragBetweenIndices(page, [0, 1], [0, 3]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('C'));
+  page.keyboard.press(`${SHORT_KEY}+C`);
   const textOne = await getSelectedTextByQuill(page);
   expect(textOne).toBe('12345');
 });
@@ -507,7 +507,7 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   await assertRichTexts(page, ['123456789']);
 
   await dragBetweenIndices(page, [0, 1], [0, 3]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   await page.keyboard.type('1');
   const textOne = await getQuillSelectionText(page);
@@ -606,7 +606,7 @@ test('should delete line with content after divider should not lost content', as
   await page.keyboard.type('123');
   await assertDivider(page, 1);
   // Jump to line start
-  await withCtrlOrMeta(page, () => page.keyboard.press('ArrowLeft'));
+  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
   await page.keyboard.press('Backspace');
   await page.waitForTimeout(10);
   await page.keyboard.press('Backspace');

@@ -65,11 +65,14 @@ async function keyUpOptionMeta(page: Page) {
   }
 }
 
-// It's not good enough, but better than calling keyDownCtrlOrMeta and keyUpCtrlOrMeta separately
-export const withCtrlOrMeta = async (page: Page, fn: () => Promise<void>) => {
-  await keyDownCtrlOrMeta(page);
+export const withPressKey = async (
+  page: Page,
+  key: string,
+  fn: () => Promise<void>
+) => {
+  await page.keyboard.down(key);
   await fn();
-  await keyUpCtrlOrMeta(page);
+  await page.keyboard.up(key);
 };
 
 export async function pressEnter(page: Page) {

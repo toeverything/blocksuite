@@ -3,12 +3,15 @@ import {
   clickBlockTypeMenuItem,
   dragBetweenIndices,
   enterPlaygroundRoom,
+  focusRichText,
   initEmptyParagraphState,
   initThreeParagraphs,
   pressEnter,
   switchReadonly,
+  withPressKey,
 } from './utils/actions/index.js';
 import {
+  assertAlmostEqual,
   assertClipItems,
   assertLocatorVisible,
   assertSelection,
@@ -34,6 +37,52 @@ test('should format quick bar show when select text', async ({ page }) => {
 
   await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();
+});
+
+test('should format quick bar show when select text by keyboard', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('hello world');
+  await withPressKey(page, 'Shift', async () => {
+    let i = 10;
+    while (i--) {
+      await page.keyboard.press('ArrowLeft');
+    }
+  });
+
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
+
+  const leftBox = await formatQuickBar.boundingBox();
+  if (!leftBox) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(leftBox.x, 20, 3);
+  assertAlmostEqual(leftBox.y, 106, 3);
+
+  await page.keyboard.press('ArrowLeft');
+  await expect(formatQuickBar).not.toBeVisible();
+
+  await withPressKey(page, 'Shift', async () => {
+    let i = 10;
+    while (i--) {
+      await page.keyboard.press('ArrowRight');
+    }
+  });
+
+  await expect(formatQuickBar).toBeVisible();
+
+  const rightBox = await formatQuickBar.boundingBox();
+  if (!rightBox) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  // The x position of the format quick bar depends on the font size
+  // so there are slight differences in different environments
+  assertAlmostEqual(rightBox.x, 40, 10);
+  assertAlmostEqual(rightBox.y, 180, 3);
 });
 
 test('should format quick bar can only display one at a time', async ({
