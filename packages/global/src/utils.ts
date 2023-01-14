@@ -1,5 +1,3 @@
-import '../env.d.ts';
-
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object

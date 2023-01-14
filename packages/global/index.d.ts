@@ -14,9 +14,9 @@ declare module NodeJS {
   }
 }
 
-type PropsWithId<Props> = Props & { id: string };
+declare type PropsWithId<Props> = Props & { id: string };
 
-type BlockSuiteFlags = {
+declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
   enable_drag_handle: boolean;
   readonly: Record<string, boolean>;
@@ -59,11 +59,19 @@ declare namespace BlockSuiteInternal {
   };
 }
 
-type EmbedType = 'image' | 'video' | 'audio' | 'file';
-type ListType = 'bulleted' | 'numbered' | 'todo';
-type ParagraphType = 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+declare type EmbedType = 'image' | 'video' | 'audio' | 'file';
+declare type ListType = 'bulleted' | 'numbered' | 'todo';
+declare type ParagraphType =
+  | 'text'
+  | 'quote'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6';
 
-namespace BlockSuiteModelProps {
+declare namespace BlockSuiteModelProps {
   interface CodeBlockModel {
     language: string;
   }
