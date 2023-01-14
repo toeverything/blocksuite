@@ -7,12 +7,12 @@ import {
   showLinkPopover,
 } from '../../../components/link-popover/index.js';
 import {
-  assertExists,
   getDefaultPageBlock,
   getModelByElement,
   hotkey,
 } from '../../utils/index.js';
 import { LinkIcon } from './link-icon.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {

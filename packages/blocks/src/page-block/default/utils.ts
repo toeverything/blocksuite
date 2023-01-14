@@ -2,7 +2,6 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { toast } from '../../components/toast.js';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
 import {
-  assertExists,
   asyncFocusRichText,
   caretRangeFromPoint,
   focusNextBlock,
@@ -18,7 +17,6 @@ import {
   HOTKEYS,
   isPageTitle,
   getRichTextByModel,
-  matchFlavours,
   Point,
   resetNativeSelection,
   BLOCK_ID_ATTR,
@@ -37,6 +35,7 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import type { DefaultSelectionManager } from './selection-manager.js';
 import type { CodeBlockOption } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export interface EditingState {
   model: BaseBlockModel;

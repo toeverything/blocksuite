@@ -4,10 +4,10 @@ import type { EmbedBlockModel } from '../index.js';
 import {
   BLOCK_ID_ATTR,
   type BlockHost,
-  assertExists,
   NonShadowLitElement,
   BlockChildrenContainer,
 } from '../../__internal__/index.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {

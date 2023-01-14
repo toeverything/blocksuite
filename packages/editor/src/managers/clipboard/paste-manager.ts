@@ -5,11 +5,10 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
 import {
   SelectionUtils,
   SelectionInfo,
-  matchFlavours,
-  assertExists,
   getStartModelBySelection,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export class PasteManager {
   private _editor: EditorContainer;

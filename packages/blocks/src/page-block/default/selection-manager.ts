@@ -3,7 +3,6 @@ import type { EmbedBlockComponent } from '../../embed-block/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import '../../components/drag-handle.js';
 import {
-  assertExists,
   caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
@@ -31,10 +30,11 @@ import {
   getBlockEditingStateByPosition,
   getBlockEditingStateByCursor,
 } from './utils.js';
-import { BaseBlockModel, Utils } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -456,10 +456,7 @@ export class DefaultSelectionManager {
 
     if (
       clickBlockInfo &&
-      Utils.matchFlavours(clickBlockInfo.model, [
-        'affine:embed',
-        'affine:divider',
-      ])
+      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
     ) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();

@@ -2,7 +2,6 @@ import type { Page } from '@blocksuite/store';
 import type { ParentBlot } from 'parchment';
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
-  assertExists,
   getRichTextByModel,
   getStartModelBySelection,
   hotkey,
@@ -10,6 +9,7 @@ import {
 } from '../../utils/index.js';
 import './link-node';
 import { MockSelectNode } from './mock-select-node.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 // Disable hotkey to fix common hotkey(ctrl+c, ctrl+v, etc) not working at edit link popover
 export const createLink = hotkey.withDisabledHotkeyFn(async (page: Page) => {

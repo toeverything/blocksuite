@@ -14,6 +14,9 @@ export default defineConfig({
       '@blocksuite/blocks/*': path.resolve(
         fileURLToPath(new URL('../blocks/src/*', import.meta.url))
       ),
+      '@blocksuite/global/*': path.resolve(
+        fileURLToPath(new URL('../global/src/*', import.meta.url))
+      ),
     },
   },
 });

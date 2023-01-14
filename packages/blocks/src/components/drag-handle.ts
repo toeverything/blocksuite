@@ -4,7 +4,8 @@ import type { IPoint } from '../__internal__/index.js';
 import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
+import { getBlockElementByModel } from '../__internal__/index.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078

@@ -4,7 +4,6 @@ import { Page, Text } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import {
   ExtendedModel,
-  assertExists,
   getRichTextByModel,
   getContainerByModel,
   getPreviousBlock,
@@ -16,12 +15,12 @@ import {
   convertToList,
   convertToParagraph,
   convertToDivider,
-  matchFlavours,
   focusPreviousBlock,
   focusBlockByModel,
   supportsChildren,
   getModelByElement,
 } from '../utils/index.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);

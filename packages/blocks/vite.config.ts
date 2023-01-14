@@ -18,7 +18,7 @@ export default defineConfig({
       external: [
         'yjs',
         /^y-protocols/,
-        '@blocksuite/store',
+        /^@blocksuite/,
         'highlight.js',
         '@tldraw/intersect',
         '@tldraw/vec',

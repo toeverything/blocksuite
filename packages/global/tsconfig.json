@@ -1,11 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./",
-    "outDir": "./dist/",
-    "emitDeclarationOnly": true
+    "rootDir": "./src",
+    "outDir": "./dist/"
   },
-  "include": ["./src"],
+  "include": ["./src", "index.d.ts"],
   // This package MUST NOT use any other package.
   "references": []
 }

@@ -5,7 +5,7 @@ import { ShapeBlockTag } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { BLOCK_ID_ATTR as ATTR } from './consts.js';
 import type { IPoint } from './gesture.js';
-import { assertExists, matchFlavours } from './std.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 

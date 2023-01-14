@@ -17,7 +17,7 @@ import { ListBlockModel } from '../../../blocks/src/list-block/list-model.js';
 import { FrameBlockModel } from '../../../blocks/src/frame-block/frame-model.js';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model.js';
 import type { PageMeta } from '../workspace/index.js';
-import { assertExists } from '../utils/utils.js';
+import { assertExists } from './test-utils-dom.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;

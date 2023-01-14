@@ -3,7 +3,7 @@ import type { Quill as QuillType } from 'quill';
 
 // @ts-ignore
 import type hljs from 'highlight.js';
-import { assertExists } from '../../__internal__/index.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 const Module = Quill.import('core/module');
 const CodeBlock = Quill.import('formats/code-block');

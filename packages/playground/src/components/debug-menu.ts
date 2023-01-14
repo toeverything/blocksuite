@@ -21,7 +21,6 @@ import type {
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 
 import {
-  assertExists,
   ColorStyle,
   createEvent,
   getCurrentRange,
@@ -35,6 +34,7 @@ import {
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
+import { assertExists } from '@blocksuite/store/src/__tests__/test-utils-dom';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
