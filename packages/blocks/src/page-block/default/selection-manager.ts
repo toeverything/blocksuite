@@ -521,17 +521,7 @@ export class DefaultSelectionManager {
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
       if (this._dragHandle) {
-        const clickDragState = getBlockEditingStateByPosition(
-          this._blocks,
-          e.raw.pageX,
-          e.raw.pageY,
-          {
-            skipX: true,
-          }
-        );
-        if (clickDragState?.model) {
-          this._dragHandle.show(clickDragState);
-        }
+        this._dragHandle.showBySelectionEvent(e);
       }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);

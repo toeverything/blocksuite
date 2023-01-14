@@ -4,7 +4,11 @@ import type { IPoint } from '../__internal__/index.js';
 import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { assertExists, getBlockElementByModel } from '../__internal__/index.js';
+import {
+  assertExists,
+  getBlockElementByModel,
+  SelectionEvent,
+} from '../__internal__/index.js';
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
@@ -64,6 +68,8 @@ export type DragHandleGetModelStateWithCursorCallback = (
   dragging?: boolean
 ) => EditingState | null;
 
+const DRAG_HANDLE_HEIGHT = 24; // px
+
 @customElement('affine-drag-handle')
 export class DragHandle extends LitElement {
   static styles = css`
@@ -73,7 +79,7 @@ export class DragHandle extends LitElement {
       align-items: center;
       justify-content: center;
       width: 18px;
-      height: 24px;
+      height: ${DRAG_HANDLE_HEIGHT}px;
       border-radius: 3px;
       fill: rgba(55, 53, 47, 0.35);
       background: rgba(55, 53, 47, 0.08);
@@ -129,11 +135,28 @@ export class DragHandle extends LitElement {
     this.style.display = 'none';
   }
 
+  public showBySelectionEvent(event: SelectionEvent) {
+    if (!this._getBlockEditingStateByPosition) {
+      return;
+    }
+    const modelState = this._getBlockEditingStateByPosition(
+      event.raw.pageX,
+      event.raw.pageY
+    );
+    if (modelState) {
+      this._startModelState = modelState;
+      this._cursor = modelState.index;
+      const rect = modelState.position;
+      this.style.display = 'block';
+      this.style.left = `${rect.left - 20}px`;
+      this.style.top = `${event.raw.pageY - DRAG_HANDLE_HEIGHT / 2}px`;
+    }
+  }
+
   public show(startModelState: EditingState) {
     this._startModelState = startModelState;
     this._cursor = startModelState.index;
     const rect = this._startModelState.position;
-    this.style.position = 'absolute';
     this.style.display = 'block';
     this.style.left = `${rect.left - 20}px`;
     this.style.top = `${rect.top + 8}px`;
@@ -150,6 +173,7 @@ export class DragHandle extends LitElement {
 
   public connectedCallback() {
     super.connectedCallback();
+    this.style.position = 'absolute';
     document.body.addEventListener(
       'dragover',
       handlePreventDocumentDragOverDelay,
