@@ -294,9 +294,13 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         matchFlavours(previousSibling, ['affine:database'])
       ) {
         if (previousSibling.children.length === 0) {
-          // delete by two backspace
-          page.captureSync();
-          page.deleteBlock(previousSibling);
+          window.requestAnimationFrame(() => {
+            focusBlockByModel(previousSibling, 'start');
+            if (!model.text?.length) {
+              page.captureSync();
+              page.deleteBlock(model);
+            }
+          });
         } else {
           page.captureSync();
           page.deleteBlock(model, {
