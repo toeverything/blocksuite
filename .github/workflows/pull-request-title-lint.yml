@@ -26,4 +26,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - run: echo "${{ github.event.pull_request.title }}" | npx commitlint -g ./.commitlintrc.json
