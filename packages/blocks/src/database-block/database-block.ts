@@ -15,6 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 const MODEL_CELL_WIDTH = 200; // px
 
+// @ts-expect-error
 function TagCircle(tag: TagTypes) {
   return html`
     <div
