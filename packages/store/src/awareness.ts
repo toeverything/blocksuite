@@ -100,7 +100,7 @@ export class AwarenessAdapter<
   }
 
   public getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
-    const flags = this.awareness.getLocalState()?.flags;
+    const flags = this.awareness.getLocalState()?.flags ?? {};
     return flags[field];
   }
 
