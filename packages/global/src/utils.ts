@@ -29,7 +29,18 @@ export function matchFlavours<
   return expected.includes(model.flavour as Key);
 }
 
-export function assertEquals<T, U>(val: T, expected: U): asserts val is T {
+type Allowed =
+  | null
+  | undefined
+  | boolean
+  | number
+  | string
+  | Record<string, unknown>
+  | unknown[];
+export function assertEquals<T extends Allowed, U extends Allowed>(
+  val: T,
+  expected: U
+): asserts val is T {
   const a = isPrimitive(val);
   const b = isPrimitive(expected);
   if (a && b) {
