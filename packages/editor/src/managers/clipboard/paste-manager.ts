@@ -5,10 +5,12 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
 import {
   SelectionUtils,
   SelectionInfo,
+  SelectedBlock,
   getStartModelBySelection,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { deleteModelsByRange } from '@blocksuite/blocks';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -256,16 +258,23 @@ export class PasteManager {
             this._editor.page.deleteBlock(lastBlockModel);
           } else {
             if (currentSelectionInfo.type === 'Range') {
-              selectedBlock?.text?.delete(0, selectedBlock.text.length);
+              if (currentSelectionInfo.selectedBlocks.length > 1) {
+                deleteModelsByRange(this._editor.page);
+                selectedBlock?.text?.insertList(insertTexts, 0);
+              } else {
+                selectedBlock?.text?.delete(0, selectedBlock.text.length);
+                selectedBlock?.text?.insertList(insertTexts, endIndex);
+              }
+            } else {
+              selectedBlock?.text?.insertList(insertTexts, endIndex);
+              selectedBlock &&
+                this._addBlocks(
+                  blocks[0].children,
+                  selectedBlock,
+                  0,
+                  addBlockIds
+                );
             }
-            selectedBlock?.text?.insertList(insertTexts, endIndex);
-            selectedBlock &&
-              this._addBlocks(
-                blocks[0].children,
-                selectedBlock,
-                0,
-                addBlockIds
-              );
           }
 
           parent &&
@@ -356,6 +365,17 @@ export class PasteManager {
       }
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);
+    }
+  }
+
+  private _deleteBlocks(blocks: SelectedBlock[]) {
+    if (blocks.length < 1) {
+      return;
+    }
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      this._editor.page.deleteBlockById(block.id);
+      this._deleteBlocks(block.children);
     }
   }
 }
