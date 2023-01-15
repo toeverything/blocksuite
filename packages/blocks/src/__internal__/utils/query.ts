@@ -398,7 +398,7 @@ export function getAllBlocks() {
 export function isInsideRichText(element: unknown): element is RichText {
   // Fool-proofing
   if (element instanceof Event) {
-    throw new Error('Do you want "event.target"?');
+    throw new Error('Did you mean "event.target"?');
   }
 
   if (!element || !(element instanceof Element)) {
