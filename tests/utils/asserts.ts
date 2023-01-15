@@ -15,6 +15,11 @@ import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
+import {
+  undoByKeyboard,
+  redoByKeyboard,
+  SHORT_KEY,
+} from './actions/keyboard.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
@@ -461,4 +466,46 @@ export async function assertLocatorVisible(
       rect.y + rect.height < bodyRect.y;
     expect(isInVisible).toBe(true);
   }
+}
+
+/**
+ * Assert basic keyboard operation works in input
+ *
+ * Will clear the input value.
+ */
+export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
+  await expect(locator).toBeVisible();
+  await locator.focus();
+  // Clear input before test
+  await locator.clear();
+
+  // type/backspace
+  await page.keyboard.type('1234');
+  await expect(locator).toHaveValue('1234');
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('123');
+
+  // undo/redo
+  await undoByKeyboard(page);
+  await expect(locator).toHaveValue('1234');
+  await redoByKeyboard(page);
+  await expect(locator).toHaveValue('123');
+
+  // keyboard
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('13');
+
+  // copy/cut/paste
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+c`);
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('');
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await expect(locator).toHaveValue('13');
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await expect(locator).toHaveValue('');
 }
