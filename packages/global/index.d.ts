@@ -19,6 +19,7 @@ declare type PropsWithId<Props> = Props & { id: string };
 declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
   enable_drag_handle: boolean;
+  enable_surface: boolean;
   readonly: Record<string, boolean>;
 };
 

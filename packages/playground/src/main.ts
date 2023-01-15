@@ -9,6 +9,7 @@ import { DebugMenu } from './components/debug-menu.js';
 import {
   defaultMode,
   getOptions,
+  initFeatureFlags,
   initParam,
   isBase64,
   isE2E,
@@ -23,6 +24,7 @@ const options = getOptions();
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
     const page = workspace.getPage(pageId) as Page;
+    initFeatureFlags(page);
 
     const editor = new EditorContainer();
     editor.page = page;

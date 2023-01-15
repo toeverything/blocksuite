@@ -3,6 +3,7 @@ import {
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
+  Page,
   StoreOptions,
 } from '@blocksuite/store';
 
@@ -16,6 +17,12 @@ export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
+
+export function initFeatureFlags(page: Page) {
+  if (params.get('surface') !== null) {
+    page.awareness.setFlag('enable_surface', true);
+  }
+}
 
 /**
  * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.

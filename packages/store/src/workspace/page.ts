@@ -22,7 +22,7 @@ import {
 import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
-import { matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -104,6 +104,18 @@ export class Page extends Space<PageData> {
 
   get rootLayer() {
     return Array.isArray(this._root) ? this._root[1] : null;
+  }
+
+  /** @internal used for getting surface block elements for phasor */
+  get ySurfaceContainer() {
+    assertExists(this.rootLayer);
+    const ySurface = this._yBlocks.get(this.rootLayer.id);
+    if (ySurface?.has('elements')) {
+      return ySurface.get('elements') as Y.Map<unknown>;
+    } else {
+      ySurface?.set('elements', new Y.Map());
+      return ySurface?.get('elements') as Y.Map<unknown>;
+    }
   }
 
   get isEmpty() {
