@@ -31,5 +31,8 @@
       "./src/*": "./dist/*.js",
       ".": "./dist/index.js"
     }
+  },
+  "dependencies": {
+    "fractional-indexing": "^3.1.0"
   }
 }

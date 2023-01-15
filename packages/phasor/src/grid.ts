@@ -1,6 +1,12 @@
 import type { Element } from './elements.js';
 import type { Bound } from './consts.js';
-import { getGridIndex, isOverlap, isPointIn, rangeFromBound } from './utils.js';
+import {
+  compare,
+  getGridIndex,
+  isOverlap,
+  isPointIn,
+  rangeFromBound,
+} from './utils.js';
 
 export class GridManager {
   private _grids: Map<string, Set<Element>> = new Map();
@@ -56,7 +62,7 @@ export class GridManager {
     );
   }
 
-  search(bound: Bound): Set<Element> {
+  search(bound: Bound): Element[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const results: Set<Element> = new Set();
     for (let i = minRow; i <= maxRow; i++) {
@@ -72,7 +78,10 @@ export class GridManager {
       }
     }
 
-    return results;
+    // sort elements in set based on index
+    const sorted = Array.from(results).sort(compare);
+
+    return sorted;
   }
 
   pick(x: number, y: number): Element[] {

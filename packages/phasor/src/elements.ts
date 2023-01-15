@@ -3,15 +3,14 @@ const BLACK = '#000000';
 abstract class BaseElement {
   abstract type: string;
   id: string;
-  index: string;
+  index!: string;
   x = 0;
   y = 0;
   w = 0;
   h = 0;
 
-  constructor(id: string, index: string) {
+  constructor(id: string) {
     this.id = id;
-    this.index = index;
   }
 
   get centerX() {
@@ -39,8 +38,8 @@ export class PathElement extends BaseElement {
   path: Path2D;
   color = BLACK;
   points: number[] = [];
-  constructor(id: string, index: string, points: number[]) {
-    super(id, index);
+  constructor(id: string, points: number[]) {
+    super(id);
     this.points = points;
     const path = new Path2D();
     path.moveTo(0, 0);
@@ -71,11 +70,9 @@ export class PathElement extends BaseElement {
 
   static deserialize(data: Record<string, unknown>): PathElement {
     const points = (data.points as string).split(',').map(v => Number(v));
-    const element = new PathElement(
-      data.id as string,
-      data.index as string,
-      points
-    );
+    const element = new PathElement(data.id as string, points);
+    element.index = data.index as string;
+
     const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
     element.setBound(x, y, w, h);
     element.color = data.color as string;
@@ -103,7 +100,9 @@ export class RectElement extends BaseElement {
   }
 
   static deserialize(data: Record<string, unknown>): RectElement {
-    const element = new RectElement(data.id as string, data.index as string);
+    const element = new RectElement(data.id as string);
+    element.index = data.index as string;
+
     const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
     element.setBound(x, y, w, h);
     element.color = data.color as string;
