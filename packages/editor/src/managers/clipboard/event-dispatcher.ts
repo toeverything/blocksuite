@@ -56,7 +56,13 @@ export class ClipboardEventDispatcher {
 
   private _copyHandler(e: ClipboardEvent) {
     if (!isInsideRichText(e.target)) {
-      return;
+      // Ad-hoc for copy from format quick bar copy button
+      if (
+        e.target instanceof Element &&
+        e.target.tagName === 'FORMAT-QUICK-BAR'
+      ) {
+        // should handle, do noting
+      } else return;
     }
     this.signals.copy.emit(e);
   }
