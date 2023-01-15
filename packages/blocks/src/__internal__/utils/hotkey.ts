@@ -44,6 +44,11 @@ function shouldFilter(event: KeyboardEvent) {
       event.preventDefault();
       return false;
     }
+    // Some event dispatch from body
+    // for example, press backspace to remove block-level selection
+    if (event.target === document.body) {
+      return false;
+    }
     return true;
   }
   // if (

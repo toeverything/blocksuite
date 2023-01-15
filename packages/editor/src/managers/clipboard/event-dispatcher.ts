@@ -54,21 +54,34 @@ export class ClipboardEventDispatcher {
     return document.activeElement?.closest('editor-container') != null;
   }
 
+  private _isValidEvent(e: ClipboardEvent) {
+    if (isInsideRichText(e.target)) {
+      return true;
+    }
+    // Ad-hoc for copy from format quick bar copy button
+    if (
+      e.target instanceof Element &&
+      e.target.tagName === 'FORMAT-QUICK-BAR'
+    ) {
+      return true;
+    }
+    // Some copy event dispatch from body
+    // for example, copy block-level selection
+    if (e.target === document.body) {
+      return true;
+    }
+    return false;
+  }
+
   private _copyHandler(e: ClipboardEvent) {
-    if (!isInsideRichText(e.target)) {
-      // Ad-hoc for copy from format quick bar copy button
-      if (
-        e.target instanceof Element &&
-        e.target.tagName === 'FORMAT-QUICK-BAR'
-      ) {
-        // should handle, do noting
-      } else return;
+    if (!this._isValidEvent(e)) {
+      return;
     }
     this.signals.copy.emit(e);
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    if (!isInsideRichText(e.target)) {
+    if (!this._isValidEvent(e)) {
       return;
     }
     if (ClipboardEventDispatcher.editorElementActive()) {
@@ -76,7 +89,7 @@ export class ClipboardEventDispatcher {
     }
   }
   private _pasteHandler(e: ClipboardEvent) {
-    if (!isInsideRichText(e.target)) {
+    if (!this._isValidEvent(e)) {
       return;
     }
     if (ClipboardEventDispatcher.editorElementActive()) {

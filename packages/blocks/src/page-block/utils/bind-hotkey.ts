@@ -8,6 +8,8 @@ const { UNDO, REDO } = HOTKEYS;
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
     hotkey.addListener(hotkeyStr, e => {
+      // Prevent quill default behavior
+      e.preventDefault();
       if (page.awareness.isReadonly()) {
         return;
       }
