@@ -1,6 +1,10 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { Renderer, bindWheelEvents, initMockData } from '@blocksuite/phasor';
+import {
+  SurfaceContainer,
+  RectElement,
+  bindWheelEvents,
+} from '@blocksuite/phasor';
 import { BLOCK_ID_ATTR, type BlockHost } from '../__internal__/index.js';
 import '../__internal__/rich-text/rich-text.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -19,7 +23,7 @@ export class SurfaceBlockComponent extends LitElement {
 
   @query('.affine-surface-canvas')
   private _canvas!: HTMLCanvasElement;
-  private _renderer!: Renderer;
+  private _container!: SurfaceContainer;
 
   @property()
   mouseRoot!: HTMLElement;
@@ -38,12 +42,22 @@ export class SurfaceBlockComponent extends LitElement {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
 
-    this._renderer = new Renderer(this._canvas);
+    const { page } = this.model;
+    const yContainer = page.ySurfaceContainer;
+    const container = new SurfaceContainer(this._canvas, yContainer);
+    this._container = container;
 
     const params = new URLSearchParams(location.search);
-    if (params.get('phasor') !== null) {
-      bindWheelEvents(this._renderer, this.mouseRoot);
-      initMockData(this._renderer, 1000000, 100000, 100000);
+    if (params.get('surface') !== null) {
+      bindWheelEvents(this._container.renderer, this.mouseRoot);
+
+      if (params.get('init') !== null) {
+        const element0 = new RectElement('0');
+        element0.setBound(0, 0, 100, 100);
+        element0.color = 'red';
+        container.addElement(element0);
+        // initMockData(this._container.renderer, 1000000, 100000, 100000);
+      }
     }
   }
 

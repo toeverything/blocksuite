@@ -278,12 +278,14 @@ export class EdgelessPageBlockComponent
         </div>
         ${hoverRect} ${selectionRect}
         ${selectionState.type !== 'none'
-          ? html` <edgeless-selected-rect
-              .state=${selectionState}
-              .rect=${selectionState.rect}
-              .zoom=${zoom}
-              .readonly=${this.readonly}
-            ></edgeless-selected-rect>`
+          ? html`
+              <edgeless-selected-rect
+                .state=${selectionState}
+                .rect=${selectionState.rect}
+                .zoom=${zoom}
+                .readonly=${this.readonly}
+              ></edgeless-selected-rect>
+            `
           : null}
       </div>
     `;

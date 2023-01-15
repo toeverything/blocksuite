@@ -19,6 +19,8 @@ export class SurfaceContainer {
   constructor(canvas: HTMLCanvasElement, yContainer: Y.Map<unknown>) {
     this.renderer = new Renderer(canvas);
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
+
+    this._syncFromExistingContainer();
     this._yElements.observeDeep(this._handleYEvents);
   }
 
@@ -56,6 +58,28 @@ export class SurfaceContainer {
     });
   }
 
+  private _handleYElementAdded(yElement: Y.Map<unknown>) {
+    const type = yElement.get('type') as string;
+    switch (type) {
+      case 'rect': {
+        const element = RectElement.deserialize(yElement.toJSON());
+        this.renderer.addElement(element);
+        this._elements.set(element.id, element);
+        break;
+      }
+      case 'path': {
+        const element = PathElement.deserialize(yElement.toJSON());
+        this.renderer.addElement(element);
+        this._elements.set(element.id, element);
+        break;
+      }
+    }
+  }
+
+  private _syncFromExistingContainer() {
+    this._yElements.forEach(yElement => this._handleYElementAdded(yElement));
+  }
+
   private _handleYElementsEvent(event: Y.YMapEvent<unknown>) {
     // skip empty event
     if (event.changes.keys.size === 0) return;
@@ -69,21 +93,7 @@ export class SurfaceContainer {
 
       if (type.action === 'add') {
         const yElement = this._yElements.get(id) as Y.Map<unknown>;
-        const type = yElement.get('type') as string;
-        switch (type) {
-          case 'rect': {
-            const element = RectElement.deserialize(yElement.toJSON());
-            this.renderer.addElement(element);
-            this._elements.set(element.id, element);
-            break;
-          }
-          case 'path': {
-            const element = PathElement.deserialize(yElement.toJSON());
-            this.renderer.addElement(element);
-            this._elements.set(element.id, element);
-            break;
-          }
-        }
+        this._handleYElementAdded(yElement);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
       } else if (type.action === 'delete') {
