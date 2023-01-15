@@ -367,15 +367,4 @@ export class PasteManager {
       model && this._addBlocks(block.children, model, 0, addBlockIds);
     }
   }
-
-  private _deleteBlocks(blocks: SelectedBlock[]) {
-    if (blocks.length < 1) {
-      return;
-    }
-    for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i];
-      this._editor.page.deleteBlockById(block.id);
-      this._deleteBlocks(block.children);
-    }
-  }
 }
