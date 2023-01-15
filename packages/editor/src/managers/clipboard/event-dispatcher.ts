@@ -1,4 +1,4 @@
-import { isPageTitle } from '@blocksuite/blocks/std';
+import { isInsideRichText } from '@blocksuite/blocks/std';
 import { Signal } from '@blocksuite/store';
 import { ClipboardAction } from './types.js';
 
@@ -26,7 +26,6 @@ export class ClipboardEventDispatcher {
     clipboardTarget.addEventListener(ClipboardAction.copy, this._copyHandler);
     clipboardTarget.addEventListener(ClipboardAction.cut, this._cutHandler);
     clipboardTarget.addEventListener(ClipboardAction.paste, this._pasteHandler);
-    // TODO fix break popover input
     document.addEventListener(ClipboardAction.copy, this._copyHandler);
     document.addEventListener(ClipboardAction.cut, this._cutHandler);
     document.addEventListener(ClipboardAction.paste, this._pasteHandler);
@@ -56,14 +55,14 @@ export class ClipboardEventDispatcher {
   }
 
   private _copyHandler(e: ClipboardEvent) {
-    if (isPageTitle(e)) {
+    if (!isInsideRichText(e)) {
       return;
     }
     this.signals.copy.emit(e);
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    if (isPageTitle(e)) {
+    if (!isInsideRichText(e)) {
       return;
     }
     if (ClipboardEventDispatcher.editorElementActive()) {
@@ -71,7 +70,7 @@ export class ClipboardEventDispatcher {
     }
   }
   private _pasteHandler(e: ClipboardEvent) {
-    if (isPageTitle(e)) {
+    if (!isInsideRichText(e)) {
       return;
     }
     if (ClipboardEventDispatcher.editorElementActive()) {

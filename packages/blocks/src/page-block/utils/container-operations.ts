@@ -2,7 +2,6 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
   ExtendedModel,
-  isPageTitle,
   RootBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
@@ -167,8 +166,6 @@ export function transformBlock(
  * Do nothing when selection is collapsed or not multi block selected
  */
 export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
-  // workaround page title
-  if (isPageTitle(e)) return;
   if (isNoneSelection()) return;
   if (isCollapsedSelection()) return;
   if (!isMultiBlockRange()) return;

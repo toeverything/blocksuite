@@ -72,28 +72,26 @@ export class LinkNodeComponent extends LitElement {
     assertExists(blot);
     const text = blot.domNode.textContent ?? undefined;
 
-    hotkey.withDisabledHotkey(async () => {
-      const linkState = await showLinkPopover({
-        anchorEl: e.target as HTMLElement,
-        text,
-        link: this.href,
-        showMask: false,
-        interactionKind: 'hover',
-      });
-      if (linkState.type === 'confirm') {
-        const link = linkState.link;
-        const newText = linkState.text;
-        const isUpdateText = newText !== text;
-        assertExists(blot);
-        this._updateLink(blot, link, isUpdateText ? newText : undefined);
-        return;
-      }
-      if (linkState.type === 'remove') {
-        assertExists(blot);
-        this._updateLink(blot, false);
-        return;
-      }
+    const linkState = await showLinkPopover({
+      anchorEl: e.target as HTMLElement,
+      text,
+      link: this.href,
+      showMask: false,
+      interactionKind: 'hover',
     });
+    if (linkState.type === 'confirm') {
+      const link = linkState.link;
+      const newText = linkState.text;
+      const isUpdateText = newText !== text;
+      assertExists(blot);
+      this._updateLink(blot, link, isUpdateText ? newText : undefined);
+      return;
+    }
+    if (linkState.type === 'remove') {
+      assertExists(blot);
+      this._updateLink(blot, false);
+      return;
+    }
   }
 
   /**

@@ -394,3 +394,58 @@ export function getAllBlocks() {
     );
   });
 }
+
+export function isInsideRichText(element: unknown): element is RichText {
+  // Fool-proofing
+  if (element instanceof Event) {
+    throw new Error('Do you want "event.target"?');
+  }
+
+  if (!element || !(element instanceof Element)) {
+    return false;
+  }
+  const richText = element.closest('rich-text');
+  return !!richText;
+}
+
+export function isPageTitleElement(
+  element: unknown
+): element is HTMLTextAreaElement {
+  return (
+    element instanceof HTMLTextAreaElement &&
+    element.classList.contains('affine-default-page-block-title')
+  );
+}
+
+export function isCaptionElement(node: unknown): node is HTMLInputElement {
+  if (!(node instanceof Element)) {
+    return false;
+  }
+  return node.classList.contains('affine-embed-wrapper-caption');
+}
+
+/**
+ * This function is slightly different from {@link isInsideRichText}.
+ * It include all of element in editor.
+ * This is very useful when wanting to handle edges between blocks.
+ *
+ * See also {@link isInsideRichText} or {@link isPageTitleElement}
+ */
+export function isInsideBlockContainer(element: unknown): element is Node {
+  const defaultBlockContainer = document.querySelector(
+    '.affine-default-page-block-container'
+  );
+  const edgelessBlockContainer = document.querySelector(
+    '.affine-edgeless-page-block-container'
+  );
+  if (!(element instanceof Node)) {
+    return false;
+  }
+  if (defaultBlockContainer) {
+    return defaultBlockContainer.contains(element);
+  }
+  if (edgelessBlockContainer) {
+    return edgelessBlockContainer.contains(element);
+  }
+  return false;
+}
