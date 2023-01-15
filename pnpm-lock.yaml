@@ -118,7 +118,10 @@ importers:
 
   packages/phasor:
     specifiers:
+      fractional-indexing: ^3.1.0
       yjs: ^13.5.44
+    dependencies:
+      fractional-indexing: 3.1.0
     devDependencies:
       yjs: 13.5.44
 
@@ -3760,6 +3763,11 @@ packages:
 
   /flexsearch/0.7.21:
     resolution: {integrity: sha512-W7cHV7Hrwjid6lWmy0IhsWDFQboWSng25U3VVywpHOTJnnAZNPScog67G+cVpeX9f7yDD21ih0WDrMMT+JoaYg==}
+    dev: false
+
+  /fractional-indexing/3.1.0:
+    resolution: {integrity: sha512-j5mtGgQxuEH6pI8n1N9xmAamb9WRwc5JcLYXidKc6IQ6HP8WvGePHxuilhAogglGA6qeafgFiXslVn4yAtNHsQ==}
+    engines: {node: ^14.13.1 || >=16.0.0}
     dev: false
 
   /fs-extra/11.1.0:

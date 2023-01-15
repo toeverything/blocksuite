@@ -1,4 +1,5 @@
 import * as Y from 'yjs';
+import { generateKeyBetween } from 'fractional-indexing';
 import type { Bound } from './consts.js';
 import { Element, RectElement, PathElement } from './elements.js';
 import { Renderer } from './renderer.js';
@@ -13,6 +14,7 @@ export class SurfaceContainer {
   readonly renderer: Renderer;
   private _yElements: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, Element>();
+  private _lastIndex = 'a0';
 
   constructor(canvas: HTMLCanvasElement, yContainer: Y.Map<unknown>) {
     this.renderer = new Renderer(canvas);
@@ -30,6 +32,9 @@ export class SurfaceContainer {
   }
 
   addElement(props: Element) {
+    props.index = generateKeyBetween(this._lastIndex, null);
+    this._lastIndex = props.index;
+
     this._yElements.doc?.transact(() => {
       const yElement = this._createYElement(props);
       this._yElements.set(props.id, yElement);

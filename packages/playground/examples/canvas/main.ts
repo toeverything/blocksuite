@@ -15,7 +15,7 @@ function main() {
 
   bindWheelEvents(container.renderer, canvas);
 
-  const element0 = new RectElement('0', '0');
+  const element0 = new RectElement('0');
   element0.setBound(0, 0, 100, 100);
   element0.color = 'red';
   container.addElement(element0);
@@ -23,11 +23,11 @@ function main() {
   // const bound = { x: 100, y: 100, w: 100, h: 100 };
   // container.setElementBound(element0.id, bound);
 
-  container.removeElement(element0.id);
+  const element1 = new RectElement('1');
+  element1.setBound(50, 50, 100, 100);
+  container.addElement(element1);
 
-  // const element1 = new RectElement('1', '1');
-  // element1.setBound(100, 100, 100, 100);
-  // container.addElement(element1);
+  container.removeElement(element0.id);
 
   // @ts-ignore
   window.container = container;
