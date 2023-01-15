@@ -5,12 +5,11 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
 import {
   SelectionUtils,
   SelectionInfo,
-  SelectedBlock,
   getStartModelBySelection,
+  deleteModelsByRange,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { deleteModelsByRange } from '@blocksuite/blocks';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -258,23 +257,16 @@ export class PasteManager {
             this._editor.page.deleteBlock(lastBlockModel);
           } else {
             if (currentSelectionInfo.type === 'Range') {
-              if (currentSelectionInfo.selectedBlocks.length > 1) {
-                deleteModelsByRange(this._editor.page);
-                selectedBlock?.text?.insertList(insertTexts, 0);
-              } else {
-                selectedBlock?.text?.delete(0, selectedBlock.text.length);
-                selectedBlock?.text?.insertList(insertTexts, endIndex);
-              }
-            } else {
-              selectedBlock?.text?.insertList(insertTexts, endIndex);
-              selectedBlock &&
-                this._addBlocks(
-                  blocks[0].children,
-                  selectedBlock,
-                  0,
-                  addBlockIds
-                );
+              deleteModelsByRange(this._editor.page);
             }
+            selectedBlock?.text?.insertList(insertTexts, endIndex);
+            selectedBlock &&
+              this._addBlocks(
+                blocks[0].children,
+                selectedBlock,
+                0,
+                addBlockIds
+              );
           }
 
           parent &&
