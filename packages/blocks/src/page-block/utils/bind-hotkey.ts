@@ -11,7 +11,13 @@ export function bindCommonHotkey(page: Page) {
       // workaround page title
       e.preventDefault();
       // TODO also disable hotkey when focus on other input
-      if (e.target instanceof HTMLTextAreaElement) return;
+      if (isPageTitle(e)) {
+        return;
+      }
+      if (page.awareness.isReadonly()) {
+        return;
+      }
+
       action({ page });
     });
   });
