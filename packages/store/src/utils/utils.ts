@@ -130,7 +130,7 @@ export function trySyncTextProp(
     // @ts-ignore
     const yBase = base._yText;
 
-    // attach meta state for identifing split
+    // attach meta state for identifying split
     // otherwise local change from y-side will be ignored by TextAdapter
     // @ts-ignore
     yBase.meta = { split: true };
@@ -143,7 +143,7 @@ export function trySyncTextProp(
     yRight.delete(0, right.index);
 
     // delete the right-half part of `yBase`, making it the new left
-    yBase.delete(right.index, yBase.length - right.index);
+    yBase.delete(left.index, yBase.length - left.index);
 
     // cleanup
     splitSet.clear();

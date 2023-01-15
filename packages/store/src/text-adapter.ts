@@ -152,10 +152,10 @@ export class Text {
     return new Text(this._space, this._yText.clone());
   }
 
-  split(index: number): [PrelimText, PrelimText] {
+  split(index: number, length: number): [PrelimText, PrelimText] {
     return [
       new PrelimText('splitLeft', index),
-      new PrelimText('splitRight', index),
+      new PrelimText('splitRight', index + length),
     ];
   }
 
