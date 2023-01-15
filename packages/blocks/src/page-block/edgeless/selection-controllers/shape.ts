@@ -29,6 +29,7 @@ export class ShapeSelectionController extends SelectionController<ShapeMouseMode
   onContainerDblClick(e: SelectionEvent): void {
     noop();
   }
+
   onContainerDragStart(e: SelectionEvent): void {
     this._container.page.captureSync();
     // create a shape block when drag start
