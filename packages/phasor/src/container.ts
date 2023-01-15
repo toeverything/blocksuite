@@ -113,8 +113,11 @@ export class SurfaceContainer {
         if (key === 'xywh') {
           const xywh = yElement.get(key) as string;
           const [x, y, w, h] = xywh.split(',').map(Number);
-          // FIXME should update grid here
+
+          // refresh grid manager
+          this.renderer.removeElement(element);
           element.setBound(x, y, w, h);
+          this.renderer.addElement(element);
         }
       }
     });
