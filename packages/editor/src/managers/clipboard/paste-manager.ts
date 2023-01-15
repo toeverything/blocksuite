@@ -258,8 +258,13 @@ export class PasteManager {
           } else {
             if (currentSelectionInfo.type === 'Range') {
               deleteModelsByRange(this._editor.page);
+              selectedBlock?.text?.insertList(
+                insertTexts,
+                currentSelectionInfo.selectedBlocks[0].startPos as number
+              );
+            } else {
+              selectedBlock?.text?.insertList(insertTexts, endIndex);
             }
-            selectedBlock?.text?.insertList(insertTexts, endIndex);
             selectedBlock &&
               this._addBlocks(
                 blocks[0].children,
