@@ -55,14 +55,14 @@ export class ClipboardEventDispatcher {
   }
 
   private _copyHandler(e: ClipboardEvent) {
-    if (!isInsideRichText(e)) {
+    if (!isInsideRichText(e.target)) {
       return;
     }
     this.signals.copy.emit(e);
   }
 
   private _cutHandler(e: ClipboardEvent) {
-    if (!isInsideRichText(e)) {
+    if (!isInsideRichText(e.target)) {
       return;
     }
     if (ClipboardEventDispatcher.editorElementActive()) {
@@ -70,7 +70,7 @@ export class ClipboardEventDispatcher {
     }
   }
   private _pasteHandler(e: ClipboardEvent) {
-    if (!isInsideRichText(e)) {
+    if (!isInsideRichText(e.target)) {
       return;
     }
     if (ClipboardEventDispatcher.editorElementActive()) {

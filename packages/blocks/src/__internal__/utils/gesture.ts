@@ -6,6 +6,7 @@ import {
 } from './selection.js';
 import { debounce } from './std.js';
 import { MOVE_DETECT_THRESHOLD } from './consts.js';
+import { isInsideBlockContainer, isPageTitleElement } from './query.js';
 
 export interface IPoint {
   x: number;
@@ -77,39 +78,6 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
-export function isPageTitle(e: Event) {
-  return (
-    e.target instanceof HTMLTextAreaElement &&
-    e.target.classList.contains('affine-default-page-block-title')
-  );
-}
-export function isInput(e: Event) {
-  return e.target instanceof HTMLTextAreaElement;
-}
-export function isInsideBlockContainer(e: Event) {
-  const defaultBlockContainer = document.querySelector(
-    '.affine-default-page-block-container'
-  );
-  const edgelessBlockContainer = document.querySelector(
-    '.affine-edgeless-page-block-container'
-  );
-  return (
-    (e.target instanceof Node &&
-      defaultBlockContainer &&
-      defaultBlockContainer.contains(e.target)) ||
-    (e.target instanceof Node &&
-      edgelessBlockContainer &&
-      edgelessBlockContainer.contains(e.target))
-  );
-}
-
-function tryPreventDefault(e: MouseEvent) {
-  // workaround page title click
-  if (!isInput(e)) {
-    e.preventDefault();
-  }
-}
-
 export function initMouseEventHandlers(
   container: HTMLElement,
   onContainerDragStart: (e: SelectionEvent) => void,
@@ -135,7 +103,9 @@ export function initMouseEventHandlers(
     );
 
   const mouseDownHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (!isPageTitleElement(e.target)) {
+      e.preventDefault();
+    }
     const rect = getBoundingClientRect();
 
     startX = e.clientX - rect.left;
@@ -150,7 +120,9 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (!isPageTitleElement(e.target)) {
+      e.preventDefault();
+    }
     const rect = getBoundingClientRect();
 
     const a = { x: startX, y: startY };
@@ -182,7 +154,9 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (!isPageTitleElement(e.target)) {
+      e.preventDefault();
+    }
 
     if (!isDragging)
       onContainerClick(
@@ -194,7 +168,8 @@ export function initMouseEventHandlers(
       );
 
     const horizontalElement = getClosestHorizontalEditor(e.clientY);
-    if (!isInsideBlockContainer(e) && horizontalElement) {
+
+    if (!isInsideBlockContainer(e.target) && horizontalElement) {
       let containerDom = document.querySelector(
         '.affine-default-page-block-container'
       );
