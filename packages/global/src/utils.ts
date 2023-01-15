@@ -43,14 +43,14 @@ export function assertEquals<T, U>(val: T, expected: U): asserts val is T {
       if (val.length !== expected.length) {
         throw new Error('val is not same as expected');
       }
-      val.every((x, i) => assertEqual(x, expected[i]));
+      val.every((x, i) => assertEquals(x, expected[i]));
     } else if (typeof val === 'object' && typeof expected === 'object') {
       const obj1 = Object.entries(val as Record<string, unknown>);
       const obj2 = Object.entries(expected as Record<string, unknown>);
       if (obj1.length !== obj2.length) {
         throw new Error('val is not same as expected');
       }
-      obj1.every((x, i) => assertEqual(x, obj2[i]));
+      obj1.every((x, i) => assertEquals(x, obj2[i]));
     }
   }
 }
