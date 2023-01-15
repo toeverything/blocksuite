@@ -260,6 +260,7 @@ export async function pasteContent(
   await page.evaluate(
     ({ clipData }) => {
       const e = {
+        target: document.body,
         preventDefault: () => null,
         stopPropagation: () => null,
         clipboardData: {

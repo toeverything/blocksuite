@@ -55,6 +55,10 @@ test('clipboard paste html', async ({ page }) => {
     ({ clipData }) => {
       const dT = new DataTransfer();
       const e = new ClipboardEvent('paste', { clipboardData: dT });
+      Object.defineProperty(e, 'target', {
+        writable: false,
+        value: document.body,
+      });
       e.clipboardData?.setData('text/html', clipData['text/html']);
       document
         .getElementsByTagName('editor-container')[0]
