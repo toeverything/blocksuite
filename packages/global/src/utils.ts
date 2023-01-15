@@ -37,10 +37,10 @@ type Allowed =
   | string
   | Record<string, unknown>
   | unknown[];
-export function assertEquals<T extends Allowed, U extends Allowed>(
+export function assertEquals<T extends Allowed, U extends T>(
   val: T,
   expected: U
-): asserts val is T {
+): asserts val is U {
   const a = isPrimitive(val);
   const b = isPrimitive(expected);
   if (a && b) {
