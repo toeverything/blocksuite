@@ -95,7 +95,7 @@ class SyntaxCodeBlock extends CodeBlock {
     const clientWidth = this.domNode.clientWidth;
     const lineHeight = window.getComputedStyle(this.domNode).lineHeight;
     let codeBlockLineNum = 0;
-    const tempEle = this.initEle();
+    const mockElement = this._initMockElement();
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       // quill specifies to end with a newline, it's redundant for line number see https://quilljs.com/docs/delta/#line-formatting
@@ -103,7 +103,7 @@ class SyntaxCodeBlock extends CodeBlock {
         break;
       }
 
-      const width = this.getLineWidth(line, tempEle);
+      const width = this._getLineWidth(line, mockElement);
       const lineNumOfOneLine = width == 0 ? 1 : Math.ceil(width / clientWidth);
       addLineNumber(container, lineHeight, ++codeBlockLineNum);
       if (hasWrap) {
@@ -112,7 +112,7 @@ class SyntaxCodeBlock extends CodeBlock {
         }
       }
     }
-    tempEle.remove();
+    mockElement.remove();
 
     // adjust position according to line number digits
     const lineNumberDigits = codeBlockLineNum.toString().length;
@@ -121,22 +121,24 @@ class SyntaxCodeBlock extends CodeBlock {
     this.cachedTextLineNumber = text;
   }
 
-  private initEle() {
-    const tempEle = document.createElement('div');
-    tempEle.classList.add('.affine-code-block-container');
+  // Use mock element to compute wrap counts for long lines,
+  // so as to mark correct line number.
+  private _initMockElement() {
+    const mockElement = document.createElement('div');
+    mockElement.classList.add('.affine-code-block-container');
     // HTMLElement should append to DOM in order to get scrollWidth, which is 0px otherwise
-    this.domNode.appendChild(tempEle);
-    tempEle.style.width = '0px';
-    tempEle.style.whiteSpace = 'pre';
-    tempEle.style.position = 'fixed';
-    // hide temp element
-    tempEle.style.right = '-100px';
-    return tempEle;
+    this.domNode.appendChild(mockElement);
+    mockElement.style.width = '0px';
+    mockElement.style.whiteSpace = 'pre';
+    mockElement.style.position = 'fixed';
+    // hide mock element
+    mockElement.style.right = '-100px';
+    return mockElement;
   }
 
-  private getLineWidth(line: string, tempEle: HTMLElement) {
-    tempEle.textContent = line;
-    const width = tempEle.scrollWidth;
+  private _getLineWidth(line: string, mockElement: HTMLElement) {
+    mockElement.textContent = line;
+    const width = mockElement.scrollWidth;
     return width;
   }
 }
