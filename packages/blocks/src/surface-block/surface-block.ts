@@ -38,10 +38,7 @@ export class SurfaceBlockComponent extends LitElement {
   @property()
   host!: BlockHost;
 
-  firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
-
+  private _initContainer() {
     const { page } = this.model;
     const yContainer = page.ySurfaceContainer;
     const container = new SurfaceContainer(this._canvas, yContainer);
@@ -49,16 +46,27 @@ export class SurfaceBlockComponent extends LitElement {
 
     const params = new URLSearchParams(location.search);
     if (params.get('surface') !== null) {
+      page.awareness.setFlag('enable_surface', true);
+    }
+
+    if (page.awareness.getFlag('enable_surface')) {
       bindWheelEvents(this._container.renderer, this.mouseRoot);
 
       if (params.get('init') !== null) {
         const element0 = new RectElement('0');
         element0.setBound(0, 0, 100, 100);
         element0.color = 'red';
-        container.addElement(element0);
-        // initMockData(this._container.renderer, 1000000, 100000, 100000);
+        this._container.addElement(element0);
       }
     }
+  }
+
+  firstUpdated() {
+    this.model.propsUpdated.on(() => this.requestUpdate());
+    this.model.childrenUpdated.on(() => this.requestUpdate());
+
+    // Avoid DOM mutation in SurfaceContainer constructor
+    requestAnimationFrame(() => this._initContainer());
   }
 
   render() {
