@@ -177,6 +177,23 @@ test('type character in link should not jump out link node', async ({
   );
 });
 
+test('readonly mode should not trigger create link popup', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('linkText');
+  await switchReadonly(page);
+
+  // Create link
+  await dragBetweenIndices(page, [0, 0], [0, 8]);
+  await pressCreateLinkShortCut(page);
+
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).not.toBeVisible();
+  const linkPopoverInput = page.locator('.affine-link-popover-input');
+  await expect(linkPopoverInput).not.toBeVisible();
+});
+
 test('readonly mode should not trigger link hover', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const linkText = 'linkText';
