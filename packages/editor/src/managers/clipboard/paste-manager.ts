@@ -255,6 +255,9 @@ export class PasteManager {
             this._addBlocks(blocks.slice(0, 1), parent, index, addBlockIds);
             this._editor.page.deleteBlock(lastBlockModel);
           } else {
+            if (currentSelectionInfo.type === 'Range') {
+              selectedBlock?.text?.delete(0, selectedBlock.text.length);
+            }
             selectedBlock?.text?.insertList(insertTexts, endIndex);
             selectedBlock &&
               this._addBlocks(
