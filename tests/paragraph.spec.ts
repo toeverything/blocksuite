@@ -9,6 +9,7 @@ import {
   assertTitle,
   assertPageTitleFocus,
   assertStoreMatchJSX,
+  assertKeyboardWorkInInput,
 } from './utils/asserts.js';
 import {
   clickBlockTypeMenuItem,
@@ -89,6 +90,8 @@ test('backspace and arrow on title', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertTitle(page, 'hll');
+  const title = page.locator('.affine-default-page-block-title');
+  await assertKeyboardWorkInInput(page, title);
 });
 
 test('backspace on line start of the first block', async ({ page }) => {

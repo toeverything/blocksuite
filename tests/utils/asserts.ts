@@ -20,6 +20,7 @@ import {
   redoByKeyboard,
   SHORT_KEY,
 } from './actions/keyboard.js';
+import { captureHistory } from './actions/misc.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
@@ -471,17 +472,19 @@ export async function assertLocatorVisible(
 /**
  * Assert basic keyboard operation works in input
  *
- * Will clear the input value.
+ * NOTICE:
+ *   - it will clear the input value.
+ *   - it will pollute undo/redo history.
  */
 export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   await expect(locator).toBeVisible();
   await locator.focus();
   // Clear input before test
   await locator.clear();
-
   // type/backspace
   await page.keyboard.type('1234');
   await expect(locator).toHaveValue('1234');
+  await captureHistory(page);
   await page.keyboard.press('Backspace');
   await expect(locator).toHaveValue('123');
 
