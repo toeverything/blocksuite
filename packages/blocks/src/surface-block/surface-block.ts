@@ -44,14 +44,10 @@ export class SurfaceBlockComponent extends LitElement {
     const container = new SurfaceContainer(this._canvas, yContainer);
     this._container = container;
 
-    const params = new URLSearchParams(location.search);
-    if (params.get('surface') !== null) {
-      page.awareness.setFlag('enable_surface', true);
-    }
-
     if (page.awareness.getFlag('enable_surface')) {
       bindWheelEvents(this._container.renderer, this.mouseRoot);
 
+      const params = new URLSearchParams(location.search);
       if (params.get('init') !== null) {
         const element0 = new RectElement('0');
         element0.setBound(0, 0, 100, 100);
