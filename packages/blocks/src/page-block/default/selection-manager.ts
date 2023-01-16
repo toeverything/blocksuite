@@ -35,6 +35,7 @@ import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { BlockHub } from '../../components/blockhub.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -159,6 +160,7 @@ export class DefaultSelectionManager {
   private _dragHandleAbortController = new AbortController();
 
   private _dragHandle: DragHandle | null = null;
+  // private _blockHub: BlockHub;
 
   constructor({
     page,
@@ -241,6 +243,52 @@ export class DefaultSelectionManager {
     if (this.page.awareness.getFlag('enable_drag_handle')) {
       createHandle();
     }
+    new BlockHub({
+      onDropCallback: (e, end) => {
+        // console.log(e);
+        // console.log(end);
+        const dataTransfer = e.dataTransfer;
+        assertExists(dataTransfer);
+        const data = dataTransfer.getData('affine/block-hub');
+        // console.log(data);
+        const blockProps = JSON.parse(data);
+        const targetModel = end.model;
+        const rect = end.position;
+        this.page.captureSync();
+        const distanceToTop = Math.abs(rect.top - e.y);
+        const distanceToBottom = Math.abs(rect.bottom - e.y);
+        this.page.insertBlock(
+          blockProps,
+          targetModel,
+          distanceToTop < distanceToBottom
+        );
+      },
+      getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+        return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+          skipX,
+        });
+      },
+      getBlockEditingStateByCursor: (
+        pageX,
+        pageY,
+        cursor,
+        size,
+        skipX,
+        dragging
+      ) => {
+        return getBlockEditingStateByCursor(
+          this._blocks,
+          pageX,
+          pageY,
+          cursor,
+          {
+            size,
+            skipX,
+            dragging,
+          }
+        );
+      },
+    });
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposeCallbacks.push(
       initMouseEventHandlers(

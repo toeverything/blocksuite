@@ -42,6 +42,8 @@ export type PrefixedBlockProps = Record<string, unknown> & {
   'sys:flavour': string;
 };
 
+type OptionalBlockProps = { [P in keyof BaseBlockModel]?: BaseBlockModel[P] };
+
 const isWeb = typeof window !== 'undefined';
 
 function createChildMap(yChildIds: Y.Array<string>) {
@@ -386,6 +388,39 @@ export class Page extends Space<PageData> {
     }
     const model = this._blockMap.get(id) as BaseBlockModel;
     this.updateBlock(model, props);
+  }
+
+  insertBlock(
+    blockProps: OptionalBlockProps,
+    targetModel: BaseBlockModel,
+    top = true
+  ) {
+    console.log(blockProps);
+    console.log(targetModel);
+    console.log(top);
+    const targetParentModel = this.getParent(targetModel);
+    if (targetParentModel === null) {
+      throw new Error('cannot find parent model');
+    }
+    this.transact(() => {
+      const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
+      const yChildren = yParent.get('sys:children') as Y.Array<string>;
+      const targetIdx = yChildren
+        .toArray()
+        .findIndex(id => id === targetModel.id);
+      // if (top) {
+      // yChildren.insert(targetIdx, [])
+      assertExists(blockProps.flavour);
+      this.addBlockByFlavour(
+        blockProps.flavour,
+        {
+          type: blockProps.type,
+        },
+        targetParentModel.id,
+        top ? targetIdx : targetIdx + 1
+      );
+      // }
+    });
   }
 
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
