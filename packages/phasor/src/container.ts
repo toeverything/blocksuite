@@ -3,12 +3,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 import type { Bound } from './consts.js';
 import { Element, RectElement, PathElement } from './elements.js';
 import { Renderer } from './renderer.js';
-
-function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
-}
+import { assertExists } from '@blocksuite/global/utils';
 
 export class SurfaceContainer {
   readonly renderer: Renderer;
