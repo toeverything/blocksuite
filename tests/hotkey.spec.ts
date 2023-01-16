@@ -41,6 +41,26 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 });
 
+test('cmd+backspace keep deleting when start of an empty list', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await assertRichTexts(page, ['123', '456', '\n']);
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await assertRichTexts(page, ['123', '456']);
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await assertRichTexts(page, ['123', '\n']);
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await assertRichTexts(page, ['123']);
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await assertRichTexts(page, ['\n']);
+});
+
 test('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);

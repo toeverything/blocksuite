@@ -1,6 +1,9 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { toast } from '../../components/toast.js';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
+import {
+  handleLineStartBackspace,
+  isAtLineEdge,
+} from '../../__internal__/rich-text/rich-text-operations.js';
 import {
   asyncFocusRichText,
   focusNextBlock,
@@ -18,6 +21,7 @@ import {
   resetNativeSelection,
   isCaptionElement,
   doesInSamePath,
+  isCollapsedAtBlockStart,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -538,8 +542,17 @@ export function bindHotkeys(
     const { state } = selection;
     if (state.type === 'none') {
       // Will be handled in the `keyboard.onBackspace` function
-      return;
+      const target = e.target as HTMLElement;
+      const model = getModelByElement(target);
+      const richText = getRichTextByModel(model);
+      assertExists(richText);
+      const quill = richText?.quill;
+      if (isCollapsedAtBlockStart(quill)) {
+        handleLineStartBackspace(page, model);
+        return;
+      }
     }
+
     if (state.type === 'native') {
       handleMultiBlockBackspace(page, e);
       return;
