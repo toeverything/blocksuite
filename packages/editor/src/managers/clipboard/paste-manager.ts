@@ -82,10 +82,10 @@ export class PasteManager {
 
   // Get the most needed clipboard data based on `_optimalMimeTypes` order
   public getOptimalClip(clipboardData: ClipboardEvent['clipboardData']) {
-    for (let i = 0; i < PasteManager._optimalMimeTypes.length; i++) {
+    // I think this part should be in reverse order, which is why the content is wrong when pasting
+    for (let i = PasteManager._optimalMimeTypes.length - 1; i >= 0; i--) {
       const mimeType = PasteManager._optimalMimeTypes[i];
       const data = clipboardData?.getData(mimeType);
-
       if (data) {
         return {
           type: mimeType,
@@ -264,7 +264,10 @@ export class PasteManager {
                 .startPos as number;
               const endPos = currentSelectionInfo.selectedBlocks[0]
                 .endPos as number;
-              if (startPos + endPos === textLength + 1) {
+              if (
+                startPos + endPos === textLength + 1 ||
+                currentSelectionInfo.selectedBlocks.length > 1
+              ) {
                 selectedBlock?.text?.insertList(insertTexts, startPos);
               } else {
                 handleBlockSplit(this._editor.page, selectedBlock, startPos, 0);
