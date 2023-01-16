@@ -216,6 +216,10 @@ export class Page extends Space<PageData> {
     return this.tagsSchema.get(id) ?? (null as TagSchema | null);
   }
 
+  setTagSchema(schema: TagSchema) {
+    return this.tagsSchema.set(schema.id, schema);
+  }
+
   getBlockById(id: string) {
     return this._blockMap.get(id) ?? null;
   }
