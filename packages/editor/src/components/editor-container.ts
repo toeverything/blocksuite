@@ -144,8 +144,8 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .pageModel=${this.pageBlockModel}
-        .surfaceModel=${this.surfaceBlockModel}
+        .pageModel=${this.pageBlockModel as PageBlockModel}
+        .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
         .showGrid=${this.showGrid}

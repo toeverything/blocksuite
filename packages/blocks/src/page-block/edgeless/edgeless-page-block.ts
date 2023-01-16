@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
   FrameBlockModel,
@@ -35,6 +35,11 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import {
+  bindWheelEvents,
+  RectElement,
+  SurfaceContainer,
+} from '@blocksuite/phasor';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -71,6 +76,14 @@ export class EdgelessPageBlockComponent
       width: 100%;
       height: 100%;
     }
+
+    .affine-surface-canvas {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
   `;
 
   @property()
@@ -103,6 +116,10 @@ export class EdgelessPageBlockComponent
     },
   })
   surfaceModel!: SurfaceBlockModel;
+
+  @query('.affine-surface-canvas')
+  private _canvas!: HTMLCanvasElement;
+  private _surface!: SurfaceContainer;
 
   getService = getService;
 
@@ -164,6 +181,32 @@ export class EdgelessPageBlockComponent
     });
   }
 
+  // Should be called in requestAnimationFrame,
+  // so as to avoid DOM mutation in SurfaceContainer constructor
+  private _initSurface() {
+    const { page } = this;
+    const yContainer = page.ySurfaceContainer;
+    const container = new SurfaceContainer(this._canvas, yContainer);
+    this._surface = container;
+
+    if (page.awareness.getFlag('enable_surface')) {
+      bindWheelEvents(this._surface.renderer, this.mouseRoot);
+
+      const params = new URLSearchParams(location.search);
+      if (params.get('init') !== null) {
+        const element1 = new RectElement('1');
+        element1.setBound(50, 50, 100, 100);
+        element1.color = 'black';
+        this._surface.addElement(element1);
+
+        const element0 = new RectElement('0');
+        element0.setBound(0, 0, 100, 100);
+        element0.color = 'red';
+        this._surface.addElement(element0);
+      }
+    }
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
@@ -204,6 +247,7 @@ export class EdgelessPageBlockComponent
 
     requestAnimationFrame(() => {
       this._initViewport();
+      this._initSurface();
       this.requestUpdate();
     });
 
@@ -211,7 +255,7 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  override disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
 
     this.signals.updateSelection.dispose();
@@ -251,11 +295,7 @@ export class EdgelessPageBlockComponent
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <affine-surface
-          .model=${this.surfaceModel}
-          .mouseRoot=${this.mouseRoot}
-        >
-        </affine-surface>
+        <canvas class="affine-surface-canvas"> </canvas>
       </div>
       <div class="affine-edgeless-page-block-container">
         <style>
