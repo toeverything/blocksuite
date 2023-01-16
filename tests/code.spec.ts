@@ -288,8 +288,8 @@ test('press enter twice at end of code block can jump out', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
+  await pressEnter(page);
 
   const locator = page.locator('affine-paragraph');
   await expect(locator).toBeVisible();
@@ -302,7 +302,7 @@ test('press ArrowDown before code block can select code block', async ({
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
   await addCodeBlock(page);
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('ArrowDown');
@@ -318,8 +318,8 @@ test('press backspace after code block can select code block', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
+  await pressEnter(page);
   await page.keyboard.press('Backspace');
 
   const locator = page.locator('.affine-page-selected-rects-container');
@@ -333,8 +333,8 @@ test('press ArrowUp after code block can select code block', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
+  await pressEnter(page);
   await page.keyboard.press('ArrowUp');
 
   const locator = page.locator('.affine-page-selected-rects-container');
