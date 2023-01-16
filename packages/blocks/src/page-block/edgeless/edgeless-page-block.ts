@@ -35,11 +35,7 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import {
-  bindWheelEvents,
-  RectElement,
-  SurfaceContainer,
-} from '@blocksuite/phasor';
+import { RectElement, SurfaceContainer } from '@blocksuite/phasor';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -172,17 +168,23 @@ export class EdgelessPageBlockComponent
     });
   }
 
+  private _syncSurfaceViewport() {
+    this._surface.renderer.setCenterZoom(
+      this.viewport.centerX,
+      this.viewport.centerY,
+      this.viewport.zoom
+    );
+  }
+
   // Should be called in requestAnimationFrame,
   // so as to avoid DOM mutation in SurfaceContainer constructor
   private _initSurface() {
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
-    const container = new SurfaceContainer(this._canvas, yContainer);
-    this._surface = container;
+    this._surface = new SurfaceContainer(this._canvas, yContainer);
+    this._syncSurfaceViewport();
 
     if (page.awareness.getFlag('enable_surface')) {
-      bindWheelEvents(this._surface.renderer, this.mouseRoot);
-
       const params = new URLSearchParams(location.search);
       if (params.get('init') !== null) {
         const element1 = new RectElement('1');
@@ -216,6 +218,9 @@ export class EdgelessPageBlockComponent
 
     this.signals.viewportUpdated.on(() => {
       this.style.setProperty('--affine-zoom', `${this.viewport.zoom}`);
+
+      this._syncSurfaceViewport();
+
       this._selection.syncBlockSelectionRect();
       this.requestUpdate();
     });

@@ -83,6 +83,13 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
+  setCenterZoom(centerX: number, centerY: number, zoom: number) {
+    this._centerX = centerX;
+    this._centerY = centerY;
+    this._zoom = zoom;
+    this._shouldUpdate = true;
+  }
+
   addElement(element: Element) {
     this.gridManager.add(element);
     this._shouldUpdate = true;
