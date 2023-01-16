@@ -33,6 +33,7 @@ export class IndexedDBBlobProvider implements BlobProvider {
     blobAdded: new Signal<BlobId>(),
     blobDeleted: new Signal<BlobId>(),
     uploadState: new Signal<boolean>(),
+    finishedId: new Signal<BlobId>(),
   };
 
   onUploadStateChange(
@@ -41,6 +42,10 @@ export class IndexedDBBlobProvider implements BlobProvider {
   ) {
     if (immediately) callback(this._uploading);
     this.signals.uploadState.on(callback);
+  }
+
+  onUploadFinished(callback: (id: BlobId) => void) {
+    this.signals.finishedId.on(callback);
   }
 
   static async init(
@@ -71,7 +76,8 @@ export class IndexedDBBlobProvider implements BlobProvider {
         workspace,
         cloudApi,
         this._database,
-        this.signals.uploadState
+        this.signals.uploadState,
+        this.signals.finishedId
       );
     }
   }
@@ -143,6 +149,7 @@ export class BlobCloudSync {
   private readonly _pendingPipeline: SyncTask[] = [];
   private readonly _workspace: string;
   private readonly _uploading: IDBInstance<boolean>;
+  private readonly _finishedId: Signal<string>;
 
   private _pipeline: SyncTask[] = [];
   private initialized = false;
@@ -152,8 +159,10 @@ export class BlobCloudSync {
     workspace: string,
     prefixUrl: string,
     db: IDBInstance,
-    uploadSingle: Signal<boolean>
+    uploadSingle: Signal<boolean>,
+    finishedId: Signal<BlobId>
   ) {
+    this._finishedId = finishedId;
     this._fetcher = ky.create({
       prefixUrl,
       signal: this._abortController.signal,
@@ -231,6 +240,7 @@ export class BlobCloudSync {
     if (status?.exists) {
       await this._pending.delete(task.id);
       await this._uploading.set(task.id, true);
+      this._finishedId.emit(task.id);
     } else {
       await this._pending.set(task.id, {
         type: task.type,
