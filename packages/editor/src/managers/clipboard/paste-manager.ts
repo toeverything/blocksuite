@@ -7,6 +7,7 @@ import {
   SelectionInfo,
   getStartModelBySelection,
   deleteModelsByRange,
+  handleBlockSplit,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
@@ -257,11 +258,18 @@ export class PasteManager {
             this._editor.page.deleteBlock(lastBlockModel);
           } else {
             if (currentSelectionInfo.type === 'Range') {
+              const textLength = selectedBlock.text?.length as number;
               deleteModelsByRange(this._editor.page);
-              selectedBlock?.text?.insertList(
-                insertTexts,
-                currentSelectionInfo.selectedBlocks[0].startPos as number
-              );
+              const startPos = currentSelectionInfo.selectedBlocks[0]
+                .startPos as number;
+              const endPos = currentSelectionInfo.selectedBlocks[0]
+                .endPos as number;
+              if (startPos + endPos === textLength + 1) {
+                selectedBlock?.text?.insertList(insertTexts, startPos);
+              } else {
+                handleBlockSplit(this._editor.page, selectedBlock, startPos, 0);
+                selectedBlock?.text?.insertList(insertTexts, startPos);
+              }
             } else {
               selectedBlock?.text?.insertList(insertTexts, endIndex);
             }
