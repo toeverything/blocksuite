@@ -1,10 +1,7 @@
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
-  assertExists,
-  assertFlavours,
   ExtendedModel,
-  matchFlavours,
   RootBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
@@ -28,28 +25,38 @@ import {
 } from '../../__internal__/utils/selection.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
-import { CodeBlockModel } from '../../code-block/index.js';
+import type { CodeBlockModel } from '../../code-block/index.js';
+import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 
-export function deleteModels(page: Page, models: BaseBlockModel[]) {
-  const selection = window.getSelection();
+export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
+  const models = getModelsByRange(range);
+
   const first = models[0];
-  const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
+  const last = models[models.length - 1];
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
-  assertExists(selection);
 
   const firstTextIndex = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset as number,
+    range.startContainer,
+    range.startOffset,
     true
   );
   const endTextIndex = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset as number,
+    range.endContainer,
+    range.endOffset,
     false
   );
+
+  // Only select one block
+  if (models.length === 1) {
+    firstRichText.model.text?.delete(
+      firstTextIndex,
+      endTextIndex - firstTextIndex
+    );
+    return;
+  }
 
   const isFirstRichTextNotEmpty =
     firstRichText.model.text &&
@@ -155,18 +162,16 @@ export function transformBlock(
   return id;
 }
 
-export function handleBackspace(page: Page, e: KeyboardEvent) {
-  // workaround page title
-  if (e.target instanceof HTMLInputElement) return;
+/**
+ * Do nothing when selection is collapsed or not multi block selected
+ */
+export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   if (isNoneSelection()) return;
-  if (!isCollapsedSelection() && isRangeSelection()) {
-    const range = getCurrentRange();
-    if (isMultiBlockRange(range)) {
-      e.preventDefault();
-      const intersectedModels = getModelsByRange(range);
-      deleteModels(page, intersectedModels);
-    }
-  }
+  if (isCollapsedSelection()) return;
+  if (!isMultiBlockRange()) return;
+
+  e.preventDefault();
+  deleteModelsByRange(page);
 }
 
 export const getFormat = () => {
@@ -206,8 +211,8 @@ export const getFormat = () => {
   const lastFormat = lastRichText.quill.getFormat(0, endIndex);
 
   const formatArr = [];
-  !(models[0] instanceof CodeBlockModel) && formatArr.push(firstFormat);
-  !(models[models.length - 1] instanceof CodeBlockModel) &&
+  !(models[0].flavour === 'affine:code') && formatArr.push(firstFormat);
+  !(models[models.length - 1].flavour === 'affine:code') &&
     formatArr.push(lastFormat);
   for (let i = 1; i < models.length - 1; i++) {
     const richText = getRichTextByModel(models[i]);
@@ -217,7 +222,7 @@ export const getFormat = () => {
       // empty line should not be included
       continue;
     }
-    if (models[i] instanceof CodeBlockModel) {
+    if (models[i].flavour === 'affine:code') {
       continue;
     }
     const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
@@ -285,7 +290,7 @@ export function handleFormat(page: Page, key: string) {
 
   if (isRangeSelection()) {
     const models = getModelsByRange(getCurrentRange()).filter(model => {
-      return !(model instanceof CodeBlockModel);
+      return !(model.flavour === 'affine:code');
     });
     if (models.length === 1) {
       const richText = getRichTextByModel(models[0]);
@@ -420,14 +425,15 @@ export function handleBlockSelectionBatchDelete(
   id && asyncFocusRichText(page, id);
 }
 
-export function tryUpdateGroupSize(page: Page, zoom: number) {
+export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const groups = page.root.children as RootBlockModel[];
+    const frames = page.root.children as RootBlockModel[];
     let offset = 0;
-    groups.forEach(model => {
+    frames.forEach(model => {
       // DO NOT resize shape block
-      if (matchFlavours(model, ['affine:shape'])) return;
+      // FIXME: we don't have shape block for now.
+      // if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();

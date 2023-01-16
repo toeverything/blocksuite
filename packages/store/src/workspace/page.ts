@@ -18,10 +18,11 @@ import {
   syncBlockProps,
   trySyncTextProp,
   toBlockProps,
-  matchFlavours,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
-
+import type { BlockSuiteDoc } from '../yjs/index.js';
+import { tryMigrate } from './migrations.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -45,24 +46,29 @@ function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
 }
 
-export class Page extends Space {
+export type PageData = {
+  [key: string]: YBlock;
+};
+
+export class Page extends Space<PageData> {
   public workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
-  private _root: BaseBlockModel | null = null;
+  private _root: BaseBlockModel | BaseBlockModel[] | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _splitSet = new Set<Text | PrelimText>();
   private _synced = false;
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(
-    Object.keys(new BaseBlockModel(this, {}))
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    Object.keys(new BaseBlockModel(this, { id: null! }))
   );
 
   readonly signals = {
     historyUpdated: new Signal(),
-    rootAdded: new Signal<BaseBlockModel>(),
-    rootDeleted: new Signal<string>(),
+    rootAdded: new Signal<BaseBlockModel | BaseBlockModel[]>(),
+    rootDeleted: new Signal<string | string[]>(),
     textUpdated: new Signal<Y.YTextEvent>(),
     updated: new Signal(),
   };
@@ -70,7 +76,7 @@ export class Page extends Space {
   constructor(
     workspace: Workspace,
     id: string,
-    doc: Y.Doc,
+    doc: BlockSuiteDoc,
     awareness: Awareness,
     idGenerator: IdGenerator = uuidv4
   ) {
@@ -88,12 +94,28 @@ export class Page extends Space {
   }
 
   /** key-value store of blocks */
-  private get _yBlocks() {
-    return this.doc.getMap(this.prefixedId) as YBlocks;
+  private get _yBlocks(): YBlocks {
+    return this.origin;
   }
 
   get root() {
-    return this._root;
+    return Array.isArray(this._root) ? this._root[0] : this._root;
+  }
+
+  get rootLayer() {
+    return Array.isArray(this._root) ? this._root[1] : null;
+  }
+
+  /** @internal used for getting surface block elements for phasor */
+  get ySurfaceContainer() {
+    assertExists(this.rootLayer);
+    const ySurface = this._yBlocks.get(this.rootLayer.id);
+    if (ySurface?.has('elements')) {
+      return ySurface.get('elements') as Y.Map<unknown>;
+    } else {
+      ySurface?.set('elements', new Y.Map());
+      return ySurface?.get('elements') as Y.Map<unknown>;
+    }
   }
 
   get isEmpty() {
@@ -101,10 +123,16 @@ export class Page extends Space {
   }
 
   get canUndo() {
+    if (this.awareness.isReadonly()) {
+      return false;
+    }
     return this._history.canUndo();
   }
 
   get canRedo() {
+    if (this.awareness.isReadonly()) {
+      return false;
+    }
     return this._history.canRedo();
   }
 
@@ -113,10 +141,18 @@ export class Page extends Space {
   }
 
   undo() {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     this._history.undo();
   }
 
   redo() {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     this._history.redo();
   }
 
@@ -155,42 +191,94 @@ export class Page extends Space {
   }
 
   getParent(block: BaseBlockModel) {
-    if (!this._root) return null;
+    if (!this.root) return null;
 
-    return this.getParentById(this._root.id, block);
+    return this.getParentById(this.root.id, block);
   }
 
   getPreviousSibling(block: BaseBlockModel) {
     const parent = this.getParent(block);
-    const index = parent?.children.indexOf(block) ?? -1;
-    return parent?.children[index - 1] ?? null;
+    if (!parent) {
+      return null;
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children[index - 1] ?? null;
+  }
+
+  getPreviousSiblings(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children.slice(0, index);
   }
 
   getNextSibling(block: BaseBlockModel) {
     const parent = this.getParent(block);
-    const index = parent?.children.indexOf(block) ?? -1;
-    if (index === -1) {
+    if (!parent) {
       return null;
     }
-    return parent?.children[index + 1] ?? null;
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getPreviousSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children[index + 1] ?? null;
   }
 
-  addBlock<T extends BlockProps>(
-    blockProps: Partial<T>,
-    parent?: BaseBlockModel | string,
+  getNextSiblings(block: BaseBlockModel) {
+    const parent = this.getParent(block);
+    if (!parent) {
+      return [];
+    }
+    const index = parent.children.indexOf(block);
+    if (index === -1) {
+      throw new Error(
+        "Failed to getNextSiblings! Block not found in parent's children"
+      );
+    }
+    return parent.children.slice(index + 1);
+  }
+
+  public addBlockByFlavour<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+    Flavour extends keyof ALLProps & string = keyof ALLProps & string
+  >(
+    flavour: Flavour,
+    blockProps: Partial<
+      ALLProps[Flavour] &
+        Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
+    > = {},
+    parent?: BaseBlockModel | string | null,
     parentIndex?: number
-  ): string {
-    if (!blockProps.flavour) {
+  ) {
+    if (this.awareness.isReadonly()) {
+      throw new Error('cannot modify data in readonly mode');
+    }
+    if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
 
-    if (blockProps.flavour === 'affine:shape') {
-      if (parent != null || parentIndex != null) {
-        throw new Error('Shape block should only be appear under page');
-      }
-    }
+    // if (blockProps.flavour === 'affine:shape') {
+    //   if (parent != null || parentIndex != null) {
+    //     throw new Error('Shape block should only be appear under page');
+    //   }
+    // }
 
-    const clonedProps: Partial<BlockProps> = { ...blockProps };
+    const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
     clonedProps.id = id;
 
@@ -206,7 +294,7 @@ export class Page extends Space {
         parent = this._blockMap.get(parent);
       }
 
-      const parentId = parent?.id ?? this._root?.id;
+      const parentId = parent === null ? null : parent?.id ?? this.root?.id;
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -220,12 +308,66 @@ export class Page extends Space {
     return id;
   }
 
+  /**
+   * @deprecated use `addBlockByFlavour`
+   */
+  addBlock<T extends BlockProps>(
+    blockProps: Partial<T>,
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ): string {
+    return this.addBlockByFlavour(
+      blockProps.flavour as Parameters<typeof this.addBlockByFlavour>[0],
+      blockProps as Parameters<typeof this.addBlockByFlavour>[1],
+      parent,
+      parentIndex
+    );
+  }
+
   updateBlockById(id: string, props: Partial<BlockProps>) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     const model = this._blockMap.get(id) as BaseBlockModel;
     this.updateBlock(model, props);
   }
 
+  moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
+    const currentParentModel = this.getParent(model);
+    const nextParentModel = this.getParent(targetModel);
+    if (currentParentModel === null || nextParentModel === null) {
+      throw new Error('cannot find parent model');
+    }
+    this.transact(() => {
+      const yParentA = this._yBlocks.get(currentParentModel.id) as YBlock;
+      const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
+      const idx = yChildrenA.toArray().findIndex(id => id === model.id);
+      yChildrenA.delete(idx);
+      const yParentB = this._yBlocks.get(nextParentModel.id) as YBlock;
+      const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
+      const nextIdx = yChildrenB
+        .toArray()
+        .findIndex(id => id === targetModel.id);
+      if (top) {
+        yChildrenB.insert(nextIdx, [model.id]);
+      } else {
+        yChildrenB.insert(nextIdx + 1, [model.id]);
+      }
+    });
+    currentParentModel.propsUpdated.emit();
+    nextParentModel.propsUpdated.emit();
+  }
+
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
     this.transact(() => {
@@ -237,25 +379,58 @@ export class Page extends Space {
         yBlock.set('prop:text', props.text._yText);
       }
 
+      // TODO diff children changes
+      // All child nodes will be deleted in the current behavior, then added again.
+      // Through diff children changes, the experience can be improved.
+      if (props.children) {
+        const yChildren = new Y.Array<string>();
+        yChildren.insert(
+          0,
+          props.children.map(child => child.id)
+        );
+        yBlock.set('sys:children', yChildren);
+      }
+
       syncBlockProps(yBlock, props, this._ignoredKeys);
     });
   }
 
   deleteBlockById(id: string) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     const model = this._blockMap.get(id) as BaseBlockModel;
     this.deleteBlock(model);
   }
 
-  deleteBlock(model: BaseBlockModel) {
+  deleteBlock(
+    model: BaseBlockModel,
+    options: {
+      bringChildrenTo: 'parent' | BaseBlockModel;
+    } = {
+      bringChildrenTo: 'parent',
+    }
+  ) {
+    if (this.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     const parent = this.getParent(model);
     const index = parent?.children.indexOf(model) ?? -1;
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
+    if (options.bringChildrenTo === 'parent' && parent) {
+      parent.children.unshift(...model.children);
+    } else if (options.bringChildrenTo instanceof BaseBlockModel) {
+      options.bringChildrenTo.children.unshift(...model.children);
+    }
     this._blockMap.delete(model.id);
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
+      const children = model.children.map(model => model.id);
       model.dispose();
 
       if (parent) {
@@ -264,6 +439,13 @@ export class Page extends Space {
 
         if (index > -1) {
           yChildren.delete(index, 1);
+        }
+        if (options.bringChildrenTo === 'parent' && parent) {
+          yChildren.unshift(children);
+        } else if (options.bringChildrenTo instanceof BaseBlockModel) {
+          this.updateBlockById(options.bringChildrenTo.id, {
+            children: options.bringChildrenTo.children,
+          });
         }
       }
     });
@@ -304,6 +486,8 @@ export class Page extends Space {
     if (this._synced) {
       throw new Error('Cannot sync from existing doc more than once');
     }
+
+    tryMigrate(this.doc);
 
     this._handleVersion();
     this._initYBlocks();
@@ -389,19 +573,28 @@ export class Page extends Space {
     const BlockModelCtor = this.workspace.flavourMap.get(props.flavour);
     if (!BlockModelCtor) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
+    } else if (!props.id) {
+      throw new Error('Block id is not defined');
     }
 
-    const blockModel = new BlockModelCtor(this, props);
+    const blockModel = new BlockModelCtor(
+      this,
+      props as PropsWithId<Omit<BlockProps, 'children'>>
+    );
     return blockModel;
   }
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
     const isRoot = this._blockMap.size === 0;
+    let isSurface = false;
 
     const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
     const props = toBlockProps(prefixedProps) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
+    if (model.flavour === 'affine:surface') {
+      isSurface = true;
+    }
     this._blockMap.set(props.id, model);
 
     if (
@@ -443,6 +636,9 @@ export class Page extends Space {
     if (isRoot) {
       this._root = model;
       this.signals.rootAdded.emit(model);
+    } else if (isSurface) {
+      this._root = [this.root as BaseBlockModel, model];
+      this.signals.rootAdded.emit(this._root);
     } else {
       const parent = this.getParent(model);
       const index = parent?.childMap.get(model.id);
@@ -469,13 +665,39 @@ export class Page extends Space {
     if (!model) return;
 
     const props: Partial<BlockProps> = {};
+    let hasPropsUpdate = false;
+    let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
       // TODO use schema
       if (key === 'prop:text') continue;
+      // Update children
+      if (key === 'sys:children') {
+        hasChildrenUpdate = true;
+        const yChildren = event.target.get('sys:children');
+        if (!(yChildren instanceof Y.Array)) {
+          console.error(
+            'Failed to update block children!, sys:children is not an Y array',
+            event,
+            yChildren
+          );
+          continue;
+        }
+        model.childMap = createChildMap(yChildren);
+        model.children = yChildren.map(
+          id => this._blockMap.get(id) as BaseBlockModel
+        );
+        continue;
+      }
+      // Update props
+      hasPropsUpdate = true;
       props[key.replace('prop:', '')] = event.target.get(key);
     }
-    Object.assign(model, props);
-    model.propsUpdated.emit();
+
+    if (hasPropsUpdate) {
+      Object.assign(model, props);
+      model.propsUpdated.emit();
+    }
+    hasChildrenUpdate && model.childrenUpdated.emit();
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
@@ -551,11 +773,11 @@ export class Page extends Space {
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
     if (this._yBlocks.size === 0) {
-      this.workspace.meta.writeVersion();
+      this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.
     else {
-      this.workspace.meta.validateVersion();
+      this.workspace.meta.validateVersion(this.workspace);
     }
   }
 }

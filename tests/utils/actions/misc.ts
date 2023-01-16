@@ -1,12 +1,34 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 import type { Page as StorePage } from '../../../packages/store/src/index.js';
-import type { Page } from '@playwright/test';
-import { pressEnter } from './keyboard.js';
+import type { ConsoleMessage, Page } from '@playwright/test';
+import { pressEnter, SHORT_KEY } from './keyboard.js';
 
-const NEXT_FRAME_TIMEOUT = 50;
+const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
+const TITLE_SELECTOR = '.affine-default-page-block-title';
+
+function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
+  if (!process.env.CI) {
+    return true;
+  }
+  const ignoredMessages = [
+    // basic.spec.ts
+    "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
+    // embed.spec.ts
+    'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    // embed.spec.ts
+    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
+    // embed.spec.ts
+    'Element affine-embed scheduled an update (generally because a property was set) after an update completed',
+    // clipboard.spec.ts
+    "TypeError: Cannot read properties of null (reading 'model')",
+    // basic.spec.ts › should readonly mode not be able to modify text
+    'cannot modify data in readonly mode',
+  ];
+  return ignoredMessages.some(msg => message.text().startsWith(msg));
+}
 
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
@@ -28,6 +50,7 @@ async function initEmptyEditor(page: Page) {
       document.body.appendChild(editor);
       document.body.appendChild(debugMenu);
 
+      window.debugMenu = debugMenu;
       window.editor = editor;
       window.page = page;
     });
@@ -48,6 +71,10 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
   page.on('console', message => {
+    const ignore = shamefullyIgnoreConsoleMessage(message);
+    if (!ignore) {
+      throw new Error('Unexpected console message: ' + message.text());
+    }
     if (message.type() === 'warning') {
       console.warn(message.text());
     }
@@ -76,6 +103,12 @@ export async function clearLog(page: Page) {
   await page.evaluate(() => console.clear());
 }
 
+export async function captureHistory(page: Page) {
+  await page.evaluate(() => {
+    window.page.captureSync();
+  });
+}
+
 export async function resetHistory(page: Page) {
   await page.evaluate(() => {
     const space = window.page;
@@ -91,9 +124,9 @@ export async function enterPlaygroundWithList(page: Page) {
   await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
     for (let i = 0; i < 3; i++) {
-      page.addBlock({ flavour: 'affine:list' }, groupId);
+      page.addBlock({ flavour: 'affine:list' }, frameId);
     }
   });
   await waitNextFrame(page);
@@ -104,12 +137,31 @@ export async function initEmptyParagraphState(page: Page) {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, frameId);
     page.captureSync();
-    return { pageId, groupId, paragraphId };
+    return { pageId, frameId, paragraphId };
   });
   return ids;
+}
+
+export async function initEmptyCodeBlockState(page: Page) {
+  const ids = await page.evaluate(() => {
+    const { page } = window;
+    page.captureSync();
+    const pageId = page.addBlock({ flavour: 'affine:page' });
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, frameId);
+    page.captureSync();
+    return { pageId, frameId, codeBlockId };
+  });
+  await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
+  return ids;
+}
+
+export async function focusTitle(page: Page) {
+  const locator = page.locator(TITLE_SELECTOR);
+  await locator.click();
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -208,6 +260,7 @@ export async function pasteContent(
   await page.evaluate(
     ({ clipData }) => {
       const e = {
+        target: document.body,
         preventDefault: () => null,
         stopPropagation: () => null,
         clipboardData: {
@@ -219,7 +272,7 @@ export async function pasteContent(
       };
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
+        .clipboard['_clipboardEventDispatcher']['_onPaste'](
           e as unknown as ClipboardEvent
         );
     },
@@ -268,4 +321,21 @@ export async function setSelection(
     },
     { anchorBlockId, anchorOffset, focusBlockId, focusOffset }
   );
+}
+
+export async function readClipboardText(page: Page) {
+  await page.evaluate(() => {
+    const textarea = document.createElement('textarea');
+    textarea.setAttribute('id', 'textarea-test');
+    document.body.appendChild(textarea);
+  });
+  const textarea = page.locator('#textarea-test');
+  await textarea.focus();
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  const text = await textarea.inputValue();
+  await page.evaluate(() => {
+    const textarea = document.querySelector('#textarea-test');
+    textarea?.remove();
+  });
+  return text;
 }

@@ -1,7 +1,6 @@
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import { Awareness } from 'y-protocols/awareness.js';
-import * as Y from 'yjs';
 import type { DocProvider, DocProviderConstructor } from './doc-providers.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
@@ -9,6 +8,7 @@ import {
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
 } from './utils/id-generator.js';
+import { BlockSuiteDoc } from './yjs/index.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -45,17 +45,20 @@ export interface SSROptions {
   isSSR?: boolean;
 }
 
-export interface StoreOptions extends SSROptions {
+export interface StoreOptions<
+  Flags extends Record<string, unknown> = BlockSuiteFlags
+> extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
   awareness?: Awareness;
   idGenerator?: Generator;
+  defaultFlags?: Partial<Flags>;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
 
 export class Store {
-  readonly doc = new Y.Doc();
+  readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awareness: Awareness;
@@ -101,17 +104,10 @@ export class Store {
   }
 
   /**
-   * @internal Only for testing
-   */
-  serializeDoc() {
-    return serializeYDoc(this.doc) as unknown as SerializedStore;
-  }
-
-  /**
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
    */
-  toJSXElement(id = '0') {
-    const json = this.serializeDoc();
+  exportJSX(id = '0') {
+    const json = serializeYDoc(this.doc) as unknown as SerializedStore;
     if (!('space:page0' in json)) {
       throw new Error("Failed to convert to JSX: 'space:page0' not found");
     }

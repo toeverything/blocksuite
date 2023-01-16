@@ -1,9 +1,11 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
+import { ShapeBlockTag } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { BLOCK_ID_ATTR as ATTR } from './consts.js';
-import { assertExists, matchFlavours } from './std.js';
-import { ShapeBlockTag } from '../../index.js';
+import type { IPoint } from './gesture.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -14,7 +16,7 @@ interface ContainerBlock {
 export function getShapeBlockHitBox(id: string): SVGPathElement | null {
   const shapeBlock = getBlockById<'affine-shape'>(id);
   if (shapeBlock?.tagName !== ShapeBlockTag.toUpperCase()) {
-    throw new Error(`data-block-id: ${id} is not shape block`);
+    throw new Error(`${ATTR}: ${id} is not shape block`);
   }
   return (
     shapeBlock.shadowRoot?.querySelector('.affine-shape-block-hit-box') ?? null
@@ -23,9 +25,13 @@ export function getShapeBlockHitBox(id: string): SVGPathElement | null {
 
 export function getBlockById<T extends ElementTagName>(
   id: string,
-  ele: Element = document.body
+  container: Element = document.body
 ) {
-  return ele.querySelector<T>(`[${ATTR}="${id}"]` as T);
+  return container.querySelector<T>(`[${ATTR}="${id}"]` as T);
+}
+
+export function getBlockByPoint(point: IPoint): Element | null | undefined {
+  return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
 }
 
 export function getParentBlockById<T extends ElementTagName>(
@@ -36,7 +42,10 @@ export function getParentBlockById<T extends ElementTagName>(
   return currentBlock?.parentElement?.closest<T>(`[${ATTR}]` as T) || null;
 }
 
-export function getSiblingsById(id: string, ele: Element = document.body) {
+/**
+ * @deprecated use methods in page instead
+ */
+function getSiblingsById(id: string, ele: Element = document.body) {
   // TODO : resolve BaseBlockModel type relay
   const parentBlock = getParentBlockById(id, ele) as ContainerBlock;
   const children = parentBlock?.model?.children;
@@ -47,6 +56,9 @@ export function getSiblingsById(id: string, ele: Element = document.body) {
   return [];
 }
 
+/**
+ * @deprecated use {@link page.getPreviousSibling} instead
+ */
 export function getPreviousSiblingById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
@@ -60,6 +72,9 @@ export function getPreviousSiblingById<T extends ElementTagName>(
   return null;
 }
 
+/**
+ * @deprecated use {@link page.getNextSibling} instead
+ */
 export function getNextSiblingById<T extends ElementTagName>(
   id: string,
   ele: HTMLElement = document.body
@@ -209,7 +224,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
-        blockElement?.tagName !== 'AFFINE-GROUP'
+        blockElement?.tagName !== 'AFFINE-FRAME'
       ) {
         intersectedModels.push(block.model);
       }
@@ -319,7 +334,7 @@ export function getQuillIndexByNativeSelection(
       // @ts-ignore
       !lastNode.getAttributeNode('contenteditable'))
   ) {
-    if (ele instanceof Element && ele.hasAttribute('data-block-id')) {
+    if (ele instanceof Element && ele.hasAttribute(ATTR)) {
       offset = 0;
       break;
     }
@@ -367,13 +382,7 @@ export function getTextNodeBySelectedBlock(selectedBlock: SelectedBlock) {
   }
   const quill = richText.quill;
 
-  const [leaf, leafOffset]: [
-    {
-      // Blot
-      domNode: HTMLElement;
-    },
-    number
-  ] = quill.getLeaf(offset);
+  const [leaf, leafOffset]: [LeafBlot, number] = quill.getLeaf(offset);
   return [leaf.domNode, leafOffset] as const;
 }
 
@@ -381,7 +390,62 @@ export function getAllBlocks() {
   const blocks = Array.from(document.querySelectorAll(`[${ATTR}]`));
   return blocks.filter(item => {
     return (
-      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-GROUP'
+      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-FRAME'
     );
   });
+}
+
+export function isInsideRichText(element: unknown): element is RichText {
+  // Fool-proofing
+  if (element instanceof Event) {
+    throw new Error('Did you mean "event.target"?');
+  }
+
+  if (!element || !(element instanceof Element)) {
+    return false;
+  }
+  const richText = element.closest('rich-text');
+  return !!richText;
+}
+
+export function isPageTitleElement(
+  element: unknown
+): element is HTMLTextAreaElement {
+  return (
+    element instanceof HTMLTextAreaElement &&
+    element.classList.contains('affine-default-page-block-title')
+  );
+}
+
+export function isCaptionElement(node: unknown): node is HTMLInputElement {
+  if (!(node instanceof Element)) {
+    return false;
+  }
+  return node.classList.contains('affine-embed-wrapper-caption');
+}
+
+/**
+ * This function is slightly different from {@link isInsideRichText}.
+ * It include all of element in editor.
+ * This is very useful when wanting to handle edges between blocks.
+ *
+ * See also {@link isInsideRichText} or {@link isPageTitleElement}
+ */
+export function isInsideBlockContainer(element: unknown): element is Node {
+  const defaultBlockContainer = document.querySelector(
+    '.affine-default-page-block-container'
+  );
+  const edgelessBlockContainer = document.querySelector(
+    '.affine-edgeless-page-block-container'
+  );
+  if (!(element instanceof Node)) {
+    return false;
+  }
+  if (defaultBlockContainer) {
+    return defaultBlockContainer.contains(element);
+  }
+  if (edgelessBlockContainer) {
+    return edgelessBlockContainer.contains(element);
+  }
+  return false;
 }

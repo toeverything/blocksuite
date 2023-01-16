@@ -140,6 +140,10 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
+    if (this._space.awareness.isReadonly()) {
+      console.error('cannot modify data in readonly mode');
+      return;
+    }
     const { _space, _shouldTransact } = this;
     _shouldTransact ? _space.transact(callback) : callback();
   }
@@ -148,10 +152,10 @@ export class Text {
     return new Text(this._space, this._yText.clone());
   }
 
-  split(index: number): [PrelimText, PrelimText] {
+  split(index: number, length: number): [PrelimText, PrelimText] {
     return [
       new PrelimText('splitLeft', index),
-      new PrelimText('splitRight', index),
+      new PrelimText('splitRight', index + length),
     ];
   }
 
@@ -162,7 +166,7 @@ export class Text {
     });
   }
 
-  insertList(insertTexts: Record<string, unknown>[], index: number) {
+  insertList(insertTexts: DeltaOperation[], index: number) {
     this._transact(() => {
       for (let i = insertTexts.length - 1; i >= 0; i--) {
         this._yText.insert(
@@ -226,33 +230,36 @@ export class Text {
     });
   }
 
-  toDelta() {
+  toDelta(): DeltaOperation[] {
     return this._yText?.toDelta() || [];
   }
 
-  sliceToDelta(begin: number, end?: number) {
+  sliceToDelta(begin: number, end?: number): DeltaOperation[] {
+    const result: DeltaOperation[] = [];
     if (end && begin >= end) {
-      return [];
+      return result;
     }
 
     const delta = this.toDelta();
     if (begin < 1 && !end) {
       return delta;
     }
-    const result = [];
+
     if (delta && delta instanceof Array) {
       let charNum = 0;
       for (let i = 0; i < delta.length; i++) {
         const content = delta[i];
-        let contentText = content.insert || '';
+        let contentText: string = content.insert || '';
         const contentLen = contentText.length;
-        if (end && charNum + contentLen > end) {
-          contentText = contentText.slice(0, end - charNum);
-        }
-        if (charNum + contentLen > begin && result.length === 0) {
-          contentText = contentText.slice(begin - charNum);
-        }
-        if (charNum + contentLen > begin && result.length === 0) {
+
+        const isLastOp = end && charNum + contentLen > end;
+        const isFirstOp = charNum + contentLen > begin && result.length === 0;
+
+        if (isFirstOp || isLastOp) {
+          contentText = isLastOp
+            ? contentText.slice(0, end - charNum)
+            : contentText.slice(begin - charNum);
+
           result.push({
             ...content,
             insert: contentText,
@@ -260,9 +267,11 @@ export class Text {
         } else {
           result.length > 0 && result.push(content);
         }
+
         if (end && charNum + contentLen > end) {
           break;
         }
+
         charNum = charNum + contentLen;
       }
     }
@@ -388,6 +397,7 @@ export class RichTextAdapter {
     return {
       anchor,
       focus,
+      selection,
     };
   }
 

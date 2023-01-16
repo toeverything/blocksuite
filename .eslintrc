@@ -7,13 +7,17 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended"
+    "plugin:react-hooks/recommended",
+    "plugin:wc/recommended",
+    "plugin:lit/recommended"
   ],
   "ignorePatterns": [
     "packages/store/dist/*",
     "packages/blocks/dist/*",
     "packages/editor/dist/*",
     "packages/react/dist/*",
+    "packages/react/examples/next/.next/*",
+    "packages/phasor/dist/*",
     "packages/playground/dist/assets/*"
   ],
   "overrides": [
@@ -51,6 +55,11 @@
           {
             "group": ["**/src", "**/src/**"],
             "message": "Don't import from src",
+            "allowTypeImports": false
+          },
+          {
+            "group": ["**/*.css", "**/*.css?*"],
+            "message": "Don't import CSS directly, see https://github.com/toeverything/blocksuite/issues/525",
             "allowTypeImports": false
           }
         ]

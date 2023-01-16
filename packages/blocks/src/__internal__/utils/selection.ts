@@ -14,20 +14,19 @@ import {
   getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-  sleep,
-} from './std.js';
+import { caretRangeFromPoint, sleep } from './std.js';
 import type {
   DomSelectionType,
   SelectedBlock,
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-
-const SCROLL_THRESHOLD = 100;
+import {
+  BLOCK_ID_ATTR,
+  MOVE_DETECT_THRESHOLD,
+  SCROLL_THRESHOLD,
+} from './consts.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -42,6 +41,9 @@ function forwardSelect(newRange: Range, range: Range) {
       newRange.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
       newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
     }
+  }
+  if (range.comparePoint(newRange.endContainer, newRange.endOffset) === -1) {
+    return;
   }
   range.setEnd(newRange.endContainer, newRange.endOffset);
 }
@@ -68,24 +70,31 @@ function fixCurrentRangeToText(
   const endContainer = isForward ? range.endContainer : range.startContainer;
   let newRange: Range | null = range;
   if (endContainer.nodeType !== Node.TEXT_NODE) {
-    const texts = Array.from(
+    const textBlocks = Array.from(
       (range.commonAncestorContainer as HTMLElement).querySelectorAll(
         '.ql-editor'
       )
-    );
-    if (texts.length) {
-      const text = isForward
-        ? texts.reverse().find(t => {
+    ).map(elem => {
+      const block = elem.closest(`[${BLOCK_ID_ATTR}]`);
+      assertExists(block);
+      return block;
+    });
+
+    if (textBlocks.length) {
+      const textBlock = isForward
+        ? textBlocks.reverse().find(t => {
             const rect = t.getBoundingClientRect();
             return clientY >= rect.top; // handle both drag downward, and rightward
           })
-        : texts.find(t => {
+        : textBlocks.find(t => {
             const rect = t.getBoundingClientRect();
             return clientY <= rect.bottom; // handle both drag upwards and leftward
           });
-      if (!text) {
+      if (!textBlock) {
         throw new Error('Failed to focus text node!');
       }
+      const text = textBlock.querySelector('.ql-editor');
+      assertExists(text);
       const rect = text.getBoundingClientRect();
       const newY = isForward
         ? rect.bottom - offset.y - 6
@@ -101,7 +110,7 @@ function fixCurrentRangeToText(
   return range;
 }
 
-function setStartRange(editableContainer: Element) {
+export function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
   let firstNode = editableContainer.firstChild;
   while (firstNode?.firstChild) {
@@ -114,7 +123,7 @@ function setStartRange(editableContainer: Element) {
   return newRange;
 }
 
-function setEndRange(editableContainer: Element) {
+export function setEndRange(editableContainer: Element) {
   const newRange = document.createRange();
   let lastNode = editableContainer.lastChild;
   while (lastNode?.lastChild) {
@@ -128,7 +137,7 @@ function setEndRange(editableContainer: Element) {
 }
 
 async function setNewTop(y: number, editableContainer: Element) {
-  const scrollContainer = editableContainer.closest('.affine-editor-container');
+  const scrollContainer = editableContainer.closest('.affine-default-viewport');
   const { top, bottom } = Rect.fromDom(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
@@ -163,8 +172,8 @@ async function setNewTop(y: number, editableContainer: Element) {
 }
 
 export async function focusRichText(
-  position: SelectionPosition,
-  editableContainer: Element
+  editableContainer: Element,
+  position: SelectionPosition = 'end'
 ) {
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDom(editableContainer);
@@ -194,28 +203,29 @@ export async function focusRichText(
   resetNativeSelection(range);
 }
 
-function focusRichTextByModel(
-  position: SelectionPosition,
-  model: BaseBlockModel
+export function focusBlockByModel(
+  model: BaseBlockModel,
+  position: SelectionPosition = 'end'
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
-  if (matchFlavours(model, ['affine:embed', 'affine:divider'])) {
+  if (matchFlavours(model, ['affine:embed', 'affine:divider', 'affine:code'])) {
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
-    const embedElement = getBlockElementByModel(model);
-    assertExists(embedElement);
-    defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
-    defaultPageBlock.selection.state.type = 'block';
-    window.getSelection()?.removeAllRanges();
-    (document.activeElement as HTMLInputElement).blur();
-  } else {
     const element = getBlockElementByModel(model);
-    const editableContainer = element?.querySelector('[contenteditable]');
-    defaultPageBlock.selection.state.clear();
-    if (editableContainer) {
-      focusRichText(position, editableContainer);
-    }
+    assertExists(element);
+    defaultPageBlock.selection.state.selectedBlocks.push(element);
+    defaultPageBlock.selection.state.type = 'block';
+    resetNativeSelection(null);
+    (document.activeElement as HTMLTextAreaElement).blur();
+    return;
+  }
+
+  const element = getBlockElementByModel(model);
+  const editableContainer = element?.querySelector('[contenteditable]');
+  defaultPageBlock.selection.state.clear();
+  if (editableContainer) {
+    focusRichText(editableContainer, position);
   }
 }
 
@@ -235,7 +245,7 @@ export function focusPreviousBlock(
 
   const preNodeModel = getPreviousBlock(container, model.id);
   if (preNodeModel && nextPosition) {
-    focusRichTextByModel(nextPosition, preNodeModel);
+    focusBlockByModel(preNodeModel, nextPosition);
   }
 }
 
@@ -253,7 +263,7 @@ export function focusNextBlock(
   const nextNodeModel = getNextBlock(model.id);
 
   if (nextNodeModel) {
-    focusRichTextByModel(nextPosition, nextNodeModel);
+    focusBlockByModel(nextNodeModel, nextPosition);
   }
 }
 
@@ -305,7 +315,7 @@ export function isRangeSelection() {
  *
  * Please check the difference between {@link isMultiLineRange} before use this function
  */
-export function isMultiBlockRange(range: Range) {
+export function isMultiBlockRange(range = getCurrentRange()) {
   return getModelsByRange(range).length > 1;
 }
 
@@ -321,7 +331,7 @@ export function isMultiBlockRange(range: Range) {
  * this function will return true,
  * but {@link isMultiBlockRange} will return false.
  */
-export function isMultiLineRange(range: Range) {
+export function isMultiLineRange(range = getCurrentRange()) {
   // Get the selection height
   const { height } = range.getBoundingClientRect();
 
@@ -413,7 +423,9 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  const isForward = e.x > e.start.x || e.y > e.start.y;
+  const isDownward = e.y > e.start.y + MOVE_DETECT_THRESHOLD;
+  const isRightward = e.x > e.start.x;
+  const isForward = isDownward || (e.y === e.start.y && isRightward);
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
@@ -440,12 +452,12 @@ function isBlankAreaBetweenBlocks(startContainer: Node) {
 }
 
 function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
-  return startContainer.tagName === 'AFFINE-GROUP';
+  return startContainer.tagName === 'AFFINE-FRAME';
 }
 
 function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
   if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-group-block-container');
+  return startContainer.className.includes('affine-frame-block-container');
 }
 
 export function isBlankArea(e: SelectionEvent) {
@@ -480,6 +492,14 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
+    } else if (matchFlavours(lastChild, ['affine:code', 'affine:embed'])) {
+      page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(page, ''),
+        },
+        page.getParent(lastChild)
+      );
     }
   }
 }
@@ -490,17 +510,14 @@ export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
     const editableContainer =
       selection.anchorNode.parentElement?.closest('[contenteditable]');
     if (editableContainer) {
-      return expandRangesByCharacter(selection, editableContainer);
+      return expandRangeByCharacter(selection, editableContainer);
     }
     return null;
   }
   return null;
 }
 
-function expandRangesByCharacter(
-  selection: Selection,
-  editableContainer: Node
-) {
+function expandRangeByCharacter(selection: Selection, editableContainer: Node) {
   const leafNodes = leftFirstSearchLeafNodes(editableContainer);
   if (!leafNodes.length) {
     return null;
@@ -517,7 +534,12 @@ function expandRangesByCharacter(
     leafNodes,
     currentNodeIndex
   );
-  resetNativeSelection(extendRange);
+
+  // don't mutate selection if it's not changed
+  if (extendRange) {
+    resetNativeSelection(extendRange);
+  }
+
   return extendRange;
 }
 
@@ -643,6 +665,8 @@ function trySelectBySegmenter(
       selection,
       currentChar
     );
+    if (currentCharIndex === -1) return null;
+
     // length for expand left
     let leftLength = currentCharIndex;
     // length for expand right
@@ -691,6 +715,11 @@ function getCurrentCharIndex(
   const segmenter = new Intl.Segmenter([], { granularity: 'word' });
   const wordsIterator = segmenter.segment(rangeString)[Symbol.iterator]();
   const words = Array.from(wordsIterator);
+
+  if (words.length === 0) {
+    return [-1, ''] as const;
+  }
+
   let absoluteOffset = 0;
   let started = false;
   // get absolute offset of current cursor
@@ -723,6 +752,7 @@ function getCurrentCharIndex(
   const currentCharIndex = wordText.indexOf(currentChar);
   return [currentCharIndex, wordText] as const;
 }
+
 /**
  * left first search all leaf text nodes
  * @example
@@ -749,7 +779,7 @@ export function getFirstTextNode(node: Node) {
   return leftFirstSearchLeafNodes(node)[0];
 }
 
-export function getSplicedTitle(title: HTMLInputElement) {
+export function getSplicedTitle(title: HTMLTextAreaElement) {
   const text = [...title.value];
   assertExists(title.selectionStart);
   assertExists(title.selectionEnd);
@@ -818,4 +848,39 @@ export function restoreSelection(selectedBlocks: SelectedBlock[]) {
   range.setEnd(endNode, endOffset);
   resetNativeSelection(range);
   return range;
+}
+
+/**
+ * Get the closest editor element in the horizontal position
+ */
+export function getClosestHorizontalEditor(clientY: number) {
+  // sort for binary search (In fact, it is generally orderly, just in case)
+  const editorsElements = Array.from(
+    document.querySelectorAll('.ql-editor')
+  ).sort((a, b) =>
+    // getBoundingClientRect here actually run so fast because of the browser cache
+    a.getBoundingClientRect().top > b.getBoundingClientRect().top ? 1 : -1
+  );
+
+  // binary search
+  let left = 0;
+  let right = editorsElements.length - 1;
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const minElement = editorsElements[mid];
+    if (
+      clientY <= minElement.getBoundingClientRect().bottom &&
+      (mid === 0 ||
+        clientY > editorsElements[mid - 1].getBoundingClientRect().bottom)
+    ) {
+      return editorsElements[mid];
+    }
+    if (minElement.getBoundingClientRect().top > clientY) {
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
+  }
+
+  return null;
 }

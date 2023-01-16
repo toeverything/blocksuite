@@ -41,4 +41,5 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Type Check
-        run: pnpm exec tsc -b
+        # run: pnpm exec tsc -b
+        run: pnpm build

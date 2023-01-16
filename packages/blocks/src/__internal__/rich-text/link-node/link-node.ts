@@ -1,27 +1,14 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { Quill as QuillType } from 'quill';
-import Q from 'quill';
+import type { InlineBlot } from 'parchment';
+import Quill from 'quill';
 import {
   ALLOWED_SCHEMES,
   showLinkPopover,
 } from '../../../components/link-popover/index.js';
-import {
-  assertExists,
-  getDefaultPageBlock,
-  getModelByElement,
-  hotkey,
-} from '../../utils/index.js';
+import { getDefaultPageBlock, getModelByElement } from '../../utils/index.js';
 import { LinkIcon } from './link-icon.js';
-
-const Quill = Q as unknown as typeof QuillType;
-
-// TODO fix Blot types
-type Blot = {
-  domNode: HTMLElement;
-  offset: () => number;
-  length: () => number;
-};
+import { assertExists } from '@blocksuite/global/utils';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {
@@ -76,38 +63,41 @@ export class LinkNodeComponent extends LitElement {
   }
 
   async onDelayHover(e: MouseEvent) {
-    const blot: Blot = Quill.find(this);
+    // The link blot extends inline blot
+    const blot: InlineBlot = Quill.find(this);
     assertExists(blot);
     const text = blot.domNode.textContent ?? undefined;
 
-    hotkey.withDisabledHotkey(async () => {
-      const linkState = await showLinkPopover({
-        anchorEl: e.target as HTMLElement,
-        text,
-        link: this.href,
-        showMask: false,
-        interactionKind: 'hover',
-      });
-      if (linkState.type === 'confirm') {
-        const link = linkState.link;
-        const newText = linkState.text;
-        const isUpdateText = newText !== text;
-        assertExists(blot);
-        this._updateLink(blot, link, isUpdateText ? newText : undefined);
-        return;
-      }
-      if (linkState.type === 'remove') {
-        assertExists(blot);
-        this._updateLink(blot, false);
-        return;
-      }
+    const linkState = await showLinkPopover({
+      anchorEl: e.target as HTMLElement,
+      text,
+      link: this.href,
+      showMask: false,
+      interactionKind: 'hover',
     });
+    if (linkState.type === 'confirm') {
+      const link = linkState.link;
+      const newText = linkState.text;
+      const isUpdateText = newText !== text;
+      assertExists(blot);
+      this._updateLink(blot, link, isUpdateText ? newText : undefined);
+      return;
+    }
+    if (linkState.type === 'remove') {
+      assertExists(blot);
+      this._updateLink(blot, false);
+      return;
+    }
   }
 
   /**
    * If no pass text, use the original text
    */
-  private async _updateLink(blot: Blot, link: string | false, text?: string) {
+  private async _updateLink(
+    blot: InlineBlot,
+    link: string | false,
+    text?: string
+  ) {
     const model = getModelByElement(this);
     const { page: page } = model;
 
@@ -137,6 +127,8 @@ export class LinkNodeComponent extends LitElement {
     ></a>`;
   }
 }
+
+// See https://github.com/quilljs/quill/blob/develop/formats/link.ts
 const Link = Quill.import('formats/link');
 Link.tagName = 'link-node'; // Quill uses <a> by default
 Link.PROTOCOL_WHITELIST = ALLOWED_SCHEMES;

@@ -12,16 +12,17 @@ import {
 import {
   assertImageOption,
   assertImageSize,
+  assertKeyboardWorkInInput,
   assertRichDragButton,
   assertRichImage,
   assertRichTexts,
 } from './utils/asserts.js';
 
 async function initImageState(page: Page) {
-  await page.evaluate(() => {
+  return await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
     page.addBlock(
       {
         flavour: 'affine:embed',
@@ -30,8 +31,9 @@ async function initImageState(page: Page) {
         width: 200,
         height: 180,
       },
-      groupId
+      frameId
     );
+    return { pageId, frameId };
   });
 }
 
@@ -103,7 +105,7 @@ test('press enter will create new block when click and select image', async ({
   await activeEmbed(page);
   await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.type('aa');
-  await assertRichTexts(page, ['\n', 'aa']);
+  await assertRichTexts(page, ['aa']);
 });
 
 test('enter shortcut on focusing embed block and its caption', async ({
@@ -118,6 +120,10 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await assertImageOption(page);
 
   await focusCaption(page);
+  await assertKeyboardWorkInInput(
+    page,
+    page.locator('.affine-embed-wrapper-caption')
+  );
   await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.type('aa');
   await assertRichTexts(page, ['aa']);

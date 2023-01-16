@@ -22,6 +22,7 @@ export interface CurrentWorkspaceActions {
   setCurrentWorkspace: (workspace: Workspace) => void;
   setCurrentPage: (page: Page | null) => void;
   createPage: (id?: string) => void;
+  deletePage: (id: string) => void;
 }
 
 export const createCurrentWorkspaceActions: BlockSuiteActionsCreator<
@@ -45,6 +46,9 @@ export const createCurrentWorkspaceActions: BlockSuiteActionsCreator<
     },
     createPage: (id = uuidv4()) => {
       get().currentWorkspace.createPage(id);
+    },
+    deletePage: id => {
+      get().currentWorkspace.removePage(id);
     },
   };
 };

@@ -163,19 +163,29 @@ export function getStickyFontStyle(style: ShapeStyles): string {
 }
 
 export function getStickyShapeStyle(style: ShapeStyles, isDarkMode = false) {
-  const { color } = style;
+  if (style.color.startsWith('#')) {
+    const color = style.color as `#${string}`;
+    const stroke = style.color as `#${string}`;
+    const fill = Utils.lerpColor(color, canvasLight, 0.45);
+    return {
+      stroke,
+      fill,
+      color: isDarkMode ? '#1d1d1d' : '#0d0d0d',
+    };
+  } else {
+    const color = style.color as ColorStyle;
+    const theme: Theme = isDarkMode ? 'dark' : 'light';
+    const adjustedColor =
+      color === ColorStyle.White || color === ColorStyle.Black
+        ? ColorStyle.Yellow
+        : color;
 
-  const theme: Theme = isDarkMode ? 'dark' : 'light';
-  const adjustedColor =
-    color === ColorStyle.White || color === ColorStyle.Black
-      ? ColorStyle.Yellow
-      : color;
-
-  return {
-    fill: stickyFills[theme][adjustedColor],
-    stroke: strokes[theme][adjustedColor],
-    color: isDarkMode ? '#1d1d1d' : '#0d0d0d',
-  };
+    return {
+      fill: stickyFills[theme][adjustedColor],
+      stroke: strokes[theme][adjustedColor],
+      color: isDarkMode ? '#1d1d1d' : '#0d0d0d',
+    };
+  }
 }
 
 export function getShapeStyle(
@@ -189,14 +199,23 @@ export function getShapeStyle(
   const { color, size, isFilled } = style;
 
   const strokeWidth = getStrokeWidth(size);
-
-  const theme: Theme = isDarkMode ? 'dark' : 'light';
-
-  return {
-    stroke: strokes[theme][color],
-    fill: isFilled ? fills[theme][color] : 'none',
-    strokeWidth,
-  };
+  if (color.startsWith('#')) {
+    const stroke = style.color as `#${string}`;
+    const fill = Utils.lerpColor(color, canvasLight, 0.45);
+    return {
+      stroke,
+      fill,
+      strokeWidth,
+    };
+  } else {
+    const color = style.color as ColorStyle;
+    const theme: Theme = isDarkMode ? 'dark' : 'light';
+    return {
+      stroke: strokes[theme][color],
+      fill: isFilled ? fills[theme][color] : 'none',
+      strokeWidth,
+    };
+  }
 }
 
 export const defaultStyle: ShapeStyles = {

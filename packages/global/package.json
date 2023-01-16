@@ -1,0 +1,26 @@
+{
+  "name": "@blocksuite/global",
+  "version": "0.4.0-alpha.0",
+  "types": "./index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": "./index.d.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./index.d.ts",
+      "./utils": "./dist/utils.js"
+    },
+    "files": [
+      "dist",
+      "index.d.ts"
+    ]
+  }
+}

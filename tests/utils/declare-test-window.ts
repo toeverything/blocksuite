@@ -6,6 +6,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { EditorContainer } from '../../packages/editor/src/components/editor-container.js';
 import type {} from '../../packages/playground/src/components/debug-menu.js';
+import type { DebugMenu } from '../../packages/playground/src/components/debug-menu.js';
 
 declare global {
   interface Window {
@@ -14,6 +15,7 @@ declare global {
     workspace: Workspace;
     blockSchema: Record<string, typeof BaseBlockModel>;
     page: Page;
+    debugMenu: DebugMenu;
     editor: EditorContainer;
   }
 }

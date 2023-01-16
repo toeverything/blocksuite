@@ -25,10 +25,13 @@
       "@blocksuite/editor": ["./packages/editor/src"],
       "@blocksuite/blocks": ["./packages/blocks/src"],
       "@blocksuite/blocks/*": ["./packages/blocks/src/*"],
+      "@blocksuite/global/*": ["./packages/global/src/*"],
       "@blocksuite/react": ["./packages/react/src"],
       "@blocksuite/react/*": ["./packages/react/src/*"],
       "@blocksuite/store": ["./packages/store/src"],
-      "@blocksuite/store/*": ["./packages/store/src/*"]
+      "@blocksuite/store/*": ["./packages/store/src/*"],
+      "@blocksuite/phasor": ["./packages/phasor/src"],
+      "@blocksuite/phasor/*": ["./packages/phasor/src/*"]
     }
   },
   "files": [],
@@ -44,6 +47,15 @@
     },
     {
       "path": "./packages/store"
+    },
+    {
+      "path": "./packages/react"
+    },
+    {
+      "path": "./packages/phasor"
+    },
+    {
+      "path": "./packages/global"
     },
     {
       "path": "./tests"

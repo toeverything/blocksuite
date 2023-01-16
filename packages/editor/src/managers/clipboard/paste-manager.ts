@@ -5,10 +5,10 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
 import {
   SelectionUtils,
   SelectionInfo,
-  matchFlavours,
-  assertExists,
   getStartModelBySelection,
 } from '@blocksuite/blocks';
+import type { DeltaOperation } from 'quill';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -118,7 +118,7 @@ export class PasteManager {
     }
 
     if (shouldConvertMarkdown) {
-      return this._editor.contentParser.markdown2Block(textClipData);
+      return await this._editor.contentParser.markdown2Block(textClipData);
     }
 
     return this._editor.contentParser.text2blocks(textClipData);
@@ -193,38 +193,39 @@ export class PasteManager {
       let index = 0;
       if (selectedBlock) {
         if (matchFlavours(selectedBlock, ['affine:page'])) {
-          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
-              { flavour: 'affine:group' },
+              { flavour: 'affine:frame' },
               selectedBlock.id
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
+        } else if (!matchFlavours(selectedBlock, ['affine:frame'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
       }
       const addBlockIds: string[] = [];
       if (selectedBlock && !matchFlavours(selectedBlock, ['affine:page'])) {
-        const endIndex = lastBlock.endPos || selectedBlock?.text?.length || 0;
+        const endIndex = lastBlock.endPos ?? (selectedBlock?.text?.length || 0);
         const insertTexts = blocks[0].text;
         const insertLen = insertTexts.reduce(
-          (len: number, value: Record<string, unknown>) => {
+          (len: number, value: DeltaOperation) => {
             return len + ((value.insert as string) || '').length;
           },
           0
         );
-        selectedBlock?.text?.insertList(insertTexts, endIndex);
-        selectedBlock &&
-          this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
         //This is a temporary processing of the divider block, subsequent refactoring of the divider will remove it
         if (
           blocks[0].flavour === 'affine:divider' ||
           blocks[0].flavour === 'affine:embed'
         ) {
+          selectedBlock?.text?.insertList(insertTexts, endIndex);
+          selectedBlock &&
+            this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
+
           parent &&
             this._addBlocks(blocks.slice(0), parent, index, addBlockIds);
           const lastBlockModel = this._editor.page.getBlockById(lastBlock.id);
@@ -239,15 +240,39 @@ export class PasteManager {
             this._editor.page.deleteBlock(lastBlockModel);
           }
         } else {
+          const lastBlockModel = this._editor.page.getBlockById(lastBlock.id);
+
+          // if current paragraph is an empty frame, delete it after inserting other blocks.
+          if (
+            endIndex === 0 &&
+            insertLen > 0 &&
+            parent &&
+            lastBlockModel &&
+            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            lastBlockModel?.text?.length === 0 &&
+            lastBlockModel?.children.length === 0
+          ) {
+            this._addBlocks(blocks.slice(0, 1), parent, index, addBlockIds);
+            this._editor.page.deleteBlock(lastBlockModel);
+          } else {
+            selectedBlock?.text?.insertList(insertTexts, endIndex);
+            selectedBlock &&
+              this._addBlocks(
+                blocks[0].children,
+                selectedBlock,
+                0,
+                addBlockIds
+              );
+          }
+
           parent &&
             this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
         }
         let lastId = selectedBlock?.id;
         let position = endIndex + insertLen;
         if (addBlockIds.length > 0) {
-          const endtexts = selectedBlock?.text?.sliceToDelta(
-            endIndex + insertLen
-          );
+          const endtexts =
+            selectedBlock?.text?.sliceToDelta(endIndex + insertLen) || [];
           lastId = addBlockIds[addBlockIds.length - 1];
           const lastBlock = this._editor.page.getBlockById(lastId);
           if (
@@ -282,16 +307,16 @@ export class PasteManager {
       let index = 0;
       if (selectedBlock) {
         if (matchFlavours(selectedBlock, ['affine:page'])) {
-          if (matchFlavours(selectedBlock.children[0], ['affine:group'])) {
+          if (matchFlavours(selectedBlock.children[0], ['affine:frame'])) {
             parent = selectedBlock.children[0];
           } else {
             const id = this._editor.page.addBlock(
-              { flavour: 'affine:group' },
+              { flavour: 'affine:frame' },
               selectedBlock.id
             );
             parent = this._editor.page.getBlockById(id);
           }
-        } else if (!matchFlavours(selectedBlock, ['affine:group'])) {
+        } else if (!matchFlavours(selectedBlock, ['affine:frame'])) {
           parent = this._editor.page.getParent(selectedBlock);
           index = (parent?.children.indexOf(selectedBlock) || 0) + 1;
         }
@@ -319,6 +344,7 @@ export class PasteManager {
         caption: block.caption,
         width: block.width,
         height: block.height,
+        language: block.language,
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);

@@ -1,3 +1,13 @@
+import {
+  getClosestHorizontalEditor,
+  resetNativeSelection,
+  setEndRange,
+  setStartRange,
+} from './selection.js';
+import { debounce } from './std.js';
+import { MOVE_DETECT_THRESHOLD } from './consts.js';
+import { isInsideBlockContainer, isPageTitleElement } from './query.js';
+
 export interface IPoint {
   x: number;
   y: number;
@@ -24,7 +34,7 @@ export interface SelectionEvent extends IPoint {
   button?: number;
 }
 
-function isFarEnough(a: IPoint, b: IPoint, d = 2) {
+function isFarEnough(a: IPoint, b: IPoint, d = MOVE_DETECT_THRESHOLD) {
   return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) > d * d;
 }
 
@@ -68,23 +78,6 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
-export function isPageTitle(e: Event) {
-  return (
-    e.target instanceof HTMLInputElement &&
-    e.target.classList.contains('affine-default-page-block-title')
-  );
-}
-export function isInput(e: Event) {
-  return e.target instanceof HTMLInputElement;
-}
-
-function tryPreventDefault(e: MouseEvent) {
-  // workaround page title click
-  if (!isInput(e)) {
-    e.preventDefault();
-  }
-}
-
 export function initMouseEventHandlers(
   container: HTMLElement,
   onContainerDragStart: (e: SelectionEvent) => void,
@@ -94,7 +87,8 @@ export function initMouseEventHandlers(
   onContainerDblClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
-  onContainerContextMenu: (e: SelectionEvent) => void
+  onContainerContextMenu: (e: SelectionEvent) => void,
+  onSelectionChange: (e: Event) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
@@ -109,7 +103,9 @@ export function initMouseEventHandlers(
     );
 
   const mouseDownHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (!isPageTitleElement(e.target)) {
+      e.preventDefault();
+    }
     const rect = getBoundingClientRect();
 
     startX = e.clientX - rect.left;
@@ -124,7 +120,9 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (!isPageTitleElement(e.target)) {
+      e.preventDefault();
+    }
     const rect = getBoundingClientRect();
 
     const a = { x: startX, y: startY };
@@ -156,7 +154,9 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (!isPageTitleElement(e.target)) {
+      e.preventDefault();
+    }
 
     if (!isDragging)
       onContainerClick(
@@ -166,6 +166,31 @@ export function initMouseEventHandlers(
       onContainerDragEnd(
         toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
       );
+
+    const horizontalElement = getClosestHorizontalEditor(e.clientY);
+
+    if (!isInsideBlockContainer(e.target) && horizontalElement) {
+      let containerDom = document.querySelector(
+        '.affine-default-page-block-container'
+      );
+      // TODO adapt edgeless block
+      if (!containerDom) {
+        containerDom = document.querySelector(
+          '.affine-edgeless-page-block-container'
+        );
+      }
+
+      if (containerDom) {
+        const react = containerDom.getBoundingClientRect();
+        if (e.clientX < react.left) {
+          const range = setStartRange(horizontalElement);
+          resetNativeSelection(range);
+        } else {
+          const range = setEndRange(horizontalElement);
+          resetNativeSelection(range);
+        }
+      }
+    }
 
     startX = startY = -Infinity;
     isDragging = false;
@@ -189,16 +214,26 @@ export function initMouseEventHandlers(
     );
   };
 
+  const selectionChangeHandler = debounce(e => {
+    if (isDragging) {
+      return;
+    }
+
+    onSelectionChange(e as Event);
+  }, 300);
+
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
+  document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
+    document.removeEventListener('selectionchange', selectionChangeHandler);
   };
   return dispose;
 }

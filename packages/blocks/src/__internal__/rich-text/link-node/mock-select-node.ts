@@ -1,15 +1,16 @@
-import type { Quill as QuillType } from 'quill';
-import Q from 'quill';
-const Quill = Q as unknown as typeof QuillType;
+import type { InlineBlot } from 'parchment';
+import Quill from 'quill';
 
-const Inline = Quill.import('blots/inline');
+// See https://github.com/quilljs/quill/blob/develop/blots/inline.ts
+// See https://github.com/quilljs/parchment
+const Inline: typeof InlineBlot = Quill.import('blots/inline');
 export class MockSelectNode extends Inline {
   static blotName = 'mock-select';
   static tagName = 'span';
   static className = 'affine-mock-select';
 
   static create(value: boolean) {
-    const node = super.create() as HTMLElement;
+    const node = super.create(value) as HTMLElement;
     node.style.backgroundColor = 'rgba(35, 131, 226, 0.28)';
     return node;
   }

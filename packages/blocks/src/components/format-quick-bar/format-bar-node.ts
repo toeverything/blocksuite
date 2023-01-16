@@ -2,7 +2,9 @@ import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { formatConfig, paragraphConfig } from '../../page-block/utils/const.js';
 import {
+  DragDirection,
   getFormat,
   updateSelectedTextType,
 } from '../../page-block/utils/index.js';
@@ -12,15 +14,8 @@ import {
 } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
 import './button';
-import { formatButtons, paragraphButtons } from './config.js';
 import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
-
-const onCopy = () => {
-  // Will forward to the `CopyCutManager`
-  document.dispatchEvent(new ClipboardEvent('copy'));
-  toast('Copied to clipboard');
-};
 
 @customElement('format-quick-bar')
 export class FormatQuickBar extends LitElement {
@@ -33,14 +28,15 @@ export class FormatQuickBar extends LitElement {
   top: string | null = null;
 
   @property()
-  bottom: string | null = null;
-
-  @property()
   abortController = new AbortController();
 
   // Sometimes the quick bar need to update position
   @property()
   positionUpdated = new Signal();
+
+  // for update position
+  @property()
+  direction!: DragDirection;
 
   @state()
   models: BaseBlockModel[] = [];
@@ -51,7 +47,7 @@ export class FormatQuickBar extends LitElement {
   @state()
   paragraphType = 'text';
 
-  @property()
+  @state()
   paragraphPanelHoverDelay = 150;
 
   @state()
@@ -78,9 +74,15 @@ export class FormatQuickBar extends LitElement {
     const startModel = models[0];
     this.paragraphType = startModel.type;
     this.page = startModel.page as Page;
-    if (models.length > 1) {
-      // Select multiple models
-    }
+
+    this.addEventListener('mousedown', (e: MouseEvent) => {
+      // Prevent click event from making selection lost
+      e.preventDefault();
+    });
+    // TODO add transition
+    this.abortController.signal.addEventListener('abort', () => {
+      this.remove();
+    });
   }
 
   private _onHover() {
@@ -102,10 +104,16 @@ export class FormatQuickBar extends LitElement {
       // Prepare to disappear
       this.paragraphPanelTimer = window.setTimeout(async () => {
         this.showParagraphPanel = 'hidden';
-      }, this.paragraphPanelHoverDelay);
+      }, this.paragraphPanelHoverDelay * 2);
       return;
     }
     clearTimeout(this.paragraphPanelTimer);
+  }
+
+  private _onCopy() {
+    // Will forward to the `CopyCutManager`
+    this.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
+    toast('Copied to clipboard');
   }
 
   private _paragraphPanelTemplate() {
@@ -126,7 +134,7 @@ export class FormatQuickBar extends LitElement {
       @mouseover=${this._onHover}
       @mouseout=${this._onHoverEnd}
     >
-      ${paragraphButtons.map(
+      ${paragraphConfig.map(
         ({ flavour, type, name, icon }) => html`<format-bar-button
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
@@ -139,7 +147,8 @@ export class FormatQuickBar extends LitElement {
             if (this.paragraphType === type) {
               // Already in the target format, convert back to text
               const { flavour: defaultFlavour, type: defaultType } =
-                paragraphButtons[0];
+                paragraphConfig[0];
+              if (this.paragraphType === defaultType) return;
               updateSelectedTextType(defaultFlavour, defaultType, this.page);
               this.paragraphType = defaultType;
               return;
@@ -167,8 +176,8 @@ export class FormatQuickBar extends LitElement {
       return html``;
     }
     const paragraphIcon =
-      paragraphButtons.find(btn => btn.type === this.paragraphType)?.icon ??
-      paragraphButtons[0].icon;
+      paragraphConfig.find(btn => btn.type === this.paragraphType)?.icon ??
+      paragraphConfig[0].icon;
     const paragraphItems = html`<format-bar-button
       class="paragraph-button"
       width="52px"
@@ -180,7 +189,7 @@ export class FormatQuickBar extends LitElement {
 
     const paragraphPanel = this._paragraphPanelTemplate();
 
-    const formatItems = formatButtons
+    const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
         ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
@@ -206,7 +215,7 @@ export class FormatQuickBar extends LitElement {
     const actionItems = html`<format-bar-button
       class="has-tool-tip"
       data-testid="copy"
-      @click=${() => onCopy()}
+      @click=${() => this._onCopy()}
     >
       ${CopyIcon}
       <tool-tip inert role="tooltip">Copy</tool-tip>
@@ -215,7 +224,6 @@ export class FormatQuickBar extends LitElement {
     const styles = styleMap({
       left: this.left,
       top: this.top,
-      bottom: this.bottom,
     });
     return html`<div class="format-quick-bar" style="${styles}">
       ${paragraphItems}

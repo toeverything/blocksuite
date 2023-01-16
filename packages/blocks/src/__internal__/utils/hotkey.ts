@@ -1,8 +1,65 @@
-import Hotkeys from 'hotkeys-js';
-import type { Hotkeys as HotkeysType, KeyHandler } from 'hotkeys-js';
-const hotkeys = Hotkeys as unknown as HotkeysType;
+import hotkeys from 'hotkeys-js';
+import type { KeyHandler } from 'hotkeys-js';
+import {
+  isCaptionElement,
+  isInsideRichText,
+  isPageTitleElement,
+} from './query.js';
 
-hotkeys.filter = () => true;
+hotkeys.filter = (event: KeyboardEvent) => {
+  if (shouldFilter(event)) {
+    return false;
+  }
+  return true;
+};
+
+function isUndoRedo(event: KeyboardEvent) {
+  // If undo or redo: when event.shiftKey is false => undo, when event.shiftKey is true => redo
+  if (event.metaKey && !event.altKey && event.key === 'z') {
+    return true;
+  }
+  return false;
+}
+
+function shouldFilter(event: KeyboardEvent) {
+  const target = event.target;
+  // Not sure if this is the right thing to do
+  if (!target) {
+    return true;
+  }
+  // Skip input element
+  // including
+  // - code block language search input
+  // - image caption
+  // - link create/edit popover
+  if (!isInsideRichText(event.target)) {
+    // TODO Remove ad-hoc
+    // This ad-hoc should be moved to the caption input for processing
+    // Enter on caption should jump out of input
+    // See also `hotkey.addListener(ENTER, handler)`
+    if (isCaptionElement(event.target) && event.key === 'Enter') {
+      return false;
+    }
+    // undo/redo should work in page title
+    if (isPageTitleElement(event.target) && isUndoRedo(event)) {
+      event.preventDefault();
+      return false;
+    }
+    // Some event dispatch from body
+    // for example, press backspace to remove block-level selection
+    if (event.target === document.body) {
+      return false;
+    }
+    return true;
+  }
+  // if (
+  //   target instanceof Element &&
+  //   ['INPUT', 'EDIT-LINK-PANEL'].includes(target.tagName)
+  // ) {
+  //   return true;
+  // }
+  return false;
+}
 
 const SCOPE = {
   AFFINE_PAGE: 'affine:page',

@@ -1,8 +1,8 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import type { EmbedBlockComponent } from '../../embed-block/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
+import '../../components/drag-handle.js';
 import {
-  assertExists,
   caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
@@ -10,14 +10,15 @@ import {
   initMouseEventHandlers,
   isBlankArea,
   isEmbed,
-  noop,
   resetNativeSelection,
   SelectionEvent,
   getBlockElementByModel,
   getAllBlocks,
   getDefaultPageBlock,
-  isInput,
   IPoint,
+  doesInSamePath,
+  getCurrentRange,
+  isPageTitleElement,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -25,17 +26,22 @@ import {
   repairContextMenuRange,
 } from '../utils/cursor.js';
 import type { DefaultPageSignals } from './default-page-block.js';
-import { getBlockEditingStateByPosition } from './utils.js';
-import { Utils } from '@blocksuite/store';
+import {
+  getBlockEditingStateByPosition,
+  getBlockEditingStateByCursor,
+} from './utils.js';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
+import { DragHandle } from '../../components/drag-handle.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
-    rect.left < selectionRect.right + offset.x &&
-    rect.right > selectionRect.left + offset.x &&
-    rect.top < selectionRect.bottom + offset.y &&
-    rect.bottom > selectionRect.top + offset.y
+    rect.left <= selectionRect.right + offset.x &&
+    rect.right >= selectionRect.left + offset.x &&
+    rect.top <= selectionRect.bottom + offset.y &&
+    rect.bottom >= selectionRect.top + offset.y
   );
 }
 
@@ -74,7 +80,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'focus';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
 
 export class PageSelectionState {
   type: PageSelectionType;
@@ -125,11 +131,12 @@ export class PageSelectionState {
   }
 
   refreshRichTextBoundsCache(mouseRoot: HTMLElement) {
+    this._blockCache.clear();
     const allBlocks = getAllBlocks();
-    allBlocks.forEach(block => {
+    for (const block of allBlocks) {
       const rect = block.getBoundingClientRect();
       this._blockCache.set(block, rect);
-    });
+    }
   }
 
   clear() {
@@ -146,9 +153,13 @@ export class DefaultSelectionManager {
   state = new PageSelectionState('none');
   private _mouseRoot: HTMLElement;
   private _container: DefaultPageBlockComponent;
-  private _mouseDisposeCallback: () => void;
+  private _disposeCallbacks: (() => void)[] = [];
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
+  private _dragHandleAbortController = new AbortController();
+
+  private _dragHandle: DragHandle | null = null;
+
   constructor({
     page,
     mouseRoot,
@@ -164,22 +175,116 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
+    const createHandle = () => {
+      this._dragHandle = new DragHandle({
+        setSelectedBlocks: this._setSelectedBlocks,
+        onDropCallback: (e, start, end) => {
+          const startModel = start.model;
+          const rect = end.position;
+          const nextModel = end.model;
+          if (doesInSamePath(this.page, nextModel, startModel)) {
+            return;
+          }
+          this.page.captureSync();
+          const distanceToTop = Math.abs(rect.top - e.y);
+          const distanceToBottom = Math.abs(rect.bottom - e.y);
+          this.page.moveBlock(
+            startModel,
+            nextModel,
+            distanceToTop < distanceToBottom
+          );
+          this.clearRects();
+        },
+        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+            skipX,
+          });
+        },
+        getBlockEditingStateByCursor: (
+          pageX,
+          pageY,
+          cursor,
+          size,
+          skipX,
+          dragging
+        ) => {
+          return getBlockEditingStateByCursor(
+            this._blocks,
+            pageX,
+            pageY,
+            cursor,
+            {
+              size,
+              skipX,
+              dragging,
+            }
+          );
+        },
+      });
+    };
+    this._disposeCallbacks.push(
+      this.page.awareness.signals.update.on(msg => {
+        if (msg.id !== this.page.doc.clientID) {
+          return;
+        }
+        if (msg.state?.flags.enable_drag_handle) {
+          // todo: implement subscribe with selector
+          if (!this._dragHandle) {
+            createHandle();
+          }
+        } else {
+          this._dragHandle?.remove();
+          this._dragHandle = null;
+        }
+      }).dispose
+    );
+    if (this.page.awareness.getFlag('enable_drag_handle')) {
+      createHandle();
+    }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
-    this._mouseDisposeCallback = initMouseEventHandlers(
-      this._mouseRoot,
-      this._onContainerDragStart,
-      this._onContainerDragMove,
-      this._onContainerDragEnd,
-      this._onContainerClick,
-      this._onContainerDblClick,
-      this._onContainerMouseMove,
-      this._onContainerMouseOut,
-      this._onContainerContextMenu
+    this._disposeCallbacks.push(
+      initMouseEventHandlers(
+        this._mouseRoot,
+        this._onContainerDragStart,
+        this._onContainerDragMove,
+        this._onContainerDragEnd,
+        this._onContainerClick,
+        this._onContainerDblClick,
+        this._onContainerMouseMove,
+        this._onContainerMouseOut,
+        this._onContainerContextMenu,
+        this._onSelectionChange
+      )
     );
   }
 
   private get _blocks(): BaseBlockModel[] {
-    return (this.page.root?.children[0].children as BaseBlockModel[]) ?? [];
+    const result: BaseBlockModel[] = [];
+    const blocks = this.page.root?.children.slice();
+    if (!blocks) {
+      return [];
+    }
+
+    const dfs = (
+      blocks: BaseBlockModel[],
+      depth: number,
+      parentIndex: number
+    ) => {
+      for (const block of blocks) {
+        if (block.flavour !== 'affine:frame') {
+          result.push(block);
+        }
+        block.depth = depth;
+        if (parentIndex !== -1) {
+          block.parentIndex = parentIndex;
+        }
+        block.children.length &&
+          dfs(block.children, depth + 1, result.length - 1);
+      }
+    };
+
+    dfs(blocks, 0, -1);
+    return result;
   }
 
   private get _containerOffset() {
@@ -191,20 +296,22 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks(selectedBlocks: Element[]) {
+  private _setSelectedBlocks = (selectedBlocks: Element[]) => {
     this.state.selectedBlocks = selectedBlocks;
     const { blockCache } = this.state;
     const selectedRects = selectedBlocks.map(block => {
       return blockCache.get(block) as DOMRect;
     });
     this._signals.updateSelectedRects.emit(selectedRects);
-  }
+  };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
     this.state.resetStartRange(e);
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     resetNativeSelection(null);
+    // deactivate quill keyboard event handler
+    (document.activeElement as HTMLDivElement).blur();
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
@@ -240,12 +347,11 @@ export class DefaultSelectionManager {
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
     this._signals.nativeSelection.emit(true);
-    noop();
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isInput(e.raw)) return;
+    if (isPageTitleElement(e.raw.target)) return;
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
@@ -327,8 +433,6 @@ export class DefaultSelectionManager {
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
 
-    if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
-
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
       document.querySelectorAll('.affine-embed-wrapper-caption')
@@ -353,18 +457,12 @@ export class DefaultSelectionManager {
 
     if (
       clickBlockInfo &&
-      Utils.matchFlavours(clickBlockInfo.model, [
-        'affine:embed',
-        'affine:divider',
-      ])
+      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
     ) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
 
-      assertExists(clickBlockInfo?.model);
-      this.state.activeComponent = getBlockElementByModel(
-        clickBlockInfo?.model
-      );
+      this.state.activeComponent = getBlockElementByModel(clickBlockInfo.model);
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
@@ -375,7 +473,7 @@ export class DefaultSelectionManager {
       this.state.selectedBlocks.push(this.state.activeComponent);
       return;
     }
-    if (e.raw.target instanceof HTMLInputElement) return;
+    if (e.raw.target instanceof HTMLTextAreaElement) return;
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
@@ -383,8 +481,7 @@ export class DefaultSelectionManager {
   private _onContainerDblClick = (e: SelectionEvent) => {
     this.state.clear();
     this._signals.updateSelectedRects.emit([]);
-    if ((e.raw.target as HTMLElement).tagName === 'DEBUG-MENU') return;
-    if (e.raw.target instanceof HTMLInputElement) return;
+    if (e.raw.target instanceof HTMLTextAreaElement) return;
     const range = handleNativeRangeDblClick(this.page, e);
     if (!range || range.collapsed) {
       return;
@@ -400,6 +497,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
+    this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const hoverEditingState = getBlockEditingStateByPosition(
       this._blocks,
       e.raw.pageX,
@@ -408,12 +506,31 @@ export class DefaultSelectionManager {
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
     if (hoverEditingState?.model.type === 'image') {
-      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      const { position } = hoverEditingState;
+      // when image size is too large, the option popup should show inside
+      if (position.width > 680) {
+        hoverEditingState.position.x = hoverEditingState.position.right - 50;
+      } else {
+        hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      }
       this._signals.updateEmbedEditingState.emit(hoverEditingState);
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
-      hoverEditingState.position.x = hoverEditingState.position.right + 10;
+      hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
+      if (this._dragHandle) {
+        const clickDragState = getBlockEditingStateByPosition(
+          this._blocks,
+          e.raw.pageX,
+          e.raw.pageY,
+          {
+            skipX: true,
+          }
+        );
+        if (clickDragState?.model) {
+          this._dragHandle.show(clickDragState);
+        }
+      }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
     }
@@ -421,6 +538,39 @@ export class DefaultSelectionManager {
 
   private _onContainerMouseOut = (e: SelectionEvent) => {
     // console.log('mouseout', e);
+  };
+
+  private _onSelectionChange = (e: Event) => {
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+    // Exclude selection change outside the editor
+    if (!selection.containsNode(this._container, true)) {
+      return;
+    }
+
+    const range = getCurrentRange(selection);
+    if (range.collapsed) {
+      return;
+    }
+    if (this._container.readonly) {
+      return;
+    }
+
+    // Fix selection direction after support multi-line selection by keyboard
+    // FIXME: if selection produced by mouse, it always be `left-right`
+    const offsetDelta = selection.anchorOffset - selection.focusOffset;
+    let direction: 'left-right' | 'right-left' | 'none' = 'none';
+
+    if (offsetDelta > 0) {
+      direction = 'right-left';
+    } else if (offsetDelta < 0) {
+      direction = 'left-right';
+    }
+    showFormatQuickBar({
+      direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
+    });
   };
 
   clearRects() {
@@ -431,11 +581,15 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
+    if (this._dragHandle) {
+      this._dragHandle.remove();
+    }
+    this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
-    this._mouseDisposeCallback();
+    this._disposeCallbacks.forEach(callback => callback());
   }
 
   resetSelectedBlockByRect(

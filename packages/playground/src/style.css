@@ -16,13 +16,13 @@
   --affine-link-visited-color: #abb8fe;
   --affine-icon-color: #888a94;
   --affine-popover-color: #4c6275;
-  --affine-code-color: #517ea6;
+  --affine-code-color: #48749b;
   --affine-quote-color: #4c6275;
   --affine-selected-color: rgba(104, 128, 255, 0.1);
   --affine-placeholder-color: #c7c7c7;
   --affine-border-color: #d0d7e3;
   --affine-disable-color: #c0c0c0;
-  --affine-line-number-color: #92afc8;
+  --affine-line-number-color: #888a9e;
   --affine-modal-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
     -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   --affine-popover-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
@@ -37,16 +37,16 @@
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
     Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
-  --affine-font-family2: Space Mono, apple-system, BlinkMacSystemFont,
-    Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
-    Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
+  --affine-font-mono: Space Mono, Consolas, Menlo, Monaco, Courier, monospace;
   --affine-paragraph-space: 8px;
   --affine-popover-radius: 10px;
 
   --affine-tooltip-color: #fff;
   --affine-tooltip-background: var(--affine-primary-color);
   --affine-tooltip-shadow: 1px 1px 4px rgba(0, 0, 0, 0.14);
+
+  --sl-font-size-medium: var(--affine-font-xs);
+  --sl-input-font-size-small: var(--affine-font-xs);
 }
 
 html,

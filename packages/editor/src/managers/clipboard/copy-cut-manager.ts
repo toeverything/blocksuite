@@ -1,13 +1,15 @@
 import {
+  deleteModelsByRange,
   EmbedBlockModel,
   getCurrentRange,
   ListBlockModel,
-  matchFlavours,
   SelectionUtils,
 } from '@blocksuite/blocks';
+import type { DeltaOperation } from 'quill';
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
+import { matchFlavours } from '@blocksuite/global/utils';
 
 export class CopyCutManager {
   private _editor: EditorContainer;
@@ -38,27 +40,7 @@ export class CopyCutManager {
 
   public handleCut(e: ClipboardEvent) {
     this.handleCopy(e);
-    // FIXME
-    /*
-    const { selectionInfo } = this._selection;
-    if (selectionInfo.type == 'Block') {
-      selectionInfo.blocks.forEach(({ id }) =>
-        this._editor.space.deleteBlockById(id)
-      );
-    } else if (
-      selectionInfo.type === 'Range' ||
-      selectionInfo.type === 'Caret'
-    ) {
-      // TODO the selection of  discontinuous and cross blocks are not exist yet
-      this._editor.space.richTextAdapters
-        .get(selectionInfo.anchorBlockId)
-        ?.quill.deleteText(
-          selectionInfo.anchorBlockPosition || 0,
-          (selectionInfo.focusBlockPosition || 0) -
-            (selectionInfo.anchorBlockPosition || 0)
-        );
-    }
-    */
+    deleteModelsByRange(this._editor.page);
   }
 
   private _getClipItems() {
@@ -111,14 +93,14 @@ export class CopyCutManager {
     }
 
     let { flavour, type } = model;
-    let delta = [];
+    let delta: DeltaOperation[] = [];
     if (matchFlavours(model, ['affine:page'])) {
       flavour = 'affine:paragraph';
       type = 'text';
       const text = model.block2Text(
         '',
-        selectedBlock?.startPos,
-        selectedBlock?.endPos
+        selectedBlock.startPos,
+        selectedBlock.endPos
       );
       delta = [
         {
@@ -135,10 +117,11 @@ export class CopyCutManager {
         },
       ];
     } else {
-      delta = model?.text?.sliceToDelta(
-        selectedBlock?.startPos || 0,
-        selectedBlock?.endPos
-      );
+      delta =
+        model.text?.sliceToDelta(
+          selectedBlock.startPos || 0,
+          selectedBlock.endPos
+        ) || [];
     }
 
     const children: OpenBlockInfo[] = [];

@@ -1,19 +1,24 @@
 import './utils/declare-test-window.js';
 import { test } from '@playwright/test';
 import {
+  SHORT_KEY,
+  pressBackspace,
+  copyByKeyboard,
+  dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  setQuillSelection,
-  pasteContent,
-  undoByClick,
   importMarkdown,
-  dragBetweenCoords,
-  setSelection,
-  pressEnter,
   initEmptyParagraphState,
-  resetHistory,
-  copyByKeyboard,
   pasteByKeyboard,
+  pasteContent,
+  pressEnter,
+  pressShiftTab,
+  pressTab,
+  resetHistory,
+  setQuillSelection,
+  setSelection,
+  undoByClick,
+  pressSpace,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
@@ -22,10 +27,10 @@ import {
   assertSelection,
   assertText,
   assertTextFormats,
+  assertStoreMatchJSX,
 } from './utils/asserts.js';
 
-// TODO fix CI
-test.skip('clipboard copy paste', async ({ page }) => {
+test('clipboard copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -34,8 +39,35 @@ test.skip('clipboard copy paste', async ({ page }) => {
   await setQuillSelection(page, 0, 3);
   await copyByKeyboard(page);
   await focusRichText(page);
-  await pasteByKeyboard(page);
-  await assertText(page, 'testest');
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertText(page, 'testtes');
+});
+
+test('clipboard paste html', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  // set up clipboard data using html
+  const clipData = {
+    'text/html': `<span>aaa</span><span>bbb</span><span>ccc</span>`,
+  };
+  await page.evaluate(
+    ({ clipData }) => {
+      const dT = new DataTransfer();
+      const e = new ClipboardEvent('paste', { clipboardData: dT });
+      Object.defineProperty(e, 'target', {
+        writable: false,
+        value: document.body,
+      });
+      e.clipboardData?.setData('text/html', clipData['text/html']);
+      document
+        .getElementsByTagName('editor-container')[0]
+        .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
+    },
+    { clipData }
+  );
+  await assertText(page, 'aaabbbccc');
 });
 
 test('markdown format parse', async ({ page }) => {
@@ -45,8 +77,7 @@ test('markdown format parse', async ({ page }) => {
   await resetHistory(page);
 
   let clipData = {
-    'text/plain': `# text
-# h1
+    'text/plain': `# h1
 
 ## h2
 
@@ -75,7 +106,6 @@ test('markdown format parse', async ({ page }) => {
   };
   await pasteContent(page, clipData);
   await assertBlockTypes(page, [
-    'text',
     'h1',
     'h2',
     'h3',
@@ -91,7 +121,6 @@ test('markdown format parse', async ({ page }) => {
     'quote',
   ]);
   await assertRichTexts(page, [
-    'text',
     'h1',
     'h2',
     'h3',
@@ -218,6 +247,52 @@ test('copy clipItems format', async ({ page }) => {
   await assertRichTexts(page, ['\n']);
 });
 
+test('copy more than one delta op on a block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await resetHistory(page);
+
+  const clipData = 'You `talking` to me?';
+
+  await importMarkdown(page, clipData, '0');
+  await setSelection(page, 3, 0, 3, 1);
+  await setQuillSelection(page, 0, 14);
+  await assertClipItems(page, 'text/plain', 'You talking to');
+  await assertClipItems(
+    page,
+    'blocksuite/x-c+w',
+    JSON.stringify({
+      data: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: 'You ',
+            },
+            {
+              insert: 'talking',
+              attributes: {
+                code: true,
+              },
+            },
+            {
+              insert: ' to',
+            },
+          ],
+          children: [],
+        },
+      ],
+    })
+  );
+  await assertClipItems(
+    page,
+    'text/html',
+    '<p>You <code>talking</code> to</p>'
+  );
+});
+
 test('copy & paste outside editor', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -233,4 +308,111 @@ test('copy & paste outside editor', async ({ page }) => {
   await focusRichText(page);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['123']);
+});
+
+test('should keep first line format when pasted into a new line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('-');
+  await pressSpace(page);
+  await page.keyboard.type('1');
+  await pressEnter(page);
+  await pressTab(page);
+  await page.keyboard.type('2');
+  await pressEnter(page);
+  await page.keyboard.type('3');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await page.keyboard.type('4');
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame
+    prop:xywh="[0,0,720,130]"
+  >
+    <affine:list
+      prop:checked={false}
+      prop:text="1"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="2"
+        prop:type="bulleted"
+      />
+      <affine:list
+        prop:checked={false}
+        prop:text="3"
+        prop:type="bulleted"
+      />
+    </affine:list>
+    <affine:list
+      prop:checked={false}
+      prop:text="4"
+      prop:type="bulleted"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+
+  await setSelection(page, 5, 1, 3, 0);
+  await copyByKeyboard(page);
+
+  await focusRichText(page, 3);
+  await pressEnter(page);
+  await pressBackspace(page);
+  await pasteByKeyboard(page);
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame
+    prop:xywh="[0,0,720,170]"
+  >
+    <affine:list
+      prop:checked={false}
+      prop:text="1"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="2"
+        prop:type="bulleted"
+      />
+      <affine:list
+        prop:checked={false}
+        prop:text="3"
+        prop:type="bulleted"
+      />
+    </affine:list>
+    <affine:list
+      prop:checked={false}
+      prop:text="4"
+      prop:type="bulleted"
+    />
+    <affine:list
+      prop:checked={false}
+      prop:text="1"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="2"
+        prop:type="bulleted"
+      />
+      <affine:list
+        prop:checked={false}
+        prop:text="3"
+        prop:type="bulleted"
+      />
+    </affine:list>
+  </affine:frame>
+</affine:page>`
+  );
 });

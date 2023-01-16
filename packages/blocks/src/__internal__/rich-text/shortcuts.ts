@@ -1,12 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import type { RangeStatic } from 'quill';
-import {
-  ALLOW_DEFAULT,
-  assertExists,
-  getDefaultPageBlock,
-  PREVENT_DEFAULT,
-} from '../index.js';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../index.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 type Match = {
   name: string;
@@ -230,7 +226,7 @@ export class Shortcuts {
     },
     {
       name: 'code',
-      pattern: /(?:`)([^`]+?)(?:`)$/g,
+      pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
       action: (
         model: BaseBlockModel,
         quill: Quill,
@@ -266,7 +262,7 @@ export class Shortcuts {
     },
     {
       name: 'codeblock',
-      pattern: /^```/g,
+      pattern: /^```[a-zA-Z0-9]*$/g,
       action: (
         model: BaseBlockModel,
         quill: Quill,
@@ -277,7 +273,8 @@ export class Shortcuts {
         if (model.flavour === 'affine:paragraph' && model.type === 'quote') {
           return PREVENT_DEFAULT;
         }
-        const page = getDefaultPageBlock(model).page;
+        const page = model.page;
+        page.captureSync();
         const parent = page.getParent(model);
         assertExists(parent);
         const index = parent.children.indexOf(model);

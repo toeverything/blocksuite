@@ -15,6 +15,12 @@ import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
+import {
+  undoByKeyboard,
+  redoByKeyboard,
+  SHORT_KEY,
+} from './actions/keyboard.js';
+import { captureHistory } from './actions/misc.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
@@ -25,14 +31,15 @@ export const defaultStore: SerializedStore = {
       },
     ],
     versions: {
-      'affine:paragraph': [1, 0],
-      'affine:page': [1, 0],
-      'affine:list': [1, 0],
-      'affine:group': [1, 0],
-      'affine:divider': [1, 0],
-      'affine:embed': [1, 0],
-      'affine:shape': [1, 0],
-      'affine:code': [1, 0],
+      'affine:paragraph': 1,
+      'affine:page': 1,
+      'affine:list': 1,
+      'affine:frame': 1,
+      'affine:divider': 1,
+      'affine:embed': 1,
+      // 'affine:shape': 1,
+      'affine:code': 1,
+      'affine:surface': 1,
     },
   },
   'space:page0': {
@@ -42,7 +49,7 @@ export const defaultStore: SerializedStore = {
       'sys:children': ['1'],
     },
     '1': {
-      'sys:flavour': 'affine:group',
+      'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,32]',
@@ -62,7 +69,7 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const locator = page.locator('input').nth(0);
+  const locator = page.locator('.affine-default-page-block-title').nth(0);
   const actual = await locator.inputValue();
   expect(actual).toBe(text);
 }
@@ -115,7 +122,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('input').nth(0);
+  const locator = page.locator('.affine-default-page-block-title').nth(0);
   await expect(locator).toBeFocused();
 }
 
@@ -354,7 +361,7 @@ export async function assertStoreMatchJSX(
   id?: string
 ) {
   const element = (await page.evaluate(
-    id => window.workspace.toJSXElement(id),
+    id => window.workspace.exportJSX(id),
     id
   )) as JSXElement;
 
@@ -411,7 +418,10 @@ export function assertAlmostEqual(
   expected: number,
   precision = 0.001
 ) {
-  expect(Math.abs(actual - expected)).toBeLessThan(precision);
+  expect(
+    Math.abs(actual - expected),
+    `expected: ${expected}, but actual: ${actual}`
+  ).toBeLessThan(precision);
 }
 
 /**
@@ -457,4 +467,48 @@ export async function assertLocatorVisible(
       rect.y + rect.height < bodyRect.y;
     expect(isInVisible).toBe(true);
   }
+}
+
+/**
+ * Assert basic keyboard operation works in input
+ *
+ * NOTICE:
+ *   - it will clear the input value.
+ *   - it will pollute undo/redo history.
+ */
+export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
+  await expect(locator).toBeVisible();
+  await locator.focus();
+  // Clear input before test
+  await locator.clear();
+  // type/backspace
+  await page.keyboard.type('1234');
+  await expect(locator).toHaveValue('1234');
+  await captureHistory(page);
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('123');
+
+  // undo/redo
+  await undoByKeyboard(page);
+  await expect(locator).toHaveValue('1234');
+  await redoByKeyboard(page);
+  await expect(locator).toHaveValue('123');
+
+  // keyboard
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('13');
+
+  // copy/cut/paste
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+c`);
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('');
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await expect(locator).toHaveValue('13');
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await expect(locator).toHaveValue('');
 }

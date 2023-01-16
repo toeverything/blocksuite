@@ -1,5 +1,4 @@
 import * as Y from 'yjs';
-import type { BaseBlockModel } from '../base.js';
 import type {
   BlockProps,
   PrefixedBlockProps,
@@ -9,31 +8,7 @@ import type {
 import { PrelimText, Text, TextType } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
-
-const SYS_KEYS = new Set(['id', 'flavour', 'children']);
-
-// https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
-function isPrimitive(
-  a: unknown
-): a is null | undefined | boolean | number | string {
-  return a !== Object(a);
-}
-
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
-}
-
-export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
-  if (!allowed.includes(model.flavour)) {
-    throw new Error(`model flavour ${model.flavour} is not allowed`);
-  }
-}
-
-export function matchFlavours(model: BaseBlockModel, expected: string[]) {
-  return expected.includes(model.flavour);
-}
+import { isPrimitive, SYS_KEYS } from '@blocksuite/global/utils';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -95,7 +70,7 @@ export function syncBlockProps(
   if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
     yBlock.set('prop:checked', props.checked ?? false);
   }
-  if (props.flavour === 'affine:group' && !yBlock.has('prop:xywh')) {
+  if (props.flavour === 'affine:frame' && !yBlock.has('prop:xywh')) {
     yBlock.set('prop:xywh', props.xywh ?? '[0,0,720,480]');
   }
   if (props.flavour === 'affine:embed' && !yBlock.has('prop:width')) {
@@ -155,7 +130,7 @@ export function trySyncTextProp(
     // @ts-ignore
     const yBase = base._yText;
 
-    // attach meta state for identifing split
+    // attach meta state for identifying split
     // otherwise local change from y-side will be ignored by TextAdapter
     // @ts-ignore
     yBase.meta = { split: true };
@@ -168,7 +143,7 @@ export function trySyncTextProp(
     yRight.delete(0, right.index);
 
     // delete the right-half part of `yBase`, making it the new left
-    yBase.delete(right.index, yBase.length - right.index);
+    yBase.delete(left.index, yBase.length - left.index);
 
     // cleanup
     splitSet.clear();

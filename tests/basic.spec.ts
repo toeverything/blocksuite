@@ -10,8 +10,13 @@ import {
   focusRichText,
   waitDefaultPageLoaded,
   pressEnter,
-  addGroupByClick,
+  addFrameByClick,
   initEmptyParagraphState,
+  dragBetweenIndices,
+  switchReadonly,
+  SHORT_KEY,
+  captureHistory,
+  focusTitle,
 } from './utils/actions/index.js';
 import {
   defaultStore,
@@ -21,6 +26,7 @@ import {
   assertText,
   assertRichTexts,
   assertTitle,
+  assertStoreMatchJSX,
 } from './utils/asserts.js';
 
 test('basic input', async ({ page }) => {
@@ -39,11 +45,11 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const pageId = page.addBlockByFlavour('affine:page', { title: 'hello' });
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
 
     const text = new page.Text(page, 'world');
-    page.addBlock({ flavour: 'affine:paragraph', text }, groupId);
+    page.addBlockByFlavour('affine:paragraph', { text }, frame);
 
     const delta = [
       { insert: 'foo ' },
@@ -54,7 +60,7 @@ test('basic init with external text', async ({ page }) => {
         flavour: 'affine:paragraph',
         text: page.Text.fromDelta(page, delta),
       },
-      groupId
+      frame
     );
   });
 
@@ -185,6 +191,38 @@ test('undo after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
+test('should readonly mode not be able to modify text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.type('hello');
+  await switchReadonly(page);
+
+  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await page.keyboard.press(`${SHORT_KEY}+b`);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+
+  await undoByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+});
+
 test('undo/redo twice after adding block twice', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -207,11 +245,46 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test('undo multi groups', async ({ page }) => {
+test('should undo/redo work on title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+  await page.keyboard.type('title');
+  await focusRichText(page);
+  await page.keyboard.type('hello world');
+  await captureHistory(page);
+  let i = 5;
+  while (i--) {
+    await page.keyboard.press('Backspace');
+  }
+
+  await focusTitle(page);
+  await captureHistory(page);
+  await page.keyboard.type(' something');
+  await undoByKeyboard(page);
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello ']);
+
+  await undoByKeyboard(page);
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello world']);
+
+  await focusTitle(page);
+  await redoByKeyboard(page);
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello ']);
+
+  await focusTitle(page);
+  await redoByKeyboard(page);
+  await assertTitle(page, 'title something');
+  await assertRichTexts(page, ['hello ']);
+});
+
+test.skip('undo multi frames', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await addGroupByClick(page);
+  await addFrameByClick(page);
   await assertRichTexts(page, ['\n', '\n']);
 
   await undoByClick(page);

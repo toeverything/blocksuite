@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
@@ -6,7 +7,7 @@ const config: PlaywrightTestConfig = {
   use: {
     browserName: 'chromium',
     viewport: { width: 900, height: 600 },
-    actionTimeout: 5 * 1000,
+    actionTimeout: 3 * 1000,
     // Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer
     // You can open traces locally(`npx playwright show-trace trace.zip`)
     // or in your browser on [Playwright Trace Viewer](https://trace.playwright.dev/).
@@ -15,7 +16,11 @@ const config: PlaywrightTestConfig = {
     video: 'on-first-retry',
   },
   workers: '100%',
-  retries: 2,
+  retries: 1,
+  // 'github' for GitHub Actions CI to generate annotations, plus a concise 'dot'
+  // default 'list' when running locally
+  // See https://playwright.dev/docs/test-reporters#github-actions-annotations
+  reporter: process.env.CI ? 'github' : 'list',
 };
 
 if (process.env.CI) {
@@ -23,7 +28,7 @@ if (process.env.CI) {
     command: 'pnpm dev',
     port: 5173,
   };
-  config.retries = 3;
+  config.retries = 2;
   // config.workers = 2;
 }
 

@@ -3,6 +3,8 @@ import type { RelativePosition } from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
 import type { Space } from './space.js';
 import { Signal } from './utils/signal.js';
+import { merge } from 'merge';
+import { uuidv4 } from './utils/id-generator.js';
 
 export interface SelectionRange {
   id: string;
@@ -16,34 +18,128 @@ interface UserInfo {
   color: string;
 }
 
-interface AwarenessState {
+type Request<
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
+  Key extends keyof Flags = keyof Flags
+> = {
+  id: string;
+  clientId: number;
+  field: Key;
+  value: Flags[Key];
+};
+
+type Response = {
+  id: string;
+};
+
+interface AwarenessState<
+  Flags extends Record<string, unknown> = BlockSuiteFlags
+> {
   cursor?: SelectionRange;
-  user: UserInfo;
+  user?: UserInfo;
+  flags: Flags;
+  request?: Request<Flags>[];
+  response?: Response[];
 }
 
-interface AwarenessMessage {
+interface AwarenessMessage<
+  Flags extends Record<string, unknown> = BlockSuiteFlags
+> {
   id: number;
   type: 'add' | 'update' | 'remove';
-  state?: AwarenessState;
+  state?: AwarenessState<Flags>;
 }
 
-export class AwarenessAdapter {
-  readonly space: Space;
+export interface AwarenessMetadataMessage<
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
+  Key extends keyof Flags = keyof Flags
+> {
+  field: Key;
+  value: Flags[Key];
+}
+
+export class AwarenessAdapter<
+  Flags extends Record<string, unknown> = BlockSuiteFlags
+> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly space: Space<any, Flags>;
   readonly awareness: Awareness;
 
   readonly signals = {
-    update: new Signal<AwarenessMessage>(),
+    update: new Signal<AwarenessMessage<Flags>>(),
   };
 
-  constructor(space: Space, awareness: Awareness) {
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    space: Space<any, Flags>,
+    awareness: Awareness,
+    defaultFlags: Partial<Flags> = {}
+  ) {
     this.space = space;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
     this.signals.update.on(this._onAwarenessMessage);
+    const upstreamFlags = awareness.getLocalState()?.flags;
+    if (upstreamFlags) {
+      this.awareness.setLocalStateField(
+        'flags',
+        merge(defaultFlags, upstreamFlags)
+      );
+    } else {
+      this.awareness.setLocalStateField('flags', { ...defaultFlags });
+    }
   }
 
   public setLocalCursor(range: SelectionRange) {
     this.awareness.setLocalStateField('cursor', range);
+  }
+
+  public setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
+    const oldFlags = this.awareness.getLocalState()?.flags ?? {};
+    this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
+  }
+
+  public getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
+    const flags = this.awareness.getLocalState()?.flags ?? {};
+    return flags[field];
+  }
+
+  public setReadonly(value: boolean): void {
+    const flags = this.getFlag('readonly') ?? {};
+    this.setFlag('readonly', {
+      ...flags,
+      [this.space.prefixedId]: value,
+    } as Flags['readonly']);
+  }
+
+  public isReadonly(): boolean {
+    const rd = this.getFlag('readonly');
+    if (rd && typeof rd === 'object') {
+      return Boolean((rd as Record<string, boolean>)[this.space.prefixedId]);
+    } else {
+      return false;
+    }
+  }
+
+  setRemoteFlag<Key extends keyof Flags>(
+    clientId: number,
+    field: Key,
+    value: Flags[Key]
+  ) {
+    if (!this.getFlag('enable_set_remote_flag')) {
+      console.error('set remote flag feature disabled');
+      return;
+    }
+    const oldRequest = this.awareness.getLocalState()?.request ?? [];
+    this.awareness.setLocalStateField('request', [
+      ...oldRequest,
+      {
+        id: uuidv4(),
+        clientId,
+        field,
+        value,
+      },
+    ] satisfies Request<Flags>[]);
   }
 
   public getLocalCursor(): SelectionRange | undefined {
@@ -52,8 +148,8 @@ export class AwarenessAdapter {
     return awarenessState?.cursor;
   }
 
-  public getStates(): Map<number, AwarenessState> {
-    return this.awareness.getStates() as Map<number, AwarenessState>;
+  public getStates(): Map<number, AwarenessState<Flags>> {
+    return this.awareness.getStates() as Map<number, AwarenessState<Flags>>;
   }
 
   private _onAwarenessChange = (diff: {
@@ -68,14 +164,14 @@ export class AwarenessAdapter {
       this.signals.update.emit({
         id,
         type: 'add',
-        state: states.get(id) as AwarenessState,
+        state: states.get(id) as AwarenessState<Flags>,
       });
     });
     updated.forEach(id => {
       this.signals.update.emit({
         id,
         type: 'update',
-        state: states.get(id) as AwarenessState,
+        state: states.get(id) as AwarenessState<Flags>,
       });
     });
     removed.forEach(id => {
@@ -86,13 +182,81 @@ export class AwarenessAdapter {
     });
   };
 
-  private _onAwarenessMessage = (awMsg: AwarenessMessage) => {
+  private _onAwarenessMessage = (awMsg: AwarenessMessage<Flags>) => {
     if (awMsg.id === this.awareness.clientID) {
       this.updateLocalCursor();
     } else {
       this._resetRemoteCursor();
     }
+    if (this.getFlag('enable_set_remote_flag') === true) {
+      this._handleRemoteFlags();
+    }
   };
+
+  private _handleRemoteFlags() {
+    const nextTick: (() => void)[] = [];
+    const localState = this.awareness.getLocalState() as AwarenessState<Flags>;
+    const request = (localState?.request ?? []) as Request<Flags>[];
+    const selfResponse = [] as Response[];
+    const fakeDirtyResponse = [] as Response[];
+    if (localState && Array.isArray(localState.response)) {
+      selfResponse.push(...localState.response);
+      fakeDirtyResponse.push(...localState.response);
+    }
+    const response = [] as Response[];
+    for (const [clientId, state] of this.awareness.getStates()) {
+      if (clientId === this.awareness.clientID) {
+        continue;
+      }
+      if (Array.isArray(state.response)) {
+        response.push(...state.response);
+      }
+      if (Array.isArray(state.request)) {
+        const remoteRequest = state.request as Request<Flags>[];
+        selfResponse.forEach((response, idx) => {
+          if (response === null) {
+            return;
+          }
+          const index = remoteRequest.findIndex(
+            request => request.id === response.id
+          );
+          if (index === -1) {
+            fakeDirtyResponse[idx].id = 'remove';
+          }
+        });
+        remoteRequest.forEach(request => {
+          if (request.clientId === this.awareness.clientID) {
+            // handle request
+            nextTick.push(() => {
+              this.setFlag(request.field, request.value);
+            });
+            selfResponse.push({
+              id: request.id,
+            });
+          }
+        });
+      }
+    }
+    response.forEach(response => {
+      const idx = request.findIndex(request => request.id === response.id);
+      if (idx !== -1) {
+        request.splice(idx, 1);
+      }
+    });
+    nextTick.push(() => {
+      this.awareness.setLocalStateField('request', request);
+      this.awareness.setLocalStateField(
+        'response',
+        selfResponse.filter((response, idx) =>
+          fakeDirtyResponse[idx] ? fakeDirtyResponse[idx].id !== 'remove' : true
+        )
+      );
+    });
+
+    setTimeout(() => {
+      nextTick.forEach(fn => fn());
+    }, 100);
+  }
 
   private _resetRemoteCursor() {
     this.space.richTextAdapters.forEach(textAdapter =>
@@ -112,7 +276,7 @@ export class AwarenessAdapter {
           awState.cursor.id || ''
         );
         if (anchor && focus && textAdapter) {
-          const user = awState.user || {};
+          const user: Partial<UserInfo> = awState.user || {};
           const color = user.color || '#ffa500';
           const name = user.name || 'other';
           textAdapter.quillCursors.createCursor(
@@ -130,7 +294,7 @@ export class AwarenessAdapter {
   }
 
   public updateLocalCursor() {
-    const localCursor = this.space.awareness.getLocalCursor();
+    const localCursor = this.getLocalCursor();
     if (!localCursor) {
       return;
     }

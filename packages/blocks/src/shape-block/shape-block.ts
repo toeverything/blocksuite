@@ -1,9 +1,9 @@
-import { customElement, property } from 'lit/decorators.js';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { css, html, LitElement } from 'lit';
 import type { ShapeBlockModel } from './shape-model.js';
 import type { XYWH } from '../page-block/edgeless/selection-manager.js';
-import { BLOCK_ID_ATTR } from '../__internal__/index.js';
 import {
+  BLOCK_ID_ATTR,
   DashStyle,
   ShapeStyles,
   SizeStyle,
@@ -14,8 +14,14 @@ import {
   getRectanglePath,
 } from './utils/rectangle-helpers.js';
 import { getShapeStyle } from './utils/shape-style.js';
-import { getTrianglePath } from './utils/triangle-helpers.js';
-import style from './style.css?inline';
+import {
+  getTriangleIndicatorPathTDSnapshot,
+  getTrianglePath,
+} from './utils/triangle-helpers.js';
+import {
+  getEllipseIndicatorPath,
+  getEllipsePath,
+} from './utils/ellpse-helpers.js';
 
 export const SHAPE_PADDING = 48;
 
@@ -24,7 +30,30 @@ export const ShapeBlockTag = 'affine-shape';
 @customElement(ShapeBlockTag)
 export class ShapeBlockComponent extends LitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-shape-block {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* enable pointer events, otherwise edgeless block cannot detect by mouse event */
+    .affine-shape-block-hit-box {
+      fill: none;
+      stroke: transparent;
+      stroke-width: calc(24px * var(--affine-scale));
+      pointer-events: stroke;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .affine-shape-block-hit-box-fill {
+      fill: transparent;
+      stroke: transparent;
+      stroke-width: calc(24px * var(--affine-scale));
+      pointer-events: all;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
     /* to make it at the center of the container */
     .affine-shape-block-g {
@@ -39,6 +68,9 @@ export class ShapeBlockComponent extends LitElement {
   })
   model!: ShapeBlockModel;
 
+  @state()
+  selected = false;
+
   render() {
     const id = this.model.id;
     this.setAttribute(BLOCK_ID_ATTR, id);
@@ -51,17 +83,17 @@ export class ShapeBlockComponent extends LitElement {
 
     const size = [modelW, modelH];
     const { stroke, strokeWidth } = getShapeStyle(shapeStyles, false);
-    const innerPath = getRectangleIndicatorPathTDSnapshot(
-      id,
-      shapeStyles,
-      size
-    );
     switch (this.model.type) {
       case TDShapeType.Rectangle: {
         return html`
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
-              <path class="affine-shape-block-hit-box" d=${innerPath} />
+              <path
+                class=${this.selected
+                  ? 'affine-shape-block-hit-box-fill'
+                  : 'affine-shape-block-hit-box'}
+                d=${getRectangleIndicatorPathTDSnapshot(id, shapeStyles, size)}
+              />
               <path
                 d=${getRectanglePath(id, shapeStyles, size)}
                 fill=${stroke}
@@ -77,8 +109,32 @@ export class ShapeBlockComponent extends LitElement {
           <svg class="affine-shape-block">
             <g class="affine-shape-block-g">
               <path
-                class="affine-shape-block-hit-box"
+                class=${this.selected
+                  ? 'affine-shape-block-hit-box-fill'
+                  : 'affine-shape-block-hit-box'}
+                d=${getTriangleIndicatorPathTDSnapshot(id, size, shapeStyles)}
+              />
+              <path
                 d=${getTrianglePath(id, size, shapeStyles)}
+                fill=${stroke}
+                stroke=${stroke}
+                stroke-width=${strokeWidth}
+              />
+            </g>
+          </svg>
+        `;
+      }
+      case TDShapeType.Ellipse: {
+        const radius = [size[0] / 2, size[1] / 2];
+        return html`
+          <svg class="affine-shape-block">
+            <g class="affine-shape-block-g">
+              <path
+                class="affine-shape-block-hit-box"
+                d=${getEllipseIndicatorPath(id, radius, shapeStyles)}
+              />
+              <path
+                d=${getEllipsePath(id, radius, shapeStyles)}
                 fill=${stroke}
                 stroke=${stroke}
                 stroke-width=${strokeWidth}

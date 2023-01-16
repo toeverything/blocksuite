@@ -39,7 +39,10 @@ const DEFAULT_SIGNALING = [
 ];
 
 const isWeb = typeof window !== 'undefined';
-const isLocalhost = isWeb && window.location.hostname === 'localhost';
+const isLocalhost =
+  isWeb &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1');
 const signaling = isLocalhost ? LOCAL_SIGNALING : DEFAULT_SIGNALING;
 
 export class DebugDocProvider extends WebrtcProvider implements DocProvider {

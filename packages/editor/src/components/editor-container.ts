@@ -2,10 +2,10 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { Page, Signal } from '@blocksuite/store';
+import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
-import { NonShadowLitElement } from '@blocksuite/blocks';
+import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
 
 @customElement('editor-container')
@@ -24,6 +24,9 @@ export class EditorContainer extends NonShadowLitElement {
     type: 'default',
   };
 
+  @state()
+  showGrid = false;
+
   // TODO only select block
   @state()
   clipboard = new ClipboardManager(this, this);
@@ -32,7 +35,20 @@ export class EditorContainer extends NonShadowLitElement {
   contentParser = new ContentParser(this);
 
   get model() {
-    return this.page.root as PageBlockModel;
+    return [this.page.root, this.page.rootLayer] as [
+      PageBlockModel | null,
+      BaseBlockModel | null
+    ];
+  }
+
+  get pageBlockModel(): PageBlockModel | null {
+    return Array.isArray(this.model) ? this.model[0] : this.model;
+  }
+
+  get surfaceBlockModel(): SurfaceBlockModel | null {
+    return Array.isArray(this.model)
+      ? (this.model[1] as SurfaceBlockModel)
+      : null;
   }
 
   @query('.affine-block-placeholder-input')
@@ -45,8 +61,28 @@ export class EditorContainer extends NonShadowLitElement {
     return this;
   }
 
+  protected update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('readonly')) {
+      this.page.awareness.setReadonly(this.readonly);
+    }
+    super.update(changedProperties);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
+    this._disposables.add(
+      this.page.awareness.signals.update.on(msg => {
+        if (msg.id !== this.page.doc.clientID) {
+          return;
+        }
+        if (
+          typeof this.page.awareness.isReadonly() === 'boolean' &&
+          this.readonly !== this.page.awareness.isReadonly()
+        ) {
+          this.readonly = this.page.awareness.isReadonly();
+        }
+      })
+    );
 
     // Question: Why do we prevent this?
     this._disposables.add(
@@ -66,6 +102,14 @@ export class EditorContainer extends NonShadowLitElement {
       Signal.fromEvent(window, 'affine.switch-mouse-mode').on(({ detail }) => {
         this.mouseMode = detail;
       })
+    );
+
+    this._disposables.add(
+      Signal.fromEvent(window, 'affine:switch-edgeless-display-mode').on(
+        ({ detail }) => {
+          this.showGrid = detail;
+        }
+      )
     );
 
     // subscribe store
@@ -91,7 +135,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.model}
+        .model=${this.pageBlockModel}
         .readonly=${this.readonly}
       ></affine-default-page>
     `;
@@ -100,9 +144,11 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.model}
+        .pageModel=${this.pageBlockModel}
+        .surfaceModel=${this.surfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
+        .showGrid=${this.showGrid}
       ></affine-edgeless-page>
     `;
 

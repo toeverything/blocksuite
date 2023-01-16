@@ -1,17 +1,16 @@
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { ViewportState, XYWH } from './selection-manager.js';
 import type { RootBlockModel } from '../../__internal__/index.js';
-import { ShapeBlockComponent } from '../../shape-block/index.js';
 import type { SelectionEvent } from '../../__internal__/index.js';
 
 export const DEFAULT_SPACING = 64;
 
-// XXX: edgeless group container padding
+// XXX: edgeless frame container padding
 export const PADDING_X = 48;
 export const PADDING_Y = 48;
 
-// XXX: edgeless group min length
-export const GROUP_MIN_LENGTH = 20;
+// XXX: edgeless frame min length
+export const FRAME_MIN_LENGTH = 20;
 
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
   const a = JSON.parse(block.xywh) as [number, number, number, number];
@@ -28,22 +27,21 @@ export function pick(
   container: EdgelessContainer,
   e: SelectionEvent
 ): RootBlockModel | null {
-  const target = e.raw.target;
-  const isShapeBlock = target instanceof ShapeBlockComponent;
   for (let i = blocks.length - 1; i >= 0; i--) {
     const block = blocks[i];
     if (isPointIn(block, modelX, modelY)) {
-      if (
-        isShapeBlock &&
-        block.flavour === 'affine:shape' &&
-        (target as ShapeBlockComponent).model === block
-      ) {
-        return block;
-      } else if (!isShapeBlock && block.flavour !== 'affine:shape') {
-        return block;
-      } else {
-        continue;
-      }
+      // if (
+      //   isShapeBlock &&
+      //   block.flavour === 'affine:shape' &&
+      //   (target as ShapeBlockComponent).model === block
+      // ) {
+      //   return block;
+      // } else if (!isShapeBlock && block.flavour !== 'affine:shape') {
+      //   return block;
+      // } else {
+      //   continue;
+      // }
+      return block;
     }
   }
   return null;

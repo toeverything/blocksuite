@@ -4,13 +4,23 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
 
 jobs:
-  test:
-    name: test
+  main-test:
+    name: Playground E2E test
     runs-on: ubuntu-latest
 
     steps:
@@ -26,16 +36,36 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+      - name: Install playwright browsers
+        run: npx playwright install chromium
 
-      - name: Run tests
-        run: PLAYWRIGHT_BROWSERS_PATH=0 pnpm test -- --forbid-only
+      - name: Run playwright tests
+        run: pnpm test -- --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: test-results
+          name: test-results-main
           path: ./test-results
           if-no-files-found: ignore
+
+  store-test:
+    name: Store unit test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm --filter @blocksuite/store test:unit

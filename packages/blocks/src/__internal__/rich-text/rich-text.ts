@@ -1,19 +1,16 @@
-import { html, css, unsafeCSS } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import Quill from 'quill';
 import type { Quill as QuillType } from 'quill';
-import Q from 'quill';
 import QuillCursors from 'quill-cursors';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { BlockHost } from '../utils/index.js';
 import { createKeyboardBindings } from './keyboard.js';
 
-import style from './styles.css?inline';
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import { NonShadowLitElement } from '../utils/lit.js';
 
-const Quill = Q as unknown as typeof QuillType;
-
-Quill.register('modules/cursors', QuillCursors);
+Quill.register('modules/cursors', QuillCursors, true);
 const Clipboard = Quill.import('modules/clipboard');
 
 class EmptyClipboard extends Clipboard {
@@ -37,7 +34,50 @@ Quill.register('modules/syntax', Syntax, true);
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    /*
+ * This style is most simple to reset the default styles of the quill editor
+ * User should custom the styles of the block in the block itself
+ */
+    .ql-container {
+      box-sizing: border-box;
+      height: 100%;
+      margin: 0;
+      position: relative;
+    }
+    .ql-container.ql-disabled .ql-tooltip {
+      visibility: hidden;
+    }
+    .ql-clipboard {
+      left: -100000px;
+      height: 1px;
+      overflow-y: hidden;
+      position: absolute;
+      top: 50%;
+    }
+    .ql-container p {
+      margin: 0;
+      padding: 0;
+    }
+    .ql-editor {
+      box-sizing: border-box;
+      height: 100%;
+      outline: none;
+      tab-size: 4;
+      -moz-tab-size: 4;
+      text-align: left;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 3px 0;
+    }
+    .ql-editor > * {
+      cursor: text;
+    }
+    .ql-editor.ql-blank::before {
+      color: var(--affine-disable-color);
+      content: attr(data-placeholder);
+      pointer-events: none;
+      position: absolute;
+    }
   `;
 
   @query('.affine-rich-text.quill-container')
@@ -90,9 +130,8 @@ export class RichText extends NonShadowLitElement {
     page.awareness.updateLocalCursor();
     this.model.propsUpdated.on(() => this.requestUpdate());
 
-    if (this.modules.syntax) {
-      this.quill.formatText(0, this.quill.getLength(), 'code-block', true);
-      this.quill.format('code-block', true);
+    if (this.modules.syntax && this.quill.getText() === '\n') {
+      this.quill.focus();
     }
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
@@ -162,10 +201,6 @@ export class RichText extends NonShadowLitElement {
     // Update placeholder if block`s type changed
     this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
     this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
-    if (this.modules.syntax) {
-      //@ts-ignore
-      this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);
-    }
   }
 
   render() {

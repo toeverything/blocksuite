@@ -10,7 +10,7 @@ import {
   pressShiftTab,
   getCursorBlockIdAndHeight,
   fillLine,
-  addGroupByClick,
+  addFrameByClick,
   initThreeParagraphs,
   initEmptyParagraphState,
   undoByKeyboard,
@@ -22,7 +22,7 @@ import {
   copyByKeyboard,
   pasteByKeyboard,
   getSelectedTextByQuill,
-  withCtrlOrMeta,
+  SHORT_KEY,
 } from './utils/actions/index.js';
 import { expect } from '@playwright/test';
 import {
@@ -298,10 +298,10 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test.skip('cursor move up and down through group', async ({ page }) => {
+test.skip('cursor move up and down through frame', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await addGroupByClick(page);
+  await addFrameByClick(page);
   await focusRichText(page, 0);
   let currentId: string | null = null;
   const [id] = await getCursorBlockIdAndHeight(page);
@@ -395,7 +395,7 @@ test('select text in the same line with dragging leftward and move outside the e
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -50, y: 0 }
+    { x: -25, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
   await page.keyboard.type('abc');
@@ -436,7 +436,7 @@ test('select text in the same line with dragging rightward and press enter creat
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left - 30, y: bbox.top - 20 };
+    return { x: bbox.left - 20, y: bbox.top - 20 };
   });
   const below789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
@@ -491,9 +491,9 @@ test('drag to select tagged text, and copy', async ({ page }) => {
   await assertRichTexts(page, ['123456789']);
 
   await dragBetweenIndices(page, [0, 1], [0, 3]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('C'));
+  page.keyboard.press(`${SHORT_KEY}+C`);
   const textOne = await getSelectedTextByQuill(page);
   expect(textOne).toBe('12345');
 });
@@ -507,7 +507,7 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   await assertRichTexts(page, ['123456789']);
 
   await dragBetweenIndices(page, [0, 1], [0, 3]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   await page.keyboard.type('1');
   const textOne = await getQuillSelectionText(page);
@@ -579,4 +579,73 @@ test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
   await pasteByKeyboard(page);
   await assertDivider(page, 2);
+});
+
+test('Delete the blank line between two dividers', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('--- ');
+  await assertDivider(page, 1);
+
+  await pressEnter(page);
+  await page.keyboard.type('--- ');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('Backspace');
+  await assertDivider(page, 2);
+  await assertRichTexts(page, ['\n']);
+});
+
+test('should delete line with content after divider should not lost content', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('--- ');
+  await page.keyboard.type('123');
+  await assertDivider(page, 1);
+  // Jump to line start
+  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await page.keyboard.press('Backspace');
+  await page.waitForTimeout(10);
+  await page.keyboard.press('Backspace');
+  await assertDivider(page, 0);
+  await assertRichTexts(page, ['\n', '123']);
+});
+
+test('the cursor should move to closest editor block when clicking outside container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const rect = await page.evaluate(() => {
+    const secondRichText = document.querySelector(
+      '[data-block-id="3"] .ql-editor'
+    );
+    if (!secondRichText) {
+      throw new Error();
+    }
+
+    return secondRichText.getBoundingClientRect();
+  });
+
+  await page.mouse.move(rect.left - 50, rect.top + 5);
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123456', '789']);
+
+  await undoByKeyboard(page);
+  await page.mouse.move(rect.right + 50, rect.top + 5);
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '45', '789']);
 });

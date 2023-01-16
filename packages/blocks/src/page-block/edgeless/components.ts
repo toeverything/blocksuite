@@ -4,11 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type {
-  GroupBlockModel,
-  RootBlockModel,
-  ShapeBlockModel,
-} from '../../index.js';
+import type { FrameBlockModel, RootBlockModel } from '../../index.js';
 import type {
   BlockSelectionState,
   HoverState,
@@ -24,12 +20,17 @@ import '../../__internal__/index.js';
 import {
   PADDING_X,
   PADDING_Y,
-  GROUP_MIN_LENGTH,
+  FRAME_MIN_LENGTH,
   getSelectionBoxBound,
 } from './utils.js';
 import { SHAPE_PADDING } from '../../index.js';
 
-function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
+function getCommonRectStyle(
+  rect: DOMRect,
+  zoom: number,
+  isShape = false,
+  selected = false
+) {
   return {
     position: 'absolute',
     left: rect.x + 'px',
@@ -39,16 +40,17 @@ function getCommonRectStyle(rect: DOMRect, zoom: number, isShape = false) {
     borderRadius: `${10 * zoom}px`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
+    backgroundColor: isShape && selected ? 'var(--affine-selected-color)' : '',
   };
 }
 
 export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
-  const isShape = hoverState.block.flavour === 'affine:shape';
+  // const isShape = hoverState.block.flavour === 'affine:shape';
 
   const style = {
-    ...getCommonRectStyle(rect, zoom, isShape),
+    ...getCommonRectStyle(rect, zoom, false),
     border: '1px solid var(--affine-primary-color)',
   };
 
@@ -138,8 +140,8 @@ function EdgelessBlockChild(
   host: BlockHost,
   viewport: ViewportState
 ) {
-  const { xywh, flavour } = model;
-  const isShape = flavour === 'affine:shape';
+  const { xywh } = model;
+  const isShape = false;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
   const translateX =
@@ -176,48 +178,12 @@ export function EdgelessBlockChildrenContainer(
   host: BlockHost,
   viewport: ViewportState
 ) {
-  const { zoom, viewportX, viewportY } = viewport;
-  const translateX = -viewportX * zoom;
-  const translateY = -viewportY * zoom;
-
-  const gridStyle = {
-    backgroundImage:
-      'linear-gradient(#cccccc66 1px, transparent 1px),linear-gradient(90deg, #cccccc66 1px, transparent 1px)',
-  };
-  const defaultStyle = {};
-  const USE_GRID = location.href.includes('grid');
-  const style = USE_GRID ? gridStyle : defaultStyle;
-
   return html`
-    <style>
-      .affine-block-children-container.edgeless {
-        padding-left: 0;
-        position: relative;
-        overflow: hidden;
-        height: 100%;
-
-        /* background-image: linear-gradient(#cccccc66 1px, transparent 1px),
-                linear-gradient(90deg, #cccccc66 1px, transparent 1px); */
-        background-size: ${20 * viewport.zoom}px ${20 * viewport.zoom}px;
-        background-position: ${translateX}px ${translateY}px;
-        background-color: #fff;
-      }
-    </style>
-    <div
-      class="affine-block-children-container edgeless"
-      style=${styleMap(style)}
-    >
-      ${repeat(
-        model.children,
-        child => child.id,
-        child =>
-          EdgelessBlockChild(
-            child as GroupBlockModel | ShapeBlockModel,
-            host,
-            viewport
-          )
-      )}
-    </div>
+    ${repeat(
+      model.children,
+      child => child.id,
+      child => EdgelessBlockChild(child as FrameBlockModel, host, viewport)
+    )}
   `;
 }
 
@@ -332,7 +298,7 @@ export class EdgelessSelectedRect extends LitElement {
         startMouseY: e.clientY,
         absoluteX: x,
         absoluteY: y,
-        // the width of the selected group may 0 after init use rect.width instead
+        // the width of the selected frame may 0 after init use rect.width instead
         width: rect.width,
         height: rect.height,
         direction,
@@ -352,7 +318,7 @@ export class EdgelessSelectedRect extends LitElement {
       let newY = y;
       let newW = w;
       let newH = h;
-      let isShape = false;
+      const isShape = false;
       const deltaX = this._dragStartInfo.startMouseX - e.clientX;
       const deltaY = this._dragStartInfo.startMouseY - e.clientY;
       const direction = this._dragStartInfo.direction;
@@ -361,25 +327,21 @@ export class EdgelessSelectedRect extends LitElement {
           newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
           newW = (this._dragStartInfo.width - deltaX) / this.zoom;
           newH = (this._dragStartInfo.height + deltaY) / this.zoom;
-          isShape = true;
           break;
         case HandleDirection.LeftBottom:
           newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
           newW = (this._dragStartInfo.width + deltaX) / this.zoom;
           newH = (this._dragStartInfo.height - deltaY) / this.zoom;
-          isShape = true;
           break;
         case HandleDirection.RightBottom:
           newW = (this._dragStartInfo.width - deltaX) / this.zoom;
           newH = (this._dragStartInfo.height - deltaY) / this.zoom;
-          isShape = true;
           break;
         case HandleDirection.LeftTop: {
           newY = this._dragStartInfo.absoluteY - deltaY / this.zoom;
           newX = this._dragStartInfo.absoluteX - deltaX / this.zoom;
           newW = (this._dragStartInfo.width + deltaX) / this.zoom;
           newH = (this._dragStartInfo.height + deltaY) / this.zoom;
-          isShape = true;
           break;
         }
         case HandleDirection.Left: {
@@ -393,26 +355,26 @@ export class EdgelessSelectedRect extends LitElement {
           break;
         }
       }
-      // limit the width of the selected group
-      if (newW < GROUP_MIN_LENGTH) {
-        newW = GROUP_MIN_LENGTH;
+      // limit the width of the selected frame
+      if (newW < FRAME_MIN_LENGTH) {
+        newW = FRAME_MIN_LENGTH;
         newX = x;
       }
-      // limit the height of the selected group
-      if (newH < GROUP_MIN_LENGTH) {
-        newH = GROUP_MIN_LENGTH;
+      // limit the height of the selected frame
+      if (newH < FRAME_MIN_LENGTH) {
+        newH = FRAME_MIN_LENGTH;
         newY = y;
       }
       // if xywh do not change, no need to update
       if (newW === w && newX === x && newY === y && newW === w) {
         return;
       }
-      const groupBlock = getBlockById<'div'>(selected.id);
-      const groupContainer = groupBlock?.parentElement;
-      // first change container`s x/w directly for get groups real height
-      if (groupContainer) {
-        groupContainer.style.width = newW + 'px';
-        groupContainer.style.translate = `translate(${newX}px, ${newY}px) scale(${this.zoom})`;
+      const frameBlock = getBlockById<'div'>(selected.id);
+      const frameContainer = frameBlock?.parentElement;
+      // first change container`s x/w directly for get frames real height
+      if (frameContainer) {
+        frameContainer.style.width = newW + 'px';
+        frameContainer.style.translate = `translate(${newX}px, ${newY}px) scale(${this.zoom})`;
       }
       // reset the width of the container may trigger animation
       requestAnimationFrame(() => {
@@ -431,7 +393,7 @@ export class EdgelessSelectedRect extends LitElement {
           newY,
           newW,
           !isShape
-            ? (groupBlock?.getBoundingClientRect().height || 0) / this.zoom
+            ? (frameBlock?.getBoundingClientRect().height || 0) / this.zoom
             : newH,
         ]);
         selected.xywh = newXywh;
@@ -453,14 +415,15 @@ export class EdgelessSelectedRect extends LitElement {
 
   render() {
     if (this.state.type === 'none') return html``;
-    const isShape = this.state.selected.flavour === 'affine:shape';
+    // const isShape = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      ...getCommonRectStyle(this.rect, this.zoom, isShape),
+      zIndex: '3',
+      ...getCommonRectStyle(this.rect, this.zoom, false, true),
     };
-    const handlers = this._getHandles(this.rect, isShape);
+    const handlers = this._getHandles(this.rect, false);
     return html`
       ${this.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>

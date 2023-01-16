@@ -1,22 +1,20 @@
 /// <reference types="vite/client" />
-import { html, css, unsafeCSS, PropertyValueMap } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
+import { BaseBlockModel, Page, Signal, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
 import {
-  assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
   type BlockHost,
   getCurrentRange,
-  getModelsByRange,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { DefaultSelectionManager } from './selection-manager.js';
-import { deleteModels, tryUpdateGroupSize } from '../utils/index.js';
+import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
   EmbedEditingContainer,
@@ -29,8 +27,10 @@ import {
   isControlledKeyboardEvent,
   removeHotkeys,
 } from './utils.js';
-import style from './style.css?inline';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import { getService } from '../../__internal__/service.js';
+import autosize from 'autosize';
+import { assertExists } from '@blocksuite/global/utils';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -51,7 +51,7 @@ export interface DefaultPageSignals {
 }
 
 // https://stackoverflow.com/a/2345915
-function focusTextEnd(input: HTMLInputElement) {
+function focusTextEnd(input: HTMLTextAreaElement) {
   const current = input.value;
   input.focus();
   input.value = '';
@@ -64,7 +64,55 @@ export class DefaultPageBlockComponent
   implements BlockHost
 {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-default-viewport {
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: 100%;
+    }
+    .affine-default-page-block-container {
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height-base);
+      color: var(--affine-text-color);
+      font-weight: 400;
+      width: 720px;
+      margin: 0 auto;
+      /* cursor: crosshair; */
+      cursor: default;
+
+      min-height: calc(100% - 78px);
+      height: auto;
+      overflow: hidden;
+      padding-bottom: 150px;
+    }
+
+    .affine-default-page-block-container > .affine-block-children-container {
+      padding-left: 0;
+    }
+
+    .affine-default-page-block-title {
+      /* autosize will calculate height automatically */
+      height: 0;
+      width: 100%;
+      font-size: 40px;
+      line-height: 50px;
+      font-weight: 700;
+      outline: none;
+      resize: none;
+      border: 0;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .affine-default-page-block-title::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+    .affine-default-page-block-title:disabled {
+      background-color: transparent;
+    }
+    .affine-default-page-block-title-container {
+      margin-top: 78px;
+    }
   `;
 
   @property()
@@ -76,6 +124,7 @@ export class DefaultPageBlockComponent
   flavour = 'affine:page' as const;
 
   selection!: DefaultSelectionManager;
+  getService = getService;
 
   lastSelectionPosition: SelectionPosition = 'start';
 
@@ -123,7 +172,7 @@ export class DefaultPageBlockComponent
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
-  private _title!: HTMLInputElement;
+  private _title!: HTMLTextAreaElement;
 
   private _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = !this.page.isEmpty;
@@ -135,12 +184,12 @@ export class DefaultPageBlockComponent
       const contentLeft = _title.value.slice(0, titleCursorIndex);
       const contentRight = _title.value.slice(titleCursorIndex);
 
-      const defaultGroup = model.children[0];
+      const defaultFrame = model.children[0];
       const props = {
         flavour: 'affine:paragraph',
         text: new Text(page, contentRight),
       };
-      const newFirstParagraphId = page.addBlock(props, defaultGroup, 0);
+      const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       page.updateBlock(model, { title: contentLeft });
       page.workspace.setPageMeta(page.id, { title: contentLeft });
       asyncFocusRichText(this.page, newFirstParagraphId);
@@ -154,14 +203,17 @@ export class DefaultPageBlockComponent
     const { page } = this;
 
     if (!this.model.id) {
-      const title = (e.target as HTMLInputElement).value;
+      const title = (e.target as HTMLTextAreaElement).value;
       const pageId = page.addBlock({ flavour: 'affine:page', title });
-      const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-      page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+      page.addBlock({ flavour: 'affine:paragraph' }, frameId);
       return;
     }
 
-    const title = (e.target as HTMLInputElement).value;
+    let title = (e.target as HTMLTextAreaElement).value;
+    if (title.endsWith('\n')) {
+      title = title.slice(0, -1);
+    }
     page.updateBlock(this.model, { title });
     page.workspace.setPageMeta(page.id, { title });
   }
@@ -223,8 +275,7 @@ export class DefaultPageBlockComponent
     ) {
       const range = getCurrentRange();
       if (isMultiBlockRange(range)) {
-        const intersectedModels = getModelsByRange(range);
-        deleteModels(this.page, intersectedModels);
+        deleteModelsByRange(this.page);
       }
       window.removeEventListener('keydown', this._handleNativeKeydown);
     } else if (window.getSelection()?.type !== 'Range') {
@@ -234,6 +285,7 @@ export class DefaultPageBlockComponent
   };
 
   firstUpdated() {
+    autosize(this._title);
     bindHotkeys(this.page, this.selection, this.signals, this.model);
 
     hotkey.enableHotkey();
@@ -241,6 +293,7 @@ export class DefaultPageBlockComponent
       if (this.model.title !== this._title.value) {
         this._title.value = this.model.title || '';
         this.requestUpdate();
+        autosize.update(this._title);
       }
     });
 
@@ -273,10 +326,10 @@ export class DefaultPageBlockComponent
       }
     });
 
-    tryUpdateGroupSize(this.page, 1);
+    tryUpdateFrameSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.page, 1);
+      tryUpdateFrameSize(this.page, 1);
     });
 
     // TMP: clear selected rects on scroll
@@ -284,6 +337,7 @@ export class DefaultPageBlockComponent
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     focusTextEnd(this._title);
   }
 
@@ -300,20 +354,10 @@ export class DefaultPageBlockComponent
     document.removeEventListener('wheel', this._clearSelection);
   }
 
-  protected updated(changedProperties: PropertyValueMap<this>) {
-    const titleInput = this.querySelector('.affine-default-page-block-title');
-
-    if (this.readonly) {
-      titleInput?.setAttribute('disabled', 'disabled');
-    } else {
-      titleInput?.removeAttribute('disabled');
-    }
-  }
-
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
-    const childrenContainer = BlockChildrenContainer(this.model, this);
+    const childrenContainer = BlockChildrenContainer(this.model, this, () =>
+      this.requestUpdate()
+    );
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
@@ -330,13 +374,14 @@ export class DefaultPageBlockComponent
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
           <div class="affine-default-page-block-title-container">
-            <input
+            <textarea
+              ?disabled=${this.readonly}
+              .value=${this.model.title}
               placeholder="Title"
               class="affine-default-page-block-title"
-              value=${this.model.title}
               @keydown=${this._onTitleKeyDown}
               @input=${this._onTitleInput}
-            />
+            ></textarea>
           </div>
           ${childrenContainer}
         </div>

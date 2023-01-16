@@ -1,13 +1,38 @@
-import { html, css, unsafeCSS } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from './embed-model.js';
-import style from './style.css?inline';
 import { NonShadowLitElement } from '../__internal__/index.js';
 
 @customElement('affine-embed')
 export class EmbedBlockComponent extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-embed-wrapper {
+      /* padding: 10px; */
+      text-align: center;
+      height: 24px;
+    }
+    .affine-embed-wrapper-caption {
+      width: 100%;
+      font-size: var(--affine-font-sm);
+      outline: none;
+      border: 0;
+      font-family: inherit;
+      color: inherit;
+      text-align: center;
+      color: var(--affine-icon-color);
+      display: none;
+    }
+    .affine-embed-wrapper-caption::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-embed-wrapper-caption:disabled {
+      background-color: var(--affine-page-background);
+    }
+
+    .affine-embed-wrapper .caption-show {
+      display: inline-block;
+    }
   `;
   @property()
   model!: EmbedBlockModel;
@@ -26,6 +51,21 @@ export class EmbedBlockComponent extends NonShadowLitElement {
     if (this._caption) {
       this._input.classList.add('caption-show');
     }
+
+    // The embed block can not be focused,
+    // so the active element will be the last activated element.
+    // If the active element is the title textarea,
+    // any event will dispatch from it and be ignored. (Most events will ignore title)
+    // so we need to blur it.
+    // See also https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+    this.addEventListener('click', () => {
+      if (
+        document.activeElement &&
+        document.activeElement instanceof HTMLElement
+      ) {
+        document.activeElement.blur();
+      }
+    });
   }
 
   private _onInputChange() {

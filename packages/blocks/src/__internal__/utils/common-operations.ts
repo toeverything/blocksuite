@@ -1,7 +1,9 @@
 import type { Page } from '@blocksuite/store';
 import type { Quill } from 'quill';
-import { matchFlavours, sleep } from './std.js';
+import { sleep } from './std.js';
 import type { ExtendedModel } from './types.js';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { matchFlavours } from '@blocksuite/global/utils';
 
 // XXX: workaround quill lifecycle issue
 export async function asyncFocusRichText(page: Page, id: string) {
@@ -14,6 +16,26 @@ export function isCollapsedAtBlockStart(quill: Quill) {
   return (
     quill.getSelection(true)?.index === 0 && quill.getSelection()?.length === 0
   );
+}
+
+export function doesInSamePath(
+  page: Page,
+  children: BaseBlockModel,
+  father: BaseBlockModel
+): boolean {
+  if (children === father) {
+    return true;
+  }
+  let parent: BaseBlockModel | null;
+  for (;;) {
+    parent = page.getParent(children);
+    if (parent === null) {
+      return false;
+    } else if (parent.id === father.id) {
+      return true;
+    }
+    children = parent;
+  }
 }
 
 export function convertToList(
@@ -38,7 +60,7 @@ export function convertToList(
     const blockProps = {
       flavour: 'affine:list',
       type: listType,
-      text: model?.text?.clone(),
+      text: model.text?.clone(),
       children: model.children,
       ...otherProperties,
     };
@@ -62,7 +84,7 @@ export function convertToList(
 export function convertToParagraph(
   page: Page,
   model: ExtendedModel,
-  type: 'affine:paragraph' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  type: 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
 ): boolean {
   if (matchFlavours(model, ['affine:paragraph']) && model['type'] === type) {
@@ -80,7 +102,7 @@ export function convertToParagraph(
     const blockProps = {
       flavour: 'affine:paragraph',
       type: type,
-      text: model?.text?.clone(),
+      text: model.text?.clone(),
       children: model.children,
     };
     page.deleteBlock(model);

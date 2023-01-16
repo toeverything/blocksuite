@@ -14,10 +14,10 @@ import {
 import { PageBlockModel } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import { ListBlockModel } from '../../../blocks/src/list-block/list-model.js';
-import { GroupBlockModel } from '../../../blocks/src/group-block/group-model.js';
+import { FrameBlockModel } from '../../../blocks/src/frame-block/frame-model.js';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model.js';
 import type { PageMeta } from '../workspace/index.js';
-import { assertExists } from '../utils/utils.js';
+import { assertExists } from './test-utils-dom.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -29,7 +29,7 @@ export const BlockSchema = {
   'affine:paragraph': ParagraphBlockModel,
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
-  'affine:group': GroupBlockModel,
+  'affine:frame': FrameBlockModel,
   'affine:divider': DividerBlockModel,
 } as const;
 
@@ -67,7 +67,7 @@ const spaceId = `space:${defaultPageId}`;
 const spaceMetaId = 'space:meta';
 
 describe.concurrent('basic', () => {
-  it('can init store', async () => {
+  it('can init workspace', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = await createPage(workspace);
@@ -340,30 +340,30 @@ describe.concurrent('getBlock', () => {
 });
 
 // Inline snapshot is not supported under describe.parallel config
-describe('store.toJSXElement works', async () => {
-  it('store matches snapshot', async () => {
+describe('workspace.exportJSX works', async () => {
+  it('workspace matches snapshot', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
 
     page.addBlock({ flavour: 'affine:page', title: 'hello' });
 
-    expect(workspace.toJSXElement()).toMatchInlineSnapshot(`
+    expect(workspace.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
         prop:title="hello"
       />
     `);
   });
 
-  it('empty store matches snapshot', async () => {
+  it('empty workspace matches snapshot', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
     await createPage(workspace);
 
-    expect(workspace.toJSXElement()).toMatchInlineSnapshot('null');
+    expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
 
-  it('store with multiple blocks children matches snapshot', async () => {
+  it('workspace with multiple blocks children matches snapshot', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
@@ -372,7 +372,7 @@ describe('store.toJSXElement works', async () => {
     page.addBlock({ flavour: 'affine:paragraph' });
     page.addBlock({ flavour: 'affine:paragraph' });
 
-    expect(workspace.toJSXElement()).toMatchInlineSnapshot(/* xml */ `
+    expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
         <affine:paragraph
           prop:type="text"
@@ -385,8 +385,8 @@ describe('store.toJSXElement works', async () => {
   });
 });
 
-describe.concurrent('store.search works', async () => {
-  it('store search matching', async () => {
+describe.concurrent('workspace.search works', async () => {
+  it('workspace search matching', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);

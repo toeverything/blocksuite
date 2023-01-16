@@ -9,9 +9,10 @@ import {
   assertTitle,
   assertPageTitleFocus,
   assertStoreMatchJSX,
+  assertKeyboardWorkInInput,
 } from './utils/asserts.js';
 import {
-  clickMenuButton,
+  clickBlockTypeMenuItem,
   enterPlaygroundRoom,
   focusRichText,
   pressEnter,
@@ -23,6 +24,8 @@ import {
   initEmptyParagraphState,
   dragOverTitle,
   resetHistory,
+  initThreeParagraphs,
+  redoByClick,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -87,6 +90,41 @@ test('backspace and arrow on title', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertTitle(page, 'hll');
+  const title = page.locator('.affine-default-page-block-title');
+  await assertKeyboardWorkInInput(page, title);
+});
+
+test('backspace on line start of the first block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await page.keyboard.type('hello');
+  await assertTitle(page, 'hello');
+  await resetHistory(page);
+
+  await focusRichText(page, 0);
+  await page.keyboard.type('abc');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await assertSelection(page, 0, 0, 0);
+
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, 'helloabc');
+
+  await pressEnter(page);
+  await assertTitle(page, 'hello');
+  await assertRichTexts(page, ['abc']);
+
+  await page.keyboard.press('Backspace', { delay: 50 });
+  await assertTitle(page, 'helloabc');
+  await assertRichTexts(page, []);
+  await undoByClick(page);
+  await assertTitle(page, 'hello');
+  await assertRichTexts(page, ['abc']);
+
+  await redoByClick(page);
+  await assertTitle(page, 'helloabc');
+  await assertRichTexts(page, []);
 });
 
 test('append new paragraph block by enter', async ({ page }) => {
@@ -160,6 +198,37 @@ test('split paragraph block by enter', async ({ page }) => {
   await assertRichTexts(page, ['he', 'llo']);
 });
 
+test('split paragraph block with selected text by enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+  await assertRichTexts(page, ['hello']);
+
+  // select 'll'
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.up('Shift');
+  await assertSelection(page, 0, 2, 2);
+
+  await pressEnter(page);
+  await assertRichTexts(page, ['he', 'o']);
+  await assertBlockChildrenFlavours(page, '1', [
+    'affine:paragraph',
+    'affine:paragraph',
+  ]);
+  await assertSelection(page, 1, 0, 0);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he', 'o']);
+});
+
 test('add multi line by soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -199,24 +268,100 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await page.keyboard.press('Tab');
   await assertRichTexts(page, ['hello', 'world']);
   await assertBlockChildrenIds(page, '1', ['2']);
-  await assertBlockChildrenIds(page, '2', ['4']);
+  await assertBlockChildrenIds(page, '2', ['3']);
 
   // unindent
   await pressShiftTab(page);
   await assertRichTexts(page, ['hello', 'world']);
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
 
   await undoByKeyboard(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 
   await redoByKeyboard(page);
-  await assertBlockChildrenIds(page, '1', ['2', '5']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
+});
+
+test('should indent and unindent works with children', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await pressEnter(page);
+  await page.keyboard.type('012');
+
+  // Focus 789
+  await focusRichText(page, 2);
+  await page.keyboard.press('Tab');
+  // Focus 456
+  await focusRichText(page, 1);
+  await page.keyboard.press('Tab');
+  // Focus 012
+  await focusRichText(page, 3);
+  await page.keyboard.press('Tab');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:xywh="[0,0,720,152]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="012"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:frame>`,
+    frameId
+  );
+
+  // unindent
+  await focusRichText(page, 2);
+  await pressShiftTab(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:xywh="[0,0,720,152]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="012"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:frame>`,
+    frameId
+  );
 });
 
 // https://github.com/toeverything/blocksuite/issues/364
 test('paragraph with child block should work at enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { groupId } = await initEmptyParagraphState(page);
+  const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('123');
   await pressEnter(page);
@@ -227,7 +372,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,72]"
 >
   <affine:paragraph
@@ -239,8 +384,8 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       prop:type="text"
     />
   </affine:paragraph>
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
   );
   await focusRichText(page, 0);
   await pressEnter(page);
@@ -248,7 +393,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:group
+<affine:frame
   prop:xywh="[0,0,720,112]"
 >
   <affine:paragraph
@@ -264,8 +409,52 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       prop:type="text"
     />
   </affine:paragraph>
-</affine:group>`,
-    groupId
+</affine:frame>`,
+    frameId
+  );
+});
+
+test('should delete paragraph block child can hold cursor in correct position', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await pressEnter(page);
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(10);
+  await page.keyboard.type('456');
+  await focusRichText(page, 0);
+  await pressEnter(page);
+  await page.keyboard.press('Backspace');
+  await page.waitForTimeout(10);
+  await page.keyboard.type('now');
+
+  // TODO FIXME wait for frame bounding box update
+  await page.waitForTimeout(20);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame
+  prop:xywh="[0,0,720,112]"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="now"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:frame>`,
+    frameId
   );
 });
 
@@ -277,13 +466,13 @@ test('switch between paragraph types', async ({ page }) => {
 
   const selector = '.affine-paragraph-block-container';
 
-  await clickMenuButton(page, 'heading-1');
+  await clickBlockTypeMenuItem(page, 'H1');
   await assertClassName(page, selector, /h1/);
 
-  await clickMenuButton(page, 'heading-2');
+  await clickBlockTypeMenuItem(page, 'H2');
   await assertClassName(page, selector, /h2/);
 
-  await clickMenuButton(page, 'heading-3');
+  await clickBlockTypeMenuItem(page, 'H3');
   await assertClassName(page, selector, /h3/);
 
   await undoByClick(page);
@@ -302,7 +491,7 @@ test('delete at start of paragraph block', async ({ page }) => {
   await pressEnter(page);
   await page.keyboard.type('a');
 
-  await clickMenuButton(page, 'heading-1');
+  await clickBlockTypeMenuItem(page, 'H1');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '3', 'h1');
@@ -330,7 +519,7 @@ test('delete at start of paragraph immediately following list', async ({
   await pressEnter(page);
   await page.keyboard.type('a');
 
-  await clickMenuButton(page, 'convert to bulleted list');
+  await clickBlockTypeMenuItem(page, 'Bulleted List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'bulleted');
@@ -345,7 +534,7 @@ test('delete at start of paragraph immediately following list', async ({
 
   await undoByClick(page);
   await undoByClick(page);
-  await clickMenuButton(page, 'convert to numbered list');
+  await clickBlockTypeMenuItem(page, 'Numbered List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'numbered');
@@ -359,7 +548,7 @@ test('delete at start of paragraph immediately following list', async ({
 
   await undoByClick(page);
   await undoByClick(page);
-  await clickMenuButton(page, 'convert to todo list');
+  await clickBlockTypeMenuItem(page, 'Todo List');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '4', 'todo');

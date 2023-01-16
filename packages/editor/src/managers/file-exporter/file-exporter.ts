@@ -1,4 +1,6 @@
+/* eslint-disable no-control-regex */
 import TurndownService from 'turndown';
+import { globalCSS, highlightCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
@@ -31,11 +33,8 @@ export const FileExporter = {
       'href',
       'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
     );
-    // Consider if we should replace invalid characters in filenames before downloading, or if the browser
-    // will do that for us automatically...
-    // // replace illegal characters that cannot appear in file names
-    // const safeFilename = filename.replace(/[ <>:/|?*]+/g, " ")
-    element.setAttribute('download', filename);
+    const safeFilename = getSafeFileName(filename);
+    element.setAttribute('download', safeFilename);
 
     element.style.display = 'none';
     document.body.appendChild(element);
@@ -62,6 +61,19 @@ export const FileExporter = {
           : '[x] ';
       },
     });
+    turndownService.addRule('codeBlock', {
+      filter: ['pre'],
+      replacement: function (content, node: Node) {
+        const element = node as Element;
+        return (
+          '```' +
+          element.getAttribute('code-lang') +
+          '\n' +
+          node.textContent +
+          '```\n'
+        );
+      },
+    });
     const markdown = turndownService.turndown(htmlContent);
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
@@ -73,15 +85,8 @@ function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
   // Question: Why not embed css directly into html?
   const htmlCss = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
 <style>
-  :root {
-    --affine-primary-color: #3a4c5c;
-    --affine-font-family: Avenir Next, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-    --affine-font-family2: Roboto Mono, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-  }
-  body {
-    font-family: var(--affine-font-family);
-    color: var(--affine-primary-color);
-  }
+  ${globalCSS}
+  ${highlightCSS}
 </style>`;
   // Question: Do we really need the extra div container?
   return `<!DOCTYPE html>
@@ -98,4 +103,39 @@ ${htmlContent}
 </body>
 </html>
 `;
+}
+
+function getSafeFileName(string: string) {
+  const replacement = ' ';
+  const filenameReservedRegex = /[<>:"/\\|?*\u0000-\u001F]/g;
+  const windowsReservedNameRegex = /^(con|prn|aux|nul|com\d|lpt\d)$/i;
+  const reControlChars = /[\u0000-\u001F\u0080-\u009F]/g;
+  const reTrailingPeriods = /\.+$/;
+  const allowedLength = 50;
+
+  function trimRepeated(string: string, target: string) {
+    const escapeStringRegexp = target
+      .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+      .replace(/-/g, '\\x2d');
+    const regex = new RegExp(`(?:${escapeStringRegexp}){2,}`, 'g');
+    return string.replace(regex, target);
+  }
+
+  string = string
+    .normalize('NFD')
+    .replace(filenameReservedRegex, replacement)
+    .replace(reControlChars, replacement)
+    .replace(reTrailingPeriods, '');
+
+  string = trimRepeated(string, replacement);
+  string = windowsReservedNameRegex.test(string)
+    ? string + replacement
+    : string;
+  const extIndex = string.lastIndexOf('.');
+  const filename = string.slice(0, extIndex).trim();
+  const extension = string.slice(extIndex);
+  string =
+    filename.slice(0, Math.max(1, allowedLength - extension.length)) +
+    extension;
+  return string;
 }

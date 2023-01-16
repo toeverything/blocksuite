@@ -15,6 +15,11 @@ jq '.name = "@blocksuite/blocks"' package.json > package-modified.json
 replace
 cd ../..
 
+cd packages/phasor
+jq '.name = "@blocksuite/phasor"' package.json > package-modified.json
+replace
+cd ../..
+
 cd packages/editor
 jq '.name = "@blocksuite/editor"' package.json > package-modified.json
 replace
@@ -27,5 +32,10 @@ cd ../..
 
 cd packages/react
 jq '.name = "@blocksuite/react"' package.json > package-modified.json
+replace
+cd ../..
+
+cd packages/global
+jq '.name = "@blocksuite/global"' package.json > package-modified.json
 replace
 cd ../..

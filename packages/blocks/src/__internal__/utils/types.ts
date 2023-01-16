@@ -1,8 +1,8 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Point } from './rect.js';
-import type { GroupBlockModel } from '../../group-block/index.js';
-import type { ShapeBlockModel } from '../../shape-block/index.js';
+import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ColorStyle, TDShapeType } from './shape.js';
+import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {
@@ -10,8 +10,32 @@ export type SelectionOptions = {
   from?: 'previous' | 'next';
 };
 
+export interface BaseService {
+  isLoaded: boolean;
+}
+
+export interface AsyncService extends BaseService {
+  load: () => Promise<void>;
+}
+
+export interface SyncService extends BaseService {
+  isLoaded: true;
+}
+
+export type Service = SyncService | AsyncService;
+
 /** Common context interface definition for block models. */
-export interface BlockHost {
+
+/**
+ * Functions that a block host provides
+ */
+export interface BlockHostContext {
+  getService: <Key extends ServiceFlavour>(
+    flavour: Key
+  ) => BlockServiceInstance[Key];
+}
+
+export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   readonly: boolean;
@@ -52,7 +76,7 @@ export interface BlockSelectionInfo {
 }
 
 // blocks that would only appear under the edgeless container root
-export type RootBlockModel = GroupBlockModel | ShapeBlockModel;
+export type RootBlockModel = FrameBlockModel;
 
 export type DefaultMouseMode = {
   type: 'default';
@@ -61,7 +85,7 @@ export type DefaultMouseMode = {
 export type ShapeMouseMode = {
   type: 'shape';
   shape: TDShapeType;
-  color: ColorStyle;
+  color: ColorStyle | `#${string}`;
 };
 
 export type MouseMode = DefaultMouseMode | ShapeMouseMode;
@@ -69,6 +93,7 @@ export type MouseMode = DefaultMouseMode | ShapeMouseMode;
 declare global {
   interface WindowEventMap {
     'affine.switch-mouse-mode': CustomEvent<MouseMode>;
+    'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
   }
 }
 

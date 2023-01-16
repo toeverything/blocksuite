@@ -1,0 +1,6 @@
+.affine-frame-block-container > .affine-block-children-container {
+  padding-left: 0;
+}
+.affine-frame-block-container.selected {
+  background-color: var(--affine-selected-color);
+}

@@ -6,7 +6,6 @@ import {
   getNextBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
-  matchFlavours,
   noop,
   PREVENT_DEFAULT,
 } from '../utils/index.js';
@@ -22,6 +21,7 @@ import {
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 import { Shortcuts } from './shortcuts.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 interface QuillRange {
   index: number;
@@ -97,7 +97,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList =
       matchFlavours(model, ['affine:list']) && model.text?.length === 0;
-    const index = this.quill.getSelection()?.index || 0;
+    const selection = this.quill.getSelection();
+    assertExists(selection);
 
     // Some block should treat Enter as soft enter
     // Logic is：
@@ -118,12 +119,19 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     if (
       isEmptyList &&
       parent &&
-      matchFlavours(parent, ['affine:group']) &&
+      matchFlavours(parent, ['affine:frame']) &&
       model.children.length === 0
     ) {
       handleLineStartBackspace(page, model);
     } else if (isEmptyList && isLastChild) {
-      handleUnindent(page, model, index);
+      // Before
+      // - line1
+      //   - ↩ <-- press Enter
+      //
+      // After
+      // - line1
+      // - | <-- will unindent the block
+      handleUnindent(page, model, selection.index);
     } else if (isEnd) {
       const isSoftEnterBlock = shouldSoftEnterFirstBlocks.find(
         ({ flavour, type }) => {
@@ -139,7 +147,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       } else {
         // delete the \n at the end of block
         if (isSoftEnterBlock) {
-          this.quill.deleteText(index, 1);
+          this.quill.deleteText(selection.index, 1);
         }
         handleBlockEndEnter(page, model);
       }
@@ -152,7 +160,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       if (isSoftEnterBlock) {
         onSoftEnter.bind(this)();
       } else {
-        handleBlockSplit(page, model, index);
+        handleBlockSplit(page, model, selection.index, selection.length);
       }
     }
 
@@ -160,21 +168,22 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   function onSoftEnter(this: KeyboardEventThis) {
-    const index = this.quill.getSelection()?.index || 0;
-    handleSoftEnter(page, model, index);
-    this.quill.setSelection(index + 1, 0);
+    const selection = this.quill.getSelection();
+    assertExists(selection);
+    handleSoftEnter(page, model, selection.index, selection.length);
+    this.quill.setSelection(selection.index + 1, 0);
 
     return PREVENT_DEFAULT;
   }
 
   function onIndent(this: KeyboardEventThis) {
-    const index = this.quill.getSelection()?.index || 0;
+    const index = this.quill.getSelection()?.index;
     handleIndent(page, model, index);
     return PREVENT_DEFAULT;
   }
 
   function onUnindent(this: KeyboardEventThis) {
-    const index = this.quill.getSelection()?.index || 0;
+    const index = this.quill.getSelection()?.index;
     handleUnindent(page, model, index);
     return PREVENT_DEFAULT;
   }
@@ -241,11 +250,31 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   }
 
   const keyboardBindings: KeyboardBindings = {
+    // Note: Since Quill’s default handlers are added at initialization,
+    // the only way to prevent them is to add yours in the configuration.
+    // See https://quilljs.com/docs/modules/keyboard/#configuration
+    // The defaultOptions can found at https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L334-L607
     'code exit': {
       key: 'enter',
       // override default quill behavior
       handler: () => ALLOW_DEFAULT,
     },
+    bold: {
+      key: 'b',
+      shortKey: true,
+      handler: () => ALLOW_DEFAULT,
+    },
+    italic: {
+      key: 'i',
+      shortKey: true,
+      handler: () => ALLOW_DEFAULT,
+    },
+    underline: {
+      key: 'u',
+      shortKey: true,
+      handler: () => ALLOW_DEFAULT,
+    },
+
     enterMarkdownMatch: {
       key: 'enter',
       handler: enterMarkdownMatch,
