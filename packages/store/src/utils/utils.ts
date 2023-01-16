@@ -28,7 +28,7 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:flavour', props.flavour);
   if (props.flavour === 'affine:page') {
     yBlock.set('meta:tags', new Y.Map());
-    yBlock.set('meta:tagsSchema', new Y.Map());
+    yBlock.set('meta:tagSchema', new Y.Map());
   }
 
   const yChildren = new Y.Array();

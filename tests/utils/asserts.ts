@@ -45,7 +45,7 @@ export const defaultStore: SerializedStore = {
   'space:page0': {
     '0': {
       'meta:tags': {},
-      'meta:tagsSchema': {},
+      'meta:tagSchema': {},
       'sys:id': '0',
       'sys:flavour': 'affine:page',
       'sys:children': ['1'],

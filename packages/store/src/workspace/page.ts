@@ -97,10 +97,10 @@ export class Page extends Space<PageData> {
     return this.root.tags as Y.Map<Y.Map<unknown>>;
   }
 
-  get tagsSchema() {
+  get tagSchema() {
     assertExists(this.root);
     assertExists(this.root.flavour === 'affine:page');
-    return this.root.tagsSchema as Y.Map<unknown>;
+    return this.root.tagSchema as Y.Map<unknown>;
   }
 
   get blobs() {
@@ -213,11 +213,11 @@ export class Page extends Space<PageData> {
   }
 
   getTagSchema(id: TagSchema['id']) {
-    return this.tagsSchema.get(id) ?? (null as TagSchema | null);
+    return this.tagSchema.get(id) ?? (null as TagSchema | null);
   }
 
   setTagSchema(schema: TagSchema) {
-    return this.tagsSchema.set(schema.id, schema);
+    return this.tagSchema.set(schema.id, schema);
   }
 
   getBlockById(id: string) {
@@ -669,7 +669,7 @@ export class Page extends Space<PageData> {
     model.text = text;
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
-      model.tagsSchema = yBlock.get('meta:tags') as Y.Map<unknown>;
+      model.tagSchema = yBlock.get('meta:tags') as Y.Map<unknown>;
     }
 
     const yChildren = yBlock.get('sys:children');

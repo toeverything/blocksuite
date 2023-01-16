@@ -100,7 +100,7 @@ describe.concurrent('addBlock', () => {
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
-        'meta:tagsSchema': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -115,7 +115,7 @@ describe.concurrent('addBlock', () => {
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
-        'meta:tagsSchema': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -132,7 +132,7 @@ describe.concurrent('addBlock', () => {
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
-        'meta:tagsSchema': {},
+        'meta:tagSchema': {},
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -255,7 +255,7 @@ describe.concurrent('deleteBlock', () => {
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
-        'meta:tagsSchema': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -276,7 +276,7 @@ describe.concurrent('deleteBlock', () => {
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
-        'meta:tagsSchema': {},
+        'meta:tagSchema': {},
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -296,7 +296,7 @@ describe.concurrent('deleteBlock', () => {
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
-        'meta:tagsSchema': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',

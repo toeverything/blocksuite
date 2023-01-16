@@ -27,7 +27,7 @@ export class BaseBlockModel<Props = unknown>
   children: BaseBlockModel[];
   // TODO use schema
   tags?: Y.Map<Y.Map<unknown>>;
-  tagsSchema?: Y.Map<unknown>;
+  tagSchema?: Y.Map<unknown>;
   text?: TextType;
   sourceId?: string;
 

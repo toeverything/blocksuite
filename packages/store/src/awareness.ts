@@ -50,7 +50,7 @@ interface AwarenessMessage<
   state?: AwarenessState<Flags>;
 }
 
-export interface AwarenessMetadataMessage<
+export interface AwarenessMetaMessage<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
   Key extends keyof Flags = keyof Flags
 > {

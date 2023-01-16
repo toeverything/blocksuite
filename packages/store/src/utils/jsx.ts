@@ -34,7 +34,7 @@ const IGNORE_PROPS = [
   'sys:flavour',
   'sys:children',
   'meta:tags',
-  'meta:tagsSchema',
+  'meta:tagSchema',
 ];
 
 export function yDocToJSXNode(

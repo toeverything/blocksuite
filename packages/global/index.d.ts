@@ -25,7 +25,7 @@ declare type BlockSuiteFlags = {
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
-  interface SchemaMetadata {
+  interface SchemaMeta {
     /**
      * color of the tag
      */
@@ -51,7 +51,7 @@ declare namespace BlockSuiteInternal {
      * column name
      */
     name: string;
-    metadata: SchemaMetadata;
+    meta: SchemaMeta;
     /**
      * this value is just for hold the `BaseValue`,
      *  don't use this value in the runtime.
@@ -60,22 +60,22 @@ declare namespace BlockSuiteInternal {
   }
 
   interface TextTagSchema extends BaseTagSchema<string> {
-    type: 'affine-tag:text';
+    type: 'text';
   }
 
   interface NumberTagSchema extends BaseTagSchema<number> {
-    type: 'affine-tag:number';
+    type: 'number';
     decimal: number;
   }
 
   interface SelectTagSchema<Selection extends string = string>
     extends BaseTagSchema<string> {
-    type: 'affine-tag:select';
+    type: 'select';
     selection: Selection[];
   }
 
   interface RichTextTagSchema extends BaseTagSchema<TextType> {
-    type: 'affine-tag:rich-text';
+    type: 'rich-text';
   }
 
   type TagSchema =
