@@ -29,8 +29,6 @@ interface SingleBlockSelectionState {
   type: 'single';
   // Which block that be selected
   selected: RootBlockModel;
-  // Current viewport
-  viewport: ViewportState;
   // Rect of the selected block
   rect: DOMRect;
   // True if the block is active (like double click)
