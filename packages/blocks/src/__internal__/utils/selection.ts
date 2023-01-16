@@ -492,6 +492,14 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
+    } else if (matchFlavours(lastChild, ['affine:code', 'affine:embed'])) {
+      page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(page, ''),
+        },
+        page.getParent(lastChild)
+      );
     }
   }
 }
