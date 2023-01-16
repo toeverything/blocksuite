@@ -17,6 +17,10 @@ const config: PlaywrightTestConfig = {
   },
   workers: '100%',
   retries: 1,
+  // 'github' for GitHub Actions CI to generate annotations, plus a concise 'dot'
+  // default 'list' when running locally
+  // See https://playwright.dev/docs/test-reporters#github-actions-annotations
+  reporter: process.env.CI ? 'github' : 'list',
 };
 
 if (process.env.CI) {
