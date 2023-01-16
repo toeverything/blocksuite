@@ -10,16 +10,14 @@ import './link-node';
 import { MockSelectNode } from './mock-select-node.js';
 import { assertExists } from '@blocksuite/global/utils';
 
-export const createLink = async (page: Page) => {
-  if (!isRangeSelection()) {
-    // TODO maybe allow user creating a link with text
-    return;
-  }
+export async function createLink(page: Page) {
+  // TODO may allow user creating a link with text
+  if (!isRangeSelection()) return;
+
   const startModel = getStartModelBySelection();
   const richText = getRichTextByModel(startModel);
-  if (!richText) {
-    return;
-  }
+  if (!richText) return;
+
   const { quill } = richText;
   const range = quill.getSelection();
   // TODO fix selection with multiple lines
@@ -58,11 +56,10 @@ export const createLink = async (page: Page) => {
   const linkState = await showLinkPopover({ anchorEl: mockSelectDom });
 
   quill.formatText(range, { 'mock-select': false });
-  if (linkState.type !== 'confirm') {
-    return;
-  }
+  if (linkState.type !== 'confirm') return;
+
   const link = linkState.link;
 
   page.captureSync();
   startModel.text?.format(range.index, range.length, { link });
-};
+}
