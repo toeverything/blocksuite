@@ -83,11 +83,7 @@ export class ListBlockComponent extends NonShadowLitElement {
     }
   `;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   model!: ListBlockModel;
 
   @property()
