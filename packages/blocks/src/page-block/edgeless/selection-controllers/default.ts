@@ -34,7 +34,6 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
       this._blockSelectionState = {
         type: 'single',
         selected: this._hoverState.block,
-        viewport: this._container.viewport,
         rect: this._hoverState.rect,
         active: false,
       };
@@ -60,7 +59,6 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
         this._blockSelectionState = {
           type: 'single',
           active: false,
-          viewport: this._container.viewport,
           selected,
           rect: getSelectionBoxBound(viewport, selected.xywh),
         };
@@ -75,7 +73,6 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
         } else {
           this._blockSelectionState = {
             type: 'single',
-            viewport: this._container.viewport,
             active: false,
             selected,
             rect: getSelectionBoxBound(viewport, selected.xywh),
