@@ -10,54 +10,40 @@ export class ClipboardEventDispatcher {
   };
 
   constructor(clipboardTarget: HTMLElement) {
-    this._copyHandler = this._copyHandler.bind(this);
-    this._cutHandler = this._cutHandler.bind(this);
-    this._pasteHandler = this._pasteHandler.bind(this);
     this.initClipboardTargetEvent(clipboardTarget);
   }
 
   initClipboardTargetEvent(clipboardTarget: HTMLElement) {
-    if (!clipboardTarget) {
-      return;
-    }
+    if (!clipboardTarget) return;
 
     this.disposeClipboardTargetEvent(clipboardTarget);
 
-    clipboardTarget.addEventListener(ClipboardAction.copy, this._copyHandler);
-    clipboardTarget.addEventListener(ClipboardAction.cut, this._cutHandler);
-    clipboardTarget.addEventListener(ClipboardAction.paste, this._pasteHandler);
-    document.addEventListener(ClipboardAction.copy, this._copyHandler);
-    document.addEventListener(ClipboardAction.cut, this._cutHandler);
-    document.addEventListener(ClipboardAction.paste, this._pasteHandler);
+    clipboardTarget.addEventListener(ClipboardAction.copy, this._onCopy);
+    clipboardTarget.addEventListener(ClipboardAction.cut, this._onCut);
+    clipboardTarget.addEventListener(ClipboardAction.paste, this._onPaste);
+    document.addEventListener(ClipboardAction.copy, this._onCopy);
+    document.addEventListener(ClipboardAction.cut, this._onCut);
+    document.addEventListener(ClipboardAction.paste, this._onPaste);
   }
 
   disposeClipboardTargetEvent(clipboardTarget: HTMLElement) {
-    if (!clipboardTarget) {
-      return;
-    }
+    if (!clipboardTarget) return;
 
-    clipboardTarget.removeEventListener(
-      ClipboardAction.copy,
-      this._copyHandler
-    );
-    clipboardTarget.removeEventListener(ClipboardAction.cut, this._cutHandler);
-    clipboardTarget.removeEventListener(
-      ClipboardAction.paste,
-      this._pasteHandler
-    );
-    document.removeEventListener(ClipboardAction.copy, this._copyHandler);
-    document.removeEventListener(ClipboardAction.cut, this._cutHandler);
-    document.removeEventListener(ClipboardAction.paste, this._pasteHandler);
+    clipboardTarget.removeEventListener(ClipboardAction.copy, this._onCopy);
+    clipboardTarget.removeEventListener(ClipboardAction.cut, this._onCut);
+    clipboardTarget.removeEventListener(ClipboardAction.paste, this._onPaste);
+    document.removeEventListener(ClipboardAction.copy, this._onCopy);
+    document.removeEventListener(ClipboardAction.cut, this._onCut);
+    document.removeEventListener(ClipboardAction.paste, this._onPaste);
   }
 
   static editorElementActive(): boolean {
     return document.activeElement?.closest('editor-container') != null;
   }
 
-  private _isValidEvent(e: ClipboardEvent) {
-    if (isInsideRichText(e.target)) {
-      return true;
-    }
+  private _isValidClipboardEvent(e: ClipboardEvent) {
+    if (isInsideRichText(e.target)) return true;
+
     // Ad-hoc for copy from format quick bar copy button
     if (
       e.target instanceof Element &&
@@ -73,29 +59,27 @@ export class ClipboardEventDispatcher {
     return false;
   }
 
-  private _copyHandler(e: ClipboardEvent) {
-    if (!this._isValidEvent(e)) {
-      return;
-    }
-    this.signals.copy.emit(e);
-  }
+  private _onCopy = (e: ClipboardEvent) => {
+    if (!this._isValidClipboardEvent(e)) return;
 
-  private _cutHandler(e: ClipboardEvent) {
-    if (!this._isValidEvent(e)) {
-      return;
-    }
+    this.signals.copy.emit(e);
+  };
+
+  private _onCut = (e: ClipboardEvent) => {
+    if (!this._isValidClipboardEvent(e)) return;
+
     if (ClipboardEventDispatcher.editorElementActive()) {
       this.signals.cut.emit(e);
     }
-  }
-  private _pasteHandler(e: ClipboardEvent) {
-    if (!this._isValidEvent(e)) {
-      return;
-    }
+  };
+
+  private _onPaste = (e: ClipboardEvent) => {
+    if (!this._isValidClipboardEvent(e)) return;
+
     if (ClipboardEventDispatcher.editorElementActive()) {
       this.signals.paste.emit(e);
     }
-  }
+  };
 
   dispose(clipboardTarget: HTMLElement) {
     this.signals.copy.dispose();

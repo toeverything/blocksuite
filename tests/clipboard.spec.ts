@@ -62,7 +62,7 @@ test('clipboard paste html', async ({ page }) => {
       e.clipboardData?.setData('text/html', clipData['text/html']);
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](e);
+        .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
     },
     { clipData }
   );

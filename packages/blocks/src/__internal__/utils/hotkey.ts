@@ -13,13 +13,14 @@ hotkeys.filter = (event: KeyboardEvent) => {
   return true;
 };
 
-const isUndoRedo = (event: KeyboardEvent) => {
+function isUndoRedo(event: KeyboardEvent) {
   // If undo or redo: when event.shiftKey is false => undo, when event.shiftKey is true => redo
   if (event.metaKey && !event.altKey && event.key === 'z') {
     return true;
   }
   return false;
-};
+}
+
 function shouldFilter(event: KeyboardEvent) {
   const target = event.target;
   // Not sure if this is the right thing to do

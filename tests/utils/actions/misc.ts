@@ -272,7 +272,7 @@ export async function pasteContent(
       };
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
+        .clipboard['_clipboardEventDispatcher']['_onPaste'](
           e as unknown as ClipboardEvent
         );
     },
