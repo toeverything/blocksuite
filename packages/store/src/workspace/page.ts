@@ -265,28 +265,10 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ) {
-    return this.addBlock(
-      {
-        flavour,
-        ...blockProps,
-      },
-      parent,
-      parentIndex
-    );
-  }
-
-  /**
-   * @deprecated use `addBlockByFlavour`
-   */
-  addBlock<T extends BlockProps>(
-    blockProps: Partial<T>,
-    parent?: BaseBlockModel | string | null,
-    parentIndex?: number
-  ): string {
     if (this.awareness.isReadonly()) {
       throw new Error('cannot modify data in readonly mode');
     }
-    if (!blockProps.flavour) {
+    if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
 
@@ -296,7 +278,7 @@ export class Page extends Space<PageData> {
     //   }
     // }
 
-    const clonedProps: Partial<BlockProps> = { ...blockProps };
+    const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
     clonedProps.id = id;
 
@@ -324,6 +306,22 @@ export class Page extends Space<PageData> {
       this._yBlocks.set(id, yBlock);
     });
     return id;
+  }
+
+  /**
+   * @deprecated use `addBlockByFlavour`
+   */
+  addBlock<T extends BlockProps>(
+    blockProps: Partial<T>,
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ): string {
+    return this.addBlockByFlavour(
+      blockProps.flavour as Parameters<typeof this.addBlockByFlavour>[0],
+      blockProps as Parameters<typeof this.addBlockByFlavour>[1],
+      parent,
+      parentIndex
+    );
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
