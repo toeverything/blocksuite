@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:hmr": "WC_HMR=1 vite",
     "build": "tsc --project ./tsconfig.json && vite build",
     "preview": "vite preview"
   },
@@ -18,5 +19,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "license": "MPL-2.0"
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "@types/micromatch": "^4.0.2"
+  }
 }
