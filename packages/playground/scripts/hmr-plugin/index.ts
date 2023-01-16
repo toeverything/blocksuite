@@ -1,7 +1,10 @@
 import path from 'node:path';
-import { hmrPlugin, presets } from 'vite-plugin-web-components-hmr';
+import {
+  hmrPlugin as wcHmrPlugin,
+  presets,
+} from 'vite-plugin-web-components-hmr';
 
-import { fineTuneHmr } from './fineTune';
+import { fineTuneHmr } from './fine-tune';
 
 const customLitPath = path.resolve(
   __dirname,
@@ -12,9 +15,9 @@ const include = ['../blocks/src/**/*'];
 const exclude = ['**/*/node_modules/**/*'];
 
 // https://vitejs.dev/config/
-export const hmrPlugins = process.env.WC_HMR
+export const hmrPlugin = process.env.WC_HMR
   ? [
-      hmrPlugin({
+      wcHmrPlugin({
         include,
         exclude,
         presets: [presets.lit],
