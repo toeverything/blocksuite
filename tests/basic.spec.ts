@@ -15,6 +15,8 @@ import {
   dragBetweenIndices,
   switchReadonly,
   SHORT_KEY,
+  captureHistory,
+  focusTitle,
 } from './utils/actions/index.js';
 import {
   defaultStore,
@@ -241,6 +243,41 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['hello', 'world']);
+});
+
+test('should undo/redo work on title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+  await page.keyboard.type('title');
+  await focusRichText(page);
+  await page.keyboard.type('hello world');
+  await captureHistory(page);
+  let i = 5;
+  while (i--) {
+    await page.keyboard.press('Backspace');
+  }
+
+  await focusTitle(page);
+  await captureHistory(page);
+  await page.keyboard.type(' something');
+  await undoByKeyboard(page);
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello ']);
+
+  await undoByKeyboard(page);
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello world']);
+
+  await focusTitle(page);
+  await redoByKeyboard(page);
+  await assertTitle(page, 'title');
+  await assertRichTexts(page, ['hello ']);
+
+  await focusTitle(page);
+  await redoByKeyboard(page);
+  await assertTitle(page, 'title something');
+  await assertRichTexts(page, ['hello ']);
 });
 
 test.skip('undo multi frames', async ({ page }) => {

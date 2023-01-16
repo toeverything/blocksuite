@@ -15,7 +15,7 @@ import {
   selectAllByKeyboard,
   undoByKeyboard,
 } from './utils/actions/index.js';
-import { assertRichTexts } from './utils/asserts.js';
+import { assertKeyboardWorkInInput, assertRichTexts } from './utils/asserts.js';
 
 test('use debug menu can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -103,6 +103,7 @@ test('change code language can work', async ({ page }) => {
   await page.click(codeLangSelector);
   const locator = page.locator('.lang-list-button-container');
   await expect(locator).toBeVisible();
+  await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
 
   await page.keyboard.type('rust');
   await page.click(

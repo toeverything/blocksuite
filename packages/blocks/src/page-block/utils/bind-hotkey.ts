@@ -1,6 +1,6 @@
 import { formatConfig, paragraphConfig } from './const.js';
 import type { Page } from '@blocksuite/store';
-import { hotkey, HOTKEYS, isPageTitle } from '../../__internal__/index.js';
+import { hotkey, HOTKEYS } from '../../__internal__/index.js';
 import { updateSelectedTextType } from './container-operations.js';
 
 const { UNDO, REDO } = HOTKEYS;
@@ -8,12 +8,8 @@ const { UNDO, REDO } = HOTKEYS;
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
     hotkey.addListener(hotkeyStr, e => {
-      // workaround page title
+      // Prevent quill default behavior
       e.preventDefault();
-      // TODO also disable hotkey when focus on other input
-      if (isPageTitle(e)) {
-        return;
-      }
       if (page.awareness.isReadonly()) {
         return;
       }
@@ -32,15 +28,9 @@ export function bindCommonHotkey(page: Page) {
   });
 
   hotkey.addListener(UNDO, e => {
-    if (isPageTitle(e)) {
-      e.preventDefault();
-    }
     page.undo();
   });
   hotkey.addListener(REDO, e => {
-    if (isPageTitle(e)) {
-      e.preventDefault();
-    }
     page.redo();
   });
   // !!!

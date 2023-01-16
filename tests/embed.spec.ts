@@ -12,6 +12,7 @@ import {
 import {
   assertImageOption,
   assertImageSize,
+  assertKeyboardWorkInInput,
   assertRichDragButton,
   assertRichImage,
   assertRichTexts,
@@ -119,6 +120,10 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await assertImageOption(page);
 
   await focusCaption(page);
+  await assertKeyboardWorkInInput(
+    page,
+    page.locator('.affine-embed-wrapper-caption')
+  );
   await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.type('aa');
   await assertRichTexts(page, ['aa']);

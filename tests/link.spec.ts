@@ -9,7 +9,10 @@ import {
   SHORT_KEY,
   switchReadonly,
 } from './utils/actions/index.js';
-import { assertStoreMatchJSX } from './utils/asserts.js';
+import {
+  assertKeyboardWorkInInput,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 
 const pressCreateLinkShortCut = async (page: Page) => {
   await page.keyboard.press(`${SHORT_KEY}+k`);
@@ -196,7 +199,9 @@ test('readonly mode should not trigger link popup', async ({ page }) => {
   await linkLocator.hover();
   await expect(linkPopoverLocator).not.toBeVisible();
 
+  // ---
   // press hotkey should not trigger create link popup
+
   await dragBetweenIndices(page, [0, 0], [0, 3]);
   await pressCreateLinkShortCut(page);
 
@@ -205,7 +210,7 @@ test('readonly mode should not trigger link popup', async ({ page }) => {
   await expect(linkPopoverInput).not.toBeVisible();
 });
 
-test('should mock selection works', async ({ page }) => {
+test('should mock selection not stored', async ({ page }) => {
   const linkText = 'linkText';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
@@ -238,4 +243,36 @@ test('should mock selection works', async ({ page }) => {
   // the mock select node should be removed after link created
   await expect(mockSelectNode).not.toBeVisible();
   await expect(mockSelectNode).toHaveCount(0);
+});
+
+test('should keyboard work in link popover', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const linkText = 'linkText';
+  await createLinkBlock(page, linkText, 'http://example.com');
+
+  await dragBetweenIndices(page, [0, 0], [0, 8]);
+  await pressCreateLinkShortCut(page);
+  const linkPopoverInput = page.locator('.affine-link-popover-input');
+  await assertKeyboardWorkInInput(page, linkPopoverInput);
+  await page.mouse.click(1, 100);
+
+  // ---
+
+  const linkLocator = page.locator(`text="${linkText}"`);
+  const linkPopover = page.locator('.affine-link-popover');
+  // Hover link
+  await linkLocator.hover();
+  // wait for popover delay open
+  await page.waitForTimeout(200);
+  await expect(linkPopover).toBeVisible();
+  const editLinkBtn = linkPopover.locator(`[data-testid=edit]`);
+  await editLinkBtn.click();
+
+  const editLinkPopover = page.locator('.affine-link-edit-popover');
+  await expect(editLinkPopover).toBeVisible();
+
+  const editTextInput = editLinkPopover.locator('.affine-edit-text-input');
+  await assertKeyboardWorkInInput(page, editTextInput);
+  const editLinkInput = editLinkPopover.locator('.affine-edit-link-input');
+  await assertKeyboardWorkInInput(page, editLinkInput);
 });
