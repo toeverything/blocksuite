@@ -25,27 +25,24 @@ function isSetDeleteFunction<T>(value: unknown): value is Set<T>['delete'] {
 @staticImplements<BlobProviderStatic>()
 export class IndexedDBBlobProvider implements BlobProvider {
   private readonly _database: IDBInstance;
-  private readonly _cloud?: BlobCloudSync;
+  private readonly _cloud?: CloudSyncManager;
   private _uploading = false;
 
   readonly blobs: Set<string> = new Set();
   readonly signals = {
     blobAdded: new Signal<BlobId>(),
     blobDeleted: new Signal<BlobId>(),
-    uploadState: new Signal<boolean>(),
-    finishedId: new Signal<BlobId>(),
+    uploadStateChanged: new Signal<boolean>(),
+    uploadFinished: new Signal<BlobId>(),
   };
 
-  onUploadStateChange(
-    callback: (uploading: boolean) => void,
-    immediately = true
-  ) {
-    if (immediately) callback(this._uploading);
-    this.signals.uploadState.on(callback);
+  onUploadStateChange(callback: (uploading: boolean) => void, sync = true) {
+    if (sync) callback(this._uploading);
+    this.signals.uploadStateChanged.on(callback);
   }
 
   onUploadFinished(callback: (id: BlobId) => void) {
-    this.signals.finishedId.on(callback);
+    this.signals.uploadFinished.on(callback);
   }
 
   static async init(
@@ -69,15 +66,15 @@ export class IndexedDBBlobProvider implements BlobProvider {
   private constructor(workspace: string, cloudApi?: string) {
     this._database = getDatabase('blob', workspace);
     if (cloudApi) {
-      this.signals.uploadState.on(uploading => {
+      this.signals.uploadStateChanged.on(uploading => {
         this._uploading = uploading;
       });
-      this._cloud = new BlobCloudSync(
+      this._cloud = new CloudSyncManager(
         workspace,
         cloudApi,
         this._database,
-        this.signals.uploadState,
-        this.signals.finishedId
+        this.signals.uploadStateChanged,
+        this.signals.uploadFinished
       );
     }
   }
@@ -138,7 +135,8 @@ type SyncTask = {
 type BlobStatus = {
   exists: boolean;
 };
-export class BlobCloudSync {
+
+export class CloudSyncManager {
   private readonly _abortController = new AbortController();
   private readonly _fetcher: typeof ky;
   private readonly _database: IDBInstance;
@@ -149,7 +147,7 @@ export class BlobCloudSync {
   private readonly _pendingPipeline: SyncTask[] = [];
   private readonly _workspace: string;
   // private readonly _uploading: IDBInstance<boolean>;
-  private readonly _finishedId: Signal<string>;
+  private readonly _onUploadFinished: Signal<string>;
 
   private _pipeline: SyncTask[] = [];
   private initialized = false;
@@ -159,10 +157,10 @@ export class BlobCloudSync {
     workspace: string,
     prefixUrl: string,
     db: IDBInstance,
-    uploadSingle: Signal<boolean>,
-    finishedId: Signal<BlobId>
+    onUploadStateChanged: Signal<boolean>,
+    onUploadFinished: Signal<BlobId>
   ) {
-    this._finishedId = finishedId;
+    this._onUploadFinished = onUploadFinished;
     this._fetcher = ky.create({
       prefixUrl,
       signal: this._abortController.signal,
@@ -177,14 +175,14 @@ export class BlobCloudSync {
           if (prop === 'add' && isSetAddFunction<string>(val)) {
             resultFunction = (...args: Parameters<typeof val>) => {
               const result = val.apply(target, args);
-              uploadSingle.emit(!!target.size);
+              onUploadStateChanged.emit(!!target.size);
               return result;
             };
           }
           if (prop === 'delete' && isSetDeleteFunction<string>(val)) {
             resultFunction = (...args: Parameters<typeof val>) => {
               const result = val.apply(target, args);
-              uploadSingle.emit(!!target.size);
+              onUploadStateChanged.emit(!!target.size);
               return result;
             };
           }
@@ -232,7 +230,7 @@ export class BlobCloudSync {
     this._uploadingIds.delete(task.id);
     if (status?.exists) {
       await this._pending.delete(task.id);
-      this._finishedId.emit(task.id);
+      this._onUploadFinished.emit(task.id);
     } else {
       await this._pending.set(task.id, {
         type: task.type,
@@ -272,7 +270,7 @@ export class BlobCloudSync {
       await sleep(RETRY_TIMEOUT);
     }
 
-    console.error('BlobCloudSync taskRunner exited');
+    console.error('CloudSyncManager taskRunner exited');
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
