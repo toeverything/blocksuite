@@ -44,7 +44,7 @@ export function assertEquals<T extends Allowed, U extends T>(
   const a = isPrimitive(val);
   const b = isPrimitive(expected);
   if (a && b) {
-    if (!Object.is(a, b)) {
+    if (!Object.is(val, expected)) {
       throw new Error('val is not same as expected');
     }
   } else if (a !== b) {
