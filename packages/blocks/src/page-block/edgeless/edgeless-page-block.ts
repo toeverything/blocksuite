@@ -267,7 +267,7 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const { _selection } = this;
+    const { _selection, viewport } = this;
     const { frameSelectionRect } = _selection;
     const selectionState = this._selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = this.viewport;
@@ -311,6 +311,7 @@ export class EdgelessPageBlockComponent
         ${selectionState.type !== 'none'
           ? html`
               <edgeless-selected-rect
+                .viewport=${viewport}
                 .state=${selectionState}
                 .rect=${selectionState.rect}
                 .zoom=${zoom}

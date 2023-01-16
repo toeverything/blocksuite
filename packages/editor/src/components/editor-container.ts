@@ -135,7 +135,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.pageBlockModel}
+        .model=${this.pageBlockModel as PageBlockModel}
         .readonly=${this.readonly}
       ></affine-default-page>
     `;
