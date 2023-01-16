@@ -25,6 +25,75 @@ declare type BlockSuiteFlags = {
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
+  interface SchemaMetadata {
+    /**
+     * color of the tag
+     */
+    color: `#${string}`;
+    /**
+     * width of a column
+     */
+    width: number; // px
+    /**
+     * whether this display in the table
+     */
+    hide: boolean;
+  }
+
+  // Threat this type as a column type
+  interface BaseTagSchema<BaseValue = unknown> {
+    /**
+     * each instance of tag type has its own unique uuid
+     */
+    id: string;
+    type: string;
+    /**
+     * column name
+     */
+    name: string;
+    metadata: SchemaMetadata;
+    /**
+     * this value is just for hold the `BaseValue`,
+     *  don't use this value in the runtime.
+     */
+    __$TYPE_HOLDER$__?: BaseValue;
+  }
+
+  interface TextTagSchema extends BaseTagSchema<string> {
+    type: 'affine-tag:text';
+  }
+
+  interface NumberTagSchema extends BaseTagSchema<number> {
+    type: 'affine-tag:number';
+    decimal: number;
+  }
+
+  interface SelectTagSchema<Selection extends string = string>
+    extends BaseTagSchema<string> {
+    type: 'affine-tag:select';
+    selection: Selection[];
+  }
+
+  interface RichTextTagSchema extends BaseTagSchema<TextType> {
+    type: 'affine-tag:rich-text';
+  }
+
+  type TagSchema =
+    | SelectTagSchema
+    | NumberTagSchema
+    | TextTagSchema
+    | RichTextTagSchema;
+
+  // threat this type as row type
+  interface BlockTag<Schema extends TagSchema = TagSchema> {
+    type: Schema['id'];
+    value: Schema extends BaseTagSchema<infer U>
+      ? U
+      : Type extends BlockColumnType
+      ? undefined
+      : never;
+  }
+
   interface IBaseBlockProps {
     flavour: string;
     type: string;
