@@ -75,8 +75,12 @@ export const withPressKey = async (
   await page.keyboard.up(key);
 };
 
-export async function backsapce(page: Page) {
+export async function pressBackspace(page: Page) {
   await page.keyboard.press('Backspace', { delay: 50 });
+}
+
+export async function pressSpace(page: Page) {
+  await page.keyboard.press('Space', { delay: 50 });
 }
 
 export async function pressEnter(page: Page) {
