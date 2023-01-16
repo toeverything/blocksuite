@@ -43,7 +43,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   private _updateHoverState(hoverBlock: RootBlockModel | null) {
     if (hoverBlock) {
       this._hoverState = {
-        rect: getSelectionBoxBound(this._container.viewport, hoverBlock.xywh),
+        rect: getSelectionBoxBound(this._edgeless.viewport, hoverBlock.xywh),
         block: hoverBlock,
       };
     } else {
@@ -52,7 +52,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   }
 
   private _handleClickOnSelected(selected: RootBlockModel, e: SelectionEvent) {
-    const { viewport } = this._container;
+    const { viewport } = this._edgeless;
 
     switch (this.blockSelectionState.type) {
       case 'none':
@@ -62,14 +62,12 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
           selected,
           rect: getSelectionBoxBound(viewport, selected.xywh),
         };
-        this._container.signals.updateSelection.emit(this.blockSelectionState);
+        this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
         break;
       case 'single':
         if (this.blockSelectionState.selected === selected) {
           this.blockSelectionState.active = true;
-          this._container.signals.updateSelection.emit(
-            this.blockSelectionState
-          );
+          this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
         } else {
           this._blockSelectionState = {
             type: 'single',
@@ -77,9 +75,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
             selected,
             rect: getSelectionBoxBound(viewport, selected.xywh),
           };
-          this._container.signals.updateSelection.emit(
-            this.blockSelectionState
-          );
+          this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
         }
         handleNativeRangeClick(this._page, e);
         break;
@@ -87,15 +83,15 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   }
 
   onContainerClick(e: SelectionEvent): void {
-    const { viewport } = this._container;
+    const { viewport } = this._edgeless;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY, this._container, e);
+    const selected = pick(this._blocks, modelX, modelY, this._edgeless, e);
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
     } else {
       this._blockSelectionState = { type: 'none' };
-      this._container.signals.updateSelection.emit(this.blockSelectionState);
+      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
   }
@@ -109,9 +105,9 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   }
 
   onContainerDragStart(e: SelectionEvent): void {
-    const { viewport } = this._container;
+    const { viewport } = this._edgeless;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY, this._container, e);
+    const selected = pick(this._blocks, modelX, modelY, this._edgeless, e);
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
@@ -122,7 +118,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
         end: new DOMPoint(e.x, e.y),
       };
 
-      this._container.signals.updateSelection.emit(this.blockSelectionState);
+      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
     this._startRange = caretRangeFromPoint(e.x, e.y);
@@ -146,7 +142,7 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
           const [modelX, modelY, modelW, modelH] = JSON.parse(
             block.xywh
           ) as XYWH;
-          const { zoom } = this._container.viewport;
+          const { zoom } = this._edgeless.viewport;
           const xywh = JSON.stringify([
             modelX + e.delta.x / zoom,
             modelY + e.delta.y / zoom,
@@ -155,12 +151,10 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
           ]);
           this._page.updateBlock(block, { xywh });
           this.blockSelectionState.rect = getSelectionBoxBound(
-            this._container.viewport,
+            this._edgeless.viewport,
             xywh
           );
-          this._container.signals.updateSelection.emit(
-            this.blockSelectionState
-          );
+          this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
         }
         break;
     }
@@ -187,12 +181,12 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   }
 
   onContainerMouseMove(e: SelectionEvent): void {
-    const { viewport } = this._container;
+    const { viewport } = this._edgeless;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const hovered = pick(this._blocks, modelX, modelY, this._container, e);
+    const hovered = pick(this._blocks, modelX, modelY, this._edgeless, e);
 
     this._updateHoverState(hovered);
-    this._container.signals.hoverUpdated.emit();
+    this._edgeless.signals.hoverUpdated.emit();
   }
 
   onContainerMouseOut(e: SelectionEvent): void {
@@ -202,11 +196,11 @@ export class DefaultSelectionController extends SelectionController<DefaultMouse
   syncBlockSelectionRect() {
     if (this.blockSelectionState.type === 'single') {
       const rect = getSelectionBoxBound(
-        this._container.viewport,
+        this._edgeless.viewport,
         this.blockSelectionState.selected.xywh
       );
       this.blockSelectionState.rect = rect;
-      this._container.signals.updateSelection.emit(this.blockSelectionState);
+      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
     }
 
     this._updateHoverState(this._hoverState?.block || null);

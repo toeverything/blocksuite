@@ -35,7 +35,7 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import { RectElement, SurfaceContainer } from '@blocksuite/phasor';
+import { SurfaceContainer } from '@blocksuite/phasor';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -107,9 +107,6 @@ export class EdgelessPageBlockComponent
 
   @query('.affine-surface-canvas')
   private _canvas!: HTMLCanvasElement;
-  private _surface!: SurfaceContainer;
-
-  viewport = new ViewportState();
 
   signals = {
     viewportUpdated: new Signal(),
@@ -117,6 +114,10 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Signal(),
     shapeUpdated: new Signal(),
   };
+
+  surface!: SurfaceContainer;
+
+  viewport = new ViewportState();
 
   getService = getService;
 
@@ -169,7 +170,7 @@ export class EdgelessPageBlockComponent
   }
 
   private _syncSurfaceViewport() {
-    this._surface.renderer.setCenterZoom(
+    this.surface.renderer.setCenterZoom(
       this.viewport.centerX,
       this.viewport.centerY,
       this.viewport.zoom
@@ -181,23 +182,8 @@ export class EdgelessPageBlockComponent
   private _initSurface() {
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
-    this._surface = new SurfaceContainer(this._canvas, yContainer);
+    this.surface = new SurfaceContainer(this._canvas, yContainer);
     this._syncSurfaceViewport();
-
-    if (page.awareness.getFlag('enable_surface')) {
-      const params = new URLSearchParams(location.search);
-      if (params.get('init') !== null) {
-        const element1 = new RectElement('1');
-        element1.setBound(50, 50, 100, 100);
-        element1.color = 'black';
-        this._surface.addElement(element1);
-
-        const element0 = new RectElement('0');
-        element0.setBound(0, 0, 100, 100);
-        element0.color = 'red';
-        this._surface.addElement(element0);
-      }
-    }
   }
 
   update(changedProperties: Map<string, unknown>) {
