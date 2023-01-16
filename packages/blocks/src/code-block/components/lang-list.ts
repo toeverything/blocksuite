@@ -41,9 +41,11 @@ export class LangList extends NonShadowLitElement {
         /*scrollbar-color: #fff0 #fff0;*/
       }
 
+      /*
       .lang-list-button-container::-webkit-scrollbar {
-        /*background: none;*/
+        background: none;
       }
+      */
 
       .lang-item {
         display: flex;
@@ -103,7 +105,7 @@ export class LangList extends NonShadowLitElement {
   @property()
   id!: string;
 
-  @property({ type: String })
+  @property()
   selectedLanguage = '';
 
   @property()

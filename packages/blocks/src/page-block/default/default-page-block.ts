@@ -164,11 +164,7 @@ export class DefaultPageBlockComponent
 
   public isCompositionStart = false;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')

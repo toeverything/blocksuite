@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { html, css } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
   FrameBlockModel,
@@ -86,6 +86,8 @@ export class EdgelessPageBlockComponent
     }
   `;
 
+  flavour = 'edgeless' as const;
+
   @property()
   showGrid = false;
 
@@ -95,35 +97,22 @@ export class EdgelessPageBlockComponent
   @property()
   readonly = false;
 
-  flavour = 'edgeless' as const;
-
   @property()
   mouseRoot!: HTMLElement;
 
   @property()
   mouseMode!: MouseMode;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   pageModel!: PageBlockModel;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   surfaceModel!: SurfaceBlockModel;
 
   @query('.affine-surface-canvas')
   private _canvas!: HTMLCanvasElement;
   private _surface!: SurfaceContainer;
 
-  getService = getService;
-
-  @state()
   viewport = new ViewportState();
 
   signals = {
@@ -132,6 +121,8 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Signal(),
     shapeUpdated: new Signal(),
   };
+
+  getService = getService;
 
   private _historyDisposable!: Disposable;
   private _selection!: EdgelessSelectionManager;

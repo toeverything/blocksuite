@@ -85,11 +85,7 @@ export class RichText extends NonShadowLitElement {
 
   quill!: QuillType;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   host!: BlockHost;
 
   @property()
@@ -98,9 +94,7 @@ export class RichText extends NonShadowLitElement {
   @property()
   placeholder?: string;
 
-  @property({
-    hasChanged: () => true,
-  })
+  @property({ hasChanged: () => true })
   modules: Record<string, unknown> = {};
 
   firstUpdated() {

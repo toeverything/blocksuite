@@ -65,7 +65,7 @@ export class IconButton extends LitElement {
   @property()
   text: string | null = null;
 
-  @property({ type: Boolean })
+  @property()
   disabled = false;
 
   constructor() {
