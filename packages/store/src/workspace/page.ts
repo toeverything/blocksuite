@@ -217,8 +217,8 @@ export class Page extends Space<PageData> {
     return (tags?.get(schema.id) as BlockTag) ?? null;
   }
 
-  getTagSchema(id: TagSchema['id']) {
-    return this.tagSchema.get(id) ?? (null as TagSchema | null);
+  getTagSchema(id: TagSchema['id']): TagSchema | null {
+    return (this.tagSchema.get(id) ?? null) as TagSchema | null;
   }
 
   setTagSchema(schema: TagSchema) {

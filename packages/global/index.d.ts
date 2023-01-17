@@ -64,6 +64,7 @@ declare type PropsWithId<Props> = Props & { id: string };
 
 declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
+  enable_database: boolean;
   enable_drag_handle: boolean;
   enable_surface: boolean;
   enable_block_hub: boolean;
@@ -164,6 +165,7 @@ declare namespace BlockSuiteInternal {
     PageBlockModel,
     ParagraphBlockModel,
     SurfaceBlockModel,
+    DatabaseBlockModel,
   } from '@blocksuite/blocks';
 
   export type BlockModels = {
@@ -176,6 +178,7 @@ declare namespace BlockSuiteInternal {
     'affine:embed': EmbedBlockModel;
     // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
+    'affine:database': DatabaseBlockModel;
   };
 }
 
@@ -233,10 +236,16 @@ declare namespace BlockSuiteModelProps {
     xywh: string;
   }
 
+  interface DatabaseBlockModel {
+    columns: BlockSuiteInternal.ColumnTypes[];
+    title: string;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface SurfaceBlockModel {}
 
   export type ALL = {
+    'affine:database': DatabaseBlockModel;
     'affine:paragraph': ParagraphBlockModel;
     'affine:page': PageBlockModel;
     'affine:list': ListBlockModel;

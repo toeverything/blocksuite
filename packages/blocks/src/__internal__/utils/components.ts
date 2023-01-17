@@ -59,7 +59,7 @@ function EmbedBlock(model: EmbedBlockModel, host: BlockHost) {
   }
 }
 
-function BlockElementWithService(
+export function BlockElementWithService(
   model: BaseBlockModel,
   host: BlockHost,
   onLoaded: () => void
