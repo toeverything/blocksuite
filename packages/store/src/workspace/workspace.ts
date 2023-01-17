@@ -32,8 +32,12 @@ class WorkspaceMeta<
   pagesUpdated = new Signal();
   commonFieldsUpdated = new Signal();
 
-  constructor(id: string, doc: BlockSuiteDoc) {
-    super(id, doc, {
+  constructor(
+    id: string,
+    doc: BlockSuiteDoc,
+    awarenessAdapter: AwarenessAdapter
+  ) {
+    super(id, doc, awarenessAdapter, {
       valueInitializer: {
         pages: () => new Y.Array(),
         versions: () => new Y.Map(),
@@ -238,7 +242,11 @@ export class Workspace {
     }
     this.room = options.room;
 
-    this.meta = new WorkspaceMeta('space:meta', this.doc);
+    this.meta = new WorkspaceMeta(
+      'space:meta',
+      this.doc,
+      this.awarenessAdapter
+    );
 
     this.signals = {
       pagesUpdated: this.meta.pagesUpdated,
@@ -292,7 +300,13 @@ export class Workspace {
 
   private _handlePageEvent() {
     this.signals.pageAdded.on(pageId => {
-      const page = new Page(this, pageId, this.doc, this._store.idGenerator);
+      const page = new Page(
+        this,
+        pageId,
+        this.doc,
+        this.awarenessAdapter,
+        this._store.idGenerator
+      );
       this._store.addSpace(page);
       page.syncFromExistingDoc();
       this._indexer.onCreatePage(pageId);

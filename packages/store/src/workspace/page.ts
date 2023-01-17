@@ -25,6 +25,7 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
 import BlockTag = BlockSuiteInternal.BlockTag;
 import TagSchema = BlockSuiteInternal.TagSchema;
+import type { AwarenessAdapter } from '../awareness.js';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -79,19 +80,16 @@ export class Page extends Space<PageData> {
     workspace: Workspace,
     id: string,
     doc: BlockSuiteDoc,
+    awarenessAdapter: AwarenessAdapter,
     idGenerator: IdGenerator = uuidv4
   ) {
-    super(id, doc);
+    super(id, doc, awarenessAdapter);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
   }
 
   get workspace() {
     return this._workspace;
-  }
-
-  get awarenessAdapter() {
-    return this.workspace.awarenessAdapter;
   }
 
   get meta() {

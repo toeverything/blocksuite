@@ -3,6 +3,7 @@ import type { SelectionRange } from './awareness.js';
 import type { RichTextAdapter } from './text-adapter.js';
 import type { DataInitializer } from './yjs/proxy.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
+import type { AwarenessAdapter } from './awareness.js';
 
 export interface StackItem {
   meta: Map<'cursor-location', SelectionRange | undefined>;
@@ -17,6 +18,7 @@ export class Space<
   /** unprefixed id */
   readonly id: string;
   readonly doc: BlockSuiteDoc;
+  readonly awarenessAdapter: AwarenessAdapter;
   /**
    * @internal
    * @protected
@@ -28,12 +30,14 @@ export class Space<
   constructor(
     id: string,
     doc: BlockSuiteDoc,
+    awarenessAdapter: AwarenessAdapter,
     options?: {
       valueInitializer?: DataInitializer<Partial<Data>>;
     }
   ) {
     this.id = id;
     this.doc = doc;
+    this.awarenessAdapter = awarenessAdapter;
     const targetId = this.id.startsWith('space:') ? this.id : this.prefixedId;
     this.origin = this.doc.getMap(targetId);
     this.proxy = this.doc.getMapProxy<string, Data>(targetId, {
