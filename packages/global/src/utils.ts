@@ -65,3 +65,7 @@ export function assertEquals<T extends Allowed, U extends T>(
     }
   }
 }
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
