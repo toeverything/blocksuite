@@ -14,14 +14,6 @@ function staticImplements<T>() {
   return <U extends T>(constructor: U) => constructor;
 }
 
-function isSetAddFunction<T>(value: unknown): value is Set<T>['add'] {
-  return typeof value === 'function';
-}
-
-function isSetDeleteFunction<T>(value: unknown): value is Set<T>['delete'] {
-  return typeof value === 'function';
-}
-
 @staticImplements<BlobProviderStatic>()
 export class IndexedDBBlobProvider implements BlobProvider {
   private readonly _database: IDBInstance;
