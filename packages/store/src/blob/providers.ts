@@ -144,11 +144,11 @@ export class BlobCloudSync {
   private readonly _database: IDBInstance;
   private readonly _pending: IDBInstance<{
     retry: number;
-    type: 'add' | 'delete';
+    type: 'add' | 'delete' | 'upload';
   }>;
   private readonly _pendingPipeline: SyncTask[] = [];
   private readonly _workspace: string;
-  private readonly _uploading: IDBInstance<boolean>;
+  // private readonly _uploading: IDBInstance<boolean>;
   private readonly _finishedId: Signal<string>;
 
   private _pipeline: SyncTask[] = [];
@@ -200,7 +200,7 @@ export class BlobCloudSync {
 
     this._database = db;
     this._pending = getDatabase('pending', workspace);
-    this._uploading = getDatabase('uploading', workspace);
+    // this._uploading = getDatabase('uploading', workspace);
     this._workspace = workspace;
 
     this._pending.keys().then(async keys => {
@@ -211,6 +211,9 @@ export class BlobCloudSync {
             const blob = await db.get(id);
             if ((blob || type === 'delete') && type) {
               return { id, blob, retry, type };
+            }
+            if (blob && type === 'upload') {
+              this.addTask(id, 'add');
             }
             return undefined;
           })
@@ -223,23 +226,12 @@ export class BlobCloudSync {
 
       this._taskRunner();
     });
-
-    // resume pending blobs when reconnected
-    this._uploading.keys().then(async keys => {
-      for (const key of keys) {
-        const uploaded = await this._uploading.get(key);
-        if (!uploaded) {
-          this.addTask(key, 'add');
-        }
-      }
-    });
   }
 
   private async _handleTaskRetry(task: SyncTask, status?: BlobStatus) {
     this._uploadingIds.delete(task.id);
     if (status?.exists) {
       await this._pending.delete(task.id);
-      await this._uploading.set(task.id, true);
       this._finishedId.emit(task.id);
     } else {
       await this._pending.set(task.id, {
@@ -265,7 +257,7 @@ export class BlobCloudSync {
             `${this._workspace}/blob/${task.id}`
           );
           if (resp.status === 404) {
-            await this._uploading.set(task.id, false);
+            this._pending.set(task.id, { type: 'upload', retry: task.retry });
             this._uploadingIds.add(task.id);
             const status = await this._fetcher
               .put(`${this._workspace}/blob`, { body: task.blob, retry: 3 })
