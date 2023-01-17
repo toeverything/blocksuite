@@ -23,6 +23,7 @@ import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { debug } from '@blocksuite/global/debug';
 import BlockTag = BlockSuiteInternal.BlockTag;
 import TagSchema = BlockSuiteInternal.TagSchema;
 export type YBlock = Y.Map<unknown>;
@@ -309,6 +310,7 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
@@ -390,36 +392,7 @@ export class Page extends Space<PageData> {
     this.updateBlock(model, props);
   }
 
-  insertBlock(
-    blockProps: OptionalBlockProps,
-    targetModel: BaseBlockModel,
-    top = true
-  ) {
-    const targetParentModel = this.getParent(targetModel);
-    if (targetParentModel === null) {
-      throw new Error('cannot find parent model');
-    }
-    this.transact(() => {
-      const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
-      const yChildren = yParent.get('sys:children') as Y.Array<string>;
-      const targetIdx = yChildren
-        .toArray()
-        .findIndex(id => id === targetModel.id);
-      // if (top) {
-      // yChildren.insert(targetIdx, [])
-      assertExists(blockProps.flavour);
-      this.addBlockByFlavour(
-        blockProps.flavour,
-        {
-          type: blockProps.type,
-        },
-        targetParentModel.id,
-        top ? targetIdx : targetIdx + 1
-      );
-      // }
-    });
-  }
-
+  @debug('CRUD')
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
@@ -450,6 +423,7 @@ export class Page extends Space<PageData> {
     nextParentModel.propsUpdated.emit();
   }
 
+  @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
@@ -482,6 +456,36 @@ export class Page extends Space<PageData> {
     });
   }
 
+  insertBlock(
+    blockProps: OptionalBlockProps,
+    targetModel: BaseBlockModel,
+    top = true
+  ) {
+    const targetParentModel = this.getParent(targetModel);
+    if (targetParentModel === null) {
+      throw new Error('cannot find parent model');
+    }
+    this.transact(() => {
+      const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
+      const yChildren = yParent.get('sys:children') as Y.Array<string>;
+      const targetIdx = yChildren
+        .toArray()
+        .findIndex(id => id === targetModel.id);
+      // if (top) {
+      // yChildren.insert(targetIdx, [])
+      assertExists(blockProps.flavour);
+      this.addBlockByFlavour(
+        blockProps.flavour,
+        {
+          type: blockProps.type,
+        },
+        targetParentModel.id,
+        top ? targetIdx : targetIdx + 1
+      );
+      // }
+    });
+  }
+
   deleteBlockById(id: string) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
@@ -491,6 +495,7 @@ export class Page extends Space<PageData> {
     this.deleteBlock(model);
   }
 
+  @debug('CRUD')
   deleteBlock(
     model: BaseBlockModel,
     options: {
