@@ -20,8 +20,7 @@ export const debugLog = function (
   const stackInfo = removeStackHeader(error.stack).split('\n');
   const message = stackInfo[callerIdx].trim();
   const method = /(?<=at\s)(\S*)(?=\s)/.exec(message)?.[0] ?? message;
-  const subsystem =
-    /(?<=\/packages\/)[a-z]+/.exec(message)?.[0] ?? 'playground';
+  const subsystem = /(?<=\/packages\/)[a-z]+/.exec(message)?.[0] ?? 'unknown';
   console.log(
     `[packages/${color.blue(subsystem)}] ${color.magenta(
       method
