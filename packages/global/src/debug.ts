@@ -17,10 +17,11 @@ export const debugLog = function (
   }
   const { callerIdx } = info;
   const error = new Error();
-  const stackInfo = removeStackHeader(error.stack);
-  const message = stackInfo.split('\n')[callerIdx].trim();
+  const stackInfo = removeStackHeader(error.stack).split('\n');
+  const message = stackInfo[callerIdx].trim();
   const method = /(?<=at\s)(\S*)(?=\s)/.exec(message)?.[0] ?? message;
-  const subsystem = /(?<=\/packages\/)[a-z]+/.exec(message)?.[0] ?? 'unknown';
+  const subsystem =
+    /(?<=\/packages\/)[a-z]+/.exec(message)?.[0] ?? 'playground';
   console.log(
     `[packages/${color.blue(subsystem)}] ${color.magenta(
       method
