@@ -155,7 +155,7 @@ export class AwarenessAdapter<
   public getLocalCursor = (space: Space): SelectionRange | undefined => {
     const states = this.awareness.getStates();
     const awarenessState = states.get(this.awareness.clientID);
-    return awarenessState?.[space.prefixedId].cursor;
+    return awarenessState?.[space.prefixedId]?.cursor;
   };
 
   public getStates = (): Map<number, AwarenessState<Flags>> => {
