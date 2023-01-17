@@ -89,46 +89,48 @@ export class AwarenessAdapter<
     }
   }
 
-  public setLocalCursor(space: Space, range: SelectionRange) {
+  public setLocalCursor = (space: Space, range: SelectionRange) => {
     const cursor = this.awareness.getLocalState()?.cursor ?? {};
     this.awareness.setLocalStateField('cursor', {
       ...cursor,
       [space.prefixedId]: range,
     });
-  }
+  };
 
-  public setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
+  public setFlag = <Key extends keyof Flags>(field: Key, value: Flags[Key]) => {
     const oldFlags = this.awareness.getLocalState()?.flags ?? {};
     this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
-  }
+  };
 
-  public getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
+  public getFlag = <Key extends keyof Flags>(
+    field: Key
+  ): Flags[Key] | undefined => {
     const flags = this.awareness.getLocalState()?.flags ?? {};
     return flags[field];
-  }
+  };
 
-  public setReadonly(space: Space, value: boolean): void {
+  public setReadonly = (space: Space, value: boolean): void => {
     const flags = this.getFlag('readonly') ?? {};
     this.setFlag('readonly', {
       ...flags,
       [space.prefixedId]: value,
     } as Flags['readonly']);
-  }
+  };
 
-  public isReadonly(space: Space): boolean {
+  public isReadonly = (space: Space): boolean => {
     const rd = this.getFlag('readonly');
     if (rd && typeof rd === 'object') {
       return Boolean((rd as Record<string, boolean>)[space.prefixedId]);
     } else {
       return false;
     }
-  }
+  };
 
-  setRemoteFlag<Key extends keyof Flags>(
+  setRemoteFlag = <Key extends keyof Flags>(
     clientId: number,
     field: Key,
     value: Flags[Key]
-  ) {
+  ) => {
     if (!this.getFlag('enable_set_remote_flag')) {
       console.error('set remote flag feature disabled');
       return;
@@ -143,17 +145,17 @@ export class AwarenessAdapter<
         value,
       },
     ] satisfies Request<Flags>[]);
-  }
+  };
 
-  public getLocalCursor(space: Space): SelectionRange | undefined {
+  public getLocalCursor = (space: Space): SelectionRange | undefined => {
     const states = this.awareness.getStates();
     const awarenessState = states.get(this.awareness.clientID);
     return awarenessState?.[space.prefixedId].cursor;
-  }
+  };
 
-  public getStates(): Map<number, AwarenessState<Flags>> {
+  public getStates = (): Map<number, AwarenessState<Flags>> => {
     return this.awareness.getStates() as Map<number, AwarenessState<Flags>>;
-  }
+  };
 
   private _onAwarenessChange = (diff: {
     added: number[];
@@ -196,7 +198,7 @@ export class AwarenessAdapter<
     }
   };
 
-  private _handleRemoteFlags() {
+  private _handleRemoteFlags = () => {
     const nextTick: (() => void)[] = [];
     const localState = this.awareness.getLocalState() as AwarenessState<Flags>;
     const request = (localState?.request ?? []) as Request<Flags>[];
@@ -259,9 +261,9 @@ export class AwarenessAdapter<
     setTimeout(() => {
       nextTick.forEach(fn => fn());
     }, 100);
-  }
+  };
 
-  private _resetRemoteCursor() {
+  private _resetRemoteCursor = () => {
     const states = this.getStates();
     this.store.spaces.forEach(space => {
       states.forEach((awState, clientId) => {
@@ -296,9 +298,9 @@ export class AwarenessAdapter<
         }
       });
     });
-  }
+  };
 
-  public updateLocalCursor() {
+  public updateLocalCursor = () => {
     this.store.spaces.forEach(space => {
       const localCursor = this.getLocalCursor(space);
       if (!localCursor) {
@@ -320,12 +322,12 @@ export class AwarenessAdapter<
         );
       }
     });
-  }
+  };
 
-  destroy() {
+  destroy = () => {
     if (this.awareness) {
       this.awareness.off('change', this._onAwarenessChange);
       this.signals.update.dispose();
     }
-  }
+  };
 }
