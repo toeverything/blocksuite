@@ -116,18 +116,12 @@ declare module 'yjs' {
 export class Text {
   private _space: Space;
   private _yText: Y.Text;
-  private _awarenessAdapter: AwarenessAdapter;
 
   // TODO toggle transact by options
   private _shouldTransact = true;
 
-  constructor(
-    space: Space,
-    input: Y.Text | string,
-    awarenessAdapter: AwarenessAdapter
-  ) {
+  constructor(space: Space, input: Y.Text | string) {
     this._space = space;
-    this._awarenessAdapter = awarenessAdapter;
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
     } else {
@@ -135,12 +129,8 @@ export class Text {
     }
   }
 
-  static fromDelta(
-    space: Space,
-    delta: DeltaOperation[],
-    awarenessAdapter: AwarenessAdapter
-  ) {
-    const result = new Text(space, '', awarenessAdapter);
+  static fromDelta(space: Space, delta: DeltaOperation[]) {
+    const result = new Text(space, '');
     result.applyDelta(delta);
     return result;
   }
@@ -150,7 +140,7 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    if (this._awarenessAdapter.isReadonly(this._space)) {
+    if (this._space.awarenessAdapter.isReadonly(this._space)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -159,7 +149,7 @@ export class Text {
   }
 
   clone() {
-    return new Text(this._space, this._yText.clone(), this._awarenessAdapter);
+    return new Text(this._space, this._yText.clone());
   }
 
   split(index: number, length: number): [PrelimText, PrelimText] {

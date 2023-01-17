@@ -498,7 +498,7 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
       page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, '', page.awarenessAdapter),
+          text: new page.Text(page, ''),
         },
         page.getParent(lastChild)
       );
