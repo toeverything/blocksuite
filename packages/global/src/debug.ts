@@ -1,16 +1,6 @@
 import color from 'ansi-colors';
 import { assertEquals, assertExists } from './utils.js';
 
-export enum Subsystem {
-  Global = 'global',
-  Editor = 'editor',
-  Blocks = 'blocks',
-  Phasor = 'phasor',
-  Playground = 'playground',
-  React = 'react',
-  Store = 'store',
-}
-
 let enabled = false;
 
 export const removeStackHeader = (stack: unknown) =>
