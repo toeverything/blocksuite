@@ -2,14 +2,13 @@ import type { Page } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import type { ExtendedModel } from './types.js';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { matchFlavours } from '@blocksuite/global/utils';
+import { matchFlavours, sleep } from '@blocksuite/global/utils';
 
 // XXX: workaround quill lifecycle issue
 export async function asyncFocusRichText(page: Page, id: string) {
-  requestAnimationFrame(() => {
-    const adapter = page.richTextAdapters.get(id);
-    adapter?.quill.focus();
-  });
+  await sleep(0);
+  const adapter = page.richTextAdapters.get(id);
+  adapter?.quill.focus();
 }
 
 export function isCollapsedAtBlockStart(quill: Quill) {
