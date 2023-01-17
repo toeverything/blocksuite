@@ -101,6 +101,13 @@ export class SlashMenu extends LitElement {
     });
   }
 
+  protected override willUpdate(_changedProperties: PropertyValues): void {
+    super.willUpdate(_changedProperties);
+    if (_changedProperties.has('searchString')) {
+      this.activeItemIndex = 0;
+    }
+  }
+
   /**
    * Handle arrow key
    */
