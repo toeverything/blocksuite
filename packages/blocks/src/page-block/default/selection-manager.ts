@@ -230,7 +230,7 @@ export class DefaultSelectionManager {
         enable => {
           if (enable && !this._dragHandle) {
             createHandle();
-          } else {
+          } else if (!enable) {
             this._dragHandle?.remove();
             this._dragHandle = null;
           }
