@@ -128,6 +128,9 @@ export class DragHandle extends LitElement {
   protected firstUpdated() {
     this.setAttribute('draggable', 'true');
     this.style.display = 'none';
+    this._indicator = <DragIndicator>(
+      document.querySelector('affine-drag-indicator')
+    );
   }
 
   public show(startModelState: EditingState) {
@@ -158,10 +161,6 @@ export class DragHandle extends LitElement {
     );
     document.body.addEventListener('wheel', this._onWheel);
     window.addEventListener('resize', this._onResize);
-    this._indicator = <DragIndicator>(
-      document.createElement('affine-drag-indicator')
-    );
-    document.body.appendChild(this._indicator);
     this.addEventListener('mousedown', this._onMouseDown);
     isFirefox &&
       document.addEventListener('dragover', this._onDragOverDocument);
@@ -173,7 +172,8 @@ export class DragHandle extends LitElement {
 
   public disconnectedCallback() {
     super.disconnectedCallback();
-    this._indicator.remove();
+    this._indicator.cursorPosition = null;
+    this._indicator.targetRect = null;
     window.removeEventListener('resize', this._onResize);
     document.body.removeEventListener('wheel', this._onWheel);
     document.body.removeEventListener(

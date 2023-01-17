@@ -385,6 +385,7 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
+        <affine-drag-indicator></affine-drag-indicator>
         ${selectedRectsContainer} ${selectionRect}
         ${selectedEmbedContainer}${embedEditingContainer}
         ${codeBlockOptionContainer}
