@@ -36,7 +36,7 @@ type Response = {
 interface AwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
-  cursor?: Record<string, SelectionRange>;
+  cursor?: Record<Space['prefixedId'], SelectionRange>;
   user?: UserInfo;
   flags: Flags;
   request?: Request<Flags>[];
@@ -90,7 +90,11 @@ export class AwarenessAdapter<
   }
 
   public setLocalCursor(space: Space, range: SelectionRange) {
-    this.awareness.setLocalStateField('cursor', range);
+    const cursor = this.awareness.getLocalState()?.cursor ?? {};
+    this.awareness.setLocalStateField('cursor', {
+      ...cursor,
+      [space.prefixedId]: range,
+    });
   }
 
   public setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
