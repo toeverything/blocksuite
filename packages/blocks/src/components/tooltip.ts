@@ -36,6 +36,12 @@ export const toolTipStyle = css`
     transform: translateX(calc(100% + 8px));
     border-radius: 0px 10px 10px 10px;
   }
+  tool-tip:is([tip-position='left']) {
+    left: 0;
+    right: unset;
+    transform: translateX(calc(-100% - 8px));
+    border-radius: 10px 10px 0px 10px;
+  }
   .has-tool-tip {
     position: relative;
   }

@@ -430,7 +430,7 @@ export class BlockHub extends NonShadowLitElement {
     return html`
       <div style=${this._expanded ? 'display:block' : 'display:none'}>
         <div
-          class="block-hub-icon-container"
+          class="block-hub-icon-container has-tool-tip"
           selected=${this._cardvisibleType === 'blank' ? 'true' : 'false'}
           type="blank"
           draggable="true"
@@ -438,6 +438,9 @@ export class BlockHub extends NonShadowLitElement {
           affine-type="text"
         >
           ${RectIcon}
+          <tool-tip inert role="tooltip" tip-position="left" style="top: 5px"
+            >Drag to Insert blank line</tool-tip
+          >
         </div>
         <div
           class="block-hub-icon-container"
@@ -552,7 +555,6 @@ export class BlockHub extends NonShadowLitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
-    console.log(this._indicator);
     let x = e.pageX;
     let y = e.pageY;
     if (isFirefox) {
@@ -631,6 +633,7 @@ export class BlockHub extends NonShadowLitElement {
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
+          role="menu-entry"
         >
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
