@@ -1,11 +1,11 @@
-import { getRichTextByModel } from '@blocksuite/blocks/std.js';
-import type { RichText } from '@blocksuite/blocks/__internal__/rich-text/rich-text.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { paragraphConfig } from '../../page-block/utils/const.js';
 import { updateSelectedTextType } from '../../page-block/utils/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
+import { getRichTextByModel } from '../../__internal__/utils/index.js';
 
 const slashMenuStyle = css`
   .slash-menu {
@@ -209,7 +209,7 @@ export class SlashMenu extends LitElement {
     return html`<div class="slash-menu-container" style="${containerStyles}">
       <div
         class="overlay-mask"
-        @click="${() => this.abortController.abort()}"
+        @click="${() => this.abortController.abort('ABORT')}"
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
         ${filterConfig.map(
