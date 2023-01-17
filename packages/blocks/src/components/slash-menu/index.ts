@@ -38,6 +38,7 @@ export const showSlashMenu = ({
   globalAbortController = abortController;
 
   const slashMenu = document.createElement('slash-menu');
+  slashMenu.model = model;
   slashMenu.abortController = abortController;
 
   // Handle slash text
@@ -75,7 +76,6 @@ export const showSlashMenu = ({
 
     slashMenu.left = `${safeCoordinate.x}px`;
     slashMenu.top = `${safeCoordinate.y}px`;
-    slashMenu.page = model.page;
   }, 10);
 
   window.addEventListener('resize', updatePos, { passive: true });

@@ -55,9 +55,9 @@ export class SlashTextNode extends Inline {
       console.error('slash text search error', context, this, children);
       return;
     }
-    const value = children.head.value();
+    const value: string = children.head.value();
     if (this.slashMenu) {
-      this.slashMenu.searchString = value;
+      this.slashMenu.searchString = value.slice(1);
     }
   }
 

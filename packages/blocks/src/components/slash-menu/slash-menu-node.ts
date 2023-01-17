@@ -1,7 +1,7 @@
 import { getRichTextByModel } from '@blocksuite/blocks/std.js';
 import type { RichText } from '@blocksuite/blocks/__internal__/rich-text/rich-text.js';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, LitElement, PropertyValueMap } from 'lit';
+import { css, html, LitElement, PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { paragraphConfig } from '../../page-block/utils/const.js';
@@ -169,7 +169,7 @@ export class SlashMenu extends LitElement {
   }
 
   private _filterConfig() {
-    const normalizeString = this.searchString.slice(1).trim().toLowerCase();
+    const normalizeString = this.searchString.trim().toLowerCase();
 
     if (!normalizeString) {
       return paragraphConfig;
