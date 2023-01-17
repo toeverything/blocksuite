@@ -193,7 +193,7 @@ export class AwarenessAdapter<
 
   private _onAwarenessMessage = (awMsg: AwarenessMessage<Flags>) => {
     if (awMsg.id === this.awareness.clientID) {
-      this.updateLocalCursor();
+      this.store.spaces.forEach(space => this.updateLocalCursor(space));
     } else {
       this._resetRemoteCursor();
     }
@@ -307,28 +307,23 @@ export class AwarenessAdapter<
     });
   };
 
-  public updateLocalCursor = () => {
-    this.store.spaces.forEach(space => {
-      const localCursor = this.getLocalCursor(space);
-      if (!localCursor) {
-        return;
-      }
-      const anchor = Y.createAbsolutePositionFromRelativePosition(
-        localCursor.anchor,
-        space.doc
-      );
-      const focus = Y.createAbsolutePositionFromRelativePosition(
-        localCursor.focus,
-        space.doc
-      );
-      if (anchor && focus) {
-        const textAdapter = space.richTextAdapters.get(localCursor.id || '');
-        textAdapter?.quill.setSelection(
-          anchor.index,
-          focus.index - anchor.index
-        );
-      }
-    });
+  public updateLocalCursor = (space: Space) => {
+    const localCursor = this.getLocalCursor(space);
+    if (!localCursor) {
+      return;
+    }
+    const anchor = Y.createAbsolutePositionFromRelativePosition(
+      localCursor.anchor,
+      space.doc
+    );
+    const focus = Y.createAbsolutePositionFromRelativePosition(
+      localCursor.focus,
+      space.doc
+    );
+    if (anchor && focus) {
+      const textAdapter = space.richTextAdapters.get(localCursor.id || '');
+      textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
+    }
   };
 
   destroy = () => {

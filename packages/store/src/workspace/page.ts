@@ -518,7 +518,7 @@ export class Page extends Space<PageData> {
   }
 
   /** Connect a rich text editor instance with a YText instance. */
-  attachRichText(id: string, quill: Quill) {
+  attachRichText = (id: string, quill: Quill) => {
     const yBlock = this._getYBlock(id);
 
     const yText = yBlock.get('prop:text') as Y.Text | null;
@@ -540,7 +540,7 @@ export class Page extends Space<PageData> {
 
       this.awarenessAdapter.setLocalCursor(this, { ...cursor, id });
     });
-  }
+  };
 
   /** Cancel the connection between the rich text editor instance and YText. */
   detachRichText(id: string) {
