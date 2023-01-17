@@ -150,7 +150,8 @@ export class CloudSyncManager {
 
   private _pipeline: SyncTask[] = [];
   private initialized = false;
-  private _uploadingIds: Set<string>;
+  private _uploadingIds: Set<string> = new Set();
+  private _onUploadStateChanged: Signal<boolean>;
 
   constructor(
     workspace: string,
@@ -160,40 +161,12 @@ export class CloudSyncManager {
     onUploadFinished: Signal<BlobId>
   ) {
     this._onUploadFinished = onUploadFinished;
+    this._onUploadStateChanged = onUploadStateChanged;
     this._fetcher = ky.create({
       prefixUrl,
       signal: this._abortController.signal,
       throwHttpErrors: false,
     });
-
-    const uploadingProxy = new Proxy(new Set<string>(), {
-      get(target, prop, receiver) {
-        const val = target[prop as keyof typeof Set.prototype];
-        if (typeof val === 'function' && typeof prop === 'string') {
-          let resultFunction;
-          if (prop === 'add' && isSetAddFunction<string>(val)) {
-            resultFunction = (...args: Parameters<typeof val>) => {
-              const result = val.apply(target, args);
-              onUploadStateChanged.emit(!!target.size);
-              return result;
-            };
-          }
-          if (prop === 'delete' && isSetDeleteFunction<string>(val)) {
-            resultFunction = (...args: Parameters<typeof val>) => {
-              const result = val.apply(target, args);
-              onUploadStateChanged.emit(!!target.size);
-              return result;
-            };
-          }
-          if (resultFunction) {
-            return resultFunction;
-          }
-        }
-        return Reflect.get(target, prop, receiver);
-      },
-    });
-
-    this._uploadingIds = uploadingProxy;
 
     this._database = db;
     this._pending = getDatabase('pending', workspace);
@@ -225,7 +198,7 @@ export class CloudSyncManager {
   }
 
   private async _handleTaskRetry(task: SyncTask, status?: BlobStatus) {
-    this._uploadingIds.delete(task.id);
+    this._removeUploadId(task.id);
     if (status?.exists) {
       await this._pending.delete(task.id);
       this._onUploadFinished.emit(task.id);
@@ -257,7 +230,7 @@ export class CloudSyncManager {
               type: 'upload',
               retry: task.retry,
             });
-            this._uploadingIds.add(task.id);
+            this._addUploadId(task.id);
             const status = await this._fetcher
               .put(`${this._workspace}/blob`, { body: task.blob, retry: 3 })
               .json<BlobStatus>();
@@ -272,6 +245,16 @@ export class CloudSyncManager {
     }
 
     console.error('CloudSyncManager taskRunner exited');
+  }
+
+  private _addUploadId(id: BlobId) {
+    this._uploadingIds.add(id);
+    this._onUploadStateChanged.emit(!!this._uploadingIds.size);
+  }
+
+  private _removeUploadId(id: BlobId) {
+    this._uploadingIds.delete(id);
+    this._onUploadStateChanged.emit(!!this._uploadingIds.size);
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
