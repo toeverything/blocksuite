@@ -1,10 +1,7 @@
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
-  assertExists,
-  assertFlavours,
   ExtendedModel,
-  isPageTitle,
   RootBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
@@ -29,6 +26,7 @@ import {
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
+import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 
 export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
   const models = getModelsByRange(range);
@@ -168,8 +166,6 @@ export function transformBlock(
  * Do nothing when selection is collapsed or not multi block selected
  */
 export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
-  // workaround page title
-  if (isPageTitle(e)) return;
   if (isNoneSelection()) return;
   if (isCollapsedSelection()) return;
   if (!isMultiBlockRange()) return;

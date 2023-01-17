@@ -4,8 +4,8 @@ import type { IPoint } from '../__internal__/index.js';
 import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
+import { assertExists } from '@blocksuite/global/utils';
 import {
-  assertExists,
   getBlockElementByModel,
   SelectionEvent,
 } from '../__internal__/index.js';
@@ -210,6 +210,15 @@ export class DragHandle extends LitElement {
   protected firstUpdated() {
     this.style.display = 'none';
     this.style.position = 'absolute';
+    this._indicator = <DragIndicator>(
+      document.querySelector('affine-drag-indicator')
+    );
+    if (!this._indicator) {
+      this._indicator = <DragIndicator>(
+        document.createElement('affine-drag-indicator')
+      );
+      document.body.appendChild(this._indicator);
+    }
     document.body.addEventListener(
       'dragover',
       handlePreventDocumentDragOverDelay,
@@ -233,7 +242,12 @@ export class DragHandle extends LitElement {
 
   public disconnectedCallback() {
     super.disconnectedCallback();
-    this._indicator.remove();
+    // Drag handle may be disposed without initializing indicator
+    if (this._indicator) {
+      this._indicator.cursorPosition = null;
+      this._indicator.targetRect = null;
+    }
+
     window.removeEventListener('resize', this._onResize);
     document.body.removeEventListener('wheel', this._onWheel);
     document.body.removeEventListener(

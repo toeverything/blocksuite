@@ -68,11 +68,7 @@ export async function runOnce() {
   testCases = [];
 }
 
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
-}
+export { assertExists } from '@blocksuite/global/utils';
 
 export async function nextFrame() {
   return new Promise(resolve => requestAnimationFrame(resolve));

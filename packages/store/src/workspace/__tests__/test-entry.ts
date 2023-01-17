@@ -6,7 +6,7 @@ import {
   runOnce,
   nextFrame,
 } from '../../__tests__/test-utils-dom.js';
-import { assertExists } from '../../utils/utils.js';
+import { assertExists } from '@blocksuite/global/utils';
 import './test-app';
 
 let i = 0;

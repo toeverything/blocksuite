@@ -17,7 +17,7 @@ import { ListBlockModel } from '../../../blocks/src/list-block/list-model.js';
 import { FrameBlockModel } from '../../../blocks/src/frame-block/frame-model.js';
 import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model.js';
 import type { PageMeta } from '../workspace/index.js';
-import { assertExists } from '../utils/utils.js';
+import { assertExists } from './test-utils-dom.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -42,7 +42,7 @@ function waitOnce<T>(signal: Signal<T>) {
 }
 
 async function createRoot(page: Page) {
-  queueMicrotask(() => page.addBlock({ flavour: 'affine:page' }));
+  queueMicrotask(() => page.addBlockByFlavour('affine:page'));
   const root = await waitOnce(page.signals.rootAdded);
   return root;
 }
@@ -95,10 +95,12 @@ describe.concurrent('basic', () => {
 describe.concurrent('addBlock', () => {
   it('can add single model', async () => {
     const page = await createTestPage();
-    page.addBlock({ flavour: 'affine:page' });
+    page.addBlockByFlavour('affine:page');
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
+        'meta:tags': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -108,10 +110,12 @@ describe.concurrent('addBlock', () => {
 
   it('can add model with props', async () => {
     const page = await createTestPage();
-    page.addBlock({ flavour: 'affine:page', title: 'hello' });
+    page.addBlockByFlavour('affine:page', { title: 'hello' });
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
+        'meta:tags': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -122,11 +126,13 @@ describe.concurrent('addBlock', () => {
 
   it('can add multi models', async () => {
     const page = await createTestPage();
-    page.addBlock({ flavour: 'affine:page' });
-    page.addBlock({ flavour: 'affine:paragraph' });
+    page.addBlockByFlavour('affine:page');
+    page.addBlockByFlavour('affine:paragraph');
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
+        'meta:tags': {},
+        'meta:tagSchema': {},
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -144,7 +150,7 @@ describe.concurrent('addBlock', () => {
   it('can observe signal events', async () => {
     const page = await createTestPage();
 
-    queueMicrotask(() => page.addBlock({ flavour: 'affine:page' }));
+    queueMicrotask(() => page.addBlockByFlavour('affine:page'));
     const block = await waitOnce(page.signals.rootAdded);
     assert.ok(block instanceof BlockSchema['affine:page']);
   });
@@ -152,11 +158,12 @@ describe.concurrent('addBlock', () => {
   it('can add block to root', async () => {
     const page = await createTestPage();
 
-    queueMicrotask(() => page.addBlock({ flavour: 'affine:page' }));
-    const root = await waitOnce(page.signals.rootAdded);
+    queueMicrotask(() => page.addBlockByFlavour('affine:page'));
+    const roots = await waitOnce(page.signals.rootAdded);
+    const root = Array.isArray(roots) ? roots[0] : roots;
     assert.ok(root instanceof BlockSchema['affine:page']);
 
-    page.addBlock({ flavour: 'affine:paragraph' });
+    page.addBlockByFlavour('affine:paragraph');
     assert.ok(root.children[0] instanceof BlockSchema['affine:paragraph']);
     assert.equal(root.childMap.get('1'), 0);
 
@@ -174,7 +181,7 @@ describe.concurrent('addBlock', () => {
     // @ts-ignore
     assert.equal(workspace._pages.size, 2);
 
-    page0.addBlock({ flavour: 'affine:page' });
+    page0.addBlockByFlavour('affine:page');
     workspace.removePage(page0.id);
 
     // @ts-expect-error
@@ -245,9 +252,11 @@ describe.concurrent('deleteBlock', () => {
   it('can delete single model', async () => {
     const page = await createTestPage();
 
-    page.addBlock({ flavour: 'affine:page' });
+    page.addBlockByFlavour('affine:page');
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
+        'meta:tags': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -260,13 +269,16 @@ describe.concurrent('deleteBlock', () => {
 
   it('can delete model with parent', async () => {
     const page = await createTestPage();
-    const root = await createRoot(page);
+    const roots = await createRoot(page);
+    const root = Array.isArray(roots) ? roots[0] : roots;
 
-    page.addBlock({ flavour: 'affine:paragraph' });
+    page.addBlockByFlavour('affine:paragraph');
 
     // before delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
+        'meta:tags': {},
+        'meta:tagSchema': {},
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -285,6 +297,8 @@ describe.concurrent('deleteBlock', () => {
     // after delete
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
+        'meta:tags': {},
+        'meta:tagSchema': {},
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -297,10 +311,11 @@ describe.concurrent('deleteBlock', () => {
 describe.concurrent('getBlock', () => {
   it('can get block by id', async () => {
     const page = await createTestPage();
-    const root = await createRoot(page);
+    const roots = await createRoot(page);
+    const root = Array.isArray(roots) ? roots[0] : roots;
 
-    page.addBlock({ flavour: 'affine:paragraph' });
-    page.addBlock({ flavour: 'affine:paragraph' });
+    page.addBlockByFlavour('affine:paragraph');
+    page.addBlockByFlavour('affine:paragraph');
 
     const text = page.getBlockById('2') as BaseBlockModel;
     assert.ok(text instanceof BlockSchema['affine:paragraph']);
@@ -312,10 +327,11 @@ describe.concurrent('getBlock', () => {
 
   it('can get parent', async () => {
     const page = await createTestPage();
-    const root = await createRoot(page);
+    const roots = await createRoot(page);
+    const root = Array.isArray(roots) ? roots[0] : roots;
 
-    page.addBlock({ flavour: 'affine:paragraph' });
-    page.addBlock({ flavour: 'affine:paragraph' });
+    page.addBlockByFlavour('affine:paragraph');
+    page.addBlockByFlavour('affine:paragraph');
 
     const result = page.getParent(root.children[1]) as BaseBlockModel;
     assert.equal(result, root);
@@ -326,10 +342,11 @@ describe.concurrent('getBlock', () => {
 
   it('can get previous sibling', async () => {
     const page = await createTestPage();
-    const root = await createRoot(page);
+    const roots = await createRoot(page);
+    const root = Array.isArray(roots) ? roots[0] : roots;
 
-    page.addBlock({ flavour: 'affine:paragraph' });
-    page.addBlock({ flavour: 'affine:paragraph' });
+    page.addBlockByFlavour('affine:paragraph');
+    page.addBlockByFlavour('affine:paragraph');
 
     const result = page.getPreviousSibling(root.children[1]) as BaseBlockModel;
     assert.equal(result, root.children[0]);
@@ -346,7 +363,7 @@ describe('workspace.exportJSX works', async () => {
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
 
-    page.addBlock({ flavour: 'affine:page', title: 'hello' });
+    page.addBlockByFlavour('affine:page', { title: 'hello' });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
@@ -368,9 +385,9 @@ describe('workspace.exportJSX works', async () => {
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
 
-    page.addBlock({ flavour: 'affine:page' });
-    page.addBlock({ flavour: 'affine:paragraph' });
-    page.addBlock({ flavour: 'affine:paragraph' });
+    page.addBlockByFlavour('affine:page');
+    page.addBlockByFlavour('affine:paragraph');
+    page.addBlockByFlavour('affine:paragraph');
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
@@ -391,18 +408,16 @@ describe.concurrent('workspace.search works', async () => {
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
 
-    page.addBlock({ flavour: 'affine:page', title: 'hello' });
+    page.addBlockByFlavour('affine:page', { title: 'hello' });
 
-    page.addBlock({
-      flavour: 'affine:paragraph',
+    page.addBlockByFlavour('affine:paragraph', {
       text: new page.Text(
         page,
         '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
       ),
     });
 
-    page.addBlock({
-      flavour: 'affine:paragraph',
+    page.addBlockByFlavour('affine:paragraph', {
       text: new page.Text(
         page,
         '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'

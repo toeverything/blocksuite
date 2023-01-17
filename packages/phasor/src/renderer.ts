@@ -1,6 +1,6 @@
 import { Bound, MIN_ZOOM } from './consts.js';
 import { GridManager } from './grid.js';
-import type { Model } from './models.js';
+import type { Element } from './elements.js';
 import { intersects } from './utils.js';
 
 export class Renderer {
@@ -83,27 +83,39 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
-  addModel(model: Model) {
-    this.gridManager.add(model);
+  setCenterZoom(centerX: number, centerY: number, zoom: number) {
+    this._centerX = centerX;
+    this._centerY = centerY;
+    this._zoom = zoom;
     this._shouldUpdate = true;
   }
 
-  invalidateModel(model: Model, newBound: Bound) {
+  addElement(element: Element) {
+    this.gridManager.add(element);
+    this._shouldUpdate = true;
+  }
+
+  removeElement(element: Element) {
+    this.gridManager.remove(element);
+    this._shouldUpdate = true;
+  }
+
+  invalidateElement(element: Element, newBound: Bound) {
     const { gridManager } = this;
-    if (gridManager.boundHasChanged(model, newBound)) {
-      gridManager.remove(model);
-      gridManager.add(model);
+    if (gridManager.boundHasChanged(element, newBound)) {
+      gridManager.remove(element);
+      gridManager.add(element);
     }
-    model.x = newBound.x;
-    model.y = newBound.y;
-    model.w = newBound.w;
-    model.h = newBound.h;
+    element.x = newBound.x;
+    element.y = newBound.y;
+    element.w = newBound.w;
+    element.h = newBound.h;
     this._shouldUpdate = true;
   }
 
-  load(models: Model[]) {
-    for (let i = 0; i < models.length; i++) {
-      this.gridManager.add(models[i]);
+  load(elements: Element[]) {
+    for (let i = 0; i < elements.length; i++) {
+      this.gridManager.add(elements[i]);
     }
     this._shouldUpdate = true;
   }
@@ -138,15 +150,15 @@ export class Renderer {
     ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, width, height);
     ctx.translate(-width / 2 / zoom, -height / 2 / zoom);
 
-    const models = this.gridManager.search(viewBound);
-    for (const model of models) {
-      const dx = model.x - viewBound.x;
-      const dy = model.y - viewBound.y;
+    const elements = this.gridManager.search(viewBound);
+    for (const element of elements) {
+      const dx = element.x - viewBound.x;
+      const dy = element.y - viewBound.y;
       this.ctx.save();
       this.ctx.translate(dx, dy);
 
-      if (intersects(model, viewBound)) {
-        model.render(this.ctx);
+      if (intersects(element, viewBound)) {
+        element.render(this.ctx);
       }
 
       this.ctx.restore();

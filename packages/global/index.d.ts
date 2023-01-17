@@ -1,5 +1,3 @@
-// type shims for https://github.com/toeverything/blocksuite/issues/398
-// remove this until quill turned to `type: "module"`
 declare module 'quill' {
   import quill = require('quill/index');
   export type * from 'quill/index' assert { 'resolution-mode': 'require' };
@@ -16,15 +14,86 @@ declare module NodeJS {
   }
 }
 
-type PropsWithId<Props> = Props & { id: string };
+declare type PropsWithId<Props> = Props & { id: string };
 
-type BlockSuiteFlags = {
+declare type BlockSuiteFlags = {
+  enable_set_remote_flag: boolean;
   enable_drag_handle: boolean;
+  enable_surface: boolean;
   readonly: Record<string, boolean>;
 };
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
+  interface SchemaMeta {
+    /**
+     * color of the tag
+     */
+    color: `#${string}`;
+    /**
+     * width of a column
+     */
+    width: number; // px
+    /**
+     * whether this display in the table
+     */
+    hide: boolean;
+  }
+
+  // Threat this type as a column type
+  interface BaseTagSchema<BaseValue = unknown> {
+    /**
+     * each instance of tag type has its own unique uuid
+     */
+    id: string;
+    type: string;
+    /**
+     * column name
+     */
+    name: string;
+    meta: SchemaMeta;
+    /**
+     * this value is just for hold the `BaseValue`,
+     *  don't use this value in the runtime.
+     */
+    __$TYPE_HOLDER$__?: BaseValue;
+  }
+
+  interface TextTagSchema extends BaseTagSchema<string> {
+    type: 'text';
+  }
+
+  interface NumberTagSchema extends BaseTagSchema<number> {
+    type: 'number';
+    decimal: number;
+  }
+
+  interface SelectTagSchema<Selection extends string = string>
+    extends BaseTagSchema<string> {
+    type: 'select';
+    selection: Selection[];
+  }
+
+  interface RichTextTagSchema extends BaseTagSchema<TextType> {
+    type: 'rich-text';
+  }
+
+  type TagSchema =
+    | SelectTagSchema
+    | NumberTagSchema
+    | TextTagSchema
+    | RichTextTagSchema;
+
+  // threat this type as row type
+  interface BlockTag<Schema extends TagSchema = TagSchema> {
+    type: Schema['id'];
+    value: Schema extends BaseTagSchema<infer U>
+      ? U
+      : Type extends BlockColumnType
+      ? undefined
+      : never;
+  }
+
   interface IBaseBlockProps {
     flavour: string;
     type: string;
@@ -60,11 +129,19 @@ declare namespace BlockSuiteInternal {
   };
 }
 
-type EmbedType = 'image' | 'video' | 'audio' | 'file';
-type ListType = 'bulleted' | 'numbered' | 'todo';
-type ParagraphType = 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+declare type EmbedType = 'image' | 'video' | 'audio' | 'file';
+declare type ListType = 'bulleted' | 'numbered' | 'todo';
+declare type ParagraphType =
+  | 'text'
+  | 'quote'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6';
 
-namespace BlockSuiteModelProps {
+declare namespace BlockSuiteModelProps {
   interface CodeBlockModel {
     language: string;
   }

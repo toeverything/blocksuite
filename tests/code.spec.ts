@@ -10,11 +10,12 @@ import {
   initEmptyCodeBlockState,
   initEmptyParagraphState,
   pasteByKeyboard,
+  pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
   undoByKeyboard,
 } from './utils/actions/index.js';
-import { assertRichTexts } from './utils/asserts.js';
+import { assertKeyboardWorkInInput, assertRichTexts } from './utils/asserts.js';
 
 test('use debug menu can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -102,6 +103,7 @@ test('change code language can work', async ({ page }) => {
   await page.click(codeLangSelector);
   const locator = page.locator('.lang-list-button-container');
   await expect(locator).toBeVisible();
+  await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
 
   await page.keyboard.type('rust');
   await page.click(
@@ -187,6 +189,52 @@ test('drag copy paste', async ({ page }) => {
   expect(content).toBe('useuse\n');
 });
 
+test('split code by enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+
+  // he|llo
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+
+  await pressEnter(page);
+  await assertRichTexts(page, ['he\nllo\n']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello\n']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he\nllo\n']);
+});
+
+test('split code with selection by enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('hello');
+
+  // select 'll'
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.up('Shift');
+
+  await pressEnter(page);
+  await assertRichTexts(page, ['he\no\n']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello\n']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['he\no\n']);
+});
+
 test('keyboard selection and copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
@@ -240,8 +288,8 @@ test('press enter twice at end of code block can jump out', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
+  await pressEnter(page);
 
   const locator = page.locator('affine-paragraph');
   await expect(locator).toBeVisible();
@@ -254,7 +302,7 @@ test('press ArrowDown before code block can select code block', async ({
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
   await addCodeBlock(page);
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('ArrowDown');
@@ -270,8 +318,8 @@ test('press backspace after code block can select code block', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
+  await pressEnter(page);
   await page.keyboard.press('Backspace');
 
   const locator = page.locator('.affine-page-selected-rects-container');
@@ -285,8 +333,8 @@ test('press ArrowUp after code block can select code block', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
+  await pressEnter(page);
   await page.keyboard.press('ArrowUp');
 
   const locator = page.locator('.affine-page-selected-rects-container');

@@ -61,11 +61,7 @@ export class ShapeBlockComponent extends LitElement {
     }
   `;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   model!: ShapeBlockModel;
 
   @state()

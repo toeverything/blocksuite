@@ -37,7 +37,13 @@ const nextConfig = {
       '@blocksuite/blocks': path.resolve(baseDir, 'packages', 'blocks'),
       '@blocksuite/store': path.resolve(baseDir, 'packages', 'store'),
       '@blocksuite/phasor': path.resolve(baseDir, 'packages', 'phasor'),
-      '@blocksuite/global': path.resolve(baseDir, 'packages', 'global'),
+      '@blocksuite/global/utils': path.resolve(
+        baseDir,
+        'packages',
+        'global',
+        'src',
+        'utils'
+      ),
     };
     return config;
   },

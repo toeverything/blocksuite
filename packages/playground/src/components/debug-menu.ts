@@ -21,7 +21,6 @@ import type {
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 
 import {
-  assertExists,
   ColorStyle,
   createEvent,
   getCurrentRange,
@@ -35,6 +34,7 @@ import {
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
+import { assertExists } from '@blocksuite/store/src/__tests__/test-utils-dom';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -210,6 +210,20 @@ export class DebugMenu extends LitElement {
     window.history.pushState({}, '', url);
   }
 
+  private _setReadonlyOthers() {
+    const clients = [...this.page.awareness.getStates().keys()].filter(
+      id => id !== this.page.workspace.doc.clientID
+    );
+    if (this.page.awareness.getFlag('enable_set_remote_flag')) {
+      clients.forEach(id => {
+        this.page.awareness.setRemoteFlag(id, 'readonly', {
+          ...(this.page.awareness.getFlag('readonly') ?? {}),
+          [this.page.prefixedId]: true,
+        });
+      });
+    }
+  }
+
   firstUpdated() {
     this.page.signals.historyUpdated.on(() => {
       this.canUndo = this.page.canUndo;
@@ -380,6 +394,9 @@ export class DebugMenu extends LitElement {
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
               <sl-menu-item @click=${this._addFrame}> Add Frame </sl-menu-item>
+              <sl-menu-item @click=${this._setReadonlyOthers}>
+                Set Others Readonly
+              </sl-menu-item>
               <sl-menu-item @click=${this._toggleReadonly}>
                 Toggle Readonly
               </sl-menu-item>
@@ -409,9 +426,7 @@ export class DebugMenu extends LitElement {
 
         <div
           class="edgeless-toolbar"
-          style=${
-            'display:none' /*'display:' + (this.mode === 'edgeless' ? 'none' : 'none')*/
-          }
+          style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
         >
           <sl-tooltip content="Show Grid" placement="bottom" hoist>
             <sl-button

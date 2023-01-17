@@ -4,7 +4,6 @@ import { Page, Text } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import {
   ExtendedModel,
-  assertExists,
   getRichTextByModel,
   getContainerByModel,
   getPreviousBlock,
@@ -16,12 +15,12 @@ import {
   convertToList,
   convertToParagraph,
   convertToDivider,
-  matchFlavours,
   focusPreviousBlock,
   focusBlockByModel,
   supportsChildren,
   getModelByElement,
 } from '../utils/index.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -57,13 +56,15 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
 export function handleSoftEnter(
   page: Page,
   model: ExtendedModel,
-  index: number
+  index: number,
+  length: number
 ) {
   page.captureSync();
   const shouldFormatCode = matchFlavours(model, ['affine:code']);
-  model.text?.insert(
-    '\n',
+  model.text?.replace(
     index,
+    length,
+    '\n',
     shouldFormatCode ? { 'code-block': true } : {}
   );
 }
@@ -71,14 +72,15 @@ export function handleSoftEnter(
 export function handleBlockSplit(
   page: Page,
   model: ExtendedModel,
-  splitIndex: number
+  splitIndex: number,
+  splitLength: number
 ) {
   if (!(model.text instanceof Text)) return;
 
   const parent = page.getParent(model);
   if (!parent) return;
 
-  const [left, right] = model.text.split(splitIndex);
+  const [left, right] = model.text.split(splitIndex, splitLength);
   page.captureSync();
   page.markTextSplit(model.text, left, right);
   page.updateBlock(model, { text: left });
@@ -89,8 +91,15 @@ export function handleBlockSplit(
     newParent = model;
     newBlockIndex = 0;
   }
-  const id = page.addBlock(
-    { flavour: model.flavour, text: right, type: model.type },
+  const children = [...model.children];
+  page.updateBlockById(model.id, { children: [] });
+  const id = page.addBlockByFlavour(
+    model.flavour,
+    {
+      text: right,
+      type: model.type,
+      children,
+    },
     newParent,
     newBlockIndex
   );
@@ -262,7 +271,9 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         page.captureSync();
         const preTextLength = previousSibling.text?.length || 0;
         model.text?.length && previousSibling.text?.join(model.text as Text);
-        page.deleteBlock(model);
+        page.deleteBlock(model, {
+          bringChildrenTo: previousSibling,
+        });
         const richText = getRichTextByModel(previousSibling);
         richText?.quill?.setSelection(preTextLength, 0);
       } else if (

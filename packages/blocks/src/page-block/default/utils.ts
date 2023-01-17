@@ -2,7 +2,6 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { toast } from '../../components/toast.js';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
 import {
-  assertExists,
   asyncFocusRichText,
   caretRangeFromPoint,
   focusNextBlock,
@@ -16,14 +15,13 @@ import {
   getStartModelBySelection,
   hotkey,
   HOTKEYS,
-  isPageTitle,
   getRichTextByModel,
-  matchFlavours,
   Point,
   resetNativeSelection,
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  isCaptionElement,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -37,6 +35,7 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import type { DefaultSelectionManager } from './selection-manager.js';
 import type { CodeBlockOption } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -484,10 +483,9 @@ export function bindHotkeys(
 
   hotkey.addListener(ENTER, e => {
     const { type, selectedBlocks } = selection.state;
-    const targetInput = e.target as HTMLElement;
-    const isCaption = targetInput.classList.contains(
-      'affine-embed-wrapper-caption'
-    );
+    const targetInput = e.target;
+    // TODO caption ad-hoc should be moved to the caption input for processing
+    const isCaption = isCaptionElement(targetInput);
     // select blocks or focus caption input, then enter will create a new block.
     if ((type === 'block' && selectedBlocks.length) || isCaption) {
       e.stopPropagation();
@@ -550,9 +548,6 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(SELECT_ALL, e => {
-    if (isPageTitle(e)) {
-      return;
-    }
     e.preventDefault();
     handleSelectAll(selection);
     selection.state.type = 'block';

@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
   FrameBlockModel,
@@ -35,6 +35,7 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { SurfaceContainer } from '@blocksuite/phasor';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -71,7 +72,17 @@ export class EdgelessPageBlockComponent
       width: 100%;
       height: 100%;
     }
+
+    .affine-surface-canvas {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
   `;
+
+  flavour = 'edgeless' as const;
 
   @property()
   showGrid = false;
@@ -82,32 +93,20 @@ export class EdgelessPageBlockComponent
   @property()
   readonly = false;
 
-  flavour = 'edgeless' as const;
-
   @property()
   mouseRoot!: HTMLElement;
 
   @property()
   mouseMode!: MouseMode;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   pageModel!: PageBlockModel;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   surfaceModel!: SurfaceBlockModel;
 
-  getService = getService;
-
-  @state()
-  viewport = new ViewportState();
+  @query('.affine-surface-canvas')
+  private _canvas!: HTMLCanvasElement;
 
   signals = {
     viewportUpdated: new Signal(),
@@ -115,6 +114,12 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Signal(),
     shapeUpdated: new Signal(),
   };
+
+  surface!: SurfaceContainer;
+
+  viewport = new ViewportState();
+
+  getService = getService;
 
   private _historyDisposable!: Disposable;
   private _selection!: EdgelessSelectionManager;
@@ -164,6 +169,23 @@ export class EdgelessPageBlockComponent
     });
   }
 
+  private _syncSurfaceViewport() {
+    this.surface.renderer.setCenterZoom(
+      this.viewport.centerX,
+      this.viewport.centerY,
+      this.viewport.zoom
+    );
+  }
+
+  // Should be called in requestAnimationFrame,
+  // so as to avoid DOM mutation in SurfaceContainer constructor
+  private _initSurface() {
+    const { page } = this;
+    const yContainer = page.ySurfaceContainer;
+    this.surface = new SurfaceContainer(this._canvas, yContainer);
+    this._syncSurfaceViewport();
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
@@ -182,6 +204,9 @@ export class EdgelessPageBlockComponent
 
     this.signals.viewportUpdated.on(() => {
       this.style.setProperty('--affine-zoom', `${this.viewport.zoom}`);
+
+      this._syncSurfaceViewport();
+
       this._selection.syncBlockSelectionRect();
       this.requestUpdate();
     });
@@ -204,6 +229,7 @@ export class EdgelessPageBlockComponent
 
     requestAnimationFrame(() => {
       this._initViewport();
+      this._initSurface();
       this.requestUpdate();
     });
 
@@ -211,7 +237,7 @@ export class EdgelessPageBlockComponent
     this._clearSelection();
   }
 
-  override disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
 
     this.signals.updateSelection.dispose();
@@ -232,7 +258,7 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const { _selection } = this;
+    const { _selection, viewport } = this;
     const { frameSelectionRect } = _selection;
     const selectionState = this._selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = this.viewport;
@@ -251,11 +277,7 @@ export class EdgelessPageBlockComponent
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <affine-surface
-          .model=${this.surfaceModel}
-          .mouseRoot=${this.mouseRoot}
-        >
-        </affine-surface>
+        <canvas class="affine-surface-canvas"> </canvas>
       </div>
       <div class="affine-edgeless-page-block-container">
         <style>
@@ -278,12 +300,15 @@ export class EdgelessPageBlockComponent
         </div>
         ${hoverRect} ${selectionRect}
         ${selectionState.type !== 'none'
-          ? html` <edgeless-selected-rect
-              .state=${selectionState}
-              .rect=${selectionState.rect}
-              .zoom=${zoom}
-              .readonly=${this.readonly}
-            ></edgeless-selected-rect>`
+          ? html`
+              <edgeless-selected-rect
+                .viewport=${viewport}
+                .state=${selectionState}
+                .rect=${selectionState.rect}
+                .zoom=${zoom}
+                .readonly=${this.readonly}
+              ></edgeless-selected-rect>
+            `
           : null}
       </div>
     `;

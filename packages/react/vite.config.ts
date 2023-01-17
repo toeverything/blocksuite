@@ -1,7 +1,5 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
-import { basename, extname } from 'node:path';
-import banner from 'vite-plugin-banner';
 
 export default defineConfig({
   build: {
@@ -17,17 +15,4 @@ export default defineConfig({
       external: ['react', /^@blocksuite/, /^zustand/],
     },
   },
-  plugins: [
-    banner({
-      content: fileName => {
-        return `/// <reference types="./${basename(
-          fileName,
-          extname(fileName)
-        )}.d.ts" />
-/**/
-`;
-      },
-      verify: false,
-    }),
-  ],
 });

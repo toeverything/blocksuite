@@ -4,7 +4,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { BaseBlockModel, Page, Signal, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
 import {
-  assertExists,
   asyncFocusRichText,
   BLOCK_ID_ATTR,
   BlockChildrenContainer,
@@ -31,6 +30,7 @@ import {
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import autosize from 'autosize';
+import { assertExists } from '@blocksuite/global/utils';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -164,11 +164,7 @@ export class DefaultPageBlockComponent
 
   public isCompositionStart = false;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
@@ -233,9 +229,6 @@ export class DefaultPageBlockComponent
         signals: this.signals,
         container: this,
       });
-    }
-    if (changedProperties.has('readonly')) {
-      this.page.awareness.setReadonly(this.readonly);
     }
 
     this._tryUpdateMetaTitle();

@@ -5,11 +5,10 @@ import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
 import {
   SelectionUtils,
   SelectionInfo,
-  matchFlavours,
-  assertExists,
   getStartModelBySelection,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export class PasteManager {
   private _editor: EditorContainer;
@@ -218,14 +217,15 @@ export class PasteManager {
           },
           0
         );
-        selectedBlock?.text?.insertList(insertTexts, endIndex);
-        selectedBlock &&
-          this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
         //This is a temporary processing of the divider block, subsequent refactoring of the divider will remove it
         if (
           blocks[0].flavour === 'affine:divider' ||
           blocks[0].flavour === 'affine:embed'
         ) {
+          selectedBlock?.text?.insertList(insertTexts, endIndex);
+          selectedBlock &&
+            this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
+
           parent &&
             this._addBlocks(blocks.slice(0), parent, index, addBlockIds);
           const lastBlockModel = this._editor.page.getBlockById(lastBlock.id);
@@ -240,6 +240,31 @@ export class PasteManager {
             this._editor.page.deleteBlock(lastBlockModel);
           }
         } else {
+          const lastBlockModel = this._editor.page.getBlockById(lastBlock.id);
+
+          // if current paragraph is an empty frame, delete it after inserting other blocks.
+          if (
+            endIndex === 0 &&
+            insertLen > 0 &&
+            parent &&
+            lastBlockModel &&
+            matchFlavours(lastBlockModel, ['affine:paragraph']) &&
+            lastBlockModel?.text?.length === 0 &&
+            lastBlockModel?.children.length === 0
+          ) {
+            this._addBlocks(blocks.slice(0, 1), parent, index, addBlockIds);
+            this._editor.page.deleteBlock(lastBlockModel);
+          } else {
+            selectedBlock?.text?.insertList(insertTexts, endIndex);
+            selectedBlock &&
+              this._addBlocks(
+                blocks[0].children,
+                selectedBlock,
+                0,
+                addBlockIds
+              );
+          }
+
           parent &&
             this._addBlocks(blocks.slice(1), parent, index, addBlockIds);
         }

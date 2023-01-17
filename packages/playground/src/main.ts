@@ -9,6 +9,8 @@ import { DebugMenu } from './components/debug-menu.js';
 import {
   defaultMode,
   getOptions,
+  initDebugConfig,
+  initFeatureFlags,
   initParam,
   isBase64,
   isE2E,
@@ -18,11 +20,13 @@ import './style.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
+initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
     const page = workspace.getPage(pageId) as Page;
+    initFeatureFlags(page);
 
     const editor = new EditorContainer();
     editor.page = page;

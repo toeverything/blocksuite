@@ -148,31 +148,9 @@ main();
 
 For React developers, check out the [`@blocksuite/react`](./packages/react/README.md) doc for React components and hooks support.
 
-## Local Development
+## Building
 
-Setting up basic local environment:
-
-```bash
-# install dependencies
-pnpm i
-
-# start vite playground
-pnpm dev
-```
-
-The example page should work at [http://localhost:5173/?init](http://localhost:5173/?init)
-
-To test locally, please make sure browser binaries are already installed via `npx playwright install` and Vite playground is started with `pnpm dev`. Then there are multi commands to choose from:
-
-```bash
-# run tests in headless mode in another terminal window
-pnpm test
-
-# or run tests in headed mode for debugging
-pnpm test:headed
-```
-
-In headed mode, `await page.pause()` can be used in test cases to suspend the test runner. Note that the usage of the [Playwright VSCode extension](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) is also highly recommended.
+See [BUILDING.md](BUILDING.md) for instructions on how to build BlockSuite from source code.
 
 ## License
 

@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import type { YBlock } from './page.js';
-import { initSysProps } from '../utils/utils.js';
+import { initInternalProps } from '../utils/utils.js';
 import { uuidv4 } from '../utils/id-generator.js';
 
 interface Migration {
@@ -72,7 +72,7 @@ const migrations: Migration[] = [
         const yBlocks = doc.getMap(spaceId);
         const yBlock = new Y.Map() as YBlock;
         const id = uuidv4();
-        initSysProps(yBlock, {
+        initInternalProps(yBlock, {
           id,
           flavour: 'affine:surface',
         });

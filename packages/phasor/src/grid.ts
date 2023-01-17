@@ -1,15 +1,21 @@
-import type { Model } from './models.js';
+import type { Element } from './elements.js';
 import type { Bound } from './consts.js';
-import { getGridIndex, isOverlap, isPointIn, rangeFromBound } from './utils.js';
+import {
+  compare,
+  getGridIndex,
+  isOverlap,
+  isPointIn,
+  rangeFromBound,
+} from './utils.js';
 
 export class GridManager {
-  private _grids: Map<string, Set<Model>> = new Map();
+  private _grids: Map<string, Set<Element>> = new Map();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const models: Set<Model> = new Set();
-    this._grids.set(id, models);
-    return models;
+    const elements: Set<Element> = new Set();
+    this._grids.set(id, elements);
+    return elements;
   }
 
   private _getGrid(row: number, col: number) {
@@ -21,26 +27,26 @@ export class GridManager {
     return this._grids.size === 0;
   }
 
-  add(model: Model) {
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(model);
+  add(element: Element) {
+    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         let grid = this._getGrid(i, j);
         if (!grid) {
           grid = this._createGrid(i, j);
         }
-        grid.add(model);
+        grid.add(element);
       }
     }
   }
 
-  remove(model: Model) {
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(model);
+  remove(element: Element) {
+    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         const grid = this._getGrid(i, j);
         if (!grid) continue;
-        grid.delete(model);
+        grid.delete(element);
       }
     }
   }
@@ -56,35 +62,38 @@ export class GridManager {
     );
   }
 
-  search(bound: Bound): Set<Model> {
+  search(bound: Bound): Element[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results: Set<Model> = new Set();
+    const results: Set<Element> = new Set();
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
-        const gridmodels = this._getGrid(i, j);
-        if (!gridmodels) continue;
+        const gridElements = this._getGrid(i, j);
+        if (!gridElements) continue;
 
-        for (const model of gridmodels) {
-          if (isOverlap(model, bound)) {
-            results.add(model);
+        for (const element of gridElements) {
+          if (isOverlap(element, bound)) {
+            results.add(element);
           }
         }
       }
     }
 
-    return results;
+    // sort elements in set based on index
+    const sorted = Array.from(results).sort(compare);
+
+    return sorted;
   }
 
-  pick(x: number, y: number): Model[] {
+  pick(x: number, y: number): Element[] {
     const row = getGridIndex(x);
     const col = getGridIndex(y);
-    const gridmodels = this._getGrid(row, col);
-    if (!gridmodels) return [];
+    const gridElements = this._getGrid(row, col);
+    if (!gridElements) return [];
 
-    const results: Model[] = [];
-    for (const model of gridmodels) {
-      if (isPointIn(model, x, y)) {
-        results.push(model);
+    const results: Element[] = [];
+    for (const element of gridElements) {
+      if (isPointIn(element, x, y)) {
+        results.push(element);
       }
     }
 

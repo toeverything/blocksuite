@@ -4,19 +4,24 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:hmr": "WC_HMR=1 vite",
     "build": "tsc --project ./tsconfig.json && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@lit-labs/react": "^1.1.1",
     "@shoelace-style/shoelace": "2.0.0-beta.88",
-    "lit": "^2.6.0",
+    "lit": "^2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "license": "MPL-2.0"
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "@types/micromatch": "^4.0.2"
+  }
 }

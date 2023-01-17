@@ -1,5 +1,5 @@
 // Test page entry located in playground/examples/blob/index.html
-import { getBlobStorage } from '..';
+import { getBlobStorage } from '../index.js';
 import {
   testSerial,
   runOnce,
@@ -8,7 +8,7 @@ import {
   assertColor,
   assertExists,
   disableButtonsAfterClick,
-} from '../../__tests__/test-utils-dom';
+} from '../../__tests__/test-utils-dom.js';
 
 async function testBasic() {
   const storage = await getBlobStorage('test', '');

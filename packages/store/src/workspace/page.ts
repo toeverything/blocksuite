@@ -14,16 +14,18 @@ import type { IdGenerator } from '../utils/id-generator.js';
 import { Signal } from '../utils/signal.js';
 import {
   assertValidChildren,
-  initSysProps,
+  initInternalProps,
   syncBlockProps,
   trySyncTextProp,
   toBlockProps,
-  matchFlavours,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
-
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { debug } from '@blocksuite/global/debug';
+import BlockTag = BlockSuiteInternal.BlockTag;
+import TagSchema = BlockSuiteInternal.TagSchema;
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -90,6 +92,18 @@ export class Page extends Space<PageData> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
+  get tags() {
+    assertExists(this.root);
+    assertExists(this.root.flavour === 'affine:page');
+    return this.root.tags as Y.Map<Y.Map<unknown>>;
+  }
+
+  get tagSchema() {
+    assertExists(this.root);
+    assertExists(this.root.flavour === 'affine:page');
+    return this.root.tagSchema as Y.Map<unknown>;
+  }
+
   get blobs() {
     return this.workspace.blobs;
   }
@@ -105,6 +119,18 @@ export class Page extends Space<PageData> {
 
   get rootLayer() {
     return Array.isArray(this._root) ? this._root[1] : null;
+  }
+
+  /** @internal used for getting surface block elements for phasor */
+  get ySurfaceContainer() {
+    assertExists(this.rootLayer);
+    const ySurface = this._yBlocks.get(this.rootLayer.id);
+    if (ySurface?.has('elements')) {
+      return ySurface.get('elements') as Y.Map<unknown>;
+    } else {
+      ySurface?.set('elements', new Y.Map());
+      return ySurface?.get('elements') as Y.Map<unknown>;
+    }
   }
 
   get isEmpty() {
@@ -152,6 +178,47 @@ export class Page extends Space<PageData> {
 
   resetHistory() {
     this._history.clear();
+  }
+
+  updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
+    const already = this.tags.has(id);
+    let tags: Y.Map<unknown>;
+    if (!already) {
+      tags = new Y.Map();
+    } else {
+      tags = this.tags.get(id) as Y.Map<unknown>;
+    }
+    this.transact(() => {
+      if (!already) {
+        this.tags.set(id, tags);
+      }
+      tags.set(tag.type, tag);
+    });
+  }
+
+  getBlockTags(model: BaseBlockModel): Record<string, BlockTag> {
+    const tags = this.tags.get(model.id);
+    if (!tags) {
+      return {};
+    }
+    // fixme: performance issue
+    return tags.toJSON();
+  }
+
+  getBlockTagByTagSchema(
+    model: BaseBlockModel,
+    schema: TagSchema
+  ): BlockTag | null {
+    const tags = this.tags.get(model.id);
+    return (tags?.get(schema.id) as BlockTag) ?? null;
+  }
+
+  getTagSchema(id: TagSchema['id']) {
+    return this.tagSchema.get(id) ?? (null as TagSchema | null);
+  }
+
+  setTagSchema(schema: TagSchema) {
+    return this.tagSchema.set(schema.id, schema);
   }
 
   getBlockById(id: string) {
@@ -241,6 +308,7 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
@@ -254,28 +322,10 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ) {
-    return this.addBlock(
-      {
-        flavour,
-        ...blockProps,
-      },
-      parent,
-      parentIndex
-    );
-  }
-
-  /**
-   * @deprecated use `addBlockByFlavour`
-   */
-  addBlock<T extends BlockProps>(
-    blockProps: Partial<T>,
-    parent?: BaseBlockModel | string | null,
-    parentIndex?: number
-  ): string {
     if (this.awareness.isReadonly()) {
       throw new Error('cannot modify data in readonly mode');
     }
-    if (!blockProps.flavour) {
+    if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
 
@@ -285,7 +335,7 @@ export class Page extends Space<PageData> {
     //   }
     // }
 
-    const clonedProps: Partial<BlockProps> = { ...blockProps };
+    const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
     clonedProps.id = id;
 
@@ -293,7 +343,7 @@ export class Page extends Space<PageData> {
       const yBlock = new Y.Map() as YBlock;
 
       assertValidChildren(this._yBlocks, clonedProps);
-      initSysProps(yBlock, clonedProps);
+      initInternalProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
@@ -315,6 +365,22 @@ export class Page extends Space<PageData> {
     return id;
   }
 
+  /**
+   * @deprecated use `addBlockByFlavour`
+   */
+  addBlock<T extends BlockProps>(
+    blockProps: Partial<T>,
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ): string {
+    return this.addBlockByFlavour(
+      blockProps.flavour as Parameters<typeof this.addBlockByFlavour>[0],
+      blockProps as Parameters<typeof this.addBlockByFlavour>[1],
+      parent,
+      parentIndex
+    );
+  }
+
   updateBlockById(id: string, props: Partial<BlockProps>) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
@@ -324,6 +390,7 @@ export class Page extends Space<PageData> {
     this.updateBlock(model, props);
   }
 
+  @debug('CRUD')
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
@@ -354,6 +421,7 @@ export class Page extends Space<PageData> {
     nextParentModel.propsUpdated.emit();
   }
 
+  @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
@@ -395,7 +463,15 @@ export class Page extends Space<PageData> {
     this.deleteBlock(model);
   }
 
-  deleteBlock(model: BaseBlockModel) {
+  @debug('CRUD')
+  deleteBlock(
+    model: BaseBlockModel,
+    options: {
+      bringChildrenTo: 'parent' | BaseBlockModel;
+    } = {
+      bringChildrenTo: 'parent',
+    }
+  ) {
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -405,10 +481,16 @@ export class Page extends Space<PageData> {
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
+    if (options.bringChildrenTo === 'parent' && parent) {
+      parent.children.unshift(...model.children);
+    } else if (options.bringChildrenTo instanceof BaseBlockModel) {
+      options.bringChildrenTo.children.unshift(...model.children);
+    }
     this._blockMap.delete(model.id);
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
+      const children = model.children.map(model => model.id);
       model.dispose();
 
       if (parent) {
@@ -417,6 +499,13 @@ export class Page extends Space<PageData> {
 
         if (index > -1) {
           yChildren.delete(index, 1);
+        }
+        if (options.bringChildrenTo === 'parent' && parent) {
+          yChildren.unshift(children);
+        } else if (options.bringChildrenTo instanceof BaseBlockModel) {
+          this.updateBlockById(options.bringChildrenTo.id, {
+            children: options.bringChildrenTo.children,
+          });
         }
       }
     });
@@ -583,6 +672,10 @@ export class Page extends Space<PageData> {
     const yText = yBlock.get('prop:text') as Y.Text;
     const text = new Text(this, yText);
     model.text = text;
+    if (model.flavour === 'affine:page') {
+      model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
+      model.tagSchema = yBlock.get('meta:tags') as Y.Map<unknown>;
+    }
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {

@@ -8,6 +8,7 @@ import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { merge } from 'merge';
 
 export interface PageMeta {
   id: string;
@@ -16,7 +17,7 @@ export interface PageMeta {
   [key: string]: string | number | boolean;
 }
 
-type WorkspaceMetaData = {
+type WorkspaceMetaFields = {
   pages: Y.Array<unknown>;
   versions: Y.Map<unknown>;
   name: string;
@@ -25,7 +26,7 @@ type WorkspaceMetaData = {
 
 class WorkspaceMeta<
   Flags extends Record<string, unknown> = BlockSuiteFlags
-> extends Space<WorkspaceMetaData, Flags> {
+> extends Space<WorkspaceMetaFields, Flags> {
   private _prevPages = new Set<string>();
   pageAdded = new Signal<string>();
   pageRemoved = new Signal<string>();
@@ -216,7 +217,9 @@ class WorkspaceMeta<
 }
 
 const flagsPreset = {
+  enable_set_remote_flag: true,
   enable_drag_handle: true,
+  enable_surface: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 
@@ -253,10 +256,7 @@ export class Workspace {
       'space:meta',
       this.doc,
       this._store.awareness,
-      {
-        ...flagsPreset,
-        ...options.defaultFlags,
-      }
+      merge(flagsPreset, options.defaultFlags)
     );
 
     this.signals = {

@@ -3,7 +3,6 @@ import type { EmbedBlockComponent } from '../../embed-block/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import '../../components/drag-handle.js';
 import {
-  assertExists,
   caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
@@ -16,10 +15,10 @@ import {
   getBlockElementByModel,
   getAllBlocks,
   getDefaultPageBlock,
-  isInput,
   IPoint,
   doesInSamePath,
   getCurrentRange,
+  isPageTitleElement,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -31,10 +30,12 @@ import {
   getBlockEditingStateByPosition,
   getBlockEditingStateByCursor,
 } from './utils.js';
-import { BaseBlockModel, Utils } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/store';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -153,7 +154,7 @@ export class DefaultSelectionManager {
   state = new PageSelectionState('none');
   private _mouseRoot: HTMLElement;
   private _container: DefaultPageBlockComponent;
-  private _disposeCallbacks: (() => void)[] = [];
+  private _disposables = new DisposableGroup();
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
@@ -222,7 +223,7 @@ export class DefaultSelectionManager {
         },
       });
     };
-    this._disposeCallbacks.push(
+    this._disposables.add(
       this.page.awareness.signals.update.on(msg => {
         if (msg.id !== this.page.doc.clientID) {
           return;
@@ -236,13 +237,13 @@ export class DefaultSelectionManager {
           this._dragHandle?.remove();
           this._dragHandle = null;
         }
-      }).dispose
+      })
     );
     if (this.page.awareness.getFlag('enable_drag_handle')) {
       createHandle();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
-    this._disposeCallbacks.push(
+    this._disposables.add(
       initMouseEventHandlers(
         this._mouseRoot,
         this._onContainerDragStart,
@@ -278,7 +279,8 @@ export class DefaultSelectionManager {
         if (parentIndex !== -1) {
           block.parentIndex = parentIndex;
         }
-        block.children && dfs(block.children, depth + 1, result.length - 1);
+        block.children.length &&
+          dfs(block.children, depth + 1, result.length - 1);
       }
     };
 
@@ -350,7 +352,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isInput(e.raw)) return;
+    if (isPageTitleElement(e.raw.target)) return;
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
@@ -456,10 +458,7 @@ export class DefaultSelectionManager {
 
     if (
       clickBlockInfo &&
-      Utils.matchFlavours(clickBlockInfo.model, [
-        'affine:embed',
-        'affine:divider',
-      ])
+      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
     ) {
       this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
@@ -581,7 +580,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
-    this._disposeCallbacks.forEach(callback => callback());
+    this._disposables.dispose();
   }
 
   resetSelectedBlockByRect(

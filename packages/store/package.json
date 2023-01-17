@@ -8,6 +8,7 @@
     "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
     "test:unit": "vitest --run",
+    "test:unit:ui": "vitest --ui",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"
   },
@@ -17,7 +18,6 @@
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@types/flexsearch": "^0.7.3",
-    "@types/quill": "^1.3.7",
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "lit": "^2.6.0",
+    "lit": "^2.6.1",
     "yjs": "^13.5.44"
   },
   "peerDependencies": {
