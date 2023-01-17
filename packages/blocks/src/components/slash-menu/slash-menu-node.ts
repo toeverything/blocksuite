@@ -71,8 +71,10 @@ export class SlashMenu extends LitElement {
   @query('.slash-menu')
   slashMenuElement!: HTMLElement;
 
+  private filterItems: typeof paragraphConfig = [];
+
   // Just a temp variable
-  richText?: RichText;
+  private richText?: RichText;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -105,6 +107,10 @@ export class SlashMenu extends LitElement {
     super.willUpdate(_changedProperties);
     if (_changedProperties.has('searchString')) {
       this.activeItemIndex = 0;
+      this.filterItems = this._updateItem();
+      if (!this.filterItems.length) {
+        this.abortController.abort('ABORT');
+      }
     }
   }
 
@@ -123,7 +129,7 @@ export class SlashMenu extends LitElement {
       this.abortController.abort('ABORT');
       return;
     }
-    const configLen = this._filterConfig().length;
+    const configLen = this.filterItems.length;
     switch (e.key) {
       case 'Enter': {
         this._handleItemClick(this.activeItemIndex);
@@ -164,21 +170,25 @@ export class SlashMenu extends LitElement {
 
   private _handleItemClick(index: number) {
     this.abortController.abort();
-    const { flavour, type } = this._filterConfig()[index];
+    const { flavour, type } = this.filterItems[index];
     updateSelectedTextType(flavour, type, this.model.page);
   }
 
-  private _filterConfig() {
-    const normalizeString = this.searchString.trim().toLowerCase();
+  private _updateItem() {
+    const normalizeStr = (str: string) =>
+      str
+        .trim()
+        .toLowerCase()
+        .split('')
+        .filter(char => /[A-Za-z0-9]/.test(char))
+        .join('');
+    const searchStr = normalizeStr(this.searchString);
 
-    if (!normalizeString) {
+    if (!searchStr) {
       return paragraphConfig;
     }
-    return paragraphConfig.filter(({ name, type }) => {
-      if (name.toLowerCase().includes(normalizeString)) {
-        return true;
-      }
-      if (type.toLowerCase().includes(normalizeString)) {
+    return paragraphConfig.filter(({ name }) => {
+      if (normalizeStr(name).includes(searchStr)) {
         return true;
       }
       return false;
@@ -200,19 +210,13 @@ export class SlashMenu extends LitElement {
       flexDirection: position === 'bottom' ? 'column' : 'column-reverse',
     });
 
-    const filterConfig = this._filterConfig();
-    if (!filterConfig.length) {
-      this.abortController.abort('ABORT');
-      return html``;
-    }
-
     return html`<div class="slash-menu-container" style="${containerStyles}">
       <div
         class="overlay-mask"
         @click="${() => this.abortController.abort('ABORT')}"
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
-        ${filterConfig.map(
+        ${this.filterItems.map(
           ({ flavour, type, name, icon }, index) => html`<format-bar-button
             width="100%"
             style="padding-left: 12px; justify-content: flex-start;"
