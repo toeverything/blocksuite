@@ -8,7 +8,6 @@ import {
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
-  sleep,
   throttle,
 } from '../../__internal__/utils/index.js';
 import './button.js';
@@ -115,9 +114,9 @@ export const showFormatQuickBar = async ({
 
   // Mount
   container.appendChild(formatQuickBar);
-  // Wait for the format quick bar to be mounted
-  await sleep();
-  updatePos();
+  requestAnimationFrame(() => {
+    updatePos();
+  });
 
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
