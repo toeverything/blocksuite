@@ -5,9 +5,6 @@ import {
   DragDirection,
 } from '../../page-block/utils/cursor.js';
 import {
-  getContainerByModel,
-  getCurrentRange,
-  getModelsByRange,
   getRichTextByModel,
   getStartModelBySelection,
   throttle,
@@ -81,19 +78,6 @@ export const showSlashMenu = ({
     slashMenu.page = model.page;
   }, 10);
 
-  const models = getModelsByRange(getCurrentRange());
-  if (!models.length) {
-    return;
-  }
-  const editorContainer = getContainerByModel(models[0]);
-  // TODO need a better way to get the editor scroll container
-  const scrollContainer = editorContainer.querySelector(
-    '.affine-default-viewport'
-  );
-  if (scrollContainer) {
-    // Note: in edgeless mode, the scroll container is not exist!
-    scrollContainer.addEventListener('scroll', updatePos, { passive: true });
-  }
   window.addEventListener('resize', updatePos, { passive: true });
 
   // Mount
@@ -106,7 +90,6 @@ export const showSlashMenu = ({
   // Handle dispose
   abortController.signal.addEventListener('abort', e => {
     slashMenu.remove();
-    scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
 
     // Clean slash text
