@@ -14,19 +14,11 @@ function staticImplements<T>() {
   return <U extends T>(constructor: U) => constructor;
 }
 
-function isSetAddFunction<T>(value: unknown): value is Set<T>['add'] {
-  return typeof value === 'function';
-}
-
-function isSetDeleteFunction<T>(value: unknown): value is Set<T>['delete'] {
-  return typeof value === 'function';
-}
-
 @staticImplements<BlobProviderStatic>()
 export class IndexedDBBlobProvider implements BlobProvider {
   private readonly _database: IDBInstance;
   private readonly _cloud?: CloudSyncManager;
-  private _uploading = false;
+  public uploading = false;
 
   readonly blobs: Set<string> = new Set();
   readonly signals = {
@@ -35,15 +27,6 @@ export class IndexedDBBlobProvider implements BlobProvider {
     uploadStateChanged: new Signal<boolean>(),
     uploadFinished: new Signal<BlobId>(),
   };
-
-  onUploadStateChange(callback: (uploading: boolean) => void, sync = true) {
-    if (sync) callback(this._uploading);
-    this.signals.uploadStateChanged.on(callback);
-  }
-
-  onUploadFinished(callback: (id: BlobId) => void) {
-    this.signals.uploadFinished.on(callback);
-  }
 
   static async init(
     workspace: string,
@@ -67,7 +50,7 @@ export class IndexedDBBlobProvider implements BlobProvider {
     this._database = getDatabase('blob', workspace);
     if (cloudApi) {
       this.signals.uploadStateChanged.on(uploading => {
-        this._uploading = uploading;
+        this.uploading = uploading;
       });
       this._cloud = new CloudSyncManager(
         workspace,
