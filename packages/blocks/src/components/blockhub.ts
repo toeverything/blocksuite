@@ -1,4 +1,4 @@
-import { css, html } from 'lit';
+import { css, html, TemplateResult } from 'lit';
 import { customElement, query, queryAll } from 'lit/decorators.js';
 import { isFirefox, NonShadowLitElement } from '../__internal__/index.js';
 import type {
@@ -154,8 +154,8 @@ export class BlockHub extends NonShadowLitElement {
   private _currentPageX = 0;
   private _currentPageY = 0;
 
-  @query('affine-drag-indicator')
   private _indicator!: DragIndicator;
+  private _indicatorHTMLTemplate!: TemplateResult<1>;
 
   @queryAll('.card-container')
   private _blockHubCards!: Array<HTMLElement>;
@@ -381,6 +381,12 @@ export class BlockHub extends NonShadowLitElement {
 
     document.addEventListener('click', this._onClick);
     this._blockHubButton.addEventListener('click', this._onBlockHubButtonClick);
+    this._indicator = <DragIndicator>(
+      document.querySelector('affine-drag-indicator')
+    );
+    if (!this._indicator) {
+      this._indicatorHTMLTemplate = html`<affine-drag-indicator></affine-drag-indicator>`;
+    }
   }
 
   disconnectedCallback() {
@@ -546,6 +552,7 @@ export class BlockHub extends NonShadowLitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
+    console.log(this._indicator);
     let x = e.pageX;
     let y = e.pageY;
     if (isFirefox) {
@@ -636,7 +643,7 @@ export class BlockHub extends NonShadowLitElement {
         </div>
         ${this._blockHubCardTemplate(BLOCKHUB_TEXT_ITEMS, 'text', 'Text block')}
       </div>
-      <affine-drag-indicator></affine-drag-indicator>
+      ${this._indicatorHTMLTemplate}
     `;
   }
 }
