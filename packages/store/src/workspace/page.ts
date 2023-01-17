@@ -90,6 +90,10 @@ export class Page extends Space<PageData> {
     return this._workspace;
   }
 
+  get awarenessAdapter() {
+    return this.workspace.awarenessAdapter;
+  }
+
   get meta() {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }

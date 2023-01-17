@@ -211,13 +211,13 @@ export class DebugMenu extends LitElement {
   }
 
   private _setReadonlyOthers() {
-    const clients = [...this.page.awareness.getStates().keys()].filter(
+    const clients = [...this.page.awarenessAdapter.getStates().keys()].filter(
       id => id !== this.page.workspace.doc.clientID
     );
-    if (this.page.awareness.getFlag('enable_set_remote_flag')) {
+    if (this.page.awarenessAdapter.getFlag('enable_set_remote_flag')) {
       clients.forEach(id => {
-        this.page.awareness.setRemoteFlag(id, 'readonly', {
-          ...(this.page.awareness.getFlag('readonly') ?? {}),
+        this.page.awarenessAdapter.setRemoteFlag(id, 'readonly', {
+          ...(this.page.awarenessAdapter.getFlag('readonly') ?? {}),
           [this.page.prefixedId]: true,
         });
       });

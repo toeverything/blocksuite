@@ -10,7 +10,7 @@ export function bindCommonHotkey(page: Page) {
     hotkey.addListener(hotkeyStr, e => {
       // Prevent quill default behavior
       e.preventDefault();
-      if (page.awareness.isReadonly()) {
+      if (page.awarenessAdapter.isReadonly(page)) {
         return;
       }
 
