@@ -125,7 +125,6 @@ export class EditorContainer extends NonShadowLitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
-    this._disposables = new DisposableGroup();
   }
 
   render() {
