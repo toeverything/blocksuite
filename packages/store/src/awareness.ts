@@ -271,6 +271,9 @@ export class AwarenessAdapter<
     const states = this.getStates();
     this.store.spaces.forEach(space => {
       states.forEach((awState, clientId) => {
+        if (clientId === this.awareness.clientID) {
+          return;
+        }
         const cursor = awState.cursor?.[space.prefixedId];
         if (cursor) {
           space.richTextAdapters.forEach(textAdapter =>
