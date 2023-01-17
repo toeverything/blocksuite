@@ -175,20 +175,20 @@ export class SlashMenu extends LitElement {
   }
 
   private _updateItem() {
-    const normalizeStr = (str: string) =>
-      str
-        .trim()
-        .toLowerCase()
-        .split('')
-        .filter(char => /[A-Za-z0-9]/.test(char))
-        .join('');
-    const searchStr = normalizeStr(this.searchString);
-
+    const searchStr = this.searchString.toLowerCase();
     if (!searchStr) {
       return paragraphConfig;
     }
     return paragraphConfig.filter(({ name }) => {
-      if (normalizeStr(name).includes(searchStr)) {
+      if (
+        name
+          .trim()
+          .toLowerCase()
+          .split('')
+          .filter(char => /[A-Za-z0-9]/.test(char))
+          .join('')
+          .includes(searchStr)
+      ) {
         return true;
       }
       return false;

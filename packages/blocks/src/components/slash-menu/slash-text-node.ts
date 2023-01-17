@@ -56,9 +56,14 @@ export class SlashTextNode extends Inline {
       return;
     }
     const value: string = children.head.value();
-    if (this.slashMenu) {
-      this.slashMenu.searchString = value.slice(1);
+    if (value.includes(' ')) {
+      // Should hide slash menu when space is typed
+      this.abortController.abort('ABORT');
     }
+    if (!this.slashMenu) {
+      return;
+    }
+    this.slashMenu.searchString = value.slice(1);
   }
 
   override attach(): void {
@@ -75,7 +80,7 @@ export class SlashTextNode extends Inline {
 
   override detach(): void {
     super.detach();
-    this.abortController.abort();
+    this.abortController.abort('ABORT');
   }
 }
 
