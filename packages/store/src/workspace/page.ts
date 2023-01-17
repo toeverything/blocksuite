@@ -161,30 +161,30 @@ export class Page extends Space<PageData> {
     return Text;
   }
 
-  undo() {
+  undo = () => {
     if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.undo();
-  }
+  };
 
-  redo() {
+  redo = () => {
     if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.redo();
-  }
+  };
 
   /** Capture current operations to undo stack synchronously. */
-  captureSync() {
+  captureSync = () => {
     this._history.stopCapturing();
-  }
+  };
 
-  resetHistory() {
+  resetHistory = () => {
     this._history.clear();
-  }
+  };
 
   updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
     const already = this.tags.has(id);
