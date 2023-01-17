@@ -35,6 +35,7 @@ import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/store';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -153,7 +154,7 @@ export class DefaultSelectionManager {
   state = new PageSelectionState('none');
   private _mouseRoot: HTMLElement;
   private _container: DefaultPageBlockComponent;
-  private _disposeCallbacks: (() => void)[] = [];
+  private _disposables = new DisposableGroup();
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
@@ -222,7 +223,7 @@ export class DefaultSelectionManager {
         },
       });
     };
-    this._disposeCallbacks.push(
+    this._disposables.add(
       this.page.awarenessAdapter.signals.update.on(msg => {
         if (msg.id !== this.page.doc.clientID) {
           return;
@@ -236,13 +237,13 @@ export class DefaultSelectionManager {
           this._dragHandle?.remove();
           this._dragHandle = null;
         }
-      }).dispose
+      })
     );
     if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
       createHandle();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
-    this._disposeCallbacks.push(
+    this._disposables.add(
       initMouseEventHandlers(
         this._mouseRoot,
         this._onContainerDragStart,
@@ -589,7 +590,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
-    this._disposeCallbacks.forEach(callback => callback());
+    this._disposables.dispose();
   }
 
   resetSelectedBlockByRect(
