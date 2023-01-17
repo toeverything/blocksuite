@@ -32,6 +32,7 @@ export const debugLog = function (
 
 const whitelist = new Set<string>();
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 export const debug = (tag?: string) => {
   return (
