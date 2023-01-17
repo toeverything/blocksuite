@@ -17,9 +17,9 @@ import {
   repairContextMenuRange,
 } from '../../utils/cursor.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import { SelectionController } from './index.js';
+import { MouseModeController } from './index.js';
 
-export class DefaultSelectionController extends SelectionController<DefaultMouseMode> {
+export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{
     type: 'default',
   };
