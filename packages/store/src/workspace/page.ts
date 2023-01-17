@@ -395,9 +395,6 @@ export class Page extends Space<PageData> {
     targetModel: BaseBlockModel,
     top = true
   ) {
-    console.log(blockProps);
-    console.log(targetModel);
-    console.log(top);
     const targetParentModel = this.getParent(targetModel);
     if (targetParentModel === null) {
       throw new Error('cannot find parent model');
