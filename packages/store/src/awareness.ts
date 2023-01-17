@@ -153,7 +153,8 @@ export class AwarenessAdapter<
   };
 
   public getLocalCursor = (space: Space): SelectionRange | undefined => {
-    const awarenessState = this.awareness.getLocalState();
+    const states = this.awareness.getStates();
+    const awarenessState = states.get(this.awareness.clientID);
     return awarenessState?.[space.prefixedId]?.cursor;
   };
 
