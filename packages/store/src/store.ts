@@ -10,7 +10,7 @@ import {
 } from './utils/id-generator.js';
 import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
-import { AwarenessAdapter } from './awareness.js';
+import { AwarenessAdapter, AwarenessState } from './awareness.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -52,7 +52,7 @@ export interface StoreOptions<
 > extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
-  awareness?: Awareness;
+  awareness?: Awareness<AwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
 }
@@ -83,7 +83,7 @@ export class Store {
   }: StoreOptions = {}) {
     this.awarenessAdapter = new AwarenessAdapter(
       this,
-      awareness ?? new Awareness(this.doc),
+      awareness ?? new Awareness<AwarenessState>(this.doc),
       merge(flagsPreset, defaultFlags)
     );
     switch (idGenerator) {
@@ -106,6 +106,7 @@ export class Store {
     this.providers = providers.map(
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, {
+          // @ts-expect-error
           awareness: this.awarenessAdapter.awareness,
         })
     );

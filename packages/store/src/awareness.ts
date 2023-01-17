@@ -33,15 +33,15 @@ type Response = {
   id: string;
 };
 
-interface AwarenessState<
+export type AwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
-> {
+> = {
   cursor?: Record<Space['prefixedId'], SelectionRange>;
   user?: UserInfo;
   flags: Flags;
   request?: Request<Flags>[];
   response?: Response[];
-}
+};
 
 interface AwarenessMessage<
   Flags extends Record<string, unknown> = BlockSuiteFlags
@@ -62,7 +62,7 @@ export interface AwarenessMetaMessage<
 export class AwarenessAdapter<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
-  readonly awareness: Awareness;
+  readonly awareness: Awareness<AwarenessState<Flags>>;
   readonly store: Store;
 
   readonly signals = {
@@ -71,8 +71,8 @@ export class AwarenessAdapter<
 
   constructor(
     store: Store,
-    awareness: Awareness,
-    defaultFlags: Partial<Flags> = {}
+    awareness: Awareness<AwarenessState<Flags>>,
+    defaultFlags: Flags
   ) {
     this.store = store;
     this.awareness = awareness;
@@ -142,7 +142,7 @@ export class AwarenessAdapter<
   public setLocalCursor = (space: Space, range: SelectionRange | null) => {
     const cursor = this.awareness.getLocalState()?.cursor ?? {};
     if (range === null) {
-      cursor[space.prefixedId] = undefined;
+      delete cursor[space.prefixedId];
       this.awareness.setLocalStateField('cursor', cursor);
     } else {
       this.awareness.setLocalStateField('cursor', {
