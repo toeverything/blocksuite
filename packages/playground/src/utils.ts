@@ -79,6 +79,7 @@ export function getOptions(): Pick<
     defaultFlags: {
       enable_set_remote_flag: true,
       enable_drag_handle: true,
+      enable_block_hub: true,
       readonly: {
         'space:page0': false,
       },

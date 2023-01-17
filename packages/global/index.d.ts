@@ -20,11 +20,13 @@ declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
   enable_drag_handle: boolean;
   enable_surface: boolean;
+  enable_block_hub: boolean;
   readonly: Record<string, boolean>;
 };
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
+
   interface SchemaMeta {
     /**
      * color of the tag
@@ -175,6 +177,7 @@ declare namespace BlockSuiteModelProps {
   }
 
   import type { ColorStyle, TDShapeType } from '@blocksuite/blocks';
+
   interface ShapeBlockModel {
     color: ColorStyle | `#${string}`;
     type: TDShapeType;

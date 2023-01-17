@@ -160,7 +160,7 @@ export class DefaultSelectionManager {
   private _dragHandleAbortController = new AbortController();
 
   private _dragHandle: DragHandle | null = null;
-  // private _blockHub: BlockHub;
+  // private _blockHub: BlockHub | null = null; // TODO need to be referenced to remove
 
   constructor({
     page,
@@ -224,6 +224,52 @@ export class DefaultSelectionManager {
         },
       });
     };
+    const createBlockHub = () => {
+      new BlockHub({
+        onDropCallback: (e, end) => {
+          const dataTransfer = e.dataTransfer;
+          assertExists(dataTransfer);
+          const data = dataTransfer.getData('affine/block-hub');
+          const blockProps = JSON.parse(data);
+          const targetModel = end.model;
+          const rect = end.position;
+          this.page.captureSync();
+          const distanceToTop = Math.abs(rect.top - e.y);
+          const distanceToBottom = Math.abs(rect.bottom - e.y);
+          this.page.insertBlock(
+            blockProps,
+            targetModel,
+            distanceToTop < distanceToBottom
+          );
+        },
+        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+            skipX,
+          });
+        },
+        getBlockEditingStateByCursor: (
+          pageX,
+          pageY,
+          cursor,
+          size,
+          skipX,
+          dragging
+        ) => {
+          return getBlockEditingStateByCursor(
+            this._blocks,
+            pageX,
+            pageY,
+            cursor,
+            {
+              size,
+              skipX,
+              dragging,
+            }
+          );
+        },
+      });
+    };
+    // TODO waiting https://github.com/toeverything/blocksuite/pull/706/files
     this._disposeCallbacks.push(
       this.page.awareness.signals.update.on(msg => {
         if (msg.id !== this.page.doc.clientID) {
@@ -243,52 +289,9 @@ export class DefaultSelectionManager {
     if (this.page.awareness.getFlag('enable_drag_handle')) {
       createHandle();
     }
-    new BlockHub({
-      onDropCallback: (e, end) => {
-        // console.log(e);
-        // console.log(end);
-        const dataTransfer = e.dataTransfer;
-        assertExists(dataTransfer);
-        const data = dataTransfer.getData('affine/block-hub');
-        // console.log(data);
-        const blockProps = JSON.parse(data);
-        const targetModel = end.model;
-        const rect = end.position;
-        this.page.captureSync();
-        const distanceToTop = Math.abs(rect.top - e.y);
-        const distanceToBottom = Math.abs(rect.bottom - e.y);
-        this.page.insertBlock(
-          blockProps,
-          targetModel,
-          distanceToTop < distanceToBottom
-        );
-      },
-      getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-        return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
-          skipX,
-        });
-      },
-      getBlockEditingStateByCursor: (
-        pageX,
-        pageY,
-        cursor,
-        size,
-        skipX,
-        dragging
-      ) => {
-        return getBlockEditingStateByCursor(
-          this._blocks,
-          pageX,
-          pageY,
-          cursor,
-          {
-            size,
-            skipX,
-            dragging,
-          }
-        );
-      },
-    });
+    if (this.page.awareness.getFlag('enable_block_hub')) {
+      createBlockHub();
+    }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposeCallbacks.push(
       initMouseEventHandlers(
