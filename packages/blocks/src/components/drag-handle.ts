@@ -178,8 +178,13 @@ export class DragHandle extends LitElement {
 
   public disconnectedCallback() {
     super.disconnectedCallback();
-    this._indicator.cursorPosition = null;
-    this._indicator.targetRect = null;
+
+    // Drag handle may be disposed without initializing indicator
+    if (this._indicator) {
+      this._indicator.cursorPosition = null;
+      this._indicator.targetRect = null;
+    }
+
     window.removeEventListener('resize', this._onResize);
     document.body.removeEventListener('wheel', this._onWheel);
     document.body.removeEventListener(
