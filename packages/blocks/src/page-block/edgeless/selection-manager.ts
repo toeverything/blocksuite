@@ -8,12 +8,12 @@ import {
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { DefaultSelectionController } from './selection-controllers/default.js';
-import { ShapeSelectionController } from './selection-controllers/shape.js';
+import { DefaultModeController } from './mode-controllers/default.js';
+import { ShapeModeController } from './mode-controllers/shape.js';
 import type {
   HoverState,
-  SelectionController,
-} from './selection-controllers/index.js';
+  MouseModeController,
+} from './mode-controllers/index.js';
 import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { Disposable } from '@blocksuite/store';
 
@@ -128,7 +128,7 @@ export class EdgelessSelectionManager {
     type: 'default',
   };
   private _container: EdgelessPageBlockComponent;
-  private _controllers: Record<MouseMode['type'], SelectionController>;
+  private _controllers: Record<MouseMode['type'], MouseModeController>;
 
   private _mouseDisposeCallback: () => void;
   private _selectionUpdateCallback: Disposable;
@@ -181,8 +181,8 @@ export class EdgelessSelectionManager {
   constructor(container: EdgelessPageBlockComponent) {
     this._container = container;
     this._controllers = {
-      default: new DefaultSelectionController(this._container),
-      shape: new ShapeSelectionController(this._container),
+      default: new DefaultModeController(this._container),
+      shape: new ShapeModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
