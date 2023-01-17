@@ -17,7 +17,7 @@ export interface PageMeta {
   [key: string]: string | number | boolean;
 }
 
-type WorkspaceMetaData = {
+type WorkspaceMetaFields = {
   pages: Y.Array<unknown>;
   versions: Y.Map<unknown>;
   name: string;
@@ -26,7 +26,7 @@ type WorkspaceMetaData = {
 
 class WorkspaceMeta<
   Flags extends Record<string, unknown> = BlockSuiteFlags
-> extends Space<WorkspaceMetaData, Flags> {
+> extends Space<WorkspaceMetaFields, Flags> {
   private _prevPages = new Set<string>();
   pageAdded = new Signal<string>();
   pageRemoved = new Signal<string>();

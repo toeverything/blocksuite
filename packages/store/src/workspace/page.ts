@@ -14,7 +14,7 @@ import type { IdGenerator } from '../utils/id-generator.js';
 import { Signal } from '../utils/signal.js';
 import {
   assertValidChildren,
-  initSysProps,
+  initInternalProps,
   syncBlockProps,
   trySyncTextProp,
   toBlockProps,
@@ -23,6 +23,8 @@ import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import BlockTag = BlockSuiteInternal.BlockTag;
+import TagSchema = BlockSuiteInternal.TagSchema;
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -87,6 +89,18 @@ export class Page extends Space<PageData> {
 
   get meta() {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
+  }
+
+  get tags() {
+    assertExists(this.root);
+    assertExists(this.root.flavour === 'affine:page');
+    return this.root.tags as Y.Map<Y.Map<unknown>>;
+  }
+
+  get tagSchema() {
+    assertExists(this.root);
+    assertExists(this.root.flavour === 'affine:page');
+    return this.root.tagSchema as Y.Map<unknown>;
   }
 
   get blobs() {
@@ -163,6 +177,47 @@ export class Page extends Space<PageData> {
 
   resetHistory() {
     this._history.clear();
+  }
+
+  updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
+    const already = this.tags.has(id);
+    let tags: Y.Map<unknown>;
+    if (!already) {
+      tags = new Y.Map();
+    } else {
+      tags = this.tags.get(id) as Y.Map<unknown>;
+    }
+    this.transact(() => {
+      if (!already) {
+        this.tags.set(id, tags);
+      }
+      tags.set(tag.type, tag);
+    });
+  }
+
+  getBlockTags(model: BaseBlockModel): Record<string, BlockTag> {
+    const tags = this.tags.get(model.id);
+    if (!tags) {
+      return {};
+    }
+    // fixme: performance issue
+    return tags.toJSON();
+  }
+
+  getBlockTagByTagSchema(
+    model: BaseBlockModel,
+    schema: TagSchema
+  ): BlockTag | null {
+    const tags = this.tags.get(model.id);
+    return (tags?.get(schema.id) as BlockTag) ?? null;
+  }
+
+  getTagSchema(id: TagSchema['id']) {
+    return this.tagSchema.get(id) ?? (null as TagSchema | null);
+  }
+
+  setTagSchema(schema: TagSchema) {
+    return this.tagSchema.set(schema.id, schema);
   }
 
   getBlockById(id: string) {
@@ -286,7 +341,7 @@ export class Page extends Space<PageData> {
       const yBlock = new Y.Map() as YBlock;
 
       assertValidChildren(this._yBlocks, clonedProps);
-      initSysProps(yBlock, clonedProps);
+      initInternalProps(yBlock, clonedProps);
       syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
@@ -612,6 +667,10 @@ export class Page extends Space<PageData> {
     const yText = yBlock.get('prop:text') as Y.Text;
     const text = new Text(this, yText);
     model.text = text;
+    if (model.flavour === 'affine:page') {
+      model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
+      model.tagSchema = yBlock.get('meta:tags') as Y.Map<unknown>;
+    }
 
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {

@@ -33,6 +33,7 @@
     }
   },
   "dependencies": {
+    "@blocksuite/global": "workspace:*",
     "fractional-indexing": "^3.1.0"
   }
 }
