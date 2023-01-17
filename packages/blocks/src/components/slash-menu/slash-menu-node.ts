@@ -58,21 +58,41 @@ export class SlashMenu extends LitElement {
   @query('.slash-menu')
   slashMenuElement!: HTMLElement;
 
-  override connectedCallback(): void {
+  override connectedCallback() {
     super.connectedCallback();
-
-    // Handle click outside
-    const clickAwayListener = (e: MouseEvent) => {
-      if (e.target === this) {
-        return;
-      }
-      this.abortController.abort('ABORT');
-      window.removeEventListener('mousedown', clickAwayListener);
-    };
-    window.addEventListener('mousedown', clickAwayListener);
+    window.addEventListener('mouseup', this._clickAwayListener);
+    window.addEventListener('keyup', this._escapeListener);
   }
 
-  filterConfig() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('mouseup', this._clickAwayListener);
+    window.removeEventListener('keyup', this._escapeListener);
+  }
+
+  /**
+   * Handle click outside
+   */
+  private _clickAwayListener = (e: MouseEvent | KeyboardEvent) => {
+    if (e.target === this) {
+      return;
+    }
+    this.abortController.abort('ABORT');
+    window.removeEventListener('mouseup', this._clickAwayListener);
+  };
+
+  /**
+   * Handle press esc
+   */
+  private _escapeListener = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape') {
+      return;
+    }
+    this.abortController.abort('ABORT');
+    window.removeEventListener('keyup', this._escapeListener);
+  };
+
+  private _filterConfig() {
     const normalizeString = this.searchString.slice(1).trim().toLowerCase();
 
     if (!normalizeString) {
@@ -104,7 +124,7 @@ export class SlashMenu extends LitElement {
       flexDirection: position === 'bottom' ? 'column' : 'column-reverse',
     });
 
-    const filterConfig = this.filterConfig();
+    const filterConfig = this._filterConfig();
     if (!filterConfig.length) {
       this.abortController.abort('ABORT');
       return html``;
