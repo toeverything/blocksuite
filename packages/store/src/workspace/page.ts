@@ -23,7 +23,7 @@ import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { logger, Subsystem } from '@blocksuite/global/debug';
+import { debug } from '@blocksuite/global/debug';
 import BlockTag = BlockSuiteInternal.BlockTag;
 import TagSchema = BlockSuiteInternal.TagSchema;
 export type YBlock = Y.Map<unknown>;
@@ -308,6 +308,7 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
@@ -321,7 +322,6 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ) {
-    logger.debug(Subsystem.Store, 'addBlockByFlavour');
     if (this.awareness.isReadonly()) {
       throw new Error('cannot modify data in readonly mode');
     }
@@ -390,8 +390,8 @@ export class Page extends Space<PageData> {
     this.updateBlock(model, props);
   }
 
+  @debug('CRUD')
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
-    logger.debug(Subsystem.Store, 'moveBlock');
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -421,8 +421,8 @@ export class Page extends Space<PageData> {
     nextParentModel.propsUpdated.emit();
   }
 
+  @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
-    logger.debug(Subsystem.Store, 'updateBlock');
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -463,6 +463,7 @@ export class Page extends Space<PageData> {
     this.deleteBlock(model);
   }
 
+  @debug('CRUD')
   deleteBlock(
     model: BaseBlockModel,
     options: {
@@ -471,7 +472,6 @@ export class Page extends Space<PageData> {
       bringChildrenTo: 'parent',
     }
   ) {
-    logger.debug(Subsystem.Store, 'deleteBlock');
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
