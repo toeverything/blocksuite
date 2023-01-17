@@ -395,21 +395,23 @@ export class BlockHub extends NonShadowLitElement {
       document.removeEventListener('dragover', this._onDragOverDocument);
     this.removeEventListener('mousedown', this._onMouseDown);
 
-    this._blockHubCards.forEach(card => {
-      card.removeEventListener('mousedown', this._onCardMouseDown);
-      card.removeEventListener('mouseup', this._onCardMouseUp);
-    });
-    for (const blockHubMenu of this._blockHubMenus) {
-      blockHubMenu.removeEventListener(
-        'mouseover',
-        this._onBlockHubMenuMouseOver
+    if (this.hasUpdated) {
+      this._blockHubCards.forEach(card => {
+        card.removeEventListener('mousedown', this._onCardMouseDown);
+        card.removeEventListener('mouseup', this._onCardMouseUp);
+      });
+      for (const blockHubMenu of this._blockHubMenus) {
+        blockHubMenu.removeEventListener(
+          'mouseover',
+          this._onBlockHubMenuMouseOver
+        );
+      }
+      document.removeEventListener('click', this._onClick);
+      this._blockHubButton.removeEventListener(
+        'click',
+        this._onBlockHubButtonClick
       );
     }
-    document.removeEventListener('click', this._onClick);
-    this._blockHubButton.removeEventListener(
-      'click',
-      this._onBlockHubButtonClick
-    );
   }
 
   private _shouldCardDisplay(type: string) {
