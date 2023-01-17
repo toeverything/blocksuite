@@ -1,6 +1,5 @@
 import type * as Y from 'yjs';
-import { Awareness } from 'y-protocols/awareness.js';
-import { AwarenessAdapter, SelectionRange } from './awareness.js';
+import type { SelectionRange } from './awareness.js';
 import type { RichTextAdapter } from './text-adapter.js';
 import type { DataInitializer } from './yjs/proxy.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
@@ -24,16 +23,13 @@ export class Space<
    */
   protected readonly proxy: Data;
   protected readonly origin: Y.Map<Data[keyof Data]>;
-  readonly awareness!: AwarenessAdapter<Flags>;
   readonly richTextAdapters = new Map<string, RichTextAdapter>();
 
   constructor(
     id: string,
     doc: BlockSuiteDoc,
-    awareness: Awareness,
     options?: {
       valueInitializer?: DataInitializer<Partial<Data>>;
-      defaultFlags?: Partial<Flags>;
     }
   ) {
     this.id = id;
@@ -43,9 +39,6 @@ export class Space<
     this.proxy = this.doc.getMapProxy<string, Data>(targetId, {
       initializer: options?.valueInitializer,
     });
-
-    const aware = awareness ?? new Awareness(this.doc);
-    this.awareness = new AwarenessAdapter(this, aware, options?.defaultFlags);
   }
 
   get prefixedId() {

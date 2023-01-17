@@ -4,11 +4,10 @@ import { Space } from '../space.js';
 import { Page } from './page.js';
 import { Signal } from '../utils/signal.js';
 import { Indexer, QueryContent } from './search.js';
-import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { merge } from 'merge';
+import type { AwarenessAdapter } from '../awareness.js';
 
 export interface PageMeta {
   id: string;
@@ -33,20 +32,14 @@ class WorkspaceMeta<
   pagesUpdated = new Signal();
   commonFieldsUpdated = new Signal();
 
-  constructor(
-    id: string,
-    doc: BlockSuiteDoc,
-    awareness: Awareness,
-    defaultFlags?: Partial<Flags>
-  ) {
-    super(id, doc, awareness, {
+  constructor(id: string, doc: BlockSuiteDoc) {
+    super(id, doc, {
       valueInitializer: {
         pages: () => new Y.Array(),
         versions: () => new Y.Map(),
         avatar: () => '',
         name: () => '',
       },
-      defaultFlags,
     });
     this.origin.observeDeep(this._handleEvents);
   }
@@ -216,13 +209,6 @@ class WorkspaceMeta<
   };
 }
 
-const flagsPreset = {
-  enable_set_remote_flag: true,
-  enable_drag_handle: true,
-  enable_surface: false,
-  readonly: {},
-} satisfies BlockSuiteFlags;
-
 export class Workspace {
   static Y = Y;
   public readonly room: string | undefined;
@@ -252,12 +238,7 @@ export class Workspace {
     }
     this.room = options.room;
 
-    this.meta = new WorkspaceMeta(
-      'space:meta',
-      this.doc,
-      this._store.awareness,
-      merge(flagsPreset, options.defaultFlags)
-    );
+    this.meta = new WorkspaceMeta('space:meta', this.doc);
 
     this.signals = {
       pagesUpdated: this.meta.pagesUpdated,
@@ -266,6 +247,10 @@ export class Workspace {
     };
 
     this._handlePageEvent();
+  }
+
+  get awarenessAdapter(): AwarenessAdapter {
+    return this._store.awarenessAdapter;
   }
 
   get providers() {
@@ -307,13 +292,7 @@ export class Workspace {
 
   private _handlePageEvent() {
     this.signals.pageAdded.on(pageId => {
-      const page = new Page(
-        this,
-        pageId,
-        this.doc,
-        this._store.awareness,
-        this._store.idGenerator
-      );
+      const page = new Page(this, pageId, this.doc, this._store.idGenerator);
       this._store.addSpace(page);
       page.syncFromExistingDoc();
       this._indexer.onCreatePage(pageId);

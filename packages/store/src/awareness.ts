@@ -1,10 +1,11 @@
 import * as Y from 'yjs';
 import type { RelativePosition } from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
-import type { Space } from './space.js';
 import { Signal } from './utils/signal.js';
 import { merge } from 'merge';
 import { uuidv4 } from './utils/id-generator.js';
+import type { Space } from './space.js';
+import type { Store } from './store.js';
 
 export interface SelectionRange {
   id: string;
@@ -35,7 +36,7 @@ type Response = {
 interface AwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
-  cursor?: SelectionRange;
+  cursor?: Record<string, SelectionRange>;
   user?: UserInfo;
   flags: Flags;
   request?: Request<Flags>[];
@@ -61,21 +62,19 @@ export interface AwarenessMetaMessage<
 export class AwarenessAdapter<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly space: Space<any, Flags>;
   readonly awareness: Awareness;
+  readonly store: Store;
 
   readonly signals = {
     update: new Signal<AwarenessMessage<Flags>>(),
   };
 
   constructor(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    space: Space<any, Flags>,
+    store: Store,
     awareness: Awareness,
     defaultFlags: Partial<Flags> = {}
   ) {
-    this.space = space;
+    this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
     this.signals.update.on(this._onAwarenessMessage);
@@ -90,7 +89,7 @@ export class AwarenessAdapter<
     }
   }
 
-  public setLocalCursor(range: SelectionRange) {
+  public setLocalCursor(space: Space, range: SelectionRange) {
     this.awareness.setLocalStateField('cursor', range);
   }
 
@@ -104,18 +103,18 @@ export class AwarenessAdapter<
     return flags[field];
   }
 
-  public setReadonly(value: boolean): void {
+  public setReadonly(space: Space, value: boolean): void {
     const flags = this.getFlag('readonly') ?? {};
     this.setFlag('readonly', {
       ...flags,
-      [this.space.prefixedId]: value,
+      [space.prefixedId]: value,
     } as Flags['readonly']);
   }
 
-  public isReadonly(): boolean {
+  public isReadonly(space: Space): boolean {
     const rd = this.getFlag('readonly');
     if (rd && typeof rd === 'object') {
-      return Boolean((rd as Record<string, boolean>)[this.space.prefixedId]);
+      return Boolean((rd as Record<string, boolean>)[space.prefixedId]);
     } else {
       return false;
     }
@@ -142,10 +141,10 @@ export class AwarenessAdapter<
     ] satisfies Request<Flags>[]);
   }
 
-  public getLocalCursor(): SelectionRange | undefined {
+  public getLocalCursor(space: Space): SelectionRange | undefined {
     const states = this.awareness.getStates();
     const awarenessState = states.get(this.awareness.clientID);
-    return awarenessState?.cursor;
+    return awarenessState?.[space.prefixedId].cursor;
   }
 
   public getStates(): Map<number, AwarenessState<Flags>> {
@@ -259,57 +258,64 @@ export class AwarenessAdapter<
   }
 
   private _resetRemoteCursor() {
-    this.space.richTextAdapters.forEach(textAdapter =>
-      textAdapter.quillCursors.clearCursors()
-    );
-    this.getStates().forEach((awState, clientId) => {
-      if (clientId !== this.awareness.clientID && awState.cursor) {
-        const anchor = Y.createAbsolutePositionFromRelativePosition(
-          awState.cursor.anchor,
-          this.space.doc
-        );
-        const focus = Y.createAbsolutePositionFromRelativePosition(
-          awState.cursor.focus,
-          this.space.doc
-        );
-        const textAdapter = this.space.richTextAdapters.get(
-          awState.cursor.id || ''
-        );
-        if (anchor && focus && textAdapter) {
-          const user: Partial<UserInfo> = awState.user || {};
-          const color = user.color || '#ffa500';
-          const name = user.name || 'other';
-          textAdapter.quillCursors.createCursor(
-            clientId.toString(),
-            name,
-            color
+    const states = this.getStates();
+    this.store.spaces.forEach(space => {
+      states.forEach((awState, clientId) => {
+        const cursor = awState.cursor?.[space.prefixedId];
+        if (cursor) {
+          space.richTextAdapters.forEach(textAdapter =>
+            textAdapter.quillCursors.clearCursors()
           );
-          textAdapter.quillCursors.moveCursor(clientId.toString(), {
-            index: anchor.index,
-            length: focus.index - anchor.index,
-          });
+          const anchor = Y.createAbsolutePositionFromRelativePosition(
+            cursor.anchor,
+            space.doc
+          );
+          const focus = Y.createAbsolutePositionFromRelativePosition(
+            cursor.focus,
+            space.doc
+          );
+          const textAdapter = space.richTextAdapters.get(cursor.id || '');
+          if (anchor && focus && textAdapter) {
+            const user: Partial<UserInfo> = awState.user || {};
+            const color = user.color || '#ffa500';
+            const name = user.name || 'other';
+            textAdapter.quillCursors.createCursor(
+              clientId.toString(),
+              name,
+              color
+            );
+            textAdapter.quillCursors.moveCursor(clientId.toString(), {
+              index: anchor.index,
+              length: focus.index - anchor.index,
+            });
+          }
         }
-      }
+      });
     });
   }
 
   public updateLocalCursor() {
-    const localCursor = this.getLocalCursor();
-    if (!localCursor) {
-      return;
-    }
-    const anchor = Y.createAbsolutePositionFromRelativePosition(
-      localCursor.anchor,
-      this.space.doc
-    );
-    const focus = Y.createAbsolutePositionFromRelativePosition(
-      localCursor.focus,
-      this.space.doc
-    );
-    if (anchor && focus) {
-      const textAdapter = this.space.richTextAdapters.get(localCursor.id || '');
-      textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
-    }
+    this.store.spaces.forEach(space => {
+      const localCursor = this.getLocalCursor(space);
+      if (!localCursor) {
+        return;
+      }
+      const anchor = Y.createAbsolutePositionFromRelativePosition(
+        localCursor.anchor,
+        space.doc
+      );
+      const focus = Y.createAbsolutePositionFromRelativePosition(
+        localCursor.focus,
+        space.doc
+      );
+      if (anchor && focus) {
+        const textAdapter = space.richTextAdapters.get(localCursor.id || '');
+        textAdapter?.quill.setSelection(
+          anchor.index,
+          focus.index - anchor.index
+        );
+      }
+    });
   }
 
   destroy() {

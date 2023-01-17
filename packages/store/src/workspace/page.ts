@@ -1,6 +1,5 @@
 import * as Y from 'yjs';
 import type { Quill } from 'quill';
-import type { Awareness } from 'y-protocols/awareness';
 import { uuidv4 } from 'lib0/random.js';
 import { BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
@@ -54,7 +53,7 @@ export type PageData = {
 };
 
 export class Page extends Space<PageData> {
-  public workspace: Workspace;
+  private _workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | BaseBlockModel[] | null = null;
@@ -80,12 +79,15 @@ export class Page extends Space<PageData> {
     workspace: Workspace,
     id: string,
     doc: BlockSuiteDoc,
-    awareness: Awareness,
     idGenerator: IdGenerator = uuidv4
   ) {
-    super(id, doc, awareness);
-    this.workspace = workspace;
+    super(id, doc);
+    this._workspace = workspace;
     this._idGenerator = idGenerator;
+  }
+
+  get workspace() {
+    return this._workspace;
   }
 
   get meta() {
@@ -138,14 +140,14 @@ export class Page extends Space<PageData> {
   }
 
   get canUndo() {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       return false;
     }
     return this._history.canUndo();
   }
 
   get canRedo() {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       return false;
     }
     return this._history.canRedo();
@@ -156,7 +158,7 @@ export class Page extends Space<PageData> {
   }
 
   undo() {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -164,7 +166,7 @@ export class Page extends Space<PageData> {
   }
 
   redo() {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -322,7 +324,7 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ) {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       throw new Error('cannot modify data in readonly mode');
     }
     if (!flavour) {
@@ -382,7 +384,7 @@ export class Page extends Space<PageData> {
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -392,7 +394,7 @@ export class Page extends Space<PageData> {
 
   @debug('CRUD')
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -423,7 +425,7 @@ export class Page extends Space<PageData> {
 
   @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -455,7 +457,7 @@ export class Page extends Space<PageData> {
   }
 
   deleteBlockById(id: string) {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -472,7 +474,7 @@ export class Page extends Space<PageData> {
       bringChildrenTo: 'parent',
     }
   ) {
-    if (this.awareness.isReadonly()) {
+    if (this.workspace.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -520,14 +522,19 @@ export class Page extends Space<PageData> {
       throw new Error(`Block "${id}" does not have text`);
     }
 
-    const adapter = new RichTextAdapter(this, yText, quill);
+    const adapter = new RichTextAdapter(
+      this,
+      yText,
+      quill,
+      this.workspace.awarenessAdapter
+    );
     this.richTextAdapters.set(id, adapter);
 
     quill.on('selection-change', () => {
       const cursor = adapter.getCursor();
       if (!cursor) return;
 
-      this.awareness.setLocalCursor({ ...cursor, id });
+      this.workspace.awarenessAdapter.setLocalCursor(this, { ...cursor, id });
     });
   }
 
@@ -608,7 +615,7 @@ export class Page extends Space<PageData> {
     if (isWeb) {
       event.stackItem.meta.set(
         'cursor-location',
-        this.awareness.getLocalCursor()
+        this.workspace.awarenessAdapter.getLocalCursor(this)
       );
     }
 
@@ -621,7 +628,7 @@ export class Page extends Space<PageData> {
       return;
     }
 
-    this.awareness.setLocalCursor(cursor);
+    this.workspace.awarenessAdapter.setLocalCursor(this, cursor);
     this._historyObserver();
   };
 
@@ -670,7 +677,7 @@ export class Page extends Space<PageData> {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const text = new Text(this, yText);
+    const text = new Text(this, yText, this.workspace.awarenessAdapter);
     model.text = text;
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;

@@ -116,12 +116,18 @@ declare module 'yjs' {
 export class Text {
   private _space: Space;
   private _yText: Y.Text;
+  private _awarenessAdapter: AwarenessAdapter;
 
   // TODO toggle transact by options
   private _shouldTransact = true;
 
-  constructor(space: Space, input: Y.Text | string) {
+  constructor(
+    space: Space,
+    input: Y.Text | string,
+    awarenessAdapter: AwarenessAdapter
+  ) {
     this._space = space;
+    this._awarenessAdapter = awarenessAdapter;
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
     } else {
@@ -129,8 +135,12 @@ export class Text {
     }
   }
 
-  static fromDelta(space: Space, delta: DeltaOperation[]) {
-    const result = new Text(space, '');
+  static fromDelta(
+    space: Space,
+    delta: DeltaOperation[],
+    awarenessAdapter: AwarenessAdapter
+  ) {
+    const result = new Text(space, '', awarenessAdapter);
     result.applyDelta(delta);
     return result;
   }
@@ -140,7 +150,7 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    if (this._space.awareness.isReadonly()) {
+    if (this._awarenessAdapter.isReadonly(this._space)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -149,7 +159,7 @@ export class Text {
   }
 
   clone() {
-    return new Text(this._space, this._yText.clone());
+    return new Text(this._space, this._yText.clone(), this._awarenessAdapter);
   }
 
   split(index: number, length: number): [PrelimText, PrelimText] {
@@ -289,16 +299,21 @@ export class RichTextAdapter {
   readonly yText: Y.Text;
   readonly quill: Quill;
   readonly quillCursors: any;
-  readonly awareness: AwarenessAdapter;
+  readonly awarenessAdapter: AwarenessAdapter;
   private _negatedUsedFormats: Record<string, any>;
 
-  constructor(space: Space, yText: Y.Text, quill: Quill) {
+  constructor(
+    space: Space,
+    yText: Y.Text,
+    quill: Quill,
+    awarenessAdapter: AwarenessAdapter
+  ) {
     this.space = space;
     this.yText = yText;
     this.doc = space.doc;
     this.quill = quill;
 
-    this.awareness = space.awareness;
+    this.awarenessAdapter = awarenessAdapter;
     const quillCursors = quill.getModule('cursors') || null;
     this.quillCursors = quillCursors;
     // This object contains all attributes used in the quill instance
