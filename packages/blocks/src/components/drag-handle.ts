@@ -131,6 +131,12 @@ export class DragHandle extends LitElement {
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
+    if (!this._indicator) {
+      this._indicator = <DragIndicator>(
+        document.createElement('affine-drag-indicator')
+      );
+      document.body.appendChild(this._indicator);
+    }
   }
 
   public show(startModelState: EditingState) {
