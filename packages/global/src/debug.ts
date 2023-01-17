@@ -2,6 +2,7 @@ import color from 'ansi-colors';
 import { assertEquals, assertExists } from './utils.js';
 
 let enabled = false;
+let showStack = false;
 
 export const removeStackHeader = (stack: unknown) =>
   String(stack).replace(/^.+\n.+\n/, '');
@@ -18,6 +19,7 @@ export const debugLog = function (
   const { callerIdx } = info;
   const error = new Error();
   const stackInfo = removeStackHeader(error.stack).split('\n');
+  const upperStackInfo = stackInfo.slice(1).join('\n');
   const message = stackInfo[callerIdx].trim();
   const method = /(?<=at\s)(\S*)(?=\s)/.exec(message)?.[0] ?? message;
   const subsystem = /(?<=\/packages\/)[a-z]+/.exec(message)?.[0] ?? 'unknown';
@@ -25,7 +27,8 @@ export const debugLog = function (
     `[packages/${color.blue(subsystem)}] ${color.magenta(
       method
     )}(${info.arguments.map(() => '%o').join(', ')})\n`,
-    ...info.arguments
+    ...info.arguments,
+    showStack ? upperStackInfo : ''
   );
 };
 
@@ -57,6 +60,10 @@ export const debug = (tag?: string) => {
     return descriptor;
   };
 };
+
+export function configDebugLog(verbose: boolean) {
+  showStack = verbose;
+}
 
 export function enableDebugLog(tags: string | string[]) {
   color.enabled = true;

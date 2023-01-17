@@ -2,7 +2,11 @@
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
-import { enableDebugLog, disableDebuglog } from '@blocksuite/global/debug';
+import {
+  enableDebugLog,
+  disableDebuglog,
+  configDebugLog,
+} from '@blocksuite/global/debug';
 import { BlockSchema } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 import { Page, Workspace, Utils } from '@blocksuite/store';
@@ -57,6 +61,9 @@ async function main() {
   });
   Object.defineProperty(globalThis, 'disableDebugLog', {
     value: disableDebuglog,
+  });
+  Object.defineProperty(globalThis, 'configDebugLog', {
+    value: configDebugLog,
   });
 
   subscribePage(workspace);
