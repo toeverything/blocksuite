@@ -54,7 +54,7 @@ const BLOCKHUB_TEXT_ITEMS = [
     name: 'Heading 1',
     description: 'Heading in the largest font.',
     icon: H1Icon,
-    toolTip: 'Drag to insert Heading 1', // TODO confirm
+    toolTip: 'Drag to insert Heading 1',
   },
   {
     flavour: 'affine:paragraph',
@@ -151,12 +151,6 @@ const BLOCKHUB_LIST_ITEMS = [
 
 @customElement('affine-block-hub')
 export class BlockHub extends NonShadowLitElement {
-  private _currentPageX = 0;
-  private _currentPageY = 0;
-
-  private _indicator!: DragIndicator;
-  private _indicatorHTMLTemplate!: TemplateResult<1>;
-
   @queryAll('.card-container')
   private _blockHubCards!: Array<HTMLElement>;
 
@@ -166,22 +160,24 @@ export class BlockHub extends NonShadowLitElement {
   @query('.new-icon')
   private _blockHubButton!: HTMLElement;
 
-  // @query('.affine-block-hub-container')
-  // private _blockHubContainer!: HTMLElement;
-
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
-
   private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
     null;
+
+  private _currentPageX = 0;
+  private _currentPageY = 0;
+  private _indicator!: DragIndicator;
+  private _indicatorHTMLTemplate!: TemplateResult<1>;
   private _lastModelState: EditingState | null = null;
   private _cursor: number | null = 0;
-  private _expanded = false; // if blockHub menu is expanded
+  private _expanded = false;
   private _isGrabbing = false;
   private _isCardListVisiable = false;
   private _cardvisibleType = '';
   private _showToolTip = true;
+
   static styles = css`
     .affine-block-hub-container {
       width: 280px;
@@ -269,7 +265,6 @@ export class BlockHub extends NonShadowLitElement {
       position: fixed;
       right: 28px;
       bottom: 84px;
-      //bottom: 500px;
       width: 44px;
       background: #ffffff;
       box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
@@ -299,7 +294,6 @@ export class BlockHub extends NonShadowLitElement {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      //margin-top: 8px;
       align-items: center;
       background: #ffffff;
       border-radius: 10px;
@@ -385,7 +379,7 @@ export class BlockHub extends NonShadowLitElement {
       document.querySelector('affine-drag-indicator')
     );
     if (!this._indicator) {
-      this._indicatorHTMLTemplate = html`<affine-drag-indicator></affine-drag-indicator>`;
+      this._indicatorHTMLTemplate = html` <affine-drag-indicator></affine-drag-indicator>`;
     }
   }
 
@@ -439,8 +433,8 @@ export class BlockHub extends NonShadowLitElement {
         >
           ${RectIcon}
           <tool-tip inert role="tooltip" tip-position="left" style="top: 5px"
-            >Drag to Insert blank line</tool-tip
-          >
+            >Drag to Insert blank line
+          </tool-tip>
         </div>
         <div
           class="block-hub-icon-container"
@@ -531,7 +525,6 @@ export class BlockHub extends NonShadowLitElement {
     // DragEvent that doesn't dispatch manually, is expected to have dataTransfer property
     assertExists(event.dataTransfer);
     event.dataTransfer.effectAllowed = 'move';
-    // event.dataTransfer.dropEffect = 'none';
     const blockHubElement = event.target as HTMLElement;
     const affineType = blockHubElement.getAttribute('affine-type');
     const data: {
@@ -623,7 +616,6 @@ export class BlockHub extends NonShadowLitElement {
     assertExists(cardType);
     this._isCardListVisiable = true;
     this._cardvisibleType = cardType;
-    console.log(this._cardvisibleType);
     this.requestUpdate();
   };
 
