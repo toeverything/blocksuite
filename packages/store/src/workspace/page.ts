@@ -23,6 +23,7 @@ import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { logger, Subsystem } from '@blocksuite/global/debug';
 import BlockTag = BlockSuiteInternal.BlockTag;
 import TagSchema = BlockSuiteInternal.TagSchema;
 export type YBlock = Y.Map<unknown>;
@@ -320,6 +321,7 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ) {
+    logger.debug(Subsystem.Store, 'addBlockByFlavour');
     if (this.awareness.isReadonly()) {
       throw new Error('cannot modify data in readonly mode');
     }
@@ -389,6 +391,7 @@ export class Page extends Space<PageData> {
   }
 
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
+    logger.debug(Subsystem.Store, 'moveBlock');
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -419,6 +422,7 @@ export class Page extends Space<PageData> {
   }
 
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
+    logger.debug(Subsystem.Store, 'updateBlock');
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -467,6 +471,7 @@ export class Page extends Space<PageData> {
       bringChildrenTo: 'parent',
     }
   ) {
+    logger.debug(Subsystem.Store, 'deleteBlock');
     if (this.awareness.isReadonly()) {
       console.error('cannot modify data in readonly mode');
       return;

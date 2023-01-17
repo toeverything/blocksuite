@@ -8,7 +8,8 @@
   },
   "exports": {
     ".": "./index.d.ts",
-    "./utils": "./src/utils.ts"
+    "./utils": "./src/utils.ts",
+    "./debug": "./src/debug.ts"
   },
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -16,11 +17,15 @@
     "access": "public",
     "exports": {
       ".": "./index.d.ts",
-      "./utils": "./dist/utils.js"
+      "./utils": "./dist/utils.js",
+      "./debug": "./dist/debug.js"
     },
     "files": [
       "dist",
       "index.d.ts"
     ]
+  },
+  "dependencies": {
+    "chalk": "^5.2.0"
   }
 }
