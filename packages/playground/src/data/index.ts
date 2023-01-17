@@ -16,7 +16,7 @@ export function heavy(workspace: Workspace) {
       page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new Text(page, 'Hello, world! ' + i, page.awarenessAdapter),
+          text: new Text(page, 'Hello, world! ' + i),
         },
         frameId
       );

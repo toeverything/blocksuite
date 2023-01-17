@@ -679,7 +679,7 @@ export class Page extends Space<PageData> {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const text = new Text(this, yText, this.awarenessAdapter);
+    const text = new Text(this, yText);
     model.text = text;
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
