@@ -89,14 +89,6 @@ export class AwarenessAdapter<
     }
   }
 
-  public setLocalCursor = (space: Space, range: SelectionRange) => {
-    const cursor = this.awareness.getLocalState()?.cursor ?? {};
-    this.awareness.setLocalStateField('cursor', {
-      ...cursor,
-      [space.prefixedId]: range,
-    });
-  };
-
   public setFlag = <Key extends keyof Flags>(field: Key, value: Flags[Key]) => {
     const oldFlags = this.awareness.getLocalState()?.flags ?? {};
     this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
@@ -145,6 +137,19 @@ export class AwarenessAdapter<
         value,
       },
     ] satisfies Request<Flags>[]);
+  };
+
+  public setLocalCursor = (space: Space, range: SelectionRange | null) => {
+    const cursor = this.awareness.getLocalState()?.cursor ?? {};
+    if (range === null) {
+      delete cursor[space.prefixedId];
+      this.awareness.setLocalStateField('cursor', cursor);
+    } else {
+      this.awareness.setLocalStateField('cursor', {
+        ...cursor,
+        [space.prefixedId]: range,
+      });
+    }
   };
 
   public getLocalCursor = (space: Space): SelectionRange | undefined => {

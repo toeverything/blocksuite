@@ -127,6 +127,7 @@ export class EditorContainer extends NonShadowLitElement {
     super.disconnectedCallback();
     this._disposables.dispose();
     this._disposables = new DisposableGroup();
+    this.page.awarenessAdapter.setLocalCursor(this.page, null);
   }
 
   render() {
