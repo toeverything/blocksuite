@@ -226,10 +226,6 @@ export class DragHandle extends LitElement {
     );
     document.body.addEventListener('wheel', this._onWheel);
     window.addEventListener('resize', this._onResize);
-    this._indicator = <DragIndicator>(
-      document.createElement('affine-drag-indicator')
-    );
-    document.body.appendChild(this._indicator);
     this._dragHandle.addEventListener('mousedown', this._onClick);
     this._dragHandle.addEventListener('click', this._onClick);
     isFirefox &&
