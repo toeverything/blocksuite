@@ -339,3 +339,30 @@ export async function readClipboardText(page: Page) {
   });
   return text;
 }
+
+export const getCenterPosition: (
+  page: Page,
+  selector: string
+) => Promise<{ x: number; y: number }> = async (
+  page: Page,
+  selector: string
+) => {
+  return await page.evaluate((selector: string) => {
+    const bbox = document
+      .querySelector(selector)
+      ?.getBoundingClientRect() as DOMRect;
+    return {
+      x: bbox.left + bbox.width / 2,
+      y: bbox.top + bbox.height / 2,
+    };
+  }, selector);
+};
+
+export const getBoundingClientRect: (
+  page: Page,
+  selector: string
+) => Promise<DOMRect> = async (page: Page, selector: string) => {
+  return await page.evaluate((selector: string) => {
+    return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
+  }, selector);
+};
