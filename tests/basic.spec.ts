@@ -58,7 +58,7 @@ test('basic init with external text', async ({ page }) => {
     page.addBlock(
       {
         flavour: 'affine:paragraph',
-        text: page.Text.fromDelta(page, delta),
+        text: page.Text.fromDelta(page, delta, page.awarenessAdapter),
       },
       frame
     );

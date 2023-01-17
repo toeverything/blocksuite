@@ -102,7 +102,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       const text = page.Text.fromDelta(
         page,
         [{ insert: 'Hello' }, { insert: str, attributes: { link } }],
-        page.workspace.awarenessAdapter
+        page.awarenessAdapter
       );
       const id = page.addBlock(
         { flavour: 'affine:paragraph', type: 'text', text: text },
