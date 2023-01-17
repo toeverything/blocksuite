@@ -3,7 +3,7 @@ import type {
   ShapeMouseMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { SelectionController } from './index.js';
+import { MouseModeController } from './index.js';
 import type { SelectionArea } from '../selection-manager.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { RectElement } from '@blocksuite/phasor';
@@ -11,7 +11,7 @@ import { RectElement } from '@blocksuite/phasor';
 // FIXME use nanoid
 let i = 0;
 
-export class ShapeSelectionController extends SelectionController<ShapeMouseMode> {
+export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{
     type: 'shape',
     color: 'black',

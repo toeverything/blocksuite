@@ -14,7 +14,7 @@ export interface HoverState {
   block: RootBlockModel;
 }
 
-export abstract class SelectionController<Mode extends MouseMode = MouseMode> {
+export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   protected readonly _edgeless: EdgelessPageBlockComponent;
   protected _blockSelectionState: BlockSelectionState = {
     type: 'none',

@@ -28,18 +28,23 @@ export class SurfaceContainer {
     return yElement;
   }
 
+  private _transact(callback: () => void) {
+    const doc = this._yElements.doc as Y.Doc;
+    doc.transact(callback, doc.clientID);
+  }
+
   addElement(props: Element) {
     props.index = generateKeyBetween(this._lastIndex, null);
     this._lastIndex = props.index;
 
-    this._yElements.doc?.transact(() => {
+    this._transact(() => {
       const yElement = this._createYElement(props);
       this._yElements.set(props.id, yElement);
     });
   }
 
   setElementBound(id: string, bound: Bound) {
-    this._yElements.doc?.transact(() => {
+    this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
       const xywh = `${bound.x},${bound.y},${bound.w},${bound.h}`;
@@ -48,7 +53,7 @@ export class SurfaceContainer {
   }
 
   removeElement(id: string) {
-    this._yElements.doc?.transact(() => {
+    this._transact(() => {
       this._yElements.delete(id);
     });
   }
