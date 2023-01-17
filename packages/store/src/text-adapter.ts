@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import type { AwarenessAdapter } from './awareness.js';
 import type { DeltaOperation, Quill } from 'quill';
 import type { Space } from './space.js';
 
@@ -289,21 +288,13 @@ export class RichTextAdapter {
   readonly yText: Y.Text;
   readonly quill: Quill;
   readonly quillCursors: any;
-  readonly awarenessAdapter: AwarenessAdapter;
   private _negatedUsedFormats: Record<string, any>;
 
-  constructor(
-    space: Space,
-    yText: Y.Text,
-    quill: Quill,
-    awarenessAdapter: AwarenessAdapter
-  ) {
+  constructor(space: Space, yText: Y.Text, quill: Quill) {
     this.space = space;
     this.yText = yText;
     this.doc = space.doc;
     this.quill = quill;
-
-    this.awarenessAdapter = awarenessAdapter;
     const quillCursors = quill.getModule('cursors') || null;
     this.quillCursors = quillCursors;
     // This object contains all attributes used in the quill instance

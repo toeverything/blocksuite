@@ -524,12 +524,7 @@ export class Page extends Space<PageData> {
       throw new Error(`Block "${id}" does not have text`);
     }
 
-    const adapter = new RichTextAdapter(
-      this,
-      yText,
-      quill,
-      this.awarenessAdapter
-    );
+    const adapter = new RichTextAdapter(this, yText, quill);
     this.richTextAdapters.set(id, adapter);
 
     quill.on('selection-change', () => {

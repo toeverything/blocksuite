@@ -157,7 +157,7 @@ export class AwarenessAdapter<
   };
 
   public getStates = (): Map<number, AwarenessState<Flags>> => {
-    return this.awareness.getStates() as Map<number, AwarenessState<Flags>>;
+    return this.awareness.getStates();
   };
 
   private _onAwarenessChange = (diff: {
