@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
