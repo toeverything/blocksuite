@@ -39,6 +39,7 @@ export type AwarenessState<
   cursor?: Record<Space['prefixedId'], SelectionRange>;
   user?: UserInfo;
   flags: Flags;
+  uploading?: string[];
   request?: Request<Flags>[];
   response?: Response[];
 };
@@ -118,6 +119,21 @@ export class AwarenessAdapter<
     }
   };
 
+  public isUploading(id: string): boolean {
+    const uploading = this.getAllUploading();
+    return uploading.includes(id);
+  }
+
+  public addUploading(id: string): void {
+    const uploading = this.awareness.getLocalState()?.uploading ?? [];
+    this.awareness.setLocalStateField('uploading', [...uploading, id]);
+  }
+  public deleteUploading(id: string): void {
+    const uploading = this.awareness.getLocalState()?.uploading ?? [];
+    uploading.splice(uploading.indexOf(id), 1);
+    this.awareness.setLocalStateField('uploading', [...uploading, id]);
+  }
+
   setRemoteFlag = <Key extends keyof Flags>(
     clientId: number,
     field: Key,
@@ -160,6 +176,15 @@ export class AwarenessAdapter<
     return this.awareness.getStates();
   };
 
+  public getAllUploading = (): string[] => {
+    const uploading: string[] = [];
+    this.awareness.getStates().forEach((value, key) => {
+      if (key !== this.awareness.clientID) {
+        uploading.concat(value.uploading ?? []);
+      }
+    });
+    return uploading;
+  };
   private _onAwarenessChange = (diff: {
     added: number[];
     removed: number[];

@@ -117,17 +117,52 @@ export class ImageBlockComponent extends NonShadowLitElement {
   @state()
   _source!: string;
 
+  @state()
+  _uploadingStatus!: string;
+
   // This is the initial width before event resize is applied
+
+  async setImageSource() {
+    const storage = await this.model.page.blobs;
+    assertExists(storage);
+    try {
+      const url = await storage.get(this.model.sourceId);
+      url && (this._source = url);
+    } catch (e) {
+      this._uploadingStatus = 'finish';
+      this._source = '';
+    }
+  }
 
   override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._uploadingStatus = 'loading';
     // exclude padding and border width
     const { width, height } = this.model;
-    const storage = await this.model.page.blobs;
-    assertExists(storage);
-    const url = await storage.get(this.model.sourceId);
-    url && (this._source = url);
+    if (this.model.page.awarenessAdapter.isUploading(this.model.sourceId)) {
+      this._uploadingStatus = 'loading';
+      this.model.page.awarenessAdapter.signals.update.subscribe(
+        () => {
+          return this.model.page.awarenessAdapter.getAllUploading();
+        },
+        data => {
+          if (data?.includes(this.model.sourceId)) {
+            this._uploadingStatus = 'loading';
+          } else {
+            this._uploadingStatus = 'finish';
+            // TODO: get url from storage
+            // await this.setImageSource();
+          }
+        },
+        {
+          filter: msg => msg.id !== this.model.page.doc.clientID,
+        }
+      );
+    } else {
+      await this.setImageSource();
+    }
+
     if (width && height) {
       this._resizeImg.style.width = width + 'px';
       this._resizeImg.style.height = height + 'px';
@@ -153,7 +188,9 @@ export class ImageBlockComponent extends NonShadowLitElement {
       <affine-embed .model=${this.model} .readonly=${this.host.readonly}>
         <div class="affine-image-wrapper">
           <div>
-            <img class="resizable-img" src=${this._source} />
+            ${this._uploadingStatus === 'loading'
+              ? html`<div>loading</div>`
+              : html`<img class="resizable-img" src=${this._source} />`}
           </div>
           ${childrenContainer}
         </div>
