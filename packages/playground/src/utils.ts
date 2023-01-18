@@ -27,6 +27,9 @@ export function initFeatureFlags(page: Page) {
   if (params.get('surface') !== null) {
     page.awarenessStore.setFlag('enable_surface', true);
   }
+  if (params.get('slash') !== null) {
+    page.awarenessStore.setFlag('enable_slash_menu', true);
+  }
 }
 
 export function initDebugConfig() {

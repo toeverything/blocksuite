@@ -22,6 +22,7 @@ import {
 } from './rich-text-operations.js';
 import { Shortcuts } from './shortcuts.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { showSlashMenu } from '../../components/slash-menu/index.js';
 
 interface QuillRange {
   index: number;
@@ -337,6 +338,32 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'right',
       shiftKey: false,
       handler: onKeyRight,
+    },
+
+    slash: {
+      // Slash '/'
+      key: 191,
+      // prefix non digit or empty string
+      // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
+      // prefix: /[^\d]$|^(?![\s\S])/,
+      handler(range, context) {
+        // TODO remove feature flag after slash menu is stable
+        const flag = page.awarenessStore.getFlag('enable_slash_menu');
+        if (!flag) {
+          return ALLOW_DEFAULT;
+        }
+        // End of feature flag
+
+        if (matchFlavours(model, ['affine:code'])) {
+          return ALLOW_DEFAULT;
+        }
+        // if (context.format['code'] === true) {
+        //   return ALLOW_DEFAULT;
+        // }
+        const curRange = getCurrentRange();
+        showSlashMenu({ model, range: curRange });
+        return ALLOW_DEFAULT;
+      },
     },
   };
 

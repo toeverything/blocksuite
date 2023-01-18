@@ -67,6 +67,7 @@ const flagsPreset = {
   enable_drag_handle: true,
   enable_block_hub: true,
   enable_surface: false,
+  enable_slash_menu: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 
