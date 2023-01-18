@@ -6,8 +6,6 @@ import {
 } from '../../page-block/utils/position.js';
 import {
   getQuillIndexByNativeSelection,
-  getRichTextByModel,
-  getStartModelBySelection,
   throttle,
 } from '../../__internal__/utils/index.js';
 import './slash-menu-node.js';
@@ -33,13 +31,6 @@ export const showSlashMenu = ({
   const slashMenu = document.createElement('slash-menu');
   slashMenu.model = model;
   slashMenu.abortController = abortController;
-
-  // Handle slash text
-  const startModel = getStartModelBySelection();
-  const richText = getRichTextByModel(startModel);
-  if (!richText) {
-    return;
-  }
 
   // Handle position
 
@@ -77,7 +68,7 @@ export const showSlashMenu = ({
     slashMenu.position = placement;
   }, 10);
 
-  window.addEventListener('resize', updatePos, { passive: true });
+  window.addEventListener('resize', updatePos);
 
   // Mount
   container.appendChild(slashMenu);
