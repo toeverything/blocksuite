@@ -38,7 +38,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
 
     if (this._page.awarenessAdapter.getFlag('enable_surface')) {
-      const bound = new Bound(modelX, modelY, 100, 100);
+      const bound = new Bound(modelX, modelY, 0, 0);
       const color = this.mouseMode.color;
       // TODO
       // type: this.mouseMode.shape
@@ -53,12 +53,10 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   }
 
   onContainerDragMove(e: SelectionEvent) {
-    // FIXME
-    if (this._page.awarenessAdapter.getFlag('enable_surface')) return;
-
     assertExists(this._draggingElementId);
     assertExists(this._draggingArea);
     this._draggingArea.end = new DOMPoint(e.x, e.y);
+
     const [x, y] = this._edgeless.viewport.toModelCoord(
       Math.min(this._draggingArea.start.x, this._draggingArea.end.x),
       Math.min(this._draggingArea.start.y, this._draggingArea.end.y)
@@ -70,13 +68,10 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
       Math.abs(this._draggingArea.start.y - this._draggingArea.end.y) /
       this._edgeless.viewport.zoom;
 
-    // TODO update _draggingElementId
-    new Bound(x, y, w, h);
-    /*
-    this._page.updateBlockById(this._draggingShapeBlockId, {
-      xywh: JSON.stringify([x, y, w, h]),
-    });
-    */
+    const bound = new Bound(x, y, w, h);
+    const id = this._draggingElementId;
+    this._surface.setElementBound(id, bound);
+
     this._edgeless.signals.shapeUpdated.emit();
   }
 
