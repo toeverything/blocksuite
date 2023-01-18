@@ -62,16 +62,15 @@ export class SlashMenu extends LitElement {
   @property()
   abortController = new AbortController();
 
-  @property()
-  searchString = '';
-
-  @state()
-  activeItemIndex = 0;
-
   @query('.slash-menu')
   slashMenuElement!: HTMLElement;
 
-  private filterItems: typeof paragraphConfig = [];
+  private searchString = '';
+
+  private activeItemIndex = 0;
+
+  @state()
+  private filterItems: typeof paragraphConfig = paragraphConfig;
 
   // Just a temp variable
   private richText?: RichText;
@@ -103,21 +102,31 @@ export class SlashMenu extends LitElement {
     });
   }
 
-  protected override willUpdate(_changedProperties: PropertyValues): void {
-    super.willUpdate(_changedProperties);
-    if (_changedProperties.has('searchString')) {
-      this.activeItemIndex = 0;
-      this.filterItems = this._updateItem();
-      if (!this.filterItems.length) {
-        this.abortController.abort('ABORT');
-      }
-    }
-  }
-
   /**
    * Handle arrow key
    */
   private _keyDownListener = (e: KeyboardEvent) => {
+    if (e.key === ' ') {
+      this.abortController.abort();
+      return;
+    }
+    if (e.key === 'Backspace') {
+      if (!this.searchString.length) {
+        this.abortController.abort();
+      }
+      this.searchString = this.searchString.slice(0, -1);
+      this.filterItems = this._updateItem();
+      return;
+    }
+    if (e.key.length === 1) {
+      this.searchString += e.key;
+      this.filterItems = this._updateItem();
+      if (!this.filterItems.length) {
+        this.abortController.abort();
+      }
+      return;
+    }
+
     if (
       !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'].includes(
         e.key
@@ -126,7 +135,7 @@ export class SlashMenu extends LitElement {
       return;
     }
     if (e.key === 'ArrowLeft') {
-      this.abortController.abort('ABORT');
+      this.abortController.abort();
       return;
     }
     const configLen = this.filterItems.length;
@@ -146,7 +155,7 @@ export class SlashMenu extends LitElement {
       }
       case 'ArrowRight':
       case 'ArrowLeft':
-        this.abortController.abort('ABORT');
+        this.abortController.abort();
         return;
       default:
         throw new Error(`Unknown key: ${e.key}`);
@@ -164,17 +173,19 @@ export class SlashMenu extends LitElement {
     if (e.key !== 'Escape') {
       return;
     }
-    this.abortController.abort('ABORT');
+    this.abortController.abort();
     window.removeEventListener('keyup', this._escapeListener);
   };
 
   private _handleItemClick(index: number) {
-    this.abortController.abort();
+    // Need to remove the search string
+    this.abortController.abort(this.searchString);
     const { flavour, type } = this.filterItems[index];
     updateSelectedTextType(flavour, type, this.model.page);
   }
 
   private _updateItem() {
+    this.activeItemIndex = 0;
     const searchStr = this.searchString.toLowerCase();
     if (!searchStr) {
       return paragraphConfig;
@@ -213,7 +224,7 @@ export class SlashMenu extends LitElement {
     return html`<div class="slash-menu-container" style="${containerStyles}">
       <div
         class="overlay-mask"
-        @click="${() => this.abortController.abort('ABORT')}"
+        @click="${() => this.abortController.abort()}"
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
         ${this.filterItems.map(

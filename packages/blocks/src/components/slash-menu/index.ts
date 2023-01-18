@@ -1,40 +1,32 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { InlineBlot } from 'parchment';
+import { BaseBlockModel, PrelimText } from '@blocksuite/store';
 import {
   calcSafeCoordinate,
   DragDirection,
 } from '../../page-block/utils/cursor.js';
 import {
+  getQuillIndexByNativeSelection,
   getRichTextByModel,
   getStartModelBySelection,
   throttle,
 } from '../../__internal__/utils/index.js';
 import './slash-menu-node.js';
-import './slash-text-node.js';
 
 let globalAbortController = new AbortController();
 
 export const showSlashMenu = ({
-  blot,
   model,
-  anchorEl,
+  range,
   container = document.body,
   abortController = new AbortController(),
 }: {
-  blot: InlineBlot;
   model: BaseBlockModel;
-  anchorEl:
-    | {
-        getBoundingClientRect: () => DOMRect;
-        // contextElement?: Element;
-      }
-    | Range;
+  range: Range;
   direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
 }) => {
   // Abort previous format quick bar
-  globalAbortController.abort('ABORT');
+  globalAbortController.abort();
   globalAbortController = abortController;
 
   const slashMenu = document.createElement('slash-menu');
@@ -47,12 +39,11 @@ export const showSlashMenu = ({
   if (!richText) {
     return;
   }
-  const { quill } = richText;
 
   // Handle position
 
   const updatePos = throttle(() => {
-    const positioningElRect = anchorEl.getBoundingClientRect();
+    const positioningElRect = range.getBoundingClientRect();
     // TODO update direction and position
     const direction = 'right-bottom';
     const positioningPoint = {
@@ -94,15 +85,35 @@ export const showSlashMenu = ({
 
     // Clean slash text
 
-    if (e.target instanceof AbortSignal && e.target.reason === 'ABORT') {
-      // TODO Fix slash should not be synced to other clients
+    if (!e.target || !(e.target instanceof AbortSignal)) {
+      throw new Error('Failed to clean slash search text! Unknown abort event');
+    }
+    if (!e.target.reason) {
       // Should not clean slash text when click away or abort
-      quill.formatText(blot.offset(), blot.length(), {
-        'slash-text': false,
-      });
       return;
     }
-    model.text?.delete(blot.offset(), blot.length());
+    const searchStr: string = '/' + e.target.reason;
+    const text = model.text;
+    if (!text || text instanceof PrelimText) {
+      console.warn(
+        'Failed to clean slash search text! No text found for model',
+        model
+      );
+      return;
+    }
+    const idx = getQuillIndexByNativeSelection(
+      range.startContainer,
+      range.startOffset
+    );
+
+    const textStr = text.toString().slice(idx, idx + searchStr.length);
+    if (textStr !== searchStr) {
+      console.warn(
+        `Failed to clean slash search text! Text mismatch expected: ${searchStr} but actual: ${textStr}`
+      );
+      return;
+    }
+    text.delete(idx, searchStr.length);
   });
 
   return slashMenu;

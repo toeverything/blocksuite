@@ -22,6 +22,7 @@ import {
 } from './rich-text-operations.js';
 import { Shortcuts } from './shortcuts.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { showSlashMenu } from '@blocksuite/blocks/components/slash-menu/index.js';
 
 interface QuillRange {
   index: number;
@@ -359,13 +360,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         // if (context.format['code'] === true) {
         //   return ALLOW_DEFAULT;
         // }
-        // Wait for the slash input
-        requestAnimationFrame(() => {
-          // showSlashMenu({ model });
-          // Format the slash char
-          range.length = 1;
-          this.quill.formatText(range, { 'slash-text': true });
-        });
+        const curRange = getCurrentRange();
+        showSlashMenu({ model, range: curRange });
         return ALLOW_DEFAULT;
       },
     },
