@@ -123,7 +123,7 @@ type SyncTask = {
 };
 
 type BlobStatus = {
-  exists: boolean;
+  status: number;
 };
 
 export class CloudSyncManager {
@@ -198,9 +198,17 @@ export class CloudSyncManager {
     });
   }
 
-  private async _handleTaskRetry(task: SyncTask, status?: BlobStatus) {
+  private async _handleTaskRetry(task: SyncTask, response?: BlobStatus) {
     this._removeUploadId(task.id);
-    if (status?.exists) {
+    if (
+      response?.status === 413 ||
+      response?.status === 200 ||
+      task.retry >= 10
+    ) {
+      // if blob is too large, may try to upload it forever
+      if (response?.status === 413) {
+        console.log('blob too large:', task.id);
+      }
       await this._pending.delete(task.id);
       this._onUploadFinished.emit(task.id);
     } else {
@@ -239,20 +247,12 @@ export class CloudSyncManager {
                 retry: task.retry,
               }
             );
-            // if blob is too large, may try to upload it forever
-            if (response.status === 413) {
-              console.warn('Blob too large');
-              this._removeUploadId(task.id);
-              this._pending.delete(task.id);
-              return;
-            } else {
-              const status: BlobStatus | undefined = await response.json();
-              await this._handleTaskRetry(task, status);
-            }
+            await this._handleTaskRetry(task, response);
           }
         } catch (e) {
           console.warn('Error while syncing blob', e);
           if (e) await this._handleTaskRetry(task);
+          this._taskRunner();
         }
       }
       await sleep(RETRY_TIMEOUT);
@@ -263,12 +263,12 @@ export class CloudSyncManager {
 
   private _addUploadId(id: BlobId) {
     this._uploadingIds.add(id);
-    this._onUploadStateChanged.emit(!!this._uploadingIds.size);
+    this._onUploadStateChanged.emit(Boolean(this._uploadingIds.size));
   }
 
   private _removeUploadId(id: BlobId) {
     this._uploadingIds.delete(id);
-    this._onUploadStateChanged.emit(!!this._uploadingIds.size);
+    this._onUploadStateChanged.emit(Boolean(this._uploadingIds.size));
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
