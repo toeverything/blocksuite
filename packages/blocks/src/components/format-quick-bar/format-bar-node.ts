@@ -1,13 +1,14 @@
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import {
   ArrowDownIcon,
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
+import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { formatConfig } from '../../page-block/utils/const.js';
+import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import {
   DragDirection,
   getFormat,
@@ -60,6 +61,8 @@ export class FormatQuickBar extends LitElement {
   @state()
   showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
 
+  paragraphPanelMaxHeight: string | null = null;
+
   @state()
   format: Record<string, unknown> = {};
 
@@ -94,12 +97,15 @@ export class FormatQuickBar extends LitElement {
       clearTimeout(this.paragraphPanelTimer);
       return;
     }
+
     this.paragraphPanelTimer = window.setTimeout(async () => {
-      const rect = this.formatQuickBarElement.getBoundingClientRect();
-      const bodyRect = document.body.getBoundingClientRect();
-      const topSpace = rect.top - bodyRect.top;
-      const bottomSpace = bodyRect.bottom - rect.bottom;
-      this.showParagraphPanel = topSpace > bottomSpace ? 'top' : 'bottom';
+      const { placement, height } = compareTopAndBottomSpace(
+        this.formatQuickBarElement,
+        document.body,
+        10
+      );
+      this.showParagraphPanel = placement;
+      this.paragraphPanelMaxHeight = height + 'px';
     }, this.paragraphPanelHoverDelay);
   }
 
@@ -128,9 +134,7 @@ export class FormatQuickBar extends LitElement {
       left: '0',
       top: this.showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
       bottom: this.showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
-      display: 'flex',
-      flexDirection:
-        this.showParagraphPanel === 'bottom' ? 'column' : 'column-reverse',
+      maxHeight: this.paragraphPanelMaxHeight,
     });
     return html` <div
       class="paragraph-panel"

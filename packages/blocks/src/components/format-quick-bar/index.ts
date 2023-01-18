@@ -3,7 +3,7 @@ import {
   calcPositionPointByRange,
   calcSafeCoordinate,
   DragDirection,
-} from '../../page-block/utils/cursor.js';
+} from '../../page-block/utils/position.js';
 import {
   getContainerByModel,
   getCurrentRange,
