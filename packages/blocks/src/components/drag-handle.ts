@@ -31,9 +31,6 @@ export class DragIndicator extends LitElement {
   cursorPosition: IPoint | null = null;
 
   override render() {
-    // return html`
-    //     <div style="height: 400px; width: 400px; position: absolute; left: 10px; top: 500px; background: #3a4c5c">123123</div>
-    // `;
     if (!this.targetRect || !this.cursorPosition) {
       return null;
     }

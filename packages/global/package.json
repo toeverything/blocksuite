@@ -9,7 +9,8 @@
   "exports": {
     ".": "./index.d.ts",
     "./utils": "./src/utils.ts",
-    "./debug": "./src/debug.ts"
+    "./debug": "./src/debug.ts",
+    "./config": "./src/config/index.ts"
   },
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -26,6 +27,7 @@
     ]
   },
   "dependencies": {
-    "ansi-colors": "^4.1.3"
+    "ansi-colors": "^4.1.3",
+    "lit": "^2.6.1"
   }
 }

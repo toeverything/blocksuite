@@ -7,28 +7,17 @@ import type {
   DragIndicator,
 } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import {
-  BlockHubIcon,
-  BulletedListIcon,
-  BulletedListIconLarge,
-  CodeIcon,
-  CrossIcon,
-  DividerIcon,
-  H1Icon,
-  H2Icon,
-  H3Icon,
-  H4Icon,
-  H5Icon,
-  H6Icon,
-  NumberedIcon,
-  QuoteIcon,
-  RectIcon,
-  TextIcon,
-  TextIconLarge,
-  TodoIcon,
-} from '../page-block/utils/icons.js';
 import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
 import { assertExists } from '@blocksuite/global/utils';
+import {
+  BulletedListIconLarge,
+  CrossIcon,
+  RectIcon,
+  TextIconLarge,
+  BlockHubIcon,
+  BLOCKHUB_LIST_ITEMS,
+  BLOCKHUB_TEXT_ITEMS,
+} from '@blocksuite/global/config';
 
 type BlockHubItem = {
   flavour: string;
@@ -38,116 +27,6 @@ type BlockHubItem = {
   icon: unknown;
   toolTip: string;
 };
-
-const BLOCKHUB_TEXT_ITEMS = [
-  {
-    flavour: 'affine:paragraph',
-    type: 'text',
-    name: 'Text',
-    description: 'Start typing with plain text.',
-    icon: TextIcon,
-    toolTip: 'Drag to insert Text block',
-  },
-  {
-    flavour: 'affine:paragraph',
-    type: 'h1',
-    name: 'Heading 1',
-    description: 'Heading in the largest font.',
-    icon: H1Icon,
-    toolTip: 'Drag to insert Heading 1',
-  },
-  {
-    flavour: 'affine:paragraph',
-    type: 'h2',
-    name: 'Heading 2',
-    description: 'Heading in second largest font.',
-    icon: H2Icon,
-    toolTip: 'Drag to insert Heading 2',
-  },
-  {
-    flavour: 'affine:paragraph',
-    type: 'h3',
-    name: 'Heading 3',
-    description: 'Heading in third largest font.',
-    icon: H3Icon,
-    toolTip: 'Drag to insert Heading 3',
-  },
-  {
-    flavour: 'affine:paragraph',
-    type: 'h4',
-    name: 'Heading 4',
-    description: 'Heading in forth largest font.',
-    icon: H4Icon,
-    toolTip: 'Drag to insert Heading 4',
-  },
-  {
-    flavour: 'affine:paragraph',
-    type: 'h5',
-    name: 'Heading 5',
-    description: 'Heading in fifth largest font.',
-    icon: H5Icon,
-    toolTip: 'Drag to insert Heading 5',
-  },
-  {
-    flavour: 'affine:paragraph',
-    type: 'h6',
-    name: 'Heading 6',
-    description: 'Heading in sixth largest font.',
-    icon: H6Icon,
-    toolTip: 'Drag to insert Heading 6',
-  },
-  {
-    flavour: 'affine:code',
-    type: 'code',
-    name: 'Code Block',
-    description: 'Capture a code snippet.',
-    icon: CodeIcon,
-    toolTip: 'Drag to insert Code Block',
-  },
-  {
-    flavour: 'affine:paragraph',
-    type: 'quote',
-    name: 'Quote',
-    description: 'Capture a quote.',
-    icon: QuoteIcon,
-    toolTip: 'Drag to insert Quote',
-  },
-  {
-    flavour: 'affine:divider',
-    type: null,
-    name: 'Divider',
-    description: 'A visually divide block.',
-    icon: DividerIcon,
-    toolTip: 'Drag to insert Divider',
-  },
-];
-
-const BLOCKHUB_LIST_ITEMS = [
-  {
-    flavour: 'affine:list',
-    type: 'bulleted',
-    name: 'Bulleted List',
-    description: 'a simple bulleted list.',
-    icon: BulletedListIcon,
-    toolTip: 'Drag to insert Bulleted List.',
-  },
-  {
-    flavour: 'affine:list',
-    type: 'numbered',
-    name: 'Numbered List',
-    description: 'A list with numbering.',
-    icon: NumberedIcon,
-    toolTip: 'Drag to insert Numbered List.',
-  },
-  {
-    flavour: 'affine:list',
-    type: 'todo',
-    name: 'To-do List',
-    description: 'Track tasks with a to-do list.',
-    icon: TodoIcon,
-    toolTip: 'Drag to insert To-do List.',
-  },
-];
 
 @customElement('affine-block-hub')
 export class BlockHub extends NonShadowLitElement {

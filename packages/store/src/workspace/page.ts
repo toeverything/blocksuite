@@ -475,8 +475,6 @@ export class Page extends Space<PageData> {
       const targetIdx = yChildren
         .toArray()
         .findIndex(id => id === targetModel.id);
-      // if (top) {
-      // yChildren.insert(targetIdx, [])
       assertExists(blockProps.flavour);
       this.addBlockByFlavour(
         blockProps.flavour,

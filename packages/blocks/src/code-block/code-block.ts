@@ -9,8 +9,8 @@ import {
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import { ArrowDownIcon } from '../components/format-quick-bar/icons.js';
 import '../__internal__/rich-text/rich-text.js';
+import { ArrowDownIcon } from '@blocksuite/global/config';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {
@@ -238,7 +238,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     return html`
       <div class="affine-code-block-container">
         ${isHovering || this.showLangList !== 'hidden'
-          ? html`<div class="container">
+          ? html` <div class="container">
               <div class="lang-container" @click=${this._onClick}>
                 <code-block-button
                   width="101px"

@@ -281,9 +281,6 @@ export class DefaultPageBlockComponent
   };
 
   firstUpdated() {
-    // const blockHub = document.createElement('affine-block-hub');
-    // document.body.appendChild(blockHub);
-    // const blockHub = new BlockHub();
     autosize(this._title);
     bindHotkeys(this.page, this.selection, this.signals, this.model);
 
