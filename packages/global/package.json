@@ -4,6 +4,8 @@
   "types": "./index.d.ts",
   "type": "module",
   "scripts": {
+    "test:unit": "vitest --run",
+    "test:unit:ui": "vitest --ui",
     "build": "tsc"
   },
   "exports": {
