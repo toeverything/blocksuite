@@ -224,7 +224,7 @@ export class DefaultSelectionManager {
       });
     };
     this._disposables.add(
-      this.page.awareness.signals.update.on(msg => {
+      this.page.awarenessAdapter.signals.update.on(msg => {
         if (msg.id !== this.page.doc.clientID) {
           return;
         }
@@ -239,7 +239,7 @@ export class DefaultSelectionManager {
         }
       })
     );
-    if (this.page.awareness.getFlag('enable_drag_handle')) {
+    if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
       createHandle();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
