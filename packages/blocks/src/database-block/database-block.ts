@@ -41,9 +41,21 @@ const preview: Preview[] = [
   },
 ];
 
+const FIRST_LINE_TEXT_WIDTH = 200;
+
 function DatabaseHeader(block: DatabaseBlock) {
   return html`
     <div class="affine-database-block-header">
+      <div
+        class="affine-database-block-column"
+        data-column-id="-1"
+        style=${styleMap({
+          minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
+          maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
+        })}
+      >
+        Name
+      </div>
       ${repeat(
         block.columns,
         column => column.id,
@@ -297,12 +309,10 @@ export class DatabaseBlock extends NonShadowLitElement {
       border-top: 1px solid rgb(233, 233, 231);
     }
   `;
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+
+  @property({ hasChanged: () => true })
   model!: DatabaseBlockModel;
+
   @property()
   host!: BlockHost;
 

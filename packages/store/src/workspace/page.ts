@@ -682,8 +682,7 @@ export class Page extends Space<PageData> {
     const isRoot = this._blockMap.size === 0;
     let isSurface = false;
 
-    const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-    const props = toBlockProps(prefixedProps) as BlockProps;
+    const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
     if (model.flavour === 'affine:surface') {
       isSurface = true;

@@ -96,6 +96,15 @@ export function syncBlockProps(
       yBlock.set('prop:color', props.color ?? 'black');
     }
   }
+  if (props.flavour === 'affine:database') {
+    if (!yBlock.has('prop:columns')) {
+      const columns = Y.Array.from(props.columns ?? []);
+      yBlock.set('prop:columns', columns);
+    }
+    if (!yBlock.has('prop:title')) {
+      yBlock.set('prop:title', '');
+    }
+  }
 }
 
 export function trySyncTextProp(
@@ -153,9 +162,8 @@ export function trySyncTextProp(
   }
 }
 
-export function toBlockProps(
-  prefixedProps: PrefixedBlockProps
-): Partial<BlockProps> {
+export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
+  const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
   Object.keys(prefixedProps).forEach(key => {
     if (prefixedProps[key]) {
@@ -167,7 +175,12 @@ export function toBlockProps(
     if (SYS_KEYS.has(prefixedKey)) return;
 
     const key = prefixedKey.replace('prop:', '');
-    props[key] = prefixedProps[prefixedKey];
+    const realValue = yBlock.get(prefixedKey);
+    if (realValue instanceof Y.Array) {
+      props[key] = realValue.toArray();
+    } else {
+      props[key] = prefixedProps[prefixedKey];
+    }
   });
 
   return props;

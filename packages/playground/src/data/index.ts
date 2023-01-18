@@ -72,8 +72,7 @@ export function basic(workspace: Workspace) {
 export function database(workspace: Workspace) {
   workspace.signals.pageAdded.once(async id => {
     const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlock({
-      flavour: 'affine:page',
+    const pageBlockId = page.addBlockByFlavour('affine:page', {
       title: 'Welcome to BlockSuite playground',
     });
     page.addBlockByFlavour('affine:surface', {}, null);
