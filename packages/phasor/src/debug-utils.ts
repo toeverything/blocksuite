@@ -1,4 +1,4 @@
-import { PathElement, RectElement, type Element } from './elements.js';
+import { PathElement, DebugElement, type Element } from './elements.js';
 import type { Renderer } from './renderer.js';
 
 const PATH_POINTS = 10;
@@ -37,7 +37,7 @@ function createMockElement(id: number, rangeX: number, rangeY: number) {
     return element;
   } else {
     const size = randomInt(IMAGE_MAX, IMAGE_MIN);
-    const element = new RectElement(`${id}`);
+    const element = new DebugElement(`${id}`);
     element.color = randomColor();
     element.setBound(x, y, size, size);
     return element;

@@ -1,4 +1,4 @@
-import { Bound, MIN_ZOOM } from './consts.js';
+import { IBound, MIN_ZOOM } from './consts.js';
 import { GridManager } from './grid.js';
 import type { Element } from './elements.js';
 import { intersects } from './utils.js';
@@ -100,7 +100,7 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
-  invalidateElement(element: Element, newBound: Bound) {
+  invalidateElement(element: Element, newBound: IBound) {
     const { gridManager } = this;
     if (gridManager.boundHasChanged(element, newBound)) {
       gridManager.remove(element);
