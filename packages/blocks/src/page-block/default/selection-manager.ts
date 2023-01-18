@@ -36,6 +36,7 @@ import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
+import { BlockHub } from '../../components/blockhub.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -160,6 +161,7 @@ export class DefaultSelectionManager {
   private _dragHandleAbortController = new AbortController();
 
   private _dragHandle: DragHandle | null = null;
+  private _blockHub: BlockHub | null = null;
 
   constructor({
     page,
@@ -223,6 +225,51 @@ export class DefaultSelectionManager {
         },
       });
     };
+    const createBlockHub = () => {
+      this._blockHub = new BlockHub({
+        onDropCallback: (e, end) => {
+          const dataTransfer = e.dataTransfer;
+          assertExists(dataTransfer);
+          const data = dataTransfer.getData('affine/block-hub');
+          const blockProps = JSON.parse(data);
+          const targetModel = end.model;
+          const rect = end.position;
+          this.page.captureSync();
+          const distanceToTop = Math.abs(rect.top - e.y);
+          const distanceToBottom = Math.abs(rect.bottom - e.y);
+          this.page.insertBlock(
+            blockProps,
+            targetModel,
+            distanceToTop < distanceToBottom
+          );
+        },
+        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+            skipX,
+          });
+        },
+        getBlockEditingStateByCursor: (
+          pageX,
+          pageY,
+          cursor,
+          size,
+          skipX,
+          dragging
+        ) => {
+          return getBlockEditingStateByCursor(
+            this._blocks,
+            pageX,
+            pageY,
+            cursor,
+            {
+              size,
+              skipX,
+              dragging,
+            }
+          );
+        },
+      });
+    };
     this._disposables.add(
       this.page.awarenessAdapter.signals.update.subscribe(
         msg => msg.state?.flags.enable_drag_handle,
@@ -241,8 +288,29 @@ export class DefaultSelectionManager {
         }
       )
     );
+    this._disposables.add(
+      this.page.awarenessAdapter.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this._blockHub) {
+              createHandle();
+            }
+          } else {
+            this._blockHub?.remove();
+            this._blockHub = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
     if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
       createHandle();
+    }
+    if (this.page.awarenessAdapter.getFlag('enable_block_hub')) {
+      createBlockHub();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(

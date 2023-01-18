@@ -63,6 +63,7 @@ const flagsPreset = {
   enable_set_remote_flag: true,
   enable_drag_handle: true,
   enable_surface: false,
+  enable_block_hub: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

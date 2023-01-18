@@ -1,8 +1,13 @@
 import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import {
+  ArrowDownIcon,
+  CopyIcon,
+  paragraphConfig,
+} from '@blocksuite/global/config';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { formatConfig, paragraphConfig } from '../../page-block/utils/const.js';
+import { formatConfig } from '../../page-block/utils/const.js';
 import {
   DragDirection,
   getFormat,
@@ -14,7 +19,6 @@ import {
 } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
 import './button';
-import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
 
 @customElement('format-quick-bar')
@@ -128,14 +132,14 @@ export class FormatQuickBar extends LitElement {
       flexDirection:
         this.showParagraphPanel === 'bottom' ? 'column' : 'column-reverse',
     });
-    return html`<div
+    return html` <div
       class="paragraph-panel"
       style="${styles}"
       @mouseover=${this._onHover}
       @mouseout=${this._onHoverEnd}
     >
       ${paragraphConfig.map(
-        ({ flavour, type, name, icon }) => html`<format-bar-button
+        ({ flavour, type, name, icon }) => html` <format-bar-button
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
@@ -178,7 +182,7 @@ export class FormatQuickBar extends LitElement {
     const paragraphIcon =
       paragraphConfig.find(btn => btn.type === this.paragraphType)?.icon ??
       paragraphConfig[0].icon;
-    const paragraphItems = html`<format-bar-button
+    const paragraphItems = html` <format-bar-button
       class="paragraph-button"
       width="52px"
       @mouseover=${this._onHover}
@@ -192,7 +196,7 @@ export class FormatQuickBar extends LitElement {
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
-        ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
+        ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
           ?active=${activeWhen(this.format)}
@@ -212,7 +216,7 @@ export class FormatQuickBar extends LitElement {
         </format-bar-button>`
       );
 
-    const actionItems = html`<format-bar-button
+    const actionItems = html` <format-bar-button
       class="has-tool-tip"
       data-testid="copy"
       @click=${() => this._onCopy()}
@@ -225,11 +229,11 @@ export class FormatQuickBar extends LitElement {
       left: this.left,
       top: this.top,
     });
-    return html`<div class="format-quick-bar" style="${styles}">
+    return html` <div class="format-quick-bar" style="${styles}">
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}
-      ${formatItems.length ? html`<div class="divider"></div>` : ''}
+      ${formatItems.length ? html` <div class="divider"></div>` : ''}
       ${actionItems} ${paragraphPanel}
     </div>`;
   }

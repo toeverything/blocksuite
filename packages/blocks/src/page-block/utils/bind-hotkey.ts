@@ -1,7 +1,8 @@
-import { formatConfig, paragraphConfig } from './const.js';
+import { formatConfig } from './const.js';
 import type { Page } from '@blocksuite/store';
 import { hotkey, HOTKEYS } from '../../__internal__/index.js';
 import { updateSelectedTextType } from './container-operations.js';
+import { paragraphConfig } from '@blocksuite/global/config';
 
 const { UNDO, REDO } = HOTKEYS;
 

@@ -458,6 +458,35 @@ export class Page extends Space<PageData> {
     });
   }
 
+  @debug('CRUD')
+  insertBlock(
+    blockProps: Partial<BaseBlockModel>,
+    targetModel: BaseBlockModel,
+    top = true
+  ) {
+    const targetParentModel = this.getParent(targetModel);
+    if (targetParentModel === null) {
+      throw new Error('cannot find parent model');
+    }
+    this.transact(() => {
+      const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
+      const yChildren = yParent.get('sys:children') as Y.Array<string>;
+      const targetIdx = yChildren
+        .toArray()
+        .findIndex(id => id === targetModel.id);
+      assertExists(blockProps.flavour);
+      this.addBlockByFlavour(
+        blockProps.flavour,
+        {
+          type: blockProps.type,
+        },
+        targetParentModel.id,
+        top ? targetIdx : targetIdx + 1
+      );
+      // }
+    });
+  }
+
   deleteBlockById(id: string) {
     if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');

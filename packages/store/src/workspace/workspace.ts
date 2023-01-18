@@ -13,6 +13,7 @@ export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
+
   [key: string]: string | number | boolean;
 }
 
