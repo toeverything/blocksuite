@@ -52,7 +52,7 @@ pnpm build
 
 ## Testing
 
-When you contribute new features and bug fixes, the test cases are encouraged and most time are required.
+Adding test cases is strongly encouraged when you contribute new features and bug fixes.
 
 We use [Playwright](https://playwright.dev/) for E2E test, and [vitest](https://vitest.dev/) for unit test.
 
