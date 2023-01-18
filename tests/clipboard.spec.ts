@@ -2,7 +2,7 @@ import './utils/declare-test-window.js';
 import { test } from '@playwright/test';
 import {
   SHORT_KEY,
-  backsapce,
+  pressBackspace,
   copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -18,6 +18,7 @@ import {
   setQuillSelection,
   setSelection,
   undoByClick,
+  pressSpace,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
@@ -55,10 +56,14 @@ test('clipboard paste html', async ({ page }) => {
     ({ clipData }) => {
       const dT = new DataTransfer();
       const e = new ClipboardEvent('paste', { clipboardData: dT });
+      Object.defineProperty(e, 'target', {
+        writable: false,
+        value: document.body,
+      });
       e.clipboardData?.setData('text/html', clipData['text/html']);
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](e);
+        .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
     },
     { clipData }
   );
@@ -312,7 +317,7 @@ test('should keep first line format when pasted into a new line', async ({
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await page.keyboard.type('-');
-  await page.keyboard.press('Space', { delay: 50 });
+  await pressSpace(page);
   await page.keyboard.type('1');
   await pressEnter(page);
   await pressTab(page);
@@ -360,7 +365,7 @@ test('should keep first line format when pasted into a new line', async ({
 
   await focusRichText(page, 3);
   await pressEnter(page);
-  await backsapce(page);
+  await pressBackspace(page);
   await pasteByKeyboard(page);
 
   await assertStoreMatchJSX(

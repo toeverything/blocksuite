@@ -21,6 +21,7 @@ import {
   pressTab,
   initEmptyParagraphState,
   clickBlockTypeMenuItem,
+  pressSpace,
 } from './utils/actions/index.js';
 
 test('add new bulleted list', async ({ page }) => {
@@ -291,8 +292,10 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('text1');
   await pressEnter(page);
-  await page.keyboard.type('[x] ');
-  await page.waitForTimeout(10);
+
+  await page.keyboard.type('[x]');
+  await pressSpace(page);
+
   await page.keyboard.type('todo item');
   await pressTab(page);
   await assertStoreMatchJSX(

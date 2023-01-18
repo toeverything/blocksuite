@@ -4,11 +4,10 @@ import { Space } from '../space.js';
 import { Page } from './page.js';
 import { Signal } from '../utils/signal.js';
 import { Indexer, QueryContent } from './search.js';
-import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { merge } from 'merge';
+import type { AwarenessAdapter } from '../awareness.js';
 
 export interface PageMeta {
   id: string;
@@ -17,7 +16,7 @@ export interface PageMeta {
   [key: string]: string | number | boolean;
 }
 
-type WorkspaceMetaData = {
+type WorkspaceMetaFields = {
   pages: Y.Array<unknown>;
   versions: Y.Map<unknown>;
   name: string;
@@ -26,7 +25,7 @@ type WorkspaceMetaData = {
 
 class WorkspaceMeta<
   Flags extends Record<string, unknown> = BlockSuiteFlags
-> extends Space<WorkspaceMetaData, Flags> {
+> extends Space<WorkspaceMetaFields, Flags> {
   private _prevPages = new Set<string>();
   pageAdded = new Signal<string>();
   pageRemoved = new Signal<string>();
@@ -36,17 +35,15 @@ class WorkspaceMeta<
   constructor(
     id: string,
     doc: BlockSuiteDoc,
-    awareness: Awareness,
-    defaultFlags?: Partial<Flags>
+    awarenessAdapter: AwarenessAdapter
   ) {
-    super(id, doc, awareness, {
+    super(id, doc, awarenessAdapter, {
       valueInitializer: {
         pages: () => new Y.Array(),
         versions: () => new Y.Map(),
         avatar: () => '',
         name: () => '',
       },
-      defaultFlags,
     });
     this.origin.observeDeep(this._handleEvents);
   }
@@ -216,12 +213,6 @@ class WorkspaceMeta<
   };
 }
 
-const flagsPreset = {
-  enable_set_remote_flag: true,
-  enable_drag_handle: true,
-  readonly: {},
-} satisfies BlockSuiteFlags;
-
 export class Workspace {
   static Y = Y;
   public readonly room: string | undefined;
@@ -254,8 +245,7 @@ export class Workspace {
     this.meta = new WorkspaceMeta(
       'space:meta',
       this.doc,
-      this._store.awareness,
-      merge(flagsPreset, options.defaultFlags)
+      this.awarenessAdapter
     );
 
     this.signals = {
@@ -265,6 +255,10 @@ export class Workspace {
     };
 
     this._handlePageEvent();
+  }
+
+  get awarenessAdapter(): AwarenessAdapter {
+    return this._store.awarenessAdapter;
   }
 
   get providers() {
@@ -310,7 +304,7 @@ export class Workspace {
         this,
         pageId,
         this.doc,
-        this._store.awareness,
+        this.awarenessAdapter,
         this._store.idGenerator
       );
       this._store.addSpace(page);

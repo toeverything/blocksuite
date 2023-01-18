@@ -587,7 +587,8 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.type('--- ');
   await assertDivider(page, 1);
-  await page.keyboard.press('Enter');
+
+  await pressEnter(page);
   await page.keyboard.type('--- ');
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('ArrowUp');

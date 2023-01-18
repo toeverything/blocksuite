@@ -1,10 +1,11 @@
 import * as Y from 'yjs';
 import type { RelativePosition } from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
-import type { Space } from './space.js';
 import { Signal } from './utils/signal.js';
 import { merge } from 'merge';
 import { uuidv4 } from './utils/id-generator.js';
+import type { Space } from './space.js';
+import type { Store } from './store.js';
 
 export interface SelectionRange {
   id: string;
@@ -32,15 +33,15 @@ type Response = {
   id: string;
 };
 
-interface AwarenessState<
+export type AwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
-> {
-  cursor?: SelectionRange;
+> = {
+  cursor?: Record<Space['prefixedId'], SelectionRange>;
   user?: UserInfo;
   flags: Flags;
   request?: Request<Flags>[];
   response?: Response[];
-}
+};
 
 interface AwarenessMessage<
   Flags extends Record<string, unknown> = BlockSuiteFlags
@@ -50,7 +51,7 @@ interface AwarenessMessage<
   state?: AwarenessState<Flags>;
 }
 
-export interface AwarenessMetadataMessage<
+export interface AwarenessMetaMessage<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
   Key extends keyof Flags = keyof Flags
 > {
@@ -61,21 +62,19 @@ export interface AwarenessMetadataMessage<
 export class AwarenessAdapter<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly space: Space<any, Flags>;
-  readonly awareness: Awareness;
+  readonly awareness: Awareness<AwarenessState<Flags>>;
+  readonly store: Store;
 
   readonly signals = {
     update: new Signal<AwarenessMessage<Flags>>(),
   };
 
   constructor(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    space: Space<any, Flags>,
-    awareness: Awareness,
-    defaultFlags: Partial<Flags> = {}
+    store: Store,
+    awareness: Awareness<AwarenessState<Flags>>,
+    defaultFlags: Flags
   ) {
-    this.space = space;
+    this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
     this.signals.update.on(this._onAwarenessMessage);
@@ -90,42 +89,40 @@ export class AwarenessAdapter<
     }
   }
 
-  public setLocalCursor(range: SelectionRange) {
-    this.awareness.setLocalStateField('cursor', range);
-  }
-
-  public setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
+  public setFlag = <Key extends keyof Flags>(field: Key, value: Flags[Key]) => {
     const oldFlags = this.awareness.getLocalState()?.flags ?? {};
     this.awareness.setLocalStateField('flags', { ...oldFlags, [field]: value });
-  }
+  };
 
-  public getFlag<Key extends keyof Flags>(field: Key): Flags[Key] | undefined {
+  public getFlag = <Key extends keyof Flags>(
+    field: Key
+  ): Flags[Key] | undefined => {
     const flags = this.awareness.getLocalState()?.flags ?? {};
     return flags[field];
-  }
+  };
 
-  public setReadonly(value: boolean): void {
+  public setReadonly = (space: Space, value: boolean): void => {
     const flags = this.getFlag('readonly') ?? {};
     this.setFlag('readonly', {
       ...flags,
-      [this.space.prefixedId]: value,
+      [space.prefixedId]: value,
     } as Flags['readonly']);
-  }
+  };
 
-  public isReadonly(): boolean {
+  public isReadonly = (space: Space): boolean => {
     const rd = this.getFlag('readonly');
     if (rd && typeof rd === 'object') {
-      return Boolean((rd as Record<string, boolean>)[this.space.prefixedId]);
+      return Boolean((rd as Record<string, boolean>)[space.prefixedId]);
     } else {
       return false;
     }
-  }
+  };
 
-  setRemoteFlag<Key extends keyof Flags>(
+  setRemoteFlag = <Key extends keyof Flags>(
     clientId: number,
     field: Key,
     value: Flags[Key]
-  ) {
+  ) => {
     if (!this.getFlag('enable_set_remote_flag')) {
       console.error('set remote flag feature disabled');
       return;
@@ -140,17 +137,28 @@ export class AwarenessAdapter<
         value,
       },
     ] satisfies Request<Flags>[]);
-  }
+  };
 
-  public getLocalCursor(): SelectionRange | undefined {
-    const states = this.awareness.getStates();
-    const awarenessState = states.get(this.awareness.clientID);
-    return awarenessState?.cursor;
-  }
+  public setLocalCursor = (space: Space, range: SelectionRange | null) => {
+    const cursor = this.awareness.getLocalState()?.cursor ?? {};
+    if (range === null) {
+      delete cursor[space.prefixedId];
+      this.awareness.setLocalStateField('cursor', cursor);
+    } else {
+      this.awareness.setLocalStateField('cursor', {
+        ...cursor,
+        [space.prefixedId]: range,
+      });
+    }
+  };
 
-  public getStates(): Map<number, AwarenessState<Flags>> {
-    return this.awareness.getStates() as Map<number, AwarenessState<Flags>>;
-  }
+  public getLocalCursor = (space: Space): SelectionRange | undefined => {
+    return this.awareness.getLocalState()?.['cursor']?.[space.prefixedId];
+  };
+
+  public getStates = (): Map<number, AwarenessState<Flags>> => {
+    return this.awareness.getStates();
+  };
 
   private _onAwarenessChange = (diff: {
     added: number[];
@@ -184,7 +192,7 @@ export class AwarenessAdapter<
 
   private _onAwarenessMessage = (awMsg: AwarenessMessage<Flags>) => {
     if (awMsg.id === this.awareness.clientID) {
-      this.updateLocalCursor();
+      this.store.spaces.forEach(space => this.updateLocalCursor(space));
     } else {
       this._resetRemoteCursor();
     }
@@ -193,7 +201,7 @@ export class AwarenessAdapter<
     }
   };
 
-  private _handleRemoteFlags() {
+  private _handleRemoteFlags = () => {
     const nextTick: (() => void)[] = [];
     const localState = this.awareness.getLocalState() as AwarenessState<Flags>;
     const request = (localState?.request ?? []) as Request<Flags>[];
@@ -256,66 +264,71 @@ export class AwarenessAdapter<
     setTimeout(() => {
       nextTick.forEach(fn => fn());
     }, 100);
-  }
+  };
 
-  private _resetRemoteCursor() {
-    this.space.richTextAdapters.forEach(textAdapter =>
-      textAdapter.quillCursors.clearCursors()
-    );
-    this.getStates().forEach((awState, clientId) => {
-      if (clientId !== this.awareness.clientID && awState.cursor) {
-        const anchor = Y.createAbsolutePositionFromRelativePosition(
-          awState.cursor.anchor,
-          this.space.doc
-        );
-        const focus = Y.createAbsolutePositionFromRelativePosition(
-          awState.cursor.focus,
-          this.space.doc
-        );
-        const textAdapter = this.space.richTextAdapters.get(
-          awState.cursor.id || ''
-        );
-        if (anchor && focus && textAdapter) {
-          const user: Partial<UserInfo> = awState.user || {};
-          const color = user.color || '#ffa500';
-          const name = user.name || 'other';
-          textAdapter.quillCursors.createCursor(
-            clientId.toString(),
-            name,
-            color
-          );
-          textAdapter.quillCursors.moveCursor(clientId.toString(), {
-            index: anchor.index,
-            length: focus.index - anchor.index,
-          });
+  private _resetRemoteCursor = () => {
+    const states = this.getStates();
+    this.store.spaces.forEach(space => {
+      states.forEach((awState, clientId) => {
+        if (clientId === this.awareness.clientID) {
+          return;
         }
-      }
+        const cursor = awState.cursor?.[space.prefixedId];
+        if (cursor) {
+          space.richTextAdapters.forEach(textAdapter =>
+            textAdapter.quillCursors.clearCursors()
+          );
+          const anchor = Y.createAbsolutePositionFromRelativePosition(
+            cursor.anchor,
+            space.doc
+          );
+          const focus = Y.createAbsolutePositionFromRelativePosition(
+            cursor.focus,
+            space.doc
+          );
+          const textAdapter = space.richTextAdapters.get(cursor.id || '');
+          if (anchor && focus && textAdapter) {
+            const user: Partial<UserInfo> = awState.user || {};
+            const color = user.color || '#ffa500';
+            const name = user.name || 'other';
+            textAdapter.quillCursors.createCursor(
+              clientId.toString(),
+              name,
+              color
+            );
+            textAdapter.quillCursors.moveCursor(clientId.toString(), {
+              index: anchor.index,
+              length: focus.index - anchor.index,
+            });
+          }
+        }
+      });
     });
-  }
+  };
 
-  public updateLocalCursor() {
-    const localCursor = this.getLocalCursor();
+  public updateLocalCursor = (space: Space) => {
+    const localCursor = this.getLocalCursor(space);
     if (!localCursor) {
       return;
     }
     const anchor = Y.createAbsolutePositionFromRelativePosition(
       localCursor.anchor,
-      this.space.doc
+      space.doc
     );
     const focus = Y.createAbsolutePositionFromRelativePosition(
       localCursor.focus,
-      this.space.doc
+      space.doc
     );
     if (anchor && focus) {
-      const textAdapter = this.space.richTextAdapters.get(localCursor.id || '');
+      const textAdapter = space.richTextAdapters.get(localCursor.id || '');
       textAdapter?.quill.setSelection(anchor.index, focus.index - anchor.index);
     }
-  }
+  };
 
-  destroy() {
+  destroy = () => {
     if (this.awareness) {
       this.awareness.off('change', this._onAwarenessChange);
       this.signals.update.dispose();
     }
-  }
+  };
 }

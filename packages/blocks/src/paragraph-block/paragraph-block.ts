@@ -148,11 +148,8 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       font-style: italic;
     }
   `;
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+
+  @property({ hasChanged: () => true })
   model!: ParagraphBlockModel;
 
   @property()

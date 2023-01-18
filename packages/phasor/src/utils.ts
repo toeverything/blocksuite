@@ -1,4 +1,5 @@
 import { Bound, GRID_SIZE } from './consts.js';
+import type { Element } from './elements.js';
 
 export function intersects(a: Bound, b: Bound): boolean {
   return (
@@ -26,4 +27,10 @@ export function rangeFromBound(a: Bound): number[] {
   const minCol = getGridIndex(a.y);
   const maxCol = getGridIndex(a.y + a.h);
   return [minRow, maxRow, minCol, maxCol];
+}
+
+export function compare(a: Element, b: Element): number {
+  if (a.index > b.index) return 1;
+  else if (a.index < b.index) return -1;
+  return a.id > b.id ? 1 : -1;
 }

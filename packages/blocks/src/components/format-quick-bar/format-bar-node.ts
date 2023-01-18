@@ -17,12 +17,6 @@ import './button';
 import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
 
-const onCopy = () => {
-  // Will forward to the `CopyCutManager`
-  document.dispatchEvent(new ClipboardEvent('copy'));
-  toast('Copied to clipboard');
-};
-
 @customElement('format-quick-bar')
 export class FormatQuickBar extends LitElement {
   static styles = formatQuickBarStyle;
@@ -114,6 +108,12 @@ export class FormatQuickBar extends LitElement {
       return;
     }
     clearTimeout(this.paragraphPanelTimer);
+  }
+
+  private _onCopy() {
+    // Will forward to the `CopyCutManager`
+    this.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
+    toast('Copied to clipboard');
   }
 
   private _paragraphPanelTemplate() {
@@ -215,7 +215,7 @@ export class FormatQuickBar extends LitElement {
     const actionItems = html`<format-bar-button
       class="has-tool-tip"
       data-testid="copy"
-      @click=${() => onCopy()}
+      @click=${() => this._onCopy()}
     >
       ${CopyIcon}
       <tool-tip inert role="tooltip">Copy</tool-tip>

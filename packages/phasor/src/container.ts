@@ -1,22 +1,21 @@
 import * as Y from 'yjs';
+import { generateKeyBetween } from 'fractional-indexing';
 import type { Bound } from './consts.js';
 import { Element, RectElement, PathElement } from './elements.js';
 import { Renderer } from './renderer.js';
-
-function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
-}
+import { assertExists } from '@blocksuite/global/utils';
 
 export class SurfaceContainer {
   readonly renderer: Renderer;
   private _yElements: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, Element>();
+  private _lastIndex = 'a0';
 
   constructor(canvas: HTMLCanvasElement, yContainer: Y.Map<unknown>) {
     this.renderer = new Renderer(canvas);
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
+
+    this._syncFromExistingContainer();
     this._yElements.observeDeep(this._handleYEvents);
   }
 
@@ -29,15 +28,23 @@ export class SurfaceContainer {
     return yElement;
   }
 
+  private _transact(callback: () => void) {
+    const doc = this._yElements.doc as Y.Doc;
+    doc.transact(callback, doc.clientID);
+  }
+
   addElement(props: Element) {
-    this._yElements.doc?.transact(() => {
+    props.index = generateKeyBetween(this._lastIndex, null);
+    this._lastIndex = props.index;
+
+    this._transact(() => {
       const yElement = this._createYElement(props);
       this._yElements.set(props.id, yElement);
     });
   }
 
   setElementBound(id: string, bound: Bound) {
-    this._yElements.doc?.transact(() => {
+    this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
       const xywh = `${bound.x},${bound.y},${bound.w},${bound.h}`;
@@ -46,9 +53,31 @@ export class SurfaceContainer {
   }
 
   removeElement(id: string) {
-    this._yElements.doc?.transact(() => {
+    this._transact(() => {
       this._yElements.delete(id);
     });
+  }
+
+  private _handleYElementAdded(yElement: Y.Map<unknown>) {
+    const type = yElement.get('type') as string;
+    switch (type) {
+      case 'rect': {
+        const element = RectElement.deserialize(yElement.toJSON());
+        this.renderer.addElement(element);
+        this._elements.set(element.id, element);
+        break;
+      }
+      case 'path': {
+        const element = PathElement.deserialize(yElement.toJSON());
+        this.renderer.addElement(element);
+        this._elements.set(element.id, element);
+        break;
+      }
+    }
+  }
+
+  private _syncFromExistingContainer() {
+    this._yElements.forEach(yElement => this._handleYElementAdded(yElement));
   }
 
   private _handleYElementsEvent(event: Y.YMapEvent<unknown>) {
@@ -64,21 +93,7 @@ export class SurfaceContainer {
 
       if (type.action === 'add') {
         const yElement = this._yElements.get(id) as Y.Map<unknown>;
-        const type = yElement.get('type') as string;
-        switch (type) {
-          case 'rect': {
-            const element = RectElement.deserialize(yElement.toJSON());
-            this.renderer.addElement(element);
-            this._elements.set(element.id, element);
-            break;
-          }
-          case 'path': {
-            const element = PathElement.deserialize(yElement.toJSON());
-            this.renderer.addElement(element);
-            this._elements.set(element.id, element);
-            break;
-          }
-        }
+        this._handleYElementAdded(yElement);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
       } else if (type.action === 'delete') {
@@ -108,8 +123,11 @@ export class SurfaceContainer {
         if (key === 'xywh') {
           const xywh = yElement.get(key) as string;
           const [x, y, w, h] = xywh.split(',').map(Number);
-          // FIXME should update grid here
+
+          // refresh grid manager
+          this.renderer.removeElement(element);
           element.setBound(x, y, w, h);
+          this.renderer.addElement(element);
         }
       }
     });

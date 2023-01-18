@@ -8,12 +8,12 @@ import {
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { DefaultSelectionController } from './selection-manager/default.js';
-import { ShapeSelectionController } from './selection-manager/shape.js';
+import { DefaultModeController } from './mode-controllers/default.js';
+import { ShapeModeController } from './mode-controllers/shape.js';
 import type {
   HoverState,
-  SelectionController,
-} from './selection-manager/index.js';
+  MouseModeController,
+} from './mode-controllers/index.js';
 import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { Disposable } from '@blocksuite/store';
 
@@ -29,8 +29,6 @@ interface SingleBlockSelectionState {
   type: 'single';
   // Which block that be selected
   selected: RootBlockModel;
-  // Current viewport
-  viewport: ViewportState;
   // Rect of the selected block
   rect: DOMRect;
   // True if the block is active (like double click)
@@ -130,7 +128,7 @@ export class EdgelessSelectionManager {
     type: 'default',
   };
   private _container: EdgelessPageBlockComponent;
-  private _selectionManagers: Record<MouseMode['type'], SelectionController>;
+  private _controllers: Record<MouseMode['type'], MouseModeController>;
 
   private _mouseDisposeCallback: () => void;
   private _selectionUpdateCallback: Disposable;
@@ -149,7 +147,7 @@ export class EdgelessSelectionManager {
   set mouseMode(mode: MouseMode) {
     this._mouseMode = mode;
     // sync mouse mode
-    this._selectionManagers[this._mouseMode.type].mouseMode = this._mouseMode;
+    this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
   }
 
   get blockSelectionState() {
@@ -157,7 +155,7 @@ export class EdgelessSelectionManager {
   }
 
   get currentController() {
-    return this._selectionManagers[this.mouseMode.type];
+    return this._controllers[this.mouseMode.type];
   }
 
   get hoverState() {
@@ -182,9 +180,9 @@ export class EdgelessSelectionManager {
 
   constructor(container: EdgelessPageBlockComponent) {
     this._container = container;
-    this._selectionManagers = {
-      default: new DefaultSelectionController(this._container),
-      shape: new ShapeSelectionController(this._container),
+    this._controllers = {
+      default: new DefaultModeController(this._container),
+      shape: new ShapeModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -224,23 +222,20 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    if (this._container.readonly) {
-      return;
-    }
+    if (this._container.readonly) return;
+
     return this.currentController.onContainerDragStart(e);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    if (this._container.readonly) {
-      return;
-    }
+    if (this._container.readonly) return;
+
     return this.currentController.onContainerDragMove(e);
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this._container.readonly) {
-      return;
-    }
+    if (this._container.readonly) return;
+
     return this.currentController.onContainerDragEnd(e);
   };
 
@@ -257,17 +252,15 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    return this._selectionManagers[this.mouseMode.type].onContainerMouseMove(e);
+    return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
   };
 
   private _onContainerMouseOut = (e: SelectionEvent) => {
-    return this._selectionManagers[this.mouseMode.type].onContainerMouseOut(e);
+    return this._controllers[this.mouseMode.type].onContainerMouseOut(e);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    return this._selectionManagers[this.mouseMode.type].onContainerContextMenu(
-      e
-    );
+    return this._controllers[this.mouseMode.type].onContainerContextMenu(e);
   };
 
   dispose() {

@@ -7,6 +7,7 @@ import { pressEnter, SHORT_KEY } from './keyboard.js';
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
+const TITLE_SELECTOR = '.affine-default-page-block-title';
 
 function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   if (!process.env.CI) {
@@ -102,6 +103,12 @@ export async function clearLog(page: Page) {
   await page.evaluate(() => console.clear());
 }
 
+export async function captureHistory(page: Page) {
+  await page.evaluate(() => {
+    window.page.captureSync();
+  });
+}
+
 export async function resetHistory(page: Page) {
   await page.evaluate(() => {
     const space = window.page;
@@ -150,6 +157,11 @@ export async function initEmptyCodeBlockState(page: Page) {
   });
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
+}
+
+export async function focusTitle(page: Page) {
+  const locator = page.locator(TITLE_SELECTOR);
+  await locator.click();
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -248,6 +260,7 @@ export async function pasteContent(
   await page.evaluate(
     ({ clipData }) => {
       const e = {
+        target: document.body,
         preventDefault: () => null,
         stopPropagation: () => null,
         clipboardData: {
@@ -259,7 +272,7 @@ export async function pasteContent(
       };
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
+        .clipboard['_clipboardEventDispatcher']['_onPaste'](
           e as unknown as ClipboardEvent
         );
     },

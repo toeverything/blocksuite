@@ -35,9 +35,7 @@ export const BlockSchema = {
   'affine:surface': SurfaceBlockModel,
 };
 
-export type BlockSchemaType = typeof BlockSchema;
-
-export type Flavour = keyof BlockSchemaType;
+export type Flavour = keyof typeof BlockSchema;
 
 export const blockService = {
   'affine:code': async () => import('./code-block/code-service.js'),

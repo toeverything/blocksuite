@@ -14,7 +14,7 @@ import {
   getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import { caretRangeFromPoint, sleep } from './std.js';
+import { caretRangeFromPoint } from './std.js';
 import type {
   DomSelectionType,
   SelectedBlock,
@@ -152,8 +152,9 @@ async function setNewTop(y: number, editableContainer: Element) {
         scrollContainer.scrollTop =
           scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
         // set scroll may has a animation, wait for over
-        await sleep();
-        finalBottom = editableContainer.getBoundingClientRect().bottom;
+        requestAnimationFrame(() => {
+          finalBottom = editableContainer.getBoundingClientRect().bottom;
+        });
       }
       return finalBottom - lineHeight / 2;
     }
@@ -163,8 +164,9 @@ async function setNewTop(y: number, editableContainer: Element) {
         scrollContainer.scrollTop =
           scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
         // set scroll may has a animation, wait for over
-        await sleep();
-        finalTop = editableContainer.getBoundingClientRect().top;
+        requestAnimationFrame(() => {
+          finalTop = editableContainer.getBoundingClientRect().top;
+        });
       }
       return finalTop + lineHeight / 2;
     }
@@ -492,6 +494,14 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
       const block = getBlockElementByModel(lastChild);
       if (!block) return;
       focusRichTextByOffset(block, e.raw.clientX);
+    } else if (matchFlavours(lastChild, ['affine:code', 'affine:embed'])) {
+      page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(page, ''),
+        },
+        page.getParent(lastChild)
+      );
     }
   }
 }

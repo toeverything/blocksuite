@@ -184,9 +184,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     ${toolTipStyle}
   `;
 
-  @property({
-    hasChanged: () => true,
-  })
+  @property({ hasChanged: () => true })
   model!: CodeBlockModel;
 
   @property()

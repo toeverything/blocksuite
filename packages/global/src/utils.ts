@@ -28,3 +28,44 @@ export function matchFlavours<
 ): boolean /* model is BlockModels[Key] */ {
   return expected.includes(model.flavour as Key);
 }
+
+type Allowed =
+  | null
+  | undefined
+  | boolean
+  | number
+  | string
+  | Record<string, unknown>
+  | unknown[];
+export function assertEquals<T extends Allowed, U extends T>(
+  val: T,
+  expected: U
+): asserts val is U {
+  const a = isPrimitive(val);
+  const b = isPrimitive(expected);
+  if (a && b) {
+    if (!Object.is(val, expected)) {
+      throw new Error('val is not same as expected');
+    }
+  } else if (a !== b) {
+    throw new Error('val is not same as expected');
+  } else {
+    if (Array.isArray(val) && Array.isArray(expected)) {
+      if (val.length !== expected.length) {
+        throw new Error('val is not same as expected');
+      }
+      val.every((x, i) => assertEquals(x, expected[i]));
+    } else if (typeof val === 'object' && typeof expected === 'object') {
+      const obj1 = Object.entries(val as Record<string, unknown>);
+      const obj2 = Object.entries(expected as Record<string, unknown>);
+      if (obj1.length !== obj2.length) {
+        throw new Error('val is not same as expected');
+      }
+      obj1.every((x, i) => assertEquals(x, obj2[i]));
+    }
+  }
+}
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

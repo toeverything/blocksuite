@@ -1,8 +1,54 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
+
 declare module 'quill' {
   import quill = require('quill/index');
   export type * from 'quill/index' assert { 'resolution-mode': 'require' };
   declare const quillDefault: typeof quill.default;
   export default quillDefault;
+}
+
+declare module 'y-protocols/awareness.js' {
+  export class Awareness<
+    State extends Record<string, unknown> = Record<string, unknown>
+  > {
+    constructor<
+      State extends Record<string, unknown> = Record<string, unknown>
+    >(doc: Y.Doc): Awareness<State>;
+    clientID: number;
+    destroy(): void;
+    getStates(): Map<number, State>;
+    getLocalState(): State;
+    setLocalState(state: State): void;
+    setLocalStateField<Field extends keyof State>(
+      field: Field,
+      value: State[Field]
+    ): void;
+    on(
+      event: 'change',
+      callback: (
+        diff: {
+          added: number[];
+          removed: number[];
+          updated: number[];
+        },
+        transactionOrigin: string | number
+      ) => void
+    ): void;
+    on(
+      event: 'update',
+      callback: (
+        diff: {
+          added: number[];
+          removed: number[];
+          updated: number[];
+        },
+        transactionOrigin: string | number
+      ) => void
+    ): void;
+    on(event: 'destroy', callback: () => void): void;
+    off(event: 'change' | 'update' | 'destroy', callback: AnyFunction): void;
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
@@ -19,11 +65,81 @@ declare type PropsWithId<Props> = Props & { id: string };
 declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
   enable_drag_handle: boolean;
+  enable_surface: boolean;
   readonly: Record<string, boolean>;
 };
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
+  interface SchemaMeta {
+    /**
+     * color of the tag
+     */
+    color: `#${string}`;
+    /**
+     * width of a column
+     */
+    width: number; // px
+    /**
+     * whether this display in the table
+     */
+    hide: boolean;
+  }
+
+  // Threat this type as a column type
+  interface BaseTagSchema<BaseValue = unknown> {
+    /**
+     * each instance of tag type has its own unique uuid
+     */
+    id: string;
+    type: string;
+    /**
+     * column name
+     */
+    name: string;
+    meta: SchemaMeta;
+    /**
+     * this value is just for hold the `BaseValue`,
+     *  don't use this value in the runtime.
+     */
+    __$TYPE_HOLDER$__?: BaseValue;
+  }
+
+  interface TextTagSchema extends BaseTagSchema<string> {
+    type: 'text';
+  }
+
+  interface NumberTagSchema extends BaseTagSchema<number> {
+    type: 'number';
+    decimal: number;
+  }
+
+  interface SelectTagSchema<Selection extends string = string>
+    extends BaseTagSchema<string> {
+    type: 'select';
+    selection: Selection[];
+  }
+
+  interface RichTextTagSchema extends BaseTagSchema<TextType> {
+    type: 'rich-text';
+  }
+
+  type TagSchema =
+    | SelectTagSchema
+    | NumberTagSchema
+    | TextTagSchema
+    | RichTextTagSchema;
+
+  // threat this type as row type
+  interface BlockTag<Schema extends TagSchema = TagSchema> {
+    type: Schema['id'];
+    value: Schema extends BaseTagSchema<infer U>
+      ? U
+      : Type extends BlockColumnType
+      ? undefined
+      : never;
+  }
+
   interface IBaseBlockProps {
     flavour: string;
     type: string;

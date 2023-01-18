@@ -1,8 +1,14 @@
 import {
+  enableDebugLog,
+  disableDebuglog,
+  configDebugLog,
+} from '@blocksuite/global/debug';
+import {
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
+  Page,
   StoreOptions,
 } from '@blocksuite/store';
 
@@ -16,6 +22,27 @@ export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
+
+export function initFeatureFlags(page: Page) {
+  if (params.get('surface') !== null) {
+    page.awarenessAdapter.setFlag('enable_surface', true);
+  }
+}
+
+export function initDebugConfig() {
+  Object.defineProperty(globalThis, 'enableDebugLog', {
+    value: enableDebugLog,
+  });
+  Object.defineProperty(globalThis, 'disableDebugLog', {
+    value: disableDebuglog,
+  });
+  Object.defineProperty(globalThis, 'configDebugLog', {
+    value: configDebugLog,
+  });
+
+  // Uncomment this line or paste it into console to enable debug log.
+  // enableDebugLog(['CRUD']);
+}
 
 /**
  * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.

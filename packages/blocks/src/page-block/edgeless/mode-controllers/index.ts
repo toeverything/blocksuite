@@ -14,8 +14,8 @@ export interface HoverState {
   block: RootBlockModel;
 }
 
-export abstract class SelectionController<Mode extends MouseMode = MouseMode> {
-  protected readonly _container: EdgelessPageBlockComponent;
+export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
+  protected readonly _edgeless: EdgelessPageBlockComponent;
   protected _blockSelectionState: BlockSelectionState = {
     type: 'none',
   };
@@ -23,34 +23,38 @@ export abstract class SelectionController<Mode extends MouseMode = MouseMode> {
   protected _hoverState: HoverState | null = null;
   protected _frameSelectionState: SelectionArea | null = null;
 
-  constructor(container: EdgelessPageBlockComponent) {
-    this._container = container;
+  constructor(edgeless: EdgelessPageBlockComponent) {
+    this._edgeless = edgeless;
   }
 
-  public get isActive() {
+  get isActive() {
     return (
       this._blockSelectionState.type === 'single' &&
       this._blockSelectionState.active
     );
   }
 
-  public get hoverState() {
+  get hoverState() {
     return this._hoverState;
   }
 
   /**
    * Hold the state that the current selection of block(s)
    */
-  public get blockSelectionState() {
+  get blockSelectionState() {
     return this._blockSelectionState;
   }
 
-  public get frameSelectionState() {
+  get frameSelectionState() {
     return this._frameSelectionState;
   }
 
+  protected get _surface() {
+    return this._edgeless.surface;
+  }
+
   protected get _page() {
-    return this._container.page;
+    return this._edgeless.page;
   }
 
   protected get _blocks(): RootBlockModel[] {

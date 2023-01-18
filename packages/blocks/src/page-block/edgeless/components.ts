@@ -192,6 +192,9 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Boolean })
   lock!: boolean;
 
+  @property()
+  viewport!: ViewportState;
+
   @property({ type: Number })
   zoom!: number;
 
@@ -311,7 +314,8 @@ export class EdgelessSelectedRect extends LitElement {
 
   private _onDragMove = (e: MouseEvent) => {
     if (this.state.type === 'single') {
-      const { selected, viewport } = this.state;
+      const { viewport } = this;
+      const { selected } = this.state;
       const { xywh } = selected;
       const [x, y, w, h] = JSON.parse(xywh) as XYWH;
       let newX = x;
