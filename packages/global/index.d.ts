@@ -1,8 +1,54 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
+
 declare module 'quill' {
   import quill = require('quill/index');
   export type * from 'quill/index' assert { 'resolution-mode': 'require' };
   declare const quillDefault: typeof quill.default;
   export default quillDefault;
+}
+
+declare module 'y-protocols/awareness.js' {
+  export class Awareness<
+    State extends Record<string, unknown> = Record<string, unknown>
+  > {
+    constructor<
+      State extends Record<string, unknown> = Record<string, unknown>
+    >(doc: Y.Doc): Awareness<State>;
+    clientID: number;
+    destroy(): void;
+    getStates(): Map<number, State>;
+    getLocalState(): State;
+    setLocalState(state: State): void;
+    setLocalStateField<Field extends keyof State>(
+      field: Field,
+      value: State[Field]
+    ): void;
+    on(
+      event: 'change',
+      callback: (
+        diff: {
+          added: number[];
+          removed: number[];
+          updated: number[];
+        },
+        transactionOrigin: string | number
+      ) => void
+    ): void;
+    on(
+      event: 'update',
+      callback: (
+        diff: {
+          added: number[];
+          removed: number[];
+          updated: number[];
+        },
+        transactionOrigin: string | number
+      ) => void
+    ): void;
+    on(event: 'destroy', callback: () => void): void;
+    off(event: 'change' | 'update' | 'destroy', callback: AnyFunction): void;
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
@@ -20,11 +66,13 @@ declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
   enable_drag_handle: boolean;
   enable_surface: boolean;
+  enable_block_hub: boolean;
   readonly: Record<string, boolean>;
 };
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
+
   interface SchemaMeta {
     /**
      * color of the tag
@@ -175,6 +223,7 @@ declare namespace BlockSuiteModelProps {
   }
 
   import type { ColorStyle, TDShapeType } from '@blocksuite/blocks';
+
   interface ShapeBlockModel {
     color: ColorStyle | `#${string}`;
     type: TDShapeType;

@@ -1,4 +1,4 @@
-import type { Signal } from '../utils/signal.js';
+import type { Signal } from '@blocksuite/global/utils';
 
 export type BlobId = string;
 export type BlobURL = string;

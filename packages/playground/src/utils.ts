@@ -1,4 +1,9 @@
 import {
+  enableDebugLog,
+  disableDebuglog,
+  configDebugLog,
+} from '@blocksuite/global/debug';
+import {
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
@@ -20,8 +25,23 @@ export const isBase64 =
 
 export function initFeatureFlags(page: Page) {
   if (params.get('surface') !== null) {
-    page.awareness.setFlag('enable_surface', true);
+    page.awarenessAdapter.setFlag('enable_surface', true);
   }
+}
+
+export function initDebugConfig() {
+  Object.defineProperty(globalThis, 'enableDebugLog', {
+    value: enableDebugLog,
+  });
+  Object.defineProperty(globalThis, 'disableDebugLog', {
+    value: disableDebuglog,
+  });
+  Object.defineProperty(globalThis, 'configDebugLog', {
+    value: configDebugLog,
+  });
+
+  // Uncomment this line or paste it into console to enable debug log.
+  // enableDebugLog(['CRUD']);
 }
 
 /**
@@ -59,6 +79,7 @@ export function getOptions(): Pick<
     defaultFlags: {
       enable_set_remote_flag: true,
       enable_drag_handle: true,
+      enable_block_hub: true,
       readonly: {
         'space:page0': false,
       },

@@ -6,8 +6,6 @@ on:
       - opened
       - edited
       - synchronize
-      - labeled
-      - unlabeled
     branches:
       - master
 

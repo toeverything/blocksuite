@@ -9,6 +9,7 @@ import { DebugMenu } from './components/debug-menu.js';
 import {
   defaultMode,
   getOptions,
+  initDebugConfig,
   initFeatureFlags,
   initParam,
   isBase64,
@@ -19,6 +20,7 @@ import './style.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
+initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
