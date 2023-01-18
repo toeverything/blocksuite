@@ -289,7 +289,7 @@ export class DefaultSelectionManager {
     if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
       createHandle();
     }
-    if (this.page.awareness.getFlag('enable_block_hub')) {
+    if (this.page.awarenessAdapter.getFlag('enable_block_hub')) {
       createBlockHub();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
