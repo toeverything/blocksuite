@@ -7,16 +7,27 @@ import { updateSelectedTextType } from '../../page-block/utils/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
 
-const slashMenuStyle = css`
+const styles = css`
+  .overlay-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--affine-z-index-popover);
+  }
+
+  .slash-menu-container {
+    position: fixed;
+    z-index: var(--affine-z-index-popover);
+  }
+
   .slash-menu {
     font-size: var(--affine-font-sm);
-    box-sizing: border-box;
     position: absolute;
-    width: 173px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    min-width: 173px;
     padding: 8px 4px;
+    overflow-y: auto;
 
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);
@@ -27,34 +38,19 @@ const slashMenuStyle = css`
 
 @customElement('slash-menu')
 export class SlashMenu extends LitElement {
-  static styles = css`
-    .slash-menu-container {
-      box-sizing: border-box;
-      position: fixed;
-      display: flex;
-      align-items: center;
-
-      border-radius: 10px 10px 10px 0;
-      background: var(--affine-popover-background);
-      box-shadow: var(--affine-popover-shadow);
-      z-index: var(--affine-z-index-popover);
-    }
-    .overlay-mask {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: var(--affine-z-index-popover);
-    }
-    ${slashMenuStyle}
-  `;
+  static styles = styles;
 
   @property()
   left: string | null = null;
 
   @property()
   top: string | null = null;
+
+  @property()
+  maxHeight: string | null = null;
+
+  @property()
+  position: 'top' | 'bottom' = 'bottom';
 
   @property()
   model!: BaseBlockModel;
@@ -209,13 +205,10 @@ export class SlashMenu extends LitElement {
       top: this.top,
     });
 
-    const position = 'bottom';
     const slashMenuStyles = styleMap({
-      left: '0',
-      top: position === 'bottom' ? 'calc(100% + 4px)' : null,
-      bottom: position !== 'bottom' ? 'calc(100% + 4px)' : null,
-      display: 'flex',
-      flexDirection: position === 'bottom' ? 'column' : 'column-reverse',
+      top: this.position === 'bottom' ? '100%' : null,
+      bottom: this.position !== 'bottom' ? '100%' : null,
+      maxHeight: this.maxHeight,
     });
 
     return html`<div class="slash-menu-container" style="${containerStyles}">

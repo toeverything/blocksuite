@@ -1,8 +1,9 @@
 import { BaseBlockModel, PrelimText } from '@blocksuite/store';
 import {
   calcSafeCoordinate,
+  compareTopAndBottomSpace,
   DragDirection,
-} from '../../page-block/utils/cursor.js';
+} from '../../page-block/utils/position.js';
 import {
   getQuillIndexByNativeSelection,
   getRichTextByModel,
@@ -43,12 +44,18 @@ export const showSlashMenu = ({
   // Handle position
 
   const updatePos = throttle(() => {
+    const { placement, height } = compareTopAndBottomSpace(
+      range,
+      document.body,
+      30
+    );
+
     const positioningElRect = range.getBoundingClientRect();
-    // TODO update direction and position
-    const direction = 'right-bottom';
     const positioningPoint = {
       x: positioningElRect.x,
-      y: positioningElRect.y + positioningElRect.height,
+      y:
+        positioningElRect.y +
+        (placement === 'bottom' ? positioningElRect.height : 0),
     };
 
     // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
@@ -57,16 +64,17 @@ export const showSlashMenu = ({
 
     // Add offset to avoid the quick bar being covered by the window border
     const gapY = 5;
-    const isBottom = direction.includes('bottom');
     const safeCoordinate = calcSafeCoordinate({
       positioningPoint,
       objRect: slashMenuRect,
       boundaryRect,
-      offsetY: isBottom ? gapY : -slashMenuRect.height - gapY,
+      offsetY: placement === 'bottom' ? gapY : -gapY,
     });
 
     slashMenu.left = `${safeCoordinate.x}px`;
     slashMenu.top = `${safeCoordinate.y}px`;
+    slashMenu.maxHeight = `${height}px`;
+    slashMenu.position = placement;
   }, 10);
 
   window.addEventListener('resize', updatePos, { passive: true });
