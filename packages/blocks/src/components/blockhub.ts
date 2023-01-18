@@ -60,6 +60,7 @@ export class BlockHub extends NonShadowLitElement {
   private _cardvisibleType = '';
   private _showToolTip = true;
   private _timer: number | null = null;
+  private _delay = 200; // ms
 
   static styles = css`
     .affine-block-hub-container {
@@ -261,27 +262,6 @@ export class BlockHub extends NonShadowLitElement {
     this.addEventListener('mousedown', this._onMouseDown);
   }
 
-  /**
-   * This is currently a workaround, as the height of the _blockHubIconsContainer is determined by the height of its
-   * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
-   * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
-   */
-  private _onTransitionStart = (e: TransitionEvent) => {
-    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
-    if (e.propertyName === 'opacity') {
-      return;
-    }
-    if (!this._expanded) {
-      if (this._timer) {
-        clearTimeout(this._timer);
-      }
-      this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.height = '0px';
-      }, 50);
-    } else {
-      this._blockHubIconsContainer.style.height = 'unset';
-    }
-  };
   protected firstUpdated() {
     this._blockHubCards.forEach(card => {
       card.addEventListener('mousedown', this._onCardMouseDown);
@@ -339,6 +319,28 @@ export class BlockHub extends NonShadowLitElement {
       );
     }
   }
+
+  /**
+   * This is currently a workaround, as the height of the _blockHubIconsContainer is determined by the height of its
+   * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
+   * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
+   */
+  private _onTransitionStart = (e: TransitionEvent) => {
+    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
+    if (e.propertyName === 'opacity') {
+      return;
+    }
+    if (this._timer) {
+      clearTimeout(this._timer);
+    }
+    if (!this._expanded) {
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.height = '0px';
+      }, this._delay);
+    } else {
+      this._blockHubIconsContainer.style.height = 'unset';
+    }
+  };
 
   private _shouldCardDisplay(type: string) {
     return (
