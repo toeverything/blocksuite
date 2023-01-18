@@ -262,7 +262,7 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   /**
-   * This is currently a workaround, as the height of the .block-hub-icons-container is determined by the height of its
+   * This is currently a workaround, as the height of the _blockHubIconsContainer is determined by the height of its
    * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
    * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
    */
