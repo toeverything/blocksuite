@@ -7,6 +7,9 @@ import { hmrPlugin } from './scripts/hmr-plugin';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), hmrPlugin],
+  build: {
+    sourcemap: true,
+  },
   resolve: {
     alias: {
       '@blocksuite/blocks': path.resolve(

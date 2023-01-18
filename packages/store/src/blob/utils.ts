@@ -23,7 +23,3 @@ export function getDatabase<T = ArrayBufferLike>(
     clear: () => clear(db),
   };
 }
-
-export async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}

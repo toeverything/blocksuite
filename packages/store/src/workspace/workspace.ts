@@ -2,18 +2,18 @@ import * as Y from 'yjs';
 import { Store, StoreOptions } from '../store.js';
 import { Space } from '../space.js';
 import { Page } from './page.js';
-import { Signal } from '../utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 import { Indexer, QueryContent } from './search.js';
-import type { Awareness } from 'y-protocols/awareness';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { merge } from 'merge';
+import type { AwarenessAdapter } from '../awareness.js';
 
 export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
+
   [key: string]: string | number | boolean;
 }
 
@@ -36,17 +36,15 @@ class WorkspaceMeta<
   constructor(
     id: string,
     doc: BlockSuiteDoc,
-    awareness: Awareness,
-    defaultFlags?: Partial<Flags>
+    awarenessAdapter: AwarenessAdapter
   ) {
-    super(id, doc, awareness, {
+    super(id, doc, awarenessAdapter, {
       valueInitializer: {
         pages: () => new Y.Array(),
         versions: () => new Y.Map(),
         avatar: () => '',
         name: () => '',
       },
-      defaultFlags,
     });
     this.origin.observeDeep(this._handleEvents);
   }
@@ -216,13 +214,6 @@ class WorkspaceMeta<
   };
 }
 
-const flagsPreset = {
-  enable_set_remote_flag: true,
-  enable_drag_handle: true,
-  enable_surface: false,
-  readonly: {},
-} satisfies BlockSuiteFlags;
-
 export class Workspace {
   static Y = Y;
   public readonly room: string | undefined;
@@ -255,8 +246,7 @@ export class Workspace {
     this.meta = new WorkspaceMeta(
       'space:meta',
       this.doc,
-      this._store.awareness,
-      merge(flagsPreset, options.defaultFlags)
+      this.awarenessAdapter
     );
 
     this.signals = {
@@ -266,6 +256,10 @@ export class Workspace {
     };
 
     this._handlePageEvent();
+  }
+
+  get awarenessAdapter(): AwarenessAdapter {
+    return this._store.awarenessAdapter;
   }
 
   get providers() {
@@ -311,7 +305,7 @@ export class Workspace {
         this,
         pageId,
         this.doc,
-        this._store.awareness,
+        this.awarenessAdapter,
         this._store.idGenerator
       );
       this._store.addSpace(page);

@@ -1,7 +1,8 @@
-import { formatConfig, paragraphConfig } from './const.js';
+import { formatConfig } from './const.js';
 import type { Page } from '@blocksuite/store';
 import { hotkey, HOTKEYS } from '../../__internal__/index.js';
 import { updateSelectedTextType } from './container-operations.js';
+import { paragraphConfig } from '@blocksuite/global/config';
 
 const { UNDO, REDO } = HOTKEYS;
 
@@ -10,7 +11,7 @@ export function bindCommonHotkey(page: Page) {
     hotkey.addListener(hotkeyStr, e => {
       // Prevent quill default behavior
       e.preventDefault();
-      if (page.awareness.isReadonly()) {
+      if (page.awarenessAdapter.isReadonly(page)) {
         return;
       }
 
