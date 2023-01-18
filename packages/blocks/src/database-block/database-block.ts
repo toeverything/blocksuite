@@ -115,6 +115,8 @@ function DataBaseRowContainer(block: DatabaseBlock) {
 
       .affine-database-block-row {
         width: 100%;
+        display: flex;
+        flex-direction: row;
         border-top: 1px solid rgb(238, 238, 237);
       }
     </style>
@@ -125,9 +127,35 @@ function DataBaseRowContainer(block: DatabaseBlock) {
         (child, idx) => {
           return html`
             <div class="affine-database-block-row" data-row-id="${idx}">
-              ${BlockElementWithService(child, host, () => {
-                block.requestUpdate();
-              })}
+              <div
+                style=${styleMap({
+                  minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
+                  maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
+                })}
+              >
+                ${BlockElementWithService(child, host, () => {
+                  block.requestUpdate();
+                })}
+              </div>
+              ${repeat(
+                block.columns.map(
+                  column =>
+                    [
+                      column,
+                      child.page.getBlockTagByTagSchema(model, column),
+                    ] as const
+                ),
+                ([column, tag]) => html`
+                  <div
+                    style=${styleMap({
+                      minWidth: `${column.meta.width}px`,
+                      maxWidth: `${column.meta.width}px`,
+                    })}
+                  >
+                    ${tag?.value ?? 'no value'}
+                  </div>
+                `
+              )}
             </div>
           `;
         }
@@ -355,9 +383,9 @@ export class DatabaseBlock extends NonShadowLitElement {
 
   protected render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-    const totalWidth = this.columns
-      .map(column => column.meta.width)
-      .reduce((t, x) => t + x);
+    const totalWidth =
+      this.columns.map(column => column.meta.width).reduce((t, x) => t + x) +
+      FIRST_LINE_TEXT_WIDTH;
 
     return html`
       <div>
