@@ -74,6 +74,7 @@ export const FileExporter = {
         );
       },
     });
+    turndownService.keep(['del', 'u']);
     const markdown = turndownService.turndown(htmlContent);
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
