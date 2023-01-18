@@ -1,6 +1,6 @@
 import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
-import { Signal } from './utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
 import type * as Y from 'yjs';
 

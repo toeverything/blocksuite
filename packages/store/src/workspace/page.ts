@@ -1,6 +1,5 @@
 import * as Y from 'yjs';
 import type { Quill } from 'quill';
-import type { Awareness } from 'y-protocols/awareness';
 import { uuidv4 } from 'lib0/random.js';
 import { BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
@@ -11,7 +10,7 @@ import {
   TextType,
 } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import { Signal } from '../utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 import {
   assertValidChildren,
   initInternalProps,
@@ -23,8 +22,10 @@ import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { debug } from '@blocksuite/global/debug';
 import BlockTag = BlockSuiteInternal.BlockTag;
 import TagSchema = BlockSuiteInternal.TagSchema;
+import type { AwarenessAdapter } from '../awareness.js';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -53,7 +54,7 @@ export type PageData = {
 };
 
 export class Page extends Space<PageData> {
-  public workspace: Workspace;
+  private _workspace: Workspace;
   private _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | BaseBlockModel[] | null = null;
@@ -79,12 +80,16 @@ export class Page extends Space<PageData> {
     workspace: Workspace,
     id: string,
     doc: BlockSuiteDoc,
-    awareness: Awareness,
+    awarenessAdapter: AwarenessAdapter,
     idGenerator: IdGenerator = uuidv4
   ) {
-    super(id, doc, awareness);
-    this.workspace = workspace;
+    super(id, doc, awarenessAdapter);
+    this._workspace = workspace;
     this._idGenerator = idGenerator;
+  }
+
+  get workspace() {
+    return this._workspace;
   }
 
   get meta() {
@@ -137,14 +142,14 @@ export class Page extends Space<PageData> {
   }
 
   get canUndo() {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       return false;
     }
     return this._history.canUndo();
   }
 
   get canRedo() {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       return false;
     }
     return this._history.canRedo();
@@ -154,30 +159,30 @@ export class Page extends Space<PageData> {
     return Text;
   }
 
-  undo() {
-    if (this.awareness.isReadonly()) {
+  undo = () => {
+    if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.undo();
-  }
+  };
 
-  redo() {
-    if (this.awareness.isReadonly()) {
+  redo = () => {
+    if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
     this._history.redo();
-  }
+  };
 
   /** Capture current operations to undo stack synchronously. */
-  captureSync() {
+  captureSync = () => {
     this._history.stopCapturing();
-  }
+  };
 
-  resetHistory() {
+  resetHistory = () => {
     this._history.clear();
-  }
+  };
 
   updateBlockTag<Tag extends BlockTag>(id: BaseBlockModel['id'], tag: Tag) {
     const already = this.tags.has(id);
@@ -307,6 +312,7 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
@@ -320,7 +326,7 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ) {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       throw new Error('cannot modify data in readonly mode');
     }
     if (!flavour) {
@@ -380,7 +386,7 @@ export class Page extends Space<PageData> {
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -388,8 +394,9 @@ export class Page extends Space<PageData> {
     this.updateBlock(model, props);
   }
 
+  @debug('CRUD')
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -418,8 +425,9 @@ export class Page extends Space<PageData> {
     nextParentModel.propsUpdated.emit();
   }
 
+  @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -450,8 +458,37 @@ export class Page extends Space<PageData> {
     });
   }
 
+  @debug('CRUD')
+  insertBlock(
+    blockProps: Partial<BaseBlockModel>,
+    targetModel: BaseBlockModel,
+    top = true
+  ) {
+    const targetParentModel = this.getParent(targetModel);
+    if (targetParentModel === null) {
+      throw new Error('cannot find parent model');
+    }
+    this.transact(() => {
+      const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
+      const yChildren = yParent.get('sys:children') as Y.Array<string>;
+      const targetIdx = yChildren
+        .toArray()
+        .findIndex(id => id === targetModel.id);
+      assertExists(blockProps.flavour);
+      this.addBlockByFlavour(
+        blockProps.flavour,
+        {
+          type: blockProps.type,
+        },
+        targetParentModel.id,
+        top ? targetIdx : targetIdx + 1
+      );
+      // }
+    });
+  }
+
   deleteBlockById(id: string) {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -459,6 +496,7 @@ export class Page extends Space<PageData> {
     this.deleteBlock(model);
   }
 
+  @debug('CRUD')
   deleteBlock(
     model: BaseBlockModel,
     options: {
@@ -467,7 +505,7 @@ export class Page extends Space<PageData> {
       bringChildrenTo: 'parent',
     }
   ) {
-    if (this.awareness.isReadonly()) {
+    if (this.awarenessAdapter.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -507,7 +545,7 @@ export class Page extends Space<PageData> {
   }
 
   /** Connect a rich text editor instance with a YText instance. */
-  attachRichText(id: string, quill: Quill) {
+  attachRichText = (id: string, quill: Quill) => {
     const yBlock = this._getYBlock(id);
 
     const yText = yBlock.get('prop:text') as Y.Text | null;
@@ -522,9 +560,9 @@ export class Page extends Space<PageData> {
       const cursor = adapter.getCursor();
       if (!cursor) return;
 
-      this.awareness.setLocalCursor({ ...cursor, id });
+      this.awarenessAdapter.setLocalCursor(this, { ...cursor, id });
     });
-  }
+  };
 
   /** Cancel the connection between the rich text editor instance and YText. */
   detachRichText(id: string) {
@@ -603,7 +641,7 @@ export class Page extends Space<PageData> {
     if (isWeb) {
       event.stackItem.meta.set(
         'cursor-location',
-        this.awareness.getLocalCursor()
+        this.awarenessAdapter.getLocalCursor(this)
       );
     }
 
@@ -616,7 +654,7 @@ export class Page extends Space<PageData> {
       return;
     }
 
-    this.awareness.setLocalCursor(cursor);
+    this.awarenessAdapter.setLocalCursor(this, cursor);
     this._historyObserver();
   };
 

@@ -1,4 +1,4 @@
-import { Signal } from '../utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 import type { BlobId, BlobProvider, BlobURL } from './types.js';
 
 export class BlobStorage {

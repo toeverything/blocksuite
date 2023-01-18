@@ -35,6 +35,8 @@ import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/store';
+import { BlockHub } from '../../components/blockhub.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -153,12 +155,13 @@ export class DefaultSelectionManager {
   state = new PageSelectionState('none');
   private _mouseRoot: HTMLElement;
   private _container: DefaultPageBlockComponent;
-  private _disposeCallbacks: (() => void)[] = [];
+  private _disposables = new DisposableGroup();
   private _signals: DefaultPageSignals;
   private _embedResizeManager: EmbedResizeManager;
   private _dragHandleAbortController = new AbortController();
 
   private _dragHandle: DragHandle | null = null;
+  private _blockHub: BlockHub | null = null;
 
   constructor({
     page,
@@ -222,27 +225,95 @@ export class DefaultSelectionManager {
         },
       });
     };
-    this._disposeCallbacks.push(
-      this.page.awareness.signals.update.on(msg => {
-        if (msg.id !== this.page.doc.clientID) {
-          return;
-        }
-        if (msg.state?.flags.enable_drag_handle) {
-          // todo: implement subscribe with selector
-          if (!this._dragHandle) {
-            createHandle();
+    const createBlockHub = () => {
+      this._blockHub = new BlockHub({
+        onDropCallback: (e, end) => {
+          const dataTransfer = e.dataTransfer;
+          assertExists(dataTransfer);
+          const data = dataTransfer.getData('affine/block-hub');
+          const blockProps = JSON.parse(data);
+          const targetModel = end.model;
+          const rect = end.position;
+          this.page.captureSync();
+          const distanceToTop = Math.abs(rect.top - e.y);
+          const distanceToBottom = Math.abs(rect.bottom - e.y);
+          this.page.insertBlock(
+            blockProps,
+            targetModel,
+            distanceToTop < distanceToBottom
+          );
+        },
+        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+            skipX,
+          });
+        },
+        getBlockEditingStateByCursor: (
+          pageX,
+          pageY,
+          cursor,
+          size,
+          skipX,
+          dragging
+        ) => {
+          return getBlockEditingStateByCursor(
+            this._blocks,
+            pageX,
+            pageY,
+            cursor,
+            {
+              size,
+              skipX,
+              dragging,
+            }
+          );
+        },
+      });
+    };
+    this._disposables.add(
+      this.page.awarenessAdapter.signals.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this._dragHandle) {
+              createHandle();
+            }
+          } else {
+            this._dragHandle?.remove();
+            this._dragHandle = null;
           }
-        } else {
-          this._dragHandle?.remove();
-          this._dragHandle = null;
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
         }
-      }).dispose
+      )
     );
-    if (this.page.awareness.getFlag('enable_drag_handle')) {
+    this._disposables.add(
+      this.page.awarenessAdapter.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this._blockHub) {
+              createHandle();
+            }
+          } else {
+            this._blockHub?.remove();
+            this._blockHub = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+    if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
       createHandle();
     }
+    if (this.page.awarenessAdapter.getFlag('enable_block_hub')) {
+      createBlockHub();
+    }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
-    this._disposeCallbacks.push(
+    this._disposables.add(
       initMouseEventHandlers(
         this._mouseRoot,
         this._onContainerDragStart,
@@ -589,7 +660,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
-    this._disposeCallbacks.forEach(callback => callback());
+    this._disposables.dispose();
   }
 
   resetSelectedBlockByRect(

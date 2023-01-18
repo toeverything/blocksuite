@@ -1,8 +1,9 @@
 import ky from 'ky';
-import { Signal } from '../utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 
 import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types.js';
-import { getDatabase, sha, sleep } from './utils.js';
+import { getDatabase, sha } from './utils.js';
+import { sleep } from '@blocksuite/global/utils';
 
 const RETRY_TIMEOUT = 500;
 

@@ -67,5 +67,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests
-        run: pnpm --filter @blocksuite/store test:unit
+      - name: Run unit tests
+        run: pnpm test:unit

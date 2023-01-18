@@ -19,6 +19,7 @@ import {
   setSelection,
   undoByClick,
   pressSpace,
+  captureHistory,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
@@ -179,12 +180,18 @@ test('split block when paste', async ({ page }) => {
 `,
   };
   await page.keyboard.type('abc');
+  await captureHistory(page);
+
   await setQuillSelection(page, 1, 1);
   await pasteContent(page, clipData);
-  await assertRichTexts(page, ['abtext', 'h1c']);
+
+  await assertRichTexts(page, ['atext', 'h1', 'c']);
   await assertSelection(page, 1, 2, 0);
+
+  // FIXME: one redundant step in clipboard operation
   await undoByClick(page);
-  await assertRichTexts(page, ['\n']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['abc']);
 
   await page.keyboard.type('aa');
   await pressEnter(page);
@@ -195,13 +202,13 @@ test('split block when paste', async ({ page }) => {
     return { x: bbox.left, y: bbox.top - 2 };
   });
   const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const paragraph = document.querySelector('[data-block-id="5"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
     return { x: bbox.right, y: bbox.bottom };
   });
   await dragBetweenCoords(page, topLeft123, bottomRight789);
   await pasteContent(page, clipData);
-  await assertRichTexts(page, ['aa', 'bb', 'text', 'h1']);
+  await assertRichTexts(page, ['aaa', 'bbc', 'text', 'h1']);
 });
 
 test('import markdown', async ({ page }) => {

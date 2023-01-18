@@ -46,13 +46,6 @@ export function noop() {
 }
 
 /**
- * Sleep is not a good practice.
- * Please use it sparingly!
- */
-export const sleep = (ms = 0) =>
-  new Promise(resolve => setTimeout(resolve, ms));
-
-/**
  * @example
  * ```ts
  * const log = (message: string) => console.log(`[${new Date().toISOString()}] ${message}`);
