@@ -34,12 +34,25 @@ function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
 
-async function initEmptyEditor(page: Page) {
-  await page.evaluate(() => {
+/**
+ * @example
+ * ```ts
+ * await initEmptyEditor(page, { enable_some_flag: true });
+ * ```
+ */
+async function initEmptyEditor(
+  page: Page,
+  flags: Partial<BlockSuiteFlags> = {}
+) {
+  await page.evaluate(flags => {
     const { workspace } = window;
 
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as StorePage;
+      for (const [key, value] of Object.entries(flags)) {
+        page.awarenessAdapter.setFlag(key as keyof typeof flags, value);
+      }
+
       const editor = document.createElement('editor-container');
       editor.page = page;
 
@@ -56,11 +69,15 @@ async function initEmptyEditor(page: Page) {
     });
 
     workspace.createPage('page0');
-  });
+  }, flags);
   await waitNextFrame(page);
 }
 
-export async function enterPlaygroundRoom(page: Page, room?: string) {
+export async function enterPlaygroundRoom(
+  page: Page,
+  flags?: Partial<BlockSuiteFlags>,
+  room?: string
+) {
   const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
@@ -83,7 +100,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
     }
   });
 
-  await initEmptyEditor(page);
+  await initEmptyEditor(page, flags);
   return room;
 }
 
