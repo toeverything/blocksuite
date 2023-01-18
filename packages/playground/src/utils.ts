@@ -28,7 +28,7 @@ export function initFeatureFlags(page: Page) {
     page.awarenessStore.setFlag('enable_surface', true);
   }
   if (params.get('slash') !== null) {
-    page.awarenessAdapter.setFlag('enable_slash_menu', true);
+    page.awarenessStore.setFlag('enable_slash_menu', true);
   }
 }
 
