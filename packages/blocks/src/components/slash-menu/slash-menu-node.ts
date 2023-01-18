@@ -62,15 +62,15 @@ export class SlashMenu extends LitElement {
   slashMenuElement!: HTMLElement;
 
   @state()
-  private activeItemIndex = 0;
+  private _activeItemIndex = 0;
 
   @state()
-  private filterItems: typeof paragraphConfig = paragraphConfig;
+  private _filterItems: typeof paragraphConfig = paragraphConfig;
 
-  private searchString = '';
+  private _searchString = '';
 
   // Just a temp variable
-  private richText?: RichText;
+  private _richText?: RichText;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -88,13 +88,13 @@ export class SlashMenu extends LitElement {
       // Workaround Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
     });
-    this.richText = richText;
+    this._richText = richText;
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('keydown', this._escapeListener);
-    this.richText?.removeEventListener('keydown', this._keyDownListener, {
+    this._richText?.removeEventListener('keydown', this._keyDownListener, {
       capture: true,
     });
   }
@@ -108,17 +108,17 @@ export class SlashMenu extends LitElement {
       return;
     }
     if (e.key === 'Backspace') {
-      if (!this.searchString.length) {
+      if (!this._searchString.length) {
         this.abortController.abort();
       }
-      this.searchString = this.searchString.slice(0, -1);
-      this.filterItems = this._updateItem();
+      this._searchString = this._searchString.slice(0, -1);
+      this._filterItems = this._updateItem();
       return;
     }
     if (e.key.length === 1) {
-      this.searchString += e.key;
-      this.filterItems = this._updateItem();
-      if (!this.filterItems.length) {
+      this._searchString += e.key;
+      this._filterItems = this._updateItem();
+      if (!this._filterItems.length) {
         this.abortController.abort();
       }
       return;
@@ -131,19 +131,19 @@ export class SlashMenu extends LitElement {
     ) {
       return;
     }
-    const configLen = this.filterItems.length;
+    const configLen = this._filterItems.length;
     switch (e.key) {
       case 'Enter': {
-        this._handleItemClick(this.activeItemIndex);
+        this._handleItemClick(this._activeItemIndex);
         break;
       }
       case 'ArrowUp': {
-        this.activeItemIndex =
-          (this.activeItemIndex - 1 + configLen) % configLen;
+        this._activeItemIndex =
+          (this._activeItemIndex - 1 + configLen) % configLen;
         break;
       }
       case 'ArrowDown': {
-        this.activeItemIndex = (this.activeItemIndex + 1) % configLen;
+        this._activeItemIndex = (this._activeItemIndex + 1) % configLen;
         break;
       }
       case 'ArrowRight':
@@ -172,14 +172,14 @@ export class SlashMenu extends LitElement {
 
   private _handleItemClick(index: number) {
     // Need to remove the search string
-    this.abortController.abort(this.searchString);
-    const { flavour, type } = this.filterItems[index];
+    this.abortController.abort(this._searchString);
+    const { flavour, type } = this._filterItems[index];
     updateSelectedTextType(flavour, type, this.model.page);
   }
 
   private _updateItem() {
-    this.activeItemIndex = 0;
-    const searchStr = this.searchString.toLowerCase();
+    this._activeItemIndex = 0;
+    const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
       return paragraphConfig;
     }
@@ -217,11 +217,11 @@ export class SlashMenu extends LitElement {
         @click="${() => this.abortController.abort()}"
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
-        ${this.filterItems.map(
+        ${this._filterItems.map(
           ({ type, name, icon }, index) => html`<format-bar-button
             width="100%"
             style="padding-left: 12px; justify-content: flex-start;"
-            ?hover=${this.activeItemIndex === index}
+            ?hover=${this._activeItemIndex === index}
             text="${name}"
             data-testid="${type}"
             @click=${() => {
