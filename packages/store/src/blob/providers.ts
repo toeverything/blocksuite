@@ -1,14 +1,15 @@
 import ky from 'ky';
-import { Signal } from '@blocksuite/global/utils';
+import { assertExists, Signal, sleep } from '@blocksuite/global/utils';
 
 import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types.js';
 import { getDatabase, sha } from './utils.js';
-import { sleep } from '@blocksuite/global/utils';
 
 const RETRY_TIMEOUT = 500;
 
+export type GetBlobOptions = (key: string) => string | undefined;
+
 interface BlobProviderStatic {
-  init(workspace: string, cloudApi?: string): Promise<BlobProvider>;
+  init(workspace: string, getOptions?: GetBlobOptions): Promise<BlobProvider>;
 }
 
 function staticImplements<T>() {
@@ -31,9 +32,9 @@ export class IndexedDBBlobProvider implements BlobProvider {
 
   static async init(
     workspace: string,
-    cloudApi?: string
+    getOptions?: GetBlobOptions
   ): Promise<IndexedDBBlobProvider> {
-    const provider = new IndexedDBBlobProvider(workspace, cloudApi);
+    const provider = new IndexedDBBlobProvider(workspace, getOptions);
     await provider._initBlobs();
     return provider;
   }
@@ -47,15 +48,18 @@ export class IndexedDBBlobProvider implements BlobProvider {
     }
   }
 
-  private constructor(workspace: string, cloudApi?: string) {
+  private constructor(workspace: string, getOptions?: GetBlobOptions) {
     this._database = getDatabase('blob', workspace);
+
+    const cloudApi = getOptions?.('api');
     if (cloudApi) {
+      assertExists(getOptions);
       this.signals.uploadStateChanged.on(uploading => {
         this.uploading = uploading;
       });
       this._cloud = new CloudSyncManager(
         workspace,
-        cloudApi,
+        getOptions,
         this._database,
         this.signals.uploadStateChanged,
         this.signals.uploadFinished
@@ -139,7 +143,7 @@ export class CloudSyncManager {
 
   constructor(
     workspace: string,
-    prefixUrl: string,
+    getOptions: GetBlobOptions,
     db: IDBInstance,
     onUploadStateChanged: Signal<boolean>,
     onUploadFinished: Signal<BlobId>
@@ -147,9 +151,19 @@ export class CloudSyncManager {
     this._onUploadFinished = onUploadFinished;
     this._onUploadStateChanged = onUploadStateChanged;
     this._fetcher = ky.create({
-      prefixUrl,
+      prefixUrl: getOptions('api'),
       signal: this._abortController.signal,
       throwHttpErrors: false,
+      hooks: {
+        beforeRequest: [
+          async request => {
+            const token = getOptions('token');
+            if (token) {
+              request.headers.set('Authorization', token);
+            }
+          },
+        ],
+      },
     });
 
     this._database = db;

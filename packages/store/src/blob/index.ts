@@ -1,13 +1,14 @@
 import { IndexedDBBlobProvider } from './providers.js';
+import type { GetBlobOptions } from './providers.js';
 import { BlobStorage } from './storage.js';
 
-const CLOUD_API = '/api/workspace';
+const CLOUD_API = (k: string) => ({ api: '/api/workspace' }[k]);
 
 export const getBlobStorage = async (
   // Note: In the current backend design, the workspace id is a randomly generated int64 number
   // so if you need to test or enable blob synchronization, the provided workspace needs to be a number
   workspace?: string,
-  cloudApi: string = CLOUD_API
+  cloudApi: GetBlobOptions = CLOUD_API
 ) => {
   if (workspace) {
     const storage = new BlobStorage();
@@ -20,3 +21,4 @@ export const getBlobStorage = async (
 };
 
 export { BlobStorage } from './storage.js';
+export type { GetBlobOptions };

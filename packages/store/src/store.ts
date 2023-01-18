@@ -11,6 +11,7 @@ import {
 import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
 import { AwarenessAdapter, AwarenessState } from './awareness.js';
+import type { GetBlobOptions } from './blob/index.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -55,6 +56,7 @@ export interface StoreOptions<
   awareness?: Awareness<AwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
+  getBlobOptions?: GetBlobOptions;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
