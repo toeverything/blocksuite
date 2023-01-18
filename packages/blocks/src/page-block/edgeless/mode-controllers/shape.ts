@@ -6,10 +6,7 @@ import { noop } from '../../../__internal__/index.js';
 import { MouseModeController } from './index.js';
 import type { SelectionArea } from '../selection-manager.js';
 import { assertExists } from '@blocksuite/global/utils';
-import { RectElement } from '@blocksuite/phasor';
-
-// FIXME use nanoid
-let i = 0;
+import { Bound } from '@blocksuite/phasor';
 
 export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{
@@ -18,7 +15,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     shape: 'rectangle',
   };
 
-  private _draggingShapeBlockId: string | null = null;
+  private _draggingElementId: string | null = null;
 
   protected _draggingArea: SelectionArea | null = null;
 
@@ -41,32 +38,25 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
 
     if (this._page.awarenessAdapter.getFlag('enable_surface')) {
-      const element1 = new RectElement(`${i++}`);
-      element1.setBound(modelX, modelY, 100, 100);
-      element1.color = 'red';
-      this._surface.addElement(element1);
+      const bound = new Bound(modelX, modelY, 100, 100);
+      const color = this.mouseMode.color;
+      // TODO
+      // type: this.mouseMode.shape
+      this._draggingElementId = this._surface.addDebugElement(bound, color);
     }
 
-    /*
-    this._draggingShapeBlockId = this._page.addBlock({
-      flavour: 'affine:shape',
-      xywh: JSON.stringify([modelX, modelY, 0, 0]),
-      color: this.mouseMode.color,
-      type: this.mouseMode.shape,
-    });
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),
     };
     this._edgeless.signals.shapeUpdated.emit();
-    */
   }
 
   onContainerDragMove(e: SelectionEvent) {
     // FIXME
     if (this._page.awarenessAdapter.getFlag('enable_surface')) return;
 
-    assertExists(this._draggingShapeBlockId);
+    assertExists(this._draggingElementId);
     assertExists(this._draggingArea);
     this._draggingArea.end = new DOMPoint(e.x, e.y);
     const [x, y] = this._edgeless.viewport.toModelCoord(
@@ -79,14 +69,19 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const h =
       Math.abs(this._draggingArea.start.y - this._draggingArea.end.y) /
       this._edgeless.viewport.zoom;
+
+    // TODO update _draggingElementId
+    new Bound(x, y, w, h);
+    /*
     this._page.updateBlockById(this._draggingShapeBlockId, {
       xywh: JSON.stringify([x, y, w, h]),
     });
+    */
     this._edgeless.signals.shapeUpdated.emit();
   }
 
   onContainerDragEnd(e: SelectionEvent) {
-    this._draggingShapeBlockId = null;
+    this._draggingElementId = null;
     this._draggingArea = null;
     this._page.captureSync();
     this._edgeless.signals.shapeUpdated.emit();

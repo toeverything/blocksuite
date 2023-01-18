@@ -1,5 +1,5 @@
 import type { Element } from './elements.js';
-import type { Bound } from './consts.js';
+import type { IBound } from './consts.js';
 import {
   compare,
   getGridIndex,
@@ -51,7 +51,7 @@ export class GridManager {
     }
   }
 
-  boundHasChanged(a: Bound, b: Bound) {
+  boundHasChanged(a: IBound, b: IBound) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(a);
     const [minRow2, maxRow2, minCol2, maxCol2] = rangeFromBound(b);
     return (
@@ -62,7 +62,7 @@ export class GridManager {
     );
   }
 
-  search(bound: Bound): Element[] {
+  search(bound: IBound): Element[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const results: Set<Element> = new Set();
     for (let i = minRow; i <= maxRow; i++) {

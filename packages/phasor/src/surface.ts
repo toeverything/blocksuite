@@ -1,9 +1,10 @@
 import * as Y from 'yjs';
 import { generateKeyBetween } from 'fractional-indexing';
-import type { Bound } from './consts.js';
-import { Element, RectElement, PathElement } from './elements.js';
+import type { IBound } from './consts.js';
+import { Element, DebugElement, PathElement } from './elements.js';
 import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
+import { nanoid } from 'nanoid';
 
 export class SurfaceContainer {
   readonly renderer: Renderer;
@@ -19,7 +20,7 @@ export class SurfaceContainer {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  private _createYElement(element: Element) {
+  private _createYElement(element: Omit<Element, 'id'>) {
     const serialized = element.serialize();
     const yElement = new Y.Map<unknown>();
     for (const [key, value] of Object.entries(serialized)) {
@@ -33,17 +34,30 @@ export class SurfaceContainer {
     doc.transact(callback, doc.clientID);
   }
 
-  addElement(props: Element) {
-    props.index = generateKeyBetween(this._lastIndex, null);
-    this._lastIndex = props.index;
+  addDebugElement(bound: IBound, color: string): string {
+    const id = nanoid(10);
+    const element = new DebugElement(id);
+    const { x, y, w, h } = bound;
 
-    this._transact(() => {
-      const yElement = this._createYElement(props);
-      this._yElements.set(props.id, yElement);
-    });
+    element.setBound(x, y, w, h);
+    element.color = color;
+
+    return this._addElement(element);
   }
 
-  setElementBound(id: string, bound: Bound) {
+  private _addElement(element: Element) {
+    element.index = generateKeyBetween(this._lastIndex, null);
+    this._lastIndex = element.index as string;
+
+    this._transact(() => {
+      const yElement = this._createYElement(element);
+      this._yElements.set(element.id, yElement);
+    });
+
+    return element.id;
+  }
+
+  setElementBound(id: string, bound: IBound) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
@@ -61,8 +75,8 @@ export class SurfaceContainer {
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as string;
     switch (type) {
-      case 'rect': {
-        const element = RectElement.deserialize(yElement.toJSON());
+      case 'debug': {
+        const element = DebugElement.deserialize(yElement.toJSON());
         this.renderer.addElement(element);
         this._elements.set(element.id, element);
         break;
