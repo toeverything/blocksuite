@@ -271,7 +271,7 @@ export class DefaultSelectionManager {
       });
     };
     this._disposables.add(
-      this.page.awarenessAdapter.signals.update.subscribe(
+      this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_drag_handle,
         enable => {
           if (enable) {
@@ -289,7 +289,7 @@ export class DefaultSelectionManager {
       )
     );
     this._disposables.add(
-      this.page.awarenessAdapter.signals.update.subscribe(
+      this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_block_hub,
         enable => {
           if (enable) {
@@ -306,10 +306,10 @@ export class DefaultSelectionManager {
         }
       )
     );
-    if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
+    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
       createHandle();
     }
-    if (this.page.awarenessAdapter.getFlag('enable_block_hub')) {
+    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
       createBlockHub();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
