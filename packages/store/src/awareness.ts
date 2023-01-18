@@ -1,6 +1,6 @@
 import * as Y from 'yjs';
 import type { RelativePosition } from 'yjs';
-import type { Awareness } from 'y-protocols/awareness.js';
+import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 import { Signal } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { uuidv4 } from './utils/id-generator.js';
@@ -33,7 +33,8 @@ type Response = {
   id: string;
 };
 
-export type AwarenessState<
+// Raw JSON state in awareness CRDT
+export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > = {
   cursor?: Record<Space['prefixedId'], SelectionRange>;
@@ -43,35 +44,27 @@ export type AwarenessState<
   response?: Response[];
 };
 
-interface AwarenessMessage<
+interface AwarenessEvent<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
   id: number;
   type: 'add' | 'update' | 'remove';
-  state?: AwarenessState<Flags>;
+  state?: RawAwarenessState<Flags>;
 }
 
-export interface AwarenessMetaMessage<
-  Flags extends Record<string, unknown> = BlockSuiteFlags,
-  Key extends keyof Flags = keyof Flags
-> {
-  field: Key;
-  value: Flags[Key];
-}
-
-export class AwarenessAdapter<
+export class AwarenessStore<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
-  readonly awareness: Awareness<AwarenessState<Flags>>;
+  readonly awareness: YAwareness<RawAwarenessState<Flags>>;
   readonly store: Store;
 
   readonly signals = {
-    update: new Signal<AwarenessMessage<Flags>>(),
+    update: new Signal<AwarenessEvent<Flags>>(),
   };
 
   constructor(
     store: Store,
-    awareness: Awareness<AwarenessState<Flags>>,
+    awareness: YAwareness<RawAwarenessState<Flags>>,
     defaultFlags: Flags
   ) {
     this.store = store;
@@ -154,7 +147,7 @@ export class AwarenessAdapter<
     return this.awareness.getLocalState()?.['cursor']?.[space.prefixedId];
   }
 
-  getStates(): Map<number, AwarenessState<Flags>> {
+  getStates(): Map<number, RawAwarenessState<Flags>> {
     return this.awareness.getStates();
   }
 
@@ -170,14 +163,14 @@ export class AwarenessAdapter<
       this.signals.update.emit({
         id,
         type: 'add',
-        state: states.get(id) as AwarenessState<Flags>,
+        state: states.get(id) as RawAwarenessState<Flags>,
       });
     });
     updated.forEach(id => {
       this.signals.update.emit({
         id,
         type: 'update',
-        state: states.get(id) as AwarenessState<Flags>,
+        state: states.get(id) as RawAwarenessState<Flags>,
       });
     });
     removed.forEach(id => {
@@ -188,7 +181,7 @@ export class AwarenessAdapter<
     });
   };
 
-  private _onAwarenessMessage = (awMsg: AwarenessMessage<Flags>) => {
+  private _onAwarenessMessage = (awMsg: AwarenessEvent<Flags>) => {
     if (awMsg.id === this.awareness.clientID) {
       this.store.spaces.forEach(space => this.updateLocalCursor(space));
     } else {
@@ -201,7 +194,8 @@ export class AwarenessAdapter<
 
   private _handleRemoteFlags() {
     const nextTick: (() => void)[] = [];
-    const localState = this.awareness.getLocalState() as AwarenessState<Flags>;
+    const localState =
+      this.awareness.getLocalState() as RawAwarenessState<Flags>;
     const request = (localState?.request ?? []) as Request<Flags>[];
     const selfResponse = [] as Response[];
     const fakeDirtyResponse = [] as Response[];

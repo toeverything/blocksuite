@@ -63,7 +63,7 @@ export class EditorContainer extends NonShadowLitElement {
 
   protected update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('readonly')) {
-      this.page.awarenessAdapter.setReadonly(this.page, this.readonly);
+      this.page.awarenessStore.setReadonly(this.page, this.readonly);
     }
     super.update(changedProperties);
   }
@@ -71,7 +71,7 @@ export class EditorContainer extends NonShadowLitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.page.awarenessAdapter.signals.update.subscribe(
+      this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.readonly[this.page.prefixedId],
         rd => {
           if (typeof rd === 'boolean' && rd !== this.readonly) {
@@ -124,7 +124,7 @@ export class EditorContainer extends NonShadowLitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.page.awarenessAdapter.setLocalCursor(this.page, null);
+    this.page.awarenessStore.setLocalCursor(this.page, null);
     this._disposables.dispose();
   }
 

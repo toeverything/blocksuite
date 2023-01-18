@@ -37,7 +37,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     // create a shape block when drag start
     const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
 
-    if (this._page.awarenessAdapter.getFlag('enable_surface')) {
+    if (this._page.awarenessStore.getFlag('enable_surface')) {
       const bound = new Bound(modelX, modelY, 0, 0);
       const color = this.mouseMode.color;
       // TODO
