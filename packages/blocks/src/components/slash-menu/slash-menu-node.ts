@@ -1,8 +1,8 @@
+import { paragraphConfig } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { paragraphConfig } from '../../page-block/utils/const.js';
 import { updateSelectedTextType } from '../../page-block/utils/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
@@ -146,7 +146,7 @@ export class SlashMenu extends LitElement {
       }
       case 'ArrowRight':
       case 'ArrowLeft':
-        // do nothing temporarily
+        this.abortController.abort('ABORT');
         return;
       default:
         throw new Error(`Unknown key: ${e.key}`);
@@ -217,7 +217,7 @@ export class SlashMenu extends LitElement {
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
         ${this.filterItems.map(
-          ({ flavour, type, name, icon }, index) => html`<format-bar-button
+          ({ type, name, icon }, index) => html`<format-bar-button
             width="100%"
             style="padding-left: 12px; justify-content: flex-start;"
             ?hover=${this.activeItemIndex === index}

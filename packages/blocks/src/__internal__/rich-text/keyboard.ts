@@ -347,7 +347,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       // prefix: /[^\d]$|^(?![\s\S])/,
       handler(range, context) {
         // TODO remove feature flag after slash menu is stable
-        const flag = page.awareness.getFlag('enable_slash_menu');
+        const flag = page.awarenessAdapter.getFlag('enable_slash_menu');
         if (!flag) {
           return ALLOW_DEFAULT;
         }
