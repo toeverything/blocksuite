@@ -1,5 +1,5 @@
 import ky from 'ky';
-import { Signal } from '../utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 
 import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types.js';
 import { getDatabase, sha } from './utils.js';

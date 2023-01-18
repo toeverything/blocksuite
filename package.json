@@ -12,6 +12,7 @@
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "lint": "eslint ./ --max-warnings=0",
     "test": "playwright test",
+    "test:unit": "pnpm -r test:unit",
     "test:headed": "playwright test --headed",
     "test:store": "pnpm --filter @blocksuite/store test",
     "format": "prettier --write packages tests",
