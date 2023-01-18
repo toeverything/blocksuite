@@ -48,8 +48,7 @@ export function syncBlockProps(
 
     // TODO use schema
     if (key === 'text') return;
-
-    if (!isPrimitive(props[key])) {
+    if (!isPrimitive(props[key]) && !Array.isArray(props[key])) {
       throw new Error('Only top level primitives are supported for now');
     }
 

@@ -5,8 +5,8 @@ import {
   BLOCK_ID_ATTR,
   BlockElementWithService,
   BlockHost,
-  NonShadowLitElement,
 } from '../__internal__/index.js';
+import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
@@ -234,7 +234,6 @@ export class DatabaseBlockSettingsSidebar extends LitElement {
 }
 
 @customElement('affine-database')
-// cannot find children in shadow dom
 export class DatabaseBlock extends NonShadowLitElement {
   static styles = css`
     .affine-database-block {

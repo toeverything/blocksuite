@@ -33,13 +33,12 @@ export function matchFlavours<
   return expected.includes(model.flavour as Key);
 }
 
-export const nonTextBlock: readonly (keyof BlockSuiteInternal.BlockModels)[] = [
+export const nonTextBlock: (keyof BlockSuiteInternal.BlockModels)[] = [
   'affine:database',
   'affine:divider',
   'affine:embed',
   'affine:code',
-  'affine:row',
-] as const;
+];
 
 export const isNonTextBlock = <
   Key extends keyof BlockSuiteInternal.BlockModels &

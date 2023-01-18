@@ -5,17 +5,23 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
+import BlockTag = BlockSuiteInternal.BlockTag;
 
 export function heavy(workspace: Workspace) {
   workspace.signals.pageAdded.once(id => {
     const page = workspace.getPage(id) as Page;
     const pageBlockId = page.addBlockByFlavour('affine:page');
-    page.addBlockByFlavour('affine:surface', {}, null);
+    page.addBlock(
+      {
+        flavour: 'affine:surface',
+      },
+      null
+    );
     const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
     for (let i = 0; i < 1000; i++) {
-      page.addBlockByFlavour(
-        'affine:paragraph',
+      page.addBlock(
         {
+          flavour: 'affine:paragraph',
           text: new Text(page, 'Hello, world! ' + i),
         },
         frameId
@@ -56,6 +62,82 @@ export function basic(workspace: Workspace) {
 
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
     await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+
+    requestAnimationFrame(() => page.resetHistory());
+  });
+
+  workspace.createPage('page0');
+}
+
+export function database(workspace: Workspace) {
+  workspace.signals.pageAdded.once(async id => {
+    const page = workspace.getPage(id) as Page;
+    const pageBlockId = page.addBlock({
+      flavour: 'affine:page',
+      title: 'Welcome to BlockSuite playground',
+    });
+    page.addBlockByFlavour('affine:surface', {}, null);
+
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+    type Option = 'Done' | 'TODO' | 'WIP';
+    const selection = ['Done', 'TODO', 'WIP'] as Option[];
+    const databaseId = page.addBlockByFlavour(
+      'affine:database',
+      {
+        columns: ['1', '2'],
+      },
+      frameId
+    );
+    const p1 = page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text(page, '1'),
+      },
+      databaseId
+    );
+    const p2 = page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text(page, '2'),
+      },
+      databaseId
+    );
+
+    page.setTagSchema({
+      meta: {
+        color: '#ff0000',
+        width: 200,
+        hide: false,
+      },
+      name: 'Select',
+      id: '1',
+      type: 'select',
+      selection: selection,
+    });
+    page.setTagSchema({
+      meta: {
+        color: '#ff0000',
+        width: 200,
+        hide: false,
+      },
+      name: 'Select 2',
+      id: '2',
+      type: 'select',
+      selection: selection,
+    });
+
+    page.updateBlockTag(p1, {
+      type: '1',
+      value: 'text1',
+    });
+
+    page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
+      p2,
+      {
+        type: '2',
+        value: 'TODO',
+      }
+    );
 
     requestAnimationFrame(() => page.resetHistory());
   });

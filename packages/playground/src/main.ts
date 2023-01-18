@@ -10,7 +10,6 @@ import {
   defaultMode,
   getOptions,
   initDebugConfig,
-  initFeatureFlags,
   initParam,
   isBase64,
   isE2E,
@@ -26,7 +25,6 @@ initDebugConfig();
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
     const page = workspace.getPage(pageId) as Page;
-    initFeatureFlags(page);
 
     const editor = new EditorContainer();
     editor.page = page;
