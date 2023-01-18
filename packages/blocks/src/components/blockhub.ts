@@ -226,7 +226,7 @@ export class BlockHub extends NonShadowLitElement {
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
     }
 
-    .block-hub-icons-container[transition='true'] {
+    .block-hub-icons-container[transition] {
       opacity: 1;
       top: 0px;
     }
@@ -350,10 +350,7 @@ export class BlockHub extends NonShadowLitElement {
 
   private _blockHubMenuTemplate = () => {
     return html`
-      <div
-        class="block-hub-icons-container"
-        transition=${this._expanded ? 'true' : 'false'}
-      >
+      <div class="block-hub-icons-container" ?transition=${this._expanded}>
         <div
           class="block-hub-icon-container has-tool-tip"
           selected=${this._cardvisibleType === 'blank' ? 'true' : 'false'}
@@ -553,10 +550,7 @@ export class BlockHub extends NonShadowLitElement {
 
   override render() {
     return html`
-      <div
-        class="block-hub-menu-container"
-        transition=${this._expanded ? 'true' : 'false'}
-      >
+      <div class="block-hub-menu-container">
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
