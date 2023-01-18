@@ -8,7 +8,9 @@ import {
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
 } from './utils/id-generator.js';
+import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
+import { AwarenessAdapter, AwarenessState } from './awareness.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -50,18 +52,25 @@ export interface StoreOptions<
 > extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
-  awareness?: Awareness;
+  awareness?: Awareness<AwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
 
+const flagsPreset = {
+  enable_set_remote_flag: true,
+  enable_drag_handle: true,
+  enable_surface: false,
+  readonly: {},
+} satisfies BlockSuiteFlags;
+
 export class Store {
   readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
-  readonly awareness: Awareness;
+  readonly awarenessAdapter: AwarenessAdapter;
   readonly idGenerator: IdGenerator;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
@@ -70,8 +79,13 @@ export class Store {
     providers = [],
     awareness,
     idGenerator,
+    defaultFlags,
   }: StoreOptions = {}) {
-    this.awareness = awareness ?? new Awareness(this.doc);
+    this.awarenessAdapter = new AwarenessAdapter(
+      this,
+      awareness ?? new Awareness<AwarenessState>(this.doc),
+      merge(flagsPreset, defaultFlags)
+    );
     switch (idGenerator) {
       case Generator.AutoIncrement: {
         this.idGenerator = createAutoIncrementIdGenerator();
@@ -91,7 +105,10 @@ export class Store {
     }
     this.providers = providers.map(
       ProviderConstructor =>
-        new ProviderConstructor(room, this.doc, { awareness: this.awareness })
+        new ProviderConstructor(room, this.doc, {
+          // @ts-expect-error
+          awareness: this.awarenessAdapter.awareness,
+        })
     );
   }
 

@@ -25,7 +25,7 @@ export const isBase64 =
 
 export function initFeatureFlags(page: Page) {
   if (params.get('surface') !== null) {
-    page.awareness.setFlag('enable_surface', true);
+    page.awarenessAdapter.setFlag('enable_surface', true);
   }
 }
 

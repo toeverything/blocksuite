@@ -40,7 +40,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     // create a shape block when drag start
     const [modelX, modelY] = this._edgeless.viewport.toModelCoord(e.x, e.y);
 
-    if (this._page.awareness.getFlag('enable_surface')) {
+    if (this._page.awarenessAdapter.getFlag('enable_surface')) {
       const element1 = new RectElement(`${i++}`);
       element1.setBound(modelX, modelY, 100, 100);
       element1.color = 'red';
@@ -64,7 +64,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
   onContainerDragMove(e: SelectionEvent) {
     // FIXME
-    if (this._page.awareness.getFlag('enable_surface')) return;
+    if (this._page.awarenessAdapter.getFlag('enable_surface')) return;
 
     assertExists(this._draggingShapeBlockId);
     assertExists(this._draggingArea);
