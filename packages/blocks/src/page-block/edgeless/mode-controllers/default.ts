@@ -15,7 +15,7 @@ import {
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-} from '../../utils/cursor.js';
+} from '../../utils/position.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import { MouseModeController } from './index.js';
 

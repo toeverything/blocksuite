@@ -329,7 +329,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       handler: onKeyDown,
     },
     left: {
-      key: 37,
+      key: 'left',
       shiftKey: false,
       handler: onKeyLeft,
     },

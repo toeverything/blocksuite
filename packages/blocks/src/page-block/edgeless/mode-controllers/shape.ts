@@ -71,7 +71,6 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     const bound = new Bound(x, y, w, h);
     const id = this._draggingElementId;
     this._surface.setElementBound(id, bound);
-
     this._edgeless.signals.shapeUpdated.emit();
   }
 

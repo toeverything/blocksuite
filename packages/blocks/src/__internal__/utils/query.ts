@@ -311,7 +311,7 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number,
-  isStart: boolean
+  isStart = true
 ) {
   if (
     ele instanceof Element &&

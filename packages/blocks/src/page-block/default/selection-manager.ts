@@ -24,7 +24,7 @@ import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-} from '../utils/cursor.js';
+} from '../utils/position.js';
 import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
