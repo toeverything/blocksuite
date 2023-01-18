@@ -24,16 +24,16 @@ test('first level menu always exists, second level menu can be hidden by click f
   );
 
   await expect(menuEntry).toBeVisible();
-  await expect(menuContainer).toHaveAttribute('transition', 'false');
+  await expect(menuContainer).toBeHidden();
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
   await page.waitForTimeout(200);
   await expect(menuEntry).toBeVisible();
-  await expect(menuContainer).toHaveAttribute('transition', 'true');
+  await expect(menuContainer).toBeVisible();
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
   await page.waitForTimeout(200);
-  await expect(menuContainer).toHaveAttribute('transition', 'false');
+  await expect(menuContainer).toBeHidden();
 });
 
 test('blockHub card items should appear and disappear properly with corresponding menu', async ({
