@@ -22,7 +22,7 @@ import {
 } from './rich-text-operations.js';
 import { Shortcuts } from './shortcuts.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { showSlashMenu } from '@blocksuite/blocks/components/slash-menu/index.js';
+import { showSlashMenu } from '../../components/slash-menu/index.js';
 
 interface QuillRange {
   index: number;

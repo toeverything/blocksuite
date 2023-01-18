@@ -1,6 +1,6 @@
 import { paragraphConfig } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, LitElement, PropertyValues } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { updateSelectedTextType } from '../../page-block/utils/index.js';
@@ -65,12 +65,13 @@ export class SlashMenu extends LitElement {
   @query('.slash-menu')
   slashMenuElement!: HTMLElement;
 
-  private searchString = '';
-
+  @state()
   private activeItemIndex = 0;
 
   @state()
   private filterItems: typeof paragraphConfig = paragraphConfig;
+
+  private searchString = '';
 
   // Just a temp variable
   private richText?: RichText;
@@ -132,10 +133,6 @@ export class SlashMenu extends LitElement {
         e.key
       )
     ) {
-      return;
-    }
-    if (e.key === 'ArrowLeft') {
-      this.abortController.abort();
       return;
     }
     const configLen = this.filterItems.length;

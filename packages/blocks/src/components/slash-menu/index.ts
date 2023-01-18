@@ -88,9 +88,15 @@ export const showSlashMenu = ({
     if (!e.target || !(e.target instanceof AbortSignal)) {
       throw new Error('Failed to clean slash search text! Unknown abort event');
     }
-    if (!e.target.reason) {
+    // If not explicitly set in those methods, it defaults to "AbortError" DOMException.
+    if (e.target.reason instanceof DOMException) {
       // Should not clean slash text when click away or abort
       return;
+    }
+    if (typeof e.target.reason !== 'string') {
+      throw new Error(
+        'Failed to clean slash search text! Unknown abort reason'
+      );
     }
     const searchStr: string = '/' + e.target.reason;
     const text = model.text;
