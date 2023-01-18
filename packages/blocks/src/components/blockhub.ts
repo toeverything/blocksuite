@@ -261,6 +261,27 @@ export class BlockHub extends NonShadowLitElement {
     this.addEventListener('mousedown', this._onMouseDown);
   }
 
+  /**
+   * This is currently a workaround, as the height of the .block-hub-icons-container is determined by the height of its
+   * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
+   * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
+   */
+  private _onTransitionStart = (e: TransitionEvent) => {
+    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
+    if (e.propertyName === 'opacity') {
+      return;
+    }
+    if (!this._expanded) {
+      if (this._timer) {
+        clearTimeout(this._timer);
+      }
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.height = '0px';
+      }, 50);
+    } else {
+      this._blockHubIconsContainer.style.height = 'unset';
+    }
+  };
   protected firstUpdated() {
     this._blockHubCards.forEach(card => {
       card.addEventListener('mousedown', this._onCardMouseDown);
@@ -278,6 +299,10 @@ export class BlockHub extends NonShadowLitElement {
     if (!this._indicator) {
       this._indicatorHTMLTemplate = html` <affine-drag-indicator></affine-drag-indicator>`;
     }
+    this._blockHubIconsContainer.addEventListener(
+      'transitionstart',
+      this._onTransitionStart
+    );
   }
 
   disconnectedCallback() {
@@ -307,6 +332,10 @@ export class BlockHub extends NonShadowLitElement {
       this._blockHubButton.removeEventListener(
         'click',
         this._onBlockHubButtonClick
+      );
+      this._blockHubIconsContainer.removeEventListener(
+        'transitionstart',
+        this._onTransitionStart
       );
     }
   }
@@ -415,30 +444,11 @@ export class BlockHub extends NonShadowLitElement {
 
   private _onBlockHubButtonClick = (e: MouseEvent) => {
     this._expanded = !this._expanded;
-    this._toggleHide();
     if (!this._expanded) {
       this._cardvisibleType = '';
       this._isCardListVisiable = false;
     }
     this.requestUpdate();
-  };
-
-  /**
-   * This is currently a workaround, as the height of the .block-hub-icons-container is determined by the height of its
-   * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
-   * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
-   */
-  private _toggleHide = () => {
-    if (!this._expanded) {
-      if (this._timer) {
-        clearTimeout(this._timer);
-      }
-      this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.height = '0px';
-      }, 100);
-    } else {
-      this._blockHubIconsContainer.style.height = 'unset';
-    }
   };
 
   private _onDragStart = (event: DragEvent) => {
