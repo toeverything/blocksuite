@@ -19,6 +19,7 @@ import {
   setSelection,
   undoByClick,
   pressSpace,
+  captureHistory,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
@@ -179,12 +180,18 @@ test('split block when paste', async ({ page }) => {
 `,
   };
   await page.keyboard.type('abc');
+  await captureHistory(page);
+
   await setQuillSelection(page, 1, 1);
   await pasteContent(page, clipData);
+
   await assertRichTexts(page, ['atext', 'h1', 'c']);
   await assertSelection(page, 1, 2, 0);
+
+  // FIXME: one redundant step in clipboard operation
   await undoByClick(page);
-  await assertRichTexts(page, ['ac']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['abc']);
 
   await page.keyboard.type('aa');
   await pressEnter(page);
