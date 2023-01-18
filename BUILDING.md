@@ -52,11 +52,11 @@ pnpm build
 
 ## Testing
 
-When you contribute new features and bug fixes, the test cases are encouraged and most time are required.
+Adding test cases is strongly encouraged when you contribute new features and bug fixes.
 
 We use [Playwright](https://playwright.dev/) for E2E test, and [vitest](https://vitest.dev/) for unit test.
 
-To test locally, please make sure browser binaries are already installed via `npx playwright install` and Vite playground is started with `pnpm dev`. Then there are multi commands to choose from:
+To test locally, please make sure browser binaries are already installed via `npx playwright install`. Then there are multi commands to choose from:
 
 ```sh
 # run tests in headless mode in another terminal window

@@ -294,7 +294,7 @@ export class DefaultSelectionManager {
         enable => {
           if (enable) {
             if (!this._blockHub) {
-              createHandle();
+              createBlockHub();
             }
           } else {
             this._blockHub?.remove();

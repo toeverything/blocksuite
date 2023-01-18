@@ -74,7 +74,7 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await pageA.keyboard.type('hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, room);
+  await enterPlaygroundRoom(pageB, {}, room);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
 
@@ -89,7 +89,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   await pageA.keyboard.type('hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, room);
+  await enterPlaygroundRoom(pageB, {}, room);
 
   // wait until pageB content updated
   await assertText(pageB, 'hello');
@@ -108,7 +108,7 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   await focusRichText(pageA);
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, room);
+  await enterPlaygroundRoom(pageB, {}, room);
   await focusRichText(pageB);
   await pageB.keyboard.type('hello');
 
@@ -126,7 +126,7 @@ test('does not sync when disconnected', async ({ browser, page: pageA }) => {
 
   const room = await enterPlaygroundRoom(pageA);
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, room);
+  await enterPlaygroundRoom(pageB, {}, room);
 
   await disconnectByClick(pageA);
   await disconnectByClick(pageB);
