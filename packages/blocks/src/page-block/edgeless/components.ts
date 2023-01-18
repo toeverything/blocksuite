@@ -424,7 +424,7 @@ export class EdgelessSelectedRect extends LitElement {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      zIndex: '3',
+      zIndex: '0',
       ...getCommonRectStyle(this.rect, this.zoom, false, true),
     };
     const handlers = this._getHandles(this.rect, false);
