@@ -34,8 +34,8 @@ Although BlockSuite is still in its early stage, you can already use the `@block
   - ✅ Inline text format bar
   - ⚛️ Block-level selection
   - ⚛️ Block drag handle
+  - ⚛️ Block hub
   - 🚧 Inline slash menu
-  - 🚧 Block hub
 - Rich-content
   - ⚛️ Image block
   - 🚧 Database block

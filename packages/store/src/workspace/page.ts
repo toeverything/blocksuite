@@ -43,8 +43,6 @@ export type PrefixedBlockProps = Record<string, unknown> & {
   'sys:flavour': string;
 };
 
-type OptionalBlockProps = { [P in keyof BaseBlockModel]?: BaseBlockModel[P] };
-
 const isWeb = typeof window !== 'undefined';
 
 function createChildMap(yChildIds: Y.Array<string>) {
@@ -460,8 +458,9 @@ export class Page extends Space<PageData> {
     });
   }
 
+  @debug('CRUD')
   insertBlock(
-    blockProps: OptionalBlockProps,
+    blockProps: Partial<BaseBlockModel>,
     targetModel: BaseBlockModel,
     top = true
   ) {

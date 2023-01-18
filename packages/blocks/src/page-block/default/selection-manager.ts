@@ -161,7 +161,7 @@ export class DefaultSelectionManager {
   private _dragHandleAbortController = new AbortController();
 
   private _dragHandle: DragHandle | null = null;
-  // private _blockHub: BlockHub | null = null; // TODO need to be referenced to remove
+  private _blockHub: BlockHub | null = null;
 
   constructor({
     page,
@@ -226,7 +226,7 @@ export class DefaultSelectionManager {
       });
     };
     const createBlockHub = () => {
-      new BlockHub({
+      this._blockHub = new BlockHub({
         onDropCallback: (e, end) => {
           const dataTransfer = e.dataTransfer;
           assertExists(dataTransfer);
@@ -275,7 +275,11 @@ export class DefaultSelectionManager {
         if (msg.id !== this.page.doc.clientID) {
           return;
         }
-        if (msg.state?.flags.enable_drag_handle) {
+        if (!msg.state?.flags) {
+          return;
+        }
+        const flags = msg.state.flags;
+        if (flags.enable_drag_handle) {
           // todo: implement subscribe with selector
           if (!this._dragHandle) {
             createHandle();
@@ -283,6 +287,15 @@ export class DefaultSelectionManager {
         } else {
           this._dragHandle?.remove();
           this._dragHandle = null;
+        }
+
+        if (flags.enable_block_hub) {
+          if (!this._blockHub) {
+            createBlockHub();
+          }
+        } else {
+          this._blockHub?.remove();
+          this._blockHub = null;
         }
       })
     );
