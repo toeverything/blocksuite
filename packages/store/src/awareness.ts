@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { RelativePosition } from 'yjs';
 import type { Awareness } from 'y-protocols/awareness.js';
-import { Signal } from './utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { uuidv4 } from './utils/id-generator.js';
 import type { Space } from './space.js';

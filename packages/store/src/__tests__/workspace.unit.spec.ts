@@ -2,13 +2,8 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import { assert, describe, expect, it } from 'vitest';
-import {
-  BaseBlockModel,
-  Signal,
-  Workspace,
-  Page,
-  Generator,
-} from '../index.js';
+import { BaseBlockModel, Workspace, Page, Generator } from '../index.js';
+import type { Signal } from '@blocksuite/global/utils';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { PageBlockModel } from '../../../blocks/src/page-block/page-model.js';

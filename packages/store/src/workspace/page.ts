@@ -10,7 +10,7 @@ import {
   TextType,
 } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import { Signal } from '../utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 import {
   assertValidChildren,
   initInternalProps,

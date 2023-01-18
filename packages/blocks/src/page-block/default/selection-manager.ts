@@ -271,33 +271,40 @@ export class DefaultSelectionManager {
       });
     };
     this._disposables.add(
-      this.page.awarenessAdapter.signals.update.on(msg => {
-        if (msg.id !== this.page.doc.clientID) {
-          return;
-        }
-        if (!msg.state?.flags) {
-          return;
-        }
-        const flags = msg.state.flags;
-        if (flags.enable_drag_handle) {
-          // todo: implement subscribe with selector
-          if (!this._dragHandle) {
-            createHandle();
+      this.page.awarenessAdapter.signals.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this._dragHandle) {
+              createHandle();
+            }
+          } else {
+            this._dragHandle?.remove();
+            this._dragHandle = null;
           }
-        } else {
-          this._dragHandle?.remove();
-          this._dragHandle = null;
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
         }
-
-        if (flags.enable_block_hub) {
-          if (!this._blockHub) {
-            createBlockHub();
+      )
+    );
+    this._disposables.add(
+      this.page.awarenessAdapter.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this._blockHub) {
+              createHandle();
+            }
+          } else {
+            this._blockHub?.remove();
+            this._blockHub = null;
           }
-        } else {
-          this._blockHub?.remove();
-          this._blockHub = null;
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
         }
-      })
+      )
     );
     if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
       createHandle();
