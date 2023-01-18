@@ -135,10 +135,12 @@ importers:
     specifiers:
       '@blocksuite/global': workspace:*
       fractional-indexing: ^3.1.0
+      nanoid: ^4.0.0
       yjs: ^13.5.44
     dependencies:
       '@blocksuite/global': link:../global
       fractional-indexing: 3.1.0
+      nanoid: 4.0.0
     devDependencies:
       yjs: 13.5.44
 
@@ -239,6 +241,7 @@ importers:
       lib0: ^0.2.58
       lit: ^2.6.1
       merge: ^2.1.1
+      nanoid: ^4.0.0
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.3
       yjs: ^13.5.44
@@ -251,6 +254,7 @@ importers:
       ky: 0.33.1
       lib0: 0.2.58
       merge: 2.1.1
+      nanoid: 4.0.0
       y-protocols: 1.0.5
       y-webrtc: 10.2.3
     devDependencies:
@@ -5315,6 +5319,12 @@ packages:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanoid/4.0.0:
+    resolution: {integrity: sha512-IgBP8piMxe/gf73RTQx7hmnhwz0aaEXYakvqZyE302IXW3HyVNhdNGC+O2MwMAVhLEnvXlvKtGbtJf6wvHihCg==}
+    engines: {node: ^14 || ^16 || >=18}
+    hasBin: true
+    dev: false
 
   /natural-compare-lite/1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}

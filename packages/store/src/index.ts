@@ -13,6 +13,7 @@ export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
+  nanoid,
 } from './utils/id-generator.js';
 export type { IdGenerator } from './utils/id-generator.js';
 
