@@ -29,6 +29,7 @@ export * from './__internal__/utils/std.js';
 export * from './__internal__/utils/query.js';
 export * from './__internal__/utils/shape.js';
 export * from './__internal__/utils/lit.js';
+export * from './__internal__/rich-text/rich-text-operations.js';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
