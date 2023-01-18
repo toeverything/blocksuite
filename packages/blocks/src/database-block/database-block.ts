@@ -142,19 +142,21 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                   column =>
                     [
                       column,
-                      child.page.getBlockTagByTagSchema(model, column),
+                      child.page.getBlockTagByTagSchema(child, column),
                     ] as const
                 ),
-                ([column, tag]) => html`
-                  <div
-                    style=${styleMap({
-                      minWidth: `${column.meta.width}px`,
-                      maxWidth: `${column.meta.width}px`,
-                    })}
-                  >
-                    ${tag?.value ?? 'no value'}
-                  </div>
-                `
+                ([column, tag]) => {
+                  return html`
+                    <div
+                      style=${styleMap({
+                        minWidth: `${column.meta.width}px`,
+                        maxWidth: `${column.meta.width}px`,
+                      })}
+                    >
+                      ${tag?.value ?? 'no value'}
+                    </div>
+                  `;
+                }
               )}
             </div>
           `;

@@ -706,7 +706,7 @@ export class Page extends Space<PageData> {
     model.text = text;
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
-      model.tagSchema = yBlock.get('meta:tags') as Y.Map<unknown>;
+      model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
     }
 
     const yChildren = yBlock.get('sys:children');
