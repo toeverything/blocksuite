@@ -25,7 +25,7 @@ export const isBase64 =
 
 export function initFeatureFlags(page: Page) {
   if (params.get('surface') !== null) {
-    page.awarenessAdapter.setFlag('enable_surface', true);
+    page.awarenessStore.setFlag('enable_surface', true);
   }
   if (params.get('slash') !== null) {
     page.awarenessAdapter.setFlag('enable_slash_menu', true);

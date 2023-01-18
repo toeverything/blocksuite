@@ -25,7 +25,7 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
 import BlockTag = BlockSuiteInternal.BlockTag;
 import TagSchema = BlockSuiteInternal.TagSchema;
-import type { AwarenessAdapter } from '../awareness.js';
+import type { AwarenessStore } from '../awareness.js';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -80,10 +80,10 @@ export class Page extends Space<PageData> {
     workspace: Workspace,
     id: string,
     doc: BlockSuiteDoc,
-    awarenessAdapter: AwarenessAdapter,
+    awarenessStore: AwarenessStore,
     idGenerator: IdGenerator = uuidv4
   ) {
-    super(id, doc, awarenessAdapter);
+    super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
   }
@@ -142,14 +142,14 @@ export class Page extends Space<PageData> {
   }
 
   get canUndo() {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       return false;
     }
     return this._history.canUndo();
   }
 
   get canRedo() {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       return false;
     }
     return this._history.canRedo();
@@ -160,7 +160,7 @@ export class Page extends Space<PageData> {
   }
 
   undo = () => {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -168,7 +168,7 @@ export class Page extends Space<PageData> {
   };
 
   redo = () => {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -326,7 +326,7 @@ export class Page extends Space<PageData> {
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ) {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       throw new Error('cannot modify data in readonly mode');
     }
     if (!flavour) {
@@ -386,7 +386,7 @@ export class Page extends Space<PageData> {
   }
 
   updateBlockById(id: string, props: Partial<BlockProps>) {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -396,7 +396,7 @@ export class Page extends Space<PageData> {
 
   @debug('CRUD')
   moveBlock(model: BaseBlockModel, targetModel: BaseBlockModel, top = true) {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -427,7 +427,7 @@ export class Page extends Space<PageData> {
 
   @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -488,7 +488,7 @@ export class Page extends Space<PageData> {
   }
 
   deleteBlockById(id: string) {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -505,7 +505,7 @@ export class Page extends Space<PageData> {
       bringChildrenTo: 'parent',
     }
   ) {
-    if (this.awarenessAdapter.isReadonly(this)) {
+    if (this.awarenessStore.isReadonly(this)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -560,7 +560,7 @@ export class Page extends Space<PageData> {
       const cursor = adapter.getCursor();
       if (!cursor) return;
 
-      this.awarenessAdapter.setLocalCursor(this, { ...cursor, id });
+      this.awarenessStore.setLocalCursor(this, { ...cursor, id });
     });
   };
 
@@ -641,7 +641,7 @@ export class Page extends Space<PageData> {
     if (isWeb) {
       event.stackItem.meta.set(
         'cursor-location',
-        this.awarenessAdapter.getLocalCursor(this)
+        this.awarenessStore.getLocalCursor(this)
       );
     }
 
@@ -654,7 +654,7 @@ export class Page extends Space<PageData> {
       return;
     }
 
-    this.awarenessAdapter.setLocalCursor(this, cursor);
+    this.awarenessStore.setLocalCursor(this, cursor);
     this._historyObserver();
   };
 
