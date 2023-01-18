@@ -7,6 +7,7 @@ import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
+  nanoid,
 } from './utils/id-generator.js';
 import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
@@ -22,6 +23,8 @@ export enum Generator {
   /**
    * Default mode, generator for the unpredictable id
    */
+  NanoID = 'nanoID',
+
   UUIDv4 = 'uuidV4',
   /**
    * This generator is trying to fix the real-time collaboration on debug mode.
@@ -87,6 +90,7 @@ export class Store {
       awareness ?? new Awareness<AwarenessState>(this.doc),
       merge(flagsPreset, defaultFlags)
     );
+
     switch (idGenerator) {
       case Generator.AutoIncrement: {
         this.idGenerator = createAutoIncrementIdGenerator();
@@ -98,12 +102,17 @@ export class Store {
         );
         break;
       }
-      case Generator.UUIDv4:
-      default: {
+      case Generator.UUIDv4: {
         this.idGenerator = uuidv4;
         break;
       }
+      case Generator.NanoID:
+      default: {
+        this.idGenerator = nanoid;
+        break;
+      }
     }
+
     this.providers = providers.map(
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, {
