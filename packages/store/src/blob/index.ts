@@ -1,5 +1,5 @@
 import { IndexedDBBlobProvider } from './providers.js';
-import type { GetBlobOptions } from './providers.js';
+import type { GetBlobOptions, BlobOptions } from './providers.js';
 import { BlobStorage } from './storage.js';
 
 const CLOUD_API = (k: string) => ({ api: '/api/workspace' }[k]);
@@ -21,4 +21,4 @@ export const getBlobStorage = async (
 };
 
 export { BlobStorage } from './storage.js';
-export type { GetBlobOptions };
+export type { GetBlobOptions, BlobOptions };

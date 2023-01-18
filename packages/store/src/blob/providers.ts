@@ -6,7 +6,9 @@ import { getDatabase, sha } from './utils.js';
 
 const RETRY_TIMEOUT = 500;
 
-export type GetBlobOptions = (key: string) => string | undefined;
+export type BlobOptions = Record<'api' | 'token', string>;
+
+export type GetBlobOptions = (key: keyof BlobOptions) => string | undefined;
 
 interface BlobProviderStatic {
   init(workspace: string, getOptions?: GetBlobOptions): Promise<BlobProvider>;
@@ -176,10 +178,11 @@ export class CloudSyncManager {
           keys.map(async id => {
             const { retry = 0, type } = (await this._pending.get(id)) || {};
             const blob = await db.get(id);
-            if ((blob || type === 'delete') && type) {
+            if ((blob || type === 'delete') && type !== 'upload') {
               return { id, blob, retry, type };
             }
             if (blob && type === 'upload') {
+              console.log('try resume uploading blob:', id);
               this.addTask(id, 'add');
             }
             return undefined;
@@ -229,14 +232,27 @@ export class CloudSyncManager {
               retry: task.retry,
             });
             this._addUploadId(task.id);
-            const status = await this._fetcher
-              .put(`${this._workspace}/blob`, { body: task.blob, retry: 3 })
-              .json<BlobStatus>();
-            await this._handleTaskRetry(task, status);
+            const response = await this._fetcher.put(
+              `${this._workspace}/blob`,
+              {
+                body: task.blob,
+                retry: task.retry,
+              }
+            );
+            // if blob is too large, may try to upload it forever
+            if (response.status === 413) {
+              console.warn('Blob too large');
+              this._removeUploadId(task.id);
+              this._pending.delete(task.id);
+              return;
+            } else {
+              const status: BlobStatus | undefined = await response.json();
+              await this._handleTaskRetry(task, status);
+            }
           }
         } catch (e) {
           console.warn('Error while syncing blob', e);
-          await this._handleTaskRetry(task);
+          if (e) await this._handleTaskRetry(task);
         }
       }
       await sleep(RETRY_TIMEOUT);
