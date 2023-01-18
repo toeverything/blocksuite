@@ -10,7 +10,7 @@ import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ShapeBlockModel } from './shape-block/shape-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import { SurfaceBlockModel } from './surface-block/surface-model.js';
-import { DatabaseBlockModel } from './database-block/index.js';
+import { DatabaseBlockModel } from './database-block/database-model.js';
 
 export {
   CodeBlockModel,
