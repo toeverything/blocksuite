@@ -11,7 +11,7 @@ import { Bound } from '@blocksuite/phasor';
 export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{
     type: 'shape',
-    color: 'black',
+    color: '#000000',
     shape: 'rect',
   };
 
