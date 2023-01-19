@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
 import { isFirefox } from '../__internal__/utils/std.js';
@@ -9,6 +9,37 @@ import {
   getBlockElementByModel,
   SelectionEvent,
 } from '../__internal__/index.js';
+
+const handleIcon = svg`
+            <rect
+              x="7.7782"
+              y="2.72803"
+              width="11"
+              height="11"
+              rx="3"
+              transform="rotate(45 7.7782 2.72803)"
+              fill="#888A9E"
+            />
+            <path
+              d="M14.1422 6.36396L9.89952 2.12132C8.72795 0.949748 6.82845 0.949747 5.65688 2.12132L1.41424 6.36396"
+              stroke="#888A9E"
+              stroke-miterlimit="16"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M1.41424 14.6482L5.65688 18.8909C6.82845 20.0625 8.72795 20.0625 9.89952 18.8909L14.1422 14.6482"
+              stroke="#888A9E"
+              stroke-miterlimit="16"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M5.27844 11.2427L6.69266 12.6569C7.08318 13.0474 7.71635 13.0474 8.10687 12.6569L10.9353 9.82846"
+              stroke="white"
+              stroke-linecap="round"
+            />
+`;
 
 let lastSelectedIndex = -1;
 
@@ -387,9 +418,11 @@ export class DragHandle extends LitElement {
         :host(:hover) > .affine-drag-handle-line {
           opacity: 1;
         }
+
         :host(:hover) .affine-drag-handle-normal {
           display: none !important;
         }
+
         :host(:hover) .affine-drag-handle-hover {
           display: block !important;
         }
@@ -425,34 +458,7 @@ export class DragHandle extends LitElement {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <rect
-              x="7.7782"
-              y="2.72803"
-              width="11"
-              height="11"
-              rx="3"
-              transform="rotate(45 7.7782 2.72803)"
-              fill="#888A9E"
-            />
-            <path
-              d="M14.1422 6.36396L9.89952 2.12132C8.72795 0.949748 6.82845 0.949747 5.65688 2.12132L1.41424 6.36396"
-              stroke="#888A9E"
-              stroke-miterlimit="16"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M1.41424 14.6482L5.65688 18.8909C6.82845 20.0625 8.72795 20.0625 9.89952 18.8909L14.1422 14.6482"
-              stroke="#888A9E"
-              stroke-miterlimit="16"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M5.27844 11.2427L6.69266 12.6569C7.08318 13.0474 7.71635 13.0474 8.10687 12.6569L10.9353 9.82846"
-              stroke="white"
-              stroke-linecap="round"
-            />
+            ${handleIcon}
           </svg>
         </div>
       </div>
