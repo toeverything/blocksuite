@@ -139,6 +139,12 @@ export class DragHandle extends LitElement {
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
 
+  @query('.affine-drag-handle-hover')
+  private _dragHandleOver!: HTMLDivElement;
+
+  @query('.affine-drag-handle-normal')
+  private _dragHandleNormal!: HTMLDivElement;
+
   private _currentPageX = 0;
   private _currentPageY = 0;
 
@@ -168,19 +174,11 @@ export class DragHandle extends LitElement {
       this._cursor = modelState.index;
       const rect = modelState.position;
       if (this._cursor === lastSelectedIndex) {
-        this._dragHandle.getElementsByClassName(
-          'affine-drag-handle-hover'
-        )[0].style.display = 'block';
-        this._dragHandle.getElementsByClassName(
-          'affine-drag-handle-normal'
-        )[0].style.display = 'none';
+        this._dragHandleOver.style.display = 'block';
+        this._dragHandleNormal.style.display = 'none';
       } else {
-        this._dragHandle.getElementsByClassName(
-          'affine-drag-handle-hover'
-        )[0].style.display = 'none';
-        this._dragHandle.getElementsByClassName(
-          'affine-drag-handle-normal'
-        )[0].style.display = 'block';
+        this._dragHandleOver.style.display = 'none';
+        this._dragHandleNormal.style.display = 'block';
       }
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
@@ -323,12 +321,8 @@ export class DragHandle extends LitElement {
       this.setSelectedBlocks([
         getBlockElementByModel(clickDragState.model) as HTMLElement,
       ]);
-      this._dragHandle.getElementsByClassName(
-        'affine-drag-handle-hover'
-      )[0].style.display = 'block';
-      this._dragHandle.getElementsByClassName(
-        'affine-drag-handle-normal'
-      )[0].style.display = 'none';
+      this._dragHandleOver.style.display = 'block';
+      this._dragHandleNormal.style.display = 'none';
     }
   };
 
