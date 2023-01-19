@@ -5,7 +5,11 @@ import { Page } from './page.js';
 import { Signal } from '@blocksuite/global/utils';
 import { Indexer, QueryContent } from './search.js';
 import type { BaseBlockModel } from '../base.js';
-import { BlobStorage, getBlobStorage } from '../blob/index.js';
+import {
+  BlobStorage,
+  BlobOptionsGetter,
+  getBlobStorage,
+} from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { AwarenessStore } from '../awareness.js';
 
@@ -217,6 +221,8 @@ export class Workspace {
   private _store: Store;
   private _indexer: Indexer;
   private _blobStorage: Promise<BlobStorage | null>;
+  private _blobOptionsGetter?: BlobOptionsGetter = (k: string) =>
+    ({ api: '/api/workspace' }[k]);
 
   meta: WorkspaceMeta;
 
@@ -231,8 +237,13 @@ export class Workspace {
   constructor(options: StoreOptions) {
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
+    if (options.blobOptionsGetter) {
+      this._blobOptionsGetter = options.blobOptionsGetter;
+    }
     if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.room);
+      this._blobStorage = getBlobStorage(options.room, k => {
+        return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
+      });
     } else {
       // blob storage is not reachable in server side
       this._blobStorage = Promise.resolve(null);
@@ -336,6 +347,10 @@ export class Workspace {
 
   search(query: QueryContent) {
     return this._indexer.search(query);
+  }
+
+  setGettingBlobOptions(blobOptionsGetter: BlobOptionsGetter) {
+    this._blobOptionsGetter = blobOptionsGetter;
   }
 
   /**

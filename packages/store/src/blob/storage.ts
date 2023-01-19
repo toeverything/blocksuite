@@ -3,9 +3,15 @@ import type { BlobId, BlobProvider, BlobURL } from './types.js';
 
 export class BlobStorage {
   private _providers: BlobProvider[] = [];
+
   signals = {
     blobAdded: new Signal<BlobId>(),
+    uploadStateChanged: new Signal<boolean>(),
   };
+
+  get uploading(): boolean {
+    return this._providers.some(p => p.uploading);
+  }
 
   get providers(): Readonly<BlobProvider[]> {
     return this._providers;
@@ -26,6 +32,9 @@ export class BlobStorage {
     this._providers.push(provider);
     provider.signals.blobAdded.on(blobId => {
       this.signals.blobAdded.emit(blobId);
+    });
+    provider.signals.uploadStateChanged?.on(() => {
+      this.signals.uploadStateChanged.emit(this.uploading);
     });
   }
 

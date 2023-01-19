@@ -1,14 +1,20 @@
 import ky from 'ky';
-import { Signal } from '@blocksuite/global/utils';
+import { assertExists, Signal, sleep } from '@blocksuite/global/utils';
 
 import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types.js';
 import { getDatabase, sha } from './utils.js';
-import { sleep } from '@blocksuite/global/utils';
 
 const RETRY_TIMEOUT = 500;
 
+export type BlobOptions = Record<'api' | 'token', string>;
+
+export type BlobOptionsGetter = (key: keyof BlobOptions) => string | undefined;
+
 interface BlobProviderStatic {
-  init(workspace: string, cloudApi?: string): Promise<BlobProvider>;
+  init(
+    workspace: string,
+    optionsGetter?: BlobOptionsGetter
+  ): Promise<BlobProvider>;
 }
 
 function staticImplements<T>() {
@@ -19,7 +25,7 @@ function staticImplements<T>() {
 export class IndexedDBBlobProvider implements BlobProvider {
   private readonly _database: IDBInstance;
   private readonly _cloud?: CloudSyncManager;
-  private _uploading = false;
+  public uploading = false;
 
   readonly blobs: Set<string> = new Set();
   readonly signals = {
@@ -29,20 +35,11 @@ export class IndexedDBBlobProvider implements BlobProvider {
     uploadFinished: new Signal<BlobId>(),
   };
 
-  onUploadStateChange(callback: (uploading: boolean) => void, sync = true) {
-    if (sync) callback(this._uploading);
-    this.signals.uploadStateChanged.on(callback);
-  }
-
-  onUploadFinished(callback: (id: BlobId) => void) {
-    this.signals.uploadFinished.on(callback);
-  }
-
   static async init(
     workspace: string,
-    cloudApi?: string
+    optionsGetter?: BlobOptionsGetter
   ): Promise<IndexedDBBlobProvider> {
-    const provider = new IndexedDBBlobProvider(workspace, cloudApi);
+    const provider = new IndexedDBBlobProvider(workspace, optionsGetter);
     await provider._initBlobs();
     return provider;
   }
@@ -56,15 +53,18 @@ export class IndexedDBBlobProvider implements BlobProvider {
     }
   }
 
-  private constructor(workspace: string, cloudApi?: string) {
+  private constructor(workspace: string, optionsGetter?: BlobOptionsGetter) {
     this._database = getDatabase('blob', workspace);
-    if (cloudApi) {
+
+    const endpoint = optionsGetter?.('api');
+    if (endpoint) {
+      assertExists(optionsGetter);
       this.signals.uploadStateChanged.on(uploading => {
-        this._uploading = uploading;
+        this.uploading = uploading;
       });
       this._cloud = new CloudSyncManager(
         workspace,
-        cloudApi,
+        optionsGetter,
         this._database,
         this.signals.uploadStateChanged,
         this.signals.uploadFinished
@@ -126,7 +126,7 @@ type SyncTask = {
 };
 
 type BlobStatus = {
-  exists: boolean;
+  status: number;
 };
 
 export class CloudSyncManager {
@@ -148,7 +148,7 @@ export class CloudSyncManager {
 
   constructor(
     workspace: string,
-    prefixUrl: string,
+    blobOptionsGetter: BlobOptionsGetter,
     db: IDBInstance,
     onUploadStateChanged: Signal<boolean>,
     onUploadFinished: Signal<BlobId>
@@ -156,9 +156,19 @@ export class CloudSyncManager {
     this._onUploadFinished = onUploadFinished;
     this._onUploadStateChanged = onUploadStateChanged;
     this._fetcher = ky.create({
-      prefixUrl,
+      prefixUrl: blobOptionsGetter('api'),
       signal: this._abortController.signal,
       throwHttpErrors: false,
+      hooks: {
+        beforeRequest: [
+          async request => {
+            const token = blobOptionsGetter('token');
+            if (token) {
+              request.headers.set('Authorization', token);
+            }
+          },
+        ],
+      },
     });
 
     this._database = db;
@@ -171,10 +181,11 @@ export class CloudSyncManager {
           keys.map(async id => {
             const { retry = 0, type } = (await this._pending.get(id)) || {};
             const blob = await db.get(id);
-            if ((blob || type === 'delete') && type) {
+            if ((blob || type === 'delete') && type !== 'upload') {
               return { id, blob, retry, type };
             }
             if (blob && type === 'upload') {
+              console.log('try resume uploading blob:', id);
               this.addTask(id, 'add');
             }
             return undefined;
@@ -190,9 +201,17 @@ export class CloudSyncManager {
     });
   }
 
-  private async _handleTaskRetry(task: SyncTask, status?: BlobStatus) {
+  private async _handleTaskRetry(task: SyncTask, response?: BlobStatus) {
     this._removeUploadId(task.id);
-    if (status?.exists) {
+    if (
+      response?.status === 413 ||
+      response?.status === 200 ||
+      task.retry >= 10
+    ) {
+      // if blob is too large, may try to upload it forever
+      if (response?.status === 413) {
+        console.log('blob too large:', task.id);
+      }
       await this._pending.delete(task.id);
       this._onUploadFinished.emit(task.id);
     } else {
@@ -224,14 +243,19 @@ export class CloudSyncManager {
               retry: task.retry,
             });
             this._addUploadId(task.id);
-            const status = await this._fetcher
-              .put(`${this._workspace}/blob`, { body: task.blob, retry: 3 })
-              .json<BlobStatus>();
-            await this._handleTaskRetry(task, status);
+            const response = await this._fetcher.put(
+              `${this._workspace}/blob`,
+              {
+                body: task.blob,
+                retry: task.retry,
+              }
+            );
+            await this._handleTaskRetry(task, response);
           }
         } catch (e) {
           console.warn('Error while syncing blob', e);
-          await this._handleTaskRetry(task);
+          if (e) await this._handleTaskRetry(task);
+          this._taskRunner();
         }
       }
       await sleep(RETRY_TIMEOUT);
@@ -242,19 +266,19 @@ export class CloudSyncManager {
 
   private _addUploadId(id: BlobId) {
     this._uploadingIds.add(id);
-    this._onUploadStateChanged.emit(!!this._uploadingIds.size);
+    this._onUploadStateChanged.emit(Boolean(this._uploadingIds.size));
   }
 
   private _removeUploadId(id: BlobId) {
     this._uploadingIds.delete(id);
-    this._onUploadStateChanged.emit(!!this._uploadingIds.size);
+    this._onUploadStateChanged.emit(Boolean(this._uploadingIds.size));
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
-    const api = `${this._workspace}/blob/${id}`;
+    const endpoint = `${this._workspace}/blob/${id}`;
     try {
       const blob = await this._fetcher
-        .get(api, { throwHttpErrors: true })
+        .get(endpoint, { throwHttpErrors: true })
         .blob();
 
       await this._database.set(id, await blob.arrayBuffer());
