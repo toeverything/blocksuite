@@ -21,11 +21,7 @@ import type {
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-import {
-  BLOCK_ID_ATTR,
-  MOVE_DETECT_THRESHOLD,
-  SCROLL_THRESHOLD,
-} from './consts.js';
+import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from './consts.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
@@ -425,17 +421,23 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  const isDownward = e.y > e.start.y + MOVE_DETECT_THRESHOLD;
-  const isRightward = e.x > e.start.x;
-  const isForward = isDownward || (e.y === e.start.y && isRightward);
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+
+  // See https://github.com/toeverything/blocksuite/pull/783 for direction recognition
+  const isDownward = e.y > e.start.y;
+  const isForward =
+    currentRange?.commonAncestorContainer.nodeType === Node.TEXT_NODE
+      ? !(currentRange?.comparePoint(endContainer, endOffset) === 1)
+      : isDownward;
+
   if (isForward) {
     currentRange?.setStart(startContainer, startOffset);
   } else {
     currentRange?.setEnd(endContainer, endOffset);
   }
+
   if (currentRange) {
     currentRange = fixCurrentRangeToText(
       e.raw.clientX,
