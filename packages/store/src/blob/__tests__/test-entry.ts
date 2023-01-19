@@ -10,11 +10,13 @@ import {
   disableButtonsAfterClick,
 } from '../../__tests__/test-utils-dom.js';
 
-const noopCloudApi = () => void 0;
-const cloudApi = (k: string) => ({ api: '/api/workspace' }[k]);
+const optionsGetters = {
+  noop: () => void 0,
+  cloudEndpoint: (k: string) => ({ api: '/api/workspace' }[k]),
+};
 
 async function testBasic() {
-  const storage = await getBlobStorage('test', noopCloudApi);
+  const storage = await getBlobStorage('test', optionsGetters.noop);
   assertExists(storage);
 
   const blob = await loadTestImageBlob('test-card-1');
@@ -87,7 +89,7 @@ async function testBasic() {
 async function testRefreshBefore() {
   clearIndexedDB();
 
-  const storage = await getBlobStorage('test', noopCloudApi);
+  const storage = await getBlobStorage('test', optionsGetters.noop);
   assertExists(storage);
 
   testSerial('can set blob', async () => {
@@ -100,7 +102,7 @@ async function testRefreshBefore() {
 }
 
 async function testRefreshAfter() {
-  const storage = await getBlobStorage('test', noopCloudApi);
+  const storage = await getBlobStorage('test', optionsGetters.noop);
   assertExists(storage);
 
   testSerial('can get saved blob', async () => {
@@ -145,7 +147,7 @@ function clearIndexedDB(workspace = 'test') {
 
 async function testCloudSyncBefore() {
   await clearIndexedDB('114514');
-  const storage = await getBlobStorage('114514', cloudApi);
+  const storage = await getBlobStorage('114514', optionsGetters.cloudEndpoint);
   assertExists(storage);
 
   testSerial('can set blob', async () => {
@@ -162,7 +164,7 @@ async function testCloudSyncBefore() {
 }
 
 async function testCloudSyncAfter() {
-  const storage = await getBlobStorage('114514', cloudApi);
+  const storage = await getBlobStorage('114514', optionsGetters.cloudEndpoint);
   assertExists(storage);
 
   testSerial('can get saved blob', async () => {

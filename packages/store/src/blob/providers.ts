@@ -8,10 +8,13 @@ const RETRY_TIMEOUT = 500;
 
 export type BlobOptions = Record<'api' | 'token', string>;
 
-export type GetBlobOptions = (key: keyof BlobOptions) => string | undefined;
+export type BlobOptionsGetter = (key: keyof BlobOptions) => string | undefined;
 
 interface BlobProviderStatic {
-  init(workspace: string, getOptions?: GetBlobOptions): Promise<BlobProvider>;
+  init(
+    workspace: string,
+    optionsGetter?: BlobOptionsGetter
+  ): Promise<BlobProvider>;
 }
 
 function staticImplements<T>() {
@@ -34,9 +37,9 @@ export class IndexedDBBlobProvider implements BlobProvider {
 
   static async init(
     workspace: string,
-    getOptions?: GetBlobOptions
+    optionsGetter?: BlobOptionsGetter
   ): Promise<IndexedDBBlobProvider> {
-    const provider = new IndexedDBBlobProvider(workspace, getOptions);
+    const provider = new IndexedDBBlobProvider(workspace, optionsGetter);
     await provider._initBlobs();
     return provider;
   }
@@ -50,18 +53,18 @@ export class IndexedDBBlobProvider implements BlobProvider {
     }
   }
 
-  private constructor(workspace: string, getOptions?: GetBlobOptions) {
+  private constructor(workspace: string, optionsGetter?: BlobOptionsGetter) {
     this._database = getDatabase('blob', workspace);
 
-    const cloudApi = getOptions?.('api');
-    if (cloudApi) {
-      assertExists(getOptions);
+    const endpoint = optionsGetter?.('api');
+    if (endpoint) {
+      assertExists(optionsGetter);
       this.signals.uploadStateChanged.on(uploading => {
         this.uploading = uploading;
       });
       this._cloud = new CloudSyncManager(
         workspace,
-        getOptions,
+        optionsGetter,
         this._database,
         this.signals.uploadStateChanged,
         this.signals.uploadFinished
@@ -145,7 +148,7 @@ export class CloudSyncManager {
 
   constructor(
     workspace: string,
-    getOptions: GetBlobOptions,
+    blobOptionsGetter: BlobOptionsGetter,
     db: IDBInstance,
     onUploadStateChanged: Signal<boolean>,
     onUploadFinished: Signal<BlobId>
@@ -153,13 +156,13 @@ export class CloudSyncManager {
     this._onUploadFinished = onUploadFinished;
     this._onUploadStateChanged = onUploadStateChanged;
     this._fetcher = ky.create({
-      prefixUrl: getOptions('api'),
+      prefixUrl: blobOptionsGetter('api'),
       signal: this._abortController.signal,
       throwHttpErrors: false,
       hooks: {
         beforeRequest: [
           async request => {
-            const token = getOptions('token');
+            const token = blobOptionsGetter('token');
             if (token) {
               request.headers.set('Authorization', token);
             }
@@ -272,10 +275,10 @@ export class CloudSyncManager {
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
-    const api = `${this._workspace}/blob/${id}`;
+    const endpoint = `${this._workspace}/blob/${id}`;
     try {
       const blob = await this._fetcher
-        .get(api, { throwHttpErrors: true })
+        .get(endpoint, { throwHttpErrors: true })
         .blob();
 
       await this._database.set(id, await blob.arrayBuffer());
