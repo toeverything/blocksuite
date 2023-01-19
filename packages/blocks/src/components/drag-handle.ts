@@ -1,11 +1,10 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
-import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { getBlockElementByModel } from '../__internal__/index.js';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078

@@ -5,7 +5,6 @@ import type {
 } from '../../../__internal__/index.js';
 import { getSelectionBoxBound, pick } from '../utils.js';
 import {
-  caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
   noop,
@@ -15,9 +14,10 @@ import {
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-} from '../../utils/cursor.js';
+} from '../../utils/position.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import { MouseModeController } from './index.js';
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{

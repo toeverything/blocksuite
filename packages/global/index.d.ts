@@ -67,6 +67,7 @@ declare type BlockSuiteFlags = {
   enable_drag_handle: boolean;
   enable_surface: boolean;
   enable_block_hub: boolean;
+  enable_slash_menu: boolean;
   readonly: Record<string, boolean>;
 };
 

@@ -139,7 +139,7 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    if (this._space.awarenessAdapter.isReadonly(this._space)) {
+    if (this._space.awarenessStore.isReadonly(this._space)) {
       console.error('cannot modify data in readonly mode');
       return;
     }

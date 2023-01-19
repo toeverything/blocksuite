@@ -3,7 +3,6 @@ import type { EmbedBlockComponent } from '../../embed-block/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import '../../components/drag-handle.js';
 import {
-  caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -24,7 +23,7 @@ import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-} from '../utils/cursor.js';
+} from '../utils/position.js';
 import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
@@ -34,7 +33,11 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
 import { BlockHub } from '../../components/blockhub.js';
 
@@ -271,7 +274,7 @@ export class DefaultSelectionManager {
       });
     };
     this._disposables.add(
-      this.page.awarenessAdapter.signals.update.subscribe(
+      this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_drag_handle,
         enable => {
           if (enable) {
@@ -289,7 +292,7 @@ export class DefaultSelectionManager {
       )
     );
     this._disposables.add(
-      this.page.awarenessAdapter.signals.update.subscribe(
+      this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_block_hub,
         enable => {
           if (enable) {
@@ -306,10 +309,10 @@ export class DefaultSelectionManager {
         }
       )
     );
-    if (this.page.awarenessAdapter.getFlag('enable_drag_handle')) {
+    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
       createHandle();
     }
-    if (this.page.awarenessAdapter.getFlag('enable_block_hub')) {
+    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
       createBlockHub();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);

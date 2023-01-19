@@ -50,7 +50,7 @@ async function initEmptyEditor(
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as StorePage;
       for (const [key, value] of Object.entries(flags)) {
-        page.awarenessAdapter.setFlag(key as keyof typeof flags, value);
+        page.awarenessStore.setFlag(key as keyof typeof flags, value);
       }
 
       const editor = document.createElement('editor-container');
