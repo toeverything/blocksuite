@@ -185,6 +185,14 @@ export class RichText extends NonShadowLitElement {
     });
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    const { model, host } = this;
+    if (this.quill) {
+      host.page.attachRichText(model.id, this.quill);
+    }
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
