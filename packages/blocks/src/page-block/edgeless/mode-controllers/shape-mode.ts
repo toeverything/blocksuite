@@ -12,7 +12,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{
     type: 'shape',
     color: 'black',
-    shape: 'rectangle',
+    shape: 'rect',
   };
 
   private _draggingElementId: string | null = null;
@@ -39,10 +39,9 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     if (this._page.awarenessStore.getFlag('enable_surface')) {
       const bound = new Bound(modelX, modelY, 0, 0);
-      const color = this.mouseMode.color;
-      // TODO
-      // type: this.mouseMode.shape
-      this._draggingElementId = this._surface.addDebugElement(bound, color);
+      const { shape, color } = this.mouseMode;
+      const id = this._surface.addShapeElement(bound, shape, color);
+      this._draggingElementId = id;
     }
 
     this._draggingArea = {

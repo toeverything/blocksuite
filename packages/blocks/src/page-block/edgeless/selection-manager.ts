@@ -8,8 +8,8 @@ import {
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { DefaultModeController } from './mode-controllers/default.js';
-import { ShapeModeController } from './mode-controllers/shape.js';
+import { DefaultModeController } from './mode-controllers/default-mode.js';
+import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import type {
   HoverState,
   MouseModeController,

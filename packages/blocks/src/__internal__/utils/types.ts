@@ -1,7 +1,8 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { ShapeType } from '@blocksuite/phasor';
 import type { Point } from './rect.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { ColorStyle, TDShapeType } from './shape.js';
+import type { ColorStyle } from './shape.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
@@ -84,7 +85,7 @@ export type DefaultMouseMode = {
 
 export type ShapeMouseMode = {
   type: 'shape';
-  shape: TDShapeType;
+  shape: ShapeType;
   color: ColorStyle | `#${string}`;
 };
 

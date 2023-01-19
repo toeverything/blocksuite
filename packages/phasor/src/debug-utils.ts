@@ -1,11 +1,8 @@
-import { PathElement, DebugElement, type Element } from './elements.js';
+import { DebugElement, type Element } from './elements.js';
 import type { Renderer } from './renderer.js';
 
-const PATH_POINTS = 10;
-const PATH_MAX = 150;
-const PATH_MIN = 10;
-const IMAGE_MAX = 150;
-const IMAGE_MIN = 120;
+const DEBUG_ELEMENT_MAX = 150;
+const DEBUG_ELEMEMNT_MIN = 120;
 
 function randomInt(range: number, min = 0) {
   return Math.floor(Math.random() * (range - min)) + min;
@@ -16,32 +13,14 @@ function randomColor() {
 }
 
 function createMockElement(id: number, rangeX: number, rangeY: number) {
-  const r = randomInt(100);
-
   const x = randomInt(rangeX);
   const y = randomInt(rangeY);
-  if (r % 2 === 0) {
-    const points: number[] = [];
-    let maxX = 0;
-    let maxY = 0;
-    for (let i = 0; i < PATH_POINTS; i++) {
-      const x = randomInt(PATH_MAX, PATH_MIN);
-      const y = randomInt(PATH_MAX, PATH_MIN);
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
-      points.push(x, y);
-    }
-    const element = new PathElement(`${id}`, points);
-    element.color = randomColor();
-    element.setBound(x, y, maxX, maxY);
-    return element;
-  } else {
-    const size = randomInt(IMAGE_MAX, IMAGE_MIN);
-    const element = new DebugElement(`${id}`);
-    element.color = randomColor();
-    element.setBound(x, y, size, size);
-    return element;
-  }
+
+  const size = randomInt(DEBUG_ELEMENT_MAX, DEBUG_ELEMEMNT_MIN);
+  const element = new DebugElement(`${id}`);
+  element.color = randomColor();
+  element.setBound(x, y, size, size);
+  return element;
 }
 
 export function initMockData(
