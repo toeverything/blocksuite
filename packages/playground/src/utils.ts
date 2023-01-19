@@ -27,8 +27,18 @@ export function initFeatureFlags(page: Page) {
   if (params.get('surface') !== null) {
     page.awarenessStore.setFlag('enable_surface', true);
   }
-  if (params.get('slash') !== null) {
-    page.awarenessStore.setFlag('enable_slash_menu', true);
+  const slashFlag = params.get('slash');
+  switch (slashFlag) {
+    case '0':
+      page.awarenessStore.setFlag('enable_slash_menu', false);
+      break;
+    case '1':
+      page.awarenessStore.setFlag('enable_slash_menu', true);
+      page.awarenessStore.setFlag('enable_boss_flavor_slash', true);
+      break;
+    default:
+      page.awarenessStore.setFlag('enable_slash_menu', true);
+      break;
   }
 }
 

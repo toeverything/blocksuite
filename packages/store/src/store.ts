@@ -70,6 +70,7 @@ const flagsPreset = {
   enable_block_hub: true,
   enable_surface: false,
   enable_slash_menu: false,
+  enable_boss_flavor_slash: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

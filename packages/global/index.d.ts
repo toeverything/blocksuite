@@ -68,6 +68,7 @@ declare type BlockSuiteFlags = {
   enable_surface: boolean;
   enable_block_hub: boolean;
   enable_slash_menu: boolean;
+  enable_boss_flavor_slash: boolean;
   readonly: Record<string, boolean>;
 };
 

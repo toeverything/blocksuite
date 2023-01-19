@@ -5,7 +5,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { updateSelectedTextType } from '../../page-block/utils/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
-import { getRichTextByModel } from '../../__internal__/utils/index.js';
+import {
+  asyncFocusRichText,
+  getRichTextByModel,
+} from '../../__internal__/utils/index.js';
 
 const styles = css`
   .overlay-mask {
@@ -174,10 +177,23 @@ export class SlashMenu extends LitElement {
     // Need to remove the search string
     this.abortController.abort(this._searchString);
     const { flavour, type } = this._filterItems[index];
-    updateSelectedTextType(flavour, type, this.model.page);
+
+    if (this.model.page.awarenessStore.getFlag('enable_boss_flavor_slash')) {
+      // Add new block
+      const page = this.model.page;
+      const parent = page.getParent(this.model);
+      if (!parent) {
+        throw new Error('Failed add block!');
+      }
+      const index = parent.children.indexOf(this.model);
+      const id = page.addBlockByFlavour(flavour, { type }, parent, index + 1);
+      asyncFocusRichText(page, id);
+      return;
+    }
+    updateSelectedTextType(flavour, type);
   }
 
-  private _updateItem() {
+  private _updateItem(): typeof paragraphConfig {
     this._activeItemIndex = 0;
     const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
