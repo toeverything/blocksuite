@@ -295,6 +295,7 @@ export class BlockHub extends NonShadowLitElement {
     this.removeEventListener('drag', this._onDrag);
     this.removeEventListener('dragend', this._onDragEnd);
 
+    // FIXME: do not listen on the document
     document.removeEventListener('dragover', this._onDragOver);
     document.removeEventListener('drop', this._onDrop);
     isFirefox &&
@@ -534,6 +535,10 @@ export class BlockHub extends NonShadowLitElement {
   };
 
   private _onDrop = (e: DragEvent) => {
+    assertExists(e.dataTransfer);
+    if (!e.dataTransfer.getData('affine/block-hub')) {
+      return;
+    }
     assertExists(this._lastModelState);
     this._onDropCallback(e, this._lastModelState);
   };
