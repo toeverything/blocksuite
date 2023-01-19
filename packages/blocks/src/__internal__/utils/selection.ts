@@ -424,16 +424,20 @@ export function handleNativeRangeDragMove(
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  const isDownWard = e.y > e.start.y;
+
+  // See https://github.com/toeverything/blocksuite/pull/783 for direction recognition
+  const isDownward = e.y > e.start.y;
   const isForward =
     currentRange?.commonAncestorContainer.nodeType === Node.TEXT_NODE
       ? !(currentRange?.comparePoint(endContainer, endOffset) === 1)
-      : isDownWard;
+      : isDownward;
+
   if (isForward) {
     currentRange?.setStart(startContainer, startOffset);
   } else {
     currentRange?.setEnd(endContainer, endOffset);
   }
+
   if (currentRange) {
     currentRange = fixCurrentRangeToText(
       e.raw.clientX,
