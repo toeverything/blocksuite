@@ -7,7 +7,7 @@ import { Indexer, QueryContent } from './search.js';
 import type { BaseBlockModel } from '../base.js';
 import { BlobStorage, GetBlobOptions, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import type { AwarenessAdapter } from '../awareness.js';
+import type { AwarenessStore } from '../awareness.js';
 
 export interface PageMeta {
   id: string;
@@ -33,12 +33,8 @@ class WorkspaceMeta<
   pagesUpdated = new Signal();
   commonFieldsUpdated = new Signal();
 
-  constructor(
-    id: string,
-    doc: BlockSuiteDoc,
-    awarenessAdapter: AwarenessAdapter
-  ) {
-    super(id, doc, awarenessAdapter, {
+  constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
+    super(id, doc, awarenessStore, {
       valueInitializer: {
         pages: () => new Y.Array(),
         versions: () => new Y.Map(),
@@ -250,11 +246,7 @@ export class Workspace {
     }
     this.room = options.room;
 
-    this.meta = new WorkspaceMeta(
-      'space:meta',
-      this.doc,
-      this.awarenessAdapter
-    );
+    this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
 
     this.signals = {
       pagesUpdated: this.meta.pagesUpdated,
@@ -265,8 +257,8 @@ export class Workspace {
     this._handlePageEvent();
   }
 
-  get awarenessAdapter(): AwarenessAdapter {
-    return this._store.awarenessAdapter;
+  get awarenessStore(): AwarenessStore {
+    return this._store.awarenessStore;
   }
 
   get providers() {
@@ -312,7 +304,7 @@ export class Workspace {
         this,
         pageId,
         this.doc,
-        this.awarenessAdapter,
+        this.awarenessStore,
         this._store.idGenerator
       );
       this._store.addSpace(page);

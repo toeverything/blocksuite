@@ -1,11 +1,11 @@
 import {
-  caretRangeFromPoint,
   clamp,
   getCurrentRange,
   isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const currentRange = window.getSelection()?.getRangeAt(0);
@@ -180,5 +180,27 @@ export function calcSafeCoordinate({
   return {
     x: safeX,
     y,
+  };
+}
+
+/**
+ * Used to compare the space available
+ * at the top and bottom of an element within a container.
+ */
+export function compareTopAndBottomSpace(
+  obj: { getBoundingClientRect: () => DOMRect },
+  container = document.body,
+  gap = 20
+) {
+  const objRect = obj.getBoundingClientRect();
+  const spaceRect = container.getBoundingClientRect();
+  const topSpace = objRect.top - spaceRect.top;
+  const bottomSpace = spaceRect.bottom - objRect.bottom;
+  const topOrBottom: 'top' | 'bottom' =
+    topSpace > bottomSpace ? 'top' : 'bottom';
+  return {
+    placement: topOrBottom,
+    // the height is the available space.
+    height: (topOrBottom === 'top' ? topSpace : bottomSpace) - gap,
   };
 }

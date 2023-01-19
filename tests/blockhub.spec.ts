@@ -24,14 +24,16 @@ test('first level menu always exists, second level menu can be hidden by click f
   );
 
   await expect(menuEntry).toBeVisible();
-  await expect(menuContainer).toHaveAttribute('style', 'display:none');
+  await expect(menuContainer).toBeHidden();
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.waitForTimeout(200);
   await expect(menuEntry).toBeVisible();
-  await expect(menuContainer).toHaveAttribute('style', 'display:block');
+  await expect(menuContainer).toBeVisible();
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
-  await expect(menuContainer).toHaveAttribute('style', 'display:none');
+  await page.waitForTimeout(200);
+  await expect(menuContainer).toBeHidden();
 });
 
 test('blockHub card items should appear and disappear properly with corresponding menu', async ({
@@ -42,6 +44,7 @@ test('blockHub card items should appear and disappear properly with correspondin
   await focusRichText(page);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.waitForTimeout(200);
   const blankMenu = '.block-hub-icon-container:nth-child(1)';
   const textMenu = '.block-hub-icon-container:nth-child(2)';
   const listMenu = '.block-hub-icon-container:nth-child(3)';
@@ -75,6 +78,7 @@ test('blockHub card items can disappear when clicking blank area', async ({
   await focusRichText(page);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.waitForTimeout(200);
   const textMenu = '.block-hub-icon-container:nth-child(2)';
 
   const textMenuRect = await getCenterPosition(page, textMenu);
@@ -101,6 +105,7 @@ test('drag blank line into text area', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.waitForTimeout(200);
   const blankMenu = '.block-hub-icon-container:nth-child(1)';
 
   const blankMenuRect = await getCenterPosition(page, blankMenu);
@@ -148,6 +153,7 @@ test('drag quote block from text menu into text area and blockHub text cards wil
   await assertRichTexts(page, ['123', '456', '789']);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.waitForTimeout(200);
   const textMenu = '.block-hub-icon-container:nth-child(2)';
 
   const textMenuRect = await getCenterPosition(page, textMenu);
@@ -206,6 +212,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
   await assertRichTexts(page, ['123', '456', '789']);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
+  await page.waitForTimeout(200);
   const listMenu = '.block-hub-icon-container:nth-child(3)';
 
   const listMenuRect = await getCenterPosition(page, listMenu);

@@ -11,7 +11,7 @@ import {
 } from './utils/id-generator.js';
 import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
-import { AwarenessAdapter, AwarenessState } from './awareness.js';
+import { AwarenessStore, RawAwarenessState } from './awareness.js';
 import type { GetBlobOptions } from './blob/index.js';
 
 export interface SerializedStore {
@@ -56,7 +56,7 @@ export interface StoreOptions<
 > extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
-  awareness?: Awareness<AwarenessState<Flags>>;
+  awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
   getBlobOptions?: GetBlobOptions;
@@ -69,6 +69,7 @@ const flagsPreset = {
   enable_drag_handle: true,
   enable_block_hub: true,
   enable_surface: false,
+  enable_slash_menu: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 
@@ -76,7 +77,7 @@ export class Store {
   readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
-  readonly awarenessAdapter: AwarenessAdapter;
+  readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
@@ -87,9 +88,9 @@ export class Store {
     idGenerator,
     defaultFlags,
   }: StoreOptions = {}) {
-    this.awarenessAdapter = new AwarenessAdapter(
+    this.awarenessStore = new AwarenessStore(
       this,
-      awareness ?? new Awareness<AwarenessState>(this.doc),
+      awareness ?? new Awareness<RawAwarenessState>(this.doc),
       merge(flagsPreset, defaultFlags)
     );
 
@@ -119,7 +120,7 @@ export class Store {
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, {
           // @ts-expect-error
-          awareness: this.awarenessAdapter.awareness,
+          awareness: this.awarenessStore.awareness,
         })
     );
   }

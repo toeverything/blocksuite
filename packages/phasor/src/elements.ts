@@ -80,8 +80,8 @@ export class PathElement extends BaseElement {
   }
 }
 
-export class RectElement extends BaseElement {
-  type = 'rect' as const;
+export class DebugElement extends BaseElement {
+  type = 'debug' as const;
   color = BLACK;
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -99,8 +99,8 @@ export class RectElement extends BaseElement {
     };
   }
 
-  static deserialize(data: Record<string, unknown>): RectElement {
-    const element = new RectElement(data.id as string);
+  static deserialize(data: Record<string, unknown>): DebugElement {
+    const element = new DebugElement(data.id as string);
     element.index = data.index as string;
 
     const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
@@ -110,4 +110,4 @@ export class RectElement extends BaseElement {
   }
 }
 
-export type Element = PathElement | RectElement;
+export type Element = PathElement | DebugElement;

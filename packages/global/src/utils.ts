@@ -1,3 +1,4 @@
+export { isFirefox, isWeb, caretRangeFromPoint } from './utils/web.js';
 export { Signal } from './utils/signal.js';
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup, flattenDisposable } from './utils/disposable.js';

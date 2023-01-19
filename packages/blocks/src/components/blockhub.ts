@@ -1,6 +1,6 @@
 import { css, html, TemplateResult } from 'lit';
 import { customElement, query, queryAll } from 'lit/decorators.js';
-import { isFirefox, NonShadowLitElement } from '../__internal__/index.js';
+import { NonShadowLitElement } from '../__internal__/index.js';
 import type {
   DragHandleGetModelStateCallback,
   DragHandleGetModelStateWithCursorCallback,
@@ -8,7 +8,7 @@ import type {
 } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import {
   BulletedListIconLarge,
   CrossIcon,
@@ -39,6 +39,9 @@ export class BlockHub extends NonShadowLitElement {
   @query('.new-icon')
   private _blockHubButton!: HTMLElement;
 
+  @query('.block-hub-icons-container')
+  private _blockHubIconsContainer!: HTMLElement;
+
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -56,6 +59,8 @@ export class BlockHub extends NonShadowLitElement {
   private _isCardListVisiable = false;
   private _cardvisibleType = '';
   private _showToolTip = true;
+  private _timer: number | null = null;
+  private _delay = 200; // ms
 
   static styles = css`
     .affine-block-hub-container {
@@ -79,6 +84,7 @@ export class BlockHub extends NonShadowLitElement {
       top: unset;
       bottom: 0px;
       transform: unset;
+      right: calc(100% + 5.5px);
     }
 
     .visible {
@@ -142,8 +148,8 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       padding: 4px;
       position: fixed;
-      right: 28px;
-      bottom: 84px;
+      right: 24px;
+      bottom: 70px;
       width: 44px;
       background: #ffffff;
       box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
@@ -213,6 +219,19 @@ export class BlockHub extends NonShadowLitElement {
       border-radius: 10px 10px 0px 10px;
     }
 
+    .block-hub-icons-container {
+      position: relative;
+      opacity: 0;
+      top: 100px;
+      height: 0px;
+      transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
+    }
+
+    .block-hub-icons-container[transition] {
+      opacity: 1;
+      top: 0px;
+    }
+
     ${centeredToolTipStyle}
     ${toolTipStyle}
   `;
@@ -260,6 +279,10 @@ export class BlockHub extends NonShadowLitElement {
     if (!this._indicator) {
       this._indicatorHTMLTemplate = html` <affine-drag-indicator></affine-drag-indicator>`;
     }
+    this._blockHubIconsContainer.addEventListener(
+      'transitionstart',
+      this._onTransitionStart
+    );
   }
 
   disconnectedCallback() {
@@ -290,8 +313,34 @@ export class BlockHub extends NonShadowLitElement {
         'click',
         this._onBlockHubButtonClick
       );
+      this._blockHubIconsContainer.removeEventListener(
+        'transitionstart',
+        this._onTransitionStart
+      );
     }
   }
+
+  /**
+   * This is currently a workaround, as the height of the _blockHubIconsContainer is determined by the height of its
+   * content, and if its child's opacity is set to 0 during a transition, its height won't change, causing the background
+   * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
+   */
+  private _onTransitionStart = (e: TransitionEvent) => {
+    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
+    if (e.propertyName === 'opacity') {
+      return;
+    }
+    if (this._timer) {
+      clearTimeout(this._timer);
+    }
+    if (!this._expanded) {
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.height = '0px';
+      }, this._delay);
+    } else {
+      this._blockHubIconsContainer.style.height = 'unset';
+    }
+  };
 
   private _shouldCardDisplay(type: string) {
     return (
@@ -303,7 +352,7 @@ export class BlockHub extends NonShadowLitElement {
 
   private _blockHubMenuTemplate = () => {
     return html`
-      <div style=${this._expanded ? 'display:block' : 'display:none'}>
+      <div class="block-hub-icons-container" ?transition=${this._expanded}>
         <div
           class="block-hub-icon-container has-tool-tip"
           selected=${this._cardvisibleType === 'blank' ? 'true' : 'false'}
@@ -467,6 +516,7 @@ export class BlockHub extends NonShadowLitElement {
 
   private _onDragEnd = (e: DragEvent) => {
     this._showToolTip = true;
+    this._isGrabbing = false;
     if (this._indicator.cursorPosition && this._indicator.targetRect) {
       this._isCardListVisiable = false;
       this._cardvisibleType = '';
