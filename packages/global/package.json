@@ -29,7 +29,14 @@
     ]
   },
   "dependencies": {
-    "ansi-colors": "^4.1.3",
-    "lit": "^2.6.1"
+    "ansi-colors": "^4.1.3"
+  },
+  "peerDependencies": {
+    "lit": "^2.6"
+  },
+  "peerDependenciesMeta": {
+    "lit": {
+      "optional": true
+    }
   }
 }
