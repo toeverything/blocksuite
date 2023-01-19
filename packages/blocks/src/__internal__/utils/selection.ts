@@ -14,7 +14,6 @@ import {
   getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import { caretRangeFromPoint } from './std.js';
 import type {
   DomSelectionType,
   SelectedBlock,
@@ -22,7 +21,11 @@ import type {
   SelectionPosition,
 } from './types.js';
 import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from './consts.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;

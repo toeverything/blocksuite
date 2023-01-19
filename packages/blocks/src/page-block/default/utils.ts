@@ -3,7 +3,6 @@ import { toast } from '../../components/toast.js';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
 import {
   asyncFocusRichText,
-  caretRangeFromPoint,
   focusNextBlock,
   focusPreviousBlock,
   getBlockById,
@@ -35,7 +34,11 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import type { DefaultSelectionManager } from './selection-manager.js';
 import type { CodeBlockOption } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 
 export interface EditingState {
   model: BaseBlockModel;

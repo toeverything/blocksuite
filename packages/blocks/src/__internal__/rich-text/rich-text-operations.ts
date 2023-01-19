@@ -8,7 +8,6 @@ import {
   getContainerByModel,
   getPreviousBlock,
   ALLOW_DEFAULT,
-  caretRangeFromPoint,
   getNextBlock,
   PREVENT_DEFAULT,
   asyncFocusRichText,
@@ -20,7 +19,11 @@ import {
   supportsChildren,
   getModelByElement,
 } from '../utils/index.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);

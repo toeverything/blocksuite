@@ -3,7 +3,6 @@ import type { EmbedBlockComponent } from '../../embed-block/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import '../../components/drag-handle.js';
 import {
-  caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -34,7 +33,11 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { DragHandle } from '../../components/drag-handle.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
 import { BlockHub } from '../../components/blockhub.js';
 
