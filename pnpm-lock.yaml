@@ -126,8 +126,11 @@ importers:
   packages/global:
     specifiers:
       ansi-colors: ^4.1.3
+      lit: ^2.6.1
     dependencies:
       ansi-colors: 4.1.3
+    devDependencies:
+      lit: 2.6.1
 
   packages/phasor:
     specifiers:
