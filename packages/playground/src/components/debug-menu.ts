@@ -21,20 +21,19 @@ import type {
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 
 import {
-  ColorStyle,
   createEvent,
   getCurrentRange,
   getModelsByRange,
   type FrameBlockModel,
   MouseMode,
   ShapeMouseMode,
-  TDShapeType,
   updateSelectedTextType,
 } from '@blocksuite/blocks';
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/store/src/__tests__/test-utils-dom';
+import type { ShapeType } from '@blocksuite/phasor';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -68,10 +67,10 @@ export class DebugMenu extends LitElement {
   showGrid = false;
 
   @state()
-  shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
+  shapeModeColor: ShapeMouseMode['color'] = '#000000';
 
   @state()
-  shapeModeShape: ShapeMouseMode['shape'] = TDShapeType.Rectangle;
+  shapeModeShape: ShapeMouseMode['shape'] = 'rect';
 
   @state()
   readonly = false;
@@ -471,7 +470,7 @@ export class DebugMenu extends LitElement {
             hoist
             @sl-change=${(e: CustomEvent) => {
               const target = e.target as SlSelect;
-              this.shapeModeShape = target.value as TDShapeType;
+              this.shapeModeShape = target.value as ShapeType;
             }}
           >
             <sl-menu-item value="rectangle">Rectangle</sl-menu-item>

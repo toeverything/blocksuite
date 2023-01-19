@@ -1,5 +1,10 @@
 import { Workspace } from '@blocksuite/store';
-import { SurfaceContainer, bindWheelEvents, Bound } from '@blocksuite/phasor';
+import {
+  SurfaceContainer,
+  bindWheelEvents,
+  Bound,
+  // initMockData,
+} from '@blocksuite/phasor';
 
 const { Y } = Workspace;
 
@@ -14,6 +19,9 @@ function main() {
   container.addDebugElement(new Bound(0, 0, 100, 100), 'red');
 
   container.addDebugElement(new Bound(50, 50, 100, 100), 'black');
+
+  // Uncomment to batch load mock data
+  // initMockData(container.renderer, 100, 1000, 1000);
 
   // @ts-ignore
   window.container = container;

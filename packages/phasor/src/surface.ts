@@ -1,7 +1,13 @@
 import * as Y from 'yjs';
 import { generateKeyBetween } from 'fractional-indexing';
 import type { IBound } from './consts.js';
-import { Element, DebugElement, PathElement } from './elements.js';
+import {
+  Element,
+  DebugElement,
+  ShapeElement,
+  ElementType,
+  ShapeType,
+} from './elements.js';
 import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from 'nanoid';
@@ -20,18 +26,15 @@ export class SurfaceContainer {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  private _createYElement(element: Omit<Element, 'id'>) {
-    const serialized = element.serialize();
-    const yElement = new Y.Map<unknown>();
-    for (const [key, value] of Object.entries(serialized)) {
-      yElement.set(key, value);
-    }
-    return yElement;
-  }
+  addShapeElement(bound: IBound, shapeType: ShapeType, color: string) {
+    const id = nanoid(10);
+    const element = new ShapeElement(id, shapeType);
+    const { x, y, w, h } = bound;
 
-  private _transact(callback: () => void) {
-    const doc = this._yElements.doc as Y.Doc;
-    doc.transact(callback, doc.clientID);
+    element.setBound(x, y, w, h);
+    element.color = color;
+
+    return this._addElement(element);
   }
 
   addDebugElement(bound: IBound, color: string): string {
@@ -73,7 +76,7 @@ export class SurfaceContainer {
   }
 
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as string;
+    const type = yElement.get('type') as ElementType;
     switch (type) {
       case 'debug': {
         const element = DebugElement.deserialize(yElement.toJSON());
@@ -81,8 +84,8 @@ export class SurfaceContainer {
         this._elements.set(element.id, element);
         break;
       }
-      case 'path': {
-        const element = PathElement.deserialize(yElement.toJSON());
+      case 'shape': {
+        const element = ShapeElement.deserialize(yElement.toJSON());
         this.renderer.addElement(element);
         this._elements.set(element.id, element);
         break;
@@ -92,6 +95,20 @@ export class SurfaceContainer {
 
   private _syncFromExistingContainer() {
     this._yElements.forEach(yElement => this._handleYElementAdded(yElement));
+  }
+
+  private _createYElement(element: Omit<Element, 'id'>) {
+    const serialized = element.serialize();
+    const yElement = new Y.Map<unknown>();
+    for (const [key, value] of Object.entries(serialized)) {
+      yElement.set(key, value);
+    }
+    return yElement;
+  }
+
+  private _transact(callback: () => void) {
+    const doc = this._yElements.doc as Y.Doc;
+    doc.transact(callback, doc.clientID);
   }
 
   private _handleYElementsEvent(event: Y.YMapEvent<unknown>) {
