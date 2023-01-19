@@ -10,6 +10,8 @@ import {
   SelectionEvent,
 } from '../__internal__/index.js';
 
+let lastSelectedIndex = -1;
+
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
   event.preventDefault();
@@ -68,7 +70,7 @@ export type DragHandleGetModelStateWithCursorCallback = (
   dragging?: boolean
 ) => EditingState | null;
 
-const DRAG_HANDLE_HEIGHT = 24; // px
+const DRAG_HANDLE_HEIGHT = 14; // px FIXME
 const DRAG_HANDLE_WIDTH = 24; // px
 
 @customElement('affine-drag-handle')
@@ -83,29 +85,25 @@ export class DragHandle extends LitElement {
       opacity: 0;
       height: 100%;
       position: absolute;
-      left: ${DRAG_HANDLE_WIDTH / 2}px;
-      border-right: 1px solid rgba(61, 61, 61, 1);
+      left: ${DRAG_HANDLE_WIDTH / 2 - 1}px;
+      border-right: 1px solid #888a9e;
       transition: opacity ease-in-out 100ms;
     }
 
     .affine-drag-handle {
       position: absolute;
-      cursor: grab;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: ${DRAG_HANDLE_HEIGHT}px;
-      height: ${DRAG_HANDLE_WIDTH}px;
+      width: ${DRAG_HANDLE_WIDTH}px;
+      height: ${DRAG_HANDLE_HEIGHT}px;
+      background-color: var(--affine-page-background);
     }
 
-    .affine-drag-handle-rect {
-      width: 11px;
-      height: 11px;
-      border-width: 1px;
-      border-style: solid;
-      border-color: rgba(61, 61, 61, 1);
-      background-color: var(--affine-page-background);
-      transform: rotate(45deg);
+    .affine-drag-handle-hover {
+      display: none;
+      transition: opacity ease-in-out 100ms;
     }
   `;
 
@@ -169,11 +167,26 @@ export class DragHandle extends LitElement {
       this._startModelState = modelState;
       this._cursor = modelState.index;
       const rect = modelState.position;
+      if (this._cursor === lastSelectedIndex) {
+        this._dragHandle.getElementsByClassName(
+          'affine-drag-handle-hover'
+        )[0].style.display = 'block';
+        this._dragHandle.getElementsByClassName(
+          'affine-drag-handle-normal'
+        )[0].style.display = 'none';
+      } else {
+        this._dragHandle.getElementsByClassName(
+          'affine-drag-handle-hover'
+        )[0].style.display = 'none';
+        this._dragHandle.getElementsByClassName(
+          'affine-drag-handle-normal'
+        )[0].style.display = 'block';
+      }
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
-      this.style.left = `${rect.left - DRAG_HANDLE_WIDTH}px`;
-      this.style.top = `${rect.top}px`;
+      this.style.left = `${rect.left - DRAG_HANDLE_WIDTH - 20}px`;
+      this.style.top = `${rect.top - 2}px`;
       this.style.opacity = `${(
         1 -
         (event.raw.pageX - rect.left) / rect.width
@@ -276,6 +289,8 @@ export class DragHandle extends LitElement {
         rect.height - DRAG_HANDLE_HEIGHT - 6
       )
     );
+
+    this._dragHandle.style.cursor = 'pointer';
     this._dragHandle.style.top = `${top}px`;
   }
 
@@ -304,9 +319,16 @@ export class DragHandle extends LitElement {
     );
     if (clickDragState) {
       this._cursor = clickDragState.index;
+      lastSelectedIndex = this._cursor;
       this.setSelectedBlocks([
         getBlockElementByModel(clickDragState.model) as HTMLElement,
       ]);
+      this._dragHandle.getElementsByClassName(
+        'affine-drag-handle-hover'
+      )[0].style.display = 'block';
+      this._dragHandle.getElementsByClassName(
+        'affine-drag-handle-normal'
+      )[0].style.display = 'none';
     }
   };
 
@@ -325,6 +347,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onDrag = (e: DragEvent) => {
+    this._dragHandle.style.cursor = 'grabbing';
     let x = e.pageX;
     let y = e.pageY;
     if (isFirefox) {
@@ -370,10 +393,74 @@ export class DragHandle extends LitElement {
         :host(:hover) > .affine-drag-handle-line {
           opacity: 1;
         }
+        :host(:hover) .affine-drag-handle-normal {
+          display: none !important;
+        }
+        :host(:hover) .affine-drag-handle-hover {
+          display: block !important;
+        }
       </style>
       <div class="affine-drag-handle-line"></div>
-      <div class="affine-drag-handle">
-        <div class="affine-drag-handle-rect" draggable="true"></div>
+      <div class="affine-drag-handle" draggable="true">
+        <div class="affine-drag-handle-normal" draggable="true">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="7.7782"
+              y="0.707107"
+              width="10"
+              height="10"
+              rx="2.5"
+              transform="rotate(45 7.7782 0.707107)"
+              stroke="#888A9E"
+            />
+          </svg>
+        </div>
+
+        <div class="affine-drag-handle-hover" draggable="true">
+          <svg
+            class="handle-hover"
+            width="16"
+            height="22"
+            viewBox="0 0 16 22"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="7.7782"
+              y="2.72803"
+              width="11"
+              height="11"
+              rx="3"
+              transform="rotate(45 7.7782 2.72803)"
+              fill="#888A9E"
+            />
+            <path
+              d="M14.1422 6.36396L9.89952 2.12132C8.72795 0.949748 6.82845 0.949747 5.65688 2.12132L1.41424 6.36396"
+              stroke="#888A9E"
+              stroke-miterlimit="16"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M1.41424 14.6482L5.65688 18.8909C6.82845 20.0625 8.72795 20.0625 9.89952 18.8909L14.1422 14.6482"
+              stroke="#888A9E"
+              stroke-miterlimit="16"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M5.27844 11.2427L6.69266 12.6569C7.08318 13.0474 7.71635 13.0474 8.10687 12.6569L10.9353 9.82846"
+              stroke="white"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
       </div>
     `;
   }
