@@ -1,11 +1,11 @@
 import {
-  caretRangeFromPoint,
   clamp,
   getCurrentRange,
   isMultiLineRange,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const currentRange = window.getSelection()?.getRangeAt(0);

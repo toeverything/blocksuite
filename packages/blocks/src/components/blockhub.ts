@@ -1,6 +1,6 @@
 import { css, html, TemplateResult } from 'lit';
 import { customElement, query, queryAll } from 'lit/decorators.js';
-import { isFirefox, NonShadowLitElement } from '../__internal__/index.js';
+import { NonShadowLitElement } from '../__internal__/index.js';
 import type {
   DragHandleGetModelStateCallback,
   DragHandleGetModelStateWithCursorCallback,
@@ -8,7 +8,7 @@ import type {
 } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import {
   BulletedListIconLarge,
   CrossIcon,
