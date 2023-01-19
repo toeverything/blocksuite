@@ -47,10 +47,15 @@ export class EmbedBlockComponent extends NonShadowLitElement {
   _caption!: string;
 
   firstUpdated() {
-    this._caption = this.model?.caption ?? '';
-    if (this._caption) {
-      this._input.classList.add('caption-show');
-    }
+    requestAnimationFrame(() => {
+      this._caption = this.model?.caption ?? '';
+
+      if (this._caption.length > 0) {
+        // Caption input should be toggled manually.
+        // Otherwise it will be lost if the caption is deleted into empty state.
+        this._input.classList.add('caption-show');
+      }
+    });
 
     // The embed block can not be focused,
     // so the active element will be the last activated element.

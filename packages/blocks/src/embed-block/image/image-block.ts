@@ -106,20 +106,19 @@ export class ImageBlockComponent extends NonShadowLitElement {
     }
   `;
 
+  @property({ hasChanged: () => true })
   model!: EmbedBlockModel;
 
   @property()
   host!: BlockHost;
 
   @query('.resizable-img')
-  _resizeImg!: HTMLElement;
+  private _resizeImg!: HTMLElement;
 
   @state()
-  _source!: string;
+  private _source!: string;
 
-  // This is the initial width before event resize is applied
-
-  override async firstUpdated() {
+  async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
