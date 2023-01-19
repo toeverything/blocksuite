@@ -1,3 +1,4 @@
+import type { TemplateResult } from 'lit/html.js';
 import {
   BulletedListIcon,
   CodeIcon,
@@ -13,6 +14,18 @@ import {
   TextIcon,
   TodoIcon,
 } from './icons.js';
+
+export type BlockConfig<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+  Flavour extends keyof ALLProps & string = keyof ALLProps & string
+> = {
+  flavour: Flavour;
+  type: ALLProps[Flavour]['type'];
+  name: string;
+  hotkey: string | null;
+  icon: TemplateResult<2>;
+};
 
 export const paragraphConfig = [
   {
@@ -106,7 +119,7 @@ export const paragraphConfig = [
   //   name: 'Callout',
   //   icon: CalloutIcon,
   // },
-];
+] satisfies BlockConfig[];
 
 export const BLOCKHUB_TEXT_ITEMS = [
   {

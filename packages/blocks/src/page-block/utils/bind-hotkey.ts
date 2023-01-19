@@ -24,7 +24,7 @@ export function bindCommonHotkey(page: Page) {
       return;
     }
     hotkey.addListener(hotkeyStr, () => {
-      updateSelectedTextType(flavour, type, page);
+      updateSelectedTextType(flavour, type);
     });
   });
 
