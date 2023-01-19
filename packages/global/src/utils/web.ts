@@ -7,7 +7,7 @@ export function caretRangeFromPoint(
   clientY: number
 ): Range | null {
   if (isFirefox) {
-    // @ts-ignore
+    // @ts-expect-error
     const caret = document.caretPositionFromPoint(clientX, clientY);
     const range = document.createRange();
     range.setStart(caret.offsetNode, caret.offset);
