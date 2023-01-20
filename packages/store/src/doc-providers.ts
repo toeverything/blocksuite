@@ -48,7 +48,7 @@ const signaling = isLocalhost ? LOCAL_SIGNALING : DEFAULT_SIGNALING;
 export class DebugDocProvider extends WebrtcProvider implements DocProvider {
   constructor(room: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
     super(room, doc, {
-      awareness: options?.awareness ?? null,
+      awareness: options?.awareness ?? undefined,
       signaling,
       // YJS has broken default types. 🥲
       ...({} as {
