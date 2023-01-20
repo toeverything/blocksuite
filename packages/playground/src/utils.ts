@@ -115,6 +115,7 @@ export function getOptions(): Pick<
       enable_drag_handle: true,
       enable_block_hub: true,
       enable_database: true,
+      enable_toolbar: true,
       enable_slash_menu: params.get('slash') !== '0',
       enable_append_flavor_slash: params.get('slash') === '1',
       readonly: {

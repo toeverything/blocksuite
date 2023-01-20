@@ -38,6 +38,7 @@ import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import type { BlockHub } from '../../components/index.js';
 import { getAllowSelectedBlocks } from '../default/utils.js';
 import { createBlockHub } from '../utils/components.js';
+import './toolbar';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -236,6 +237,10 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
+    if (this.page.awarenessStore.getFlag('enable_toolbar')) {
+      const toolbar = document.createElement('edgeless-toolbar');
+      document.body.appendChild(toolbar);
+    }
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
@@ -318,7 +323,7 @@ export class EdgelessPageBlockComponent
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <canvas class="affine-surface-canvas"></canvas>
+        <canvas class="affine-surface-canvas"> </canvas>
       </div>
       <div class="affine-edgeless-page-block-container">
         <style>

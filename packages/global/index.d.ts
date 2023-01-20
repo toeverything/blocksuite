@@ -73,6 +73,7 @@ declare type BlockSuiteFlags = {
    * @deprecated Will be removed after slash menu is stable
    */
   enable_append_flavor_slash: boolean;
+  enable_toolbar: boolean;
   readonly: Record<string, boolean>;
 };
 
