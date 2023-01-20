@@ -202,9 +202,14 @@ export class DefaultSelectionManager {
           this.clearRects();
         },
         getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
-            skipX,
-          });
+          return getBlockEditingStateByPosition(
+            this._allowSelectedBlocks,
+            pageX,
+            pageY,
+            {
+              skipX,
+            }
+          );
         },
         getBlockEditingStateByCursor: (
           pageX,
@@ -215,7 +220,7 @@ export class DefaultSelectionManager {
           dragging
         ) => {
           return getBlockEditingStateByCursor(
-            this._blocks,
+            this._allowSelectedBlocks,
             pageX,
             pageY,
             cursor,
@@ -247,9 +252,14 @@ export class DefaultSelectionManager {
           );
         },
         getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
-            skipX,
-          });
+          return getBlockEditingStateByPosition(
+            this._allowSelectedBlocks,
+            pageX,
+            pageY,
+            {
+              skipX,
+            }
+          );
         },
         getBlockEditingStateByCursor: (
           pageX,
@@ -260,7 +270,7 @@ export class DefaultSelectionManager {
           dragging
         ) => {
           return getBlockEditingStateByCursor(
-            this._blocks,
+            this._allowSelectedBlocks,
             pageX,
             pageY,
             cursor,
@@ -332,7 +342,12 @@ export class DefaultSelectionManager {
     );
   }
 
-  private get _blocks(): BaseBlockModel[] {
+  /**
+   * This array contains the blocks allowed to be selected by selection manager.
+   *  Blocks like `affine:frame`, blocks inside `affine:database` will be discharged.
+   * @private
+   */
+  private get _allowSelectedBlocks(): BaseBlockModel[] {
     const result: BaseBlockModel[] = [];
     const blocks = this.page.root?.children.slice();
     if (!blocks) {
@@ -351,6 +366,10 @@ export class DefaultSelectionManager {
         block.depth = depth;
         if (parentIndex !== -1) {
           block.parentIndex = parentIndex;
+        }
+        if (block.flavour === 'affine:database') {
+          // ignore to push the children inside the database block
+          return;
         }
         block.children.length &&
           dfs(block.children, depth + 1, result.length - 1);
@@ -518,7 +537,7 @@ export class DefaultSelectionManager {
     });
 
     const clickBlockInfo = getBlockEditingStateByPosition(
-      this._blocks,
+      this._allowSelectedBlocks,
       e.raw.pageX,
       e.raw.pageY
     );
@@ -573,7 +592,7 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const hoverEditingState = getBlockEditingStateByPosition(
-      this._blocks,
+      this._allowSelectedBlocks,
       e.raw.pageX,
       e.raw.pageY
     );
@@ -594,7 +613,7 @@ export class DefaultSelectionManager {
     } else {
       if (this._dragHandle) {
         const clickDragState = getBlockEditingStateByPosition(
-          this._blocks,
+          this._allowSelectedBlocks,
           e.raw.pageX,
           e.raw.pageY,
           {
