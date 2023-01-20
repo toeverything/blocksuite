@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { html, css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { Disposable, Signal, Page } from '@blocksuite/store';
 import type {
   FrameBlockModel,

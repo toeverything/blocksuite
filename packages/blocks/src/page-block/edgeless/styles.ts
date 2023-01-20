@@ -3,6 +3,7 @@ import { toolTipStyle } from '../../components/tooltip.js';
 
 export const toolbarStyle = css`
   .edgeless-toolbar-container {
+    fill: currentColor;
     height: 320px;
     position: absolute;
     left: 12px;

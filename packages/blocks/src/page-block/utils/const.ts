@@ -6,12 +6,23 @@ import {
   InlineCodeIcon,
   ItalicIcon,
   LinkIcon,
+  RectIcon,
   StrikethroughIcon,
+  TextIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
-import {ConnectorIcon, GridIcon, penIcon, RedoIcon, SelectIcon, ShapeIcon, StickerIcon, UndoIcon} from "../icons.js";
-import {EdgelessToolBar} from "../edgeless/index.js";
-import {createEvent} from "../../__internal__/index.js";
+import {
+  ConnectorIcon,
+  GridIcon,
+  penIcon,
+  RedoIcon,
+  SelectIcon,
+  ShapeIcon,
+  StickerIcon,
+  UndoIcon,
+} from '../icons.js';
+import type { EdgelessToolBar } from '../edgeless/index.js';
+import { createEvent } from '../../__internal__/index.js';
 
 type ActionProps = {
   page: Page;

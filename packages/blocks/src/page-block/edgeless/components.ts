@@ -199,7 +199,7 @@ export class EdgelessToolBar extends LitElement {
 
   showGrid = false;
 
-  private _showToolBar(
+  private _toolbarTemplate(
     config: {
       id: string;
       name: string;
@@ -238,10 +238,10 @@ export class EdgelessToolBar extends LitElement {
     return html`
       <div class="edgeless-toolbar-container">
         <div class="styled-toolbar-wrapper">
-          ${this._showToolBar(toolbarDrawConfig)}
+          ${this._toolbarTemplate(toolbarDrawConfig)}
         </div>
         <div class="styled-toolbar-wrapper">
-          ${this._showToolBar(toolbarActionConfig)}
+          ${this._toolbarTemplate(toolbarActionConfig)}
         </div>
       </div>
     `;
