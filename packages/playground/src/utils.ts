@@ -34,7 +34,7 @@ export function initFeatureFlags(page: Page) {
       break;
     case '1':
       page.awarenessStore.setFlag('enable_slash_menu', true);
-      page.awarenessStore.setFlag('enable_boss_flavor_slash', true);
+      page.awarenessStore.setFlag('enable_append_flavor_slash', true);
       break;
     default:
       page.awarenessStore.setFlag('enable_slash_menu', true);

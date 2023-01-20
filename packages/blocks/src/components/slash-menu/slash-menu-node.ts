@@ -178,7 +178,7 @@ export class SlashMenu extends LitElement {
     this.abortController.abort(this._searchString);
     const { flavour, type } = this._filterItems[index];
 
-    if (this.model.page.awarenessStore.getFlag('enable_boss_flavor_slash')) {
+    if (this.model.page.awarenessStore.getFlag('enable_append_flavor_slash')) {
       // Add new block
       const page = this.model.page;
       const parent = page.getParent(this.model);
