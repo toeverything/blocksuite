@@ -209,13 +209,26 @@ export function focusBlockByModel(
   position: SelectionPosition = 'end'
 ) {
   const defaultPageBlock = getDefaultPageBlock(model);
-  if (matchFlavours(model, ['affine:embed', 'affine:divider', 'affine:code'])) {
+  if (
+    matchFlavours(model, [
+      'affine:embed',
+      'affine:divider',
+      'affine:code',
+      'affine:database',
+    ])
+  ) {
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
     const element = getBlockElementByModel(model);
     assertExists(element);
     defaultPageBlock.selection.state.selectedBlocks.push(element);
+    if (matchFlavours(model, ['affine:database'])) {
+      const elements = model.children
+        .map(child => getBlockElementByModel(child))
+        .filter((element): element is HTMLElement => element !== null);
+      defaultPageBlock.selection.state.selectedBlocks.push(...elements);
+    }
     defaultPageBlock.selection.state.type = 'block';
     resetNativeSelection(null);
     (document.activeElement as HTMLTextAreaElement).blur();
