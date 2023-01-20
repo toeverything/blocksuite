@@ -1,5 +1,8 @@
 /// <reference types="node" />
-import type { PlaywrightTestConfig } from '@playwright/test';
+import type {
+  PlaywrightTestConfig,
+  PlaywrightWorkerOptions,
+} from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
@@ -11,7 +14,10 @@ const config: PlaywrightTestConfig = {
     reuseExistingServer: !process.env.CI,
   },
   use: {
-    browserName: 'chromium',
+    browserName:
+      (process.env
+        .TEST_PLAYWRIGHT_BROWSER_NAME as PlaywrightWorkerOptions['browserName']) ??
+      'chromium',
     viewport: { width: 900, height: 600 },
     // Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer
     // You can open traces locally(`npx playwright show-trace trace.zip`)
