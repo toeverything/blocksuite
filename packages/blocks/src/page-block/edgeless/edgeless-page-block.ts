@@ -35,6 +35,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import './toolbar';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -310,6 +311,7 @@ export class EdgelessPageBlockComponent
             `
           : null}
       </div>
+      <edgeless-toolbar .page=${this.page}></edgeless-toolbar>
     `;
   }
 }
