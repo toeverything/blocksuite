@@ -3,6 +3,7 @@ import type * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { IndexeddbPersistence } from './providers/indexeddb.js';
 import type { Awareness } from 'y-protocols/awareness';
+import { isWeb } from '@blocksuite/global/utils';
 
 /**
  * Different examples of providers could include webrtc sync,
@@ -38,7 +39,6 @@ const DEFAULT_SIGNALING = [
   'wss://y-webrtc-signaling-eu.herokuapp.com',
 ];
 
-const isWeb = typeof window !== 'undefined';
 const isLocalhost =
   isWeb &&
   (window.location.hostname === 'localhost' ||
