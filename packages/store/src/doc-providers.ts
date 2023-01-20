@@ -50,14 +50,6 @@ export class DebugDocProvider extends WebrtcProvider implements DocProvider {
     super(room, doc, {
       awareness: options?.awareness ?? undefined,
       signaling,
-      // YJS has broken default types. 🥲
-      ...({} as {
-        // calling each one of these null to make TypeScript happy, because YJS is wrong.
-        filterBcConns: null;
-        maxConns: null;
-        password: null;
-        peerOpts: null;
-      }),
     });
   }
 
