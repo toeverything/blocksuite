@@ -71,7 +71,7 @@ function onAbort(
   if (typeof e.target.reason !== 'string') {
     throw new Error('Failed to clean slash search text! Unknown abort reason');
   }
-  const searchStr: string = '/' + e.target.reason;
+  const searchStr = '/' + e.target.reason;
   const text = model.text;
   if (!text || text instanceof PrelimText) {
     console.warn(

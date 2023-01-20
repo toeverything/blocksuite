@@ -157,11 +157,11 @@ export class FormatQuickBar extends LitElement {
               const { flavour: defaultFlavour, type: defaultType } =
                 paragraphConfig[0];
               if (this.paragraphType === defaultType) return;
-              updateSelectedTextType(defaultFlavour, defaultType, this.page);
+              updateSelectedTextType(defaultFlavour, defaultType);
               this.paragraphType = defaultType;
               return;
             }
-            updateSelectedTextType(flavour, type, this.page);
+            updateSelectedTextType(flavour, type);
             this.paragraphType = type;
             this.positionUpdated.emit();
           }}

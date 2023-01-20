@@ -105,27 +105,43 @@ function mergeTextOfBlocks(
   });
 }
 
-export async function updateSelectedTextType(
-  flavour: string,
-  type: string,
-  page: Page
-) {
+export async function updateSelectedTextType(flavour: string, type: string) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
+  updateBlockType(flavour, type, modelsInRange);
+}
+
+async function updateBlockType(
+  flavour: string,
+  type: string,
+  models: BaseBlockModel[]
+) {
+  if (!models.length) {
+    return;
+  }
+  const page = models[0].page;
+  const hasSamePage = models.every(model => model.page === page);
+  if (!hasSamePage) {
+    // page check
+    console.error(
+      'Not all models have the same page instanceof, the result for update text type may not be correct',
+      models
+    );
+  }
   page.captureSync();
   if (flavour === 'affine:code') {
-    mergeTextOfBlocks(page, modelsInRange, { flavour: 'affine:code' });
+    mergeTextOfBlocks(page, models, { flavour: 'affine:code' });
     return;
   }
   const selectedBlocks = saveBlockSelection();
   let lastNewId: string | null = null;
-  modelsInRange.forEach(model => {
+  models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {
       const oldId = model.id;
-      const newId = transformBlock(page, model, flavour, type);
+      const newId = transformBlock(model, flavour, type);
 
       // Replace selected block id
       const blocks = selectedBlocks.filter(block => block.id === oldId);
@@ -142,12 +158,8 @@ export async function updateSelectedTextType(
   restoreSelection(selectedBlocks);
 }
 
-export function transformBlock(
-  page: Page,
-  model: BaseBlockModel,
-  flavour: string,
-  type: string
-) {
+function transformBlock(model: BaseBlockModel, flavour: string, type: string) {
+  const page = model.page;
   const parent = page.getParent(model);
   assertExists(parent);
   const blockProps = {

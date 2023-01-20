@@ -127,7 +127,7 @@ export class DebugMenu extends LitElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    updateSelectedTextType('affine:list', listType, this.page);
+    updateSelectedTextType('affine:list', listType);
   }
 
   private _addCodeBlock(e: PointerEvent) {
@@ -152,7 +152,7 @@ export class DebugMenu extends LitElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    updateSelectedTextType('affine:paragraph', type, this.page);
+    updateSelectedTextType('affine:paragraph', type);
   }
 
   private _switchEditorMode() {
