@@ -21,12 +21,12 @@
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
-    "ky": "^0.33.1",
-    "lib0": "^0.2.58",
+    "ky": "^0.33.2",
+    "lib0": "^0.2.60",
     "merge": "^2.1.1",
     "nanoid": "^4.0.0",
     "y-protocols": "^1.0.5",
-    "y-webrtc": "^10.2.3"
+    "y-webrtc": "^10.2.4"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
