@@ -1,6 +1,6 @@
 import { IBound, MIN_ZOOM } from './consts.js';
 import { GridManager } from './grid.js';
-import type { Element } from './elements.js';
+import type { Element } from './elements/index.js';
 import { intersects } from './utils.js';
 
 export class Renderer {

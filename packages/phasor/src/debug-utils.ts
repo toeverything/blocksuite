@@ -1,4 +1,4 @@
-import { DebugElement, type Element } from './elements.js';
+import { DebugElement, type Element } from './elements/index.js';
 import type { Renderer } from './renderer.js';
 
 const DEBUG_ELEMENT_MAX = 150;
