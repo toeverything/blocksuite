@@ -1,16 +1,9 @@
 import * as Y from 'yjs';
 import { generateKeyBetween } from 'fractional-indexing';
 import type { IBound } from './consts.js';
-import {
-  Element,
-  DebugElement,
-  ShapeElement,
-  ElementType,
-  ShapeType,
-} from './elements/index.js';
+import { Element, DebugElement, ShapeElement } from './elements/index.js';
 import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
-import { nanoid } from 'nanoid';
 
 export class SurfaceContainer {
   readonly renderer: Renderer;
@@ -26,38 +19,28 @@ export class SurfaceContainer {
     this._yElements.observeDeep(this._handleYEvents);
   }
 
-  addShapeElement(bound: IBound, shapeType: ShapeType, color: string) {
-    const id = nanoid(10);
-    const element = new ShapeElement(id, shapeType);
-    const { x, y, w, h } = bound;
-
-    element.setBound(x, y, w, h);
-    element.color = color;
-
-    return this._addElement(element);
+  private _createYElement(element: Element) {
+    const serialized = element.serialize();
+    const yElement = new Y.Map<unknown>();
+    for (const [key, value] of Object.entries(serialized)) {
+      yElement.set(key, value);
+    }
+    return yElement;
   }
 
-  addDebugElement(bound: IBound, color: string): string {
-    const id = nanoid(10);
-    const element = new DebugElement(id);
-    const { x, y, w, h } = bound;
-
-    element.setBound(x, y, w, h);
-    element.color = color;
-
-    return this._addElement(element);
+  private _transact(callback: () => void) {
+    const doc = this._yElements.doc as Y.Doc;
+    doc.transact(callback, doc.clientID);
   }
 
-  private _addElement(element: Element) {
-    element.index = generateKeyBetween(this._lastIndex, null);
-    this._lastIndex = element.index as string;
+  addElement(props: Element) {
+    props.index = generateKeyBetween(this._lastIndex, null);
+    this._lastIndex = props.index;
 
     this._transact(() => {
-      const yElement = this._createYElement(element);
-      this._yElements.set(element.id, yElement);
+      const yElement = this._createYElement(props);
+      this._yElements.set(props.id, yElement);
     });
-
-    return element.id;
   }
 
   setElementBound(id: string, bound: IBound) {
@@ -76,41 +59,25 @@ export class SurfaceContainer {
   }
 
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as ElementType;
-
-    let element: Element | null = null;
+    const type = yElement.get('type') as string;
     switch (type) {
-      case 'debug': {
-        element = DebugElement.deserialize(yElement.toJSON());
+      case 'rect': {
+        const element = DebugElement.deserialize(yElement.toJSON());
+        this.renderer.addElement(element);
+        this._elements.set(element.id, element);
         break;
       }
-      case 'shape': {
-        element = ShapeElement.deserialize(yElement.toJSON());
+      case 'path': {
+        const element = ShapeElement.deserialize(yElement.toJSON());
+        this.renderer.addElement(element);
+        this._elements.set(element.id, element);
         break;
       }
     }
-    assertExists(element);
-
-    this.renderer.addElement(element);
-    this._elements.set(element.id, element);
   }
 
   private _syncFromExistingContainer() {
     this._yElements.forEach(yElement => this._handleYElementAdded(yElement));
-  }
-
-  private _createYElement(element: Omit<Element, 'id'>) {
-    const serialized = element.serialize();
-    const yElement = new Y.Map<unknown>();
-    for (const [key, value] of Object.entries(serialized)) {
-      yElement.set(key, value);
-    }
-    return yElement;
-  }
-
-  private _transact(callback: () => void) {
-    const doc = this._yElements.doc as Y.Doc;
-    doc.transact(callback, doc.clientID);
   }
 
   private _handleYElementsEvent(event: Y.YMapEvent<unknown>) {
