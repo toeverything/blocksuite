@@ -231,9 +231,7 @@ test('copy clipItems format', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.evaluate(() => {
-    window.page.captureSync();
-  });
+  await captureHistory(page);
 
   const clipData = `
 - aa
@@ -252,6 +250,25 @@ test('copy clipItems format', async ({ page }) => {
   );
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
+});
+
+test('copy partially selected text', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('123 456 789');
+
+  // select 456
+  await setQuillSelection(page, 4, 3);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '456');
+
+  // move to line end
+  await setQuillSelection(page, 11, 0);
+  await pressEnter(page);
+  await pasteByKeyboard(page);
+  await assertRichTexts(page, ['123 456 789', '456']);
 });
 
 test('copy more than one delta op on a block', async ({ page }) => {
