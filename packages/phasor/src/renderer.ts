@@ -1,7 +1,12 @@
 import { IBound, MIN_ZOOM } from './consts.js';
 import { GridManager } from './grid.js';
 import type { Element } from './elements/index.js';
-import { intersects } from './utils.js';
+
+function intersects(a: IBound, b: IBound): boolean {
+  return (
+    a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
+  );
+}
 
 export class Renderer {
   canvas: HTMLCanvasElement;
