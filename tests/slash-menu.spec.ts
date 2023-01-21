@@ -1,78 +1,114 @@
-import { expect, test } from '@playwright/test';
+import { expect, Locator, Page, test } from '@playwright/test';
+import { SHORT_KEY } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
 } from 'utils/actions/misc.js';
-import { assertStoreMatchJSX } from 'utils/asserts.js';
+import {
+  assertAlmostEqual,
+  assertRichTexts,
+  assertStoreMatchJSX,
+} from 'utils/asserts.js';
 
-test('slash menu should show and hide correctly', async ({ page }) => {
-  await enterPlaygroundRoom(page, { enable_slash_menu: true });
-  const { paragraphId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  const slashMenu = page.locator(`.slash-menu`);
+test.describe('slash menu should show and hide correctly', () => {
+  // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests
+  test.describe.configure({ mode: 'serial' });
+  let page: Page;
+  let paragraphId: string;
+  let slashMenu: Locator;
 
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
+  test.beforeAll(async ({ browser }) => {
+    page = await browser.newPage();
+    await enterPlaygroundRoom(page, { enable_slash_menu: true });
+    const id = await initEmptyParagraphState(page);
+    paragraphId = id.paragraphId;
+    slashMenu = page.locator(`.slash-menu`);
+  });
 
-  const box = await slashMenu.boundingBox();
-  if (!box) {
-    throw new Error("slashMenu doesn't exist");
-  }
-  // Click outside should close slash menu
-  await page.mouse.click(0, 50);
-  await expect(slashMenu).not.toBeVisible();
-  await assertStoreMatchJSX(
-    page,
-    `
+  test.beforeEach(async () => {
+    await focusRichText(page);
+    await page.keyboard.type('/');
+    await expect(slashMenu).toBeVisible();
+  });
+
+  test.afterEach(async () => {
+    // Close the slash menu
+    if (await slashMenu.isVisible()) {
+      // Click outside
+      await page.mouse.click(0, 50);
+    }
+    await focusRichText(page);
+    // Clear input
+    await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  });
+
+  test('slash menu should hide after click away', async () => {
+    // Click outside should close slash menu
+    await page.mouse.click(0, 50);
+    await expect(slashMenu).not.toBeVisible();
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text="/"
   prop:type="text"
 />`,
-    paragraphId
-  );
+      paragraphId
+    );
+  });
 
-  // Pressing the whitespace key should close the slash menu
-  await focusRichText(page);
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
-  await page.keyboard.type(' ');
-  await expect(slashMenu).not.toBeVisible();
+  test('slash menu should hide after input whitespace', async () => {
+    await page.keyboard.type(' ');
+    await expect(slashMenu).not.toBeVisible();
+    await assertRichTexts(page, ['/ ']);
+  });
 
-  // Pressing the backspace key should close the slash menu
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
-  await page.keyboard.press('Backspace');
-  await expect(slashMenu).not.toBeVisible();
+  test('delete the slash symbol should close the slash menu', async () => {
+    await page.keyboard.press('Backspace');
+    await expect(slashMenu).not.toBeVisible();
+    await assertStoreMatchJSX(
+      page,
+      `
+<affine:paragraph
+  prop:type="text"
+/>`,
+      paragraphId
+    );
+  });
 
-  // Typing something that does not match should close the slash menu
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
-  await page.keyboard.type('_');
-  await expect(slashMenu).not.toBeVisible();
+  test('typing something that does not match should close the slash menu', async () => {
+    await page.keyboard.type('_');
+    await expect(slashMenu).not.toBeVisible();
+    await assertRichTexts(page, ['/_']);
+  });
 
-  // Pressing the slash key again should close the old slash menu and open new one
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
-  await expect(slashMenu).toHaveCount(1);
-  // You may need to press Esc twice in a real browser
-  await page.keyboard.press('Escape');
-  await expect(slashMenu).not.toBeVisible();
+  test('pressing the slash key again should close the old slash menu and open new one', async () => {
+    await page.keyboard.type('/');
+    await expect(slashMenu).toBeVisible();
+    await expect(slashMenu).toHaveCount(1);
+    await assertRichTexts(page, ['//']);
+  });
 
-  // Left/right arrow should close the slash menu
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
-  await page.keyboard.press('ArrowLeft');
-  await expect(slashMenu).not.toBeVisible();
-  await page.keyboard.type('/');
-  await expect(slashMenu).toBeVisible();
-  await page.keyboard.press('ArrowRight');
-  await expect(slashMenu).not.toBeVisible();
+  test('pressing esc should close the slash menu', async () => {
+    // You may need to press Esc twice in a real browser
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect(slashMenu).not.toBeVisible();
+    await assertRichTexts(page, ['/']);
+  });
 
-  // TODO fix snapshot
-  // await assertStoreMatchJSX(page, ``, paragraphId);
+  test('left arrow should close the slash menu', async () => {
+    await page.keyboard.press('ArrowLeft');
+    await expect(slashMenu).not.toBeVisible();
+    await assertRichTexts(page, ['/']);
+  });
+
+  test('right arrow should close the slash menu', async () => {
+    await page.keyboard.press('ArrowRight');
+    await expect(slashMenu).not.toBeVisible();
+    await assertRichTexts(page, ['/']);
+  });
 });
 
 test('should slash menu search and keyboard works', async ({ page }) => {
