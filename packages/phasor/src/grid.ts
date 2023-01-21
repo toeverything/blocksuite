@@ -1,4 +1,4 @@
-import type { Element } from './elements.js';
+import type { Element } from './elements/index.js';
 import type { IBound } from './consts.js';
 import {
   compare,

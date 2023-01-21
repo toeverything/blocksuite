@@ -3,11 +3,11 @@ import { generateKeyBetween } from 'fractional-indexing';
 import type { IBound } from './consts.js';
 import {
   Element,
+  ElementType,
   DebugElement,
   ShapeElement,
-  ElementType,
   ShapeType,
-} from './elements.js';
+} from './elements/index.js';
 import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from 'nanoid';

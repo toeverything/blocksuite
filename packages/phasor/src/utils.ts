@@ -1,5 +1,5 @@
 import { IBound, GRID_SIZE } from './consts.js';
-import type { Element } from './elements.js';
+import type { Element } from './elements/index.js';
 
 export class Bound implements IBound {
   x: number;
