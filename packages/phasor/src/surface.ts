@@ -32,7 +32,7 @@ export class SurfaceContainer {
     const { x, y, w, h } = bound;
 
     element.setBound(x, y, w, h);
-    element.color = color;
+    element.color = color as `#${string}`;
 
     return this._addElement(element);
   }
