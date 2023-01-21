@@ -82,7 +82,8 @@ function onAbort(
   }
   const idx = getQuillIndexByNativeSelection(
     range.startContainer,
-    range.startOffset
+    // minus 1 to remove the slash
+    range.startOffset - 1
   );
 
   const textStr = text.toString().slice(idx, idx + searchStr.length);
