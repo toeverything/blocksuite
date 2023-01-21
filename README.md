@@ -5,7 +5,7 @@
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 
-💠 BlockSuite is the open source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
+💠 BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
 [Try BlockSuite-based AFFiNE Alpha editor](https://pathfinder.affine.pro/)
 
@@ -19,7 +19,7 @@ BlockSuite works very differently than traditional rich text frameworks:
 
 BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building various collaborative applications directly through whatever UI framework you're comfortable with**. To this end, we will try to open-source more basic modules as reusable packages for this in the BlockSuite project.
 
-Although BlockSuite is still in its early stages, you can already use the `@blocksuite/editor` package, the collaborative editor used by AFFiNE Alpha. Note that this editor is also a web component and completely framework-independent!
+Although BlockSuite is still in its early stages, you can already use the `@blocksuite/editor` package, the collaborative editor used by AFFiNE Alpha. Note that this editor is also a web component and is completely framework-independent!
 
 ## Current Status (`@blocksuite/editor`)
 
