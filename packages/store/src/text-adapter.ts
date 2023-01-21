@@ -253,8 +253,14 @@ export class Text {
 
         const isLastOp = end && charNum + contentLen > end;
         const isFirstOp = charNum + contentLen > begin && result.length === 0;
-
-        if (isFirstOp || isLastOp) {
+        if (isFirstOp && isLastOp) {
+          contentText = contentText.slice(begin - charNum, end - charNum);
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+          break;
+        } else if (isFirstOp || isLastOp) {
           contentText = isLastOp
             ? contentText.slice(0, end - charNum)
             : contentText.slice(begin - charNum);
