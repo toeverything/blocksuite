@@ -1,4 +1,11 @@
+import { isPointIn } from './utils.js';
+
 const BLACK = '#000000';
+
+interface HitTestOptions {
+  expandStroke: boolean;
+  fillHollow: boolean;
+}
 
 abstract class BaseElement {
   abstract type: string;
@@ -28,6 +35,8 @@ abstract class BaseElement {
     this.h = h;
   }
 
+  abstract hitTest(x: number, y: number, options?: HitTestOptions): boolean;
+
   abstract render(_: CanvasRenderingContext2D): void;
 
   abstract serialize(): Record<string, unknown>;
@@ -48,6 +57,10 @@ export class ShapeElement extends BaseElement {
     this.path = path;
   }
 
+  hitTest(x: number, y: number, options?: HitTestOptions) {
+    return isPointIn(this, x, y);
+  }
+
   render(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = this.color;
     ctx.fillRect(0, 0, this.w, this.h);
@@ -62,6 +75,10 @@ export class ShapeElement extends BaseElement {
       xywh: `${this.x},${this.y},${this.w},${this.h}`,
       color: this.color,
     };
+  }
+
+  setBound(x: number, y: number, w: number, h: number) {
+    super.setBound(x, y, w, h);
   }
 
   static deserialize(data: Record<string, unknown>): ShapeElement {
@@ -79,6 +96,10 @@ export class ShapeElement extends BaseElement {
 export class DebugElement extends BaseElement {
   type = 'debug' as const;
   color = BLACK;
+
+  hitTest(x: number, y: number, options?: HitTestOptions) {
+    return isPointIn(this, x, y);
+  }
 
   render(ctx: CanvasRenderingContext2D): void {
     ctx.strokeStyle = this.color;
