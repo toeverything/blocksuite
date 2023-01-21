@@ -360,8 +360,10 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         // if (context.format['code'] === true) {
         //   return ALLOW_DEFAULT;
         // }
+        requestAnimationFrame(() => {
         const curRange = getCurrentRange();
         showSlashMenu({ model, range: curRange });
+        });
         return ALLOW_DEFAULT;
       },
     },
