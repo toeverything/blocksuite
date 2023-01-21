@@ -15,7 +15,7 @@ on:
         description: 'blocksuite branch to use'
         required: true
         type: string
-        default: 'main'
+        default: 'master'
 jobs:
   main-test:
     name: Playground E2E test
