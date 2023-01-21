@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
-import type { Page as StorePage } from '../../../packages/store/src/index.js';
-import type { ConsoleMessage, Page } from '@playwright/test';
+import type {
+  BaseBlockModel,
+  Page as StorePage,
+} from '../../../packages/store/src/index.js';
+import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -383,3 +386,17 @@ export const getBoundingClientRect: (
     return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
   }, selector);
 };
+
+export async function getBlockModel<Model extends BaseBlockModel>(
+  page: Page,
+  blockId: string
+) {
+  const result: BaseBlockModel | null | undefined = await page.evaluate(
+    blockId => {
+      return window.page?.getBlockById(blockId);
+    },
+    blockId
+  );
+  expect(result).not.toBeNull();
+  return result as Model;
+}

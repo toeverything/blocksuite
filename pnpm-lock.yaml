@@ -74,7 +74,6 @@ importers:
       '@blocksuite/global': workspace:*
       '@blocksuite/phasor': workspace:*
       '@blocksuite/store': workspace:*
-      '@tldraw/intersect': ^1.8.0
       '@types/autosize': ^4.0.1
       autosize: ^5.0.2
       highlight.js: ^11.7.0
@@ -88,7 +87,6 @@ importers:
       '@blocksuite/global': link:../global
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/store': link:../store
-      '@tldraw/intersect': 1.8.0
       autosize: 5.0.2
       highlight.js: 11.7.0
       hotkeys-js: 3.10.1_otx73r74oyscqvo3amwccrzngy
@@ -2241,16 +2239,6 @@ packages:
     resolution: {integrity: sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==}
     dependencies:
       tslib: 2.4.1
-    dev: false
-
-  /@tldraw/intersect/1.8.0:
-    resolution: {integrity: sha512-0UarshNpyq2+O4o0xHMJIBgF0E630mes5CkMoO+D5xgYppSBIkeqYDcv0ujsmAhMKX1O6Y0ShuuHeflBEULUoQ==}
-    dependencies:
-      '@tldraw/vec': 1.8.0
-    dev: false
-
-  /@tldraw/vec/1.8.0:
-    resolution: {integrity: sha512-GiS5Df3CzXY/fPBFcM0CKFERZfI4Cg1X33VPZX+NLo7Fwm/h9zu/aU24N1mG75Q9LuMnwKm7woxKr8BiUXGYCg==}
     dev: false
 
   /@tsconfig/node10/1.0.9:

@@ -224,15 +224,6 @@ declare namespace BlockSuiteModelProps {
     type: ParagraphType;
   }
 
-  import type { ColorStyle, TDShapeType } from '@blocksuite/blocks';
-
-  interface ShapeBlockModel {
-    color: ColorStyle | `#${string}`;
-    type: TDShapeType;
-
-    xywh: string;
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface SurfaceBlockModel {}
 
@@ -244,7 +235,6 @@ declare namespace BlockSuiteModelProps {
     'affine:code': CodeBlockModel;
     'affine:divider': DividerBlockModel;
     'affine:embed': EmbedBlockModel;
-    // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
   };
 }

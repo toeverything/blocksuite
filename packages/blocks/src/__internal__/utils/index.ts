@@ -14,5 +14,4 @@ export * from './components.js';
 export * from './gesture.js';
 export * from './selection.js';
 export * from './std.js';
-export * from './shape.js';
 export * from './lit.js';

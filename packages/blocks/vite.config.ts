@@ -19,7 +19,6 @@ export default defineConfig({
         /^@blocksuite/,
         'highlight.js',
         '@tldraw/intersect',
-        '@tldraw/vec',
         'hotkeys-js',
         /^lit/,
         'perfect-freehand',
