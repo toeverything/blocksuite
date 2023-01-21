@@ -135,11 +135,13 @@ importers:
       '@blocksuite/global': workspace:*
       fractional-indexing: ^3.1.0
       nanoid: ^4.0.0
+      perfect-freehand: ^1.2.0
       yjs: ^13.5.44
     dependencies:
       '@blocksuite/global': link:../global
       fractional-indexing: 3.1.0
       nanoid: 4.0.0
+      perfect-freehand: 1.2.0
     devDependencies:
       yjs: 13.5.44
 

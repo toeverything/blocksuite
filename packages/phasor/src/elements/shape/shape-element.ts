@@ -1,4 +1,6 @@
 import { BaseElement } from '../base-element.js';
+import { getRectanglePath } from './rect-utils.js';
+import { DashStyle, ShapeStyles, SizeStyle } from './shape-style.js';
 
 export type ShapeType = 'rect' | 'triangle';
 
@@ -6,7 +8,7 @@ export class ShapeElement extends BaseElement {
   type = 'shape' as const;
   path: Path2D;
   shapeType: ShapeType;
-  color = '#000000';
+  color: `#${string}` = '#000000';
   constructor(id: string, shapeType: ShapeType) {
     super(id);
     this.shapeType = shapeType;
@@ -15,9 +17,28 @@ export class ShapeElement extends BaseElement {
     this.path = path;
   }
 
+  setBound(x: number, y: number, w: number, h: number): void {
+    super.setBound(x, y, w, h);
+
+    // temp workaround
+    if (this.shapeType === 'rect') {
+      const path = new Path2D();
+      path.rect(0, 0, w, h);
+      this.path = path;
+    }
+
+    const shapeStyles: ShapeStyles = {
+      color: this.color,
+      dash: DashStyle.Draw,
+      size: SizeStyle.Small,
+    };
+    const size = [w, h];
+    getRectanglePath(this.id, shapeStyles, size);
+  }
+
   render(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = this.color;
-    ctx.fillRect(0, 0, this.w, this.h);
+    ctx.fill(this.path);
   }
 
   serialize(): Record<string, unknown> {
@@ -38,7 +59,7 @@ export class ShapeElement extends BaseElement {
 
     const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
     element.setBound(x, y, w, h);
-    element.color = data.color as string;
+    element.color = data.color as `#${string}`;
     return element;
   }
 }
