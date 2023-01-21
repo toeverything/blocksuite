@@ -109,6 +109,16 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/']);
   });
+
+  test('should slash menu position correct', async () => {
+    const box = await slashMenu.boundingBox();
+    if (!box) {
+      throw new Error("slashMenu doesn't exist");
+    }
+    const { x, y } = box;
+    assertAlmostEqual(x, 122, 10);
+    assertAlmostEqual(y, 180, 10);
+  });
 });
 
 test('should slash menu search and keyboard works', async ({ page }) => {
