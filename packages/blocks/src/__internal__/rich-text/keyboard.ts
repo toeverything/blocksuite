@@ -361,8 +361,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         //   return ALLOW_DEFAULT;
         // }
         requestAnimationFrame(() => {
-        const curRange = getCurrentRange();
-        showSlashMenu({ model, range: curRange });
+          const curRange = getCurrentRange();
+          showSlashMenu({ model, range: curRange });
         });
         return ALLOW_DEFAULT;
       },
