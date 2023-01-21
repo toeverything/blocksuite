@@ -23,7 +23,8 @@ import {
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
 } from './utils.js';
-import { SHAPE_PADDING } from '../../index.js';
+
+const SHAPE_PADDING = 48;
 
 function getCommonRectStyle(
   rect: DOMRect,

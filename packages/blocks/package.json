@@ -15,7 +15,6 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@tldraw/intersect": "^1.8.0",
     "autosize": "^5.0.2",
     "highlight.js": "^11.7.0",
     "hotkeys-js": "^3.10.1",
