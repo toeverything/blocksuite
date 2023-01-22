@@ -10,9 +10,10 @@ jobs:
     name: Playground E2E test
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        browsers: [firefox, safari]
+        browsers: [firefox, webkit]
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
