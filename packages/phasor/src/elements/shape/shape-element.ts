@@ -33,7 +33,8 @@ export class ShapeElement extends BaseElement {
       size: SizeStyle.Small,
     };
     const size = [w, h];
-    getRectanglePath(this.id, shapeStyles, size);
+    const path = getRectanglePath(this.id, shapeStyles, size);
+    this.path = path;
   }
 
   render(ctx: CanvasRenderingContext2D) {
