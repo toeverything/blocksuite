@@ -24,9 +24,6 @@ export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
 export function initFeatureFlags(page: Page) {
-  if (params.get('surface') !== null) {
-    page.awarenessStore.setFlag('enable_surface', true);
-  }
   const slashFlag = params.get('slash');
   switch (slashFlag) {
     case '0':

@@ -43,7 +43,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
 - Whiteboard (edgeless mode)
   - ✅ Zooming and panning
   - ⚛️ Frame block
-  - 🚧 Shape element
+  - ⚛️ Shape element
   - 🚧 Handwriting element
   - 📌 Grouping
 - Playground
