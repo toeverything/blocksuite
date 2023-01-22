@@ -88,6 +88,8 @@ export function getRectanglePath(
 ) {
   const { points, options } = getDrawStrokeInfo(id, style, size);
   const stroke = getStroke(points, options);
-  // TODO adapt to canvas Path2D
-  return Utils.getSvgPathFromStroke(stroke);
+  const commands = Utils.getSvgPathFromStroke(stroke);
+  // https://stackoverflow.com/a/30830108
+  const path = new Path2D(commands);
+  return path;
 }
