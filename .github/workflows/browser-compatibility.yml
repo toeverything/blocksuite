@@ -4,7 +4,18 @@ on:
   schedule:
     # At the end of every day
     - cron: '0 0 * * *'
-
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'blocksuite repository to use'
+        required: true
+        type: string
+        default: 'toeverything/blocksuite'
+      ref:
+        description: 'blocksuite branch to use'
+        required: true
+        type: string
+        default: 'master'
 jobs:
   main-test:
     name: Playground E2E test
@@ -16,9 +27,14 @@ jobs:
         browsers: [firefox, webkit]
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.repo }}
+          ref: ${{ inputs.ref }}
+
       - uses: pnpm/action-setup@v2
         with:
           version: 7.9.5
+
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
