@@ -28,8 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: ${{ inputs.repo }}
-          ref: ${{ inputs.ref }}
+          repository: ${{ inputs.repo || github.repository }}
+          ref: ${{ inputs.ref || github.ref }}
 
       - uses: pnpm/action-setup@v2
         with:
