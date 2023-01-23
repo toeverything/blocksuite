@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { html, LitElement } from 'lit';
+import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -28,6 +28,7 @@ import {
   MouseMode,
   ShapeMouseMode,
   updateSelectedTextType,
+  NonShadowLitElement,
 } from '@blocksuite/blocks';
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
@@ -41,7 +42,14 @@ const basePath = import.meta.env.DEV
 setBasePath(basePath);
 
 @customElement('debug-menu')
-export class DebugMenu extends LitElement {
+export class DebugMenu extends NonShadowLitElement {
+  static styles = css`
+    :root {
+      --sl-font-size-medium: var(--affine-font-xs);
+      --sl-input-font-size-small: var(--affine-font-xs);
+    }
+  `;
+
   @property()
   workspace!: Workspace;
 
