@@ -71,6 +71,7 @@ Icons above correspond to the following meanings:
   - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/) ([🔗 source](./packages/playground/examples/basic/index.html))
   - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/packages/app))
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
+- 📦 [Code Sandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
