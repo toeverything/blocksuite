@@ -21,8 +21,12 @@ export const debugLog = function (
   const stackInfo = removeStackHeader(error.stack).split('\n');
   const upperStackInfo = stackInfo.slice(1).join('\n');
   const message = stackInfo[callerIdx].trim();
-  const method = /(?<=at\s)(\S*)(?=\s)/.exec(message)?.[0] ?? message;
-  const subsystem = /(?<=\/packages\/)[a-z]+/.exec(message)?.[0] ?? 'unknown';
+  // For example, the message is:
+  // at handleBlockEndEnter (http://localhost:5173/@fs/Users/username/blocksuite/packages/blocks/src/__internal__/rich-text/rich-text-operations.ts?t=1674485091790:41:44)
+  // method will match `handleBlockEndEnter`
+  // subsystem will match `blocks`
+  const method = /at\s(\S*)(?=\s)/.exec(message)?.[1] ?? message;
+  const subsystem = /\/packages\/([a-z]+)/.exec(message)?.[1] ?? 'unknown';
   console.log(
     `[packages/${color.blue(subsystem)}] ${color.magenta(
       method
