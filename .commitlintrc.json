@@ -1,3 +1,6 @@
 {
-  "extends": ["@commitlint/config-conventional"]
+  "extends": [
+    "@commitlint/config-conventional",
+    "@commitlint/config-pnpm-scopes"
+  ]
 }
