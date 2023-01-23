@@ -75,18 +75,19 @@ Icons above correspond to the following meanings:
 - 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
 - 🚀 [Releases](https://github.com/toeverything/blocksuite/releases)
 
-## Getting Started with the BlockSuite Editor
+## Getting Started
 
-The `@blocksuite/editor` package contains the editor built into AFFiNE, it's basically a simple `<editor-container>` tag:
+The `@blocksuite/editor` package contains the editor built into AFFiNE. If you want to easily reuse most of its features, you can use the `SimpleAffineEditor` web component directly:
 
 ```ts
-import { EditorContainer } from '@blocksuite/editor';
+import { SimpleAffineEditor } from '@blocksuite/editor';
+import '@blocksuite/editor/src/themes/affine.css';
 
-const editor = new EditorContainer();
+const editor = new SimpleAffineEditor();
 document.body.appendChild(editor);
 ```
 
-However, to support its use in the real world (with customized block models and configured data source), three core packages are required to be imported:
+However, if you are going to support more complicated real-world use cases (e.g., with customized block models and configured data sources), this will involve the use of these three following core packages:
 
 - The `packages/store` package is a data store built for general-purpose state management.
 - The `packages/blocks` package holds the default BlockSuite editable blocks.
