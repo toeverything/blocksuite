@@ -4,12 +4,15 @@ import {
   configDebugLog,
 } from '@blocksuite/global/debug';
 import {
+  assertExists,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
   Page,
   StoreOptions,
+  Utils,
+  Workspace,
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
@@ -52,6 +55,29 @@ export function initDebugConfig() {
 
   // Uncomment this line or paste it into console to enable debug log.
   // enableDebugLog(['CRUD']);
+}
+
+async function initWithMarkdownContent(workspace: Workspace, url: URL) {
+  const { empty: emptyInit } = await import('./data/index.js');
+
+  const pageId = await emptyInit(workspace);
+  const page = workspace.getPage(pageId);
+  assertExists(page);
+  assertExists(page.root);
+  const content = await fetch(url).then(res => res.text());
+  return window.editor.clipboard.importMarkdown(content, page.root.id);
+}
+
+export async function tryInitExternalContent(
+  workspace: Workspace,
+  initParam: string
+) {
+  if (isValidUrl(initParam)) {
+    const url = new URL(initParam);
+    await initWithMarkdownContent(workspace, url);
+  } else if (isBase64.test(initParam)) {
+    Utils.applyYjsUpdateV2(workspace, initParam);
+  }
 }
 
 /**
