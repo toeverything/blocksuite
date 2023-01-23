@@ -23,8 +23,6 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     'Failed to load resource: the server responded with a status of 404 (Not Found)',
     // embed.spec.ts
     'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
-    // embed.spec.ts
-    'Element affine-embed scheduled an update (generally because a property was set) after an update completed',
     // clipboard.spec.ts
     "TypeError: Cannot read properties of null (reading 'model')",
     // basic.spec.ts › should readonly mode not be able to modify text
