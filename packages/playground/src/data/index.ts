@@ -6,24 +6,41 @@
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
 
-export function heavy(workspace: Workspace) {
-  workspace.signals.pageAdded.once(id => {
-    const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlockByFlavour('affine:page');
-    page.addBlockByFlavour('affine:surface', {}, null);
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-    for (let i = 0; i < 1000; i++) {
-      page.addBlockByFlavour(
-        'affine:paragraph',
-        {
-          text: new Text(page, 'Hello, world! ' + i),
-        },
-        frameId
-      );
-    }
-  });
+export function empty(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(pageId => {
+      const page = workspace.getPage(pageId) as Page;
+      const pageBlockId = page.addBlockByFlavour('affine:page', { title: '' });
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      page.addBlockByFlavour('affine:paragraph', {}, frameId);
+      resolve(pageId);
+    });
 
-  workspace.createPage('page0');
+    workspace.createPage('page0');
+  });
+}
+
+export function heavy(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(pageId => {
+      const page = workspace.getPage(pageId) as Page;
+      const pageBlockId = page.addBlockByFlavour('affine:page');
+      page.addBlockByFlavour('affine:surface', {}, null);
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      for (let i = 0; i < 1000; i++) {
+        page.addBlockByFlavour(
+          'affine:paragraph',
+          {
+            text: new Text(page, 'Hello, world! ' + i),
+          },
+          frameId
+        );
+      }
+      resolve(pageId);
+    });
+
+    workspace.createPage('page0');
+  });
 }
 
 const presetMarkdown = `This playground is designed to:
@@ -46,19 +63,24 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
 export function basic(workspace: Workspace) {
-  workspace.signals.pageAdded.once(async id => {
-    const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlock({
-      flavour: 'affine:page',
-      title: 'Welcome to BlockSuite playground',
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(async pageId => {
+      const page = workspace.getPage(pageId) as Page;
+      const pageBlockId = page.addBlock({
+        flavour: 'affine:page',
+        title: 'Welcome to BlockSuite playground',
+      });
+      page.addBlock({ flavour: 'affine:surface' }, null);
+
+      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
+      await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+
+      requestAnimationFrame(() => {
+        page.resetHistory();
+        resolve(pageId);
+      });
     });
-    page.addBlock({ flavour: 'affine:surface' }, null);
 
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
-    await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
-
-    requestAnimationFrame(() => page.resetHistory());
+    workspace.createPage('page0');
   });
-
-  workspace.createPage('page0');
 }

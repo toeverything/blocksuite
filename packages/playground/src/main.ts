@@ -14,6 +14,7 @@ import {
   initParam,
   isBase64,
   isE2E,
+  isValidUrl,
 } from './utils.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
@@ -57,7 +58,7 @@ async function main() {
 
   const initFunctions = (await import('./data/index.js')) as Record<
     string,
-    (workspace: Workspace) => void
+    (workspace: Workspace) => Promise<string>
   >;
   initButton.addEventListener('click', () => initFunctions.basic(workspace));
 
@@ -65,8 +66,16 @@ async function main() {
     if (initFunctions[initParam]) {
       initFunctions[initParam]?.(workspace);
     } else {
-      if (initParam !== '' && isBase64.test(initParam)) {
-        Utils.applyYjsUpdateV2(workspace, initParam);
+      if (initParam !== '') {
+        if (isValidUrl(initParam)) {
+          const url = new URL(initParam);
+          initFunctions.empty(workspace).then(async pageId => {
+            const text = await fetch(url).then(res => res.text());
+            return window.editor.clipboard.importMarkdown(text, pageId);
+          });
+        } else if (isBase64.test(initParam)) {
+          Utils.applyYjsUpdateV2(workspace, initParam);
+        }
       } else {
         // fallback
         initFunctions.basic(workspace);

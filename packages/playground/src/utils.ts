@@ -96,3 +96,13 @@ export function getOptions(): Pick<
     },
   };
 }
+
+export function isValidUrl(urlLike: string) {
+  let url;
+  try {
+    url = new URL(urlLike);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
+}
