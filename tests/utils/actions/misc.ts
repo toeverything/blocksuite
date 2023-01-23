@@ -29,6 +29,9 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     "TypeError: Cannot read properties of null (reading 'model')",
     // basic.spec.ts › should readonly mode not be able to modify text
     'cannot modify data in readonly mode',
+    // Firefox warn on quill
+    // See https://github.com/quilljs/quill/issues/2030
+    '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
