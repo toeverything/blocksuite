@@ -12,10 +12,10 @@ import {
 @customElement('affine-frame')
 export class FrameBlockComponent extends NonShadowLitElement {
   static styles = css`
-    .affine-group-block-container > .affine-block-children-container {
+    .affine-frame-block-container > .affine-block-children-container {
       padding-left: 0;
     }
-    .affine-group-block-container.selected {
+    .affine-frame-block-container.selected {
       background-color: var(--affine-selected-color);
     }
   `;

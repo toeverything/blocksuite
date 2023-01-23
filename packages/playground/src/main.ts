@@ -16,7 +16,7 @@ import {
   isE2E,
 } from './utils.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import './style.css';
+import '@blocksuite/editor/src/themes/affine.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
