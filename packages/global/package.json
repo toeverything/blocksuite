@@ -21,7 +21,8 @@
     "exports": {
       ".": "./index.d.ts",
       "./utils": "./dist/utils.js",
-      "./debug": "./dist/debug.js"
+      "./debug": "./dist/debug.js",
+      "./config": "./dist/config.js"
     },
     "files": [
       "dist",
