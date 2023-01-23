@@ -13,13 +13,13 @@
 
 BlockSuite works very differently than traditional rich text frameworks:
 
-- For the data model, BlockSuite does not implement the [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html) pattern but instead provides a CRDT-based block tree based directly on [Yjs](https://github.com/yjs/yjs), supporting zero-cost time travel and real-time collaboration out of the box. Its data persistence layer is also designed to be [local-first](https://martin.kleppmann.com/papers/local-first.pdf).
+- For the data model, BlockSuite does not implement the [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html) pattern but instead provides a [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)-based block tree based directly on [Yjs](https://github.com/yjs/yjs), supporting zero-cost time travel and real-time collaboration out of the box. Its data persistence layer is also designed to be [local-first](https://martin.kleppmann.com/papers/local-first.pdf).
 - For rich text editing, multiple different nodes in the BlockSuite block tree can be connected to different rich text editing components, thus modeling rich text content as multiple _UI components_ instead of a single _UI container_, eliminating the use of the dangerous monolith [`contenteditale`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable).
-- For the rendering layer, BlockSuite does not assume that content can only be rendered through the DOM. It not only implements a basic document editing UI based on [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but also develops a hybrid canvas-based renderer for parts of the whiteboard content. Both renderers can coexist on the same page and are updated from the same store.
+- For the rendering layer, BlockSuite does not assume that content can only be rendered through the DOM. It not only implements a basic document editing UI based on [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but also develops a hybrid [canvas-based renderer](./packages/phasor/) for parts of the whiteboard content. Both renderers can coexist on the same page and are updated from the same store.
 
-BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building various collaborative applications directly through whatever UI framework you're comfortable with**. To this end, we will try to open-source more basic modules as reusable packages for this in the BlockSuite project.
+BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building various collaborative applications directly through whatever UI framework you're comfortable with**. To this end, we will try to open-source more foundational modules as reusable packages for this in the BlockSuite project.
 
-Although BlockSuite is still in its early stages, you can already use the `@blocksuite/editor` package, the collaborative editor used by AFFiNE Alpha. Note that this editor is also a web component and is completely framework-independent!
+Although BlockSuite is still in its early stages, you can already use the `@blocksuite/editor` package, the collaborative editor used in AFFiNE Alpha. Note that this editor is also a web component and is completely framework-independent!
 
 ## Current Status (`@blocksuite/editor`)
 
@@ -67,10 +67,10 @@ Icons above correspond to the following meanings:
 ## Resources
 
 - 🎁 Examples
-  - [Nightly Playground](https://blocksuite-toeverything.vercel.app/?init)
-  - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/)
-  - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/)
-  - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/)
+  - [Nightly Playground](https://blocksuite-toeverything.vercel.app/?init) ([🔗 source](./packages/playground/src/main.ts))
+  - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/) ([🔗 source](./packages/playground/examples/basic/index.html))
+  - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/packages/app))
+  - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
@@ -84,7 +84,7 @@ The `@blocksuite/editor` package contains the editor built into AFFiNE. Its `nig
 pnpm i @blocksuite/editor@nightly
 ```
 
-If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly:
+If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly ([code example here](./packages/playground/examples/basic/index.html)):
 
 ```ts
 import { SimpleAffineEditor } from '@blocksuite/editor';
