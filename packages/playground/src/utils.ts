@@ -4,12 +4,15 @@ import {
   configDebugLog,
 } from '@blocksuite/global/debug';
 import {
+  assertExists,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
   Page,
   StoreOptions,
+  Utils,
+  Workspace,
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
@@ -54,6 +57,29 @@ export function initDebugConfig() {
   // enableDebugLog(['CRUD']);
 }
 
+async function initWithMarkdownContent(workspace: Workspace, url: URL) {
+  const { empty: emptyInit } = await import('./data/index.js');
+
+  const pageId = await emptyInit(workspace);
+  const page = workspace.getPage(pageId);
+  assertExists(page);
+  assertExists(page.root);
+  const content = await fetch(url).then(res => res.text());
+  return window.editor.clipboard.importMarkdown(content, page.root.id);
+}
+
+export async function tryInitExternalContent(
+  workspace: Workspace,
+  initParam: string
+) {
+  if (isValidUrl(initParam)) {
+    const url = new URL(initParam);
+    await initWithMarkdownContent(workspace, url);
+  } else if (isBase64.test(initParam)) {
+    Utils.applyYjsUpdateV2(workspace, initParam);
+  }
+}
+
 /**
  * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
  * We use webrtcDocProvider by default if the `providers` param is missing.
@@ -95,4 +121,14 @@ export function getOptions(): Pick<
       },
     },
   };
+}
+
+export function isValidUrl(urlLike: string) {
+  let url;
+  try {
+    url = new URL(urlLike);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
 }
