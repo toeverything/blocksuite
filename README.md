@@ -7,7 +7,7 @@
 
 💠 BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
-[Try BlockSuite-based AFFiNE Alpha editor](https://pathfinder.affine.pro/)
+👉 [Try BlockSuite-based AFFiNE online](https://pathfinder.affine.pro/)
 
 ## Introduction
 
@@ -67,7 +67,8 @@ Icons above correspond to the following meanings:
 ## Resources
 
 - 🎁 Examples
-  - [Latest Playground](https://block-suite.pages.dev/?init)
+  - [Nightly Playground](https://blocksuite-toeverything.vercel.app/?init)
+  - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/)
   - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/)
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
@@ -77,9 +78,9 @@ Icons above correspond to the following meanings:
 
 ## Getting Started
 
-The `@blocksuite/editor` package contains the editor built into AFFiNE. Its `nightly` versions are released daily based on the master branch, and they are always tested on CI. This means that the `nightly` versions can already be used in real-world projects like AFFiNE at any point:
+The `@blocksuite/editor` package contains the editor built into AFFiNE. Its `nightly` versions are released daily based on the master branch, and they are always tested on CI. This means that the `nightly` versions can already be used in real-world projects like AFFiNE at any time:
 
-```
+```sh
 pnpm i @blocksuite/editor@nightly
 ```
 
@@ -104,6 +105,8 @@ Or equivalently, you can also use the declarative style:
   </script>
 </body>
 ```
+
+👉 [Try `SimpleAffineEditor` online](https://blocksuite-toeverything.vercel.app/examples/basic/)
 
 However, the `SimpleAffineEditor` here is just a [thin wrapper with dozens of lines](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts) that doesn't enable the opt-in collaboration and data persistence features. If you are going to support more complicated real-world use cases (e.g., with customized block models and configured data sources), this will involve the use of these three following core packages:
 
