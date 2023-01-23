@@ -4,7 +4,7 @@ import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
 import { BlockSchema } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
-import { Page, Workspace, Utils } from '@blocksuite/store';
+import { Page, Workspace, Utils, assertExists } from '@blocksuite/store';
 import { DebugMenu } from './components/debug-menu.js';
 import {
   defaultMode,
@@ -70,8 +70,11 @@ async function main() {
         if (isValidUrl(initParam)) {
           const url = new URL(initParam);
           initFunctions.empty(workspace).then(async pageId => {
+            const page = workspace.getPage(pageId);
+            assertExists(page);
+            assertExists(page.root);
             const text = await fetch(url).then(res => res.text());
-            return window.editor.clipboard.importMarkdown(text, pageId);
+            return window.editor.clipboard.importMarkdown(text, page.root.id);
           });
         } else if (isBase64.test(initParam)) {
           Utils.applyYjsUpdateV2(workspace, initParam);
