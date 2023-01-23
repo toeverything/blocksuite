@@ -25,18 +25,20 @@
     "@types/turndown": "^5.0.1"
   },
   "exports": {
-    "./src/*": "./src/*.ts",
     ".": "./src/index.ts",
-    "./src/themes/affine.css": "./src/themes/affine.css"
+    "./themes/*": "./themes/*"
   },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./src/*": "./dist/*.js",
       ".": "./dist/index.js",
-      "./src/themes/affine.css": "./src/themes/affine.css"
-    }
+      "./themes/*": "./themes/*"
+    },
+    "files": [
+      "dist",
+      "themes"
+    ]
   }
 }
