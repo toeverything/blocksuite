@@ -22,7 +22,7 @@
       ".": "./index.d.ts",
       "./utils": "./dist/utils.js",
       "./debug": "./dist/debug.js",
-      "./config": "./dist/config.js"
+      "./config": "./dist/config/index.js"
     },
     "files": [
       "dist",
