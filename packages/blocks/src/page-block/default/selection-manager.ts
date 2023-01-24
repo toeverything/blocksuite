@@ -392,44 +392,10 @@ export class DefaultSelectionManager {
   private _setSelectedBlocks = (selectedBlocks: Element[]) => {
     this.state.selectedBlocks = selectedBlocks;
     const { blockCache } = this.state;
-    type Info = {
-      x: number;
-      y: number;
-      w: number;
-      h: number;
-      rects: DOMRect[];
-    };
-    const { rects } = selectedBlocks
-      .map(block => {
-        return blockCache.get(block) as DOMRect;
-      })
-      .reduce<Info>(
-        (info, rect) => {
-          if (
-            !(
-              rect.x > info.x &&
-              rect.y > info.y &&
-              rect.width < info.w &&
-              rect.height < info.h
-            )
-          ) {
-            info.x = rect.x;
-            info.y = rect.y;
-            info.w = rect.width;
-            info.h = rect.height;
-            info.rects.push(rect);
-          }
-          return info;
-        },
-        {
-          x: 0,
-          y: 0,
-          w: 0,
-          h: 0,
-          rects: [],
-        }
-      );
-    this._signals.updateSelectedRects.emit(rects);
+    const selectedRects = selectedBlocks.map(block => {
+      return blockCache.get(block) as DOMRect;
+    });
+    this._signals.updateSelectedRects.emit(selectedRects);
   };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
