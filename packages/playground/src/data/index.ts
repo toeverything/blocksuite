@@ -86,7 +86,7 @@ export function preset(workspace: Workspace) {
   });
 }
 
-export async function database(workspace: Workspace) {
+export function database(workspace: Workspace) {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
