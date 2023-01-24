@@ -28,7 +28,7 @@ export class MarkdownUtils {
     text = text.replace(/\r\n/g, '\n'); // dos
     text = text.replace(/\r/g, '\n'); // mac
     text = text.replace(/\u00A0/g, '&nbsp;'); // normalize spaces
-    // 2. Due to the grammatical characteristics of markdwon (one \n is not counted as a newline, two are counted), let the start and end of the text be a pair of newlines, so as to ensure that the first and last lines of the pasted content can be recognized normally
+    // 2. Due to the grammatical characteristics of markdown (one \n is not counted as a newline, two are counted), let the start and end of the text be a pair of newlines, so as to ensure that the first and last lines of the pasted content can be recognized normally
     text = `\n\n${text}\n\n`; // 3. Convert tab to space
     text = MarkdownUtils._detab(text); // 4. Delete lines consisting only of space and tab
 

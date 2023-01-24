@@ -1,5 +1,5 @@
 /// <reference types="@blocksuite/global" />
-// manual import to avoid being tree-shaked
+// manual import to avoid being tree-shaken
 import './page-block';
 import './counter-block';
 import './paragraph-block';

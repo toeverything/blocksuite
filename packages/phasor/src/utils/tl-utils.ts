@@ -64,7 +64,7 @@ export class Utils {
   /* -------------------------------------------------- */
 
   /**
-   * Linear interpolation betwen two numbers.
+   * Linear interpolation between two numbers.
    * @param y1
    * @param y2
    * @param mu
@@ -181,7 +181,7 @@ export class Utils {
 
   /**
    * Seeded random number generator, using [xorshift](https://en.wikipedia.org/wiki/Xorshift).
-   * The result will always be betweeen -1 and 1.
+   * The result will always be between -1 and 1.
    *
    * Adapted from [seedrandom](https://github.com/davidbau/seedrandom).
    */
@@ -529,7 +529,7 @@ export class Utils {
    * Hit test a point and a polyline using a minimum distance.
    * @param A The point to check.
    * @param points The points that make up the polyline.
-   * @param distance (optional) The mininum distance that qualifies a hit.
+   * @param distance (optional) The minimum distance that qualifies a hit.
    */
   static pointInPolyline(
     A: number[],
@@ -963,7 +963,7 @@ new box's aspect ratio matches the original aspect ratio.
 3. Rotation
 
 If the bounds are rotated, get a Vector from the rotated anchor
-corner in the inital bounds to the rotated anchor corner in the
+corner in the initial bounds to the rotated anchor corner in the
 result's bounds. Subtract this Vector from the result's corners,
 so that the two anchor points (initial and result) will be equal.
 */
@@ -1479,7 +1479,7 @@ left past the initial left edge) then swap points on that axis.
   }
 
   /**
-   * Turn an array of points into a path of quadradic curves.
+   * Turn an array of points into a path of quadratic curves.
    *
    * @param points The points returned from perfect-freehand
    * @param closed Whether the stroke is closed
@@ -1519,7 +1519,7 @@ left past the initial left edge) then swap points on that axis.
   }
 
   /**
-   * Turn an array of stroke points into a path of quadradic curves.
+   * Turn an array of stroke points into a path of quadratic curves.
    * @param points - the stroke points returned from perfect-freehand
    */
   static getSvgPathFromStrokePoints(
@@ -1674,7 +1674,7 @@ left past the initial left edge) then swap points on that axis.
   }
 
   /**
-   * Reversable psuedo hash.
+   * Reversible pseudo hash.
    * @param str string
    */
   static lns(str: string) {

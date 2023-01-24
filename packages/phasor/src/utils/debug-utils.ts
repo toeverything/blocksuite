@@ -2,7 +2,7 @@ import { DebugElement, type Element } from '../elements/index.js';
 import type { Renderer } from '../renderer.js';
 
 const DEBUG_ELEMENT_MAX = 150;
-const DEBUG_ELEMEMNT_MIN = 120;
+const DEBUG_ELEMENT_MIN = 120;
 
 function randomInt(range: number, min = 0) {
   return Math.floor(Math.random() * (range - min)) + min;
@@ -16,7 +16,7 @@ function createMockElement(id: number, rangeX: number, rangeY: number) {
   const x = randomInt(rangeX);
   const y = randomInt(rangeY);
 
-  const size = randomInt(DEBUG_ELEMENT_MAX, DEBUG_ELEMEMNT_MIN);
+  const size = randomInt(DEBUG_ELEMENT_MAX, DEBUG_ELEMENT_MIN);
   const element = new DebugElement(`${id}`);
   element.color = randomColor();
   element.setBound(x, y, size, size);

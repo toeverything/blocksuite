@@ -59,8 +59,8 @@ export class BlockHub extends NonShadowLitElement {
   private _cursor: number | null = 0;
   private _expanded = false;
   private _isGrabbing = false;
-  private _isCardListVisiable = false;
-  private _cardvisibleType = '';
+  private _isCardListVisible = false;
+  private _cardVisibleType = '';
   private _showToolTip = true;
   private _timer: number | null = null;
   private _delay = 200; // ms
@@ -353,8 +353,8 @@ export class BlockHub extends NonShadowLitElement {
   private _shouldCardDisplay(type: string) {
     return (
       this._expanded &&
-      this._isCardListVisiable &&
-      this._cardvisibleType === type
+      this._isCardListVisible &&
+      this._cardVisibleType === type
     );
   }
 
@@ -363,7 +363,7 @@ export class BlockHub extends NonShadowLitElement {
       <div class="block-hub-icons-container" ?transition=${this._expanded}>
         <div
           class="block-hub-icon-container has-tool-tip"
-          selected=${this._cardvisibleType === 'blank' ? 'true' : 'false'}
+          selected=${this._cardVisibleType === 'blank' ? 'true' : 'false'}
           type="blank"
           draggable="true"
           affine-flavour="affine:paragraph"
@@ -377,14 +377,14 @@ export class BlockHub extends NonShadowLitElement {
         <div
           class="block-hub-icon-container"
           type="text"
-          selected=${this._cardvisibleType === 'text' ? 'true' : 'false'}
+          selected=${this._cardVisibleType === 'text' ? 'true' : 'false'}
         >
           ${TextIconLarge}
         </div>
         <div
           class="block-hub-icon-container"
           type="list"
-          selected=${this._cardvisibleType === 'list' ? 'true' : 'false'}
+          selected=${this._cardVisibleType === 'list' ? 'true' : 'false'}
         >
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
           ${BulletedListIconLarge}
@@ -443,8 +443,8 @@ export class BlockHub extends NonShadowLitElement {
   private _onClick = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
-      this._isCardListVisiable = false;
-      this._cardvisibleType = '';
+      this._isCardListVisible = false;
+      this._cardVisibleType = '';
       this.requestUpdate();
     }
   };
@@ -452,8 +452,8 @@ export class BlockHub extends NonShadowLitElement {
   private _onBlockHubButtonClick = (e: MouseEvent) => {
     this._expanded = !this._expanded;
     if (!this._expanded) {
-      this._cardvisibleType = '';
-      this._isCardListVisiable = false;
+      this._cardVisibleType = '';
+      this._isCardListVisible = false;
     }
     this.requestUpdate();
   };
@@ -526,8 +526,8 @@ export class BlockHub extends NonShadowLitElement {
     this._showToolTip = true;
     this._isGrabbing = false;
     if (this._indicator.cursorPosition && this._indicator.targetRect) {
-      this._isCardListVisiable = false;
-      this._cardvisibleType = '';
+      this._isCardListVisible = false;
+      this._cardVisibleType = '';
     }
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
@@ -557,8 +557,8 @@ export class BlockHub extends NonShadowLitElement {
     const menu = e.currentTarget as HTMLElement;
     const cardType = menu.getAttribute('type');
     assertExists(cardType);
-    this._isCardListVisiable = true;
-    this._cardvisibleType = cardType;
+    this._isCardListVisible = true;
+    this._cardVisibleType = cardType;
     this.requestUpdate();
   };
 

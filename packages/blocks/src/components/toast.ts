@@ -13,7 +13,7 @@ const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
     template.innerHTML = html;
   } else {
     const { strings, values } = html;
-    const v = [...values, '']; // + last emtpty part
+    const v = [...values, '']; // + last empty part
     const htmlString = strings.reduce((acc, cur, i) => acc + cur + v[i], '');
     template.innerHTML = htmlString;
   }

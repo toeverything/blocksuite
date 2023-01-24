@@ -15,9 +15,9 @@ export class EmbedResizeManager {
   };
   private _dragMoveTarget = 'right';
 
-  constructor(state: PageSelectionState, singals: DefaultPageSignals) {
+  constructor(state: PageSelectionState, signals: DefaultPageSignals) {
     this.state = state;
-    this.signals = singals;
+    this.signals = signals;
   }
 
   onStart(e: SelectionEvent) {
