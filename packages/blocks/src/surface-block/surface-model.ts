@@ -5,6 +5,4 @@ export class SurfaceBlockModel extends BaseBlockModel {
   static version = 1;
   flavour = 'affine:surface' as const;
   tag = literal`affine-surface`;
-
-  paths: string[] = [];
 }

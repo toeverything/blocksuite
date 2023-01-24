@@ -12,7 +12,7 @@ import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from 'nanoid';
 
-export class SurfaceContainer {
+export class SurfaceManager {
   readonly renderer: Renderer;
   private _yElements: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, Element>();
