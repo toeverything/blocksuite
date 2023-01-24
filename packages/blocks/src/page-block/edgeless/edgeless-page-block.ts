@@ -35,7 +35,7 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import { SurfaceContainer } from '@blocksuite/phasor';
+import { SurfaceManager } from '@blocksuite/phasor';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -115,7 +115,7 @@ export class EdgelessPageBlockComponent
     shapeUpdated: new Signal(),
   };
 
-  surface!: SurfaceContainer;
+  surface!: SurfaceManager;
 
   viewport = new ViewportState();
 
@@ -178,11 +178,11 @@ export class EdgelessPageBlockComponent
   }
 
   // Should be called in requestAnimationFrame,
-  // so as to avoid DOM mutation in SurfaceContainer constructor
+  // so as to avoid DOM mutation in SurfaceManager constructor
   private _initSurface() {
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
-    this.surface = new SurfaceContainer(this._canvas, yContainer);
+    this.surface = new SurfaceManager(this._canvas, yContainer);
     this._syncSurfaceViewport();
   }
 
