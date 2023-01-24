@@ -22,6 +22,7 @@ import {
   PADDING_Y,
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
+  isBlock,
 } from './utils.js';
 
 const SHAPE_PADDING = 48;
@@ -295,11 +296,10 @@ export class EdgelessSelectedRect extends LitElement {
     // prevent selection action being fired
     e.stopPropagation();
     if (this.state?.type === 'single') {
-      const {
-        rect,
-        selected: { xywh },
-      } = this.state;
-      const [x, y] = JSON.parse(xywh) as XYWH;
+      const { rect, selected } = this.state;
+      if (!isBlock(selected)) return;
+
+      const [x, y] = JSON.parse(selected.xywh) as XYWH;
       this._dragStartInfo = {
         startMouseX: e.clientX,
         startMouseY: e.clientY,
@@ -320,6 +320,8 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       const { viewport } = this;
       const { selected } = this.state;
+      if (!isBlock(selected)) return;
+
       const { xywh } = selected;
       const [x, y, w, h] = JSON.parse(xywh) as XYWH;
       let newX = x;
@@ -413,6 +415,8 @@ export class EdgelessSelectedRect extends LitElement {
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
     if (this.state.type === 'single') {
+      if (!isBlock(this.state.selected)) return;
+
       this.state.selected.page.captureSync();
     } else {
       console.error('unexpected state.type:', this.state.type);
