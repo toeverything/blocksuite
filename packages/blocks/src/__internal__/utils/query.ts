@@ -1,7 +1,6 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
-import { ShapeBlockTag } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { BLOCK_ID_ATTR as ATTR } from './consts.js';
 import type { IPoint } from './gesture.js';
@@ -11,16 +10,6 @@ type ElementTagName = keyof HTMLElementTagNameMap;
 
 interface ContainerBlock {
   model?: BaseBlockModel;
-}
-
-export function getShapeBlockHitBox(id: string): SVGPathElement | null {
-  const shapeBlock = getBlockById<'affine-shape'>(id);
-  if (shapeBlock?.tagName !== ShapeBlockTag.toUpperCase()) {
-    throw new Error(`${ATTR}: ${id} is not shape block`);
-  }
-  return (
-    shapeBlock.shadowRoot?.querySelector('.affine-shape-block-hit-box') ?? null
-  );
 }
 
 export function getBlockById<T extends ElementTagName>(

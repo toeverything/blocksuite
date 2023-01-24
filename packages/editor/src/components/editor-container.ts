@@ -56,11 +56,6 @@ export class EditorContainer extends NonShadowLitElement {
 
   private _disposables = new DisposableGroup();
 
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
-
   protected update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('readonly')) {
       this.page.awarenessStore.setReadonly(this.page, this.readonly);

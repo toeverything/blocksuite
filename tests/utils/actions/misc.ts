@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
-import type { Page as StorePage } from '../../../packages/store/src/index.js';
-import type { ConsoleMessage, Page } from '@playwright/test';
+import type {
+  BaseBlockModel,
+  Page as StorePage,
+} from '../../../packages/store/src/index.js';
+import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -20,12 +23,13 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     'Failed to load resource: the server responded with a status of 404 (Not Found)',
     // embed.spec.ts
     'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
-    // embed.spec.ts
-    'Element affine-embed scheduled an update (generally because a property was set) after an update completed',
     // clipboard.spec.ts
     "TypeError: Cannot read properties of null (reading 'model')",
     // basic.spec.ts › should readonly mode not be able to modify text
     'cannot modify data in readonly mode',
+    // Firefox warn on quill
+    // See https://github.com/quilljs/quill/issues/2030
+    '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -383,3 +387,17 @@ export const getBoundingClientRect: (
     return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
   }, selector);
 };
+
+export async function getBlockModel<Model extends BaseBlockModel>(
+  page: Page,
+  blockId: string
+) {
+  const result: BaseBlockModel | null | undefined = await page.evaluate(
+    blockId => {
+      return window.page?.getBlockById(blockId);
+    },
+    blockId
+  );
+  expect(result).not.toBeNull();
+  return result as Model;
+}

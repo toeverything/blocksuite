@@ -4,18 +4,18 @@ import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
 import { BlockSchema } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
-import { Page, Workspace, Utils } from '@blocksuite/store';
+import { Page, Workspace } from '@blocksuite/store';
 import { DebugMenu } from './components/debug-menu.js';
 import {
   defaultMode,
   getOptions,
+  tryInitExternalContent,
   initDebugConfig,
   initParam,
-  isBase64,
   isE2E,
 } from './utils.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import './style.css';
+import '@blocksuite/editor/themes/affine.css';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
@@ -42,6 +42,33 @@ function subscribePage(workspace: Workspace) {
   });
 }
 
+async function initPageContentByParam(workspace: Workspace) {
+  const initFunctions = (await import('./data/index.js')) as Record<
+    string,
+    (workspace: Workspace) => Promise<string>
+  >;
+
+  initButton.addEventListener('click', () => initFunctions.preset(workspace));
+
+  // No `?init` param provided
+  if (initParam === null) return;
+
+  // Load the preset playground documentation when `?init` param provided
+  if (initParam === '') {
+    await initFunctions.preset(workspace);
+    return;
+  }
+
+  // Load built-in init function when `?init=heavy` param provided
+  if (initFunctions[initParam]) {
+    await initFunctions[initParam]?.(workspace);
+    return;
+  }
+
+  // Try to load base64 content or markdown content from url
+  await tryInitExternalContent(workspace, initParam);
+}
+
 async function main() {
   const workspace = new Workspace(options).register(BlockSchema);
   [window.workspace, window.blockSchema] = [workspace, BlockSchema];
@@ -53,24 +80,7 @@ async function main() {
 
   subscribePage(workspace);
 
-  const initFunctions = (await import('./data/index.js')) as Record<
-    string,
-    (workspace: Workspace) => void
-  >;
-  initButton.addEventListener('click', () => initFunctions.basic(workspace));
-
-  if (initParam != null) {
-    if (initFunctions[initParam]) {
-      initFunctions[initParam]?.(workspace);
-    } else {
-      if (initParam !== '' && isBase64.test(initParam)) {
-        Utils.applyYjsUpdateV2(workspace, initParam);
-      } else {
-        // fallback
-        initFunctions.basic(workspace);
-      }
-    }
-  }
+  await initPageContentByParam(workspace);
 }
 
 main();

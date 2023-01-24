@@ -74,7 +74,6 @@ importers:
       '@blocksuite/global': workspace:*
       '@blocksuite/phasor': workspace:*
       '@blocksuite/store': workspace:*
-      '@tldraw/intersect': ^1.8.0
       '@types/autosize': ^4.0.1
       autosize: ^5.0.2
       highlight.js: ^11.7.0
@@ -89,7 +88,6 @@ importers:
       '@blocksuite/global': link:../global
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/store': link:../store
-      '@tldraw/intersect': 1.8.0
       autosize: 5.0.2
       highlight.js: 11.7.0
       hotkeys-js: 3.10.1_otx73r74oyscqvo3amwccrzngy
@@ -139,11 +137,13 @@ importers:
       '@blocksuite/global': workspace:*
       fractional-indexing: ^3.1.0
       nanoid: ^4.0.0
+      perfect-freehand: ^1.2.0
       yjs: ^13.5.44
     dependencies:
       '@blocksuite/global': link:../global
       fractional-indexing: 3.1.0
       nanoid: 4.0.0
+      perfect-freehand: 1.2.0
     devDependencies:
       yjs: 13.5.44
 
@@ -237,7 +237,6 @@ importers:
       '@blocksuite/global': workspace:*
       '@types/flexsearch': ^0.7.3
       buffer: ^6.0.3
-      cross-env: ^7.0.3
       flexsearch: 0.7.21
       idb-keyval: ^6.2.0
       ky: ^0.33.2
@@ -261,7 +260,6 @@ importers:
       y-protocols: 1.0.5
       y-webrtc: 10.2.4
     devDependencies:
-      cross-env: 7.0.3
       lit: 2.6.1
       yjs: 13.5.44
 
@@ -2245,16 +2243,6 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@tldraw/intersect/1.8.0:
-    resolution: {integrity: sha512-0UarshNpyq2+O4o0xHMJIBgF0E630mes5CkMoO+D5xgYppSBIkeqYDcv0ujsmAhMKX1O6Y0ShuuHeflBEULUoQ==}
-    dependencies:
-      '@tldraw/vec': 1.8.0
-    dev: false
-
-  /@tldraw/vec/1.8.0:
-    resolution: {integrity: sha512-GiS5Df3CzXY/fPBFcM0CKFERZfI4Cg1X33VPZX+NLo7Fwm/h9zu/aU24N1mG75Q9LuMnwKm7woxKr8BiUXGYCg==}
-    dev: false
-
   /@tsconfig/node10/1.0.9:
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
     dev: true
@@ -3273,14 +3261,6 @@ packages:
 
   /create-require/1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
-    dev: true
-
-  /cross-env/7.0.3:
-    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
-    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
-    hasBin: true
-    dependencies:
-      cross-spawn: 7.0.3
     dev: true
 
   /cross-spawn/5.1.0:

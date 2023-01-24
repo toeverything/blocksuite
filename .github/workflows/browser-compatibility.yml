@@ -4,20 +4,37 @@ on:
   schedule:
     # At the end of every day
     - cron: '0 0 * * *'
-
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'blocksuite repository to use'
+        required: true
+        type: string
+        default: 'toeverything/blocksuite'
+      ref:
+        description: 'blocksuite branch to use'
+        required: true
+        type: string
+        default: 'master'
 jobs:
   main-test:
     name: Playground E2E test
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        browsers: [firefox, safari]
+        browsers: [firefox, webkit]
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.repo || github.repository }}
+          ref: ${{ inputs.ref || github.ref }}
+
       - uses: pnpm/action-setup@v2
         with:
           version: 7.9.5
+
       - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
@@ -30,7 +47,9 @@ jobs:
         run: npx playwright install ${{ matrix.browsers }}
 
       - name: Run playwright tests
-        run: TEST_PLAYWRIGHT_BROWSER_NAME=${{ matrix.browsers }} pnpm test -- --forbid-only
+        env:
+          TEST_PLAYWRIGHT_BROWSER_NAME: ${{ matrix.browsers }}
+        run: pnpm test -- --forbid-only
 
       - name: Upload test results
         if: ${{ failure() }}

@@ -38,7 +38,6 @@ export const defaultStore: SerializedStore = {
       'affine:frame': 1,
       'affine:divider': 1,
       'affine:embed': 1,
-      // 'affine:shape': 1,
       'affine:code': 1,
       'affine:surface': 1,
     },

@@ -7,7 +7,6 @@ import { FrameBlockModel } from './frame-block/frame-model.js';
 import { ListBlockModel } from './list-block/list-model.js';
 import { PageBlockModel } from './page-block/page-model.js';
 import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
-import { ShapeBlockModel } from './shape-block/shape-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { DatabaseBlockModel } from './database-block/database-model.js';
@@ -20,7 +19,6 @@ export {
   ListBlockModel,
   PageBlockModel,
   ParagraphBlockModel,
-  ShapeBlockModel,
   DatabaseBlockModel,
 };
 
@@ -33,7 +31,6 @@ export const BlockSchema = {
   'affine:code': CodeBlockModel,
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
-  // 'affine:shape': ShapeBlockModel,
   'affine:surface': SurfaceBlockModel,
   'affine:database': DatabaseBlockModel,
 };

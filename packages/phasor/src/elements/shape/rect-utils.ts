@@ -1,12 +1,7 @@
-// https://github.com/tldraw/tldraw/blob/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/tldraw/src/state/shapes/RectangleUtil/rectangleHelpers.ts
-// Credits to tldraw
-
-import { Utils } from './utils.js';
-import { Vec } from './vec.js';
-import { getShapeStyle } from './shape-style.js';
-import type { ShapeStyles } from '../../__internal__/index.js';
-
-import { getStroke, getStrokePoints } from 'perfect-freehand';
+import { Vec } from '../../utils/vec.js';
+import Utils from '../../utils/tl-utils.js';
+import { getShapeStyle, ShapeStyles } from './shape-style.js';
+import { getStroke } from 'perfect-freehand';
 
 function getRectangleDrawPoints(
   id: string,
@@ -93,14 +88,8 @@ export function getRectanglePath(
 ) {
   const { points, options } = getDrawStrokeInfo(id, style, size);
   const stroke = getStroke(points, options);
-  return Utils.getSvgPathFromStroke(stroke);
-}
-
-export function getRectangleIndicatorPathTDSnapshot(
-  id: string,
-  style: ShapeStyles,
-  size: number[]
-) {
-  const { points, options } = getDrawStrokeInfo(id, style, size);
-  return Utils.getSvgPathFromStrokePoints(getStrokePoints(points, options));
+  const commands = Utils.getSvgPathFromStroke(stroke);
+  // https://stackoverflow.com/a/30830108
+  const path = new Path2D(commands);
+  return path;
 }

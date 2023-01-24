@@ -3,7 +3,6 @@ import {
   initMouseEventHandlers,
   MouseMode,
   RootBlockModel,
-  getBlockById,
   noop,
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';
@@ -14,7 +13,6 @@ import type {
   HoverState,
   MouseModeController,
 } from './mode-controllers/index.js';
-import type { ShapeBlockModel } from '../../shape-block/index.js';
 import type { Disposable } from '@blocksuite/store';
 
 export { HoverState };
@@ -134,7 +132,7 @@ export class EdgelessSelectionManager {
   private _selectionUpdateCallback: Disposable;
   private _wheelDisposeCallback: () => void;
 
-  private _previousSelectedShape: ShapeBlockModel | null = null;
+  private _prevSelectedShapeId: string | null = null;
 
   get isActive() {
     return this.currentController.isActive;
@@ -198,14 +196,16 @@ export class EdgelessSelectionManager {
     );
     this._selectionUpdateCallback = this._container.signals.updateSelection.on(
       state => {
-        if (this._previousSelectedShape) {
+        if (this._prevSelectedShapeId) {
+          /*
           const element = getBlockById<'affine-shape'>(
-            this._previousSelectedShape.id
+            this._prevSelectedShapeId
           );
           if (element) {
             element.selected = false;
           }
-          this._previousSelectedShape = null;
+          */
+          this._prevSelectedShapeId = null;
         }
         if (state.type === 'single') {
           // if (matchFlavours(state.selected, ['affine:shape'])) {

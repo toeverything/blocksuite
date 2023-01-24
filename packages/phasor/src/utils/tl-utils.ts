@@ -4,17 +4,59 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vec } from './vec.js';
 import type { StrokePoint } from 'perfect-freehand';
-import type { Patch } from '../../__internal__/index.js';
-import {
-  TLBoundsWithCenter,
-  Snap,
-  SnapPoints,
-  TLBounds,
-  TLBoundsCorner,
-  TLBoundsEdge,
-} from '../../__internal__/index.js';
 
 const TAU = Math.PI * 2;
+
+type Patch<T> = Partial<{
+  [P in keyof T]: T | Partial<T> | Patch<T[P]>;
+}>;
+
+enum TLBoundsEdge {
+  Top = 'top_edge',
+  Right = 'right_edge',
+  Bottom = 'bottom_edge',
+  Left = 'left_edge',
+}
+
+enum TLBoundsCorner {
+  TopLeft = 'top_left_corner',
+  TopRight = 'top_right_corner',
+  BottomRight = 'bottom_right_corner',
+  BottomLeft = 'bottom_left_corner',
+}
+interface TLBounds {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  width: number;
+  height: number;
+  rotation?: number;
+}
+
+interface TLBoundsWithCenter extends TLBounds {
+  midX: number;
+  midY: number;
+}
+
+enum SnapPoints {
+  minX = 'minX',
+  midX = 'midX',
+  maxX = 'maxX',
+  minY = 'minY',
+  midY = 'midY',
+  maxY = 'maxY',
+}
+
+type Snap =
+  | { id: SnapPoints; isSnapped: false }
+  | {
+      id: SnapPoints;
+      isSnapped: true;
+      to: number;
+      B: TLBoundsWithCenter;
+      distance: number;
+    };
 
 export class Utils {
   /* -------------------------------------------------- */

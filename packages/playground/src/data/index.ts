@@ -7,29 +7,41 @@
 import { Page, Text, Workspace } from '@blocksuite/store';
 import BlockTag = BlockSuiteInternal.BlockTag;
 
-export function heavy(workspace: Workspace) {
-  workspace.signals.pageAdded.once(id => {
-    const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlockByFlavour('affine:page');
-    page.addBlock(
-      {
-        flavour: 'affine:surface',
-      },
-      null
-    );
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-    for (let i = 0; i < 1000; i++) {
-      page.addBlock(
-        {
-          flavour: 'affine:paragraph',
-          text: new Text(page, 'Hello, world! ' + i),
-        },
-        frameId
-      );
-    }
-  });
+export function empty(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(pageId => {
+      const page = workspace.getPage(pageId) as Page;
+      const pageBlockId = page.addBlockByFlavour('affine:page', { title: '' });
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      page.addBlockByFlavour('affine:paragraph', {}, frameId);
+      resolve(pageId);
+    });
 
-  workspace.createPage('page0');
+    workspace.createPage('page0');
+  });
+}
+
+export function heavy(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(pageId => {
+      const page = workspace.getPage(pageId) as Page;
+      const pageBlockId = page.addBlockByFlavour('affine:page');
+      page.addBlockByFlavour('affine:surface', {}, null);
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      for (let i = 0; i < 1000; i++) {
+        page.addBlockByFlavour(
+          'affine:paragraph',
+          {
+            text: new Text(page, 'Hello, world! ' + i),
+          },
+          frameId
+        );
+      }
+      resolve(pageId);
+    });
+
+    workspace.createPage('page0');
+  });
 }
 
 const presetMarkdown = `This playground is designed to:
@@ -39,7 +51,7 @@ const presetMarkdown = `This playground is designed to:
 * 🔗 Demonstrate how BlockSuite reconciles real-time collaboration with [local-first](https://martin.kleppmann.com/papers/local-first.pdf) data ownership.
 
 ## Controlling Playground Data Source
-You might initially enter this page with the \`?init\` URL param. This is the default (opt-in) setup that automatically loads this built-in article. Meanwhile, you'll connect to a random single-user room via a WebRTC provider by default. This is the “single-user mode“ for local testing.
+You might initially enter this page with the \`?init\` URL param. This is the default (opt-in) setup that automatically loads this built-in article. Meanwhile, you'll connect to a random single-user room via a WebRTC provider by default. This is the "single-user mode" for local testing.
 
 To test real-time collaboration, you can specify the room to join by adding the \`?room=foo\` config - Try opening this page with \`?room=foo\` in two different tabs and see what happens!
 
@@ -51,22 +63,27 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export function basic(workspace: Workspace) {
-  workspace.signals.pageAdded.once(async id => {
-    const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlock({
-      flavour: 'affine:page',
-      title: 'Welcome to BlockSuite playground',
+export function preset(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(async pageId => {
+      const page = workspace.getPage(pageId) as Page;
+      const pageBlockId = page.addBlock({
+        flavour: 'affine:page',
+        title: 'Welcome to BlockSuite playground',
+      });
+      page.addBlock({ flavour: 'affine:surface' }, null);
+
+      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
+      await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+
+      requestAnimationFrame(() => {
+        page.resetHistory();
+        resolve(pageId);
+      });
     });
-    page.addBlock({ flavour: 'affine:surface' }, null);
 
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
-    await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
-
-    requestAnimationFrame(() => page.resetHistory());
+    workspace.createPage('page0');
   });
-
-  workspace.createPage('page0');
 }
 
 export function database(workspace: Workspace) {

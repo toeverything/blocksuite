@@ -3,11 +3,11 @@ import { generateKeyBetween } from 'fractional-indexing';
 import type { IBound } from './consts.js';
 import {
   Element,
+  ElementType,
   DebugElement,
   ShapeElement,
-  ElementType,
   ShapeType,
-} from './elements.js';
+} from './elements/index.js';
 import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from 'nanoid';
@@ -32,7 +32,7 @@ export class SurfaceContainer {
     const { x, y, w, h } = bound;
 
     element.setBound(x, y, w, h);
-    element.color = color;
+    element.color = color as `#${string}`;
 
     return this._addElement(element);
   }
@@ -77,20 +77,22 @@ export class SurfaceContainer {
 
   private _handleYElementAdded(yElement: Y.Map<unknown>) {
     const type = yElement.get('type') as ElementType;
+
+    let element: Element | null = null;
     switch (type) {
       case 'debug': {
-        const element = DebugElement.deserialize(yElement.toJSON());
-        this.renderer.addElement(element);
-        this._elements.set(element.id, element);
+        element = DebugElement.deserialize(yElement.toJSON());
         break;
       }
       case 'shape': {
-        const element = ShapeElement.deserialize(yElement.toJSON());
-        this.renderer.addElement(element);
-        this._elements.set(element.id, element);
+        element = ShapeElement.deserialize(yElement.toJSON());
         break;
       }
     }
+    assertExists(element);
+
+    this.renderer.addElement(element);
+    this._elements.set(element.id, element);
   }
 
   private _syncFromExistingContainer() {

@@ -5,11 +5,14 @@ import {
 } from '@blocksuite/global/debug';
 import {
   Page,
+  assertExists,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
   StoreOptions,
+  Utils,
+  Workspace,
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
@@ -24,9 +27,6 @@ export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
 export function initFeatureFlags(page: Page) {
-  if (params.get('surface') !== null) {
-    page.awarenessStore.setFlag('enable_surface', true);
-  }
   const slashFlag = params.get('slash');
   switch (slashFlag) {
     case '0':
@@ -55,6 +55,29 @@ export function initDebugConfig() {
 
   // Uncomment this line or paste it into console to enable debug log.
   // enableDebugLog(['CRUD']);
+}
+
+async function initWithMarkdownContent(workspace: Workspace, url: URL) {
+  const { empty: emptyInit } = await import('./data/index.js');
+
+  const pageId = await emptyInit(workspace);
+  const page = workspace.getPage(pageId);
+  assertExists(page);
+  assertExists(page.root);
+  const content = await fetch(url).then(res => res.text());
+  return window.editor.clipboard.importMarkdown(content, page.root.id);
+}
+
+export async function tryInitExternalContent(
+  workspace: Workspace,
+  initParam: string
+) {
+  if (isValidUrl(initParam)) {
+    const url = new URL(initParam);
+    await initWithMarkdownContent(workspace, url);
+  } else if (isBase64.test(initParam)) {
+    Utils.applyYjsUpdateV2(workspace, initParam);
+  }
 }
 
 /**
@@ -100,4 +123,14 @@ export function getOptions(): Pick<
       },
     },
   };
+}
+
+export function isValidUrl(urlLike: string) {
+  let url;
+  try {
+    url = new URL(urlLike);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
 }

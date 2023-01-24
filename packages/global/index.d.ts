@@ -176,7 +176,6 @@ declare namespace BlockSuiteInternal {
     'affine:code': CodeBlockModel;
     'affine:divider': DividerBlockModel;
     'affine:embed': EmbedBlockModel;
-    // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
     'affine:database': DatabaseBlockModel;
   };
@@ -229,13 +228,6 @@ declare namespace BlockSuiteModelProps {
 
   import type { ColorStyle, TDShapeType } from '@blocksuite/blocks';
 
-  interface ShapeBlockModel {
-    color: ColorStyle | `#${string}`;
-    type: TDShapeType;
-
-    xywh: string;
-  }
-
   interface DatabaseBlockModel {
     columns: BlockSuiteInternal.ColumnTypes[];
     title: string;
@@ -253,7 +245,6 @@ declare namespace BlockSuiteModelProps {
     'affine:code': CodeBlockModel;
     'affine:divider': DividerBlockModel;
     'affine:embed': EmbedBlockModel;
-    // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
   };
 }

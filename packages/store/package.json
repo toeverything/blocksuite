@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
+    "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
     "test:unit": "vitest --run",
     "test:unit:ui": "vitest --ui",
@@ -29,7 +29,6 @@
     "y-webrtc": "^10.2.4"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
     "lit": "^2.6.1",
     "yjs": "^13.5.44"
   },
