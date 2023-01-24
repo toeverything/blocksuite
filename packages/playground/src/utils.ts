@@ -4,6 +4,7 @@ import {
   configDebugLog,
 } from '@blocksuite/global/debug';
 import {
+  Page,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
