@@ -207,5 +207,5 @@ export function doesInsideBlockByFlavour(
   } else if (matchFlavours(parent, [flavour])) {
     return true;
   }
-  return doesInsideBlockByFlavour(page, block, flavour);
+  return doesInsideBlockByFlavour(page, parent, flavour);
 }
