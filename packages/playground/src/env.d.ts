@@ -1,5 +1,5 @@
 import type { Page, Workspace } from '@blocksuite/store';
-import type { BlockSchemaType } from '@blocksuite/blocks/models';
+import type { BlockSchema } from '@blocksuite/blocks/models';
 import type { EditorContainer } from '@blocksuite/editor';
 
 declare global {
@@ -7,7 +7,7 @@ declare global {
     editor: EditorContainer;
     page: Page;
     workspace: Workspace;
-    blockSchema: BlockSchemaType;
+    blockSchema: typeof BlockSchema;
     Y: typeof Workspace.Y;
     std: typeof std;
   }
