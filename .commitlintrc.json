@@ -1,6 +1,19 @@
 {
-  "extends": [
-    "@commitlint/config-conventional",
-    "@commitlint/config-pnpm-scopes"
-  ]
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "blocks",
+        "editor",
+        "global",
+        "phasor",
+        "playground",
+        "react",
+        "next-example",
+        "store"
+      ]
+    ]
+  }
 }
