@@ -4,10 +4,12 @@
 [![Issues Closed](https://img.shields.io/github/issues-closed/toeverything/blocksuite?color=6880ff)](https://github.com/toeverything/blocksuite/issues?q=is%3Aissue+is%3Aclosed)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
+[![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 
 💠 BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
-👉 [Try BlockSuite-based AFFiNE online](https://pathfinder.affine.pro/)
+- 👉 [Try BlockSuite-based AFFiNE online](https://pathfinder.affine.pro/)
+- 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
 
 ## Introduction
 
@@ -71,7 +73,8 @@ Icons above correspond to the following meanings:
   - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/) ([🔗 source](./packages/playground/examples/basic/index.html))
   - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/packages/app))
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
-- 📦 [Code Sandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
+  - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
+  - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
@@ -89,7 +92,7 @@ If you want to easily reuse most of the rich-text editing features, you can use 
 
 ```ts
 import { SimpleAffineEditor } from '@blocksuite/editor';
-import '@blocksuite/editor/src/themes/affine.css';
+import '@blocksuite/editor/themes/affine.css';
 
 const editor = new SimpleAffineEditor();
 document.body.appendChild(editor);
@@ -102,7 +105,7 @@ Or equivalently, you can also use the declarative style:
   <simple-affine-editor></simple-affine-editor>
   <script type="module">
     import '@blocksuite/editor';
-    import '@blocksuite/editor/src/themes/affine.css';
+    import '@blocksuite/editor/themes/affine.css';
   </script>
 </body>
 ```
