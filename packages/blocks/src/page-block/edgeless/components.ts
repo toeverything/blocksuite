@@ -4,10 +4,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { FrameBlockModel, RootBlockModel } from '../../index.js';
+import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
 import type {
-  BlockSelectionState,
-  HoverState,
+  EdgelessSelectionState,
+  EdgelessHoverState,
   ViewportState,
   XYWH,
 } from './selection-manager.js';
@@ -22,6 +22,7 @@ import {
   PADDING_Y,
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
+  isBlock,
 } from './utils.js';
 
 const SHAPE_PADDING = 48;
@@ -45,7 +46,10 @@ function getCommonRectStyle(
   };
 }
 
-export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
+export function EdgelessHoverRect(
+  hoverState: EdgelessHoverState | null,
+  zoom: number
+) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
   // const isShape = hoverState.block.flavour === 'affine:shape';
@@ -137,7 +141,7 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
 }
 
 function EdgelessBlockChild(
-  model: RootBlockModel,
+  model: TopLevelBlockModel,
   host: BlockHost,
   viewport: ViewportState
 ) {
@@ -200,7 +204,7 @@ export class EdgelessSelectedRect extends LitElement {
   zoom!: number;
 
   @property({ type: Object })
-  state!: BlockSelectionState;
+  state!: EdgelessSelectionState;
 
   @property()
   readonly?: boolean = false;
@@ -292,11 +296,10 @@ export class EdgelessSelectedRect extends LitElement {
     // prevent selection action being fired
     e.stopPropagation();
     if (this.state?.type === 'single') {
-      const {
-        rect,
-        selected: { xywh },
-      } = this.state;
-      const [x, y] = JSON.parse(xywh) as XYWH;
+      const { rect, selected } = this.state;
+      if (!isBlock(selected)) return;
+
+      const [x, y] = JSON.parse(selected.xywh) as XYWH;
       this._dragStartInfo = {
         startMouseX: e.clientX,
         startMouseY: e.clientY,
@@ -317,6 +320,8 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       const { viewport } = this;
       const { selected } = this.state;
+      if (!isBlock(selected)) return;
+
       const { xywh } = selected;
       const [x, y, w, h] = JSON.parse(xywh) as XYWH;
       let newX = x;
@@ -410,6 +415,8 @@ export class EdgelessSelectedRect extends LitElement {
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
     if (this.state.type === 'single') {
+      if (!isBlock(this.state.selected)) return;
+
       this.state.selected.page.captureSync();
     } else {
       console.error('unexpected state.type:', this.state.type);

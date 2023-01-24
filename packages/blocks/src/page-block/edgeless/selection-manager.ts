@@ -2,40 +2,41 @@ import {
   SelectionEvent,
   initMouseEventHandlers,
   MouseMode,
-  RootBlockModel,
+  TopLevelBlockModel,
   noop,
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
-import type {
-  HoverState,
-  MouseModeController,
-} from './mode-controllers/index.js';
+import type { MouseModeController } from './mode-controllers/index.js';
 import type { Disposable } from '@blocksuite/store';
+import type { SurfaceElement } from '@blocksuite/phasor';
 
-export { HoverState };
+export type Selectable = TopLevelBlockModel | SurfaceElement;
 
-interface NoneBlockSelectionState {
-  // No selected block
+export interface EdgelessHoverState {
+  rect: DOMRect;
+  content: Selectable;
+}
+
+/* Indicates there is no selected block */
+interface NoneSelectionState {
   type: 'none';
 }
 
-interface SingleBlockSelectionState {
-  // There is one block that be selected
+/* Indicates there is one selected block */
+interface SingleSelectionState {
   type: 'single';
-  // Which block that be selected
-  selected: RootBlockModel;
-  // Rect of the selected block
+  /* The selected block or surface element */
+  selected: Selectable;
+  /* Rect of the selected content */
   rect: DOMRect;
-  // True if the block is active (like double click)
+  /* True if the selected content is active (like after double click) */
   active: boolean;
 }
 
-export type BlockSelectionState =
-  | NoneBlockSelectionState
-  | SingleBlockSelectionState;
+export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
 
 export interface SelectionArea {
   start: DOMPoint;

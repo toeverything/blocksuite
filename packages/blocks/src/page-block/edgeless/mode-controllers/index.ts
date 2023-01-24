@@ -1,26 +1,22 @@
 import type {
   MouseMode,
-  RootBlockModel,
+  TopLevelBlockModel,
   SelectionEvent,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type {
-  BlockSelectionState,
+  EdgelessSelectionState,
   SelectionArea,
+  EdgelessHoverState,
 } from '../selection-manager.js';
-
-export interface HoverState {
-  rect: DOMRect;
-  block: RootBlockModel;
-}
 
 export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   protected readonly _edgeless: EdgelessPageBlockComponent;
-  protected _blockSelectionState: BlockSelectionState = {
+  protected _blockSelectionState: EdgelessSelectionState = {
     type: 'none',
   };
 
-  protected _hoverState: HoverState | null = null;
+  protected _hoverState: EdgelessHoverState | null = null;
   protected _frameSelectionState: SelectionArea | null = null;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
@@ -57,8 +53,8 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
     return this._edgeless.page;
   }
 
-  protected get _blocks(): RootBlockModel[] {
-    return (this._page.root?.children as RootBlockModel[]) ?? [];
+  protected get _blocks(): TopLevelBlockModel[] {
+    return (this._page.root?.children as TopLevelBlockModel[]) ?? [];
   }
 
   public abstract mouseMode: Mode;

@@ -21,7 +21,7 @@ import {
 } from '../../__internal__/index.js';
 import {
   EdgelessSelectionManager,
-  BlockSelectionState,
+  EdgelessSelectionState,
   ViewportState,
   XYWH,
 } from './selection-manager.js';
@@ -44,7 +44,7 @@ export interface EdgelessContainer extends HTMLElement {
   readonly signals: {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
-    updateSelection: Signal<BlockSelectionState>;
+    updateSelection: Signal<EdgelessSelectionState>;
     shapeUpdated: Signal;
   };
 }
@@ -110,7 +110,7 @@ export class EdgelessPageBlockComponent
 
   signals = {
     viewportUpdated: new Signal(),
-    updateSelection: new Signal<BlockSelectionState>(),
+    updateSelection: new Signal<EdgelessSelectionState>(),
     hoverUpdated: new Signal(),
     shapeUpdated: new Signal(),
   };
