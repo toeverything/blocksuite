@@ -566,7 +566,7 @@ export class DefaultSelectionManager {
       this.state.selectedBlocks.push(this.state.activeComponent);
       return;
     }
-    if (e.raw.target instanceof HTMLTextAreaElement) return;
+    if (isPageTitleElement(e.raw.target)) return;
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
