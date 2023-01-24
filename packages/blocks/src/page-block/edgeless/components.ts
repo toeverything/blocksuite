@@ -4,10 +4,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { FrameBlockModel, RootBlockModel } from '../../index.js';
+import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
 import type {
-  BlockSelectionState,
-  HoverState,
+  EdgelessSelectionState,
+  EdgelessHoverState,
   ViewportState,
   XYWH,
 } from './selection-manager.js';
@@ -45,7 +45,10 @@ function getCommonRectStyle(
   };
 }
 
-export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
+export function EdgelessHoverRect(
+  hoverState: EdgelessHoverState | null,
+  zoom: number
+) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
   // const isShape = hoverState.block.flavour === 'affine:shape';
@@ -137,7 +140,7 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
 }
 
 function EdgelessBlockChild(
-  model: RootBlockModel,
+  model: TopLevelBlockModel,
   host: BlockHost,
   viewport: ViewportState
 ) {
@@ -200,7 +203,7 @@ export class EdgelessSelectedRect extends LitElement {
   zoom!: number;
 
   @property({ type: Object })
-  state!: BlockSelectionState;
+  state!: EdgelessSelectionState;
 
   @property()
   readonly?: boolean = false;

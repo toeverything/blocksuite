@@ -2,7 +2,7 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
   ExtendedModel,
-  RootBlockModel,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
@@ -440,7 +440,7 @@ export function handleBlockSelectionBatchDelete(
 export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const frames = page.root.children as RootBlockModel[];
+    const frames = page.root.children as TopLevelBlockModel[];
     let offset = 0;
     frames.forEach(model => {
       // DO NOT resize shape block

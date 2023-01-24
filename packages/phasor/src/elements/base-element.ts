@@ -1,4 +1,12 @@
-export abstract class BaseElement {
+export interface SurfaceElement {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export abstract class BaseElement implements SurfaceElement {
   abstract type: string;
   id: string;
   index!: string;

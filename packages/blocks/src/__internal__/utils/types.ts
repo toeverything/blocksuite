@@ -76,7 +76,7 @@ export interface BlockSelectionInfo {
 }
 
 // blocks that would only appear under the edgeless container root
-export type RootBlockModel = FrameBlockModel;
+export type TopLevelBlockModel = FrameBlockModel;
 
 export type DefaultMouseMode = {
   type: 'default';
