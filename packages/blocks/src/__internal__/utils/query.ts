@@ -399,7 +399,7 @@ export function isInsideRichText(element: unknown): element is RichText {
 
 export function isTitleElement(
   element: unknown
-): element is HTMLTextAreaElement {
+): element is HTMLTextAreaElement | HTMLInputElement {
   return (
     (element instanceof HTMLTextAreaElement ||
       element instanceof HTMLInputElement) &&
