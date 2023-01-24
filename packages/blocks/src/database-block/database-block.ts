@@ -12,7 +12,7 @@ import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import TagSchema = BlockSuiteInternal.TagSchema;
-import { uuidv4 } from '@blocksuite/store';
+import { nanoid } from '@blocksuite/store';
 import z from 'zod';
 
 const columnPreviewSchema = z.object({
@@ -355,11 +355,6 @@ export class DatabaseBlock extends NonShadowLitElement {
     ) as TagSchema[];
   }
 
-  firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
-  }
-
   private _addRow = () => {
     this.model.page.captureSync();
     this.model.page.addBlockByFlavour('affine:paragraph', {}, this.model.id);
@@ -369,7 +364,7 @@ export class DatabaseBlock extends NonShadowLitElement {
     this.model.page.captureSync();
     // @ts-expect-error
     const column: TagSchema = {
-      id: uuidv4(),
+      id: nanoid(),
       type: columnType,
       name: columnType,
       meta: {
@@ -383,7 +378,12 @@ export class DatabaseBlock extends NonShadowLitElement {
     });
   };
 
-  protected render() {
+  firstUpdated() {
+    this.model.propsUpdated.on(() => this.requestUpdate());
+    this.model.childrenUpdated.on(() => this.requestUpdate());
+  }
+
+  render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
       this.columns.map(column => column.meta.width).reduce((t, x) => t + x) +
