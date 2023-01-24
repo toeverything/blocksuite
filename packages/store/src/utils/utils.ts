@@ -9,8 +9,8 @@ import { PrelimText, Text, TextType } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
-import { Page } from '../workspace/page.js';
-import { BaseBlockModel } from '../base.js';
+import type { Page } from '../workspace/page.js';
+import type { BaseBlockModel } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
