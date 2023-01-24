@@ -24,13 +24,14 @@ import {
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import { Utils } from '@blocksuite/store';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
   if (!parent) {
     return;
   }
-  if (page.doesInsideBlockByFlavour(model, 'affine:database')) {
+  if (Utils.doesInsideBlockByFlavour(page, model, 'affine:database')) {
     // todo: jump into next row
     return;
   }

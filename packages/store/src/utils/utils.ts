@@ -8,7 +8,9 @@ import type {
 import { PrelimText, Text, TextType } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
-import { isPrimitive, SYS_KEYS } from '@blocksuite/global/utils';
+import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
+import { Page } from '../workspace/page.js';
+import { BaseBlockModel } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -192,4 +194,18 @@ export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
 
 export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
   Y.applyUpdateV2(workspace.doc, fromBase64(update));
+}
+
+export function doesInsideBlockByFlavour(
+  page: Page,
+  block: BaseBlockModel,
+  flavour: keyof BlockSuiteInternal.BlockModels
+) {
+  const parent = page.getParent(block);
+  if (parent === null) {
+    return false;
+  } else if (matchFlavours(parent, [flavour])) {
+    return true;
+  }
+  return doesInsideBlockByFlavour(page, block, flavour);
 }

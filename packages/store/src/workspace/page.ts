@@ -256,19 +256,6 @@ export class Page extends Space<PageData> {
     return this.getParentById(this.root.id, block);
   }
 
-  doesInsideBlockByFlavour(
-    block: BaseBlockModel,
-    flavour: keyof BlockSuiteInternal.BlockModels
-  ): boolean {
-    const parent = this.getParent(block);
-    if (parent === null) {
-      return false;
-    } else if (matchFlavours(parent, [flavour])) {
-      return true;
-    }
-    return this.doesInsideBlockByFlavour(block, flavour);
-  }
-
   getPreviousSibling(block: BaseBlockModel) {
     const parent = this.getParent(block);
     if (!parent) {
