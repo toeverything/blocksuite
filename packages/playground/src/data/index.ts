@@ -11,8 +11,14 @@ export function empty(workspace: Workspace) {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
+
+      // Add page block and surface block at root level
       const pageBlockId = page.addBlockByFlavour('affine:page', { title: '' });
+      page.addBlockByFlavour('affine:surface', {}, null);
+
+      // Add frame block inside page block
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      // Add paragraph block inside frame block
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
       resolve(pageId);
     });
@@ -25,10 +31,15 @@ export function heavy(workspace: Workspace) {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
+
+      // Add page block and surface block at root level
       const pageBlockId = page.addBlockByFlavour('affine:page');
       page.addBlockByFlavour('affine:surface', {}, null);
+
+      // Add frame block inside page block
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
       for (let i = 0; i < 1000; i++) {
+        // Add paragraph block inside frame block
         page.addBlockByFlavour(
           'affine:paragraph',
           {
@@ -67,13 +78,16 @@ export function preset(workspace: Workspace) {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
-      const pageBlockId = page.addBlock({
-        flavour: 'affine:page',
+
+      // Add page block and surface block at root level
+      const pageBlockId = page.addBlockByFlavour('affine:page', {
         title: 'Welcome to BlockSuite playground',
       });
-      page.addBlock({ flavour: 'affine:surface' }, null);
+      page.addBlockByFlavour('affine:surface', {}, null);
 
-      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
+      // Add frame block inside page block
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      // Import preset markdown content inside frame block
       await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
 
       requestAnimationFrame(() => {
@@ -90,14 +104,19 @@ export function database(workspace: Workspace) {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
+
+      // Add page block and surface block at root level
       const pageBlockId = page.addBlockByFlavour('affine:page', {
         title: 'Welcome to BlockSuite playground',
       });
       page.addBlockByFlavour('affine:surface', {}, null);
 
+      // Add frame block inside page block
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+
       type Option = 'Done' | 'TODO' | 'WIP';
       const selection = ['Done', 'TODO', 'WIP'] as Option[];
+      // Add database block inside frame block
       const databaseId = page.addBlockByFlavour(
         'affine:database',
         {
