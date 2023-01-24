@@ -384,12 +384,11 @@ export class DatabaseBlock extends NonShadowLitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  private _onTitleKeyDown = (e: KeyboardEvent) => {
-    noop();
-  };
-
   private _onTitleInput = (e: InputEvent) => {
-    console.log('title input');
+    const value = (e.target as HTMLInputElement).value;
+    this.model.page.updateBlock(this.model, {
+      title: value,
+    });
   };
 
   render() {
@@ -405,7 +404,6 @@ export class DatabaseBlock extends NonShadowLitElement {
           data-block-is-title="true"
           .value=${this.model.title}
           placeholder="Database"
-          @keydown=${this._onTitleKeyDown}
           @input=${this._onTitleInput}
         />
       </div>
