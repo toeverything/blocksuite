@@ -116,7 +116,6 @@ export function getOptions(): Pick<
       enable_set_remote_flag: true,
       enable_drag_handle: true,
       enable_block_hub: true,
-      enable_surface: params.get('surface') !== null,
       enable_database: params.get('database') !== null,
       readonly: {
         'space:page0': false,
