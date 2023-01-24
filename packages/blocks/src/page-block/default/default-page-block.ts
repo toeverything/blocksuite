@@ -374,6 +374,7 @@ export class DefaultPageBlockComponent
               ?disabled=${this.readonly}
               .value=${this.model.title}
               placeholder="Title"
+              data-block-is-title="true"
               class="affine-default-page-block-title"
               @keydown=${this._onTitleKeyDown}
               @input=${this._onTitleInput}

@@ -5,6 +5,7 @@ import {
   BLOCK_ID_ATTR,
   BlockElementWithService,
   BlockHost,
+  noop,
 } from '../__internal__/index.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -383,6 +384,14 @@ export class DatabaseBlock extends NonShadowLitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
+  private _onTitleKeyDown = (e: KeyboardEvent) => {
+    noop();
+  };
+
+  private _onTitleInput = (e: InputEvent) => {
+    console.log('title input');
+  };
+
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
@@ -393,8 +402,11 @@ export class DatabaseBlock extends NonShadowLitElement {
       <div>
         <input
           class="affine-database-block-title"
+          data-block-is-title="true"
           .value=${this.model.title}
           placeholder="Database"
+          @keydown=${this._onTitleKeyDown}
+          @input=${this._onTitleInput}
         />
       </div>
       <div class="affine-database-block">

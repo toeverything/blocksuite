@@ -17,7 +17,7 @@ import {
   IPoint,
   doesInSamePath,
   getCurrentRange,
-  isPageTitleElement,
+  isTitleElement,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -444,7 +444,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isPageTitleElement(e.raw.target)) return;
+    if (isTitleElement(e.raw.target)) return;
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
@@ -566,7 +566,10 @@ export class DefaultSelectionManager {
       this.state.selectedBlocks.push(this.state.activeComponent);
       return;
     }
-    if (e.raw.target instanceof HTMLTextAreaElement) return;
+    const target = e.raw.target;
+    if (isTitleElement(target)) {
+      return;
+    }
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
