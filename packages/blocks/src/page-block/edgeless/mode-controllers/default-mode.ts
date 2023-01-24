@@ -214,6 +214,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
     }
 
-    this._updateHoverState(this._hoverState?.content || null);
+    this._updateHoverState(this._hoverState?.content ?? null);
   }
 }
