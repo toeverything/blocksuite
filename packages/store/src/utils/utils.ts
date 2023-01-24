@@ -200,7 +200,7 @@ export function doesInsideBlockByFlavour(
   page: Page,
   block: BaseBlockModel,
   flavour: keyof BlockSuiteInternal.BlockModels
-) {
+): boolean {
   const parent = page.getParent(block);
   if (parent === null) {
     return false;
