@@ -1,6 +1,7 @@
 import type { EdgelessContainer } from './edgeless-page-block.js';
 import type { ViewportState, Selectable, XYWH } from './selection-manager.js';
 import type { TopLevelBlockModel } from '../../__internal__/index.js';
+import type { SurfaceElement } from '@blocksuite/phasor';
 
 export const DEFAULT_SPACING = 64;
 
@@ -11,8 +12,16 @@ export const PADDING_Y = 48;
 // XXX: edgeless frame min length
 export const FRAME_MIN_LENGTH = 20;
 
-export function isBlock(block: Selectable | null): block is TopLevelBlockModel {
-  return !!block && 'flavour' in block;
+export function isBlock(
+  selectable: Selectable | null
+): selectable is TopLevelBlockModel {
+  return !!selectable && 'flavour' in selectable;
+}
+
+export function isSurfaceElement(
+  selectable: Selectable | null
+): selectable is SurfaceElement {
+  return !isBlock(selectable);
 }
 
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
