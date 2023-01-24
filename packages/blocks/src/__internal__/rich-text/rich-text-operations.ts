@@ -30,6 +30,10 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   if (!parent) {
     return;
   }
+  if (page.doesInsideBlockByFlavour(model, 'affine:database')) {
+    // todo: jump into next row
+    return;
+  }
   const index = parent.children.indexOf(model);
   if (index === -1) {
     return;

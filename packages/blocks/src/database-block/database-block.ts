@@ -5,7 +5,6 @@ import {
   BLOCK_ID_ATTR,
   BlockElementWithService,
   BlockHost,
-  noop,
 } from '../__internal__/index.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { repeat } from 'lit/directives/repeat.js';
