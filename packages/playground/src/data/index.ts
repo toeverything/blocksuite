@@ -86,77 +86,82 @@ export function preset(workspace: Workspace) {
   });
 }
 
-export function database(workspace: Workspace) {
-  workspace.signals.pageAdded.once(async id => {
-    const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlockByFlavour('affine:page', {
-      title: 'Welcome to BlockSuite playground',
+export async function database(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(async pageId => {
+      const page = workspace.getPage(pageId) as Page;
+      const pageBlockId = page.addBlockByFlavour('affine:page', {
+        title: 'Welcome to BlockSuite playground',
+      });
+      page.addBlockByFlavour('affine:surface', {}, null);
+
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      type Option = 'Done' | 'TODO' | 'WIP';
+      const selection = ['Done', 'TODO', 'WIP'] as Option[];
+      const databaseId = page.addBlockByFlavour(
+        'affine:database',
+        {
+          columns: ['1', '2'],
+        },
+        frameId
+      );
+      const p1 = page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(page, '1'),
+        },
+        databaseId
+      );
+      const p2 = page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(page, '2'),
+        },
+        databaseId
+      );
+
+      page.setTagSchema({
+        meta: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        name: 'Select',
+        id: '1',
+        type: 'select',
+        selection: selection,
+      });
+      page.setTagSchema({
+        meta: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        name: 'Select 2',
+        id: '2',
+        type: 'select',
+        selection: selection,
+      });
+
+      page.updateBlockTag(p1, {
+        type: '1',
+        value: 'text1',
+      });
+
+      page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
+        p2,
+        {
+          type: '2',
+          value: 'TODO',
+        }
+      );
+
+      requestAnimationFrame(() => {
+        page.resetHistory();
+        resolve(pageId);
+      });
     });
-    page.addBlockByFlavour('affine:surface', {}, null);
 
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-    type Option = 'Done' | 'TODO' | 'WIP';
-    const selection = ['Done', 'TODO', 'WIP'] as Option[];
-    const databaseId = page.addBlockByFlavour(
-      'affine:database',
-      {
-        columns: ['1', '2'],
-      },
-      frameId
-    );
-    const p1 = page.addBlockByFlavour(
-      'affine:paragraph',
-      {
-        text: new page.Text(page, '1'),
-      },
-      databaseId
-    );
-    const p2 = page.addBlockByFlavour(
-      'affine:paragraph',
-      {
-        text: new page.Text(page, '2'),
-      },
-      databaseId
-    );
-
-    page.setTagSchema({
-      meta: {
-        color: '#ff0000',
-        width: 200,
-        hide: false,
-      },
-      name: 'Select',
-      id: '1',
-      type: 'select',
-      selection: selection,
-    });
-    page.setTagSchema({
-      meta: {
-        color: '#ff0000',
-        width: 200,
-        hide: false,
-      },
-      name: 'Select 2',
-      id: '2',
-      type: 'select',
-      selection: selection,
-    });
-
-    page.updateBlockTag(p1, {
-      type: '1',
-      value: 'text1',
-    });
-
-    page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
-      p2,
-      {
-        type: '2',
-        value: 'TODO',
-      }
-    );
-
-    requestAnimationFrame(() => page.resetHistory());
+    workspace.createPage('page0');
   });
-
-  workspace.createPage('page0');
 }
