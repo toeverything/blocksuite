@@ -383,6 +383,13 @@ export class DatabaseBlock extends NonShadowLitElement {
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
+  private _onTitleInput = (e: InputEvent) => {
+    const value = (e.target as HTMLInputElement).value;
+    this.model.page.updateBlock(this.model, {
+      title: value,
+    });
+  };
+
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
@@ -393,8 +400,10 @@ export class DatabaseBlock extends NonShadowLitElement {
       <div>
         <input
           class="affine-database-block-title"
+          data-block-is-title="true"
           .value=${this.model.title}
           placeholder="Database"
+          @input=${this._onTitleInput}
         />
       </div>
       <div class="affine-database-block">

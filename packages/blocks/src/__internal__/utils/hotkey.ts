@@ -1,10 +1,6 @@
 import hotkeys from 'hotkeys-js';
 import type { KeyHandler } from 'hotkeys-js';
-import {
-  isCaptionElement,
-  isInsideRichText,
-  isPageTitleElement,
-} from './query.js';
+import { isCaptionElement, isInsideRichText, isTitleElement } from './query.js';
 
 hotkeys.filter = (event: KeyboardEvent) => {
   if (shouldFilter(event)) {
@@ -41,7 +37,7 @@ function shouldFilter(event: KeyboardEvent) {
       return false;
     }
     // undo/redo should work in page title
-    if (isPageTitleElement(event.target) && isUndoRedo(event)) {
+    if (isTitleElement(event.target) && isUndoRedo(event)) {
       event.preventDefault();
       return false;
     }

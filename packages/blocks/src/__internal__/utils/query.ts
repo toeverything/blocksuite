@@ -397,12 +397,13 @@ export function isInsideRichText(element: unknown): element is RichText {
   return !!richText;
 }
 
-export function isPageTitleElement(
+export function isTitleElement(
   element: unknown
-): element is HTMLTextAreaElement {
+): element is HTMLTextAreaElement | HTMLInputElement {
   return (
-    element instanceof HTMLTextAreaElement &&
-    element.classList.contains('affine-default-page-block-title')
+    (element instanceof HTMLTextAreaElement ||
+      element instanceof HTMLInputElement) &&
+    element.getAttribute('data-block-is-title') === 'true'
   );
 }
 
@@ -418,7 +419,7 @@ export function isCaptionElement(node: unknown): node is HTMLInputElement {
  * It include all of element in editor.
  * This is very useful when wanting to handle edges between blocks.
  *
- * See also {@link isInsideRichText} or {@link isPageTitleElement}
+ * See also {@link isInsideRichText} or {@link isTitleElement}
  */
 export function isInsideBlockContainer(element: unknown): element is Node {
   const defaultBlockContainer = document.querySelector(
