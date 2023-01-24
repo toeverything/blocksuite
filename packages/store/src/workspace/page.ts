@@ -217,8 +217,8 @@ export class Page extends Space<PageData> {
     return (tags?.get(schema.id) as BlockTag) ?? null;
   }
 
-  getTagSchema(id: TagSchema['id']) {
-    return this.tagSchema.get(id) ?? (null as TagSchema | null);
+  getTagSchema(id: TagSchema['id']): TagSchema | null {
+    return (this.tagSchema.get(id) ?? null) as TagSchema | null;
   }
 
   setTagSchema(schema: TagSchema) {
@@ -682,8 +682,7 @@ export class Page extends Space<PageData> {
     const isRoot = this._blockMap.size === 0;
     let isSurface = false;
 
-    const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-    const props = toBlockProps(prefixedProps) as BlockProps;
+    const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
     if (model.flavour === 'affine:surface') {
       isSurface = true;
@@ -707,7 +706,7 @@ export class Page extends Space<PageData> {
     model.text = text;
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
-      model.tagSchema = yBlock.get('meta:tags') as Y.Map<unknown>;
+      model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
     }
 
     const yChildren = yBlock.get('sys:children');

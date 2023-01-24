@@ -9,6 +9,7 @@ import { PageBlockModel } from './page-block/page-model.js';
 import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import { SurfaceBlockModel } from './surface-block/surface-model.js';
+import { DatabaseBlockModel } from './database-block/database-model.js';
 
 export {
   CodeBlockModel,
@@ -18,6 +19,7 @@ export {
   ListBlockModel,
   PageBlockModel,
   ParagraphBlockModel,
+  DatabaseBlockModel,
 };
 
 // TODO support dynamic register
@@ -30,6 +32,7 @@ export const BlockSchema = {
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
   'affine:surface': SurfaceBlockModel,
+  'affine:database': DatabaseBlockModel,
 };
 
 export type Flavour = keyof typeof BlockSchema;

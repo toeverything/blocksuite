@@ -11,7 +11,6 @@ import {
   getOptions,
   tryInitExternalContent,
   initDebugConfig,
-  initFeatureFlags,
   initParam,
   isE2E,
 } from './utils.js';
@@ -26,7 +25,6 @@ initDebugConfig();
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
     const page = workspace.getPage(pageId) as Page;
-    initFeatureFlags(page);
 
     const editor = new EditorContainer();
     editor.page = page;

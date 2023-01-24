@@ -71,6 +71,7 @@ const flagsPreset = {
   enable_surface: true,
   enable_slash_menu: false,
   enable_append_flavor_slash: false,
+  enable_database: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

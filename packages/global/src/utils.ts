@@ -28,10 +28,24 @@ export function matchFlavours<
     string = keyof BlockSuiteInternal.BlockModels & string
 >(
   model: { flavour: Key },
-  expected: Key[]
+  expected: readonly Key[]
 ): boolean /* model is BlockModels[Key] */ {
   return expected.includes(model.flavour as Key);
 }
+
+export const nonTextBlock: (keyof BlockSuiteInternal.BlockModels)[] = [
+  'affine:database',
+  'affine:divider',
+  'affine:embed',
+  'affine:code',
+];
+
+export const isNonTextBlock = <
+  Key extends keyof BlockSuiteInternal.BlockModels &
+    string = keyof BlockSuiteInternal.BlockModels & string
+>(model: {
+  flavour: Key;
+}) => matchFlavours(model, nonTextBlock);
 
 type Allowed =
   | null

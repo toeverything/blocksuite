@@ -267,7 +267,22 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     if (!parent || matchFlavours(parent, ['affine:frame'])) {
       const container = getContainerByModel(model);
       const previousSibling = getPreviousBlock(container, model.id);
+      const previousSiblingParent = previousSibling
+        ? page.getParent(previousSibling)
+        : null;
       if (
+        previousSiblingParent &&
+        matchFlavours(previousSiblingParent, ['affine:database'])
+      ) {
+        window.requestAnimationFrame(() => {
+          focusBlockByModel(previousSiblingParent, 'end');
+          // We can not delete block if the block has content
+          if (!model.text?.length) {
+            page.captureSync();
+            page.deleteBlock(model);
+          }
+        });
+      } else if (
         previousSibling &&
         matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
       ) {

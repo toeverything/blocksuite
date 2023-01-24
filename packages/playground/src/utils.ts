@@ -4,12 +4,12 @@ import {
   configDebugLog,
 } from '@blocksuite/global/debug';
 import {
+  Page,
   assertExists,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
-  Page,
   StoreOptions,
   Utils,
   Workspace,
@@ -116,6 +116,7 @@ export function getOptions(): Pick<
       enable_set_remote_flag: true,
       enable_drag_handle: true,
       enable_block_hub: true,
+      enable_database: params.get('database') !== null,
       readonly: {
         'space:page0': false,
       },

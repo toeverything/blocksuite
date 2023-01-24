@@ -11,6 +11,7 @@ import './embed-block';
 import './embed-block/image';
 import './surface-block';
 import './components/slash-menu';
+import './database-block';
 
 export * from './counter-block/index.js';
 export * from './embed-block/index.js';
@@ -22,6 +23,7 @@ export * from './code-block/index.js';
 export * from './divider-block/index.js';
 export * from './embed-block/image/index.js';
 export * from './surface-block/index.js';
+export * from './database-block/index.js';
 export * as SelectionUtils from './__internal__/utils/selection.js';
 export * from './__internal__/utils/types.js';
 export * from './__internal__/utils/common-operations.js';
