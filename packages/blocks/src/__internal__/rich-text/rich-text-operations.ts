@@ -237,6 +237,10 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     focusBlockByModel(model);
     return;
   }
+  if (Utils.doesInsideBlockByFlavour(page, model, 'affine:database')) {
+    // Forbid user to delete a block inside database block
+    return;
+  }
 
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
