@@ -107,7 +107,7 @@ export class DragHandle extends LitElement {
   }
 
   /**
-   * A function that returns all allowed blocks to drag and drop.
+   * A function that returns all blocks that are allowed to be moved to
    *
    * If there is `draggingBlock`, the user is dragging a block to another place
    *
