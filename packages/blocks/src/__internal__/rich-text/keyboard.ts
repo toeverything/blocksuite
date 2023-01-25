@@ -297,7 +297,8 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         return onSoftEnter(this.quill);
       },
     },
-    shortEnter: {
+    // shortKey+enter
+    insertLineAfter: {
       key: 'enter',
       shortKey: true,
       handler() {
