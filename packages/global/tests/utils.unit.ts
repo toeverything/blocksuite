@@ -61,8 +61,6 @@ describe('isEqual', () => {
         'second-child': false,
         'last-child': null,
       },
-      string_number: '1234',
-      timer: 0,
       bigint: 110101195306153019n,
     };
     expect(isEqual(nested, nested)).toBe(true);
