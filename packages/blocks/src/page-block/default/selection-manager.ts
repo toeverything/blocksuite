@@ -154,14 +154,14 @@ export class PageSelectionState {
 }
 
 export class DefaultSelectionManager {
-  page: Page;
-  state = new PageSelectionState('none');
-  private _mouseRoot: HTMLElement;
-  private _container: DefaultPageBlockComponent;
-  private _disposables = new DisposableGroup();
-  private _signals: DefaultPageSignals;
-  private _embedResizeManager: EmbedResizeManager;
-  private _dragHandleAbortController = new AbortController();
+  readonly page: Page;
+  readonly state = new PageSelectionState('none');
+  private readonly _mouseRoot: HTMLElement;
+  private readonly _container: DefaultPageBlockComponent;
+  private readonly _disposables = new DisposableGroup();
+  private readonly _signals: DefaultPageSignals;
+  private readonly _embedResizeManager: EmbedResizeManager;
+  private readonly _dragHandleAbortController = new AbortController();
 
   private _dragHandle: DragHandle | null = null;
   private _blockHub: BlockHub | null = null;
