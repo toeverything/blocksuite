@@ -21,6 +21,7 @@ import {
   BLOCK_SERVICE_LOADING_ATTR,
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   isCaptionElement,
+  doesInSamePath,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -685,31 +686,84 @@ export function toggleWrap(codeBlockOption: CodeBlockOption) {
   syntaxElem.classList.toggle('wrap');
 }
 
+export function getAllowSelectedBlocks(
+  model: BaseBlockModel
+): BaseBlockModel[] {
+  const result: BaseBlockModel[] = [];
+  const blocks = model.children.slice();
+  if (!blocks) {
+    return [];
+  }
+
+  const dfs = (
+    blocks: BaseBlockModel[],
+    depth: number,
+    parentIndex: number
+  ) => {
+    for (const block of blocks) {
+      if (block.flavour !== 'affine:frame') {
+        result.push(block);
+      }
+      block.depth = depth;
+      if (parentIndex !== -1) {
+        block.parentIndex = parentIndex;
+      }
+      if (block.flavour === 'affine:database') {
+        // ignore to push the children inside the database block
+        return;
+      }
+      block.children.length &&
+        dfs(block.children, depth + 1, result.length - 1);
+    }
+  };
+
+  dfs(blocks, 0, -1);
+  return result;
+}
+
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
-    getBlockEditingStateByCursor(
-      pageX: number,
-      pageY: number,
-      cursor: number,
-      size: number | undefined,
-      skipX: boolean | undefined,
-      dragging: boolean | undefined
-    ): EditingState | null {
-      throw new Error('Unimplemented');
+    getBlockEditingStateByCursor(pageX, pageY, cursor, size, skipX, dragging) {
+      assertExists(defaultPageBlock.page.root);
+      return getBlockEditingStateByCursor(
+        getAllowSelectedBlocks(defaultPageBlock.page.root),
+        pageX,
+        pageY,
+        cursor,
+        {
+          size,
+          skipX,
+          dragging,
+        }
+      );
     },
-    getBlockEditingStateByPosition(
-      pageX: number,
-      pageY: number,
-      skipX: boolean | undefined
-    ): EditingState | null {
-      throw new Error('Unimplemented');
+    getBlockEditingStateByPosition(pageX, pageY, skipX) {
+      assertExists(defaultPageBlock.page.root);
+      return getBlockEditingStateByPosition(
+        getAllowSelectedBlocks(defaultPageBlock.page.root),
+        pageX,
+        pageY,
+        {
+          skipX,
+        }
+      );
     },
-    onDropCallback(
-      e: DragEvent,
-      startModelState: EditingState,
-      lastModelState: EditingState
-    ): void {
-      throw new Error('Unimplemented');
+    onDropCallback(e, start, end): void {
+      const page = defaultPageBlock.page;
+      const startModel = start.model;
+      const rect = end.position;
+      const nextModel = end.model;
+      if (doesInSamePath(page, nextModel, startModel)) {
+        return;
+      }
+      page.captureSync();
+      const distanceToTop = Math.abs(rect.top - e.y);
+      const distanceToBottom = Math.abs(rect.bottom - e.y);
+      page.moveBlock(startModel, nextModel, distanceToTop < distanceToBottom);
+      defaultPageBlock.signals.updateSelectedRects.emit([]);
+      defaultPageBlock.signals.updateFrameSelectionRect.emit(null);
+      defaultPageBlock.signals.updateEmbedEditingState.emit(null);
+      defaultPageBlock.signals.updateEmbedRects.emit([]);
     },
     setSelectedBlocks(selectedBlocks: Element | null): void {
       defaultPageBlock.signals.updateSelectedRects.emit(
