@@ -1,5 +1,6 @@
 import { paragraphConfig } from '@blocksuite/global/config';
-import { BaseBlockModel, PrelimText } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { PrelimText } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

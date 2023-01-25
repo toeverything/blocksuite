@@ -4,7 +4,6 @@ import {
   configDebugLog,
 } from '@blocksuite/global/debug';
 import {
-  Page,
   assertExists,
   DebugDocProvider,
   DocProviderConstructor,
@@ -25,22 +24,6 @@ export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-
-export function initFeatureFlags(page: Page) {
-  const slashFlag = params.get('slash');
-  switch (slashFlag) {
-    case '0':
-      page.awarenessStore.setFlag('enable_slash_menu', false);
-      break;
-    case '1':
-      page.awarenessStore.setFlag('enable_slash_menu', true);
-      page.awarenessStore.setFlag('enable_append_flavor_slash', true);
-      break;
-    default:
-      page.awarenessStore.setFlag('enable_slash_menu', true);
-      break;
-  }
-}
 
 export function initDebugConfig() {
   Object.defineProperty(globalThis, 'enableDebugLog', {
@@ -117,6 +100,8 @@ export function getOptions(): Pick<
       enable_drag_handle: true,
       enable_block_hub: true,
       enable_database: params.get('database') !== null,
+      enable_slash_menu: params.get('slash') !== '0',
+      enable_append_flavor_slash: params.get('slash') === '1',
       readonly: {
         'space:page0': false,
       },
