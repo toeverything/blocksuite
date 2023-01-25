@@ -1,8 +1,8 @@
 import {
-  SelectionEvent,
+  type SelectionEvent,
   initMouseEventHandlers,
-  MouseMode,
-  TopLevelBlockModel,
+  type MouseMode,
+  type TopLevelBlockModel,
   noop,
 } from '../../__internal__/index.js';
 import { initWheelEventHandlers } from './utils.js';

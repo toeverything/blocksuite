@@ -1,6 +1,7 @@
 import { BaseElement } from '../base-element.js';
 import { getRectanglePath } from './rect-utils.js';
-import { DashStyle, ShapeStyles, SizeStyle } from './shape-style.js';
+import type { ShapeStyles } from './shape-style.js';
+import { DashStyle, SizeStyle } from './shape-style.js';
 
 export type ShapeType = 'rect' | 'triangle';
 

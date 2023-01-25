@@ -10,7 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import {
-  DragDirection,
+  type DragDirection,
   getFormat,
   updateSelectedTextType,
 } from '../../page-block/utils/index.js';

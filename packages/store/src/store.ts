@@ -11,7 +11,7 @@ import {
 } from './utils/id-generator.js';
 import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
-import { AwarenessStore, RawAwarenessState } from './awareness.js';
+import { AwarenessStore, type RawAwarenessState } from './awareness.js';
 import type { BlobOptionsGetter } from './blob/index.js';
 
 export interface SerializedStore {

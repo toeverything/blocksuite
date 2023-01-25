@@ -1,4 +1,5 @@
-import { Disposable, flattenDisposable } from './disposable.js';
+import type { Disposable } from './disposable.js';
+import { flattenDisposable } from './disposable.js';
 
 // borrowed from blocky-editor
 // https://github.com/vincentdchan/blocky-editor

@@ -10,11 +10,11 @@ import {
   isBlankArea,
   isEmbed,
   resetNativeSelection,
-  SelectionEvent,
+  type SelectionEvent,
   getBlockElementByModel,
   getAllBlocks,
   getDefaultPageBlock,
-  IPoint,
+  type IPoint,
   getCurrentRange,
   isTitleElement,
 } from '../../__internal__/index.js';

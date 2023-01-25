@@ -1,13 +1,8 @@
 import * as Y from 'yjs';
 import { generateKeyBetween } from 'fractional-indexing';
 import type { IBound } from './consts.js';
-import {
-  Element,
-  ElementType,
-  DebugElement,
-  ShapeElement,
-  ShapeType,
-} from './elements/index.js';
+import type { Element, ElementType, ShapeType } from './elements/index.js';
+import { DebugElement, ShapeElement } from './elements/index.js';
 import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from 'nanoid';

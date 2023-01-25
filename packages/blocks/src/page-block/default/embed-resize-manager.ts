@@ -1,4 +1,8 @@
-import { getModelByElement, IPoint, SelectionEvent } from '../../std.js';
+import {
+  getModelByElement,
+  type IPoint,
+  type SelectionEvent,
+} from '../../std.js';
 import type { DefaultPageSignals } from '../index.js';
 import type { PageSelectionState } from './selection-manager.js';
 import { assertExists } from '@blocksuite/global/utils';

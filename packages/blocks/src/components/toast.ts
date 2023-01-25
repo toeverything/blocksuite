@@ -1,4 +1,4 @@
-import { css, html, TemplateResult } from 'lit';
+import { css, html, type TemplateResult } from 'lit';
 
 let ToastContainer: HTMLDivElement | null = null;
 

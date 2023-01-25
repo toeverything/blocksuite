@@ -36,4 +36,5 @@ export class ParagraphBlockService extends BaseService {
   }
 }
 
+// @ts-expect-error
 export default ParagraphBlockService;

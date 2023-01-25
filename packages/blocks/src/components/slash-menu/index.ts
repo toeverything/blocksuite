@@ -2,7 +2,7 @@ import { BaseBlockModel, PrelimText } from '@blocksuite/store';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
-  DragDirection,
+  type DragDirection,
 } from '../../page-block/utils/position.js';
 import {
   getQuillIndexByNativeSelection,

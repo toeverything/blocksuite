@@ -1,5 +1,5 @@
 import type { PageMeta, Workspace } from '../workspace.js';
-import { LitElement, html, PropertyValues } from 'lit';
+import { LitElement, html, type PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 @customElement('test-app')

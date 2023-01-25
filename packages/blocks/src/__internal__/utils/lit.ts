@@ -1,4 +1,9 @@
-import { CSSResult, CSSResultGroup, CSSResultOrNative, LitElement } from 'lit';
+import {
+  CSSResult,
+  type CSSResultGroup,
+  type CSSResultOrNative,
+  LitElement,
+} from 'lit';
 
 export class NonShadowLitElement extends LitElement {
   static disableShadowRoot = true;

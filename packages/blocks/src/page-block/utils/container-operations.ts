@@ -1,8 +1,8 @@
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
-  ExtendedModel,
-  TopLevelBlockModel,
+  type ExtendedModel,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {

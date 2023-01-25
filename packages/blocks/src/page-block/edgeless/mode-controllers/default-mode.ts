@@ -9,7 +9,7 @@ import {
   handleNativeRangeDragMove,
   noop,
   resetNativeSelection,
-  TopLevelBlockModel,
+  type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import {
   getNativeSelectionMouseDragInfo,

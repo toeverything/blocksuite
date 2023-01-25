@@ -2,7 +2,7 @@ import { Signal } from '@blocksuite/store';
 import {
   calcPositionPointByRange,
   calcSafeCoordinate,
-  DragDirection,
+  type DragDirection,
 } from '../../page-block/utils/position.js';
 import {
   getContainerByModel,

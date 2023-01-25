@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { type Page, expect } from '@playwright/test';
 import type { TestResult } from './test-utils-dom.js';
 
 // TODO: use custom playwright reporter

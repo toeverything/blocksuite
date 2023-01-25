@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { createYMapProxy, ProxyConfig } from './proxy.js';
+import { createYMapProxy, type ProxyConfig } from './proxy.js';
 
 export type BlockSuiteDocAllowedValue =
   | Record<string, unknown>

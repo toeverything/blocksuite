@@ -4,7 +4,7 @@ import type { CodeBlockModel } from './code-model.js';
 import { toolTipStyle } from '../components/tooltip.js';
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';

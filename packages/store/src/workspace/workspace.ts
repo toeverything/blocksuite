@@ -1,13 +1,13 @@
 import * as Y from 'yjs';
-import { Store, StoreOptions } from '../store.js';
+import { Store, type StoreOptions } from '../store.js';
 import { Space } from '../space.js';
 import { Page } from './page.js';
 import { Signal } from '@blocksuite/global/utils';
-import { Indexer, QueryContent } from './search.js';
+import { Indexer, type QueryContent } from './search.js';
 import type { BaseBlockModel } from '../base.js';
 import {
   BlobStorage,
-  BlobOptionsGetter,
+  type BlobOptionsGetter,
   getBlobStorage,
 } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';

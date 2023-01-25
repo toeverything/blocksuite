@@ -2,12 +2,12 @@ import * as Y from 'yjs';
 import type { Quill } from 'quill';
 import { uuidv4 } from 'lib0/random.js';
 import { BaseBlockModel } from '../base.js';
-import { Space, StackItem } from '../space.js';
+import { Space, type StackItem } from '../space.js';
 import {
   Text,
   PrelimText,
   RichTextAdapter,
-  TextType,
+  type TextType,
 } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import { Signal } from '@blocksuite/global/utils';
@@ -23,8 +23,8 @@ import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
-import BlockTag = BlockSuiteInternal.BlockTag;
-import TagSchema = BlockSuiteInternal.TagSchema;
+type BlockTag = BlockSuiteInternal.BlockTag;
+type TagSchema = BlockSuiteInternal.TagSchema;
 import type { AwarenessStore } from '../awareness.js';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;

@@ -3,7 +3,7 @@ import {
   getCurrentRange,
   isMultiLineRange,
   resetNativeSelection,
-  SelectionEvent,
+  type SelectionEvent,
 } from '../../__internal__/index.js';
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
 

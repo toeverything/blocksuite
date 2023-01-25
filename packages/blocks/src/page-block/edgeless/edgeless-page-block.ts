@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { Disposable, Signal, Page } from '@blocksuite/store';
+import { type Disposable, Signal, Page } from '@blocksuite/store';
 import type {
   FrameBlockModel,
   MouseMode,
@@ -13,15 +13,15 @@ import {
   EdgelessFrameSelectionRect,
 } from './components.js';
 import {
-  BlockHost,
+  type BlockHost,
   hotkey,
   resetNativeSelection,
 } from '../../__internal__/index.js';
 import {
   EdgelessSelectionManager,
-  EdgelessSelectionState,
+  type EdgelessSelectionState,
   ViewportState,
-  XYWH,
+  type XYWH,
 } from './selection-manager.js';
 import {
   bindCommonHotkey,

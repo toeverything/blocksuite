@@ -5,7 +5,7 @@ import type {
   YBlock,
   YBlocks,
 } from '../workspace/page.js';
-import { PrelimText, Text, TextType } from '../text-adapter.js';
+import { PrelimText, Text, type TextType } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';

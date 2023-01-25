@@ -3,7 +3,7 @@
 import { Page, Text } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import {
-  ExtendedModel,
+  type ExtendedModel,
   getRichTextByModel,
   getContainerByModel,
   getPreviousBlock,

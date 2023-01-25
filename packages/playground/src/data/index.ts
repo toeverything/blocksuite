@@ -5,7 +5,6 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
-import BlockTag = BlockSuiteInternal.BlockTag;
 
 export function empty(workspace: Workspace) {
   return new Promise<string>(resolve => {
@@ -167,13 +166,12 @@ export function database(workspace: Workspace) {
         value: 'text1',
       });
 
-      page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
-        p2,
-        {
-          type: '2',
-          value: 'TODO',
-        }
-      );
+      page.updateBlockTag<
+        BlockSuiteInternal.BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>
+      >(p2, {
+        type: '2',
+        value: 'TODO',
+      });
 
       requestAnimationFrame(() => {
         page.resetHistory();

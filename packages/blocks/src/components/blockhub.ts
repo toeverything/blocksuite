@@ -1,4 +1,4 @@
-import { css, html, TemplateResult } from 'lit';
+import { css, html, type TemplateResult } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { NonShadowLitElement } from '../__internal__/index.js';
 import type {

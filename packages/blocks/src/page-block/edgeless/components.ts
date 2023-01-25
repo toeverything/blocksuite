@@ -13,7 +13,7 @@ import type {
 } from './selection-manager.js';
 import {
   BlockElement,
-  BlockHost,
+  type BlockHost,
   getBlockById,
 } from '../../__internal__/index.js';
 import '../../__internal__/index.js';

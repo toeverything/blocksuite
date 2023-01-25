@@ -37,3 +37,6 @@ export class CodeBlockService extends BaseService {
     return codeElement.outerHTML;
   }
 }
+
+// @ts-expect-error
+export default CodeBlockService;

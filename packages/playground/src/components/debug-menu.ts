@@ -25,8 +25,8 @@ import {
   getCurrentRange,
   getModelsByRange,
   type FrameBlockModel,
-  MouseMode,
-  ShapeMouseMode,
+  type MouseMode,
+  type ShapeMouseMode,
   updateSelectedTextType,
   NonShadowLitElement,
 } from '@blocksuite/blocks';

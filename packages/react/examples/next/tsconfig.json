@@ -4,7 +4,7 @@
     "composite": true,
     "strict": true,
     "jsx": "preserve",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "noEmit": false,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true

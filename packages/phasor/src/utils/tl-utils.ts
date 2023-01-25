@@ -1690,6 +1690,7 @@ left past the initial left edge) then swap points on that axis.
   }
 }
 
+// @ts-expect-error
 export default Utils;
 
 function average(a: number, b: number): number {

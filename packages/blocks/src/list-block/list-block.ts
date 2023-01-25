@@ -3,7 +3,7 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
   BlockChildrenContainer,
-  BlockHost,
+  type BlockHost,
   getBlockElementByModel,
   getDefaultPageBlock,
   NonShadowLitElement,

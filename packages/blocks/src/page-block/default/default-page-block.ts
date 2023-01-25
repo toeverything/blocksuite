@@ -17,7 +17,7 @@ import {
   getCurrentRange,
   hotkey,
   isMultiBlockRange,
-  SelectionPosition,
+  type SelectionPosition,
 } from '../../__internal__/index.js';
 import { DefaultSelectionManager } from './selection-manager.js';
 import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';

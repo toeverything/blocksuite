@@ -1,4 +1,5 @@
-import { IBound, MIN_ZOOM } from './consts.js';
+import type { IBound } from './consts.js';
+import { MIN_ZOOM } from './consts.js';
 import { GridManager } from './grid.js';
 import type { Element } from './elements/index.js';
 

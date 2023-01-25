@@ -1,5 +1,6 @@
 import type { Element } from './elements/index.js';
-import { GRID_SIZE, IBound } from './consts.js';
+import type { IBound } from './consts.js';
+import { GRID_SIZE } from './consts.js';
 
 function isPointIn(a: IBound, x: number, y: number): boolean {
   return a.x < x && x <= a.x + a.w && a.y < y && y <= a.y + a.h;
