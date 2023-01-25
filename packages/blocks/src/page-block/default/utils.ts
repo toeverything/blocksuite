@@ -171,6 +171,19 @@ function binarySearchBlockEditingState(
         options
       );
       return result;
+    } else if (matchFlavours(block, ['affine:database'])) {
+      // double check when current block is database block
+      const result = binarySearchBlockEditingState(
+        blocks,
+        x,
+        y,
+        mid + 1,
+        end,
+        options
+      );
+      if (result) {
+        return result;
+      }
     }
 
     let in_block = y <= detectRect.bottom;
