@@ -389,7 +389,10 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks = (selectedBlocks: Element[]) => {
+  private _setSelectedBlocks = (
+    selectedBlocks: Element[],
+    startPoint: IPoint
+  ) => {
     this.state.selectedBlocks = selectedBlocks;
     const { blockCache } = this.state;
     const selectedRects = selectedBlocks.map(block => {
@@ -419,7 +422,10 @@ export class DefaultSelectionManager {
       e.containerOffset
     );
 
-    this._setSelectedBlocks(selectedBlocks);
+    this._setSelectedBlocks(selectedBlocks, {
+      x: e.raw.pageX,
+      y: e.raw.pageY,
+    });
     this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
 
@@ -701,7 +707,10 @@ export class DefaultSelectionManager {
       blockRect,
       _containerOffset
     );
-    this._setSelectedBlocks(selectedBlocks);
+    this._setSelectedBlocks(selectedBlocks, {
+      x: blockRect.x,
+      y: blockRect.y,
+    });
   }
 
   selectBlocksByRect(hitRect: DOMRect) {
@@ -721,7 +730,10 @@ export class DefaultSelectionManager {
     this.state.type = 'block';
 
     this._signals.updateEmbedRects.emit([]);
-    this._setSelectedBlocks(selectedBlocks);
+    this._setSelectedBlocks(selectedBlocks, {
+      x: hitRect.x,
+      y: hitRect.y,
+    });
     return;
   }
 }
