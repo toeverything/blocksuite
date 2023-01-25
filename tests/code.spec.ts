@@ -13,6 +13,7 @@ import {
   pressEnter,
   redoByKeyboard,
   selectAllByKeyboard,
+  SHORT_KEY,
   undoByKeyboard,
 } from './utils/actions/index.js';
 import { assertKeyboardWorkInInput, assertRichTexts } from './utils/asserts.js';
@@ -382,4 +383,21 @@ test('code block option will not disappear when hovering on it', async ({
   await page.mouse.move(optionPosition.x, optionPosition.y);
   const locator = page.locator('.code-block-option');
   await expect(locator).toBeVisible();
+});
+
+test('should ctrl+enter works in code block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('const a = 10;');
+  await assertRichTexts(page, ['const a = 10;\n']);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  await page.keyboard.press(`${SHORT_KEY}+Enter`);
+  // TODO fix this
+  // actual
+  await assertRichTexts(page, ['\nconst a = 10;\n']);
+  test.fail();
+  // but expected
+  await assertRichTexts(page, ['const a = 10;\n\n']);
 });
