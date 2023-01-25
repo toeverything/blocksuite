@@ -32,37 +32,38 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-function forwardSelect(newRange: Range, range: Range) {
-  if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
-    const lastTextNode = getLastTextNode(newRange.endContainer);
-    if (lastTextNode) {
-      newRange = document.createRange();
-      newRange.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
-      newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
-    }
-  }
-  if (range.comparePoint(newRange.endContainer, newRange.endOffset) === -1) {
-    return;
-  }
-  range.setEnd(newRange.endContainer, newRange.endOffset);
-}
-
-function backwardSelect(newRange: Range, range: Range) {
-  if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
-    const firstTextNode = getFirstTextNode(newRange.startContainer);
-    if (firstTextNode) {
-      newRange = document.createRange();
-      newRange.setStart(firstTextNode, 0);
-      newRange.setEnd(firstTextNode, 0);
-    }
-  }
-  range.setStart(newRange.endContainer, newRange.endOffset);
-}
+// function forwardSelect(newRange: Range, range: Range) {
+//   if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
+//     const lastTextNode = getLastTextNode(newRange.endContainer);
+//     if (lastTextNode) {
+//       newRange = document.createRange();
+//       newRange.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
+//       newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
+//     }
+//   }
+//   if (range.comparePoint(newRange.endContainer, newRange.endOffset) === -1) {
+//     return;
+//   }
+//   range.setEnd(newRange.endContainer, newRange.endOffset);
+// }
+//
+// function backwardSelect(newRange: Range, range: Range) {
+//   if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
+//     const firstTextNode = getFirstTextNode(newRange.startContainer);
+//     if (firstTextNode) {
+//       newRange = document.createRange();
+//       newRange.setStart(firstTextNode, 0);
+//       newRange.setEnd(firstTextNode, 0);
+//     }
+//   }
+//   range.setStart(newRange.endContainer, newRange.endOffset);
+// }
 
 function fixCurrentRangeToText(
   clientX: number,
   clientY: number,
   offset: IPoint,
+  startRange: Range,
   range: Range,
   isForward: boolean
 ) {
@@ -83,11 +84,11 @@ function fixCurrentRangeToText(
       const textBlock = isForward
         ? textBlocks.reverse().find(t => {
             const rect = t.getBoundingClientRect();
-            return clientY >= rect.top; // handle both drag downward, and rightward
+            return clientY >= rect.bottom; // handle both drag downward, and rightward
           })
         : textBlocks.find(t => {
             const rect = t.getBoundingClientRect();
-            return clientY <= rect.bottom; // handle both drag upwards and leftward
+            return clientY <= rect.top; // handle both drag upwards and leftward
           });
       if (!textBlock) {
         throw new Error('Failed to focus text node!');
@@ -99,10 +100,15 @@ function fixCurrentRangeToText(
         ? rect.bottom - offset.y - 6
         : rect.top - offset.y + 6;
       newRange = caretRangeFromPoint(clientX, newY);
-      if (isForward && newRange) {
-        forwardSelect(newRange, range);
-      } else if (!isForward && newRange) {
-        backwardSelect(newRange, range);
+      if (newRange && text.firstChild) {
+        if (isForward && text.firstChild.lastChild) {
+          newRange.setStart(startRange.startContainer, startRange.startOffset);
+          newRange.setEndAfter(text.firstChild.lastChild);
+        } else if (!isForward && text.firstChild.firstChild) {
+          newRange.setEnd(startRange.startContainer, startRange.startOffset);
+          newRange.setStartBefore(text.firstChild.firstChild);
+        }
+        return newRange;
       }
     }
   }
@@ -437,32 +443,45 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
+  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  if (!currentRange) {
+    return;
+  }
+
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  const container = currentRange.commonAncestorContainer as HTMLElement;
+  // Forward: ↓, Downward: ↑
+  const isForward = currentRange.comparePoint(endContainer, endOffset) === -1;
 
-  // See https://github.com/toeverything/blocksuite/pull/783 for direction recognition
-  const isDownward = e.y > e.start.y;
-  const isForward =
-    currentRange?.commonAncestorContainer.nodeType === Node.TEXT_NODE
-      ? !(currentRange?.comparePoint(endContainer, endOffset) === 1)
-      : isDownward;
-
-  if (isForward) {
-    currentRange?.setStart(startContainer, startOffset);
+  if (container.nodeType !== Node.TEXT_NODE) {
+    //  Forward: ↓ leave `affine-frame`
+    // Downward: ↑ leave `.affine-frame-block-container` or `.affine-default-page-block-title-container`
+    if (
+      container.tagName === 'AFFINE-FRAME' ||
+      container.classList.contains('affine-frame-block-container') ||
+      container.classList.contains('affine-default-page-block-title-container')
+    ) {
+      currentRange = fixCurrentRangeToText(
+        e.raw.clientX,
+        e.raw.clientY,
+        e.containerOffset,
+        startRange,
+        currentRange,
+        isForward
+      );
+    } else {
+      // ignore other elements, e.g: `list-block-prefix`
+      return;
+    }
   } else {
-    currentRange?.setEnd(endContainer, endOffset);
+    if (isForward) {
+      currentRange.setStart(startContainer, startOffset);
+    } else {
+      currentRange.setEnd(endContainer, endOffset);
+    }
   }
 
-  if (currentRange) {
-    currentRange = fixCurrentRangeToText(
-      e.raw.clientX,
-      e.raw.clientY,
-      e.containerOffset,
-      currentRange,
-      isForward
-    );
-  }
   resetNativeSelection(currentRange);
 }
 
