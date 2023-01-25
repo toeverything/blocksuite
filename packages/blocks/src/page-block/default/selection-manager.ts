@@ -27,12 +27,10 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
   getBlockEditingStateByCursor,
-  createDragHandle,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
-import type { DragHandle } from '../../components/drag-handle.js';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -161,9 +159,7 @@ export class DefaultSelectionManager {
   private readonly _disposables = new DisposableGroup();
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _dragHandleAbortController = new AbortController();
 
-  private _dragHandle: DragHandle | null = null;
   private _blockHub: BlockHub | null = null;
 
   constructor({
@@ -181,10 +177,6 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    const createHandle = () => {
-      this._dragHandle = createDragHandle(container);
-      this._dragHandle.getAllowedBlocks = () => this._allowSelectedBlocks;
-    };
 
     const createBlockHub = () => {
       this._blockHub = new BlockHub({
@@ -229,24 +221,6 @@ export class DefaultSelectionManager {
     };
     this._disposables.add(
       this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_drag_handle,
-        enable => {
-          if (enable) {
-            if (!this._dragHandle) {
-              createHandle();
-            }
-          } else {
-            this._dragHandle?.remove();
-            this._dragHandle = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_block_hub,
         enable => {
           if (enable) {
@@ -263,9 +237,6 @@ export class DefaultSelectionManager {
         }
       )
     );
-    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
-      createHandle();
-    }
     if (this.page.awarenessStore.getFlag('enable_block_hub')) {
       createBlockHub();
     }
@@ -558,9 +529,9 @@ export class DefaultSelectionManager {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
-      if (this._dragHandle) {
+      if (this._container.components.dragHandle) {
         const clickDragState = getBlockEditingStateByPosition(
-          this._allowSelectedBlocks,
+          this._container.components.dragHandle.getAllowedBlocks(),
           e.raw.pageX,
           e.raw.pageY,
           {
@@ -568,7 +539,7 @@ export class DefaultSelectionManager {
           }
         );
         if (clickDragState?.model) {
-          this._dragHandle.show(clickDragState);
+          this._container.components.dragHandle.show(clickDragState);
         }
       }
       this._signals.updateEmbedEditingState.emit(null);
@@ -621,10 +592,6 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
-    if (this._dragHandle) {
-      this._dragHandle.remove();
-    }
-    this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();
