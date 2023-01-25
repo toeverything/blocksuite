@@ -67,9 +67,13 @@ export function handleSoftEnter(
   index: number,
   length: number
 ) {
+  if (!model.text) {
+    console.error('Failed to handle soft enter! No text found!', model);
+    return;
+  }
   page.captureSync();
   const shouldFormatCode = matchFlavours(model, ['affine:code']);
-  model.text?.replace(
+  model.text.replace(
     index,
     length,
     '\n',
