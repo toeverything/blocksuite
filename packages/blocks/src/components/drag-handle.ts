@@ -5,6 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { getBlockElementByModel } from '../__internal__/index.js';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
@@ -50,12 +51,14 @@ export class DragIndicator extends LitElement {
 }
 
 export type DragHandleGetModelStateCallback = (
+  blocks: BaseBlockModel[],
   pageX: number,
   pageY: number,
   skipX?: boolean
 ) => EditingState | null;
 
 export type DragHandleGetModelStateWithCursorCallback = (
+  blocks: BaseBlockModel[],
   pageX: number,
   pageY: number,
   cursor: number,
@@ -91,6 +94,10 @@ export class DragHandle extends LitElement {
     setSelectedBlocks: (selectedBlocks: Element | null) => void;
   }) {
     super();
+    this.getAllowedBlocks = () => {
+      console.warn('you may forget to set `getAllowedBlocks`');
+      return [];
+    };
     this.onDropCallback = options.onDropCallback;
     this.setSelectedBlocks = options.setSelectedBlocks;
     this._getBlockEditingStateByPosition =
@@ -98,6 +105,12 @@ export class DragHandle extends LitElement {
     this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
     document.body.appendChild(this);
   }
+
+  /**
+   * A function that returns all allowed blocks to drag and drop
+   */
+  @property()
+  public getAllowedBlocks: () => BaseBlockModel[];
 
   @property()
   public onDropCallback: (
@@ -202,6 +215,7 @@ export class DragHandle extends LitElement {
   private _onResize = (e: UIEvent) => {
     if (this._startModelState) {
       const newModelState = this._getBlockEditingStateByPosition?.(
+        this.getAllowedBlocks(),
         this._startModelState.position.x,
         this._startModelState.position.y,
         true
@@ -218,6 +232,7 @@ export class DragHandle extends LitElement {
 
   private _onMouseDown = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
+      this.getAllowedBlocks(),
       e.pageX,
       e.pageY,
       true
@@ -265,6 +280,7 @@ export class DragHandle extends LitElement {
       return;
     }
     const modelState = this._getBlockEditingStateByCursor?.(
+      this.getAllowedBlocks(),
       x,
       y,
       this._cursor,

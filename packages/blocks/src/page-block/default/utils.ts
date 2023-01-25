@@ -723,30 +723,27 @@ export function getAllowSelectedBlocks(
 
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
-    getBlockEditingStateByCursor(pageX, pageY, cursor, size, skipX, dragging) {
+    getBlockEditingStateByCursor(
+      blocks,
+      pageX,
+      pageY,
+      cursor,
+      size,
+      skipX,
+      dragging
+    ) {
       assertExists(defaultPageBlock.page.root);
-      return getBlockEditingStateByCursor(
-        getAllowSelectedBlocks(defaultPageBlock.page.root),
-        pageX,
-        pageY,
-        cursor,
-        {
-          size,
-          skipX,
-          dragging,
-        }
-      );
+      return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
+        size,
+        skipX,
+        dragging,
+      });
     },
-    getBlockEditingStateByPosition(pageX, pageY, skipX) {
+    getBlockEditingStateByPosition(blocks, pageX, pageY, skipX) {
       assertExists(defaultPageBlock.page.root);
-      return getBlockEditingStateByPosition(
-        getAllowSelectedBlocks(defaultPageBlock.page.root),
-        pageX,
-        pageY,
-        {
-          skipX,
-        }
-      );
+      return getBlockEditingStateByPosition(blocks, pageX, pageY, {
+        skipX,
+      });
     },
     onDropCallback(e, start, end): void {
       const page = defaultPageBlock.page;

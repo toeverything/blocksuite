@@ -15,7 +15,6 @@ import {
   getAllBlocks,
   getDefaultPageBlock,
   IPoint,
-  doesInSamePath,
   getCurrentRange,
   isTitleElement,
 } from '../../__internal__/index.js';
@@ -28,11 +27,12 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
   getBlockEditingStateByCursor,
+  createDragHandle,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
-import { DragHandle } from '../../components/drag-handle.js';
+import type { DragHandle } from '../../components/drag-handle.js';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -182,58 +182,10 @@ export class DefaultSelectionManager {
     this._mouseRoot = mouseRoot;
     this._container = container;
     const createHandle = () => {
-      this._dragHandle = new DragHandle({
-        setSelectedBlocks: element =>
-          this._setSelectedBlocks(element ? [element] : []),
-        onDropCallback: (e, start, end) => {
-          const startModel = start.model;
-          const rect = end.position;
-          const nextModel = end.model;
-          if (doesInSamePath(this.page, nextModel, startModel)) {
-            return;
-          }
-          this.page.captureSync();
-          const distanceToTop = Math.abs(rect.top - e.y);
-          const distanceToBottom = Math.abs(rect.bottom - e.y);
-          this.page.moveBlock(
-            startModel,
-            nextModel,
-            distanceToTop < distanceToBottom
-          );
-          this.clearRects();
-        },
-        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            {
-              skipX,
-            }
-          );
-        },
-        getBlockEditingStateByCursor: (
-          pageX,
-          pageY,
-          cursor,
-          size,
-          skipX,
-          dragging
-        ) => {
-          return getBlockEditingStateByCursor(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            cursor,
-            {
-              size,
-              skipX,
-              dragging,
-            }
-          );
-        },
-      });
+      this._dragHandle = createDragHandle(container);
+      this._dragHandle.getAllowedBlocks = () => this._allowSelectedBlocks;
     };
+
     const createBlockHub = () => {
       this._blockHub = new BlockHub({
         onDropCallback: (e, end) => {
@@ -252,17 +204,13 @@ export class DefaultSelectionManager {
             distanceToTop < distanceToBottom
           );
         },
-        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            {
-              skipX,
-            }
-          );
+        getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(blocks, pageX, pageY, {
+            skipX,
+          });
         },
         getBlockEditingStateByCursor: (
+          blocks,
           pageX,
           pageY,
           cursor,
@@ -270,19 +218,14 @@ export class DefaultSelectionManager {
           skipX,
           dragging
         ) => {
-          return getBlockEditingStateByCursor(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            cursor,
-            {
-              size,
-              skipX,
-              dragging,
-            }
-          );
+          return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
+            size,
+            skipX,
+            dragging,
+          });
         },
       });
+      this._blockHub.getAllowedBlocks = () => this._allowSelectedBlocks;
     };
     this._disposables.add(
       this.page.awarenessStore.signals.update.subscribe(
