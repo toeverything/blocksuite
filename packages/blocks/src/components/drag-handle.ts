@@ -88,7 +88,7 @@ export class DragHandle extends LitElement {
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
     getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
-    setSelectedBlocks: (selectedBlocks: Element[]) => void;
+    setSelectedBlocks: (selectedBlocks: Element | null) => void;
   }) {
     super();
     this.onDropCallback = options.onDropCallback;
@@ -107,7 +107,7 @@ export class DragHandle extends LitElement {
   ) => void;
 
   @property()
-  public setSelectedBlocks: (selectedBlocks: Element[]) => void;
+  public setSelectedBlocks: (selectedBlock: Element | null) => void;
 
   private _currentPageX = 0;
   private _currentPageY = 0;
@@ -228,9 +228,9 @@ export class DragHandle extends LitElement {
     }
     if (clickDragState) {
       this._cursor = clickDragState.index;
-      this.setSelectedBlocks([
-        getBlockElementByModel(clickDragState.model) as HTMLElement,
-      ]);
+      this.setSelectedBlocks(
+        getBlockElementByModel(clickDragState.model) as HTMLElement
+      );
     }
   };
 
@@ -243,7 +243,7 @@ export class DragHandle extends LitElement {
   };
 
   private _onMouseLeave = (_: MouseEvent) => {
-    this.setSelectedBlocks([]);
+    this.setSelectedBlocks(null);
   };
 
   private _onDragStart = (e: DragEvent) => {

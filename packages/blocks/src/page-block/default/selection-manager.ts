@@ -183,7 +183,8 @@ export class DefaultSelectionManager {
     this._container = container;
     const createHandle = () => {
       this._dragHandle = new DragHandle({
-        setSelectedBlocks: this._setSelectedBlocks,
+        setSelectedBlocks: element =>
+          this._setSelectedBlocks(element ? [element] : []),
         onDropCallback: (e, start, end) => {
           const startModel = start.model;
           const rect = end.position;

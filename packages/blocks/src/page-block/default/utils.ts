@@ -39,6 +39,8 @@ import {
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import type { DefaultPageBlockComponent } from './default-page-block.js';
+import { DragHandle } from '../../components/index.js';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -681,4 +683,38 @@ export function toggleWrap(codeBlockOption: CodeBlockOption) {
   );
   assertExists(syntaxElem);
   syntaxElem.classList.toggle('wrap');
+}
+
+export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
+  return new DragHandle({
+    getBlockEditingStateByCursor(
+      pageX: number,
+      pageY: number,
+      cursor: number,
+      size: number | undefined,
+      skipX: boolean | undefined,
+      dragging: boolean | undefined
+    ): EditingState | null {
+      throw new Error('Unimplemented');
+    },
+    getBlockEditingStateByPosition(
+      pageX: number,
+      pageY: number,
+      skipX: boolean | undefined
+    ): EditingState | null {
+      throw new Error('Unimplemented');
+    },
+    onDropCallback(
+      e: DragEvent,
+      startModelState: EditingState,
+      lastModelState: EditingState
+    ): void {
+      throw new Error('Unimplemented');
+    },
+    setSelectedBlocks(selectedBlocks: Element | null): void {
+      defaultPageBlock.signals.updateSelectedRects.emit(
+        selectedBlocks ? [selectedBlocks.getBoundingClientRect()] : []
+      );
+    },
+  });
 }
