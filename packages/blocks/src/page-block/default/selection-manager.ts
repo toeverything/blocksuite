@@ -27,6 +27,7 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
   getBlockEditingStateByCursor,
+  getAllowSelectedBlocks,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
@@ -263,36 +264,7 @@ export class DefaultSelectionManager {
    * @private
    */
   private get _allowSelectedBlocks(): BaseBlockModel[] {
-    const result: BaseBlockModel[] = [];
-    const blocks = this.page.root?.children.slice();
-    if (!blocks) {
-      return [];
-    }
-
-    const dfs = (
-      blocks: BaseBlockModel[],
-      depth: number,
-      parentIndex: number
-    ) => {
-      for (const block of blocks) {
-        if (block.flavour !== 'affine:frame') {
-          result.push(block);
-        }
-        block.depth = depth;
-        if (parentIndex !== -1) {
-          block.parentIndex = parentIndex;
-        }
-        if (block.flavour === 'affine:database') {
-          // ignore to push the children inside the database block
-          return;
-        }
-        block.children.length &&
-          dfs(block.children, depth + 1, result.length - 1);
-      }
-    };
-
-    dfs(blocks, 0, -1);
-    return result;
+    return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
   private get _containerOffset() {
