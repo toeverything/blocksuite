@@ -732,7 +732,6 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       skipX,
       dragging
     ) {
-      assertExists(defaultPageBlock.page.root);
       return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
         size,
         skipX,
@@ -740,7 +739,6 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       });
     },
     getBlockEditingStateByPosition(blocks, pageX, pageY, skipX) {
-      assertExists(defaultPageBlock.page.root);
       return getBlockEditingStateByPosition(blocks, pageX, pageY, {
         skipX,
       });
