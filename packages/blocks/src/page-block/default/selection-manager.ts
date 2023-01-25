@@ -531,7 +531,7 @@ export class DefaultSelectionManager {
     } else {
       if (this._container.components.dragHandle) {
         const clickDragState = getBlockEditingStateByPosition(
-          this._container.components.dragHandle.getAllowedBlocks(),
+          this._container.components.dragHandle.getDropAllowedBlocks(null),
           e.raw.pageX,
           e.raw.pageY,
           {

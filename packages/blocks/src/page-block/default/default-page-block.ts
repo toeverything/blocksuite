@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import { css, html } from 'lit';
+import { Utils } from '@blocksuite/store';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BaseBlockModel,
@@ -361,8 +362,21 @@ export class DefaultPageBlockComponent
     super.connectedCallback();
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getAllowedBlocks = () =>
-        getAllowSelectedBlocks(this.model);
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+        if (
+          draggingBlock &&
+          Utils.doesInsideBlockByFlavour(
+            this.page,
+            draggingBlock,
+            'affine:database'
+          )
+        ) {
+          return getAllowSelectedBlocks(
+            this.page.getParent(draggingBlock) as BaseBlockModel
+          );
+        }
+        return getAllowSelectedBlocks(this.model);
+      };
     };
     if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
       createHandle();

@@ -708,10 +708,6 @@ export function getAllowSelectedBlocks(
       if (parentIndex !== -1) {
         block.parentIndex = parentIndex;
       }
-      if (block.flavour === 'affine:database') {
-        // ignore to push the children inside the database block
-        return;
-      }
       block.children.length &&
         dfs(block.children, depth + 1, result.length - 1);
     }

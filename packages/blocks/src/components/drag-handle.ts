@@ -94,7 +94,7 @@ export class DragHandle extends LitElement {
     setSelectedBlocks: (selectedBlocks: Element | null) => void;
   }) {
     super();
-    this.getAllowedBlocks = () => {
+    this.getDropAllowedBlocks = () => {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
     };
@@ -107,10 +107,15 @@ export class DragHandle extends LitElement {
   }
 
   /**
-   * A function that returns all allowed blocks to drag and drop
+   * A function that returns all allowed blocks to drag and drop.
+   *
+   * If there is `draggingBlock`, the user is dragging a block to another place
+   *
    */
   @property()
-  public getAllowedBlocks: () => BaseBlockModel[];
+  public getDropAllowedBlocks: (
+    draggingBlock: BaseBlockModel | null
+  ) => BaseBlockModel[];
 
   @property()
   public onDropCallback: (
@@ -215,7 +220,7 @@ export class DragHandle extends LitElement {
   private _onResize = (e: UIEvent) => {
     if (this._startModelState) {
       const newModelState = this._getBlockEditingStateByPosition?.(
-        this.getAllowedBlocks(),
+        this.getDropAllowedBlocks(this._startModelState.model),
         this._startModelState.position.x,
         this._startModelState.position.y,
         true
@@ -232,7 +237,7 @@ export class DragHandle extends LitElement {
 
   private _onMouseDown = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
-      this.getAllowedBlocks(),
+      this.getDropAllowedBlocks(null),
       e.pageX,
       e.pageY,
       true
@@ -279,8 +284,9 @@ export class DragHandle extends LitElement {
     if (this._cursor === null) {
       return;
     }
+    assertExists(this._startModelState);
     const modelState = this._getBlockEditingStateByCursor?.(
-      this.getAllowedBlocks(),
+      this.getDropAllowedBlocks(this._startModelState.model),
       x,
       y,
       this._cursor,
