@@ -81,14 +81,14 @@ export function isEqual<T extends Allowed, U extends T>(
       if (val.length !== expected.length) {
         return false;
       }
-      val.every((x, i) => assertEquals(x, expected[i]));
+      return val.every((x, i) => isEqual(x, expected[i]));
     } else if (typeof val === 'object' && typeof expected === 'object') {
       const obj1 = Object.entries(val as Record<string, unknown>);
       const obj2 = Object.entries(expected as Record<string, unknown>);
       if (obj1.length !== obj2.length) {
         return false;
       }
-      obj1.every((x, i) => assertEquals(x, obj2[i]));
+      return obj1.every((x, i) => isEqual(x, obj2[i]));
     }
   }
   return true;
