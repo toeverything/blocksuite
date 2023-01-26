@@ -63,7 +63,9 @@ export function BlockElementWithService(
 
     const state = registerService(model.flavour, service);
     if (state instanceof Promise) {
-      state.then(onLoaded);
+      state.then(() => {
+        onLoaded();
+      });
       return html` <loader-element .hostModel=${model}> </loader-element> `;
     }
 
