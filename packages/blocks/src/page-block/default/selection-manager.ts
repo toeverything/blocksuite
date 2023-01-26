@@ -317,6 +317,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
+    this._container.components.dragHandle?.pointerEvents('none');
     this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
@@ -326,6 +327,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
+    this._container.components.dragHandle?.pointerEvents();
     this._signals.nativeSelection.emit(true);
   }
 

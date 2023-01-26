@@ -175,6 +175,10 @@ export class DragHandle extends LitElement {
     this._indicator.targetRect = null;
   }
 
+  public pointerEvents(value = 'auto') {
+    this.style.pointerEvents = value;
+  }
+
   public connectedCallback() {
     super.connectedCallback();
     document.body.addEventListener(
