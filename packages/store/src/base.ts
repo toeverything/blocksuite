@@ -86,18 +86,18 @@ export function defineBlockSchema<
   } & Metadata;
 };
 export function defineBlockSchema(
+  flavour: string,
   state: Record<string, unknown>,
   methods: (...args: unknown[]) => Record<string, AnyFunction>,
   metadata: {
     version: number;
-    flavour: string;
     tag: StaticValue;
   }
 ): z.infer<typeof BlockSchema> {
   const schema = {
     version: metadata.version,
     model: {
-      flavour: metadata.flavour,
+      flavour,
       tag: metadata.tag,
       state,
       methods,
