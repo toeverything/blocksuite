@@ -10,19 +10,9 @@ export type SelectionOptions = {
   from?: 'previous' | 'next';
 };
 
-export interface BaseService {
-  isLoaded: boolean;
+export interface IService {
+  onLoad?: () => Promise<void>;
 }
-
-export interface AsyncService extends BaseService {
-  load: () => Promise<void>;
-}
-
-export interface SyncService extends BaseService {
-  isLoaded: true;
-}
-
-export type Service = SyncService | AsyncService;
 
 /** Common context interface definition for block models. */
 
