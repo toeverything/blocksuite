@@ -427,7 +427,6 @@ export class HtmlParser {
     return [
       {
         flavour: 'affine:code',
-        type: 'code',
         text: [
           {
             insert: content,
