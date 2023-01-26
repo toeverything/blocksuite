@@ -34,7 +34,7 @@ importers:
       npm-run-all: ^4.1.5
       prettier: ^2.8.3
       pretty-format: ^29.3.1
-      typescript: ^5.0.0-dev.20230125
+      typescript: ^5.0.0-beta
       vite: ^4.0.4
       vite-plugin-web-components-hmr: ^0.1.2
       vitest: ^0.27.2
@@ -212,7 +212,7 @@ importers:
       next: 13.1.5
       react: ^18.2.0
       react-dom: ^18.2.0
-      typescript: ^5.0.0-dev.20230125
+      typescript: ^5.0.0-beta
     dependencies:
       '@blocksuite/blocks': link:../../../blocks
       '@blocksuite/editor': link:../../../editor
