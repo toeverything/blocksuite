@@ -10,10 +10,10 @@ const TagSchema = z.object({
   r: z.symbol(),
 });
 
-const StateSchema = z.record(z.any());
+const StateSchema = z.any();
 const MethodSchema = z.function(z.tuple([]).rest(z.any()));
 const SetFunctionSchema = z.function(z.tuple([z.record(z.any())]));
-const GetFunctionSchema = z.function(z.tuple([])).returns(StateSchema);
+const GetFunctionSchema = z.function(z.tuple([]), StateSchema);
 const MethodsSchema = z
   .function()
   .args(GetFunctionSchema, SetFunctionSchema)
