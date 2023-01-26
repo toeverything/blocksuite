@@ -13,14 +13,11 @@ import {
   getPreviousBlock,
   getStartModelBySelection,
   hotkey,
-  HOTKEYS,
   getRichTextByModel,
   Point,
   resetNativeSelection,
-  BLOCK_ID_ATTR,
-  BLOCK_SERVICE_LOADING_ATTR,
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   isCaptionElement,
+  doesInSamePath,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -39,6 +36,15 @@ import {
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import type { DefaultPageBlockComponent } from './default-page-block.js';
+import { DragHandle } from '../../components/index.js';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  BLOCK_ID_ATTR,
+  BLOCK_SERVICE_LOADING_ATTR,
+  HOTKEYS,
+} from '@blocksuite/global/config';
+import { getService } from '../../__internal__/service.js';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -168,6 +174,19 @@ function binarySearchBlockEditingState(
         options
       );
       return result;
+    } else if (matchFlavours(block, ['affine:database'])) {
+      // double check when current block is database block
+      const result = binarySearchBlockEditingState(
+        blocks,
+        x,
+        y,
+        mid + 1,
+        end,
+        options
+      );
+      if (result) {
+        return result;
+      }
     }
 
     let in_block = y <= detectRect.bottom;
@@ -292,7 +311,8 @@ export async function downloadImage(model: BaseBlockModel) {
 
 export async function copyImage(model: EmbedBlockModel) {
   const copyType = 'blocksuite/x-c+w';
-  const text = model.block2Text('', 0, 0);
+  const service = getService(model.flavour);
+  const text = service.block2Text(model, '', 0, 0);
   const delta = [
     {
       insert: text,
@@ -681,4 +701,82 @@ export function toggleWrap(codeBlockOption: CodeBlockOption) {
   );
   assertExists(syntaxElem);
   syntaxElem.classList.toggle('wrap');
+}
+
+export function getAllowSelectedBlocks(
+  model: BaseBlockModel
+): BaseBlockModel[] {
+  const result: BaseBlockModel[] = [];
+  const blocks = model.children.slice();
+  if (!blocks) {
+    return [];
+  }
+
+  const dfs = (
+    blocks: BaseBlockModel[],
+    depth: number,
+    parentIndex: number
+  ) => {
+    for (const block of blocks) {
+      if (block.flavour !== 'affine:frame') {
+        result.push(block);
+      }
+      block.depth = depth;
+      if (parentIndex !== -1) {
+        block.parentIndex = parentIndex;
+      }
+      block.children.length &&
+        dfs(block.children, depth + 1, result.length - 1);
+    }
+  };
+
+  dfs(blocks, 0, -1);
+  return result;
+}
+
+export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
+  return new DragHandle({
+    getBlockEditingStateByCursor(
+      blocks,
+      pageX,
+      pageY,
+      cursor,
+      size,
+      skipX,
+      dragging
+    ) {
+      return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
+        size,
+        skipX,
+        dragging,
+      });
+    },
+    getBlockEditingStateByPosition(blocks, pageX, pageY, skipX) {
+      return getBlockEditingStateByPosition(blocks, pageX, pageY, {
+        skipX,
+      });
+    },
+    onDropCallback(e, start, end): void {
+      const page = defaultPageBlock.page;
+      const startModel = start.model;
+      const rect = end.position;
+      const nextModel = end.model;
+      if (doesInSamePath(page, nextModel, startModel)) {
+        return;
+      }
+      page.captureSync();
+      const distanceToTop = Math.abs(rect.top - e.y);
+      const distanceToBottom = Math.abs(rect.bottom - e.y);
+      page.moveBlock(startModel, nextModel, distanceToTop < distanceToBottom);
+      defaultPageBlock.signals.updateSelectedRects.emit([]);
+      defaultPageBlock.signals.updateFrameSelectionRect.emit(null);
+      defaultPageBlock.signals.updateEmbedEditingState.emit(null);
+      defaultPageBlock.signals.updateEmbedRects.emit([]);
+    },
+    setSelectedBlocks(selectedBlocks: Element | null): void {
+      defaultPageBlock.signals.updateSelectedRects.emit(
+        selectedBlocks ? [selectedBlocks.getBoundingClientRect()] : []
+      );
+    },
+  });
 }

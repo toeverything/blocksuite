@@ -3,14 +3,13 @@ import { css, html } from 'lit';
 import type { CodeBlockModel } from './code-model.js';
 import { toolTipStyle } from '../components/tooltip.js';
 import {
-  BLOCK_ID_ATTR,
   BlockChildrenContainer,
   BlockHost,
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import '../__internal__/rich-text/rich-text.js';
-import { ArrowDownIcon } from '@blocksuite/global/config';
+import { ArrowDownIcon, BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {

@@ -1,7 +1,6 @@
 import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
 import { Signal } from '@blocksuite/global/utils';
-import type { DeltaOperation } from 'quill';
 import type * as Y from 'yjs';
 
 // ported from lit
@@ -56,52 +55,6 @@ export class BaseBlockModel<Props = unknown>
       return this;
     }
     return this.children[this.children.length - 1].lastChild();
-  }
-
-  block2html(
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
-    const delta = this.text?.sliceToDelta(begin || 0, end) || [];
-    const text = delta.reduce((html: string, item: DeltaOperation) => {
-      return html + this._deltaLeaf2Html(item);
-    }, '');
-    return `${text}${childText}`;
-  }
-
-  block2Text(childText: string, begin?: number, end?: number) {
-    const text = (this.text?.toString() || '').slice(begin || 0, end);
-    return `${text}${childText}`;
-  }
-
-  _deltaLeaf2Html(deltaLeaf: DeltaOperation) {
-    let text: string = deltaLeaf.insert;
-    const attributes = deltaLeaf.attributes;
-    if (!attributes) {
-      return text;
-    }
-    if (attributes.code) {
-      text = `<code>${text}</code>`;
-    }
-    if (attributes.bold) {
-      text = `<strong>${text}</strong>`;
-    }
-    if (attributes.italic) {
-      text = `<em>${text}</em>`;
-    }
-    if (attributes.underline) {
-      text = `<u>${text}</u>`;
-    }
-    if (attributes.strikethrough) {
-      text = `<s>${text}</s>`;
-    }
-    if (attributes.link) {
-      text = `<a href='${attributes.link}'>${text}</a>`;
-    }
-    return text;
   }
 
   dispose() {

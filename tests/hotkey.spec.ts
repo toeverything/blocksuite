@@ -647,3 +647,17 @@ test('should cut work multiple line', async ({ page }) => {
     frameId
   );
 });
+
+test('should ctrl+enter create new block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await page.keyboard.type('123');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await pressEnter(page);
+  await assertRichTexts(page, ['1', '23']);
+  await page.keyboard.press(`${SHORT_KEY}+Enter`);
+  await assertRichTexts(page, ['1', '23', '\n']);
+});

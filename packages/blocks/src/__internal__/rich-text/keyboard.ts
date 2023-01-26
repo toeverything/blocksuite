@@ -1,13 +1,11 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 import {
-  ALLOW_DEFAULT,
   getCurrentRange,
   getNextBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   noop,
-  PREVENT_DEFAULT,
 } from '../utils/index.js';
 import {
   handleLineStartBackspace,
@@ -23,6 +21,7 @@ import {
 import { Shortcuts } from './shortcuts.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 interface QuillRange {
   index: number;
@@ -92,13 +91,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       : ALLOW_DEFAULT;
   }
 
-  function hardEnter(this: KeyboardEventThis) {
-    const isEnd = isAtBlockEnd(this.quill);
+  function hardEnter(quill: Quill, shortKey = false) {
+    const isEnd = isAtBlockEnd(quill);
     const parent = page.getParent(model);
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList =
       matchFlavours(model, ['affine:list']) && model.text?.length === 0;
-    const selection = this.quill.getSelection();
+    const selection = quill.getSelection();
     assertExists(selection);
 
     // Some block should treat Enter as soft enter
@@ -133,22 +132,23 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       // - line1
       // - | <-- will unindent the block
       handleUnindent(page, model, selection.index);
-    } else if (isEnd) {
+    } else if (isEnd || shortKey) {
       const isSoftEnterBlock = shouldSoftEnterFirstBlocks.find(
         ({ flavour, type }) => {
           return model.flavour === flavour && model.type === type;
         }
       );
 
-      const isNewLine = /\n\n$/.test(this.quill.getText());
+      const isNewLine = /\n\n$/.test(quill.getText());
       const shouldSoftEnter = isSoftEnterBlock && !isNewLine;
 
       if (shouldSoftEnter) {
-        onSoftEnter.bind(this)();
+        // TODO handle ctrl+enter in code/quote block or other force soft enter block
+        onSoftEnter(quill);
       } else {
         // delete the \n at the end of block
         if (isSoftEnterBlock) {
-          this.quill.deleteText(selection.index, 1);
+          quill.deleteText(selection.index, 1);
         }
         handleBlockEndEnter(page, model);
       }
@@ -159,7 +159,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         }) !== -1;
 
       if (isSoftEnterBlock) {
-        onSoftEnter.bind(this)();
+        onSoftEnter(quill);
       } else {
         handleBlockSplit(page, model, selection.index, selection.length);
       }
@@ -168,12 +168,11 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onSoftEnter(this: KeyboardEventThis) {
-    const selection = this.quill.getSelection();
+  function onSoftEnter(quill: Quill) {
+    const selection = quill.getSelection();
     assertExists(selection);
     handleSoftEnter(page, model, selection.index, selection.length);
-    this.quill.setSelection(selection.index + 1, 0);
-
+    quill.setSelection(selection.index + 1, 0);
     return PREVENT_DEFAULT;
   }
 
@@ -286,12 +285,24 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     hardEnter: {
       key: 'enter',
-      handler: hardEnter,
+      handler() {
+        return hardEnter(this.quill);
+      },
     },
     softEnter: {
       key: 'enter',
       shiftKey: true,
-      handler: onSoftEnter,
+      handler() {
+        return onSoftEnter(this.quill);
+      },
+    },
+    // shortKey+enter
+    insertLineAfter: {
+      key: 'enter',
+      shortKey: true,
+      handler() {
+        return hardEnter(this.quill, true);
+      },
     },
     tab: {
       key: 'tab',

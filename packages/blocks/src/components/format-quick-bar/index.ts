@@ -104,7 +104,7 @@ export const showFormatQuickBar = async ({
 
   const selectionChangeHandler = () => {
     const selection = document.getSelection();
-    if (!selection || selection.type === 'Caret') {
+    if (!selection || selection.type === 'Caret' || selection.type === 'None') {
       abortController.abort();
       return;
     }

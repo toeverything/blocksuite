@@ -1,5 +1,6 @@
 import { paragraphConfig } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { PrelimText } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -178,6 +179,7 @@ export class SlashMenu extends LitElement {
     this.abortController.abort(this._searchString);
     const { flavour, type } = this._filterItems[index];
 
+    // WARNING: This flag is a simple prototype implementation, just for proof of product.
     if (this.model.page.awarenessStore.getFlag('enable_append_flavor_slash')) {
       // Add new block
       const page = this.model.page;
@@ -185,8 +187,29 @@ export class SlashMenu extends LitElement {
       if (!parent) {
         throw new Error('Failed add block!');
       }
+      // TODO merge with `handleBlockSplit` and it will the issue of children not extending.
+      const richText = getRichTextByModel(this.model);
+      if (!richText) {
+        throw new Error("Can't get richText instance!");
+      }
+      const quill = richText.quill;
+      const selection = quill.getSelection();
+      const text = this.model.text;
+      if (!text || text instanceof PrelimText) {
+        throw new Error("Can't get text or text is PrelimText!");
+      }
+      const [left, right] = text.split(selection.index, 0);
+      page.captureSync();
+      page.markTextSplit(text, left, right);
+      page.updateBlock(this.model, { text: left });
+
       const index = parent.children.indexOf(this.model);
-      const id = page.addBlockByFlavour(flavour, { type }, parent, index + 1);
+      const id = page.addBlockByFlavour(
+        flavour,
+        { type, text: right },
+        parent,
+        index + 1
+      );
       asyncFocusRichText(page, id);
       return;
     }

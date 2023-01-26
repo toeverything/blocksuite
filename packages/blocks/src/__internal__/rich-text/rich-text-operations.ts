@@ -7,9 +7,7 @@ import {
   getRichTextByModel,
   getContainerByModel,
   getPreviousBlock,
-  ALLOW_DEFAULT,
   getNextBlock,
-  PREVENT_DEFAULT,
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
@@ -25,6 +23,7 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -67,9 +66,13 @@ export function handleSoftEnter(
   index: number,
   length: number
 ) {
+  if (!model.text) {
+    console.error('Failed to handle soft enter! No text found!', model);
+    return;
+  }
   page.captureSync();
   const shouldFormatCode = matchFlavours(model, ['affine:code']);
-  model.text?.replace(
+  model.text.replace(
     index,
     length,
     '\n',
@@ -231,6 +234,10 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   // select the code block itself
   if (matchFlavours(model, ['affine:code'])) {
     focusBlockByModel(model);
+    return;
+  }
+  if (Utils.doesInsideBlockByFlavour(page, model, 'affine:database')) {
+    // Forbid user to delete a block inside database block
     return;
   }
 

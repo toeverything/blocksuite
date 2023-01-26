@@ -6,8 +6,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
 import '../../components/loader.js';
-import { hasService, registerService } from '../service.js';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../__internal__/utils/consts.js';
+import { BaseService, hasService, registerService } from '../service.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -58,17 +58,17 @@ export function BlockElementWithService(
   if (hasService(model.flavour)) {
     return BlockElement(model, host);
   } else {
-    const loadOrService =
-      blockService[model.flavour as keyof typeof blockService];
-    if (loadOrService) {
-      const state = registerService(model.flavour, loadOrService);
-      if (state instanceof Promise) {
-        state.then(() => {
-          onLoaded();
-        });
-        return html` <loader-element .hostModel=${model}> </loader-element> `;
-      }
+    const service =
+      blockService[model.flavour as keyof typeof blockService] ?? BaseService;
+
+    const state = registerService(model.flavour, service);
+    if (state instanceof Promise) {
+      state.then(() => {
+        onLoaded();
+      });
+      return html` <loader-element .hostModel=${model}> </loader-element> `;
     }
+
     return BlockElement(model, host);
   }
 }
