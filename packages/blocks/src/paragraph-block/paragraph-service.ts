@@ -1,8 +1,8 @@
-import type { SyncService } from '../__internal__/index.js';
+import type { IService } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-export class ParagraphBlockService implements SyncService {
-  isLoaded = true as const;
+export class ParagraphBlockService implements IService {
+  onLoad: undefined;
   block2html(
     model: ParagraphBlockModel,
     childText: string,
