@@ -16,7 +16,6 @@ import { ListBlockService } from './list-block/list-service.js';
 import { DividerBlockService } from './divider-block/divider-service.js';
 
 export {
-  CodeBlockModel,
   DividerBlockModel,
   EmbedBlockModel,
   FrameBlockModel,
@@ -26,6 +25,8 @@ export {
   DatabaseBlockModel,
 };
 
+export type { CodeBlockModel };
+
 export const __unstable__BlockSchema = [CodeBlockSchema];
 
 // TODO support dynamic register
@@ -34,14 +35,13 @@ export const BlockSchema = {
   'affine:page': PageBlockModel,
   'affine:list': ListBlockModel,
   'affine:frame': FrameBlockModel,
-  'affine:code': CodeBlockModel,
   'affine:divider': DividerBlockModel,
   'affine:embed': EmbedBlockModel,
   'affine:surface': SurfaceBlockModel,
   'affine:database': DatabaseBlockModel,
 };
 
-export type Flavour = keyof typeof BlockSchema;
+export type Flavour = keyof typeof BlockSchema | 'affine:code';
 
 export const blockService = {
   'affine:code': CodeBlockService,
