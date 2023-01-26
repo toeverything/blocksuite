@@ -219,6 +219,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   render() {
+    console.log('model', this.model);
     const page = getDefaultPageBlock(this.model);
     const codeBlockOption = page.codeBlockOption;
     const boundingClientRect = this.getBoundingClientRect();

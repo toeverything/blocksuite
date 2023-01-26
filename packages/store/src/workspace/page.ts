@@ -663,18 +663,53 @@ export class Page extends Space<PageData> {
   };
 
   private _createBlockModel(props: Omit<BlockProps, 'children'>) {
-    const BlockModelCtor = this.workspace.flavourMap.get(props.flavour);
-    if (!BlockModelCtor) {
-      throw new Error(`Block flavour ${props.flavour} is not registered`);
-    } else if (!props.id) {
-      throw new Error('Block id is not defined');
-    }
+    const schema = this.workspace.flavourSchemaMap.get(props.flavour);
+    if (schema) {
+      const blockModel = new BaseBlockModel(
+        this,
+        props as PropsWithId<Omit<BlockProps, 'children'>>
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      blockModel.flavour = schema.model.flavour as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      blockModel.tag = schema.model.tag as any;
+      let state = { ...schema.model.state };
+      const getState = () => state;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const setState = (newState: any) => {
+        state = { ...state, ...newState };
+        Object.entries(newState).forEach(([key, value]) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (blockModel as any)[key] = value;
+        });
+      };
+      const methods = schema.model.methods(getState, setState);
+      Object.entries(state).forEach(([key, value]) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (blockModel as any)[key] = value;
+      });
+      Object.entries(methods).forEach(([key, fn]) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (blockModel as any)[key] = fn;
+      });
+      return blockModel;
+    } else {
+      /**
+       * @deprecated
+       */
+      const BlockModelCtor = this.workspace.flavourMap.get(props.flavour);
+      if (!BlockModelCtor) {
+        throw new Error(`Block flavour ${props.flavour} is not registered`);
+      } else if (!props.id) {
+        throw new Error('Block id is not defined');
+      }
 
-    const blockModel = new BlockModelCtor(
-      this,
-      props as PropsWithId<Omit<BlockProps, 'children'>>
-    );
-    return blockModel;
+      const blockModel = new BlockModelCtor(
+        this,
+        props as PropsWithId<Omit<BlockProps, 'children'>>
+      );
+      return blockModel;
+    }
   }
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {

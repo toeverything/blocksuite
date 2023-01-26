@@ -3,19 +3,19 @@ import { literal } from 'lit/static-html.js';
 
 export const CodeBlockSchema = defineBlockSchema(
   {
-    lang: 'JavaScript',
+    language: 'JavaScript',
   },
   (get, set) => ({
-    setLang: (lang: string) => {
+    setLang: (language: string) => {
       set({
-        lang,
+        language,
       });
     },
   }),
   {
     version: 1,
     flavour: 'affine:code',
-    tag: 'affine-code',
+    tag: literal`affine-code`,
   }
 );
 
@@ -40,6 +40,6 @@ export class CodeBlockModel
     props: PropsWithId<Partial<BlockSuiteModelProps.CodeBlockModel>>
   ) {
     super(page, props);
-    this.language = props.language ?? 'JavaScript';
+    throw new Error('unreachable');
   }
 }

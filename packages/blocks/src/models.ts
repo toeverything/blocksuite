@@ -1,6 +1,6 @@
 /// <reference types="@blocksuite/global" />
 // Import models only, the bundled file should not include anything else.
-import { CodeBlockModel } from './code-block/code-model.js';
+import { CodeBlockModel, CodeBlockSchema } from './code-block/code-model.js';
 import { DividerBlockModel } from './divider-block/divider-model.js';
 import { EmbedBlockModel } from './embed-block/embed-model.js';
 import { FrameBlockModel } from './frame-block/frame-model.js';
@@ -25,6 +25,8 @@ export {
   ParagraphBlockModel,
   DatabaseBlockModel,
 };
+
+export const __unstable__BlockSchema = [CodeBlockSchema];
 
 // TODO support dynamic register
 export const BlockSchema = {

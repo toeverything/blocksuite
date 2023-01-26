@@ -12,6 +12,8 @@ import {
 } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { AwarenessStore } from '../awareness.js';
+import type { z } from 'zod';
+import type { BlockSchema } from '../base.js';
 
 export interface PageMeta {
   id: string;
@@ -233,6 +235,7 @@ export class Workspace {
   };
 
   flavourMap = new Map<string, typeof BaseBlockModel>();
+  flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
 
   constructor(options: StoreOptions) {
     this._store = new Store(options);
@@ -288,6 +291,11 @@ export class Workspace {
     });
     return this;
   }
+
+  registerSchema = (schema: z.infer<typeof BlockSchema>) => {
+    this.flavourSchemaMap.set(schema.model.flavour, schema);
+    return this;
+  };
 
   private _hasPage(pageId: string) {
     return this._pages.has('space:' + pageId);
