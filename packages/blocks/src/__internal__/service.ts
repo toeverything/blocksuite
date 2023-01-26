@@ -1,8 +1,12 @@
 import type { IService } from './utils/index.js';
 import type { DeltaOperation } from 'quill';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { assertEquals } from '@blocksuite/global/utils';
-import { blockService, BlockServiceInstance, Flavour } from '../models.js';
+import {
+  BlockService,
+  blockService,
+  BlockServiceInstance,
+  Flavour,
+} from '../models.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
@@ -88,18 +92,34 @@ export function registerService(
   return;
 }
 
+/**
+ * @internal
+ */
 export function getService<Key extends Flavour>(
   flavour: Key
 ): BlockServiceInstance[Key] {
   const service = services.get(flavour);
   if (!service) {
+    throw new Error(`cannot find service by flavour ${flavour}`);
+  }
+  return service as BlockServiceInstance[Key];
+}
+
+export function getServiceOrRegister<Key extends Flavour>(
+  flavour: Key
+): BlockServiceInstance[Key] | Promise<BlockServiceInstance[Key]> {
+  const service = services.get(flavour);
+  if (!service) {
     const Constructor =
-      blockService[flavour as keyof typeof blockService] ?? BaseService;
+      blockService[flavour as keyof BlockService] ?? BaseService;
     const result = registerService(flavour, Constructor);
-    assertEquals(result, void 0);
-    const service = services.get(flavour) as BaseService;
-    assertEquals(service.onLoad, undefined);
-    return service as BlockServiceInstance[Key];
+    if (result instanceof Promise) {
+      return result.then(
+        () => services.get(flavour) as BlockServiceInstance[Key]
+      );
+    } else {
+      return services.get(flavour) as BlockServiceInstance[Key];
+    }
   }
   return service as BlockServiceInstance[Key];
 }

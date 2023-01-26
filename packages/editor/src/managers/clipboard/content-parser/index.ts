@@ -1,5 +1,6 @@
 import { marked } from 'marked';
-import type { PageBlockModel } from '@blocksuite/blocks';
+import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
+import { getServiceOrRegister } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
 import type {
   EditorContainer,
@@ -8,8 +9,6 @@ import type {
 } from '../../../index.js';
 import { FileExporter } from '../../file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
-import { getService } from '@blocksuite/blocks';
-import type { BaseService } from '@blocksuite/blocks';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ParseHtml2BlockFunc = (...args: any[]) => Promise<OpenBlockInfo[] | null>;
@@ -66,11 +65,12 @@ export class ContentParser {
     return htmlText;
   }
 
-  public block2Text(blocks: SelectedBlock[]): string {
-    const text = blocks.reduce((text, block) => {
-      return text + this._getTextInfoBySelectionInfo(block);
-    }, '');
-    return text;
+  public async block2Text(blocks: SelectedBlock[]): Promise<string> {
+    return (
+      await Promise.all(
+        blocks.map(block => this._getTextInfoBySelectionInfo(block))
+      )
+    ).reduce((text, block) => text + block, '');
   }
 
   public async htmlText2Block(html: string): Promise<OpenBlockInfo[]> {
@@ -160,30 +160,32 @@ export class ContentParser {
     return block;
   }
 
-  private _getHtmlInfoBySelectionInfo(
+  private async _getHtmlInfoBySelectionInfo(
     block: SelectedBlock,
     previousSibling: SelectedBlock | null,
     nextSibling: SelectedBlock | null
-  ): string {
+  ): Promise<string> {
     const model = this._editor.page.getBlockById(block.id);
     if (!model) {
       return '';
     }
 
-    const children: string[] = block.children.reduce(
-      (children, child, currentIndex: number, array: SelectedBlock[]) => {
-        const childText = this._getHtmlInfoBySelectionInfo(
-          child,
-          currentIndex > 0 ? array[currentIndex - 1] : null,
-          currentIndex < array.length - 1 ? array[currentIndex + 1] : null
-        );
-        childText && children.push(childText);
-        return children;
-      },
-      [] as string[]
+    const children: string[] = await Promise.all(
+      block.children.reduce(
+        (children, child, currentIndex: number, array: SelectedBlock[]) => {
+          const childText = this._getHtmlInfoBySelectionInfo(
+            child,
+            currentIndex > 0 ? array[currentIndex - 1] : null,
+            currentIndex < array.length - 1 ? array[currentIndex + 1] : null
+          );
+          childText && children.push(childText);
+          return children;
+        },
+        [] as Promise<string>[]
+      )
     );
 
-    const service = getService(model.flavour) as BaseService;
+    const service = (await getServiceOrRegister(model.flavour)) as BaseService;
 
     const text = service.block2html(
       model,
@@ -211,28 +213,28 @@ export class ContentParser {
     }
   }
 
-  private _getTextInfoBySelectionInfo(selectedBlock: SelectedBlock): string {
+  private async _getTextInfoBySelectionInfo(
+    selectedBlock: SelectedBlock
+  ): Promise<string> {
     const model = this._editor.page.getBlockById(selectedBlock.id);
     if (!model) {
       return '';
     }
 
     const children: string[] = [];
-    selectedBlock.children.forEach(child => {
-      const childText = this._getTextInfoBySelectionInfo(child);
+    for (const child of selectedBlock.children) {
+      const childText = await this._getTextInfoBySelectionInfo(child);
       childText && children.push(childText);
-    });
+    }
 
-    const service = getService(model.flavour);
+    const service = await getServiceOrRegister(model.flavour);
 
-    const text = service.block2Text(
+    return service.block2Text(
       model,
       children.join(''),
       selectedBlock.startPos,
       selectedBlock.endPos
     );
-
-    return text;
   }
 
   private async _convertHtml2Blocks(

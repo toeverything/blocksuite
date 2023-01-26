@@ -32,7 +32,7 @@ export * from './__internal__/utils/query.js';
 export * from './__internal__/utils/lit.js';
 export * from './__internal__/rich-text/rich-text-operations.js';
 export type { BaseService } from './__internal__/service.js';
-export { getService } from './__internal__/service.js';
+export { getServiceOrRegister } from './__internal__/service.js';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
