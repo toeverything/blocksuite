@@ -15,7 +15,6 @@ import {
   getAllBlocks,
   getDefaultPageBlock,
   IPoint,
-  doesInSamePath,
   getCurrentRange,
   isTitleElement,
 } from '../../__internal__/index.js';
@@ -28,11 +27,11 @@ import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
   getBlockEditingStateByCursor,
+  getAllowSelectedBlocks,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
-import { DragHandle } from '../../components/drag-handle.js';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -161,9 +160,7 @@ export class DefaultSelectionManager {
   private readonly _disposables = new DisposableGroup();
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _dragHandleAbortController = new AbortController();
 
-  private _dragHandle: DragHandle | null = null;
   private _blockHub: BlockHub | null = null;
 
   constructor({
@@ -181,58 +178,7 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    const createHandle = () => {
-      this._dragHandle = new DragHandle({
-        setSelectedBlocks: this._setSelectedBlocks,
-        onDropCallback: (e, start, end) => {
-          const startModel = start.model;
-          const rect = end.position;
-          const nextModel = end.model;
-          if (doesInSamePath(this.page, nextModel, startModel)) {
-            return;
-          }
-          this.page.captureSync();
-          const distanceToTop = Math.abs(rect.top - e.y);
-          const distanceToBottom = Math.abs(rect.bottom - e.y);
-          this.page.moveBlock(
-            startModel,
-            nextModel,
-            distanceToTop < distanceToBottom
-          );
-          this.clearRects();
-        },
-        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            {
-              skipX,
-            }
-          );
-        },
-        getBlockEditingStateByCursor: (
-          pageX,
-          pageY,
-          cursor,
-          size,
-          skipX,
-          dragging
-        ) => {
-          return getBlockEditingStateByCursor(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            cursor,
-            {
-              size,
-              skipX,
-              dragging,
-            }
-          );
-        },
-      });
-    };
+
     const createBlockHub = () => {
       this._blockHub = new BlockHub({
         onDropCallback: (e, end) => {
@@ -251,17 +197,13 @@ export class DefaultSelectionManager {
             distanceToTop < distanceToBottom
           );
         },
-        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            {
-              skipX,
-            }
-          );
+        getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(blocks, pageX, pageY, {
+            skipX,
+          });
         },
         getBlockEditingStateByCursor: (
+          blocks,
           pageX,
           pageY,
           cursor,
@@ -269,38 +211,15 @@ export class DefaultSelectionManager {
           skipX,
           dragging
         ) => {
-          return getBlockEditingStateByCursor(
-            this._allowSelectedBlocks,
-            pageX,
-            pageY,
-            cursor,
-            {
-              size,
-              skipX,
-              dragging,
-            }
-          );
+          return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
+            size,
+            skipX,
+            dragging,
+          });
         },
       });
+      this._blockHub.getAllowedBlocks = () => this._allowSelectedBlocks;
     };
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_drag_handle,
-        enable => {
-          if (enable) {
-            if (!this._dragHandle) {
-              createHandle();
-            }
-          } else {
-            this._dragHandle?.remove();
-            this._dragHandle = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
     this._disposables.add(
       this.page.awarenessStore.signals.update.subscribe(
         msg => msg.state?.flags.enable_block_hub,
@@ -319,9 +238,6 @@ export class DefaultSelectionManager {
         }
       )
     );
-    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
-      createHandle();
-    }
     if (this.page.awarenessStore.getFlag('enable_block_hub')) {
       createBlockHub();
     }
@@ -348,36 +264,7 @@ export class DefaultSelectionManager {
    * @private
    */
   private get _allowSelectedBlocks(): BaseBlockModel[] {
-    const result: BaseBlockModel[] = [];
-    const blocks = this.page.root?.children.slice();
-    if (!blocks) {
-      return [];
-    }
-
-    const dfs = (
-      blocks: BaseBlockModel[],
-      depth: number,
-      parentIndex: number
-    ) => {
-      for (const block of blocks) {
-        if (block.flavour !== 'affine:frame') {
-          result.push(block);
-        }
-        block.depth = depth;
-        if (parentIndex !== -1) {
-          block.parentIndex = parentIndex;
-        }
-        if (block.flavour === 'affine:database') {
-          // ignore to push the children inside the database block
-          return;
-        }
-        block.children.length &&
-          dfs(block.children, depth + 1, result.length - 1);
-      }
-    };
-
-    dfs(blocks, 0, -1);
-    return result;
+    return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
   private get _containerOffset() {
@@ -614,9 +501,9 @@ export class DefaultSelectionManager {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
-      if (this._dragHandle) {
+      if (this._container.components.dragHandle) {
         const clickDragState = getBlockEditingStateByPosition(
-          this._allowSelectedBlocks,
+          this._container.components.dragHandle.getDropAllowedBlocks(null),
           e.raw.pageX,
           e.raw.pageY,
           {
@@ -624,7 +511,7 @@ export class DefaultSelectionManager {
           }
         );
         if (clickDragState?.model) {
-          this._dragHandle.show(clickDragState);
+          this._container.components.dragHandle.show(clickDragState);
         }
       }
       this._signals.updateEmbedEditingState.emit(null);
@@ -677,10 +564,6 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
-    if (this._dragHandle) {
-      this._dragHandle.remove();
-    }
-    this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();

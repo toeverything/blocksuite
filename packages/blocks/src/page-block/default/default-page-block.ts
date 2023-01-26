@@ -1,7 +1,14 @@
 /// <reference types="vite/client" />
 import { css, html } from 'lit';
+import { Utils } from '@blocksuite/store';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { BaseBlockModel, Page, Signal, Text } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  DisposableGroup,
+  Page,
+  Signal,
+  Text,
+} from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
 import {
   asyncFocusRichText,
@@ -24,6 +31,8 @@ import {
 } from './components.js';
 import {
   bindHotkeys,
+  createDragHandle,
+  getAllowSelectedBlocks,
   isControlledKeyboardEvent,
   removeHotkeys,
 } from './utils.js';
@@ -31,6 +40,7 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import autosize from 'autosize';
 import { assertExists } from '@blocksuite/global/utils';
+import type { DragHandle } from '../../components/index.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -127,6 +137,15 @@ export class DefaultPageBlockComponent
   getService = getService;
 
   lastSelectionPosition: SelectionPosition = 'start';
+
+  /**
+   * shard components
+   */
+  components: {
+    dragHandle: DragHandle | null;
+  } = {
+    dragHandle: null,
+  };
 
   @property()
   mouseRoot!: HTMLElement;
@@ -337,8 +356,55 @@ export class DefaultPageBlockComponent
     focusTextEnd(this._title);
   }
 
+  private _disposables = new DisposableGroup();
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const createHandle = () => {
+      this.components.dragHandle = createDragHandle(this);
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+        if (
+          draggingBlock &&
+          Utils.doesInsideBlockByFlavour(
+            this.page,
+            draggingBlock,
+            'affine:database'
+          )
+        ) {
+          return getAllowSelectedBlocks(
+            this.page.getParent(draggingBlock) as BaseBlockModel
+          );
+        }
+        return getAllowSelectedBlocks(this.model);
+      };
+    };
+    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
+      createHandle();
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this.components.dragHandle) {
+              createHandle();
+            }
+          } else {
+            this.components.dragHandle?.remove();
+            this.components.dragHandle = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this._disposables.dispose();
+    this.components.dragHandle?.remove();
 
     removeHotkeys();
     this.selection.dispose();

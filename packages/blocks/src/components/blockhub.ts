@@ -1,5 +1,5 @@
 import { css, html, TemplateResult } from 'lit';
-import { customElement, query, queryAll } from 'lit/decorators.js';
+import { customElement, property, query, queryAll } from 'lit/decorators.js';
 import { NonShadowLitElement } from '../__internal__/index.js';
 import type {
   DragHandleGetModelStateCallback,
@@ -18,6 +18,7 @@ import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
 } from '@blocksuite/global/config';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 type BlockHubItem = {
   flavour: string;
@@ -30,6 +31,12 @@ type BlockHubItem = {
 
 @customElement('affine-block-hub')
 export class BlockHub extends NonShadowLitElement {
+  /**
+   * A function that returns all blocks that are allowed to be moved to
+   */
+  @property()
+  public getAllowedBlocks: () => BaseBlockModel[];
+
   @queryAll('.card-container')
   private _blockHubCards!: Array<HTMLElement>;
 
@@ -246,6 +253,10 @@ export class BlockHub extends NonShadowLitElement {
     getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
   }) {
     super();
+    this.getAllowedBlocks = () => {
+      console.warn('you may forget to set `getAllowedBlocks`');
+      return [];
+    };
     this._onDropCallback = options.onDropCallback;
     this._getBlockEditingStateByPosition =
       options.getBlockEditingStateByPosition;
@@ -496,8 +507,21 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     const modelState = this._cursor
-      ? this._getBlockEditingStateByCursor?.(x, y, this._cursor, 5, false, true)
-      : this._getBlockEditingStateByPosition?.(x, y, true);
+      ? this._getBlockEditingStateByCursor?.(
+          this.getAllowedBlocks(),
+          x,
+          y,
+          this._cursor,
+          5,
+          false,
+          true
+        )
+      : this._getBlockEditingStateByPosition?.(
+          this.getAllowedBlocks(),
+          x,
+          y,
+          true
+        );
 
     if (modelState) {
       this._cursor = modelState.index;
