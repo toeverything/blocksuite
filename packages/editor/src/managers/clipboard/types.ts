@@ -30,7 +30,7 @@ export interface SelectedBlock {
 
 export type OpenBlockInfo = {
   flavour: string;
-  type: string;
+  type?: string;
   text: DeltaOperation[];
   checked?: boolean;
   children: OpenBlockInfo[];

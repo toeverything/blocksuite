@@ -69,6 +69,18 @@ function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
 }
 
+// If a block is soft enterable, the rule is:
+// 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
+// 2. In the middle and start of block, press Enter will insert a \n to break the line
+// TODO this should be configurable per-block
+function isSoftEnterable(model: BaseBlockModel) {
+  if (matchFlavours(model, ['affine:code'])) return true;
+  if (matchFlavours(model, ['affine:paragraph'])) {
+    return model.type === 'quote';
+  }
+  return false;
+}
+
 export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   function enterMarkdownMatch(
     this: KeyboardEventThis,
@@ -100,22 +112,6 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     const selection = quill.getSelection();
     assertExists(selection);
 
-    // Some block should treat Enter as soft enter
-    // Logic is：
-    // 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
-    // 2. In the middle and start of block, press Enter will insert a \n to break the line
-    // TODO: These block list may should be configurable in the block self
-    const shouldSoftEnterFirstBlocks = [
-      {
-        flavour: 'affine:paragraph',
-        type: 'quote',
-      },
-      {
-        flavour: 'affine:code',
-        type: 'code',
-      },
-    ];
-
     if (
       isEmptyList &&
       parent &&
@@ -133,30 +129,23 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       // - | <-- will unindent the block
       handleUnindent(page, model, selection.index);
     } else if (isEnd || shortKey) {
-      const isSoftEnterBlock = shouldSoftEnterFirstBlocks.find(
-        ({ flavour, type }) => {
-          return model.flavour === flavour && model.type === type;
-        }
-      );
+      const softEnterable = isSoftEnterable(model);
 
       const isNewLine = /\n\n$/.test(quill.getText());
-      const shouldSoftEnter = isSoftEnterBlock && !isNewLine;
+      const shouldSoftEnter = softEnterable && !isNewLine;
 
       if (shouldSoftEnter) {
         // TODO handle ctrl+enter in code/quote block or other force soft enter block
         onSoftEnter(quill);
       } else {
         // delete the \n at the end of block
-        if (isSoftEnterBlock) {
+        if (softEnterable) {
           quill.deleteText(selection.index, 1);
         }
         handleBlockEndEnter(page, model);
       }
     } else {
-      const isSoftEnterBlock =
-        shouldSoftEnterFirstBlocks.findIndex(({ flavour, type }) => {
-          return model.flavour === flavour && model.type === type;
-        }) !== -1;
+      const isSoftEnterBlock = isSoftEnterable(model);
 
       if (isSoftEnterBlock) {
         onSoftEnter(quill);

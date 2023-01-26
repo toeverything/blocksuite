@@ -7,7 +7,6 @@ export class CodeBlockModel
 {
   static version = 1;
   flavour = 'affine:code' as const;
-  type = 'code' as const;
   tag = literal`affine-code`;
 
   language: string;
