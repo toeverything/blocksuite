@@ -32,42 +32,15 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-// function forwardSelect(newRange: Range, range: Range) {
-//   if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
-//     const lastTextNode = getLastTextNode(newRange.endContainer);
-//     if (lastTextNode) {
-//       newRange = document.createRange();
-//       newRange.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
-//       newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
-//     }
-//   }
-//   if (range.comparePoint(newRange.endContainer, newRange.endOffset) === -1) {
-//     return;
-//   }
-//   range.setEnd(newRange.endContainer, newRange.endOffset);
-// }
-//
-// function backwardSelect(newRange: Range, range: Range) {
-//   if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
-//     const firstTextNode = getFirstTextNode(newRange.startContainer);
-//     if (firstTextNode) {
-//       newRange = document.createRange();
-//       newRange.setStart(firstTextNode, 0);
-//       newRange.setEnd(firstTextNode, 0);
-//     }
-//   }
-//   range.setStart(newRange.endContainer, newRange.endOffset);
-// }
-
 function fixCurrentRangeToText(
   clientX: number,
   clientY: number,
   offset: IPoint,
   startRange: Range,
   range: Range,
-  isDownward: boolean
+  isBackward: boolean
 ) {
-  const endContainer = isDownward ? range.startContainer : range.endContainer;
+  const endContainer = isBackward ? range.startContainer : range.endContainer;
   if (endContainer.nodeType !== Node.TEXT_NODE) {
     const textBlocks = Array.from(
       (range.commonAncestorContainer as HTMLElement).querySelectorAll(
@@ -80,14 +53,14 @@ function fixCurrentRangeToText(
     });
 
     if (textBlocks.length) {
-      const textBlock = isDownward
+      const textBlock = isBackward
         ? textBlocks.find(t => {
             const rect = t.getBoundingClientRect();
-            return clientY <= rect.top; // handle both drag upwards and leftward
+            return clientY <= rect.top; // handle dragging backward
           })
         : textBlocks.reverse().find(t => {
             const rect = t.getBoundingClientRect();
-            return clientY >= rect.bottom; // handle both drag downward, and rightward
+            return clientY >= rect.bottom; // handle dragging forward
           });
       if (!textBlock) {
         throw new Error('Failed to focus text node!');
@@ -95,15 +68,15 @@ function fixCurrentRangeToText(
       const text = textBlock.querySelector('.ql-editor');
       assertExists(text);
       const rect = text.getBoundingClientRect();
-      const newY = isDownward
+      const newY = isBackward
         ? rect.bottom - offset.y - 6
         : rect.top - offset.y + 6;
       const newRange = caretRangeFromPoint(clientX, newY);
       if (newRange && text.firstChild) {
-        if (isDownward && text.firstChild.firstChild) {
+        if (isBackward && text.firstChild.firstChild) {
           newRange.setEnd(startRange.startContainer, startRange.startOffset);
           newRange.setStartBefore(text.firstChild.firstChild);
-        } else if (!isDownward && text.firstChild.lastChild) {
+        } else if (!isBackward && text.firstChild.lastChild) {
           newRange.setStart(startRange.startContainer, startRange.startOffset);
           // should update `endOffset`
           if (text.firstChild.firstChild === text.firstChild.lastChild) {
@@ -451,19 +424,19 @@ export function handleNativeRangeDragMove(
   e: SelectionEvent
 ) {
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  if (!currentRange) {
-    return;
-  }
+  if (!currentRange) return;
 
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   const container = currentRange.commonAncestorContainer as HTMLElement;
-  // Forward: ↓ →, Downward: ← ↑
-  const isDownward = currentRange.comparePoint(endContainer, endOffset) === 1;
+  // Forward: ↓ →, Backward: ← ↑
+  const isBackward = currentRange.comparePoint(endContainer, endOffset) === 1;
 
+  // Handle native range state on cross-block dragging,
+  // see https://github.com/toeverything/blocksuite/pull/845
   if (container.nodeType !== Node.TEXT_NODE) {
-    //  Forward: ↓ → leave `affine-frame`
-    // Downward: ← ↑ leave `.affine-frame-block-container` or `.affine-default-page-block-title-container`
+    // Forward: ↓ → leave `affine-frame`
+    // Backward: ← ↑ leave `.affine-frame-block-container` or `.affine-default-page-block-title-container`
     if (
       container.tagName === 'AFFINE-FRAME' ||
       container.classList.contains('affine-frame-block-container') ||
@@ -475,14 +448,14 @@ export function handleNativeRangeDragMove(
         e.containerOffset,
         startRange,
         currentRange,
-        isDownward
+        isBackward
       );
     } else {
-      // ignore other elements, e.g: `list-block-prefix`
+      // ignore other elements, e.g., `list-block-prefix`
       return;
     }
   } else {
-    if (isDownward) {
+    if (isBackward) {
       currentRange.setEnd(endContainer, endOffset);
     } else {
       currentRange.setStart(startContainer, startOffset);
