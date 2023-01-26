@@ -61,5 +61,5 @@ export type BlockServiceInstance = {
     ? BlockService[Key] extends { new (): unknown }
       ? RemoveInternals<InstanceType<BlockService[Key]>>
       : never
-    : InstanceType<typeof BaseService>;
+    : RemoveInternals<InstanceType<typeof BaseService>>;
 };
