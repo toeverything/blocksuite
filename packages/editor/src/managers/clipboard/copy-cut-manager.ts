@@ -53,7 +53,7 @@ export class CopyCutManager {
     const textClip = await this._getTextClip(selectedBlocks);
     textClip && clips.push(textClip);
 
-    const htmlClip = this._getHtmlClip(selectedBlocks);
+    const htmlClip = await this._getHtmlClip(selectedBlocks);
     htmlClip && clips.push(htmlClip);
 
     return clips;
@@ -75,8 +75,12 @@ export class CopyCutManager {
     );
   }
 
-  private _getHtmlClip(selectedBlocks: SelectedBlock[]): ClipboardItem | null {
-    const htmlText = this._editor.contentParser.block2Html(selectedBlocks);
+  private async _getHtmlClip(
+    selectedBlocks: SelectedBlock[]
+  ): Promise<ClipboardItem | null> {
+    const htmlText = await this._editor.contentParser.block2Html(
+      selectedBlocks
+    );
     return new ClipboardItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
   }
 
