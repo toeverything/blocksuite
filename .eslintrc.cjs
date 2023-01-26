@@ -88,6 +88,10 @@ module.exports = {
   },
   plugins: ['react', '@typescript-eslint'],
   rules: {
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { prefer: 'type-imports', disallowTypeAnnotations: false },
+    ],
     '@typescript-eslint/no-restricted-imports': [
       'error',
       {

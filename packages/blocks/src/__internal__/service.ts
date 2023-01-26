@@ -1,12 +1,8 @@
 import type { IService } from './utils/index.js';
 import type { DeltaOperation } from 'quill';
 import type { BaseBlockModel } from '@blocksuite/store';
-import {
-  BlockService,
-  blockService,
-  BlockServiceInstance,
-  Flavour,
-} from '../models.js';
+import type { BlockServiceInstance, Flavour, BlockService } from '../models.js';
+import { blockService } from '../models.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
