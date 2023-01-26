@@ -74,7 +74,7 @@ declare type BlockSuiteFlags = {
 };
 
 declare namespace BlockSuiteInternal {
-  import { TextType } from '@blocksuite/store';
+  import type { TextType } from '@blocksuite/store';
 
   interface SchemaMeta {
     /**
@@ -155,7 +155,7 @@ declare namespace BlockSuiteInternal {
     text?: TextType;
   }
 
-  import {
+  import type {
     // Model
     CodeBlockModel,
     DividerBlockModel,

@@ -1,4 +1,5 @@
-import { BaseBlockModel, PrelimText } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { PrelimText } from '@blocksuite/store';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,

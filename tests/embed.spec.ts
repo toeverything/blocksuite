@@ -1,5 +1,6 @@
 import './utils/declare-test-window.js';
-import { test, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test } from '@playwright/test';
 import {
   activeEmbed,
   dragEmbedResizeByBottomLeft,

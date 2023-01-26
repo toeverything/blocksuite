@@ -3,7 +3,8 @@ import {
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

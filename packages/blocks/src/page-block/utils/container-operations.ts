@@ -1,4 +1,5 @@
-import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import {
   almostEqual,
   type ExtendedModel,

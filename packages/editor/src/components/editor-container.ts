@@ -2,10 +2,15 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
-import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
-import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
+import type {
+  MouseMode,
+  PageBlockModel,
+  SurfaceBlockModel,
+} from '@blocksuite/blocks';
+import { NonShadowLitElement } from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
 
 @customElement('editor-container')

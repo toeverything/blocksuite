@@ -1,4 +1,5 @@
-import { expect, Locator, Page, test } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { SHORT_KEY } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,

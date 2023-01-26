@@ -5,11 +5,8 @@ import { Page } from './page.js';
 import { Signal } from '@blocksuite/global/utils';
 import { Indexer, type QueryContent } from './search.js';
 import type { BaseBlockModel } from '../base.js';
-import {
-  BlobStorage,
-  type BlobOptionsGetter,
-  getBlobStorage,
-} from '../blob/index.js';
+import type { BlobStorage } from '../blob/index.js';
+import { type BlobOptionsGetter, getBlobStorage } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { AwarenessStore } from '../awareness.js';
 

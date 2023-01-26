@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import './declare-test-window.js';
-import { expect, Locator, type Page } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import type {
   BaseBlockModel,
   SerializedStore,

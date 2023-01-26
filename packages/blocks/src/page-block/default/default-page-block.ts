@@ -2,13 +2,8 @@
 import { css, html } from 'lit';
 import { Utils } from '@blocksuite/store';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import {
-  BaseBlockModel,
-  DisposableGroup,
-  Page,
-  Signal,
-  Text,
-} from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { DisposableGroup, Signal, Text } from '@blocksuite/store';
 import type { PageBlockModel } from '../index.js';
 import {
   asyncFocusRichText,

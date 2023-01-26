@@ -3,6 +3,7 @@ import {
   disableDebuglog,
   configDebugLog,
 } from '@blocksuite/global/debug';
+import type { Workspace } from '@blocksuite/store';
 import {
   assertExists,
   DebugDocProvider,
@@ -11,7 +12,6 @@ import {
   IndexedDBDocProvider,
   type StoreOptions,
   Utils,
-  Workspace,
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);

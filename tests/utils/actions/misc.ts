@@ -4,7 +4,8 @@ import type {
   BaseBlockModel,
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
-import { ConsoleMessage, expect, Page } from '@playwright/test';
+import type { ConsoleMessage, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { pressEnter, SHORT_KEY } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;

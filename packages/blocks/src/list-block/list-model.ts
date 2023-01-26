@@ -1,4 +1,5 @@
-import { Page, BaseBlockModel } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+import { BaseBlockModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export class ListBlockModel

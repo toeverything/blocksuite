@@ -4,7 +4,8 @@ import '@blocksuite/editor';
 import std from '@blocksuite/blocks/std';
 import { BlockSchema } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
-import { Page, Workspace } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import { DebugMenu } from './components/debug-menu.js';
 import {
   defaultMode,

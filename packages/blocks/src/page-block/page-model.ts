@@ -1,4 +1,5 @@
-import { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+import { BaseBlockModel } from '@blocksuite/store';
 
 export class PageBlockModel
   extends BaseBlockModel

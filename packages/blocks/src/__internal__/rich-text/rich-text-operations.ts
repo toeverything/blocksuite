@@ -1,6 +1,7 @@
 // operations used in rich-text level
 
-import { Page, Text } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import {
   type ExtendedModel,
