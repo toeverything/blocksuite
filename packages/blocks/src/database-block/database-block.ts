@@ -1,7 +1,10 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { BlockElementWithService, type BlockHost } from '../__internal__/index.js';
+import {
+  BlockElementWithService,
+  type BlockHost,
+} from '../__internal__/index.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { assertEquals } from '@blocksuite/global/utils';
@@ -10,6 +13,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { nanoid } from '@blocksuite/store';
 import z from 'zod';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+
 type TagSchema = BlockSuiteInternal.TagSchema;
 
 const columnPreviewSchema = z.object({
