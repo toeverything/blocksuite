@@ -1,5 +1,23 @@
-import { BaseBlockModel, Page } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
+
+export const CodeBlockSchema = defineBlockSchema(
+  {
+    lang: 'JavaScript',
+  },
+  (get, set) => ({
+    setLang: (lang: string) => {
+      set({
+        lang,
+      });
+    },
+  }),
+  {
+    version: 1,
+    flavour: 'affine:code',
+    tag: 'affine-code',
+  }
+);
 
 export class CodeBlockModel
   extends BaseBlockModel<BlockSuiteModelProps.CodeBlockModel>
