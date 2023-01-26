@@ -130,6 +130,9 @@ class WorkspaceMeta<
     workspace.flavourMap.forEach((model, flavour) => {
       versions.set(flavour, model.version);
     });
+    workspace.flavourSchemaMap.forEach((schema, flavour) => {
+      versions.set(flavour, schema.version);
+    });
   }
 
   /**
@@ -148,7 +151,9 @@ class WorkspaceMeta<
 
     dataFlavours.forEach(dataFlavour => {
       const dataVersion = versions[dataFlavour] as number;
-      const editorVersion = workspace.flavourMap.get(dataFlavour)?.version;
+      const editorVersion =
+        workspace.flavourMap.get(dataFlavour)?.version ??
+        workspace.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
         throw new Error(
           `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`
