@@ -2,7 +2,12 @@ import type { IService } from './utils/index.js';
 import type { DeltaOperation } from 'quill';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertEquals } from '@blocksuite/global/utils';
-import { blockService } from '../models.js';
+import {
+  blockService,
+  BlockServiceInstance,
+  Flavour,
+  ServiceFlavour,
+} from '../models.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
@@ -88,7 +93,9 @@ export function registerService(
   return;
 }
 
-export function getService(flavour: string): BaseService {
+export function getService<Key extends Flavour>(
+  flavour: Key
+): BlockServiceInstance[Key] {
   const service = services.get(flavour);
   if (!service) {
     const Constructor =
@@ -97,7 +104,7 @@ export function getService(flavour: string): BaseService {
     assertEquals(result, void 0);
     const service = services.get(flavour) as BaseService;
     assertEquals(service.onLoad, undefined);
-    return service;
+    return service as BlockServiceInstance[Key];
   }
-  return service;
+  return service as BlockServiceInstance[Key];
 }

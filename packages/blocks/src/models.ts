@@ -47,7 +47,7 @@ export const blockService = {
   'affine:list': ListBlockService,
   'affine:divider': DividerBlockService,
 } satisfies {
-  [key: string]: typeof BaseService;
+  [key in Flavour]?: { new (): BaseService };
 };
 
 export type BlockService = typeof blockService;
@@ -57,7 +57,9 @@ export type ServiceFlavour = keyof BlockService;
 type RemoveInternals<T> = Omit<T, 'onLoad'>;
 
 export type BlockServiceInstance = {
-  [Key in keyof BlockService]: BlockService[Key] extends { new (): unknown }
-    ? RemoveInternals<InstanceType<BlockService[Key]>>
-    : never;
+  [Key in Flavour]: Key extends ServiceFlavour
+    ? BlockService[Key] extends { new (): unknown }
+      ? RemoveInternals<InstanceType<BlockService[Key]>>
+      : never
+    : InstanceType<typeof BaseService>;
 };
