@@ -2,13 +2,13 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
-  BLOCK_ID_ATTR,
   BlockChildrenContainer,
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 
 import type { DividerBlockModel } from './divider-model.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends NonShadowLitElement {

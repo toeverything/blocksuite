@@ -12,7 +12,6 @@ import {
 import type { PageBlockModel } from '../index.js';
 import {
   asyncFocusRichText,
-  BLOCK_ID_ATTR,
   BlockChildrenContainer,
   type BlockHost,
   getCurrentRange,
@@ -41,6 +40,7 @@ import { getService } from '../../__internal__/service.js';
 import autosize from 'autosize';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DragHandle } from '../../components/index.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
