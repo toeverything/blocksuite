@@ -1,6 +1,5 @@
 import { BaseBlockModel, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 export class CodeBlockModel
   extends BaseBlockModel<BlockSuiteModelProps.CodeBlockModel>
@@ -25,30 +24,5 @@ export class CodeBlockModel
   ) {
     super(page, props);
     this.language = props.language ?? 'JavaScript';
-  }
-
-  // TODO block2html
-
-  block2html(
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ): string {
-    const codeElement = document.querySelector(
-      `[${BLOCK_ID_ATTR}="${this.id}"] pre`
-    );
-    if (!codeElement) {
-      return super.block2html(
-        childText,
-        _previousSiblingId,
-        _nextSiblingId,
-        begin,
-        end
-      );
-    }
-    codeElement.setAttribute('code-lang', this.language);
-    return codeElement.outerHTML;
   }
 }

@@ -10,7 +10,8 @@ export class ParagraphBlockService extends BaseService {
     begin?: number,
     end?: number
   ) {
-    const text = model.block2html(
+    const text = super.block2html(
+      model,
       childText,
       previousSiblingId,
       nextSiblingId,

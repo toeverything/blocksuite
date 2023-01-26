@@ -4,6 +4,7 @@ import {
   getCurrentRange,
   ListBlockModel,
   SelectionUtils,
+  getService,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
 import type { EditorContainer } from '../../components/index.js';
@@ -97,7 +98,9 @@ export class CopyCutManager {
     if (matchFlavours(model, ['affine:page'])) {
       flavour = 'affine:paragraph';
       type = 'text';
-      const text = model.block2Text(
+      const service = getService(model.flavour);
+      const text = service.block2Text(
+        model,
         '',
         selectedBlock.startPos,
         selectedBlock.endPos
@@ -110,7 +113,8 @@ export class CopyCutManager {
     } else if (matchFlavours(model, ['affine:embed'])) {
       flavour = 'affine:embed';
       type = 'image';
-      const text = model.block2Text('', 0, 0);
+      const service = getService(model.flavour);
+      const text = service.block2Text(model, '', 0, 0);
       delta = [
         {
           insert: text,

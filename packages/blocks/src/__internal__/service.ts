@@ -1,6 +1,8 @@
 import type { IService } from './utils/index.js';
 import type { DeltaOperation } from 'quill';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { assertEquals } from '@blocksuite/global/utils';
+import { blockService } from '../models.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
@@ -86,15 +88,16 @@ export function registerService(
   return;
 }
 
-export function getService(
-  flavour: string,
-  strict: false
-): BaseService | undefined;
-export function getService(flavour: string, strict?: true): BaseService;
-export function getService(flavour: string, strict = true) {
+export function getService(flavour: string): BaseService {
   const service = services.get(flavour);
-  if (strict && !service) {
-    throw new Error(`cannot find service '${flavour}'`);
+  if (!service) {
+    const Constructor =
+      blockService[flavour as keyof typeof blockService] ?? BaseService;
+    const result = registerService(flavour, Constructor);
+    assertEquals(result, void 0);
+    const service = services.get(flavour) as BaseService;
+    assertEquals(service.onLoad, undefined);
+    return service;
   }
   return service;
 }

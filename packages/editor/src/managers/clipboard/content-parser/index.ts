@@ -8,6 +8,7 @@ import type {
 } from '../../../index.js';
 import { FileExporter } from '../../file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
+import { getService } from '@blocksuite/blocks';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ParseHtml2BlockFunc = (...args: any[]) => Promise<OpenBlockInfo[] | null>;
@@ -181,7 +182,10 @@ export class ContentParser {
       [] as string[]
     );
 
-    const text = model.block2html(
+    const service = getService(model.flavour);
+
+    const text = service.block2html(
+      model,
       children.join(''),
       previousSibling?.id || '',
       nextSibling?.id || '',
@@ -218,7 +222,10 @@ export class ContentParser {
       childText && children.push(childText);
     });
 
-    const text = model.block2Text(
+    const service = getService(model.flavour);
+
+    const text = service.block2Text(
+      model,
       children.join(''),
       selectedBlock.startPos,
       selectedBlock.endPos
