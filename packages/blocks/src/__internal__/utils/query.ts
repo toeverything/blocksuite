@@ -2,7 +2,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import { BLOCK_ID_ATTR as ATTR } from './consts.js';
+import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import type { IPoint } from './gesture.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 

@@ -2,13 +2,13 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
-  BLOCK_ID_ATTR,
   BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import '../__internal__/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 const getPlaceholder = (model: ParagraphBlockModel) => {
   const { type } = model;

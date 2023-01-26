@@ -1,13 +1,11 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 import {
-  ALLOW_DEFAULT,
   getCurrentRange,
   getNextBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   noop,
-  PREVENT_DEFAULT,
 } from '../utils/index.js';
 import {
   handleLineStartBackspace,
@@ -23,6 +21,7 @@ import {
 import { Shortcuts } from './shortcuts.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 interface QuillRange {
   index: number;

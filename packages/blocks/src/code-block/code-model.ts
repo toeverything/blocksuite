@@ -1,6 +1,6 @@
 import { BaseBlockModel, Page } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-import { BLOCK_ID_ATTR } from '../__internal__/utils/consts.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 export class CodeBlockModel
   extends BaseBlockModel<BlockSuiteModelProps.CodeBlockModel>

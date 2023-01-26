@@ -5,7 +5,7 @@ import {
   setStartRange,
 } from './selection.js';
 import { debounce } from './std.js';
-import { MOVE_DETECT_THRESHOLD } from './consts.js';
+import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
 import { isInsideBlockContainer, isTitleElement } from './query.js';
 
 export interface IPoint {

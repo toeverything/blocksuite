@@ -7,9 +7,7 @@ import {
   getRichTextByModel,
   getContainerByModel,
   getPreviousBlock,
-  ALLOW_DEFAULT,
   getNextBlock,
-  PREVENT_DEFAULT,
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
@@ -25,6 +23,7 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);

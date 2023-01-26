@@ -4,7 +4,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import {
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
-} from '../__internal__/index.js';
+} from '@blocksuite/global/config';
 
 @customElement('loader-element')
 export class Loader extends LitElement {

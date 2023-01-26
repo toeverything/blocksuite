@@ -2,7 +2,6 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
-  BLOCK_ID_ATTR,
   BlockChildrenContainer,
   BlockHost,
   getBlockElementByModel,
@@ -14,6 +13,7 @@ import '../__internal__/rich-text/rich-text.js';
 import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 function selectList(model: ListBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;

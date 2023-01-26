@@ -13,13 +13,9 @@ import {
   getPreviousBlock,
   getStartModelBySelection,
   hotkey,
-  HOTKEYS,
   getRichTextByModel,
   Point,
   resetNativeSelection,
-  BLOCK_ID_ATTR,
-  BLOCK_SERVICE_LOADING_ATTR,
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   isCaptionElement,
   doesInSamePath,
 } from '../../__internal__/utils/index.js';
@@ -42,6 +38,12 @@ import {
 } from '@blocksuite/global/utils';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { DragHandle } from '../../components/index.js';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  BLOCK_ID_ATTR,
+  BLOCK_SERVICE_LOADING_ATTR,
+  HOTKEYS,
+} from '@blocksuite/global/config';
 
 export interface EditingState {
   model: BaseBlockModel;

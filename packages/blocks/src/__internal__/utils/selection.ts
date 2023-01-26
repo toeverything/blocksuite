@@ -20,7 +20,7 @@ import type {
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from './consts.js';
+import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,

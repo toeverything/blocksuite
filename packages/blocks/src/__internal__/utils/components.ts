@@ -7,7 +7,7 @@ import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
 import '../../components/loader.js';
 import { hasService, registerService } from '../service.js';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../__internal__/utils/consts.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 
 // TODO support dynamic block types
 export function BlockElement(
