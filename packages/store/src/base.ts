@@ -2,6 +2,29 @@ import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
 import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
+import { z } from 'zod';
+
+const BlockSchema = z.object({
+  version: z.number(),
+  schema: z.object({
+    flavour: z.string(),
+    tag: z.string(),
+    type: z.string().optional(),
+    defaultProps: z.record(z.any()),
+  }),
+});
+
+const CodeBlockSchema = {
+  version: 1,
+  schema: {
+    flavour: 'affine:code',
+    tag: 'affine-code',
+    type: 'code',
+    defaultProps: {
+      language: 'JavaScript',
+    },
+  },
+} satisfies z.infer<typeof BlockSchema>;
 
 // ported from lit
 interface StaticValue {
