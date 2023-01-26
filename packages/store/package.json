@@ -26,7 +26,8 @@
     "merge": "^2.1.1",
     "nanoid": "^4.0.0",
     "y-protocols": "^1.0.5",
-    "y-webrtc": "^10.2.4"
+    "y-webrtc": "^10.2.4",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "lit": "^2.6.1",

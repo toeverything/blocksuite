@@ -247,6 +247,7 @@ importers:
       y-protocols: ^1.0.5
       y-webrtc: ^10.2.4
       yjs: ^13.5.44
+      zod: ^3.20.2
     dependencies:
       '@blocksuite/global': link:../global
       '@types/flexsearch': 0.7.3
@@ -259,6 +260,7 @@ importers:
       nanoid: 4.0.0
       y-protocols: 1.0.5
       y-webrtc: 10.2.4
+      zod: 3.20.2
     devDependencies:
       lit: 2.6.1
       yjs: 13.5.44

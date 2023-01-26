@@ -6,16 +6,16 @@ import { z } from 'zod';
 
 const BlockSchema = z.object({
   version: z.number(),
-  schema: z.object({
+  model: z.object({
     flavour: z.string(),
-    type: z.string().optional(),
+    tag: z.string(),
     defaultProps: z.record(z.any()),
   }),
 });
 
 const CodeBlockSchema = {
   version: 1,
-  schema: {
+  model: {
     flavour: 'affine:code',
     tag: 'affine-code',
     defaultProps: {
