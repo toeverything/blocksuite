@@ -44,6 +44,7 @@ import {
   BLOCK_SERVICE_LOADING_ATTR,
   HOTKEYS,
 } from '@blocksuite/global/config';
+import { getService } from '../../__internal__/service.js';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -310,7 +311,8 @@ export async function downloadImage(model: BaseBlockModel) {
 
 export async function copyImage(model: EmbedBlockModel) {
   const copyType = 'blocksuite/x-c+w';
-  const text = model.block2Text('', 0, 0);
+  const service = getService(model.flavour);
+  const text = service.block2Text(model, '', 0, 0);
   const delta = [
     {
       insert: text,

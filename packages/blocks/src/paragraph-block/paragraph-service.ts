@@ -1,8 +1,7 @@
-import type { IService } from '../__internal__/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
+import { BaseService } from '../__internal__/service.js';
 
-export class ParagraphBlockService implements IService {
-  onLoad: undefined;
+export class ParagraphBlockService extends BaseService {
   block2html(
     model: ParagraphBlockModel,
     childText: string,
@@ -11,7 +10,8 @@ export class ParagraphBlockService implements IService {
     begin?: number,
     end?: number
   ) {
-    const text = model.block2html(
+    const text = super.block2html(
+      model,
       childText,
       previousSiblingId,
       nextSiblingId,

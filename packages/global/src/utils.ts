@@ -48,13 +48,14 @@ export const isNonTextBlock = <
 }) => matchFlavours(model, nonTextBlock);
 
 type Allowed =
+  | void
   | null
   | undefined
   | boolean
   | number
   | string
-  | Record<string, unknown>
-  | unknown[];
+  | unknown[]
+  | object;
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,
   expected: U

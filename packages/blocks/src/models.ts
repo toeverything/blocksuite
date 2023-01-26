@@ -11,6 +11,9 @@ import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { DatabaseBlockModel } from './database-block/database-model.js';
 import { CodeBlockService } from './code-block/code-service.js';
+import type { BaseService } from './__internal__/service.js';
+import { ListBlockService } from './list-block/list-service.js';
+import { DividerBlockService } from './divider-block/divider-service.js';
 
 export {
   CodeBlockModel,
@@ -41,6 +44,10 @@ export type Flavour = keyof typeof BlockSchema;
 export const blockService = {
   'affine:code': CodeBlockService,
   'affine:paragraph': ParagraphBlockService,
+  'affine:list': ListBlockService,
+  'affine:divider': DividerBlockService,
+} satisfies {
+  [key in Flavour]?: { new (): BaseService };
 };
 
 export type BlockService = typeof blockService;
@@ -50,7 +57,9 @@ export type ServiceFlavour = keyof BlockService;
 type RemoveInternals<T> = Omit<T, 'onLoad'>;
 
 export type BlockServiceInstance = {
-  [Key in keyof BlockService]: BlockService[Key] extends { new (): unknown }
-    ? RemoveInternals<InstanceType<BlockService[Key]>>
-    : never;
+  [Key in Flavour]: Key extends ServiceFlavour
+    ? BlockService[Key] extends { new (): unknown }
+      ? RemoveInternals<InstanceType<BlockService[Key]>>
+      : never
+    : RemoveInternals<InstanceType<typeof BaseService>>;
 };
