@@ -31,6 +31,7 @@ import {
   assertSelection,
   assertAlmostEqual,
   assertDivider,
+  assertClipItems,
 } from './utils/asserts.js';
 
 test('click on blank area', async ({ page }) => {
@@ -400,7 +401,7 @@ test('select text in the same line with dragging leftward and move outside the e
   await page.keyboard.press('Backspace', { delay: 50 });
   await page.keyboard.type('abc');
   const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('abc\n');
+  expect(textOne).toBe('78abc\n');
 });
 
 test('select text in the same line with dragging rightward and move outside the editor-container', async ({
@@ -648,4 +649,79 @@ test('the cursor should move to closest editor block when clicking outside conta
 
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45', '789']);
+});
+
+test('should not crash when mouse over the left side of the list block prefix', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [1, 2], [1, 0]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '45');
+  // blur
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [1, 2],
+    [1, 0],
+    { x: 0, y: 0 },
+    { x: -50, y: 0 }
+  );
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '');
+});
+
+test('should set the last block to end the range after while leaving the affine-frame', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 2], [2, 1]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '34567');
+  // blur
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 2],
+    [2, 1],
+    { x: 0, y: 0 },
+    { x: 0, y: 30 }
+  );
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '3456789');
+});
+
+test('should set the first block to start the range before while leaving the affine-frame-block-container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [2, 1], [0, 2]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '34567');
+  // blur
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [2, 1],
+    [0, 2],
+    { x: 0, y: 0 },
+    { x: 0, y: -20 }
+  );
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '1234567');
 });

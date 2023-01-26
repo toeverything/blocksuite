@@ -65,10 +65,9 @@ function fixCurrentRangeToText(
   offset: IPoint,
   startRange: Range,
   range: Range,
-  isForward: boolean
+  isDownward: boolean
 ) {
-  const endContainer = isForward ? range.endContainer : range.startContainer;
-  let newRange: Range | null = range;
+  const endContainer = isDownward ? range.startContainer : range.endContainer;
   if (endContainer.nodeType !== Node.TEXT_NODE) {
     const textBlocks = Array.from(
       (range.commonAncestorContainer as HTMLElement).querySelectorAll(
@@ -81,14 +80,14 @@ function fixCurrentRangeToText(
     });
 
     if (textBlocks.length) {
-      const textBlock = isForward
-        ? textBlocks.reverse().find(t => {
-            const rect = t.getBoundingClientRect();
-            return clientY >= rect.bottom; // handle both drag downward, and rightward
-          })
-        : textBlocks.find(t => {
+      const textBlock = isDownward
+        ? textBlocks.find(t => {
             const rect = t.getBoundingClientRect();
             return clientY <= rect.top; // handle both drag upwards and leftward
+          })
+        : textBlocks.reverse().find(t => {
+            const rect = t.getBoundingClientRect();
+            return clientY >= rect.bottom; // handle both drag downward, and rightward
           });
       if (!textBlock) {
         throw new Error('Failed to focus text node!');
@@ -96,17 +95,25 @@ function fixCurrentRangeToText(
       const text = textBlock.querySelector('.ql-editor');
       assertExists(text);
       const rect = text.getBoundingClientRect();
-      const newY = isForward
+      const newY = isDownward
         ? rect.bottom - offset.y - 6
         : rect.top - offset.y + 6;
-      newRange = caretRangeFromPoint(clientX, newY);
+      const newRange = caretRangeFromPoint(clientX, newY);
       if (newRange && text.firstChild) {
-        if (isForward && text.firstChild.lastChild) {
-          newRange.setStart(startRange.startContainer, startRange.startOffset);
-          newRange.setEndAfter(text.firstChild.lastChild);
-        } else if (!isForward && text.firstChild.firstChild) {
+        if (isDownward && text.firstChild.firstChild) {
           newRange.setEnd(startRange.startContainer, startRange.startOffset);
           newRange.setStartBefore(text.firstChild.firstChild);
+        } else if (!isDownward && text.firstChild.lastChild) {
+          newRange.setStart(startRange.startContainer, startRange.startOffset);
+          // should update `endOffset`
+          if (text.firstChild.firstChild === text.firstChild.lastChild) {
+            newRange.setEnd(
+              text.firstChild.firstChild,
+              text.firstChild.firstChild.textContent?.length || 0
+            );
+          } else {
+            newRange.setEndAfter(text.firstChild.lastChild);
+          }
         }
         return newRange;
       }
@@ -451,12 +458,12 @@ export function handleNativeRangeDragMove(
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
   const container = currentRange.commonAncestorContainer as HTMLElement;
-  // Forward: ↓, Downward: ↑
-  const isForward = currentRange.comparePoint(endContainer, endOffset) === -1;
+  // Forward: ↓ →, Downward: ← ↑
+  const isDownward = currentRange.comparePoint(endContainer, endOffset) === 1;
 
   if (container.nodeType !== Node.TEXT_NODE) {
-    //  Forward: ↓ leave `affine-frame`
-    // Downward: ↑ leave `.affine-frame-block-container` or `.affine-default-page-block-title-container`
+    //  Forward: ↓ → leave `affine-frame`
+    // Downward: ← ↑ leave `.affine-frame-block-container` or `.affine-default-page-block-title-container`
     if (
       container.tagName === 'AFFINE-FRAME' ||
       container.classList.contains('affine-frame-block-container') ||
@@ -468,17 +475,17 @@ export function handleNativeRangeDragMove(
         e.containerOffset,
         startRange,
         currentRange,
-        isForward
+        isDownward
       );
     } else {
       // ignore other elements, e.g: `list-block-prefix`
       return;
     }
   } else {
-    if (isForward) {
-      currentRange.setStart(startContainer, startOffset);
-    } else {
+    if (isDownward) {
       currentRange.setEnd(endContainer, endOffset);
+    } else {
+      currentRange.setStart(startContainer, startOffset);
     }
   }
 
