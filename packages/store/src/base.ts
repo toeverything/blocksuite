@@ -42,7 +42,24 @@ interface StaticValue {
   r: symbol;
 }
 
+export type Model<
+  Schema extends {
+    model: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      state: Record<string, any>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      methods: (...args: any[]) => Record<string, AnyFunction>;
+      flavour: string;
+    };
+  }
+> = BaseBlockModel &
+  Schema['model']['state'] &
+  ReturnType<Schema['model']['methods']> & {
+    flavour: Schema['model']['flavour'];
+  };
+
 export function defineBlockSchema<
+  Flavour extends string,
   State extends Record<string, unknown>,
   Methods extends (
     get: () => State,
@@ -53,14 +70,21 @@ export function defineBlockSchema<
   ) => Record<string, AnyFunction>,
   Metadata extends Readonly<{
     version: number;
-    flavour: string;
     tag: StaticValue;
   }>
 >(
-  state: Partial<State>,
+  flavour: Flavour,
+  state: State,
   methods: Methods,
   metadata: Metadata
-): z.infer<typeof BlockSchema>;
+): {
+  version: number;
+  model: {
+    state: State;
+    methods: Methods;
+    flavour: Flavour;
+  } & Metadata;
+};
 export function defineBlockSchema(
   state: Record<string, unknown>,
   methods: (...args: unknown[]) => Record<string, AnyFunction>,
@@ -69,7 +93,7 @@ export function defineBlockSchema(
     flavour: string;
     tag: StaticValue;
   }
-): unknown {
+): z.infer<typeof BlockSchema> {
   const schema = {
     version: metadata.version,
     model: {
