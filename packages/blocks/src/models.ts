@@ -11,6 +11,7 @@ import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { DatabaseBlockModel } from './database-block/database-model.js';
 import { CodeBlockService } from './code-block/code-service.js';
+import type { BaseService } from './__internal__/service.js';
 
 export {
   CodeBlockModel,
@@ -41,6 +42,8 @@ export type Flavour = keyof typeof BlockSchema;
 export const blockService = {
   'affine:code': CodeBlockService,
   'affine:paragraph': ParagraphBlockService,
+} satisfies {
+  [key: string]: typeof BaseService;
 };
 
 export type BlockService = typeof blockService;

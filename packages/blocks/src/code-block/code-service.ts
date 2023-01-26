@@ -1,6 +1,6 @@
-import type { IService } from '../__internal__/index.js';
+import { BaseService } from '../__internal__/service.js';
 
-export class CodeBlockService implements IService {
+export class CodeBlockService extends BaseService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hljs: any;
   onLoad = async () => {
