@@ -8,7 +8,6 @@ const BlockSchema = z.object({
   version: z.number(),
   schema: z.object({
     flavour: z.string(),
-    tag: z.string(),
     type: z.string().optional(),
     defaultProps: z.record(z.any()),
   }),
@@ -19,7 +18,6 @@ const CodeBlockSchema = {
   schema: {
     flavour: 'affine:code',
     tag: 'affine-code',
-    type: 'code',
     defaultProps: {
       language: 'JavaScript',
     },
