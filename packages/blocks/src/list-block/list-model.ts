@@ -1,4 +1,4 @@
-import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
+import { $useText, defineBlockSchema, SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export const ListBlockModelSchema = defineBlockSchema(
@@ -6,13 +6,11 @@ export const ListBlockModelSchema = defineBlockSchema(
   () => ({
     type: 'bulleted' as ListType,
     checked: false,
+    text: $useText,
   }),
   {
     version: 1,
     tag: literal`affine-list`,
-  },
-  {
-    enableText: true,
   }
 );
 

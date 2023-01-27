@@ -13,6 +13,7 @@ import type { Page } from '../workspace/page.js';
 import type { BaseBlockModel } from '../base.js';
 import type { BlockSchema } from '../base.js';
 import type { z } from 'zod';
+import { $useText } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -53,8 +54,10 @@ export function syncBlockProps(
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
     const value = props[key];
 
-    // skip text update since we check it in top level
-    if (key === 'text') return;
+    if (value === $useText) {
+      yBlock.set(`prop:${key}`, new Y.Text());
+      return;
+    }
     if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
@@ -78,12 +81,6 @@ export function syncBlockProps(
       }
     }
   });
-
-  if (schema.model.features.enableText) {
-    if (!yBlock.has('prop:text')) {
-      yBlock.set('prop:text', new Y.Text());
-    }
-  }
 }
 
 export function trySyncTextProp(

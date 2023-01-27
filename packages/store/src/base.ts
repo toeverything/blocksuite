@@ -4,17 +4,15 @@ import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+export const $useText = {
+  symbol: Symbol('vTextSymbol'),
+};
+
 const FlavourSchema = z.string();
 const TagSchema = z.object({
   _$litStatic$: z.string(),
   r: z.symbol(),
 });
-
-const FeaturesSchema = z.object({
-  enableText: z.boolean(),
-});
-
-export type ModelFeatures = z.infer<typeof FeaturesSchema>;
 
 export const BlockSchema = z.object({
   version: z.number(),
@@ -22,7 +20,6 @@ export const BlockSchema = z.object({
     flavour: FlavourSchema,
     tag: TagSchema,
     state: z.function().returns(z.record(z.any())),
-    features: FeaturesSchema,
   }),
 });
 
@@ -32,26 +29,21 @@ interface StaticValue {
   r: symbol;
 }
 
+type State<S extends Record<string, unknown>> = {
+  [K in keyof S]: S[K] extends typeof $useText ? TextType : S[K];
+};
+
 export type SchemaToModel<
   Schema extends {
     model: {
       state: () => Record<string, unknown>;
       flavour: string;
-      features: ModelFeatures;
     };
   }
 > = BaseBlockModel &
-  ReturnType<Schema['model']['state']> & {
+  State<ReturnType<Schema['model']['state']>> & {
     flavour: Schema['model']['flavour'];
-  } & {
-    text: Schema['model']['features']['enableText'] extends true
-      ? TextType
-      : never;
   };
-
-const defaultFeatures: ModelFeatures = {
-  enableText: false,
-};
 
 export function defineBlockSchema<
   Flavour extends string,
@@ -59,19 +51,16 @@ export function defineBlockSchema<
   Metadata extends Readonly<{
     version: number;
     tag: StaticValue;
-  }>,
-  Features extends ModelFeatures
+  }>
 >(
   flavour: Flavour,
   state: () => State,
-  metadata: Metadata,
-  features?: Partial<Features>
+  metadata: Metadata
 ): {
   version: number;
   model: {
     state: () => State;
     flavour: Flavour;
-    features: Features;
   } & Metadata;
 };
 export function defineBlockSchema(
@@ -80,8 +69,7 @@ export function defineBlockSchema(
   metadata: {
     version: number;
     tag: StaticValue;
-  },
-  features?: Partial<ModelFeatures>
+  }
 ): z.infer<typeof BlockSchema> {
   const schema = {
     version: metadata.version,
@@ -89,10 +77,6 @@ export function defineBlockSchema(
       flavour,
       tag: metadata.tag,
       state,
-      features: {
-        ...defaultFeatures,
-        ...(features ?? {}),
-      },
     },
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);

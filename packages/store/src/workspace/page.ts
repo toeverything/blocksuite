@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { Quill } from 'quill';
 import { uuidv4 } from 'lib0/random.js';
-import { BaseBlockModel } from '../base.js';
+import { $useText, BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import {
   Text,
@@ -443,17 +443,12 @@ export class Page extends Space<PageData> {
       );
       assertExists(schema);
       assertExists(defaultState);
-
-      if (schema.model.features.enableText) {
-        if (props.text instanceof PrelimText) {
-          props.text.ready = true;
-        } else if (props.text instanceof Text) {
-          model.text = props.text;
-          // @ts-ignore
-          yBlock.set('prop:text', props.text._yText);
-        }
-      } else {
-        throw new Error('text feature does not enable but in updateBlock');
+      if (props.text instanceof PrelimText) {
+        props.text.ready = true;
+      } else if (props.text instanceof Text) {
+        model.text = props.text;
+        // @ts-ignore
+        yBlock.set('prop:text', props.text._yText);
       }
 
       // TODO diff children changes
@@ -777,17 +772,18 @@ export class Page extends Space<PageData> {
     const model = this.getBlockById(id);
     if (!model) return;
     const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+    const defaultState = this.workspace.flavourInitialStateMap.get(
+      model.flavour
+    );
+    assertExists(defaultState);
     assertExists(schema);
 
     const props: Partial<BlockProps> = {};
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
-      if (key === 'prop:text') {
-        if (schema.model.features.enableText) {
-          continue;
-        }
-        throw new Error('text feature does not enable but in event update');
+      if (defaultState[key] === $useText) {
+        continue;
       }
       // Update children
       if (key === 'sys:children') {
