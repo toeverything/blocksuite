@@ -126,9 +126,6 @@ class WorkspaceMeta<
    */
   writeVersion(workspace: Workspace) {
     const versions = this.proxy.versions;
-    workspace.flavourSchemaMap.forEach((model, flavour) => {
-      versions.set(flavour, model.version);
-    });
     workspace.flavourSchemaMap.forEach((schema, flavour) => {
       versions.set(flavour, schema.version);
     });
