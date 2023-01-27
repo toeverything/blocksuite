@@ -3,10 +3,10 @@ import { literal } from 'lit/static-html.js';
 
 export const ListBlockModelSchema = defineBlockSchema(
   'affine:list',
-  {
+  () => ({
     type: 'bulleted' as ListType,
     checked: false,
-  },
+  }),
   {
     version: 1,
     tag: literal`affine-list`,

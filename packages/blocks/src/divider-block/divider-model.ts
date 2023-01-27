@@ -3,7 +3,7 @@ import { literal } from 'lit/static-html.js';
 
 export const DividerBlockModelSchema = defineBlockSchema(
   'affine:divider',
-  {},
+  () => ({}),
   {
     version: 1,
     tag: literal`affine-divider`,

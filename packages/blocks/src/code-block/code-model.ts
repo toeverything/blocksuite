@@ -3,9 +3,9 @@ import { literal } from 'lit/static-html.js';
 
 export const CodeBlockModelSchema = defineBlockSchema(
   'affine:code',
-  {
+  () => ({
     language: 'JavaScript',
-  },
+  }),
   {
     version: 1,
     tag: literal`affine-code`,

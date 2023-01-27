@@ -10,21 +10,14 @@ const TagSchema = z.object({
   r: z.symbol(),
 });
 
-const StateSchema = z.any();
-
 export const BlockSchema = z.object({
   version: z.number(),
   model: z.object({
     flavour: FlavourSchema,
     tag: TagSchema,
-    state: StateSchema,
+    state: z.function().returns(z.record(z.any())),
   }),
 });
-
-type VoidFunction = () => void;
-type Listener<State> = (state: State, prevState: State) => void;
-// @ts-expect-error
-type Subscribe<State> = (listener: Listener<State>) => VoidFunction;
 
 // ported from lit
 interface StaticValue {
@@ -35,12 +28,12 @@ interface StaticValue {
 export type SchemaToModel<
   Schema extends {
     model: {
-      state: Record<string, unknown>;
+      state: () => Record<string, unknown>;
       flavour: string;
     };
   }
 > = BaseBlockModel &
-  Schema['model']['state'] & {
+  ReturnType<Schema['model']['state']> & {
     flavour: Schema['model']['flavour'];
   };
 
@@ -53,19 +46,19 @@ export function defineBlockSchema<
   }>
 >(
   flavour: Flavour,
-  state: State,
+  state: () => State,
   metadata: Metadata
 ): {
   version: number;
   model: {
-    state: State;
+    state: () => State;
     flavour: Flavour;
   } & Metadata;
 };
 
 export function defineBlockSchema(
   flavour: string,
-  state: Record<string, unknown>,
+  state: () => Record<string, unknown>,
   metadata: {
     version: number;
     tag: StaticValue;

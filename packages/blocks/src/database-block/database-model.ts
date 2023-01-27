@@ -10,11 +10,11 @@ export enum DatabaseBlockDisplayMode {
 
 export const DatabaseBlockModelSchema = defineBlockSchema(
   'affine:database',
-  {
+  () => ({
     title: '',
     columns: [] as TagSchema['id'][],
     mode: DatabaseBlockDisplayMode.Database,
-  },
+  }),
   {
     version: 1,
     tag: literal`affine-database`,

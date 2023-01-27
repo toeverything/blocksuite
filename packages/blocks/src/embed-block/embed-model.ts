@@ -3,13 +3,13 @@ import { literal } from 'lit/static-html.js';
 
 export const EmbedBlockModelSchema = defineBlockSchema(
   'affine:embed',
-  {
+  () => ({
     type: 'image',
     caption: 'image',
     sourceId: '',
     width: 0,
     height: 0,
-  },
+  }),
   {
     version: 1,
     tag: literal`affine-embed`,
