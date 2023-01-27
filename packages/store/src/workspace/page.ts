@@ -712,12 +712,12 @@ export class Page extends Space<PageData> {
     this._blockMap.set(props.id, model);
     Object.entries(defaultState).map(([key, value]) => {
       const storedValue = yBlock.get(`prop:${key}`);
-      if (value === $useText) {
+      if (storedValue instanceof Y.Text) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (model as any)[key] = storedValue;
-      } else if (Array.isArray(value)) {
+      } else if (storedValue instanceof Y.Array) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (model as any)[key] = (storedValue as Y.Array<unknown>).toArray();
+        (model as any)[key] = storedValue.toArray();
       }
     });
 
