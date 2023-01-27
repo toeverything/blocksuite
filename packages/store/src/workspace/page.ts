@@ -700,25 +700,29 @@ export class Page extends Space<PageData> {
 
     const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
+    const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+    const defaultState = this.workspace.flavourInitialStateMap.get(
+      model.flavour
+    );
+    assertExists(schema);
+    assertExists(defaultState);
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
     this._blockMap.set(props.id, model);
+    Object.entries(defaultState).map(([key, value]) => {
+      const storedValue = yBlock.get(`prop:${key}`);
+      if (value === $useText) {
+        (model as any)[key] = storedValue;
+      } else if (Array.isArray(value)) {
+        (model as any)[key] = (storedValue as Y.Array<unknown>).toArray();
+      }
+    });
 
-    const yText = yBlock.get('prop:text') as Y.Text;
-    const text = new Text(this, yText);
-    model.text = text;
+    // todo: use schema
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
-    }
-
-    // todo: use schema
-    if (model.flavour === 'affine:database') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (model as any).columns = (
-        yBlock.get('prop:columns') as Y.Array<unknown>
-      ).toArray();
     }
 
     const yChildren = yBlock.get('sys:children');
