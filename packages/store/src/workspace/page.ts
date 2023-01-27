@@ -121,14 +121,14 @@ export class Page extends Space<PageData> {
     return Array.isArray(this._root) ? this._root[0] : this._root;
   }
 
-  get rootLayer() {
+  get surface() {
     return Array.isArray(this._root) ? this._root[1] : null;
   }
 
   /** @internal used for getting surface block elements for phasor */
   get ySurfaceContainer() {
-    assertExists(this.rootLayer);
-    const ySurface = this._yBlocks.get(this.rootLayer.id);
+    assertExists(this.surface);
+    const ySurface = this._yBlocks.get(this.surface.id);
     if (ySurface?.has('elements')) {
       return ySurface.get('elements') as Y.Map<unknown>;
     } else {
