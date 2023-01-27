@@ -18,7 +18,7 @@ import {
   currentWorkspaceSideEffect,
 } from './currentWorkspace/index.js';
 import { IndexedDBDocProvider } from '@blocksuite/store';
-import { internalSchemas } from '@blocksuite/blocks/models';
+import { builtInSchemas } from '@blocksuite/blocks/models';
 
 export interface BlockSuiteState extends ManagerState, CurrentWorkspaceState {}
 
@@ -58,7 +58,7 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
           })
       );
       workspaces.forEach(workspace => bindWorkspaceWithPages(workspace));
-      workspaces.forEach(workspace => workspace.register(internalSchemas));
+      workspaces.forEach(workspace => workspace.register(builtInSchemas));
       window.setTimeout(
         () =>
           store.setState({

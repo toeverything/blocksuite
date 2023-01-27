@@ -39,7 +39,8 @@ export type {
   DatabaseBlockModel,
 };
 
-export const internalSchemas = [
+/** Default first party model types built for affine */
+export const builtInSchemas = [
   CodeBlockModelSchema,
   ParagraphBlockModelSchema,
   PageBlockModelSchema,
