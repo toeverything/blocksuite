@@ -713,8 +713,10 @@ export class Page extends Space<PageData> {
     Object.entries(defaultState).map(([key, value]) => {
       const storedValue = yBlock.get(`prop:${key}`);
       if (value === $useText) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (model as any)[key] = storedValue;
       } else if (Array.isArray(value)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (model as any)[key] = (storedValue as Y.Array<unknown>).toArray();
       }
     });
