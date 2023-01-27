@@ -11,6 +11,8 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
 import type { Page } from '../workspace/page.js';
 import type { BaseBlockModel } from '../base.js';
+import type { BlockSchema } from '../base.js';
+import type { z } from 'zod';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -41,7 +43,7 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 }
 
 export function syncBlockProps(
-  // schema: z.infer<typeof BlockSchema>,
+  schema: z.infer<typeof BlockSchema>,
   defaultState: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
@@ -76,6 +78,12 @@ export function syncBlockProps(
       }
     }
   });
+
+  if (schema.model.features.enableText) {
+    if (!yBlock.has('prop:text')) {
+      yBlock.set('prop:text', new Y.Text());
+    }
+  }
 }
 
 export function trySyncTextProp(

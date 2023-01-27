@@ -9,6 +9,9 @@ export const ParagraphBlockModelSchema = defineBlockSchema(
   {
     version: 1,
     tag: literal`affine-paragraph`,
+  },
+  {
+    enableText: true,
   }
 );
 

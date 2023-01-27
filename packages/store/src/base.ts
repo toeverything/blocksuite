@@ -10,12 +10,19 @@ const TagSchema = z.object({
   r: z.symbol(),
 });
 
+const FeaturesSchema = z.object({
+  enableText: z.boolean(),
+});
+
+export type ModelFeatures = z.infer<typeof FeaturesSchema>;
+
 export const BlockSchema = z.object({
   version: z.number(),
   model: z.object({
     flavour: FlavourSchema,
     tag: TagSchema,
     state: z.function().returns(z.record(z.any())),
+    features: FeaturesSchema,
   }),
 });
 
@@ -37,6 +44,10 @@ export type SchemaToModel<
     flavour: Schema['model']['flavour'];
   };
 
+const defaultFeatures: ModelFeatures = {
+  enableText: false,
+};
+
 export function defineBlockSchema<
   Flavour extends string,
   State extends Record<string, unknown>,
@@ -47,22 +58,24 @@ export function defineBlockSchema<
 >(
   flavour: Flavour,
   state: () => State,
-  metadata: Metadata
+  metadata: Metadata,
+  features?: Partial<ModelFeatures>
 ): {
   version: number;
   model: {
     state: () => State;
     flavour: Flavour;
+    features: ModelFeatures;
   } & Metadata;
 };
-
 export function defineBlockSchema(
   flavour: string,
   state: () => Record<string, unknown>,
   metadata: {
     version: number;
     tag: StaticValue;
-  }
+  },
+  features?: Partial<ModelFeatures>
 ): z.infer<typeof BlockSchema> {
   const schema = {
     version: metadata.version,
@@ -70,6 +83,10 @@ export function defineBlockSchema(
       flavour,
       tag: metadata.tag,
       state,
+      features: {
+        ...defaultFeatures,
+        ...(features ?? {}),
+      },
     },
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);

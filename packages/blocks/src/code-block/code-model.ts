@@ -9,6 +9,9 @@ export const CodeBlockModelSchema = defineBlockSchema(
   {
     version: 1,
     tag: literal`affine-code`,
+  },
+  {
+    enableText: true,
   }
 );
 

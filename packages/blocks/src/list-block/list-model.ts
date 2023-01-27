@@ -10,6 +10,9 @@ export const ListBlockModelSchema = defineBlockSchema(
   {
     version: 1,
     tag: literal`affine-list`,
+  },
+  {
+    enableText: true,
   }
 );
 

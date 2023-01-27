@@ -21,7 +21,7 @@ import {
 import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
 import BlockTag = BlockSuiteInternal.BlockTag;
 import TagSchema = BlockSuiteInternal.TagSchema;
@@ -344,9 +344,17 @@ export class Page extends Space<PageData> {
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
+      const schema = this.workspace.flavourSchemaMap.get(flavour);
       const defaultState = this.workspace.flavourInitialStateMap.get(flavour);
+      assertExists(schema);
       assertExists(defaultState);
-      syncBlockProps(defaultState, yBlock, clonedProps, this._ignoredKeys);
+      syncBlockProps(
+        schema,
+        defaultState,
+        yBlock,
+        clonedProps,
+        this._ignoredKeys
+      );
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       if (typeof parent === 'string') {
@@ -450,11 +458,13 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
+      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
       const defaultState = this.workspace.flavourInitialStateMap.get(
         model.flavour
       );
+      assertExists(schema);
       assertExists(defaultState);
-      syncBlockProps(defaultState, yBlock, props, this._ignoredKeys);
+      syncBlockProps(schema, defaultState, yBlock, props, this._ignoredKeys);
     });
   }
 
@@ -695,18 +705,6 @@ export class Page extends Space<PageData> {
       isSurface = true;
     }
     this._blockMap.set(props.id, model);
-
-    if (
-      // TODO use schema
-      matchFlavours(model, [
-        'affine:paragraph',
-        'affine:list',
-        'affine:code',
-      ]) &&
-      !yBlock.get('prop:text')
-    ) {
-      this.transact(() => yBlock.set('prop:text', new Y.Text()));
-    }
 
     const yText = yBlock.get('prop:text') as Y.Text;
     const text = new Text(this, yText);
