@@ -41,10 +41,10 @@
     "@types/quill": "=1.3.7",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
-    "@typescript-eslint/eslint-plugin": "^5.48.2",
-    "@typescript-eslint/parser": "^5.48.2",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
     "@vitejs/plugin-react": "^3.0.1",
-    "@vitest/ui": "^0.27.2",
+    "@vitest/ui": "^0.28.2",
     "es-module-lexer": "^1.1.0",
     "eslint": "^8.32.0",
     "eslint-plugin-lit": "^1.8.2",
@@ -60,7 +60,7 @@
     "typescript": "^4.9.4",
     "vite": "^4.0.4",
     "vite-plugin-web-components-hmr": "^0.1.2",
-    "vitest": "^0.27.2"
+    "vitest": "^0.28.2"
   },
   "pnpm": {
     "patchedDependencies": {

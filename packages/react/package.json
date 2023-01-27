@@ -15,7 +15,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "zustand": "^4.3.1"
+    "zustand": "^4.3.2"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
