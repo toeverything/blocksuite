@@ -13,6 +13,7 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "zustand": "^4.3.2"

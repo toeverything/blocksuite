@@ -176,6 +176,7 @@ importers:
     specifiers:
       '@blocksuite/blocks': workspace:*
       '@blocksuite/editor': workspace:*
+      '@blocksuite/global': workspace:*
       '@blocksuite/store': workspace:*
       '@types/react': ^18.0.26
       '@types/react-dom': ^18.0.10
@@ -185,6 +186,7 @@ importers:
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/editor': link:../editor
+      '@blocksuite/global': link:../global
       '@blocksuite/store': link:../store
       zustand: 4.3.2_react@18.2.0
     devDependencies:

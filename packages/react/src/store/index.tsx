@@ -1,5 +1,5 @@
-import createContext from 'zustand/context';
-import create from 'zustand';
+import { useContext, useRef, useMemo, createContext } from 'react';
+import create, { useStore } from 'zustand';
 import { combine, subscribeWithSelector } from 'zustand/middleware';
 import { Workspace } from '@blocksuite/store';
 import type { ManagerActions, ManagerState } from './manager/index.js';
@@ -19,6 +19,7 @@ import {
 } from './currentWorkspace/index.js';
 import { IndexedDBDocProvider } from '@blocksuite/store';
 import { builtInSchemas } from '@blocksuite/blocks/models';
+import { assertExists } from '@blocksuite/global/utils';
 
 export interface BlockSuiteState extends ManagerState, CurrentWorkspaceState {}
 
@@ -85,9 +86,43 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
 };
 
 export type CreateBlockSuiteStore = ReturnType<typeof createBlockSuiteStore>;
+export type ReturnedBlockSuiteState = ReturnType<
+  CreateBlockSuiteStore['getState']
+>;
 
-export const {
-  useStore: useBlockSuiteStore,
-  useStoreApi: useBlockSuiteStoreApi,
-  Provider: BlockSuiteProvider,
-} = createContext<CreateBlockSuiteStore>();
+const BlockSuiteProviderContext = createContext<CreateBlockSuiteStore | null>(
+  null
+);
+export function BlockSuiteProvider(
+  props: React.PropsWithChildren<{
+    createStore: () => CreateBlockSuiteStore;
+  }>
+) {
+  const ref = useRef<CreateBlockSuiteStore | null>(null);
+  if (ref.current === null) {
+    ref.current = props.createStore();
+  }
+  return (
+    <BlockSuiteProviderContext.Provider value={ref.current}>
+      {props.children}
+    </BlockSuiteProviderContext.Provider>
+  );
+}
+
+export function useBlockSuiteStore(): ReturnedBlockSuiteState;
+export function useBlockSuiteStore<U>(
+  selector: (state: ReturnedBlockSuiteState) => U,
+  equalityFn?: (a: U, b: U) => boolean
+): U;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useBlockSuiteStore(selector?: any, equalityFn?: any) {
+  const store = useContext(BlockSuiteProviderContext);
+  assertExists(store);
+  return useStore(store, selector, equalityFn);
+}
+
+export function useBlockSuiteStoreApi() {
+  const store = useContext(BlockSuiteProviderContext);
+  assertExists(store);
+  return useMemo(() => ({ ...store }), [store]);
+}
