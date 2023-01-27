@@ -1,6 +1,7 @@
 import * as Y from 'yjs';
 import * as idb from 'lib0/indexeddb.js';
 import { Observable } from 'lib0/observable.js';
+import type { DocProvider } from './index.js';
 
 const customStoreName = 'custom';
 const updatesStoreName = 'updates';
@@ -65,7 +66,7 @@ async function storeState(
   }
 }
 
-export class IndexedDBPersistence extends Observable<string> {
+class IndexedDBPersistence extends Observable<string> {
   doc: Y.Doc;
   name: string;
   _dbref = 0;
@@ -172,5 +173,28 @@ export class IndexedDBPersistence extends Observable<string> {
     const db = await this._db;
     const [custom] = idb.transact(db, [customStoreName]);
     return idb.del(custom, key);
+  }
+}
+
+export class IndexedDBDocProvider
+  extends IndexedDBPersistence
+  implements DocProvider
+{
+  constructor(room: string, doc: Y.Doc) {
+    super(room, doc);
+  }
+
+  // Consider whether "connect" and "disconnect" are good to put on the SyncProvider
+  connect() {
+    // not necessary as it will be set up in indexeddb persistence
+  }
+
+  disconnect() {
+    // not necessary as it will be set up in indexeddb persistence
+  }
+
+  public clearData() {
+    // Do nothing for now
+    return Promise.resolve();
   }
 }
