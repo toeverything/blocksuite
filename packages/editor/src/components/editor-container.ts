@@ -2,7 +2,7 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
 import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
@@ -35,9 +35,9 @@ export class EditorContainer extends NonShadowLitElement {
   contentParser = new ContentParser(this);
 
   get model() {
-    return [this.page.root, this.page.rootLayer] as [
+    return [this.page.root, this.page.surface] as [
       PageBlockModel | null,
-      BaseBlockModel | null
+      SurfaceBlockModel | null
     ];
   }
 
