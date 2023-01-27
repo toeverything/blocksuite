@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { Quill } from 'quill';
 import { uuidv4 } from 'lib0/random.js';
-import { $useText, BaseBlockModel } from '../base.js';
+import { $textValue, BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import {
   Text,
@@ -788,7 +788,7 @@ export class Page extends Space<PageData> {
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
-      if (defaultState[key] === $useText) {
+      if (defaultState[key] === $textValue) {
         continue;
       }
       // Update children

@@ -4,8 +4,10 @@ import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
-export const $useText = Object.freeze({
-  symbol: Symbol('vTextSymbol'),
+export const kValue = Symbol('kValue');
+
+export const $textValue = Object.freeze({
+  [kValue]: Symbol('vTextValue'),
 } as const);
 
 const FlavourSchema = z.string();
@@ -30,7 +32,7 @@ interface StaticValue {
 }
 
 type State<S extends Record<string, unknown>> = {
-  [K in keyof S]: S[K] extends typeof $useText ? TextType : S[K];
+  [K in keyof S]: S[K] extends typeof $textValue ? TextType : S[K];
 };
 
 export type SchemaToModel<

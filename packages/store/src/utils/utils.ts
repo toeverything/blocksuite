@@ -13,7 +13,7 @@ import type { Page } from '../workspace/page.js';
 import type { BaseBlockModel } from '../base.js';
 import type { BlockSchema } from '../base.js';
 import type { z } from 'zod';
-import { $useText } from '../base.js';
+import { $textValue } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -53,7 +53,7 @@ export function syncBlockProps(
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
     const value = props[key];
-    if (defaultState[key] === $useText) {
+    if (defaultState[key] === $textValue) {
       return;
     }
     if (!isPrimitive(value) && !Array.isArray(value)) {
@@ -72,7 +72,7 @@ export function syncBlockProps(
   // set default value
   Object.entries(defaultState).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
-      if (value === $useText) {
+      if (value === $textValue) {
         yBlock.set(`prop:${key}`, new Y.Text());
       } else if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));

@@ -1,11 +1,15 @@
-import { defineBlockSchema, SchemaToModel, $useText } from '@blocksuite/store';
+import {
+  defineBlockSchema,
+  SchemaToModel,
+  $textValue,
+} from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export const CodeBlockModelSchema = defineBlockSchema(
   'affine:code',
   () => ({
     language: 'JavaScript',
-    text: $useText,
+    text: $textValue,
   }),
   {
     version: 1,
