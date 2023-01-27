@@ -53,7 +53,7 @@ export function syncBlockProps(
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
     const value = props[key];
 
-    // TODO use schema
+    // skip text update since we check it in top level
     if (key === 'text') return;
     if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');

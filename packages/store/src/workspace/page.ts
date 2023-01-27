@@ -436,14 +436,24 @@ export class Page extends Space<PageData> {
       return;
     }
     const yBlock = this._yBlocks.get(model.id) as YBlock;
-
     this.transact(() => {
-      if (props.text instanceof PrelimText) {
-        props.text.ready = true;
-      } else if (props.text instanceof Text) {
-        model.text = props.text;
-        // @ts-ignore
-        yBlock.set('prop:text', props.text._yText);
+      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+      const defaultState = this.workspace.flavourInitialStateMap.get(
+        model.flavour
+      );
+      assertExists(schema);
+      assertExists(defaultState);
+
+      if (schema.model.features.enableText) {
+        if (props.text instanceof PrelimText) {
+          props.text.ready = true;
+        } else if (props.text instanceof Text) {
+          model.text = props.text;
+          // @ts-ignore
+          yBlock.set('prop:text', props.text._yText);
+        }
+      } else {
+        throw new Error('text feature does not enable but in updateBlock');
       }
 
       // TODO diff children changes
@@ -458,12 +468,6 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
-      const defaultState = this.workspace.flavourInitialStateMap.get(
-        model.flavour
-      );
-      assertExists(schema);
-      assertExists(defaultState);
       syncBlockProps(schema, defaultState, yBlock, props, this._ignoredKeys);
     });
   }
@@ -772,13 +776,19 @@ export class Page extends Space<PageData> {
     const id = event.target.get('sys:id') as string;
     const model = this.getBlockById(id);
     if (!model) return;
+    const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+    assertExists(schema);
 
     const props: Partial<BlockProps> = {};
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
-      // TODO use schema
-      if (key === 'prop:text') continue;
+      if (key === 'prop:text') {
+        if (schema.model.features.enableText) {
+          continue;
+        }
+        throw new Error('text feature does not enable but in event update');
+      }
       // Update children
       if (key === 'sys:children') {
         hasChildrenUpdate = true;

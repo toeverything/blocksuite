@@ -37,11 +37,16 @@ export type SchemaToModel<
     model: {
       state: () => Record<string, unknown>;
       flavour: string;
+      features: ModelFeatures;
     };
   }
 > = BaseBlockModel &
   ReturnType<Schema['model']['state']> & {
     flavour: Schema['model']['flavour'];
+  } & {
+    text: Schema['model']['features']['enableText'] extends true
+      ? TextType
+      : never;
   };
 
 const defaultFeatures: ModelFeatures = {
@@ -54,18 +59,19 @@ export function defineBlockSchema<
   Metadata extends Readonly<{
     version: number;
     tag: StaticValue;
-  }>
+  }>,
+  Features extends ModelFeatures
 >(
   flavour: Flavour,
   state: () => State,
   metadata: Metadata,
-  features?: Partial<ModelFeatures>
+  features?: Partial<Features>
 ): {
   version: number;
   model: {
     state: () => State;
     flavour: Flavour;
-    features: ModelFeatures;
+    features: Features;
   } & Metadata;
 };
 export function defineBlockSchema(
