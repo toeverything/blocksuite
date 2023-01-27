@@ -53,9 +53,7 @@ export function syncBlockProps(
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
     const value = props[key];
-
-    if (value === $useText) {
-      yBlock.set(`prop:${key}`, new Y.Text());
+    if (defaultState[key] === $useText) {
       return;
     }
     if (!isPrimitive(value) && !Array.isArray(value)) {
@@ -74,7 +72,9 @@ export function syncBlockProps(
   // set default value
   Object.entries(defaultState).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
-      if (Array.isArray(value)) {
+      if (value === $useText) {
+        yBlock.set(`prop:${key}`, new Y.Text());
+      } else if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));
       } else {
         yBlock.set(`prop:${key}`, value);
