@@ -43,7 +43,7 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 }
 
 export function syncBlockProps(
-  schema: z.infer<typeof BlockSchema>,
+  // schema: z.infer<typeof BlockSchema>,
   defaultState: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,

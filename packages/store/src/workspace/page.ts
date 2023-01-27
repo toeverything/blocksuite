@@ -344,17 +344,9 @@ export class Page extends Space<PageData> {
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
-      const schema = this.workspace.flavourSchemaMap.get(flavour);
       const defaultState = this.workspace.flavourInitialStateMap.get(flavour);
-      assertExists(schema);
       assertExists(defaultState);
-      syncBlockProps(
-        schema,
-        defaultState,
-        yBlock,
-        clonedProps,
-        this._ignoredKeys
-      );
+      syncBlockProps(defaultState, yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       if (typeof parent === 'string') {
@@ -458,13 +450,11 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
       const defaultState = this.workspace.flavourInitialStateMap.get(
         model.flavour
       );
-      assertExists(schema);
       assertExists(defaultState);
-      syncBlockProps(schema, defaultState, yBlock, props, this._ignoredKeys);
+      syncBlockProps(defaultState, yBlock, props, this._ignoredKeys);
     });
   }
 
