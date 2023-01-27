@@ -339,10 +339,14 @@ export class Page extends Space<PageData> {
 
     this.transact(() => {
       const yBlock = new Y.Map() as YBlock;
+      // set the yBlock at the very beginning, otherwise yBlock will be always empty
+      this._yBlocks.set(id, yBlock);
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
-      syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
+      const defaultState = this.workspace.flavourInitialStateMap.get(flavour);
+      assertExists(defaultState);
+      syncBlockProps(defaultState, yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       if (typeof parent === 'string') {
@@ -357,8 +361,6 @@ export class Page extends Space<PageData> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
-
-      this._yBlocks.set(id, yBlock);
     });
     return id;
   }
@@ -448,7 +450,11 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      syncBlockProps(yBlock, props, this._ignoredKeys);
+      const defaultState = this.workspace.flavourInitialStateMap.get(
+        model.flavour
+      );
+      assertExists(defaultState);
+      syncBlockProps(defaultState, yBlock, props, this._ignoredKeys);
     });
   }
 
@@ -710,6 +716,14 @@ export class Page extends Space<PageData> {
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
     }
 
+    // todo: use schema
+    if (model.flavour === 'affine:database') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (model as any).columns = (
+        yBlock.get('prop:columns') as Y.Array<unknown>
+      ).toArray();
+    }
+
     const yChildren = yBlock.get('sys:children');
     if (yChildren instanceof Y.Array) {
       model.childMap = createChildMap(yChildren);
@@ -785,9 +799,13 @@ export class Page extends Space<PageData> {
         );
         continue;
       }
-      // Update props
+      const value = event.target.get(key);
       hasPropsUpdate = true;
-      props[key.replace('prop:', '')] = event.target.get(key);
+      if (value instanceof Y.Array) {
+        props[key.replace('prop:', '')] = value.toArray();
+      } else {
+        props[key.replace('prop:', '')] = value;
+      }
     }
 
     if (hasPropsUpdate) {

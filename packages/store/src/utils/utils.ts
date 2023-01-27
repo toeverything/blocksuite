@@ -41,72 +41,41 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 }
 
 export function syncBlockProps(
+  // schema: z.infer<typeof BlockSchema>,
+  defaultState: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
   ignoredKeys: Set<string>
 ) {
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
+    const value = props[key];
 
     // TODO use schema
     if (key === 'text') return;
-    if (!isPrimitive(props[key]) && !Array.isArray(props[key])) {
+    if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // TODO compare with current yBlock value
-    if (props[key] !== undefined) {
-      yBlock.set('prop:' + key, props[key]);
+    if (value !== undefined) {
+      if (Array.isArray(value)) {
+        yBlock.set(`prop:${key}`, Y.Array.from(value));
+      } else {
+        yBlock.set(`prop:${key}`, value);
+      }
     }
   });
 
-  // TODO use schema
-  if (
-    props.flavour === 'affine:paragraph' &&
-    !props.type &&
-    !yBlock.has('prop:type')
-  ) {
-    yBlock.set('prop:type', 'text');
-  }
-  if (props.flavour === 'affine:list' && !yBlock.has('prop:type')) {
-    yBlock.set('prop:type', props.type ?? 'bulleted');
-  }
-
-  if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
-    yBlock.set('prop:checked', props.checked ?? false);
-  }
-  if (props.flavour === 'affine:frame' && !yBlock.has('prop:xywh')) {
-    yBlock.set('prop:xywh', props.xywh ?? '[0,0,720,480]');
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:width')) {
-    yBlock.set('prop:width', props.width ?? 20);
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:sourceId')) {
-    yBlock.set('prop:sourceId', props.sourceId ?? '');
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:caption')) {
-    yBlock.set('prop:caption', props.caption ?? '');
-  }
-  if (props.flavour === 'affine:shape') {
-    if (!yBlock.has('prop:xywh')) {
-      yBlock.set('prop:xywh', props.xywh ?? '[0,0,50,50]');
+  // set default value
+  Object.entries(defaultState).forEach(([key, value]) => {
+    if (!yBlock.has(`prop:${key}`)) {
+      if (Array.isArray(value)) {
+        yBlock.set(`prop:${key}`, Y.Array.from(value));
+      } else {
+        yBlock.set(`prop:${key}`, value);
+      }
     }
-    if (!yBlock.has('prop:type')) {
-      yBlock.set('prop:type', props.type ?? 'rectangle');
-    }
-    if (!yBlock.has('prop:color')) {
-      yBlock.set('prop:color', props.color ?? 'black');
-    }
-  }
-  if (props.flavour === 'affine:database') {
-    if (!yBlock.has('prop:columns')) {
-      const columns = Y.Array.from(props.columns ?? []);
-      yBlock.set('prop:columns', columns);
-    }
-    if (!yBlock.has('prop:title')) {
-      yBlock.set('prop:title', '');
-    }
-  }
+  });
 }
 
 export function trySyncTextProp(

@@ -120,7 +120,9 @@ test('drag blank line into text area', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,112]"
   >
@@ -178,7 +180,9 @@ test('drag quote block from text menu into text area and blockHub text cards wil
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,112]"
   >
@@ -237,7 +241,9 @@ test('drag numbered list block from list menu into text area and blockHub list c
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,112]"
   >
