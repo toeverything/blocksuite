@@ -147,7 +147,7 @@ declare namespace BlockSuiteInternal {
 
   interface IBaseBlockProps {
     flavour: string;
-    type: string;
+    type?: string;
     id: string;
     children: IBaseBlockProps[];
 
