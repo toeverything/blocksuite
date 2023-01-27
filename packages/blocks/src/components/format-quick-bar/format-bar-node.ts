@@ -79,7 +79,6 @@ export class FormatQuickBar extends LitElement {
     }
     this.format = getFormat();
     const startModel = models[0];
-    // FIX code block
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
 
@@ -148,7 +147,7 @@ export class FormatQuickBar extends LitElement {
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
-          data-testid="${flavour + '/' + type}"
+          data-testid="${flavour}/${type}"
           @click=${() => {
             if (!this.page) {
               throw new Error('Failed to format paragraph! Page not found.');
