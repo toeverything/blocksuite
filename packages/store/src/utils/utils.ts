@@ -59,13 +59,12 @@ export function syncBlockProps(
       throw new Error('Only top level primitives are supported for now');
     }
 
-    if (Array.isArray(value)) {
-      yBlock.set(`prop:${key}`, Y.Array.from(value));
-    } else {
-      yBlock.set(`prop:${key}`, value);
-    }
-    if (!(key in defaultState)) {
-      console.warn(`unexpected props: ${key}`);
+    if (value !== undefined) {
+      if (Array.isArray(value)) {
+        yBlock.set(`prop:${key}`, Y.Array.from(value));
+      } else {
+        yBlock.set(`prop:${key}`, value);
+      }
     }
   });
 
