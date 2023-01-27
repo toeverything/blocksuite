@@ -6,11 +6,11 @@ import { BaseBlockModel, Workspace, Page, Generator } from '../index.js';
 import type { Signal } from '@blocksuite/global/utils';
 
 // Use manual per-module import/export to support vitest environment on Node.js
-import { PageBlockModel } from '../../../blocks/src/page-block/page-model.js';
-import { ParagraphBlockModel } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { ListBlockModel } from '../../../blocks/src/list-block/list-model.js';
-import { FrameBlockModel } from '../../../blocks/src/frame-block/frame-model.js';
-import { DividerBlockModel } from '../../../blocks/src/divider-block/divider-model.js';
+import { PageBlockModelSchema } from '../../../blocks/src/page-block/page-model.js';
+import { ParagraphBlockModelSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import { ListBlockModelSchema } from '../../../blocks/src/list-block/list-model.js';
+import { FrameBlockModelSchema } from '../../../blocks/src/frame-block/frame-model.js';
+import { DividerBlockModelSchema } from '../../../blocks/src/divider-block/divider-model.js';
 import type { PageMeta } from '../workspace/index.js';
 import { assertExists } from './test-utils-dom.js';
 
@@ -20,13 +20,13 @@ function createTestOptions() {
 }
 
 // Create BlockSchema manually
-export const BlockSchema = {
-  'affine:paragraph': ParagraphBlockModel,
-  'affine:page': PageBlockModel,
-  'affine:list': ListBlockModel,
-  'affine:frame': FrameBlockModel,
-  'affine:divider': DividerBlockModel,
-} as const;
+export const BlockSchema = [
+  ParagraphBlockModelSchema,
+  PageBlockModelSchema,
+  ListBlockModelSchema,
+  FrameBlockModelSchema,
+  DividerBlockModelSchema,
+];
 
 function serialize(page: Page) {
   return page.doc.toJSON();
@@ -147,7 +147,10 @@ describe.concurrent('addBlock', () => {
 
     queueMicrotask(() => page.addBlockByFlavour('affine:page'));
     const block = await waitOnce(page.signals.rootAdded);
-    assert.ok(block instanceof BlockSchema['affine:page']);
+    if (Array.isArray(block)) {
+      throw new Error('');
+    }
+    assert.equal(block.flavour, 'affine:page');
   });
 
   it('can add block to root', async () => {
@@ -156,10 +159,13 @@ describe.concurrent('addBlock', () => {
     queueMicrotask(() => page.addBlockByFlavour('affine:page'));
     const roots = await waitOnce(page.signals.rootAdded);
     const root = Array.isArray(roots) ? roots[0] : roots;
-    assert.ok(root instanceof BlockSchema['affine:page']);
+    if (Array.isArray(root)) {
+      throw new Error('');
+    }
+    assert.equal(root.flavour, 'affine:page');
 
     page.addBlockByFlavour('affine:paragraph');
-    assert.ok(root.children[0] instanceof BlockSchema['affine:paragraph']);
+    assert.equal(root.children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
     const serializedChildren = serialize(page)[spaceId]['0']['sys:children'];
@@ -313,7 +319,7 @@ describe.concurrent('getBlock', () => {
     page.addBlockByFlavour('affine:paragraph');
 
     const text = page.getBlockById('2') as BaseBlockModel;
-    assert.ok(text instanceof BlockSchema['affine:paragraph']);
+    assert.equal(text.flavour, 'affine:paragraph');
     assert.equal(root.children.indexOf(text), 1);
 
     const invalid = page.getBlockById('😅');
