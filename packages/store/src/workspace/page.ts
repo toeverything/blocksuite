@@ -714,7 +714,7 @@ export class Page extends Space<PageData> {
       const storedValue = yBlock.get(`prop:${key}`);
       if (storedValue instanceof Y.Text) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (model as any)[key] = storedValue;
+        (model as any)[key] = new Text(this, storedValue);
       } else if (storedValue instanceof Y.Array) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (model as any)[key] = storedValue.toArray();
