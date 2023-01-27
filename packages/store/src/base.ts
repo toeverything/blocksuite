@@ -4,9 +4,9 @@ import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
-export const $useText = {
+export const $useText = Object.freeze({
   symbol: Symbol('vTextSymbol'),
-};
+} as const);
 
 const FlavourSchema = z.string();
 const TagSchema = z.object({
