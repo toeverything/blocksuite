@@ -133,7 +133,9 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,228]"
   >
@@ -184,7 +186,9 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,228]"
   >
@@ -241,7 +245,9 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,228]"
   >
@@ -299,7 +305,9 @@ test('move to the last block of each level in multi-level nesting', async ({
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,228]"
   >
