@@ -2,7 +2,7 @@ import { Dropdown } from '@nextui-org/react';
 import { useBlockSuiteStore } from '@blocksuite/react';
 import React from 'react';
 import { IndexedDBDocProvider, uuidv4, Workspace } from '@blocksuite/store';
-import { BlockSchema } from '@blocksuite/blocks/models';
+import { builtInSchemas } from '@blocksuite/blocks/models';
 
 export const DisplayRoomName = ({ room }: { room: string | undefined }) => {
   return (
@@ -42,7 +42,7 @@ export const WorkspacesDropdown = (): React.ReactElement => {
               room: 'random:' + uuidv4(),
               providers: [IndexedDBDocProvider],
             });
-            workspace.register(BlockSchema);
+            workspace.register(builtInSchemas);
             addWorkspace(workspace);
             setCurrentWorkspace(workspace);
           } else if (array[0] === 'delete-workspace') {

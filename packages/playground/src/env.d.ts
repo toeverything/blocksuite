@@ -1,13 +1,13 @@
-import type { Page, Workspace } from '@blocksuite/store';
-import type { BlockSchema } from '@blocksuite/blocks/models';
+import type { Page, Workspace, BlockSchema } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
+import type { z } from 'zod';
 
 declare global {
   interface Window {
     editor: EditorContainer;
     page: Page;
     workspace: Workspace;
-    blockSchema: typeof BlockSchema;
+    blockSchemas: z.infer<typeof BlockSchema>[];
     Y: typeof Workspace.Y;
     std: typeof std;
   }

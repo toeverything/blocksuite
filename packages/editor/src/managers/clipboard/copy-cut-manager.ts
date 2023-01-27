@@ -1,10 +1,10 @@
 import {
   deleteModelsByRange,
-  EmbedBlockModel,
   getCurrentRange,
-  ListBlockModel,
   SelectionUtils,
   getServiceOrRegister,
+  ListBlockModel,
+  EmbedBlockModel,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
 import type { EditorContainer } from '../../components/index.js';
@@ -139,19 +139,23 @@ export class CopyCutManager {
       const childInfo = await this._getClipInfoBySelectionInfo(child);
       childInfo && children.push(childInfo);
     }
+
     const result = {
       flavour: flavour,
       type: type,
       text: delta,
-      checked: model instanceof ListBlockModel ? model.checked : undefined,
+      checked:
+        model.flavour === 'affine:list'
+          ? (model as ListBlockModel).checked
+          : undefined,
       children: children,
     };
-    if (model instanceof EmbedBlockModel) {
+    if (model.flavour === 'affine:embed') {
       Object.assign(result, {
         sourceId: model.sourceId,
-        caption: model.caption,
-        width: model.width,
-        height: model.height,
+        caption: (model as EmbedBlockModel).caption,
+        width: (model as EmbedBlockModel).width,
+        height: (model as EmbedBlockModel).height,
       });
     }
 

@@ -1,27 +1,15 @@
-import { BaseBlockModel, Page } from '@blocksuite/store';
+import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export class CodeBlockModel
-  extends BaseBlockModel<BlockSuiteModelProps.CodeBlockModel>
-  implements BlockSuiteModelProps.CodeBlockModel
-{
-  static version = 1;
-  flavour = 'affine:code' as const;
-  tag = literal`affine-code`;
-
-  language: string;
-
-  setLang(lang: string) {
-    this.page.updateBlockById(this.id, {
-      language: lang,
-    });
+export const CodeBlockModelSchema = defineBlockSchema(
+  'affine:code',
+  () => ({
+    language: 'JavaScript',
+  }),
+  {
+    version: 1,
+    tag: literal`affine-code`,
   }
+);
 
-  constructor(
-    page: Page,
-    props: PropsWithId<Partial<BlockSuiteModelProps.CodeBlockModel>>
-  ) {
-    super(page, props);
-    this.language = props.language ?? 'JavaScript';
-  }
-}
+export type CodeBlockModel = SchemaToModel<typeof CodeBlockModelSchema>;

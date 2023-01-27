@@ -4,7 +4,6 @@ import { Space } from '../space.js';
 import { Page } from './page.js';
 import { Signal } from '@blocksuite/global/utils';
 import { Indexer, QueryContent } from './search.js';
-import type { BaseBlockModel } from '../base.js';
 import {
   BlobStorage,
   BlobOptionsGetter,
@@ -12,6 +11,8 @@ import {
 } from '../blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { AwarenessStore } from '../awareness.js';
+import type { z } from 'zod';
+import { BlockSchema } from '../base.js';
 
 export interface PageMeta {
   id: string;
@@ -125,8 +126,8 @@ class WorkspaceMeta<
    */
   writeVersion(workspace: Workspace) {
     const versions = this.proxy.versions;
-    workspace.flavourMap.forEach((model, flavour) => {
-      versions.set(flavour, model.version);
+    workspace.flavourSchemaMap.forEach((schema, flavour) => {
+      versions.set(flavour, schema.version);
     });
   }
 
@@ -146,7 +147,8 @@ class WorkspaceMeta<
 
     dataFlavours.forEach(dataFlavour => {
       const dataVersion = versions[dataFlavour] as number;
-      const editorVersion = workspace.flavourMap.get(dataFlavour)?.version;
+      const editorVersion =
+        workspace.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
         throw new Error(
           `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`
@@ -232,7 +234,7 @@ export class Workspace {
     pageRemoved: Signal<string>;
   };
 
-  flavourMap = new Map<string, typeof BaseBlockModel>();
+  flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
 
   constructor(options: StoreOptions) {
     this._store = new Store(options);
@@ -282,9 +284,10 @@ export class Workspace {
     return this._store.doc;
   }
 
-  register(blockSchema: Record<string, typeof BaseBlockModel>) {
-    Object.keys(blockSchema).forEach(key => {
-      this.flavourMap.set(key, blockSchema[key]);
+  register(blockSchema: z.infer<typeof BlockSchema>[]) {
+    blockSchema.forEach(schema => {
+      BlockSchema.parse(schema);
+      this.flavourSchemaMap.set(schema.model.flavour, schema);
     });
     return this;
   }

@@ -133,7 +133,7 @@ And here is a minimal collaboration-ready editor showing how these underlying Bl
 import '@blocksuite/blocks';
 // A workspace can hold multiple pages, and a page can hold multiple blocks.
 import { Workspace, Page } from '@blocksuite/store';
-import { BlockSchema } from '@blocksuite/blocks/models';
+import { builtInSchemas } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
 
 /**
@@ -169,7 +169,7 @@ function initEditorOnPageAdded(workspace: Workspace) {
 
 function main() {
   // Initialize the store.
-  const workspace = new Workspace({}).register(BlockSchema);
+  const workspace = new Workspace({}).register(builtInSchemas);
 
   // Start waiting for the first page...
   initEditorOnPageAdded(workspace);

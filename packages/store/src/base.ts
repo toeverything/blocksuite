@@ -2,11 +2,78 @@ import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
 import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
+import { z } from 'zod';
+
+const FlavourSchema = z.string();
+const TagSchema = z.object({
+  _$litStatic$: z.string(),
+  r: z.symbol(),
+});
+
+export const BlockSchema = z.object({
+  version: z.number(),
+  model: z.object({
+    flavour: FlavourSchema,
+    tag: TagSchema,
+    state: z.function().returns(z.record(z.any())),
+  }),
+});
 
 // ported from lit
 interface StaticValue {
   _$litStatic$: string;
-  r: unknown;
+  r: symbol;
+}
+
+export type SchemaToModel<
+  Schema extends {
+    model: {
+      state: () => Record<string, unknown>;
+      flavour: string;
+    };
+  }
+> = BaseBlockModel &
+  ReturnType<Schema['model']['state']> & {
+    flavour: Schema['model']['flavour'];
+  };
+
+export function defineBlockSchema<
+  Flavour extends string,
+  State extends Record<string, unknown>,
+  Metadata extends Readonly<{
+    version: number;
+    tag: StaticValue;
+  }>
+>(
+  flavour: Flavour,
+  state: () => State,
+  metadata: Metadata
+): {
+  version: number;
+  model: {
+    state: () => State;
+    flavour: Flavour;
+  } & Metadata;
+};
+
+export function defineBlockSchema(
+  flavour: string,
+  state: () => Record<string, unknown>,
+  metadata: {
+    version: number;
+    tag: StaticValue;
+  }
+): z.infer<typeof BlockSchema> {
+  const schema = {
+    version: metadata.version,
+    model: {
+      flavour,
+      tag: metadata.tag,
+      state,
+    },
+  } satisfies z.infer<typeof BlockSchema>;
+  BlockSchema.parse(schema);
+  return schema;
 }
 
 export class BaseBlockModel<Props = unknown>

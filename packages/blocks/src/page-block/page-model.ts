@@ -1,18 +1,15 @@
-import { BaseBlockModel, Page } from '@blocksuite/store';
+import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
+import { literal } from 'lit/static-html.js';
 
-export class PageBlockModel
-  extends BaseBlockModel
-  implements BlockSuiteModelProps.PageBlockModel
-{
-  static version = 1;
-  flavour = 'affine:page' as const;
-
-  title = '';
-  constructor(
-    page: Page,
-    props: PropsWithId<Partial<BlockSuiteModelProps.PageBlockModel>>
-  ) {
-    super(page, props);
-    this.title = props.title ?? '';
+export const PageBlockModelSchema = defineBlockSchema(
+  'affine:page',
+  () => ({
+    title: '',
+  }),
+  {
+    version: 1,
+    tag: literal`affine-page`,
   }
-}
+);
+
+export type PageBlockModel = SchemaToModel<typeof PageBlockModelSchema>;

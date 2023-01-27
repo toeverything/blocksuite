@@ -333,12 +333,6 @@ export class Page extends Space<PageData> {
       throw new Error('Block props must contain flavour');
     }
 
-    // if (blockProps.flavour === 'affine:shape') {
-    //   if (parent != null || parentIndex != null) {
-    //     throw new Error('Shape block should only be appear under page');
-    //   }
-    // }
-
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
     clonedProps.id = id;
@@ -663,17 +657,24 @@ export class Page extends Space<PageData> {
   };
 
   private _createBlockModel(props: Omit<BlockProps, 'children'>) {
-    const BlockModelCtor = this.workspace.flavourMap.get(props.flavour);
-    if (!BlockModelCtor) {
+    const schema = this.workspace.flavourSchemaMap.get(props.flavour);
+    if (!schema) {
       throw new Error(`Block flavour ${props.flavour} is not registered`);
     } else if (!props.id) {
       throw new Error('Block id is not defined');
     }
-
-    const blockModel = new BlockModelCtor(
+    const blockModel = new BaseBlockModel(
       this,
       props as PropsWithId<Omit<BlockProps, 'children'>>
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    blockModel.flavour = schema.model.flavour as any;
+    blockModel.tag = schema.model.tag;
+    const state = schema.model.state();
+    Object.entries(state).forEach(([key, value]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (blockModel as any)[key] = props[key] ?? value;
+    });
     return blockModel;
   }
 
