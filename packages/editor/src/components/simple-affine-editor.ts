@@ -1,9 +1,6 @@
 import { customElement, query } from 'lit/decorators.js';
 import { NonShadowLitElement } from '@blocksuite/blocks';
-import {
-  BlockSchema,
-  __unstable__BlockSchema,
-} from '@blocksuite/blocks/models';
+import { internalSchemas } from '@blocksuite/blocks/models';
 import { BaseBlockModel, Page, Workspace } from '@blocksuite/store';
 import { EditorContainer } from './editor-container.js';
 
@@ -25,10 +22,7 @@ export class SimpleAffineEditor extends NonShadowLitElement {
   constructor() {
     super();
 
-    this.workspace = new Workspace({}).register(BlockSchema);
-    __unstable__BlockSchema.forEach(schema =>
-      this.workspace.registerSchema(schema)
-    );
+    this.workspace = new Workspace({}).register(internalSchemas);
     this._subscribePage();
 
     this.workspace.createPage('page0');

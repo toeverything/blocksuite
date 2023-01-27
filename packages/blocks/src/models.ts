@@ -1,21 +1,35 @@
 /// <reference types="@blocksuite/global" />
 // Import models only, the bundled file should not include anything else.
-import { CodeBlockModel, CodeBlockSchema } from './code-block/code-model.js';
-import { DividerBlockModel } from './divider-block/divider-model.js';
-import { EmbedBlockModel } from './embed-block/embed-model.js';
-import { FrameBlockModel } from './frame-block/frame-model.js';
-import { ListBlockModel } from './list-block/list-model.js';
-import { PageBlockModel } from './page-block/page-model.js';
-import { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
+import {
+  CodeBlockModel,
+  CodeBlockModelSchema,
+} from './code-block/code-model.js';
+import type { DividerBlockModel } from './divider-block/divider-model.js';
+import type { EmbedBlockModel } from './embed-block/embed-model.js';
+import type { FrameBlockModel } from './frame-block/frame-model.js';
+import type { ListBlockModel } from './list-block/list-model.js';
+import type { PageBlockModel } from './page-block/page-model.js';
+import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
-import { SurfaceBlockModel } from './surface-block/surface-model.js';
-import { DatabaseBlockModel } from './database-block/database-model.js';
+import type { SurfaceBlockModel } from './surface-block/surface-model.js';
+import type { DatabaseBlockModel } from './database-block/database-model.js';
 import { CodeBlockService } from './code-block/code-service.js';
 import type { BaseService } from './__internal__/service.js';
 import { ListBlockService } from './list-block/list-service.js';
 import { DividerBlockService } from './divider-block/divider-service.js';
+import { ParagraphBlockModelSchema } from './paragraph-block/paragraph-model.js';
+import { PageBlockModelSchema } from './page-block/page-model.js';
+import { ListBlockModelSchema } from './list-block/list-model.js';
+import { FrameBlockModelSchema } from './frame-block/frame-model.js';
+import { DividerBlockModelSchema } from './divider-block/divider-model.js';
+import { EmbedBlockModelSchema } from './embed-block/embed-model.js';
+import { SurfaceBlockModelSchema } from './surface-block/surface-model.js';
+import { DatabaseBlockModelSchema } from './database-block/database-model.js';
+import type { z } from 'zod';
+import type { BlockSchema } from '@blocksuite/store';
 
-export {
+export type {
+  CodeBlockModel,
   DividerBlockModel,
   EmbedBlockModel,
   FrameBlockModel,
@@ -25,23 +39,32 @@ export {
   DatabaseBlockModel,
 };
 
-export type { CodeBlockModel };
-
-export const __unstable__BlockSchema = [CodeBlockSchema];
+export const internalSchemas = [
+  CodeBlockModelSchema,
+  ParagraphBlockModelSchema,
+  PageBlockModelSchema,
+  ListBlockModelSchema,
+  FrameBlockModelSchema,
+  DividerBlockModelSchema,
+  EmbedBlockModelSchema,
+  SurfaceBlockModelSchema,
+  DatabaseBlockModelSchema,
+] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register
-export const BlockSchema = {
-  'affine:paragraph': ParagraphBlockModel,
-  'affine:page': PageBlockModel,
-  'affine:list': ListBlockModel,
-  'affine:frame': FrameBlockModel,
-  'affine:divider': DividerBlockModel,
-  'affine:embed': EmbedBlockModel,
-  'affine:surface': SurfaceBlockModel,
-  'affine:database': DatabaseBlockModel,
+export type BlockSchema = {
+  'affine:code': CodeBlockModel;
+  'affine:paragraph': ParagraphBlockModel;
+  'affine:page': PageBlockModel;
+  'affine:list': ListBlockModel;
+  'affine:frame': FrameBlockModel;
+  'affine:divider': DividerBlockModel;
+  'affine:embed': EmbedBlockModel;
+  'affine:surface': SurfaceBlockModel;
+  'affine:database': DatabaseBlockModel;
 };
 
-export type Flavour = keyof typeof BlockSchema | 'affine:code';
+export type Flavour = keyof BlockSchema;
 
 export const blockService = {
   'affine:code': CodeBlockService,

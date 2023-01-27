@@ -32,11 +32,10 @@ interface StaticValue {
   r: symbol;
 }
 
-export type Model<
+export type SchemaToModel<
   Schema extends {
     model: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      state: Record<string, any>;
+      state: Record<string, unknown>;
       flavour: string;
     };
   }
@@ -63,6 +62,7 @@ export function defineBlockSchema<
     flavour: Flavour;
   } & Metadata;
 };
+
 export function defineBlockSchema(
   flavour: string,
   state: Record<string, unknown>,

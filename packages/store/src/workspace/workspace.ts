@@ -4,7 +4,6 @@ import { Space } from '../space.js';
 import { Page } from './page.js';
 import { Signal } from '@blocksuite/global/utils';
 import { Indexer, QueryContent } from './search.js';
-import type { BaseBlockModel } from '../base.js';
 import {
   BlobStorage,
   BlobOptionsGetter,
@@ -13,7 +12,7 @@ import {
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { AwarenessStore } from '../awareness.js';
 import type { z } from 'zod';
-import type { BlockSchema } from '../base.js';
+import { BlockSchema } from '../base.js';
 
 export interface PageMeta {
   id: string;
@@ -127,7 +126,7 @@ class WorkspaceMeta<
    */
   writeVersion(workspace: Workspace) {
     const versions = this.proxy.versions;
-    workspace.flavourMap.forEach((model, flavour) => {
+    workspace.flavourSchemaMap.forEach((model, flavour) => {
       versions.set(flavour, model.version);
     });
     workspace.flavourSchemaMap.forEach((schema, flavour) => {
@@ -152,7 +151,6 @@ class WorkspaceMeta<
     dataFlavours.forEach(dataFlavour => {
       const dataVersion = versions[dataFlavour] as number;
       const editorVersion =
-        workspace.flavourMap.get(dataFlavour)?.version ??
         workspace.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
         throw new Error(
@@ -239,7 +237,6 @@ export class Workspace {
     pageRemoved: Signal<string>;
   };
 
-  flavourMap = new Map<string, typeof BaseBlockModel>();
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
 
   constructor(options: StoreOptions) {
@@ -290,17 +287,13 @@ export class Workspace {
     return this._store.doc;
   }
 
-  register(blockSchema: Record<string, typeof BaseBlockModel>) {
-    Object.keys(blockSchema).forEach(key => {
-      this.flavourMap.set(key, blockSchema[key]);
+  register(blockSchema: z.infer<typeof BlockSchema>[]) {
+    blockSchema.forEach(schema => {
+      BlockSchema.parse(schema);
+      this.flavourSchemaMap.set(schema.model.flavour, schema);
     });
     return this;
   }
-
-  registerSchema = (schema: z.infer<typeof BlockSchema>) => {
-    this.flavourSchemaMap.set(schema.model.flavour, schema);
-    return this;
-  };
 
   private _hasPage(pageId: string) {
     return this._pages.has('space:' + pageId);

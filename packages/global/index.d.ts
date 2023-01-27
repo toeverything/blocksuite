@@ -166,7 +166,7 @@ declare namespace BlockSuiteInternal {
     ParagraphBlockModel,
     SurfaceBlockModel,
     DatabaseBlockModel,
-  } from '@blocksuite/blocks';
+  } from '@blocksuite/blocks/models';
 
   export type BlockModels = {
     'affine:paragraph': ParagraphBlockModel;

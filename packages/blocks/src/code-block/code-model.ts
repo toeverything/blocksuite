@@ -1,7 +1,7 @@
-import { defineBlockSchema, Model } from '@blocksuite/store';
+import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export const CodeBlockSchema = defineBlockSchema(
+export const CodeBlockModelSchema = defineBlockSchema(
   'affine:code',
   {
     language: 'JavaScript',
@@ -12,4 +12,4 @@ export const CodeBlockSchema = defineBlockSchema(
   }
 );
 
-export type CodeBlockModel = Model<typeof CodeBlockSchema>;
+export type CodeBlockModel = SchemaToModel<typeof CodeBlockModelSchema>;
