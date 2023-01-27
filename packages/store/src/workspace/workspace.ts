@@ -235,6 +235,7 @@ export class Workspace {
   };
 
   flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
+  flavourInitialStateMap = new Map<string, Record<string, unknown>>();
 
   constructor(options: StoreOptions) {
     this._store = new Store(options);
@@ -288,6 +289,10 @@ export class Workspace {
     blockSchema.forEach(schema => {
       BlockSchema.parse(schema);
       this.flavourSchemaMap.set(schema.model.flavour, schema);
+      this.flavourInitialStateMap.set(
+        schema.model.flavour,
+        schema.model.state()
+      );
     });
     return this;
   }

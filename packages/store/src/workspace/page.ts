@@ -342,7 +342,17 @@ export class Page extends Space<PageData> {
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
-      syncBlockProps(yBlock, clonedProps, this._ignoredKeys);
+      const schema = this.workspace.flavourSchemaMap.get(flavour);
+      const defaultState = this.workspace.flavourInitialStateMap.get(flavour);
+      assertExists(schema);
+      assertExists(defaultState);
+      syncBlockProps(
+        schema,
+        defaultState,
+        yBlock,
+        clonedProps,
+        this._ignoredKeys
+      );
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       if (typeof parent === 'string') {
@@ -357,6 +367,8 @@ export class Page extends Space<PageData> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
+
+      console.log('yB', flavour, yBlock);
 
       this._yBlocks.set(id, yBlock);
     });
@@ -448,7 +460,13 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      syncBlockProps(yBlock, props, this._ignoredKeys);
+      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+      const defaultState = this.workspace.flavourInitialStateMap.get(
+        model.flavour
+      );
+      assertExists(schema);
+      assertExists(defaultState);
+      syncBlockProps(schema, defaultState, yBlock, props, this._ignoredKeys);
     });
   }
 
@@ -785,9 +803,13 @@ export class Page extends Space<PageData> {
         );
         continue;
       }
-      // Update props
+      const value = event.target.get(key);
       hasPropsUpdate = true;
-      props[key.replace('prop:', '')] = event.target.get(key);
+      if (value instanceof Y.Array) {
+        props[key.replace('prop:', '')] = value.toArray();
+      } else {
+        props[key.replace('prop:', '')] = value;
+      }
     }
 
     if (hasPropsUpdate) {

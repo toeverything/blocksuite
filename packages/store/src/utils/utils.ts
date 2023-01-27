@@ -11,6 +11,8 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
 import type { Page } from '../workspace/page.js';
 import type { BaseBlockModel } from '../base.js';
+import type { z } from 'zod';
+import type { BlockSchema } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -41,6 +43,8 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 }
 
 export function syncBlockProps(
+  schema: z.infer<typeof BlockSchema>,
+  defaultState: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
   ignoredKeys: Set<string>
@@ -54,59 +58,31 @@ export function syncBlockProps(
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // TODO compare with current yBlock value
-    if (props[key] !== undefined) {
-      yBlock.set('prop:' + key, props[key]);
+    if (key in defaultState) {
+      if (Array.isArray(props[key])) {
+        const columns = Y.Array.from([...props[key]]);
+        console.log('c', columns.toJSON(), props[key]);
+        yBlock.set(`prop:${key}`, columns);
+      } else {
+        yBlock.set(`prop:${key}`, props[key]);
+      }
+    }
+    if (!(key in defaultState)) {
+      console.warn(`unexpected props: ${key}`);
     }
   });
 
-  // TODO use schema
-  if (
-    props.flavour === 'affine:paragraph' &&
-    !props.type &&
-    !yBlock.has('prop:type')
-  ) {
-    yBlock.set('prop:type', 'text');
-  }
-  if (props.flavour === 'affine:list' && !yBlock.has('prop:type')) {
-    yBlock.set('prop:type', props.type ?? 'bulleted');
-  }
-
-  if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
-    yBlock.set('prop:checked', props.checked ?? false);
-  }
-  if (props.flavour === 'affine:frame' && !yBlock.has('prop:xywh')) {
-    yBlock.set('prop:xywh', props.xywh ?? '[0,0,720,480]');
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:width')) {
-    yBlock.set('prop:width', props.width ?? 20);
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:sourceId')) {
-    yBlock.set('prop:sourceId', props.sourceId ?? '');
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:caption')) {
-    yBlock.set('prop:caption', props.caption ?? '');
-  }
-  if (props.flavour === 'affine:shape') {
-    if (!yBlock.has('prop:xywh')) {
-      yBlock.set('prop:xywh', props.xywh ?? '[0,0,50,50]');
+  Object.entries(defaultState).forEach(([key, value]) => {
+    if (!yBlock.has(`prop:${key}`)) {
+      // set default value
+      if (Array.isArray(value)) {
+        const columns = Y.Array.from(value);
+        yBlock.set(`prop:${key}`, columns);
+      } else {
+        yBlock.set(`prop:${key}`, value);
+      }
     }
-    if (!yBlock.has('prop:type')) {
-      yBlock.set('prop:type', props.type ?? 'rectangle');
-    }
-    if (!yBlock.has('prop:color')) {
-      yBlock.set('prop:color', props.color ?? 'black');
-    }
-  }
-  if (props.flavour === 'affine:database') {
-    if (!yBlock.has('prop:columns')) {
-      const columns = Y.Array.from(props.columns ?? []);
-      yBlock.set('prop:columns', columns);
-    }
-    if (!yBlock.has('prop:title')) {
-      yBlock.set('prop:title', '');
-    }
-  }
+  });
 }
 
 export function trySyncTextProp(

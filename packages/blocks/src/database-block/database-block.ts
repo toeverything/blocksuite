@@ -370,8 +370,9 @@ export class DatabaseBlock extends NonShadowLitElement {
         width: 200,
       },
     };
+    this.model.page.setTagSchema(column);
     this.model.page.updateBlock(this.model, {
-      columns: [...this.model.columns, column],
+      columns: [...this.model.columns, column.id],
     });
   };
 
@@ -390,7 +391,7 @@ export class DatabaseBlock extends NonShadowLitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
-      this.columns.map(column => column.meta.width).reduce((t, x) => t + x) +
+      this.columns.map(column => column.meta.width).reduce((t, x) => t + x, 0) +
       FIRST_LINE_TEXT_WIDTH;
 
     return html`
