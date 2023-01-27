@@ -101,7 +101,7 @@ export const paragraphConfig = [
   },
   {
     flavour: 'affine:code',
-    type: 'code',
+    type: undefined,
     name: 'Code Block',
     hotkey: 'command+option+c,ctrl+alt+c',
     icon: CodeIcon,

@@ -50,7 +50,7 @@ export class FormatQuickBar extends LitElement {
   page: Page | null = null;
 
   @state()
-  paragraphType = 'text';
+  paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
 
   @state()
   paragraphPanelHoverDelay = 150;
@@ -79,7 +79,7 @@ export class FormatQuickBar extends LitElement {
     }
     this.format = getFormat();
     const startModel = models[0];
-    this.paragraphType = startModel.type;
+    this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
 
     this.addEventListener('mousedown', (e: MouseEvent) => {
@@ -147,22 +147,22 @@ export class FormatQuickBar extends LitElement {
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
-          data-testid="${type}"
+          data-testid="${flavour}/${type}"
           @click=${() => {
             if (!this.page) {
               throw new Error('Failed to format paragraph! Page not found.');
             }
-            if (this.paragraphType === type) {
+            if (this.paragraphType === `${flavour}/${type}`) {
               // Already in the target format, convert back to text
               const { flavour: defaultFlavour, type: defaultType } =
                 paragraphConfig[0];
               if (this.paragraphType === defaultType) return;
               updateSelectedTextType(defaultFlavour, defaultType);
-              this.paragraphType = defaultType;
+              this.paragraphType = `${defaultFlavour}/${defaultType}`;
               return;
             }
             updateSelectedTextType(flavour, type);
-            this.paragraphType = type;
+            this.paragraphType = `${flavour}/${type}`;
             this.positionUpdated.emit();
           }}
         >
@@ -184,8 +184,9 @@ export class FormatQuickBar extends LitElement {
       return html``;
     }
     const paragraphIcon =
-      paragraphConfig.find(btn => btn.type === this.paragraphType)?.icon ??
-      paragraphConfig[0].icon;
+      paragraphConfig.find(
+        ({ flavour, type }) => `${flavour}/${type}` === this.paragraphType
+      )?.icon ?? paragraphConfig[0].icon;
     const paragraphItems = html` <format-bar-button
       class="paragraph-button"
       width="52px"

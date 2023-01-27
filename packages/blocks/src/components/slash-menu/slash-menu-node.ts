@@ -257,12 +257,12 @@ export class SlashMenu extends LitElement {
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
         ${this._filterItems.map(
-          ({ type, name, icon }, index) => html`<format-bar-button
+          ({ flavour, type, name, icon }, index) => html`<format-bar-button
             width="100%"
             style="padding-left: 12px; justify-content: flex-start;"
             ?hover=${this._activeItemIndex === index}
             text="${name}"
-            data-testid="${type}"
+            data-testid="${flavour}/${type}"
             @click=${() => {
               this._handleItemClick(index);
             }}

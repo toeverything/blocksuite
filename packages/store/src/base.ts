@@ -89,7 +89,7 @@ export class BaseBlockModel<Props = unknown>
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
-  type!: string;
+  type?: string;
   children: BaseBlockModel[];
   // TODO use schema
   tags?: Y.Map<Y.Map<unknown>>;
