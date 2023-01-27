@@ -5,14 +5,18 @@ import { PageManger } from '../components/PageManger';
 import { Layout } from '../layouts/Layout';
 import { Navbar, Text } from '@nextui-org/react';
 import { WorkspacesDropdown } from '../components/WorkspacesDropdown';
+import type { Workspace } from '@blocksuite/store';
+
+declare global {
+  interface Window {
+    workspace: Workspace;
+  }
+}
 
 export default function Home() {
   const workspace = useBlockSuiteStore(store => store.currentWorkspace);
   useEffect(() => {
-    console.log('workspace', workspace);
-    // @ts-ignore
     if (!window.workspace) {
-      // @ts-ignore
       window.workspace = workspace;
     }
   }, [workspace]);

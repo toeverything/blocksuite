@@ -1,12 +1,11 @@
-import { useBlockSuiteStore } from '@blocksuite/react';
 import dynamic from 'next/dynamic';
+import { useBlockSuiteStore } from '@blocksuite/react';
 import type { Page } from '@blocksuite/store';
 import { Button, Card, Grid, Text } from '@nextui-org/react';
 import { Box } from './Box';
 
 const Editor: React.ComponentType<{
   page: Page;
-  // @ts-ignore
 }> = dynamic(async () => (await import('@blocksuite/react/editor')).Editor, {
   ssr: false,
 });
