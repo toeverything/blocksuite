@@ -8,7 +8,7 @@ import {
   BlobStorage,
   BlobOptionsGetter,
   getBlobStorage,
-} from '../blob/index.js';
+} from '../persistence/blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { AwarenessStore } from '../awareness.js';
 import type { z } from 'zod';

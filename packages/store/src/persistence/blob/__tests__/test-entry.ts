@@ -8,7 +8,7 @@ import {
   assertColor,
   assertExists,
   disableButtonsAfterClick,
-} from '../../__tests__/test-utils-dom.js';
+} from '../../../__tests__/test-utils-dom.js';
 
 const optionsGetters = {
   noop: () => void 0,
