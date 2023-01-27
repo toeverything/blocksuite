@@ -1,5 +1,5 @@
-import { IndexedDBBlobProvider } from './providers.js';
-import type { BlobOptionsGetter, BlobOptions } from './providers.js';
+import { DuplexBlobProvider } from './duplex-provider.js';
+import type { BlobOptionsGetter, BlobOptions } from './duplex-provider.js';
 import { BlobStorage } from './storage.js';
 
 const CLOUD_ENDPOINT_GETTER = (k: string) => ({ api: '/api/workspace' }[k]);
@@ -12,7 +12,7 @@ export async function getBlobStorage(
 ) {
   if (workspace) {
     const storage = new BlobStorage();
-    const provider = await IndexedDBBlobProvider.init(workspace, optionsGetter);
+    const provider = await DuplexBlobProvider.init(workspace, optionsGetter);
     storage.addProvider(provider);
 
     return storage;
