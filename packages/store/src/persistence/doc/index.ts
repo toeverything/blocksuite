@@ -1,7 +1,7 @@
 import type * as Y from 'yjs';
 // @ts-ignore
 import { WebrtcProvider } from 'y-webrtc';
-import { IndexedDBPersistence } from './providers/indexeddb.js';
+import { IndexedDBPersistence } from './indexeddb.js';
 import type { Awareness } from 'y-protocols/awareness';
 import { isWeb } from '@blocksuite/global/utils';
 
