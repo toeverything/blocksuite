@@ -333,12 +333,6 @@ export class Page extends Space<PageData> {
       throw new Error('Block props must contain flavour');
     }
 
-    // if (blockProps.flavour === 'affine:shape') {
-    //   if (parent != null || parentIndex != null) {
-    //     throw new Error('Shape block should only be appear under page');
-    //   }
-    // }
-
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
     clonedProps.id = id;
