@@ -11,13 +11,6 @@ const TagSchema = z.object({
 });
 
 const StateSchema = z.any();
-const MethodSchema = z.function(z.tuple([]).rest(z.any()));
-const SetFunctionSchema = z.function(z.tuple([z.record(z.any())]));
-const GetFunctionSchema = z.function(z.tuple([]), StateSchema);
-const MethodsSchema = z
-  .function()
-  .args(GetFunctionSchema, SetFunctionSchema)
-  .returns(z.record(MethodSchema));
 
 export const BlockSchema = z.object({
   version: z.number(),
@@ -25,12 +18,9 @@ export const BlockSchema = z.object({
     flavour: FlavourSchema,
     tag: TagSchema,
     state: StateSchema,
-    methods: MethodsSchema,
   }),
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyFunction = (...args: any[]) => any;
 type VoidFunction = () => void;
 type Listener<State> = (state: State, prevState: State) => void;
 // @ts-expect-error
@@ -47,27 +37,17 @@ export type Model<
     model: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       state: Record<string, any>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      methods: (...args: any[]) => Record<string, AnyFunction>;
       flavour: string;
     };
   }
 > = BaseBlockModel &
-  Schema['model']['state'] &
-  ReturnType<Schema['model']['methods']> & {
+  Schema['model']['state'] & {
     flavour: Schema['model']['flavour'];
   };
 
 export function defineBlockSchema<
   Flavour extends string,
   State extends Record<string, unknown>,
-  Methods extends (
-    get: () => State,
-    set: (props: Partial<State>) => void,
-    $: {
-      metadata: Metadata;
-    }
-  ) => Record<string, AnyFunction>,
   Metadata extends Readonly<{
     version: number;
     tag: StaticValue;
@@ -75,20 +55,17 @@ export function defineBlockSchema<
 >(
   flavour: Flavour,
   state: State,
-  methods: Methods,
   metadata: Metadata
 ): {
   version: number;
   model: {
     state: State;
-    methods: Methods;
     flavour: Flavour;
   } & Metadata;
 };
 export function defineBlockSchema(
   flavour: string,
   state: Record<string, unknown>,
-  methods: (...args: unknown[]) => Record<string, AnyFunction>,
   metadata: {
     version: number;
     tag: StaticValue;
@@ -100,7 +77,6 @@ export function defineBlockSchema(
       flavour,
       tag: metadata.tag,
       state,
-      methods,
     },
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);

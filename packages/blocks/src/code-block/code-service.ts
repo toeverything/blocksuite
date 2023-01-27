@@ -10,6 +10,10 @@ export class CodeBlockService extends BaseService {
     this.hljs = await import('highlight.js');
   };
 
+  setLang(model: CodeBlockModel, lang: string) {
+    model.language = lang;
+  }
+
   // TODO block2html
 
   override block2html(

@@ -6,13 +6,6 @@ export const CodeBlockSchema = defineBlockSchema(
   {
     language: 'JavaScript',
   },
-  (get, set) => ({
-    setLang: (language: string) => {
-      set({
-        language,
-      });
-    },
-  }),
   {
     version: 1,
     tag: literal`affine-code`,
