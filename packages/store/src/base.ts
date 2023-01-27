@@ -4,11 +4,19 @@ import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+/**
+ * @internal
+ */
 export const kValue = Symbol('kValue');
 
-export const $textValue = Object.freeze({
+export interface InternalValue<Value = unknown> {
+  __VALUE_HOLDER__?: Value;
+  [kValue]: symbol;
+}
+
+export const $textValue: InternalValue<TextType> = {
   [kValue]: Symbol('vTextValue'),
-} as const);
+};
 
 const FlavourSchema = z.string();
 const TagSchema = z.object({
@@ -32,7 +40,7 @@ interface StaticValue {
 }
 
 type State<S extends Record<string, unknown>> = {
-  [K in keyof S]: S[K] extends typeof $textValue ? TextType : S[K];
+  [K in keyof S]: S[K] extends InternalValue<infer Value> ? Value : S[K];
 };
 
 export type SchemaToModel<
