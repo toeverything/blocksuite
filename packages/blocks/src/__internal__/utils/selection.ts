@@ -194,6 +194,9 @@ export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end'
 ) {
+  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
+    throw new Error("Can't focus frame or page!");
+  }
   const defaultPageBlock = getDefaultPageBlock(model);
   if (
     matchFlavours(model, [
