@@ -1,7 +1,7 @@
 import type * as Y from 'yjs';
 // @ts-ignore
 import { WebrtcProvider } from 'y-webrtc';
-import { IndexeddbPersistence } from './providers/indexeddb.js';
+import { IndexedDBPersistence } from './providers/indexeddb.js';
 import type { Awareness } from 'y-protocols/awareness';
 import { isWeb } from '@blocksuite/global/utils';
 
@@ -60,7 +60,7 @@ export class DebugDocProvider extends WebrtcProvider implements DocProvider {
 }
 
 export class IndexedDBDocProvider
-  extends IndexeddbPersistence
+  extends IndexedDBPersistence
   implements DocProvider
 {
   constructor(room: string, doc: Y.Doc) {

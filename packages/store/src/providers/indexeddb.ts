@@ -5,72 +5,67 @@ import { Observable } from 'lib0/observable.js';
 const customStoreName = 'custom';
 const updatesStoreName = 'updates';
 
-export const PREFERRED_TRIM_SIZE = 500;
+const PREFERRED_TRIM_SIZE = 500;
 
-export const fetchUpdates = (
-  idbPersistence: IndexeddbPersistence,
+async function fetchUpdates(
+  idbPersistence: IndexedDBPersistence,
   beforeApplyUpdatesCallback: (store: IDBObjectStore) => void = () => {
     void 0;
   }
-) => {
+) {
   if (!idbPersistence.db) {
     throw new Error('idbPersistence.db is null');
   }
-  const [updatesStore] = idb.transact(idbPersistence.db, [updatesStoreName]); // , 'readonly')
-  return idb
-    .getAll(
-      updatesStore,
-      idb.createIDBKeyRangeLowerBound(idbPersistence._dbref, false)
-    )
-    .then(updates => {
-      beforeApplyUpdatesCallback(updatesStore);
-      Y.transact(
-        idbPersistence.doc,
-        () => {
-          updates.forEach(val => Y.applyUpdate(idbPersistence.doc, val));
-        },
-        idbPersistence,
-        false
-      );
-    })
-    .then(() =>
-      idb.getLastKey(updatesStore).then(lastKey => {
-        idbPersistence._dbref = lastKey + 1;
-      })
-    )
-    .then(() =>
-      idb.count(updatesStore).then(cnt => {
-        idbPersistence._dbsize = cnt;
-      })
-    )
-    .then(() => updatesStore);
-};
 
-export const storeState = (
-  idbPersistence: IndexeddbPersistence,
+  const [updatesStore] = idb.transact(idbPersistence.db, [updatesStoreName]);
+  const updates = await idb.getAll(
+    updatesStore,
+    idb.createIDBKeyRangeLowerBound(idbPersistence._dbref, false)
+  );
+
+  beforeApplyUpdatesCallback(updatesStore);
+  Y.transact(
+    idbPersistence.doc,
+    () => {
+      updates.forEach(val => Y.applyUpdate(idbPersistence.doc, val));
+    },
+    idbPersistence,
+    false
+  );
+
+  const lastKey = await idb.getLastKey(updatesStore);
+  idbPersistence._dbref = lastKey + 1;
+
+  const cnt = await idb.count(updatesStore);
+  idbPersistence._dbsize = cnt;
+
+  return updatesStore;
+}
+
+async function storeState(
+  idbPersistence: IndexedDBPersistence,
   forceStore = true
-) =>
-  fetchUpdates(idbPersistence).then(updatesStore => {
-    if (forceStore || idbPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
-      idb
-        .addAutoKey(updatesStore, Y.encodeStateAsUpdate(idbPersistence.doc))
-        .then(() =>
-          idb.del(
-            updatesStore,
-            idb.createIDBKeyRangeUpperBound(idbPersistence._dbref, true)
-          )
+) {
+  const updatesStore = await fetchUpdates(idbPersistence);
+
+  if (forceStore || idbPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
+    idb
+      .addAutoKey(updatesStore, Y.encodeStateAsUpdate(idbPersistence.doc))
+      .then(() =>
+        idb.del(
+          updatesStore,
+          idb.createIDBKeyRangeUpperBound(idbPersistence._dbref, true)
         )
-        .then(() =>
-          idb.count(updatesStore).then(cnt => {
-            idbPersistence._dbsize = cnt;
-          })
-        );
-    }
-  });
+      )
+      .then(() =>
+        idb.count(updatesStore).then(cnt => {
+          idbPersistence._dbsize = cnt;
+        })
+      );
+  }
+}
 
-export const clearDocument = (name: string) => idb.deleteDB(name);
-
-export class IndexeddbPersistence extends Observable<string> {
+export class IndexedDBPersistence extends Observable<string> {
   doc: Y.Doc;
   name: string;
   _dbref = 0;
@@ -79,7 +74,7 @@ export class IndexeddbPersistence extends Observable<string> {
   db: IDBDatabase | null;
   synced = false;
   _db: Promise<IDBDatabase>;
-  whenSynced: Promise<IndexeddbPersistence>;
+  whenSynced: Promise<IndexedDBPersistence>;
   /**
    * Timeout in ms untill data is merged and persisted in idb.
    */
@@ -99,7 +94,7 @@ export class IndexeddbPersistence extends Observable<string> {
       idb.createStores(db, [['updates', { autoIncrement: true }], ['custom']])
     );
     /**
-     * @type {Promise<IndexeddbPersistence>}
+     * @type {Promise<IndexedDBPersistence>}
      */
     this.whenSynced = this._db.then(db => {
       this.db = db;
@@ -138,50 +133,44 @@ export class IndexeddbPersistence extends Observable<string> {
     doc.on('destroy', this.destroy);
   }
 
-  destroy() {
+  async destroy() {
     if (this._storeTimeoutId) {
       clearTimeout(this._storeTimeoutId);
     }
     this.doc.off('update', this._storeUpdate);
     this.doc.off('destroy', this.destroy);
     this._destroyed = true;
-    return this._db.then(db => {
-      db.close();
-    });
+
+    const db = await this._db;
+    db.close();
   }
 
   /**
    * Destroys this instance and removes all data from indexeddb.
-   *
-   * @return {Promise<void>}
    */
-  clearData() {
-    return this.destroy().then(() => {
-      idb.deleteDB(this.name);
-    });
+  async clearData() {
+    await this.destroy();
+    await idb.deleteDB(this.name);
   }
 
-  get(key: string | number | ArrayBuffer | Date) {
-    return this._db.then(db => {
-      const [custom] = idb.transact(db, [customStoreName], 'readonly');
-      return idb.get(custom, key);
-    });
+  async get(key: string | number | ArrayBuffer | Date) {
+    const db = await this._db;
+    const [custom] = idb.transact(db, [customStoreName], 'readonly');
+    return idb.get(custom, key);
   }
 
-  set(
+  async set(
     key: string | number | ArrayBuffer | Date,
     value: string | number | ArrayBuffer | Date
   ) {
-    return this._db.then(db => {
-      const [custom] = idb.transact(db, [customStoreName]);
-      return idb.put(custom, value, key);
-    });
+    const db = await this._db;
+    const [custom] = idb.transact(db, [customStoreName]);
+    return idb.put(custom, value, key);
   }
 
-  del(key: string | number | ArrayBuffer | Date) {
-    return this._db.then(db => {
-      const [custom] = idb.transact(db, [customStoreName]);
-      return idb.del(custom, key);
-    });
+  async del(key: string | number | ArrayBuffer | Date) {
+    const db = await this._db;
+    const [custom] = idb.transact(db, [customStoreName]);
+    return idb.del(custom, key);
   }
 }
