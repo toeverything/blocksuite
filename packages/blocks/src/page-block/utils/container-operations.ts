@@ -105,16 +105,16 @@ function mergeTextOfBlocks(
   });
 }
 
-export async function updateSelectedTextType(flavour: string, type: string) {
+export async function updateSelectedTextType(flavour: string, type?: string) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
-  updateBlockType(flavour, type, modelsInRange);
+  updateBlockType(modelsInRange, flavour, type);
 }
 
 async function updateBlockType(
+  models: BaseBlockModel[],
   flavour: string,
-  type: string,
-  models: BaseBlockModel[]
+  type?: string
 ) {
   if (!models.length) {
     return;
@@ -158,7 +158,7 @@ async function updateBlockType(
   restoreSelection(selectedBlocks);
 }
 
-function transformBlock(model: BaseBlockModel, flavour: string, type: string) {
+function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
   const page = model.page;
   const parent = page.getParent(model);
   assertExists(parent);
