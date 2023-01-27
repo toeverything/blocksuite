@@ -86,6 +86,9 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
 };
 
 export type CreateBlockSuiteStore = ReturnType<typeof createBlockSuiteStore>;
+export type ReturnedBlockSuiteState = ReturnType<
+  CreateBlockSuiteStore['getState']
+>;
 
 const BlockSuiteProviderContext = createContext<CreateBlockSuiteStore | null>(
   null
@@ -106,15 +109,9 @@ export function BlockSuiteProvider(
   );
 }
 
-export function useBlockSuiteStore(): ReturnType<
-  CreateBlockSuiteStore['getState']
->;
+export function useBlockSuiteStore(): ReturnedBlockSuiteState;
 export function useBlockSuiteStore<U>(
-  selector: (
-    state: U extends ReturnType<CreateBlockSuiteStore['getState']>
-      ? ReturnType<CreateBlockSuiteStore['getState']>
-      : never
-  ) => U,
+  selector: (state: ReturnedBlockSuiteState) => U,
   equalityFn?: (a: U, b: U) => boolean
 ): U;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
