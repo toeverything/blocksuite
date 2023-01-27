@@ -96,6 +96,7 @@ describe.concurrent('addBlock', () => {
       '0': {
         'meta:tags': {},
         'meta:tagSchema': {},
+        'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -131,6 +132,7 @@ describe.concurrent('addBlock', () => {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'prop:title': '',
       },
       '1': {
         'sys:children': [],
@@ -261,6 +263,7 @@ describe.concurrent('deleteBlock', () => {
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
+        'prop:title': '',
       },
     });
 
@@ -280,6 +283,7 @@ describe.concurrent('deleteBlock', () => {
       '0': {
         'meta:tags': {},
         'meta:tagSchema': {},
+        'prop:title': '',
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -300,6 +304,7 @@ describe.concurrent('deleteBlock', () => {
       '0': {
         'meta:tags': {},
         'meta:tagSchema': {},
+        'prop:title': '',
         'sys:children': [],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
@@ -391,7 +396,9 @@ describe('workspace.exportJSX works', async () => {
     page.addBlockByFlavour('affine:paragraph');
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
-      <affine:page>
+      <affine:page
+        prop:title=""
+      >
         <affine:paragraph
           prop:type="text"
         />
