@@ -669,9 +669,8 @@ export class Page extends Space<PageData> {
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     blockModel.flavour = schema.model.flavour as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    blockModel.tag = schema.model.tag as any;
-    const state = { ...schema.model.state };
+    blockModel.tag = schema.model.tag;
+    const state = schema.model.state();
     Object.entries(state).forEach(([key, value]) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (blockModel as any)[key] = props[key] ?? value;
