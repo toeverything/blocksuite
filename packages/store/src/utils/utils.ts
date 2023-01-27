@@ -51,33 +51,29 @@ export function syncBlockProps(
 ) {
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
+    const value = props[key];
 
     // TODO use schema
     if (key === 'text') return;
-    if (!isPrimitive(props[key]) && !Array.isArray(props[key])) {
+    if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
 
-    if (key in defaultState) {
-      if (Array.isArray(props[key])) {
-        const columns = Y.Array.from([...props[key]]);
-        console.log('c', columns.toJSON(), props[key]);
-        yBlock.set(`prop:${key}`, columns);
-      } else {
-        yBlock.set(`prop:${key}`, props[key]);
-      }
+    if (Array.isArray(value)) {
+      yBlock.set(`prop:${key}`, Y.Array.from(value));
+    } else {
+      yBlock.set(`prop:${key}`, value);
     }
     if (!(key in defaultState)) {
       console.warn(`unexpected props: ${key}`);
     }
   });
 
+  // set default value
   Object.entries(defaultState).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
-      // set default value
       if (Array.isArray(value)) {
-        const columns = Y.Array.from(value);
-        yBlock.set(`prop:${key}`, columns);
+        yBlock.set(`prop:${key}`, Y.Array.from(value));
       } else {
         yBlock.set(`prop:${key}`, value);
       }

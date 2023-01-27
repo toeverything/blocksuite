@@ -339,6 +339,8 @@ export class Page extends Space<PageData> {
 
     this.transact(() => {
       const yBlock = new Y.Map() as YBlock;
+      // set the yBlock at the very beginning, otherwise yBlock will be always empty
+      this._yBlocks.set(id, yBlock);
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
@@ -367,10 +369,6 @@ export class Page extends Space<PageData> {
         const index = parentIndex ?? yChildren.length;
         yChildren.insert(index, [id]);
       }
-
-      console.log('yB', flavour, yBlock);
-
-      this._yBlocks.set(id, yBlock);
     });
     return id;
   }
@@ -726,6 +724,14 @@ export class Page extends Space<PageData> {
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
+    }
+
+    // todo: use schema
+    if (model.flavour === 'affine:database') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (model as any).columns = (
+        yBlock.get('prop:columns') as Y.Array<unknown>
+      ).toArray();
     }
 
     const yChildren = yBlock.get('sys:children');
