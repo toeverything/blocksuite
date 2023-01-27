@@ -11,8 +11,6 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
 import type { Page } from '../workspace/page.js';
 import type { BaseBlockModel } from '../base.js';
-import type { z } from 'zod';
-import type { BlockSchema } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
