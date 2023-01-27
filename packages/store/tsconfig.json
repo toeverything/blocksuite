@@ -6,6 +6,6 @@
     "noEmit": false
   },
   "include": ["./src"],
-  "exclude": ["./src/__tests__", "./src/blob/__tests__"],
+  "exclude": ["./src/__tests__", "./src/persistence/blob/__tests__"],
   "references": []
 }

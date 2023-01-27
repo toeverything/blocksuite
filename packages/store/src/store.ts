@@ -1,7 +1,10 @@
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import { Awareness } from 'y-protocols/awareness.js';
-import type { DocProvider, DocProviderConstructor } from './doc-providers.js';
+import type {
+  DocProvider,
+  DocProviderConstructor,
+} from './persistence/doc/index.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
   createAutoIncrementIdGenerator,
@@ -12,7 +15,7 @@ import {
 import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
 import { AwarenessStore, RawAwarenessState } from './awareness.js';
-import type { BlobOptionsGetter } from './blob/index.js';
+import type { BlobOptionsGetter } from './persistence/blob/index.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -121,7 +124,6 @@ export class Store {
     this.providers = providers.map(
       ProviderConstructor =>
         new ProviderConstructor(room, this.doc, {
-          // @ts-expect-error
           awareness: this.awarenessStore.awareness,
         })
     );

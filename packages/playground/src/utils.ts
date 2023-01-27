@@ -75,7 +75,7 @@ export function getOptions(): Pick<
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
   if (providerArgs.includes('webrtc')) {
-    providers.push(DebugDocProvider);
+    providers.push(DebugDocProvider as DocProviderConstructor);
     idGenerator = Generator.AutoIncrementByClientId; // works in multi-user mode
   }
 
