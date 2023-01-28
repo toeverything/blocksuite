@@ -38,60 +38,68 @@ function fixCurrentRangeToText(
   offset: IPoint,
   startRange: Range,
   range: Range,
-  isBackward: boolean
+  isBackward: boolean,
+  container: HTMLElement
 ) {
-  const endContainer = isBackward ? range.startContainer : range.endContainer;
-  if (endContainer.nodeType !== Node.TEXT_NODE) {
-    const textBlocks = Array.from(
-      (range.commonAncestorContainer as HTMLElement).querySelectorAll(
-        '.ql-editor'
-      )
-    ).map(elem => {
-      const block = elem.closest(`[${BLOCK_ID_ATTR}]`);
-      assertExists(block);
-      return block;
-    });
+  let textBlock: HTMLElement | undefined;
 
-    if (textBlocks.length) {
-      const textBlock = isBackward
-        ? textBlocks.find(t => {
-            const rect = t.getBoundingClientRect();
-            return clientY <= rect.top; // handle dragging backward
-          })
-        : textBlocks.reverse().find(t => {
-            const rect = t.getBoundingClientRect();
-            return clientY >= rect.bottom; // handle dragging forward
-          });
-      if (!textBlock) {
-        throw new Error('Failed to focus text node!');
+  if (isBackward) {
+    const elem = container
+      .querySelector('.ql-editor')
+      ?.closest(`[${BLOCK_ID_ATTR}]`) as HTMLElement;
+    if (elem) {
+      const rect = elem.getBoundingClientRect();
+      // handle dragging backward
+      if (clientY <= rect.top) {
+        textBlock = elem;
       }
-      const text = textBlock.querySelector('.ql-editor');
-      assertExists(text);
-      const rect = text.getBoundingClientRect();
-      const newY = isBackward
-        ? rect.bottom - offset.y - 6
-        : rect.top - offset.y + 6;
-      const newRange = caretRangeFromPoint(clientX, newY);
-      if (newRange && text.firstChild) {
-        if (isBackward && text.firstChild.firstChild) {
-          newRange.setEnd(startRange.startContainer, startRange.startOffset);
-          newRange.setStartBefore(text.firstChild.firstChild);
-        } else if (!isBackward && text.firstChild.lastChild) {
-          newRange.setStart(startRange.startContainer, startRange.startOffset);
-          // should update `endOffset`
-          if (text.firstChild.firstChild === text.firstChild.lastChild) {
-            newRange.setEnd(
-              text.firstChild.firstChild,
-              text.firstChild.firstChild.textContent?.length || 0
-            );
-          } else {
-            newRange.setEndAfter(text.firstChild.lastChild);
-          }
+    }
+  } else {
+    const textBlocks = container.querySelectorAll('.ql-editor');
+    if (textBlocks.length) {
+      const elem = textBlocks[textBlocks.length - 1].closest(
+        `[${BLOCK_ID_ATTR}]`
+      ) as HTMLElement;
+      if (elem) {
+        const rect = elem.getBoundingClientRect();
+        // handle dragging forward
+        if (clientY >= rect.bottom) {
+          textBlock = elem;
         }
-        return newRange;
       }
     }
   }
+
+  if (!textBlock) {
+    return range;
+  }
+
+  const text = textBlock.querySelector('.ql-editor');
+  assertExists(text);
+  const rect = text.getBoundingClientRect();
+  const newY = isBackward
+    ? rect.bottom - offset.y - 6
+    : rect.top - offset.y + 6;
+  const newRange = caretRangeFromPoint(clientX, newY);
+  if (newRange && text.firstChild) {
+    if (isBackward && text.firstChild.firstChild) {
+      newRange.setEnd(startRange.startContainer, startRange.startOffset);
+      newRange.setStartBefore(text.firstChild.firstChild);
+    } else if (!isBackward && text.firstChild.lastChild) {
+      newRange.setStart(startRange.startContainer, startRange.startOffset);
+      // should update `endOffset`
+      if (text.firstChild.firstChild === text.firstChild.lastChild) {
+        newRange.setEnd(
+          text.firstChild.firstChild,
+          text.firstChild.firstChild.textContent?.length || 0
+        );
+      } else {
+        newRange.setEndAfter(text.firstChild.lastChild);
+      }
+    }
+    return newRange;
+  }
+
   return range;
 }
 
@@ -436,22 +444,32 @@ export function handleNativeRangeDragMove(
   // see https://github.com/toeverything/blocksuite/pull/845
   if (container.nodeType !== Node.TEXT_NODE) {
     // Forward: ↓ → leave `affine-frame`
-    // Backward: ← ↑ leave `.affine-frame-block-container` or `.affine-default-page-block-title-container`
-    if (
-      container.tagName === 'AFFINE-FRAME' ||
-      container.classList.contains('affine-frame-block-container') ||
-      container.classList.contains('affine-default-page-block-title-container')
-    ) {
+    // Backward: ← ↑ leave `.affine-default-page-block-title-container`
+    const isTitle = container.classList.contains(
+      'affine-default-page-block-title-container'
+    );
+    if (container.tagName === 'AFFINE-FRAME' || isTitle) {
+      // rewrites container when moving to title,
+      // if you want to select a title you can rewrite this piece of logic
+      const newContainer = isTitle
+        ? container
+            .closest('.affine-default-page-block-container')
+            ?.querySelector('affine-frame')
+        : container;
+
+      assertExists(newContainer);
+
       currentRange = fixCurrentRangeToText(
         e.raw.clientX,
         e.raw.clientY,
         e.containerOffset,
         startRange,
         currentRange,
-        isBackward
+        isBackward,
+        newContainer
       );
     } else {
-      // ignore other elements, e.g., `list-block-prefix`
+      // ignore other elements, e.g., `.affine-frame-block-container`, `.affine-list-block__prefix`
       return;
     }
   } else {
