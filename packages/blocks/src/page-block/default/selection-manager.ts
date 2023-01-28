@@ -333,7 +333,10 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isTitleElement(e.raw.target)) return;
+    if (isTitleElement(e.raw.target)) {
+      this.state.type = 'none';
+      return;
+    }
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
