@@ -153,16 +153,18 @@ export async function enterPlaygroundWithList(page: Page) {
   await waitNextFrame(page);
 }
 
-export async function initEmptyParagraphState(page: Page) {
-  const ids = await page.evaluate(() => {
+export async function initEmptyParagraphState(page: Page, pageId?: string) {
+  const ids = await page.evaluate(pageId => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlock({ flavour: 'affine:page' });
+    if (!pageId) {
+      pageId = page.addBlock({ flavour: 'affine:page' });
+    }
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
     const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, frameId);
     page.captureSync();
     return { pageId, frameId, paragraphId };
-  });
+  }, pageId);
   return ids;
 }
 

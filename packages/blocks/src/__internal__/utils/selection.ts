@@ -32,67 +32,88 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-function fixCurrentRangeToText(
+// Find the first block or last block inside the frame,
+// so that we can select the full text of the block when moving outside of the frame.
+function findFrameBoundaryText(
+  clientY: number,
+  isBackward: boolean,
+  container: HTMLElement
+) {
+  let textBlock: HTMLElement | null = null;
+
+  if (isBackward) {
+    const elem = container
+      .querySelector('.ql-editor')
+      ?.closest(`[${BLOCK_ID_ATTR}]`) as HTMLElement;
+    if (elem) {
+      const rect = elem.getBoundingClientRect();
+      // handle dragging backward
+      if (clientY <= rect.top) {
+        textBlock = elem;
+      }
+    }
+  } else {
+    const textBlocks = container.querySelectorAll('.ql-editor');
+    if (textBlocks.length) {
+      const elem = textBlocks[textBlocks.length - 1].closest(
+        `[${BLOCK_ID_ATTR}]`
+      ) as HTMLElement;
+      if (elem) {
+        const rect = elem.getBoundingClientRect();
+        // handle dragging forward
+        if (clientY >= rect.bottom) {
+          textBlock = elem;
+        }
+      }
+    }
+  }
+
+  const text = textBlock?.querySelector('.ql-editor');
+  assertExists(text);
+  return text;
+}
+
+function computeCrossFrameRange(
   clientX: number,
   clientY: number,
   offset: IPoint,
   startRange: Range,
-  range: Range,
-  isBackward: boolean
+  currentRange: Range,
+  isBackward: boolean,
+  container: HTMLElement
 ) {
-  const endContainer = isBackward ? range.startContainer : range.endContainer;
-  if (endContainer.nodeType !== Node.TEXT_NODE) {
-    const textBlocks = Array.from(
-      (range.commonAncestorContainer as HTMLElement).querySelectorAll(
-        '.ql-editor'
-      )
-    ).map(elem => {
-      const block = elem.closest(`[${BLOCK_ID_ATTR}]`);
-      assertExists(block);
-      return block;
-    });
+  const text = findFrameBoundaryText(clientY, isBackward, container);
+  const rect = text.getBoundingClientRect();
 
-    if (textBlocks.length) {
-      const textBlock = isBackward
-        ? textBlocks.find(t => {
-            const rect = t.getBoundingClientRect();
-            return clientY <= rect.top; // handle dragging backward
-          })
-        : textBlocks.reverse().find(t => {
-            const rect = t.getBoundingClientRect();
-            return clientY >= rect.bottom; // handle dragging forward
-          });
-      if (!textBlock) {
-        throw new Error('Failed to focus text node!');
-      }
-      const text = textBlock.querySelector('.ql-editor');
-      assertExists(text);
-      const rect = text.getBoundingClientRect();
-      const newY = isBackward
-        ? rect.bottom - offset.y - 6
-        : rect.top - offset.y + 6;
-      const newRange = caretRangeFromPoint(clientX, newY);
-      if (newRange && text.firstChild) {
-        if (isBackward && text.firstChild.firstChild) {
-          newRange.setEnd(startRange.startContainer, startRange.startOffset);
-          newRange.setStartBefore(text.firstChild.firstChild);
-        } else if (!isBackward && text.firstChild.lastChild) {
-          newRange.setStart(startRange.startContainer, startRange.startOffset);
-          // should update `endOffset`
-          if (text.firstChild.firstChild === text.firstChild.lastChild) {
-            newRange.setEnd(
-              text.firstChild.firstChild,
-              text.firstChild.firstChild.textContent?.length || 0
-            );
-          } else {
-            newRange.setEndAfter(text.firstChild.lastChild);
-          }
-        }
-        return newRange;
-      }
+  // Pick a position inside the text rect
+  const newY = isBackward
+    ? rect.bottom - offset.y - 6
+    : rect.top - offset.y + 6;
+  const newRange = caretRangeFromPoint(clientX, newY);
+
+  if (!newRange || !text.firstChild) return currentRange;
+
+  // Select the full text of the first block,
+  // when dragging backward outside of the first block in frame
+  if (isBackward && text.firstChild.firstChild) {
+    newRange.setStartBefore(text.firstChild.firstChild);
+    newRange.setEnd(startRange.startContainer, startRange.startOffset);
+  }
+  // Select the full text of the last block,
+  // when dragging forward outside of the last block in frame
+  else if (!isBackward && text.firstChild.lastChild) {
+    newRange.setStart(startRange.startContainer, startRange.startOffset);
+    // should update `endOffset`
+    if (text.firstChild.firstChild === text.firstChild.lastChild) {
+      newRange.setEnd(
+        text.firstChild.firstChild,
+        text.firstChild.firstChild.textContent?.length || 0
+      );
+    } else {
+      newRange.setEndAfter(text.firstChild.lastChild);
     }
   }
-  return range;
+  return newRange;
 }
 
 export function setStartRange(editableContainer: Element) {
@@ -419,11 +440,69 @@ export function getSelectInfo(page: Page): SelectionInfo {
   };
 }
 
+function handleCrossFrameDragMove(
+  e: SelectionEvent,
+  container: HTMLElement,
+  startRange: Range | null,
+  currentRange: Range,
+  isBackward: boolean
+) {
+  // Forward: ↓ → leave `affine-frame`
+  // Backward: ← ↑ leave `.affine-default-page-block-title-container`
+  const isTitle = container.classList.contains(
+    'affine-default-page-block-title-container'
+  );
+  assertExists(startRange);
+  // const { startContainer, startOffset, endContainer, endOffset } = startRange;
+  if (container.tagName === 'AFFINE-FRAME' || isTitle) {
+    // rewrites container when moving to title,
+    // if you want to select a title you can rewrite this piece of logic
+    const newContainer = isTitle
+      ? container
+          .closest('.affine-default-page-block-container')
+          ?.querySelector('affine-frame')
+      : container;
+
+    assertExists(newContainer);
+
+    const newRange = computeCrossFrameRange(
+      e.raw.clientX,
+      e.raw.clientY,
+      e.containerOffset,
+      startRange,
+      currentRange,
+      isBackward,
+      newContainer
+    );
+    resetNativeSelection(newRange);
+  } else {
+    // ignore other elements, e.g., `.affine-frame-block-container`, `.affine-list-block__prefix`
+    return;
+  }
+}
+
+function handleInFrameDragMove(
+  startContainer: Node,
+  startOffset: number,
+  endContainer: Node,
+  endOffset: number,
+  currentRange: Range,
+  isBackward: boolean
+) {
+  if (isBackward) {
+    currentRange.setEnd(endContainer, endOffset);
+  } else {
+    currentRange.setStart(startContainer, startOffset);
+  }
+  resetNativeSelection(currentRange);
+}
+
 export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  // Range from current mouse position
+  const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   if (!currentRange) return;
 
   assertExists(startRange);
@@ -435,34 +514,23 @@ export function handleNativeRangeDragMove(
   // Handle native range state on cross-block dragging,
   // see https://github.com/toeverything/blocksuite/pull/845
   if (container.nodeType !== Node.TEXT_NODE) {
-    // Forward: ↓ → leave `affine-frame`
-    // Backward: ← ↑ leave `.affine-frame-block-container` or `.affine-default-page-block-title-container`
-    if (
-      container.tagName === 'AFFINE-FRAME' ||
-      container.classList.contains('affine-frame-block-container') ||
-      container.classList.contains('affine-default-page-block-title-container')
-    ) {
-      currentRange = fixCurrentRangeToText(
-        e.raw.clientX,
-        e.raw.clientY,
-        e.containerOffset,
-        startRange,
-        currentRange,
-        isBackward
-      );
-    } else {
-      // ignore other elements, e.g., `list-block-prefix`
-      return;
-    }
+    handleCrossFrameDragMove(
+      e,
+      container,
+      startRange,
+      currentRange,
+      isBackward
+    );
   } else {
-    if (isBackward) {
-      currentRange.setEnd(endContainer, endOffset);
-    } else {
-      currentRange.setStart(startContainer, startOffset);
-    }
+    handleInFrameDragMove(
+      startContainer,
+      startOffset,
+      endContainer,
+      endOffset,
+      currentRange,
+      isBackward
+    );
   }
-
-  resetNativeSelection(currentRange);
 }
 
 function isBlankAreaBetweenBlocks(startContainer: Node) {
