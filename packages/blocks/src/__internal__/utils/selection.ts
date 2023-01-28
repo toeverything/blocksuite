@@ -441,40 +441,41 @@ export function getSelectInfo(page: Page): SelectionInfo {
   };
 }
 
+// Forward: ↓ → leave `affine-frame`
+// Backward: ← ↑ leave `.affine-default-page-block-title-container`
 function handleCrossFrameDragMove(
   e: SelectionEvent,
   container: HTMLElement,
-  startRange: Range | null,
+  startRange: Range,
   currentRange: Range,
   isBackward: boolean
 ) {
-  // Forward: ↓ → leave `affine-frame`
-  // Backward: ← ↑ leave `.affine-default-page-block-title-container`
-  const isTitle = container.classList.contains(
-    'affine-default-page-block-title-container'
-  );
-  assertExists(startRange);
+  let isFrame = container.tagName === 'AFFINE-FRAME';
+  const isTitle =
+    !isFrame &&
+    container.classList.contains('affine-default-page-block-title-container');
 
-  // In edgeless mode, there is no header.
-  if (
-    isBackward &&
-    !isTitle &&
-    container.classList.contains('affine-frame-block-container')
-  ) {
-    container = container.parentElement as HTMLElement;
+  if (isBackward) {
+    if (isTitle) {
+      isFrame = true;
+      container = container
+        .closest('.affine-default-page-block-container')
+        ?.querySelector('affine-frame') as HTMLElement;
+      assertExists(container);
+    } else if (
+      !isFrame &&
+      container.classList.contains('affine-frame-block-container')
+    ) {
+      // In edgeless mode, there is no header.
+      isFrame = true;
+      container = container.parentElement as HTMLElement;
+      assertExists(container);
+    }
   }
 
-  if (container.tagName === 'AFFINE-FRAME' || isTitle) {
+  if (isFrame) {
     // rewrites container when moving to title,
     // if you want to select a title you can rewrite this piece of logic
-    const newContainer = isTitle
-      ? container
-          .closest('.affine-default-page-block-container')
-          ?.querySelector('affine-frame')
-      : container;
-
-    assertExists(newContainer);
-
     const newRange = computeCrossFrameRange(
       e.raw.clientX,
       e.raw.clientY,
@@ -482,7 +483,7 @@ function handleCrossFrameDragMove(
       startRange,
       currentRange,
       isBackward,
-      newContainer
+      container
     );
     resetNativeSelection(newRange);
   } else {
@@ -523,20 +524,20 @@ export function handleNativeRangeDragMove(
 
   // Handle native range state on cross-block dragging,
   // see https://github.com/toeverything/blocksuite/pull/845
-  if (container.nodeType !== Node.TEXT_NODE) {
-    handleCrossFrameDragMove(
-      e,
-      container,
-      startRange,
-      currentRange,
-      isBackward
-    );
-  } else {
+  if (container.nodeType === Node.TEXT_NODE) {
     handleInFrameDragMove(
       startContainer,
       startOffset,
       endContainer,
       endOffset,
+      currentRange,
+      isBackward
+    );
+  } else {
+    handleCrossFrameDragMove(
+      e,
+      container,
+      startRange,
       currentRange,
       isBackward
     );
