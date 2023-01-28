@@ -5,6 +5,7 @@
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 [![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
+[![Join Telegram](https://img.shields.io/badge/join-telegram-blue)](https://t.me/blocksuite)
 
 💠 BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
@@ -23,49 +24,6 @@ BlockSuite is not intended to be yet another plugin-based rich text editing fram
 
 Although BlockSuite is still in its early stages, you can already use the `@blocksuite/editor` package, the collaborative editor used in AFFiNE Alpha. Note that this editor is also a web component and is completely framework-independent!
 
-## Current Status (`@blocksuite/editor`)
-
-> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
-
-- Basic text editing
-  - ✅ Paragraph with inline style
-  - ✅ Nested list
-  - ✅ Code block
-  - ✅ Markdown shortcuts
-- Block-level editing
-  - ✅ Inline text format bar
-  - ⚛️ Block-level selection
-  - ⚛️ Block drag handle
-  - ⚛️ Block hub
-  - ⚛️ Inline slash menu
-- Rich-content
-  - ⚛️ Image block
-  - 🚧 Database block
-  - 📌 Third-party embedded block
-- Whiteboard (edgeless mode)
-  - ✅ Zooming and panning
-  - ⚛️ Frame block
-  - ⚛️ Shape element
-  - 🚧 Handwriting element
-  - 📌 Grouping
-- Playground
-  - ✅ Multiplayer collaboration
-  - ✅ Local data persistence
-  - ✅ E2E test suite
-- Developer experience
-  - ✅ Block tree update API
-  - ✅ Zero cost time travel (undo/redo)
-  - ✅ Reusable NPM package
-  - ⚛️ React hooks integration
-  - 📌 Dynamic block registration
-
-Icons above correspond to the following meanings:
-
-- ✅ - **Beta**
-- ⚛️ - **Alpha**
-- 🚧 - **Developing**
-- 📌 - **Planned**
-
 ## Resources
 
 - 🎁 Examples
@@ -77,6 +35,7 @@ Icons above correspond to the following meanings:
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
+- 💬 [Telegram Group](https://t.me/blocksuite)
 - 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
 - 🚀 [Releases](https://github.com/toeverything/blocksuite/releases)
 
@@ -182,6 +141,49 @@ main();
 ```
 
 For React developers, check out the [`@blocksuite/react`](./packages/react/README.md) doc for React components and hooks support.
+
+## Current Status (`@blocksuite/editor`)
+
+> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
+
+- Basic text editing
+  - ✅ Paragraph with inline style
+  - ✅ Nested list
+  - ✅ Code block
+  - ✅ Markdown shortcuts
+- Block-level editing
+  - ✅ Inline text format bar
+  - ⚛️ Block-level selection
+  - ⚛️ Block drag handle
+  - ⚛️ Block hub
+  - ⚛️ Inline slash menu
+- Rich-content
+  - ⚛️ Image block
+  - 🚧 Database block
+  - 📌 Third-party embedded block
+- Whiteboard (edgeless mode)
+  - ✅ Zooming and panning
+  - ⚛️ Frame block
+  - ⚛️ Shape element
+  - 🚧 Handwriting element
+  - 📌 Grouping
+- Playground
+  - ✅ Multiplayer collaboration
+  - ✅ Local data persistence
+  - ✅ E2E test suite
+- Developer experience
+  - ✅ Block tree update API
+  - ✅ Zero cost time travel (undo/redo)
+  - ✅ Reusable NPM package
+  - ⚛️ React hooks integration
+  - 📌 Dynamic block registration
+
+Icons above correspond to the following meanings:
+
+- ✅ - **Beta**
+- ⚛️ - **Alpha**
+- 🚧 - **Developing**
+- 📌 - **Planned**
 
 ## Building
 
