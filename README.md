@@ -12,6 +12,8 @@
 - 👉 [Try BlockSuite-based AFFiNE online](https://pathfinder.affine.pro/)
 - 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
 
+> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
+
 ## Introduction
 
 BlockSuite works very differently than traditional rich text frameworks:
@@ -143,8 +145,6 @@ main();
 For React developers, check out the [`@blocksuite/react`](./packages/react/README.md) doc for React components and hooks support.
 
 ## Current Status (`@blocksuite/editor`)
-
-> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
 
 - Basic text editing
   - ✅ Paragraph with inline style
