@@ -403,9 +403,10 @@ export function getSelectInfo(page: Page): SelectionInfo {
   let selectedBlocks: SelectedBlock[] = [];
   let selectedModels: BaseBlockModel[] = [];
   const pageBlock = getDefaultPageBlock(page.root);
-  const { state } = pageBlock.selection;
+  // FIXME: missing selection in edgeless mode
+  const state = pageBlock.selection?.state;
   const nativeSelection = window.getSelection();
-  if (state.type === 'block') {
+  if (state?.type === 'block') {
     type = 'Block';
     const { selectedBlocks } = state;
     selectedModels = selectedBlocks.map(block => getModelByElement(block));
@@ -453,7 +454,16 @@ function handleCrossFrameDragMove(
     'affine-default-page-block-title-container'
   );
   assertExists(startRange);
-  // const { startContainer, startOffset, endContainer, endOffset } = startRange;
+
+  // In edgeless mode, there is no header.
+  if (
+    isBackward &&
+    !isTitle &&
+    container.classList.contains('affine-frame-block-container')
+  ) {
+    container = container.parentElement as HTMLElement;
+  }
+
   if (container.tagName === 'AFFINE-FRAME' || isTitle) {
     // rewrites container when moving to title,
     // if you want to select a title you can rewrite this piece of logic
