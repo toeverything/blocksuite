@@ -30,50 +30,136 @@ function selectList(model: ListBlockModel) {
 @customElement('affine-list')
 export class ListBlockComponent extends NonShadowLitElement {
   static styles = css`
+    .affine-list-block__prefix svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .affine-list-block__prefix:hover svg {
+      transition: transform 0.2s ease-in-out;
+      transform: scale(1.7);
+    }
+
     .affine-list-block-container {
       box-sizing: border-box;
       border-radius: 5px;
-      margin-top: 2px;
-    }
-    .affine-list-block-container--first {
       margin-top: var(--affine-paragraph-space);
+      position: relative;
     }
+
+    .affine-list-block-container--first .affine-list-block-container::before {
+      content: '';
+      position: absolute;
+      left: -9px;
+      top: 10%;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, #555, #fff);
+      border-radius: 2px;
+      animation: pulse 2s ease-in-out infinite;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .affine-list-block-container--first
+      .affine-list-block-container:hover::before {
+      background: linear-gradient(
+        to bottom,
+        var(--ls-block-bullet-active-color),
+        #fff
+      );
+    }
+
+    .affine-list-block__toggle-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--affine-icon-color);
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: auto;
+      padding-left: 0px;
+      padding-right: 0px;
+    }
+
+    .affine-list-block__toggle-button.collapsed {
+      transform: rotate(45deg);
+    }
+
+    .affine-list-block-container--first::after {
+      content: '';
+      position: absolute;
+      left: -10px;
+      top: 50%;
+      width: calc(100% + 40px);
+      height: 1px;
+      background-color: #ccc;
+      z-index: -1;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .affine-list-block-container--first:hover::after {
+      background-color: var(--ls-block-bullet-active-color);
+    }
+
     .affine-list-block-container .affine-list-block-container {
       margin-top: 0;
     }
+
     .affine-list-block-container.selected {
       background-color: var(--affine-selected-color);
+      animation: pulse 0.5s ease-in-out infinite;
     }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
     .affine-list-rich-text-wrapper {
       display: flex;
     }
+
     .affine-list-rich-text-wrapper rich-text {
       flex: 1;
     }
 
     .affine-list-block__prefix {
-      flex-shrink: 0;
+      display: flex;
+      align-items: center;
       min-width: 26px;
       height: 26px;
       margin-top: 3px;
       margin-right: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
       color: var(--affine-code-color);
       font-size: 14px;
       line-height: var(--affine-line-height-base);
-      user-select: none;
-    }
-    .affine-list-block__todo-prefix {
       cursor: pointer;
     }
+
+    .affine-list-block__todo-prefix {
+      cursor: pointer;
+      margin-left: auto; /* Add this line to move the todo prefix to the right */
+    }
+
     .affine-list-block__todo {
       width: 16px;
       height: 16px;
       border-radius: 4px;
       border: 1px solid var(--affine-icon-color);
     }
+
     .affine-list-block__todo.affine-list-block__todo--active {
       background: var(--affine-icon-color);
     }
@@ -92,6 +178,16 @@ export class ListBlockComponent extends NonShadowLitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
+  }
+
+  toggleCollapse(e: MouseEvent) {
+    e.stopPropagation();
+    const toggleButton = e.currentTarget;
+    (toggleButton as HTMLElement)?.classList.toggle('collapsed');
+    const container = (toggleButton as HTMLElement)?.closest(
+      '.affine-list-block-container'
+    ) as HTMLElement;
+    container.classList.toggle('collapsed');
   }
 
   render() {
@@ -132,6 +228,12 @@ export class ListBlockComponent extends NonShadowLitElement {
           }`}
         >
           ${listIcon}
+          <button
+            class="affine-list-block__toggle-button"
+            @click=${this.toggleCollapse}
+          >
+            +
+          </button>
           <rich-text .host=${this.host} .model=${this.model}></rich-text>
         </div>
         ${childrenContainer}
