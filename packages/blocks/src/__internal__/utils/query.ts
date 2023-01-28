@@ -414,28 +414,11 @@ export function isCaptionElement(node: unknown): node is HTMLInputElement {
   return node.classList.contains('affine-embed-wrapper-caption');
 }
 
-/**
- * This function is slightly different from {@link isInsideRichText}.
- * It include all of element in editor.
- * This is very useful when wanting to handle edges between blocks.
- *
- * See also {@link isInsideRichText} or {@link isTitleElement}
- */
-export function isInsideBlockContainer(element: unknown): element is Node {
-  const defaultBlockContainer = document.querySelector(
-    '.affine-default-page-block-container'
-  );
-  const edgelessBlockContainer = document.querySelector(
-    '.affine-edgeless-page-block-container'
-  );
-  if (!(element instanceof Node)) {
-    return false;
-  }
-  if (defaultBlockContainer) {
-    return defaultBlockContainer.contains(element);
-  }
-  if (edgelessBlockContainer) {
-    return edgelessBlockContainer.contains(element);
-  }
-  return false;
+export function getElementFromEventTarget(
+  target: EventTarget | null
+): Element | null {
+  if (!target) return null;
+  if (target instanceof Element) return target;
+  if (target instanceof Node) target.parentElement;
+  return null;
 }

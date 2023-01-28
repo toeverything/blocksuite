@@ -872,10 +872,13 @@ export function restoreSelection(selectedBlocks: SelectedBlock[]) {
 /**
  * Get the closest editor element in the horizontal position
  */
-export function getClosestHorizontalEditor(clientY: number) {
+export function getClosestHorizontalEditor(
+  clientY: number,
+  container: Element = document.body
+) {
   // sort for binary search (In fact, it is generally orderly, just in case)
   const editorsElements = Array.from(
-    document.querySelectorAll('.ql-editor')
+    container.querySelectorAll('.ql-editor')
   ).sort((a, b) =>
     // getBoundingClientRect here actually run so fast because of the browser cache
     a.getBoundingClientRect().top > b.getBoundingClientRect().top ? 1 : -1

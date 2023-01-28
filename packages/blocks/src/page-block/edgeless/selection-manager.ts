@@ -184,6 +184,7 @@ export class EdgelessSelectionManager {
       shape: new ShapeModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
+      'edgeless',
       this._container,
       this._onContainerDragStart,
       this._onContainerDragMove,
