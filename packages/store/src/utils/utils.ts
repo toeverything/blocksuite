@@ -11,6 +11,9 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
 import type { Page } from '../workspace/page.js';
 import type { BaseBlockModel } from '../base.js';
+import type { BlockSchema } from '../base.js';
+import type { z } from 'zod';
+import { RichTextType } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -41,7 +44,7 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 }
 
 export function syncBlockProps(
-  // schema: z.infer<typeof BlockSchema>,
+  schema: z.infer<typeof BlockSchema>,
   defaultProps: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
@@ -50,9 +53,9 @@ export function syncBlockProps(
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
     const value = props[key];
-
-    // TODO use schema
-    if (key === 'text') return;
+    if (defaultProps[key] === RichTextType) {
+      return;
+    }
     if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
@@ -69,7 +72,9 @@ export function syncBlockProps(
   // set default value
   Object.entries(defaultProps).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
-      if (Array.isArray(value)) {
+      if (value === RichTextType) {
+        yBlock.set(`prop:${key}`, new Y.Text());
+      } else if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));
       } else {
         yBlock.set(`prop:${key}`, value);

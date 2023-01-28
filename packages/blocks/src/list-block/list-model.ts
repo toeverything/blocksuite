@@ -1,4 +1,8 @@
-import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
+import {
+  RichTextType,
+  defineBlockSchema,
+  SchemaToModel,
+} from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export const ListBlockModelSchema = defineBlockSchema(
@@ -6,6 +10,7 @@ export const ListBlockModelSchema = defineBlockSchema(
   () => ({
     type: 'bulleted' as ListType,
     checked: false,
+    text: RichTextType,
   }),
   {
     version: 1,
