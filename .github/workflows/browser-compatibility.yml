@@ -48,7 +48,7 @@ jobs:
 
       - name: Run playwright tests
         env:
-          TEST_PLAYWRIGHT_BROWSER_NAME: ${{ matrix.browsers }}
+          BROWSER: ${{ matrix.browsers }}
         run: pnpm test -- --forbid-only
 
       - name: Upload test results

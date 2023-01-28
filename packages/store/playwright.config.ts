@@ -9,8 +9,7 @@ const config: PlaywrightTestConfig = {
   workers: 1,
   use: {
     browserName:
-      (process.env
-        .TEST_PLAYWRIGHT_BROWSER_NAME as PlaywrightWorkerOptions['browserName']) ??
+      (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
       'chromium',
     viewport: { width: 900, height: 600 },
     actionTimeout: 1000,
