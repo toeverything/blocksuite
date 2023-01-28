@@ -1,5 +1,6 @@
 {
   "name": "blocksuite",
+  "version": "0.4.0-alpha.1",
   "private": true,
   "type": "module",
   "engines": {
