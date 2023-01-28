@@ -174,29 +174,31 @@ export function initMouseEventHandlers(
         toSelectionEvent(e, getBoundingClientRect, startX, startY)
       );
 
-      // fix selection back to the nearest block
-      // when user click on the edge of page (page mode) or frame (edgeless mode)
-      const targetEl = getElementFromEventTarget(e.target);
-      const block = targetEl?.closest(`[${BLOCK_ID_ATTR}]`) as {
-        model?: BaseBlockModel;
-        pageModel?: BaseBlockModel;
-      } | null;
-      const model = block?.model || block?.pageModel;
-      if (model) {
-        const isClickOnFramePage =
-          mode === 'page'
-            ? matchFlavours(model, ['affine:frame', 'affine:page'])
-            : matchFlavours(model, ['affine:frame']);
-        if (isClickOnFramePage) {
-          const horizontalElement = getClosestHorizontalEditor(e.clientY);
-          if (horizontalElement) {
-            const rect = horizontalElement.getBoundingClientRect();
-            if (e.clientX < rect.left) {
-              const range = setStartRange(horizontalElement);
-              resetNativeSelection(range);
-            } else {
-              const range = setEndRange(horizontalElement);
-              resetNativeSelection(range);
+      if (!isTitleElement(e.target)) {
+        // fix selection back to the nearest block
+        // when user click on the edge of page (page mode) or frame (edgeless mode)
+        const targetEl = getElementFromEventTarget(e.target);
+        const block = targetEl?.closest(`[${BLOCK_ID_ATTR}]`) as {
+          model?: BaseBlockModel;
+          pageModel?: BaseBlockModel;
+        } | null;
+        const model = block?.model || block?.pageModel;
+        if (model) {
+          const isClickOnFramePage =
+            mode === 'page'
+              ? matchFlavours(model, ['affine:frame', 'affine:page'])
+              : matchFlavours(model, ['affine:frame']);
+          if (isClickOnFramePage) {
+            const horizontalElement = getClosestHorizontalEditor(e.clientY);
+            if (horizontalElement) {
+              const rect = horizontalElement.getBoundingClientRect();
+              if (e.clientX < rect.left) {
+                const range = setStartRange(horizontalElement);
+                resetNativeSelection(range);
+              } else {
+                const range = setEndRange(horizontalElement);
+                resetNativeSelection(range);
+              }
             }
           }
         }
