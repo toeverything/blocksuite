@@ -32,12 +32,10 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-function computeCrossFrameRange(
-  clientX: number,
+// Find the first block or last block inside the frame,
+// so that we can select the full text of the block when moving outside of the frame.
+function findFrameBoundaryText(
   clientY: number,
-  offset: IPoint,
-  startRange: Range,
-  currentRange: Range,
   isBackward: boolean,
   container: HTMLElement
 ) {
@@ -70,35 +68,52 @@ function computeCrossFrameRange(
     }
   }
 
-  if (!textBlock) return currentRange;
-
-  const text = textBlock.querySelector('.ql-editor');
+  const text = textBlock?.querySelector('.ql-editor');
   assertExists(text);
+  return text;
+}
+
+function computeCrossFrameRange(
+  clientX: number,
+  clientY: number,
+  offset: IPoint,
+  startRange: Range,
+  currentRange: Range,
+  isBackward: boolean,
+  container: HTMLElement
+) {
+  const text = findFrameBoundaryText(clientY, isBackward, container);
   const rect = text.getBoundingClientRect();
+
+  // Pick a position inside the text rect
   const newY = isBackward
     ? rect.bottom - offset.y - 6
     : rect.top - offset.y + 6;
   const newRange = caretRangeFromPoint(clientX, newY);
-  if (newRange && text.firstChild) {
-    if (isBackward && text.firstChild.firstChild) {
-      newRange.setEnd(startRange.startContainer, startRange.startOffset);
-      newRange.setStartBefore(text.firstChild.firstChild);
-    } else if (!isBackward && text.firstChild.lastChild) {
-      newRange.setStart(startRange.startContainer, startRange.startOffset);
-      // should update `endOffset`
-      if (text.firstChild.firstChild === text.firstChild.lastChild) {
-        newRange.setEnd(
-          text.firstChild.firstChild,
-          text.firstChild.firstChild.textContent?.length || 0
-        );
-      } else {
-        newRange.setEndAfter(text.firstChild.lastChild);
-      }
-    }
-    return newRange;
-  }
 
-  return currentRange;
+  if (!newRange || !text.firstChild) return currentRange;
+
+  // Select the full text of the first block,
+  // when dragging backward outside of the first block in frame
+  if (isBackward && text.firstChild.firstChild) {
+    newRange.setStartBefore(text.firstChild.firstChild);
+    newRange.setEnd(startRange.startContainer, startRange.startOffset);
+  }
+  // Select the full text of the last block,
+  // when dragging forward outside of the last block in frame
+  else if (!isBackward && text.firstChild.lastChild) {
+    newRange.setStart(startRange.startContainer, startRange.startOffset);
+    // should update `endOffset`
+    if (text.firstChild.firstChild === text.firstChild.lastChild) {
+      newRange.setEnd(
+        text.firstChild.firstChild,
+        text.firstChild.firstChild.textContent?.length || 0
+      );
+    } else {
+      newRange.setEndAfter(text.firstChild.lastChild);
+    }
+  }
+  return newRange;
 }
 
 export function setStartRange(editableContainer: Element) {

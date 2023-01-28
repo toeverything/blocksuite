@@ -720,7 +720,7 @@ test('should set the first block to start the range before while leaving the aff
     [2, 1],
     [0, 2],
     { x: 0, y: 0 },
-    { x: 0, y: -30 }
+    { x: 0, y: -30 } // drag above the top of the first block
   );
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '1234567');
@@ -749,7 +749,7 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
     [0, 2],
     [3, 1],
     { x: 0, y: 0 },
-    { x: 0, y: 30 }
+    { x: 0, y: 30 } // drag below the bottom of the last block
   );
 
   await copyByKeyboard(page);
