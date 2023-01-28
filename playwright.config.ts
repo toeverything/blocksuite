@@ -15,8 +15,7 @@ const config: PlaywrightTestConfig = {
   },
   use: {
     browserName:
-      (process.env
-        .TEST_PLAYWRIGHT_BROWSER_NAME as PlaywrightWorkerOptions['browserName']) ??
+      (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
       'chromium',
     viewport: { width: 900, height: 600 },
     // Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer

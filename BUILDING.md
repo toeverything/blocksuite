@@ -67,3 +67,15 @@ pnpm test:headed
 ```
 
 In headed mode, `await page.pause()` can be used in test cases to suspend the test runner. Note that the usage of the [Playwright VSCode extension](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) is also highly recommended.
+
+To test browser compatibility, the `BROWSER` environment variable can be used:
+
+```sh
+# supports `firefox|webkit|chromium`
+BROWSER=firefox pnpm test
+
+# passing playwright params with the -- syntax
+BROWSER=webkit pnpm test -- --debug
+```
+
+To investigate flaky tests, we can mark a test case as `test.only`, then perform `npx playwright test --repeat-each=10` to reproduce the problem by repeated execution. It's also very helpful to run `pnpm test -- --debug` with `await page.pause()` added before certain asserters.
