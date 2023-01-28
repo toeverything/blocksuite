@@ -1,7 +1,7 @@
 import {
   defineBlockSchema,
   SchemaToModel,
-  $textValue,
+  RichTextType,
 } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
@@ -9,7 +9,7 @@ export const CodeBlockModelSchema = defineBlockSchema(
   'affine:code',
   () => ({
     language: 'JavaScript',
-    text: $textValue,
+    text: RichTextType,
   }),
   {
     version: 1,

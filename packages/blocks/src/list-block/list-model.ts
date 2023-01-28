@@ -1,5 +1,5 @@
 import {
-  $textValue,
+  RichTextType,
   defineBlockSchema,
   SchemaToModel,
 } from '@blocksuite/store';
@@ -10,7 +10,7 @@ export const ListBlockModelSchema = defineBlockSchema(
   () => ({
     type: 'bulleted' as ListType,
     checked: false,
-    text: $textValue,
+    text: RichTextType,
   }),
   {
     version: 1,

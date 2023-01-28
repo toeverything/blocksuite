@@ -1,5 +1,5 @@
 import {
-  $textValue,
+  RichTextType,
   defineBlockSchema,
   SchemaToModel,
 } from '@blocksuite/store';
@@ -9,7 +9,7 @@ export const ParagraphBlockModelSchema = defineBlockSchema(
   'affine:paragraph',
   () => ({
     type: 'text' as ParagraphType,
-    text: $textValue,
+    text: RichTextType,
   }),
   {
     version: 1,

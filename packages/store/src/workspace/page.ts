@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { Quill } from 'quill';
 import { uuidv4 } from 'lib0/random.js';
-import { $textValue, BaseBlockModel } from '../base.js';
+import { RichTextType, BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import {
   Text,
@@ -345,12 +345,12 @@ export class Page extends Space<PageData> {
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
       const schema = this.workspace.flavourSchemaMap.get(flavour);
-      const defaultState = this.workspace.flavourInitialStateMap.get(flavour);
+      const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
       assertExists(schema);
-      assertExists(defaultState);
+      assertExists(defaultProps);
       syncBlockProps(
         schema,
-        defaultState,
+        defaultProps,
         yBlock,
         clonedProps,
         this._ignoredKeys
@@ -438,11 +438,11 @@ export class Page extends Space<PageData> {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
     this.transact(() => {
       const schema = this.workspace.flavourSchemaMap.get(model.flavour);
-      const defaultState = this.workspace.flavourInitialStateMap.get(
+      const defaultProps = this.workspace.flavourInitialPropsMap.get(
         model.flavour
       );
       assertExists(schema);
-      assertExists(defaultState);
+      assertExists(defaultProps);
       if (props.text instanceof PrelimText) {
         props.text.ready = true;
       } else if (props.text instanceof Text) {
@@ -463,7 +463,7 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      syncBlockProps(schema, defaultState, yBlock, props, this._ignoredKeys);
+      syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
     });
   }
 
@@ -701,16 +701,16 @@ export class Page extends Space<PageData> {
     const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
     const schema = this.workspace.flavourSchemaMap.get(model.flavour);
-    const defaultState = this.workspace.flavourInitialStateMap.get(
+    const defaultProps = this.workspace.flavourInitialPropsMap.get(
       model.flavour
     );
     assertExists(schema);
-    assertExists(defaultState);
+    assertExists(defaultProps);
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
     this._blockMap.set(props.id, model);
-    Object.entries(defaultState).map(([key, value]) => {
+    Object.entries(defaultProps).map(([key, value]) => {
       const storedValue = yBlock.get(`prop:${key}`);
       if (storedValue instanceof Y.Text) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -778,7 +778,7 @@ export class Page extends Space<PageData> {
     const model = this.getBlockById(id);
     if (!model) return;
     const schema = this.workspace.flavourSchemaMap.get(model.flavour);
-    const defaultState = this.workspace.flavourInitialStateMap.get(
+    const defaultState = this.workspace.flavourInitialPropsMap.get(
       model.flavour
     );
     assertExists(defaultState);
@@ -788,7 +788,7 @@ export class Page extends Space<PageData> {
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
-      if (defaultState[key] === $textValue) {
+      if (defaultState[key] === RichTextType) {
         continue;
       }
       // Update children

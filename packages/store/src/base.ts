@@ -14,8 +14,8 @@ export interface InternalValue<Value = unknown> {
   [kValue]: symbol;
 }
 
-export const $textValue: InternalValue<TextType> = {
-  [kValue]: Symbol('vTextValue'),
+export const RichTextType: InternalValue<TextType> = {
+  [kValue]: Symbol('RichText'),
 };
 
 const FlavourSchema = z.string();
