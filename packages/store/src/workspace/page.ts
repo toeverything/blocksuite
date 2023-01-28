@@ -344,9 +344,9 @@ export class Page extends Space<PageData> {
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
-      const defaultState = this.workspace.flavourInitialStateMap.get(flavour);
-      assertExists(defaultState);
-      syncBlockProps(defaultState, yBlock, clonedProps, this._ignoredKeys);
+      const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
+      assertExists(defaultProps);
+      syncBlockProps(defaultProps, yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       if (typeof parent === 'string') {
@@ -450,11 +450,11 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      const defaultState = this.workspace.flavourInitialStateMap.get(
+      const defaultProps = this.workspace.flavourInitialPropsMap.get(
         model.flavour
       );
-      assertExists(defaultState);
-      syncBlockProps(defaultState, yBlock, props, this._ignoredKeys);
+      assertExists(defaultProps);
+      syncBlockProps(defaultProps, yBlock, props, this._ignoredKeys);
     });
   }
 
@@ -676,8 +676,8 @@ export class Page extends Space<PageData> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     blockModel.flavour = schema.model.flavour as any;
     blockModel.tag = schema.model.tag;
-    const state = schema.model.state();
-    Object.entries(state).forEach(([key, value]) => {
+    const modelProps = schema.model.props();
+    Object.entries(modelProps).forEach(([key, value]) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (blockModel as any)[key] = props[key] ?? value;
     });
