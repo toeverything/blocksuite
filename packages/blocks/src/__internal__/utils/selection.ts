@@ -28,6 +28,7 @@ import {
   nonTextBlock,
 } from '@blocksuite/global/utils';
 import { asyncFocusRichText } from './common-operations.js';
+import type { FrameBlockComponent } from '@blocksuite/blocks';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -532,19 +533,50 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
+  const isEdgelessMode = document.querySelector('affine-edgeless-page');
+
   // Range from current mouse position
-  const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   if (!currentRange) return;
 
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  const container = currentRange.commonAncestorContainer as HTMLElement;
+  const _startContainer = (
+    startContainer.nodeType === Node.TEXT_NODE
+      ? startContainer.parentElement
+      : startContainer
+  ) as HTMLElement;
+  const startFrame = _startContainer.closest('affine-frame');
+  if (!startFrame) return;
+
+  const { clientX: x, clientY: y } = e.raw;
+
+  let currentFrame: FrameBlockComponent | null | undefined = null;
+  let shouldUpdateCurrentRange = false;
+
+  if (isEdgelessMode) {
+    currentFrame = startFrame;
+    shouldUpdateCurrentRange = true;
+  } else {
+    currentFrame = document.elementFromPoint(x, y)?.closest('affine-frame');
+    shouldUpdateCurrentRange = !currentFrame;
+    currentFrame ??= getClosestFrame(y);
+  }
+  if (!currentFrame) return;
+
+  if (shouldUpdateCurrentRange) {
+    const closestEditor = getClosestEditor(y, currentFrame);
+    if (!closestEditor) return;
+
+    const newPoint = normalizePointIntoContainer({ x, y }, closestEditor);
+    currentRange = caretRangeFromPoint(newPoint.x, newPoint.y);
+    if (!currentRange) return;
+  }
+
   // Forward: ↓ →, Backward: ← ↑
   const isBackward = currentRange.comparePoint(endContainer, endOffset) === 1;
 
-  // Handle native range state on cross-block dragging,
-  // see https://github.com/toeverything/blocksuite/pull/845
-  if (container.nodeType === Node.TEXT_NODE) {
+  if (startFrame === currentFrame) {
     handleInFrameDragMove(
       startContainer,
       startOffset,
@@ -554,14 +586,45 @@ export function handleNativeRangeDragMove(
       isBackward
     );
   } else {
-    handleCrossFrameDragMove(
-      e,
-      container,
-      startRange,
-      currentRange,
-      isBackward
-    );
+    // Handle native range state on cross-block dragging,
+    // see https://github.com/toeverything/blocksuite/pull/845
+    const container = currentRange.commonAncestorContainer as HTMLElement;
+    if (container.nodeType !== Node.TEXT_NODE) {
+      handleCrossFrameDragMove(
+        e,
+        container,
+        startRange,
+        currentRange,
+        isBackward
+      );
+    } else {
+      handleInFrameDragMove(
+        startContainer,
+        startOffset,
+        endContainer,
+        endOffset,
+        currentRange,
+        isBackward
+      );
+    }
   }
+}
+
+function normalizePointIntoContainer(point: IPoint, container: Element) {
+  const { top, left, right, bottom } = container.getBoundingClientRect();
+  const newPoint = { ...point };
+  const { x, y } = point;
+  if (x < left) {
+    newPoint.x = left;
+  } else if (x > right) {
+    newPoint.x = right;
+  }
+  if (y < top) {
+    newPoint.y = top;
+  } else if (y > bottom) {
+    newPoint.y = bottom;
+  }
+  return newPoint;
 }
 
 export function isBlankArea(e: SelectionEvent) {
@@ -1048,4 +1111,11 @@ export function getHorizontalClosestElement(
  */
 export function getClosestEditor(clientY: number, container = document.body) {
   return getHorizontalClosestElement(clientY, '.ql-editor', container);
+}
+
+/**
+ * Get the closest frame element in the horizontal position
+ */
+export function getClosestFrame(clientY: number) {
+  return getHorizontalClosestElement(clientY, 'affine-frame');
 }
