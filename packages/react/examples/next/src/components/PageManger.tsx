@@ -6,6 +6,7 @@ import { Box } from './Box';
 
 const Editor: React.ComponentType<{
   page: Page;
+  // @ts-expect-error
 }> = dynamic(async () => (await import('@blocksuite/react/editor')).Editor, {
   ssr: false,
 });
