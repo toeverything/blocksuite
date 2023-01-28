@@ -11,6 +11,7 @@ import './embed-block';
 import './embed-block/image';
 import './surface-block';
 import './components/slash-menu';
+import './components/modal';
 import './database-block';
 
 export * from './counter-block/index.js';

@@ -41,6 +41,7 @@ import autosize from 'autosize';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DragHandle } from '../../components/index.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { Modal } from '../../components/modal.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -143,8 +144,10 @@ export class DefaultPageBlockComponent
    */
   components: {
     dragHandle: DragHandle | null;
+    modal: Modal | null;
   } = {
     dragHandle: null,
+    modal: null,
   };
 
   @property()
@@ -360,6 +363,8 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
+    this.components.modal = new Modal();
+    document.body.appendChild(this.components.modal);
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
       this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
@@ -404,6 +409,7 @@ export class DefaultPageBlockComponent
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
+    this.components.modal?.remove();
     this.components.dragHandle?.remove();
 
     removeHotkeys();
