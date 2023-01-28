@@ -189,7 +189,10 @@ export function initMouseEventHandlers(
               ? matchFlavours(model, ['affine:frame', 'affine:page'])
               : matchFlavours(model, ['affine:frame']);
           if (isClickOnFramePage) {
-            const horizontalElement = getClosestHorizontalEditor(e.clientY);
+            const horizontalElement = getClosestHorizontalEditor(
+              e.clientY,
+              container
+            );
             if (horizontalElement) {
               const rect = horizontalElement.getBoundingClientRect();
               if (e.clientX < rect.left) {
