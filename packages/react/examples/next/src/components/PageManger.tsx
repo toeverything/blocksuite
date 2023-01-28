@@ -1,14 +1,20 @@
 import dynamic from 'next/dynamic';
-import { useBlockSuiteStore } from '@blocksuite/react';
-import type { Page } from '@blocksuite/store';
+import { type EditorProps, useBlockSuiteStore } from '@blocksuite/react';
 import { Button, Card, Grid, Text } from '@nextui-org/react';
 import { Box } from './Box';
 
-const Editor: React.ComponentType<{
-  page: Page;
-}> = dynamic(async () => (await import('@blocksuite/react/editor')).Editor, {
-  ssr: false,
-});
+const Editor: React.ComponentType<EditorProps> = dynamic(
+  () => import('@blocksuite/react/editor'),
+  {
+    ssr: false,
+  }
+);
+
+const presetMarkdown = `This example is designed to:
+
+* ⚛️ Test react binding with BlockSuite.
+
+For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
 export const PageManger = () => {
   const pages = useBlockSuiteStore(store => store.pages);
@@ -87,7 +93,23 @@ export const PageManger = () => {
         }}
       />
       <Box css={{ bg: 'white' }}>
-        <Editor page={currentPage} />
+        <Editor
+          page={currentPage}
+          onInit={async (page, editor) => {
+            const pageBlockId = page.addBlockByFlavour('affine:page', {
+              title: 'Welcome to BlockSuite React example',
+            });
+            page.addBlockByFlavour('affine:surface', {}, null);
+            const frameId = page.addBlockByFlavour(
+              'affine:frame',
+              {},
+              pageBlockId
+            );
+            // Import preset markdown content inside frame block
+            await editor.clipboard.importMarkdown(presetMarkdown, frameId);
+            page.resetHistory();
+          }}
+        />
       </Box>
     </Box>
   );
