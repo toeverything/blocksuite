@@ -45,7 +45,7 @@ export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
 
 export function syncBlockProps(
   schema: z.infer<typeof BlockSchema>,
-  defaultState: Record<string, unknown>,
+  defaultProps: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
   ignoredKeys: Set<string>
@@ -53,7 +53,7 @@ export function syncBlockProps(
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
     const value = props[key];
-    if (defaultState[key] === RichTextType) {
+    if (defaultProps[key] === RichTextType) {
       return;
     }
     if (!isPrimitive(value) && !Array.isArray(value)) {
@@ -70,7 +70,7 @@ export function syncBlockProps(
   });
 
   // set default value
-  Object.entries(defaultState).forEach(([key, value]) => {
+  Object.entries(defaultProps).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`)) {
       if (value === RichTextType) {
         yBlock.set(`prop:${key}`, new Y.Text());

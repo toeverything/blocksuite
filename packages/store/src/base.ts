@@ -29,7 +29,7 @@ export const BlockSchema = z.object({
   model: z.object({
     flavour: FlavourSchema,
     tag: TagSchema,
-    state: z.function().returns(z.record(z.any())),
+    props: z.function().returns(z.record(z.any())),
   }),
 });
 
@@ -39,43 +39,43 @@ interface StaticValue {
   r: symbol;
 }
 
-type State<S extends Record<string, unknown>> = {
+type Props<S extends Record<string, unknown>> = {
   [K in keyof S]: S[K] extends InternalValue<infer Value> ? Value : S[K];
 };
 
 export type SchemaToModel<
   Schema extends {
     model: {
-      state: () => Record<string, unknown>;
+      props: () => Record<string, unknown>;
       flavour: string;
     };
   }
 > = BaseBlockModel &
-  State<ReturnType<Schema['model']['state']>> & {
+  Props<ReturnType<Schema['model']['props']>> & {
     flavour: Schema['model']['flavour'];
   };
 
 export function defineBlockSchema<
   Flavour extends string,
-  State extends Record<string, unknown>,
+  Props extends Record<string, unknown>,
   Metadata extends Readonly<{
     version: number;
     tag: StaticValue;
   }>
 >(
   flavour: Flavour,
-  state: () => State,
+  props: () => Props,
   metadata: Metadata
 ): {
   version: number;
   model: {
-    state: () => State;
+    props: () => Props;
     flavour: Flavour;
   } & Metadata;
 };
 export function defineBlockSchema(
   flavour: string,
-  state: () => Record<string, unknown>,
+  props: () => Record<string, unknown>,
   metadata: {
     version: number;
     tag: StaticValue;
@@ -86,7 +86,7 @@ export function defineBlockSchema(
     model: {
       flavour,
       tag: metadata.tag,
-      state,
+      props,
     },
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
@@ -106,7 +106,7 @@ export class BaseBlockModel<Props = unknown>
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
-  type!: string;
+  type?: string;
   children: BaseBlockModel[];
   // TODO use schema
   tags?: Y.Map<Y.Map<unknown>>;

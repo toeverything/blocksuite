@@ -291,7 +291,7 @@ export class Workspace {
       this.flavourSchemaMap.set(schema.model.flavour, schema);
       this.flavourInitialPropsMap.set(
         schema.model.flavour,
-        schema.model.state()
+        schema.model.props()
       );
     });
     return this;
