@@ -8,6 +8,7 @@ export type EditorProps = {
   page: Page;
   onInit?: (page: Page, editor: Readonly<EditorContainer>) => void;
 };
+
 export const Editor = ({ page, onInit }: EditorProps) => {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

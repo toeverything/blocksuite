@@ -4,7 +4,7 @@ import { Button, Card, Grid, Text } from '@nextui-org/react';
 import { Box } from './Box';
 
 const Editor: React.ComponentType<EditorProps> = dynamic(
-  async () => (await import('@blocksuite/react/editor')).Editor,
+  () => import('@blocksuite/react/editor'),
   {
     ssr: false,
   }
