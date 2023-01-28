@@ -23,6 +23,7 @@ import {
   pasteByKeyboard,
   getSelectedTextByQuill,
   SHORT_KEY,
+  switchEditorMode,
 } from './utils/actions/index.js';
 import { expect } from '@playwright/test';
 import {
@@ -676,7 +677,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
   await assertClipItems(page, 'text/plain', '');
 });
 
-test('should set the last block to end the range after while leaving the affine-frame', async ({
+test('should set the last block to end the range after when leaving the affine-frame', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -701,7 +702,7 @@ test('should set the last block to end the range after while leaving the affine-
   await assertClipItems(page, 'text/plain', '3456789');
 });
 
-test('should set the first block to start the range before while leaving the affine-frame-block-container', async ({
+test('should set the first block to start the range before when leaving the affine-frame-block-container', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -754,4 +755,33 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
 
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '3456789ABC');
+});
+
+test('should select full text of the first block when leaving the affine-frame-block-container in edgeless mode', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+  await waitNextFrame(page);
+  await page.dblclick('[data-block-id="1"]');
+  await page.mouse.click(0, 0);
+  await dragBetweenIndices(page, [2, 1], [0, 2]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '34567');
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [2, 1],
+    [0, 2],
+    { x: 0, y: 0 },
+    { x: 0, y: -30 } // drag above the top of the first block
+  );
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '1234567');
 });
