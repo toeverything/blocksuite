@@ -6,6 +6,11 @@ export interface SurfaceElement {
   h: number;
 }
 
+export interface HitTestOptions {
+  expandStroke: boolean;
+  fillHollow: boolean;
+}
+
 export abstract class BaseElement implements SurfaceElement {
   abstract type: string;
   id: string;
@@ -33,6 +38,8 @@ export abstract class BaseElement implements SurfaceElement {
     this.w = w;
     this.h = h;
   }
+
+  abstract hitTest(x: number, y: number, options?: HitTestOptions): boolean;
 
   abstract render(_: CanvasRenderingContext2D): void;
 

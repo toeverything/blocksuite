@@ -1,15 +1,6 @@
 import type { Element } from './elements/index.js';
 import { GRID_SIZE, IBound } from './consts.js';
-
-function isPointIn(a: IBound, x: number, y: number): boolean {
-  return a.x < x && x <= a.x + a.w && a.y < y && y <= a.y + a.h;
-}
-
-function isOverlap(a: IBound, b: IBound): boolean {
-  return (
-    a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
-  );
-}
+import { isOverlap, isPointIn } from './utils/hit-utils.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / GRID_SIZE) - 1;

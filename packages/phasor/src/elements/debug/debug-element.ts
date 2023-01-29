@@ -1,8 +1,13 @@
-import { BaseElement } from '../base-element.js';
+import { BaseElement, HitTestOptions } from '../base-element.js';
+import { isPointIn } from '../../utils/hit-utils.js';
 
 export class DebugElement extends BaseElement {
   type = 'debug' as const;
   color = '#000000';
+
+  hitTest(x: number, y: number, options?: HitTestOptions) {
+    return isPointIn(this, x, y);
+  }
 
   render(ctx: CanvasRenderingContext2D): void {
     ctx.strokeStyle = this.color;
