@@ -26,6 +26,7 @@ import {
   resetHistory,
   initThreeParagraphs,
   redoByClick,
+  pressTab,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -628,4 +629,21 @@ test('after deleting a text row, cursor should jump to the end of previous list 
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('Backspace');
   await assertSelection(page, 0, 5, 0);
+});
+
+test('press tab in paragarph children', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await pressEnter(page);
+  await page.keyboard.type('1');
+  await pressEnter(page);
+  await pressTab(page);
+  await page.keyboard.type('2');
+  await pressEnter(page);
+  await pressTab(page);
+  await page.keyboard.type('3');
+  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.type('- ');
+  await assertRichTexts(page, ['1', '2', '3', '\n']);
 });
