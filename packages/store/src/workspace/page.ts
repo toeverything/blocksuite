@@ -509,9 +509,9 @@ export class Page extends Space<PageData> {
   deleteBlock(
     model: BaseBlockModel,
     options: {
-      bringChildrenTo: 'parent' | BaseBlockModel;
+      bringChildrenTo: 'parent' | BaseBlockModel | false;
     } = {
-      bringChildrenTo: 'parent',
+      bringChildrenTo: false,
     }
   ) {
     if (this.awarenessStore.isReadonly(this)) {
