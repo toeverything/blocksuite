@@ -1,4 +1,5 @@
-import { BaseElement } from '../base-element.js';
+import { BaseElement, HitTestOptions } from '../base-element.js';
+import { isPointIn } from '../../utils/hit-utils.js';
 import { getRectanglePath } from './rect-utils.js';
 import { DashStyle, ShapeStyles, SizeStyle } from './shape-style.js';
 
@@ -35,6 +36,10 @@ export class ShapeElement extends BaseElement {
     const size = [w, h];
     const path = getRectanglePath(this.id, shapeStyles, size);
     this.path = path;
+  }
+
+  hitTest(x: number, y: number, options?: HitTestOptions) {
+    return isPointIn(this, x, y);
   }
 
   render(ctx: CanvasRenderingContext2D) {
