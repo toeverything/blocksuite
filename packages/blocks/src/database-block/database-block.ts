@@ -8,7 +8,6 @@ import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import TagSchema = BlockSuiteInternal.TagSchema;
-import { nanoid } from '@blocksuite/store';
 import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
 import { columnTypeToTagSchema } from './utils/index.js';
 
