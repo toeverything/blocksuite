@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "bench": "pnpm run build && npx tach dist/index.html --json-file results.json",
+    "bench:ci": "pnpm run build && npx tach --config ./config.json --json-file results.json",
     "build": "vite build"
   },
   "dependencies": {

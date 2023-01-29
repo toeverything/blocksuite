@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json",
+  "benchmarks": [
+    {
+      "url": "index.html",
+      "browser": {
+        "name": "chrome",
+        "profile": "/opt/hostedtoolcache/chromium/latest/x64/chrome",
+        "headless": true
+      }
+    }
+  ]
+}

@@ -91,5 +91,5 @@ jobs:
         run: pnpm add -g chromedriver
 
       - name: Run Benchmark
-        run: pnpm run bench
+        run: pnpm run bench:ci
         working-directory: benchmark
