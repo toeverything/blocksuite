@@ -10,8 +10,8 @@ export class DebugElement extends BaseElement {
   }
 
   render(ctx: CanvasRenderingContext2D): void {
-    ctx.strokeStyle = this.color;
-    ctx.strokeRect(0, 0, this.w, this.h);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(0, 0, this.w, this.h);
   }
 
   serialize(): Record<string, unknown> {

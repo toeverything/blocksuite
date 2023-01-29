@@ -2,8 +2,8 @@ import * as Y from 'yjs';
 import { generateKeyBetween } from 'fractional-indexing';
 import type { IBound } from './consts.js';
 import {
-  Element,
-  ElementType,
+  PhasorElement,
+  PhasorElementType,
   DebugElement,
   ShapeElement,
   ShapeType,
@@ -11,15 +11,16 @@ import {
 import { Renderer } from './renderer.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from 'nanoid';
+import type { HitTestOptions } from './elements/base-element.js';
 
 export class SurfaceManager {
-  readonly renderer: Renderer;
+  private _renderer: Renderer;
   private _yElements: Y.Map<Y.Map<unknown>>;
-  private _elements = new Map<string, Element>();
+  private _elements = new Map<string, PhasorElement>();
   private _lastIndex = 'a0';
 
   constructor(canvas: HTMLCanvasElement, yContainer: Y.Map<unknown>) {
-    this.renderer = new Renderer(canvas);
+    this._renderer = new Renderer(canvas);
     this._yElements = yContainer as Y.Map<Y.Map<unknown>>;
 
     this._syncFromExistingContainer();
@@ -48,18 +49,6 @@ export class SurfaceManager {
     return this._addElement(element);
   }
 
-  private _addElement(element: Element) {
-    element.index = generateKeyBetween(this._lastIndex, null);
-    this._lastIndex = element.index as string;
-
-    this._transact(() => {
-      const yElement = this._createYElement(element);
-      this._yElements.set(element.id, yElement);
-    });
-
-    return element.id;
-  }
-
   setElementBound(id: string, bound: IBound) {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
@@ -75,10 +64,41 @@ export class SurfaceManager {
     });
   }
 
-  private _handleYElementAdded(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as ElementType;
+  toModelCoord(viewX: number, viewY: number): [number, number] {
+    return this._renderer.toModelCoord(viewX, viewY);
+  }
 
-    let element: Element | null = null;
+  toViewCoord(modelX: number, modelY: number): [number, number] {
+    return this._renderer.toViewCoord(modelX, modelY);
+  }
+
+  setViewport(centerX: number, centerY: number, zoom: number) {
+    this._renderer.setViewport(centerX, centerY, zoom);
+  }
+
+  pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
+    const bound: IBound = { x, y, w: 1, h: 1 };
+    const candidates = this._renderer.gridManager.search(bound);
+    const picked = candidates.filter((element: PhasorElement) => {
+      return element.hitTest(x, y, options);
+    });
+
+    return picked;
+  }
+
+  pickTop(x: number, y: number): PhasorElement | null {
+    const results = this.pick(x, y);
+    return results[results.length - 1] ?? null;
+  }
+
+  addElements(elements: PhasorElement[]) {
+    elements.forEach(element => this._addElement(element));
+  }
+
+  private _handleYElementAdded(yElement: Y.Map<unknown>) {
+    const type = yElement.get('type') as PhasorElementType;
+
+    let element: PhasorElement | null = null;
     switch (type) {
       case 'debug': {
         element = DebugElement.deserialize(yElement.toJSON());
@@ -91,7 +111,7 @@ export class SurfaceManager {
     }
     assertExists(element);
 
-    this.renderer.addElement(element);
+    this._renderer.addElement(element);
     this._elements.set(element.id, element);
   }
 
@@ -99,7 +119,19 @@ export class SurfaceManager {
     this._yElements.forEach(yElement => this._handleYElementAdded(yElement));
   }
 
-  private _createYElement(element: Omit<Element, 'id'>) {
+  private _addElement(element: PhasorElement) {
+    element.index = generateKeyBetween(this._lastIndex, null);
+    this._lastIndex = element.index as string;
+
+    this._transact(() => {
+      const yElement = this._createYElement(element);
+      this._yElements.set(element.id, yElement);
+    });
+
+    return element.id;
+  }
+
+  private _createYElement(element: Omit<PhasorElement, 'id'>) {
     const serialized = element.serialize();
     const yElement = new Y.Map<unknown>();
     for (const [key, value] of Object.entries(serialized)) {
@@ -132,7 +164,7 @@ export class SurfaceManager {
       } else if (type.action === 'delete') {
         const element = this._elements.get(id);
         assertExists(element);
-        this.renderer.removeElement(element);
+        this._renderer.removeElement(element);
         this._elements.delete(id);
       }
     });
@@ -158,9 +190,9 @@ export class SurfaceManager {
           const [x, y, w, h] = xywh.split(',').map(Number);
 
           // refresh grid manager
-          this.renderer.removeElement(element);
+          this._renderer.removeElement(element);
           element.setBound(x, y, w, h);
-          this.renderer.addElement(element);
+          this._renderer.addElement(element);
         }
       }
     });
@@ -181,4 +213,24 @@ export class SurfaceManager {
       this._handleYEvent(event);
     }
   };
+
+  /** @internal Only for testing */
+  initDefaultGestureHandler() {
+    const { _renderer } = this;
+    const mouseRoot = _renderer.canvas;
+    mouseRoot.addEventListener('wheel', e => {
+      e.preventDefault();
+      // pan
+      if (!e.ctrlKey) {
+        const dx = e.deltaX / _renderer.zoom;
+        const dy = e.deltaY / _renderer.zoom;
+        _renderer.setCenter(_renderer.centerX + dx, _renderer.centerY + dy);
+      }
+      // zoom
+      else {
+        const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
+        _renderer.applyDeltaZoom(delta);
+      }
+    });
+  }
 }

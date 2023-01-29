@@ -169,7 +169,7 @@ export class EdgelessPageBlockComponent
   }
 
   private _syncSurfaceViewport() {
-    this.surface.renderer.setCenterZoom(
+    this.surface.setViewport(
       this.viewport.centerX,
       this.viewport.centerY,
       this.viewport.zoom

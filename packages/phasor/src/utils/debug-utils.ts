@@ -1,5 +1,5 @@
-import { DebugElement, type Element } from '../elements/index.js';
-import type { Renderer } from '../renderer.js';
+import { DebugElement, type PhasorElement } from '../elements/index.js';
+import type { SurfaceManager } from '../surface.js';
 
 const DEBUG_ELEMENT_MAX = 150;
 const DEBUG_ELEMENT_MIN = 120;
@@ -24,32 +24,15 @@ function createMockElement(id: number, rangeX: number, rangeY: number) {
 }
 
 export function initMockData(
-  renderer: Renderer,
+  surface: SurfaceManager,
   count: number,
   rangeX: number,
   rangeY: number
 ) {
-  const elements: Element[] = [];
+  const elements: PhasorElement[] = [];
   for (let i = 0; i < count; i++) {
     const element = createMockElement(i, rangeX, rangeY);
     elements.push(element);
   }
-  renderer.load(elements);
-}
-
-export function bindWheelEvents(renderer: Renderer, mouseRoot: HTMLElement) {
-  mouseRoot.addEventListener('wheel', e => {
-    e.preventDefault();
-    // pan
-    if (!e.ctrlKey) {
-      const dx = e.deltaX / renderer.zoom;
-      const dy = e.deltaY / renderer.zoom;
-      renderer.setCenter(renderer.centerX + dx, renderer.centerY + dy);
-    }
-    // zoom
-    else {
-      const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-      renderer.applyDeltaZoom(delta);
-    }
-  });
+  surface.addElements(elements);
 }
