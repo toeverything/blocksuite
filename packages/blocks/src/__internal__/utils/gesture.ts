@@ -1,18 +1,6 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import {
-  getClosestHorizontalEditor,
-  resetNativeSelection,
-  setEndRange,
-  setStartRange,
-} from './selection.js';
 import { debounce } from './std.js';
-import {
-  BLOCK_ID_ATTR,
-  MOVE_DETECT_THRESHOLD,
-} from '@blocksuite/global/config';
+import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
 import { isTitleElement } from './query.js';
-import { getElementFromEventTarget } from './query.js';
-import { matchFlavours } from '@blocksuite/global/utils';
 
 export interface IPoint {
   x: number;
@@ -85,7 +73,6 @@ function toSelectionEvent(
 }
 
 export function initMouseEventHandlers(
-  mode: 'page' | 'edgeless',
   container: HTMLElement,
   onContainerDragStart: (e: SelectionEvent) => void,
   onContainerDragMove: (e: SelectionEvent) => void,
@@ -173,39 +160,6 @@ export function initMouseEventHandlers(
       onContainerClick(
         toSelectionEvent(e, getBoundingClientRect, startX, startY)
       );
-
-      if (!isTitleElement(e.target)) {
-        // fix selection back to the nearest block
-        // when user click on the edge of page (page mode) or frame (edgeless mode)
-        const targetEl = getElementFromEventTarget(e.target);
-        const block = targetEl?.closest(`[${BLOCK_ID_ATTR}]`) as {
-          model?: BaseBlockModel;
-          pageModel?: BaseBlockModel;
-        } | null;
-        const model = block?.model || block?.pageModel;
-        if (model) {
-          const isClickOnFramePage =
-            mode === 'page'
-              ? matchFlavours(model, ['affine:frame', 'affine:page'])
-              : matchFlavours(model, ['affine:frame']);
-          if (isClickOnFramePage) {
-            const horizontalElement = getClosestHorizontalEditor(
-              e.clientY,
-              container
-            );
-            if (horizontalElement) {
-              const rect = horizontalElement.getBoundingClientRect();
-              if (e.clientX < rect.left) {
-                const range = setStartRange(horizontalElement);
-                resetNativeSelection(range);
-              } else {
-                const range = setEndRange(horizontalElement);
-                resetNativeSelection(range);
-              }
-            }
-          }
-        }
-      }
     }
 
     startX = startY = -Infinity;

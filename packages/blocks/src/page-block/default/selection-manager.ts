@@ -244,7 +244,6 @@ export class DefaultSelectionManager {
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(
       initMouseEventHandlers(
-        'page',
         this._mouseRoot,
         this._onContainerDragStart,
         this._onContainerDragMove,
