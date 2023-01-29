@@ -75,6 +75,7 @@ jobs:
     name: Benchmark
     runs-on: ubuntu-latest
     steps:
+      - uses: browser-actions/setup-chrome@v1
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
         with:
