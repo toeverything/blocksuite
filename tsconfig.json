@@ -59,6 +59,9 @@
     },
     {
       "path": "./tests"
+    },
+    {
+      "path": "./benchmark"
     }
   ]
 }

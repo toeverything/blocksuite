@@ -1,0 +1,16 @@
+{
+  "name": "@blocksuite/benchmark",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "bench": "pnpm run build && npx tachometer dist/index.html",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@blocksuite/global": "workspace:*",
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/editor": "workspace:*",
+    "@blocksuite/phasor": "workspace:*",
+    "@blocksuite/store": "workspace:*"
+  }
+}
