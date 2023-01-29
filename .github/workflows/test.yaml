@@ -77,10 +77,6 @@ jobs:
     steps:
       - uses: browser-actions/setup-chrome@v1
       - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
-        with:
-          path: .master
-
       - uses: pnpm/action-setup@v2
         with:
           version: 7.9.5
@@ -89,17 +85,9 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
 
-      - name: Install dependencies(current)
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Install dependencies(master)
-        run: pnpm install --frozen-lockfile
-        working-directory: .master
 
       - name: Run Benchmark in current
         run: CHROMIUM_BIN=$(which chrome) pnpm run bench
         working-directory: benchmark
-      - name: Run Benchmark in master
-        run: CHROMIUM_BIN=$(which chrome) pnpm run bench
-        # remove this once master branch have benchmark suite
-        continue-on-error: true
-        working-directory: .master/benchmark
