@@ -12,8 +12,5 @@
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*"
-  },
-  "devDependencies": {
-    "chromedriver": "^109.0.0"
   }
 }
