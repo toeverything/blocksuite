@@ -207,6 +207,8 @@ test('split block when paste', async ({ page }) => {
     return { x: bbox.right - 2, y: bbox.bottom - 2 };
   });
   await dragBetweenCoords(page, topLeft123, bottomRight789);
+
+  // FIXME see https://github.com/toeverything/blocksuite/pull/878
   // await pasteContent(page, clipData);
   // await assertRichTexts(page, ['aaa', 'bbc', 'text', 'h1']);
 });
