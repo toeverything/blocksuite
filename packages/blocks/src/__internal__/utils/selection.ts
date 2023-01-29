@@ -452,8 +452,8 @@ function handleCrossFrameDragMove(
 ) {
   let isFrame = container.tagName === 'AFFINE-FRAME';
 
-  if (isBackward && !isFrame) {
-    // rewrites container when moving to title,
+  if (isBackward) {
+    // Reassign container when moving to title,
     // if you want to select a title you can rewrite this piece of logic
     if (
       container.classList.contains('affine-default-page-block-title-container')
