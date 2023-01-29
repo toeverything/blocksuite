@@ -76,32 +76,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          path: current
       - uses: actions/checkout@v3
         with:
-          path: master
+          path: .master
 
       - uses: pnpm/action-setup@v2
         with:
           version: 7.9.5
       - uses: actions/setup-node@v3
         with:
-          node-version-file: 'current/.nvmrc'
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
 
       - name: Install dependencies(current)
         run: pnpm install --frozen-lockfile
-        working-directory: current
       - name: Install dependencies(master)
         run: pnpm install --frozen-lockfile
-        working-directory: master
+        working-directory: .master
 
       - name: Run Benchmark in current
         run: pnpm run bench
-        working-directory: current/benchmark
+        working-directory: benchmark
       - name: Run Benchmark in master
         run: pnpm run bench
         # remove this once master branch have benchmark suite
         continue-on-error: true
-        working-directory: master/benchmark
+        working-directory: .master/benchmark
