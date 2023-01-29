@@ -96,10 +96,10 @@ jobs:
         working-directory: .master
 
       - name: Run Benchmark in current
-        run: pnpm run bench
+        run: CHROMIUM_BIN=$(which chrome) pnpm run bench
         working-directory: benchmark
       - name: Run Benchmark in master
-        run: pnpm run bench
+        run: CHROMIUM_BIN=$(which chrome) pnpm run bench
         # remove this once master branch have benchmark suite
         continue-on-error: true
         working-directory: .master/benchmark
