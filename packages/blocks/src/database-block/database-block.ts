@@ -15,6 +15,25 @@ import { createPopper } from '@popperjs/core';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
+const isVisible = (elem: HTMLElement) =>
+  !!elem &&
+  !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length); // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
+function hideOnClickOutside(element: HTMLElement) {
+  const outsideClickListener = (event: MouseEvent) => {
+    if (!element.contains(event.target as Node) && isVisible(element)) {
+      // or use: event.target.closest(selector) === null
+      element.remove();
+      removeClickListener();
+    }
+  };
+
+  const removeClickListener = () => {
+    document.removeEventListener('click', outsideClickListener);
+  };
+
+  document.addEventListener('click', outsideClickListener);
+}
+
 function DatabaseHeader(block: DatabaseBlock) {
   return html`
     <div class="affine-database-block-header">
@@ -42,9 +61,14 @@ function DatabaseHeader(block: DatabaseBlock) {
               })}
               @click=${(event: MouseEvent) => {
                 const editColumn = new DatabaseEditColumn();
+                editColumn.targetModel = block.model;
+                editColumn.targetTagSchema = column;
                 document.body.appendChild(editColumn);
-                createPopper(event.target, editColumn, {
-                  placement: 'bottom',
+                requestAnimationFrame(() => {
+                  createPopper(event.target as Element, editColumn, {
+                    placement: 'bottom',
+                  });
+                  hideOnClickOutside(editColumn);
                 });
               }}
             >
