@@ -125,8 +125,10 @@ importers:
     specifiers:
       ansi-colors: ^4.1.3
       lit: ^2.6.1
+      zod: ^3.20.2
     dependencies:
       ansi-colors: 4.1.3
+      zod: 3.20.2
     devDependencies:
       lit: 2.6.1
 
