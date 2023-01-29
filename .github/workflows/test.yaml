@@ -88,6 +88,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Benchmark in current
+      - name: Run Benchmark
         run: CHROMIUM_BIN=$(which chrome) pnpm run bench
         working-directory: benchmark
