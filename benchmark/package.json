@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "bench": "pnpm run build && npx tachometer dist/index.html",
+    "bench": "pnpm run build && npx tachometer dist/index.html --json-file results.json",
     "build": "vite build"
   },
   "dependencies": {
@@ -12,5 +12,8 @@
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*"
+  },
+  "devDependencies": {
+    "chromedriver": "^109.0.0"
   }
 }
