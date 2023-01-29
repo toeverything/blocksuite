@@ -1,4 +1,5 @@
 export * from './consts/blockhub.js';
+export * from './consts/database-block.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id' as const;
 export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading' as const;

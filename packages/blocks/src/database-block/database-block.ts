@@ -9,34 +9,7 @@ import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import TagSchema = BlockSuiteInternal.TagSchema;
 import { nanoid } from '@blocksuite/store';
-import z from 'zod';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-
-const columnPreviewSchema = z.object({
-  type: z.enum(['text', 'rich-text', 'select', 'number']),
-  name: z.string(),
-});
-
-type Preview = z.infer<typeof columnPreviewSchema>;
-
-const preview: Preview[] = [
-  {
-    type: 'number',
-    name: 'Number',
-  },
-  {
-    type: 'select',
-    name: 'Select',
-  },
-  {
-    type: 'text',
-    name: 'Single Line Text',
-  },
-  {
-    type: 'rich-text',
-    name: 'Rich Text',
-  },
-];
+import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -259,7 +232,7 @@ export class DatabaseBlockSettingsSidebar extends LitElement {
       <div class="affine-database-settings-sidebar-subtitle">Type</div>
       <div class="affine-database-settings-sidebar-list">
         ${repeat(
-          preview,
+          columnPreviews,
           preview =>
             html`
               <div data-type="${preview.type}" @click=${this._handleSelectType}>
@@ -275,6 +248,10 @@ export class DatabaseBlockSettingsSidebar extends LitElement {
 @customElement('affine-database')
 export class DatabaseBlock extends NonShadowLitElement {
   static styles = css`
+    affine-database {
+      position: relative;
+    }
+
     .affine-database-block {
       position: relative;
       width: 100%;
