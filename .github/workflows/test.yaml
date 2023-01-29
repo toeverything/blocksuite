@@ -90,5 +90,5 @@ jobs:
         run: pnpm add -g chromedriver
 
       - name: Run Benchmark
-        run: CHROMIUM_BIN=$(which chrome) pnpm run bench
+        run: pnpm run bench
         working-directory: benchmark
