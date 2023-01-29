@@ -10,6 +10,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import TagSchema = BlockSuiteInternal.TagSchema;
 import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
 import { columnTypeToTagSchema } from './utils/index.js';
+import { DatabaseEditColumn } from './components/database-edit-column.js';
+import { createPopper } from '@popperjs/core';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -38,6 +40,13 @@ function DatabaseHeader(block: DatabaseBlock) {
                 minWidth: `${column.meta.width}px`,
                 maxWidth: `${column.meta.width}px`,
               })}
+              @click=${(event: MouseEvent) => {
+                const editColumn = new DatabaseEditColumn();
+                document.body.appendChild(editColumn);
+                createPopper(event.target, editColumn, {
+                  placement: 'bottom',
+                });
+              }}
             >
               ${column.name}
             </div>
