@@ -10,6 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import TagSchema = BlockSuiteInternal.TagSchema;
 import { nanoid } from '@blocksuite/store';
 import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
+import { columnTypeToTagSchema } from './utils/index.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -336,20 +337,10 @@ export class DatabaseBlock extends NonShadowLitElement {
 
   private _addColumn = (columnType: TagSchema['type']) => {
     this.model.page.captureSync();
-    // @ts-expect-error
-    const column: TagSchema = {
-      id: nanoid(),
-      type: columnType,
-      name: columnType,
-      meta: {
-        color: '#ff0000',
-        hide: false,
-        width: 200,
-      },
-    };
-    this.model.page.setTagSchema(column);
+    const schema = columnTypeToTagSchema(columnType);
+    this.model.page.setTagSchema(schema);
     this.model.page.updateBlock(this.model, {
-      columns: [...this.model.columns, column.id],
+      columns: [...this.model.columns, schema.id],
     });
   };
 
