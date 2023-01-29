@@ -87,7 +87,7 @@ jobs:
           version: 7.9.5
       - uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'current/.nvmrc'
           cache: 'pnpm'
 
       - name: Install dependencies(current)
