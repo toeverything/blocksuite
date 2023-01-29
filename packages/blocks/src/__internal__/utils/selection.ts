@@ -533,7 +533,7 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
-  const isEdgelessMode = document.querySelector('affine-edgeless-page');
+  const isEdgelessMode = !!document.querySelector('affine-edgeless-page');
 
   // Range from current mouse position
   let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
@@ -575,8 +575,18 @@ export function handleNativeRangeDragMove(
 
   // Forward: ↓ →, Backward: ← ↑
   const isBackward = currentRange.comparePoint(endContainer, endOffset) === 1;
-
-  if (startFrame === currentFrame) {
+  // Handle native range state on cross-block dragging,
+  // see https://github.com/toeverything/blocksuite/pull/845
+  const container = currentRange.commonAncestorContainer as HTMLElement;
+  if (container.nodeType !== Node.TEXT_NODE) {
+    handleCrossFrameDragMove(
+      e,
+      container,
+      startRange,
+      currentRange,
+      isBackward
+    );
+  } else {
     handleInFrameDragMove(
       startContainer,
       startOffset,
@@ -585,28 +595,6 @@ export function handleNativeRangeDragMove(
       currentRange,
       isBackward
     );
-  } else {
-    // Handle native range state on cross-block dragging,
-    // see https://github.com/toeverything/blocksuite/pull/845
-    const container = currentRange.commonAncestorContainer as HTMLElement;
-    if (container.nodeType !== Node.TEXT_NODE) {
-      handleCrossFrameDragMove(
-        e,
-        container,
-        startRange,
-        currentRange,
-        isBackward
-      );
-    } else {
-      handleInFrameDragMove(
-        startContainer,
-        startOffset,
-        endContainer,
-        endOffset,
-        currentRange,
-        isBackward
-      );
-    }
   }
 }
 
