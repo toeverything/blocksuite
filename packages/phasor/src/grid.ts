@@ -1,6 +1,6 @@
-import type { Element } from './elements/index.js';
+import type { PhasorElement } from './elements/index.js';
 import { GRID_SIZE, IBound } from './consts.js';
-import { isOverlap, isPointIn } from './utils/hit-utils.js';
+import { intersects, isPointIn } from './utils/hit-utils.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / GRID_SIZE) - 1;
@@ -14,18 +14,18 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-function compare(a: Element, b: Element): number {
+function compare(a: PhasorElement, b: PhasorElement): number {
   if (a.index > b.index) return 1;
   else if (a.index < b.index) return -1;
   return a.id > b.id ? 1 : -1;
 }
 
 export class GridManager {
-  private _grids: Map<string, Set<Element>> = new Map();
+  private _grids: Map<string, Set<PhasorElement>> = new Map();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<Element> = new Set();
+    const elements: Set<PhasorElement> = new Set();
     this._grids.set(id, elements);
     return elements;
   }
@@ -39,7 +39,7 @@ export class GridManager {
     return this._grids.size === 0;
   }
 
-  add(element: Element) {
+  add(element: PhasorElement) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -52,7 +52,7 @@ export class GridManager {
     }
   }
 
-  remove(element: Element) {
+  remove(element: PhasorElement) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
@@ -74,16 +74,16 @@ export class GridManager {
     );
   }
 
-  search(bound: IBound): Element[] {
+  search(bound: IBound): PhasorElement[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results: Set<Element> = new Set();
+    const results: Set<PhasorElement> = new Set();
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         const gridElements = this._getGrid(i, j);
         if (!gridElements) continue;
 
         for (const element of gridElements) {
-          if (isOverlap(element, bound)) {
+          if (intersects(element, bound)) {
             results.add(element);
           }
         }
@@ -96,13 +96,13 @@ export class GridManager {
     return sorted;
   }
 
-  pick(x: number, y: number): Element[] {
+  pick(x: number, y: number): PhasorElement[] {
     const row = getGridIndex(x);
     const col = getGridIndex(y);
     const gridElements = this._getGrid(row, col);
     if (!gridElements) return [];
 
-    const results: Element[] = [];
+    const results: PhasorElement[] = [];
     for (const element of gridElements) {
       if (isPointIn(element, x, y)) {
         results.push(element);
