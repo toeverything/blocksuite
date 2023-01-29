@@ -451,21 +451,19 @@ function handleCrossFrameDragMove(
   isBackward: boolean
 ) {
   let isFrame = container.tagName === 'AFFINE-FRAME';
-  const isTitle =
-    !isFrame &&
-    container.classList.contains('affine-default-page-block-title-container');
 
-  if (isBackward) {
-    if (isTitle) {
+  if (isBackward && !isFrame) {
+    // rewrites container when moving to title,
+    // if you want to select a title you can rewrite this piece of logic
+    if (
+      container.classList.contains('affine-default-page-block-title-container')
+    ) {
       isFrame = true;
       container = container
         .closest('.affine-default-page-block-container')
         ?.querySelector('affine-frame') as HTMLElement;
       assertExists(container);
-    } else if (
-      !isFrame &&
-      container.classList.contains('affine-frame-block-container')
-    ) {
+    } else if (container.classList.contains('affine-frame-block-container')) {
       // In edgeless mode, there is no header.
       isFrame = true;
       container = container.parentElement as HTMLElement;
@@ -474,8 +472,6 @@ function handleCrossFrameDragMove(
   }
 
   if (isFrame) {
-    // rewrites container when moving to title,
-    // if you want to select a title you can rewrite this piece of logic
     const newRange = computeCrossFrameRange(
       e.raw.clientX,
       e.raw.clientY,
