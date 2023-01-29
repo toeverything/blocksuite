@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "bench": "pnpm run build && npx tachometer dist/index.html --json-file results.json",
+    "bench": "pnpm run build && npx tach dist/index.html --json-file results.json",
     "build": "vite build"
   },
   "dependencies": {
