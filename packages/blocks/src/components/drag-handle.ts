@@ -118,7 +118,7 @@ export class DragHandle extends LitElement {
       position: absolute;
       left: ${DRAG_HANDLE_WIDTH / 2 - 1}px;
       border-right: 1px solid var(--affine-block-handle-color);
-      transition: opacity ease-in-out 100ms;
+      transition: opacity ease-in-out 300ms;
     }
 
     .affine-drag-handle {
@@ -134,7 +134,7 @@ export class DragHandle extends LitElement {
 
     .affine-drag-handle-hover {
       display: none;
-      transition: opacity ease-in-out 100ms;
+      transition: opacity ease-in-out 300ms;
     }
   `;
 
@@ -450,8 +450,8 @@ export class DragHandle extends LitElement {
           <svg
             class="handle-hover"
             width="16"
-            height="22"
-            viewBox="0 0 16 22"
+            height="24"
+            viewBox="0 0 16 17"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
