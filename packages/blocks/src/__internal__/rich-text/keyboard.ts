@@ -306,13 +306,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     'list autofill': {
       key: ' ',
       shiftKey: false,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|>>)$/,
       handler: onSpace,
     },
     'list autofill shift': {
       key: ' ',
       shiftKey: true,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
+      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|>>)$/,
       handler: onSpace,
     },
     backspace: {

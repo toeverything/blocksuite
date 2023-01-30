@@ -102,14 +102,20 @@ export class ListBlockComponent extends NonShadowLitElement {
       deep,
       index,
       onClick: () => {
-        if (this.model.type !== 'todo') {
-          selectList(this.model);
+        if (this.model.type === 'todo' || this.model.type === 'toggled') {
+          this.host.page.captureSync();
+          const checkedOrOpen =
+            this.model.type === 'toggled'
+              ? {
+                  open: !!this.model.children.length,
+                }
+              : {
+                  checked: !this.model.checked,
+                };
+          this.host.page.updateBlock(this.model, checkedOrOpen);
           return;
         }
-        this.host.page.captureSync();
-        this.host.page.updateBlock(this.model, {
-          checked: !this.model.checked,
-        });
+        selectList(this.model);
       },
     });
     const childrenContainer = BlockChildrenContainer(

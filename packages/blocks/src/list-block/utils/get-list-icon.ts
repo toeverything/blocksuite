@@ -1,5 +1,11 @@
 import type { ListBlockModel } from '../list-model.js';
-import { points, checkboxChecked, checkboxUnchecked } from './icons.js';
+import {
+  points,
+  checkboxChecked,
+  checkboxUnchecked,
+  toggleRight,
+  toggleDown,
+} from './icons.js';
 import { getNumberPrefix } from './get-number-prefix.js';
 import { html } from 'lit';
 
@@ -33,6 +39,8 @@ export function getListIcon({
           });
         case 'todo':
           return model.checked ? checkboxChecked() : checkboxUnchecked();
+        case 'toggled':
+          return model.open ? toggleDown() : toggleRight();
         default:
           return '';
       }

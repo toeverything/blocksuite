@@ -481,6 +481,11 @@ export function tryMatchSpaceHotkey(
     case '*':
       isConverted = convertToList(page, model, 'bulleted', prefix);
       break;
+    case '>>':
+      isConverted = convertToList(page, model, 'toggled', prefix, {
+        open: !!model.children.length,
+      });
+      break;
     case '***':
       isConverted = convertToDivider(page, model, prefix);
       break;
