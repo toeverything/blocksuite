@@ -171,9 +171,14 @@ export class RichText extends NonShadowLitElement {
             nextEmbedElement !== currentEmbedElement
           ) {
             if (this.host.isCompositionStart) {
-              model.text?.replace(retain, insertedString.length, ' ', {
-                [attr]: false,
-              });
+              model.text?.replace(
+                retain,
+                insertedString.length,
+                ' ' + insertedString,
+                {
+                  [attr]: false,
+                }
+              );
             } else {
               model.text?.replace(
                 retain,
