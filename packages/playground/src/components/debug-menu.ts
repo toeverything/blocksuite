@@ -91,6 +91,8 @@ export class DebugMenu extends NonShadowLitElement {
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
+  private _gui!: GUI;
+  private _showCSSDebugGUI = false;
 
   get mouseMode(): MouseMode {
     if (this.mouseModeType === 'default') {
@@ -203,11 +205,6 @@ export class DebugMenu extends NonShadowLitElement {
     this.contentParser.onExportHtml();
   }
 
-  private _toggleReadonly() {
-    this.editor.readonly = !this.editor.readonly;
-    this.readonly = !this.readonly;
-  }
-
   private _exportMarkDown() {
     this.contentParser.onExportMarkdown();
   }
@@ -221,6 +218,11 @@ export class DebugMenu extends NonShadowLitElement {
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);
+  }
+
+  private _toggleCSSDebugMenu() {
+    this._showCSSDebugGUI = !this._showCSSDebugGUI;
+    this._showCSSDebugGUI ? this._gui.show() : this._gui.hide();
   }
 
   private _setReadonlyOthers() {
@@ -242,10 +244,10 @@ export class DebugMenu extends NonShadowLitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
-    const gui = new GUI();
-    gui.width = 350;
+    this._gui = new GUI();
+    this._gui.width = 350;
     const style = document.documentElement.style;
-    const sizeFolder = gui.addFolder('Size');
+    const sizeFolder = this._gui.addFolder('Size');
     sizeFolder.open();
     CSSSizeProperties.forEach(item => {
       const { name, defaultValue, cssProperty } = item;
@@ -254,7 +256,7 @@ export class DebugMenu extends NonShadowLitElement {
       });
     });
 
-    const colorFolder = gui.addFolder('Color');
+    const colorFolder = this._gui.addFolder('Color');
     colorFolder.open();
     CSSColorProperties.forEach(item => {
       const { name, cssProperty } = item;
@@ -262,7 +264,9 @@ export class DebugMenu extends NonShadowLitElement {
         style.setProperty(cssProperty, color);
       });
     });
-    gui.close();
+    // this._gui.close();
+    this._gui.hide();
+    // gui.show();
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -309,6 +313,7 @@ export class DebugMenu extends NonShadowLitElement {
         .edgeless-toolbar {
           align-items: center;
         }
+
         .edgeless-toolbar sl-select,
         .edgeless-toolbar sl-color-picker,
         .edgeless-toolbar sl-button {
@@ -431,9 +436,6 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-menu-item @click=${this._setReadonlyOthers}>
                 Set Others Readonly
               </sl-menu-item>
-              <sl-menu-item @click=${this._toggleReadonly}>
-                Toggle Readonly
-              </sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>
@@ -444,6 +446,9 @@ export class DebugMenu extends NonShadowLitElement {
                 Export YDoc
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
+              <sl-menu-item @click=${this._toggleCSSDebugMenu}>
+                Toggle CSSDebugMenu
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
