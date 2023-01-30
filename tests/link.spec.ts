@@ -139,7 +139,7 @@ test('text added after a link should not have link formatting', async ({
         link="http://example.com"
       />
       <text
-        insert="a"
+        insert=" a"
         link={false}
       />
       <text
