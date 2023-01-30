@@ -18,18 +18,18 @@ const handleIcon = svg`
     height="11"
     rx="3"
     transform="rotate(45 7.7782 2.72803)"
-    fill="#888A9E"
+    fill="var(--affine-block-handle-color)"
   />
   <path
     d="M14.1422 6.36396L9.89952 2.12132C8.72795 0.949748 6.82845 0.949747 5.65688 2.12132L1.41424 6.36396"
-    stroke="#888A9E"
+    stroke="var(--affine-block-handle-color)"
     stroke-miterlimit="16"
     stroke-linecap="round"
     stroke-linejoin="round"
   />
   <path
     d="M1.41424 14.6482L5.65688 18.8909C6.82845 20.0625 8.72795 20.0625 9.89952 18.8909L14.1422 14.6482"
-    stroke="#888A9E"
+    stroke="var(--affine-block-handle-color)"
     stroke-miterlimit="16"
     stroke-linecap="round"
     stroke-linejoin="round"
@@ -101,7 +101,7 @@ export type DragHandleGetModelStateWithCursorCallback = (
   dragging?: boolean
 ) => EditingState | null;
 
-const DRAG_HANDLE_HEIGHT = 14; // px FIXME
+const DRAG_HANDLE_HEIGHT = 22; // px FIXME
 const DRAG_HANDLE_WIDTH = 24; // px
 
 @customElement('affine-drag-handle')
@@ -117,7 +117,7 @@ export class DragHandle extends LitElement {
       height: 100%;
       position: absolute;
       left: ${DRAG_HANDLE_WIDTH / 2 - 1}px;
-      border-right: 1px solid #888a9e;
+      border-right: 1px solid var(--affine-block-handle-color);
       transition: opacity ease-in-out 100ms;
     }
 
@@ -215,7 +215,7 @@ export class DragHandle extends LitElement {
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       this.style.left = `${rect.left - DRAG_HANDLE_WIDTH - 20}px`;
-      this.style.top = `${rect.top - 2}px`;
+      this.style.top = `${rect.top}px`;
       this.style.opacity = `${(
         1 -
         (event.raw.pageX - rect.left) / rect.width
@@ -236,8 +236,9 @@ export class DragHandle extends LitElement {
     this._cursor = startModelState.index;
     const rect = this._startModelState.position;
     this.style.display = 'block';
-    this.style.left = `${rect.left - 20}px`;
+    this.style.left = `${rect.left - 200}px`;
     this.style.top = `${rect.top + 8}px`;
+    this.style.background = 'red'; // test
   }
 
   public hide() {
@@ -425,6 +426,7 @@ export class DragHandle extends LitElement {
 
         :host(:hover) .affine-drag-handle-hover {
           display: block !important;
+          /* padding-top: 5px !important; FIXME */
         }
       </style>
       <div class="affine-drag-handle-line"></div>
@@ -444,7 +446,7 @@ export class DragHandle extends LitElement {
               height="10"
               rx="2.5"
               transform="rotate(45 7.7782 0.707107)"
-              stroke="#888A9E"
+              stroke="var(--affine-block-handle-color)"
             />
           </svg>
         </div>
