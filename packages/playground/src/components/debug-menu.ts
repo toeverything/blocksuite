@@ -264,9 +264,7 @@ export class DebugMenu extends NonShadowLitElement {
         style.setProperty(cssProperty, color);
       });
     });
-    // this._gui.close();
     this._gui.hide();
-    // gui.show();
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -447,7 +445,7 @@ export class DebugMenu extends NonShadowLitElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleCSSDebugMenu}>
-                Toggle CSSDebugMenu
+                Toggle CSS Debug Menu
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
