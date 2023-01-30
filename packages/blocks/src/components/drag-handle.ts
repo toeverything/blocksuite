@@ -11,34 +11,12 @@ import {
 } from '../__internal__/index.js';
 
 const handleIcon = svg`
-  <rect
-    x="7.7782"
-    y="2.72803"
-    width="11"
-    height="11"
-    rx="3"
-    transform="rotate(45 7.7782 2.72803)"
-    fill="#888A9E"
-  />
-  <path
-    d="M14.1422 6.36396L9.89952 2.12132C8.72795 0.949748 6.82845 0.949747 5.65688 2.12132L1.41424 6.36396"
-    stroke="#888A9E"
-    stroke-miterlimit="16"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <path
-    d="M1.41424 14.6482L5.65688 18.8909C6.82845 20.0625 8.72795 20.0625 9.89952 18.8909L14.1422 14.6482"
-    stroke="#888A9E"
-    stroke-miterlimit="16"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <path
-    d="M5.27844 11.2427L6.69266 12.6569C7.08318 13.0474 7.71635 13.0474 8.10687 12.6569L10.9353 9.82846"
-    stroke="white"
-    stroke-linecap="round"
-  />
+<path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
+fill="var(--affine-block-handle-color)" stroke="var(--affine-block-handle-color)"
+stroke-width="1.5"/>
+<path d="M5 8.5L7.5 10.5L10.5 7"
+stroke="var(--affine-page-background)"
+stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 `;
 
 let lastSelectedIndex = -1;
@@ -101,7 +79,7 @@ export type DragHandleGetModelStateWithCursorCallback = (
   dragging?: boolean
 ) => EditingState | null;
 
-const DRAG_HANDLE_HEIGHT = 14; // px FIXME
+const DRAG_HANDLE_HEIGHT = 16; // px FIXME
 const DRAG_HANDLE_WIDTH = 24; // px
 
 @customElement('affine-drag-handle')
@@ -117,8 +95,8 @@ export class DragHandle extends LitElement {
       height: 100%;
       position: absolute;
       left: ${DRAG_HANDLE_WIDTH / 2 - 1}px;
-      border-right: 1px solid #888a9e;
-      transition: opacity ease-in-out 100ms;
+      border-right: 1px solid var(--affine-block-handle-color);
+      transition: opacity ease-in-out 300ms;
     }
 
     .affine-drag-handle {
@@ -134,7 +112,7 @@ export class DragHandle extends LitElement {
 
     .affine-drag-handle-hover {
       display: none;
-      transition: opacity ease-in-out 100ms;
+      transition: opacity ease-in-out 300ms;
     }
   `;
 
@@ -215,7 +193,7 @@ export class DragHandle extends LitElement {
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
       this.style.left = `${rect.left - DRAG_HANDLE_WIDTH - 20}px`;
-      this.style.top = `${rect.top - 2}px`;
+      this.style.top = `${rect.top}px`;
       this.style.opacity = `${(
         1 -
         (event.raw.pageX - rect.left) / rect.width
@@ -421,6 +399,7 @@ export class DragHandle extends LitElement {
 
         :host(:hover) .affine-drag-handle-hover {
           display: block !important;
+          /* padding-top: 5px !important; FIXME */
         }
       </style>
       <div class="affine-drag-handle-line"></div>
@@ -428,8 +407,8 @@ export class DragHandle extends LitElement {
         <div class="affine-drag-handle-normal" draggable="true">
           <svg
             width="16"
-            height="16"
-            viewBox="0 0 16 16"
+            height="18"
+            viewBox="0 0 16 12"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -440,7 +419,7 @@ export class DragHandle extends LitElement {
               height="10"
               rx="2.5"
               transform="rotate(45 7.7782 0.707107)"
-              stroke="#888A9E"
+              stroke="var(--affine-block-handle-color)"
             />
           </svg>
         </div>
@@ -449,8 +428,8 @@ export class DragHandle extends LitElement {
           <svg
             class="handle-hover"
             width="16"
-            height="22"
-            viewBox="0 0 16 22"
+            height="18"
+            viewBox="0 0 16 12"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
