@@ -12,6 +12,7 @@ import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
 import { columnTypeToTagSchema } from './utils/index.js';
 import { DatabaseEditColumn } from './components/database-edit-column.js';
 import { createPopper } from '@popperjs/core';
+import { DatabaseSelectType } from './components/column-type/database-select-type.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -155,8 +156,23 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                         minWidth: `${column.meta.width}px`,
                         maxWidth: `${column.meta.width}px`,
                       })}
+                      @click=${(event: MouseEvent) => {
+                        switch (column.type) {
+                          case 'select': {
+                            const selectType = new DatabaseSelectType();
+                            selectType.targetModel = child;
+                            selectType.targetTagSchema = column;
+                            const element = event.target as HTMLDivElement;
+                            element.appendChild(selectType);
+                            requestAnimationFrame(() => {
+                              hideOnClickOutside(selectType);
+                            });
+                            return;
+                          }
+                        }
+                      }}
                     >
-                      ${tag?.value ?? 'no value'}
+                      ${tag?.value}
                     </div>
                   `;
                 }

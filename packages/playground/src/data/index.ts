@@ -145,10 +145,10 @@ export function database(workspace: Workspace) {
           width: 200,
           hide: false,
         },
-        name: 'Select',
+        name: 'Number',
         id: '1',
-        type: 'select',
-        selection: selection,
+        type: 'number',
+        decimal: 0,
       });
       page.setTagSchema({
         meta: {
@@ -162,9 +162,9 @@ export function database(workspace: Workspace) {
         selection: selection,
       });
 
-      page.updateBlockTag(p1, {
+      page.updateBlockTag<BlockTag<BlockSuiteInternal.NumberTagSchema>>(p1, {
         type: '1',
-        value: 'text1',
+        value: 0.1,
       });
 
       page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
