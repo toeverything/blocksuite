@@ -170,7 +170,6 @@ export class RichText extends NonShadowLitElement {
             // At the edge of the node, need to remove format
             nextEmbedElement !== currentEmbedElement
           ) {
-            // @ts-expect-error
             if (this.host.isCompositionStart) {
               model.text?.replace(retain, insertedString.length, ' ', {
                 [attr]: false,
