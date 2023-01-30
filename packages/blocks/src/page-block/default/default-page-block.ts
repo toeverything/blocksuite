@@ -80,9 +80,6 @@ export class DefaultPageBlockComponent
       height: 100%;
     }
 
-    .dg.ac {
-      z-index: 1001 !important;
-    }
     .affine-default-page-block-container {
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);

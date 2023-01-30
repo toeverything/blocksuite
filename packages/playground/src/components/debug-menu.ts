@@ -54,6 +54,10 @@ export class DebugMenu extends NonShadowLitElement {
       --sl-font-size-medium: var(--affine-font-xs);
       --sl-input-font-size-small: var(--affine-font-xs);
     }
+
+    .dg.ac {
+      z-index: 1001 !important;
+    }
   `;
 
   @property()
