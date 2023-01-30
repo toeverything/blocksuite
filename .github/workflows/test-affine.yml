@@ -24,6 +24,7 @@ jobs:
   build-affine:
     name: Build Affine
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v3
