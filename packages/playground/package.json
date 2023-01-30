@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
@@ -22,6 +21,8 @@
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@types/micromatch": "^4.0.2"
+    "@types/dat.gui": "^0.7.7",
+    "@types/micromatch": "^4.0.2",
+    "dat.gui": "^0.7.9"
   }
 }

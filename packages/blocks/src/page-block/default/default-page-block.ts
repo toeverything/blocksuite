@@ -79,6 +79,10 @@ export class DefaultPageBlockComponent
       overflow-y: auto;
       height: 100%;
     }
+
+    .dg.ac {
+      z-index: 1001 !important;
+    }
     .affine-default-page-block-container {
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
@@ -117,9 +121,11 @@ export class DefaultPageBlockComponent
     .affine-default-page-block-title::placeholder {
       color: var(--affine-placeholder-color);
     }
+
     .affine-default-page-block-title:disabled {
       background-color: transparent;
     }
+
     .affine-default-page-block-title-container {
       margin-top: 78px;
     }

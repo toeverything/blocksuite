@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { html, css } from 'lit';
+import { GUI } from 'dat.gui';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -236,6 +237,110 @@ export class DebugMenu extends NonShadowLitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
+    const gui = new GUI();
+    gui.width = 350;
+    const plate = {
+      primary: '#6880ff',
+      pageBackground: '#fff',
+      popoverBackground: '#fff',
+      hoverBackground: '#f1f3ff',
+      codeBackground: '#f2f5f9',
+      codeBlockBackground: '#fafbfd',
+      blockHubBackground: '#fbfbfc',
+      blockHubHoverBackground: '#f8f9ff',
+      textColor: '#3a4c5c',
+      edgelessTextColor: '#3a4c5c',
+      linkColor: '#6880ff',
+      linkVisitedColor: '#abb8fe',
+      IconColor: '#888a94',
+      PopoverColor: '#4c6275',
+      codeColor: '#48749b',
+      quoteColor: '#4c6275',
+      selectedColor: 'rgba(104, 128, 255, 0.1)',
+      placeHolderColor: '#c7c7c7',
+      borderColor: '#d0d7e3',
+      disableColor: '#c0c0c0',
+      lineNumberColor: '#888a9e',
+      tooltipColor: '#fff',
+      tooltipBackground: '#6880ff',
+    };
+    const CSSColorProperties: Array<{
+      name: string;
+      cssProperty: string;
+    }> = [
+      { name: 'primary', cssProperty: '--affine-primary-color' },
+      { name: 'pageBackground', cssProperty: '--affine-page-background' },
+      { name: 'popoverBackground', cssProperty: '--affine-popover-background' },
+      { name: 'hoverBackground', cssProperty: '--affine-hover-background' },
+      { name: 'codeBackground', cssProperty: '--affine-code-background' },
+      {
+        name: 'codeBlockBackground',
+        cssProperty: '--affine-code-block-background',
+      },
+      {
+        name: 'blockHubBackground',
+        cssProperty: '--affine-block-hub-background',
+      },
+      {
+        name: 'blockHubHoverBackground',
+        cssProperty: '--affine-block-hub-hover-background',
+      },
+      { name: 'textColor', cssProperty: '--affine-text-color' },
+      {
+        name: 'edgelessTextColor',
+        cssProperty: '--affine-edgeless-text-color',
+      },
+      { name: 'linkColor', cssProperty: '--affine-link-color' },
+      { name: 'linkVisitedColor', cssProperty: '--affine-link-visited-color' },
+      { name: 'IconColor', cssProperty: '--affine-icon-color' },
+      { name: 'PopoverColor', cssProperty: '--affine-popover-color' },
+      { name: 'codeColor', cssProperty: '--affine-code-color' },
+      { name: 'quoteColor', cssProperty: '--affine-quote-color' },
+      { name: 'selectedColor', cssProperty: '--affine-selected-color' },
+      { name: 'placeHolderColor', cssProperty: '--affine-placeholder-color' },
+      { name: 'borderColor', cssProperty: '--affine-border-color' },
+      { name: 'disableColor', cssProperty: '--affine-disable-color' },
+      { name: 'lineNumberColor', cssProperty: '--affine-line-number-color' },
+      { name: 'tooltipColor', cssProperty: '--affine-tooltip-color' },
+      { name: 'tooltipBackground', cssProperty: '--affine-tooltip-background' },
+    ];
+    const CSSSizeProperties: Array<{
+      name: string;
+      defaultValue: number;
+      cssProperty: string;
+    }> = [
+      {
+        name: 'lineHeight',
+        defaultValue: 26,
+        cssProperty: '--affine-line-height-base',
+      },
+      { name: 'font-xs', defaultValue: 12, cssProperty: '--affine-font-xs' },
+      { name: 'font-sm', defaultValue: 16, cssProperty: '--affine-font-sm' },
+      {
+        name: 'font-base',
+        defaultValue: 18,
+        cssProperty: '--affine-font-base',
+      },
+    ];
+    const style = document.documentElement.style;
+    const sizeFolder = gui.addFolder('Size');
+    sizeFolder.open();
+    CSSSizeProperties.forEach(item => {
+      const { name, defaultValue, cssProperty } = item;
+      sizeFolder.add({ [name]: defaultValue }, name, 0, 100).onChange(e => {
+        style.setProperty(cssProperty, Math.round(e) + 'px');
+      });
+    });
+
+    const colorFolder = gui.addFolder('Color');
+    colorFolder.open();
+    CSSColorProperties.forEach(item => {
+      const { name, cssProperty } = item;
+      colorFolder.addColor(plate, name).onChange((color: string | null) => {
+        style.setProperty(cssProperty, color);
+      });
+    });
+    gui.close();
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -400,7 +505,7 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-menu-item @click=${this._toggleConnection}>
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._addFrame}> Add Frame </sl-menu-item>
+              <sl-menu-item @click=${this._addFrame}> Add Frame</sl-menu-item>
               <sl-menu-item @click=${this._setReadonlyOthers}>
                 Set Others Readonly
               </sl-menu-item>
@@ -416,7 +521,7 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
+              <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 

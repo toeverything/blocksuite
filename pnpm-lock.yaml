@@ -156,7 +156,9 @@ importers:
       '@blocksuite/store': workspace:*
       '@lit-labs/react': ^1.1.1
       '@shoelace-style/shoelace': 2.0.0-beta.88
+      '@types/dat.gui': ^0.7.7
       '@types/micromatch': ^4.0.2
+      dat.gui: ^0.7.9
       lit: ^2.6.1
       react: ^18.2.0
       react-dom: ^18.2.0
@@ -172,7 +174,9 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     devDependencies:
+      '@types/dat.gui': 0.7.7
       '@types/micromatch': 4.0.2
+      dat.gui: 0.7.9
 
   packages/react:
     specifiers:
@@ -2313,6 +2317,10 @@ packages:
       '@types/node': 18.11.18
     dev: true
 
+  /@types/dat.gui/0.7.7:
+    resolution: {integrity: sha512-CxLCme0He5Jk3uQwfO/fGZMyNhb/ypANzqX0yU9lviBQMlen5SOvQTBQ/Cd9x5mFlUAK5Tk8RgvTyLj1nYkz+w==}
+    dev: true
+
   /@types/express-serve-static-core/4.17.32:
     resolution: {integrity: sha512-aI5h/VOkxOF2Z1saPy0Zsxs5avets/iaiAJYznQFm5By/pamU31xWKL//epiF4OfUA2qTOc9PV6tCUjhO8wlZA==}
     dependencies:
@@ -3362,6 +3370,10 @@ packages:
   /dargs/7.0.0:
     resolution: {integrity: sha512-2iy1EkLdlBzQGvbweYRFxmFath8+K7+AKB0TlhHWkNuH+TmovaMH/Wp7V7R4u7f4SnX3OgLsU9t1NI9ioDnUpg==}
     engines: {node: '>=8'}
+    dev: true
+
+  /dat.gui/0.7.9:
+    resolution: {integrity: sha512-sCNc1OHobc+Erc1HqiswYgHdVNpSJUlk/Hz8vzOCsER7rl+oF/4+v8GXFUyCgtXpoCX6+bnmg07DedLvBLwYKQ==}
     dev: true
 
   /debug/2.6.9:
