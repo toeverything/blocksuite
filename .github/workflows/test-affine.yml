@@ -50,4 +50,4 @@ jobs:
         run: pnpm run build
         working-directory: .affine
         env:
-          LOCAL_BLOCK_SUITE: ${{ $GITHUB_WORKSPACE }}
+          LOCAL_BLOCK_SUITE: ${{ github.workspace }}
