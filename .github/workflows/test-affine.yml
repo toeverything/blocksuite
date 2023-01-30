@@ -1,0 +1,53 @@
+name: Affine
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
+      - 'packages/react/examples/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '.husky'
+      - '.vscode'
+      - '**.md'
+      - 'scripts/**'
+      - 'packages/react/examples/**'
+
+jobs:
+  build-affine:
+    name: Build Affine
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          repository: 'toeverything/AFFiNE'
+          path: '.affine'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install dependencies in Affine
+        run: pnpm install --frozen-lockfile
+        working-directory: .affine
+
+      - name: Build AFFiNE
+        run: pnpm run build
+        working-directory: .affine
+        env:
+          LOCAL_BLOCK_SUITE: ${{ $GITHUB_WORKSPACE }}
