@@ -197,6 +197,10 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
+    if (this.page.awarenessStore.getFlag('enable_toolbar')) {
+      const toolbar = document.createElement('edgeless-toolbar');
+      document.body.appendChild(toolbar);
+    }
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
@@ -277,7 +281,7 @@ export class EdgelessPageBlockComponent
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <canvas class="affine-surface-canvas"> </canvas>
+        <canvas class="affine-surface-canvas"></canvas>
       </div>
       <div class="affine-edgeless-page-block-container">
         <style>
@@ -311,7 +315,6 @@ export class EdgelessPageBlockComponent
             `
           : null}
       </div>
-      <edgeless-toolbar .page=${this.page}></edgeless-toolbar>
     `;
   }
 }
