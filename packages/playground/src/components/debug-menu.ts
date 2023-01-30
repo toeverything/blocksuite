@@ -95,8 +95,9 @@ export class DebugMenu extends NonShadowLitElement {
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
-  private _gui!: GUI;
-  private _showCSSDebugGUI = false;
+
+  private _styleMenu!: GUI;
+  private _showStyleDebugMenu = false;
 
   get mouseMode(): MouseMode {
     if (this.mouseModeType === 'default') {
@@ -224,9 +225,9 @@ export class DebugMenu extends NonShadowLitElement {
     window.history.pushState({}, '', url);
   }
 
-  private _toggleCSSDebugMenu() {
-    this._showCSSDebugGUI = !this._showCSSDebugGUI;
-    this._showCSSDebugGUI ? this._gui.show() : this._gui.hide();
+  private _toggleStyleDebugMenu() {
+    this._showStyleDebugMenu = !this._showStyleDebugMenu;
+    this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
 
   private _setReadonlyOthers() {
@@ -248,10 +249,10 @@ export class DebugMenu extends NonShadowLitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
-    this._gui = new GUI();
-    this._gui.width = 350;
+    this._styleMenu = new GUI();
+    this._styleMenu.width = 350;
     const style = document.documentElement.style;
-    const sizeFolder = this._gui.addFolder('Size');
+    const sizeFolder = this._styleMenu.addFolder('Size');
     sizeFolder.open();
     CSSSizeProperties.forEach(item => {
       const { name, defaultValue, cssProperty } = item;
@@ -260,7 +261,7 @@ export class DebugMenu extends NonShadowLitElement {
       });
     });
 
-    const colorFolder = this._gui.addFolder('Color');
+    const colorFolder = this._styleMenu.addFolder('Color');
     colorFolder.open();
     CSSColorProperties.forEach(item => {
       const { name, cssProperty } = item;
@@ -268,7 +269,7 @@ export class DebugMenu extends NonShadowLitElement {
         style.setProperty(cssProperty, color);
       });
     });
-    this._gui.hide();
+    this._styleMenu.hide();
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -448,7 +449,7 @@ export class DebugMenu extends NonShadowLitElement {
                 Export YDoc
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
-              <sl-menu-item @click=${this._toggleCSSDebugMenu}>
+              <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
             </sl-menu>
