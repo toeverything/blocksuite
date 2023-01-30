@@ -91,7 +91,18 @@ export class ListBlockComponent extends NonShadowLitElement {
 
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this.model.childrenUpdated.on(() => {
+      if (
+        this.model.type === 'toggled' &&
+        this.model.children.length &&
+        !this.model.open === false // previously childless toggled blocks will have explicit null
+      ) {
+        this.host.page.updateBlock(this.model, {
+          open: true,
+        });
+      }
+      this.requestUpdate();
+    });
   }
 
   render() {
@@ -107,7 +118,7 @@ export class ListBlockComponent extends NonShadowLitElement {
           const checkedOrOpen =
             this.model.type === 'toggled'
               ? {
-                  open: !this.model.children.length ? false : !this.model.open, // don't allow to toggle if there are no kids
+                  open: !this.model.children.length ? null : !this.model.open, // don't allow to toggle if there are no kids
                 }
               : {
                   checked: !this.model.checked,
