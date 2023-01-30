@@ -37,7 +37,7 @@
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
     "@open-wc/dev-server-hmr": "^0.1.3",
-    "@playwright/test": "^1.29.2",
+    "@playwright/test": "^1.30.0",
     "@types/node": "^18.11.18",
     "@types/quill": "=1.3.7",
     "@types/react": "^18.0.27",
