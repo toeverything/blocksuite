@@ -231,16 +231,6 @@ export class DragHandle extends LitElement {
     }
   }
 
-  public show(startModelState: EditingState) {
-    this._startModelState = startModelState;
-    this._cursor = startModelState.index;
-    const rect = this._startModelState.position;
-    this.style.display = 'block';
-    this.style.left = `${rect.left - 200}px`;
-    this.style.top = `${rect.top + 8}px`;
-    this.style.background = 'red'; // test
-  }
-
   public hide() {
     this.style.display = 'none';
     this._cursor = null;
@@ -332,7 +322,12 @@ export class DragHandle extends LitElement {
         true
       );
       if (newModelState) {
-        this.show(newModelState);
+        this._startModelState = newModelState;
+        this._cursor = newModelState.index;
+        const rect = this._startModelState.position;
+        this.style.display = 'block';
+        this.style.left = `${rect.left - 20}px`;
+        this.style.top = `${rect.top + 8}px`;
       }
     }
   };
