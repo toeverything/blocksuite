@@ -15,6 +15,7 @@ import {
   getAllBlocks,
   getDefaultPageBlock,
   IPoint,
+  getModelByElement,
   getCurrentRange,
   isTitleElement,
 } from '../../__internal__/index.js';
@@ -54,9 +55,10 @@ function filterSelectedBlock(
   selectionRect: DOMRect,
   offset: IPoint
 ): Element[] {
-  const blocks = Array.from(blockCache.keys());
-  return blocks.filter(block => {
-    const rect = block.getBoundingClientRect();
+  return Array.from(blockCache.keys()).filter(block => {
+    const editor = block.querySelector('.ql-editor');
+    assertExists(editor);
+    const rect = editor.getBoundingClientRect();
     return intersects(rect, selectionRect, offset);
   });
 }
@@ -278,10 +280,39 @@ export class DefaultSelectionManager {
 
   private _setSelectedBlocks = (selectedBlocks: Element[]) => {
     this.state.selectedBlocks = selectedBlocks;
-    const { blockCache } = this.state;
-    const selectedRects = selectedBlocks.map(block => {
-      return blockCache.get(block) as DOMRect;
-    });
+    const selectedRects = [];
+    if (selectedBlocks.length) {
+      const { blockCache } = this.state;
+      // the depth of the block in the page is 1 by default
+      // See `getAllowSelectedBlocks` in packages/blocks/src/page-block/default/utils.ts
+      const model = getModelByElement(selectedBlocks[0]);
+      let currentDepth = model.depth || 1;
+      let currentParentIndex = model.parentIndex || 0;
+
+      // Backward: any level can be reached
+      // Forward: only the first level can be reached
+      selectedRects.push(
+        ...selectedBlocks
+          .filter((block, index) => {
+            if (index === 0) return true;
+            const model = getModelByElement(block);
+            const parentIndex = model.parentIndex || 0;
+            if (currentParentIndex === parentIndex) {
+              return true;
+            } else {
+              const depth = model.depth || 1;
+              if (depth < currentDepth) {
+                currentParentIndex = parentIndex;
+                currentDepth = depth;
+                return true;
+              } else {
+                return false;
+              }
+            }
+          })
+          .map(block => blockCache.get(block) as DOMRect)
+      );
+    }
     this._signals.updateSelectedRects.emit(selectedRects);
   };
 
