@@ -107,7 +107,7 @@ export class ListBlockComponent extends NonShadowLitElement {
           const checkedOrOpen =
             this.model.type === 'toggled'
               ? {
-                  open: !!this.model.children.length,
+                  open: !this.model.children.length ? false : !this.model.open, // don't allow to toggle if there are no kids
                 }
               : {
                   checked: !this.model.checked,
@@ -118,11 +118,12 @@ export class ListBlockComponent extends NonShadowLitElement {
         selectList(this.model);
       },
     });
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
+    const childrenContainer =
+      this.model.type === 'toggled' && this.model.open === false
+        ? null
+        : BlockChildrenContainer(this.model, this.host, () =>
+            this.requestUpdate()
+          );
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
 

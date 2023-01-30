@@ -40,7 +40,9 @@ export function getListIcon({
         case 'todo':
           return model.checked ? checkboxChecked() : checkboxUnchecked();
         case 'toggled':
-          return model.open ? toggleDown() : toggleRight();
+          return model.open
+            ? toggleDown()
+            : toggleRight(!!model.children.length);
         default:
           return '';
       }
