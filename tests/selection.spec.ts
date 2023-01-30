@@ -418,8 +418,7 @@ test('select text in the same line with dragging leftward and move outside the a
   );
   await page.keyboard.press('Backspace', { delay: 50 });
   await type(page, 'abc');
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('abc\n');
+  await assertRichTexts(page, ['123', 'abc', '789']);
 });
 
 test('select text in the same line with dragging rightward and move outside the affine-frame', async ({
