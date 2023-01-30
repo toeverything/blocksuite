@@ -47,8 +47,18 @@ test('cmd+backspace keep deleting when start of an empty list', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+  await pressEnter(page);
+  await page.keyboard.type('---');
+  await page.keyboard.press('Space', { delay: 50 });
+  await assertRichTexts(page, ['123', '456', '789', '\n']);
 
+  // Remove empty line
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
+  // Remove divider
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  // Remove the paragraph remaining by the divider
+  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await assertRichTexts(page, ['123', '456', '789']);
   await page.keyboard.press(`${SHORT_KEY}+Backspace`);
   await assertRichTexts(page, ['123', '456', '\n']);
   await page.keyboard.press(`${SHORT_KEY}+Backspace`);
