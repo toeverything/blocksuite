@@ -1,5 +1,4 @@
 import { expect, Locator, Page, test } from '@playwright/test';
-import { SHORT_KEY } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -38,9 +37,17 @@ test.describe('slash menu should show and hide correctly', () => {
       // Click outside
       await page.mouse.click(0, 50);
     }
-    await focusRichText(page);
     // Clear input
-    await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+    await page.evaluate(paragraphId => {
+      const { page } = window;
+      const block = page.getBlockById(paragraphId);
+      if (!block) {
+        throw new Error('Block not found, id: ' + paragraphId);
+      }
+      const text = block.text;
+      if (!text || text.length === 0) return;
+      text.delete(0, text.length);
+    }, paragraphId);
   });
 
   test('slash menu should hide after click away', async () => {
