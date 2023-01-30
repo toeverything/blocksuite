@@ -22,7 +22,6 @@ export class DatabaseEditColumn extends LitElement {
   titleInput!: HTMLInputElement;
 
   protected render(): unknown {
-    console.log(this.targetTagSchema, this.targetModel);
     return html`
       <div>
         <input value=${this.targetTagSchema.name} />
