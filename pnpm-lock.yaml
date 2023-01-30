@@ -151,6 +151,7 @@ importers:
     specifiers:
       '@blocksuite/blocks': workspace:*
       '@blocksuite/editor': workspace:*
+      '@blocksuite/global': workspace:*
       '@blocksuite/phasor': workspace:*
       '@blocksuite/store': workspace:*
       '@lit-labs/react': ^1.1.1
@@ -164,6 +165,7 @@ importers:
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/editor': link:../editor
+      '@blocksuite/global': link:../global
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/store': link:../store
       '@lit-labs/react': 1.1.1
