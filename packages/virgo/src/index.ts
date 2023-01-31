@@ -1,3 +1,4 @@
+/// <reference types="@blocksuite/global" />
 export * from './Editor.js';
 export * from './constant.js';
 export * from './types.js';
