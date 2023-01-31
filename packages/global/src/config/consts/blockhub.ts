@@ -1,5 +1,6 @@
 import type { TemplateResult } from 'lit/html.js';
 import {
+  ArrowRightIcon,
   BulletedListIcon,
   CodeIcon,
   DividerIcon,
@@ -84,6 +85,13 @@ export const paragraphConfig = [
     name: 'Bulleted List',
     hotkey: 'command+option+8,ctrl+shift+8',
     icon: BulletedListIcon,
+  },
+  {
+    flavour: 'affine:list',
+    type: 'toggled',
+    name: 'Toggle List',
+    hotkey: 'command+option+7,ctrl+shift+7',
+    icon: ArrowRightIcon,
   },
   {
     flavour: 'affine:list',
@@ -212,6 +220,14 @@ export const BLOCKHUB_LIST_ITEMS = [
     description: 'a simple bulleted list.',
     icon: BulletedListIcon,
     toolTip: 'Drag to insert Bulleted List.',
+  },
+  {
+    flavour: 'affine:list',
+    type: 'toggled',
+    name: 'Toggle List',
+    description: 'a simple toggle list.',
+    icon: ArrowRightIcon,
+    toolTip: 'Drag to insert Toggle List.',
   },
   {
     flavour: 'affine:list',
