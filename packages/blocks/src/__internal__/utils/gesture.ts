@@ -82,6 +82,17 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
+function shouldFilterMouseEvent(event: Event): boolean {
+  const target = event.target;
+  if (!target || !(target instanceof HTMLElement)) {
+    return false;
+  }
+  if (target.tagName === 'INPUT') {
+    return true;
+  }
+  return false;
+}
+
 export function initMouseEventHandlers(
   container: HTMLElement,
   onContainerDragStart: (e: SelectionEvent) => void,
@@ -107,6 +118,7 @@ export function initMouseEventHandlers(
     );
 
   const mouseDownHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
@@ -124,6 +136,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
@@ -213,12 +226,17 @@ export function initMouseEventHandlers(
   };
 
   const dblClickHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     onContainerDblClick(
       toSelectionEvent(e, getBoundingClientRect, startX, startY)
     );
   };
 
-  const selectionChangeHandler = debounce(e => {
+  const selectionChangeHandler = debounce<
+    Event[],
+    (this: unknown, ...args: Event[]) => void
+  >(e => {
+    if (shouldFilterMouseEvent(e)) return;
     if (isDragging) {
       return;
     }
