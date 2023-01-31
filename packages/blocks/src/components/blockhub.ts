@@ -411,7 +411,13 @@ export class BlockHub extends NonShadowLitElement {
           selected=${this._cardVisibleType === 'database' ? 'true' : 'false'}
         >
           ${DatabaseTableView}
-          <tool-tip inert role="tooltip" tip-position="left" style="top: 5px">
+          <tool-tip
+            inert
+            role="tooltip"
+            tip-position="left"
+            style="top: 5px"
+            ?hidden=${!this._showToolTip}
+          >
             Drag to create a database
           </tool-tip>
         </div>
