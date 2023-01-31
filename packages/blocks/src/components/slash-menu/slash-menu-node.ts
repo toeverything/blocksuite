@@ -71,6 +71,9 @@ export class SlashMenu extends LitElement {
   @state()
   private _filterItems: typeof paragraphConfig = paragraphConfig;
 
+  @state()
+  private _hide = false;
+
   private _searchString = '';
 
   // Just a temp variable
@@ -89,7 +92,7 @@ export class SlashMenu extends LitElement {
       return;
     }
     richText.addEventListener('keydown', this._keyDownListener, {
-      // Workaround Use capture to prevent the event from triggering the keyboard bindings action
+      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
     });
     this._richText = richText;
@@ -105,8 +108,25 @@ export class SlashMenu extends LitElement {
 
   /**
    * Handle arrow key
+   *
+   * The slash menu will be closed in the following keyboard cases:
+   * - Press the space key
+   * - Press the backspace key and the search string is empty
+   * - Press the escape key (handled by {@link _escapeListener})
+   * - When the search item is empty, the slash menu will be hidden temporarily,
+   *   and if the following key is not the backspace key, the slash menu will be closed
    */
   private _keyDownListener = (e: KeyboardEvent) => {
+    if (this._hide) {
+      if (e.key !== 'Backspace') {
+        this.abortController.abort();
+        return;
+      }
+      this._searchString = this._searchString.slice(0, -1);
+      this._filterItems = this._updateItem();
+      this._hide = false;
+      return;
+    }
     if (e.key === ' ') {
       this.abortController.abort();
       return;
@@ -123,7 +143,7 @@ export class SlashMenu extends LitElement {
       this._searchString += e.key;
       this._filterItems = this._updateItem();
       if (!this._filterItems.length) {
-        this.abortController.abort();
+        this._hide = true;
       }
       return;
     }
@@ -239,6 +259,9 @@ export class SlashMenu extends LitElement {
   }
 
   override render() {
+    if (this._hide) {
+      return html``;
+    }
     const containerStyles = styleMap({
       left: this.left,
       top: this.top,
