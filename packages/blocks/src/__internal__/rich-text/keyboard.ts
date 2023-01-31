@@ -319,6 +319,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'backspace',
       handler: onBackspace,
     },
+    'shortKey+backspace': {
+      key: 'backspace',
+      // TODO Fix pass `null` to mean any value for the modifier
+      // shortKey: null,
+      shortKey: true,
+      handler: onBackspace,
+    },
     up: {
       key: 'up',
       shiftKey: false,

@@ -21,59 +21,15 @@ export const SHORT_KEY = IS_MAC ? 'Meta' : 'Control';
  */
 export const MODIFIER_KEY = IS_MAC ? 'Alt' : 'Shift';
 
-/**
- * @deprecated Use {@link SHORT_KEY} directly
- */
-async function keyDownCtrlOrMeta(page: Page) {
-  if (IS_MAC) {
-    await page.keyboard.down('Meta');
-  } else {
-    await page.keyboard.down('Control');
-  }
-}
-
-/**
- * @deprecated Use {@link SHORT_KEY} directly
- */
-async function keyUpCtrlOrMeta(page: Page) {
-  if (IS_MAC) {
-    await page.keyboard.up('Meta');
-  } else {
-    await page.keyboard.up('Control');
-  }
-}
-
-/**
- * @deprecated Use {@link MODIFIER_KEY} directly
- */
-async function keyDownOptionMeta(page: Page) {
-  if (IS_MAC) {
-    await page.keyboard.down('Alt');
-  } else {
-    await page.keyboard.down('Shift');
-  }
-}
-
-/**
- * @deprecated Use {@link MODIFIER_KEY} directly
- */
-async function keyUpOptionMeta(page: Page) {
-  if (IS_MAC) {
-    await page.keyboard.up('Alt');
-  } else {
-    await page.keyboard.up('Shift');
-  }
-}
-
-export const withPressKey = async (
+export async function withPressKey(
   page: Page,
   key: string,
   fn: () => Promise<void>
-) => {
+) {
   await page.keyboard.down(key);
   await fn();
   await page.keyboard.up(key);
-};
+}
 
 export async function pressBackspace(page: Page) {
   await page.keyboard.press('Backspace', { delay: 50 });
@@ -114,6 +70,10 @@ export async function pressShiftTab(page: Page) {
 
 export async function pressShiftEnter(page: Page) {
   await page.keyboard.press('Shift+Enter', { delay: 50 });
+}
+
+export async function pressKey(page: Page, key: string) {
+  await page.keyboard.press(key, { delay: 50 });
 }
 
 export async function inlineCode(page: Page) {
