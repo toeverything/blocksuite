@@ -18,7 +18,7 @@ export async function focusRichText(page: Page): Promise<void> {
     return editor.getBoundingClientRect();
   });
 
-  await page.mouse.click(editorPosition.x + 400, editorPosition.y + 450);
+  await page.mouse.click(editorPosition.x + 400, editorPosition.y + 400);
 }
 
 export async function pageType(page: Page, text: string): Promise<void> {
