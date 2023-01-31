@@ -3,22 +3,22 @@ import { LitElement, css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import '@shoelace-style/shoelace';
-import { BaseArrtiubtes, TextEditor } from '@blocksuite/virgo';
+import { BaseArrtiubtes, Virgo } from '@blocksuite/virgo';
 
 @customElement('rich-text')
 export class RichText extends LitElement {
-  editor: TextEditor;
+  virgo: Virgo;
 
   @query(`.rich-text-container`)
   private _container!: HTMLDivElement;
 
-  constructor(editor: TextEditor) {
+  constructor(virgo: Virgo) {
     super();
-    this.editor = editor;
+    this.virgo = virgo;
   }
 
   firstUpdated() {
-    this.editor.mount(this._container);
+    this.virgo.mount(this._container);
   }
 
   render() {
@@ -43,27 +43,27 @@ export class ToolBar extends LitElement {
     }
   `;
 
-  editor: TextEditor;
+  virgo: Virgo;
 
-  constructor(editor: TextEditor) {
+  constructor(virgo: Virgo) {
     super();
-    this.editor = editor;
+    this.virgo = virgo;
   }
 
-  private format(editor: TextEditor, mark: Partial<BaseArrtiubtes>): void {
-    const rangeStatic = editor.getRangeStatic();
+  private format(virgo: Virgo, mark: Partial<BaseArrtiubtes>): void {
+    const rangeStatic = virgo.getVirgoRange();
     if (!rangeStatic) {
       return;
     }
 
-    editor.formatText(
+    virgo.formatText(
       rangeStatic,
       { type: 'base', ...mark },
       {
         mode: 'merge',
       }
     );
-    editor.syncRangeStatic();
+    virgo.syncVirgoRange();
   }
 
   protected firstUpdated(): void {
@@ -92,26 +92,26 @@ export class ToolBar extends LitElement {
     }
 
     boldButton.addEventListener('click', () => {
-      this.format(this.editor, { bold: true });
+      this.format(this.virgo, { bold: true });
     });
     italicButton.addEventListener('click', () => {
-      this.format(this.editor, { italic: true });
+      this.format(this.virgo, { italic: true });
     });
     underlineButton.addEventListener('click', () => {
-      this.format(this.editor, { underline: true });
+      this.format(this.virgo, { underline: true });
     });
     strikethroughButton.addEventListener('click', () => {
-      this.format(this.editor, { strikethrough: true });
+      this.format(this.virgo, { strikethrough: true });
     });
     resetButton.addEventListener('click', () => {
-      const rangeStatic = this.editor.getRangeStatic();
+      const rangeStatic = this.virgo.getVirgoRange();
       if (!rangeStatic) {
         return;
       }
-      this.editor.resetText(rangeStatic);
+      this.virgo.resetText(rangeStatic);
     });
 
-    const undoManager = new Y.UndoManager(this.editor.yText);
+    const undoManager = new Y.UndoManager(this.virgo.yText);
     undoButton.addEventListener('click', () => {
       undoManager.undo();
     });
@@ -175,10 +175,10 @@ export class TestPage extends LitElement {
     });
 
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new TextEditor(textA);
+    const editorA = new Virgo(textA);
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new TextEditor(textB);
+    const editorB = new Virgo(textB);
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);
