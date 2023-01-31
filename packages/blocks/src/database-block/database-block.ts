@@ -12,6 +12,7 @@ import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
 import { columnTypeToTagSchema } from './utils/index.js';
 import { DatabaseEditColumn } from './components/database-edit-column.js';
 import { createPopper } from '@popperjs/core';
+import './components/column-type/database-number-type.js';
 import { DatabaseSelectType } from './components/column-type/database-select-type.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
@@ -172,7 +173,9 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                         }
                       }}
                     >
-                      ${tag?.value}
+                      ${column.type === 'number'
+                        ? html`<database-number-type></database-number-type>`
+                        : tag?.value}
                     </div>
                   `;
                 }
