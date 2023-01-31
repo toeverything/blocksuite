@@ -1,12 +1,11 @@
 {
   "name": "@blocksuite/phasor",
-  "version": "0.4.0-alpha.0",
+  "version": "0.4.0-alpha.1",
   "description": "Hybrid canvas renderer.",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test:unit": "vitest --run",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"
   },
@@ -34,6 +33,8 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "fractional-indexing": "^3.1.0"
+    "fractional-indexing": "^3.1.0",
+    "nanoid": "^4.0.0",
+    "perfect-freehand": "^1.2.0"
   }
 }

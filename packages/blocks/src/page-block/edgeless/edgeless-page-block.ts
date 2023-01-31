@@ -14,14 +14,12 @@ import {
 } from './components.js';
 import {
   BlockHost,
-  BLOCK_ID_ATTR,
   hotkey,
-  HOTKEYS,
   resetNativeSelection,
 } from '../../__internal__/index.js';
 import {
   EdgelessSelectionManager,
-  BlockSelectionState,
+  EdgelessSelectionState,
   ViewportState,
   XYWH,
 } from './selection-manager.js';
@@ -35,7 +33,8 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import { SurfaceContainer } from '@blocksuite/phasor';
+import { SurfaceManager } from '@blocksuite/phasor';
+import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -44,7 +43,7 @@ export interface EdgelessContainer extends HTMLElement {
   readonly signals: {
     hoverUpdated: Signal;
     viewportUpdated: Signal;
-    updateSelection: Signal<BlockSelectionState>;
+    updateSelection: Signal<EdgelessSelectionState>;
     shapeUpdated: Signal;
   };
 }
@@ -110,12 +109,12 @@ export class EdgelessPageBlockComponent
 
   signals = {
     viewportUpdated: new Signal(),
-    updateSelection: new Signal<BlockSelectionState>(),
+    updateSelection: new Signal<EdgelessSelectionState>(),
     hoverUpdated: new Signal(),
     shapeUpdated: new Signal(),
   };
 
-  surface!: SurfaceContainer;
+  surface!: SurfaceManager;
 
   viewport = new ViewportState();
 
@@ -170,7 +169,7 @@ export class EdgelessPageBlockComponent
   }
 
   private _syncSurfaceViewport() {
-    this.surface.renderer.setCenterZoom(
+    this.surface.setViewport(
       this.viewport.centerX,
       this.viewport.centerY,
       this.viewport.zoom
@@ -178,11 +177,11 @@ export class EdgelessPageBlockComponent
   }
 
   // Should be called in requestAnimationFrame,
-  // so as to avoid DOM mutation in SurfaceContainer constructor
+  // so as to avoid DOM mutation in SurfaceManager constructor
   private _initSurface() {
     const { page } = this;
     const yContainer = page.ySurfaceContainer;
-    this.surface = new SurfaceContainer(this._canvas, yContainer);
+    this.surface = new SurfaceManager(this._canvas, yContainer);
     this._syncSurfaceViewport();
   }
 

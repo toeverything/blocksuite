@@ -1,3 +1,7 @@
+export { isFirefox, isWeb, caretRangeFromPoint } from './utils/web.js';
+export { Signal } from './utils/signal.js';
+export type { Disposable } from './utils/disposable.js';
+export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
@@ -23,47 +27,72 @@ export function matchFlavours<
   Key extends keyof BlockSuiteInternal.BlockModels &
     string = keyof BlockSuiteInternal.BlockModels & string
 >(
-  model: { flavour: Key },
-  expected: Key[]
+  model: { flavour: string },
+  expected: readonly Key[]
 ): boolean /* model is BlockModels[Key] */ {
   return expected.includes(model.flavour as Key);
 }
 
+export const nonTextBlock: (keyof BlockSuiteInternal.BlockModels)[] = [
+  'affine:database',
+  'affine:divider',
+  'affine:embed',
+  'affine:code',
+];
+
+export const isNonTextBlock = <
+  Key extends keyof BlockSuiteInternal.BlockModels &
+    string = keyof BlockSuiteInternal.BlockModels & string
+>(model: {
+  flavour: Key;
+}) => matchFlavours(model, nonTextBlock);
+
 type Allowed =
+  | void
   | null
   | undefined
   | boolean
   | number
   | string
-  | Record<string, unknown>
-  | unknown[];
+  | unknown[]
+  | object;
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,
   expected: U
 ): asserts val is U {
+  if (!isEqual(val, expected)) {
+    throw new Error('val is not same as expected');
+  }
+}
+
+export function isEqual<T extends Allowed, U extends T>(
+  val: T,
+  expected: U
+): boolean {
   const a = isPrimitive(val);
   const b = isPrimitive(expected);
   if (a && b) {
     if (!Object.is(val, expected)) {
-      throw new Error('val is not same as expected');
+      return false;
     }
   } else if (a !== b) {
-    throw new Error('val is not same as expected');
+    return false;
   } else {
     if (Array.isArray(val) && Array.isArray(expected)) {
       if (val.length !== expected.length) {
-        throw new Error('val is not same as expected');
+        return false;
       }
-      val.every((x, i) => assertEquals(x, expected[i]));
+      return val.every((x, i) => isEqual(x, expected[i]));
     } else if (typeof val === 'object' && typeof expected === 'object') {
       const obj1 = Object.entries(val as Record<string, unknown>);
       const obj2 = Object.entries(expected as Record<string, unknown>);
       if (obj1.length !== obj2.length) {
-        throw new Error('val is not same as expected');
+        return false;
       }
-      obj1.every((x, i) => assertEquals(x, obj2[i]));
+      return obj1.every((x, i) => isEqual(x, obj2[i]));
     }
   }
+  return true;
 }
 
 export async function sleep(ms: number): Promise<void> {

@@ -7,10 +7,7 @@ import {
   getRichTextByModel,
   getContainerByModel,
   getPreviousBlock,
-  ALLOW_DEFAULT,
-  caretRangeFromPoint,
   getNextBlock,
-  PREVENT_DEFAULT,
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
@@ -20,11 +17,21 @@ import {
   supportsChildren,
   getModelByElement,
 } from '../utils/index.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
+import { Utils } from '@blocksuite/store';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
   if (!parent) {
+    return;
+  }
+  if (Utils.doesInsideBlockByFlavour(page, model, 'affine:database')) {
+    // todo: jump into next row
     return;
   }
   const index = parent.children.indexOf(model);
@@ -59,9 +66,13 @@ export function handleSoftEnter(
   index: number,
   length: number
 ) {
+  if (!model.text) {
+    console.error('Failed to handle soft enter! No text found!', model);
+    return;
+  }
   page.captureSync();
   const shouldFormatCode = matchFlavours(model, ['affine:code']);
-  model.text?.replace(
+  model.text.replace(
     index,
     length,
     '\n',
@@ -225,6 +236,10 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     focusBlockByModel(model);
     return;
   }
+  if (Utils.doesInsideBlockByFlavour(page, model, 'affine:database')) {
+    // Forbid user to delete a block inside database block
+    return;
+  }
 
   // When deleting at line start of a list block,
   // switch it to normal paragraph block.
@@ -264,7 +279,22 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     if (!parent || matchFlavours(parent, ['affine:frame'])) {
       const container = getContainerByModel(model);
       const previousSibling = getPreviousBlock(container, model.id);
+      const previousSiblingParent = previousSibling
+        ? page.getParent(previousSibling)
+        : null;
       if (
+        previousSiblingParent &&
+        matchFlavours(previousSiblingParent, ['affine:database'])
+      ) {
+        window.requestAnimationFrame(() => {
+          focusBlockByModel(previousSiblingParent, 'end');
+          // We can not delete block if the block has content
+          if (!model.text?.length) {
+            page.captureSync();
+            page.deleteBlock(model);
+          }
+        });
+      } else if (
         previousSibling &&
         matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
       ) {

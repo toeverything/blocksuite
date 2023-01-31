@@ -4,10 +4,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { FrameBlockModel, RootBlockModel } from '../../index.js';
+import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
 import type {
-  BlockSelectionState,
-  HoverState,
+  EdgelessSelectionState,
+  EdgelessHoverState,
   ViewportState,
   XYWH,
 } from './selection-manager.js';
@@ -22,32 +22,38 @@ import {
   PADDING_Y,
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
+  isBlock,
 } from './utils.js';
-import { SHAPE_PADDING } from '../../index.js';
+
+const SHAPE_PADDING = 48;
 
 function getCommonRectStyle(
   rect: DOMRect,
   zoom: number,
-  isShape = false,
+  isSurfaceElement = false,
   selected = false
 ) {
   return {
     position: 'absolute',
     left: rect.x + 'px',
     top: rect.y + 'px',
-    width: rect.width + (isShape ? 0 : PADDING_X) * zoom + 'px',
-    height: rect.height + (isShape ? 0 : PADDING_Y) * zoom + 'px',
+    width: rect.width + (isSurfaceElement ? 0 : PADDING_X) * zoom + 'px',
+    height: rect.height + (isSurfaceElement ? 0 : PADDING_Y) * zoom + 'px',
     borderRadius: `${10 * zoom}px`,
     pointerEvents: 'none',
     boxSizing: 'border-box',
-    backgroundColor: isShape && selected ? 'var(--affine-selected-color)' : '',
+    backgroundColor:
+      isSurfaceElement && selected ? 'var(--affine-selected-color)' : '',
   };
 }
 
-export function EdgelessHoverRect(hoverState: HoverState | null, zoom: number) {
+export function EdgelessHoverRect(
+  hoverState: EdgelessHoverState | null,
+  zoom: number
+) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
-  // const isShape = hoverState.block.flavour === 'affine:shape';
+  // const isSurfaceElement = hoverState.block.flavour === 'affine:shape';
 
   const style = {
     ...getCommonRectStyle(rect, zoom, false),
@@ -136,30 +142,29 @@ export function EdgelessFrameSelectionRect(rect: DOMRect | null) {
 }
 
 function EdgelessBlockChild(
-  model: RootBlockModel,
+  model: TopLevelBlockModel,
   host: BlockHost,
   viewport: ViewportState
 ) {
   const { xywh } = model;
-  const isShape = false;
+  const isSurfaceElement = false;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
   const translateX =
-    (modelX - viewportX - (isShape ? SHAPE_PADDING / 2 : 0)) * zoom;
+    (modelX - viewportX - (isSurfaceElement ? SHAPE_PADDING / 2 : 0)) * zoom;
   const translateY =
-    (modelY - viewportY - (isShape ? SHAPE_PADDING / 2 : 0)) * zoom;
+    (modelY - viewportY - (isSurfaceElement ? SHAPE_PADDING / 2 : 0)) * zoom;
 
   const style = {
     position: 'absolute',
     transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
     transformOrigin: '0 0',
-    width: modelW + (isShape ? SHAPE_PADDING : PADDING_X) + 'px',
-    height: modelH + (isShape ? SHAPE_PADDING : PADDING_Y) + 'px',
-    padding: isShape ? '0px' : `${PADDING_X / 2}px`,
-    background: isShape ? 'transparent' : 'white',
-    pointerEvents: isShape ? 'none' : 'all',
-    // shape block should always on the top
-    zIndex: isShape ? '1' : '0',
+    width: modelW + (isSurfaceElement ? SHAPE_PADDING : PADDING_X) + 'px',
+    height: modelH + (isSurfaceElement ? SHAPE_PADDING : PADDING_Y) + 'px',
+    padding: isSurfaceElement ? '0px' : `${PADDING_X / 2}px`,
+    background: isSurfaceElement ? 'transparent' : 'white',
+    pointerEvents: isSurfaceElement ? 'none' : 'all',
+    zIndex: '0',
   };
 
   return html`
@@ -199,7 +204,7 @@ export class EdgelessSelectedRect extends LitElement {
   zoom!: number;
 
   @property({ type: Object })
-  state!: BlockSelectionState;
+  state!: EdgelessSelectionState;
 
   @property()
   readonly?: boolean = false;
@@ -225,8 +230,8 @@ export class EdgelessSelectedRect extends LitElement {
     direction: HandleDirection.Left,
   };
 
-  private _getHandles(rect: DOMRect, isShape: boolean) {
-    if (isShape) {
+  private _getHandles(rect: DOMRect, isSurfaceElement: boolean) {
+    if (isSurfaceElement) {
       const leftTop = [rect.x, rect.y];
       const rightTop = [rect.x + rect.width, rect.y];
       const leftBottom = [rect.x, rect.y + rect.height];
@@ -291,11 +296,10 @@ export class EdgelessSelectedRect extends LitElement {
     // prevent selection action being fired
     e.stopPropagation();
     if (this.state?.type === 'single') {
-      const {
-        rect,
-        selected: { xywh },
-      } = this.state;
-      const [x, y] = JSON.parse(xywh) as XYWH;
+      const { rect, selected } = this.state;
+      if (!isBlock(selected)) return;
+
+      const [x, y] = JSON.parse(selected.xywh) as XYWH;
       this._dragStartInfo = {
         startMouseX: e.clientX,
         startMouseY: e.clientY,
@@ -316,13 +320,14 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       const { viewport } = this;
       const { selected } = this.state;
+      if (!isBlock(selected)) return;
+
       const { xywh } = selected;
       const [x, y, w, h] = JSON.parse(xywh) as XYWH;
       let newX = x;
       let newY = y;
       let newW = w;
       let newH = h;
-      const isShape = false;
       const deltaX = this._dragStartInfo.startMouseX - e.clientX;
       const deltaY = this._dragStartInfo.startMouseY - e.clientY;
       const direction = this._dragStartInfo.direction;
@@ -396,9 +401,7 @@ export class EdgelessSelectedRect extends LitElement {
           newX,
           newY,
           newW,
-          !isShape
-            ? (frameBlock?.getBoundingClientRect().height || 0) / this.zoom
-            : newH,
+          (frameBlock?.getBoundingClientRect().height || 0) / this.zoom,
         ]);
         selected.xywh = newXywh;
         selected.page.updateBlock(selected, { xywh: newXywh });
@@ -409,6 +412,8 @@ export class EdgelessSelectedRect extends LitElement {
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
     if (this.state.type === 'single') {
+      if (!isBlock(this.state.selected)) return;
+
       this.state.selected.page.captureSync();
     } else {
       console.error('unexpected state.type:', this.state.type);
@@ -418,13 +423,14 @@ export class EdgelessSelectedRect extends LitElement {
   };
 
   render() {
-    if (this.state.type === 'none') return html``;
-    // const isShape = this.state.selected.flavour === 'affine:shape';
+    if (this.state.type === 'none') return null;
+
+    // const isSurfaceElement = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      zIndex: '3',
+      zIndex: '0',
       ...getCommonRectStyle(this.rect, this.zoom, false, true),
     };
     const handlers = this._getHandles(this.rect, false);

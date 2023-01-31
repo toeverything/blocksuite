@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Y from 'yjs';
-import type { AwarenessAdapter } from './awareness.js';
 import type { DeltaOperation, Quill } from 'quill';
 import type { Space } from './space.js';
 
@@ -140,7 +139,7 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    if (this._space.awareness.isReadonly()) {
+    if (this._space.awarenessStore.isReadonly(this._space)) {
       console.error('cannot modify data in readonly mode');
       return;
     }
@@ -254,8 +253,14 @@ export class Text {
 
         const isLastOp = end && charNum + contentLen > end;
         const isFirstOp = charNum + contentLen > begin && result.length === 0;
-
-        if (isFirstOp || isLastOp) {
+        if (isFirstOp && isLastOp) {
+          contentText = contentText.slice(begin - charNum, end - charNum);
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+          break;
+        } else if (isFirstOp || isLastOp) {
           contentText = isLastOp
             ? contentText.slice(0, end - charNum)
             : contentText.slice(begin - charNum);
@@ -289,7 +294,6 @@ export class RichTextAdapter {
   readonly yText: Y.Text;
   readonly quill: Quill;
   readonly quillCursors: any;
-  readonly awareness: AwarenessAdapter;
   private _negatedUsedFormats: Record<string, any>;
 
   constructor(space: Space, yText: Y.Text, quill: Quill) {
@@ -297,8 +301,6 @@ export class RichTextAdapter {
     this.yText = yText;
     this.doc = space.doc;
     this.quill = quill;
-
-    this.awareness = space.awareness;
     const quillCursors = quill.getModule('cursors') || null;
     this.quillCursors = quillCursors;
     // This object contains all attributes used in the quill instance

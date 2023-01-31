@@ -1,11 +1,11 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.4.0-alpha.0",
+  "version": "0.4.0-alpha.1",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "serve": "cross-env PORT=4444 node node_modules/y-webrtc/bin/server.js",
+    "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
     "test:unit": "vitest --run",
     "test:unit:ui": "vitest --ui",
@@ -21,14 +21,15 @@
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
-    "ky": "^0.33.1",
-    "lib0": "^0.2.58",
+    "ky": "^0.33.2",
+    "lib0": "^0.2.60",
     "merge": "^2.1.1",
+    "nanoid": "^4.0.0",
     "y-protocols": "^1.0.5",
-    "y-webrtc": "^10.2.3"
+    "y-webrtc": "^10.2.4",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
     "lit": "^2.6.1",
     "yjs": "^13.5.44"
   },

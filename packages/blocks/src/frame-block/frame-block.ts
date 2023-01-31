@@ -3,19 +3,16 @@ import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { FrameBlockModel } from './frame-model.js';
 import {
-  BLOCK_ID_ATTR,
   type BlockHost,
   NonShadowLitElement,
   BlockChildrenContainer,
 } from '../__internal__/index.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends NonShadowLitElement {
   static styles = css`
-    .affine-group-block-container > .affine-block-children-container {
-      padding-left: 0;
-    }
-    .affine-group-block-container.selected {
+    .affine-frame-block-container.selected {
       background-color: var(--affine-selected-color);
     }
   `;

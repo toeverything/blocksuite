@@ -1,6 +1,69 @@
-import type { Service } from './utils/index.js';
+import type { IService } from './utils/index.js';
+import type { DeltaOperation } from 'quill';
+import type { BaseBlockModel } from '@blocksuite/store';
+import {
+  BlockService,
+  blockService,
+  BlockServiceInstance,
+  Flavour,
+} from '../models.js';
 
-const services = new Map<string, Service>();
+export class BaseService implements IService {
+  onLoad?: () => Promise<void>;
+  block2html(
+    block: BaseBlockModel,
+    childText: string,
+    _previousSiblingId: string,
+    _nextSiblingId: string,
+    begin?: number,
+    end?: number
+  ) {
+    const delta = block.text?.sliceToDelta(begin || 0, end) || [];
+    const text = delta.reduce((html: string, item: DeltaOperation) => {
+      return html + BaseService.deltaLeaf2Html(item);
+    }, '');
+    return `${text}${childText}`;
+  }
+
+  block2Text(
+    block: BaseBlockModel,
+    childText: string,
+    begin?: number,
+    end?: number
+  ) {
+    const text = (block.text?.toString() || '').slice(begin || 0, end);
+    return `${text}${childText}`;
+  }
+
+  private static deltaLeaf2Html(deltaLeaf: DeltaOperation) {
+    let text: string = deltaLeaf.insert;
+    const attributes = deltaLeaf.attributes;
+    if (!attributes) {
+      return text;
+    }
+    if (attributes.code) {
+      text = `<code>${text}</code>`;
+    }
+    if (attributes.bold) {
+      text = `<strong>${text}</strong>`;
+    }
+    if (attributes.italic) {
+      text = `<em>${text}</em>`;
+    }
+    if (attributes.underline) {
+      text = `<u>${text}</u>`;
+    }
+    if (attributes.strikethrough) {
+      text = `<s>${text}</s>`;
+    }
+    if (attributes.link) {
+      text = `<a href='${attributes.link}'>${text}</a>`;
+    }
+    return text;
+  }
+}
+
+const services = new Map<string, BaseService>();
 
 export function hasService(flavour: string): boolean {
   return services.has(flavour);
@@ -8,61 +71,55 @@ export function hasService(flavour: string): boolean {
 
 export function registerService(
   flavour: string,
-  loadOrConstructor:
-    | (() => Promise<{ default: { new (): Service } }>)
-    | { new (): Service }
+  Constructor: { new (): BaseService }
 ): Promise<void> | void {
   if (services.has(flavour)) {
     console.error(`'${flavour}' already be registered!`);
     return;
   }
-  if (loadOrConstructor.constructor.name === 'AsyncFunction') {
-    const load = loadOrConstructor as () => Promise<{
-      default: { new (): Service };
-    }>;
+  const service = new Constructor();
+  if ('onLoad' in service && typeof service.onLoad === 'function') {
+    const onLoad = service.onLoad.bind(service);
     return new Promise(resolve => {
-      load().then(async m => {
-        const service = new m.default();
-        if ('load' in service && typeof service.load === 'function') {
-          service.load().then(() => {
-            service.isLoaded = true;
-            services.set(flavour, service);
-            resolve();
-          });
-        } else {
-          service.isLoaded = true;
-          services.set(flavour, service);
-          resolve();
-        }
+      onLoad().then(() => {
+        services.set(flavour, service);
+        resolve();
       });
     });
   } else {
-    const Constructor = loadOrConstructor as {
-      new (): Service;
-    };
-    const service = new Constructor();
-    if ('load' in service && typeof service.load === 'function') {
-      return new Promise(resolve => {
-        service.load().then(() => {
-          service.isLoaded = true;
-          services.set(flavour, service);
-          resolve();
-        });
-      });
-    } else {
-      service.isLoaded = true;
-      services.set(flavour, service);
-    }
-    return;
+    services.set(flavour, service);
   }
+  return;
 }
 
-export function getService(flavour: string, strict: false): Service | undefined;
-export function getService(flavour: string, strict?: true): Service;
-export function getService(flavour: string, strict = true) {
+/**
+ * @internal
+ */
+export function getService<Key extends Flavour>(
+  flavour: Key
+): BlockServiceInstance[Key] {
   const service = services.get(flavour);
-  if (strict && !service) {
-    throw new Error(`cannot find service '${flavour}'`);
+  if (!service) {
+    throw new Error(`cannot find service by flavour ${flavour}`);
   }
-  return service;
+  return service as BlockServiceInstance[Key];
+}
+
+export function getServiceOrRegister<Key extends Flavour>(
+  flavour: Key
+): BlockServiceInstance[Key] | Promise<BlockServiceInstance[Key]> {
+  const service = services.get(flavour);
+  if (!service) {
+    const Constructor =
+      blockService[flavour as keyof BlockService] ?? BaseService;
+    const result = registerService(flavour, Constructor);
+    if (result instanceof Promise) {
+      return result.then(
+        () => services.get(flavour) as BlockServiceInstance[Key]
+      );
+    } else {
+      return services.get(flavour) as BlockServiceInstance[Key];
+    }
+  }
+  return service as BlockServiceInstance[Key];
 }

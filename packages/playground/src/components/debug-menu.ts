@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { html, LitElement } from 'lit';
+import { html, css } from 'lit';
+import { GUI } from 'dat.gui';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -21,20 +22,25 @@ import type {
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 
 import {
-  ColorStyle,
   createEvent,
   getCurrentRange,
   getModelsByRange,
   type FrameBlockModel,
   MouseMode,
   ShapeMouseMode,
-  TDShapeType,
   updateSelectedTextType,
+  NonShadowLitElement,
 } from '@blocksuite/blocks';
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/store/src/__tests__/test-utils-dom';
+import type { ShapeType } from '@blocksuite/phasor';
+import {
+  CSSColorProperties,
+  CSSSizeProperties,
+  plate,
+} from '@blocksuite/global/config';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -42,7 +48,18 @@ const basePath = import.meta.env.DEV
 setBasePath(basePath);
 
 @customElement('debug-menu')
-export class DebugMenu extends LitElement {
+export class DebugMenu extends NonShadowLitElement {
+  static styles = css`
+    :root {
+      --sl-font-size-medium: var(--affine-font-xs);
+      --sl-input-font-size-small: var(--affine-font-xs);
+    }
+
+    .dg.ac {
+      z-index: 1001 !important;
+    }
+  `;
+
   @property()
   workspace!: Workspace;
 
@@ -68,16 +85,19 @@ export class DebugMenu extends LitElement {
   showGrid = false;
 
   @state()
-  shapeModeColor: ShapeMouseMode['color'] = ColorStyle.Black;
+  shapeModeColor: ShapeMouseMode['color'] = '#000000';
 
   @state()
-  shapeModeShape: ShapeMouseMode['shape'] = TDShapeType.Rectangle;
+  shapeModeShape: ShapeMouseMode['shape'] = 'rect';
 
   @state()
   readonly = false;
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
+
+  private _styleMenu!: GUI;
+  private _showStyleDebugMenu = false;
 
   get mouseMode(): MouseMode {
     if (this.mouseModeType === 'default') {
@@ -128,7 +148,7 @@ export class DebugMenu extends LitElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    updateSelectedTextType('affine:list', listType, this.page);
+    updateSelectedTextType('affine:list', listType);
   }
 
   private _addCodeBlock(e: PointerEvent) {
@@ -153,7 +173,7 @@ export class DebugMenu extends LitElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    updateSelectedTextType('affine:paragraph', type, this.page);
+    updateSelectedTextType('affine:paragraph', type);
   }
 
   private _switchEditorMode() {
@@ -190,11 +210,6 @@ export class DebugMenu extends LitElement {
     this.contentParser.onExportHtml();
   }
 
-  private _toggleReadonly() {
-    this.editor.readonly = !this.editor.readonly;
-    this.readonly = !this.readonly;
-  }
-
   private _exportMarkDown() {
     this.contentParser.onExportMarkdown();
   }
@@ -210,14 +225,19 @@ export class DebugMenu extends LitElement {
     window.history.pushState({}, '', url);
   }
 
+  private _toggleStyleDebugMenu() {
+    this._showStyleDebugMenu = !this._showStyleDebugMenu;
+    this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
+  }
+
   private _setReadonlyOthers() {
-    const clients = [...this.page.awareness.getStates().keys()].filter(
+    const clients = [...this.page.awarenessStore.getStates().keys()].filter(
       id => id !== this.page.workspace.doc.clientID
     );
-    if (this.page.awareness.getFlag('enable_set_remote_flag')) {
+    if (this.page.awarenessStore.getFlag('enable_set_remote_flag')) {
       clients.forEach(id => {
-        this.page.awareness.setRemoteFlag(id, 'readonly', {
-          ...(this.page.awareness.getFlag('readonly') ?? {}),
+        this.page.awarenessStore.setRemoteFlag(id, 'readonly', {
+          ...(this.page.awarenessStore.getFlag('readonly') ?? {}),
           [this.page.prefixedId]: true,
         });
       });
@@ -229,6 +249,27 @@ export class DebugMenu extends LitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
+    this._styleMenu = new GUI();
+    this._styleMenu.width = 350;
+    const style = document.documentElement.style;
+    const sizeFolder = this._styleMenu.addFolder('Size');
+    sizeFolder.open();
+    CSSSizeProperties.forEach(item => {
+      const { name, defaultValue, cssProperty } = item;
+      sizeFolder.add({ [name]: defaultValue }, name, 0, 100).onChange(e => {
+        style.setProperty(cssProperty, Math.round(e) + 'px');
+      });
+    });
+
+    const colorFolder = this._styleMenu.addFolder('Color');
+    colorFolder.open();
+    CSSColorProperties.forEach(item => {
+      const { name, cssProperty } = item;
+      colorFolder.addColor(plate, name).onChange((color: string | null) => {
+        style.setProperty(cssProperty, color);
+      });
+    });
+    this._styleMenu.hide();
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -275,6 +316,7 @@ export class DebugMenu extends LitElement {
         .edgeless-toolbar {
           align-items: center;
         }
+
         .edgeless-toolbar sl-select,
         .edgeless-toolbar sl-color-picker,
         .edgeless-toolbar sl-button {
@@ -393,12 +435,9 @@ export class DebugMenu extends LitElement {
               <sl-menu-item @click=${this._toggleConnection}>
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._addFrame}> Add Frame </sl-menu-item>
+              <sl-menu-item @click=${this._addFrame}> Add Frame</sl-menu-item>
               <sl-menu-item @click=${this._setReadonlyOthers}>
                 Set Others Readonly
-              </sl-menu-item>
-              <sl-menu-item @click=${this._toggleReadonly}>
-                Toggle Readonly
               </sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
@@ -409,7 +448,10 @@ export class DebugMenu extends LitElement {
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
+              <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
+              <sl-menu-item @click=${this._toggleStyleDebugMenu}>
+                Toggle CSS Debug Menu
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -471,7 +513,7 @@ export class DebugMenu extends LitElement {
             hoist
             @sl-change=${(e: CustomEvent) => {
               const target = e.target as SlSelect;
-              this.shapeModeShape = target.value as TDShapeType;
+              this.shapeModeShape = target.value as ShapeType;
             }}
           >
             <sl-menu-item value="rectangle">Rectangle</sl-menu-item>

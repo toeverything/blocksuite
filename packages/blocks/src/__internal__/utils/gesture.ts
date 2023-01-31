@@ -5,8 +5,12 @@ import {
   setStartRange,
 } from './selection.js';
 import { debounce } from './std.js';
-import { MOVE_DETECT_THRESHOLD } from './consts.js';
-import { isInsideBlockContainer, isPageTitleElement } from './query.js';
+import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
+import {
+  isDatabaseInput,
+  isInsideBlockContainer,
+  isTitleElement,
+} from './query.js';
 
 export interface IPoint {
   x: number;
@@ -103,7 +107,7 @@ export function initMouseEventHandlers(
     );
 
   const mouseDownHandler = (e: MouseEvent) => {
-    if (!isPageTitleElement(e.target)) {
+    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
     const rect = getBoundingClientRect();
@@ -120,7 +124,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
-    if (!isPageTitleElement(e.target)) {
+    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
     const rect = getBoundingClientRect();
@@ -154,7 +158,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    if (!isPageTitleElement(e.target)) {
+    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
 

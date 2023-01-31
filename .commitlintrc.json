@@ -1,3 +1,20 @@
 {
-  "extends": ["@commitlint/config-conventional"]
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "blocks",
+        "editor",
+        "edgeless",
+        "global",
+        "phasor",
+        "playground",
+        "react",
+        "next-example",
+        "store"
+      ]
+    ]
+  }
 }

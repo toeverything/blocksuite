@@ -159,7 +159,9 @@ test('nested list blocks', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,96]"
   >
@@ -190,7 +192,9 @@ test('nested list blocks', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,96]"
   >
@@ -227,7 +231,9 @@ test('basic indent and unindent', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,72]"
   >
@@ -247,7 +253,9 @@ test('basic indent and unindent', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,72]"
   >
@@ -269,7 +277,9 @@ test('basic indent and unindent', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page>
+<affine:page
+  prop:title=""
+>
   <affine:frame
     prop:xywh="[0,0,720,72]"
   >

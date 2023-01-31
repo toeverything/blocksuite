@@ -1,13 +1,96 @@
 import type { Page } from './workspace/index.js';
 import type { TextType } from './text-adapter.js';
-import { Signal } from './utils/signal.js';
-import type { DeltaOperation } from 'quill';
+import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
+import { z } from 'zod';
+
+/**
+ * @internal
+ */
+export const kValue = Symbol('kValue');
+
+export interface InternalValue<Value = unknown> {
+  __VALUE_HOLDER__?: Value;
+  [kValue]: symbol;
+}
+
+export const RichTextType: InternalValue<TextType> = {
+  [kValue]: Symbol('RichText'),
+};
+
+const FlavourSchema = z.string();
+const TagSchema = z.object({
+  _$litStatic$: z.string(),
+  r: z.symbol(),
+});
+
+export const BlockSchema = z.object({
+  version: z.number(),
+  model: z.object({
+    flavour: FlavourSchema,
+    tag: TagSchema,
+    props: z.function().returns(z.record(z.any())),
+  }),
+});
 
 // ported from lit
 interface StaticValue {
   _$litStatic$: string;
-  r: unknown;
+  r: symbol;
+}
+
+type Props<S extends Record<string, unknown>> = {
+  [K in keyof S]: S[K] extends InternalValue<infer Value> ? Value : S[K];
+};
+
+export type SchemaToModel<
+  Schema extends {
+    model: {
+      props: () => Record<string, unknown>;
+      flavour: string;
+    };
+  }
+> = BaseBlockModel &
+  Props<ReturnType<Schema['model']['props']>> & {
+    flavour: Schema['model']['flavour'];
+  };
+
+export function defineBlockSchema<
+  Flavour extends string,
+  Props extends Record<string, unknown>,
+  Metadata extends Readonly<{
+    version: number;
+    tag: StaticValue;
+  }>
+>(
+  flavour: Flavour,
+  props: () => Props,
+  metadata: Metadata
+): {
+  version: number;
+  model: {
+    props: () => Props;
+    flavour: Flavour;
+  } & Metadata;
+};
+export function defineBlockSchema(
+  flavour: string,
+  props: () => Record<string, unknown>,
+  metadata: {
+    version: number;
+    tag: StaticValue;
+  }
+): z.infer<typeof BlockSchema> {
+  const schema = {
+    version: metadata.version,
+    model: {
+      flavour,
+      tag: metadata.tag,
+      props,
+    },
+  } satisfies z.infer<typeof BlockSchema>;
+  BlockSchema.parse(schema);
+  return schema;
 }
 
 export class BaseBlockModel<Props = unknown>
@@ -23,7 +106,7 @@ export class BaseBlockModel<Props = unknown>
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
-  type!: string;
+  type?: string;
   children: BaseBlockModel[];
   // TODO use schema
   tags?: Y.Map<Y.Map<unknown>>;
@@ -56,52 +139,6 @@ export class BaseBlockModel<Props = unknown>
       return this;
     }
     return this.children[this.children.length - 1].lastChild();
-  }
-
-  block2html(
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
-    const delta = this.text?.sliceToDelta(begin || 0, end) || [];
-    const text = delta.reduce((html: string, item: DeltaOperation) => {
-      return html + this._deltaLeaf2Html(item);
-    }, '');
-    return `${text}${childText}`;
-  }
-
-  block2Text(childText: string, begin?: number, end?: number) {
-    const text = (this.text?.toString() || '').slice(begin || 0, end);
-    return `${text}${childText}`;
-  }
-
-  _deltaLeaf2Html(deltaLeaf: DeltaOperation) {
-    let text: string = deltaLeaf.insert;
-    const attributes = deltaLeaf.attributes;
-    if (!attributes) {
-      return text;
-    }
-    if (attributes.code) {
-      text = `<code>${text}</code>`;
-    }
-    if (attributes.bold) {
-      text = `<strong>${text}</strong>`;
-    }
-    if (attributes.italic) {
-      text = `<em>${text}</em>`;
-    }
-    if (attributes.underline) {
-      text = `<u>${text}</u>`;
-    }
-    if (attributes.strikethrough) {
-      text = `<s>${text}</s>`;
-    }
-    if (attributes.link) {
-      text = `<a href='${attributes.link}'>${text}</a>`;
-    }
-    return text;
   }
 
   dispose() {

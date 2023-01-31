@@ -1,14 +1,12 @@
 import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
-import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { assertExists } from '@blocksuite/global/utils';
-import {
-  getBlockElementByModel,
-  SelectionEvent,
-} from '../__internal__/index.js';
+import { getBlockElementByModel } from '../__internal__/index.js';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { SelectionEvent } from '../__internal__/index.js';
 
 const handleIcon = svg`
 <path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
@@ -65,12 +63,14 @@ export class DragIndicator extends LitElement {
 }
 
 export type DragHandleGetModelStateCallback = (
+  blocks: BaseBlockModel[],
   pageX: number,
   pageY: number,
   skipX?: boolean
 ) => EditingState | null;
 
 export type DragHandleGetModelStateWithCursorCallback = (
+  blocks: BaseBlockModel[],
   pageX: number,
   pageY: number,
   cursor: number,
@@ -124,9 +124,13 @@ export class DragHandle extends LitElement {
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
     getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
-    setSelectedBlocks: (selectedBlocks: Element[]) => void;
+    setSelectedBlocks: (selectedBlocks: Element | null) => void;
   }) {
     super();
+    this.getDropAllowedBlocks = () => {
+      console.warn('you may forget to set `getAllowedBlocks`');
+      return [];
+    };
     this.onDropCallback = options.onDropCallback;
     this.setSelectedBlocks = options.setSelectedBlocks;
     this._getBlockEditingStateByPosition =
@@ -134,6 +138,17 @@ export class DragHandle extends LitElement {
     this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
     document.body.appendChild(this);
   }
+
+  /**
+   * A function that returns all blocks that are allowed to be moved to
+   *
+   * If there is `draggingBlock`, the user is dragging a block to another place
+   *
+   */
+  @property()
+  public getDropAllowedBlocks: (
+    draggingBlock: BaseBlockModel | null
+  ) => BaseBlockModel[];
 
   @property()
   public onDropCallback: (
@@ -143,7 +158,7 @@ export class DragHandle extends LitElement {
   ) => void;
 
   @property()
-  public setSelectedBlocks: (selectedBlocks: Element[]) => void;
+  public setSelectedBlocks: (selectedBlock: Element | null) => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -174,6 +189,7 @@ export class DragHandle extends LitElement {
       return;
     }
     const modelState = this._getBlockEditingStateByPosition(
+      this.getDropAllowedBlocks(this._startModelState?.model ?? null),
       event.raw.pageX,
       event.raw.pageY,
       true
@@ -216,6 +232,10 @@ export class DragHandle extends LitElement {
     this._lastModelState = null;
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
+  }
+
+  public pointerEvents(value = 'auto') {
+    this.style.pointerEvents = value;
   }
 
   protected firstUpdated() {
@@ -295,6 +315,7 @@ export class DragHandle extends LitElement {
   private _onResize = (e: UIEvent) => {
     if (this._startModelState) {
       const newModelState = this._getBlockEditingStateByPosition?.(
+        this.getDropAllowedBlocks(this._startModelState.model),
         this._startModelState.position.x,
         this._startModelState.position.y,
         true
@@ -316,6 +337,7 @@ export class DragHandle extends LitElement {
 
   private _onClick = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
+      this.getDropAllowedBlocks(null),
       e.pageX,
       e.pageY,
       true
@@ -323,9 +345,9 @@ export class DragHandle extends LitElement {
     if (clickDragState) {
       this._cursor = clickDragState.index;
       lastSelectedIndex = this._cursor;
-      this.setSelectedBlocks([
-        getBlockElementByModel(clickDragState.model) as HTMLElement,
-      ]);
+      this.setSelectedBlocks(
+        getBlockElementByModel(clickDragState.model) as HTMLElement
+      );
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }
@@ -358,7 +380,9 @@ export class DragHandle extends LitElement {
     if (this._cursor === null) {
       return;
     }
+    assertExists(this._startModelState);
     const modelState = this._getBlockEditingStateByCursor?.(
+      this.getDropAllowedBlocks(this._startModelState.model),
       x,
       y,
       this._cursor,

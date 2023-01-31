@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.4.0-alpha.0",
+  "version": "0.4.0-alpha.1",
   "description": "Default BlockSuite-based editor built for AFFiNE.",
   "main": "src/index.ts",
   "type": "module",
@@ -16,7 +16,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "lit": "^2.6.1",
-    "marked": "^4.2.5",
+    "marked": "^4.2.12",
     "turndown": "^7.1.1"
   },
   "devDependencies": {
@@ -25,16 +25,20 @@
     "@types/turndown": "^5.0.1"
   },
   "exports": {
-    "./src/*": "./src/*.ts",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./themes/*": "./themes/*"
   },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./src/*": "./dist/*.js",
-      ".": "./dist/index.js"
-    }
+      ".": "./dist/index.js",
+      "./themes/*": "./themes/*"
+    },
+    "files": [
+      "dist",
+      "themes"
+    ]
   }
 }

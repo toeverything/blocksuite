@@ -1,8 +1,54 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
+
 declare module 'quill' {
   import quill = require('quill/index');
   export type * from 'quill/index' assert { 'resolution-mode': 'require' };
   declare const quillDefault: typeof quill.default;
   export default quillDefault;
+}
+
+declare module 'y-protocols/awareness.js' {
+  export class Awareness<
+    State extends Record<string, unknown> = Record<string, unknown>
+  > {
+    constructor<
+      State extends Record<string, unknown> = Record<string, unknown>
+    >(doc: Y.Doc): Awareness<State>;
+    clientID: number;
+    destroy(): void;
+    getStates(): Map<number, State>;
+    getLocalState(): State;
+    setLocalState(state: State): void;
+    setLocalStateField<Field extends keyof State>(
+      field: Field,
+      value: State[Field]
+    ): void;
+    on(
+      event: 'change',
+      callback: (
+        diff: {
+          added: number[];
+          removed: number[];
+          updated: number[];
+        },
+        transactionOrigin: string | number
+      ) => void
+    ): void;
+    on(
+      event: 'update',
+      callback: (
+        diff: {
+          added: number[];
+          removed: number[];
+          updated: number[];
+        },
+        transactionOrigin: string | number
+      ) => void
+    ): void;
+    on(event: 'destroy', callback: () => void): void;
+    off(event: 'change' | 'update' | 'destroy', callback: AnyFunction): void;
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword
@@ -18,13 +64,18 @@ declare type PropsWithId<Props> = Props & { id: string };
 
 declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
+  enable_database: boolean;
   enable_drag_handle: boolean;
   enable_surface: boolean;
+  enable_block_hub: boolean;
+  enable_slash_menu: boolean;
+  enable_append_flavor_slash: boolean;
   readonly: Record<string, boolean>;
 };
 
 declare namespace BlockSuiteInternal {
   import { TextType } from '@blocksuite/store';
+
   interface SchemaMeta {
     /**
      * color of the tag
@@ -96,7 +147,7 @@ declare namespace BlockSuiteInternal {
 
   interface IBaseBlockProps {
     flavour: string;
-    type: string;
+    type?: string;
     id: string;
     children: IBaseBlockProps[];
 
@@ -114,7 +165,8 @@ declare namespace BlockSuiteInternal {
     PageBlockModel,
     ParagraphBlockModel,
     SurfaceBlockModel,
-  } from '@blocksuite/blocks';
+    DatabaseBlockModel,
+  } from '@blocksuite/blocks/models';
 
   export type BlockModels = {
     'affine:paragraph': ParagraphBlockModel;
@@ -124,8 +176,8 @@ declare namespace BlockSuiteInternal {
     'affine:code': CodeBlockModel;
     'affine:divider': DividerBlockModel;
     'affine:embed': EmbedBlockModel;
-    // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
+    'affine:database': DatabaseBlockModel;
   };
 }
 
@@ -175,17 +227,17 @@ declare namespace BlockSuiteModelProps {
   }
 
   import type { ColorStyle, TDShapeType } from '@blocksuite/blocks';
-  interface ShapeBlockModel {
-    color: ColorStyle | `#${string}`;
-    type: TDShapeType;
 
-    xywh: string;
+  interface DatabaseBlockModel {
+    columns: BlockSuiteInternal.ColumnTypes[];
+    title: string;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface SurfaceBlockModel {}
 
   export type ALL = {
+    'affine:database': DatabaseBlockModel;
     'affine:paragraph': ParagraphBlockModel;
     'affine:page': PageBlockModel;
     'affine:list': ListBlockModel;
@@ -193,7 +245,6 @@ declare namespace BlockSuiteModelProps {
     'affine:code': CodeBlockModel;
     'affine:divider': DividerBlockModel;
     'affine:embed': EmbedBlockModel;
-    // 'affine:shape': ShapeBlockModel,
     'affine:surface': SurfaceBlockModel;
   };
 }
