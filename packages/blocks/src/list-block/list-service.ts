@@ -22,7 +22,7 @@ export class ListBlockService extends BaseService {
     const nextSiblingBlock = block.page.getBlockById(nextSiblingId);
     switch (block.type) {
       case 'bulleted':
-      case 'toggled':
+      case 'toggle':
         text = `<li>${text}</li>`;
         break;
       case 'numbered':
@@ -42,7 +42,7 @@ export class ListBlockService extends BaseService {
     ) {
       switch (block.type) {
         case 'bulleted':
-        case 'toggled':
+        case 'toggle':
         case 'todo':
           text = `<ul>${text}`;
           break;
@@ -59,7 +59,7 @@ export class ListBlockService extends BaseService {
     ) {
       switch (block.type) {
         case 'bulleted':
-        case 'toggled':
+        case 'toggle':
         case 'todo':
           text = `${text}</ul>`;
           break;

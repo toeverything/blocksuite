@@ -19,6 +19,7 @@ export const point2 = () => {
     </svg>
   `;
 };
+
 export const point3 = () => {
   return html`
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -28,6 +29,7 @@ export const point3 = () => {
     </svg>
   `;
 };
+
 export const point4 = () => {
   return html`
     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -40,6 +42,7 @@ export const point4 = () => {
     </svg>
   `;
 };
+
 export const toggleRight = (enabled = true) => {
   return html`
     <svg
@@ -56,6 +59,7 @@ export const toggleRight = (enabled = true) => {
     </svg>
   `;
 };
+
 export const toggleDown = () => {
   return html`
     <svg
@@ -71,6 +75,7 @@ export const toggleDown = () => {
     </svg>
   `;
 };
+
 export const checkboxChecked = () => {
   return html`
     <svg

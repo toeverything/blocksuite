@@ -482,7 +482,7 @@ export function tryMatchSpaceHotkey(
       isConverted = convertToList(page, model, 'bulleted', prefix);
       break;
     case '>>':
-      isConverted = convertToList(page, model, 'toggled', prefix, {
+      isConverted = convertToList(page, model, 'toggle', prefix, {
         open: !!model.children.length,
       });
       break;

@@ -115,10 +115,10 @@ export class ListBlockComponent extends NonShadowLitElement {
       deep,
       index,
       onClick: () => {
-        if (this.model.type === 'todo' || this.model.type === 'toggled') {
+        if (this.model.type === 'todo' || this.model.type === 'toggle') {
           this.host.page.captureSync();
           const checkedOrOpen =
-            this.model.type === 'toggled'
+            this.model.type === 'toggle'
               ? {
                   open: !this.model.children.length ? null : !this.model.open, // don't allow to toggle if there are no kids
                 }
@@ -132,7 +132,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       },
     });
     const childrenContainer =
-      this.model.type === 'toggled' && this.model.open === false
+      this.model.type === 'toggle' && this.model.open === false
         ? null
         : BlockChildrenContainer(this.model, this.host, () =>
             this.requestUpdate()

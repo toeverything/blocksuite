@@ -182,7 +182,7 @@ declare namespace BlockSuiteInternal {
 }
 
 declare type EmbedType = 'image' | 'video' | 'audio' | 'file';
-declare type ListType = 'bulleted' | 'numbered' | 'todo' | 'toggled';
+declare type ListType = 'bulleted' | 'numbered' | 'todo' | 'toggle';
 declare type ParagraphType =
   | 'text'
   | 'quote'

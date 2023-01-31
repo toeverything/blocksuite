@@ -88,7 +88,7 @@ export const paragraphConfig = [
   },
   {
     flavour: 'affine:list',
-    type: 'toggled',
+    type: 'toggle',
     name: 'Toggle List',
     hotkey: 'command+option+7,ctrl+shift+7',
     icon: ArrowRightIcon,
@@ -223,7 +223,7 @@ export const BLOCKHUB_LIST_ITEMS = [
   },
   {
     flavour: 'affine:list',
-    type: 'toggled',
+    type: 'toggle',
     name: 'Toggle List',
     description: 'a simple toggle list.',
     icon: ArrowRightIcon,
