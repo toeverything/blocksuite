@@ -467,33 +467,28 @@ export class Page extends Space<PageData> {
     });
   }
 
-  @debug('CRUD')
-  insertBlock(
-    blockProps: Partial<BaseBlockModel>,
+  addSiblingBlock(
     targetModel: BaseBlockModel,
-    top = true
+    blockProps: Partial<BaseBlockModel>,
+    direction: 'left' | 'right' = 'right'
   ) {
-    const targetParentModel = this.getParent(targetModel);
-    if (targetParentModel === null) {
-      throw new Error('cannot find parent model');
-    }
-    this.transact(() => {
-      const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
-      const yChildren = yParent.get('sys:children') as Y.Array<string>;
-      const targetIdx = yChildren
-        .toArray()
-        .findIndex(id => id === targetModel.id);
-      assertExists(blockProps.flavour);
-      this.addBlockByFlavour(
-        blockProps.flavour,
-        {
-          type: blockProps.type,
-        },
-        targetParentModel.id,
-        top ? targetIdx : targetIdx + 1
-      );
-      // }
-    });
+    const parent = this.getParent(targetModel);
+    assertExists(blockProps.flavour);
+    assertExists(parent);
+
+    const targetIndex =
+      parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
+    const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
+
+    const id = this.addBlockByFlavour(
+      blockProps.flavour,
+      {
+        type: blockProps.type,
+      },
+      parent.id,
+      insertIndex
+    );
+    return id;
   }
 
   deleteBlockById(id: string) {
