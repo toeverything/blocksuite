@@ -19,6 +19,8 @@ import {
   MODIFIER_KEY,
   resetHistory,
   readClipboardText,
+  pressSpace,
+  pressKey,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -47,27 +49,35 @@ test('cmd+backspace keep deleting when start of an empty list', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
+
   await pressEnter(page);
   await page.keyboard.type('---');
-  await page.keyboard.press('Space', { delay: 50 });
+  await pressSpace(page);
   await assertRichTexts(page, ['123', '456', '789', '\n']);
 
+  const cmdBackspace = `${SHORT_KEY}+Backspace`;
+
   // Remove empty line
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
+  await pressKey(page, cmdBackspace);
   // Remove divider
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await pressKey(page, cmdBackspace);
   // Remove the paragraph remaining by the divider
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+  await pressKey(page, cmdBackspace);
   await assertRichTexts(page, ['123', '456', '789']);
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+
+  await pressKey(page, cmdBackspace);
   await assertRichTexts(page, ['123', '456', '\n']);
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+
+  await pressKey(page, cmdBackspace);
   await assertRichTexts(page, ['123', '456']);
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+
+  await pressKey(page, cmdBackspace);
   await assertRichTexts(page, ['123', '\n']);
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+
+  await pressKey(page, cmdBackspace);
   await assertRichTexts(page, ['123']);
-  await page.keyboard.press(`${SHORT_KEY}+Backspace`);
+
+  await pressKey(page, cmdBackspace);
   await assertRichTexts(page, ['\n']);
 });
 
