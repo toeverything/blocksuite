@@ -14,7 +14,6 @@ import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 
 function selectList(model: ListBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;
@@ -24,9 +23,7 @@ function selectList(model: ListBlockModel) {
     console.error('list block model:', model, 'blockElement:', blockElement);
     throw new Error('Failed to select list! blockElement not found!');
   }
-  const richText = blockElement.querySelector('rich-text');
-  assertExists(richText);
-  const blockRect = richText.getBoundingClientRect();
+  const blockRect = blockElement.getBoundingClientRect();
   selectionManager.state.focusedBlockIndex = model.index as number;
   selectionManager.resetSelectedBlockByRect(blockRect);
 }

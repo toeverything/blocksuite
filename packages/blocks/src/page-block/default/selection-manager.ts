@@ -65,10 +65,69 @@ function filterSelectedBlock(
   selectionRect: DOMRect,
   offset: IPoint
 ): Element[] {
-  return Array.from(blockCache.keys()).filter(block => {
+  const blocks = Array.from(blockCache.keys());
+  const len = blocks.length;
+  const results = [];
+  let depth = 1;
+  let parentIndex: number | undefined;
+  let flag = false;
+
+  for (let i = 0; i < len; i++) {
+    const block = blocks[i];
     const rect = block.getBoundingClientRect();
-    return intersects(rect, selectionRect, offset);
-  });
+    const isIntersects = intersects(rect, selectionRect, offset);
+    if (isIntersects) {
+      const model = getModelByElement(block);
+      const currentDepth = model.depth as number;
+      const currentIndex = model.index as number;
+      const currentParentIndex = model.parentIndex as number;
+      if (flag) {
+        if (currentDepth === depth) {
+          results.push(block);
+        } else if (currentDepth > depth) {
+          // Not continuous
+          if (results.length > 1) {
+            continue;
+          }
+          depth = currentDepth;
+          parentIndex = currentParentIndex;
+          results.shift();
+          results.push(block);
+        } else {
+          let size = currentIndex - parentIndex - 1;
+          let prevIndex = parentIndex;
+          if (depth - currentDepth > 1) {
+            let b = blocks[prevIndex];
+            while (b) {
+              const m = getModelByElement(b);
+              if (m.parentIndex === currentParentIndex) {
+                prevIndex = m.index;
+                break;
+              } else {
+                prevIndex = m.parentIndex;
+                b = blocks[prevIndex];
+              }
+            }
+          }
+          while (size) {
+            results.pop();
+            size--;
+          }
+          results.push(blocks[prevIndex]);
+          results.push(blocks[currentIndex]);
+          depth = currentDepth;
+          parentIndex = currentParentIndex;
+        }
+      } else {
+        results.push(block);
+        depth = currentDepth;
+        parentIndex = currentIndex;
+        flag = true;
+      }
+    }
+  }
+
+  return results;
 }
 
 function filterSelectedBlockByIndex(
@@ -403,7 +462,6 @@ export class DefaultSelectionManager {
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
-    assertExists(this.state.startPoint);
     assertExists(this.state.startPoint);
     const current = { x: e.x, y: e.y };
     const { startPoint: start } = this.state;
