@@ -473,9 +473,10 @@ export function isBlankArea(e: SelectionEvent) {
   return cursor !== 'text';
 }
 
-// fix selection back to the nearest block
-// when user click on the edge of page (page mode) or frame (edgeless mode)
-function handleClickReTargeting(page: Page, e: SelectionEvent) {
+// Retarget selection back to the nearest block
+// when user clicks on the edge of page (page mode) or frame (edgeless mode).
+// See https://github.com/toeverything/blocksuite/pull/878
+function handleClickRetargeting(page: Page, e: SelectionEvent) {
   const targetEl = getElementFromEventTarget(e.raw.target);
   const block = targetEl?.closest(`[${BLOCK_ID_ATTR}]`) as {
     model?: BaseBlockModel;
@@ -484,11 +485,11 @@ function handleClickReTargeting(page: Page, e: SelectionEvent) {
   const parentModel = block?.model || block?.pageModel;
   if (!parentModel) return;
 
-  const shouldReTarget = matchFlavours(parentModel, [
+  const shouldRetarget = matchFlavours(parentModel, [
     'affine:frame',
     'affine:page',
   ]);
-  if (!shouldReTarget) return;
+  if (!shouldRetarget) return;
 
   const { clientX, clientY } = e.raw;
 
@@ -525,7 +526,7 @@ export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
     resetNativeSelection(range);
   }
 
-  handleClickReTargeting(page, e);
+  handleClickRetargeting(page, e);
 }
 
 export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
