@@ -7,17 +7,14 @@ import { VirgoLine } from './components/virgo-line.js';
 import { BaseText } from './components/base-text.js';
 import { baseRenderElement } from './utils/render.js';
 
-export interface VirgoRange {
+export interface VRange {
   index: number;
   length: number;
 }
 
-export type UpdateVirgoRangeProp = [
-  VirgoRange | null,
-  'native' | 'input' | 'other'
-];
+export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
 
-export type DeltaEntry = [DeltaInsert, VirgoRange];
+export type DeltaEntry = [DeltaInsert, VRange];
 
 interface DomPoint {
   // which text node this point is in
@@ -26,20 +23,20 @@ interface DomPoint {
   index: number;
 }
 
-export class Virgo {
+export class VEditor {
   private _rootElement: HTMLElement | null = null;
-  private _virgoRange: VirgoRange | null = null;
+  private _vRange: VRange | null = null;
   private _isComposing = false;
   private _renderElement: (delta: DeltaInsert) => TextElement =
     baseRenderElement;
 
   signals: {
-    updateVirgoRange: Signal<UpdateVirgoRangeProp>;
+    updateVRange: Signal<UpdateVRangeProp>;
   };
   yText: Y.Text;
 
   constructor(
-    yText: Virgo['yText'],
+    yText: VEditor['yText'],
     renderElement?: (delta: DeltaInsert) => TextElement
   ) {
     this.yText = yText;
@@ -48,17 +45,14 @@ export class Virgo {
     }
 
     this.signals = {
-      updateVirgoRange: new Signal<UpdateVirgoRangeProp>(),
+      updateVRange: new Signal<UpdateVRangeProp>(),
     };
 
-    document.addEventListener(
-      'selectionchange',
-      this._onSelectionChange.bind(this)
-    );
+    document.addEventListener('selectionchange', this._onSelectionChange);
 
-    yText.observe(this._onYTextChange.bind(this));
+    yText.observe(this._onYTextChange);
 
-    this.signals.updateVirgoRange.on(this._onUpdateVirgoRange.bind(this));
+    this.signals.updateVRange.on(this._onUpdateVRange);
   }
 
   mount(rootElement: HTMLElement): void {
@@ -117,7 +111,7 @@ export class Virgo {
     return selection;
   }
 
-  getDeltaByRangeIndex(rangeIndex: VirgoRange['index']): DeltaInsert | null {
+  getDeltaByRangeIndex(rangeIndex: VRange['index']): DeltaInsert | null {
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     let index = 0;
@@ -132,7 +126,7 @@ export class Virgo {
     return null;
   }
 
-  getDeltasByVirgoRange(virgoRange: VirgoRange): DeltaEntry[] {
+  getDeltasByVRange(vRange: VRange): DeltaEntry[] {
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     const result: DeltaEntry[] = [];
@@ -140,8 +134,8 @@ export class Virgo {
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length >= virgoRange.index &&
-        index < virgoRange.index + virgoRange.length
+        index + delta.insert.length >= vRange.index &&
+        index < vRange.index + vRange.length
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
       }
@@ -155,85 +149,77 @@ export class Virgo {
     return this._rootElement;
   }
 
-  getVirgoRange(): VirgoRange | null {
-    return this._virgoRange;
+  getVRange(): VRange | null {
+    return this._vRange;
   }
 
-  setVirgoRange(virgoRange: VirgoRange): void {
-    this.signals.updateVirgoRange.emit([virgoRange, 'other']);
+  setVRange(vRange: VRange): void {
+    this.signals.updateVRange.emit([vRange, 'other']);
   }
 
-  deleteText(virgoRange: VirgoRange): void {
-    this.yText.delete(virgoRange.index, virgoRange.length);
+  deleteText(vRange: VRange): void {
+    this.yText.delete(vRange.index, vRange.length);
   }
 
   // TODO add support for formatting
-  insertText(virgoRange: VirgoRange, text: string): void {
-    const currentDelta = this.getDeltaByRangeIndex(virgoRange.index);
-    this.yText.delete(virgoRange.index, virgoRange.length);
+  insertText(vRange: VRange, text: string): void {
+    const currentDelta = this.getDeltaByRangeIndex(vRange.index);
+    this.yText.delete(vRange.index, vRange.length);
 
     if (
-      virgoRange.index > 0 &&
+      vRange.index > 0 &&
       currentDelta &&
       currentDelta.attributes.type !== 'line-break'
     ) {
-      this.yText.insert(virgoRange.index, text, currentDelta.attributes);
+      this.yText.insert(vRange.index, text, currentDelta.attributes);
     } else {
-      this.yText.insert(virgoRange.index, text, { type: 'base' });
+      this.yText.insert(vRange.index, text, { type: 'base' });
     }
   }
 
-  insertLineBreak(virgoRange: VirgoRange): void {
-    this.yText.delete(virgoRange.index, virgoRange.length);
-    this.yText.insert(virgoRange.index, '\n', { type: 'line-break' });
+  insertLineBreak(vRange: VRange): void {
+    this.yText.delete(vRange.index, vRange.length);
+    this.yText.insert(vRange.index, '\n', { type: 'line-break' });
   }
 
   formatText(
-    virgoRange: VirgoRange,
+    vRange: VRange,
     attributes: TextAttributes,
     options: {
-      match?: (delta: DeltaInsert, deltaVirgoRange: VirgoRange) => boolean;
+      match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
     } = {}
   ): void {
     const { match = () => true, mode = 'replace' } = options;
-    const deltas = this.getDeltasByVirgoRange(virgoRange);
+    const deltas = this.getDeltasByVRange(vRange);
 
-    for (const [delta, deltaVirgoRange] of deltas) {
+    for (const [delta, deltaVRange] of deltas) {
       if (delta.attributes.type === 'line-break') {
         continue;
       }
 
-      if (match(delta, deltaVirgoRange)) {
-        const goalVirgoRange = {
-          index: Math.max(virgoRange.index, deltaVirgoRange.index),
+      if (match(delta, deltaVRange)) {
+        const targetVRange = {
+          index: Math.max(vRange.index, deltaVRange.index),
           length:
             Math.min(
-              virgoRange.index + virgoRange.length,
-              deltaVirgoRange.index + deltaVirgoRange.length
-            ) - Math.max(virgoRange.index, deltaVirgoRange.index),
+              vRange.index + vRange.length,
+              deltaVRange.index + deltaVRange.length
+            ) - Math.max(vRange.index, deltaVRange.index),
         };
 
         if (mode === 'replace') {
-          this.resetText(goalVirgoRange);
+          this.resetText(targetVRange);
         }
 
-        this.yText.format(
-          goalVirgoRange.index,
-          goalVirgoRange.length,
-          attributes
-        );
+        this.yText.format(targetVRange.index, targetVRange.length, attributes);
       }
     }
   }
 
-  resetText(virgoRange: VirgoRange): void {
+  resetText(vRange: VRange): void {
     const coverDeltas: DeltaInsert[] = [];
-    for (
-      let i = virgoRange.index;
-      i <= virgoRange.index + virgoRange.length;
-      i++
-    ) {
+    for (let i = vRange.index; i <= vRange.index + vRange.length; i++) {
       const delta = this.getDeltaByRangeIndex(i);
       if (delta) {
         coverDeltas.push(delta);
@@ -246,19 +232,19 @@ export class Virgo {
       )
     );
 
-    this.yText.format(virgoRange.index, virgoRange.length, {
+    this.yText.format(vRange.index, vRange.length, {
       ...unset,
       type: 'base',
     });
   }
 
   /**
-   * sync the dom selection from virgoRange for **this Editor**
+   * sync the dom selection from vRange for **this Editor**
    */
-  syncVirgoRange(): void {
+  syncVRange(): void {
     setTimeout(() => {
-      if (this._virgoRange) {
-        const newRange = this.toDomRange(this._virgoRange);
+      if (this._vRange) {
+        const newRange = this.toDomRange(this._vRange);
 
         if (newRange) {
           const selectionRoot = findDocumentOrShadowRoot(this);
@@ -274,9 +260,9 @@ export class Virgo {
   }
 
   /**
-   * calculate the dom selection from virgoRange for **this Editor**
+   * calculate the dom selection from vRange for **this Editor**
    */
-  toDomRange(virgoRange: VirgoRange): Range | null {
+  toDomRange(vRange: VRange): Range | null {
     assertExists(this._rootElement);
 
     const lineElements = Array.from(
@@ -302,16 +288,13 @@ export class Virgo {
 
         const textLength = calculateTextLength(textNode);
 
-        if (!anchorText && index + textLength >= virgoRange.index) {
+        if (!anchorText && index + textLength >= vRange.index) {
           anchorText = textNode;
-          anchorOffset = virgoRange.index - index;
+          anchorOffset = vRange.index - index;
         }
-        if (
-          !focusText &&
-          index + textLength >= virgoRange.index + virgoRange.length
-        ) {
+        if (!focusText && index + textLength >= vRange.index + vRange.length) {
           focusText = textNode;
-          focusOffset = virgoRange.index + virgoRange.length - index;
+          focusOffset = vRange.index + vRange.length - index;
         }
 
         index += textLength;
@@ -332,32 +315,32 @@ export class Virgo {
   }
 
   /**
-   * calculate the virgoRange from dom selection for **this Editor**
-   * there are three cases when the virgoRange of this Editor is not null:
+   * calculate the vRange from dom selection for **this Editor**
+   * there are three cases when the vRange of this Editor is not null:
    * (In the following, "|" mean anchor and focus, each line is a separate Editor)
    * 1. anchor and focus are in this Editor
    *    aaaaaa
    *    b|bbbb|b
    *    cccccc
-   *    the virgoRange of second Editor is {index: 1, length: 4}, the others are null
+   *    the vRange of second Editor is {index: 1, length: 4}, the others are null
    * 2. anchor and focus one in this Editor, one in another Editor
    *    aaa|aaa    aaaaaa
    *    bbbbb|b or bbbbb|b
    *    cccccc     cc|cccc
    *    2.1
-   *        the virgoRange of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
+   *        the vRange of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
    *        the third is null
    *    2.2
-   *        the virgoRange of first Editor is null, the second is {index: 0, length: 5},
+   *        the vRange of first Editor is null, the second is {index: 0, length: 5},
    *        the third is {index: 0, length: 2}
    * 3. anchor and focus are in another Editor
    *    aa|aaaa
    *    bbbbbb
    *    cccc|cc
-   *    the virgoRange of first Editor is {index: 2, length: 4},
+   *    the vRange of first Editor is {index: 2, length: 4},
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
-  toVirgoRange(selection: Selection): VirgoRange | null {
+  toVRange(selection: Selection): VRange | null {
     assertExists(this._rootElement);
 
     const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
@@ -370,11 +353,11 @@ export class Virgo {
     let focusText: Text | null = null;
     let focusTextOffset = focusOffset;
 
-    if (anchorNode instanceof Text && ifVirgoText(anchorNode)) {
+    if (anchorNode instanceof Text && isVText(anchorNode)) {
       anchorText = anchorNode;
       anchorTextOffset = anchorOffset;
     }
-    if (focusNode instanceof Text && ifVirgoText(focusNode)) {
+    if (focusNode instanceof Text && isVText(focusNode)) {
       focusText = focusNode;
       focusTextOffset = focusOffset;
     }
@@ -470,60 +453,58 @@ export class Virgo {
   private _onBefoeInput(event: InputEvent): void {
     event.preventDefault();
 
-    if (!this._virgoRange) {
+    if (!this._vRange) {
       return;
     }
 
     const { inputType, data } = event;
 
-    if (inputType === 'insertText' && this._virgoRange.index >= 0 && data) {
-      this.insertText(this._virgoRange, data);
+    if (inputType === 'insertText' && this._vRange.index >= 0 && data) {
+      this.insertText(this._vRange, data);
 
-      this.signals.updateVirgoRange.emit([
+      this.signals.updateVRange.emit([
         {
-          index: this._virgoRange.index + data.length,
+          index: this._vRange.index + data.length,
           length: 0,
         },
         'input',
       ]);
-    } else if (inputType === 'insertParagraph' && this._virgoRange.index >= 0) {
-      this.insertLineBreak(this._virgoRange);
+    } else if (inputType === 'insertParagraph' && this._vRange.index >= 0) {
+      this.insertLineBreak(this._vRange);
 
-      this.signals.updateVirgoRange.emit([
+      this.signals.updateVRange.emit([
         {
-          index: this._virgoRange.index + 1,
+          index: this._vRange.index + 1,
           length: 0,
         },
         'input',
       ]);
     } else if (
       inputType === 'deleteContentBackward' &&
-      this._virgoRange.index >= 0
+      this._vRange.index >= 0
     ) {
-      if (this._virgoRange.length > 0) {
-        this.deleteText(this._virgoRange);
+      if (this._vRange.length > 0) {
+        this.deleteText(this._vRange);
 
-        this.signals.updateVirgoRange.emit([
+        this.signals.updateVRange.emit([
           {
-            index: this._virgoRange.index,
+            index: this._vRange.index,
             length: 0,
           },
           'input',
         ]);
-      } else if (this._virgoRange.index > 0) {
+      } else if (this._vRange.index > 0) {
         // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
-        const tmpString = this.yText
-          .toString()
-          .slice(0, this._virgoRange.index);
+        const tmpString = this.yText.toString().slice(0, this._vRange.index);
         const deletedChracater = [...tmpString].slice(-1).join('');
         this.deleteText({
-          index: this._virgoRange.index - deletedChracater.length,
+          index: this._vRange.index - deletedChracater.length,
           length: deletedChracater.length,
         });
 
-        this.signals.updateVirgoRange.emit([
+        this.signals.updateVRange.emit([
           {
-            index: this._virgoRange.index - deletedChracater.length,
+            index: this._vRange.index - deletedChracater.length,
             length: 0,
           },
           'input',
@@ -539,18 +520,18 @@ export class Virgo {
   private _onCompositionEnd(event: CompositionEvent): void {
     this._isComposing = false;
 
-    if (!this._virgoRange) {
+    if (!this._vRange) {
       return;
     }
 
     const { data } = event;
 
-    if (this._virgoRange.index >= 0 && data) {
-      this.insertText(this._virgoRange, data);
+    if (this._vRange.index >= 0 && data) {
+      this.insertText(this._vRange, data);
 
-      this.signals.updateVirgoRange.emit([
+      this.signals.updateVRange.emit([
         {
-          index: this._virgoRange.index + data.length,
+          index: this._vRange.index + data.length,
           length: 0,
         },
         'input',
@@ -558,7 +539,7 @@ export class Virgo {
     }
   }
 
-  private _onYTextChange(): void {
+  private _onYTextChange = () => {
     assertExists(this._rootElement);
 
     const deltas = (this.yText.toDelta() as DeltaInsert[]).flatMap(d => {
@@ -571,9 +552,9 @@ export class Virgo {
     }) as DeltaInsert[];
 
     renderDeltas(deltas, this._rootElement, this._renderElement);
-  }
+  };
 
-  private _onSelectionChange(): void {
+  private _onSelectionChange = () => {
     assertExists(this._rootElement);
     if (this._isComposing) {
       return;
@@ -599,17 +580,14 @@ export class Virgo {
       return;
     }
 
-    const virgoRange = this.toVirgoRange(selection);
-    if (virgoRange) {
-      this.signals.updateVirgoRange.emit([virgoRange, 'native']);
+    const vRange = this.toVRange(selection);
+    if (vRange) {
+      this.signals.updateVRange.emit([vRange, 'native']);
     }
-  }
+  };
 
-  private _onUpdateVirgoRange([
-    newRangStatic,
-    origin,
-  ]: UpdateVirgoRangeProp): void {
-    this._virgoRange = newRangStatic;
+  private _onUpdateVRange = ([newRangStatic, origin]: UpdateVRangeProp) => {
+    this._vRange = newRangStatic;
 
     if (origin === 'native') {
       return;
@@ -619,15 +597,15 @@ export class Virgo {
     this._rootElement?.blur();
 
     const fn = () => {
-      // when using input method _VirgoRange will return to the starting point,
+      // when using input method _vRange will return to the starting point,
       // so we need to reassign
-      this._virgoRange = newRangStatic;
-      this.syncVirgoRange();
+      this._vRange = newRangStatic;
+      this.syncVRange();
     };
 
     // updates in lit are performed asynchronously
     setTimeout(fn, 0);
-  }
+  };
 }
 
 function textPointToDomPoint(
@@ -722,11 +700,11 @@ function getTextNodeFromElement(element: Element): Text | null {
   return null;
 }
 
-function ifVirgoText(text: Text) {
+function isVText(text: Text) {
   return text.parentElement?.dataset.virgoText === 'true' ?? false;
 }
 
-function findDocumentOrShadowRoot(editor: Virgo): Document | ShadowRoot {
+function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
   const el = editor.getRootElement();
 
   if (!el) {
@@ -754,7 +732,7 @@ function renderDeltas(
   const chunks = deltaInsersToChunks(deltas);
 
   // every chunk is a line
-  const lines: Array<VirgoLine> = [];
+  const lines: VirgoLine[] = [];
   for (const chunk of chunks) {
     if (chunk.length === 0) {
       const virgoLine = new VirgoLine();

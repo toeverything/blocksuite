@@ -28,11 +28,13 @@ export class BaseText extends LitElement {
     const unitText = new VirgoUnitText();
     unitText.delta = this.delta;
 
-    return html`<span
-      data-virgo-element="true"
-      style=${virgoTextStyles(this.delta.attributes)}
-      >${unitText}</span
-    >`;
+    return html`
+      <span
+        data-virgo-element="true"
+        style=${virgoTextStyles(this.delta.attributes)}
+        >${unitText}</span
+      >
+    `;
   }
 
   createRenderRoot() {

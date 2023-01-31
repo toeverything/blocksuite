@@ -1,24 +1,23 @@
 import * as Y from 'yjs';
 import { LitElement, css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-
+import { BaseArrtiubtes, VEditor } from '@blocksuite/virgo';
 import '@shoelace-style/shoelace';
-import { BaseArrtiubtes, Virgo } from '@blocksuite/virgo';
 
 @customElement('rich-text')
 export class RichText extends LitElement {
-  virgo: Virgo;
+  vEditor: VEditor;
 
-  @query(`.rich-text-container`)
+  @query('.rich-text-container')
   private _container!: HTMLDivElement;
 
-  constructor(virgo: Virgo) {
+  constructor(vEditor: VEditor) {
     super();
-    this.virgo = virgo;
+    this.vEditor = vEditor;
   }
 
   firstUpdated() {
-    this.virgo.mount(this._container);
+    this.vEditor.mount(this._container);
   }
 
   render() {
@@ -43,27 +42,27 @@ export class ToolBar extends LitElement {
     }
   `;
 
-  virgo: Virgo;
+  vEditor: VEditor;
 
-  constructor(virgo: Virgo) {
+  constructor(vEditor: VEditor) {
     super();
-    this.virgo = virgo;
+    this.vEditor = vEditor;
   }
 
-  private format(virgo: Virgo, mark: Partial<BaseArrtiubtes>): void {
-    const rangeStatic = virgo.getVirgoRange();
+  private format(vEditor: VEditor, mark: Partial<BaseArrtiubtes>): void {
+    const rangeStatic = vEditor.getVRange();
     if (!rangeStatic) {
       return;
     }
 
-    virgo.formatText(
+    vEditor.formatText(
       rangeStatic,
       { type: 'base', ...mark },
       {
         mode: 'merge',
       }
     );
-    virgo.syncVirgoRange();
+    vEditor.syncVRange();
   }
 
   protected firstUpdated(): void {
@@ -92,26 +91,26 @@ export class ToolBar extends LitElement {
     }
 
     boldButton.addEventListener('click', () => {
-      this.format(this.virgo, { bold: true });
+      this.format(this.vEditor, { bold: true });
     });
     italicButton.addEventListener('click', () => {
-      this.format(this.virgo, { italic: true });
+      this.format(this.vEditor, { italic: true });
     });
     underlineButton.addEventListener('click', () => {
-      this.format(this.virgo, { underline: true });
+      this.format(this.vEditor, { underline: true });
     });
     strikethroughButton.addEventListener('click', () => {
-      this.format(this.virgo, { strikethrough: true });
+      this.format(this.vEditor, { strikethrough: true });
     });
     resetButton.addEventListener('click', () => {
-      const rangeStatic = this.virgo.getVirgoRange();
+      const rangeStatic = this.vEditor.getVRange();
       if (!rangeStatic) {
         return;
       }
-      this.virgo.resetText(rangeStatic);
+      this.vEditor.resetText(rangeStatic);
     });
 
-    const undoManager = new Y.UndoManager(this.virgo.yText);
+    const undoManager = new Y.UndoManager(this.vEditor.yText);
     undoButton.addEventListener('click', () => {
       undoManager.undo();
     });
@@ -121,15 +120,17 @@ export class ToolBar extends LitElement {
   }
 
   protected render(): unknown {
-    return html`<div class="tool-bar">
-      <sl-button class="bold">bold</sl-button>
-      <sl-button class="italic">italic</sl-button>
-      <sl-button class="underline">underline</sl-button>
-      <sl-button class="strikethrough">strikethrough</sl-button>
-      <sl-button class="reset">reset</sl-button>
-      <sl-button class="undo">undo</sl-button>
-      <sl-button class="redo">redo</sl-button>
-    </div>`;
+    return html`
+      <div class="tool-bar">
+        <sl-button class="bold">bold</sl-button>
+        <sl-button class="italic">italic</sl-button>
+        <sl-button class="underline">underline</sl-button>
+        <sl-button class="strikethrough">strikethrough</sl-button>
+        <sl-button class="reset">reset</sl-button>
+        <sl-button class="undo">undo</sl-button>
+        <sl-button class="redo">redo</sl-button>
+      </div>
+    `;
   }
 }
 
@@ -175,10 +176,10 @@ export class TestPage extends LitElement {
     });
 
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new Virgo(textA);
+    const editorA = new VEditor(textA);
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new Virgo(textB);
+    const editorB = new VEditor(textB);
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);
@@ -204,11 +205,13 @@ export class TestPage extends LitElement {
   }
 
   protected render(): unknown {
-    return html`<div class="container">
-      <div class="editors">
-        <div class="doc-a"></div>
-        <div class="doc-b"></div>
+    return html`
+      <div class="container">
+        <div class="editors">
+          <div class="doc-a"></div>
+          <div class="doc-b"></div>
+        </div>
       </div>
-    </div>`;
+    `;
   }
 }
