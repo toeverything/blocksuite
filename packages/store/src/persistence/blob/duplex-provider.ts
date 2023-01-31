@@ -1,7 +1,13 @@
 import { assertExists, Signal } from '@blocksuite/global/utils';
 import { CloudSyncManager } from './cloud-sync-manager.js';
 
-import type { BlobId, BlobProvider, BlobURL, IDBInstance } from './types.js';
+import type {
+  BlobId,
+  BlobProvider,
+  BlobURL,
+  IDBInstance,
+  BlobSyncStateChangeEvent,
+} from './types.js';
 import { getDatabase, sha } from './utils.js';
 
 export type BlobOptions = Record<'api' | 'token', string>;
@@ -29,12 +35,8 @@ export class DuplexBlobProvider implements BlobProvider {
   private readonly _cloudManager?: CloudSyncManager;
   private _uploadingIds: BlobId[] = [];
 
-  readonly blobs: Set<string> = new Set();
   readonly signals = {
-    blobAdded: new Signal<BlobId>(),
-    blobDeleted: new Signal<BlobId>(),
-    uploadStateChanged: new Signal<BlobId[]>(),
-    uploadFinished: new Signal<BlobId>(),
+    onBlobSyncStateChange: new Signal<BlobSyncStateChangeEvent>(),
   };
 
   static async init(
@@ -42,17 +44,7 @@ export class DuplexBlobProvider implements BlobProvider {
     optionsGetter?: BlobOptionsGetter
   ): Promise<DuplexBlobProvider> {
     const provider = new DuplexBlobProvider(workspace, optionsGetter);
-    await provider._initBlobs();
     return provider;
-  }
-
-  private async _initBlobs() {
-    const entries = await this._localDB.keys();
-    for (const key of entries) {
-      const blobId = key as BlobId;
-      this.signals.blobAdded.emit(blobId);
-      this.blobs.add(blobId);
-    }
   }
 
   private constructor(workspace: string, optionsGetter?: BlobOptionsGetter) {
@@ -61,16 +53,11 @@ export class DuplexBlobProvider implements BlobProvider {
     const endpoint = optionsGetter?.('api');
     if (endpoint) {
       assertExists(optionsGetter);
-      this.signals.uploadStateChanged.on(uploadingIds => {
-        this._uploadingIds = uploadingIds;
+      this._cloudManager = new CloudSyncManager(workspace, optionsGetter);
+
+      this._cloudManager.signals.onBlobSyncStateChange.on(blobState => {
+        this.signals.onBlobSyncStateChange.emit(blobState);
       });
-      this._cloudManager = new CloudSyncManager(
-        workspace,
-        optionsGetter,
-        this._localDB,
-        this.signals.uploadStateChanged,
-        this.signals.uploadFinished
-      );
     }
   }
 
@@ -85,12 +72,12 @@ export class DuplexBlobProvider implements BlobProvider {
   async get(id: BlobId): Promise<BlobURL | null> {
     const blob = await this._localDB.get(id);
     if (!blob) {
-      const blob = this._cloudManager?.get(id);
+      const blob = await this._cloudManager?.get(id);
       if (blob) {
-        this.signals.blobAdded.emit(id);
-        this.blobs.add(id);
+        const buffer = await blob.arrayBuffer();
+        await this._localDB.set(id, buffer);
 
-        return blob;
+        return URL.createObjectURL(blob);
       }
       return null;
     }
@@ -104,12 +91,9 @@ export class DuplexBlobProvider implements BlobProvider {
     const hash = await sha(buffer);
     if (!(await this._localDB.has(hash))) {
       await this._localDB.set(hash, buffer);
-
-      this.signals.blobAdded.emit(hash);
-      this.blobs.add(hash);
     }
 
-    this._cloudManager?.addTask(hash, 'add');
+    this._cloudManager?.addTask(hash, blob);
 
     return hash;
   }
@@ -117,13 +101,11 @@ export class DuplexBlobProvider implements BlobProvider {
   async delete(id: BlobId): Promise<void> {
     await this._localDB.delete(id);
 
-    this.signals.blobDeleted.emit(id);
-    this.blobs.delete(id);
-    this._cloudManager?.addTask(id, 'delete');
+    // NOTE: should we delete blob in cloud? When?
+    // this._cloudManager?.addTask(id, 'delete');
   }
 
   async clear(): Promise<void> {
     await this._localDB.clear();
-    this.blobs.clear();
   }
 }

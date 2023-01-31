@@ -8,6 +8,7 @@ import {
   BlobStorage,
   BlobOptionsGetter,
   getBlobStorage,
+  BlobSyncState,
 } from '../persistence/blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { AwarenessStore, BlobUploadState } from '../awareness.js';
@@ -248,18 +249,24 @@ export class Workspace {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
       });
       this._blobStorage.then(blobStorage => {
-        blobStorage?.signals.uploadFinished.on(blobId => {
-          this.awarenessStore.setBlobsState({
-            [blobId]: BlobUploadState.Uploaded,
-          });
-        });
-        blobStorage?.signals.uploadStateChanged.on(uploadingIds => {
-          this.awarenessStore.setBlobsState(
-            uploadingIds.reduce((acc, id) => {
-              acc[id] = BlobUploadState.Uploading;
-              return acc;
-            }, {} as Record<string, BlobUploadState>)
-          );
+        blobStorage?.signals.onBlobSyncStateChange.on(state => {
+          const blobId = state.id;
+          const syncState = state.state;
+          if (
+            syncState === BlobSyncState.Waiting ||
+            syncState === BlobSyncState.Syncing
+          ) {
+            this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploading);
+            return;
+          }
+
+          if (
+            syncState === BlobSyncState.Success ||
+            syncState === BlobSyncState.Failed
+          ) {
+            this.awarenessStore.setBlobState(blobId, BlobUploadState.Uploaded);
+            return;
+          }
         });
       });
     } else {

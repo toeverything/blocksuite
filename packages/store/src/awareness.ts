@@ -121,26 +121,28 @@ export class AwarenessStore<
     }
   }
 
-  setBlobsState(blobStates: Record<string, BlobUploadState>) {
+  setBlobState(blobId: string, state: BlobUploadState) {
     const uploading = [
       ...(this.awareness.getLocalState()?.blobUploading ?? []),
     ];
 
-    Object.entries(blobStates).forEach(([blobId, state]) => {
-      if (state === BlobUploadState.Uploading) {
+    if (state === BlobUploadState.Uploading) {
+      if (!uploading.includes(blobId)) {
         uploading.push(blobId);
-      } else if (state === BlobUploadState.Uploaded) {
-        const position = uploading.findIndex(id => id === blobId);
-        if (position > -1) {
-          uploading.splice(position, 1);
-        }
       }
-    });
+    } else if (state === BlobUploadState.Uploaded) {
+      const position = uploading.findIndex(id => id === blobId);
+      if (position > -1) {
+        uploading.splice(position, 1);
+      }
+    }
 
     this.awareness.setLocalStateField('blobUploading', uploading);
   }
 
   getBlobState(blobId: string) {
+    // FIXME: if clientA and clientB both upload a same image,
+    // both clients could not show image correctly.
     const found = [...this.awareness.getStates().entries()].find(
       ([clientId, state]) => {
         // assume local blob always exist, because we cache it in indexedDB

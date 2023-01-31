@@ -1,104 +1,62 @@
 import { Signal } from '@blocksuite/global/utils';
-import type { BlobId, BlobProvider, BlobURL } from './types.js';
+import type {
+  BlobId,
+  BlobProvider,
+  BlobURL,
+  BlobSyncStateChangeEvent,
+} from './types.js';
+
+function assertProviderExist(
+  provider: BlobProvider | null | undefined
+): asserts provider is BlobProvider {
+  if (!provider) {
+    throw new Error('No provider found for blob storage');
+  }
+}
 
 export class BlobStorage {
-  private _providers: BlobProvider[] = [];
+  private _provider: BlobProvider | null = null;
 
   signals = {
-    blobAdded: new Signal<BlobId>(),
-    blobDeleted: new Signal<BlobId>(),
-    uploadStateChanged: new Signal<BlobId[]>(),
-    uploadFinished: new Signal<BlobId>(),
+    onBlobSyncStateChange: new Signal<BlobSyncStateChangeEvent>(),
   };
 
   get uploading(): boolean {
-    return this._providers.some(p => p.uploading);
+    return this._provider?.uploading ?? true;
   }
 
-  get providers(): Readonly<BlobProvider[]> {
-    return this._providers;
-  }
-
-  get blobs(): Set<BlobId> {
-    // merge all blobs from all providers
-    const result = new Set<BlobId>();
-    for (const provider of this._providers) {
-      for (const blob of provider.blobs) {
-        result.add(blob);
-      }
+  setProvider(provider: BlobProvider | null) {
+    if (!provider) {
+      this._provider = null;
+      return;
     }
-    return result;
-  }
-
-  addProvider(provider: BlobProvider) {
-    this._providers.push(provider);
-    provider.signals.blobAdded.on(blobId => {
-      this.signals.blobAdded.emit(blobId);
+    this._provider = provider;
+    this._provider.signals.onBlobSyncStateChange.on(state => {
+      this.signals.onBlobSyncStateChange.emit(state);
     });
-
-    provider.signals.blobDeleted.on(blobId => {
-      this.signals.blobDeleted.emit(blobId);
-    });
-
-    provider.signals.uploadStateChanged.on(() => {
-      const uploadingIds = this._providers.reduce((acc, provider) => {
-        provider.uploadingIds.forEach(id => acc.add(id));
-        return acc;
-      }, new Set<BlobId>());
-      this.signals.uploadStateChanged.emit([...uploadingIds]);
-    });
-
-    provider.signals.uploadFinished.on(blobId => {
-      this.signals.uploadFinished.emit(blobId);
-    });
-  }
-
-  removeProvider(provider: BlobProvider) {
-    this._providers = this._providers.filter(p => p !== provider);
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {
-    for (const provider of this._providers) {
-      try {
-        return await provider.get(id);
-      } catch (e) {
-        console.warn(e);
-      }
-    }
-    throw new Error(`No provider found for blob ${id}`);
+    assertProviderExist(this._provider);
+
+    return await this._provider.get(id);
   }
 
   async set(blob: Blob): Promise<BlobId> {
-    let result: BlobId | null = null;
-    for (const provider of this._providers) {
-      try {
-        result = await provider.set(blob);
-      } catch (e) {
-        console.warn(e);
-      }
-    }
+    assertProviderExist(this._provider);
 
-    if (result === null) throw new Error('No provider found for blob');
-    return result;
+    return await this._provider.set(blob);
   }
 
   async delete(id: BlobId): Promise<void> {
-    for (const provider of this._providers) {
-      try {
-        await provider.delete(id);
-      } catch (e) {
-        console.warn(e);
-      }
-    }
+    assertProviderExist(this._provider);
+
+    await this._provider.delete(id);
   }
 
   async clear(): Promise<void> {
-    for (const provider of this._providers) {
-      try {
-        await provider.clear();
-      } catch (e) {
-        console.warn(e);
-      }
-    }
+    assertProviderExist(this._provider);
+
+    await this._provider.clear();
   }
 }

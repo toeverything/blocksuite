@@ -6,7 +6,7 @@ import {
   NonShadowLitElement,
   BlockChildrenContainer,
 } from '../../__internal__/index.js';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, sleep } from '@blocksuite/global/utils';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
 
@@ -127,7 +127,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
   };
 
   @state()
-  private _imageState: 'waitUploaded' | 'loading' | 'ready' = 'waitUploaded';
+  private _imageState: 'waitUploaded' | 'loading' | 'ready' = 'loading';
 
   private waitImageUploaded() {
     return new Promise<void>(resolve => {
@@ -155,6 +155,10 @@ export class ImageBlockComponent extends NonShadowLitElement {
     const { width, height } = this.model;
     const storage = await this.model.page.blobs;
     assertExists(storage);
+
+    // FIXME: We cannot guarantee the synchronization order of ydoc and awareness
+    // If ydoc update first, we cannot get upload state for awareness
+    await sleep(1000);
 
     const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
       this.model.sourceId
