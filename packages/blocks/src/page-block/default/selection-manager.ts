@@ -18,6 +18,7 @@ import {
   getCurrentRange,
   isTitleElement,
   isDatabaseInput,
+  asyncFocusRichText,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -198,12 +199,12 @@ export class DefaultSelectionManager {
           this.page.captureSync();
           const distanceToTop = Math.abs(rect.top - e.y);
           const distanceToBottom = Math.abs(rect.bottom - e.y);
-          this.page.insertBlock(
+          const id = this.page.addSiblingBlock(
             blockProps,
             targetModel,
-            distanceToTop < distanceToBottom,
-            true
+            distanceToTop < distanceToBottom ? 'right' : 'left'
           );
+          asyncFocusRichText(this.page, id);
         },
         getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
           return getBlockEditingStateByPosition(blocks, pageX, pageY, {
