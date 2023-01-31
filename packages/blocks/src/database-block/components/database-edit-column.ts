@@ -7,7 +7,8 @@ import TagSchema = BlockSuiteInternal.TagSchema;
 export class DatabaseEditColumn extends LitElement {
   static styles = css`
     :host {
-      background: red;
+      background: var(--affine-popover-background);
+      box-shadow: var(--affine-popover-shadow);
       padding: 1rem;
     }
   `;
