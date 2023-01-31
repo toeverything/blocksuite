@@ -1,5 +1,5 @@
 /// <reference types="@blocksuite/global" />
-export * from './Editor.js';
+export * from './virgo.js';
 export * from './constant.js';
 export * from './types.js';
 
