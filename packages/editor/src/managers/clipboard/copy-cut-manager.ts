@@ -1,9 +1,10 @@
 import {
   deleteModelsByRange,
-  EmbedBlockModel,
   getCurrentRange,
-  ListBlockModel,
   SelectionUtils,
+  getServiceOrRegister,
+  ListBlockModel,
+  EmbedBlockModel,
 } from '@blocksuite/blocks';
 import type { DeltaOperation } from 'quill';
 import type { EditorContainer } from '../../components/index.js';
@@ -16,8 +17,6 @@ export class CopyCutManager {
 
   constructor(editor: EditorContainer) {
     this._editor = editor;
-    this.handleCopy = this.handleCopy.bind(this);
-    this.handleCut = this.handleCut.bind(this);
   }
 
   /* FIXME
@@ -29,42 +28,44 @@ export class CopyCutManager {
   }
   */
 
-  public handleCopy(e: ClipboardEvent) {
-    const clips = this._getClipItems();
+  public handleCopy = async (e: ClipboardEvent) => {
+    const clips = await this._getClipItems();
     if (!clips.length) {
       return;
     }
 
     this._copyToClipboard(e, clips);
-  }
+  };
 
-  public handleCut(e: ClipboardEvent) {
-    this.handleCopy(e);
+  public handleCut = async (e: ClipboardEvent) => {
+    await this.handleCopy(e);
     deleteModelsByRange(this._editor.page);
-  }
+  };
 
-  private _getClipItems() {
+  private async _getClipItems() {
     const clips: ClipboardItem[] = [];
     const selectionInfo = SelectionUtils.getSelectInfo(this._editor.page);
     const selectedBlocks = selectionInfo.selectedBlocks;
 
-    const affineClip = this._getCustomClip(selectedBlocks);
+    const affineClip = await this._getCustomClip(selectedBlocks);
     affineClip && clips.push(affineClip);
 
-    const textClip = this._getTextClip(selectedBlocks);
+    const textClip = await this._getTextClip(selectedBlocks);
     textClip && clips.push(textClip);
 
-    const htmlClip = this._getHtmlClip(selectedBlocks);
+    const htmlClip = await this._getHtmlClip(selectedBlocks);
     htmlClip && clips.push(htmlClip);
 
     return clips;
   }
 
-  private _getCustomClip(
+  private async _getCustomClip(
     selectedBlocks: SelectedBlock[]
-  ): ClipboardItem | null {
-    const clipInfos = selectedBlocks.map(selectedBlock =>
-      this._getClipInfoBySelectionInfo(selectedBlock)
+  ): Promise<ClipboardItem | null> {
+    const clipInfos = await Promise.all(
+      selectedBlocks.map(selectedBlock =>
+        this._getClipInfoBySelectionInfo(selectedBlock)
+      )
     );
     return new ClipboardItem(
       CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
@@ -74,19 +75,25 @@ export class CopyCutManager {
     );
   }
 
-  private _getHtmlClip(selectedBlocks: SelectedBlock[]): ClipboardItem | null {
-    const htmlText = this._editor.contentParser.block2Html(selectedBlocks);
+  private async _getHtmlClip(
+    selectedBlocks: SelectedBlock[]
+  ): Promise<ClipboardItem | null> {
+    const htmlText = await this._editor.contentParser.block2Html(
+      selectedBlocks
+    );
     return new ClipboardItem(CLIPBOARD_MIMETYPE.HTML, htmlText);
   }
 
-  private _getTextClip(selectedBlocks: SelectedBlock[]): ClipboardItem | null {
-    const text = this._editor.contentParser.block2Text(selectedBlocks);
+  private async _getTextClip(
+    selectedBlocks: SelectedBlock[]
+  ): Promise<ClipboardItem | null> {
+    const text = await this._editor.contentParser.block2Text(selectedBlocks);
     return new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, text);
   }
 
-  private _getClipInfoBySelectionInfo(
+  private async _getClipInfoBySelectionInfo(
     selectedBlock: SelectedBlock
-  ): OpenBlockInfo | null {
+  ): Promise<OpenBlockInfo | null> {
     const model = this._editor.page.getBlockById(selectedBlock.id);
     if (!model) {
       return null;
@@ -97,7 +104,9 @@ export class CopyCutManager {
     if (matchFlavours(model, ['affine:page'])) {
       flavour = 'affine:paragraph';
       type = 'text';
-      const text = model.block2Text(
+      const service = await getServiceOrRegister(model.flavour);
+      const text = service.block2Text(
+        model,
         '',
         selectedBlock.startPos,
         selectedBlock.endPos
@@ -110,7 +119,8 @@ export class CopyCutManager {
     } else if (matchFlavours(model, ['affine:embed'])) {
       flavour = 'affine:embed';
       type = 'image';
-      const text = model.block2Text('', 0, 0);
+      const service = await getServiceOrRegister(model.flavour);
+      const text = service.block2Text(model, '', 0, 0);
       delta = [
         {
           insert: text,
@@ -125,23 +135,27 @@ export class CopyCutManager {
     }
 
     const children: OpenBlockInfo[] = [];
-    selectedBlock.children.forEach(child => {
-      const childInfo = this._getClipInfoBySelectionInfo(child);
+    for (const child of selectedBlock.children) {
+      const childInfo = await this._getClipInfoBySelectionInfo(child);
       childInfo && children.push(childInfo);
-    });
+    }
+
     const result = {
       flavour: flavour,
       type: type,
       text: delta,
-      checked: model instanceof ListBlockModel ? model.checked : undefined,
+      checked:
+        model.flavour === 'affine:list'
+          ? (model as ListBlockModel).checked
+          : undefined,
       children: children,
     };
-    if (model instanceof EmbedBlockModel) {
+    if (model.flavour === 'affine:embed') {
       Object.assign(result, {
         sourceId: model.sourceId,
-        caption: model.caption,
-        width: model.width,
-        height: model.height,
+        caption: (model as EmbedBlockModel).caption,
+        width: (model as EmbedBlockModel).width,
+        height: (model as EmbedBlockModel).height,
       });
     }
 

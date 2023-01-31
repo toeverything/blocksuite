@@ -2,7 +2,7 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import {
   almostEqual,
   ExtendedModel,
-  RootBlockModel,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
@@ -105,27 +105,43 @@ function mergeTextOfBlocks(
   });
 }
 
-export async function updateSelectedTextType(
-  flavour: string,
-  type: string,
-  page: Page
-) {
+export async function updateSelectedTextType(flavour: string, type?: string) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
+  updateBlockType(modelsInRange, flavour, type);
+}
+
+async function updateBlockType(
+  models: BaseBlockModel[],
+  flavour: string,
+  type?: string
+) {
+  if (!models.length) {
+    return;
+  }
+  const page = models[0].page;
+  const hasSamePage = models.every(model => model.page === page);
+  if (!hasSamePage) {
+    // page check
+    console.error(
+      'Not all models have the same page instanceof, the result for update text type may not be correct',
+      models
+    );
+  }
   page.captureSync();
   if (flavour === 'affine:code') {
-    mergeTextOfBlocks(page, modelsInRange, { flavour: 'affine:code' });
+    mergeTextOfBlocks(page, models, { flavour: 'affine:code' });
     return;
   }
   const selectedBlocks = saveBlockSelection();
   let lastNewId: string | null = null;
-  modelsInRange.forEach(model => {
+  models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {
       const oldId = model.id;
-      const newId = transformBlock(page, model, flavour, type);
+      const newId = transformBlock(model, flavour, type);
 
       // Replace selected block id
       const blocks = selectedBlocks.filter(block => block.id === oldId);
@@ -142,12 +158,8 @@ export async function updateSelectedTextType(
   restoreSelection(selectedBlocks);
 }
 
-export function transformBlock(
-  page: Page,
-  model: BaseBlockModel,
-  flavour: string,
-  type: string
-) {
+function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
+  const page = model.page;
   const parent = page.getParent(model);
   assertExists(parent);
   const blockProps = {
@@ -428,7 +440,7 @@ export function handleBlockSelectionBatchDelete(
 export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const frames = page.root.children as RootBlockModel[];
+    const frames = page.root.children as TopLevelBlockModel[];
     let offset = 0;
     frames.forEach(model => {
       // DO NOT resize shape block

@@ -5,30 +5,54 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
+import BlockTag = BlockSuiteInternal.BlockTag;
+
+export function empty(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(pageId => {
+      const page = workspace.getPage(pageId) as Page;
+
+      // Add page block and surface block at root level
+      const pageBlockId = page.addBlockByFlavour('affine:page', { title: '' });
+      page.addBlockByFlavour('affine:surface', {}, null);
+
+      // Add frame block inside page block
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      // Add paragraph block inside frame block
+      page.addBlockByFlavour('affine:paragraph', {}, frameId);
+      resolve(pageId);
+    });
+
+    workspace.createPage('page0');
+  });
+}
 
 export function heavy(workspace: Workspace) {
-  workspace.signals.pageAdded.once(id => {
-    const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlockByFlavour('affine:page');
-    page.addBlock(
-      {
-        flavour: 'affine:surface',
-      },
-      null
-    );
-    const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
-    for (let i = 0; i < 1000; i++) {
-      page.addBlock(
-        {
-          flavour: 'affine:paragraph',
-          text: new Text(page, 'Hello, world! ' + i),
-        },
-        frameId
-      );
-    }
-  });
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(pageId => {
+      const page = workspace.getPage(pageId) as Page;
 
-  workspace.createPage('page0');
+      // Add page block and surface block at root level
+      const pageBlockId = page.addBlockByFlavour('affine:page');
+      page.addBlockByFlavour('affine:surface', {}, null);
+
+      // Add frame block inside page block
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      for (let i = 0; i < 1000; i++) {
+        // Add paragraph block inside frame block
+        page.addBlockByFlavour(
+          'affine:paragraph',
+          {
+            text: new Text(page, 'Hello, world! ' + i),
+          },
+          frameId
+        );
+      }
+      resolve(pageId);
+    });
+
+    workspace.createPage('page0');
+  });
 }
 
 const presetMarkdown = `This playground is designed to:
@@ -38,7 +62,7 @@ const presetMarkdown = `This playground is designed to:
 * 🔗 Demonstrate how BlockSuite reconciles real-time collaboration with [local-first](https://martin.kleppmann.com/papers/local-first.pdf) data ownership.
 
 ## Controlling Playground Data Source
-You might initially enter this page with the \`?init\` URL param. This is the default (opt-in) setup that automatically loads this built-in article. Meanwhile, you'll connect to a random single-user room via a WebRTC provider by default. This is the “single-user mode“ for local testing.
+You might initially enter this page with the \`?init\` URL param. This is the default (opt-in) setup that automatically loads this built-in article. Meanwhile, you'll connect to a random single-user room via a WebRTC provider by default. This is the "single-user mode" for local testing.
 
 To test real-time collaboration, you can specify the room to join by adding the \`?room=foo\` config - Try opening this page with \`?room=foo\` in two different tabs and see what happens!
 
@@ -50,20 +74,113 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export function basic(workspace: Workspace) {
-  workspace.signals.pageAdded.once(async id => {
-    const page = workspace.getPage(id) as Page;
-    const pageBlockId = page.addBlock({
-      flavour: 'affine:page',
-      title: 'Welcome to BlockSuite playground',
+export function preset(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(async pageId => {
+      const page = workspace.getPage(pageId) as Page;
+
+      // Add page block and surface block at root level
+      const pageBlockId = page.addBlockByFlavour('affine:page', {
+        title: 'Welcome to BlockSuite playground',
+      });
+      page.addBlockByFlavour('affine:surface', {}, null);
+
+      // Add frame block inside page block
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+      // Import preset markdown content inside frame block
+      await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
+
+      requestAnimationFrame(() => {
+        page.resetHistory();
+        resolve(pageId);
+      });
     });
-    page.addBlock({ flavour: 'affine:surface' }, null);
 
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageBlockId);
-    await window.editor.clipboard.importMarkdown(presetMarkdown, frameId);
-
-    requestAnimationFrame(() => page.resetHistory());
+    workspace.createPage('page0');
   });
+}
 
-  workspace.createPage('page0');
+export function database(workspace: Workspace) {
+  return new Promise<string>(resolve => {
+    workspace.signals.pageAdded.once(async pageId => {
+      const page = workspace.getPage(pageId) as Page;
+
+      // Add page block and surface block at root level
+      const pageBlockId = page.addBlockByFlavour('affine:page', {
+        title: 'Welcome to BlockSuite playground',
+      });
+      page.addBlockByFlavour('affine:surface', {}, null);
+
+      // Add frame block inside page block
+      const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+
+      type Option = 'Done' | 'TODO' | 'WIP';
+      const selection = ['Done', 'TODO', 'WIP'] as Option[];
+      // Add database block inside frame block
+      const databaseId = page.addBlockByFlavour(
+        'affine:database',
+        {
+          columns: ['1', '2'],
+        },
+        frameId
+      );
+      const p1 = page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(page, '1'),
+        },
+        databaseId
+      );
+      const p2 = page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text(page, '2'),
+        },
+        databaseId
+      );
+
+      page.setTagSchema({
+        meta: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        name: 'Number',
+        id: '1',
+        type: 'number',
+        decimal: 0,
+      });
+      page.setTagSchema({
+        meta: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        name: 'Select 2',
+        id: '2',
+        type: 'select',
+        selection: selection,
+      });
+
+      page.updateBlockTag<BlockTag<BlockSuiteInternal.NumberTagSchema>>(p1, {
+        type: '1',
+        value: 0.1,
+      });
+
+      page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
+        p2,
+        {
+          type: '2',
+          value: 'TODO',
+        }
+      );
+
+      requestAnimationFrame(() => {
+        page.resetHistory();
+        resolve(pageId);
+      });
+    });
+
+    workspace.createPage('page0');
+  });
 }

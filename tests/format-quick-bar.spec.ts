@@ -413,7 +413,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 
   const paragraphBtn = page.locator(`.paragraph-button`);
   await paragraphBtn.hover();
-  const h1Btn = page.locator(`.format-quick-bar [data-testid=h1]`);
+  const h1Btn = page
+    .locator(`.format-quick-bar`)
+    .getByTestId('affine:paragraph/h1');
   await expect(h1Btn).toBeVisible();
   await h1Btn.click();
 
@@ -438,7 +440,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:frame>`,
     frameId
   );
-  const bulletedBtn = page.locator(`.format-quick-bar [data-testid=bulleted]`);
+  const bulletedBtn = page
+    .locator(`.format-quick-bar`)
+    .getByTestId('affine:list/bulleted');
   await bulletedBtn.click();
   await assertStoreMatchJSX(
     page,
@@ -463,7 +467,9 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     frameId
   );
 
-  const textBtn = page.locator(`[data-testid=text]`);
+  const textBtn = page
+    .locator(`.format-quick-bar`)
+    .getByTestId('affine:paragraph/text');
   await textBtn.click();
 
   await assertStoreMatchJSX(
@@ -487,6 +493,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 </affine:frame>`,
     frameId
   );
+  await page.waitForTimeout(10);
   // The paragraph button should prevent selection after click
   await assertSelection(page, 1, 0, 3);
 });
@@ -556,6 +563,8 @@ async function scrollToBottom(page: Page) {
     .evaluate(node =>
       node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
     );
+  // TODO switch to `scrollend`
+  // See https://developer.chrome.com/en/blog/scrollend-a-new-javascript-event/
   await page.waitForFunction(() => {
     const scrollContainer = document.querySelector('.affine-default-viewport');
     if (!scrollContainer) {

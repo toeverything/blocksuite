@@ -1,8 +1,14 @@
+import {
+  ArrowDownIcon,
+  CopyIcon,
+  paragraphConfig,
+} from '@blocksuite/global/config';
 import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { formatConfig, paragraphConfig } from '../../page-block/utils/const.js';
+import { formatConfig } from '../../page-block/utils/const.js';
+import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import {
   DragDirection,
   getFormat,
@@ -14,7 +20,6 @@ import {
 } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
 import './button';
-import { ArrowDownIcon, CopyIcon } from './icons.js';
 import { formatQuickBarStyle } from './styles.js';
 
 @customElement('format-quick-bar')
@@ -45,7 +50,7 @@ export class FormatQuickBar extends LitElement {
   page: Page | null = null;
 
   @state()
-  paragraphType = 'text';
+  paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
 
   @state()
   paragraphPanelHoverDelay = 150;
@@ -55,6 +60,8 @@ export class FormatQuickBar extends LitElement {
 
   @state()
   showParagraphPanel: 'top' | 'bottom' | 'hidden' = 'hidden';
+
+  paragraphPanelMaxHeight: string | null = null;
 
   @state()
   format: Record<string, unknown> = {};
@@ -72,7 +79,7 @@ export class FormatQuickBar extends LitElement {
     }
     this.format = getFormat();
     const startModel = models[0];
-    this.paragraphType = startModel.type;
+    this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
 
     this.addEventListener('mousedown', (e: MouseEvent) => {
@@ -90,12 +97,15 @@ export class FormatQuickBar extends LitElement {
       clearTimeout(this.paragraphPanelTimer);
       return;
     }
+
     this.paragraphPanelTimer = window.setTimeout(async () => {
-      const rect = this.formatQuickBarElement.getBoundingClientRect();
-      const bodyRect = document.body.getBoundingClientRect();
-      const topSpace = rect.top - bodyRect.top;
-      const bottomSpace = bodyRect.bottom - rect.bottom;
-      this.showParagraphPanel = topSpace > bottomSpace ? 'top' : 'bottom';
+      const { placement, height } = compareTopAndBottomSpace(
+        this.formatQuickBarElement,
+        document.body,
+        10
+      );
+      this.showParagraphPanel = placement;
+      this.paragraphPanelMaxHeight = height + 'px';
     }, this.paragraphPanelHoverDelay);
   }
 
@@ -124,37 +134,35 @@ export class FormatQuickBar extends LitElement {
       left: '0',
       top: this.showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
       bottom: this.showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
-      display: 'flex',
-      flexDirection:
-        this.showParagraphPanel === 'bottom' ? 'column' : 'column-reverse',
+      maxHeight: this.paragraphPanelMaxHeight,
     });
-    return html`<div
+    return html` <div
       class="paragraph-panel"
       style="${styles}"
       @mouseover=${this._onHover}
       @mouseout=${this._onHoverEnd}
     >
       ${paragraphConfig.map(
-        ({ flavour, type, name, icon }) => html`<format-bar-button
+        ({ flavour, type, name, icon }) => html` <format-bar-button
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
-          data-testid="${type}"
+          data-testid="${flavour}/${type}"
           @click=${() => {
             if (!this.page) {
               throw new Error('Failed to format paragraph! Page not found.');
             }
-            if (this.paragraphType === type) {
+            if (this.paragraphType === `${flavour}/${type}`) {
               // Already in the target format, convert back to text
               const { flavour: defaultFlavour, type: defaultType } =
                 paragraphConfig[0];
               if (this.paragraphType === defaultType) return;
-              updateSelectedTextType(defaultFlavour, defaultType, this.page);
-              this.paragraphType = defaultType;
+              updateSelectedTextType(defaultFlavour, defaultType);
+              this.paragraphType = `${defaultFlavour}/${defaultType}`;
               return;
             }
-            updateSelectedTextType(flavour, type, this.page);
-            this.paragraphType = type;
+            updateSelectedTextType(flavour, type);
+            this.paragraphType = `${flavour}/${type}`;
             this.positionUpdated.emit();
           }}
         >
@@ -176,9 +184,10 @@ export class FormatQuickBar extends LitElement {
       return html``;
     }
     const paragraphIcon =
-      paragraphConfig.find(btn => btn.type === this.paragraphType)?.icon ??
-      paragraphConfig[0].icon;
-    const paragraphItems = html`<format-bar-button
+      paragraphConfig.find(
+        ({ flavour, type }) => `${flavour}/${type}` === this.paragraphType
+      )?.icon ?? paragraphConfig[0].icon;
+    const paragraphItems = html` <format-bar-button
       class="paragraph-button"
       width="52px"
       @mouseover=${this._onHover}
@@ -192,7 +201,7 @@ export class FormatQuickBar extends LitElement {
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
-        ({ id, name, icon, action, activeWhen }) => html`<format-bar-button
+        ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
           ?active=${activeWhen(this.format)}
@@ -212,7 +221,7 @@ export class FormatQuickBar extends LitElement {
         </format-bar-button>`
       );
 
-    const actionItems = html`<format-bar-button
+    const actionItems = html` <format-bar-button
       class="has-tool-tip"
       data-testid="copy"
       @click=${() => this._onCopy()}
@@ -225,11 +234,11 @@ export class FormatQuickBar extends LitElement {
       left: this.left,
       top: this.top,
     });
-    return html`<div class="format-quick-bar" style="${styles}">
+    return html` <div class="format-quick-bar" style="${styles}">
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}
-      ${formatItems.length ? html`<div class="divider"></div>` : ''}
+      ${formatItems.length ? html` <div class="divider"></div>` : ''}
       ${actionItems} ${paragraphPanel}
     </div>`;
   }

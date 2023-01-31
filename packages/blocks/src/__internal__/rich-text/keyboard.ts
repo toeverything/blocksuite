@@ -1,13 +1,11 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 import {
-  ALLOW_DEFAULT,
   getCurrentRange,
   getNextBlock,
   isCollapsedAtBlockStart,
   isMultiBlockRange,
   noop,
-  PREVENT_DEFAULT,
 } from '../utils/index.js';
 import {
   handleLineStartBackspace,
@@ -22,6 +20,8 @@ import {
 } from './rich-text-operations.js';
 import { Shortcuts } from './shortcuts.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { showSlashMenu } from '../../components/slash-menu/index.js';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 interface QuillRange {
   index: number;
@@ -69,6 +69,18 @@ function isAtBlockEnd(quill: Quill) {
   return quill.getLength() - 1 === quill.getSelection(true)?.index;
 }
 
+// If a block is soft enterable, the rule is:
+// 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
+// 2. In the middle and start of block, press Enter will insert a \n to break the line
+// TODO this should be configurable per-block
+function isSoftEnterable(model: BaseBlockModel) {
+  if (matchFlavours(model, ['affine:code'])) return true;
+  if (matchFlavours(model, ['affine:paragraph'])) {
+    return model.type === 'quote';
+  }
+  return false;
+}
+
 export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   function enterMarkdownMatch(
     this: KeyboardEventThis,
@@ -91,30 +103,14 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       : ALLOW_DEFAULT;
   }
 
-  function hardEnter(this: KeyboardEventThis) {
-    const isEnd = isAtBlockEnd(this.quill);
+  function hardEnter(quill: Quill, shortKey = false) {
+    const isEnd = isAtBlockEnd(quill);
     const parent = page.getParent(model);
     const isLastChild = parent?.lastChild() === model;
     const isEmptyList =
       matchFlavours(model, ['affine:list']) && model.text?.length === 0;
-    const selection = this.quill.getSelection();
+    const selection = quill.getSelection();
     assertExists(selection);
-
-    // Some block should treat Enter as soft enter
-    // Logic is：
-    // 1. In the end of block, first press Enter will insert a \n to break the line, second press Enter will insert a new block
-    // 2. In the middle and start of block, press Enter will insert a \n to break the line
-    // TODO: These block list may should be configurable in the block self
-    const shouldSoftEnterFirstBlocks = [
-      {
-        flavour: 'affine:paragraph',
-        type: 'quote',
-      },
-      {
-        flavour: 'affine:code',
-        type: 'code',
-      },
-    ];
 
     if (
       isEmptyList &&
@@ -132,33 +128,27 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       // - line1
       // - | <-- will unindent the block
       handleUnindent(page, model, selection.index);
-    } else if (isEnd) {
-      const isSoftEnterBlock = shouldSoftEnterFirstBlocks.find(
-        ({ flavour, type }) => {
-          return model.flavour === flavour && model.type === type;
-        }
-      );
+    } else if (isEnd || shortKey) {
+      const softEnterable = isSoftEnterable(model);
 
-      const isNewLine = /\n\n$/.test(this.quill.getText());
-      const shouldSoftEnter = isSoftEnterBlock && !isNewLine;
+      const isNewLine = /\n\n$/.test(quill.getText());
+      const shouldSoftEnter = softEnterable && !isNewLine;
 
       if (shouldSoftEnter) {
-        onSoftEnter.bind(this)();
+        // TODO handle ctrl+enter in code/quote block or other force soft enter block
+        onSoftEnter(quill);
       } else {
         // delete the \n at the end of block
-        if (isSoftEnterBlock) {
-          this.quill.deleteText(selection.index, 1);
+        if (softEnterable) {
+          quill.deleteText(selection.index, 1);
         }
         handleBlockEndEnter(page, model);
       }
     } else {
-      const isSoftEnterBlock =
-        shouldSoftEnterFirstBlocks.findIndex(({ flavour, type }) => {
-          return model.flavour === flavour && model.type === type;
-        }) !== -1;
+      const isSoftEnterBlock = isSoftEnterable(model);
 
       if (isSoftEnterBlock) {
-        onSoftEnter.bind(this)();
+        onSoftEnter(quill);
       } else {
         handleBlockSplit(page, model, selection.index, selection.length);
       }
@@ -167,12 +157,11 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onSoftEnter(this: KeyboardEventThis) {
-    const selection = this.quill.getSelection();
+  function onSoftEnter(quill: Quill) {
+    const selection = quill.getSelection();
     assertExists(selection);
     handleSoftEnter(page, model, selection.index, selection.length);
-    this.quill.setSelection(selection.index + 1, 0);
-
+    quill.setSelection(selection.index + 1, 0);
     return PREVENT_DEFAULT;
   }
 
@@ -285,12 +274,24 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     hardEnter: {
       key: 'enter',
-      handler: hardEnter,
+      handler() {
+        return hardEnter(this.quill);
+      },
     },
     softEnter: {
       key: 'enter',
       shiftKey: true,
-      handler: onSoftEnter,
+      handler() {
+        return onSoftEnter(this.quill);
+      },
+    },
+    // shortKey+enter
+    insertLineAfter: {
+      key: 'enter',
+      shortKey: true,
+      handler() {
+        return hardEnter(this.quill, true);
+      },
     },
     tab: {
       key: 'tab',
@@ -329,7 +330,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       handler: onKeyDown,
     },
     left: {
-      key: 37,
+      key: 'left',
       shiftKey: false,
       handler: onKeyLeft,
     },
@@ -337,6 +338,34 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'right',
       shiftKey: false,
       handler: onKeyRight,
+    },
+
+    slash: {
+      // Slash '/'
+      key: 191,
+      // prefix non digit or empty string
+      // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
+      // prefix: /[^\d]$|^(?![\s\S])/,
+      handler(range, context) {
+        // TODO remove feature flag after slash menu is stable
+        const flag = page.awarenessStore.getFlag('enable_slash_menu');
+        if (!flag) {
+          return ALLOW_DEFAULT;
+        }
+        // End of feature flag
+
+        if (matchFlavours(model, ['affine:code'])) {
+          return ALLOW_DEFAULT;
+        }
+        // if (context.format['code'] === true) {
+        //   return ALLOW_DEFAULT;
+        // }
+        requestAnimationFrame(() => {
+          const curRange = getCurrentRange();
+          showSlashMenu({ model, range: curRange });
+        });
+        return ALLOW_DEFAULT;
+      },
     },
   };
 

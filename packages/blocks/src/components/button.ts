@@ -48,6 +48,13 @@ export class IconButton extends LitElement {
       cursor: not-allowed;
     }
 
+    /* You can add a 'hover' attribute to the button to show the hover style */
+    :host([hover]) {
+      background: var(--affine-hover-background);
+      fill: var(--affine-primary-color);
+      color: var(--affine-primary-color);
+    }
+
     /* You can add a 'active' attribute to the button to revert the active style */
     :host([active]) {
       fill: var(--affine-primary-color);

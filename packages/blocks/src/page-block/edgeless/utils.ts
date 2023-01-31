@@ -1,7 +1,7 @@
 import type { EdgelessContainer } from './edgeless-page-block.js';
-import type { ViewportState, XYWH } from './selection-manager.js';
-import type { RootBlockModel } from '../../__internal__/index.js';
-import type { SelectionEvent } from '../../__internal__/index.js';
+import type { ViewportState, Selectable, XYWH } from './selection-manager.js';
+import type { TopLevelBlockModel } from '../../__internal__/index.js';
+import type { SurfaceElement } from '@blocksuite/phasor';
 
 export const DEFAULT_SPACING = 64;
 
@@ -12,6 +12,18 @@ export const PADDING_Y = 48;
 // XXX: edgeless frame min length
 export const FRAME_MIN_LENGTH = 20;
 
+export function isBlock(
+  selectable: Selectable | null
+): selectable is TopLevelBlockModel {
+  return !!selectable && 'flavour' in selectable;
+}
+
+export function isSurfaceElement(
+  selectable: Selectable | null
+): selectable is SurfaceElement {
+  return !isBlock(selectable);
+}
+
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
   const a = JSON.parse(block.xywh) as [number, number, number, number];
   const [ax, ay, aw, ah] = a;
@@ -21,26 +33,13 @@ function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
 }
 
 export function pick(
-  blocks: RootBlockModel[],
+  blocks: TopLevelBlockModel[],
   modelX: number,
-  modelY: number,
-  container: EdgelessContainer,
-  e: SelectionEvent
-): RootBlockModel | null {
+  modelY: number
+): TopLevelBlockModel | null {
   for (let i = blocks.length - 1; i >= 0; i--) {
     const block = blocks[i];
     if (isPointIn(block, modelX, modelY)) {
-      // if (
-      //   isShapeBlock &&
-      //   block.flavour === 'affine:shape' &&
-      //   (target as ShapeBlockComponent).model === block
-      // ) {
-      //   return block;
-      // } else if (!isShapeBlock && block.flavour !== 'affine:shape') {
-      //   return block;
-      // } else {
-      //   continue;
-      // }
       return block;
     }
   }

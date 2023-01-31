@@ -2,7 +2,7 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
 import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
@@ -35,9 +35,9 @@ export class EditorContainer extends NonShadowLitElement {
   contentParser = new ContentParser(this);
 
   get model() {
-    return [this.page.root, this.page.rootLayer] as [
+    return [this.page.root, this.page.surface] as [
       PageBlockModel | null,
-      BaseBlockModel | null
+      SurfaceBlockModel | null
     ];
   }
 
@@ -56,14 +56,9 @@ export class EditorContainer extends NonShadowLitElement {
 
   private _disposables = new DisposableGroup();
 
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
-  }
-
   protected update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('readonly')) {
-      this.page.awareness.setReadonly(this.readonly);
+      this.page.awarenessStore.setReadonly(this.page, this.readonly);
     }
     super.update(changedProperties);
   }
@@ -71,17 +66,17 @@ export class EditorContainer extends NonShadowLitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.page.awareness.signals.update.on(msg => {
-        if (msg.id !== this.page.doc.clientID) {
-          return;
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.readonly[this.page.prefixedId],
+        rd => {
+          if (typeof rd === 'boolean' && rd !== this.readonly) {
+            this.readonly = rd;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
         }
-        if (
-          typeof this.page.awareness.isReadonly() === 'boolean' &&
-          this.readonly !== this.page.awareness.isReadonly()
-        ) {
-          this.readonly = this.page.awareness.isReadonly();
-        }
-      })
+      )
     );
 
     // Question: Why do we prevent this?
@@ -124,6 +119,7 @@ export class EditorContainer extends NonShadowLitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.page.awarenessStore.setLocalCursor(this.page, null);
     this._disposables.dispose();
   }
 

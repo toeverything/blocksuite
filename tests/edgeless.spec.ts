@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { expect, Page, test } from '@playwright/test';
-import type {
-  FrameBlockModel,
-  ShapeBlockModel,
-} from '../packages/blocks/src/index.js';
+import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -23,7 +20,6 @@ import {
   assertRichTexts,
   assertSelection,
 } from './utils/asserts.js';
-import type { BaseBlockModel } from '../packages/store/src/index.js';
 
 async function getFrameSize(
   page: Page,
@@ -43,21 +39,6 @@ async function getFrameSize(
   );
   expect(result).not.toBeNull();
   return result as string;
-}
-
-async function getModel<Model extends BaseBlockModel>(
-  page: Page,
-  blockId: string
-) {
-  const result: BaseBlockModel | null | undefined = await page.evaluate(
-    blockId => {
-      const page = window.workspace.getPage('page0');
-      return page?.getBlockById(blockId);
-    },
-    blockId
-  );
-  expect(result).not.toBeNull();
-  return result as Model;
 }
 
 test('switch to edgeless mode', async ({ page }) => {
@@ -163,6 +144,7 @@ test.skip('add shape blocks', async ({ page }) => {
 
   await switchMouseMode(page);
 
+  /*
   const shapeModel = await getModel<ShapeBlockModel>(page, '3');
   expect(JSON.parse(shapeModel.xywh)).toStrictEqual([0, 0, 100, 100]);
   expect(shapeModel.color).toBe('black');
@@ -171,6 +153,7 @@ test.skip('add shape blocks', async ({ page }) => {
   expect(JSON.parse(shapeModel2.xywh)).toStrictEqual([0, 0, 200, 200]);
   expect(shapeModel2.color).toBe('blue');
   expect(shapeModel2.type).toBe('triangle');
+  */
 
   const tag = await page.evaluate(() => {
     const element = document.querySelector(`[data-block-id="3"]`);

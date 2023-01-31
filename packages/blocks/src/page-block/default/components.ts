@@ -21,8 +21,8 @@ import type {
   DefaultPageSignals,
   EmbedEditingState,
 } from './default-page-block.js';
-import { BLOCK_ID_ATTR } from '../../__internal__/index.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;

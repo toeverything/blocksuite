@@ -4,12 +4,14 @@ import {
   configDebugLog,
 } from '@blocksuite/global/debug';
 import {
+  assertExists,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
-  Page,
   StoreOptions,
+  Utils,
+  Workspace,
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
@@ -22,12 +24,6 @@ export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-
-export function initFeatureFlags(page: Page) {
-  if (params.get('surface') !== null) {
-    page.awareness.setFlag('enable_surface', true);
-  }
-}
 
 export function initDebugConfig() {
   Object.defineProperty(globalThis, 'enableDebugLog', {
@@ -42,6 +38,29 @@ export function initDebugConfig() {
 
   // Uncomment this line or paste it into console to enable debug log.
   // enableDebugLog(['CRUD']);
+}
+
+async function initWithMarkdownContent(workspace: Workspace, url: URL) {
+  const { empty: emptyInit } = await import('./data/index.js');
+
+  const pageId = await emptyInit(workspace);
+  const page = workspace.getPage(pageId);
+  assertExists(page);
+  assertExists(page.root);
+  const content = await fetch(url).then(res => res.text());
+  return window.editor.clipboard.importMarkdown(content, page.root.id);
+}
+
+export async function tryInitExternalContent(
+  workspace: Workspace,
+  initParam: string
+) {
+  if (isValidUrl(initParam)) {
+    const url = new URL(initParam);
+    await initWithMarkdownContent(workspace, url);
+  } else if (isBase64.test(initParam)) {
+    Utils.applyYjsUpdateV2(workspace, initParam);
+  }
 }
 
 /**
@@ -79,9 +98,23 @@ export function getOptions(): Pick<
     defaultFlags: {
       enable_set_remote_flag: true,
       enable_drag_handle: true,
+      enable_block_hub: true,
+      enable_database: params.get('database') !== null,
+      enable_slash_menu: params.get('slash') !== '0',
+      enable_append_flavor_slash: params.get('slash') === '1',
       readonly: {
         'space:page0': false,
       },
     },
   };
+}
+
+export function isValidUrl(urlLike: string) {
+  let url;
+  try {
+    url = new URL(urlLike);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
 }

@@ -2,18 +2,23 @@ import * as Y from 'yjs';
 import { Store, StoreOptions } from '../store.js';
 import { Space } from '../space.js';
 import { Page } from './page.js';
-import { Signal } from '../utils/signal.js';
+import { Signal } from '@blocksuite/global/utils';
 import { Indexer, QueryContent } from './search.js';
-import type { Awareness } from 'y-protocols/awareness';
-import type { BaseBlockModel } from '../base.js';
-import { BlobStorage, getBlobStorage } from '../blob/index.js';
+import {
+  BlobStorage,
+  BlobOptionsGetter,
+  getBlobStorage,
+} from '../persistence/blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { merge } from 'merge';
+import type { AwarenessStore } from '../awareness.js';
+import type { z } from 'zod';
+import { BlockSchema } from '../base.js';
 
 export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
+
   [key: string]: string | number | boolean;
 }
 
@@ -33,20 +38,14 @@ class WorkspaceMeta<
   pagesUpdated = new Signal();
   commonFieldsUpdated = new Signal();
 
-  constructor(
-    id: string,
-    doc: BlockSuiteDoc,
-    awareness: Awareness,
-    defaultFlags?: Partial<Flags>
-  ) {
-    super(id, doc, awareness, {
+  constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
+    super(id, doc, awarenessStore, {
       valueInitializer: {
         pages: () => new Y.Array(),
         versions: () => new Y.Map(),
         avatar: () => '',
         name: () => '',
       },
-      defaultFlags,
     });
     this.origin.observeDeep(this._handleEvents);
   }
@@ -127,8 +126,8 @@ class WorkspaceMeta<
    */
   writeVersion(workspace: Workspace) {
     const versions = this.proxy.versions;
-    workspace.flavourMap.forEach((model, flavour) => {
-      versions.set(flavour, model.version);
+    workspace.flavourSchemaMap.forEach((schema, flavour) => {
+      versions.set(flavour, schema.version);
     });
   }
 
@@ -148,7 +147,8 @@ class WorkspaceMeta<
 
     dataFlavours.forEach(dataFlavour => {
       const dataVersion = versions[dataFlavour] as number;
-      const editorVersion = workspace.flavourMap.get(dataFlavour)?.version;
+      const editorVersion =
+        workspace.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {
         throw new Error(
           `Editor missing ${dataFlavour} flavour. Please make sure this block flavour is registered.`
@@ -216,13 +216,6 @@ class WorkspaceMeta<
   };
 }
 
-const flagsPreset = {
-  enable_set_remote_flag: true,
-  enable_drag_handle: true,
-  enable_surface: false,
-  readonly: {},
-} satisfies BlockSuiteFlags;
-
 export class Workspace {
   static Y = Y;
   public readonly room: string | undefined;
@@ -230,6 +223,8 @@ export class Workspace {
   private _store: Store;
   private _indexer: Indexer;
   private _blobStorage: Promise<BlobStorage | null>;
+  private _blobOptionsGetter?: BlobOptionsGetter = (k: string) =>
+    ({ api: '/api/workspace' }[k]);
 
   meta: WorkspaceMeta;
 
@@ -239,25 +234,26 @@ export class Workspace {
     pageRemoved: Signal<string>;
   };
 
-  flavourMap = new Map<string, typeof BaseBlockModel>();
+  flavourSchemaMap = new Map<string, z.infer<typeof BlockSchema>>();
+  flavourInitialPropsMap = new Map<string, Record<string, unknown>>();
 
   constructor(options: StoreOptions) {
     this._store = new Store(options);
     this._indexer = new Indexer(this.doc);
+    if (options.blobOptionsGetter) {
+      this._blobOptionsGetter = options.blobOptionsGetter;
+    }
     if (!options.isSSR) {
-      this._blobStorage = getBlobStorage(options.room);
+      this._blobStorage = getBlobStorage(options.room, k => {
+        return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
+      });
     } else {
       // blob storage is not reachable in server side
       this._blobStorage = Promise.resolve(null);
     }
     this.room = options.room;
 
-    this.meta = new WorkspaceMeta(
-      'space:meta',
-      this.doc,
-      this._store.awareness,
-      merge(flagsPreset, options.defaultFlags)
-    );
+    this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
 
     this.signals = {
       pagesUpdated: this.meta.pagesUpdated,
@@ -266,6 +262,10 @@ export class Workspace {
     };
 
     this._handlePageEvent();
+  }
+
+  get awarenessStore(): AwarenessStore {
+    return this._store.awarenessStore;
   }
 
   get providers() {
@@ -285,9 +285,14 @@ export class Workspace {
     return this._store.doc;
   }
 
-  register(blockSchema: Record<string, typeof BaseBlockModel>) {
-    Object.keys(blockSchema).forEach(key => {
-      this.flavourMap.set(key, blockSchema[key]);
+  register(blockSchema: z.infer<typeof BlockSchema>[]) {
+    blockSchema.forEach(schema => {
+      BlockSchema.parse(schema);
+      this.flavourSchemaMap.set(schema.model.flavour, schema);
+      this.flavourInitialPropsMap.set(
+        schema.model.flavour,
+        schema.model.props()
+      );
     });
     return this;
   }
@@ -311,7 +316,7 @@ export class Workspace {
         this,
         pageId,
         this.doc,
-        this._store.awareness,
+        this.awarenessStore,
         this._store.idGenerator
       );
       this._store.addSpace(page);
@@ -350,6 +355,10 @@ export class Workspace {
 
   search(query: QueryContent) {
     return this._indexer.search(query);
+  }
+
+  setGettingBlobOptions(blobOptionsGetter: BlobOptionsGetter) {
+    this._blobOptionsGetter = blobOptionsGetter;
   }
 
   /**

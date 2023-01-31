@@ -3,7 +3,6 @@ import type { EmbedBlockComponent } from '../../embed-block/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import '../../components/drag-handle.js';
 import {
-  caretRangeFromPoint,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -16,26 +15,31 @@ import {
   getAllBlocks,
   getDefaultPageBlock,
   IPoint,
-  doesInSamePath,
   getCurrentRange,
-  isPageTitleElement,
+  isTitleElement,
+  isDatabaseInput,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-} from '../utils/cursor.js';
+} from '../utils/position.js';
 import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
   getBlockEditingStateByCursor,
+  getAllowSelectedBlocks,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
-import { DragHandle } from '../../components/drag-handle.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
+import { BlockHub } from '../../components/blockhub.js';
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -150,16 +154,15 @@ export class PageSelectionState {
 }
 
 export class DefaultSelectionManager {
-  page: Page;
-  state = new PageSelectionState('none');
-  private _mouseRoot: HTMLElement;
-  private _container: DefaultPageBlockComponent;
-  private _disposables = new DisposableGroup();
-  private _signals: DefaultPageSignals;
-  private _embedResizeManager: EmbedResizeManager;
-  private _dragHandleAbortController = new AbortController();
+  readonly page: Page;
+  readonly state = new PageSelectionState('none');
+  private readonly _mouseRoot: HTMLElement;
+  private readonly _container: DefaultPageBlockComponent;
+  private readonly _disposables = new DisposableGroup();
+  private readonly _signals: DefaultPageSignals;
+  private readonly _embedResizeManager: EmbedResizeManager;
 
-  private _dragHandle: DragHandle | null = null;
+  private _blockHub: BlockHub | null = null;
 
   constructor({
     page,
@@ -176,32 +179,32 @@ export class DefaultSelectionManager {
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
-    const createHandle = () => {
-      this._dragHandle = new DragHandle({
-        setSelectedBlocks: this._setSelectedBlocks,
-        onDropCallback: (e, start, end) => {
-          const startModel = start.model;
+
+    const createBlockHub = () => {
+      this._blockHub = new BlockHub({
+        onDropCallback: (e, end) => {
+          const dataTransfer = e.dataTransfer;
+          assertExists(dataTransfer);
+          const data = dataTransfer.getData('affine/block-hub');
+          const blockProps = JSON.parse(data);
+          const targetModel = end.model;
           const rect = end.position;
-          const nextModel = end.model;
-          if (doesInSamePath(this.page, nextModel, startModel)) {
-            return;
-          }
           this.page.captureSync();
           const distanceToTop = Math.abs(rect.top - e.y);
           const distanceToBottom = Math.abs(rect.bottom - e.y);
-          this.page.moveBlock(
-            startModel,
-            nextModel,
+          this.page.insertBlock(
+            blockProps,
+            targetModel,
             distanceToTop < distanceToBottom
           );
-          this.clearRects();
         },
-        getBlockEditingStateByPosition: (pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(this._blocks, pageX, pageY, {
+        getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
+          return getBlockEditingStateByPosition(blocks, pageX, pageY, {
             skipX,
           });
         },
         getBlockEditingStateByCursor: (
+          blocks,
           pageX,
           pageY,
           cursor,
@@ -209,38 +212,35 @@ export class DefaultSelectionManager {
           skipX,
           dragging
         ) => {
-          return getBlockEditingStateByCursor(
-            this._blocks,
-            pageX,
-            pageY,
-            cursor,
-            {
-              size,
-              skipX,
-              dragging,
-            }
-          );
+          return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
+            size,
+            skipX,
+            dragging,
+          });
         },
       });
+      this._blockHub.getAllowedBlocks = () => this._allowSelectedBlocks;
     };
     this._disposables.add(
-      this.page.awareness.signals.update.on(msg => {
-        if (msg.id !== this.page.doc.clientID) {
-          return;
-        }
-        if (msg.state?.flags.enable_drag_handle) {
-          // todo: implement subscribe with selector
-          if (!this._dragHandle) {
-            createHandle();
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this._blockHub) {
+              createBlockHub();
+            }
+          } else {
+            this._blockHub?.remove();
+            this._blockHub = null;
           }
-        } else {
-          this._dragHandle?.remove();
-          this._dragHandle = null;
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
         }
-      })
+      )
     );
-    if (this.page.awareness.getFlag('enable_drag_handle')) {
-      createHandle();
+    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
+      createBlockHub();
     }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(
@@ -259,33 +259,13 @@ export class DefaultSelectionManager {
     );
   }
 
-  private get _blocks(): BaseBlockModel[] {
-    const result: BaseBlockModel[] = [];
-    const blocks = this.page.root?.children.slice();
-    if (!blocks) {
-      return [];
-    }
-
-    const dfs = (
-      blocks: BaseBlockModel[],
-      depth: number,
-      parentIndex: number
-    ) => {
-      for (const block of blocks) {
-        if (block.flavour !== 'affine:frame') {
-          result.push(block);
-        }
-        block.depth = depth;
-        if (parentIndex !== -1) {
-          block.parentIndex = parentIndex;
-        }
-        block.children.length &&
-          dfs(block.children, depth + 1, result.length - 1);
-      }
-    };
-
-    dfs(blocks, 0, -1);
-    return result;
+  /**
+   * This array contains the blocks allowed to be selected by selection manager.
+   *  Blocks like `affine:frame`, blocks inside `affine:database` will be discharged.
+   * @private
+   */
+  private get _allowSelectedBlocks(): BaseBlockModel[] {
+    return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
   private get _containerOffset() {
@@ -338,6 +318,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
+    this._container.components.dragHandle?.pointerEvents('none');
     this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
@@ -347,12 +328,16 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
+    this._container.components.dragHandle?.pointerEvents();
     this._signals.nativeSelection.emit(true);
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isPageTitleElement(e.raw.target)) return;
+    if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
+      this.state.type = 'none';
+      return;
+    }
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
@@ -445,7 +430,7 @@ export class DefaultSelectionManager {
     });
 
     const clickBlockInfo = getBlockEditingStateByPosition(
-      this._blocks,
+      this._allowSelectedBlocks,
       e.raw.pageX,
       e.raw.pageY
     );
@@ -474,7 +459,10 @@ export class DefaultSelectionManager {
       this.state.selectedBlocks.push(this.state.activeComponent);
       return;
     }
-    if (e.raw.target instanceof HTMLTextAreaElement) return;
+    const target = e.raw.target;
+    if (isTitleElement(target) || isDatabaseInput(target)) {
+      return;
+    }
     if (e.keys.shift) return;
     handleNativeRangeClick(this.page, e);
   };
@@ -500,7 +488,7 @@ export class DefaultSelectionManager {
   private _onContainerMouseMove = (e: SelectionEvent) => {
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const hoverEditingState = getBlockEditingStateByPosition(
-      this._blocks,
+      this._allowSelectedBlocks,
       e.raw.pageX,
       e.raw.pageY
     );
@@ -519,7 +507,7 @@ export class DefaultSelectionManager {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
-      if (this._dragHandle) {
+      if (this._container.components.dragHandle) {
         this._dragHandle.showBySelectionEvent(e);
       }
       this._signals.updateEmbedEditingState.emit(null);
@@ -572,10 +560,6 @@ export class DefaultSelectionManager {
   }
 
   dispose() {
-    if (this._dragHandle) {
-      this._dragHandle.remove();
-    }
-    this._dragHandleAbortController.abort();
     this._signals.updateSelectedRects.dispose();
     this._signals.updateFrameSelectionRect.dispose();
     this._signals.updateEmbedEditingState.dispose();

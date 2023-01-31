@@ -1,14 +1,21 @@
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import { Awareness } from 'y-protocols/awareness.js';
-import type { DocProvider, DocProviderConstructor } from './doc-providers.js';
+import type {
+  DocProvider,
+  DocProviderConstructor,
+} from './persistence/doc/index.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
+  nanoid,
 } from './utils/id-generator.js';
+import { merge } from 'merge';
 import { BlockSuiteDoc } from './yjs/index.js';
+import { AwarenessStore, RawAwarenessState } from './awareness.js';
+import type { BlobOptionsGetter } from './persistence/blob/index.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -20,6 +27,8 @@ export enum Generator {
   /**
    * Default mode, generator for the unpredictable id
    */
+  NanoID = 'nanoID',
+
   UUIDv4 = 'uuidV4',
   /**
    * This generator is trying to fix the real-time collaboration on debug mode.
@@ -50,18 +59,30 @@ export interface StoreOptions<
 > extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
-  awareness?: Awareness;
+  awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
+  blobOptionsGetter?: BlobOptionsGetter;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
+
+const flagsPreset = {
+  enable_set_remote_flag: true,
+  enable_drag_handle: true,
+  enable_block_hub: true,
+  enable_surface: true,
+  enable_slash_menu: false,
+  enable_append_flavor_slash: false,
+  enable_database: false,
+  readonly: {},
+} satisfies BlockSuiteFlags;
 
 export class Store {
   readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
-  readonly awareness: Awareness;
+  readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
@@ -70,8 +91,14 @@ export class Store {
     providers = [],
     awareness,
     idGenerator,
+    defaultFlags,
   }: StoreOptions = {}) {
-    this.awareness = awareness ?? new Awareness(this.doc);
+    this.awarenessStore = new AwarenessStore(
+      this,
+      awareness ?? new Awareness<RawAwarenessState>(this.doc),
+      merge(flagsPreset, defaultFlags)
+    );
+
     switch (idGenerator) {
       case Generator.AutoIncrement: {
         this.idGenerator = createAutoIncrementIdGenerator();
@@ -83,15 +110,23 @@ export class Store {
         );
         break;
       }
-      case Generator.UUIDv4:
-      default: {
+      case Generator.UUIDv4: {
         this.idGenerator = uuidv4;
         break;
       }
+      case Generator.NanoID:
+      default: {
+        this.idGenerator = nanoid;
+        break;
+      }
     }
+
     this.providers = providers.map(
       ProviderConstructor =>
-        new ProviderConstructor(room, this.doc, { awareness: this.awareness })
+        new ProviderConstructor(room, this.doc, {
+          // @ts-expect-error
+          awareness: this.awarenessStore.awareness,
+        })
     );
   }
 

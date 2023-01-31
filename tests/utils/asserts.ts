@@ -33,11 +33,11 @@ export const defaultStore: SerializedStore = {
     versions: {
       'affine:paragraph': 1,
       'affine:page': 1,
+      'affine:database': 1,
       'affine:list': 1,
       'affine:frame': 1,
       'affine:divider': 1,
       'affine:embed': 1,
-      // 'affine:shape': 1,
       'affine:code': 1,
       'affine:surface': 1,
     },
@@ -46,6 +46,7 @@ export const defaultStore: SerializedStore = {
     '0': {
       'meta:tags': {},
       'meta:tagSchema': {},
+      'prop:title': '',
       'sys:id': '0',
       'sys:flavour': 'affine:page',
       'sys:children': ['1'],

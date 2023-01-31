@@ -1,36 +1,43 @@
 import { Workspace } from '@blocksuite/store';
 import {
-  SurfaceContainer,
-  bindWheelEvents,
-  RectElement,
+  SurfaceManager,
+  Bound,
+  DebugElement,
+  // Uncomment to batch load mock data
+  // initMockData,
 } from '@blocksuite/phasor';
 
 const { Y } = Workspace;
+
+function testClick(surface: SurfaceManager, e: MouseEvent) {
+  const [modelX, modelY] = surface.toModelCoord(e.offsetX, e.offsetY);
+  const elements = surface.pick(modelX, modelY);
+  const topElement = surface.pickTop(modelX, modelY);
+  console.log(
+    'picked elements count',
+    elements.length,
+    'top element color',
+    (topElement as DebugElement)?.color
+  );
+}
 
 function main() {
   const doc = new Y.Doc();
   const canvas = document.querySelector('canvas') as HTMLCanvasElement;
   const yContainer = doc.getMap('container');
-  const container = new SurfaceContainer(canvas, yContainer);
+  const surface = new SurfaceManager(canvas, yContainer);
 
-  bindWheelEvents(container.renderer, canvas);
+  surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
+  surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
 
-  const element0 = new RectElement('0');
-  element0.setBound(0, 0, 100, 100);
-  element0.color = 'red';
-  container.addElement(element0);
+  // Uncomment to batch load mock data
+  // initMockData(surface, 100, 1000, 1000);
 
-  const element1 = new RectElement('1');
-  element1.setBound(100, 100, 100, 100);
-  container.addElement(element1);
-
-  const bound = { x: 50, y: 50, w: 100, h: 100 };
-  container.setElementBound(element0.id, bound);
-
-  // container.removeElement(element0.id);
+  surface.initDefaultGestureHandler();
+  canvas.addEventListener('click', e => testClick(surface, e));
 
   // @ts-ignore
-  window.container = container;
+  window.surface = surface;
 }
 
 main();

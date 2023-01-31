@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
-import type { Page as StorePage } from '../../../packages/store/src/index.js';
-import type { ConsoleMessage, Page } from '@playwright/test';
+import type {
+  BaseBlockModel,
+  Page as StorePage,
+} from '../../../packages/store/src/index.js';
+import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -20,12 +23,13 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     'Failed to load resource: the server responded with a status of 404 (Not Found)',
     // embed.spec.ts
     'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
-    // embed.spec.ts
-    'Element affine-embed scheduled an update (generally because a property was set) after an update completed',
     // clipboard.spec.ts
     "TypeError: Cannot read properties of null (reading 'model')",
     // basic.spec.ts › should readonly mode not be able to modify text
     'cannot modify data in readonly mode',
+    // Firefox warn on quill
+    // See https://github.com/quilljs/quill/issues/2030
+    '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -34,12 +38,25 @@ function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
 
-async function initEmptyEditor(page: Page) {
-  await page.evaluate(() => {
+/**
+ * @example
+ * ```ts
+ * await initEmptyEditor(page, { enable_some_flag: true });
+ * ```
+ */
+async function initEmptyEditor(
+  page: Page,
+  flags: Partial<BlockSuiteFlags> = {}
+) {
+  await page.evaluate(flags => {
     const { workspace } = window;
 
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as StorePage;
+      for (const [key, value] of Object.entries(flags)) {
+        page.awarenessStore.setFlag(key as keyof typeof flags, value);
+      }
+
       const editor = document.createElement('editor-container');
       editor.page = page;
 
@@ -56,11 +73,15 @@ async function initEmptyEditor(page: Page) {
     });
 
     workspace.createPage('page0');
-  });
+  }, flags);
   await waitNextFrame(page);
 }
 
-export async function enterPlaygroundRoom(page: Page, room?: string) {
+export async function enterPlaygroundRoom(
+  page: Page,
+  flags?: Partial<BlockSuiteFlags>,
+  room?: string
+) {
   const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
@@ -83,7 +104,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
     }
   });
 
-  await initEmptyEditor(page);
+  await initEmptyEditor(page, flags);
   return room;
 }
 
@@ -132,16 +153,18 @@ export async function enterPlaygroundWithList(page: Page) {
   await waitNextFrame(page);
 }
 
-export async function initEmptyParagraphState(page: Page) {
-  const ids = await page.evaluate(() => {
+export async function initEmptyParagraphState(page: Page, pageId?: string) {
+  const ids = await page.evaluate(pageId => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlock({ flavour: 'affine:page' });
+    if (!pageId) {
+      pageId = page.addBlock({ flavour: 'affine:page' });
+    }
     const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
     const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, frameId);
     page.captureSync();
     return { pageId, frameId, paragraphId };
-  });
+  }, pageId);
   return ids;
 }
 
@@ -338,4 +361,45 @@ export async function readClipboardText(page: Page) {
     textarea?.remove();
   });
   return text;
+}
+
+export const getCenterPosition: (
+  page: Page,
+  selector: string
+) => Promise<{ x: number; y: number }> = async (
+  page: Page,
+  selector: string
+) => {
+  return await page.evaluate((selector: string) => {
+    const bbox = document
+      .querySelector(selector)
+      ?.getBoundingClientRect() as DOMRect;
+    return {
+      x: bbox.left + bbox.width / 2,
+      y: bbox.top + bbox.height / 2,
+    };
+  }, selector);
+};
+
+export const getBoundingClientRect: (
+  page: Page,
+  selector: string
+) => Promise<DOMRect> = async (page: Page, selector: string) => {
+  return await page.evaluate((selector: string) => {
+    return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
+  }, selector);
+};
+
+export async function getBlockModel<Model extends BaseBlockModel>(
+  page: Page,
+  blockId: string
+) {
+  const result: BaseBlockModel | null | undefined = await page.evaluate(
+    blockId => {
+      return window.page?.getBlockById(blockId);
+    },
+    blockId
+  );
+  expect(result).not.toBeNull();
+  return result as Model;
 }

@@ -2,12 +2,12 @@ import { html, css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import type { EmbedBlockModel } from '../index.js';
 import {
-  BLOCK_ID_ATTR,
   type BlockHost,
   NonShadowLitElement,
   BlockChildrenContainer,
 } from '../../__internal__/index.js';
 import { assertExists } from '@blocksuite/global/utils';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
@@ -106,20 +106,19 @@ export class ImageBlockComponent extends NonShadowLitElement {
     }
   `;
 
+  @property({ hasChanged: () => true })
   model!: EmbedBlockModel;
 
   @property()
   host!: BlockHost;
 
   @query('.resizable-img')
-  _resizeImg!: HTMLElement;
+  private _resizeImg!: HTMLElement;
 
   @state()
-  _source!: string;
+  private _source!: string;
 
-  // This is the initial width before event resize is applied
-
-  override async firstUpdated() {
+  async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width

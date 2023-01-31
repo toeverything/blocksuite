@@ -1,9 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
-import { ShapeBlockTag } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import { BLOCK_ID_ATTR as ATTR } from './consts.js';
+import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import type { IPoint } from './gesture.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
@@ -11,16 +10,6 @@ type ElementTagName = keyof HTMLElementTagNameMap;
 
 interface ContainerBlock {
   model?: BaseBlockModel;
-}
-
-export function getShapeBlockHitBox(id: string): SVGPathElement | null {
-  const shapeBlock = getBlockById<'affine-shape'>(id);
-  if (shapeBlock?.tagName !== ShapeBlockTag.toUpperCase()) {
-    throw new Error(`${ATTR}: ${id} is not shape block`);
-  }
-  return (
-    shapeBlock.shadowRoot?.querySelector('.affine-shape-block-hit-box') ?? null
-  );
 }
 
 export function getBlockById<T extends ElementTagName>(
@@ -311,7 +300,7 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number,
-  isStart: boolean
+  isStart = true
 ) {
   if (
     ele instanceof Element &&
@@ -408,12 +397,20 @@ export function isInsideRichText(element: unknown): element is RichText {
   return !!richText;
 }
 
-export function isPageTitleElement(
+export function isTitleElement(
   element: unknown
-): element is HTMLTextAreaElement {
+): element is HTMLTextAreaElement | HTMLInputElement {
   return (
-    element instanceof HTMLTextAreaElement &&
-    element.classList.contains('affine-default-page-block-title')
+    (element instanceof HTMLTextAreaElement ||
+      element instanceof HTMLInputElement) &&
+    element.getAttribute('data-block-is-title') === 'true'
+  );
+}
+
+export function isDatabaseInput(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.getAttribute('data-block-is-database-input') === 'true'
   );
 }
 
@@ -429,7 +426,7 @@ export function isCaptionElement(node: unknown): node is HTMLInputElement {
  * It include all of element in editor.
  * This is very useful when wanting to handle edges between blocks.
  *
- * See also {@link isInsideRichText} or {@link isPageTitleElement}
+ * See also {@link isInsideRichText} or {@link isTitleElement}
  */
 export function isInsideBlockContainer(element: unknown): element is Node {
   const defaultBlockContainer = document.querySelector(

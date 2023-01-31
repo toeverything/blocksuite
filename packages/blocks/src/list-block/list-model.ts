@@ -1,89 +1,21 @@
-import { Page, BaseBlockModel } from '@blocksuite/store';
+import {
+  RichTextType,
+  defineBlockSchema,
+  SchemaToModel,
+} from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export class ListBlockModel
-  extends BaseBlockModel
-  implements BlockSuiteModelProps.ListBlockModel
-{
-  static version = 1;
-  flavour = 'affine:list' as const;
-  tag = literal`affine-list`;
-
-  type: ListType;
-  checked: boolean;
-
-  constructor(
-    page: Page,
-    props: PropsWithId<Partial<BlockSuiteModelProps.ListBlockModel>>
-  ) {
-    super(page, props);
-    this.type = props.type ?? 'bulleted';
-    this.checked = props.checked ?? false;
+export const ListBlockModelSchema = defineBlockSchema(
+  'affine:list',
+  () => ({
+    type: 'bulleted' as ListType,
+    checked: false,
+    text: RichTextType,
+  }),
+  {
+    version: 1,
+    tag: literal`affine-list`,
   }
+);
 
-  override block2html(
-    childText: string,
-    previousSiblingId: string,
-    nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
-    let text = super.block2html(
-      childText,
-      previousSiblingId,
-      nextSiblingId,
-      begin,
-      end
-    );
-    const previousSiblingBlock = this.page.getBlockById(previousSiblingId);
-    const nextSiblingBlock = this.page.getBlockById(nextSiblingId);
-    switch (this.type) {
-      case 'bulleted':
-        text = `<li>${text}</li>`;
-        break;
-      case 'numbered':
-        text = `<li>${text}</li>`;
-        break;
-      case 'todo':
-        text = `<li><input disabled type="checkbox" ${
-          this.checked ? 'checked' : ''
-        }>${text}</li>`;
-        break;
-      default:
-        break;
-    }
-    if (
-      previousSiblingBlock?.flavour !== this.flavour ||
-      previousSiblingBlock.type !== this.type
-    ) {
-      switch (this.type) {
-        case 'bulleted':
-        case 'todo':
-          text = `<ul>${text}`;
-          break;
-        case 'numbered':
-          text = `<ol>${text}`;
-          break;
-        default:
-          break;
-      }
-    }
-    if (
-      nextSiblingBlock?.flavour !== this.flavour ||
-      nextSiblingBlock.type !== this.type
-    ) {
-      switch (this.type) {
-        case 'bulleted':
-        case 'todo':
-          text = `${text}</ul>`;
-          break;
-        case 'numbered':
-          text = `${text}</ol>`;
-          break;
-        default:
-          break;
-      }
-    }
-    return text;
-  }
-}
+export type ListBlockModel = SchemaToModel<typeof ListBlockModelSchema>;

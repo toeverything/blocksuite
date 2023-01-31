@@ -3,17 +3,17 @@ export * from './space.js';
 export * from './store.js';
 export * from './base.js';
 export * from './awareness.js';
-export * from './blob/index.js';
+export * from './persistence/blob/index.js';
 export * from './text-adapter.js';
-export * from './utils/signal.js';
-export * from './utils/disposable.js';
-export * from './doc-providers.js';
+export * from '@blocksuite/global/utils';
+export * from './persistence/doc/index.js';
 export * from './workspace/index.js';
 export * as Utils from './utils/utils.js';
 export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
   uuidv4,
+  nanoid,
 } from './utils/id-generator.js';
 export type { IdGenerator } from './utils/id-generator.js';
 

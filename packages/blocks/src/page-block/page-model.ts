@@ -1,33 +1,15 @@
-import { BaseBlockModel, Page } from '@blocksuite/store';
+import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
+import { literal } from 'lit/static-html.js';
 
-export class PageBlockModel
-  extends BaseBlockModel
-  implements BlockSuiteModelProps.PageBlockModel
-{
-  static version = 1;
-  flavour = 'affine:page' as const;
-
-  title = '';
-  constructor(
-    page: Page,
-    props: PropsWithId<Partial<BlockSuiteModelProps.PageBlockModel>>
-  ) {
-    super(page, props);
-    this.title = props.title ?? '';
+export const PageBlockModelSchema = defineBlockSchema(
+  'affine:page',
+  () => ({
+    title: '',
+  }),
+  {
+    version: 1,
+    tag: literal`affine-page`,
   }
+);
 
-  override block2html(
-    childText: string,
-    previousSiblingId: string,
-    nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
-    return `<div>${this.title}${childText}</div>`;
-  }
-
-  override block2Text(childText: string, begin?: number, end?: number) {
-    const text = (this.title || '').slice(begin || 0, end);
-    return `${text}${childText}`;
-  }
-}
+export type PageBlockModel = SchemaToModel<typeof PageBlockModelSchema>;

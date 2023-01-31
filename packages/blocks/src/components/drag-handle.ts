@@ -1,10 +1,11 @@
 import { css, html, LitElement, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
-import { isFirefox } from '../__internal__/utils/std.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { assertExists } from '@blocksuite/global/utils';
+import { getBlockElementByModel } from '../__internal__/index.js';
+import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import {
   getBlockElementByModel,
   SelectionEvent,
@@ -65,12 +66,14 @@ export class DragIndicator extends LitElement {
 }
 
 export type DragHandleGetModelStateCallback = (
+  blocks: BaseBlockModel[],
   pageX: number,
   pageY: number,
   skipX?: boolean
 ) => EditingState | null;
 
 export type DragHandleGetModelStateWithCursorCallback = (
+  blocks: BaseBlockModel[],
   pageX: number,
   pageY: number,
   cursor: number,
@@ -124,9 +127,13 @@ export class DragHandle extends LitElement {
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
     getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
-    setSelectedBlocks: (selectedBlocks: Element[]) => void;
+    setSelectedBlocks: (selectedBlocks: Element | null) => void;
   }) {
     super();
+    this.getDropAllowedBlocks = () => {
+      console.warn('you may forget to set `getAllowedBlocks`');
+      return [];
+    };
     this.onDropCallback = options.onDropCallback;
     this.setSelectedBlocks = options.setSelectedBlocks;
     this._getBlockEditingStateByPosition =
@@ -134,6 +141,17 @@ export class DragHandle extends LitElement {
     this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
     document.body.appendChild(this);
   }
+
+  /**
+   * A function that returns all blocks that are allowed to be moved to
+   *
+   * If there is `draggingBlock`, the user is dragging a block to another place
+   *
+   */
+  @property()
+  public getDropAllowedBlocks: (
+    draggingBlock: BaseBlockModel | null
+  ) => BaseBlockModel[];
 
   @property()
   public onDropCallback: (
@@ -143,7 +161,7 @@ export class DragHandle extends LitElement {
   ) => void;
 
   @property()
-  public setSelectedBlocks: (selectedBlocks: Element[]) => void;
+  public setSelectedBlocks: (selectedBlock: Element | null) => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -216,6 +234,10 @@ export class DragHandle extends LitElement {
     this._lastModelState = null;
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
+  }
+
+  public pointerEvents(value = 'auto') {
+    this.style.pointerEvents = value;
   }
 
   protected firstUpdated() {
@@ -295,6 +317,7 @@ export class DragHandle extends LitElement {
   private _onResize = (e: UIEvent) => {
     if (this._startModelState) {
       const newModelState = this._getBlockEditingStateByPosition?.(
+        this.getDropAllowedBlocks(this._startModelState.model),
         this._startModelState.position.x,
         this._startModelState.position.y,
         true
@@ -316,6 +339,7 @@ export class DragHandle extends LitElement {
 
   private _onClick = (e: MouseEvent) => {
     const clickDragState = this._getBlockEditingStateByPosition?.(
+      this.getDropAllowedBlocks(null),
       e.pageX,
       e.pageY,
       true
@@ -339,6 +363,10 @@ export class DragHandle extends LitElement {
     this._currentPageY = e.pageY;
   };
 
+  private _onMouseLeave = (_: MouseEvent) => {
+    this.setSelectedBlocks(null);
+  };
+
   private _onDragStart = (e: DragEvent) => {
     if (e.dataTransfer) {
       e.dataTransfer.effectAllowed = 'move';
@@ -358,7 +386,9 @@ export class DragHandle extends LitElement {
     if (this._cursor === null) {
       return;
     }
+    assertExists(this._startModelState);
     const modelState = this._getBlockEditingStateByCursor?.(
+      this.getDropAllowedBlocks(this._startModelState.model),
       x,
       y,
       this._cursor,

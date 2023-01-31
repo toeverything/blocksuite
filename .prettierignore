@@ -2,4 +2,6 @@ packages/playground/dist/assets/*
 packages/react/dist/*
 packages/react/examples/next/.next/*
 packages/phasor/dist/*
+packages/global/dist/*
+packages/store/dist/*
 pnpm-lock.yaml
