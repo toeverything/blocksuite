@@ -15,14 +15,14 @@ import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { columnTypeToTagSchema } from './utils/index.js';
 import { DatabaseEditColumn } from './components/database-edit-column.js';
 import { createPopper } from '@popperjs/core';
-import { registerInternal } from './components/column-type/index.js';
+import { registerInternalRenderer } from './components/column-type/index.js';
 import type { DatabaseBlockSettingsSidebar } from './components/sidebar.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
 let once = true;
 if (once) {
-  registerInternal();
+  registerInternalRenderer();
   once = false;
 }
 

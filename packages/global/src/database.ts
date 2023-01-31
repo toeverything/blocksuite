@@ -88,7 +88,7 @@ export function defineTagSchemaRenderer<
   config: {
     displayName: string;
   }
-): void {
+): TagSchemaRenderer<Type, Property, Value> {
   const renderer: TagSchemaRenderer<Type, Property, Value> = {
     displayName: config.displayName,
     type,
@@ -104,6 +104,13 @@ export function defineTagSchemaRenderer<
   uiSchema.ColumnPropertyEditing = customElement(
     `database-${type}-cell-property-editing`
   )(uiSchema.ColumnPropertyEditing);
+  return renderer;
+}
+
+export function registerTagSchemaRenderer(renderer: TagSchemaRenderer) {
+  if (registry.has(renderer.type)) {
+    throw new Error('cannot register twice for ' + renderer.type);
+  }
   registry.set(renderer.type, renderer);
 }
 
