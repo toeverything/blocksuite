@@ -174,7 +174,11 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                       }}
                     >
                       ${column.type === 'number'
-                        ? html`<database-number-type></database-number-type>`
+                        ? html`<database-number-type
+                            .targetModel=${child}
+                            .targetTagSchema=${column}
+                            .targetTag=${tag}
+                          ></database-number-type>`
                         : tag?.value}
                     </div>
                   `;
@@ -408,6 +412,7 @@ export class DatabaseBlock extends NonShadowLitElement {
   };
 
   render() {
+    console.log(1);
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
       this.columns.map(column => column.meta.width).reduce((t, x) => t + x, 0) +

@@ -407,6 +407,13 @@ export function isTitleElement(
   );
 }
 
+export function isDatabaseInput(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.getAttribute('data-block-is-database-input') === 'true'
+  );
+}
+
 export function isCaptionElement(node: unknown): node is HTMLInputElement {
   if (!(node instanceof Element)) {
     return false;

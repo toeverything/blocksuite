@@ -17,6 +17,7 @@ import {
   IPoint,
   getCurrentRange,
   isTitleElement,
+  isDatabaseInput,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -333,7 +334,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isTitleElement(e.raw.target)) {
+    if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;
     }
@@ -459,7 +460,7 @@ export class DefaultSelectionManager {
       return;
     }
     const target = e.raw.target;
-    if (isTitleElement(target)) {
+    if (isTitleElement(target) || isDatabaseInput(target)) {
       return;
     }
     if (e.keys.shift) return;
