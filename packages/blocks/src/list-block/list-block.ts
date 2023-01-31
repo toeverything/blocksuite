@@ -27,6 +27,7 @@ function selectList(model: ListBlockModel) {
   const richText = blockElement.querySelector('rich-text');
   assertExists(richText);
   const blockRect = richText.getBoundingClientRect();
+  selectionManager.state.focusedBlockIndex = model.index as number;
   selectionManager.resetSelectedBlockByRect(blockRect);
 }
 

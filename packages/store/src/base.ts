@@ -115,6 +115,7 @@ export class BaseBlockModel<Props = unknown>
   sourceId?: string;
 
   parentIndex?: number;
+  index?: number;
   depth?: number;
 
   constructor(

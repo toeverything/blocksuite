@@ -246,6 +246,7 @@ export function focusBlockByModel(
   const editableContainer = element?.querySelector('[contenteditable]');
   defaultPageBlock.selection.state.clear();
   if (editableContainer) {
+    defaultPageBlock.selection.state.focusedBlockIndex = model.index as number;
     focusRichText(editableContainer, position);
   }
 }

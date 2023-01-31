@@ -360,6 +360,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   } else {
     const LARGE_BOUND = 999999;
     const rect = new DOMRect(0, 0, LARGE_BOUND, LARGE_BOUND);
+    selection.state.focusedBlockIndex = -1; // SELECT_ALL
     selection.selectBlocksByRect(rect);
   }
 

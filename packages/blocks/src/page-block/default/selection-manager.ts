@@ -84,7 +84,6 @@ function filterSelectedBlockByIndex(
   }
 
   const len = blocks.length;
-
   const results = [];
   let flag = true;
   let blockRect: DOMRect | null = null;
@@ -180,8 +179,9 @@ export class PageSelectionState {
   type: PageSelectionType;
   selectEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: Element[] = [];
-  // current clicked-block index
-  clickedBlockIndex = -1;
+  // -1: SELECT_ALL
+  // >=0: only current focused-block
+  focusedBlockIndex = -1;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
@@ -240,7 +240,7 @@ export class PageSelectionState {
     this._richTextCache.clear();
     this._startRange = null;
     this._startPoint = null;
-    this.clickedBlockIndex = -1;
+    this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
   }
 }
@@ -375,13 +375,12 @@ export class DefaultSelectionManager {
     if (selectedBlocks.length) {
       const { blockCache } = this.state;
       const model = getModelByElement(selectedBlocks[0]);
-      this._signals.updateSelectedRects.emit(
-        filterSelectedBlockByDepthAndParentIndex(
-          selectedBlocks,
-          model.depth || 1,
-          model.parentIndex
-        ).map(block => blockCache.get(block) as DOMRect)
-      );
+      const rects = filterSelectedBlockByDepthAndParentIndex(
+        selectedBlocks,
+        model.depth || 1,
+        model.parentIndex
+      ).map(block => blockCache.get(block) as DOMRect);
+      this._signals.updateSelectedRects.emit(rects);
     } else {
       this._signals.updateSelectedRects.emit([]);
     }
@@ -540,7 +539,7 @@ export class DefaultSelectionManager {
       const { model, index } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
-      this.state.clickedBlockIndex = index;
+      this.state.focusedBlockIndex = index;
     }
 
     if (
@@ -679,7 +678,7 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
-  // Click on the icon of list block
+  // Click on the prefix icon of list block
   resetSelectedBlockByRect(
     blockRect: DOMRect,
     pageSelectionType: PageSelectionType = 'block'
@@ -687,25 +686,13 @@ export class DefaultSelectionManager {
     this.state.type = pageSelectionType;
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const { _containerOffset } = this;
-    // const selectedBlocks = filterSelectedBlock(
-    //   blockCache,
-    //   blockRect,
-    //   _containerOffset
-    // );
-    const clickBlockInfo = getBlockEditingStateByPosition(
-      this._allowSelectedBlocks,
-      blockRect.left + 1,
-      blockRect.top + 1
+    const selectedBlocks = filterSelectedBlockByIndex(
+      this.state.blockCache,
+      this.state.focusedBlockIndex,
+      blockRect,
+      _containerOffset
     );
-    if (clickBlockInfo) {
-      const selectedBlocks = filterSelectedBlockByIndex(
-        this.state.blockCache,
-        clickBlockInfo.index,
-        blockRect,
-        _containerOffset
-      );
-      this._setSelectedBlocks(selectedBlocks);
-    }
+    this._setSelectedBlocks(selectedBlocks);
   }
 
   selectBlocksByRect(hitRect: DOMRect) {
@@ -713,7 +700,7 @@ export class DefaultSelectionManager {
 
     const selectedBlocks = filterSelectedBlockByIndex(
       this.state.blockCache,
-      this.state.clickedBlockIndex,
+      this.state.focusedBlockIndex,
       hitRect,
       {
         x: 0,
