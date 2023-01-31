@@ -55,6 +55,9 @@ export class BlockHub extends NonShadowLitElement {
   @query('.block-hub-menu-container')
   private _blockHubMenuContainer!: HTMLElement;
 
+  @query('[role="menu-entry"]')
+  private _blockHubMenuEntry!: HTMLElement;
+
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -288,6 +291,10 @@ export class BlockHub extends NonShadowLitElement {
     for (const blockHubMenu of this._blockHubMenus) {
       blockHubMenu.addEventListener('mouseover', this._onBlockHubMenuMouseOver);
     }
+    this._blockHubMenuEntry.addEventListener(
+      'mouseover',
+      this._onBlockHubEntryMouseOver
+    );
 
     document.addEventListener('click', this._onClick);
     this._blockHubButton.addEventListener('click', this._onBlockHubButtonClick);
@@ -327,6 +334,10 @@ export class BlockHub extends NonShadowLitElement {
           this._onBlockHubMenuMouseOver
         );
       }
+      this._blockHubMenuEntry.addEventListener(
+        'mouseover',
+        this._onBlockHubEntryMouseOver
+      );
       document.removeEventListener('click', this._onClick);
       this._blockHubButton.removeEventListener(
         'click',
@@ -384,7 +395,12 @@ export class BlockHub extends NonShadowLitElement {
           affine-type="text"
         >
           ${RectIcon}
-          <tool-tip inert role="tooltip" tip-position="left" style="top: 5px"
+          <tool-tip
+            inert
+            role="tooltip"
+            tip-position="left"
+            style="top: 5px"
+            ?hidden=${!this._showToolTip}
             >Drag to Insert blank line
           </tool-tip>
         </div>
@@ -598,6 +614,11 @@ export class BlockHub extends NonShadowLitElement {
     assertExists(cardType);
     this._isCardListVisible = true;
     this._cardVisibleType = cardType as CardListType;
+    this.requestUpdate();
+  };
+
+  private _onBlockHubEntryMouseOver = () => {
+    this._isCardListVisible = false;
     this.requestUpdate();
   };
 
