@@ -222,7 +222,7 @@ export class Page extends Space<PageData> {
   }
 
   setTagSchema(schema: TagSchema) {
-    return this.tagSchema.set(schema.id, schema);
+    this.transact(() => this.tagSchema.set(schema.id, schema));
   }
 
   getBlockById(id: string) {

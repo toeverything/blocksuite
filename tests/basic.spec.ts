@@ -13,10 +13,10 @@ import {
   addFrameByClick,
   initEmptyParagraphState,
   dragBetweenIndices,
-  switchReadonly,
   SHORT_KEY,
   captureHistory,
   focusTitle,
+  switchReadonly,
 } from './utils/actions/index.js';
 import {
   defaultStore,

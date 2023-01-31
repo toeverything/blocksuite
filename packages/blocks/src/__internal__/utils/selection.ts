@@ -6,6 +6,7 @@ import {
   getContainerByModel,
   getCurrentRange,
   getDefaultPageBlock,
+  getElementFromEventTarget,
   getModelByElement,
   getModelsByRange,
   getNextBlock,
@@ -25,7 +26,9 @@ import {
   assertExists,
   caretRangeFromPoint,
   matchFlavours,
+  nonTextBlock,
 } from '@blocksuite/global/utils';
+import { asyncFocusRichText } from './common-operations.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -541,62 +544,65 @@ export function handleNativeRangeDragMove(
   }
 }
 
-function isBlankAreaBetweenBlocks(startContainer: Node) {
-  if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-paragraph-block-container');
-}
-
-function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
-  return startContainer.tagName === 'AFFINE-FRAME';
-}
-
-function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
-  if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-frame-block-container');
-}
-
 export function isBlankArea(e: SelectionEvent) {
   const { cursor } = window.getComputedStyle(e.raw.target as Element);
   return cursor !== 'text';
 }
 
-export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
-  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  const startContainer = range?.startContainer;
-  // if not left click
-  if (e.button) {
+// Retarget selection back to the nearest block
+// when user clicks on the edge of page (page mode) or frame (edgeless mode).
+// See https://github.com/toeverything/blocksuite/pull/878
+function handleClickRetargeting(page: Page, e: SelectionEvent) {
+  const targetEl = getElementFromEventTarget(e.raw.target);
+  const block = targetEl?.closest(`[${BLOCK_ID_ATTR}]`) as {
+    model?: BaseBlockModel;
+    pageModel?: BaseBlockModel;
+  } | null;
+  const parentModel = block?.model || block?.pageModel;
+  if (!parentModel) return;
+
+  const shouldRetarget = matchFlavours(parentModel, [
+    'affine:frame',
+    'affine:page',
+  ]);
+  if (!shouldRetarget) return;
+
+  const { clientX, clientY } = e.raw;
+
+  const horizontalElement = getClosestEditor(clientY);
+  if (!horizontalElement) return;
+
+  const model = getModelByElement(horizontalElement);
+  const rect = horizontalElement.getBoundingClientRect();
+  if (matchFlavours(model, nonTextBlock) && clientY > rect.bottom) {
+    const parent = page.getParent(model);
+    assertExists(parent);
+    const id = page.addBlockByFlavour('affine:paragraph', {}, parent.id);
+    asyncFocusRichText(page, id);
     return;
   }
+
+  if (clientX < rect.left) {
+    const range = setStartRange(horizontalElement);
+    resetNativeSelection(range);
+  } else {
+    const range = setEndRange(horizontalElement);
+    resetNativeSelection(range);
+  }
+}
+
+export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
+  // if not left click
+  if (e.button) return;
+
+  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  const startContainer = range?.startContainer;
   // click on rich text
   if (startContainer instanceof Node) {
     resetNativeSelection(range);
   }
 
-  if (!(startContainer instanceof HTMLElement)) return;
-
-  if (
-    isBlankAreaBetweenBlocks(startContainer) ||
-    isBlankAreaBeforeFirstBlock(startContainer)
-  ) {
-    focusRichTextByOffset(startContainer, e.raw.clientX);
-  } else if (isBlankAreaAfterLastBlock(startContainer)) {
-    const { root } = page;
-    const lastChild = root?.lastChild();
-    assertExists(lastChild);
-    if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
-      const block = getBlockElementByModel(lastChild);
-      if (!block) return;
-      focusRichTextByOffset(block, e.raw.clientX);
-    } else if (matchFlavours(lastChild, ['affine:code', 'affine:embed'])) {
-      page.addBlockByFlavour(
-        'affine:paragraph',
-        {
-          text: new page.Text(page, ''),
-        },
-        page.getParent(lastChild)
-      );
-    }
-  }
+  handleClickRetargeting(page, e);
 }
 
 export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
@@ -946,29 +952,59 @@ export function restoreSelection(selectedBlocks: SelectedBlock[]) {
 }
 
 /**
- * Get the closest editor element in the horizontal position
+ * Get the closest element in the horizontal position
  */
-export function getClosestHorizontalEditor(clientY: number) {
+export function getHorizontalClosestElement<
+  K extends keyof HTMLElementTagNameMap
+>(
+  clientY: number,
+  selectors: K,
+  container?: Element
+): HTMLElementTagNameMap[K] | null;
+export function getHorizontalClosestElement<
+  K extends keyof SVGElementTagNameMap
+>(
+  clientY: number,
+  selectors: K,
+  container?: Element
+): SVGElementTagNameMap[K] | null;
+export function getHorizontalClosestElement<E extends Element = Element>(
+  clientY: number,
+  selectors: string,
+  container?: Element
+): E | null;
+export function getHorizontalClosestElement(
+  clientY: number,
+  selector: string,
+  container: Element = document.body
+) {
   // sort for binary search (In fact, it is generally orderly, just in case)
-  const editorsElements = Array.from(
-    document.querySelectorAll('.ql-editor')
-  ).sort((a, b) =>
-    // getBoundingClientRect here actually run so fast because of the browser cache
-    a.getBoundingClientRect().top > b.getBoundingClientRect().top ? 1 : -1
+  const elements = Array.from(container.querySelectorAll(selector)).sort(
+    (a, b) =>
+      // getBoundingClientRect here actually run so fast because of the browser cache
+      a.getBoundingClientRect().top > b.getBoundingClientRect().top ? 1 : -1
   );
+
+  // short circuit
+  const len = elements.length;
+  if (len === 0) return null;
+  if (len === 1) return elements[0];
+
+  if (clientY < elements[0].getBoundingClientRect().top) return elements[0];
+  if (clientY > elements[len - 1].getBoundingClientRect().bottom)
+    return elements[len - 1];
 
   // binary search
   let left = 0;
-  let right = editorsElements.length - 1;
+  let right = len - 1;
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    const minElement = editorsElements[mid];
+    const minElement = elements[mid];
     if (
       clientY <= minElement.getBoundingClientRect().bottom &&
-      (mid === 0 ||
-        clientY > editorsElements[mid - 1].getBoundingClientRect().bottom)
+      (mid === 0 || clientY > elements[mid - 1].getBoundingClientRect().bottom)
     ) {
-      return editorsElements[mid];
+      return elements[mid];
     }
     if (minElement.getBoundingClientRect().top > clientY) {
       right = mid - 1;
@@ -978,4 +1014,11 @@ export function getClosestHorizontalEditor(clientY: number) {
   }
 
   return null;
+}
+
+/**
+ * Get the closest editor element in the horizontal position
+ */
+export function getClosestEditor(clientY: number, container = document.body) {
+  return getHorizontalClosestElement(clientY, '.ql-editor', container);
 }

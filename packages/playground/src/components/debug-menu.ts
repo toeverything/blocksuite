@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { html, css } from 'lit';
+import { GUI } from 'dat.gui';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -35,6 +36,11 @@ import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/store/src/__tests__/test-utils-dom';
 import type { ShapeType } from '@blocksuite/phasor';
+import {
+  CSSColorProperties,
+  CSSSizeProperties,
+  plate,
+} from '@blocksuite/global/config';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -47,6 +53,10 @@ export class DebugMenu extends NonShadowLitElement {
     :root {
       --sl-font-size-medium: var(--affine-font-xs);
       --sl-input-font-size-small: var(--affine-font-xs);
+    }
+
+    .dg.ac {
+      z-index: 1001 !important;
     }
   `;
 
@@ -85,6 +95,9 @@ export class DebugMenu extends NonShadowLitElement {
 
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
+
+  private _styleMenu!: GUI;
+  private _showStyleDebugMenu = false;
 
   get mouseMode(): MouseMode {
     if (this.mouseModeType === 'default') {
@@ -197,11 +210,6 @@ export class DebugMenu extends NonShadowLitElement {
     this.contentParser.onExportHtml();
   }
 
-  private _toggleReadonly() {
-    this.editor.readonly = !this.editor.readonly;
-    this.readonly = !this.readonly;
-  }
-
   private _exportMarkDown() {
     this.contentParser.onExportMarkdown();
   }
@@ -215,6 +223,11 @@ export class DebugMenu extends NonShadowLitElement {
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);
+  }
+
+  private _toggleStyleDebugMenu() {
+    this._showStyleDebugMenu = !this._showStyleDebugMenu;
+    this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
   }
 
   private _setReadonlyOthers() {
@@ -236,6 +249,27 @@ export class DebugMenu extends NonShadowLitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
+    this._styleMenu = new GUI();
+    this._styleMenu.width = 350;
+    const style = document.documentElement.style;
+    const sizeFolder = this._styleMenu.addFolder('Size');
+    sizeFolder.open();
+    CSSSizeProperties.forEach(item => {
+      const { name, defaultValue, cssProperty } = item;
+      sizeFolder.add({ [name]: defaultValue }, name, 0, 100).onChange(e => {
+        style.setProperty(cssProperty, Math.round(e) + 'px');
+      });
+    });
+
+    const colorFolder = this._styleMenu.addFolder('Color');
+    colorFolder.open();
+    CSSColorProperties.forEach(item => {
+      const { name, cssProperty } = item;
+      colorFolder.addColor(plate, name).onChange((color: string | null) => {
+        style.setProperty(cssProperty, color);
+      });
+    });
+    this._styleMenu.hide();
   }
 
   update(changedProperties: Map<string, unknown>) {
@@ -282,6 +316,7 @@ export class DebugMenu extends NonShadowLitElement {
         .edgeless-toolbar {
           align-items: center;
         }
+
         .edgeless-toolbar sl-select,
         .edgeless-toolbar sl-color-picker,
         .edgeless-toolbar sl-button {
@@ -400,12 +435,9 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-menu-item @click=${this._toggleConnection}>
                 ${this.connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._addFrame}> Add Frame </sl-menu-item>
+              <sl-menu-item @click=${this._addFrame}> Add Frame</sl-menu-item>
               <sl-menu-item @click=${this._setReadonlyOthers}>
                 Set Others Readonly
-              </sl-menu-item>
-              <sl-menu-item @click=${this._toggleReadonly}>
-                Toggle Readonly
               </sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
@@ -416,7 +448,10 @@ export class DebugMenu extends NonShadowLitElement {
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}> Share URL </sl-menu-item>
+              <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
+              <sl-menu-item @click=${this._toggleStyleDebugMenu}>
+                Toggle CSS Debug Menu
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 

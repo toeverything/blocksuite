@@ -6,6 +6,7 @@ const allPackages = [
   'playground',
   'react',
   'store',
+  'virgo',
 ];
 
 const createPattern = packageName => [
@@ -53,6 +54,7 @@ module.exports = {
     'packages/react/examples/next/.next/*',
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
+    'packages/virgo/dist/*',
   ],
   overrides: [
     {
