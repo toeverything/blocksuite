@@ -6,10 +6,7 @@ import type { EditingState } from '../page-block/default/utils.js';
 import { getBlockElementByModel } from '../__internal__/index.js';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import {
-  getBlockElementByModel,
-  SelectionEvent,
-} from '../__internal__/index.js';
+import type { SelectionEvent } from '../__internal__/index.js';
 
 const handleIcon = svg`
 <path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
@@ -192,6 +189,7 @@ export class DragHandle extends LitElement {
       return;
     }
     const modelState = this._getBlockEditingStateByPosition(
+      this.getDropAllowedBlocks(this._startModelState?.model ?? null),
       event.raw.pageX,
       event.raw.pageY,
       true
@@ -347,9 +345,9 @@ export class DragHandle extends LitElement {
     if (clickDragState) {
       this._cursor = clickDragState.index;
       lastSelectedIndex = this._cursor;
-      this.setSelectedBlocks([
-        getBlockElementByModel(clickDragState.model) as HTMLElement,
-      ]);
+      this.setSelectedBlocks(
+        getBlockElementByModel(clickDragState.model) as HTMLElement
+      );
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }
@@ -361,10 +359,6 @@ export class DragHandle extends LitElement {
     }
     this._currentPageX = e.pageX;
     this._currentPageY = e.pageY;
-  };
-
-  private _onMouseLeave = (_: MouseEvent) => {
-    this.setSelectedBlocks(null);
   };
 
   private _onDragStart = (e: DragEvent) => {

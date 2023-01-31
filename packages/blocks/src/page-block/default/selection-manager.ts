@@ -508,7 +508,7 @@ export class DefaultSelectionManager {
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
     } else {
       if (this._container.components.dragHandle) {
-        this._dragHandle.showBySelectionEvent(e);
+        this._container.components.dragHandle.showBySelectionEvent(e);
       }
       this._signals.updateEmbedEditingState.emit(null);
       this._signals.updateCodeBlockOption.emit(null);
