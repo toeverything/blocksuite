@@ -27,13 +27,13 @@ function staticImplements<T>() {
 export class DuplexBlobProvider implements BlobProvider {
   private readonly _localDB: IDBInstance;
   private readonly _cloudManager?: CloudSyncManager;
-  private _uploading = false;
+  private _uploadingIds: BlobId[] = [];
 
   readonly blobs: Set<string> = new Set();
   readonly signals = {
     blobAdded: new Signal<BlobId>(),
     blobDeleted: new Signal<BlobId>(),
-    uploadStateChanged: new Signal<boolean>(),
+    uploadStateChanged: new Signal<BlobId[]>(),
     uploadFinished: new Signal<BlobId>(),
   };
 
@@ -61,8 +61,8 @@ export class DuplexBlobProvider implements BlobProvider {
     const endpoint = optionsGetter?.('api');
     if (endpoint) {
       assertExists(optionsGetter);
-      this.signals.uploadStateChanged.on(uploading => {
-        this._uploading = uploading;
+      this.signals.uploadStateChanged.on(uploadingIds => {
+        this._uploadingIds = uploadingIds;
       });
       this._cloudManager = new CloudSyncManager(
         workspace,
@@ -75,7 +75,11 @@ export class DuplexBlobProvider implements BlobProvider {
   }
 
   get uploading() {
-    return this._uploading;
+    return Boolean(this._uploadingIds.length);
+  }
+
+  get uploadingIds() {
+    return [...this._uploadingIds];
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {

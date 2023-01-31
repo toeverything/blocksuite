@@ -32,13 +32,13 @@ export class CloudSyncManager {
   private _pipeline: SyncTask[] = [];
   private initialized = false;
   private _uploadingIds: Set<string> = new Set();
-  private _onUploadStateChanged: Signal<boolean>;
+  private _onUploadStateChanged: Signal<BlobId[]>;
 
   constructor(
     workspace: string,
     blobOptionsGetter: BlobOptionsGetter,
     db: IDBInstance,
-    onUploadStateChanged: Signal<boolean>,
+    onUploadStateChanged: Signal<BlobId[]>,
     onUploadFinished: Signal<BlobId>
   ) {
     this._onUploadFinished = onUploadFinished;
@@ -154,12 +154,12 @@ export class CloudSyncManager {
 
   private _addUploadId(id: BlobId) {
     this._uploadingIds.add(id);
-    this._onUploadStateChanged.emit(Boolean(this._uploadingIds.size));
+    this._onUploadStateChanged.emit([...this._uploadingIds]);
   }
 
   private _removeUploadId(id: BlobId) {
     this._uploadingIds.delete(id);
-    this._onUploadStateChanged.emit(Boolean(this._uploadingIds.size));
+    this._onUploadStateChanged.emit([...this._uploadingIds]);
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {

@@ -126,7 +126,10 @@ export class ImageBlockComponent extends NonShadowLitElement {
     },
   };
 
-  private waitImageReady() {
+  @state()
+  private _imageState: 'waitUploaded' | 'loading' | 'ready' = 'waitUploaded';
+
+  private waitImageUploaded() {
     return new Promise<void>(resolve => {
       const disposeSignal = this.model.page.awarenessStore.signals.update.on(
         () => {
@@ -158,11 +161,14 @@ export class ImageBlockComponent extends NonShadowLitElement {
     );
 
     if (isBlobUploading) {
-      await this.waitImageReady();
+      this._imageState = 'waitUploaded';
+      await this.waitImageUploaded();
     }
 
+    this._imageState = 'loading';
     const url = await storage.get(this.model.sourceId);
     url && (this._source = url);
+    this._imageState = 'ready';
     if (width && height) {
       this._resizeImg.style.width = width + 'px';
       this._resizeImg.style.height = height + 'px';
@@ -182,14 +188,18 @@ export class ImageBlockComponent extends NonShadowLitElement {
       this._resizeImg.style.width = width + 'px';
       this._resizeImg.style.height = height + 'px';
     }
+
+    const img = {
+      waitUploaded: html`<div>wait uploaded</div>`,
+      loading: html`<div>loading</div>`,
+      ready: html`<img class="resizable-img" src=${this._source} />`,
+    }[this._imageState];
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <affine-embed .model=${this.model} .readonly=${this.host.readonly}>
         <div class="affine-image-wrapper">
-          <div>
-            <img class="resizable-img" src=${this._source} />
-          </div>
+          <div>${img}</div>
           ${childrenContainer}
         </div>
       </affine-embed>

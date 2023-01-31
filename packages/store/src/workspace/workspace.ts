@@ -10,7 +10,7 @@ import {
   getBlobStorage,
 } from '../persistence/blob/index.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import type { AwarenessStore } from '../awareness.js';
+import { AwarenessStore, BlobUploadState } from '../awareness.js';
 import type { z } from 'zod';
 import { BlockSchema } from '../base.js';
 
@@ -246,6 +246,21 @@ export class Workspace {
     if (!options.isSSR) {
       this._blobStorage = getBlobStorage(options.room, k => {
         return this._blobOptionsGetter ? this._blobOptionsGetter(k) : '';
+      });
+      this._blobStorage.then(blobStorage => {
+        blobStorage?.signals.uploadFinished.on(blobId => {
+          this.awarenessStore.setBlobsState({
+            [blobId]: BlobUploadState.Uploaded,
+          });
+        });
+        blobStorage?.signals.uploadStateChanged.on(uploadingIds => {
+          this.awarenessStore.setBlobsState(
+            uploadingIds.reduce((acc, id) => {
+              acc[id] = BlobUploadState.Uploading;
+              return acc;
+            }, {} as Record<string, BlobUploadState>)
+          );
+        });
       });
     } else {
       // blob storage is not reachable in server side

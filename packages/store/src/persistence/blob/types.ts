@@ -6,9 +6,12 @@ export type BlobURL = string;
 export interface BlobProvider {
   blobs: Set<BlobId>;
   uploading: boolean;
+  uploadingIds: BlobId[];
   signals: {
     blobAdded: Signal<BlobId>;
-    uploadStateChanged?: Signal<boolean>;
+    blobDeleted: Signal<BlobId>;
+    uploadStateChanged: Signal<BlobId[]>;
+    uploadFinished: Signal<BlobId>;
   };
   get(id: BlobId): Promise<BlobURL | null>;
   set(blob: Blob): Promise<BlobId>;

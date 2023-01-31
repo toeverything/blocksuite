@@ -6,7 +6,9 @@ export class BlobStorage {
 
   signals = {
     blobAdded: new Signal<BlobId>(),
-    uploadStateChanged: new Signal<boolean>(),
+    blobDeleted: new Signal<BlobId>(),
+    uploadStateChanged: new Signal<BlobId[]>(),
+    uploadFinished: new Signal<BlobId>(),
   };
 
   get uploading(): boolean {
@@ -33,8 +35,21 @@ export class BlobStorage {
     provider.signals.blobAdded.on(blobId => {
       this.signals.blobAdded.emit(blobId);
     });
-    provider.signals.uploadStateChanged?.on(() => {
-      this.signals.uploadStateChanged.emit(this.uploading);
+
+    provider.signals.blobDeleted.on(blobId => {
+      this.signals.blobDeleted.emit(blobId);
+    });
+
+    provider.signals.uploadStateChanged.on(() => {
+      const uploadingIds = this._providers.reduce((acc, provider) => {
+        provider.uploadingIds.forEach(id => acc.add(id));
+        return acc;
+      }, new Set<BlobId>());
+      this.signals.uploadStateChanged.emit([...uploadingIds]);
+    });
+
+    provider.signals.uploadFinished.on(blobId => {
+      this.signals.uploadFinished.emit(blobId);
     });
   }
 

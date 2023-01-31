@@ -121,19 +121,23 @@ export class AwarenessStore<
     }
   }
 
-  setBlobState(blobId: string, state: BlobUploadState) {
-    const uploading = this.awareness.getLocalState()?.blobUploading ?? [];
-    if (state === BlobUploadState.Uploading) {
-      this.awareness.setLocalStateField('blobUploading', [
-        ...uploading,
-        blobId,
-      ]);
-    } else if (state === BlobUploadState.Uploaded) {
-      this.awareness.setLocalStateField(
-        'blobUploading',
-        uploading.filter(id => id !== blobId)
-      );
-    }
+  setBlobsState(blobStates: Record<string, BlobUploadState>) {
+    const uploading = [
+      ...(this.awareness.getLocalState()?.blobUploading ?? []),
+    ];
+
+    Object.entries(blobStates).forEach(([blobId, state]) => {
+      if (state === BlobUploadState.Uploading) {
+        uploading.push(blobId);
+      } else if (state === BlobUploadState.Uploaded) {
+        const position = uploading.findIndex(id => id === blobId);
+        if (position > -1) {
+          uploading.splice(position, 1);
+        }
+      }
+    });
+
+    this.awareness.setLocalStateField('blobUploading', uploading);
   }
 
   getBlobState(blobId: string) {
