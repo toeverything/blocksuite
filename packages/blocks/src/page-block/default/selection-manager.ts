@@ -15,7 +15,6 @@ import {
   getAllBlocks,
   getDefaultPageBlock,
   IPoint,
-  getModelByElement,
   getCurrentRange,
   isTitleElement,
   isDatabaseInput,
@@ -41,6 +40,13 @@ import {
 } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
 import { BlockHub } from '../../components/blockhub.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+
+function calcDepth(left: number, containerLeft: number) {
+  return Math.ceil(
+    (left - containerLeft) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+  );
+}
 
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
@@ -63,65 +69,58 @@ function contains(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
 function filterSelectedBlock(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect,
-  offset: IPoint
+  offset: IPoint,
+  containerLeft: number
 ): Element[] {
-  const blocks = Array.from(blockCache.keys());
-  const len = blocks.length;
+  const entries = Array.from(blockCache.entries());
+  const len = entries.length;
   const results = [];
   let depth = 1;
   let parentIndex: number | undefined;
   let flag = false;
 
   for (let i = 0; i < len; i++) {
-    const block = blocks[i];
-    const rect = block.getBoundingClientRect();
-    const isIntersects = intersects(rect, selectionRect, offset);
-    if (isIntersects) {
-      const model = getModelByElement(block);
-      const currentDepth = model.depth as number;
-      const currentIndex = model.index as number;
-      const currentParentIndex = model.parentIndex as number;
+    const [block, rect] = entries[i];
+    const currentDepth = calcDepth(rect.left, containerLeft);
+    if (intersects(rect, selectionRect, offset)) {
       if (flag) {
         if (currentDepth === depth) {
           results.push(block);
         } else if (currentDepth > depth) {
-          // Not continuous
+          // not continuous block
           if (results.length > 1) {
             continue;
           }
+
           depth = currentDepth;
-          parentIndex = currentParentIndex;
           results.shift();
           results.push(block);
         } else {
-          let size = currentIndex - parentIndex - 1;
-          let prevIndex = parentIndex;
-          if (depth - currentDepth > 1) {
-            let b = blocks[prevIndex];
-            while (b) {
-              const m = getModelByElement(b);
-              if (m.parentIndex === currentParentIndex) {
-                prevIndex = m.index;
-                break;
-              } else {
-                prevIndex = m.parentIndex;
-                b = blocks[prevIndex];
-              }
+          // backward search parent block
+          let n = i;
+          while (n--) {
+            if (calcDepth(entries[n][1].left, containerLeft) === currentDepth) {
+              parentIndex = n;
+              break;
             }
           }
+
+          assertExists(parentIndex);
+
+          // remove prev subtrees
+          let size = i - parentIndex - 1;
           while (size) {
             results.pop();
             size--;
           }
-          results.push(blocks[prevIndex]);
-          results.push(blocks[currentIndex]);
+
+          results.push(entries[parentIndex][0]);
+          results.push(block);
           depth = currentDepth;
-          parentIndex = currentParentIndex;
         }
       } else {
         results.push(block);
         depth = currentDepth;
-        parentIndex = currentIndex;
         flag = true;
       }
     }
@@ -130,49 +129,42 @@ function filterSelectedBlock(
   return results;
 }
 
+// find the currently focused block and its children
 function filterSelectedBlockByIndex(
   blockCache: Map<Element, DOMRect>,
   focusedBlockIndex: number,
   selectionRect: DOMRect,
   offset: IPoint
 ): Element[] {
-  const blocks = Array.from(blockCache.keys());
-
   // SELECT_ALL
   if (focusedBlockIndex === -1) {
-    return blocks;
+    return Array.from(blockCache.keys());
   }
 
-  const len = blocks.length;
+  const entries = Array.from(blockCache.entries());
+  const len = entries.length;
   const results = [];
   let flag = true;
   let blockRect: DOMRect | null = null;
 
   for (let i = focusedBlockIndex; i < len; i++) {
-    const block = blocks[i];
+    const [block, rect] = entries[i];
     const richText = block.querySelector('rich-text');
     assertExists(richText);
-    const rect = richText.getBoundingClientRect();
+    const richTextRect = richText.getBoundingClientRect();
     if (flag) {
-      const isIntersects = intersects(rect, selectionRect, offset);
-      if (isIntersects) {
-        blockRect = block.getBoundingClientRect();
+      if (intersects(richTextRect, selectionRect, offset)) {
+        blockRect = rect;
         results.push(block);
         flag = false;
       }
     } else {
       if (blockRect) {
         // sometimes: rect.bottom = 467.2372016906738, selectionRect.bottom = 467.23719024658203
-        const inside = contains(rect, blockRect, { x: 0, y: 1 });
-        if (inside) {
+        if (contains(rect, blockRect, { x: 0, y: 1 })) {
           results.push(block);
         } else {
-          if (focusedBlockIndex >= 0) {
-            break;
-          }
-          blockRect = null;
-          flag = true;
-          i--;
+          break;
         }
       }
     }
@@ -181,27 +173,16 @@ function filterSelectedBlockByIndex(
   return results;
 }
 
-// Backward: any level can be reached
-// Forward: only the first level can be reached
-//
-// The depth of the block in the page is 1 by default
-// See `getAllowSelectedBlocks` in packages/blocks/src/page-block/default/utils.ts
-function filterSelectedBlockByDepthAndParentIndex(
-  selectedBlocks: Element[],
-  depth: number,
-  parentIndex?: number
-) {
+// clear block' subtrees for drawing rect
+function clearSubtrees(selectedBlocks: Element[], left: number) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
-    const model = getModelByElement(block);
-    const currentParentIndex = model.parentIndex;
-    if (currentParentIndex === parentIndex) {
+    const currentLeft = block.getBoundingClientRect().left;
+    if (left === currentLeft) {
       return true;
     } else {
-      const currentDepth = model.depth || 1;
-      if (currentDepth < depth) {
-        parentIndex = currentParentIndex;
-        depth = currentDepth;
+      if (currentLeft < left) {
+        left = currentLeft;
         return true;
       } else {
         return false;
@@ -435,16 +416,13 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  // `CMD-A`
   private _setSelectedBlocks = (selectedBlocks: Element[]) => {
     this.state.selectedBlocks = selectedBlocks;
     if (selectedBlocks.length) {
       const { blockCache } = this.state;
-      const model = getModelByElement(selectedBlocks[0]);
-      const rects = filterSelectedBlockByDepthAndParentIndex(
+      const rects = clearSubtrees(
         selectedBlocks,
-        model.depth || 1,
-        model.parentIndex
+        selectedBlocks[0].getBoundingClientRect().left
       ).map(block => blockCache.get(block) as DOMRect);
       this._signals.updateSelectedRects.emit(rects);
     } else {
@@ -466,10 +444,15 @@ export class DefaultSelectionManager {
     const current = { x: e.x, y: e.y };
     const { startPoint: start } = this.state;
     const selectionRect = createSelectionRect(current, start);
+    const frameBlock = this._container.querySelector(
+      '.affine-frame-block-container'
+    );
+    assertExists(frameBlock);
     const selectedBlocks = filterSelectedBlock(
       this.state.blockCache,
       selectionRect,
-      e.containerOffset
+      e.containerOffset,
+      frameBlock.getBoundingClientRect().left
     );
 
     this._setSelectedBlocks(selectedBlocks);
@@ -483,7 +466,6 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
-    this._container.components.dragHandle?.pointerEvents('none');
     this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
@@ -493,7 +475,6 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
-    this._container.components.dragHandle?.pointerEvents();
     this._signals.nativeSelection.emit(true);
   }
 
@@ -508,6 +489,10 @@ export class DefaultSelectionManager {
       this._embedResizeManager.onStart(e);
       return;
     }
+
+    // disable dragHandle button
+    this._container.components.dragHandle?.pointerEvents('none');
+
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
     } else {
@@ -533,6 +518,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
+    this._container.components.dragHandle?.pointerEvents();
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
     } else if (this.state.type === 'block') {
@@ -750,16 +736,18 @@ export class DefaultSelectionManager {
   ) {
     this.state.type = pageSelectionType;
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
-    const { _containerOffset } = this;
+
     const selectedBlocks = filterSelectedBlockByIndex(
       this.state.blockCache,
       this.state.focusedBlockIndex,
       blockRect,
-      _containerOffset
+      this._containerOffset
     );
+
     this._setSelectedBlocks(selectedBlocks);
   }
 
+  // `CMD-A`
   selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
 
