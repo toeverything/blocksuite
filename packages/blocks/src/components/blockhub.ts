@@ -392,7 +392,12 @@ export class BlockHub extends NonShadowLitElement {
           affine-type="text"
         >
           ${RectIcon}
-          <tool-tip inert role="tooltip" tip-position="left" style="top: 5px"
+          <tool-tip
+            inert
+            role="tooltip"
+            tip-position="left"
+            style="top: 5px"
+            ?hidden=${!this._showToolTip}
             >Drag to Insert blank line
           </tool-tip>
         </div>
