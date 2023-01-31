@@ -200,8 +200,8 @@ export class DefaultSelectionManager {
           const distanceToTop = Math.abs(rect.top - e.y);
           const distanceToBottom = Math.abs(rect.bottom - e.y);
           const id = this.page.addSiblingBlock(
-            blockProps,
             targetModel,
+            blockProps,
             distanceToTop < distanceToBottom ? 'right' : 'left'
           );
           asyncFocusRichText(this.page, id);
