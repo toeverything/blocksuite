@@ -1,0 +1,40 @@
+{
+  "name": "@blocksuite/virgo",
+  "version": "0.1.0",
+  "description": "A micro editor.",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test:unit": "vitest --run",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "yjs": "^13.5.44",
+    "lit": "^2.6.1"
+  },
+  "peerDependencies": {
+    "yjs": "^13",
+    "lit": "^2"
+  },
+  "exports": {
+    "./src/*": "./src/*.ts",
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      "./src/*": "./dist/*.js",
+      ".": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@blocksuite/global": "workspace:*"
+  }
+}
