@@ -199,6 +199,7 @@ export class SlashMenu extends LitElement {
     this.abortController.abort(this._searchString);
     const { flavour, type } = this._filterItems[index];
 
+    // @deprecated
     // WARNING: This flag is a simple prototype implementation, just for proof of product.
     if (this.model.page.awarenessStore.getFlag('enable_append_flavor_slash')) {
       // Add new block
@@ -233,6 +234,8 @@ export class SlashMenu extends LitElement {
       asyncFocusRichText(page, id);
       return;
     }
+    // End of deprecated
+
     updateSelectedTextType(flavour, type);
   }
 
