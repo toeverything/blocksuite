@@ -287,7 +287,7 @@ export function focusNextBlock(
   } else if (page.lastSelectionPosition) {
     nextPosition = page.lastSelectionPosition;
   }
-  const nextNodeModel = getNextBlock(model.id);
+  const nextNodeModel = getNextBlock(model);
 
   if (nextNodeModel) {
     focusBlockByModel(nextNodeModel, nextPosition);

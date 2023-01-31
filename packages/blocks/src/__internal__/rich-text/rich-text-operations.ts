@@ -425,7 +425,7 @@ export function handleKeyDown(
     // TODO resolve compatible problem
     const newRange = caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      const nextBlock = getNextBlock(model.id);
+      const nextBlock = getNextBlock(model);
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }

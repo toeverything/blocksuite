@@ -62,39 +62,35 @@ export function getPreviousSiblingById<T extends ElementTagName>(
 }
 
 /**
- * @deprecated use {@link page.getNextSibling} instead
+ *
+ * @example
+ * ```md
+ * page
+ * - frame
+ *  - paragraph <- invoke this method recursively, and the return order is following
+ *    - child <- 1
+ *  - sibling <- 2
+ * - frame    <- 2.9 frame will be skipped
+ *   - paragraph <- 3
+ * ```
+ *
+ * NOTE: this method will skip the `affine:frame` block
  */
-export function getNextSiblingById<T extends ElementTagName>(
-  id: string,
-  ele: HTMLElement = document.body
-) {
-  const siblings = getSiblingsById(id, ele);
-  const currentBlock = getBlockById(id, ele);
-  if (siblings && siblings.length > 0 && currentBlock) {
-    const index = [...siblings].indexOf(currentBlock);
-    return (siblings[index + 1] as HTMLElementTagNameMap[T]) || null;
+export function getNextBlock(model: BaseBlockModel): BaseBlockModel | null {
+  const page = model.page;
+  if (model.children.length) {
+    return model.children[0];
   }
-  return null;
-}
-
-export function getNextBlock(blockId: string) {
-  let currentBlock = getBlockById<'affine-paragraph'>(blockId);
-  if (currentBlock?.model.children.length) {
-    return currentBlock.model.children[0];
-  }
+  let currentBlock: typeof model | null = model;
   while (currentBlock) {
-    const parentBlock = getParentBlockById<'affine-paragraph'>(
-      currentBlock.model.id
-    );
-    if (parentBlock) {
-      const nextSiblings = getNextSiblingById<'affine-paragraph'>(
-        currentBlock.model.id
-      );
-      if (nextSiblings) {
-        return nextSiblings.model;
+    const nextSibling = page.getNextSibling(currentBlock);
+    if (nextSibling) {
+      if (matchFlavours(nextSibling, ['affine:frame'])) {
+        return getNextBlock(nextSibling);
       }
+      return nextSibling;
     }
-    currentBlock = parentBlock;
+    currentBlock = page.getParent(currentBlock);
   }
   return null;
 }
