@@ -17,6 +17,7 @@ export interface BlobSyncStateChangeEvent {
 
 export interface BlobProvider {
   uploading: boolean;
+  blobs: Promise<string[]>;
   signals: {
     onBlobSyncStateChange: Signal<BlobSyncStateChangeEvent>;
   };

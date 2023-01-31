@@ -47,9 +47,9 @@ async function testBasic() {
     let called = false;
     let idCalled: string | null = null;
 
-    storage.signals.blobAdded.on(id => {
+    storage.signals.onBlobSyncStateChange.on(state => {
       called = true;
-      idCalled = id;
+      idCalled = state.id;
     });
 
     const blob = await loadTestImageBlob('test-card-2');
@@ -95,7 +95,8 @@ async function testRefreshBefore() {
   testSerial('can set blob', async () => {
     const blob = await loadTestImageBlob('test-card-2');
     const id = await storage.set(blob);
-    return id !== null && storage.blobs.has(id);
+    const blobs = await storage.blobs;
+    return id !== null && blobs.includes(id);
   });
 
   await runOnce();
@@ -106,7 +107,8 @@ async function testRefreshAfter() {
   assertExists(storage);
 
   testSerial('can get saved blob', async () => {
-    const id = storage.blobs.values().next().value;
+    const blobs = await storage.blobs;
+    const id = blobs[0];
     const url = await storage.get(id);
     assertExists(url);
 
@@ -114,7 +116,7 @@ async function testRefreshAfter() {
     document.body.appendChild(img);
 
     const isCorrectColor = assertColor(img, 100, 100, [193, 193, 193]);
-    return storage.blobs.size === 1 && isCorrectColor;
+    return blobs.length === 1 && isCorrectColor;
   });
 
   await runOnce();
@@ -154,7 +156,8 @@ async function testCloudSyncBefore() {
     const blob = await loadTestImageBlob('test-card-2');
     const id = await storage.set(blob);
     console.log(id);
-    const ret = id !== null && storage.blobs.has(id);
+    const blobs = await storage.blobs;
+    const ret = id !== null && blobs.includes(id);
 
     return ret;
   });
@@ -178,7 +181,8 @@ async function testCloudSyncAfter() {
     document.body.appendChild(img);
 
     const isCorrectColor = assertColor(img, 100, 100, [193, 193, 193]);
-    const ret = storage.blobs.size === 1 && isCorrectColor;
+    const blobs = await storage.blobs;
+    const ret = blobs.length === 1 && isCorrectColor;
 
     return ret;
   });

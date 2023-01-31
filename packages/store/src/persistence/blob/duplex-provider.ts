@@ -33,7 +33,6 @@ function staticImplements<T>() {
 export class DuplexBlobProvider implements BlobProvider {
   private readonly _localDB: IDBInstance;
   private readonly _cloudManager?: CloudSyncManager;
-  private _uploadingIds: BlobId[] = [];
 
   readonly signals = {
     onBlobSyncStateChange: new Signal<BlobSyncStateChangeEvent>(),
@@ -62,11 +61,11 @@ export class DuplexBlobProvider implements BlobProvider {
   }
 
   get uploading() {
-    return Boolean(this._uploadingIds.length);
+    return Boolean(this._cloudManager?.running);
   }
 
-  get uploadingIds() {
-    return [...this._uploadingIds];
+  get blobs() {
+    return this._localDB.keys();
   }
 
   async get(id: BlobId): Promise<BlobURL | null> {

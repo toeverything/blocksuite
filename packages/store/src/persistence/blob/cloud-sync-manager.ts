@@ -59,6 +59,10 @@ export class CloudSyncManager {
     });
   }
 
+  get running() {
+    return this._running;
+  }
+
   private async _runTasks() {
     if (this._running) {
       return;

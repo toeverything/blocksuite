@@ -25,6 +25,10 @@ export class BlobStorage {
     return this._provider?.uploading ?? true;
   }
 
+  get blobs() {
+    return this._provider?.blobs ?? Promise.resolve([]);
+  }
+
   setProvider(provider: BlobProvider | null) {
     if (!provider) {
       this._provider = null;
