@@ -187,6 +187,12 @@ export class DefaultSelectionManager {
           assertExists(dataTransfer);
           const data = dataTransfer.getData('affine/block-hub');
           const blockProps = JSON.parse(data);
+          if (blockProps.flavour === 'affine:database') {
+            if (!page.awarenessStore.getFlag('enable_database')) {
+              console.warn('database block is not enabled');
+              return;
+            }
+          }
           const targetModel = end.model;
           const rect = end.position;
           this.page.captureSync();
