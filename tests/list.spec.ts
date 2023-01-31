@@ -46,6 +46,7 @@ test('add new Toggle list', async ({ page }) => {
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Toggle List');
   await page.keyboard.type('aa');
+  await pressTab(page);
   await pressEnter(page);
   await page.keyboard.type('aa');
   await pressEnter(page);
