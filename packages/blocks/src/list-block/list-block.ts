@@ -92,10 +92,12 @@ export class ListBlockComponent extends NonShadowLitElement {
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => {
-      if (
-        this.model.type === 'toggled' &&
-        this.model.children.length &&
-        !this.model.open === false // previously childless toggled blocks will have explicit null
+      if (!this.model.children.length) {
+        this.host.page.updateBlock(this.model, {
+          open: null, // if all children have been removed open needs to be reset to null
+        });
+      } else if (
+        !(this.model.open === false) // previously childless toggled blocks will have explicit null
       ) {
         this.host.page.updateBlock(this.model, {
           open: true,
