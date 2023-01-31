@@ -72,14 +72,14 @@ function filterSelectedBlock(
 
 function filterSelectedBlockByIndex(
   blockCache: Map<Element, DOMRect>,
-  clickedBlockIndex: number,
+  focusedBlockIndex: number,
   selectionRect: DOMRect,
   offset: IPoint
 ): Element[] {
   const blocks = Array.from(blockCache.keys());
 
   // SELECT_ALL
-  if (clickedBlockIndex === -1) {
+  if (focusedBlockIndex === -1) {
     return blocks;
   }
 
@@ -88,7 +88,7 @@ function filterSelectedBlockByIndex(
   let flag = true;
   let blockRect: DOMRect | null = null;
 
-  for (let i = clickedBlockIndex; i < len; i++) {
+  for (let i = focusedBlockIndex; i < len; i++) {
     const block = blocks[i];
     const richText = block.querySelector('rich-text');
     assertExists(richText);
@@ -107,7 +107,7 @@ function filterSelectedBlockByIndex(
         if (inside) {
           results.push(block);
         } else {
-          if (clickedBlockIndex >= 0) {
+          if (focusedBlockIndex >= 0) {
             break;
           }
           blockRect = null;
