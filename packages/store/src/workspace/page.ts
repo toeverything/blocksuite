@@ -477,8 +477,9 @@ export class Page extends Space<PageData> {
     assertExists(parent);
 
     const targetIndex =
-      parent?.children.findIndex(({ id }) => id === targetModel.id) ?? -1;
-    const insertIndex = direction === 'left' ? targetIndex : targetIndex + 1;
+      parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
+    const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
+
     const id = this.addBlockByFlavour(
       blockProps.flavour,
       {
