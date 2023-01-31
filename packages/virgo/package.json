@@ -21,7 +21,7 @@
     "lit": "^2"
   },
   "exports": {
-    "./src/*": "./src/*.ts",
+    "./*": "./src/*.ts",
     ".": "./src/index.ts"
   },
   "publishConfig": {
@@ -29,7 +29,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      "./src/*": "./dist/*.js",
+      "./*": "./dist/*.js",
       ".": "./dist/index.js"
     }
   },
