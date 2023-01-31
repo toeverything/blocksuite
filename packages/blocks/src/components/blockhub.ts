@@ -400,6 +400,14 @@ export class BlockHub extends NonShadowLitElement {
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
           ${BulletedListIconLarge}
         </div>
+        <div
+          class="block-hub-icon-container"
+          type="list"
+          selected=${this._cardVisibleType === 'list' ? 'true' : 'false'}
+        >
+          ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
+          ${BulletedListIconLarge}
+        </div>
         <div class="divider"></div>
       </div>
     `;
