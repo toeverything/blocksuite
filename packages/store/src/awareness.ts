@@ -42,6 +42,13 @@ export type RawAwarenessState<
   flags: Flags;
   request?: Request<Flags>[];
   response?: Response[];
+  /**
+   * After insert a blob block with cloud sync,
+   * uploading will trigger automatically,
+   * blob id will add to this property,
+   * and will remove after finish.
+   */
+  blobUploading?: string[];
 };
 
 interface AwarenessEvent<
@@ -50,6 +57,11 @@ interface AwarenessEvent<
   id: number;
   type: 'add' | 'update' | 'remove';
   state?: RawAwarenessState<Flags>;
+}
+
+export enum BlobUploadState {
+  Uploading,
+  Uploaded,
 }
 
 export class AwarenessStore<
@@ -107,6 +119,41 @@ export class AwarenessStore<
     } else {
       return false;
     }
+  }
+
+  setBlobState(blobId: string, state: BlobUploadState) {
+    const uploading = this.awareness.getLocalState()?.blobUploading ?? [];
+    if (state === BlobUploadState.Uploading) {
+      this.awareness.setLocalStateField('blobUploading', [
+        ...uploading,
+        blobId,
+      ]);
+    } else if (state === BlobUploadState.Uploaded) {
+      this.awareness.setLocalStateField(
+        'blobUploading',
+        uploading.filter(id => id !== blobId)
+      );
+    }
+  }
+
+  getBlobState(blobId: string) {
+    const found = [...this.awareness.getStates().entries()].find(
+      ([clientId, state]) => {
+        // assume local blob always exist, because we cache it in indexedDB
+        if (clientId === this.awareness.clientID) {
+          return;
+        }
+
+        const uploading: string[] = state?.blobUploading ?? [];
+        return uploading.includes(blobId);
+      }
+    );
+
+    return found ? BlobUploadState.Uploading : BlobUploadState.Uploaded;
+  }
+
+  isBlobUploading(blobId: string) {
+    return this.getBlobState(blobId) === BlobUploadState.Uploading;
   }
 
   setRemoteFlag<Key extends keyof Flags>(

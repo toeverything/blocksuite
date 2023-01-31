@@ -8,6 +8,7 @@ import {
 } from '../../__internal__/index.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/global/utils';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
@@ -118,6 +119,32 @@ export class ImageBlockComponent extends NonShadowLitElement {
   @state()
   private _source!: string;
 
+  @state()
+  private _imageReady: Disposable = {
+    dispose: () => {
+      return;
+    },
+  };
+
+  private waitImageReady() {
+    return new Promise<void>(resolve => {
+      const disposeSignal = this.model.page.awarenessStore.signals.update.on(
+        () => {
+          const isBlobUploading =
+            this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
+          if (!isBlobUploading) {
+            resolve();
+          }
+        }
+      );
+
+      this._imageReady.dispose = () => {
+        disposeSignal.dispose();
+        resolve();
+      };
+    });
+  }
+
   async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -125,6 +152,15 @@ export class ImageBlockComponent extends NonShadowLitElement {
     const { width, height } = this.model;
     const storage = await this.model.page.blobs;
     assertExists(storage);
+
+    const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
+      this.model.sourceId
+    );
+
+    if (isBlobUploading) {
+      await this.waitImageReady();
+    }
+
     const url = await storage.get(this.model.sourceId);
     url && (this._source = url);
     if (width && height) {
@@ -158,6 +194,11 @@ export class ImageBlockComponent extends NonShadowLitElement {
         </div>
       </affine-embed>
     `;
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._imageReady.dispose();
   }
 }
 
