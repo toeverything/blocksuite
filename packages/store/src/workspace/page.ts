@@ -471,12 +471,14 @@ export class Page extends Space<PageData> {
   insertBlock(
     blockProps: Partial<BaseBlockModel>,
     targetModel: BaseBlockModel,
-    top = true
+    top = true,
+    autofocus = false
   ) {
     const targetParentModel = this.getParent(targetModel);
     if (targetParentModel === null) {
       throw new Error('cannot find parent model');
     }
+    let id: string | null = null;
     this.transact(() => {
       const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
       const yChildren = yParent.get('sys:children') as Y.Array<string>;
@@ -484,7 +486,7 @@ export class Page extends Space<PageData> {
         .toArray()
         .findIndex(id => id === targetModel.id);
       assertExists(blockProps.flavour);
-      this.addBlockByFlavour(
+      id = this.addBlockByFlavour(
         blockProps.flavour,
         {
           type: blockProps.type,
@@ -492,7 +494,13 @@ export class Page extends Space<PageData> {
         targetParentModel.id,
         top ? targetIdx : targetIdx + 1
       );
-      // }
+    });
+    if (!autofocus) return;
+    // borrowed from asyncFocusRichText() in @blocksuite/blocks
+    requestAnimationFrame(() => {
+      if (!id) return;
+      const adapter = this.richTextAdapters.get(id);
+      adapter?.quill.focus();
     });
   }
 

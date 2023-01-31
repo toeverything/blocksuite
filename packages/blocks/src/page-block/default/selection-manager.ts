@@ -201,7 +201,8 @@ export class DefaultSelectionManager {
           this.page.insertBlock(
             blockProps,
             targetModel,
-            distanceToTop < distanceToBottom
+            distanceToTop < distanceToBottom,
+            true
           );
         },
         getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
