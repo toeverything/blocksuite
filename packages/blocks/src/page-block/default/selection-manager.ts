@@ -50,16 +50,104 @@ function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   );
 }
 
+function contains(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
+  return (
+    rect.left >= selectionRect.left + offset.x &&
+    rect.right <= selectionRect.right + offset.x &&
+    rect.top >= selectionRect.top + offset.y &&
+    rect.bottom <= selectionRect.bottom + offset.y
+  );
+}
+
 function filterSelectedBlock(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect,
   offset: IPoint
 ): Element[] {
   return Array.from(blockCache.keys()).filter(block => {
-    const editor = block.querySelector('.ql-editor');
-    assertExists(editor);
-    const rect = editor.getBoundingClientRect();
+    const rect = block.getBoundingClientRect();
     return intersects(rect, selectionRect, offset);
+  });
+}
+
+function filterSelectedBlockByIndex(
+  blockCache: Map<Element, DOMRect>,
+  clickedBlockIndex: number,
+  selectionRect: DOMRect,
+  offset: IPoint
+): Element[] {
+  const blocks = Array.from(blockCache.keys());
+
+  // SELECT_ALL
+  if (clickedBlockIndex === -1) {
+    return blocks;
+  }
+
+  const len = blocks.length;
+
+  const results = [];
+  let flag = true;
+  let blockRect: DOMRect | null = null;
+
+  for (let i = clickedBlockIndex; i < len; i++) {
+    const block = blocks[i];
+    const richText = block.querySelector('rich-text');
+    assertExists(richText);
+    const rect = richText.getBoundingClientRect();
+    if (flag) {
+      const isIntersects = intersects(rect, selectionRect, offset);
+      if (isIntersects) {
+        blockRect = block.getBoundingClientRect();
+        results.push(block);
+        flag = false;
+      }
+    } else {
+      if (blockRect) {
+        // sometimes: rect.bottom = 467.2372016906738, selectionRect.bottom = 467.23719024658203
+        const inside = contains(rect, blockRect, { x: 0, y: 1 });
+        if (inside) {
+          results.push(block);
+        } else {
+          if (clickedBlockIndex >= 0) {
+            break;
+          }
+          blockRect = null;
+          flag = true;
+          i--;
+        }
+      }
+    }
+  }
+
+  return results;
+}
+
+// Backward: any level can be reached
+// Forward: only the first level can be reached
+//
+// The depth of the block in the page is 1 by default
+// See `getAllowSelectedBlocks` in packages/blocks/src/page-block/default/utils.ts
+function filterSelectedBlockByDepthAndParentIndex(
+  selectedBlocks: Element[],
+  depth: number,
+  parentIndex?: number
+) {
+  return selectedBlocks.filter((block, index) => {
+    if (index === 0) return true;
+    const model = getModelByElement(block);
+    const currentParentIndex = model.parentIndex;
+    if (currentParentIndex === parentIndex) {
+      return true;
+    } else {
+      const currentDepth = model.depth || 1;
+      if (currentDepth < depth) {
+        parentIndex = currentParentIndex;
+        depth = currentDepth;
+        return true;
+      } else {
+        return false;
+      }
+    }
   });
 }
 
@@ -92,6 +180,8 @@ export class PageSelectionState {
   type: PageSelectionType;
   selectEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: Element[] = [];
+  // current clicked-block index
+  clickedBlockIndex = -1;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
@@ -150,6 +240,7 @@ export class PageSelectionState {
     this._richTextCache.clear();
     this._startRange = null;
     this._startPoint = null;
+    this.clickedBlockIndex = -1;
     this.selectedBlocks = [];
   }
 }
@@ -278,42 +369,22 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
+  // `CMD-A`
   private _setSelectedBlocks = (selectedBlocks: Element[]) => {
     this.state.selectedBlocks = selectedBlocks;
-    const selectedRects = [];
     if (selectedBlocks.length) {
       const { blockCache } = this.state;
-      // the depth of the block in the page is 1 by default
-      // See `getAllowSelectedBlocks` in packages/blocks/src/page-block/default/utils.ts
       const model = getModelByElement(selectedBlocks[0]);
-      let currentDepth = model.depth || 1;
-      let currentParentIndex = model.parentIndex || 0;
-
-      // Backward: any level can be reached
-      // Forward: only the first level can be reached
-      selectedRects.push(
-        ...selectedBlocks
-          .filter((block, index) => {
-            if (index === 0) return true;
-            const model = getModelByElement(block);
-            const parentIndex = model.parentIndex || 0;
-            if (currentParentIndex === parentIndex) {
-              return true;
-            } else {
-              const depth = model.depth || 1;
-              if (depth < currentDepth) {
-                currentParentIndex = parentIndex;
-                currentDepth = depth;
-                return true;
-              } else {
-                return false;
-              }
-            }
-          })
-          .map(block => blockCache.get(block) as DOMRect)
+      this._signals.updateSelectedRects.emit(
+        filterSelectedBlockByDepthAndParentIndex(
+          selectedBlocks,
+          model.depth || 1,
+          model.parentIndex
+        ).map(block => blockCache.get(block) as DOMRect)
       );
+    } else {
+      this._signals.updateSelectedRects.emit([]);
     }
-    this._signals.updateSelectedRects.emit(selectedRects);
   };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -466,9 +537,10 @@ export class DefaultSelectionManager {
     );
 
     if (clickBlockInfo && clickBlockInfo.model) {
-      const { model } = clickBlockInfo;
+      const { model, index } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
+      this.state.clickedBlockIndex = index;
     }
 
     if (
@@ -607,29 +679,47 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
+  // Click on the icon of list block
   resetSelectedBlockByRect(
     blockRect: DOMRect,
     pageSelectionType: PageSelectionType = 'block'
   ) {
     this.state.type = pageSelectionType;
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
-    const { blockCache } = this.state;
     const { _containerOffset } = this;
-    const selectedBlocks = filterSelectedBlock(
-      blockCache,
-      blockRect,
-      _containerOffset
+    // const selectedBlocks = filterSelectedBlock(
+    //   blockCache,
+    //   blockRect,
+    //   _containerOffset
+    // );
+    const clickBlockInfo = getBlockEditingStateByPosition(
+      this._allowSelectedBlocks,
+      blockRect.left + 1,
+      blockRect.top + 1
     );
-    this._setSelectedBlocks(selectedBlocks);
+    if (clickBlockInfo) {
+      const selectedBlocks = filterSelectedBlockByIndex(
+        this.state.blockCache,
+        clickBlockInfo.index,
+        blockRect,
+        _containerOffset
+      );
+      this._setSelectedBlocks(selectedBlocks);
+    }
   }
 
   selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
 
-    const selectedBlocks = filterSelectedBlock(this.state.blockCache, hitRect, {
-      x: 0,
-      y: 0,
-    });
+    const selectedBlocks = filterSelectedBlockByIndex(
+      this.state.blockCache,
+      this.state.clickedBlockIndex,
+      hitRect,
+      {
+        x: 0,
+        y: 0,
+      }
+    );
 
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
       this._signals.updateSelectedRects.emit([]);
