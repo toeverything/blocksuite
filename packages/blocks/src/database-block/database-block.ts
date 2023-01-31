@@ -8,10 +8,33 @@ import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import TagSchema = BlockSuiteInternal.TagSchema;
-import { nanoid } from '@blocksuite/store';
 import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
+import { columnTypeToTagSchema } from './utils/index.js';
+import { DatabaseEditColumn } from './components/database-edit-column.js';
+import { createPopper } from '@popperjs/core';
+import './components/column-type/database-number-type.js';
+import { DatabaseSelectType } from './components/column-type/database-select-type.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
+
+const isVisible = (elem: HTMLElement) =>
+  !!elem &&
+  !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length); // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
+function hideOnClickOutside(element: HTMLElement) {
+  const outsideClickListener = (event: MouseEvent) => {
+    if (!element.contains(event.target as Node) && isVisible(element)) {
+      // or use: event.target.closest(selector) === null
+      element.remove();
+      removeClickListener();
+    }
+  };
+
+  const removeClickListener = () => {
+    document.removeEventListener('click', outsideClickListener);
+  };
+
+  document.addEventListener('click', outsideClickListener);
+}
 
 function DatabaseHeader(block: DatabaseBlock) {
   return html`
@@ -38,6 +61,18 @@ function DatabaseHeader(block: DatabaseBlock) {
                 minWidth: `${column.meta.width}px`,
                 maxWidth: `${column.meta.width}px`,
               })}
+              @click=${(event: MouseEvent) => {
+                const editColumn = new DatabaseEditColumn();
+                editColumn.targetModel = block.model;
+                editColumn.targetTagSchema = column;
+                document.body.appendChild(editColumn);
+                requestAnimationFrame(() => {
+                  createPopper(event.target as Element, editColumn, {
+                    placement: 'bottom',
+                  });
+                  hideOnClickOutside(editColumn);
+                });
+              }}
             >
               ${column.name}
             </div>
@@ -122,8 +157,29 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                         minWidth: `${column.meta.width}px`,
                         maxWidth: `${column.meta.width}px`,
                       })}
+                      @click=${(event: MouseEvent) => {
+                        switch (column.type) {
+                          case 'select': {
+                            const selectType = new DatabaseSelectType();
+                            selectType.targetModel = child;
+                            selectType.targetTagSchema = column;
+                            const element = event.target as HTMLDivElement;
+                            element.appendChild(selectType);
+                            requestAnimationFrame(() => {
+                              hideOnClickOutside(selectType);
+                            });
+                            return;
+                          }
+                        }
+                      }}
                     >
-                      ${tag?.value ?? 'no value'}
+                      ${column.type === 'number'
+                        ? html`<database-number-type
+                            .targetModel=${child}
+                            .targetTagSchema=${column}
+                            .targetTag=${tag}
+                          ></database-number-type>`
+                        : tag?.value}
                     </div>
                   `;
                 }
@@ -336,20 +392,10 @@ export class DatabaseBlock extends NonShadowLitElement {
 
   private _addColumn = (columnType: TagSchema['type']) => {
     this.model.page.captureSync();
-    // @ts-expect-error
-    const column: TagSchema = {
-      id: nanoid(),
-      type: columnType,
-      name: columnType,
-      meta: {
-        color: '#ff0000',
-        hide: false,
-        width: 200,
-      },
-    };
-    this.model.page.setTagSchema(column);
+    const schema = columnTypeToTagSchema(columnType);
+    this.model.page.setTagSchema(schema);
     this.model.page.updateBlock(this.model, {
-      columns: [...this.model.columns, column.id],
+      columns: [...this.model.columns, schema.id],
     });
   };
 

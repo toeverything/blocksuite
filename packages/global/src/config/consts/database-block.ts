@@ -14,12 +14,12 @@ export const columnPreviews: z.infer<typeof columnPreviewSchema>[] = [
     type: 'select',
     name: 'Select',
   },
-  {
-    type: 'text',
-    name: 'Single Line Text',
-  },
-  {
-    type: 'rich-text',
-    name: 'Rich Text',
-  },
+  // {
+  //   type: 'text',
+  //   name: 'Single Line Text',
+  // },
+  // {
+  //   type: 'rich-text',
+  //   name: 'Rich Text',
+  // },
 ];
