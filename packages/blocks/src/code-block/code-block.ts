@@ -215,7 +215,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
   }
 
   private _onClick() {
-    this.showLangList = 'visible';
+    this.showLangList = this.showLangList === 'visible' ? 'hidden' : 'visible';
   }
 
   render() {
