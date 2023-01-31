@@ -20,6 +20,7 @@ export default defineConfig({
           __dirname,
           'examples/workspace/index.html'
         ),
+        'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
       },
     },
   },

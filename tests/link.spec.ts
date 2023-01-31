@@ -139,7 +139,7 @@ test('text added after a link should not have link formatting', async ({
         link="http://example.com"
       />
       <text
-        insert="a"
+        insert=" a"
         link={false}
       />
       <text
@@ -195,6 +195,7 @@ test('readonly mode should not trigger link popup', async ({ page }) => {
   await expect(linkPopoverLocator).toBeVisible();
   await switchReadonly(page);
 
+  page.mouse.move(0, 0);
   // XXX Wait for readonly delay
   await page.waitForTimeout(300);
 

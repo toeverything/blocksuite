@@ -1,5 +1,5 @@
 import { useContext, useRef, useMemo, createContext } from 'react';
-import create, { useStore } from 'zustand';
+import { create, useStore } from 'zustand';
 import { combine, subscribeWithSelector } from 'zustand/middleware';
 import { Workspace } from '@blocksuite/store';
 import type { ManagerActions, ManagerState } from './manager/index.js';

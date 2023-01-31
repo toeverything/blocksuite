@@ -17,6 +17,7 @@ import {
   IPoint,
   getCurrentRange,
   isTitleElement,
+  isDatabaseInput,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -186,6 +187,12 @@ export class DefaultSelectionManager {
           assertExists(dataTransfer);
           const data = dataTransfer.getData('affine/block-hub');
           const blockProps = JSON.parse(data);
+          if (blockProps.flavour === 'affine:database') {
+            if (!page.awarenessStore.getFlag('enable_database')) {
+              console.warn('database block is not enabled');
+              return;
+            }
+          }
           const targetModel = end.model;
           const rect = end.position;
           this.page.captureSync();
@@ -333,7 +340,10 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isTitleElement(e.raw.target)) return;
+    if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
+      this.state.type = 'none';
+      return;
+    }
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
@@ -456,7 +466,7 @@ export class DefaultSelectionManager {
       return;
     }
     const target = e.raw.target;
-    if (isTitleElement(target)) {
+    if (isTitleElement(target) || isDatabaseInput(target)) {
       return;
     }
     if (e.keys.shift) return;

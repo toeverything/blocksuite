@@ -13,7 +13,7 @@ importers:
       '@commitlint/cli': ^17.4.2
       '@commitlint/config-conventional': ^17.4.2
       '@open-wc/dev-server-hmr': ^0.1.3
-      '@playwright/test': ^1.29.2
+      '@playwright/test': ^1.30.0
       '@types/node': ^18.11.18
       '@types/quill': '=1.3.7'
       '@types/react': ^18.0.27
@@ -43,7 +43,7 @@ importers:
       '@commitlint/cli': 17.4.2
       '@commitlint/config-conventional': 17.4.2
       '@open-wc/dev-server-hmr': 0.1.3
-      '@playwright/test': 1.29.2
+      '@playwright/test': 1.30.0
       '@types/node': 18.11.18
       '@types/quill': 1.3.7
       '@types/react': 18.0.27
@@ -74,6 +74,7 @@ importers:
       '@blocksuite/global': workspace:*
       '@blocksuite/phasor': workspace:*
       '@blocksuite/store': workspace:*
+      '@popperjs/core': ^2.11.6
       '@types/autosize': ^4.0.1
       autosize: ^5.0.2
       highlight.js: ^11.7.0
@@ -87,6 +88,7 @@ importers:
       '@blocksuite/global': link:../global
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/store': link:../store
+      '@popperjs/core': 2.11.6
       autosize: 5.0.2
       highlight.js: 11.7.0
       hotkeys-js: 3.10.1_otx73r74oyscqvo3amwccrzngy
@@ -125,8 +127,10 @@ importers:
     specifiers:
       ansi-colors: ^4.1.3
       lit: ^2.6.1
+      zod: ^3.20.2
     dependencies:
       ansi-colors: 4.1.3
+      zod: 3.20.2
     devDependencies:
       lit: 2.6.1
 
@@ -152,25 +156,33 @@ importers:
       '@blocksuite/global': workspace:*
       '@blocksuite/phasor': workspace:*
       '@blocksuite/store': workspace:*
+      '@blocksuite/virgo': workspace:*
       '@lit-labs/react': ^1.1.1
       '@shoelace-style/shoelace': 2.0.0-beta.88
+      '@types/dat.gui': ^0.7.7
       '@types/micromatch': ^4.0.2
+      dat.gui: ^0.7.9
       lit: ^2.6.1
       react: ^18.2.0
       react-dom: ^18.2.0
+      yjs: ^13.5.44
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/editor': link:../editor
       '@blocksuite/global': link:../global
       '@blocksuite/phasor': link:../phasor
       '@blocksuite/store': link:../store
+      '@blocksuite/virgo': link:../virgo
       '@lit-labs/react': 1.1.1
       '@shoelace-style/shoelace': 2.0.0-beta.88
       lit: 2.6.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      yjs: 13.5.44
     devDependencies:
+      '@types/dat.gui': 0.7.7
       '@types/micromatch': 4.0.2
+      dat.gui: 0.7.9
 
   packages/react:
     specifiers:
@@ -261,6 +273,17 @@ importers:
       y-protocols: 1.0.5
       y-webrtc: 10.2.4
       zod: 3.20.2
+    devDependencies:
+      lit: 2.6.1
+      yjs: 13.5.44
+
+  packages/virgo:
+    specifiers:
+      '@blocksuite/global': workspace:*
+      lit: ^2.6.1
+      yjs: ^13.5.44
+    dependencies:
+      '@blocksuite/global': link:../global
     devDependencies:
       lit: 2.6.1
       yjs: 13.5.44
@@ -1511,18 +1534,22 @@ packages:
       tslib: 2.4.1
     dev: true
 
-  /@playwright/test/1.29.2:
-    resolution: {integrity: sha512-+3/GPwOgcoF0xLz/opTnahel1/y42PdcgZ4hs+BZGIUjtmEFSXGg+nFoaH3NSmuc7a6GSFwXDJ5L7VXpqzigNg==}
+  /@playwright/test/1.30.0:
+    resolution: {integrity: sha512-SVxkQw1xvn/Wk/EvBnqWIq6NLo1AppwbYOjNLmyU0R1RoQ3rLEBtmjTnElcnz8VEtn11fptj1ECxK0tgURhajw==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
       '@types/node': 18.11.18
-      playwright-core: 1.29.2
+      playwright-core: 1.30.0
     dev: true
 
   /@polka/url/1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
+
+  /@popperjs/core/2.11.6:
+    resolution: {integrity: sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==}
+    dev: false
 
   /@react-aria/button/3.6.2_react@18.2.0:
     resolution: {integrity: sha512-8XRcPR5qXKNmnBO6u9FSY8vYa7P1FIgVix07EHBCTZiJYHYxcUsFYRWG9qf2aShGotJs4957unqGH1L1ncRYKQ==}
@@ -2309,6 +2336,10 @@ packages:
       '@types/express': 4.17.15
       '@types/keygrip': 1.0.2
       '@types/node': 18.11.18
+    dev: true
+
+  /@types/dat.gui/0.7.7:
+    resolution: {integrity: sha512-CxLCme0He5Jk3uQwfO/fGZMyNhb/ypANzqX0yU9lviBQMlen5SOvQTBQ/Cd9x5mFlUAK5Tk8RgvTyLj1nYkz+w==}
     dev: true
 
   /@types/express-serve-static-core/4.17.32:
@@ -3360,6 +3391,10 @@ packages:
   /dargs/7.0.0:
     resolution: {integrity: sha512-2iy1EkLdlBzQGvbweYRFxmFath8+K7+AKB0TlhHWkNuH+TmovaMH/Wp7V7R4u7f4SnX3OgLsU9t1NI9ioDnUpg==}
     engines: {node: '>=8'}
+    dev: true
+
+  /dat.gui/0.7.9:
+    resolution: {integrity: sha512-sCNc1OHobc+Erc1HqiswYgHdVNpSJUlk/Hz8vzOCsER7rl+oF/4+v8GXFUyCgtXpoCX6+bnmg07DedLvBLwYKQ==}
     dev: true
 
   /debug/2.6.9:
@@ -4982,19 +5017,11 @@ packages:
       type-check: 0.4.0
     dev: true
 
-  /lib0/0.2.58:
-    resolution: {integrity: sha512-6ovqPaYfOKU7GkkVxz/wjMR0zsqmNsISLvH+h9Lx5YNtWDZey69aYsTGXaSVpUPpJ+ZFtIvcZHsTGL3MbwOM8A==}
-    engines: {node: '>=14'}
-    dependencies:
-      isomorphic.js: 0.2.5
-    dev: true
-
   /lib0/0.2.60:
     resolution: {integrity: sha512-vzhtdUXBV8HyJnJWIZxUSH/aUVo1U4jUFRFDPVY245zFtzCl9Gld/EgvA8Jhnrio7Jn0HmGswErbPjsabYd7ow==}
     engines: {node: '>=14'}
     dependencies:
       isomorphic.js: 0.2.5
-    dev: false
 
   /lilconfig/2.0.6:
     resolution: {integrity: sha512-9JROoBW7pobfsx+Sq2JsASvCo6Pfo6WWoUW79HuB1BCoBXD4PLWJPqDF6fNj67pqBYTbAHkE57M1kS/+L1neOg==}
@@ -5820,8 +5847,8 @@ packages:
       pathe: 1.1.0
     dev: true
 
-  /playwright-core/1.29.2:
-    resolution: {integrity: sha512-94QXm4PMgFoHAhlCuoWyaBYKb92yOcGVHdQLoxQ7Wjlc7Flg4aC/jbFW7xMR52OfXMVkWicue4WXE7QEegbIRA==}
+  /playwright-core/1.30.0:
+    resolution: {integrity: sha512-7AnRmTCf+GVYhHbLJsGUtskWTE33SwMZkybJ0v6rqR1boxq2x36U7p1vDRV7HO2IwTZgmycracLxPEJI49wu4g==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
@@ -7175,8 +7202,7 @@ packages:
   /yjs/13.5.44:
     resolution: {integrity: sha512-UL+abIh2lQonqXfaJ+en7z9eGshpY11j1zNLc2kDYs0vrTjee4gZJUXC3ZsuhP6geQt0IRU04epCGRaVPQAVCA==}
     dependencies:
-      lib0: 0.2.58
-    dev: true
+      lib0: 0.2.60
 
   /ylru/1.3.2:
     resolution: {integrity: sha512-RXRJzMiK6U2ye0BlGGZnmpwJDPgakn6aNQ0A7gHRbD4I0uvK4TW6UqkK1V0pp9jskjJBAXd3dRrbzWkqJ+6cxA==}

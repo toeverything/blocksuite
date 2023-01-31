@@ -1,12 +1,7 @@
 import { IBound, MIN_ZOOM } from './consts.js';
 import { GridManager } from './grid.js';
-import type { Element } from './elements/index.js';
-
-function intersects(a: IBound, b: IBound): boolean {
-  return (
-    a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
-  );
-}
+import type { PhasorElement } from './elements/index.js';
+import { intersects } from './utils/hit-utils.js';
 
 export class Renderer {
   canvas: HTMLCanvasElement;
@@ -88,24 +83,24 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
-  setCenterZoom(centerX: number, centerY: number, zoom: number) {
+  setViewport(centerX: number, centerY: number, zoom: number) {
     this._centerX = centerX;
     this._centerY = centerY;
     this._zoom = zoom;
     this._shouldUpdate = true;
   }
 
-  addElement(element: Element) {
+  addElement(element: PhasorElement) {
     this.gridManager.add(element);
     this._shouldUpdate = true;
   }
 
-  removeElement(element: Element) {
+  removeElement(element: PhasorElement) {
     this.gridManager.remove(element);
     this._shouldUpdate = true;
   }
 
-  invalidateElement(element: Element, newBound: IBound) {
+  invalidateElement(element: PhasorElement, newBound: IBound) {
     const { gridManager } = this;
     if (gridManager.boundHasChanged(element, newBound)) {
       gridManager.remove(element);
@@ -118,7 +113,7 @@ export class Renderer {
     this._shouldUpdate = true;
   }
 
-  load(elements: Element[]) {
+  load(elements: PhasorElement[]) {
     for (let i = 0; i < elements.length; i++) {
       this.gridManager.add(elements[i]);
     }

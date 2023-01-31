@@ -222,7 +222,7 @@ export class Page extends Space<PageData> {
   }
 
   setTagSchema(schema: TagSchema) {
-    return this.tagSchema.set(schema.id, schema);
+    this.transact(() => this.tagSchema.set(schema.id, schema));
   }
 
   getBlockById(id: string) {
@@ -509,9 +509,9 @@ export class Page extends Space<PageData> {
   deleteBlock(
     model: BaseBlockModel,
     options: {
-      bringChildrenTo: 'parent' | BaseBlockModel;
+      bringChildrenTo: 'parent' | BaseBlockModel | false;
     } = {
-      bringChildrenTo: 'parent',
+      bringChildrenTo: false,
     }
   ) {
     if (this.awarenessStore.isReadonly(this)) {
