@@ -1,4 +1,7 @@
-import { css, html, LitElement } from 'lit';
+// related component
+import './components/sidebar.js';
+
+import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { BlockElementWithService, BlockHost } from '../__internal__/index.js';
@@ -8,14 +11,20 @@ import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import TagSchema = BlockSuiteInternal.TagSchema;
-import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { columnTypeToTagSchema } from './utils/index.js';
 import { DatabaseEditColumn } from './components/database-edit-column.js';
 import { createPopper } from '@popperjs/core';
-import './components/column-type/database-number-type.js';
-import { DatabaseSelectType } from './components/column-type/database-select-type.js';
+import { registerInternal } from './components/column-type/index.js';
+import type { DatabaseBlockSettingsSidebar } from './components/sidebar.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
+
+let once = true;
+if (once) {
+  registerInternal();
+  once = false;
+}
 
 const isVisible = (elem: HTMLElement) =>
   !!elem &&
@@ -158,19 +167,19 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                         maxWidth: `${column.meta.width}px`,
                       })}
                       @click=${(event: MouseEvent) => {
-                        switch (column.type) {
-                          case 'select': {
-                            const selectType = new DatabaseSelectType();
-                            selectType.targetModel = child;
-                            selectType.targetTagSchema = column;
-                            const element = event.target as HTMLDivElement;
-                            element.appendChild(selectType);
-                            requestAnimationFrame(() => {
-                              hideOnClickOutside(selectType);
-                            });
-                            return;
-                          }
-                        }
+                        // switch (column.type) {
+                        //   case 'select': {
+                        //     const selectType = new DatabaseSelectType();
+                        //     selectType.targetModel = child;
+                        //     selectType.targetTagSchema = column;
+                        //     const element = event.target as HTMLDivElement;
+                        //     element.appendChild(selectType);
+                        //     requestAnimationFrame(() => {
+                        //       hideOnClickOutside(selectType);
+                        //     });
+                        //     return;
+                        //   }
+                        // }
                       }}
                     >
                       ${column.type === 'number'
@@ -190,115 +199,6 @@ function DataBaseRowContainer(block: DatabaseBlock) {
       )}
     </div>
   `;
-}
-
-@customElement('affine-database-settings-sidebar')
-export class DatabaseBlockSettingsSidebar extends LitElement {
-  static styles = css`
-    :host {
-      position: absolute;
-      right: 0;
-      top: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      border-left: 1px solid rgb(233, 233, 231);
-      background-color: var(--affine-page-background);
-    }
-
-    :host > * {
-      padding-left: 14px;
-    }
-
-    .affine-database-settings-sidebar-subtitle {
-      color: rgba(55, 53, 47, 0.65);
-      padding-top: 14px;
-      padding-bottom: 14px;
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 120%;
-      user-select: none;
-    }
-
-    .affine-database-settings-sidebar-title {
-      padding-top: 12px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .affine-database-settings-sidebar-list {
-      font-size: 14px;
-    }
-
-    .affine-database-settings-sidebar-list > div {
-      min-height: 28px;
-    }
-  `;
-
-  @property()
-  show = false;
-
-  @property()
-  onSelectType!: (type: TagSchema['type']) => void;
-
-  private _handleSelectType = (e: MouseEvent) => {
-    if (e.target instanceof HTMLElement) {
-      const type = e.target.getAttribute('data-type');
-      this.onSelectType(type as TagSchema['type']);
-    }
-  };
-
-  private _handleClose = () => {
-    this.show = false;
-  };
-
-  private _handleClickAway = (event: MouseEvent) => {
-    if (this.contains(event.target as Node)) {
-      return;
-    }
-    this._handleClose();
-  };
-
-  protected update(changedProperties: Map<string, unknown>) {
-    super.update(changedProperties);
-    if (changedProperties.has('show')) {
-      if (this.show) {
-        this.style.minWidth = `290px`;
-        this.style.maxWidth = `290px`;
-        setTimeout(() =>
-          document.addEventListener('click', this._handleClickAway)
-        );
-      } else {
-        this.style.minWidth = '0';
-        this.style.maxWidth = `0`;
-        document.removeEventListener('click', this._handleClickAway);
-      }
-    }
-  }
-
-  protected render() {
-    if (!this.show) {
-      return null;
-    }
-    return html`
-      <div class="affine-database-settings-sidebar-title">
-        New column
-        <button @click=${this._handleClose}>X</button>
-      </div>
-      <div class="affine-database-settings-sidebar-subtitle">Type</div>
-      <div class="affine-database-settings-sidebar-list">
-        ${repeat(
-          columnPreviews,
-          preview =>
-            html`
-              <div data-type="${preview.type}" @click=${this._handleSelectType}>
-                ${preview.name}
-              </div>
-            `
-        )}
-      </div>
-    `;
-  }
 }
 
 @customElement('affine-database')
@@ -452,6 +352,5 @@ export class DatabaseBlock extends NonShadowLitElement {
 declare global {
   interface HTMLElementTagNameMap {
     'affine-database': DatabaseBlock;
-    'affine-database-settings-sidebar': DatabaseBlockSettingsSidebar;
   }
 }
