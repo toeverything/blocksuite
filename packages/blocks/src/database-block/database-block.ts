@@ -412,7 +412,6 @@ export class DatabaseBlock extends NonShadowLitElement {
   };
 
   render() {
-    console.log(1);
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
       this.columns.map(column => column.meta.width).reduce((t, x) => t + x, 0) +
