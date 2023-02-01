@@ -82,20 +82,7 @@ export class SlashMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     window.addEventListener('keydown', this._escapeListener);
-
-    // Handle click outside
-    const clickAwayListener = (e: MouseEvent) => {
-      // if (e.target === this) {
-      //   return;
-      // }
-      if (!this._hide) {
-        return;
-      }
-      // If the slash menu is hidden, click anywhere will close the slash menu
-      this.abortController.abort();
-      window.removeEventListener('mousedown', clickAwayListener);
-    };
-    window.addEventListener('mousedown', clickAwayListener);
+    window.addEventListener('mousedown', this._clickAwayListener);
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -105,11 +92,12 @@ export class SlashMenu extends LitElement {
       );
       return;
     }
+    this._richText = richText;
     richText.addEventListener('keydown', this._keyDownListener, {
       // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
     });
-    this._richText = richText;
+    richText.addEventListener('focusout', this._clickAwayListener);
   }
 
   override disconnectedCallback() {
@@ -118,7 +106,20 @@ export class SlashMenu extends LitElement {
     this._richText?.removeEventListener('keydown', this._keyDownListener, {
       capture: true,
     });
+    this._richText?.removeEventListener('focusout', this._clickAwayListener);
   }
+
+  // Handle click outside
+  private _clickAwayListener = (e: Event) => {
+    // if (e.target === this) {
+    //   return;
+    // }
+    if (!this._hide) {
+      return;
+    }
+    // If the slash menu is hidden, click anywhere will close the slash menu
+    this.abortController.abort();
+  };
 
   /**
    * Handle arrow key
