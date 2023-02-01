@@ -83,6 +83,20 @@ export class SlashMenu extends LitElement {
     super.connectedCallback();
     window.addEventListener('keydown', this._escapeListener);
 
+    // Handle click outside
+    const clickAwayListener = (e: MouseEvent) => {
+      // if (e.target === this) {
+      //   return;
+      // }
+      if (!this._hide) {
+        return;
+      }
+      // If the slash menu is hidden, click anywhere will close the slash menu
+      this.abortController.abort();
+      window.removeEventListener('mousedown', clickAwayListener);
+    };
+    window.addEventListener('mousedown', clickAwayListener);
+
     const richText = getRichTextByModel(this.model);
     if (!richText) {
       console.warn(
