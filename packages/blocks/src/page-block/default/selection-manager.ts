@@ -297,7 +297,7 @@ export class PageSelectionState {
     this._startPoint = { x: e.x, y: e.y };
   }
 
-  refreshRichTextBoundsCache(mouseRoot: HTMLElement) {
+  refreshBlockRectCache() {
     this._blockCache.clear();
     const allBlocks = getAllBlocks();
     for (const block of allBlocks) {
@@ -457,7 +457,7 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
     this.state.resetStartRange(e);
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
+    this.state.refreshBlockRectCache();
     resetNativeSelection(null);
     // deactivate quill keyboard event handler
     (document.activeElement as HTMLDivElement).blur();
@@ -665,7 +665,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
+    this.state.refreshBlockRectCache();
     const hoverEditingState = getBlockEditingStateByPosition(
       this._allowSelectedBlocks,
       e.raw.pageX,
@@ -762,7 +762,7 @@ export class DefaultSelectionManager {
     pageSelectionType: PageSelectionType = 'block'
   ) {
     this.state.type = pageSelectionType;
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
+    this.state.refreshBlockRectCache();
     const { blockCache, focusedBlockIndex } = this.state;
 
     const selectedBlocks = filterSelectedBlockByIndex(
@@ -781,7 +781,7 @@ export class DefaultSelectionManager {
 
   // `CMD-A`
   selectBlocksByRect(hitRect: DOMRect) {
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
+    this.state.refreshBlockRectCache();
     const { blockCache, focusedBlockIndex } = this.state;
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
