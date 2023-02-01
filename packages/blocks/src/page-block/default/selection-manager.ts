@@ -52,21 +52,21 @@ function calcContainerLeft(left: number) {
   return left + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
 }
 
-function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
+function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
-    rect.left <= selectionRect.right + offset.x &&
-    rect.right >= selectionRect.left + offset.x &&
-    rect.top <= selectionRect.bottom + offset.y &&
-    rect.bottom >= selectionRect.top + offset.y
+    a.left <= b.right + offset.x &&
+    a.right >= b.left + offset.x &&
+    a.top <= b.bottom + offset.y &&
+    a.bottom >= b.top + offset.y
   );
 }
 
-function contains(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
+function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
   return (
-    rect.left >= selectionRect.left + offset.x &&
-    rect.right <= selectionRect.right + offset.x &&
-    rect.top >= selectionRect.top + offset.y &&
-    rect.bottom <= selectionRect.bottom + offset.y
+    a.left >= bound.left + offset.x &&
+    a.right <= bound.right + offset.x &&
+    a.top >= bound.top + offset.y &&
+    a.bottom <= bound.bottom + offset.y
   );
 }
 
@@ -147,14 +147,13 @@ function filterSelectedBlockByIndex(
     return Array.from(blockCache.keys());
   }
 
-  const entries = Array.from(blockCache.entries());
-  const len = entries.length;
+  const blockRects = Array.from(blockCache.entries());
   const results = [];
   let flag = true;
   let blockRect: DOMRect | null = null;
 
-  for (let i = focusedBlockIndex; i < len; i++) {
-    const [block, rect] = entries[i];
+  for (let i = focusedBlockIndex; i < blockRects.length; i++) {
+    const [block, rect] = blockRects[i];
     const richText = block.querySelector('rich-text');
     assertExists(richText);
     const richTextRect = richText.getBoundingClientRect();
@@ -167,7 +166,7 @@ function filterSelectedBlockByIndex(
     } else {
       if (blockRect) {
         // sometimes: rect.bottom = 467.2372016906738, selectionRect.bottom = 467.23719024658203
-        if (contains(rect, blockRect, { x: 0, y: 1 })) {
+        if (contains(blockRect, rect, { x: 0, y: 1 })) {
           results.push(block);
         } else {
           break;
