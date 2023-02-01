@@ -3,6 +3,14 @@
 import { Page, Text } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+} from '@blocksuite/global/utils';
+import { Utils } from '@blocksuite/store';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import type { PageBlockModel } from '../../models.js';
+import {
   ExtendedModel,
   getRichTextByModel,
   getPreviousBlock,
@@ -15,14 +23,8 @@ import {
   focusBlockByModel,
   supportsChildren,
   getModelByElement,
+  focusTitle,
 } from '../utils/index.js';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-} from '@blocksuite/global/utils';
-import { Utils } from '@blocksuite/store';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -321,26 +323,21 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           }
         });
       } else {
-        const richText = getRichTextByModel(model);
-        if (richText) {
-          const text = richText.quill.getText().trimEnd();
-          const titleElement = document.querySelector(
-            '.affine-default-page-block-title'
-          ) as HTMLTextAreaElement;
-          const oldTitle = titleElement.value;
-          const title = oldTitle + text;
-          page.captureSync();
-          page.deleteBlock(model);
-          // model.text?.delete(0, model.text.length);
-          const titleModel = getModelByElement(titleElement);
-          page.updateBlock(titleModel, { title });
-          const oldTitleTextLength = oldTitle.length;
-          titleElement.setSelectionRange(
-            oldTitleTextLength,
-            oldTitleTextLength
-          );
-          titleElement.focus();
-        }
+        // No previous sibling, it's the first block
+        // Try to merge with the title
+
+        const text = model.text?.toString() || '';
+        const titleElement = document.querySelector(
+          '.affine-default-page-block-title'
+        ) as HTMLTextAreaElement;
+        const pageModel = getModelByElement(titleElement) as PageBlockModel;
+        const oldTitle = pageModel.title;
+        const title = oldTitle + text;
+        page.captureSync();
+        page.deleteBlock(model);
+        // model.text?.delete(0, model.text.length);
+        page.updateBlock(pageModel, { title });
+        focusTitle(oldTitle.length);
       }
     }
 

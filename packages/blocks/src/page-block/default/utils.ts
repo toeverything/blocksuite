@@ -4,6 +4,7 @@ import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.
 import {
   asyncFocusRichText,
   focusNextBlock,
+  focusTitle,
   focusPreviousBlock,
   getBlockById,
   getBlockElementByModel,
@@ -18,7 +19,6 @@ import {
   isCaptionElement,
   doesInSamePath,
 } from '../../__internal__/utils/index.js';
-import type { PageBlockModel } from '../page-model.js';
 import {
   bindCommonHotkey,
   handleMultiBlockBackspace,
@@ -401,15 +401,8 @@ export function handleUp(
       !isAtLineEdge(range)
     ) {
       // FIXME: Then it will turn the input into the div
-      if (
-        activePreNodeModel &&
-        matchFlavours(activePreNodeModel, ['affine:frame'])
-      ) {
-        (
-          document.querySelector(
-            '.affine-default-page-block-title'
-          ) as HTMLTextAreaElement
-        ).focus();
+      if (!activePreNodeModel) {
+        focusTitle();
       } else {
         focusPreviousBlock(model, new Point(left, top));
       }
@@ -481,8 +474,7 @@ function isDispatchFromCodeBlock(e: KeyboardEvent) {
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  pageModel: PageBlockModel
+  signals: DefaultPageSignals
 ) {
   const {
     BACKSPACE,
