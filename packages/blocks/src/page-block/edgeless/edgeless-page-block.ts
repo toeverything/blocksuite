@@ -39,6 +39,7 @@ import type { BlockHub } from '../../components/index.js';
 import { getAllowSelectedBlocks } from '../default/utils.js';
 import { createBlockHub } from '../utils/components.js';
 import './toolbar';
+import type { EdgelessToolBar } from './toolbar.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -132,6 +133,8 @@ export class EdgelessPageBlockComponent
 
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
+
+  private _toolbar: EdgelessToolBar | null = null;
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
@@ -238,8 +241,8 @@ export class EdgelessPageBlockComponent
 
   firstUpdated() {
     if (this.page.awarenessStore.getFlag('enable_toolbar')) {
-      const toolbar = document.createElement('edgeless-toolbar');
-      document.body.appendChild(toolbar);
+      this._toolbar = document.createElement('edgeless-toolbar');
+      document.body.appendChild(this._toolbar);
     }
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
@@ -293,6 +296,10 @@ export class EdgelessPageBlockComponent
     this._disposables.dispose();
     this._selection.dispose();
     this._removeHotkeys();
+    if (this._toolbar) {
+      this._toolbar.remove();
+      this._toolbar = null;
+    }
   }
 
   render() {
