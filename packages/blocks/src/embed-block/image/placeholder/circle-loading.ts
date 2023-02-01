@@ -2,7 +2,8 @@ import { html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { NonShadowLitElement } from '../../../__internal__/index.js';
 
-@customElement('affine-image-block-circle-loading')
+const ELEMENT_TAG = 'affine-image-block-circle-loading' as const;
+@customElement(ELEMENT_TAG)
 export class AffineImageBlockCircleLoading extends NonShadowLitElement {
   static styles = css`
     @keyframes rotate {
@@ -44,5 +45,11 @@ export class AffineImageBlockCircleLoading extends NonShadowLitElement {
 
   render() {
     return html`<div class="container"><div class="loading"></div></div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [ELEMENT_TAG]: AffineImageBlockCircleLoading;
   }
 }

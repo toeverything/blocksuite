@@ -3,7 +3,9 @@ import { customElement, property } from 'lit/decorators.js';
 import { NonShadowLitElement } from '../../../__internal__/index.js';
 import './circle-loading.js';
 
-@customElement('affine-image-block-loading-card')
+const ELEMENT_TAG = 'affine-image-block-loading-card' as const;
+
+@customElement(ELEMENT_TAG)
 export class AffineImageBlockLoadingCard extends NonShadowLitElement {
   static styles = css`
     .loading-card {
@@ -39,5 +41,11 @@ export class AffineImageBlockLoadingCard extends NonShadowLitElement {
         <div class="content">${this.content}</div>
       </div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [ELEMENT_TAG]: AffineImageBlockLoadingCard;
   }
 }

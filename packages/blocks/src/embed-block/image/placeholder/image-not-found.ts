@@ -7,7 +7,9 @@ const notFoundIcon = svg`<svg width="25" height="24" viewBox="0 0 25 24" fill="n
 </svg>
 `;
 
-@customElement('affine-image-block-not-found-card')
+const ELEMENT_TAG = 'affine-image-block-not-found-card' as const;
+
+@customElement(ELEMENT_TAG)
 export class AffineImageBlockNotFoundCard extends NonShadowLitElement {
   static styles = css`
     .not-found-card {
@@ -25,5 +27,11 @@ export class AffineImageBlockNotFoundCard extends NonShadowLitElement {
 
   render() {
     return html` <div class="not-found-card">${notFoundIcon}</div> `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [ELEMENT_TAG]: AffineImageBlockNotFoundCard;
   }
 }
