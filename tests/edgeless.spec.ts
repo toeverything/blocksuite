@@ -12,6 +12,7 @@ import {
   switchMouseMode,
   switchShapeColor,
   switchShapeType,
+  type,
   undoByClick,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -45,7 +46,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
   await assertSelection(page, 0, 5, 0);
 
@@ -63,7 +64,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await pressEnter(page);
   await pressEnter(page);
   await assertRichTexts(page, ['hello', '\n', '\n']);
@@ -92,7 +93,7 @@ test('resize the block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
@@ -125,7 +126,7 @@ test.skip('add shape blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);

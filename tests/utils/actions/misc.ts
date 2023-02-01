@@ -5,7 +5,7 @@ import type {
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
-import { pressEnter, SHORT_KEY } from './keyboard.js';
+import { pressEnter, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
@@ -200,36 +200,36 @@ export async function focusRichText(page: Page, i = 0) {
 
 export async function initThreeParagraphs(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await pressEnter(page);
-  await page.keyboard.type('789');
+  await type(page, '789');
 }
 
 export async function initThreeLists(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('-');
+  await type(page, '-');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await pressEnter(page);
   await page.keyboard.press('Tab', { delay: 50 });
-  await page.keyboard.type('789');
+  await type(page, '789');
 }
 
 export async function initThreeDividers(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('123');
+  await type(page, '123');
 }
 
 export async function getQuillSelectionIndex(page: Page) {
