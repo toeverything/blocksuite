@@ -27,6 +27,7 @@ export class VEditor {
   private _rootElement: HTMLElement | null = null;
   private _vRange: VRange | null = null;
   private _isComposing = false;
+  private _isReadOnly = false;
   private _renderElement: (delta: DeltaInsert) => TextElement =
     baseRenderElement;
 
@@ -151,6 +152,14 @@ export class VEditor {
 
   getVRange(): VRange | null {
     return this._vRange;
+  }
+
+  getReadOnly(): boolean {
+    return this._isReadOnly;
+  }
+
+  setReadOnly(isReadOnly: boolean): void {
+    this._isReadOnly = isReadOnly;
   }
 
   setVRange(vRange: VRange): void {
@@ -466,6 +475,10 @@ export class VEditor {
 
   private _onBefoeInput(event: InputEvent): void {
     event.preventDefault();
+
+    if (this._isReadOnly) {
+      return;
+    }
 
     if (!this._vRange) {
       return;
