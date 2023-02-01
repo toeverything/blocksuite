@@ -19,7 +19,7 @@ import type { TagSchema } from '@blocksuite/global/database';
 import { html } from 'lit/static-html.js';
 import './components/cell-container.js';
 import { getTagSchemaRenderer } from '@blocksuite/global/database';
-import { uuidv4 } from '@blocksuite/store';
+import { nanoid } from '@blocksuite/store';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -265,7 +265,7 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
     this.model.page.captureSync();
     const renderer = getTagSchemaRenderer(columnType);
     const schema: TagSchema = {
-      id: uuidv4(),
+      id: nanoid(),
       type: columnType,
       name: 'new column',
       internalProperty: {
