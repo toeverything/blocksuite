@@ -158,28 +158,34 @@ export class VEditor {
   }
 
   deleteText(vRange: VRange): void {
-    this.yText.delete(vRange.index, vRange.length);
+    this._transact(() => {
+      this.yText.delete(vRange.index, vRange.length);
+    });
   }
 
   // TODO add support for formatting
   insertText(vRange: VRange, text: string): void {
     const currentDelta = this.getDeltaByRangeIndex(vRange.index);
-    this.yText.delete(vRange.index, vRange.length);
 
-    if (
-      vRange.index > 0 &&
-      currentDelta &&
-      currentDelta.attributes.type !== 'line-break'
-    ) {
-      this.yText.insert(vRange.index, text, currentDelta.attributes);
-    } else {
-      this.yText.insert(vRange.index, text, { type: 'base' });
-    }
+    this._transact(() => {
+      this.yText.delete(vRange.index, vRange.length);
+      if (
+        vRange.index > 0 &&
+        currentDelta &&
+        currentDelta.attributes.type !== 'line-break'
+      ) {
+        this.yText.insert(vRange.index, text, currentDelta.attributes);
+      } else {
+        this.yText.insert(vRange.index, text, { type: 'base' });
+      }
+    });
   }
 
   insertLineBreak(vRange: VRange): void {
-    this.yText.delete(vRange.index, vRange.length);
-    this.yText.insert(vRange.index, '\n', { type: 'line-break' });
+    this._transact(() => {
+      this.yText.delete(vRange.index, vRange.length);
+      this.yText.insert(vRange.index, '\n', { type: 'line-break' });
+    });
   }
 
   formatText(
@@ -212,7 +218,13 @@ export class VEditor {
           this.resetText(targetVRange);
         }
 
-        this.yText.format(targetVRange.index, targetVRange.length, attributes);
+        this._transact(() => {
+          this.yText.format(
+            targetVRange.index,
+            targetVRange.length,
+            attributes
+          );
+        });
       }
     }
   }
@@ -232,9 +244,11 @@ export class VEditor {
       )
     );
 
-    this.yText.format(vRange.index, vRange.length, {
-      ...unset,
-      type: 'base',
+    this._transact(() => {
+      this.yText.format(vRange.index, vRange.length, {
+        ...unset,
+        type: 'base',
+      });
     });
   }
 
@@ -606,6 +620,15 @@ export class VEditor {
     // updates in lit are performed asynchronously
     setTimeout(fn, 0);
   };
+
+  private _transact(fn: () => void): void {
+    const doc = this.yText.doc;
+    if (!doc) {
+      throw new Error('yText is not attached to a doc');
+    }
+
+    doc.transact(fn, doc.clientID);
+  }
 }
 
 function textPointToDomPoint(
