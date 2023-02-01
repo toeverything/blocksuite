@@ -5,24 +5,23 @@ import {
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
-@customElement('affine-database-text-cell-preview')
+@customElement('affine-database-rich-text-cell-preview')
 class TextCellPreview extends DatabaseCellLitElement {
-  static tag = literal`affine-database-text-cell-preview`;
+  static tag = literal`affine-database-rich-text-cell-preview`;
 }
 
-@customElement('affine-database-text-cell-editing')
+@customElement('affine-database-rich-text-cell-editing')
 class TextCellEditing extends DatabaseCellLitElement {
-  static tag = literal`affine-database-text-cell-editing`;
+  static tag = literal`affine-database-rich-text-cell-editing`;
 }
-
-@customElement('affine-database-text-column-property-editing')
+@customElement('affine-database-rich-text-column-property-editing')
 class TextColumnPropertyEditing extends DatabaseCellLitElement {
-  static tag = literal`affine-database-text-column-property-editing`;
+  static tag = literal`affine-database-rich-text-column-property-editing`;
 }
 export const TextTagSchemaRenderer = defineTagSchemaRenderer(
-  'text',
+  'rich-text',
   () => ({}),
-  () => '',
+  page => new page.Text(page, ''),
   {
     CellPreview: TextCellPreview,
     CellEditing: TextCellEditing,
