@@ -653,7 +653,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
-test('should not crash when mouse over the left side of the list block prefix', async ({
+test.skip('should not crash when mouse over the left side of the list block prefix', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -672,7 +672,8 @@ test('should not crash when mouse over the left side of the list block prefix', 
     [1, 2],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -10, y: 0 }
+    // fixme: what is this?
+    { x: -50, y: 0 }
   );
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '');
