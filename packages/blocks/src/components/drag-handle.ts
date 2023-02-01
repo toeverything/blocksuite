@@ -17,8 +17,6 @@ stroke="var(--affine-page-background)"
 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 `;
 
-let lastSelectedIndex = -1;
-
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
   event.preventDefault();
@@ -177,6 +175,7 @@ export class DragHandle extends LitElement {
   private _lastModelState: EditingState | null = null;
   private _indicator!: DragIndicator;
   private _cursor: number | null = 0;
+  private _lastSelectedIndex = -1;
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -198,7 +197,7 @@ export class DragHandle extends LitElement {
       this._startModelState = modelState;
       this._cursor = modelState.index;
       const rect = modelState.position;
-      if (this._cursor === lastSelectedIndex) {
+      if (this._cursor === this._lastSelectedIndex) {
         this._dragHandleOver.style.display = 'block';
         this._dragHandleNormal.style.display = 'none';
       } else {
@@ -344,7 +343,7 @@ export class DragHandle extends LitElement {
     );
     if (clickDragState) {
       this._cursor = clickDragState.index;
-      lastSelectedIndex = this._cursor;
+      this._lastSelectedIndex = this._cursor;
       this.setSelectedBlocks(
         getBlockElementByModel(clickDragState.model) as HTMLElement
       );
