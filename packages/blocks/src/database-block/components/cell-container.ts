@@ -75,7 +75,7 @@ export class DatabaseCellContainer
       this.column
     );
     if (this.isEditing) {
-      const editingTag = renderer.uiSchema.CellEditing.tag;
+      const editingTag = renderer.components.CellEditing.tag;
       return html`
         <${editingTag}
           data-is-editing-cell="true"
@@ -87,7 +87,7 @@ export class DatabaseCellContainer
         ></${editingTag}>
       `;
     }
-    const previewTag = renderer.uiSchema.CellPreview.tag;
+    const previewTag = renderer.components.CellPreview.tag;
     return html`
       <${previewTag}
         .rowHost=${this}
