@@ -48,6 +48,10 @@ function calcDepth(left: number, containerLeft: number) {
   );
 }
 
+function calcContainerLeft(left: number) {
+  return left + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+}
+
 function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   return (
     rect.left <= selectionRect.right + offset.x &&
@@ -69,12 +73,16 @@ function contains(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
 function filterSelectedBlockWithoutSubtrees(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect,
-  offset: IPoint,
-  containerLeft: number
-): { block: Element; index: number }[] {
+  offset: IPoint
+) {
   const entries = Array.from(blockCache.entries());
   const len = entries.length;
-  const results = [];
+  const results: { block: Element; index: number }[] = [];
+
+  // empty
+  if (len === 0) return results;
+
+  const containerLeft = calcContainerLeft(entries[0][1].left);
   let depth = 1;
   let parentIndex: number | undefined;
   let flag = false;
@@ -458,17 +466,10 @@ export class DefaultSelectionManager {
     const { blockCache, startPoint: start } = this.state;
     const selectionRect = createSelectionRect(current, start);
 
-    const frameBlock = this._container.querySelector(
-      '.affine-frame-block-container'
-    );
-    assertExists(frameBlock);
-    const containerLeft = frameBlock.getBoundingClientRect().left;
-
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtrees(
       blockCache,
       selectionRect,
-      e.containerOffset,
-      containerLeft
+      e.containerOffset
     );
     const rects = selectedBlocksWithoutSubtrees.map(
       ({ block }) => blockCache.get(block) as DOMRect
