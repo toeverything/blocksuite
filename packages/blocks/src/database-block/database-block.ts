@@ -47,7 +47,7 @@ function hideOnClickOutside(element: HTMLElement) {
   document.addEventListener('click', outsideClickListener);
 }
 
-function DatabaseHeader(block: DatabaseBlock) {
+function DatabaseHeader(block: DatabaseBlockComponent) {
   return html`
     <div class="affine-database-block-header">
       <div
@@ -102,7 +102,7 @@ function DatabaseHeader(block: DatabaseBlock) {
   `;
 }
 
-function DataBaseRowContainer(databaseBlock: DatabaseBlock) {
+function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
   const databaseModel = databaseBlock.model;
   const host = databaseBlock.host;
   assertEquals(databaseModel.mode, DatabaseBlockDisplayMode.Database);
@@ -172,7 +172,7 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlock) {
 }
 
 @customElement('affine-database')
-export class DatabaseBlock extends NonShadowLitElement {
+export class DatabaseBlockComponent extends NonShadowLitElement {
   static styles = css`
     affine-database {
       position: relative;
@@ -322,6 +322,6 @@ export class DatabaseBlock extends NonShadowLitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database': DatabaseBlock;
+    'affine-database': DatabaseBlockComponent;
   }
 }
