@@ -14,6 +14,7 @@ import {
   redoByKeyboard,
   selectAllByKeyboard,
   SHORT_KEY,
+  type,
   undoByKeyboard,
 } from './utils/actions/index.js';
 import { assertKeyboardWorkInInput, assertRichTexts } from './utils/asserts.js';
@@ -34,8 +35,8 @@ test('use markdown syntax can create code block', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('```');
-  await page.keyboard.type(' ');
+  await type(page, '```');
+  await type(page, ' ');
 
   const locator = page.locator('affine-code');
   await expect(locator).toBeVisible();
@@ -48,8 +49,8 @@ test('use markdown syntax with trailing characters can create code block', async
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('```JavaScript');
-  await page.keyboard.type(' ');
+  await type(page, '```JavaScript');
+  await type(page, ' ');
 
   const locator = page.locator('affine-code');
   await expect(locator).toBeVisible();
@@ -62,8 +63,8 @@ test('use more than three backticks can not create code block', async ({
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('`````');
-  await page.keyboard.type(' ');
+  await type(page, '`````');
+  await type(page, ' ');
 
   const codeBlockLocator = page.locator('affine-code');
   await expect(codeBlockLocator).toBeHidden();
@@ -106,7 +107,7 @@ test('change code language can work', async ({ page }) => {
   await expect(locator).toBeVisible();
   await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
 
-  await page.keyboard.type('rust');
+  await type(page, 'rust');
   await page.click(
     '.lang-list-button-container > code-block-button:nth-child(1)'
   );
@@ -166,7 +167,7 @@ test('drag copy paste', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('use');
+  await type(page, 'use');
   const position = await page.evaluate(() => {
     const code = document.querySelector('pre');
     const bbox = code?.getBoundingClientRect() as DOMRect;
@@ -195,7 +196,7 @@ test('split code by enter', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   // he|llo
   await page.keyboard.press('ArrowLeft');
@@ -217,7 +218,7 @@ test('split code with selection by enter', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   // select 'll'
   await page.keyboard.press('ArrowLeft');
@@ -241,7 +242,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('use');
+  await type(page, 'use');
   await page.keyboard.down('Shift');
   for (let i = 0; i < 'use'.length; i++) {
     await page.keyboard.press('ArrowLeft');
@@ -347,7 +348,7 @@ test('undo and redo works in code block', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('const a = 10;');
+  await type(page, 'const a = 10;');
   await assertRichTexts(page, ['const a = 10;\n']);
   await undoByKeyboard(page);
   await assertRichTexts(page, ['\n']);
@@ -390,7 +391,7 @@ test('should ctrl+enter works in code block', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('const a = 10;');
+  await type(page, 'const a = 10;');
   await assertRichTexts(page, ['const a = 10;\n']);
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press(`${SHORT_KEY}+Enter`);

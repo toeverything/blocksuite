@@ -19,6 +19,7 @@ import {
   MODIFIER_KEY,
   resetHistory,
   readClipboardText,
+  type,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -31,9 +32,9 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await pressEnter(page);
-  await page.keyboard.type('world');
+  await type(page, 'world');
   await assertRichTexts(page, ['hello', 'world']);
 
   await dragBetweenIndices(page, [0, 0], [1, 5]);
@@ -45,7 +46,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   await inlineCode(page);
   await assertTextFormat(page, 0, 0, { code: true });
@@ -66,11 +67,11 @@ test('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('Hello');
+  await type(page, 'Hello');
   await selectAllByKeyboard(page);
   await inlineCode(page);
   await page.keyboard.press('ArrowRight');
-  await page.keyboard.type('block suite', { delay: 10 });
+  await type(page, 'block suite');
   // block suite should not be code
   await assertTextFormat(page, 0, 6, {});
 });
@@ -215,7 +216,7 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await dragBetweenIndices(page, [0, 0], [0, 5]);
   await strikethrough(page);
   await assertTextFormat(page, 0, 0, { strike: true });
@@ -235,7 +236,7 @@ test('should single line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await dragBetweenIndices(page, [0, 1], [0, 4]);
 
   // bold
@@ -465,7 +466,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
   const { frameId } = await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   // XXX wait for group to be updated
   await page.waitForTimeout(10);
@@ -549,7 +550,7 @@ test('format list to h1', async ({ page }) => {
 
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Bulleted List');
-  await page.keyboard.type('aa');
+  await type(page, 'aa');
   await focusRichText(page, 0);
   await formatType(page);
   await assertTypeFormat(page, 'h1');
@@ -563,7 +564,7 @@ test('should cut work single line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await resetHistory(page);
   await dragBetweenIndices(page, [0, 1], [0, 4]);
   // cut
@@ -653,7 +654,7 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await pressEnter(page);
