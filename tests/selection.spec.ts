@@ -793,11 +793,11 @@ test('should add a new line when clicking the bottom of the last non-text block'
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
 
   // code block
   await page.keyboard.type('```');
-  await page.keyboard.press('Enter');
+  await pressEnter(page);
 
   const locator = page.locator('affine-code');
   await expect(locator).toBeVisible();

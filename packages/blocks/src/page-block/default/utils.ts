@@ -403,7 +403,7 @@ export function handleUp(
       if (!activePreNodeModel) {
         focusTitle();
       } else {
-        focusPreviousBlock(activePreNodeModel, new Point(left, top));
+        focusPreviousBlock(model, new Point(left, top));
       }
     }
     return;
