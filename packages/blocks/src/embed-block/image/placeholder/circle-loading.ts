@@ -6,7 +6,7 @@ const ELEMENT_TAG = 'affine-image-block-circle-loading' as const;
 @customElement(ELEMENT_TAG)
 export class AffineImageBlockCircleLoading extends NonShadowLitElement {
   static styles = css`
-    @keyframes rotate {
+    @keyframes affine-image-block-rotate {
       from {
         rotate: 0deg;
       }
@@ -15,23 +15,23 @@ export class AffineImageBlockCircleLoading extends NonShadowLitElement {
       }
     }
 
-    .container {
+    .affine-image-block-container {
       width: 24px;
       height: 24px;
       overflow: hidden;
     }
 
-    .loading {
+    .affine-image-block-loading {
       display: inline-block;
       width: 24px;
       height: 24px;
       position: relative;
       background: conic-gradient(rgba(255, 255, 255, 0.31), #6880ff);
       border-radius: 50%;
-      animation: rotate 1s infinite ease-in;
+      animation: affine-image-block-rotate 1s infinite ease-in;
     }
 
-    .loading::before {
+    .affine-image-block-loading::before {
       content: '';
       width: 20px;
       height: 20px;
@@ -44,7 +44,9 @@ export class AffineImageBlockCircleLoading extends NonShadowLitElement {
   `;
 
   render() {
-    return html`<div class="container"><div class="loading"></div></div>`;
+    return html`<div class="affine-image-block-container">
+      <div class="affine-image-block-loading"></div>
+    </div>`;
   }
 }
 

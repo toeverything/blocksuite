@@ -8,7 +8,7 @@ const ELEMENT_TAG = 'affine-image-block-loading-card' as const;
 @customElement(ELEMENT_TAG)
 export class AffineImageBlockLoadingCard extends NonShadowLitElement {
   static styles = css`
-    .loading-card {
+    .affine-image-block-loading-card {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -21,7 +21,7 @@ export class AffineImageBlockLoadingCard extends NonShadowLitElement {
       background: #fbfbff;
     }
 
-    .content {
+    .affine-image-block-content {
       height: 30px;
       line-height: 22px;
       padding-top: 8px;
@@ -36,9 +36,9 @@ export class AffineImageBlockLoadingCard extends NonShadowLitElement {
 
   render() {
     return html`
-      <div class="loading-card">
+      <div class="affine-image-block-loading-card">
         <affine-image-block-circle-loading></affine-image-block-circle-loading>
-        <div class="content">${this.content}</div>
+        <div class="affine-image-block-content">${this.content}</div>
       </div>
     `;
   }

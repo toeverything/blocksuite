@@ -12,13 +12,14 @@ const ELEMENT_TAG = 'affine-image-block-not-found-card' as const;
 @customElement(ELEMENT_TAG)
 export class AffineImageBlockNotFoundCard extends NonShadowLitElement {
   static styles = css`
-    .not-found-card {
+    .affine-image-block-not-found-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       width: 453px;
       height: 104px;
+      margin: 0 auto;
       border: 1px solid #ebeeff;
       border-radius: 10px;
       background: #fbfbff;
@@ -26,7 +27,9 @@ export class AffineImageBlockNotFoundCard extends NonShadowLitElement {
   `;
 
   render() {
-    return html` <div class="not-found-card">${notFoundIcon}</div> `;
+    return html`
+      <div class="affine-image-block-not-found-card">${notFoundIcon}</div>
+    `;
   }
 }
 
