@@ -86,15 +86,13 @@ export class DefaultPageBlockComponent
       line-height: var(--affine-line-height-base);
       color: var(--affine-text-color);
       font-weight: 400;
-      width: 720px;
-      margin: 0 auto;
-      /* cursor: crosshair; */
       cursor: default;
 
       min-height: calc(100% - 78px);
       height: auto;
       overflow: hidden;
       padding-bottom: 150px;
+      margin: 0 auto;
     }
 
     .affine-default-page-block-container > .affine-block-children-container {
@@ -125,6 +123,7 @@ export class DefaultPageBlockComponent
 
     .affine-default-page-block-title-container {
       margin-top: 78px;
+      margin-bottom: 40px;
     }
   `;
 
