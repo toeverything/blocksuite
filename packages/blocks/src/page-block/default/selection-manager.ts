@@ -18,6 +18,7 @@ import {
   getCurrentRange,
   isTitleElement,
   isDatabaseInput,
+  asyncFocusRichText,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -187,16 +188,23 @@ export class DefaultSelectionManager {
           assertExists(dataTransfer);
           const data = dataTransfer.getData('affine/block-hub');
           const blockProps = JSON.parse(data);
+          if (blockProps.flavour === 'affine:database') {
+            if (!page.awarenessStore.getFlag('enable_database')) {
+              console.warn('database block is not enabled');
+              return;
+            }
+          }
           const targetModel = end.model;
           const rect = end.position;
           this.page.captureSync();
           const distanceToTop = Math.abs(rect.top - e.y);
           const distanceToBottom = Math.abs(rect.bottom - e.y);
-          this.page.insertBlock(
-            blockProps,
+          const id = this.page.addSiblingBlock(
             targetModel,
-            distanceToTop < distanceToBottom
+            blockProps,
+            distanceToTop < distanceToBottom ? 'right' : 'left'
           );
+          asyncFocusRichText(this.page, id);
         },
         getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
           return getBlockEditingStateByPosition(blocks, pageX, pageY, {

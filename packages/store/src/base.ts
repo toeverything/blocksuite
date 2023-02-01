@@ -4,20 +4,6 @@ import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
-/**
- * @internal
- */
-export const kValue = Symbol('kValue');
-
-export interface InternalValue<Value = unknown> {
-  __VALUE_HOLDER__?: Value;
-  [kValue]: symbol;
-}
-
-export const RichTextType: InternalValue<TextType> = {
-  [kValue]: Symbol('RichText'),
-};
-
 const FlavourSchema = z.string();
 const TagSchema = z.object({
   _$litStatic$: z.string(),
@@ -39,10 +25,6 @@ interface StaticValue {
   r: symbol;
 }
 
-type Props<S extends Record<string, unknown>> = {
-  [K in keyof S]: S[K] extends InternalValue<infer Value> ? Value : S[K];
-};
-
 export type SchemaToModel<
   Schema extends {
     model: {
@@ -51,7 +33,7 @@ export type SchemaToModel<
     };
   }
 > = BaseBlockModel &
-  Props<ReturnType<Schema['model']['props']>> & {
+  ReturnType<Schema['model']['props']> & {
     flavour: Schema['model']['flavour'];
   };
 
@@ -73,6 +55,7 @@ export function defineBlockSchema<
     flavour: Flavour;
   } & Metadata;
 };
+
 export function defineBlockSchema(
   flavour: string,
   props: () => Record<string, unknown>,

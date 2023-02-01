@@ -785,3 +785,39 @@ test('should select full text of the first block when leaving the affine-frame-b
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '1234567');
 });
+
+test('should add a new line when clicking the bottom of the last non-text block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await page.keyboard.press('Enter');
+
+  // code block
+  await page.keyboard.type('```');
+  await page.keyboard.press('Enter');
+
+  const locator = page.locator('affine-code');
+  await expect(locator).toBeVisible();
+
+  const rect = await page.evaluate(() => {
+    const secondRichText = document.querySelector('affine-code');
+    if (!secondRichText) {
+      throw new Error();
+    }
+
+    return secondRichText.getBoundingClientRect();
+  });
+  await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
+  await page.keyboard.type('ABC');
+  await assertRichTexts(page, [
+    '123',
+    '456',
+    '789',
+    `
+`, // code block
+    'ABC',
+  ]);
+});

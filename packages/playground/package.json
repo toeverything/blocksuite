@@ -9,16 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/virgo": "workspace:*",
     "@lit-labs/react": "^1.1.1",
     "@shoelace-style/shoelace": "2.0.0-beta.88",
     "lit": "^2.6.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "yjs": "^13.5.44"
   },
   "license": "MPL-2.0",
   "devDependencies": {

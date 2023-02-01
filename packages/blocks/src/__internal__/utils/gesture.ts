@@ -1,16 +1,6 @@
-import {
-  getClosestHorizontalEditor,
-  resetNativeSelection,
-  setEndRange,
-  setStartRange,
-} from './selection.js';
 import { debounce } from './std.js';
 import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
-import {
-  isDatabaseInput,
-  isInsideBlockContainer,
-  isTitleElement,
-} from './query.js';
+import { isDatabaseInput, isTitleElement } from './query.js';
 
 export interface IPoint {
   x: number;
@@ -82,6 +72,17 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
+function shouldFilterMouseEvent(event: Event): boolean {
+  const target = event.target;
+  if (!target || !(target instanceof HTMLElement)) {
+    return false;
+  }
+  if (target.tagName === 'INPUT') {
+    return true;
+  }
+  return false;
+}
+
 export function initMouseEventHandlers(
   container: HTMLElement,
   onContainerDragStart: (e: SelectionEvent) => void,
@@ -107,6 +108,7 @@ export function initMouseEventHandlers(
     );
 
   const mouseDownHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
@@ -124,6 +126,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
@@ -162,38 +165,14 @@ export function initMouseEventHandlers(
       e.preventDefault();
     }
 
-    if (!isDragging)
-      onContainerClick(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY)
-      );
-    else
+    if (isDragging) {
       onContainerDragEnd(
         toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
       );
-
-    const horizontalElement = getClosestHorizontalEditor(e.clientY);
-
-    if (!isInsideBlockContainer(e.target) && horizontalElement) {
-      let containerDom = document.querySelector(
-        '.affine-default-page-block-container'
+    } else {
+      onContainerClick(
+        toSelectionEvent(e, getBoundingClientRect, startX, startY)
       );
-      // TODO adapt edgeless block
-      if (!containerDom) {
-        containerDom = document.querySelector(
-          '.affine-edgeless-page-block-container'
-        );
-      }
-
-      if (containerDom) {
-        const react = containerDom.getBoundingClientRect();
-        if (e.clientX < react.left) {
-          const range = setStartRange(horizontalElement);
-          resetNativeSelection(range);
-        } else {
-          const range = setEndRange(horizontalElement);
-          resetNativeSelection(range);
-        }
-      }
     }
 
     startX = startY = -Infinity;
@@ -213,12 +192,17 @@ export function initMouseEventHandlers(
   };
 
   const dblClickHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     onContainerDblClick(
       toSelectionEvent(e, getBoundingClientRect, startX, startY)
     );
   };
 
-  const selectionChangeHandler = debounce(e => {
+  const selectionChangeHandler = debounce<
+    Event[],
+    (this: unknown, ...args: Event[]) => void
+  >(e => {
+    if (shouldFilterMouseEvent(e)) return;
     if (isDragging) {
       return;
     }
