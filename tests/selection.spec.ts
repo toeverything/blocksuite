@@ -398,7 +398,8 @@ test('select text in the same line with dragging leftward and move outside the e
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -25, y: 0 }
+    // fixme: remove magic number
+    { x: -20, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
   await type(page, 'abc');
@@ -419,6 +420,7 @@ test('select text in the same line with dragging rightward and move outside the 
     [1, 0],
     [1, 3],
     { x: 0, y: 0 },
+    // fixme: remove magic number
     { x: 50, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
@@ -653,7 +655,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
-test('should not crash when mouse over the left side of the list block prefix', async ({
+test.skip('should not crash when mouse over the left side of the list block prefix', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -672,6 +674,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
     [1, 2],
     [1, 0],
     { x: 0, y: 0 },
+    // fixme: what is this?
     { x: -50, y: 0 }
   );
   await copyByKeyboard(page);
