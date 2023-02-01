@@ -58,7 +58,7 @@ export const NumberTagSchemaRenderer = defineTagSchemaRenderer(
   }),
   () => 0,
   {
-    CellPreview: NumberCellPreview,
+    Cell: NumberCellPreview,
     CellEditing: NumberCellEditing,
     ColumnPropertyEditing: NumberColumnPropertyEditing,
   },

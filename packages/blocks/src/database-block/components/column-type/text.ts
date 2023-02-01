@@ -24,7 +24,7 @@ export const TextTagSchemaRenderer = defineTagSchemaRenderer(
   () => ({}),
   () => '',
   {
-    CellPreview: TextCellPreview,
+    Cell: TextCellPreview,
     CellEditing: TextCellEditing,
     ColumnPropertyEditing: TextColumnPropertyEditing,
   },

@@ -103,7 +103,7 @@ export class DatabaseCellContainer
         ></${editingTag}>
       `;
     }
-    const previewTag = renderer.components.CellPreview.tag;
+    const previewTag = renderer.components.Cell.tag;
     return html`
       <${previewTag}
         .rowHost=${this}

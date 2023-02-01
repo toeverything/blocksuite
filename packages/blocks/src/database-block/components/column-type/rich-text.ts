@@ -82,7 +82,7 @@ export const RichTextTagSchemaRenderer = defineTagSchemaRenderer(
   () => ({}),
   page => new page.YText(''),
   {
-    CellPreview: TextCellPreview,
+    Cell: TextCellPreview,
     CellEditing: TextCellEditing,
     ColumnPropertyEditing: TextColumnPropertyEditing,
   },

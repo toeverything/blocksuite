@@ -86,7 +86,7 @@ export const SelectTagSchemaRenderer = defineTagSchemaRenderer(
   }),
   () => [] as string[],
   {
-    CellPreview: SelectCellPreview,
+    Cell: SelectCellPreview,
     CellEditing: SelectCellEditing,
     ColumnPropertyEditing: SelectColumnPropertyEditing,
   },

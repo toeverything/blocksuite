@@ -57,7 +57,7 @@ export interface TagUIComponents<
   Property extends Record<string, unknown> = Record<string, unknown>,
   Value = unknown
 > {
-  CellPreview: typeof DatabaseCellLitElement;
+  Cell: typeof DatabaseCellLitElement;
   CellEditing: typeof DatabaseCellLitElement;
   ColumnPropertyEditing: typeof DatabaseCellLitElement;
 }
@@ -119,7 +119,7 @@ export function defineTagSchemaRenderer<
   propertyCreator: () => Property,
   defaultValue: (page: Page) => Value | null,
   components: {
-    CellPreview: typeof DatabaseCellLitElement;
+    Cell: typeof DatabaseCellLitElement;
     CellEditing: typeof DatabaseCellLitElement;
     ColumnPropertyEditing: typeof DatabaseCellLitElement;
   },
