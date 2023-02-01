@@ -9,6 +9,8 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
+import './placeholder/loading-card.js';
+import './placeholder/image-not-found.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
@@ -202,11 +204,16 @@ export class ImageBlockComponent extends NonShadowLitElement {
     }
 
     const img = {
-      waitUploaded: html`<div>wait uploaded</div>`,
-      loading: html`<div>loading</div>`,
+      waitUploaded: html`<affine-image-block-loading-card
+        content="Delivering content..."
+      ></affine-image-block-loading-card>`,
+      loading: html`<affine-image-block-loading-card
+        content="Loading content..."
+      ></affine-image-block-loading-card>`,
       ready: html`<img class="resizable-img" src=${this._source} />`,
-      failed: html`<div>failed</div>`,
+      failed: html`<affine-image-block-not-found-card></affine-image-block-not-found-card>`,
     }[this._imageState];
+
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`

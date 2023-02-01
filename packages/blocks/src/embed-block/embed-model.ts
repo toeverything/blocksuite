@@ -5,7 +5,7 @@ export const EmbedBlockModelSchema = defineBlockSchema(
   'affine:embed',
   () => ({
     type: 'image',
-    caption: 'image',
+    caption: '',
     sourceId: '',
     width: 0,
     height: 0,
