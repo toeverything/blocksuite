@@ -3,8 +3,7 @@ import { LitElement } from 'lit';
 import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { literal } from 'lit/static-html.js';
-import { Page } from '@blocksuite/store';
-
+import type { Page } from '@blocksuite/store';
 export interface RowHost {
   setEditing(isEditing: boolean): void;
 }

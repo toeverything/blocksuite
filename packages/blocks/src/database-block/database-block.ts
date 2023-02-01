@@ -11,7 +11,6 @@ import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { columnTypeToTagSchema } from './utils/index.js';
 import { DatabaseEditColumn } from './components/database-edit-column.js';
 import { createPopper } from '@popperjs/core';
 import { registerInternalRenderer } from './components/column-type/index.js';
@@ -262,11 +261,11 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
 
   private _addColumn = (columnType: TagSchema['type']) => {
     this.model.page.captureSync();
-    const schema = columnTypeToTagSchema(columnType);
-    this.model.page.setTagSchema(schema);
-    this.model.page.updateBlock(this.model, {
-      columns: [...this.model.columns, schema.id],
-    });
+    // const schema = columnTypeToTagSchema(columnType);
+    // this.model.page.setTagSchema(schema);
+    // this.model.page.updateBlock(this.model, {
+    //   columns: [...this.model.columns, schema.id],
+    // });
   };
 
   firstUpdated() {
