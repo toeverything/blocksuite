@@ -175,6 +175,9 @@ export function database(workspace: Workspace) {
         }
       );
 
+      // Add a paragraph after database
+      page.addBlockByFlavour('affine:paragraph', {}, frameId);
+
       requestAnimationFrame(() => {
         page.resetHistory();
         resolve(pageId);
