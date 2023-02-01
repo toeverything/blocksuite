@@ -4,10 +4,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { TagSchema } from '@blocksuite/global/database';
 import { listTagSchemaRenderer } from '@blocksuite/global/database';
 
-export const DatabaseBlockSettingsSidebarTag =
-  'affine-database-settings-sidebar' as const;
-@customElement(DatabaseBlockSettingsSidebarTag)
-export class DatabaseBlockSettingsSidebar extends LitElement {
+export const DATABASE_ADD_COLUMN_TYPE_POPUP =
+  'affine-database-add-column-type-popup' as const;
+@customElement(DATABASE_ADD_COLUMN_TYPE_POPUP)
+export class DatabaseAddColumnTypePopup extends LitElement {
   static styles = css`
     :host {
       position: absolute;
@@ -24,7 +24,7 @@ export class DatabaseBlockSettingsSidebar extends LitElement {
       padding-left: 14px;
     }
 
-    .affine-database-settings-sidebar-subtitle {
+    .affine-database-add-column-type-popup-subtitle {
       color: rgba(55, 53, 47, 0.65);
       padding-top: 14px;
       padding-bottom: 14px;
@@ -34,17 +34,17 @@ export class DatabaseBlockSettingsSidebar extends LitElement {
       user-select: none;
     }
 
-    .affine-database-settings-sidebar-title {
+    .affine-database-add-column-type-popup-title {
       padding-top: 12px;
       font-size: 14px;
       font-weight: 600;
     }
 
-    .affine-database-settings-sidebar-list {
+    .affine-database-add-column-type-popup-list {
       font-size: 14px;
     }
 
-    .affine-database-settings-sidebar-list > div {
+    .affine-database-add-column-type-popup-list > div {
       min-height: 28px;
     }
   `;
@@ -95,12 +95,12 @@ export class DatabaseBlockSettingsSidebar extends LitElement {
       return null;
     }
     return html`
-      <div class="affine-database-settings-sidebar-title">
+      <div class="affine-database-add-column-type-popup-title">
         New column
         <button @click=${this._handleClose}>X</button>
       </div>
-      <div class="affine-database-settings-sidebar-subtitle">Type</div>
-      <div class="affine-database-settings-sidebar-list">
+      <div class="affine-database-add-column-type-popup-subtitle">Type</div>
+      <div class="affine-database-add-column-type-popup-list">
         ${repeat(
           listTagSchemaRenderer(),
           renderer => renderer.type,
@@ -121,6 +121,6 @@ export class DatabaseBlockSettingsSidebar extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [DatabaseBlockSettingsSidebarTag]: DatabaseBlockSettingsSidebar;
+    [DATABASE_ADD_COLUMN_TYPE_POPUP]: DatabaseAddColumnTypePopup;
   }
 }

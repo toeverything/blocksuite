@@ -1,5 +1,5 @@
 // related component
-import './components/sidebar.js';
+import './components/add-column-type-popup.js';
 
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -11,15 +11,16 @@ import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { DatabaseEditColumn } from './components/database-edit-column.js';
+import { EditColumnPopup } from './components/edit-column-popup.js';
 import { createPopper } from '@popperjs/core';
 import { registerInternalRenderer } from './components/column-type/index.js';
-import type { DatabaseBlockSettingsSidebar } from './components/sidebar.js';
+import type { DatabaseAddColumnTypePopup } from './components/add-column-type-popup.js';
 import type { TagSchema } from '@blocksuite/global/database';
-import { html } from 'lit/static-html.js';
+import { html, unsafeStatic } from 'lit/static-html.js';
 import './components/cell-container.js';
 import { getTagSchemaRenderer } from '@blocksuite/global/database';
 import { nanoid } from '@blocksuite/store';
+import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -74,7 +75,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
                 maxWidth: `${column.internalProperty.width}px`,
               })}
               @click=${(event: MouseEvent) => {
-                const editColumn = new DatabaseEditColumn();
+                const editColumn = new EditColumnPopup();
                 editColumn.targetModel = block.model;
                 editColumn.targetTagSchema = column;
                 document.body.appendChild(editColumn);
@@ -94,7 +95,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
       <div
         class="affine-database-block-add-column"
         @click=${() => {
-          block.settingsSidebar.show = true;
+          block.addColumnTypePopup.show = true;
         }}
       >
         +
@@ -247,8 +248,8 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  @query('affine-database-settings-sidebar')
-  settingsSidebar!: DatabaseBlockSettingsSidebar;
+  @query(DATABASE_ADD_COLUMN_TYPE_POPUP)
+  addColumnTypePopup!: DatabaseAddColumnTypePopup;
 
   get columns(): TagSchema[] {
     return this.model.columns.map(id =>
@@ -293,6 +294,7 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
     });
   };
 
+  /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
@@ -325,11 +327,12 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
           </div>
         </div>
       </div>
-      <affine-database-settings-sidebar
+      <${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}
         .onSelectType=${this._addColumn}
-      ></affine-database-settings-sidebar>
+      ></${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}>
     `;
   }
+  /* eslint-enable lit/binding-positions, lit/no-invalid-html */
 }
 
 declare global {

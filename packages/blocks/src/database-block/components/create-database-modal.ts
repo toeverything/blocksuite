@@ -4,7 +4,8 @@
 import { customElement, property } from 'lit/decorators.js';
 import { html, LitElement } from 'lit';
 
-export const DatabaseCreateFormTag = 'affine-database-create-form' as const;
+export const CREATE_DATABASE_MODAL_TAG =
+  'affine-create-database-modal' as const;
 
 export enum DatabaseViewType {
   Table = 'table',
@@ -13,8 +14,8 @@ export enum DatabaseViewType {
 
 export type OnConfirm = (viewType: DatabaseViewType) => void;
 
-@customElement(DatabaseCreateFormTag)
-export class DatabaseCreateForm extends LitElement {
+@customElement(CREATE_DATABASE_MODAL_TAG)
+export class CreateDatabaseModal extends LitElement {
   @property()
   onConfirm: OnConfirm | null = null;
 
@@ -34,6 +35,6 @@ export class DatabaseCreateForm extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [DatabaseCreateFormTag]: DatabaseCreateForm;
+    [CREATE_DATABASE_MODAL_TAG]: CreateDatabaseModal;
   }
 }
