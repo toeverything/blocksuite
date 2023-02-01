@@ -588,12 +588,6 @@ export function bindHotkeys(
     model && focusPreviousBlock(model, 'end');
   });
   hotkey.addListener(RIGHT, e => {
-    if (
-      e.target instanceof HTMLTextAreaElement &&
-      e.target.classList.contains('affine-default-page-block-title')
-    ) {
-      return;
-    }
     let model: BaseBlockModel | null = null;
     const {
       state: { selectedBlocks, type },
