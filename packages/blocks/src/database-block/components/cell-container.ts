@@ -27,7 +27,7 @@ export class DatabaseCellContainer
     if (value) {
       this.databaseModel.page.captureSync();
       this.databaseModel.page.updateBlockTag(this.rowModel.id, {
-        type: this.column.id,
+        schemaId: this.column.id,
         value,
       });
     }
@@ -47,8 +47,8 @@ export class DatabaseCellContainer
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('column')) {
       requestAnimationFrame(() => {
-        this.style.minWidth = `${this.column.meta.width}px`;
-        this.style.maxWidth = `${this.column.meta.width}px`;
+        this.style.minWidth = `${this.column.internalProperty.width}px`;
+        this.style.maxWidth = `${this.column.internalProperty.width}px`;
       });
     }
   }

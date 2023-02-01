@@ -195,7 +195,7 @@ export class Page extends Space<PageData> {
       if (!already) {
         this.tags.set(id, tags);
       }
-      tags.set(tag.type, tag);
+      tags.set(tag.schemaId, tag);
     });
   }
 

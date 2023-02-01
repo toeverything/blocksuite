@@ -73,7 +73,7 @@ export interface TagSchema<
    * column name
    */
   name: string;
-  meta: SchemaMeta;
+  internalProperty: SchemaMeta;
   property: TagProperty<Property>;
   /**
    * this value is just for hold the `BaseValue`,
@@ -99,7 +99,7 @@ export type RendererToTagSchema<Renderer extends TagSchemaRenderer> =
     : never;
 
 export type BlockTag<Schema extends TagSchema = TagSchema> = {
-  type: Schema['id'];
+  schemaId: Schema['id'];
   value: Schema extends TagSchema<infer _, infer __, infer Value>
     ? Value
     : never;

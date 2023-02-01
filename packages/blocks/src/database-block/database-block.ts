@@ -69,8 +69,8 @@ function DatabaseHeader(block: DatabaseBlock) {
               class="affine-database-block-column"
               data-column-id="${column.id}"
               style=${styleMap({
-                minWidth: `${column.meta.width}px`,
-                maxWidth: `${column.meta.width}px`,
+                minWidth: `${column.internalProperty.width}px`,
+                maxWidth: `${column.internalProperty.width}px`,
               })}
               @click=${(event: MouseEvent) => {
                 const editColumn = new DatabaseEditColumn();
@@ -284,8 +284,9 @@ export class DatabaseBlock extends NonShadowLitElement {
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
-      this.columns.map(column => column.meta.width).reduce((t, x) => t + x, 0) +
-      FIRST_LINE_TEXT_WIDTH;
+      this.columns
+        .map(column => column.internalProperty.width)
+        .reduce((t, x) => t + x, 0) + FIRST_LINE_TEXT_WIDTH;
 
     return html`
       <div>

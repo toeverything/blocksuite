@@ -5,7 +5,6 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
-import BlockTag = BlockSuiteInternal.BlockTag;
 
 export function empty(workspace: Workspace) {
   return new Promise<string>(resolve => {
@@ -140,40 +139,41 @@ export function database(workspace: Workspace) {
       );
 
       page.setTagSchema({
-        meta: {
+        internalProperty: {
           color: '#ff0000',
           width: 200,
           hide: false,
+        },
+        property: {
+          decimal: 0,
         },
         name: 'Number',
         id: 'column1',
         type: 'number',
-        decimal: 0,
       });
       page.setTagSchema({
-        meta: {
+        internalProperty: {
           color: '#ff0000',
           width: 200,
           hide: false,
         },
+        property: {
+          selection: selection,
+        },
         name: 'Select 2',
         id: 'column2',
         type: 'select',
-        selection: selection,
       });
 
-      page.updateBlockTag<BlockTag<BlockSuiteInternal.NumberTagSchema>>(p1, {
-        type: 'column1',
+      page.updateBlockTag(p1, {
+        schemaId: 'column1',
         value: 0.1,
       });
 
-      page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
-        p2,
-        {
-          type: 'column2',
-          value: 'TODO',
-        }
-      );
+      page.updateBlockTag(p2, {
+        schemaId: 'column2',
+        value: 'TODO',
+      });
 
       // Add a paragraph after database
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
