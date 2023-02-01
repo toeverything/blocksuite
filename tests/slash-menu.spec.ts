@@ -81,6 +81,14 @@ test.describe('slash menu should show and hide correctly', () => {
     await page.keyboard.type('_');
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/_']);
+
+    // And pressing backspace immediately should reappear the slash menu
+    await page.keyboard.press('Backspace');
+    await expect(slashMenu).toBeVisible();
+
+    await page.keyboard.type('__');
+    await page.keyboard.press('Backspace');
+    await expect(slashMenu).not.toBeVisible();
   });
 
   test('pressing the slash key again should close the old slash menu and open new one', async () => {
