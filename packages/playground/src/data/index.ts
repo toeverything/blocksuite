@@ -120,21 +120,21 @@ export function database(workspace: Workspace) {
       const databaseId = page.addBlockByFlavour(
         'affine:database',
         {
-          columns: ['1', '2'],
+          columns: ['column1', 'column2'],
         },
         frameId
       );
       const p1 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, '1'),
+          text: new page.Text(page, 'text1'),
         },
         databaseId
       );
       const p2 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, '2'),
+          text: new page.Text(page, 'text2'),
         },
         databaseId
       );
@@ -146,7 +146,7 @@ export function database(workspace: Workspace) {
           hide: false,
         },
         name: 'Number',
-        id: '1',
+        id: 'column1',
         type: 'number',
         decimal: 0,
       });
@@ -157,20 +157,20 @@ export function database(workspace: Workspace) {
           hide: false,
         },
         name: 'Select 2',
-        id: '2',
+        id: 'column2',
         type: 'select',
         selection: selection,
       });
 
       page.updateBlockTag<BlockTag<BlockSuiteInternal.NumberTagSchema>>(p1, {
-        type: '1',
+        type: 'column1',
         value: 0.1,
       });
 
       page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
         p2,
         {
-          type: '2',
+          type: 'column2',
           value: 'TODO',
         }
       );
