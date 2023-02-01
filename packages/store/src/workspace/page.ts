@@ -199,17 +199,12 @@ export class Page extends Space<PageData> {
       if (!already) {
         this.tags.set(id, tags);
       }
-      tags.set(tag.schemaId, tag);
+      // Related issue: https://github.com/yjs/yjs/issues/255
+      const tagMap = new Y.Map();
+      tagMap.set('schemaId', tag.schemaId);
+      tagMap.set('value', tag.value);
+      tags.set(tag.schemaId, tagMap);
     });
-  }
-
-  getBlockTags(model: BaseBlockModel): Record<string, BlockTag> {
-    const tags = this.tags.get(model.id);
-    if (!tags) {
-      return {};
-    }
-    // fixme: performance issue
-    return tags.toJSON();
   }
 
   getBlockTagByTagSchema(
@@ -217,7 +212,14 @@ export class Page extends Space<PageData> {
     schema: TagSchema
   ): BlockTag | null {
     const tags = this.tags.get(model.id);
-    return (tags?.get(schema.id) as BlockTag) ?? null;
+    const tagMap = (tags?.get(schema.id) as Y.Map<unknown>) ?? null;
+    if (!tagMap) {
+      return null;
+    }
+    return {
+      schemaId: tagMap.get('schemaId') as string,
+      value: tagMap.get('value') as unknown,
+    };
   }
 
   getTagSchema(id: TagSchema['id']): TagSchema | null {
