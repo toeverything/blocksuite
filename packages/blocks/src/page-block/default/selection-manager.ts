@@ -194,7 +194,7 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
   });
 }
 
-// find blocks and ites subtree
+// find blocks and its subtree
 function findBlocksWithSubtree(
   blockCache: Map<Element, DOMRect>,
   selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
