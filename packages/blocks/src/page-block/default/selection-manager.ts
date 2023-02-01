@@ -96,7 +96,7 @@ function filterSelectedBlockWithoutSubtrees(
           results.shift();
           results.push({ block, index: i });
         } else {
-          // backward search parent block and remove prev subtrees
+          // backward search parent block and its subtrees
           let n = i;
           while (n--) {
             if (calcDepth(entries[n][1].left, containerLeft) === currentDepth) {
@@ -168,7 +168,7 @@ function filterSelectedBlockByIndex(
   return results;
 }
 
-// clear block' subtrees for drawing rect
+// clear block's subtrees for drawing rect
 function clearSubtrees(selectedBlocks: Element[], left: number) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
@@ -186,7 +186,7 @@ function clearSubtrees(selectedBlocks: Element[], left: number) {
   });
 }
 
-// fill subtrees for block
+// fill block's subtrees
 function fillSubtress(
   blockCache: Map<Element, DOMRect>,
   selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
@@ -196,7 +196,7 @@ function fillSubtress(
 
   for (let i = 0; i < len; i++) {
     const { block, index } = selectedBlocksWithoutSubtrees[i];
-    // find subtrees on the last block
+    // find block's subtrees
     results.push(
       ...filterSelectedBlockByIndex(
         blockCache,
