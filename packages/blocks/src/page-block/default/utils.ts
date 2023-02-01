@@ -7,7 +7,6 @@ import {
   focusPreviousBlock,
   getBlockById,
   getBlockElementByModel,
-  getContainerByModel,
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
@@ -390,8 +389,7 @@ export function handleUp(
   const nativeSelection = window.getSelection();
   if (nativeSelection?.anchorNode) {
     const model = getStartModelBySelection();
-    const activeContainer = getContainerByModel(model);
-    const activePreNodeModel = getPreviousBlock(activeContainer, model.id);
+    const activePreNodeModel = getPreviousBlock(model);
     const editableContainer = getBlockElementByModel(model)?.querySelector(
       '.ql-editor'
     ) as HTMLElement;
@@ -420,8 +418,7 @@ export function handleUp(
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const container = getContainerByModel(selectedModel);
-    const preNodeModel = getPreviousBlock(container, selectedModel.id);
+    const preNodeModel = getPreviousBlock(selectedModel);
     assertExists(preNodeModel);
     const page = getDefaultPageBlock(selectedModel);
     e.preventDefault();
@@ -453,8 +450,7 @@ export function handleDown(
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const container = getContainerByModel(selectedModel);
-    const preNodeModel = getPreviousBlock(container, selectedModel.id);
+    const preNodeModel = getPreviousBlock(selectedModel);
     assertExists(preNodeModel);
     const page = getDefaultPageBlock(selectedModel);
     e.preventDefault();

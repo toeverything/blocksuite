@@ -3,7 +3,6 @@ import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   getBlockElementByModel,
-  getContainerByModel,
   getCurrentRange,
   getDefaultPageBlock,
   getElementFromEventTarget,
@@ -261,7 +260,6 @@ export function focusPreviousBlock(
   position?: SelectionPosition
 ) {
   const page = getDefaultPageBlock(model);
-  const container = getContainerByModel(model);
 
   let nextPosition = position;
   if (nextPosition) {
@@ -270,7 +268,7 @@ export function focusPreviousBlock(
     nextPosition = page.lastSelectionPosition;
   }
 
-  const preNodeModel = getPreviousBlock(container, model.id);
+  const preNodeModel = getPreviousBlock(model);
   if (preNodeModel && nextPosition) {
     focusBlockByModel(preNodeModel, nextPosition);
   }

@@ -5,7 +5,6 @@ import type { Quill } from 'quill';
 import {
   ExtendedModel,
   getRichTextByModel,
-  getContainerByModel,
   getPreviousBlock,
   getNextBlock,
   asyncFocusRichText,
@@ -277,8 +276,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
     const parent = page.getParent(model);
     if (!parent || matchFlavours(parent, ['affine:frame'])) {
-      const container = getContainerByModel(model);
-      const previousSibling = getPreviousBlock(container, model.id);
+      const previousSibling = getPreviousBlock(model);
       const previousSiblingParent = previousSibling
         ? page.getParent(previousSibling)
         : null;
@@ -367,8 +365,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
   const selection = window.getSelection();
-  const container = getContainerByModel(model);
-  const preNodeModel = getPreviousBlock(container, model.id);
+  const preNodeModel = getPreviousBlock(model);
   if (selection) {
     const range = selection.getRangeAt(0);
     const { height, left, top } = range.getBoundingClientRect();
