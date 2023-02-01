@@ -1,17 +1,38 @@
-import { defineTagSchemaRenderer } from '@blocksuite/global/database';
-import { LitElement } from 'lit';
+import {
+  DatabaseCellLitElement,
+  defineTagSchemaRenderer,
+} from '@blocksuite/global/database';
+import { customElement } from 'lit/decorators.js';
+import { html, literal } from 'lit/static-html.js';
 
-export const SelectTagSchemaRenderer = defineTagSchemaRenderer<string>(
+@customElement('affine-database-select-cell-preview')
+class SelectCellPreview extends DatabaseCellLitElement {
+  static tag = literal`affine-database-select-cell-preview`;
+  override render() {
+    return html` <div>${this.tag?.value}</div> `;
+  }
+}
+
+@customElement('affine-database-select-cell-editing')
+class SelectCellEditing extends DatabaseCellLitElement {
+  static tag = literal`affine-database-select-cell-editing`;
+}
+
+@customElement('affine-database-select-column-property-editing')
+class SelectColumnPropertyEditing extends DatabaseCellLitElement {
+  static tag = literal`affine-database-select-column-property-editing`;
+}
+
+export const SelectTagSchemaRenderer = defineTagSchemaRenderer(
   'select',
   () => ({
     selection: [],
   }),
-  () => null,
+  () => [] as string[],
   {
-    CellPreview: class SelectCellPreview extends LitElement {},
-    CellEditing: class SelectCellEditing extends LitElement {},
-
-    ColumnPropertyEditing: class SelectColumnPropertyEditing extends LitElement {},
+    CellPreview: SelectCellPreview,
+    CellEditing: SelectCellEditing,
+    ColumnPropertyEditing: SelectColumnPropertyEditing,
   },
   {
     displayName: 'Select',

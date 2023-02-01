@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import TagSchema = BlockSuiteInternal.TagSchema;
+import type { TagSchema } from '@blocksuite/global/database';
 
 @customElement('affine-database-edit-column')
 export class DatabaseEditColumn extends LitElement {

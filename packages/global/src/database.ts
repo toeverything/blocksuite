@@ -1,5 +1,26 @@
-import { customElement } from 'lit/decorators.js';
-import type { LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
+import { LitElement } from 'lit';
+import type { DatabaseBlockModel } from '@blocksuite/blocks';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { literal } from 'lit/static-html.js';
+
+export interface RowHost {
+  setEditing(isEditing: boolean): void;
+}
+
+export abstract class DatabaseCellLitElement extends LitElement {
+  static tag: ReturnType<typeof literal>;
+  @property()
+  rowHost!: RowHost;
+  @property({ hasChanged: () => true })
+  databaseModel!: DatabaseBlockModel;
+  @property({ hasChanged: () => true })
+  rowModel!: BaseBlockModel;
+  @property()
+  column!: TagSchema;
+  @property()
+  tag!: BlockTag | null;
+}
 
 /**
  * @internal
@@ -21,10 +42,19 @@ export interface SchemaMeta {
   hide: boolean;
 }
 
-export interface TagUISchema {
-  CellPreview: { new (): LitElement };
-  CellEditing: { new (): LitElement };
-  ColumnPropertyEditing: { new (): LitElement };
+export interface UISchema {
+  new (): LitElement;
+  tagName: string;
+}
+
+export interface TagUIComponents<
+  Type extends string = string,
+  Property extends Record<string, unknown> = Record<string, unknown>,
+  Value = unknown
+> {
+  CellPreview: typeof DatabaseCellLitElement;
+  CellEditing: typeof DatabaseCellLitElement;
+  ColumnPropertyEditing: typeof DatabaseCellLitElement;
 }
 
 export type TagProperty<Property extends Record<string, unknown>> = Property;
@@ -60,51 +90,44 @@ export interface TagSchemaRenderer<
   displayName: string;
   type: Type;
   propertyCreator: () => Property;
-  uiSchema: TagUISchema;
+  components: TagUIComponents;
 }
 
-// export type TextTagSchema = TagSchema<'text', string>
-//
-// export type NumberTagSchema = TagSchema<'number', number, {
-//   decimal: number;
-// }>
-//
-// export type SelectTagSchema<Selection extends string = string>
-//   = TagSchema<'select', string, {
-//     selection: Selection[]
-//   }>
-//
-// export type RichTextTagSchema = TagSchema<'rich-text', TextType>
+export type RendererToTagSchema<Renderer extends TagSchemaRenderer> =
+  Renderer extends TagSchemaRenderer<infer Type, infer Property, infer Value>
+    ? TagSchema<Type, Property, Value>
+    : never;
+
+export type BlockTag<Schema extends TagSchema = TagSchema> = {
+  type: Schema['id'];
+  value: Schema extends TagSchema<infer _, infer __, infer Value>
+    ? Value
+    : never;
+};
 
 export function defineTagSchemaRenderer<
-  Value,
-  Type extends string = string,
-  Property extends Record<string, unknown> = Record<string, unknown>
+  Type extends string,
+  Property extends Record<string, unknown>,
+  Value
 >(
   type: Type,
   propertyCreator: () => Property,
   defaultValue: () => Value | null,
-  uiSchema: TagUISchema,
+  components: {
+    CellPreview: typeof DatabaseCellLitElement;
+    CellEditing: typeof DatabaseCellLitElement;
+    ColumnPropertyEditing: typeof DatabaseCellLitElement;
+  },
   config: {
     displayName: string;
   }
 ): TagSchemaRenderer<Type, Property, Value> {
-  const renderer: TagSchemaRenderer<Type, Property, Value> = {
+  return {
     displayName: config.displayName,
     type,
     propertyCreator,
-    uiSchema,
+    components,
   };
-  uiSchema.CellPreview = customElement(`database-${type}-cell-preview`)(
-    uiSchema.CellPreview
-  );
-  uiSchema.CellEditing = customElement(`database-${type}-cell-editing`)(
-    uiSchema.CellEditing
-  );
-  uiSchema.ColumnPropertyEditing = customElement(
-    `database-${type}-cell-property-editing`
-  )(uiSchema.ColumnPropertyEditing);
-  return renderer;
 }
 
 export function registerTagSchemaRenderer(renderer: TagSchemaRenderer) {
@@ -116,4 +139,14 @@ export function registerTagSchemaRenderer(renderer: TagSchemaRenderer) {
 
 export function listTagSchemaRenderer(): TagSchemaRenderer[] {
   return [...registry.values()];
+}
+
+export function getTagSchemaRenderer(
+  type: TagSchemaRenderer['type']
+): TagSchemaRenderer {
+  const renderer = registry.get(type);
+  if (!renderer) {
+    throw new Error('cannot find renderer');
+  }
+  return renderer;
 }

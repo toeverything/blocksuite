@@ -1,7 +1,7 @@
 // related component
 import './components/sidebar.js';
 
-import { css, html } from 'lit';
+import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { BlockElementWithService, BlockHost } from '../__internal__/index.js';
@@ -10,13 +10,15 @@ import { repeat } from 'lit/directives/repeat.js';
 import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import TagSchema = BlockSuiteInternal.TagSchema;
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { columnTypeToTagSchema } from './utils/index.js';
 import { DatabaseEditColumn } from './components/database-edit-column.js';
 import { createPopper } from '@popperjs/core';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import type { DatabaseBlockSettingsSidebar } from './components/sidebar.js';
+import type { TagSchema } from '@blocksuite/global/database';
+import { html } from 'lit/static-html.js';
+import './components/cell-container.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -100,10 +102,10 @@ function DatabaseHeader(block: DatabaseBlock) {
   `;
 }
 
-function DataBaseRowContainer(block: DatabaseBlock) {
-  const model = block.model;
-  const host = block.host;
-  assertEquals(model.mode, DatabaseBlockDisplayMode.Database);
+function DataBaseRowContainer(databaseBlock: DatabaseBlock) {
+  const databaseModel = databaseBlock.model;
+  const host = databaseBlock.host;
+  assertEquals(databaseModel.mode, DatabaseBlockDisplayMode.Database);
 
   return html`
     <style>
@@ -136,7 +138,7 @@ function DataBaseRowContainer(block: DatabaseBlock) {
     </style>
     <div class="affine-database-block-rows">
       ${repeat(
-        model.children,
+        databaseModel.children,
         child => child.id,
         (child, idx) => {
           return html`
@@ -148,51 +150,19 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                 })}
               >
                 ${BlockElementWithService(child, host, () => {
-                  block.requestUpdate();
+                  databaseBlock.requestUpdate();
                 })}
               </div>
-              ${repeat(
-                block.columns.map(
-                  column =>
-                    [
-                      column,
-                      child.page.getBlockTagByTagSchema(child, column),
-                    ] as const
-                ),
-                ([column, tag]) => {
-                  return html`
-                    <div
-                      style=${styleMap({
-                        minWidth: `${column.meta.width}px`,
-                        maxWidth: `${column.meta.width}px`,
-                      })}
-                      @click=${(event: MouseEvent) => {
-                        // switch (column.type) {
-                        //   case 'select': {
-                        //     const selectType = new DatabaseSelectType();
-                        //     selectType.targetModel = child;
-                        //     selectType.targetTagSchema = column;
-                        //     const element = event.target as HTMLDivElement;
-                        //     element.appendChild(selectType);
-                        //     requestAnimationFrame(() => {
-                        //       hideOnClickOutside(selectType);
-                        //     });
-                        //     return;
-                        //   }
-                        // }
-                      }}
-                    >
-                      ${column.type === 'number'
-                        ? html`<database-number-type
-                            .targetModel=${child}
-                            .targetTagSchema=${column}
-                            .targetTag=${tag}
-                          ></database-number-type>`
-                        : tag?.value}
-                    </div>
-                  `;
-                }
-              )}
+              ${repeat(databaseBlock.columns, column => {
+                return html`
+                  <affine-database-cell-container
+                    .databaseModel=${databaseModel}
+                    .rowModel=${child}
+                    .column=${column}
+                  >
+                  </affine-database-cell-container>
+                `;
+              })}
             </div>
           `;
         }

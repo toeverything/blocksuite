@@ -23,9 +23,8 @@ import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
-import BlockTag = BlockSuiteInternal.BlockTag;
-import TagSchema = BlockSuiteInternal.TagSchema;
 import type { AwarenessStore } from '../awareness.js';
+import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 

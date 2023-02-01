@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/blocks": "workspace:*",
     "lit": "^2.6.1"
   },
   "peerDependencies": {
