@@ -18,6 +18,8 @@ import type { DatabaseBlockSettingsSidebar } from './components/sidebar.js';
 import type { TagSchema } from '@blocksuite/global/database';
 import { html } from 'lit/static-html.js';
 import './components/cell-container.js';
+import { getTagSchemaRenderer } from '@blocksuite/global/database';
+import { uuidv4 } from '@blocksuite/store';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -261,11 +263,22 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
 
   private _addColumn = (columnType: TagSchema['type']) => {
     this.model.page.captureSync();
-    // const schema = columnTypeToTagSchema(columnType);
-    // this.model.page.setTagSchema(schema);
-    // this.model.page.updateBlock(this.model, {
-    //   columns: [...this.model.columns, schema.id],
-    // });
+    const renderer = getTagSchemaRenderer(columnType);
+    const schema: TagSchema = {
+      id: uuidv4(),
+      type: columnType,
+      name: 'new column',
+      internalProperty: {
+        width: 200,
+        hide: false,
+        color: '#000',
+      },
+      property: renderer.propertyCreator(),
+    };
+    this.model.page.setTagSchema(schema);
+    this.model.page.updateBlock(this.model, {
+      columns: [...this.model.columns, schema.id],
+    });
   };
 
   firstUpdated() {
