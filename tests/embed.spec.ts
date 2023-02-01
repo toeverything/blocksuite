@@ -38,7 +38,8 @@ async function initImageState(page: Page) {
       .getElementsByTagName('editor-container')[0]
       .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
   });
-  await page.waitForTimeout(2000);
+  // due to pasting img calls fetch, so we need timeout for downloading finished.
+  await page.waitForTimeout(500);
 }
 
 async function focusCaption(page: Page) {
