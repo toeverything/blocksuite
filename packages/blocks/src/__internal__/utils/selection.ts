@@ -3,7 +3,6 @@ import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   getBlockElementByModel,
-  getContainerByModel,
   getCurrentRange,
   getDefaultPageBlock,
   getElementFromEventTarget,
@@ -182,6 +181,23 @@ async function setNewTop(y: number, editableContainer: Element) {
   }
 }
 
+/**
+ * As the title is a text area, this function does not yet have support for `SelectionPosition`.
+ */
+export function focusTitle(index = Infinity) {
+  const titleElement = document.querySelector(
+    '.affine-default-page-block-title'
+  ) as HTMLTextAreaElement | null;
+  if (!titleElement) {
+    throw new Error("Can't find title element");
+  }
+  if (index > titleElement.value.length) {
+    index = titleElement.value.length;
+  }
+  titleElement.setSelectionRange(index, index);
+  titleElement.focus();
+}
+
 export async function focusRichText(
   editableContainer: Element,
   position: SelectionPosition = 'end'
@@ -218,6 +234,9 @@ export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end'
 ) {
+  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
+    throw new Error("Can't focus frame or page!");
+  }
   const defaultPageBlock = getDefaultPageBlock(model);
   if (
     matchFlavours(model, [
@@ -258,7 +277,6 @@ export function focusPreviousBlock(
   position?: SelectionPosition
 ) {
   const page = getDefaultPageBlock(model);
-  const container = getContainerByModel(model);
 
   let nextPosition = position;
   if (nextPosition) {
@@ -267,7 +285,7 @@ export function focusPreviousBlock(
     nextPosition = page.lastSelectionPosition;
   }
 
-  const preNodeModel = getPreviousBlock(container, model.id);
+  const preNodeModel = getPreviousBlock(model);
   if (preNodeModel && nextPosition) {
     focusBlockByModel(preNodeModel, nextPosition);
   }
@@ -284,7 +302,7 @@ export function focusNextBlock(
   } else if (page.lastSelectionPosition) {
     nextPosition = page.lastSelectionPosition;
   }
-  const nextNodeModel = getNextBlock(model.id);
+  const nextNodeModel = getNextBlock(model);
 
   if (nextNodeModel) {
     focusBlockByModel(nextNodeModel, nextPosition);

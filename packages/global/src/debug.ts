@@ -37,8 +37,10 @@ export const debugLog = function (
 };
 
 const whitelist = new Set<string>();
+const all = new Set<string>();
 
-export const debug = (tag?: string) => {
+export const debug = (tag: string) => {
+  all.add(tag);
   return (
     target: object,
     name: string,
@@ -67,13 +69,15 @@ export function configDebugLog(verbose: boolean) {
   showStack = verbose;
 }
 
-export function enableDebugLog(tags: string | string[]) {
+export function enableDebugLog(tags?: string | string[]) {
   color.enabled = true;
   enabled = true;
   if (Array.isArray(tags)) {
     tags.forEach(tag => whitelist.add(tag));
-  } else {
+  } else if (tags) {
     whitelist.add(tags);
+  } else {
+    [...all.values()].forEach(tag => whitelist.add(tag));
   }
 }
 

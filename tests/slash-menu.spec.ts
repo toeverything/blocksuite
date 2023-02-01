@@ -1,5 +1,5 @@
 import { expect, Locator, Page, test } from '@playwright/test';
-import { SHORT_KEY } from 'utils/actions/keyboard.js';
+import { SHORT_KEY, type } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -28,7 +28,7 @@ test.describe('slash menu should show and hide correctly', () => {
 
   test.beforeEach(async () => {
     await focusRichText(page);
-    await page.keyboard.type('/');
+    await type(page, '/');
     await expect(slashMenu).toBeVisible();
   });
 
@@ -59,7 +59,7 @@ test.describe('slash menu should show and hide correctly', () => {
   });
 
   test('slash menu should hide after input whitespace', async () => {
-    await page.keyboard.type(' ');
+    await type(page, ' ');
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/ ']);
   });
@@ -78,7 +78,7 @@ test.describe('slash menu should show and hide correctly', () => {
   });
 
   test('typing something that does not match should close the slash menu', async () => {
-    await page.keyboard.type('_');
+    await type(page, '_');
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/_']);
 
@@ -86,13 +86,13 @@ test.describe('slash menu should show and hide correctly', () => {
     await page.keyboard.press('Backspace');
     await expect(slashMenu).toBeVisible();
 
-    await page.keyboard.type('__');
+    await type(page, '__');
     await page.keyboard.press('Backspace');
     await expect(slashMenu).not.toBeVisible();
   });
 
   test('pressing the slash key again should close the old slash menu and open new one', async () => {
-    await page.keyboard.type('/');
+    await type(page, '/');
     await expect(slashMenu).toBeVisible();
     await expect(slashMenu).toHaveCount(1);
     await assertRichTexts(page, ['//']);
@@ -136,11 +136,11 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   const slashMenu = page.locator(`.slash-menu`);
   const slashItems = slashMenu.locator('format-bar-button');
 
-  await page.keyboard.type('/');
+  await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
   await expect(slashItems).toHaveCount(12);
-  await page.keyboard.type('todo');
+  await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
   await page.keyboard.press('Enter');
@@ -158,7 +158,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
     frameId
   );
 
-  await page.keyboard.type('/');
+  await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // first item should be selected by default
   await expect(slashItems.first()).toHaveAttribute('hover', '');
@@ -169,11 +169,11 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
 
   // search should reset the active item
-  await page.keyboard.type('od');
+  await type(page, 'od');
   await expect(slashItems).toHaveCount(2);
   await expect(slashItems).toHaveText(['To-do List', 'Code Block']);
   await expect(slashItems.first()).toHaveAttribute('hover', '');
-  await page.keyboard.type('o');
+  await type(page, 'o');
   await expect(slashItems).toHaveCount(1);
   // assert backspace works
   await page.keyboard.press('Backspace');
