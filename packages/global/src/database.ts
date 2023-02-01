@@ -6,6 +6,8 @@ import type { literal } from 'lit/static-html.js';
 import type { Page } from '@blocksuite/store';
 export interface RowHost {
   setEditing(isEditing: boolean): void;
+  // todo: type improvement
+  setValue(value: unknown): void;
   updateColumnProperty(
     apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
   ): void;

@@ -21,7 +21,8 @@ class SelectCellEditing extends DatabaseCellLitElement {
   static styles = css`
     :host {
       position: fixed;
-      height: 300px;
+      height: 200px;
+      z-index: 2000;
       background: var(--affine-popover-background);
       box-shadow: var(--affine-popover-shadow);
     }
@@ -50,6 +51,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
                       : selection,
                 };
               });
+              this.rowHost.setValue(this.value);
               this.rowHost.setEditing(false);
             }
           }}
@@ -59,6 +61,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
             <li
               @click=${() => {
                 this.value = select;
+                this.rowHost.setValue(this.value);
                 this.rowHost.setEditing(false);
               }}
             >

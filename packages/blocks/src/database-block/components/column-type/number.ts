@@ -24,6 +24,7 @@ class NumberCellEditing extends DatabaseCellLitElement {
     super.connectedCallback();
     this.addEventListener('keypress', (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
+        this.rowHost.setValue(this.value);
         this.rowHost.setEditing(false);
       }
     });
@@ -36,6 +37,7 @@ class NumberCellEditing extends DatabaseCellLitElement {
           this.value = (event.target as HTMLInputElement).valueAsNumber;
         }}
         @blur=${() => {
+          this.rowHost.setValue(this.value);
           this.rowHost.setEditing(false);
         }}
         type="number"

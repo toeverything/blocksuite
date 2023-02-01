@@ -18,12 +18,7 @@ export class DatabaseCellContainer
   @state()
   isEditing = false;
 
-  setEditing = (isEditing: boolean) => {
-    assertExists(this.shadowRoot);
-    const editingCell = this.shadowRoot.querySelector(
-      '[data-is-editing-cell="true"]'
-    );
-    const value = (editingCell as unknown as { value: unknown }).value;
+  setValue(value: unknown) {
     if (value) {
       this.databaseModel.page.captureSync();
       this.databaseModel.page.updateBlockTag(this.rowModel.id, {
@@ -31,6 +26,10 @@ export class DatabaseCellContainer
         value,
       });
     }
+  }
+
+  setEditing = (isEditing: boolean) => {
+    assertExists(this.shadowRoot);
     this.isEditing = isEditing;
     if (!this.isEditing) {
       requestIdleCallback(() => {
