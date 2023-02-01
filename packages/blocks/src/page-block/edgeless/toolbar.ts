@@ -136,18 +136,6 @@ export class ShapeComponent extends LitElement {
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolBar extends LitElement {
-  @property()
-  page!: Page;
-
-  @property()
-  secondaryToolBar: HTMLElement | null = null;
-
-  @property()
-  secondaryToolBarName = '';
-
-  @state()
-  _selectedIcon = '';
-
   static styles = css`
     :host {
       position: fixed;
@@ -205,6 +193,26 @@ export class EdgelessToolBar extends LitElement {
     }
   `;
 
+  @property()
+  page!: Page;
+
+  @property()
+  secondaryToolBar: HTMLElement | null = null;
+
+  @property()
+  secondaryToolBarName = '';
+
+  @state()
+  _selectedIcon = '';
+
+  private _cleanSecondaryToolBar() {
+    if (this.secondaryToolBar) {
+      this.secondaryToolBarName = '';
+      this.secondaryToolBar.remove();
+      this.secondaryToolBar = null;
+    }
+  }
+
   render() {
     return html`
       <div class="edgeless-toolbar-container">
@@ -214,7 +222,7 @@ export class EdgelessToolBar extends LitElement {
               class="icon-container"
               ?clicked=${this._selectedIcon === name}
               @click=${() => {
-                action && action(this);
+                action ? action(this) : this._cleanSecondaryToolBar();
                 this._selectedIcon = this._selectedIcon === name ? '' : name;
               }}
             >
@@ -248,6 +256,7 @@ const ToolbarConfig: Array<{
         assertExists(toolbar.secondaryToolBar);
         toolbar.secondaryToolBarName = '';
         toolbar.secondaryToolBar.remove();
+        toolbar.secondaryToolBar = null;
         return;
       }
       const shapeComponent = document.createElement('shape-component');
