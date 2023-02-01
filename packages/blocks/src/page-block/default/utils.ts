@@ -71,7 +71,9 @@ function getBlockWithOptionBarRect(
     assertExists(codeBlockDom);
     return codeBlockDom;
   } else if (block.flavour === 'affine:embed' && block.type === 'image') {
-    const imgElement = hoverDom.querySelector('img');
+    const imgElement = hoverDom.querySelector(
+      '.resizable-img'
+    ) as HTMLDivElement;
     assertExists(imgElement);
     return imgElement;
   }

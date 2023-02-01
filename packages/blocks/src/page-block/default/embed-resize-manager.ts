@@ -68,7 +68,9 @@ export class EmbedResizeManager {
             top: this._dropContainer.getBoundingClientRect().top,
           },
         ]);
-        const activeImg = this.state.activeComponent?.querySelector('img');
+        const activeImg = this.state.activeComponent?.querySelector(
+          '.resizable-img'
+        ) as HTMLDivElement;
         if (activeImg) {
           activeImg.style.width = width + 'px';
           activeImg.style.height = height + 'px';

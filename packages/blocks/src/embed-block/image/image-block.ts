@@ -20,6 +20,10 @@ export class ImageBlockComponent extends NonShadowLitElement {
       width: 100%;
       text-align: center;
       line-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .affine-image-wrapper img {
       max-width: 100%;
@@ -107,6 +111,10 @@ export class ImageBlockComponent extends NonShadowLitElement {
     .resizable-img:hover {
       border: 1px solid var(--affine-primary-color);
     }
+
+    .resizable-img img {
+      width: 100%;
+    }
   `;
 
   @property({ hasChanged: () => true })
@@ -121,7 +129,6 @@ export class ImageBlockComponent extends NonShadowLitElement {
   @state()
   private _source!: string;
 
-  @state()
   private _imageReady: Disposable = {
     dispose: () => {
       return;
@@ -194,7 +201,10 @@ export class ImageBlockComponent extends NonShadowLitElement {
     const { width, height } = this.model;
 
     if (this._resizeImg) {
-      if (width && height) {
+      if (this._imageState !== 'ready') {
+        this._resizeImg.style.width = 'unset';
+        this._resizeImg.style.height = 'unset';
+      } else if (width && height) {
         this._resizeImg.style.width = width + 'px';
         this._resizeImg.style.height = height + 'px';
       } else {
@@ -210,7 +220,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
       loading: html`<affine-image-block-loading-card
         content="Loading content..."
       ></affine-image-block-loading-card>`,
-      ready: html`<img class="resizable-img" src=${this._source} />`,
+      ready: html`<img src=${this._source} />`,
       failed: html`<affine-image-block-not-found-card></affine-image-block-not-found-card>`,
     }[this._imageState];
 
@@ -219,7 +229,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
     return html`
       <affine-embed .model=${this.model} .readonly=${this.host.readonly}>
         <div class="affine-image-wrapper">
-          <div>${img}</div>
+          <div class="resizable-img">${img}</div>
           ${childrenContainer}
         </div>
       </affine-embed>
@@ -227,8 +237,8 @@ export class ImageBlockComponent extends NonShadowLitElement {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback();
     this._imageReady.dispose();
+    super.disconnectedCallback();
   }
 }
 
