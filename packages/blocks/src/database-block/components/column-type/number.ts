@@ -2,7 +2,7 @@ import {
   DatabaseCellLitElement,
   defineTagSchemaRenderer,
 } from '@blocksuite/global/database';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 import { html } from 'lit';
 
@@ -18,8 +18,7 @@ class NumberCellPreview extends DatabaseCellLitElement {
 @customElement('affine-database-number-cell-editing')
 class NumberCellEditing extends DatabaseCellLitElement {
   static tag = literal`affine-database-number-cell-editing`;
-  @state()
-  value = 0;
+  value: number | undefined = undefined;
 
   connectedCallback() {
     super.connectedCallback();

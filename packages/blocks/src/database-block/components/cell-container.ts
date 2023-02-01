@@ -32,7 +32,23 @@ export class DatabaseCellContainer
       });
     }
     this.isEditing = isEditing;
+    if (!this.isEditing) {
+      requestIdleCallback(() => {
+        this.addEventListener('click', this._onClick);
+      });
+    }
   };
+
+  updateColumnProperty(
+    apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
+  ) {
+    const newProperty = apply(this.column.property);
+    this.databaseModel.page.captureSync();
+    this.databaseModel.page.setTagSchema({
+      ...this.column,
+      property: newProperty,
+    });
+  }
 
   protected firstUpdated() {
     this.databaseModel.propsUpdated.on(() => this.requestUpdate());
@@ -55,6 +71,7 @@ export class DatabaseCellContainer
 
   _onClick = (event: Event) => {
     this.isEditing = true;
+    this.removeEventListener('click', this._onClick);
   };
 
   connectedCallback() {
@@ -63,7 +80,7 @@ export class DatabaseCellContainer
   }
 
   disconnectedCallback() {
-    this.addEventListener('click', this._onClick);
+    this.removeEventListener('click', this._onClick);
     super.disconnectedCallback();
   }
 
