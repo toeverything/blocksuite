@@ -92,8 +92,8 @@ function filterSelectedBlockWithoutSubtree(
 
   for (let i = 0; i < len; i++) {
     const [block, rect] = entries[i];
-    const currentDepth = calcDepth(rect.left, containerLeft);
     if (intersects(rect, selectionRect, offset)) {
+      const currentDepth = calcDepth(rect.left, containerLeft);
       if (flag) {
         if (currentDepth === depth) {
           results.push({ block, index: i });
@@ -185,13 +185,11 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
     const currentLeft = block.getBoundingClientRect().left;
     if (left === currentLeft) {
       return true;
+    } else if (currentLeft < left) {
+      left = currentLeft;
+      return true;
     } else {
-      if (currentLeft < left) {
-        left = currentLeft;
-        return true;
-      } else {
-        return false;
-      }
+      return false;
     }
   });
 }
