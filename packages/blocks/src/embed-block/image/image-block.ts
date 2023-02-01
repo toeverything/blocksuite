@@ -6,7 +6,7 @@ import {
   NonShadowLitElement,
   BlockChildrenContainer,
 } from '../../__internal__/index.js';
-import { assertExists, sleep } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Disposable } from '@blocksuite/global/utils';
 
