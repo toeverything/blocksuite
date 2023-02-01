@@ -400,19 +400,17 @@ export function handleUp(
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      // FIXME: Then it will turn the input into the div
       if (!activePreNodeModel) {
         focusTitle();
       } else {
-        focusPreviousBlock(model, new Point(left, top));
+        focusPreviousBlock(activePreNodeModel, new Point(left, top));
       }
     }
+    return;
   } else {
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const preNodeModel = getPreviousBlock(selectedModel);
-    assertExists(preNodeModel);
     const page = getDefaultPageBlock(selectedModel);
     e.preventDefault();
     focusPreviousBlock(
@@ -443,8 +441,6 @@ export function handleDown(
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const preNodeModel = getPreviousBlock(selectedModel);
-    assertExists(preNodeModel);
     const page = getDefaultPageBlock(selectedModel);
     e.preventDefault();
     focusNextBlock(

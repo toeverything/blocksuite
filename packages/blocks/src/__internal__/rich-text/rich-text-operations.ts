@@ -19,7 +19,6 @@ import {
   convertToList,
   convertToParagraph,
   convertToDivider,
-  focusPreviousBlock,
   focusBlockByModel,
   supportsChildren,
   getModelByElement,
@@ -315,7 +314,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         ])
       ) {
         window.requestAnimationFrame(() => {
-          focusPreviousBlock(model, 'start');
+          focusBlockByModel(previousSibling);
           // We can not delete block if the block has content
           if (!model.text?.length) {
             page.captureSync();
@@ -360,6 +359,28 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   );
 }
 
+// We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
+// but only one bounding rect.
+// If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
+export function isAtLineEdge(range: Range) {
+  if (
+    range.startOffset > 0 &&
+    Number(range.startContainer.textContent?.length) - range.startOffset > 0
+  ) {
+    const prevRange = range.cloneRange();
+    prevRange.setStart(range.startContainer, range.startOffset - 1);
+    prevRange.setEnd(range.startContainer, range.startOffset - 1);
+    const nextRange = range.cloneRange();
+    nextRange.setStart(range.endContainer, range.endOffset + 1);
+    nextRange.setEnd(range.endContainer, range.endOffset + 1);
+    return (
+      prevRange.getBoundingClientRect().top !==
+      nextRange.getBoundingClientRect().top
+    );
+  }
+  return false;
+}
+
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
   const selection = window.getSelection();
   const preNodeModel = getPreviousBlock(model);
@@ -382,28 +403,6 @@ export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
     }
   }
   return ALLOW_DEFAULT;
-}
-
-// We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
-// but only one bounding rect.
-// If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
-export function isAtLineEdge(range: Range) {
-  if (
-    range.startOffset > 0 &&
-    Number(range.startContainer.textContent?.length) - range.startOffset > 0
-  ) {
-    const prevRange = range.cloneRange();
-    prevRange.setStart(range.startContainer, range.startOffset - 1);
-    prevRange.setEnd(range.startContainer, range.startOffset - 1);
-    const nextRange = range.cloneRange();
-    nextRange.setStart(range.endContainer, range.endOffset + 1);
-    nextRange.setEnd(range.endContainer, range.endOffset + 1);
-    return (
-      prevRange.getBoundingClientRect().top !==
-      nextRange.getBoundingClientRect().top
-    );
-  }
-  return false;
 }
 
 export function handleKeyDown(

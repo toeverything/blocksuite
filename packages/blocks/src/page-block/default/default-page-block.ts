@@ -304,7 +304,7 @@ export class DefaultPageBlockComponent
 
   firstUpdated() {
     autosize(this._title);
-    bindHotkeys(this.page, this.selection, this.signals, this.model);
+    bindHotkeys(this.page, this.selection, this.signals);
 
     hotkey.enableHotkey();
     this.model.propsUpdated.on(() => {
