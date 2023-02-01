@@ -8,6 +8,8 @@ import {
   moveToImage,
   redoByKeyboard,
   undoByKeyboard,
+  focusRichText,
+  initEmptyParagraphState,
 } from './utils/actions/index.js';
 import {
   assertImageOption,
@@ -19,22 +21,24 @@ import {
 } from './utils/asserts.js';
 
 async function initImageState(page: Page) {
-  return await page.evaluate(() => {
-    const { page } = window;
-    const pageId = page.addBlock({ flavour: 'affine:page', title: 'hello' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
-    page.addBlock(
-      {
-        flavour: 'affine:embed',
-        type: 'image',
-        sourceId: '/test-card-1.png',
-        width: 200,
-        height: 180,
-      },
-      frameId
-    );
-    return { pageId, frameId };
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.evaluate(() => {
+    const clipData = {
+      'text/html': `<img src="${location.origin}/test-card-1.png" />`,
+    };
+    const dT = new DataTransfer();
+    const e = new ClipboardEvent('paste', { clipboardData: dT });
+    Object.defineProperty(e, 'target', {
+      writable: false,
+      value: document.body,
+    });
+    e.clipboardData?.setData('text/html', clipData['text/html']);
+    document
+      .getElementsByTagName('editor-container')[0]
+      .clipboard['_clipboardEventDispatcher']['_onPaste'](e);
   });
+  await page.waitForTimeout(2000);
 }
 
 async function focusCaption(page: Page) {
@@ -48,16 +52,16 @@ test('can drag resize image by left menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 200, height: 180 });
+  await assertImageSize(page, { width: 678, height: 509 });
 
   await dragEmbedResizeByBottomLeft(page);
-  await assertImageSize(page, { width: 315, height: 283.5 });
+  await assertImageSize(page, { width: 339, height: 254.5 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 200, height: 180 });
+  await assertImageSize(page, { width: 678, height: 509 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 315, height: 283.5 });
+  await assertImageSize(page, { width: 339, height: 254.5 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -67,16 +71,16 @@ test('can drag resize image by right menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 200, height: 180 });
+  await assertImageSize(page, { width: 678, height: 509 });
 
   await dragEmbedResizeByBottomRight(page);
-  await assertImageSize(page, { width: 305, height: 274.5 });
+  await assertImageSize(page, { width: 339, height: 254.5 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 200, height: 180 });
+  await assertImageSize(page, { width: 678, height: 509 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 305, height: 274.5 });
+  await assertImageSize(page, { width: 339, height: 254.5 });
 });
 
 test('can click and delete image', async ({ page }) => {

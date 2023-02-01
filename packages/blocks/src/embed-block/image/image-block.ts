@@ -191,9 +191,14 @@ export class ImageBlockComponent extends NonShadowLitElement {
     );
     const { width, height } = this.model;
 
-    if (width && height && this._resizeImg) {
-      this._resizeImg.style.width = width + 'px';
-      this._resizeImg.style.height = height + 'px';
+    if (this._resizeImg) {
+      if (width && height) {
+        this._resizeImg.style.width = width + 'px';
+        this._resizeImg.style.height = height + 'px';
+      } else {
+        this._resizeImg.style.width = 'unset';
+        this._resizeImg.style.height = 'unset';
+      }
     }
 
     const img = {
