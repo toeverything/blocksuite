@@ -420,6 +420,7 @@ test('select text in the same line with dragging rightward and move outside the 
     [1, 0],
     [1, 3],
     { x: 0, y: 0 },
+    // fixme: remove magic number
     { x: 50, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
