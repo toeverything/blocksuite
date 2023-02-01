@@ -29,11 +29,9 @@ import {
   SelectedRectsContainer,
 } from './components.js';
 import {
-  bindHotkeys,
   createDragHandle,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
-  removeHotkeys,
 } from './utils.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import { getService } from '../../__internal__/service.js';
@@ -41,6 +39,7 @@ import autosize from 'autosize';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DragHandle } from '../../components/index.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
