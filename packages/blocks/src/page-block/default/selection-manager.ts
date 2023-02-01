@@ -778,7 +778,6 @@ export class DefaultSelectionManager {
   selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshRichTextBoundsCache(this._mouseRoot);
     const { blockCache, focusedBlockIndex } = this.state;
-
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
