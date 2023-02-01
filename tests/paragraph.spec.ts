@@ -631,7 +631,7 @@ test('after deleting a text row, cursor should jump to the end of previous list 
   await assertSelection(page, 0, 5, 0);
 });
 
-test('press tab in paragarph children', async ({ page }) => {
+test('press tab in paragraph children', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await pressEnter(page);
@@ -646,4 +646,19 @@ test('press tab in paragarph children', async ({ page }) => {
   await page.keyboard.press('ArrowLeft', { delay: 50 });
   await page.keyboard.type('- ');
   await assertRichTexts(page, ['1', '2', '3', '\n']);
+});
+
+test('press left in first paragraph start should not change cursor position', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await page.keyboard.type('1');
+
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.type('l');
+  await assertRichTexts(page, ['l1']);
+  await assertTitle(page, '');
 });
