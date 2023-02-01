@@ -49,7 +49,15 @@ export function getParentBlockById<T extends ElementTagName>(
  *
  * NOTE: this method will skip the `affine:frame` block
  */
-export function getNextBlock(model: BaseBlockModel): BaseBlockModel | null {
+export function getNextBlock(
+  model: BaseBlockModel,
+  map: Record<string, true> = {}
+): BaseBlockModel | null {
+  if (model.id in map) {
+    throw new Error("Can't get next block! There's a loop in the block tree!");
+  }
+  map[model.id] = true;
+
   const page = model.page;
   if (model.children.length) {
     return model.children[0];
@@ -85,7 +93,17 @@ export function getNextBlock(model: BaseBlockModel): BaseBlockModel | null {
  *
  * NOTE: this method will skip the `affine:frame` and `affine:page` block
  */
-export function getPreviousBlock(model: BaseBlockModel): BaseBlockModel | null {
+export function getPreviousBlock(
+  model: BaseBlockModel,
+  map: Record<string, true> = {}
+): BaseBlockModel | null {
+  if (model.id in map) {
+    throw new Error(
+      "Can't get previous block! There's a loop in the block tree!"
+    );
+  }
+  map[model.id] = true;
+
   const page = model.page;
   const parentBlock = page.getParent(model);
   if (!parentBlock) {
