@@ -40,11 +40,11 @@ export function getParentBlockById<T extends ElementTagName>(
  * ```md
  * page
  * - frame
- *  - paragraph <- invoke this method recursively, and the return order is following
+ *  - paragraph <- when invoked here, the traverse order will be following
  *    - child <- 1
  *  - sibling <- 2
- * - frame    <- 2.9 frame will be skipped
- *   - paragraph <- 3
+ * - frame <- 3 (will be skipped)
+ *   - paragraph <- 4
  * ```
  *
  * NOTE: this method will skip the `affine:frame` block
@@ -83,12 +83,12 @@ export function getNextBlock(
  * ```md
  * page
  * - frame
- *   - paragraph <- 4
- * - frame      <- 3.9 frame will be skipped
+ *   - paragraph <- 5
+ * - frame <- 4 (will be skipped)
  *  - paragraph <- 3
  *    - child <- 2
  *      - child <- 1
- *  - paragraph <- invoke this method recursively, and the return order is following
+ *  - paragraph <- when invoked here, the traverse order will be above
  * ```
  *
  * NOTE: this method will skip the `affine:frame` and `affine:page` block
