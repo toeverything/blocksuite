@@ -4,10 +4,10 @@ import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.
 import {
   asyncFocusRichText,
   focusNextBlock,
+  focusTitle,
   focusPreviousBlock,
   getBlockById,
   getBlockElementByModel,
-  getContainerByModel,
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
@@ -19,7 +19,6 @@ import {
   isCaptionElement,
   doesInSamePath,
 } from '../../__internal__/utils/index.js';
-import type { PageBlockModel } from '../page-model.js';
 import {
   bindCommonHotkey,
   handleMultiBlockBackspace,
@@ -390,8 +389,7 @@ export function handleUp(
   const nativeSelection = window.getSelection();
   if (nativeSelection?.anchorNode) {
     const model = getStartModelBySelection();
-    const activeContainer = getContainerByModel(model);
-    const activePreNodeModel = getPreviousBlock(activeContainer, model.id);
+    const activePreNodeModel = getPreviousBlock(model);
     const editableContainer = getBlockElementByModel(model)?.querySelector(
       '.ql-editor'
     ) as HTMLElement;
@@ -402,27 +400,17 @@ export function handleUp(
       (!newRange || !editableContainer.contains(newRange.startContainer)) &&
       !isAtLineEdge(range)
     ) {
-      // FIXME: Then it will turn the input into the div
-      if (
-        activePreNodeModel &&
-        matchFlavours(activePreNodeModel, ['affine:frame'])
-      ) {
-        (
-          document.querySelector(
-            '.affine-default-page-block-title'
-          ) as HTMLTextAreaElement
-        ).focus();
+      if (!activePreNodeModel) {
+        focusTitle();
       } else {
         focusPreviousBlock(model, new Point(left, top));
       }
     }
+    return;
   } else {
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const container = getContainerByModel(selectedModel);
-    const preNodeModel = getPreviousBlock(container, selectedModel.id);
-    assertExists(preNodeModel);
     const page = getDefaultPageBlock(selectedModel);
     e.preventDefault();
     focusPreviousBlock(
@@ -453,9 +441,6 @@ export function handleDown(
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const container = getContainerByModel(selectedModel);
-    const preNodeModel = getPreviousBlock(container, selectedModel.id);
-    assertExists(preNodeModel);
     const page = getDefaultPageBlock(selectedModel);
     e.preventDefault();
     focusNextBlock(
@@ -485,8 +470,7 @@ function isDispatchFromCodeBlock(e: KeyboardEvent) {
 export function bindHotkeys(
   page: Page,
   selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  pageModel: PageBlockModel
+  signals: DefaultPageSignals
 ) {
   const {
     BACKSPACE,
@@ -604,12 +588,6 @@ export function bindHotkeys(
     model && focusPreviousBlock(model, 'end');
   });
   hotkey.addListener(RIGHT, e => {
-    if (
-      e.target instanceof HTMLTextAreaElement &&
-      e.target.classList.contains('affine-default-page-block-title')
-    ) {
-      return;
-    }
     let model: BaseBlockModel | null = null;
     const {
       state: { selectedBlocks, type },
