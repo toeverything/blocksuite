@@ -154,6 +154,10 @@ export class Page extends Space<PageData> {
     return this._history.canRedo();
   }
 
+  get YText() {
+    return Y.Text;
+  }
+
   get Text() {
     return Text;
   }

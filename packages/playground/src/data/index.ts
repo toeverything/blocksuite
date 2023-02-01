@@ -119,7 +119,7 @@ export function database(workspace: Workspace) {
       const databaseId = page.addBlockByFlavour(
         'affine:database',
         {
-          columns: ['column1', 'column2'],
+          columns: ['column1', /*'column3',*/ 'column2'],
         },
         frameId
       );
@@ -164,6 +164,17 @@ export function database(workspace: Workspace) {
         id: 'column2',
         type: 'select',
       });
+      // page.setTagSchema({
+      //   internalProperty: {
+      //     color: '#ff0000',
+      //     width: 200,
+      //     hide: false,
+      //   },
+      //   property: {},
+      //   name: 'Select 2',
+      //   id: 'column3',
+      //   type: 'rich-text',
+      // });
 
       page.updateBlockTag(p1, {
         schemaId: 'column1',
@@ -174,6 +185,11 @@ export function database(workspace: Workspace) {
         schemaId: 'column2',
         value: 'TODO',
       });
+
+      // page.updateBlockTag(p2, {
+      //   schemaId: 'column3',
+      //   value: new page.YText('123'),
+      // });
 
       // Add a paragraph after database
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
