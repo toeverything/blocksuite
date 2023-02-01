@@ -11,7 +11,14 @@ import type { DebugMenu } from '../../packages/playground/src/components/debug-m
 declare global {
   interface Window {
     /** Available on playground window */
-    std: typeof import('../../packages/blocks/src/std.js').default;
+    $blocksuite: {
+      store: typeof import('../../packages/store/src/index.js');
+      blocks: typeof import('../../packages/blocks/src/index.js');
+      global: {
+        utils: typeof import('../../packages/global/src/utils.js');
+      };
+      editor: typeof import('../../packages/editor/src/index.js');
+    };
     workspace: Workspace;
     blockSchema: Record<string, typeof BaseBlockModel>;
     page: Page;

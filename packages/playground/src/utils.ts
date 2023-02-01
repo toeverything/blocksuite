@@ -22,6 +22,20 @@ export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
+import * as blocks from '@blocksuite/blocks';
+import * as store from '@blocksuite/store';
+import * as globalUtils from '@blocksuite/global/utils';
+import * as editor from '@blocksuite/editor';
+if (isE2E) {
+  Object.defineProperty(window, '$blocksuite', {
+    value: Object.freeze({
+      store,
+      blocks,
+      global: { utils: globalUtils },
+      editor,
+    }),
+  });
+}
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 

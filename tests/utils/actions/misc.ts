@@ -88,6 +88,11 @@ export async function enterPlaygroundRoom(
   }
   url.searchParams.set('room', room);
   await page.goto(url.toString());
+  await page.evaluate(() => {
+    if (typeof window.$blocksuite !== 'object') {
+      throw new Error('window.$blocksuite is not object');
+    }
+  }, []);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
