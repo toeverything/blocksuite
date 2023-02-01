@@ -91,6 +91,7 @@ export class CloudSyncManager {
               id: task.id,
               state: BlobSyncState.Success,
             });
+            await this._db.delete(task.id);
             continue;
           }
 
