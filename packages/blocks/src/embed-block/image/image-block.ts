@@ -127,15 +127,20 @@ export class ImageBlockComponent extends NonShadowLitElement {
   };
 
   @state()
-  private _imageState: 'waitUploaded' | 'loading' | 'ready' = 'loading';
+  private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
+    'loading';
 
   private waitImageUploaded() {
     return new Promise<void>(resolve => {
+      // If we could not get message from awareness in 1000ms,
+      // we assume this image is not found.
+      const timer = setTimeout(resolve, 2000);
       const disposeSignal = this.model.page.awarenessStore.signals.update.on(
         () => {
           const isBlobUploading =
             this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
           if (!isBlobUploading) {
+            clearTimeout(timer);
             resolve();
           }
         }
@@ -143,6 +148,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
 
       this._imageReady.dispose = () => {
         disposeSignal.dispose();
+        clearTimeout(timer);
         resolve();
       };
     });
@@ -156,23 +162,20 @@ export class ImageBlockComponent extends NonShadowLitElement {
     const storage = await this.model.page.blobs;
     assertExists(storage);
 
-    // FIXME: We cannot guarantee the synchronization order of ydoc and awareness
-    // If ydoc update first, we cannot get upload state for awareness
-    await sleep(1000);
-
-    const isBlobUploading = this.model.page.awarenessStore.isBlobUploading(
-      this.model.sourceId
-    );
-
-    if (isBlobUploading) {
+    this._imageState = 'loading';
+    let url = await storage.get(this.model.sourceId);
+    if (!url) {
       this._imageState = 'waitUploaded';
       await this.waitImageUploaded();
+      this._imageState = 'loading';
+      url = await storage.get(this.model.sourceId);
     }
-
-    this._imageState = 'loading';
-    const url = await storage.get(this.model.sourceId);
-    url && (this._source = url);
-    this._imageState = 'ready';
+    if (url) {
+      this._source = url;
+      this._imageState = 'ready';
+    } else {
+      this._imageState = 'failed';
+    }
     if (width && height) {
       this._resizeImg.style.width = width + 'px';
       this._resizeImg.style.height = height + 'px';
@@ -197,6 +200,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
       waitUploaded: html`<div>wait uploaded</div>`,
       loading: html`<div>loading</div>`,
       ready: html`<img class="resizable-img" src=${this._source} />`,
+      failed: html`<div>failed</div>`,
     }[this._imageState];
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;

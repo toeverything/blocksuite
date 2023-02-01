@@ -121,8 +121,8 @@ export class CloudSyncManager {
         });
       }
 
-      console.log('sleep 5000');
-      await sleep(5000);
+      // task interval
+      await sleep(500);
     }
     this._running = false;
   }
