@@ -191,30 +191,20 @@ function fillSubtress(
   blockCache: Map<Element, DOMRect>,
   selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
 ) {
-  const blocks = Array.from(blockCache.keys());
-  const len = selectedBlocksWithoutSubtrees.length;
   const results = [];
-  let prevIndex = 0;
+  const len = selectedBlocksWithoutSubtrees.length;
 
   for (let i = 0; i < len; i++) {
     const { block, index } = selectedBlocksWithoutSubtrees[i];
-    if (i === 0) {
-      prevIndex = index;
-      results.push(block);
-    } else {
-      while (++prevIndex < index) {
-        results.push(blocks[prevIndex]);
-      }
-      // find subtrees on the last block
-      results.push(
-        ...filterSelectedBlockByIndex(
-          blockCache,
-          index,
-          blockCache.get(block) as DOMRect,
-          { x: 0, y: 0 }
-        )
-      );
-    }
+    // find subtrees on the last block
+    results.push(
+      ...filterSelectedBlockByIndex(
+        blockCache,
+        index,
+        blockCache.get(block) as DOMRect,
+        { x: 0, y: 0 }
+      )
+    );
   }
 
   return results;
