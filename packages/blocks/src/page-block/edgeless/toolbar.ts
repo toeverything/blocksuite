@@ -12,6 +12,7 @@ import {
   SelectIcon,
   ShapeIcon,
   SquareIcon,
+  TextIconLarge,
   TriangleIcon,
 } from '@blocksuite/global/config';
 import { createPopper } from '@popperjs/core';
@@ -55,6 +56,7 @@ export class ShapeComponent extends LitElement {
     .icon-container:hover {
       background: #f7f7f7;
     }
+
     .icon-container[clicked] {
       background: #f1eefe;
       stroke: #5438ff;
@@ -196,6 +198,7 @@ export class EdgelessToolBar extends LitElement {
     .icon-container:hover {
       background: #f7f7f7;
     }
+
     .icon-container[clicked] {
       background: #f1eefe;
       color: #5438ff;
@@ -224,10 +227,18 @@ export class EdgelessToolBar extends LitElement {
   }
 }
 
-const ToolbarConfig = [
+const ToolbarConfig: Array<{
+  name: string;
+  icon: TemplateResult<2>;
+  action?: (toolbar: EdgelessToolBar) => void;
+}> = [
   {
     name: 'selection',
     icon: SelectIcon,
+  },
+  {
+    name: 'text',
+    icon: TextIconLarge,
   },
   {
     name: 'shape',
