@@ -194,8 +194,8 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
   });
 }
 
-// fill block's subtree
-function fillSubtres(
+// find blocks and ites subtree
+function findBlocksWithSubtree(
   blockCache: Map<Element, DOMRect>,
   selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
 ) {
@@ -476,7 +476,7 @@ export class DefaultSelectionManager {
     );
 
     this._setSelectedBlocks(
-      fillSubtres(blockCache, selectedBlocksWithoutSubtrees),
+      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
     this._signals.updateFrameSelectionRect.emit(selectionRect);
