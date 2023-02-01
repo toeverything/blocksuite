@@ -96,7 +96,7 @@ function filterSelectedBlockWithoutSubtrees(
           results.shift();
           results.push({ block, index: i });
         } else {
-          // backward search parent block and its subtrees
+          // backward search parent block and remove its subtree
           let n = i;
           while (n--) {
             if (calcDepth(entries[n][1].left, containerLeft) === currentDepth) {
@@ -124,7 +124,7 @@ function filterSelectedBlockWithoutSubtrees(
   return results;
 }
 
-// find the currently focused block and its children
+// find the currently focused block and its substree
 function filterSelectedBlockByIndex(
   blockCache: Map<Element, DOMRect>,
   focusedBlockIndex: number,
@@ -168,8 +168,8 @@ function filterSelectedBlockByIndex(
   return results;
 }
 
-// clear block's subtrees for drawing rect
-function clearSubtrees(selectedBlocks: Element[], left: number) {
+// clear subtree in block for drawing rect
+function clearSubtree(selectedBlocks: Element[], left: number) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
     const currentLeft = block.getBoundingClientRect().left;
@@ -186,8 +186,8 @@ function clearSubtrees(selectedBlocks: Element[], left: number) {
   });
 }
 
-// fill block's subtrees
-function fillSubtress(
+// fill block's subtree
+function fillSubtres(
   blockCache: Map<Element, DOMRect>,
   selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
 ) {
@@ -196,7 +196,7 @@ function fillSubtress(
 
   for (let i = 0; i < len; i++) {
     const { block, index } = selectedBlocksWithoutSubtrees[i];
-    // find block's subtrees
+    // find block's subtree
     results.push(
       ...filterSelectedBlockByIndex(
         blockCache,
@@ -475,7 +475,7 @@ export class DefaultSelectionManager {
     );
 
     this._setSelectedBlocks(
-      fillSubtress(blockCache, selectedBlocksWithoutSubtrees),
+      fillSubtres(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
     this._signals.updateFrameSelectionRect.emit(selectionRect);
@@ -802,7 +802,7 @@ export class DefaultSelectionManager {
     if (focusedBlockIndex === -1) {
       // SELECT_ALL
       const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
-      const rects = clearSubtrees(selectedBlocks, containerLeft).map(
+      const rects = clearSubtree(selectedBlocks, containerLeft).map(
         block => blockCache.get(block) as DOMRect
       );
       this._setSelectedBlocks(selectedBlocks, rects);
