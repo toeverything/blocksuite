@@ -116,7 +116,6 @@ export class BaseBlockModel<Props = unknown>
 
   // TODO: separate from model
   parentIndex?: number;
-  index?: number;
   depth?: number;
 
   constructor(

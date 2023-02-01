@@ -719,7 +719,6 @@ export function getAllowSelectedBlocks(
   ) => {
     for (const block of blocks) {
       if (block.flavour !== 'affine:frame') {
-        block.index = result.length;
         result.push(block);
       }
       block.depth = depth;

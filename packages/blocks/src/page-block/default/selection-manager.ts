@@ -88,16 +88,17 @@ function filterSelectedBlockWithoutSubtree(
   const containerLeft = calcContainerLeft(entries[0][1].left);
   let depth = 1;
   let parentIndex: number | undefined;
-  let flag = false;
+  let once = true;
 
   for (let i = 0; i < len; i++) {
     const [block, rect] = entries[i];
     if (intersects(rect, selectionRect, offset)) {
       const currentDepth = calcDepth(rect.left, containerLeft);
-      if (flag) {
-        if (currentDepth === depth) {
-          results.push({ block, index: i });
-        } else if (currentDepth > depth) {
+      if (once) {
+        depth = currentDepth;
+        once = false;
+      } else {
+        if (currentDepth > depth) {
           // not continuous block
           if (results.length > 1) {
             continue;
@@ -105,8 +106,7 @@ function filterSelectedBlockWithoutSubtree(
 
           depth = currentDepth;
           results.shift();
-          results.push({ block, index: i });
-        } else {
+        } else if (currentDepth < depth) {
           // backward search parent block and remove its subtree
           let n = i;
           while (n--) {
@@ -120,22 +120,18 @@ function filterSelectedBlockWithoutSubtree(
 
           assertExists(parentIndex);
 
-          results.push({ block: entries[parentIndex][0], index: parentIndex });
-          results.push({ block, index: i });
           depth = currentDepth;
+          results.push({ block: entries[parentIndex][0], index: parentIndex });
         }
-      } else {
-        results.push({ block, index: i });
-        depth = currentDepth;
-        flag = true;
       }
+      results.push({ block, index: i });
     }
   }
 
   return results;
 }
 
-// find the currently focused block and its substree
+// find the current focused block and its substree
 function filterSelectedBlockByIndex(
   blockCache: Map<Element, DOMRect>,
   focusedBlockIndex: number,
@@ -147,26 +143,27 @@ function filterSelectedBlockByIndex(
     return Array.from(blockCache.keys());
   }
 
-  const blockRects = Array.from(blockCache.entries());
+  const entries = Array.from(blockCache.entries());
+  const len = entries.length;
   const results = [];
-  let flag = true;
-  let blockRect: DOMRect | null = null;
+  let once = true;
+  let boundRect: DOMRect | null = null;
 
-  for (let i = focusedBlockIndex; i < blockRects.length; i++) {
-    const [block, rect] = blockRects[i];
-    const richText = block.querySelector('rich-text');
-    assertExists(richText);
-    const richTextRect = richText.getBoundingClientRect();
-    if (flag) {
+  for (let i = focusedBlockIndex; i < len; i++) {
+    const [block, rect] = entries[i];
+    if (once) {
+      const richText = block.querySelector('rich-text');
+      assertExists(richText);
+      const richTextRect = richText.getBoundingClientRect();
       if (intersects(richTextRect, selectionRect, offset)) {
-        blockRect = rect;
+        boundRect = rect;
         results.push(block);
-        flag = false;
+        once = false;
       }
     } else {
-      if (blockRect) {
-        // sometimes: rect.bottom = 467.2372016906738, selectionRect.bottom = 467.23719024658203
-        if (contains(blockRect, rect, { x: 0, y: 1 })) {
+      if (boundRect) {
+        // sometimes: rect.bottom = 467.2372016906738, boundRect.bottom = 467.23719024658203
+        if (contains(boundRect, rect, { x: 0, y: 1 })) {
           results.push(block);
         } else {
           break;
@@ -183,13 +180,13 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
     const currentLeft = block.getBoundingClientRect().left;
-    if (left === currentLeft) {
-      return true;
+    if (currentLeft > left) {
+      return false;
     } else if (currentLeft < left) {
       left = currentLeft;
       return true;
     } else {
-      return false;
+      return true;
     }
   });
 }
@@ -755,19 +752,27 @@ export class DefaultSelectionManager {
 
   // Click on the prefix icon of list block
   resetSelectedBlockByRect(
-    blockRect: DOMRect,
+    blockElement: Element,
     pageSelectionType: PageSelectionType = 'block'
   ) {
+    this.setFocusedBlockIndexByElement(blockElement);
+
+    const { blockCache, focusedBlockIndex } = this.state;
+
+    if (focusedBlockIndex === -1) {
+      return;
+    }
+
     this.state.type = pageSelectionType;
     this.state.refreshBlockRectCache();
-    const { blockCache, focusedBlockIndex } = this.state;
 
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      blockRect,
+      blockCache.get(blockElement) as DOMRect,
       this._containerOffset
     );
+
     const rects = selectedBlocks
       .slice(0, 1)
       .map(block => blockCache.get(block) as DOMRect);
@@ -816,5 +821,47 @@ export class DefaultSelectionManager {
     }
 
     return;
+  }
+
+  setFocusedBlockIndexByElement(blockElement: Element) {
+    const result = this.getBlockWithIndexByElement(blockElement);
+    if (result) {
+      this.state.focusedBlockIndex = result.index;
+    } else {
+      this.state.focusedBlockIndex = -1;
+    }
+  }
+
+  getBlockWithIndexByElement(blockElement: Element) {
+    const entries = Array.from(this.state.blockCache.entries());
+    const len = entries.length;
+    const boundRect = blockElement.getBoundingClientRect();
+    const top = boundRect.top;
+
+    if (!boundRect) return null;
+
+    // fake a small rectangle: { top: top, bottom: top + h }
+    const h = 5;
+    let start = 0;
+    let end = len - 1;
+
+    // binary search block
+    while (start <= end) {
+      const mid = start + Math.floor((end - start) / 2);
+      const [block, rect] = entries[mid];
+      if (top <= rect.top + h) {
+        if (mid === 0 || top >= rect.top) {
+          return { block, index: mid };
+        }
+      }
+
+      if (rect.top > top) {
+        end = mid - 1;
+      } else if (rect.top + h < top) {
+        start = mid + 1;
+      }
+    }
+
+    return null;
   }
 }
