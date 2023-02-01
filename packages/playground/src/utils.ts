@@ -22,6 +22,7 @@ export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
+
 import * as blocks from '@blocksuite/blocks';
 import * as store from '@blocksuite/store';
 import * as globalUtils from '@blocksuite/global/utils';
