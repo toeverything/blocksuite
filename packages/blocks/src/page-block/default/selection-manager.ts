@@ -70,7 +70,7 @@ function contains(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
   );
 }
 
-function filterSelectedBlockWithoutSubtrees(
+function filterSelectedBlockWithoutSubtree(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect,
   offset: IPoint
@@ -466,7 +466,7 @@ export class DefaultSelectionManager {
     const { blockCache, startPoint: start } = this.state;
     const selectionRect = createSelectionRect(current, start);
 
-    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtrees(
+    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,
       selectionRect,
       e.containerOffset
