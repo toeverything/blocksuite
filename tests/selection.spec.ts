@@ -398,7 +398,7 @@ test('select text in the same line with dragging leftward and move outside the e
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -25, y: 0 }
+    { x: -20, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
   await type(page, 'abc');
@@ -672,7 +672,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
     [1, 2],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -50, y: 0 }
+    { x: -10, y: 0 }
   );
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '');
