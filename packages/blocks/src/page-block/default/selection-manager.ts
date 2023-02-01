@@ -514,7 +514,7 @@ export class DefaultSelectionManager {
     }
 
     // disable dragHandle button
-    this._container.components.dragHandle?.pointerEvents('none');
+    this._container.components.dragHandle?.setPointerEvents('none');
 
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
@@ -541,7 +541,8 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    this._container.components.dragHandle?.pointerEvents();
+    this._container.components.dragHandle?.setPointerEvents('auto');
+
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
     } else if (this.state.type === 'block') {
