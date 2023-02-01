@@ -71,6 +71,9 @@ export class SlashMenu extends LitElement {
   @state()
   private _filterItems: typeof paragraphConfig = paragraphConfig;
 
+  @state()
+  private _hide = false;
+
   private _searchString = '';
 
   // Just a temp variable
@@ -79,6 +82,7 @@ export class SlashMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     window.addEventListener('keydown', this._escapeListener);
+    window.addEventListener('mousedown', this._clickAwayListener);
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -88,11 +92,12 @@ export class SlashMenu extends LitElement {
       );
       return;
     }
+    this._richText = richText;
     richText.addEventListener('keydown', this._keyDownListener, {
-      // Workaround Use capture to prevent the event from triggering the keyboard bindings action
+      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
     });
-    this._richText = richText;
+    richText.addEventListener('focusout', this._clickAwayListener);
   }
 
   override disconnectedCallback() {
@@ -101,12 +106,42 @@ export class SlashMenu extends LitElement {
     this._richText?.removeEventListener('keydown', this._keyDownListener, {
       capture: true,
     });
+    this._richText?.removeEventListener('focusout', this._clickAwayListener);
   }
+
+  // Handle click outside
+  private _clickAwayListener = (e: Event) => {
+    // if (e.target === this) {
+    //   return;
+    // }
+    if (!this._hide) {
+      return;
+    }
+    // If the slash menu is hidden, click anywhere will close the slash menu
+    this.abortController.abort();
+  };
 
   /**
    * Handle arrow key
+   *
+   * The slash menu will be closed in the following keyboard cases:
+   * - Press the space key
+   * - Press the backspace key and the search string is empty
+   * - Press the escape key (handled by {@link _escapeListener})
+   * - When the search item is empty, the slash menu will be hidden temporarily,
+   *   and if the following key is not the backspace key, the slash menu will be closed
    */
   private _keyDownListener = (e: KeyboardEvent) => {
+    if (this._hide) {
+      if (e.key !== 'Backspace') {
+        this.abortController.abort();
+        return;
+      }
+      this._searchString = this._searchString.slice(0, -1);
+      this._filterItems = this._updateItem();
+      this._hide = false;
+      return;
+    }
     if (e.key === ' ') {
       this.abortController.abort();
       return;
@@ -123,7 +158,7 @@ export class SlashMenu extends LitElement {
       this._searchString += e.key;
       this._filterItems = this._updateItem();
       if (!this._filterItems.length) {
-        this.abortController.abort();
+        this._hide = true;
       }
       return;
     }
@@ -179,6 +214,7 @@ export class SlashMenu extends LitElement {
     this.abortController.abort(this._searchString);
     const { flavour, type } = this._filterItems[index];
 
+    // @deprecated
     // WARNING: This flag is a simple prototype implementation, just for proof of product.
     if (this.model.page.awarenessStore.getFlag('enable_append_flavor_slash')) {
       // Add new block
@@ -213,6 +249,8 @@ export class SlashMenu extends LitElement {
       asyncFocusRichText(page, id);
       return;
     }
+    // End of deprecated
+
     updateSelectedTextType(flavour, type);
   }
 
@@ -239,6 +277,9 @@ export class SlashMenu extends LitElement {
   }
 
   override render() {
+    if (this._hide) {
+      return html``;
+    }
     const containerStyles = styleMap({
       left: this.left,
       top: this.top,

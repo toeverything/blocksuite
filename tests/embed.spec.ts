@@ -6,7 +6,9 @@ import {
   dragEmbedResizeByBottomRight,
   enterPlaygroundRoom,
   moveToImage,
+  pressEnter,
   redoByKeyboard,
+  type,
   undoByKeyboard,
 } from './utils/actions/index.js';
 import {
@@ -103,8 +105,8 @@ test('press enter will create new block when click and select image', async ({
   await assertRichImage(page, 1);
 
   await activeEmbed(page);
-  await page.keyboard.press('Enter', { delay: 50 });
-  await page.keyboard.type('aa');
+  await pressEnter(page);
+  await type(page, 'aa');
   await assertRichTexts(page, ['aa']);
 });
 
@@ -124,7 +126,7 @@ test('enter shortcut on focusing embed block and its caption', async ({
     page,
     page.locator('.affine-embed-wrapper-caption')
   );
-  await page.keyboard.press('Enter', { delay: 50 });
-  await page.keyboard.type('aa');
+  await pressEnter(page);
+  await type(page, 'aa');
   await assertRichTexts(page, ['aa']);
 });

@@ -19,6 +19,7 @@ import {
   undoByKeyboard,
   redoByKeyboard,
   SHORT_KEY,
+  type,
 } from './actions/keyboard.js';
 import { captureHistory } from './actions/misc.js';
 
@@ -485,7 +486,7 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   // Clear input before test
   await locator.clear();
   // type/backspace
-  await page.keyboard.type('1234');
+  await type(page, '1234');
   await expect(locator).toHaveValue('1234');
   await captureHistory(page);
   await page.keyboard.press('Backspace');

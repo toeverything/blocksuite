@@ -5,7 +5,7 @@
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
 [![NPM Nightly Release](https://img.shields.io/npm/v/@blocksuite/editor/nightly?color=6880ff)](https://github.com/toeverything/blocksuite/actions/workflows/nightly-release.yml?query=branch%3Amaster)
 [![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
-[![Join Telegram](https://img.shields.io/badge/join-telegram-blue)](https://t.me/blocksuite)
+[![Join Telegram](https://img.shields.io/badge/join-telegram-blue)](https://t.me/AffineDev)
 
 💠 BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
@@ -37,7 +37,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
-- 💬 [Telegram Group](https://t.me/blocksuite)
+- 💬 [Telegram Group](https://t.me/AffineDev)
 - 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
 - 🚀 [Releases](https://github.com/toeverything/blocksuite/releases)
 

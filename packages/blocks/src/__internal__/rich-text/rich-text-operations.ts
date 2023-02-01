@@ -3,27 +3,27 @@
 import { Page, Text } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import {
-  ExtendedModel,
-  getRichTextByModel,
-  getContainerByModel,
-  getPreviousBlock,
-  getNextBlock,
-  asyncFocusRichText,
-  convertToList,
-  convertToParagraph,
-  convertToDivider,
-  focusPreviousBlock,
-  focusBlockByModel,
-  supportsChildren,
-  getModelByElement,
-} from '../utils/index.js';
-import {
   assertExists,
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import type { PageBlockModel } from '../../models.js';
+import {
+  ExtendedModel,
+  getRichTextByModel,
+  getPreviousBlock,
+  getNextBlock,
+  asyncFocusRichText,
+  convertToList,
+  convertToParagraph,
+  convertToDivider,
+  focusBlockByModel,
+  supportsChildren,
+  getModelByElement,
+  focusTitle,
+} from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -277,8 +277,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
     const parent = page.getParent(model);
     if (!parent || matchFlavours(parent, ['affine:frame'])) {
-      const container = getContainerByModel(model);
-      const previousSibling = getPreviousBlock(container, model.id);
+      const previousSibling = getPreviousBlock(model);
       const previousSiblingParent = previousSibling
         ? page.getParent(previousSibling)
         : null;
@@ -315,7 +314,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         ])
       ) {
         window.requestAnimationFrame(() => {
-          focusPreviousBlock(model, 'start');
+          focusBlockByModel(previousSibling);
           // We can not delete block if the block has content
           if (!model.text?.length) {
             page.captureSync();
@@ -323,26 +322,21 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
           }
         });
       } else {
-        const richText = getRichTextByModel(model);
-        if (richText) {
-          const text = richText.quill.getText().trimEnd();
-          const titleElement = document.querySelector(
-            '.affine-default-page-block-title'
-          ) as HTMLTextAreaElement;
-          const oldTitle = titleElement.value;
-          const title = oldTitle + text;
-          page.captureSync();
-          page.deleteBlock(model);
-          // model.text?.delete(0, model.text.length);
-          const titleModel = getModelByElement(titleElement);
-          page.updateBlock(titleModel, { title });
-          const oldTitleTextLength = oldTitle.length;
-          titleElement.setSelectionRange(
-            oldTitleTextLength,
-            oldTitleTextLength
-          );
-          titleElement.focus();
-        }
+        // No previous sibling, it's the first block
+        // Try to merge with the title
+
+        const text = model.text?.toString() || '';
+        const titleElement = document.querySelector(
+          '.affine-default-page-block-title'
+        ) as HTMLTextAreaElement;
+        const pageModel = getModelByElement(titleElement) as PageBlockModel;
+        const oldTitle = pageModel.title;
+        const title = oldTitle + text;
+        page.captureSync();
+        page.deleteBlock(model);
+        // model.text?.delete(0, model.text.length);
+        page.updateBlock(pageModel, { title });
+        focusTitle(oldTitle.length);
       }
     }
 
@@ -363,31 +357,6 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     'Failed to handle backspace! Unknown block flavours! flavour:' +
       model.flavour
   );
-}
-
-export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
-  const selection = window.getSelection();
-  const container = getContainerByModel(model);
-  const preNodeModel = getPreviousBlock(container, model.id);
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { height, left, top } = range.getBoundingClientRect();
-
-    const newRange = caretRangeFromPoint(left, top - height / 2);
-    if (
-      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
-      if (
-        preNodeModel &&
-        matchFlavours(model, ['affine:embed', 'affine:divider'])
-      ) {
-        return ALLOW_DEFAULT;
-      }
-      return PREVENT_DEFAULT;
-    }
-  }
-  return ALLOW_DEFAULT;
 }
 
 // We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
@@ -412,6 +381,30 @@ export function isAtLineEdge(range: Range) {
   return false;
 }
 
+export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
+  const selection = window.getSelection();
+  const preNodeModel = getPreviousBlock(model);
+  if (selection) {
+    const range = selection.getRangeAt(0);
+    const { height, left, top } = range.getBoundingClientRect();
+
+    const newRange = caretRangeFromPoint(left, top - height / 2);
+    if (
+      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
+      !isAtLineEdge(range)
+    ) {
+      if (
+        preNodeModel &&
+        matchFlavours(model, ['affine:embed', 'affine:divider'])
+      ) {
+        return ALLOW_DEFAULT;
+      }
+      return PREVENT_DEFAULT;
+    }
+  }
+  return ALLOW_DEFAULT;
+}
+
 export function handleKeyDown(
   model: ExtendedModel,
   textContainer: HTMLElement
@@ -425,7 +418,7 @@ export function handleKeyDown(
     // TODO resolve compatible problem
     const newRange = caretRangeFromPoint(left, bottom + height / 2);
     if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      const nextBlock = getNextBlock(model.id);
+      const nextBlock = getNextBlock(model);
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }
