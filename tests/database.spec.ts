@@ -7,9 +7,7 @@ import {
 import { assertBlockProps, assertBlockCount } from './utils/asserts.js';
 
 test('edit database block title and create new rows', async ({ page }) => {
-  await enterPlaygroundRoom(page, {
-    enable_database: true,
-  });
+  await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
   const locator = page.locator('affine-database');
