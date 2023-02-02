@@ -3,7 +3,8 @@ import { literal } from 'lit/static-html.js';
 
 export const ParagraphBlockModelSchema = defineBlockSchema(
   'affine:paragraph',
-  () => ({
+  internal => ({
+    text: internal.Text(),
     type: 'text' as ParagraphType,
   }),
   {

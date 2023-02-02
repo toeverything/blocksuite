@@ -3,7 +3,8 @@ import { literal } from 'lit/static-html.js';
 
 export const ListBlockModelSchema = defineBlockSchema(
   'affine:list',
-  () => ({
+  internal => ({
+    text: internal.Text(),
     type: 'bulleted' as ListType,
     checked: false,
   }),

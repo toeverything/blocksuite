@@ -3,6 +3,7 @@ import type { TextType } from './text-adapter.js';
 import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
+import type { Text } from './text-adapter.js';
 
 const FlavourSchema = z.string();
 const TagSchema = z.object({
@@ -15,7 +16,10 @@ export const BlockSchema = z.object({
   model: z.object({
     flavour: FlavourSchema,
     tag: TagSchema,
-    props: z.function().returns(z.record(z.any())),
+    propsCreator: z
+      .function()
+      .args(z.custom<InternalValues>())
+      .returns(z.record(z.any())),
   }),
 });
 
@@ -28,14 +32,25 @@ interface StaticValue {
 export type SchemaToModel<
   Schema extends {
     model: {
-      props: () => Record<string, unknown>;
+      propsCreator: PropsGetter<Record<string, unknown>>;
       flavour: string;
     };
   }
 > = BaseBlockModel &
-  ReturnType<Schema['model']['props']> & {
+  ReturnType<Schema['model']['propsCreator']> & {
     flavour: Schema['model']['flavour'];
   };
+
+export interface InternalValues {
+  Text: (input?: Y.Text | string) => Text;
+}
+
+export type PropsSetter<Props extends Record<string, unknown>> = (
+  props: Props
+) => Partial<Props>;
+export type PropsGetter<Props extends Record<string, unknown>> = (
+  page: InternalValues
+) => Props;
 
 export function defineBlockSchema<
   Flavour extends string,
@@ -46,19 +61,19 @@ export function defineBlockSchema<
   }>
 >(
   flavour: Flavour,
-  props: () => Props,
+  propsCreator: PropsGetter<Props>,
   metadata: Metadata
 ): {
   version: number;
   model: {
-    props: () => Props;
+    propsCreator: PropsGetter<Props>;
     flavour: Flavour;
   } & Metadata;
 };
 
 export function defineBlockSchema(
   flavour: string,
-  props: () => Record<string, unknown>,
+  propsCreator: (page: InternalValues) => Record<string, unknown>,
   metadata: {
     version: number;
     tag: StaticValue;
@@ -69,7 +84,7 @@ export function defineBlockSchema(
     model: {
       flavour,
       tag: metadata.tag,
-      props,
+      propsCreator,
     },
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
