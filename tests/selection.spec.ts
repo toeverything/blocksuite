@@ -388,7 +388,7 @@ test('select text leaving a few words in the last line and delete', async ({
   expect(textOne).toBe('abc89\n');
 });
 
-test('select text in the same line with dragging leftward and move outside the editor-container', async ({
+test('select text in the same line with dragging leftward and move outside the affine-frame', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -396,21 +396,33 @@ test('select text in the same line with dragging leftward and move outside the e
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
+  const frameLeft = await page.evaluate(() => {
+    const frame = document.querySelector('affine-frame');
+    if (!frame) {
+      throw new Error();
+    }
+    return frame.getBoundingClientRect().left;
+  });
+
   await dragBetweenIndices(
     page,
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    // fixme: remove magic number
-    { x: -20, y: 0 }
+    { x: 0, y: 0 },
+    {
+      async beforeMouseUp() {
+        await page.mouse.move(frameLeft - 1, 0);
+      },
+    }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
   await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('78abc\n');
+  expect(textOne).toBe('abc\n');
 });
 
-test('select text in the same line with dragging rightward and move outside the editor-container', async ({
+test('select text in the same line with dragging rightward and move outside the affine-frame', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -418,13 +430,25 @@ test('select text in the same line with dragging rightward and move outside the 
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
+  const frameRight = await page.evaluate(() => {
+    const frame = document.querySelector('affine-frame');
+    if (!frame) {
+      throw new Error();
+    }
+    return frame.getBoundingClientRect().right;
+  });
+
   await dragBetweenIndices(
     page,
     [1, 0],
     [1, 3],
     { x: 0, y: 0 },
-    // fixme: remove magic number
-    { x: 50, y: 0 }
+    { x: 0, y: 0 },
+    {
+      async beforeMouseUp() {
+        await page.mouse.move(frameRight + 1, 0);
+      },
+    }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
   await type(page, 'abc');
@@ -658,30 +682,47 @@ test('the cursor should move to closest editor block when clicking outside conta
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
-test.skip('should not crash when mouse over the left side of the list block prefix', async ({
+test('should not crash when mouse over the left side of the list block prefix', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
   await assertRichTexts(page, ['123', '456', '789']);
-
   await dragBetweenIndices(page, [1, 2], [1, 0]);
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '45');
   // blur
   await page.mouse.click(0, 0);
 
+  // `456`
+  const prefixIconLeft = await page.evaluate(() => {
+    const block = document.querySelector('[data-block-id="5"]');
+    if (!block) {
+      throw new Error();
+    }
+    const prefixIcon = block.querySelector('.affine-list-block__prefix ');
+    if (!prefixIcon) {
+      throw new Error();
+    }
+    return prefixIcon.getBoundingClientRect().left;
+  });
+
   await dragBetweenIndices(
     page,
     [1, 2],
     [1, 0],
     { x: 0, y: 0 },
-    // fixme: what is this?
-    { x: -50, y: 0 }
+    { x: 0, y: 0 },
+    {
+      beforeMouseUp: async () => {
+        await page.mouse.move(prefixIconLeft - 1, 0);
+      },
+    }
   );
+
   await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '');
+  await assertClipItems(page, 'text/plain', '45');
 });
 
 test('should set the last block to end the range after when leaving the affine-frame', async ({
@@ -703,7 +744,7 @@ test('should set the last block to end the range after when leaving the affine-f
     [0, 2],
     [2, 1],
     { x: 0, y: 0 },
-    { x: 0, y: 30 }
+    { x: 0, y: 30 } // drag below the bottom of the last block
   );
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '3456789');
