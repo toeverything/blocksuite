@@ -4,6 +4,7 @@ import type { RowHost } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { assertExists } from '@blocksuite/global/utils';
 import { DatabaseCellLitElement, getTagSchemaRenderer } from '../register.js';
+import { onClickOutside } from '../utils.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer
@@ -68,6 +69,16 @@ export class DatabaseCellContainer
   _onClick = (event: Event) => {
     this.isEditing = true;
     this.removeEventListener('click', this._onClick);
+    setTimeout(() => {
+      onClickOutside(
+        this,
+        () => {
+          this.addEventListener('click', this._onClick);
+          this.isEditing = false;
+        },
+        'keydown'
+      );
+    });
   };
 
   connectedCallback() {
