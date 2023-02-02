@@ -349,8 +349,11 @@ test('select all and delete', async ({ page }) => {
   await page.evaluate(() => {
     const defaultPage = document.querySelector('affine-default-page')!;
     const rect = defaultPage.getBoundingClientRect();
+    // dont focus any block
+    defaultPage.selection.state.focusedBlockIndex = -1;
     defaultPage.selection.selectBlocksByRect(rect);
   });
+
   await page.keyboard.press('Backspace');
   await focusRichText(page, 0);
   await type(page, 'abc');

@@ -97,6 +97,7 @@ export class BaseBlockModel<Props = unknown>
   text?: TextType;
   sourceId?: string;
 
+  // TODO: separate from model
   parentIndex?: number;
   depth?: number;
 

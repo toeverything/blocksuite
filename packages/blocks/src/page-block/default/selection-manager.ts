@@ -41,26 +41,179 @@ import {
 } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
 import { BlockHub } from '../../components/blockhub.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 
-function intersects(rect: DOMRect, selectionRect: DOMRect, offset: IPoint) {
-  return (
-    rect.left <= selectionRect.right + offset.x &&
-    rect.right >= selectionRect.left + offset.x &&
-    rect.top <= selectionRect.bottom + offset.y &&
-    rect.bottom >= selectionRect.top + offset.y
+function calcDepth(left: number, containerLeft: number) {
+  return Math.ceil(
+    (left - containerLeft) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
   );
 }
 
-function filterSelectedBlock(
+function calcContainerLeft(left: number) {
+  return left + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+}
+
+function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
+  return (
+    a.left <= b.right + offset.x &&
+    a.right >= b.left + offset.x &&
+    a.top <= b.bottom + offset.y &&
+    a.bottom >= b.top + offset.y
+  );
+}
+
+function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
+  return (
+    a.left >= bound.left + offset.x &&
+    a.right <= bound.right + offset.x &&
+    a.top >= bound.top + offset.y &&
+    a.bottom <= bound.bottom + offset.y
+  );
+}
+
+// See https://github.com/toeverything/blocksuite/pull/904 and
+// https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
+// for more context.
+function filterSelectedBlockWithoutSubtree(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect,
   offset: IPoint
+) {
+  const entries = Array.from(blockCache.entries());
+  const len = entries.length;
+  const results: { block: Element; index: number }[] = [];
+
+  // empty
+  if (len === 0) return results;
+
+  const containerLeft = calcContainerLeft(entries[0][1].left);
+  let depth = 1;
+  let parentIndex: number | undefined;
+  let once = true;
+
+  for (let i = 0; i < len; i++) {
+    const [block, rect] = entries[i];
+    if (intersects(rect, selectionRect, offset)) {
+      const currentDepth = calcDepth(rect.left, containerLeft);
+      if (once) {
+        depth = currentDepth;
+        once = false;
+      } else {
+        if (currentDepth > depth) {
+          // not continuous block
+          if (results.length > 1) {
+            continue;
+          }
+
+          depth = currentDepth;
+          results.shift();
+        } else if (currentDepth < depth) {
+          // backward search parent block and remove its subtree
+          let n = i;
+          while (n--) {
+            if (calcDepth(entries[n][1].left, containerLeft) === currentDepth) {
+              parentIndex = n;
+              break;
+            } else {
+              results.pop();
+            }
+          }
+
+          assertExists(parentIndex);
+
+          depth = currentDepth;
+          results.push({ block: entries[parentIndex][0], index: parentIndex });
+        }
+      }
+      results.push({ block, index: i });
+    }
+  }
+
+  return results;
+}
+
+// find the current focused block and its substree
+function filterSelectedBlockByIndex(
+  blockCache: Map<Element, DOMRect>,
+  focusedBlockIndex: number,
+  selectionRect: DOMRect,
+  offset: IPoint
 ): Element[] {
-  const blocks = Array.from(blockCache.keys());
-  return blocks.filter(block => {
-    const rect = block.getBoundingClientRect();
-    return intersects(rect, selectionRect, offset);
+  // SELECT_ALL
+  if (focusedBlockIndex === -1) {
+    return Array.from(blockCache.keys());
+  }
+
+  const entries = Array.from(blockCache.entries());
+  const len = entries.length;
+  const results = [];
+  let once = true;
+  let boundRect: DOMRect | null = null;
+
+  for (let i = focusedBlockIndex; i < len; i++) {
+    const [block, rect] = entries[i];
+    if (once) {
+      const richText = block.querySelector('rich-text');
+      assertExists(richText);
+      const richTextRect = richText.getBoundingClientRect();
+      if (intersects(richTextRect, selectionRect, offset)) {
+        boundRect = rect;
+        results.push(block);
+        once = false;
+      }
+    } else {
+      if (boundRect) {
+        // sometimes: rect.bottom = 467.2372016906738, boundRect.bottom = 467.23719024658203
+        if (contains(boundRect, rect, { x: 0, y: 1 })) {
+          results.push(block);
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  return results;
+}
+
+// clear subtree in block for drawing rect
+function clearSubtree(selectedBlocks: Element[], left: number) {
+  return selectedBlocks.filter((block, index) => {
+    if (index === 0) return true;
+    const currentLeft = block.getBoundingClientRect().left;
+    if (currentLeft > left) {
+      return false;
+    } else if (currentLeft < left) {
+      left = currentLeft;
+      return true;
+    } else {
+      return true;
+    }
   });
+}
+
+// find blocks and its subtree
+function findBlocksWithSubtree(
+  blockCache: Map<Element, DOMRect>,
+  selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
+) {
+  const results = [];
+  const len = selectedBlocksWithoutSubtrees.length;
+
+  for (let i = 0; i < len; i++) {
+    const { block, index } = selectedBlocksWithoutSubtrees[i];
+    // find block's subtree
+    results.push(
+      ...filterSelectedBlockByIndex(
+        blockCache,
+        index,
+        blockCache.get(block) as DOMRect,
+        { x: 0, y: 0 }
+      )
+    );
+  }
+
+  return results;
 }
 
 // TODO
@@ -92,6 +245,9 @@ export class PageSelectionState {
   type: PageSelectionType;
   selectEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: Element[] = [];
+  // -1: SELECT_ALL
+  // >=0: only current focused-block
+  focusedBlockIndex = -1;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
@@ -136,7 +292,7 @@ export class PageSelectionState {
     this._startPoint = { x: e.x, y: e.y };
   }
 
-  refreshRichTextBoundsCache(mouseRoot: HTMLElement) {
+  refreshBlockRectCache() {
     this._blockCache.clear();
     const allBlocks = getAllBlocks();
     for (const block of allBlocks) {
@@ -150,6 +306,7 @@ export class PageSelectionState {
     this._richTextCache.clear();
     this._startRange = null;
     this._startPoint = null;
+    this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
   }
 }
@@ -285,19 +442,18 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks = (selectedBlocks: Element[]) => {
+  private _setSelectedBlocks = (
+    selectedBlocks: Element[],
+    rects: DOMRect[] = []
+  ) => {
     this.state.selectedBlocks = selectedBlocks;
-    const { blockCache } = this.state;
-    const selectedRects = selectedBlocks.map(block => {
-      return blockCache.get(block) as DOMRect;
-    });
-    this._signals.updateSelectedRects.emit(selectedRects);
+    this._signals.updateSelectedRects.emit(rects);
   };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
     this.state.resetStartRange(e);
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
+    this.state.refreshBlockRectCache();
     resetNativeSelection(null);
     // deactivate quill keyboard event handler
     (document.activeElement as HTMLDivElement).blur();
@@ -305,17 +461,23 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
-    assertExists(this.state.startPoint);
     const current = { x: e.x, y: e.y };
-    const { startPoint: start } = this.state;
+    const { blockCache, startPoint: start } = this.state;
     const selectionRect = createSelectionRect(current, start);
-    const selectedBlocks = filterSelectedBlock(
-      this.state.blockCache,
+
+    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
+      blockCache,
       selectionRect,
       e.containerOffset
     );
+    const rects = selectedBlocksWithoutSubtrees.map(
+      ({ block }) => blockCache.get(block) as DOMRect
+    );
 
-    this._setSelectedBlocks(selectedBlocks);
+    this._setSelectedBlocks(
+      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
+      rects
+    );
     this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
 
@@ -326,7 +488,6 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
-    this._container.components.dragHandle?.pointerEvents('none');
     this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
@@ -336,7 +497,6 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragEnd(e: SelectionEvent) {
-    this._container.components.dragHandle?.pointerEvents();
     this._signals.nativeSelection.emit(true);
   }
 
@@ -351,6 +511,10 @@ export class DefaultSelectionManager {
       this._embedResizeManager.onStart(e);
       return;
     }
+
+    // disable dragHandle button
+    this._container.components.dragHandle?.setPointerEvents('none');
+
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
     } else {
@@ -376,6 +540,8 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
+    this._container.components.dragHandle?.setPointerEvents('auto');
+
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
     } else if (this.state.type === 'block') {
@@ -444,9 +610,10 @@ export class DefaultSelectionManager {
     );
 
     if (clickBlockInfo && clickBlockInfo.model) {
-      const { model } = clickBlockInfo;
+      const { model, index } = clickBlockInfo;
       const page = getDefaultPageBlock(model);
       page.lastSelectionPosition = 'start';
+      this.state.focusedBlockIndex = index;
     }
 
     if (
@@ -494,7 +661,7 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
+    this.state.refreshBlockRectCache();
     const hoverEditingState = getBlockEditingStateByPosition(
       this._allowSelectedBlocks,
       e.raw.pageX,
@@ -575,29 +742,50 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
+  // Click on the prefix icon of list block
   resetSelectedBlockByRect(
-    blockRect: DOMRect,
+    blockElement: Element,
     pageSelectionType: PageSelectionType = 'block'
   ) {
+    this.setFocusedBlockIndexByElement(blockElement);
+
+    const { blockCache, focusedBlockIndex } = this.state;
+
+    if (focusedBlockIndex === -1) {
+      return;
+    }
+
     this.state.type = pageSelectionType;
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
-    const { blockCache } = this.state;
-    const { _containerOffset } = this;
-    const selectedBlocks = filterSelectedBlock(
+    this.state.refreshBlockRectCache();
+
+    const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
-      blockRect,
-      _containerOffset
+      focusedBlockIndex,
+      blockCache.get(blockElement) as DOMRect,
+      this._containerOffset
     );
-    this._setSelectedBlocks(selectedBlocks);
+
+    const rects = selectedBlocks
+      .slice(0, 1)
+      .map(block => blockCache.get(block) as DOMRect);
+
+    // only current focused-block
+    this._setSelectedBlocks(selectedBlocks, rects);
   }
 
+  // `CMD-A`
   selectBlocksByRect(hitRect: DOMRect) {
-    this.state.refreshRichTextBoundsCache(this._mouseRoot);
-
-    const selectedBlocks = filterSelectedBlock(this.state.blockCache, hitRect, {
-      x: 0,
-      y: 0,
-    });
+    this.state.refreshBlockRectCache();
+    const { blockCache, focusedBlockIndex } = this.state;
+    const selectedBlocks = filterSelectedBlockByIndex(
+      blockCache,
+      focusedBlockIndex,
+      hitRect,
+      {
+        x: 0,
+        y: 0,
+      }
+    );
 
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
       this._signals.updateSelectedRects.emit([]);
@@ -608,7 +796,64 @@ export class DefaultSelectionManager {
     this.state.type = 'block';
 
     this._signals.updateEmbedRects.emit([]);
-    this._setSelectedBlocks(selectedBlocks);
+
+    if (focusedBlockIndex === -1) {
+      // SELECT_ALL
+      const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
+      const rects = clearSubtree(selectedBlocks, containerLeft).map(
+        block => blockCache.get(block) as DOMRect
+      );
+      this._setSelectedBlocks(selectedBlocks, rects);
+    } else {
+      // only current focused-block
+      const rects = selectedBlocks
+        .slice(0, 1)
+        .map(block => blockCache.get(block) as DOMRect);
+      this._setSelectedBlocks(selectedBlocks, rects);
+    }
+
     return;
+  }
+
+  setFocusedBlockIndexByElement(blockElement: Element) {
+    const result = this.getBlockWithIndexByElement(blockElement);
+    if (result) {
+      this.state.focusedBlockIndex = result.index;
+    } else {
+      this.state.focusedBlockIndex = -1;
+    }
+  }
+
+  getBlockWithIndexByElement(blockElement: Element) {
+    const entries = Array.from(this.state.blockCache.entries());
+    const len = entries.length;
+    const boundRect = blockElement.getBoundingClientRect();
+    const top = boundRect.top;
+
+    if (!boundRect) return null;
+
+    // fake a small rectangle: { top: top, bottom: top + h }
+    const h = 5;
+    let start = 0;
+    let end = len - 1;
+
+    // binary search block
+    while (start <= end) {
+      const mid = start + Math.floor((end - start) / 2);
+      const [block, rect] = entries[mid];
+      if (top <= rect.top + h) {
+        if (mid === 0 || top >= rect.top) {
+          return { block, index: mid };
+        }
+      }
+
+      if (rect.top > top) {
+        end = mid - 1;
+      } else if (rect.top + h < top) {
+        start = mid + 1;
+      }
+    }
+
+    return null;
   }
 }

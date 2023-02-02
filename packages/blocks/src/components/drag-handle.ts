@@ -233,7 +233,7 @@ export class DragHandle extends LitElement {
     this._indicator.targetRect = null;
   }
 
-  public pointerEvents(value = 'auto') {
+  public setPointerEvents(value: 'auto' | 'none') {
     this.style.pointerEvents = value;
   }
 
