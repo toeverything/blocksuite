@@ -23,6 +23,7 @@ import {
   supportsChildren,
   getModelByElement,
   focusTitle,
+  getCurrentRange,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -363,22 +364,36 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 // but only one bounding rect.
 // If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
 export function isAtLineEdge(range: Range) {
-  if (
-    range.startOffset > 0 &&
-    Number(range.startContainer.textContent?.length) - range.startOffset > 0
-  ) {
-    const prevRange = range.cloneRange();
-    prevRange.setStart(range.startContainer, range.startOffset - 1);
-    prevRange.setEnd(range.startContainer, range.startOffset - 1);
-    const nextRange = range.cloneRange();
-    nextRange.setStart(range.endContainer, range.endOffset + 1);
-    nextRange.setEnd(range.endContainer, range.endOffset + 1);
-    return (
-      prevRange.getBoundingClientRect().top !==
-      nextRange.getBoundingClientRect().top
+  if (!range.collapsed) {
+    console.warn(
+      'Failed to determine if the caret is at line edge! expected a collapsed range but got',
+      range
     );
+    return false;
   }
+  const textContent = range.startContainer.textContent;
+  if (!textContent) {
+    console.warn(
+      'Failed to determine if the caret is at line edge! no textContent in the startContainer',
+      range.startContainer
+    );
+    return false;
+  }
+  if (!textContent.length) {
+    // Empty text node, it may be at empty line
   return false;
+}
+  const newRange = range.cloneRange();
+  if (textContent.length > range.startOffset) {
+    newRange.setStart(range.startContainer, range.startOffset + 1);
+    newRange.setEnd(range.startContainer, range.startOffset + 1);
+  } else {
+    newRange.setStartAfter(range.startContainer);
+    newRange.setEndAfter(range.startContainer);
+  }
+  return (
+    range.getBoundingClientRect().top !== newRange.getBoundingClientRect().top
+  );
 }
 
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
