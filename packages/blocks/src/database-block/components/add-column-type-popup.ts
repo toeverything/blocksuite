@@ -2,7 +2,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { TagSchema } from '@blocksuite/global/database';
-import { listTagSchemaRenderer } from '@blocksuite/global/database';
+import { listTagSchemaRenderer } from '../register.js';
 
 export const DATABASE_ADD_COLUMN_TYPE_POPUP =
   'affine-database-add-column-type-popup' as const;

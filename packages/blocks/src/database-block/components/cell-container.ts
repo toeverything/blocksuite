@@ -1,12 +1,9 @@
 import { customElement, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import {
-  DatabaseCellLitElement,
-  getTagSchemaRenderer,
-  RowHost,
-} from '@blocksuite/global/database';
+import type { RowHost } from '@blocksuite/global/database';
 import { css } from 'lit';
 import { assertExists } from '@blocksuite/global/utils';
+import { DatabaseCellLitElement, getTagSchemaRenderer } from '../register.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer

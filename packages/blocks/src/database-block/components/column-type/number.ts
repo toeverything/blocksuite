@@ -1,10 +1,10 @@
-import {
-  DatabaseCellLitElement,
-  defineTagSchemaRenderer,
-} from '@blocksuite/global/database';
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 import { html } from 'lit';
+import {
+  DatabaseCellLitElement,
+  defineTagSchemaRenderer,
+} from '../../register.js';
 
 @customElement('affine-database-number-cell')
 class NumberCell extends DatabaseCellLitElement {
