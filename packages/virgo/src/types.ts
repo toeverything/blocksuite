@@ -1,4 +1,8 @@
 import type { BaseText } from './components/base-text.js';
+import type {
+  InlineCode,
+  InlineCodeAttributes,
+} from './components/optional/inline-code.js';
 
 export interface BaseArrtiubtes {
   type: 'base';
@@ -12,8 +16,11 @@ export interface LineBreakAttributes {
   type: 'line-break';
 }
 
-export type BaseTextElement = BaseText;
-export type BaseTextAttributes = BaseArrtiubtes | LineBreakAttributes;
+export type BaseTextElement = BaseText | InlineCode;
+export type BaseTextAttributes =
+  | BaseArrtiubtes
+  | LineBreakAttributes
+  | InlineCodeAttributes;
 
 export interface CustomTypes {
   [key: string]: unknown;
