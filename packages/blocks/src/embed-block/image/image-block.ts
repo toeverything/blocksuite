@@ -8,6 +8,9 @@ import {
 } from '../../__internal__/index.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/global/utils';
+import './placeholder/loading-card.js';
+import './placeholder/image-not-found.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
@@ -17,6 +20,10 @@ export class ImageBlockComponent extends NonShadowLitElement {
       width: 100%;
       text-align: center;
       line-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .affine-image-wrapper img {
       max-width: 100%;
@@ -104,6 +111,10 @@ export class ImageBlockComponent extends NonShadowLitElement {
     .resizable-img:hover {
       border: 1px solid var(--affine-primary-color);
     }
+
+    .resizable-img img {
+      width: 100%;
+    }
   `;
 
   @property({ hasChanged: () => true })
@@ -118,6 +129,61 @@ export class ImageBlockComponent extends NonShadowLitElement {
   @state()
   private _source!: string;
 
+  private _imageReady: Disposable = {
+    dispose: () => {
+      return;
+    },
+  };
+
+  @state()
+  private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
+    'loading';
+
+  private waitImageUploaded() {
+    return new Promise<void>(resolve => {
+      // If we could not get message from awareness in 1000ms,
+      // we assume this image is not found.
+      const timer = setTimeout(resolve, 2000);
+
+      const isBlobUploadingOnInit =
+        this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
+
+      const disposeSignal = this.model.page.awarenessStore.signals.update.on(
+        () => {
+          const isBlobUploading =
+            this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
+
+          /**
+           * case:
+           * clientA send image, but network latency is high,
+           * clientB got ydoc, but doesn't get awareness,
+           * clientC has a good network, and send awareness because of cursor changed,
+           * clientB receives awareness change from clientC,
+           * this listener will be called,
+           * but clientB doesn't get uploading state from clientA.
+           */
+          if (
+            isBlobUploadingOnInit === isBlobUploading &&
+            isBlobUploading === false
+          ) {
+            return;
+          }
+
+          if (!isBlobUploading) {
+            clearTimeout(timer);
+            resolve();
+          }
+        }
+      );
+
+      this._imageReady.dispose = () => {
+        disposeSignal.dispose();
+        clearTimeout(timer);
+        resolve();
+      };
+    });
+  }
+
   async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -125,8 +191,21 @@ export class ImageBlockComponent extends NonShadowLitElement {
     const { width, height } = this.model;
     const storage = await this.model.page.blobs;
     assertExists(storage);
-    const url = await storage.get(this.model.sourceId);
-    url && (this._source = url);
+
+    this._imageState = 'loading';
+    let url = await storage.get(this.model.sourceId);
+    if (!url) {
+      this._imageState = 'waitUploaded';
+      await this.waitImageUploaded();
+      this._imageState = 'loading';
+      url = await storage.get(this.model.sourceId);
+    }
+    if (url) {
+      this._source = url;
+      this._imageState = 'ready';
+    } else {
+      this._imageState = 'failed';
+    }
     if (width && height) {
       this._resizeImg.style.width = width + 'px';
       this._resizeImg.style.height = height + 'px';
@@ -142,22 +221,45 @@ export class ImageBlockComponent extends NonShadowLitElement {
     );
     const { width, height } = this.model;
 
-    if (width && height && this._resizeImg) {
-      this._resizeImg.style.width = width + 'px';
-      this._resizeImg.style.height = height + 'px';
+    if (this._resizeImg) {
+      if (this._imageState !== 'ready') {
+        this._resizeImg.style.width = 'unset';
+        this._resizeImg.style.height = 'unset';
+      } else if (width && height) {
+        this._resizeImg.style.width = width + 'px';
+        this._resizeImg.style.height = height + 'px';
+      } else {
+        this._resizeImg.style.width = 'unset';
+        this._resizeImg.style.height = 'unset';
+      }
     }
+
+    const img = {
+      waitUploaded: html`<affine-image-block-loading-card
+        content="Delivering content..."
+      ></affine-image-block-loading-card>`,
+      loading: html`<affine-image-block-loading-card
+        content="Loading content..."
+      ></affine-image-block-loading-card>`,
+      ready: html`<img src=${this._source} />`,
+      failed: html`<affine-image-block-not-found-card></affine-image-block-not-found-card>`,
+    }[this._imageState];
+
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
       <affine-embed .model=${this.model} .readonly=${this.host.readonly}>
         <div class="affine-image-wrapper">
-          <div>
-            <img class="resizable-img" src=${this._source} />
-          </div>
+          <div class="resizable-img">${img}</div>
           ${childrenContainer}
         </div>
       </affine-embed>
     `;
+  }
+
+  disconnectedCallback() {
+    this._imageReady.dispose();
+    super.disconnectedCallback();
   }
 }
 

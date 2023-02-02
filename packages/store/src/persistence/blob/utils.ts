@@ -1,4 +1,4 @@
-import { createStore, del, get, keys, set, clear } from 'idb-keyval';
+import { createStore, del, get, keys, set, clear, values } from 'idb-keyval';
 import type { IDBInstance } from './types.js';
 import { Buffer } from 'buffer';
 
@@ -19,6 +19,7 @@ export function getDatabase<T = ArrayBufferLike>(
     set: (key: string, value: T) => set(key, value, db),
     has: (key: string) => get(key, db).then(value => value !== undefined),
     keys: () => keys(db),
+    values: () => values(db),
     delete: (key: string) => del(key, db),
     clear: () => clear(db),
   };
