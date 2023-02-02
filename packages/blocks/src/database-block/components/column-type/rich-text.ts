@@ -5,9 +5,17 @@ import {
 import { customElement, query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 import { VEditor } from '@blocksuite/virgo';
+import { css } from 'lit';
 
 @customElement('affine-database-rich-text-cell')
 class TextCell extends DatabaseCellLitElement {
+  static styles = css`
+    :host {
+      width: 100%;
+      height: 100%;
+    }
+  `;
+
   vEditor: VEditor | null = null;
   static tag = literal`affine-database-rich-text-cell`;
 

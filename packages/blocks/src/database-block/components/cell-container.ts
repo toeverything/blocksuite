@@ -11,7 +11,12 @@ export class DatabaseCellContainer
   extends DatabaseCellLitElement
   implements RowHost
 {
-  static styles = css``;
+  static styles = css`
+    :host {
+      display: flex;
+      align-items: center;
+    }
+  `;
 
   @state()
   isEditing = false;

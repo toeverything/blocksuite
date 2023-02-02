@@ -104,6 +104,8 @@ export class VEditor {
       this._rootElementAbort = null;
     }
 
+    this._rootElement?.replaceChildren();
+
     this._rootElement = null;
   }
 

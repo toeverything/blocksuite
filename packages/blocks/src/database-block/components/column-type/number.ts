@@ -1,6 +1,6 @@
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
-import { html } from 'lit';
+import { css, html } from 'lit';
 import {
   DatabaseCellLitElement,
   defineTagSchemaRenderer,
@@ -8,6 +8,13 @@ import {
 
 @customElement('affine-database-number-cell')
 class NumberCell extends DatabaseCellLitElement {
+  static styles = css`
+    :host {
+      width: 100%;
+      height: 100%;
+    }
+  `;
+
   static tag = literal`affine-database-number-cell`;
 
   render() {
@@ -17,6 +24,13 @@ class NumberCell extends DatabaseCellLitElement {
 
 @customElement('affine-database-number-cell-editing')
 class NumberCellEditing extends DatabaseCellLitElement {
+  static styles = css`
+    :host {
+      width: 100%;
+      height: 100%;
+    }
+  `;
+
   static tag = literal`affine-database-number-cell-editing`;
   value: number | undefined = undefined;
 
