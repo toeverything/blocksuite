@@ -349,7 +349,10 @@ export class DefaultPageBlockComponent
 
   private _initBlockHub = () => {
     if (this.page.awarenessStore.getFlag('enable_block_hub')) {
-      this.components.blockHub = createBlockHub(this);
+      this.components.blockHub = createBlockHub(
+        this,
+        this.signals.updateSelectedRects
+      );
       this.components.blockHub.getAllowedBlocks = () =>
         getAllowSelectedBlocks(this.model);
     }
@@ -359,7 +362,10 @@ export class DefaultPageBlockComponent
         enable => {
           if (enable) {
             if (!this.components.blockHub) {
-              this.components.blockHub = createBlockHub(this);
+              this.components.blockHub = createBlockHub(
+                this,
+                this.signals.updateSelectedRects
+              );
               this.components.blockHub.getAllowedBlocks = () =>
                 getAllowSelectedBlocks(this.model);
             }

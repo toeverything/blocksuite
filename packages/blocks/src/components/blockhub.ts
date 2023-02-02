@@ -4,7 +4,7 @@ import { NonShadowLitElement } from '../__internal__/index.js';
 import type { DragIndicator } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
 import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
-import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
 import {
   BulletedListIconLarge,
   CrossIcon,
@@ -59,6 +59,7 @@ export class BlockHub extends NonShadowLitElement {
   private _blockHubMenuEntry!: HTMLElement;
 
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+  private _updateSelectedRects: Signal<DOMRect[]> | null = null;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
@@ -247,15 +248,19 @@ export class BlockHub extends NonShadowLitElement {
     ${toolTipStyle}
   `;
 
-  constructor(options: {
-    onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-  }) {
+  constructor(
+    options: {
+      onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+    },
+    updateSelectedRects?: Signal<DOMRect[]>
+  ) {
     super();
     this.getAllowedBlocks = () => {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
     };
     this._onDropCallback = options.onDropCallback;
+    updateSelectedRects && (this._updateSelectedRects = updateSelectedRects);
     document.body.appendChild(this);
   }
 
@@ -512,6 +517,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
+    this._updateSelectedRects && this._updateSelectedRects.emit([]);
     this.requestUpdate();
   };
 

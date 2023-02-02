@@ -3,7 +3,7 @@ import {
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
 } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours, Signal } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { BlockHub, DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -472,32 +472,36 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
 }
 
 export function createBlockHub(
-  pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent
+  pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent,
+  updateSelectedRects?: Signal<DOMRect[]>
 ) {
   const page = pageBlock.page;
-  return new BlockHub({
-    onDropCallback: (e, end) => {
-      const dataTransfer = e.dataTransfer;
-      assertExists(dataTransfer);
-      const data = dataTransfer.getData('affine/block-hub');
-      const blockProps = JSON.parse(data);
-      if (blockProps.flavour === 'affine:database') {
-        if (!page.awarenessStore.getFlag('enable_database')) {
-          console.warn('database block is not enabled');
-          return;
+  return new BlockHub(
+    {
+      onDropCallback: (e, end) => {
+        const dataTransfer = e.dataTransfer;
+        assertExists(dataTransfer);
+        const data = dataTransfer.getData('affine/block-hub');
+        const blockProps = JSON.parse(data);
+        if (blockProps.flavour === 'affine:database') {
+          if (!page.awarenessStore.getFlag('enable_database')) {
+            console.warn('database block is not enabled');
+            return;
+          }
         }
-      }
-      const targetModel = end.model;
-      const rect = end.position;
-      page.captureSync();
-      const distanceToTop = Math.abs(rect.top - e.y);
-      const distanceToBottom = Math.abs(rect.bottom - e.y);
-      const id = page.addSiblingBlock(
-        targetModel,
-        blockProps,
-        distanceToTop < distanceToBottom ? 'right' : 'left'
-      );
-      asyncFocusRichText(page, id);
+        const targetModel = end.model;
+        const rect = end.position;
+        page.captureSync();
+        const distanceToTop = Math.abs(rect.top - e.y);
+        const distanceToBottom = Math.abs(rect.bottom - e.y);
+        const id = page.addSiblingBlock(
+          targetModel,
+          blockProps,
+          distanceToTop < distanceToBottom ? 'right' : 'left'
+        );
+        asyncFocusRichText(page, id);
+      },
     },
-  });
+    updateSelectedRects
+  );
 }
