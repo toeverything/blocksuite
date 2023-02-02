@@ -13,7 +13,7 @@ import {
   BlockHubIcon,
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
-  DatabaseTableView,
+  DatabaseTableViewIcon,
 } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import {
@@ -179,9 +179,18 @@ export class BlockHub extends NonShadowLitElement {
       height: 36px;
     }
 
-    .block-hub-icon-container[selected='true'] {
+    .block-hub-icon-container:first-child {
       background: var(--affine-code-block-background);
-      border: 0.5px solid #d0d7e3;
+      border: 0.5px solid var(--affine-border-color);
+      border-radius: 5px;
+    }
+
+    .block-hub-icon-container[selected='true'] {
+      fill: var(--affine-primary-color);
+    }
+
+    .block-hub-icon-container:hover {
+      background: var(--affine-hover-background);
       border-radius: 5px;
     }
 
@@ -210,7 +219,7 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .icon-expanded:hover {
-      background: #f1f3fe;
+      background: var(--affine-hover-background);
       box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
         -4px -4px 13px rgba(58, 76, 92, 0.02),
         6px 6px 36px rgba(58, 76, 92, 0.06);
@@ -420,7 +429,7 @@ export class BlockHub extends NonShadowLitElement {
           affine-flavour="affine:database"
           selected=${this._cardVisibleType === 'database' ? 'true' : 'false'}
         >
-          ${DatabaseTableView}
+          ${DatabaseTableViewIcon}
           <tool-tip
             inert
             role="tooltip"
