@@ -38,7 +38,6 @@ class NumberCellEditing extends DatabaseCellLitElement {
         }}
         @blur=${() => {
           this.rowHost.setValue(this.value);
-          this.rowHost.setEditing(false);
         }}
         type="number"
         value=${this.tag?.value}

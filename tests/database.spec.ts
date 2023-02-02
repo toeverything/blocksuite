@@ -4,9 +4,9 @@ import {
   initEmptyDatabaseState,
   undoByClick,
 } from './utils/actions/index.js';
-import { assertBlockProps } from './utils/asserts.js';
+import { assertBlockProps, assertBlockCount } from './utils/asserts.js';
 
-test('edit database block title', async ({ page }) => {
+test('edit database block title and create new rows', async ({ page }) => {
   await enterPlaygroundRoom(page, {
     enable_database: true,
   });
@@ -28,4 +28,16 @@ test('edit database block title', async ({ page }) => {
   await assertBlockProps(page, '2', {
     title: 'Database 1',
   });
+  const button = page.locator('.affine-database-block-add-row[role="button"]');
+  await button.click();
+  await button.click();
+  await assertBlockProps(page, '3', {
+    flavour: 'affine:paragraph',
+  });
+  await assertBlockProps(page, '4', {
+    flavour: 'affine:paragraph',
+  });
+  await undoByClick(page);
+  await undoByClick(page);
+  await assertBlockCount(page, 'paragraph', 0);
 });

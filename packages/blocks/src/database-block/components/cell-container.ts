@@ -18,10 +18,12 @@ export class DatabaseCellContainer
 
   setValue(value: unknown) {
     if (value) {
-      this.databaseModel.page.captureSync();
-      this.databaseModel.page.updateBlockTag(this.rowModel.id, {
-        schemaId: this.column.id,
-        value,
+      setTimeout(() => {
+        this.databaseModel.page.captureSync();
+        this.databaseModel.page.updateBlockTag(this.rowModel.id, {
+          schemaId: this.column.id,
+          value,
+        });
       });
     }
   }
@@ -30,7 +32,7 @@ export class DatabaseCellContainer
     assertExists(this.shadowRoot);
     this.isEditing = isEditing;
     if (!this.isEditing) {
-      requestIdleCallback(() => {
+      setTimeout(() => {
         this.addEventListener('click', this._onClick);
       });
     }
@@ -76,7 +78,7 @@ export class DatabaseCellContainer
           this.addEventListener('click', this._onClick);
           this.isEditing = false;
         },
-        'keydown'
+        'mousedown'
       );
     });
   };

@@ -3,6 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { TagSchema } from '@blocksuite/global/database';
 import { listTagSchemaRenderer } from '../register.js';
+import { onClickOutside } from '../utils.js';
 
 export const DATABASE_ADD_COLUMN_TYPE_POPUP =
   'affine-database-add-column-type-popup' as const;
@@ -59,6 +60,7 @@ export class DatabaseAddColumnTypePopup extends LitElement {
     if (e.target instanceof HTMLElement) {
       const type = e.target.getAttribute('data-type');
       this.onSelectType(type as TagSchema['type']);
+      this.show = false;
     }
   };
 
@@ -66,26 +68,26 @@ export class DatabaseAddColumnTypePopup extends LitElement {
     this.show = false;
   };
 
-  private _handleClickAway = (event: MouseEvent) => {
-    if (this.contains(event.target as Node)) {
-      return;
-    }
-    this._handleClose();
-  };
-
+  private _cleanup: () => void = () => void 0;
   protected update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
     if (changedProperties.has('show')) {
       if (this.show) {
         this.style.minWidth = `290px`;
         this.style.maxWidth = `290px`;
-        setTimeout(() =>
-          document.addEventListener('click', this._handleClickAway)
-        );
+        setTimeout(() => {
+          this._cleanup = onClickOutside(
+            this,
+            () => {
+              this._handleClose();
+            },
+            'mousedown'
+          );
+        });
       } else {
         this.style.minWidth = '0';
         this.style.maxWidth = `0`;
-        document.removeEventListener('click', this._handleClickAway);
+        this._cleanup();
       }
     }
   }

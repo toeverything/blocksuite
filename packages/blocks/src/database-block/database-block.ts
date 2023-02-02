@@ -41,9 +41,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
           minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
           maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
         })}
-      >
-        Name
-      </div>
+      ></div>
       ${repeat(
         block.columns,
         column => column.id,
@@ -65,7 +63,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
                   createPopper(event.target as Element, editColumn, {
                     placement: 'bottom',
                   });
-                  onClickOutside(editColumn, ele => ele.remove());
+                  onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
                 });
               }}
             >
@@ -303,7 +301,9 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
         >
           ${DatabaseHeader(this)} ${DataBaseRowContainer(this)}
           <div class="affine-database-block-footer">
-            <div class="affine-database-block-add-row" @click=${this._addRow}>
+            <div class="affine-database-block-add-row" 
+                 role="button"
+                 @click=${this._addRow}>
               + New
             </div>
           </div>
