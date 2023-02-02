@@ -49,8 +49,12 @@ export const builtInSchemas = [
   DividerBlockModelSchema,
   EmbedBlockModelSchema,
   SurfaceBlockModelSchema,
-  DatabaseBlockModelSchema,
+  // DatabaseBlockModelSchema,
 ] satisfies z.infer<typeof BlockSchema>[];
+
+export const __unstableSchemas = [DatabaseBlockModelSchema] satisfies z.infer<
+  typeof BlockSchema
+>[];
 
 // TODO support dynamic register
 export type BlockSchema = {
