@@ -305,6 +305,76 @@ export class DefaultPageBlockComponent
     }
   };
 
+  private _initDragHandle = () => {
+    const createHandle = () => {
+      this.components.dragHandle = createDragHandle(this);
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+        if (
+          draggingBlock &&
+          Utils.doesInsideBlockByFlavour(
+            this.page,
+            draggingBlock,
+            'affine:database'
+          )
+        ) {
+          return getAllowSelectedBlocks(
+            this.page.getParent(draggingBlock) as BaseBlockModel
+          );
+        }
+        return getAllowSelectedBlocks(this.model);
+      };
+    };
+    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
+      createHandle();
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this.components.dragHandle) {
+              createHandle();
+            }
+          } else {
+            this.components.dragHandle?.remove();
+            this.components.dragHandle = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
+  private _initBlockHub = () => {
+    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
+      this.components.blockHub = createBlockHub(this);
+      this.components.blockHub.getAllowedBlocks = () =>
+        getAllowSelectedBlocks(this.model);
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this.components.blockHub) {
+              this.components.blockHub = createBlockHub(this);
+              this.components.blockHub.getAllowedBlocks = () =>
+                getAllowSelectedBlocks(this.model);
+            }
+          } else {
+            this.components.blockHub?.remove();
+            this.components.blockHub = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
   firstUpdated() {
     autosize(this._title);
     bindHotkeys(this.page, this.selection, this.signals);
@@ -366,70 +436,8 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
-    const createHandle = () => {
-      this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
-        if (
-          draggingBlock &&
-          Utils.doesInsideBlockByFlavour(
-            this.page,
-            draggingBlock,
-            'affine:database'
-          )
-        ) {
-          return getAllowSelectedBlocks(
-            this.page.getParent(draggingBlock) as BaseBlockModel
-          );
-        }
-        return getAllowSelectedBlocks(this.model);
-      };
-    };
-    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
-      createHandle();
-    }
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_drag_handle,
-        enable => {
-          if (enable) {
-            if (!this.components.dragHandle) {
-              createHandle();
-            }
-          } else {
-            this.components.dragHandle?.remove();
-            this.components.dragHandle = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
-    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
-      this.components.blockHub = createBlockHub(this);
-      this.components.blockHub.getAllowedBlocks = () =>
-        getAllowSelectedBlocks(this.model);
-    }
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_block_hub,
-        enable => {
-          if (enable) {
-            if (!this.components.blockHub) {
-              this.components.blockHub = createBlockHub(this);
-              this.components.blockHub.getAllowedBlocks = () =>
-                getAllowSelectedBlocks(this.model);
-            }
-          } else {
-            this.components.blockHub?.remove();
-            this.components.blockHub = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
+    this._initDragHandle();
+    this._initBlockHub();
   }
 
   override disconnectedCallback() {
