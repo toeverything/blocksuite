@@ -42,7 +42,7 @@ export function heavy(workspace: Workspace) {
         page.addBlockByFlavour(
           'affine:paragraph',
           {
-            text: new Text(page, 'Hello, world! ' + i),
+            text: new Text('Hello, world! ' + i),
           },
           frameId
         );
@@ -126,14 +126,14 @@ export function database(workspace: Workspace) {
       const p1 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, 'text1'),
+          text: new page.Text('text1'),
         },
         databaseId
       );
       const p2 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, 'text2'),
+          text: new page.Text('text2'),
         },
         databaseId
       );

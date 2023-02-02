@@ -204,7 +204,7 @@ export class DefaultPageBlockComponent
       const defaultFrame = model.children[0];
       const props = {
         flavour: 'affine:paragraph',
-        text: new Text(page, contentRight),
+        text: new Text(contentRight),
       };
       const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       page.updateBlock(model, { title: contentLeft });
