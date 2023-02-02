@@ -2,10 +2,11 @@ import { expect, test } from '@playwright/test';
 import {
   enterPlaygroundRoom,
   initEmptyDatabaseState,
+  undoByClick,
 } from './utils/actions/index.js';
-import { assertStoreMatchJSX } from './utils/asserts.js';
+import { assertBlockProps } from './utils/asserts.js';
 
-test('init database block', async ({ page }) => {
+test('edit database block title', async ({ page }) => {
   await enterPlaygroundRoom(page, {
     enable_database: true,
   });
@@ -13,25 +14,18 @@ test('init database block', async ({ page }) => {
 
   const locator = page.locator('affine-database');
   await expect(locator).toBeVisible();
+  await assertBlockProps(page, '2', {
+    title: 'Database 1',
+  });
   const databaseTitle = page.locator('.affine-database-block-title');
   await databaseTitle.clear();
   const expected = 'hello';
   await databaseTitle.type(expected);
-  await assertStoreMatchJSX(
-    page,
-    `
-<affine:page
-  prop:title=""
->
-  <affine:frame
-    prop:xywh="[0,0,720,117]"
-  >
-    <affine:database
-      prop:columns={Array []}
-      prop:mode={2}
-      prop:title="${expected}"
-    />
-  </affine:frame>
-</affine:page>`
-  );
+  await assertBlockProps(page, '2', {
+    title: 'hello',
+  });
+  await undoByClick(page);
+  await assertBlockProps(page, '2', {
+    title: 'Database 1',
+  });
 });
