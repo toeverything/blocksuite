@@ -1,24 +1,23 @@
 import * as Y from 'yjs';
 import { LitElement, css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-
+import { BaseArrtiubtes, VEditor } from '@blocksuite/virgo';
 import '@shoelace-style/shoelace';
-import { BaseArrtiubtes, TextEditor } from '@blocksuite/virgo';
 
 @customElement('rich-text')
 export class RichText extends LitElement {
-  editor: TextEditor;
+  vEditor: VEditor;
 
-  @query(`.rich-text-container`)
+  @query('.rich-text-container')
   private _container!: HTMLDivElement;
 
-  constructor(editor: TextEditor) {
+  constructor(vEditor: VEditor) {
     super();
-    this.editor = editor;
+    this.vEditor = vEditor;
   }
 
   firstUpdated() {
-    this.editor.mount(this._container);
+    this.vEditor.mount(this._container);
   }
 
   render() {
@@ -43,27 +42,27 @@ export class ToolBar extends LitElement {
     }
   `;
 
-  editor: TextEditor;
+  vEditor: VEditor;
 
-  constructor(editor: TextEditor) {
+  constructor(vEditor: VEditor) {
     super();
-    this.editor = editor;
+    this.vEditor = vEditor;
   }
 
-  private format(editor: TextEditor, mark: Partial<BaseArrtiubtes>): void {
-    const rangeStatic = editor.getRangeStatic();
+  private format(vEditor: VEditor, mark: Partial<BaseArrtiubtes>): void {
+    const rangeStatic = vEditor.getVRange();
     if (!rangeStatic) {
       return;
     }
 
-    editor.formatText(
+    vEditor.formatText(
       rangeStatic,
       { type: 'base', ...mark },
       {
         mode: 'merge',
       }
     );
-    editor.syncRangeStatic();
+    vEditor.syncVRange();
   }
 
   protected firstUpdated(): void {
@@ -92,26 +91,26 @@ export class ToolBar extends LitElement {
     }
 
     boldButton.addEventListener('click', () => {
-      this.format(this.editor, { bold: true });
+      this.format(this.vEditor, { bold: true });
     });
     italicButton.addEventListener('click', () => {
-      this.format(this.editor, { italic: true });
+      this.format(this.vEditor, { italic: true });
     });
     underlineButton.addEventListener('click', () => {
-      this.format(this.editor, { underline: true });
+      this.format(this.vEditor, { underline: true });
     });
     strikethroughButton.addEventListener('click', () => {
-      this.format(this.editor, { strikethrough: true });
+      this.format(this.vEditor, { strikethrough: true });
     });
     resetButton.addEventListener('click', () => {
-      const rangeStatic = this.editor.getRangeStatic();
+      const rangeStatic = this.vEditor.getVRange();
       if (!rangeStatic) {
         return;
       }
-      this.editor.resetText(rangeStatic);
+      this.vEditor.resetText(rangeStatic);
     });
 
-    const undoManager = new Y.UndoManager(this.editor.yText);
+    const undoManager = new Y.UndoManager(this.vEditor.yText);
     undoButton.addEventListener('click', () => {
       undoManager.undo();
     });
@@ -121,15 +120,17 @@ export class ToolBar extends LitElement {
   }
 
   protected render(): unknown {
-    return html`<div class="tool-bar">
-      <sl-button class="bold">bold</sl-button>
-      <sl-button class="italic">italic</sl-button>
-      <sl-button class="underline">underline</sl-button>
-      <sl-button class="strikethrough">strikethrough</sl-button>
-      <sl-button class="reset">reset</sl-button>
-      <sl-button class="undo">undo</sl-button>
-      <sl-button class="redo">redo</sl-button>
-    </div>`;
+    return html`
+      <div class="tool-bar">
+        <sl-button class="bold">bold</sl-button>
+        <sl-button class="italic">italic</sl-button>
+        <sl-button class="underline">underline</sl-button>
+        <sl-button class="strikethrough">strikethrough</sl-button>
+        <sl-button class="reset">reset</sl-button>
+        <sl-button class="undo">undo</sl-button>
+        <sl-button class="redo">redo</sl-button>
+      </div>
+    `;
   }
 }
 
@@ -175,10 +176,10 @@ export class TestPage extends LitElement {
     });
 
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new TextEditor(textA);
+    const editorA = new VEditor(textA);
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new TextEditor(textB);
+    const editorB = new VEditor(textB);
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);
@@ -204,11 +205,13 @@ export class TestPage extends LitElement {
   }
 
   protected render(): unknown {
-    return html`<div class="container">
-      <div class="editors">
-        <div class="doc-a"></div>
-        <div class="doc-b"></div>
+    return html`
+      <div class="container">
+        <div class="editors">
+          <div class="doc-a"></div>
+          <div class="doc-b"></div>
+        </div>
       </div>
-    </div>`;
+    `;
   }
 }

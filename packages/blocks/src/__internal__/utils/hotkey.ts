@@ -3,7 +3,7 @@ import type { KeyHandler } from 'hotkeys-js';
 import { isCaptionElement, isInsideRichText, isTitleElement } from './query.js';
 
 hotkeys.filter = (event: KeyboardEvent) => {
-  if (shouldFilter(event)) {
+  if (shouldFilterHotKey(event)) {
     return false;
   }
   return true;
@@ -17,7 +17,7 @@ function isUndoRedo(event: KeyboardEvent) {
   return false;
 }
 
-function shouldFilter(event: KeyboardEvent) {
+function shouldFilterHotKey(event: KeyboardEvent) {
   const target = event.target;
   // Not sure if this is the right thing to do
   if (!target) {

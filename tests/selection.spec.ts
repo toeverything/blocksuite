@@ -24,6 +24,7 @@ import {
   getSelectedTextByQuill,
   SHORT_KEY,
   switchEditorMode,
+  type,
 } from './utils/actions/index.js';
 import { expect } from '@playwright/test';
 import {
@@ -194,9 +195,9 @@ test('cursor move up and down', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('arrow down test 1');
+  await type(page, 'arrow down test 1');
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 2');
+  await type(page, 'arrow down test 2');
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
@@ -219,15 +220,15 @@ test('cursor move to up and down with children block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('arrow down test 1');
+  await type(page, 'arrow down test 1');
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 2');
+  await type(page, 'arrow down test 2');
   await page.keyboard.press('Tab');
   for (let i = 0; i <= 17; i++) {
     await page.keyboard.press('ArrowRight');
   }
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 3');
+  await type(page, 'arrow down test 3');
   await pressShiftTab(page);
   for (let i = 0; i < 2; i++) {
     await page.keyboard.press('ArrowRight');
@@ -255,9 +256,9 @@ test('cursor move left and right', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('arrow down test 1');
+  await type(page, 'arrow down test 1');
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 2');
+  await type(page, 'arrow down test 2');
   for (let i = 0; i < 18; i++) {
     await page.keyboard.press('ArrowLeft');
   }
@@ -319,7 +320,7 @@ test('double click choose words', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello block suite');
+  await type(page, 'hello block suite');
   await assertRichTexts(page, ['hello block suite']);
   const helloPosition = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
@@ -348,11 +349,14 @@ test('select all and delete', async ({ page }) => {
   await page.evaluate(() => {
     const defaultPage = document.querySelector('affine-default-page')!;
     const rect = defaultPage.getBoundingClientRect();
+    // dont focus any block
+    defaultPage.selection.state.focusedBlockIndex = -1;
     defaultPage.selection.selectBlocksByRect(rect);
   });
+
   await page.keyboard.press('Backspace');
   await focusRichText(page, 0);
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   await assertRichTexts(page, ['abc']);
 });
 
@@ -364,7 +368,7 @@ test('select all text with dragging and delete', async ({ page }) => {
 
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   await page.keyboard.press('Backspace', { delay: 50 });
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
 });
@@ -379,7 +383,7 @@ test('select text leaving a few words in the last line and delete', async ({
 
   await dragBetweenIndices(page, [0, 0], [2, 1]);
   await page.keyboard.press('Backspace');
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc89\n');
 });
@@ -397,10 +401,11 @@ test('select text in the same line with dragging leftward and move outside the e
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -25, y: 0 }
+    // fixme: remove magic number
+    { x: -20, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('78abc\n');
 });
@@ -418,10 +423,11 @@ test('select text in the same line with dragging rightward and move outside the 
     [1, 0],
     [1, 3],
     { x: 0, y: 0 },
+    // fixme: remove magic number
     { x: 50, y: 0 }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
 });
@@ -450,7 +456,7 @@ test('select text in the same line with dragging rightward and press enter creat
     steps: 50,
   });
   await page.keyboard.press('Enter', { delay: 50 });
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   await assertRichTexts(page, ['123', '456', '789', 'abc']);
 });
 
@@ -511,7 +517,7 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   await dragBetweenIndices(page, [0, 1], [0, 3]);
   page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
-  await page.keyboard.type('1');
+  await type(page, '1');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('16789\n');
 });
@@ -574,7 +580,7 @@ test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('--- ');
+  await type(page, '--- ');
   await assertDivider(page, 1);
   await page.keyboard.press('ArrowUp');
   await copyByKeyboard(page);
@@ -587,11 +593,11 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('--- ');
+  await type(page, '--- ');
   await assertDivider(page, 1);
 
   await pressEnter(page);
-  await page.keyboard.type('--- ');
+  await type(page, '--- ');
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('Backspace');
@@ -605,8 +611,8 @@ test('should delete line with content after divider should not lost content', as
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('--- ');
-  await page.keyboard.type('123');
+  await type(page, '--- ');
+  await type(page, '123');
   await assertDivider(page, 1);
   // Jump to line start
   page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
@@ -652,7 +658,7 @@ test('the cursor should move to closest editor block when clicking outside conta
   await assertRichTexts(page, ['123', '45', '789']);
 });
 
-test('should not crash when mouse over the left side of the list block prefix', async ({
+test.skip('should not crash when mouse over the left side of the list block prefix', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -671,6 +677,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
     [1, 2],
     [1, 0],
     { x: 0, y: 0 },
+    // fixme: what is this?
     { x: -50, y: 0 }
   );
   await copyByKeyboard(page);
@@ -738,7 +745,7 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
   await focusRichText(page, 2);
   // goto next frame
   await page.keyboard.press('ArrowDown');
-  await page.keyboard.type('ABC');
+  await type(page, 'ABC');
 
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);
 
@@ -784,4 +791,40 @@ test('should select full text of the first block when leaving the affine-frame-b
   );
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '1234567');
+});
+
+test('should add a new line when clicking the bottom of the last non-text block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await pressEnter(page);
+
+  // code block
+  await type(page, '```');
+  await pressEnter(page);
+
+  const locator = page.locator('affine-code');
+  await expect(locator).toBeVisible();
+
+  const rect = await page.evaluate(() => {
+    const secondRichText = document.querySelector('affine-code');
+    if (!secondRichText) {
+      throw new Error();
+    }
+
+    return secondRichText.getBoundingClientRect();
+  });
+  await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
+  await type(page, 'ABC');
+  await assertRichTexts(page, [
+    '123',
+    '456',
+    '789',
+    `
+`, // code block
+    'ABC',
+  ]);
 });

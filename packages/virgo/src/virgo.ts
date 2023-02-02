@@ -7,37 +7,37 @@ import { VirgoLine } from './components/virgo-line.js';
 import { BaseText } from './components/base-text.js';
 import { baseRenderElement } from './utils/render.js';
 
-export interface RangeStatic {
+export interface VRange {
   index: number;
   length: number;
 }
 
-export interface DomPoint {
+export type UpdateVRangeProp = [VRange | null, 'native' | 'input' | 'other'];
+
+export type DeltaEntry = [DeltaInsert, VRange];
+
+interface DomPoint {
   // which text node this point is in
   text: Text;
   // the index here is relative to the Editor, not text node
   index: number;
 }
 
-export type UpdateRangeStaticProp = [
-  RangeStatic | null,
-  'native' | 'input' | 'other'
-];
-
-export class TextEditor {
+export class VEditor {
   private _rootElement: HTMLElement | null = null;
-  private _rangeStatic: RangeStatic | null = null;
+  private _vRange: VRange | null = null;
   private _isComposing = false;
+  private _isReadOnly = false;
   private _renderElement: (delta: DeltaInsert) => TextElement =
     baseRenderElement;
 
   signals: {
-    updateRangeStatic: Signal<UpdateRangeStaticProp>;
+    updateVRange: Signal<UpdateVRangeProp>;
   };
   yText: Y.Text;
 
   constructor(
-    yText: TextEditor['yText'],
+    yText: VEditor['yText'],
     renderElement?: (delta: DeltaInsert) => TextElement
   ) {
     this.yText = yText;
@@ -46,17 +46,14 @@ export class TextEditor {
     }
 
     this.signals = {
-      updateRangeStatic: new Signal<UpdateRangeStaticProp>(),
+      updateVRange: new Signal<UpdateVRangeProp>(),
     };
 
-    document.addEventListener(
-      'selectionchange',
-      this._onSelectionChange.bind(this)
-    );
+    document.addEventListener('selectionchange', this._onSelectionChange);
 
-    yText.observe(this._onYTextChange.bind(this));
+    yText.observe(this._onYTextChange);
 
-    this.signals.updateRangeStatic.on(this._onUpdateRangeStatic.bind(this));
+    this.signals.updateVRange.on(this._onUpdateVRange);
   }
 
   mount(rootElement: HTMLElement): void {
@@ -115,7 +112,7 @@ export class TextEditor {
     return selection;
   }
 
-  getDeltaByRangeIndex(rangeIndex: RangeStatic['index']): DeltaInsert | null {
+  getDeltaByRangeIndex(rangeIndex: VRange['index']): DeltaInsert | null {
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
     let index = 0;
@@ -130,18 +127,16 @@ export class TextEditor {
     return null;
   }
 
-  getDeltasByRangeStatic(
-    rangeStatic: RangeStatic
-  ): [DeltaInsert, RangeStatic][] {
+  getDeltasByVRange(vRange: VRange): DeltaEntry[] {
     const deltas = this.yText.toDelta() as DeltaInsert[];
 
-    const result: [DeltaInsert, RangeStatic][] = [];
+    const result: DeltaEntry[] = [];
     let index = 0;
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length >= rangeStatic.index &&
-        index < rangeStatic.index + rangeStatic.length
+        index + delta.insert.length >= vRange.index &&
+        index < vRange.index + vRange.length
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
       }
@@ -155,84 +150,97 @@ export class TextEditor {
     return this._rootElement;
   }
 
-  getRangeStatic(): RangeStatic | null {
-    return this._rangeStatic;
+  getVRange(): VRange | null {
+    return this._vRange;
   }
 
-  setRangeStatic(rangeStatic: RangeStatic): void {
-    this.signals.updateRangeStatic.emit([rangeStatic, 'other']);
+  getReadOnly(): boolean {
+    return this._isReadOnly;
   }
 
-  deleteText(rangeStatic: RangeStatic): void {
-    this.yText.delete(rangeStatic.index, rangeStatic.length);
+  setReadOnly(isReadOnly: boolean): void {
+    this._isReadOnly = isReadOnly;
   }
 
-  insertText(rangeStatic: RangeStatic, text: string): void {
-    const currentDelta = this.getDeltaByRangeIndex(rangeStatic.index);
-    this.yText.delete(rangeStatic.index, rangeStatic.length);
-
-    if (
-      rangeStatic.index > 0 &&
-      currentDelta &&
-      currentDelta.attributes.type !== 'line-break'
-    ) {
-      this.yText.insert(rangeStatic.index, text, currentDelta.attributes);
-    } else {
-      this.yText.insert(rangeStatic.index, text, { type: 'base' });
-    }
+  setVRange(vRange: VRange): void {
+    this.signals.updateVRange.emit([vRange, 'other']);
   }
 
-  insertLineBreak(rangeStatic: RangeStatic): void {
-    this.yText.delete(rangeStatic.index, rangeStatic.length);
-    this.yText.insert(rangeStatic.index, '\n', { type: 'line-break' });
+  deleteText(vRange: VRange): void {
+    this._transact(() => {
+      this.yText.delete(vRange.index, vRange.length);
+    });
+  }
+
+  // TODO add support for formatting
+  insertText(vRange: VRange, text: string): void {
+    const currentDelta = this.getDeltaByRangeIndex(vRange.index);
+
+    this._transact(() => {
+      this.yText.delete(vRange.index, vRange.length);
+      if (
+        vRange.index > 0 &&
+        currentDelta &&
+        currentDelta.attributes.type !== 'line-break'
+      ) {
+        this.yText.insert(vRange.index, text, currentDelta.attributes);
+      } else {
+        this.yText.insert(vRange.index, text, { type: 'base' });
+      }
+    });
+  }
+
+  insertLineBreak(vRange: VRange): void {
+    this._transact(() => {
+      this.yText.delete(vRange.index, vRange.length);
+      this.yText.insert(vRange.index, '\n', { type: 'line-break' });
+    });
   }
 
   formatText(
-    rangeStatic: RangeStatic,
+    vRange: VRange,
     attributes: TextAttributes,
     options: {
-      match?: (delta: DeltaInsert, deltaRangeStatic: RangeStatic) => boolean;
+      match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
     } = {}
   ): void {
     const { match = () => true, mode = 'replace' } = options;
-    const deltas = this.getDeltasByRangeStatic(rangeStatic);
+    const deltas = this.getDeltasByVRange(vRange);
 
-    for (const [delta, deltaRangeStatic] of deltas) {
+    for (const [delta, deltaVRange] of deltas) {
       if (delta.attributes.type === 'line-break') {
         continue;
       }
 
-      if (match(delta, deltaRangeStatic)) {
-        const goalRangeStatic = {
-          index: Math.max(rangeStatic.index, deltaRangeStatic.index),
+      if (match(delta, deltaVRange)) {
+        const targetVRange = {
+          index: Math.max(vRange.index, deltaVRange.index),
           length:
             Math.min(
-              rangeStatic.index + rangeStatic.length,
-              deltaRangeStatic.index + deltaRangeStatic.length
-            ) - Math.max(rangeStatic.index, deltaRangeStatic.index),
+              vRange.index + vRange.length,
+              deltaVRange.index + deltaVRange.length
+            ) - Math.max(vRange.index, deltaVRange.index),
         };
 
         if (mode === 'replace') {
-          this.resetText(goalRangeStatic);
+          this.resetText(targetVRange);
         }
 
-        this.yText.format(
-          goalRangeStatic.index,
-          goalRangeStatic.length,
-          attributes
-        );
+        this._transact(() => {
+          this.yText.format(
+            targetVRange.index,
+            targetVRange.length,
+            attributes
+          );
+        });
       }
     }
   }
 
-  resetText(rangeStatic: RangeStatic): void {
+  resetText(vRange: VRange): void {
     const coverDeltas: DeltaInsert[] = [];
-    for (
-      let i = rangeStatic.index;
-      i <= rangeStatic.index + rangeStatic.length;
-      i++
-    ) {
+    for (let i = vRange.index; i <= vRange.index + vRange.length; i++) {
       const delta = this.getDeltaByRangeIndex(i);
       if (delta) {
         coverDeltas.push(delta);
@@ -245,19 +253,21 @@ export class TextEditor {
       )
     );
 
-    this.yText.format(rangeStatic.index, rangeStatic.length, {
-      ...unset,
-      type: 'base',
+    this._transact(() => {
+      this.yText.format(vRange.index, vRange.length, {
+        ...unset,
+        type: 'base',
+      });
     });
   }
 
   /**
-   * sync the dom selection from rangeStatic for **this Editor**
+   * sync the dom selection from vRange for **this Editor**
    */
-  syncRangeStatic(): void {
+  syncVRange(): void {
     setTimeout(() => {
-      if (this._rangeStatic) {
-        const newRange = this.toDomRange(this._rangeStatic);
+      if (this._vRange) {
+        const newRange = this.toDomRange(this._vRange);
 
         if (newRange) {
           const selectionRoot = findDocumentOrShadowRoot(this);
@@ -273,9 +283,9 @@ export class TextEditor {
   }
 
   /**
-   * calculate the dom selection from rangeStatic for **this Editor**
+   * calculate the dom selection from vRange for **this Editor**
    */
-  toDomRange(rangeStatic: RangeStatic): Range | null {
+  toDomRange(vRange: VRange): Range | null {
     assertExists(this._rootElement);
 
     const lineElements = Array.from(
@@ -301,16 +311,13 @@ export class TextEditor {
 
         const textLength = calculateTextLength(textNode);
 
-        if (!anchorText && index + textLength >= rangeStatic.index) {
+        if (!anchorText && index + textLength >= vRange.index) {
           anchorText = textNode;
-          anchorOffset = rangeStatic.index - index;
+          anchorOffset = vRange.index - index;
         }
-        if (
-          !focusText &&
-          index + textLength >= rangeStatic.index + rangeStatic.length
-        ) {
+        if (!focusText && index + textLength >= vRange.index + vRange.length) {
           focusText = textNode;
-          focusOffset = rangeStatic.index + rangeStatic.length - index;
+          focusOffset = vRange.index + vRange.length - index;
         }
 
         index += textLength;
@@ -331,32 +338,32 @@ export class TextEditor {
   }
 
   /**
-   * calculate the rangeStatic from dom selection for **this Editor**
-   * there are three cases when the rangeStatic of this Editor is not null:
+   * calculate the vRange from dom selection for **this Editor**
+   * there are three cases when the vRange of this Editor is not null:
    * (In the following, "|" mean anchor and focus, each line is a separate Editor)
    * 1. anchor and focus are in this Editor
    *    aaaaaa
    *    b|bbbb|b
    *    cccccc
-   *    the rangeStatic of second Editor is {index: 1, length: 4}, the others are null
+   *    the vRange of second Editor is {index: 1, length: 4}, the others are null
    * 2. anchor and focus one in this Editor, one in another Editor
    *    aaa|aaa    aaaaaa
    *    bbbbb|b or bbbbb|b
    *    cccccc     cc|cccc
    *    2.1
-   *        the rangeStatic of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
+   *        the vRange of first Editor is {index: 3, length: 3}, the second is {index: 0, length: 5},
    *        the third is null
    *    2.2
-   *        the rangeStatic of first Editor is null, the second is {index: 0, length: 5},
+   *        the vRange of first Editor is null, the second is {index: 0, length: 5},
    *        the third is {index: 0, length: 2}
    * 3. anchor and focus are in another Editor
    *    aa|aaaa
    *    bbbbbb
    *    cccc|cc
-   *    the rangeStatic of first Editor is {index: 2, length: 4},
+   *    the vRange of first Editor is {index: 2, length: 4},
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
-  toRangeStatic(selection: Selection): RangeStatic | null {
+  toVRange(selection: Selection): VRange | null {
     assertExists(this._rootElement);
 
     const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
@@ -369,11 +376,11 @@ export class TextEditor {
     let focusText: Text | null = null;
     let focusTextOffset = focusOffset;
 
-    if (anchorNode instanceof Text && ifVirgoText(anchorNode)) {
+    if (anchorNode instanceof Text && isVText(anchorNode)) {
       anchorText = anchorNode;
       anchorTextOffset = anchorOffset;
     }
-    if (focusNode instanceof Text && ifVirgoText(focusNode)) {
+    if (focusNode instanceof Text && isVText(focusNode)) {
       focusText = focusNode;
       focusTextOffset = focusOffset;
     }
@@ -469,63 +476,62 @@ export class TextEditor {
   private _onBefoeInput(event: InputEvent): void {
     event.preventDefault();
 
-    if (!this._rangeStatic) {
+    if (this._isReadOnly) {
+      return;
+    }
+
+    if (!this._vRange) {
       return;
     }
 
     const { inputType, data } = event;
-    console.log('inputType', inputType, 'data', data);
-    if (inputType === 'insertText' && this._rangeStatic.index >= 0 && data) {
-      this.insertText(this._rangeStatic, data);
 
-      this.signals.updateRangeStatic.emit([
+    if (inputType === 'insertText' && this._vRange.index >= 0 && data) {
+      this.insertText(this._vRange, data);
+
+      this.signals.updateVRange.emit([
         {
-          index: this._rangeStatic.index + data.length,
+          index: this._vRange.index + data.length,
           length: 0,
         },
         'input',
       ]);
-    } else if (
-      inputType === 'insertParagraph' &&
-      this._rangeStatic.index >= 0
-    ) {
-      this.insertLineBreak(this._rangeStatic);
+    } else if (inputType === 'insertParagraph' && this._vRange.index >= 0) {
+      this.insertLineBreak(this._vRange);
 
-      this.signals.updateRangeStatic.emit([
+      this.signals.updateVRange.emit([
         {
-          index: this._rangeStatic.index + 1,
+          index: this._vRange.index + 1,
           length: 0,
         },
         'input',
       ]);
     } else if (
       inputType === 'deleteContentBackward' &&
-      this._rangeStatic.index >= 0
+      this._vRange.index >= 0
     ) {
-      if (this._rangeStatic.length > 0) {
-        this.deleteText(this._rangeStatic);
+      if (this._vRange.length > 0) {
+        this.deleteText(this._vRange);
 
-        this.signals.updateRangeStatic.emit([
+        this.signals.updateVRange.emit([
           {
-            index: this._rangeStatic.index,
+            index: this._vRange.index,
             length: 0,
           },
           'input',
         ]);
-      } else if (this._rangeStatic.index > 0) {
+      } else if (this._vRange.index > 0) {
         // https://dev.to/acanimal/how-to-slice-or-get-symbols-from-a-unicode-string-with-emojis-in-javascript-lets-learn-how-javascript-represent-strings-h3a
-        const tmpString = this.yText
-          .toString()
-          .slice(0, this._rangeStatic.index);
+        const tmpString = this.yText.toString().slice(0, this._vRange.index);
         const deletedChracater = [...tmpString].slice(-1).join('');
         this.deleteText({
-          index: this._rangeStatic.index - deletedChracater.length,
+          index: this._vRange.index - deletedChracater.length,
           length: deletedChracater.length,
         });
 
-        this.signals.updateRangeStatic.emit([
+        this.signals.updateVRange.emit([
           {
-            index: this._rangeStatic.index - deletedChracater.length,
+            index: this._vRange.index - deletedChracater.length,
             length: 0,
           },
           'input',
@@ -541,18 +547,18 @@ export class TextEditor {
   private _onCompositionEnd(event: CompositionEvent): void {
     this._isComposing = false;
 
-    if (!this._rangeStatic) {
+    if (!this._vRange) {
       return;
     }
 
     const { data } = event;
 
-    if (this._rangeStatic.index >= 0 && data) {
-      this.insertText(this._rangeStatic, data);
+    if (this._vRange.index >= 0 && data) {
+      this.insertText(this._vRange, data);
 
-      this.signals.updateRangeStatic.emit([
+      this.signals.updateVRange.emit([
         {
-          index: this._rangeStatic.index + data.length,
+          index: this._vRange.index + data.length,
           length: 0,
         },
         'input',
@@ -560,7 +566,7 @@ export class TextEditor {
     }
   }
 
-  private _onYTextChange(): void {
+  private _onYTextChange = () => {
     assertExists(this._rootElement);
 
     const deltas = (this.yText.toDelta() as DeltaInsert[]).flatMap(d => {
@@ -573,9 +579,9 @@ export class TextEditor {
     }) as DeltaInsert[];
 
     renderDeltas(deltas, this._rootElement, this._renderElement);
-  }
+  };
 
-  private _onSelectionChange(): void {
+  private _onSelectionChange = () => {
     assertExists(this._rootElement);
     if (this._isComposing) {
       return;
@@ -601,17 +607,14 @@ export class TextEditor {
       return;
     }
 
-    const rangeStatic = this.toRangeStatic(selection);
-    if (rangeStatic) {
-      this.signals.updateRangeStatic.emit([rangeStatic, 'native']);
+    const vRange = this.toVRange(selection);
+    if (vRange) {
+      this.signals.updateVRange.emit([vRange, 'native']);
     }
-  }
+  };
 
-  private _onUpdateRangeStatic([
-    newRangStatic,
-    origin,
-  ]: UpdateRangeStaticProp): void {
-    this._rangeStatic = newRangStatic;
+  private _onUpdateVRange = ([newRangStatic, origin]: UpdateVRangeProp) => {
+    this._vRange = newRangStatic;
 
     if (origin === 'native') {
       return;
@@ -621,14 +624,23 @@ export class TextEditor {
     this._rootElement?.blur();
 
     const fn = () => {
-      // when using input method _RangeStatic will return to the starting point,
+      // when using input method _vRange will return to the starting point,
       // so we need to reassign
-      this._rangeStatic = newRangStatic;
-      this.syncRangeStatic();
+      this._vRange = newRangStatic;
+      this.syncVRange();
     };
 
     // updates in lit are performed asynchronously
     setTimeout(fn, 0);
+  };
+
+  private _transact(fn: () => void): void {
+    const doc = this.yText.doc;
+    if (!doc) {
+      throw new Error('yText is not attached to a doc');
+    }
+
+    doc.transact(fn, doc.clientID);
   }
 }
 
@@ -724,11 +736,11 @@ function getTextNodeFromElement(element: Element): Text | null {
   return null;
 }
 
-function ifVirgoText(text: Text) {
+function isVText(text: Text) {
   return text.parentElement?.dataset.virgoText === 'true' ?? false;
 }
 
-function findDocumentOrShadowRoot(editor: TextEditor): Document | ShadowRoot {
+function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
   const el = editor.getRootElement();
 
   if (!el) {
@@ -756,7 +768,7 @@ function renderDeltas(
   const chunks = deltaInsersToChunks(deltas);
 
   // every chunk is a line
-  const lines: Array<VirgoLine> = [];
+  const lines: VirgoLine[] = [];
   for (const chunk of chunks) {
     if (chunk.length === 0) {
       const virgoLine = new VirgoLine();

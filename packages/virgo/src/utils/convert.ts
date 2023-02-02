@@ -1,5 +1,8 @@
 import type { DeltaInsert } from '../types.js';
 
+/**
+ * convert a delta insert array to chunks, each chunk is a line
+ */
 export function deltaInsersToChunks(delta: DeltaInsert[]): DeltaInsert[][] {
   if (delta.length === 0) {
     return [[]];

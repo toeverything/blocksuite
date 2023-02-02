@@ -8,6 +8,7 @@ import {
   initThreeParagraphs,
   pressEnter,
   switchReadonly,
+  type,
   withPressKey,
 } from './utils/actions/index.js';
 import {
@@ -45,7 +46,7 @@ test('should format quick bar show when select text by keyboard', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello world');
+  await type(page, 'hello world');
   await withPressKey(page, 'Shift', async () => {
     let i = 10;
     while (i--) {
@@ -106,7 +107,7 @@ test('should format quick bar hide when type text', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
-  await page.keyboard.type('1');
+  await type(page, '1');
   await expect(formatQuickBar).not.toBeVisible();
 });
 
@@ -335,7 +336,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await expect(linkPopoverInput).toBeVisible();
 
-  await page.keyboard.type('https://www.example.com');
+  await type(page, 'https://www.example.com');
   await pressEnter(page);
 
   await assertStoreMatchJSX(
@@ -591,7 +592,7 @@ test('should format quick bar follow scroll', async ({ page }) => {
   for (let i = 0; i < 20; i++) {
     await pressEnter(page);
   }
-  page.keyboard.type('bottom');
+  type(page, 'bottom');
 
   await scrollToTop(page);
 

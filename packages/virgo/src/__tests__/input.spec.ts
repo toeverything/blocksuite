@@ -130,3 +130,37 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
   expect(await editorB.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
 });
+
+test('readonly mode', async ({ page }) => {
+  await enterPlayground(page);
+  await focusRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await pageType(page, 'abcdefg');
+
+  expect(await editorA.innerText()).toBe('abcdefg');
+  expect(await editorB.innerText()).toBe('abcdefg');
+
+  await page.evaluate(() => {
+    const richTextA = document
+      .querySelector('test-page')
+      ?.shadowRoot?.querySelector('rich-text');
+
+    if (!richTextA) {
+      throw new Error('Cannot find editor');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (richTextA as any).vEditor.setReadOnly(true);
+  });
+
+  await pageType(page, 'aaaa');
+
+  expect(await editorA.innerText()).toBe('abcdefg');
+  expect(await editorB.innerText()).toBe('abcdefg');
+});

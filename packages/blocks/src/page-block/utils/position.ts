@@ -8,7 +8,9 @@ import {
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 export function repairContextMenuRange(e: SelectionEvent) {
-  const currentRange = window.getSelection()?.getRangeAt(0);
+  const selection = window.getSelection() as Selection;
+  const currentRange =
+    selection && selection.rangeCount && selection.getRangeAt(0);
   const pointRange = caretRangeFromPoint(e.raw.x, e.raw.y);
   // repair browser context menu change selection can not go through blocks
   if (
@@ -23,6 +25,8 @@ export function repairContextMenuRange(e: SelectionEvent) {
     requestAnimationFrame(() => {
       resetNativeSelection(currentRange);
     });
+  } else {
+    e.raw.preventDefault();
   }
 }
 

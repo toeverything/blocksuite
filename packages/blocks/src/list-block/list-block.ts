@@ -23,8 +23,7 @@ function selectList(model: ListBlockModel) {
     console.error('list block model:', model, 'blockElement:', blockElement);
     throw new Error('Failed to select list! blockElement not found!');
   }
-  const blockRect = blockElement.getBoundingClientRect();
-  selectionManager.resetSelectedBlockByRect(blockRect);
+  selectionManager.resetSelectedBlockByRect(blockElement);
 }
 
 @customElement('affine-list')
