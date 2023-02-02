@@ -60,8 +60,8 @@ interface AwarenessEvent<
 }
 
 export enum BlobUploadState {
-  Uploading,
-  Uploaded,
+  Uploading = 0,
+  Uploaded = 1,
 }
 
 export class AwarenessStore<

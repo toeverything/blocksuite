@@ -144,10 +144,31 @@ export class ImageBlockComponent extends NonShadowLitElement {
       // If we could not get message from awareness in 1000ms,
       // we assume this image is not found.
       const timer = setTimeout(resolve, 2000);
+
+      const isBlobUploadingOnInit =
+        this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
+
       const disposeSignal = this.model.page.awarenessStore.signals.update.on(
         () => {
           const isBlobUploading =
             this.model.page.awarenessStore.isBlobUploading(this.model.sourceId);
+
+          /**
+           * case:
+           * clientA send image, but network latency is high,
+           * clientB got ydoc, but doesn't get awareness,
+           * clientC has a good network, and send awareness because of cursor changed,
+           * clientB receives awareness change from clientC,
+           * this listener will be called,
+           * but clientB doesn't get uploading state from clientA.
+           */
+          if (
+            isBlobUploadingOnInit === isBlobUploading &&
+            isBlobUploading === false
+          ) {
+            return;
+          }
+
           if (!isBlobUploading) {
             clearTimeout(timer);
             resolve();
