@@ -27,7 +27,7 @@ export function matchFlavours<
   Key extends keyof BlockSuiteInternal.BlockModels &
     string = keyof BlockSuiteInternal.BlockModels & string
 >(
-  model: { flavour: Key },
+  model: { flavour: string },
   expected: readonly Key[]
 ): boolean /* model is BlockModels[Key] */ {
   return expected.includes(model.flavour as Key);
