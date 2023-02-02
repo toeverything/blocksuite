@@ -365,7 +365,10 @@ export class PasteManager {
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);
-      if (model && !matchFlavours(model, ['affine:embed', 'affine:divider'])) {
+      if (
+        model &&
+        matchFlavours(model, ['affine:paragraph', 'affine:code', 'affine:list'])
+      ) {
         block.text && model?.text?.applyDelta(block.text);
       }
       addBlockIds.push(id);

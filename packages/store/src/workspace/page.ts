@@ -15,13 +15,12 @@ import {
   assertValidChildren,
   initInternalProps,
   syncBlockProps,
-  trySyncTextProp,
   toBlockProps,
 } from '../utils/utils.js';
 import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
 import type { AwarenessStore } from '../awareness.js';
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
@@ -357,8 +356,13 @@ export class Page extends Space<PageData> {
       initInternalProps(yBlock, clonedProps);
       const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
       assertExists(defaultProps);
-      syncBlockProps(defaultProps, yBlock, clonedProps, this._ignoredKeys);
-      trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
+      syncBlockProps(
+        defaultProps,
+        yBlock,
+        clonedProps,
+        this._ignoredKeys,
+        this._splitSet
+      );
 
       if (typeof parent === 'string') {
         parent = this._blockMap.get(parent);
@@ -441,14 +445,6 @@ export class Page extends Space<PageData> {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
     this.transact(() => {
-      if (props.text instanceof PrelimText) {
-        props.text.ready = true;
-      } else if (props.text instanceof Text) {
-        model.text = props.text;
-        // @ts-ignore
-        yBlock.set('prop:text', props.text._yText);
-      }
-
       // TODO diff children changes
       // All child nodes will be deleted in the current behavior, then added again.
       // Through diff children changes, the experience can be improved.
@@ -465,7 +461,13 @@ export class Page extends Space<PageData> {
         model.flavour
       );
       assertExists(defaultProps);
-      syncBlockProps(defaultProps, yBlock, props, this._ignoredKeys);
+      syncBlockProps(
+        defaultProps,
+        yBlock,
+        props,
+        this._ignoredKeys,
+        this._splitSet
+      );
     });
   }
 
@@ -702,20 +704,19 @@ export class Page extends Space<PageData> {
     }
     this._blockMap.set(props.id, model);
 
-    if (
-      // TODO use schema
-      matchFlavours(model, [
-        'affine:paragraph',
-        'affine:list',
-        'affine:code',
-      ]) &&
-      !yBlock.get('prop:text')
-    ) {
-      this.transact(() => yBlock.set('prop:text', new Y.Text()));
-    }
+    const initialProps = this.workspace.flavourInitialPropsMap.get(
+      model.flavour
+    );
+    assertExists(initialProps);
+    Object.entries(initialProps).forEach(([key, value]) => {
+      if (value instanceof Text) {
+        const yText = yBlock.get(`prop:${key}`) as Y.Text;
+        Object.assign(model, {
+          [key]: new Text(yText),
+        });
+      }
+    });
 
-    const yText = yBlock.get('prop:text') as Y.Text;
-    model.text = new Text(yText);
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;

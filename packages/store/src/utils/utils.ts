@@ -45,14 +45,19 @@ export function syncBlockProps(
   defaultProps: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
-  ignoredKeys: Set<string>
+  ignoredKeys: Set<string>,
+  splitSet: Set<Text | PrelimText>
 ) {
-  Object.keys(props).forEach(key => {
+  Object.entries(props).forEach(([key, value]) => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
-    const value = props[key];
 
-    // TODO use schema
-    if (key === 'text') return;
+    if (value instanceof PrelimText) {
+      value.ready = true;
+      return;
+    } else if (value instanceof Text) {
+      return trySyncTextProp(splitSet, yBlock, key, value);
+    }
+
     if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
@@ -67,12 +72,14 @@ export function syncBlockProps(
   });
 
   // set default value
-  Object.entries(defaultProps).forEach(([key, value]) => {
+  Object.entries(defaultProps).forEach(([key, defaultValue]) => {
     if (!yBlock.has(`prop:${key}`)) {
-      if (Array.isArray(value)) {
-        yBlock.set(`prop:${key}`, Y.Array.from(value));
+      if (defaultValue instanceof Text) {
+        trySyncTextProp(splitSet, yBlock, key, new Text(''));
+      } else if (Array.isArray(defaultValue)) {
+        yBlock.set(`prop:${key}`, Y.Array.from(defaultValue));
       } else {
-        yBlock.set(`prop:${key}`, value);
+        yBlock.set(`prop:${key}`, defaultValue);
       }
     }
   });
@@ -81,14 +88,15 @@ export function syncBlockProps(
 export function trySyncTextProp(
   splitSet: Set<Text | PrelimText>,
   yBlock: YBlock,
-  text?: TextType | void
+  key: string,
+  text: TextType
 ) {
   if (!text) return;
 
   // update by clone
   if (text instanceof Text) {
     // @ts-ignore
-    yBlock.set('prop:text', text._yText);
+    yBlock.set(`prop:${key}`, text._yText);
     text.doDelayedJobs();
     return;
   }
@@ -121,7 +129,7 @@ export function trySyncTextProp(
 
     // clone the original text to `yRight` and add it to the doc first
     const yRight = yBase.clone();
-    yBlock.set('prop:text', yRight);
+    yBlock.set(`prop:${key}`, yRight);
 
     // delete the left-half part of `yRight`, making it the new right
     yRight.delete(0, right.index);
