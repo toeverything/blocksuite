@@ -140,7 +140,7 @@ export class Text {
 
   static fromDelta(delta: DeltaOperation[]) {
     const result = new Text('');
-    // In the first time, yDoc is not exist.
+    // In the first time, yDoc does not exist.
     result.delayedJobs.push(() => result.applyDelta(delta));
     return result;
   }
