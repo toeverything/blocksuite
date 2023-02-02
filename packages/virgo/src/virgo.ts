@@ -50,10 +50,6 @@ export class VEditor {
       updateVRange: new Signal<UpdateVRangeProp>(),
     };
 
-    document.addEventListener('selectionchange', this._onSelectionChange);
-
-    yText.observe(this._onYTextChange);
-
     this.signals.updateVRange.on(this._onUpdateVRange);
   }
 
@@ -62,6 +58,8 @@ export class VEditor {
     this._rootElement.replaceChildren();
     this._rootElement.contentEditable = 'true';
     this._rootElement.dataset.virgoRoot = 'true';
+    this.yText.observe(this._onYTextChange);
+    document.addEventListener('selectionchange', this._onSelectionChange);
 
     this._rootElementAbort = new AbortController();
 
@@ -100,6 +98,7 @@ export class VEditor {
   }
 
   unmount(): void {
+    document.removeEventListener('selectionchange', this._onSelectionChange);
     if (this._rootElementAbort) {
       this._rootElementAbort.abort();
       this._rootElementAbort = null;

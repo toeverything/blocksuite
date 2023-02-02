@@ -28,14 +28,19 @@ class TextCell extends DatabaseCellLitElement {
       });
       this.vEditor = new VEditor(yText);
       this.vEditor.mount(this._container);
+      this.vEditor.focusEnd();
     }
   }
 
-  protected firstUpdated() {
-    if (this.tag) {
+  protected update(changedProperties: Map<string, unknown>) {
+    super.update(changedProperties);
+    if (this.tag && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.vEditor = new VEditor(this.tag.value as any);
       this.vEditor.mount(this._container);
+    } else if (!this.tag && this.vEditor) {
+      this.vEditor.unmount();
+      this.vEditor = null;
     }
   }
 
@@ -46,6 +51,8 @@ class TextCell extends DatabaseCellLitElement {
 
   disconnectedCallback() {
     this.removeEventListener('click', this._handleClick);
+    this.vEditor?.unmount();
+    this.vEditor = null;
     super.disconnectedCallback();
   }
 
