@@ -462,7 +462,7 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {
-          xywh: JSON.stringify([newX, y, w, newModelHeight]),
+          xywh: JSON.stringify([newX, y, w, Math.round(newModelHeight)]),
         });
         offset = newX + w;
       }
