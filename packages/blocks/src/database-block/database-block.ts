@@ -21,6 +21,7 @@ import './components/cell-container.js';
 import { getTagSchemaRenderer } from './register.js';
 import { nanoid } from '@blocksuite/store';
 import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
+import { onClickOutside } from './utils.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
 
@@ -28,25 +29,6 @@ let once = true;
 if (once) {
   registerInternalRenderer();
   once = false;
-}
-
-const isVisible = (elem: HTMLElement) =>
-  !!elem &&
-  !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length); // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
-function hideOnClickOutside(element: HTMLElement) {
-  const outsideClickListener = (event: MouseEvent) => {
-    if (!element.contains(event.target as Node) && isVisible(element)) {
-      // or use: event.target.closest(selector) === null
-      element.remove();
-      removeClickListener();
-    }
-  };
-
-  const removeClickListener = () => {
-    document.removeEventListener('click', outsideClickListener);
-  };
-
-  document.addEventListener('click', outsideClickListener);
 }
 
 function DatabaseHeader(block: DatabaseBlockComponent) {
@@ -83,7 +65,7 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
                   createPopper(event.target as Element, editColumn, {
                     placement: 'bottom',
                   });
-                  hideOnClickOutside(editColumn);
+                  onClickOutside(editColumn, ele => ele.remove());
                 });
               }}
             >
