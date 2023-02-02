@@ -161,7 +161,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   }
 
   render() {
-    console.log('render');
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const { type } = this.model;

@@ -76,8 +76,6 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 export function preset(workspace: Workspace) {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
-      const text = workspace.doc.getText('1');
-      console.log('1', text);
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
