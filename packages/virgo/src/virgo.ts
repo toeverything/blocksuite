@@ -166,6 +166,15 @@ export class VEditor {
     this.signals.updateVRange.emit([vRange, 'other']);
   }
 
+  focusEnd(): void {
+    this.setVRange({
+      index: this.yText.length,
+      length: 0,
+    });
+
+    this.syncVRange();
+  }
+
   deleteText(vRange: VRange): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
