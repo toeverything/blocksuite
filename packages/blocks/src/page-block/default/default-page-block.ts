@@ -41,7 +41,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { DragHandle } from '../../components/index.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
-import { BlockHub } from '../../components/index.js';
+import type { BlockHub } from '../../components/index.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };

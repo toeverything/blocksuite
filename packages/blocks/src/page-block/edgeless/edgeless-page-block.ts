@@ -99,7 +99,7 @@ export class EdgelessPageBlockComponent
   mouseMode!: MouseMode;
 
   @property({ hasChanged: () => true })
-  model!: PageBlockModel;
+  pageModel!: PageBlockModel;
 
   @property({ hasChanged: () => true })
   surfaceModel!: SurfaceBlockModel;

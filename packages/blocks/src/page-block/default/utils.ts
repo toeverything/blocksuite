@@ -21,7 +21,7 @@ import type {
   CodeBlockOption,
   DefaultPageBlockComponent,
 } from './default-page-block.js';
-import { EdgelessPageBlockComponent } from '../edgeless/edgeless-page-block.js';
+import type { EdgelessPageBlockComponent } from '../edgeless/edgeless-page-block.js';
 
 export interface EditingState {
   model: BaseBlockModel;
@@ -475,7 +475,6 @@ export function createBlockHub(
   pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent
 ) {
   const page = pageBlock.page;
-  const model = pageBlock.model;
   return new BlockHub({
     onDropCallback: (e, end) => {
       const dataTransfer = e.dataTransfer;
@@ -500,26 +499,5 @@ export function createBlockHub(
       );
       asyncFocusRichText(page, id);
     },
-    getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
-      return getBlockEditingStateByPosition(blocks, pageX, pageY, {
-        skipX,
-      });
-    },
-    getBlockEditingStateByCursor: (
-      blocks,
-      pageX,
-      pageY,
-      cursor,
-      size,
-      skipX,
-      dragging
-    ) => {
-      return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
-        size,
-        skipX,
-        dragging,
-      });
-    },
   });
-  this._blockHub.getAllowedBlocks = () => getAllowSelectedBlocks(model);
 }
