@@ -18,7 +18,7 @@ import type { DatabaseAddColumnTypePopup } from './components/add-column-type-po
 import type { TagSchema } from '@blocksuite/global/database';
 import { html, unsafeStatic } from 'lit/static-html.js';
 import './components/cell-container.js';
-import { getTagSchemaRenderer } from '@blocksuite/global/database';
+import { getTagSchemaRenderer } from './register.js';
 import { nanoid } from '@blocksuite/store';
 import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
 

@@ -1,7 +1,7 @@
 import {
   DatabaseCellLitElement,
   defineTagSchemaRenderer,
-} from '@blocksuite/global/database';
+} from '../../register.js';
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 

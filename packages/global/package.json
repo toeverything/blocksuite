@@ -36,8 +36,6 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
-    "@blocksuite/store": "workspace:*",
-    "@blocksuite/blocks": "workspace:*",
     "lit": "^2.6.1"
   },
   "peerDependencies": {
