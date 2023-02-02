@@ -113,14 +113,12 @@ declare module 'yjs' {
 }
 
 export class Text {
-  private _space: Space;
   private _yText: Y.Text;
 
   // TODO toggle transact by options
   private _shouldTransact = true;
 
-  constructor(space: Space, input: Y.Text | string) {
-    this._space = space;
+  constructor(input: Y.Text | string) {
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
     } else {
@@ -128,8 +126,8 @@ export class Text {
     }
   }
 
-  static fromDelta(space: Space, delta: DeltaOperation[]) {
-    const result = new Text(space, '');
+  static fromDelta(delta: DeltaOperation[]) {
+    const result = new Text('');
     result.applyDelta(delta);
     return result;
   }
@@ -139,16 +137,21 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    if (this._space.awarenessStore.isReadonly(this._space)) {
-      console.error('cannot modify data in readonly mode');
-      return;
+    if (this._shouldTransact) {
+      const doc = this._yText.doc;
+      if (!doc) {
+        throw new Error('cannot find doc');
+      }
+      doc.transact(() => {
+        callback();
+      }, doc.clientID);
+    } else {
+      callback();
     }
-    const { _space, _shouldTransact } = this;
-    _shouldTransact ? _space.transact(callback) : callback();
   }
 
   clone() {
-    return new Text(this._space, this._yText.clone());
+    return new Text(this._yText.clone());
   }
 
   split(index: number, length: number): [PrelimText, PrelimText] {
