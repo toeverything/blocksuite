@@ -10,6 +10,12 @@
 
 ## Prerequisites
 
+### Git
+
+See https://git-scm.com/downloads
+
+### Node.js
+
 We suggest develop our product under node.js LTS(Long-term support) version
 
 ### Option 1: Manually install node.js
