@@ -86,6 +86,22 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    desc: 'remove affine:database version',
+    condition: doc => {
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      if (!yVersions) return false;
+      return yVersions.get('affine:database') === 1;
+    },
+    migrate: doc => {
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      yVersions.delete('affine:database');
+    },
+  },
 ];
 
 export function tryMigrate(doc: Y.Doc) {
