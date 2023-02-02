@@ -687,9 +687,18 @@ test('press arrow up in the second line should move caret to the first line', as
     return paragraphId;
   });
 
-  await focusRichText(page);
-  await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  // await focusRichText(page);
+  const locator = page.locator('.ql-editor').nth(0);
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Can't get bounding box");
+  }
+  // Click left bottom corner
+  // Go to the start of the second line
+  await page.mouse.click(box.x + 1, box.y + box.height - 1);
   // await page.keyboard.press('ArrowDown');
+  // await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+
   await page.keyboard.press('ArrowUp');
   await type(page, '0');
   await page.keyboard.press('ArrowUp');
