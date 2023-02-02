@@ -29,6 +29,7 @@ import {
   SelectedRectsContainer,
 } from './components.js';
 import {
+  createBlockHub,
   createDragHandle,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
@@ -40,6 +41,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { DragHandle } from '../../components/index.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
+import { BlockHub } from '../../components/index.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -145,8 +147,10 @@ export class DefaultPageBlockComponent
    */
   components: {
     dragHandle: DragHandle | null;
+    blockHub: BlockHub | null;
   } = {
     dragHandle: null,
+    blockHub: null,
   };
 
   @property()
@@ -401,12 +405,38 @@ export class DefaultPageBlockComponent
         }
       )
     );
+    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
+      this.components.blockHub = createBlockHub(this);
+      this.components.blockHub.getAllowedBlocks = () =>
+        getAllowSelectedBlocks(this.model);
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this.components.blockHub) {
+              this.components.blockHub = createBlockHub(this);
+              this.components.blockHub.getAllowedBlocks = () =>
+                getAllowSelectedBlocks(this.model);
+            }
+          } else {
+            this.components.blockHub?.remove();
+            this.components.blockHub = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
     this.components.dragHandle?.remove();
+    this.components.blockHub?.remove();
 
     removeHotkeys();
     this.selection.dispose();

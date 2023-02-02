@@ -116,8 +116,7 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       width: 256px;
       height: 54px;
-      // TODO 颜色待定
-      background: #ffffff;
+      background: var(--affine-page-background);
       box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08),
         4px 4px 7px rgba(58, 76, 92, 0.04),
         -4px -4px 13px rgba(58, 76, 92, 0.02),
@@ -168,7 +167,7 @@ export class BlockHub extends NonShadowLitElement {
       right: 24px;
       bottom: 70px;
       width: 44px;
-      background: #ffffff;
+      background: var(--affine-page-background);
       box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
         0px 3px 16px -6px rgba(24, 39, 75, 0.04);
       border-radius: 10px;
@@ -197,7 +196,7 @@ export class BlockHub extends NonShadowLitElement {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: #ffffff;
+      background: var(--affine-page-background);
       border-radius: 10px;
       fill: var(--affine-line-number-color);
     }
@@ -206,7 +205,7 @@ export class BlockHub extends NonShadowLitElement {
       box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
         -4px -4px 13px rgba(58, 76, 92, 0.02),
         6px 6px 36px rgba(58, 76, 92, 0.06);
-      background: #ffffff;
+      background: var(--affine-page-background);
     }
 
     .icon-expanded {
