@@ -79,6 +79,11 @@ export class BlockHub extends NonShadowLitElement {
   private _delay = 200; // ms
 
   static styles = css`
+    affine-block-hub {
+      position: fixed;
+      z-index: 1;
+    }
+
     .affine-block-hub-container {
       width: 280px;
       position: absolute;
