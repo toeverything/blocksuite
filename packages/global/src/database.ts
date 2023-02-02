@@ -58,7 +58,7 @@ export interface TagUIComponents<
   Value = unknown
 > {
   Cell: typeof DatabaseCellLitElement;
-  CellEditing: typeof DatabaseCellLitElement;
+  CellEditing: typeof DatabaseCellLitElement | false;
   ColumnPropertyEditing: typeof DatabaseCellLitElement;
 }
 
@@ -120,7 +120,7 @@ export function defineTagSchemaRenderer<
   defaultValue: (page: Page) => Value | null,
   components: {
     Cell: typeof DatabaseCellLitElement;
-    CellEditing: typeof DatabaseCellLitElement;
+    CellEditing: typeof DatabaseCellLitElement | false;
     ColumnPropertyEditing: typeof DatabaseCellLitElement;
   },
   config: {

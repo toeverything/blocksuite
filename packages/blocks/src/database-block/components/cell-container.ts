@@ -90,7 +90,7 @@ export class DatabaseCellContainer
       this.rowModel,
       this.column
     );
-    if (this.isEditing) {
+    if (this.isEditing && renderer.components.CellEditing !== false) {
       const editingTag = renderer.components.CellEditing.tag;
       return html`
         <${editingTag}
