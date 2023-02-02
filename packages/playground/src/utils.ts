@@ -114,7 +114,7 @@ export function getOptions(): Pick<
       enable_set_remote_flag: true,
       enable_drag_handle: true,
       enable_block_hub: true,
-      enable_database: params.get('database') !== null,
+      enable_database: true,
       enable_slash_menu: params.get('slash') !== '0',
       enable_append_flavor_slash: params.get('slash') === '1',
       readonly: {
