@@ -5,7 +5,6 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
-import BlockTag = BlockSuiteInternal.BlockTag;
 
 export function empty(workspace: Workspace) {
   return new Promise<string>(resolve => {
@@ -120,60 +119,83 @@ export function database(workspace: Workspace) {
       const databaseId = page.addBlockByFlavour(
         'affine:database',
         {
-          columns: ['1', '2'],
+          columns: ['column1', 'column3', 'column2'],
         },
         frameId
       );
       const p1 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, '1'),
+          text: new page.Text(page, 'text1'),
         },
         databaseId
       );
       const p2 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, '2'),
+          text: new page.Text(page, 'text2'),
         },
         databaseId
       );
 
       page.setTagSchema({
-        meta: {
+        internalProperty: {
           color: '#ff0000',
           width: 200,
           hide: false,
+        },
+        property: {
+          decimal: 0,
         },
         name: 'Number',
-        id: '1',
+        id: 'column1',
         type: 'number',
-        decimal: 0,
       });
       page.setTagSchema({
-        meta: {
+        internalProperty: {
           color: '#ff0000',
           width: 200,
           hide: false,
         },
+        property: {
+          selection: selection,
+        },
         name: 'Select 2',
-        id: '2',
+        id: 'column2',
         type: 'select',
-        selection: selection,
+      });
+      page.setTagSchema({
+        internalProperty: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        property: {},
+        name: 'Select 2',
+        id: 'column3',
+        type: 'rich-text',
       });
 
-      page.updateBlockTag<BlockTag<BlockSuiteInternal.NumberTagSchema>>(p1, {
-        type: '1',
+      page.updateBlockTag(p1, {
+        schemaId: 'column1',
         value: 0.1,
       });
 
-      page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
-        p2,
-        {
-          type: '2',
-          value: 'TODO',
-        }
-      );
+      page.updateBlockTag(p2, {
+        schemaId: 'column2',
+        value: 'TODO',
+      });
+
+      const text = new page.YText();
+      text.insert(0, '123', { type: 'base' });
+      text.insert(0, 'code', { type: 'base' });
+      page.updateBlockTag(p2, {
+        schemaId: 'column3',
+        value: text,
+      });
+
+      // Add a paragraph after database
+      page.addBlockByFlavour('affine:paragraph', {}, frameId);
 
       requestAnimationFrame(() => {
         page.resetHistory();
