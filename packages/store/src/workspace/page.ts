@@ -876,7 +876,9 @@ export class Page extends Space<PageData> {
       if (event.path.includes('meta:tags')) {
         // todo: refactor here
         const blockId = event.path.at(-1) as string;
-        this.getBlockById(blockId)!.propsUpdated.emit();
+        const block = this.getBlockById(blockId);
+        assertExists(block);
+        block.propsUpdated.emit();
       }
     }
   }
