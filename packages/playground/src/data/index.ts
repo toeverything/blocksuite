@@ -103,6 +103,7 @@ export function database(workspace: Workspace) {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
+      page.awarenessStore.setFlag('enable_database', true);
 
       // Add page block and surface block at root level
       const pageBlockId = page.addBlockByFlavour('affine:page', {
