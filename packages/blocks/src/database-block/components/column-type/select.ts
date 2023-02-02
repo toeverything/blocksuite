@@ -8,6 +8,13 @@ import { css } from 'lit';
 
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellLitElement {
+  static styles = css`
+    :host {
+      width: 100%;
+      height: 100%;
+    }
+  `;
+
   static tag = literal`affine-database-select-cell`;
   override render() {
     return html` <div>${this.tag?.value}</div> `;

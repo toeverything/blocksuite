@@ -24,6 +24,7 @@ import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-pop
 import { onClickOutside } from './utils.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
+const ADD_COLUMN_BUTTON_WIDTH = 33;
 
 let once = true;
 if (once) {
@@ -73,12 +74,23 @@ function DatabaseHeader(block: DatabaseBlockComponent) {
         }
       )}
       <div
-        class="affine-database-block-add-column"
+        class="affine-database-block-add-column-button"
         @click=${() => {
           block.addColumnTypePopup.show = true;
         }}
       >
-        +
+        <svg
+          viewBox="0 0 16 16"
+          style=${styleMap({
+            width: '12px',
+            height: '100%',
+            fill: 'var(--affine-text-color)',
+          })}
+        >
+          <path
+            d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
+          ></path>
+        </svg>
       </div>
     </div>
   `;
@@ -97,6 +109,8 @@ function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
       }
 
       .affine-database-block-column {
+        display: flex;
+        align-items: center;
         transition: background 20ms ease-in 0s;
       }
 
@@ -195,6 +209,10 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       color: inherit;
     }
 
+    .affine-database-block-title:focus {
+      outline: none;
+    }
+
     .affine-database-block-title::placeholder {
       color: var(--affine-placeholder-color);
     }
@@ -219,6 +237,15 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
       font-size: 14px;
       line-height: 20px;
       border-top: 1px solid rgb(233, 233, 231);
+    }
+
+    .affine-database-block-add-column-button {
+      width: ${ADD_COLUMN_BUTTON_WIDTH}px;
+      height: ${ADD_COLUMN_BUTTON_WIDTH}px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   `;
 
@@ -280,7 +307,9 @@ export class DatabaseBlockComponent extends NonShadowLitElement {
     const totalWidth =
       this.columns
         .map(column => column.internalProperty.width)
-        .reduce((t, x) => t + x, 0) + FIRST_LINE_TEXT_WIDTH;
+        .reduce((t, x) => t + x, 0) +
+      FIRST_LINE_TEXT_WIDTH +
+      ADD_COLUMN_BUTTON_WIDTH;
 
     return html`
       <div>
