@@ -1,5 +1,11 @@
 import { css, html, TemplateResult } from 'lit';
-import { customElement, property, query, queryAll } from 'lit/decorators.js';
+import {
+  customElement,
+  property,
+  query,
+  queryAll,
+  state,
+} from 'lit/decorators.js';
 import { NonShadowLitElement } from '../__internal__/index.js';
 import type { DragIndicator } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
@@ -40,6 +46,21 @@ export class BlockHub extends NonShadowLitElement {
   @property()
   public getAllowedBlocks: () => BaseBlockModel[];
 
+  @state()
+  _expanded = false;
+
+  @state()
+  _isGrabbing = false;
+
+  @state()
+  _isCardListVisible = false;
+
+  @state()
+  _cardVisibleType: CardListType | null = null;
+
+  @state()
+  _showToolTip = true;
+
   @queryAll('.card-container')
   private _blockHubCards!: Array<HTMLElement>;
 
@@ -66,11 +87,6 @@ export class BlockHub extends NonShadowLitElement {
   private _indicatorHTMLTemplate!: TemplateResult<1>;
   private _lastModelState: EditingState | null = null;
   private _cursor: number | null = 0;
-  private _expanded = false;
-  private _isGrabbing = false;
-  private _isCardListVisible = false;
-  private _cardVisibleType: CardListType | null = null;
-  private _showToolTip = true;
   private _timer: number | null = null;
   private _delay = 200; // ms
 
@@ -141,6 +157,10 @@ export class BlockHub extends NonShadowLitElement {
 
     .grabbing {
       cursor: grabbing;
+    }
+
+    .grab {
+      cursor: grab;
     }
 
     .affine-block-hub-title-container {
@@ -293,6 +313,10 @@ export class BlockHub extends NonShadowLitElement {
     });
     for (const blockHubMenu of this._blockHubMenus) {
       blockHubMenu.addEventListener('mouseover', this._onBlockHubMenuMouseOver);
+      if (blockHubMenu.getAttribute('type') === 'blank') {
+        blockHubMenu.addEventListener('mousedown', this._onBlankMenuMouseDown);
+        blockHubMenu.addEventListener('mouseup', this._onBlankMenuMouseUp);
+      }
     }
     this._blockHubMenuEntry.addEventListener(
       'mouseover',
@@ -336,6 +360,13 @@ export class BlockHub extends NonShadowLitElement {
           'mouseover',
           this._onBlockHubMenuMouseOver
         );
+        if (blockHubMenu.getAttribute('type') === 'blank') {
+          blockHubMenu.removeEventListener(
+            'mousedown',
+            this._onBlankMenuMouseDown
+          );
+          blockHubMenu.removeEventListener('mouseup', this._onBlankMenuMouseUp);
+        }
       }
       this._blockHubMenuEntry.addEventListener(
         'mouseover',
@@ -390,7 +421,9 @@ export class BlockHub extends NonShadowLitElement {
     return html`
       <div class="block-hub-icons-container" ?transition=${this._expanded}>
         <div
-          class="block-hub-icon-container has-tool-tip"
+          class="block-hub-icon-container has-tool-tip ${this._isGrabbing
+            ? 'grabbing'
+            : 'grab'}"
           selected=${this._cardVisibleType === 'blank' ? 'true' : 'false'}
           type="blank"
           draggable="true"
@@ -423,6 +456,7 @@ export class BlockHub extends NonShadowLitElement {
           ${BulletedListIconLarge}
         </div>
         <div
+          style="display: none"
           class="block-hub-icon-container has-tool-tip"
           type="database"
           draggable="true"
@@ -496,7 +530,6 @@ export class BlockHub extends NonShadowLitElement {
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
       this._isCardListVisible = false;
       this._cardVisibleType = null;
-      this.requestUpdate();
     }
   };
 
@@ -506,7 +539,6 @@ export class BlockHub extends NonShadowLitElement {
       this._cardVisibleType = null;
       this._isCardListVisible = false;
     }
-    this.requestUpdate();
   };
 
   private _onDragStart = (event: DragEvent) => {
@@ -527,7 +559,6 @@ export class BlockHub extends NonShadowLitElement {
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
     this._updateSelectedRects && this._updateSelectedRects.emit([]);
-    this.requestUpdate();
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -595,7 +626,6 @@ export class BlockHub extends NonShadowLitElement {
     }
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
-    this.requestUpdate();
   };
 
   private _onDrop = (e: DragEvent) => {
@@ -603,18 +633,26 @@ export class BlockHub extends NonShadowLitElement {
     if (!e.dataTransfer.getData('affine/block-hub')) {
       return;
     }
-    assertExists(this._lastModelState);
+    if (!this._lastModelState) {
+      return;
+    }
     this._onDropCallback(e, this._lastModelState);
   };
 
   private _onCardMouseDown = (e: Event) => {
     this._isGrabbing = true;
-    this.requestUpdate();
   };
 
   private _onCardMouseUp = (e: Event) => {
     this._isGrabbing = false;
-    this.requestUpdate();
+  };
+
+  private _onBlankMenuMouseDown = () => {
+    this._isGrabbing = true;
+  };
+
+  private _onBlankMenuMouseUp = () => {
+    this._isGrabbing = false;
   };
 
   private _onBlockHubMenuMouseOver = (e: Event) => {
@@ -623,12 +661,10 @@ export class BlockHub extends NonShadowLitElement {
     assertExists(cardType);
     this._isCardListVisible = true;
     this._cardVisibleType = cardType as CardListType;
-    this.requestUpdate();
   };
 
   private _onBlockHubEntryMouseOver = () => {
     this._isCardListVisible = false;
-    this.requestUpdate();
   };
 
   override render() {
