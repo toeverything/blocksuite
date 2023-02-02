@@ -23,7 +23,6 @@ import {
   supportsChildren,
   getModelByElement,
   focusTitle,
-  getCurrentRange,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -363,6 +362,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 // We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
 // but only one bounding rect.
 // If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
+// See https://stackoverflow.com/questions/59767515/incorrect-positioning-of-getboundingclientrect-after-newline-character
 export function isAtLineEdge(range: Range) {
   if (!range.collapsed) {
     console.warn(
@@ -381,19 +381,26 @@ export function isAtLineEdge(range: Range) {
   }
   if (!textContent.length) {
     // Empty text node, it may be at empty line
-  return false;
-}
-  const newRange = range.cloneRange();
-  if (textContent.length > range.startOffset) {
-    newRange.setStart(range.startContainer, range.startOffset + 1);
-    newRange.setEnd(range.startContainer, range.startOffset + 1);
-  } else {
-    newRange.setStartAfter(range.startContainer);
-    newRange.setEndAfter(range.startContainer);
+    return false;
   }
-  return (
-    range.getBoundingClientRect().top !== newRange.getBoundingClientRect().top
-  );
+  const nextRange = range.cloneRange();
+  if (textContent.length > range.startOffset) {
+    nextRange.setStart(range.startContainer, range.startOffset + 1);
+    nextRange.setEnd(range.startContainer, range.startOffset + 1);
+    return (
+      range.getBoundingClientRect().top !==
+      nextRange.getBoundingClientRect().top
+    );
+  }
+
+  // TODO find next text node manually after switch to virgo
+  // XXX Insert a "zero width space" in the range and get the rect
+  const BOM = '\ufeff';
+  const tmpNode = document.createTextNode(BOM);
+  nextRange.insertNode(tmpNode);
+  const nextRangeRect = nextRange.getBoundingClientRect();
+  tmpNode.remove();
+  return range.getBoundingClientRect().top !== nextRangeRect.top;
 }
 
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
