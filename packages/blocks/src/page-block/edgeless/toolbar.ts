@@ -95,18 +95,34 @@ export class ShapeComponent extends LitElement {
       changedProperties.has('shapeModeColor') ||
       changedProperties.has('shapeModeShape')
     ) {
-      this._switchMouseMode();
+      this._dispatchSwitchMouseMode();
     }
   }
 
-  private _switchMouseMode() {
+  private _dispatchSwitchMouseMode() {
     const event = createEvent('affine.switch-mouse-mode', this.mouseMode);
     window.dispatchEvent(event);
   }
 
+  private _setMouseMode = (
+    mouseModeType: MouseMode['type'],
+    selectedShape: string,
+    shapeModeShape?: ShapeMouseMode['shape'],
+    shapeModeColor?: ShapeMouseMode['color']
+  ) => {
+    this.mouseModeType = mouseModeType;
+    this.selectedShape = selectedShape;
+    shapeModeShape && (this.shapeModeShape = shapeModeShape);
+    shapeModeColor && (this.shapeModeColor = shapeModeColor);
+  };
+
+  private _resetMouseMode = () => {
+    this._setMouseMode('default', '');
+  };
+
   disconnectedCallback() {
     this.mouseModeType = 'default';
-    this._switchMouseMode();
+    this._dispatchSwitchMouseMode();
     super.disconnectedCallback();
   }
 
@@ -119,10 +135,8 @@ export class ShapeComponent extends LitElement {
               class="icon-container"
               ?clicked=${this.selectedShape === name}
               @click=${() => {
-                this.mouseModeType = 'shape';
-                this.shapeModeShape = value;
-                this.selectedShape = name;
-                console.log('this._selectedShape', this.selectedShape);
+                if (this.selectedShape === name) this._resetMouseMode();
+                else this._setMouseMode('shape', name, value);
               }}
             >
               ${icon}
