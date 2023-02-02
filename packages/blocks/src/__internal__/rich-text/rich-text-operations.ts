@@ -372,9 +372,10 @@ export function isAtLineEdge(range: Range) {
     return false;
   }
   const textContent = range.startContainer.textContent;
-  if (!textContent) {
+  if (typeof textContent !== 'string') {
     console.warn(
       'Failed to determine if the caret is at line edge! no textContent in the startContainer',
+      range,
       range.startContainer
     );
     return false;
