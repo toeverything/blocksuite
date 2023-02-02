@@ -25,6 +25,7 @@ interface DomPoint {
 
 export class VEditor {
   private _rootElement: HTMLElement | null = null;
+  private _rootElementAbort: AbortController | null = null;
   private _vRange: VRange | null = null;
   private _isComposing = false;
   private _isReadOnly = false;
@@ -62,12 +63,17 @@ export class VEditor {
     this._rootElement.contentEditable = 'true';
     this._rootElement.dataset.virgoRoot = 'true';
 
+    this._rootElementAbort = new AbortController();
+
     const deltas = this.yText.toDelta() as DeltaInsert[];
     renderDeltas(deltas, this._rootElement, this._renderElement);
 
     this._rootElement.addEventListener(
       'beforeinput',
-      this._onBefoeInput.bind(this)
+      this._onBefoeInput.bind(this),
+      {
+        signal: this._rootElementAbort.signal,
+      }
     );
     this._rootElement
       .querySelectorAll('[data-virgo-text="true"]')
@@ -79,12 +85,27 @@ export class VEditor {
 
     this._rootElement.addEventListener(
       'compositionstart',
-      this._onCompositionStart.bind(this)
+      this._onCompositionStart.bind(this),
+      {
+        signal: this._rootElementAbort.signal,
+      }
     );
     this._rootElement.addEventListener(
       'compositionend',
-      this._onCompositionEnd.bind(this)
+      this._onCompositionEnd.bind(this),
+      {
+        signal: this._rootElementAbort.signal,
+      }
     );
+  }
+
+  unmount(): void {
+    if (this._rootElementAbort) {
+      this._rootElementAbort.abort();
+      this._rootElementAbort = null;
+    }
+
+    this._rootElement = null;
   }
 
   getBaseElement(node: Node): TextElement | null {
