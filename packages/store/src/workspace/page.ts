@@ -337,6 +337,12 @@ export class Page extends Space<PageData> {
     if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
+    if (
+      !this.awarenessStore.getFlag('enable_database') &&
+      flavour === 'affine:database'
+    ) {
+      throw new Error('database is not enabled');
+    }
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
