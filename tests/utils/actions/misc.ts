@@ -176,7 +176,6 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   const ids = await page.evaluate(pageId => {
     const { page } = window;
-    page.awarenessStore.setFlag('enable_database', true);
     page.captureSync();
     if (!pageId) {
       pageId = page.addBlockByFlavour('affine:page');

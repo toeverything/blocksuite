@@ -5,7 +5,9 @@ import {
 } from './utils/actions/index.js';
 
 test('init database block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    enable_database: true,
+  });
   await initEmptyDatabaseState(page);
 
   const locator = page.locator('affine-database');
