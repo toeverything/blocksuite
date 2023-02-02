@@ -6,10 +6,10 @@ import { customElement, query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 import { VEditor } from '@blocksuite/virgo';
 
-@customElement('affine-database-rich-text-cell-preview')
-class TextCellPreview extends DatabaseCellLitElement {
+@customElement('affine-database-rich-text-cell')
+class TextCell extends DatabaseCellLitElement {
   vEditor: VEditor | null = null;
-  static tag = literal`affine-database-rich-text-cell-preview`;
+  static tag = literal`affine-database-rich-text-cell`;
 
   @query('.rich-text-container')
   private _container!: HTMLDivElement;
@@ -72,7 +72,7 @@ export const RichTextTagSchemaRenderer = defineTagSchemaRenderer(
   () => ({}),
   page => new page.YText(''),
   {
-    Cell: TextCellPreview,
+    Cell: TextCell,
     CellEditing: false,
     ColumnPropertyEditing: TextColumnPropertyEditing,
   },

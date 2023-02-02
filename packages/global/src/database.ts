@@ -32,7 +32,7 @@ export abstract class DatabaseCellLitElement extends LitElement {
  */
 const registry = new Map<TagSchemaRenderer['type'], TagSchemaRenderer>();
 
-export interface SchemaMeta {
+export interface SchemaInternalProperty {
   /**
    * color of the tag
    */
@@ -62,7 +62,8 @@ export interface TagUIComponents<
   ColumnPropertyEditing: typeof DatabaseCellLitElement;
 }
 
-export type TagProperty<Property extends Record<string, unknown>> = Property;
+export type TagSchemaProperty<Property extends Record<string, unknown>> =
+  Property;
 
 export interface TagSchema<
   Type extends string = string,
@@ -78,8 +79,8 @@ export interface TagSchema<
    * column name
    */
   name: string;
-  internalProperty: SchemaMeta;
-  property: TagProperty<Property>;
+  internalProperty: SchemaInternalProperty;
+  property: TagSchemaProperty<Property>;
   /**
    * this value is just for hold the `BaseValue`,
    *  don't use this value in the runtime.

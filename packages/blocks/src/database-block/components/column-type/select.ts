@@ -6,9 +6,9 @@ import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 import { css } from 'lit';
 
-@customElement('affine-database-select-cell-preview')
-class SelectCellPreview extends DatabaseCellLitElement {
-  static tag = literal`affine-database-select-cell-preview`;
+@customElement('affine-database-select-cell')
+class SelectCell extends DatabaseCellLitElement {
+  static tag = literal`affine-database-select-cell`;
   override render() {
     return html` <div>${this.tag?.value}</div> `;
   }
@@ -86,7 +86,7 @@ export const SelectTagSchemaRenderer = defineTagSchemaRenderer(
   }),
   () => [] as string[],
   {
-    Cell: SelectCellPreview,
+    Cell: SelectCell,
     CellEditing: SelectCellEditing,
     ColumnPropertyEditing: SelectColumnPropertyEditing,
   },

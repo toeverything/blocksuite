@@ -6,9 +6,9 @@ import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 import { html } from 'lit';
 
-@customElement('affine-database-number-cell-preview')
-class NumberCellPreview extends DatabaseCellLitElement {
-  static tag = literal`affine-database-number-cell-preview`;
+@customElement('affine-database-number-cell')
+class NumberCell extends DatabaseCellLitElement {
+  static tag = literal`affine-database-number-cell`;
 
   render() {
     return html` <span>${this.tag?.value}</span> `;
@@ -58,7 +58,7 @@ export const NumberTagSchemaRenderer = defineTagSchemaRenderer(
   }),
   () => 0,
   {
-    Cell: NumberCellPreview,
+    Cell: NumberCell,
     CellEditing: NumberCellEditing,
     ColumnPropertyEditing: NumberColumnPropertyEditing,
   },

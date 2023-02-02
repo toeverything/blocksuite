@@ -5,9 +5,9 @@ import {
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
-@customElement('affine-database-text-cell-preview')
-class TextCellPreview extends DatabaseCellLitElement {
-  static tag = literal`affine-database-text-cell-preview`;
+@customElement('affine-database-text-cell')
+class TextCell extends DatabaseCellLitElement {
+  static tag = literal`affine-database-text-cell`;
 }
 
 @customElement('affine-database-text-cell-editing')
@@ -24,7 +24,7 @@ export const TextTagSchemaRenderer = defineTagSchemaRenderer(
   () => ({}),
   () => '',
   {
-    Cell: TextCellPreview,
+    Cell: TextCell,
     CellEditing: TextCellEditing,
     ColumnPropertyEditing: TextColumnPropertyEditing,
   },
