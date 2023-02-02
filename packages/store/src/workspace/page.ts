@@ -872,6 +872,12 @@ export class Page extends Space<PageData> {
           model.childrenUpdated.emit();
         }
       }
+    } else {
+      if (event.path.includes('meta:tags')) {
+        // todo: refactor here
+        const blockId = event.path.at(-1) as string;
+        this.getBlockById(blockId)!.propsUpdated.emit();
+      }
     }
   }
 
