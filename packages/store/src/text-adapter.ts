@@ -114,6 +114,10 @@ declare module 'yjs' {
 
 export class Text {
   private _yText: Y.Text;
+  /**
+   * @internal
+   */
+  public delayedJobs: (() => void)[] = [];
 
   // TODO toggle transact by options
   private _shouldTransact = true;
@@ -126,9 +130,18 @@ export class Text {
     }
   }
 
+  /**
+   * @internal
+   */
+  public doDelayedJobs() {
+    this.delayedJobs.forEach(cb => cb());
+    this.delayedJobs = [];
+  }
+
   static fromDelta(delta: DeltaOperation[]) {
     const result = new Text('');
-    result.applyDelta(delta);
+    // In the first time, yDoc is not exist.
+    result.delayedJobs.push(() => result.applyDelta(delta));
     return result;
   }
 

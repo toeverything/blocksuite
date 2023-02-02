@@ -89,6 +89,7 @@ export function trySyncTextProp(
   if (text instanceof Text) {
     // @ts-ignore
     yBlock.set('prop:text', text._yText);
+    text.doDelayedJobs();
     return;
   }
 
