@@ -395,9 +395,8 @@ export function isAtLineEdge(range: Range) {
   }
 
   // TODO find next text node manually after switch to virgo
-  // XXX Insert a "zero width space" in the range and get the rect
-  const BOM = '\ufeff';
-  const tmpNode = document.createTextNode(BOM);
+  // XXX Insert a tmp text node in the range and get the rect
+  const tmpNode = document.createTextNode('.');
   nextRange.insertNode(tmpNode);
   const nextRangeRect = nextRange.getBoundingClientRect();
   tmpNode.remove();
