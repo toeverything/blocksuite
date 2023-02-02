@@ -13,7 +13,7 @@ import {
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { AwarenessStore, BlobUploadState } from '../awareness.js';
 import type { z } from 'zod';
-import { BlockSchema } from '../base.js';
+import { BlockSchema, internalValues } from '../base.js';
 
 export interface PageMeta {
   id: string;
@@ -313,7 +313,7 @@ export class Workspace {
       this.flavourSchemaMap.set(schema.model.flavour, schema);
       this.flavourInitialPropsMap.set(
         schema.model.flavour,
-        schema.model.props()
+        schema.model.propsCreator(internalValues)
       );
     });
     return this;

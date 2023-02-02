@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { Quill } from 'quill';
 import { uuidv4 } from 'lib0/random.js';
-import { BaseBlockModel } from '../base.js';
+import { BaseBlockModel, internalValues } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import {
   Text,
@@ -682,11 +682,7 @@ export class Page extends Space<PageData> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     blockModel.flavour = schema.model.flavour as any;
     blockModel.tag = schema.model.tag;
-    const modelProps = schema.model.propsCreator({
-      Text: (input = '') => {
-        return new this.Text(this, input);
-      },
-    });
+    const modelProps = schema.model.propsCreator(internalValues);
     Object.entries(modelProps).forEach(([key, value]) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (blockModel as any)[key] = props[key] ?? value;

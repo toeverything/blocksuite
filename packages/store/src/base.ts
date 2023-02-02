@@ -3,7 +3,7 @@ import type { TextType } from './text-adapter.js';
 import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
-import type { Text } from './text-adapter.js';
+import { Text } from './text-adapter.js';
 
 const FlavourSchema = z.string();
 const TagSchema = z.object({
@@ -44,6 +44,12 @@ export type SchemaToModel<
 export interface InternalValues {
   Text: (input?: Y.Text | string) => Text;
 }
+
+export const internalValues = Object.freeze({
+  Text: (input: Y.Text | string = '') => {
+    return new Text(input);
+  },
+});
 
 export type PropsSetter<Props extends Record<string, unknown>> = (
   props: Props
