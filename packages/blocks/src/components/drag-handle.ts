@@ -188,7 +188,7 @@ export class DragHandle extends LitElement {
       return;
     }
     const modelState = this._getBlockEditingStateByPosition(
-      this.getDropAllowedBlocks(this._startModelState?.model ?? null),
+      this.getDropAllowedBlocks(null),
       event.raw.pageX,
       event.raw.pageY,
       true
