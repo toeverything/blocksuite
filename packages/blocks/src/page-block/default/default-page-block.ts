@@ -29,7 +29,6 @@ import {
   SelectedRectsContainer,
 } from './components.js';
 import {
-  createBlockHub,
   createDragHandle,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
@@ -42,6 +41,7 @@ import type { DragHandle } from '../../components/index.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import type { BlockHub } from '../../components/index.js';
+import { createBlockHub } from '../utils/components.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };

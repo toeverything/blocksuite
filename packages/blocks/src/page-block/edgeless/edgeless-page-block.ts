@@ -36,7 +36,8 @@ import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import type { BlockHub } from '../../components/index.js';
-import { createBlockHub, getAllowSelectedBlocks } from '../default/utils.js';
+import { getAllowSelectedBlocks } from '../default/utils.js';
+import { createBlockHub } from '../utils/components.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
