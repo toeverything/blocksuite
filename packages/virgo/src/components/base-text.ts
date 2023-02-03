@@ -28,13 +28,13 @@ export class BaseText extends LitElement {
     const unitText = new VirgoUnitText();
     unitText.delta = this.delta;
 
-    return html`
-      <span
-        data-virgo-element="true"
-        style=${virgoTextStyles(this.delta.attributes)}
-        >${unitText}</span
-      >
-    `;
+    // we need to avoid \n appearing before and after the span element, which will
+    // cause the unexpected space
+    return html`<span
+      data-virgo-element="true"
+      style=${virgoTextStyles(this.delta.attributes)}
+      >${unitText}</span
+    >`;
   }
 
   createRenderRoot() {
