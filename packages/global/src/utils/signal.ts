@@ -91,7 +91,7 @@ export class Signal<T = void> implements Disposable {
     });
   };
 
-  once(callback: (v: T) => unknown): void {
+  once(callback: (v: T) => unknown): Disposable {
     let dispose: Disposable['dispose'] | undefined = undefined;
     const handler = (v: T) => {
       callback(v);
@@ -99,7 +99,9 @@ export class Signal<T = void> implements Disposable {
         dispose();
       }
     };
-    dispose = this.on(handler).dispose;
+    const disposable = this.on(handler);
+    dispose = disposable.dispose;
+    return disposable;
   }
 
   unshift(callback: (v: T) => unknown): Disposable {
