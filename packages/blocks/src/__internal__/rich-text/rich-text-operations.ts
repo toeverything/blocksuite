@@ -487,10 +487,21 @@ function shiftRange(range: Range): Range | null {
   return nextRange;
 }
 
-// We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
-// but only one bounding rect.
-// If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
-// See https://stackoverflow.com/questions/59767515/incorrect-positioning-of-getboundingclientrect-after-newline-character
+/**
+ * It will return the next range if the cursor is at the edge of the block, otherwise return false.
+ *
+ * We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
+ * but only one bounding rect.
+ * If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
+ *
+ * See the following example:
+ * ```markdown
+ * long text| <- `range.getBoundingClientRect()` will return rect at here
+ * |line wrap <- caret at the start of the second line
+ * ```
+ *
+ * See https://stackoverflow.com/questions/59767515/incorrect-positioning-of-getboundingclientrect-after-newline-character
+ */
 export function isAtLineEdge(range: Range) {
   if (!range.collapsed) {
     console.warn(
@@ -504,7 +515,11 @@ export function isAtLineEdge(range: Range) {
     return false;
   }
   const nextRangeRect = nextRange.getBoundingClientRect();
-  return range.getBoundingClientRect().top !== nextRangeRect.top;
+  const noLineEdge = range.getBoundingClientRect().top === nextRangeRect.top;
+  if (noLineEdge) {
+    return false;
+  }
+  return nextRange;
 }
 
 export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
