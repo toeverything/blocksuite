@@ -359,6 +359,124 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   );
 }
 
+function findTextNode(node: Node): Node | null {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node;
+  }
+  // Try to find the text node in the child nodes
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const textNode = findTextNode(node.childNodes[i]);
+    if (textNode) {
+      return textNode;
+    }
+  }
+  return null;
+}
+
+function findNextTextNode(
+  node: Node,
+  endCondition = (node: Node) =>
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/contentEditable
+    node instanceof HTMLElement && node.contentEditable === 'true'
+): Node | null {
+  while (node.parentNode) {
+    const parentNode = node.parentNode;
+    if (!parentNode) {
+      console.warn('Failed to find text node from node! no parent node', node);
+      return null;
+    }
+    const nodeIdx = Array.from(parentNode.childNodes).indexOf(
+      node as ChildNode
+    );
+    if (nodeIdx === -1) {
+      console.warn('Failed to find text node from node! no node index', node);
+      return null;
+    }
+    for (let i = nodeIdx + 1; i < parentNode.childNodes.length; i++) {
+      const textNode = findTextNode(parentNode.childNodes[i]);
+      if (textNode) {
+        return textNode;
+      }
+    }
+
+    if (endCondition(parentNode)) {
+      return null;
+    }
+    node = parentNode;
+  }
+  return null;
+}
+
+/**
+ * Try to shift the range to the next caret point.
+ * If the range is already at the end of the block, return null.
+ *
+ * Reference to https://www.w3.org/TR/2000/REC-DOM-Level-2-Traversal-Range-20001113/ranges.html
+ */
+function shiftRange(range: Range): Range | null {
+  if (!range.collapsed) {
+    throw new Error('Failed to shift range! expected a collapsed range');
+  }
+  const startContainer = range.startContainer;
+
+  // If the startNode is a Node of type Text, Comment, or CDataSection,
+  // then startOffset is the number of characters from the start of startNode.
+  // For other Node types, startOffset is the number of child nodes between the start of the startNode.
+  // https://developer.mozilla.org/en-US/docs/Web/API/Range/setStart
+  const isTextLikeNode =
+    startContainer.nodeType === Node.TEXT_NODE ||
+    startContainer.nodeType === Node.COMMENT_NODE ||
+    startContainer.nodeType === Node.CDATA_SECTION_NODE;
+  if (!isTextLikeNode) {
+    // Even if we can shift the range if the node is a not text node.
+    // But in most normal situation, the node should be a text node.
+    // To simplify the processing, we just throw an warn here.
+    // If we really need to support this case, we can add it later.
+    console.warn(
+      'Failed to shiftRange! Unexpected startContainer nodeType',
+      startContainer
+    );
+    return null;
+  }
+  const textContent = startContainer.textContent;
+  if (typeof textContent !== 'string') {
+    // If the node is a `document` or a `doctype`, textContent returns `null`.
+    // See https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent
+    throw new Error('Failed to shift range! unexpected startContainer');
+  }
+
+  // const maxOffset = isTextLikeNode
+  //   ? textContent.length
+  //   : startContainer.childNodes.length;
+  const maxOffset = textContent.length;
+
+  if (
+    // isTextLikeNode &&
+    !textContent.length
+  ) {
+    // Empty text node, it may be at empty line
+    return null;
+  }
+
+  if (maxOffset > range.startOffset) {
+    const nextRange = range.cloneRange();
+    nextRange.setStart(range.startContainer, range.startOffset + 1);
+    nextRange.setEnd(range.startContainer, range.startOffset + 1);
+    return nextRange;
+  }
+
+  // Try to shift to the next text node
+  const nextTextNode = findNextTextNode(startContainer);
+  if (!nextTextNode) {
+    return null;
+  }
+
+  const nextRange = range.cloneRange();
+  nextRange.setStart(nextTextNode, 0);
+  nextRange.setEnd(nextTextNode, 0);
+  return nextRange;
+}
+
 // We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
 // but only one bounding rect.
 // If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
@@ -371,35 +489,11 @@ export function isAtLineEdge(range: Range) {
     );
     return false;
   }
-  const textContent = range.startContainer.textContent;
-  if (typeof textContent !== 'string') {
-    console.warn(
-      'Failed to determine if the caret is at line edge! no textContent in the startContainer',
-      range,
-      range.startContainer
-    );
+  const nextRange = shiftRange(range);
+  if (!nextRange) {
     return false;
   }
-  if (!textContent.length) {
-    // Empty text node, it may be at empty line
-    return false;
-  }
-  const nextRange = range.cloneRange();
-  if (textContent.length > range.startOffset) {
-    nextRange.setStart(range.startContainer, range.startOffset + 1);
-    nextRange.setEnd(range.startContainer, range.startOffset + 1);
-    return (
-      range.getBoundingClientRect().top !==
-      nextRange.getBoundingClientRect().top
-    );
-  }
-
-  // TODO find next text node manually after switch to virgo
-  // XXX Insert a tmp text node in the range and get the rect
-  const tmpNode = document.createTextNode('.');
-  nextRange.insertNode(tmpNode);
   const nextRangeRect = nextRange.getBoundingClientRect();
-  tmpNode.remove();
   return range.getBoundingClientRect().top !== nextRangeRect.top;
 }
 
