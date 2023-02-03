@@ -7,7 +7,7 @@ import { tryUpdateFrameSize } from './container-operations.js';
 
 export function createBlockHub(
   pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent,
-  updateSelectedRects?: Signal<DOMRect[]>
+  updateSelectedRectsSignal?: Signal<DOMRect[]>
 ) {
   const page = pageBlock.page;
   return new BlockHub(
@@ -37,6 +37,6 @@ export function createBlockHub(
         tryUpdateFrameSize(page, 1);
       },
     },
-    updateSelectedRects
+    updateSelectedRectsSignal
   );
 }

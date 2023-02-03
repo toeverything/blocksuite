@@ -80,7 +80,7 @@ export class BlockHub extends NonShadowLitElement {
   private _blockHubMenuEntry!: HTMLElement;
 
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-  private _updateSelectedRects: Signal<DOMRect[]> | null = null;
+  private _updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
@@ -281,7 +281,7 @@ export class BlockHub extends NonShadowLitElement {
     options: {
       onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
     },
-    updateSelectedRects?: Signal<DOMRect[]>
+    updateSelectedRectsSignal?: Signal<DOMRect[]>
   ) {
     super();
     this.getAllowedBlocks = () => {
@@ -289,7 +289,8 @@ export class BlockHub extends NonShadowLitElement {
       return [];
     };
     this._onDropCallback = options.onDropCallback;
-    updateSelectedRects && (this._updateSelectedRects = updateSelectedRects);
+    updateSelectedRectsSignal &&
+      (this._updateSelectedRectsSignal = updateSelectedRectsSignal);
     document.body.appendChild(this);
   }
 
@@ -558,7 +559,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this._updateSelectedRects && this._updateSelectedRects.emit([]);
+    this._updateSelectedRectsSignal && this._updateSelectedRectsSignal.emit([]);
   };
 
   private _onMouseDown = (e: MouseEvent) => {
