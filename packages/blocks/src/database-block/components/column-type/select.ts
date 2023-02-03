@@ -5,6 +5,7 @@ import {
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 import { css } from 'lit';
+import { createPopper } from '@popperjs/core';
 
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellLitElement {
@@ -27,9 +28,7 @@ class SelectCellEditing extends DatabaseCellLitElement {
 
   static styles = css`
     :host {
-      position: fixed;
-      height: 200px;
-      z-index: 2000;
+      z-index: 2;
       background: var(--affine-popover-background);
       box-shadow: var(--affine-popover-shadow);
     }
@@ -38,6 +37,24 @@ class SelectCellEditing extends DatabaseCellLitElement {
 
   protected firstUpdated() {
     this.style.width = `${this.column.internalProperty.width}px`;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    createPopper(
+      {
+        getBoundingClientRect: () => {
+          const rect = this.rowHost.getBoundingClientRect();
+          rect.y = rect.y - rect.height;
+          return rect;
+        },
+      },
+      this,
+      {
+        placement: 'bottom',
+        strategy: 'fixed',
+      }
+    );
   }
 
   override render() {
