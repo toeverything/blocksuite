@@ -69,7 +69,7 @@ export class EmbedResizeManager {
           },
         ]);
         const activeImg = this.state.activeComponent?.querySelector(
-          '.resizable-img'
+          '.resizable-img img'
         ) as HTMLDivElement;
         if (activeImg) {
           activeImg.style.width = width + 'px';
