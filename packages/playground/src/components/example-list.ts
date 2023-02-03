@@ -24,10 +24,6 @@ export class ExampleList extends LitElement {
     }
   `;
 
-  connectedCallback() {
-    super.connectedCallback();
-  }
-
   protected render() {
     return html`
       <div class="container">
