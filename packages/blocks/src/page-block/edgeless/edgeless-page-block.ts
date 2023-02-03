@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { Disposable, Signal, Page } from '@blocksuite/store';
+import { Signal, Page, DisposableGroup } from '@blocksuite/store';
 import type {
   FrameBlockModel,
   MouseMode,
@@ -35,6 +35,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import type { BlockHub } from '../../components/index.js';
+import { getAllowSelectedBlocks } from '../default/utils.js';
+import { createBlockHub } from '../utils/components.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -120,7 +123,13 @@ export class EdgelessPageBlockComponent
 
   getService = getService;
 
-  private _historyDisposable!: Disposable;
+  components: {
+    blockHub: BlockHub | null;
+  } = {
+    blockHub: null,
+  };
+
+  private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
   private _bindHotkeys() {
@@ -185,6 +194,37 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
+  private _initBlockHub = () => {
+    if (
+      this.page.awarenessStore.getFlag('enable_block_hub') &&
+      !this.components.blockHub
+    ) {
+      this.components.blockHub = createBlockHub(this);
+      this.components.blockHub.getAllowedBlocks = () =>
+        getAllowSelectedBlocks(this.pageModel);
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this.components.blockHub) {
+              this.components.blockHub = createBlockHub(this);
+              this.components.blockHub.getAllowedBlocks = () =>
+                getAllowSelectedBlocks(this.pageModel);
+            }
+          } else {
+            this.components.blockHub?.remove();
+            this.components.blockHub = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
@@ -212,11 +252,12 @@ export class EdgelessPageBlockComponent
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
     this.signals.shapeUpdated.on(() => this.requestUpdate());
-    this._historyDisposable = this.page.signals.historyUpdated.on(() => {
+    const historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
       this.requestUpdate();
     });
-
+    this._disposables.add(historyDisposable);
+    this._initBlockHub();
     this._bindHotkeys();
 
     tryUpdateFrameSize(this.page, this.viewport.zoom);
@@ -238,12 +279,13 @@ export class EdgelessPageBlockComponent
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this.components.blockHub?.remove();
 
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
     this.signals.shapeUpdated.dispose();
-    this._historyDisposable.dispose();
+    this._disposables.dispose();
     this._selection.dispose();
     this._removeHotkeys();
   }
@@ -276,7 +318,7 @@ export class EdgelessPageBlockComponent
 
     return html`
       <div class="affine-edgeless-surface-block-container">
-        <canvas class="affine-surface-canvas"> </canvas>
+        <canvas class="affine-surface-canvas"></canvas>
       </div>
       <div class="affine-edgeless-page-block-container">
         <style>

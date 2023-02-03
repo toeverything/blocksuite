@@ -117,6 +117,7 @@ test('drag blank line into text area', async ({ page }) => {
     { steps: 50 }
   );
 
+  await page.waitForTimeout(50);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
@@ -124,7 +125,7 @@ test('drag blank line into text area', async ({ page }) => {
   prop:title=""
 >
   <affine:frame
-    prop:xywh="[0,0,720,112]"
+    prop:xywh="[0,0,720,152]"
   >
     <affine:paragraph
       prop:text="123"
@@ -146,7 +147,7 @@ test('drag blank line into text area', async ({ page }) => {
   );
 });
 
-test('drag quote block from text menu into text area and blockHub text cards will disappear', async ({
+test('drag Heading1 block from text menu into text area and blockHub text cards will disappear', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -165,17 +166,18 @@ test('drag quote block from text menu into text area and blockHub text cards wil
   );
   await expect(blockHubTextContainer).toBeVisible();
 
-  const quotePos = await getCenterPosition(
+  const headingPos = await getCenterPosition(
     page,
-    '.has-tool-tip[affine-flavour="affine:paragraph"][affine-type="quote"]'
+    '.has-tool-tip[affine-flavour="affine:paragraph"][affine-type="h1"]'
   );
   const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
   await dragBetweenCoords(
     page,
-    { x: quotePos.x, y: quotePos.y },
+    { x: headingPos.x, y: headingPos.y },
     { x: targetPos.x, y: targetPos.y + 5 },
     { steps: 50 }
   );
+  await page.waitForTimeout(50);
 
   await assertStoreMatchJSX(
     page,
@@ -184,14 +186,14 @@ test('drag quote block from text menu into text area and blockHub text cards wil
   prop:title=""
 >
   <affine:frame
-    prop:xywh="[0,0,720,112]"
+    prop:xywh="[0,0,720,186]"
   >
     <affine:paragraph
       prop:text="123"
       prop:type="text"
     />
     <affine:paragraph
-      prop:type="quote"
+      prop:type="h1"
     />
     <affine:paragraph
       prop:text="456"
@@ -237,6 +239,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
     { x: targetPos.x, y: targetPos.y + 5 },
     { steps: 50 }
   );
+  await page.waitForTimeout(50);
 
   await assertStoreMatchJSX(
     page,
@@ -245,7 +248,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
   prop:title=""
 >
   <affine:frame
-    prop:xywh="[0,0,720,112]"
+    prop:xywh="[0,0,720,152]"
   >
     <affine:paragraph
       prop:text="123"
