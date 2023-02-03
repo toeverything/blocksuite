@@ -1,4 +1,4 @@
-export interface RowHost {
+export interface RowHost extends HTMLElement {
   setEditing(isEditing: boolean): void;
   // todo: type improvement
   setValue(value: unknown): void;
