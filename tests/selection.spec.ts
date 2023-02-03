@@ -25,6 +25,7 @@ import {
   SHORT_KEY,
   switchEditorMode,
   type,
+  getIndexCoordinate,
 } from './utils/actions/index.js';
 import { expect } from '@playwright/test';
 import {
@@ -867,4 +868,51 @@ test('should add a new line when clicking the bottom of the last non-text block'
 `, // code block
     'ABC',
   ]);
+});
+
+test.only('should select texts on dragging around the page', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const coord = await getIndexCoordinate(page, [1, 2]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.up();
+  expect(await getSelectedTextByQuill(page)).toBe('45');
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x - 20, coord.y);
+  // ↓
+  await page.mouse.move(coord.x - 20, coord.y + 90);
+  await page.mouse.up();
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '45']);
+
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.down();
+  // →
+  await page.mouse.move(coord.x + 20, coord.y);
+  // ↓
+  await page.mouse.move(coord.x + 20, coord.y + 90);
+  await page.mouse.up();
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '45']);
 });
