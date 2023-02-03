@@ -47,7 +47,9 @@ function getBlockWithOptionBarRect(
     assertExists(codeBlockDom);
     return codeBlockDom;
   } else if (block.flavour === 'affine:embed' && block.type === 'image') {
-    const imgElement = hoverDom.querySelector('img');
+    const imgElement = hoverDom.querySelector(
+      '.resizable-img'
+    ) as HTMLDivElement;
     assertExists(imgElement);
     return imgElement;
   }
@@ -246,8 +248,13 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
     detectRect = getDetectRect(block, blockRect);
   } else {
     blockRect = hoverDom.getBoundingClientRect() as DOMRect;
-    // in a nested block, we should get `rich-text` which is its own editing area
-    if (block.children.length) {
+    if (block.flavour === 'affine:database') {
+      // in a database block, `.affine-database-block-title` which is its own editing area
+      detectRect = hoverDom
+        ?.querySelector('.affine-database-block-title')
+        ?.getBoundingClientRect() as DOMRect;
+    } else if (block.children.length) {
+      // in a nested block, `rich-text` which is its own editing area
       detectRect = hoverDom
         ?.querySelector('rich-text')
         ?.getBoundingClientRect() as DOMRect;

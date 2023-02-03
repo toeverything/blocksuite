@@ -1,5 +1,4 @@
 export * from './consts/blockhub.js';
-export * from './consts/database-block.js';
 export * from './consts/affine-style-consts.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id' as const;

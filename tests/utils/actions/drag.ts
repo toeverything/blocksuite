@@ -24,7 +24,11 @@ export async function dragBetweenIndices(
   [startRichTextIndex, startQuillIndex]: [number, number],
   [endRichTextIndex, endQuillIndex]: [number, number],
   startCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
-  endCoordOffSet: { x: number; y: number } = { x: 0, y: 0 }
+  endCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
+  options?: {
+    beforeMouseUp?: () => Promise<void>;
+    steps?: number;
+  }
 ) {
   const startCoord = await page.evaluate(
     ({ startRichTextIndex, startQuillIndex, startCoordOffSet }) => {
@@ -61,7 +65,7 @@ export async function dragBetweenIndices(
     { endRichTextIndex, endQuillIndex, endCoordOffSet }
   );
 
-  await dragBetweenCoords(page, startCoord, endCoord);
+  await dragBetweenCoords(page, startCoord, endCoord, options);
 }
 
 export async function dragOverTitle(page: Page) {
@@ -90,7 +94,7 @@ export async function dragEmbedResizeByBottomRight(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left + 110, y },
+      to: { x: bottomRightButtonBound.left - 334, y },
     };
   });
   await dragBetweenCoords(page, from, to, {
@@ -107,7 +111,7 @@ export async function dragEmbedResizeByBottomLeft(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left - 110, y },
+      to: { x: bottomRightButtonBound.left + 344, y },
     };
   });
   await dragBetweenCoords(page, from, to, {

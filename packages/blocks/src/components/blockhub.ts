@@ -79,6 +79,11 @@ export class BlockHub extends NonShadowLitElement {
   private _delay = 200; // ms
 
   static styles = css`
+    affine-block-hub {
+      position: fixed;
+      z-index: 1;
+    }
+
     .affine-block-hub-container {
       width: 280px;
       position: absolute;
@@ -253,12 +258,16 @@ export class BlockHub extends NonShadowLitElement {
     ${toolTipStyle}
   `;
 
+  private enable_database: boolean;
+
   constructor(options: {
+    enable_database: boolean;
     onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
     getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
   }) {
     super();
+    this.enable_database = options.enable_database;
     this.getAllowedBlocks = () => {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
@@ -419,24 +428,30 @@ export class BlockHub extends NonShadowLitElement {
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
           ${BulletedListIconLarge}
         </div>
-        <div
-          class="block-hub-icon-container has-tool-tip"
-          type="database"
-          draggable="true"
-          affine-flavour="affine:database"
-          selected=${this._cardVisibleType === 'database' ? 'true' : 'false'}
-        >
-          ${DatabaseTableView}
-          <tool-tip
-            inert
-            role="tooltip"
-            tip-position="left"
-            style="top: 5px"
-            ?hidden=${!this._showToolTip}
-          >
-            Drag to create a database
-          </tool-tip>
-        </div>
+        ${this.enable_database
+          ? html`
+              <div
+                class="block-hub-icon-container has-tool-tip"
+                type="database"
+                draggable="true"
+                affine-flavour="affine:database"
+                selected=${this._cardVisibleType === 'database'
+                  ? 'true'
+                  : 'false'}
+              >
+                ${DatabaseTableView}
+                <tool-tip
+                  inert
+                  role="tooltip"
+                  tip-position="left"
+                  style="top: 5px"
+                  ?hidden=${!this._showToolTip}
+                >
+                  Drag to create a database
+                </tool-tip>
+              </div>
+            `
+          : null}
         <div class="divider"></div>
       </div>
     `;

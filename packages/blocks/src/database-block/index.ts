@@ -1,2 +1,2 @@
-export { DatabaseBlock } from './database-block.js';
+export { DatabaseBlockComponent as DatabaseBlock } from './database-block.js';
 export type { DatabaseBlockModel } from './database-model.js';

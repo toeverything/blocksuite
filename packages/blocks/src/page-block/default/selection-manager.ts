@@ -19,6 +19,7 @@ import {
   isTitleElement,
   isDatabaseInput,
   asyncFocusRichText,
+  isDatabase,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -239,7 +240,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'database';
 
 export class PageSelectionState {
   type: PageSelectionType;
@@ -340,6 +341,7 @@ export class DefaultSelectionManager {
 
     const createBlockHub = () => {
       this._blockHub = new BlockHub({
+        enable_database: !!this.page.awarenessStore.getFlag('enable_database'),
         onDropCallback: (e, end) => {
           const dataTransfer = e.dataTransfer;
           assertExists(dataTransfer);
@@ -509,6 +511,11 @@ export class DefaultSelectionManager {
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
+      return;
+    }
+    if (isDatabase(e)) {
+      this.state.type = 'database';
+      // todo: add manager
       return;
     }
 
