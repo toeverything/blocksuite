@@ -26,6 +26,7 @@ import {
   getBlockEditingStateByCursor,
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 type BlockHubItem = {
   flavour: string;
@@ -61,6 +62,9 @@ export class BlockHub extends NonShadowLitElement {
   @state()
   _showToolTip = true;
 
+  @state()
+  _maxHeight = 2000;
+
   @queryAll('.card-container')
   private _blockHubCards!: Array<HTMLElement>;
 
@@ -90,6 +94,8 @@ export class BlockHub extends NonShadowLitElement {
   private _timer: number | null = null;
   private _delay = 200; // ms
   private enable_database: boolean;
+  private _bottomDistance = 70;
+  private _topDistance = 24;
 
   static styles = css`
     affine-block-hub {
@@ -102,6 +108,7 @@ export class BlockHub extends NonShadowLitElement {
       position: absolute;
       right: calc(100% + 10px);
       top: calc(50%);
+      overflow-y: auto;
       transform: translateY(-50%);
       display: none;
       justify-content: center;
@@ -187,7 +194,6 @@ export class BlockHub extends NonShadowLitElement {
       padding: 4px;
       position: fixed;
       right: 24px;
-      bottom: 70px;
       width: 44px;
       background: var(--affine-page-background);
       box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
@@ -344,6 +350,8 @@ export class BlockHub extends NonShadowLitElement {
       'transitionstart',
       this._onTransitionStart
     );
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
   }
 
   disconnectedCallback() {
@@ -358,6 +366,7 @@ export class BlockHub extends NonShadowLitElement {
     isFirefox &&
       document.removeEventListener('dragover', this._onDragOverDocument);
     this.removeEventListener('mousedown', this._onMouseDown);
+    window.removeEventListener('resize', this._onResize);
 
     if (this.hasUpdated) {
       this._blockHubCards.forEach(card => {
@@ -497,11 +506,16 @@ export class BlockHub extends NonShadowLitElement {
     type: string,
     title: string
   ) => {
+    const styles = styleMap({
+      maxHeight: `${this._maxHeight}px`,
+      overflowY: this._maxHeight < 800 ? 'scroll' : 'unset',
+    });
     return html`
       <div
         class="affine-block-hub-container ${this._shouldCardDisplay(type)
           ? 'visible'
           : ''}"
+        style="${styles}"
         type=${type}
       >
         <div>
@@ -681,9 +695,18 @@ export class BlockHub extends NonShadowLitElement {
     this._isCardListVisible = false;
   };
 
+  private _onResize = () => {
+    const boundingClientRect = document.body.getBoundingClientRect();
+    this._maxHeight =
+      boundingClientRect.height - this._topDistance - this._bottomDistance;
+  };
+
   override render() {
     return html`
-      <div class="block-hub-menu-container">
+      <div
+        class="block-hub-menu-container"
+        style="bottom: ${this._bottomDistance}px"
+      >
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
