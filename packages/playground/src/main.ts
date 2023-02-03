@@ -78,7 +78,7 @@ async function main() {
 
   const exampleList = document.createElement('example-list');
   window.workspace.signals.pageAdded.once(() => exampleList.remove());
-  document.body.appendChild(exampleList);
+  document.body.prepend(exampleList);
 
   subscribePage(workspace);
 

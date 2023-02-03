@@ -10,14 +10,17 @@ const data = Object.entries(examples);
 @customElement('example-list')
 export class ExampleList extends LitElement {
   static styles = css`
-    :host {
-      position: absolute;
-      left: 1rem;
-      top: 1rem;
+    .container {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
     }
 
     .card {
       cursor: pointer;
+      width: 300px;
     }
   `;
 
@@ -27,7 +30,7 @@ export class ExampleList extends LitElement {
 
   protected render() {
     return html`
-      <div>
+      <div class="container">
         ${repeat(
           data,
           item => item[0],
@@ -39,7 +42,8 @@ export class ExampleList extends LitElement {
                   fn(window.workspace);
                 }}
               >
-                ${name}
+                <div slot="header">${fn.displayName}</div>
+                ${fn.description}
               </sl-card>
             `;
           }
