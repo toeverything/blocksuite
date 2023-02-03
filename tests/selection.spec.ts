@@ -870,9 +870,7 @@ test('should add a new line when clicking the bottom of the last non-text block'
   ]);
 });
 
-test.only('should select texts on dragging around the page', async ({
-  page,
-}) => {
+test('should select texts on dragging around the page', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
