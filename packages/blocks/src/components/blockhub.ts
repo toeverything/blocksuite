@@ -92,6 +92,11 @@ export class BlockHub extends NonShadowLitElement {
   private enable_database: boolean;
 
   static styles = css`
+    affine-block-hub {
+      position: fixed;
+      z-index: 1;
+    }
+
     .affine-block-hub-container {
       width: 280px;
       position: absolute;

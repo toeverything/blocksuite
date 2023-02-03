@@ -18,7 +18,7 @@ import {
   getCurrentRange,
   isTitleElement,
   isDatabaseInput,
-  asyncFocusRichText,
+  isDatabase,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -28,7 +28,6 @@ import {
 import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
-  getBlockEditingStateByCursor,
   getAllowSelectedBlocks,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -40,7 +39,6 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
-import { BlockHub } from '../../components/blockhub.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 
 function calcDepth(left: number, containerLeft: number) {
@@ -239,7 +237,7 @@ function createSelectionRect(
   return new DOMRect(left, top, width, height);
 }
 
-type PageSelectionType = 'native' | 'block' | 'none' | 'embed';
+type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'database';
 
 export class PageSelectionState {
   type: PageSelectionType;
