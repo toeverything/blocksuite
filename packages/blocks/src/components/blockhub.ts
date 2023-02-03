@@ -319,6 +319,7 @@ export class BlockHub extends NonShadowLitElement {
     isFirefox &&
       document.addEventListener('dragover', this._onDragOverDocument);
     this.addEventListener('mousedown', this._onMouseDown);
+    this._onResize();
   }
 
   protected firstUpdated() {
@@ -351,7 +352,6 @@ export class BlockHub extends NonShadowLitElement {
       this._onTransitionStart
     );
     window.addEventListener('resize', this._onResize);
-    this._onResize();
   }
 
   disconnectedCallback() {
