@@ -202,7 +202,6 @@ export class EdgelessToolBar extends LitElement {
     }
 
     .icon-container[clicked] {
-      background: #f1eefe;
       color: #5438ff;
     }
   `;
