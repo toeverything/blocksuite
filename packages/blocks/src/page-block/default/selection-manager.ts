@@ -749,6 +749,30 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
+  // Click on drag-handle icon
+  selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
+    this.state.focusedBlockIndex = index;
+
+    const { blockCache, focusedBlockIndex } = this.state;
+
+    if (focusedBlockIndex === -1) {
+      return;
+    }
+
+    this.state.type = 'block';
+    this.state.refreshBlockRectCache();
+
+    const selectedBlocks = filterSelectedBlockByIndex(
+      blockCache,
+      focusedBlockIndex,
+      boundRect,
+      this._containerOffset
+    );
+
+    // only current focused-block
+    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+  }
+
   // Click on the prefix icon of list block
   resetSelectedBlockByRect(
     blockElement: Element,
@@ -765,19 +789,16 @@ export class DefaultSelectionManager {
     this.state.type = pageSelectionType;
     this.state.refreshBlockRectCache();
 
+    const boundRect = blockCache.get(blockElement) as DOMRect;
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      blockCache.get(blockElement) as DOMRect,
+      boundRect,
       this._containerOffset
     );
 
-    const rects = selectedBlocks
-      .slice(0, 1)
-      .map(block => blockCache.get(block) as DOMRect);
-
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, rects);
+    this._setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // `CMD-A`

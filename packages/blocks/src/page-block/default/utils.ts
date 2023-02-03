@@ -468,10 +468,11 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.signals.updateEmbedEditingState.emit(null);
       defaultPageBlock.signals.updateEmbedRects.emit([]);
     },
-    setSelectedBlocks(selectedBlocks: Element | null): void {
-      defaultPageBlock.signals.updateSelectedRects.emit(
-        selectedBlocks ? [selectedBlocks.getBoundingClientRect()] : []
-      );
+    setSelectedBlocks(selectedBlocks: EditingState | null): void {
+      if (selectedBlocks) {
+        const { position, index } = selectedBlocks;
+        defaultPageBlock.selection.selectBlocksByIndexAndBound(index, position);
+      }
     },
   });
 }

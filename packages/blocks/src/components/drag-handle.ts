@@ -156,7 +156,7 @@ export class DragHandle extends LitElement {
   ) => void;
 
   @property()
-  public setSelectedBlocks: (selectedBlock: Element | null) => void;
+  public setSelectedBlocks: (selectedBlock: EditingState | null) => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -344,9 +344,7 @@ export class DragHandle extends LitElement {
     if (clickDragState) {
       this._cursor = clickDragState.index;
       this._lastSelectedIndex = this._cursor;
-      this.setSelectedBlocks(
-        getBlockElementByModel(clickDragState.model) as HTMLElement
-      );
+      this.setSelectedBlocks(clickDragState);
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }
