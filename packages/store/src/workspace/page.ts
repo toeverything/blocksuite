@@ -23,9 +23,8 @@ import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
-import BlockTag = BlockSuiteInternal.BlockTag;
-import TagSchema = BlockSuiteInternal.TagSchema;
 import type { AwarenessStore } from '../awareness.js';
+import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -155,6 +154,10 @@ export class Page extends Space<PageData> {
     return this._history.canRedo();
   }
 
+  get YText() {
+    return Y.Text;
+  }
+
   get Text() {
     return Text;
   }
@@ -196,17 +199,12 @@ export class Page extends Space<PageData> {
       if (!already) {
         this.tags.set(id, tags);
       }
-      tags.set(tag.type, tag);
+      // Related issue: https://github.com/yjs/yjs/issues/255
+      const tagMap = new Y.Map();
+      tagMap.set('schemaId', tag.schemaId);
+      tagMap.set('value', tag.value);
+      tags.set(tag.schemaId, tagMap);
     });
-  }
-
-  getBlockTags(model: BaseBlockModel): Record<string, BlockTag> {
-    const tags = this.tags.get(model.id);
-    if (!tags) {
-      return {};
-    }
-    // fixme: performance issue
-    return tags.toJSON();
   }
 
   getBlockTagByTagSchema(
@@ -214,7 +212,14 @@ export class Page extends Space<PageData> {
     schema: TagSchema
   ): BlockTag | null {
     const tags = this.tags.get(model.id);
-    return (tags?.get(schema.id) as BlockTag) ?? null;
+    const tagMap = (tags?.get(schema.id) as Y.Map<unknown>) ?? null;
+    if (!tagMap) {
+      return null;
+    }
+    return {
+      schemaId: tagMap.get('schemaId') as string,
+      value: tagMap.get('value') as unknown,
+    };
   }
 
   getTagSchema(id: TagSchema['id']): TagSchema | null {
@@ -331,6 +336,12 @@ export class Page extends Space<PageData> {
     }
     if (!flavour) {
       throw new Error('Block props must contain flavour');
+    }
+    if (
+      !this.awarenessStore.getFlag('enable_database') &&
+      flavour === 'affine:database'
+    ) {
+      throw new Error('database is not enabled');
     }
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
@@ -704,8 +715,7 @@ export class Page extends Space<PageData> {
     }
 
     const yText = yBlock.get('prop:text') as Y.Text;
-    const text = new Text(this, yText);
-    model.text = text;
+    model.text = new Text(yText);
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
@@ -866,6 +876,14 @@ export class Page extends Space<PageData> {
           model.childMap = createChildMap(event.target);
           model.childrenUpdated.emit();
         }
+      }
+    } else {
+      if (event.path.includes('meta:tags')) {
+        // todo: refactor here
+        const blockId = event.path[2] as string;
+        const block = this.getBlockById(blockId);
+        assertExists(block);
+        block.propsUpdated.emit();
       }
     }
   }

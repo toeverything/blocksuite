@@ -1,4 +1,7 @@
-import { css, html, LitElement } from 'lit';
+// related component
+import './components/add-column-type-popup.js';
+
+import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { BlockElementWithService, BlockHost } from '../__internal__/index.js';
@@ -7,36 +10,29 @@ import { repeat } from 'lit/directives/repeat.js';
 import { assertEquals } from '@blocksuite/global/utils';
 import { DatabaseBlockDisplayMode } from './database-model.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import TagSchema = BlockSuiteInternal.TagSchema;
-import { BLOCK_ID_ATTR, columnPreviews } from '@blocksuite/global/config';
-import { columnTypeToTagSchema } from './utils/index.js';
-import { DatabaseEditColumn } from './components/database-edit-column.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { EditColumnPopup } from './components/edit-column-popup.js';
 import { createPopper } from '@popperjs/core';
-import './components/column-type/database-number-type.js';
-import { DatabaseSelectType } from './components/column-type/database-select-type.js';
+import { registerInternalRenderer } from './components/column-type/index.js';
+import type { DatabaseAddColumnTypePopup } from './components/add-column-type-popup.js';
+import type { TagSchema } from '@blocksuite/global/database';
+import { html, unsafeStatic } from 'lit/static-html.js';
+import './components/cell-container.js';
+import { getTagSchemaRenderer } from './register.js';
+import { nanoid } from '@blocksuite/store';
+import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
+import { onClickOutside } from './utils.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;
+const ADD_COLUMN_BUTTON_WIDTH = 33;
 
-const isVisible = (elem: HTMLElement) =>
-  !!elem &&
-  !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length); // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
-function hideOnClickOutside(element: HTMLElement) {
-  const outsideClickListener = (event: MouseEvent) => {
-    if (!element.contains(event.target as Node) && isVisible(element)) {
-      // or use: event.target.closest(selector) === null
-      element.remove();
-      removeClickListener();
-    }
-  };
-
-  const removeClickListener = () => {
-    document.removeEventListener('click', outsideClickListener);
-  };
-
-  document.addEventListener('click', outsideClickListener);
+let once = true;
+if (once) {
+  registerInternalRenderer();
+  once = false;
 }
 
-function DatabaseHeader(block: DatabaseBlock) {
+function DatabaseHeader(block: DatabaseBlockComponent) {
   return html`
     <div class="affine-database-block-header">
       <div
@@ -46,9 +42,7 @@ function DatabaseHeader(block: DatabaseBlock) {
           minWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
           maxWidth: `${FIRST_LINE_TEXT_WIDTH}px`,
         })}
-      >
-        Name
-      </div>
+      ></div>
       ${repeat(
         block.columns,
         column => column.id,
@@ -58,11 +52,11 @@ function DatabaseHeader(block: DatabaseBlock) {
               class="affine-database-block-column"
               data-column-id="${column.id}"
               style=${styleMap({
-                minWidth: `${column.meta.width}px`,
-                maxWidth: `${column.meta.width}px`,
+                minWidth: `${column.internalProperty.width}px`,
+                maxWidth: `${column.internalProperty.width}px`,
               })}
               @click=${(event: MouseEvent) => {
-                const editColumn = new DatabaseEditColumn();
+                const editColumn = new EditColumnPopup();
                 editColumn.targetModel = block.model;
                 editColumn.targetTagSchema = column;
                 document.body.appendChild(editColumn);
@@ -70,7 +64,7 @@ function DatabaseHeader(block: DatabaseBlock) {
                   createPopper(event.target as Element, editColumn, {
                     placement: 'bottom',
                   });
-                  hideOnClickOutside(editColumn);
+                  onClickOutside(editColumn, ele => ele.remove(), 'mousedown');
                 });
               }}
             >
@@ -80,21 +74,32 @@ function DatabaseHeader(block: DatabaseBlock) {
         }
       )}
       <div
-        class="affine-database-block-add-column"
+        class="affine-database-block-add-column-button"
         @click=${() => {
-          block.settingsSidebar.show = true;
+          block.addColumnTypePopup.show = true;
         }}
       >
-        +
+        <svg
+          viewBox="0 0 16 16"
+          style=${styleMap({
+            width: '12px',
+            height: '100%',
+            fill: 'var(--affine-text-color)',
+          })}
+        >
+          <path
+            d="M7.977 14.963c.407 0 .747-.324.747-.723V8.72h5.362c.399 0 .74-.34.74-.747a.746.746 0 00-.74-.738H8.724V1.706c0-.398-.34-.722-.747-.722a.732.732 0 00-.739.722v5.529h-5.37a.746.746 0 00-.74.738c0 .407.341.747.74.747h5.37v5.52c0 .399.332.723.739.723z"
+          ></path>
+        </svg>
       </div>
     </div>
   `;
 }
 
-function DataBaseRowContainer(block: DatabaseBlock) {
-  const model = block.model;
-  const host = block.host;
-  assertEquals(model.mode, DatabaseBlockDisplayMode.Database);
+function DataBaseRowContainer(databaseBlock: DatabaseBlockComponent) {
+  const databaseModel = databaseBlock.model;
+  const host = databaseBlock.host;
+  assertEquals(databaseModel.mode, DatabaseBlockDisplayMode.Database);
 
   return html`
     <style>
@@ -104,6 +109,8 @@ function DataBaseRowContainer(block: DatabaseBlock) {
       }
 
       .affine-database-block-column {
+        display: flex;
+        align-items: center;
         transition: background 20ms ease-in 0s;
       }
 
@@ -127,7 +134,7 @@ function DataBaseRowContainer(block: DatabaseBlock) {
     </style>
     <div class="affine-database-block-rows">
       ${repeat(
-        model.children,
+        databaseModel.children,
         child => child.id,
         (child, idx) => {
           return html`
@@ -139,51 +146,19 @@ function DataBaseRowContainer(block: DatabaseBlock) {
                 })}
               >
                 ${BlockElementWithService(child, host, () => {
-                  block.requestUpdate();
+                  databaseBlock.requestUpdate();
                 })}
               </div>
-              ${repeat(
-                block.columns.map(
-                  column =>
-                    [
-                      column,
-                      child.page.getBlockTagByTagSchema(child, column),
-                    ] as const
-                ),
-                ([column, tag]) => {
-                  return html`
-                    <div
-                      style=${styleMap({
-                        minWidth: `${column.meta.width}px`,
-                        maxWidth: `${column.meta.width}px`,
-                      })}
-                      @click=${(event: MouseEvent) => {
-                        switch (column.type) {
-                          case 'select': {
-                            const selectType = new DatabaseSelectType();
-                            selectType.targetModel = child;
-                            selectType.targetTagSchema = column;
-                            const element = event.target as HTMLDivElement;
-                            element.appendChild(selectType);
-                            requestAnimationFrame(() => {
-                              hideOnClickOutside(selectType);
-                            });
-                            return;
-                          }
-                        }
-                      }}
-                    >
-                      ${column.type === 'number'
-                        ? html`<database-number-type
-                            .targetModel=${child}
-                            .targetTagSchema=${column}
-                            .targetTag=${tag}
-                          ></database-number-type>`
-                        : tag?.value}
-                    </div>
-                  `;
-                }
-              )}
+              ${repeat(databaseBlock.columns, column => {
+                return html`
+                  <affine-database-cell-container
+                    .databaseModel=${databaseModel}
+                    .rowModel=${child}
+                    .column=${column}
+                  >
+                  </affine-database-cell-container>
+                `;
+              })}
             </div>
           `;
         }
@@ -192,117 +167,8 @@ function DataBaseRowContainer(block: DatabaseBlock) {
   `;
 }
 
-@customElement('affine-database-settings-sidebar')
-export class DatabaseBlockSettingsSidebar extends LitElement {
-  static styles = css`
-    :host {
-      position: absolute;
-      right: 0;
-      top: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      border-left: 1px solid rgb(233, 233, 231);
-      background-color: var(--affine-page-background);
-    }
-
-    :host > * {
-      padding-left: 14px;
-    }
-
-    .affine-database-settings-sidebar-subtitle {
-      color: rgba(55, 53, 47, 0.65);
-      padding-top: 14px;
-      padding-bottom: 14px;
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 120%;
-      user-select: none;
-    }
-
-    .affine-database-settings-sidebar-title {
-      padding-top: 12px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .affine-database-settings-sidebar-list {
-      font-size: 14px;
-    }
-
-    .affine-database-settings-sidebar-list > div {
-      min-height: 28px;
-    }
-  `;
-
-  @property()
-  show = false;
-
-  @property()
-  onSelectType!: (type: TagSchema['type']) => void;
-
-  private _handleSelectType = (e: MouseEvent) => {
-    if (e.target instanceof HTMLElement) {
-      const type = e.target.getAttribute('data-type');
-      this.onSelectType(type as TagSchema['type']);
-    }
-  };
-
-  private _handleClose = () => {
-    this.show = false;
-  };
-
-  private _handleClickAway = (event: MouseEvent) => {
-    if (this.contains(event.target as Node)) {
-      return;
-    }
-    this._handleClose();
-  };
-
-  protected update(changedProperties: Map<string, unknown>) {
-    super.update(changedProperties);
-    if (changedProperties.has('show')) {
-      if (this.show) {
-        this.style.minWidth = `290px`;
-        this.style.maxWidth = `290px`;
-        setTimeout(() =>
-          document.addEventListener('click', this._handleClickAway)
-        );
-      } else {
-        this.style.minWidth = '0';
-        this.style.maxWidth = `0`;
-        document.removeEventListener('click', this._handleClickAway);
-      }
-    }
-  }
-
-  protected render() {
-    if (!this.show) {
-      return null;
-    }
-    return html`
-      <div class="affine-database-settings-sidebar-title">
-        New column
-        <button @click=${this._handleClose}>X</button>
-      </div>
-      <div class="affine-database-settings-sidebar-subtitle">Type</div>
-      <div class="affine-database-settings-sidebar-list">
-        ${repeat(
-          columnPreviews,
-          preview =>
-            html`
-              <div data-type="${preview.type}" @click=${this._handleSelectType}>
-                ${preview.name}
-              </div>
-            `
-        )}
-      </div>
-    `;
-  }
-}
-
 @customElement('affine-database')
-export class DatabaseBlock extends NonShadowLitElement {
+export class DatabaseBlockComponent extends NonShadowLitElement {
   static styles = css`
     affine-database {
       position: relative;
@@ -343,6 +209,10 @@ export class DatabaseBlock extends NonShadowLitElement {
       color: inherit;
     }
 
+    .affine-database-block-title:focus {
+      outline: none;
+    }
+
     .affine-database-block-title::placeholder {
       color: var(--affine-placeholder-color);
     }
@@ -368,6 +238,15 @@ export class DatabaseBlock extends NonShadowLitElement {
       line-height: 20px;
       border-top: 1px solid rgb(233, 233, 231);
     }
+
+    .affine-database-block-add-column-button {
+      width: ${ADD_COLUMN_BUTTON_WIDTH}px;
+      height: ${ADD_COLUMN_BUTTON_WIDTH}px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   `;
 
   @property({ hasChanged: () => true })
@@ -376,8 +255,8 @@ export class DatabaseBlock extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  @query('affine-database-settings-sidebar')
-  settingsSidebar!: DatabaseBlockSettingsSidebar;
+  @query(DATABASE_ADD_COLUMN_TYPE_POPUP)
+  addColumnTypePopup!: DatabaseAddColumnTypePopup;
 
   get columns(): TagSchema[] {
     return this.model.columns.map(id =>
@@ -392,7 +271,18 @@ export class DatabaseBlock extends NonShadowLitElement {
 
   private _addColumn = (columnType: TagSchema['type']) => {
     this.model.page.captureSync();
-    const schema = columnTypeToTagSchema(columnType);
+    const renderer = getTagSchemaRenderer(columnType);
+    const schema: TagSchema = {
+      id: nanoid(),
+      type: columnType,
+      name: 'new column',
+      internalProperty: {
+        width: 200,
+        hide: false,
+        color: '#000',
+      },
+      property: renderer.propertyCreator(),
+    };
     this.model.page.setTagSchema(schema);
     this.model.page.updateBlock(this.model, {
       columns: [...this.model.columns, schema.id],
@@ -411,11 +301,15 @@ export class DatabaseBlock extends NonShadowLitElement {
     });
   };
 
+  /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const totalWidth =
-      this.columns.map(column => column.meta.width).reduce((t, x) => t + x, 0) +
-      FIRST_LINE_TEXT_WIDTH;
+      this.columns
+        .map(column => column.internalProperty.width)
+        .reduce((t, x) => t + x, 0) +
+      FIRST_LINE_TEXT_WIDTH +
+      ADD_COLUMN_BUTTON_WIDTH;
 
     return html`
       <div>
@@ -436,22 +330,24 @@ export class DatabaseBlock extends NonShadowLitElement {
         >
           ${DatabaseHeader(this)} ${DataBaseRowContainer(this)}
           <div class="affine-database-block-footer">
-            <div class="affine-database-block-add-row" @click=${this._addRow}>
+            <div class="affine-database-block-add-row" 
+                 role="button"
+                 @click=${this._addRow}>
               + New
             </div>
           </div>
         </div>
       </div>
-      <affine-database-settings-sidebar
+      <${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}
         .onSelectType=${this._addColumn}
-      ></affine-database-settings-sidebar>
+      ></${unsafeStatic(DATABASE_ADD_COLUMN_TYPE_POPUP)}>
     `;
   }
+  /* eslint-enable lit/binding-positions, lit/no-invalid-html */
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database': DatabaseBlock;
-    'affine-database-settings-sidebar': DatabaseBlockSettingsSidebar;
+    'affine-database': DatabaseBlockComponent;
   }
 }

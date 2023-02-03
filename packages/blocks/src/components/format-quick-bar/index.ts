@@ -34,7 +34,6 @@ export const showFormatQuickBar = async ({
 }) => {
   // Reuse previous format quick bar
   if (formatQuickBarInstance) {
-    formatQuickBarInstance.direction = direction;
     return;
   }
 
@@ -102,14 +101,26 @@ export const showFormatQuickBar = async ({
 
   // Handle selection change
 
+  let isMouseDown = false;
+  const mouseDownHandler = () => {
+    isMouseDown = true;
+  };
+  const mouseUpHandler = () => {
+    isMouseDown = false;
+  };
+
   const selectionChangeHandler = () => {
     const selection = document.getSelection();
-    if (!selection || selection.type === 'Caret' || selection.type === 'None') {
+    const selectNothing =
+      !selection || selection.type === 'Caret' || selection.type === 'None';
+    if (selectNothing || isMouseDown) {
       abortController.abort();
       return;
     }
     updatePos();
   };
+  document.addEventListener('mousedown', mouseDownHandler);
+  document.addEventListener('mouseup', mouseUpHandler);
   document.addEventListener('selectionchange', selectionChangeHandler);
 
   // Mount
@@ -121,6 +132,8 @@ export const showFormatQuickBar = async ({
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
+    document.removeEventListener('mousedown', mouseDownHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
     positionUpdatedSignal.dispose();
   });

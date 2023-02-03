@@ -18,6 +18,7 @@ import {
   getCurrentRange,
   isTitleElement,
   isDatabaseInput,
+  asyncFocusRichText,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -27,6 +28,7 @@ import {
 import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
+  getBlockEditingStateByCursor,
   getAllowSelectedBlocks,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -38,6 +40,7 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
+import { BlockHub } from '../../components/blockhub.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 
 function calcDepth(left: number, containerLeft: number) {
@@ -435,6 +438,11 @@ export class DefaultSelectionManager {
     if (isEmbed(e)) {
       this.state.type = 'embed';
       this._embedResizeManager.onStart(e);
+      return;
+    }
+    if (isDatabase(e)) {
+      this.state.type = 'database';
+      // todo: add manager
       return;
     }
 

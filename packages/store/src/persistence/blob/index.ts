@@ -13,7 +13,7 @@ export async function getBlobStorage(
   if (workspace) {
     const storage = new BlobStorage();
     const provider = await DuplexBlobProvider.init(workspace, optionsGetter);
-    storage.addProvider(provider);
+    storage.setProvider(provider);
 
     return storage;
   }
@@ -22,3 +22,4 @@ export async function getBlobStorage(
 
 export { BlobStorage } from './storage.js';
 export type { BlobOptionsGetter, BlobOptions };
+export { BlobSyncState } from './types.js';

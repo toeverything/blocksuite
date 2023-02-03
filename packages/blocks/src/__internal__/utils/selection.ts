@@ -915,6 +915,13 @@ export function isEmbed(e: SelectionEvent) {
   return false;
 }
 
+export function isDatabase(e: SelectionEvent) {
+  if ((e.raw.target as HTMLElement).className.startsWith('affine-database')) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * Save the current block selection. Can be restored with {@link restoreSelection}.
  *

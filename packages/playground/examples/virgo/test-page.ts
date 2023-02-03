@@ -1,8 +1,35 @@
 import * as Y from 'yjs';
 import { LitElement, css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { BaseArrtiubtes, VEditor } from '@blocksuite/virgo';
+import {
+  BaseArrtiubtes,
+  BaseText,
+  DeltaInsert,
+  InlineCode,
+  InlineCodeAttributes,
+  TextAttributes,
+  TextElement,
+  VEditor,
+} from '@blocksuite/virgo';
 import '@shoelace-style/shoelace';
+
+export function renderElement(delta: DeltaInsert<TextAttributes>): TextElement {
+  switch (delta.attributes.type) {
+    case 'base': {
+      const baseText = new BaseText();
+      baseText.delta = delta as DeltaInsert<BaseArrtiubtes>;
+      return baseText;
+    }
+    case 'inline-code': {
+      const inlineCode = new InlineCode();
+      inlineCode.delta = delta as DeltaInsert<InlineCodeAttributes>;
+      return inlineCode;
+    }
+
+    default:
+      throw new Error(`Unknown text type: ${delta.attributes.type}`);
+  }
+}
 
 @customElement('rich-text')
 export class RichText extends LitElement {
@@ -27,6 +54,17 @@ export class RichText extends LitElement {
           height: 100%;
           outline: none;
         }
+
+        code {
+          font-family: 'SFMono-Regular', Menlo, Consolas, 'PT Mono',
+            'Liberation Mono', Courier, monospace;
+          line-height: normal;
+          background: rgba(135, 131, 120, 0.15);
+          color: #eb5757;
+          border-radius: 3px;
+          font-size: 85%;
+          padding: 0.2em 0.4em;
+        }
       </style>
       <div class="rich-text-container"></div>`;
   }
@@ -49,7 +87,7 @@ export class ToolBar extends LitElement {
     this.vEditor = vEditor;
   }
 
-  private format(vEditor: VEditor, mark: Partial<BaseArrtiubtes>): void {
+  private formatBase(vEditor: VEditor, mark: Partial<BaseArrtiubtes>): void {
     const rangeStatic = vEditor.getVRange();
     if (!rangeStatic) {
       return;
@@ -74,6 +112,7 @@ export class ToolBar extends LitElement {
     const italicButton = this.shadowRoot.querySelector('.italic');
     const underlineButton = this.shadowRoot.querySelector('.underline');
     const strikethroughButton = this.shadowRoot.querySelector('.strikethrough');
+    const inlineCode = this.shadowRoot.querySelector('.inline-code');
     const resetButton = this.shadowRoot.querySelector('.reset');
     const undoButton = this.shadowRoot.querySelector('.undo');
     const redoButton = this.shadowRoot.querySelector('.redo');
@@ -83,6 +122,7 @@ export class ToolBar extends LitElement {
       !italicButton ||
       !underlineButton ||
       !strikethroughButton ||
+      !inlineCode ||
       !resetButton ||
       !undoButton ||
       !redoButton
@@ -91,16 +131,25 @@ export class ToolBar extends LitElement {
     }
 
     boldButton.addEventListener('click', () => {
-      this.format(this.vEditor, { bold: true });
+      this.formatBase(this.vEditor, { bold: true });
     });
     italicButton.addEventListener('click', () => {
-      this.format(this.vEditor, { italic: true });
+      this.formatBase(this.vEditor, { italic: true });
     });
     underlineButton.addEventListener('click', () => {
-      this.format(this.vEditor, { underline: true });
+      this.formatBase(this.vEditor, { underline: true });
     });
     strikethroughButton.addEventListener('click', () => {
-      this.format(this.vEditor, { strikethrough: true });
+      this.formatBase(this.vEditor, { strikethrough: true });
+    });
+    inlineCode.addEventListener('click', () => {
+      const vRange = this.vEditor.getVRange();
+
+      if (!vRange) {
+        return;
+      }
+
+      this.vEditor.formatText(vRange, { type: 'inline-code' });
     });
     resetButton.addEventListener('click', () => {
       const rangeStatic = this.vEditor.getVRange();
@@ -126,6 +175,7 @@ export class ToolBar extends LitElement {
         <sl-button class="italic">italic</sl-button>
         <sl-button class="underline">underline</sl-button>
         <sl-button class="strikethrough">strikethrough</sl-button>
+        <sl-button class="inline-code">inline-code</sl-button>
         <sl-button class="reset">reset</sl-button>
         <sl-button class="undo">undo</sl-button>
         <sl-button class="redo">redo</sl-button>
@@ -152,6 +202,7 @@ export class TestPage extends LitElement {
       background-color: #202124;
       border-radius: 10px;
       color: #fff;
+      grid-gap: 20px;
     }
 
     .editors > div {
@@ -176,10 +227,10 @@ export class TestPage extends LitElement {
     });
 
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new VEditor(textA);
+    const editorA = new VEditor(textA, renderElement);
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new VEditor(textB);
+    const editorB = new VEditor(textB, renderElement);
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);

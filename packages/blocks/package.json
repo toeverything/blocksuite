@@ -15,6 +15,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/virgo": "workspace:*",
     "@popperjs/core": "^2.11.6",
     "autosize": "^5.0.2",
     "highlight.js": "^11.7.0",

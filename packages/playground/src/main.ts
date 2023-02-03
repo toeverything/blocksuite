@@ -15,7 +15,7 @@ import {
 } from './utils.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
-import { builtInSchemas } from '@blocksuite/blocks/models';
+import { builtInSchemas, __unstableSchemas } from '@blocksuite/blocks/models';
 
 const initButton = <HTMLButtonElement>document.getElementById('init-btn');
 const options = getOptions();
@@ -70,7 +70,9 @@ async function initPageContentByParam(workspace: Workspace) {
 }
 
 async function main() {
-  const workspace = new Workspace(options).register(builtInSchemas);
+  const workspace = new Workspace(options)
+    .register(builtInSchemas)
+    .register(__unstableSchemas);
   [window.workspace, window.blockSchemas] = [workspace, builtInSchemas];
   [window.Y, window.std] = [Workspace.Y, std];
 

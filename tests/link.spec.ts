@@ -102,7 +102,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       });
       const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
 
-      const text = page.Text.fromDelta(page, [
+      const text = page.Text.fromDelta([
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);

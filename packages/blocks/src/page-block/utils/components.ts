@@ -12,6 +12,7 @@ export function createBlockHub(
   const page = pageBlock.page;
   return new BlockHub(
     {
+      enable_database: !!page.awarenessStore.getFlag('enable_database'),
       onDropCallback: (e, end) => {
         const dataTransfer = e.dataTransfer;
         assertExists(dataTransfer);

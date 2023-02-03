@@ -1,10 +1,10 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import TagSchema = BlockSuiteInternal.TagSchema;
+import type { TagSchema } from '@blocksuite/global/database';
 
-@customElement('affine-database-edit-column')
-export class DatabaseEditColumn extends LitElement {
+@customElement('affine-database-edit-column-popup')
+export class EditColumnPopup extends LitElement {
   static styles = css`
     :host {
       background: var(--affine-popover-background);
@@ -44,5 +44,11 @@ export class DatabaseEditColumn extends LitElement {
         </button>
       </div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-database-edit-column-popup': EditColumnPopup;
   }
 }

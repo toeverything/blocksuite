@@ -173,6 +173,27 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initEmptyDatabaseState(page: Page, pageId?: string) {
+  const ids = await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlockByFlavour('affine:page');
+    }
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const paragraphId = page.addBlockByFlavour(
+      'affine:database',
+      {
+        title: 'Database 1',
+      },
+      frameId
+    );
+    page.captureSync();
+    return { pageId, frameId, paragraphId };
+  }, pageId);
+  return ids;
+}
+
 export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
