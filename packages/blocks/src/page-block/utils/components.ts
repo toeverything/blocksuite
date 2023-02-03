@@ -1,5 +1,5 @@
-import { DefaultPageBlockComponent } from '../default/default-page-block.js';
-import { EdgelessPageBlockComponent } from '../edgeless/edgeless-page-block.js';
+import type { DefaultPageBlockComponent } from '../default/default-page-block.js';
+import type { EdgelessPageBlockComponent } from '../edgeless/edgeless-page-block.js';
 import { assertExists, Signal } from '@blocksuite/global/utils';
 import { BlockHub } from '../../components/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
