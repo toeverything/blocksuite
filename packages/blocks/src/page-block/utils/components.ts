@@ -3,6 +3,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless/edgeless-page-block
 import { assertExists, Signal } from '@blocksuite/global/utils';
 import { BlockHub } from '../../components/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
+import { tryUpdateFrameSize } from './container-operations.js';
 
 export function createBlockHub(
   pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent,
@@ -33,6 +34,7 @@ export function createBlockHub(
           distanceToTop < distanceToBottom ? 'right' : 'left'
         );
         asyncFocusRichText(page, id);
+        tryUpdateFrameSize(page, 1);
       },
     },
     updateSelectedRects
