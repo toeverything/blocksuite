@@ -196,13 +196,13 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
 // find blocks and its subtree
 function findBlocksWithSubtree(
   blockCache: Map<Element, DOMRect>,
-  selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
+  selectedBlocksWithoutSubtree: { block: Element; index: number }[] = []
 ) {
   const results = [];
-  const len = selectedBlocksWithoutSubtrees.length;
+  const len = selectedBlocksWithoutSubtree.length;
 
   for (let i = 0; i < len; i++) {
-    const { block, index } = selectedBlocksWithoutSubtrees[i];
+    const { block, index } = selectedBlocksWithoutSubtree[i];
     // find block's subtree
     results.push(
       ...filterSelectedBlockByIndex(
@@ -749,8 +749,8 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
-  // Click on drag-handle icon
-  selectBlocksByIndexAndBound(index: number, boundRect: DOMRect) {
+  // Click on drag-handle button
+  selectBlocksByIndexAndBounding(index: number, boundRect: DOMRect) {
     this.state.focusedBlockIndex = index;
 
     const { blockCache, focusedBlockIndex } = this.state;
