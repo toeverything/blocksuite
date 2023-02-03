@@ -341,6 +341,7 @@ export class DefaultSelectionManager {
 
     const createBlockHub = () => {
       this._blockHub = new BlockHub({
+        enable_database: !!this.page.awarenessStore.getFlag('enable_database'),
         onDropCallback: (e, end) => {
           const dataTransfer = e.dataTransfer;
           assertExists(dataTransfer);
