@@ -227,10 +227,10 @@ export class TestPage extends LitElement {
     });
 
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new VEditor(textA, renderElement);
+    const editorA = new VEditor(textA, { renderElement });
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new VEditor(textB, renderElement);
+    const editorB = new VEditor(textB, { renderElement });
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);
