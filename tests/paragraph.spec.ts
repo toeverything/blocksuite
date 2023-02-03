@@ -678,7 +678,7 @@ test('press arrow up in the second line should move caret to the first line', as
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
     });
-    const text = page.Text.fromDelta(page, delta);
+    const text = page.Text.fromDelta(delta);
     const paragraphId = page.addBlockByFlavour(
       'affine:paragraph',
       { text },

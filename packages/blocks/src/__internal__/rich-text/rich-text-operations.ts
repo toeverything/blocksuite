@@ -373,11 +373,14 @@ function findTextNode(node: Node): Node | null {
   return null;
 }
 
+/**
+ * Find the next text node from the given node.
+ *
+ * Note: this function will skip the given node itself. And the boundary node will be included.
+ */
 function findNextTextNode(
   node: Node,
-  endCondition = (node: Node) =>
-    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/contentEditable
-    node instanceof HTMLElement && node.contentEditable === 'true'
+  checkWalkBoundary = (node: Node) => node === document.body
 ): Node | null {
   while (node.parentNode) {
     const parentNode = node.parentNode;
@@ -399,7 +402,7 @@ function findNextTextNode(
       }
     }
 
-    if (endCondition(parentNode)) {
+    if (checkWalkBoundary(parentNode)) {
       return null;
     }
     node = parentNode;
@@ -411,7 +414,11 @@ function findNextTextNode(
  * Try to shift the range to the next caret point.
  * If the range is already at the end of the block, return null.
  *
- * Reference to https://www.w3.org/TR/2000/REC-DOM-Level-2-Traversal-Range-20001113/ranges.html
+ * NOTE: In extreme situations, this function need to traverse the DOM tree.
+ * It may cause performance issues, so use it carefully.
+ *
+ * You can see the definition of the range in the spec for more details.
+ * https://www.w3.org/TR/2000/REC-DOM-Level-2-Traversal-Range-20001113/ranges.html
  */
 function shiftRange(range: Range): Range | null {
   if (!range.collapsed) {
@@ -428,14 +435,17 @@ function shiftRange(range: Range): Range | null {
     startContainer.nodeType === Node.COMMENT_NODE ||
     startContainer.nodeType === Node.CDATA_SECTION_NODE;
   if (!isTextLikeNode) {
-    // Even if we can shift the range if the node is a not text node.
-    // But in most normal situation, the node should be a text node.
-    // To simplify the processing, we just throw an warn here.
+    // Although we can shift the range if the node is a not text node.
+    // But in most normal situations, the node should be a text node.
+    // To simplify the processing, we just skip the case.
     // If we really need to support this case, we can add it later.
-    console.warn(
-      'Failed to shiftRange! Unexpected startContainer nodeType',
-      startContainer
-    );
+    //
+    // If in the empty line, the startContainer is a `<p><br></p>` node,
+    // it's expected but hard to distinguish, so we remove the warning temporarily.
+    // console.warn(
+    //   'Failed to shiftRange! Unexpected startContainer nodeType',
+    //   startContainer
+    // );
     return null;
   }
   const textContent = startContainer.textContent;
@@ -450,23 +460,23 @@ function shiftRange(range: Range): Range | null {
   //   : startContainer.childNodes.length;
   const maxOffset = textContent.length;
 
-  if (
-    // isTextLikeNode &&
-    !textContent.length
-  ) {
-    // Empty text node, it may be at empty line
-    return null;
-  }
-
   if (maxOffset > range.startOffset) {
+    // Just shift to the next character simply
     const nextRange = range.cloneRange();
     nextRange.setStart(range.startContainer, range.startOffset + 1);
     nextRange.setEnd(range.startContainer, range.startOffset + 1);
     return nextRange;
   }
 
-  // Try to shift to the next text node
-  const nextTextNode = findNextTextNode(startContainer);
+  // If the range is already at the end of the node,
+  // we need traverse the DOM tree to find the next text node.
+  // And this may be inefficient.
+  const nextTextNode = findNextTextNode(
+    startContainer,
+    (node: Node) =>
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/contentEditable
+      node instanceof HTMLElement && node.contentEditable === 'true'
+  );
   if (!nextTextNode) {
     return null;
   }
