@@ -324,7 +324,10 @@ export class DefaultPageBlockComponent
         return getAllowSelectedBlocks(this.model);
       };
     };
-    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
+    if (
+      this.page.awarenessStore.getFlag('enable_drag_handle') &&
+      !this.components.dragHandle
+    ) {
       createHandle();
     }
     this._disposables.add(
@@ -348,7 +351,10 @@ export class DefaultPageBlockComponent
   };
 
   private _initBlockHub = () => {
-    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
+    if (
+      this.page.awarenessStore.getFlag('enable_block_hub') &&
+      !this.components.blockHub
+    ) {
       this.components.blockHub = createBlockHub(
         this,
         this.signals.updateSelectedRects

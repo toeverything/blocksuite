@@ -195,7 +195,10 @@ export class EdgelessPageBlockComponent
   }
 
   private _initBlockHub = () => {
-    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
+    if (
+      this.page.awarenessStore.getFlag('enable_block_hub') &&
+      !this.components.blockHub
+    ) {
       this.components.blockHub = createBlockHub(this);
       this.components.blockHub.getAllowedBlocks = () =>
         getAllowSelectedBlocks(this.pageModel);
@@ -276,6 +279,7 @@ export class EdgelessPageBlockComponent
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this.components.blockHub?.remove();
 
     this.signals.updateSelection.dispose();
     this.signals.viewportUpdated.dispose();
