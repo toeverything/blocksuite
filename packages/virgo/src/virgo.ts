@@ -31,6 +31,9 @@ export class VEditor {
   private _isReadOnly = false;
   private _renderElement: (delta: DeltaInsert) => TextElement =
     baseRenderElement;
+  private _onKeyDown: (event: KeyboardEvent) => void = () => {
+    return;
+  };
 
   signals: {
     updateVRange: Signal<UpdateVRangeProp>;
@@ -39,11 +42,20 @@ export class VEditor {
 
   constructor(
     yText: VEditor['yText'],
-    renderElement?: (delta: DeltaInsert) => TextElement
+    opts: {
+      renderElement?: (delta: DeltaInsert) => TextElement;
+      onKeyDown?: (event: KeyboardEvent) => void;
+    } = {}
   ) {
     this.yText = yText;
+    const { renderElement, onKeyDown } = opts;
+
     if (renderElement) {
       this._renderElement = renderElement;
+    }
+
+    if (onKeyDown) {
+      this._onKeyDown = onKeyDown;
     }
 
     this.signals = {
@@ -95,6 +107,10 @@ export class VEditor {
         signal: this._rootElementAbort.signal,
       }
     );
+
+    this._rootElement.addEventListener('keydown', this._onKeyDown, {
+      signal: this._rootElementAbort.signal,
+    });
   }
 
   unmount(): void {
