@@ -106,27 +106,6 @@ export function initMouseEventHandlers(
       toSelectionEvent(e, getBoundingClientRect, startX, startY)
     );
 
-  const mouseDownHandler = (e: MouseEvent) => {
-    if (!isTitleElement(e.target)) {
-      e.preventDefault();
-    }
-    if (isToggleIcon(e.target)) {
-      e.preventDefault();
-      return;
-    }
-    const rect = getBoundingClientRect();
-
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-    isDragging = false;
-    // e.button is 0 means left button
-    if (!e.button) {
-      last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
-    }
-    document.addEventListener('mouseup', mouseUpHandler);
-    document.addEventListener('mouseout', mouseOutHandler);
-  };
-
   const mouseMoveHandler = (e: MouseEvent) => {
     if (!isTitleElement(e.target)) {
       e.preventDefault();
@@ -159,6 +138,27 @@ export function initMouseEventHandlers(
       );
       last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
     }
+  };
+
+  const mouseDownHandler = (e: MouseEvent) => {
+    if (!isTitleElement(e.target)) {
+      e.preventDefault();
+    }
+    if (isToggleIcon(e.target)) {
+      return;
+    }
+    const rect = getBoundingClientRect();
+
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    isDragging = false;
+    // e.button is 0 means left button
+    if (!e.button) {
+      last = toSelectionEvent(e, getBoundingClientRect, startX, startY);
+    }
+    container.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+    document.addEventListener('mouseout', mouseOutHandler);
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
@@ -231,7 +231,6 @@ export function initMouseEventHandlers(
   }, 300);
 
   container.addEventListener('mousedown', mouseDownHandler);
-  container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
   document.addEventListener('selectionchange', selectionChangeHandler);

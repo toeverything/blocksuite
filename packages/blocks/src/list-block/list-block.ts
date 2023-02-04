@@ -133,7 +133,7 @@ export class ListBlockComponent extends NonShadowLitElement {
         [...this.blocksWithHiddenChildren, currentBlockID] // add current block to hiddenChildren list
       );
     }
-    // this.requestUpdate();
+    this.requestUpdate();
   };
 
   render() {
@@ -145,6 +145,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       index,
       onClick: evt => {
         evt.preventDefault();
+        evt.stopPropagation();
         if (this.model.type === 'toggle') {
           // this.host.page.captureSync();
           this.toggleHiddenChildren();
