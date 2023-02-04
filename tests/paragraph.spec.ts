@@ -28,7 +28,6 @@ import {
   redoByClick,
   pressTab,
   type,
-  SHORT_KEY,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
