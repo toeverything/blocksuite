@@ -30,8 +30,6 @@ import {
 import { formatConfig } from './const.js';
 import { updateSelectedTextType } from './container-operations.js';
 
-const { UNDO, REDO } = HOTKEYS;
-
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
     hotkey.addListener(hotkeyStr, e => {
@@ -54,14 +52,16 @@ export function bindCommonHotkey(page: Page) {
     });
   });
 
-  hotkey.addListener(UNDO, e => {
+  hotkey.addListener(HOTKEYS.UNDO, e => {
     page.undo();
   });
-  hotkey.addListener(REDO, e => {
+
+  hotkey.addListener(HOTKEYS.REDO, e => {
     page.redo();
   });
+
   // !!!
-  // Don't forget to remove hotkeys at `_removeHotkeys`
+  // Don't forget to remove hotkeys at `removeCommonHotKey`
 }
 
 export function removeCommonHotKey() {
@@ -70,8 +70,8 @@ export function removeCommonHotKey() {
     ...paragraphConfig
       .map(({ hotkey: hotkeyStr }) => hotkeyStr)
       .filter((i): i is string => !!i),
-    UNDO,
-    REDO,
+    HOTKEYS.UNDO,
+    HOTKEYS.REDO,
   ]);
 }
 
