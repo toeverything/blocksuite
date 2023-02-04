@@ -173,7 +173,7 @@ export class VEditor {
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length >= vRange.index &&
+        index + delta.insert.length > vRange.index &&
         index < vRange.index + vRange.length
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
