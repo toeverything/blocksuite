@@ -2,6 +2,7 @@
 import { html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import {
+  asyncFocusRichText,
   BlockChildrenContainer,
   BlockHost,
   getBlockElementByModel,
@@ -133,6 +134,7 @@ export class ListBlockComponent extends NonShadowLitElement {
         [...this.blocksWithHiddenChildren, currentBlockID] // add current block to hiddenChildren list
       );
     }
+    asyncFocusRichText(this.model.page, this.model.id);
     this.requestUpdate();
   };
 
