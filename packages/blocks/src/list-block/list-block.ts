@@ -110,8 +110,9 @@ export class ListBlockComponent extends NonShadowLitElement {
     this.model.childrenUpdated.on(() => {
       if (this.isToggleEnabled && !this.model.children.length) {
         this.toggleHiddenChildren(true);
+      } else {
+        this.requestUpdate();
       }
-      this.requestUpdate();
     });
   }
   toggleHiddenChildren = (forceHidden = false) => {
@@ -132,7 +133,7 @@ export class ListBlockComponent extends NonShadowLitElement {
         [...this.blocksWithHiddenChildren, currentBlockID] // add current block to hiddenChildren list
       );
     }
-    this.requestUpdate();
+    // this.requestUpdate();
   };
 
   render() {
@@ -142,14 +143,15 @@ export class ListBlockComponent extends NonShadowLitElement {
       model: this.model,
       deep,
       index,
-      onClick: () => {
+      onClick: evt => {
+        evt.preventDefault();
         if (this.model.type === 'toggle') {
+          // this.host.page.captureSync();
           this.toggleHiddenChildren();
+          return;
         } else if (this.model.type === 'todo') {
           this.host.page.captureSync();
-          const checkedPropObj = {
-            checked: !this.model.checked,
-          };
+          const checkedPropObj = { checked: !this.model.checked };
           this.host.page.updateBlock(this.model, checkedPropObj);
           return;
         }

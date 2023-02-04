@@ -47,11 +47,13 @@ export const toggleRight = (enabled = true) => {
   return html`
     <svg
       xmlns="http://www.w3.org/2000/svg"
+      data-is-toggle-icon="true"
       width="1em"
       height="1em"
       viewBox="0 0 20 20"
     >
       <path
+        data-is-toggle-icon="true"
         fill="currentColor"
         opacity="${!enabled ? '0.6' : '1'}"
         d="m15.795 11.272l-8 5A1.5 1.5 0 0 1 5.5 15V5a1.5 1.5 0 0 1 2.295-1.272l8 5a1.5 1.5 0 0 1 0 2.544Z"
@@ -63,11 +65,17 @@ export const toggleDown = () => {
   return html`
     <svg
       xmlns="http://www.w3.org/2000/svg"
+      data-is-toggle-icon="true"
       width="1em"
       height="1em"
       viewBox="0 0 20 20"
+      @mousedown="${(e: MouseEvent) => {
+        console.log('preventing def svg');
+        e.preventDefault();
+      }}"
     >
       <path
+        data-is-toggle-icon="true"
         fill="currentColor"
         d="m8.728 15.795l-5-8A1.5 1.5 0 0 1 5 5.5h10a1.5 1.5 0 0 1 1.272 2.295l-5 8a1.5 1.5 0 0 1-2.544 0Z"
       />

@@ -27,6 +27,10 @@ export function getListIcon({
     @click="${(e: MouseEvent) => {
       onClick?.(e);
     }}"
+    @mousedown="${(e: MouseEvent) => {
+      console.log('preventing def icon div');
+      e.preventDefault();
+    }}"
   >
     ${(() => {
       const blocksWithHiddenChildren =

@@ -6,7 +6,11 @@ import {
 } from './selection.js';
 import { debounce } from './std.js';
 import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
-import { isInsideBlockContainer, isTitleElement } from './query.js';
+import {
+  isInsideBlockContainer,
+  isTitleElement,
+  isToggleIcon,
+} from './query.js';
 
 export interface IPoint {
   x: number;
@@ -105,6 +109,10 @@ export function initMouseEventHandlers(
   const mouseDownHandler = (e: MouseEvent) => {
     if (!isTitleElement(e.target)) {
       e.preventDefault();
+    }
+    if (isToggleIcon(e.target)) {
+      e.preventDefault();
+      return;
     }
     const rect = getBoundingClientRect();
 

@@ -407,6 +407,13 @@ export function isTitleElement(
   );
 }
 
+export function isToggleIcon(element: unknown): element is SVGPathElement {
+  return (
+    element instanceof SVGPathElement &&
+    element.getAttribute('data-is-toggle-icon') === 'true'
+  );
+}
+
 export function isCaptionElement(node: unknown): node is HTMLInputElement {
   if (!(node instanceof Element)) {
     return false;
