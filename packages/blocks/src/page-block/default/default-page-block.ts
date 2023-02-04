@@ -509,7 +509,6 @@ export class DefaultPageBlockComponent
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
           ${selectedRectsContainer}
-          ${selectedEmbedContainer}${embedEditingContainer}
           <div class="affine-default-page-block-title-container">
             <textarea
               ?disabled=${this.readonly}
