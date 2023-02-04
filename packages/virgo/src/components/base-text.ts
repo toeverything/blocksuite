@@ -10,7 +10,11 @@ function virgoTextStyles(props: BaseArrtiubtes): ReturnType<typeof styleMap> {
     'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
-    'text-decoration': props.underline ? 'underline' : 'none',
+    'text-decoration': props.underline
+      ? 'underline'
+      : props.strikethrough
+      ? 'line-through'
+      : 'none',
   });
 }
 
