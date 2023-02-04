@@ -23,6 +23,7 @@ import {
   supportsChildren,
   getModelByElement,
   focusTitle,
+  getCurrentRange,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -522,27 +523,35 @@ export function isAtLineEdge(range: Range) {
   return nextRange;
 }
 
-export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
-  const selection = window.getSelection();
-  const preNodeModel = getPreviousBlock(model);
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { height, left, top } = range.getBoundingClientRect();
-
-    const newRange = caretRangeFromPoint(left, top - height / 2);
-    if (
-      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
-      if (
-        preNodeModel &&
-        matchFlavours(model, ['affine:embed', 'affine:divider'])
-      ) {
-        return ALLOW_DEFAULT;
-      }
-      return PREVENT_DEFAULT;
-    }
+export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
+  const range = getCurrentRange();
+  if (!range.collapsed) {
+    // If the range is not collapsed,
+    // we assume that the caret is at the start of the range.
+    range.collapse(true);
   }
+
+  const { height, left, top } = range.getBoundingClientRect();
+  if (left === 0 && top === 0) {
+    // At empty line, it is the first line
+    return PREVENT_DEFAULT;
+  }
+  const shiftRange = caretRangeFromPoint(left + 1, top - height / 2);
+
+  // If the caret at the start of second line, as known as line edge,
+  // the range bounding rect may be incorrect, we need to check the scenario.
+  const isFirstLine =
+    (!shiftRange || !editableContainer.contains(shiftRange.startContainer)) &&
+    !isAtLineEdge(range);
+
+  if (isFirstLine) {
+    // If the caret is at the first line of the block,
+    // default behavior will move the caret to the start of the line,
+    // which is not expected. so we need to prevent default behavior.
+    return PREVENT_DEFAULT;
+  }
+  // Avoid triggering hotkey bindings
+  event.stopPropagation();
   return ALLOW_DEFAULT;
 }
 
