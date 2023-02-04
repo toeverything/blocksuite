@@ -1,3 +1,4 @@
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
 import {
   clamp,
   getCurrentRange,
@@ -5,8 +6,7 @@ import {
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
-import { isAtLineEdge } from '@blocksuite/blocks/index.js';
+import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const selection = window.getSelection() as Selection;
