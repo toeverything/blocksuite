@@ -145,8 +145,8 @@ export class ListBlockComponent extends NonShadowLitElement {
       deep,
       index,
       onClick: evt => {
-        evt.preventDefault();
-        evt.stopPropagation();
+        // evt.preventDefault();
+        // evt.stopPropagation();
         if (this.model.type === 'toggle') {
           // this.host.page.captureSync();
           this.toggleHiddenChildren();
