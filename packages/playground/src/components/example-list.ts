@@ -11,15 +11,17 @@ const data = Object.entries(examples);
 export class ExampleList extends LitElement {
   static styles = css`
     .container {
-      margin-top: 1rem;
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      gap: 1rem 2rem;
+      margin: 1rem;
+      gap: 1rem;
     }
 
     .card {
       cursor: pointer;
+      font-family: var(--sl-input-font-family);
+      font-size: 14px;
       width: 300px;
     }
   `;
