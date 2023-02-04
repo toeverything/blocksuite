@@ -8,6 +8,10 @@ node_modules
 /playwright-report/
 /playwright/.cache/
 
+# code coverage
+/.nyc_output
+/.coverage
+
 # Build out
 dist/
 build

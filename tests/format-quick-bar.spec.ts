@@ -1,4 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import { test } from './utils/playwright.js';
 import {
   clickBlockTypeMenuItem,
   dragBetweenCoords,

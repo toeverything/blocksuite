@@ -43,6 +43,11 @@ jobs:
 
       - name: Run playwright tests
         run: pnpm test -- --forbid-only
+        env:
+          COVERAGE: true
+
+      - name: Collect code coverage report
+        run: nyc report -t .nyc_output --reporter=text
 
       - name: Upload test results
         if: ${{ failure() }}
@@ -52,8 +57,8 @@ jobs:
           path: ./test-results
           if-no-files-found: ignore
 
-  store-test:
-    name: Store unit test
+  unit-test:
+    name: Unit test
     runs-on: ubuntu-latest
 
     steps:

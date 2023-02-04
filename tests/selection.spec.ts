@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test } from './utils/playwright.js';
 import {
   enterPlaygroundRoom,
   focusRichText,

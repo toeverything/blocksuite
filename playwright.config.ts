@@ -12,6 +12,9 @@ const config: PlaywrightTestConfig = {
     command: 'pnpm dev',
     port: 5173,
     reuseExistingServer: !process.env.CI,
+    env: {
+      COVERAGE: process.env.COVERAGE,
+    },
   },
   use: {
     browserName:
