@@ -14,7 +14,6 @@ import {
   ExtendedModel,
   getRichTextByModel,
   getPreviousBlock,
-  getNextBlock,
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
@@ -23,6 +22,7 @@ import {
   supportsChildren,
   getModelByElement,
   focusTitle,
+  getCurrentRange,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -522,65 +522,106 @@ export function isAtLineEdge(range: Range) {
   return nextRange;
 }
 
-export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
-  const selection = window.getSelection();
-  const preNodeModel = getPreviousBlock(model);
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { height, left, top } = range.getBoundingClientRect();
-
-    const newRange = caretRangeFromPoint(left, top - height / 2);
-    if (
-      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
-      if (
-        preNodeModel &&
-        matchFlavours(model, ['affine:embed', 'affine:divider'])
-      ) {
-        return ALLOW_DEFAULT;
-      }
-      return PREVENT_DEFAULT;
-    }
+function checkFirstLine(range: Range, container: Element) {
+  if (!range.collapsed) {
+    throw new Error(
+      'Failed to determine if the caret is at the last line! expected a collapsed range but got' +
+        range
+    );
   }
+  const { height, left, top } = range.getBoundingClientRect();
+  if (left === 0 && top === 0) {
+    // Workaround select to empty line will get empty range
+    // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+
+    // At empty line, it is the first line and also is the last line
+    return true;
+  }
+  const shiftRange = caretRangeFromPoint(left + 1, top - height / 2);
+  // If the caret at the start of second line, as known as line edge,
+  // the range bounding rect may be incorrect, we need to check the scenario.
+  const isFirstLine =
+    (!shiftRange || !container.contains(shiftRange.startContainer)) &&
+    !isAtLineEdge(range);
+  return isFirstLine;
+}
+
+function checkLastLine(range: Range, container: HTMLElement) {
+  if (!range.collapsed) {
+    throw new Error(
+      'Failed to determine if the caret is at the last line! expected a collapsed range but got' +
+        range
+    );
+  }
+  const { bottom, left, height } = range.getBoundingClientRect();
+  if (left === 0 && bottom === 0) {
+    // Workaround select to empty line will get empty range
+    // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+
+    // At empty line, it is the first line and also is the last line
+    return true;
+  }
+  const shiftRange = caretRangeFromPoint(left + 1, bottom + height / 2);
+  const isLastLineWithoutEdge =
+    !shiftRange || !container.contains(shiftRange.startContainer);
+  if (isLastLineWithoutEdge) {
+    // If the caret is at the first line of the block,
+    // default behavior will move the caret to the start of the line,
+    // which is not expected. so we need to prevent default behavior.
+    return true;
+  }
+  const atLineEdgeRange = isAtLineEdge(range);
+  if (!atLineEdgeRange) {
+    return false;
+  }
+  // If the caret is at the line edge, the range bounding rect is wrong,
+  // we need to check the next range again.
+  const nextRect = atLineEdgeRange.getBoundingClientRect();
+  const nextShiftRange = caretRangeFromPoint(
+    nextRect.left + 1,
+    nextRect.bottom + nextRect.height / 2
+  );
+  return !nextShiftRange || !container.contains(nextShiftRange.startContainer);
+}
+
+export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
+  const range = getCurrentRange();
+  if (!range.collapsed) {
+    // If the range is not collapsed,
+    // we assume that the caret is at the start of the range.
+    range.collapse(true);
+  }
+  const isFirstLine = checkFirstLine(range, editableContainer);
+  if (isFirstLine) {
+    // If the caret is at the first line of the block,
+    // default behavior will move the caret to the start of the line,
+    // which is not expected. so we need to prevent default behavior.
+    return PREVENT_DEFAULT;
+  }
+  // Avoid triggering hotkey bindings
+  event.stopPropagation();
   return ALLOW_DEFAULT;
 }
 
 export function handleKeyDown(
-  model: ExtendedModel,
-  textContainer: HTMLElement
+  event: KeyboardEvent,
+  editableContainer: HTMLElement
 ) {
-  const selection = window.getSelection();
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { bottom, left, height } = range.getBoundingClientRect();
-    // if cursor is on the last line and has no text, height is 0
-
-    // TODO resolve compatible problem
-    const newRange = caretRangeFromPoint(left, bottom + height / 2);
-    if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      const nextBlock = getNextBlock(model);
-      if (!nextBlock) {
-        return ALLOW_DEFAULT;
-      }
-      if (matchFlavours(nextBlock, ['affine:divider'])) {
-        return PREVENT_DEFAULT;
-      }
-      return PREVENT_DEFAULT;
-    }
-    // if cursor is at the edge of a block, it may out of the textContainer after keydown
-    if (isAtLineEdge(range)) {
-      const {
-        height,
-        left,
-        bottom: nextBottom,
-      } = newRange.getBoundingClientRect();
-      const nextRange = caretRangeFromPoint(left, nextBottom + height / 2);
-      if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
-        return PREVENT_DEFAULT;
-      }
-    }
+  const range = getCurrentRange();
+  if (!range.collapsed) {
+    // If the range is not collapsed,
+    // we assume that the caret is at the end of the range.
+    range.collapse();
   }
+  const isLastLine = checkLastLine(range, editableContainer);
+  if (isLastLine) {
+    // If the caret is at the last line of the block,
+    // default behavior will move the caret to the end of the line,
+    // which is not expected. so we need to prevent default behavior.
+    return PREVENT_DEFAULT;
+  }
+  // Avoid triggering hotkey bindings
+  event.stopPropagation();
   return ALLOW_DEFAULT;
 }
 
