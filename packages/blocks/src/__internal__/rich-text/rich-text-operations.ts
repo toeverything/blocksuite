@@ -523,6 +523,30 @@ export function isAtLineEdge(range: Range) {
   return nextRange;
 }
 
+function checkFirstLine(range: Range, container: Element) {
+  if (!range.collapsed) {
+    throw new Error(
+      'Failed to determine if the caret is at the last line! expected a collapsed range but got' +
+        range
+    );
+  }
+  const { height, left, top } = range.getBoundingClientRect();
+  if (left === 0 && top === 0) {
+    // Workaround select to empty line will get empty range
+    // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+
+    // At empty line, it is the first line and also is the last line
+    return true;
+  }
+  const shiftRange = caretRangeFromPoint(left + 1, top - height / 2);
+  // If the caret at the start of second line, as known as line edge,
+  // the range bounding rect may be incorrect, we need to check the scenario.
+  const isFirstLine =
+    (!shiftRange || !container.contains(shiftRange.startContainer)) &&
+    !isAtLineEdge(range);
+  return isFirstLine;
+}
+
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
   const range = getCurrentRange();
   if (!range.collapsed) {
@@ -530,20 +554,7 @@ export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
     // we assume that the caret is at the start of the range.
     range.collapse(true);
   }
-
-  const { height, left, top } = range.getBoundingClientRect();
-  if (left === 0 && top === 0) {
-    // At empty line, it is the first line
-    return PREVENT_DEFAULT;
-  }
-  const shiftRange = caretRangeFromPoint(left + 1, top - height / 2);
-
-  // If the caret at the start of second line, as known as line edge,
-  // the range bounding rect may be incorrect, we need to check the scenario.
-  const isFirstLine =
-    (!shiftRange || !editableContainer.contains(shiftRange.startContainer)) &&
-    !isAtLineEdge(range);
-
+  const isFirstLine = checkFirstLine(range, editableContainer);
   if (isFirstLine) {
     // If the caret is at the first line of the block,
     // default behavior will move the caret to the start of the line,
