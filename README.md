@@ -1,7 +1,7 @@
 # BlockSuite
 
 <p align="center">
-  <img src="assets/logo-and-name-h.svg" alt="BlockSuite logo and name" style="max-width: 500px;" />
+  <img src="assets/logo-and-name-h.svg" alt="BlockSuite logo and name" width="500" />
 </p>
 
 [![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/master)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amaster)
