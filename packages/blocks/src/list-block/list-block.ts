@@ -89,23 +89,51 @@ export class ListBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
+  private get pageAwarenessStore() {
+    return this.host.page.awarenessStore;
+  }
+  private get isToggleEnabled() {
+    return this.pageAwarenessStore.getFlag('enable_toggle_block');
+  }
+  private get blocksWithHiddenChildren() {
+    return this.pageAwarenessStore.getFlag('blocks_with_hidden_children') ?? [];
+  }
+  private get hasHiddenChildren() {
+    return this.blocksWithHiddenChildren?.includes(this.model.id);
+  }
+
   firstUpdated() {
+    // this.pageAwarenessStore.awareness.on('change', () => {
+    //   this.requestUpdate();
+    // });
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => {
-      if (!this.model.children.length) {
-        this.host.page.updateBlock(this.model, {
-          open: null, // if all children have been removed open needs to be reset to null
-        });
-      } else if (
-        !(this.model.open === false) // previously childless toggled blocks will have explicit null
-      ) {
-        this.host.page.updateBlock(this.model, {
-          open: true,
-        });
+      if (this.isToggleEnabled && !this.model.children.length) {
+        this.toggleHiddenChildren(true);
       }
       this.requestUpdate();
     });
   }
+  toggleHiddenChildren = (forceHidden = false) => {
+    if (!this.isToggleEnabled) return;
+
+    const currentBlockID = this.model.id;
+
+    if (forceHidden || this.hasHiddenChildren) {
+      this.pageAwarenessStore.setFlag(
+        'blocks_with_hidden_children',
+        this.blocksWithHiddenChildren.filter(
+          (eachBlockID: string) => eachBlockID !== currentBlockID // remove current block from hiddenChildren list
+        )
+      );
+    } else {
+      this.pageAwarenessStore.setFlag(
+        'blocks_with_hidden_children',
+        [...this.blocksWithHiddenChildren, currentBlockID] // add current block to hiddenChildren list
+      );
+    }
+    this.requestUpdate();
+  };
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
@@ -115,24 +143,21 @@ export class ListBlockComponent extends NonShadowLitElement {
       deep,
       index,
       onClick: () => {
-        if (this.model.type === 'todo' || this.model.type === 'toggle') {
+        if (this.model.type === 'toggle') {
+          this.toggleHiddenChildren();
+        } else if (this.model.type === 'todo') {
           this.host.page.captureSync();
-          const checkedOrOpen =
-            this.model.type === 'toggle'
-              ? {
-                  open: !this.model.children.length ? null : !this.model.open, // don't allow to toggle if there are no kids
-                }
-              : {
-                  checked: !this.model.checked,
-                };
-          this.host.page.updateBlock(this.model, checkedOrOpen);
+          const checkedPropObj = {
+            checked: !this.model.checked,
+          };
+          this.host.page.updateBlock(this.model, checkedPropObj);
           return;
         }
         selectList(this.model);
       },
     });
     const childrenContainer =
-      this.model.type === 'toggle' && this.model.open === false
+      this.model.type === 'toggle' && this.hasHiddenChildren
         ? null
         : BlockChildrenContainer(this.model, this.host, () =>
             this.requestUpdate()

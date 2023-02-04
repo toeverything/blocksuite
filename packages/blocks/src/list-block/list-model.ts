@@ -10,7 +10,7 @@ export const ListBlockModelSchema = defineBlockSchema(
   () => ({
     type: 'bulleted' as ListType,
     checked: false,
-    open: null, // TODO consider more explicit prop naming like 'hideChildren'
+    // hideChildren: false, // Agreed that this doesn't fit in the model/schema
     text: RichTextType,
   }),
   {

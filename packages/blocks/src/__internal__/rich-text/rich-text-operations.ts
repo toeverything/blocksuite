@@ -24,6 +24,7 @@ import {
 } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import type { ListBlockModel } from '@blocksuite/blocks/list-block/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -41,7 +42,9 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   // make adding text block by enter a standalone operation
   page.captureSync();
 
-  const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
+  const isToggleBlock = (model as ListBlockModel).type === 'toggle';
+  const shouldInheritFlavour =
+    matchFlavours(model, ['affine:list']) && !isToggleBlock;
   const blockProps = shouldInheritFlavour
     ? {
         flavour: model.flavour,
@@ -52,10 +55,10 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
         type: 'text',
       };
 
-  const id = !model.children.length
-    ? page.addBlock(blockProps, parent, index + 1)
-    : // If the block has children, insert a new block as the first child
-      page.addBlock(blockProps, model, 0);
+  const id = // If the block has children (or is a toggle block), insert a new block as the first child
+    !model.children.length && !isToggleBlock
+      ? page.addBlock(blockProps, parent, index + 1)
+      : page.addBlock(blockProps, model, 0);
 
   asyncFocusRichText(page, id);
 }
@@ -482,9 +485,12 @@ export function tryMatchSpaceHotkey(
       isConverted = convertToList(page, model, 'bulleted', prefix);
       break;
     case '>>':
-      isConverted = convertToList(page, model, 'toggle', prefix, {
-        open: !!model.children.length,
-      });
+      page.awarenessStore.setFlag('enable_toggle_block', true); // TODO find the right way to set this flag and turn it off by default
+      if (page.awarenessStore.getFlag('enable_toggle_block')) {
+        isConverted = convertToList(page, model, 'toggle', prefix, {
+          hideChildren: false,
+        });
+      }
       break;
     case '***':
       isConverted = convertToDivider(page, model, prefix);

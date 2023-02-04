@@ -70,6 +70,11 @@ declare type BlockSuiteFlags = {
   enable_block_hub: boolean;
   enable_slash_menu: boolean;
   enable_append_flavor_slash: boolean;
+
+  enable_toggle_block: boolean;
+  enable_hide_children: boolean;
+  blocks_with_hidden_children: string[] | undefined;
+
   readonly: Record<string, boolean>;
 };
 

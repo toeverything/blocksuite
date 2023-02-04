@@ -29,6 +29,8 @@ export function getListIcon({
     }}"
   >
     ${(() => {
+      const blocksWithHiddenChildren =
+        model.page.awarenessStore.getFlag('blocks_with_hidden_children') ?? [];
       switch (model.type) {
         case 'bulleted':
           return points[deep % points.length];
@@ -40,9 +42,9 @@ export function getListIcon({
         case 'todo':
           return model.checked ? checkboxChecked() : checkboxUnchecked();
         case 'toggle':
-          return model.open
-            ? toggleDown()
-            : toggleRight(!!model.children.length);
+          return blocksWithHiddenChildren.includes(model.id)
+            ? toggleRight(!!model.children.length)
+            : toggleDown();
         default:
           return '';
       }
