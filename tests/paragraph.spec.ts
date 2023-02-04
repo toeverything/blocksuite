@@ -28,6 +28,7 @@ import {
   redoByClick,
   pressTab,
   type,
+  SHORT_KEY,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -662,4 +663,48 @@ test('press left in first paragraph start should not change cursor position', as
   await type(page, 'l');
   await assertRichTexts(page, ['l1']);
   await assertTitle(page, '');
+});
+
+test('press arrow up in the second line should move caret to the first line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const delta = Array.from({ length: 100 }, (v, i) => {
+      return i % 2 === 0
+        ? { insert: 'i', attributes: { italic: true } }
+        : { insert: 'b', attributes: { bold: true } };
+    });
+    const text = page.Text.fromDelta(delta);
+    const paragraphId = page.addBlockByFlavour(
+      'affine:paragraph',
+      { text },
+      frame
+    );
+    return paragraphId;
+  });
+
+  // await focusRichText(page);
+  const locator = page.locator('.ql-editor').nth(0);
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Can't get bounding box");
+  }
+  // Click left bottom corner
+  // Go to the start of the second line
+  await page.mouse.click(box.x + 1, box.y + box.height - 1);
+  // await page.keyboard.press('ArrowDown');
+  // await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+
+  await page.keyboard.press('ArrowUp');
+  await type(page, '0');
+  await page.keyboard.press('ArrowUp');
+  await type(page, '1');
+  await assertTitle(page, '1');
+  await assertRichTexts(page, [
+    '0ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib',
+  ]);
 });
