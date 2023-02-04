@@ -22,7 +22,10 @@ import type {
   EmbedEditingState,
 } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  BLOCK_ID_ATTR,
+} from '@blocksuite/global/config';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -81,11 +84,13 @@ export function EmbedSelectedRectsContainer(
   `;
 }
 
-export function SelectedRectsContainer(rects: DOMRect[]) {
+export function SelectedRectsContainer(rects: DOMRect[], scrollTop: number) {
   return html`
     <style>
+      .affine-page-selected-rects-container {
+        position: relative;
+      }
       .affine-page-selected-rects-container > div {
-        position: fixed;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
@@ -95,9 +100,10 @@ export function SelectedRectsContainer(rects: DOMRect[]) {
     <div class="affine-page-selected-rects-container">
       ${rects.map(rect => {
         const style = {
+          position: 'absolute',
           display: 'block',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
+          left: BLOCK_CHILDREN_CONTAINER_PADDING_LEFT + 'px',
+          top: scrollTop + rect.top + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };

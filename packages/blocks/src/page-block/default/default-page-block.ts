@@ -160,6 +160,12 @@ export class DefaultPageBlockComponent
   frameSelectionRect: DOMRect | null = null;
 
   @state()
+  viewportScrollOffset = {
+    left: 0,
+    top: 0,
+  };
+
+  @state()
   selectedRects: DOMRect[] = [];
 
   @state()
@@ -239,9 +245,12 @@ export class DefaultPageBlockComponent
     page.workspace.setPageMeta(page.id, { title });
   }
 
+  // FIXME: keep embed selected rects after scroll
   private _clearSelection = () => {
-    this.selection.state.clear();
-    this.signals.updateSelectedRects.emit([]);
+    // block selection support scroll, therefore we do not clear selection
+    if (this.selection.state.type !== 'block') {
+      this.selection.state.clear();
+    }
     this.signals.updateEmbedRects.emit([]);
     this.signals.updateEmbedEditingState.emit(null);
   };
@@ -387,6 +396,14 @@ export class DefaultPageBlockComponent
     );
   };
 
+  private _getViewportScrollOffset() {
+    const container = this.children[0];
+    return {
+      left: container.scrollLeft,
+      top: container.scrollTop,
+    };
+  }
+
   firstUpdated() {
     autosize(this._title);
     bindHotkeys(this.page, this.selection, this.signals);
@@ -405,6 +422,7 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateSelectedRects.on(rects => {
+      this.viewportScrollOffset = this._getViewportScrollOffset();
       this.selectedRects = rects;
       this.requestUpdate();
     });
@@ -473,7 +491,10 @@ export class DefaultPageBlockComponent
       this.requestUpdate()
     );
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
-    const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
+    const selectedRectsContainer = SelectedRectsContainer(
+      this.selectedRects,
+      this.viewportScrollOffset.top
+    );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
@@ -487,6 +508,8 @@ export class DefaultPageBlockComponent
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
+          ${selectedRectsContainer}
+          ${selectedEmbedContainer}${embedEditingContainer}
           <div class="affine-default-page-block-title-container">
             <textarea
               ?disabled=${this.readonly}
@@ -500,8 +523,7 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectedRectsContainer} ${selectionRect}
-        ${selectedEmbedContainer}${embedEditingContainer}
+        ${selectionRect} ${selectedEmbedContainer}${embedEditingContainer}
         ${codeBlockOptionContainer}
       </div>
     `;
