@@ -14,7 +14,6 @@ import {
   ExtendedModel,
   getRichTextByModel,
   getPreviousBlock,
-  getNextBlock,
   asyncFocusRichText,
   convertToList,
   convertToParagraph,
