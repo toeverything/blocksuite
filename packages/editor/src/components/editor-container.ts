@@ -4,9 +4,14 @@ import { choose } from 'lit/directives/choose.js';
 
 import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
-import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
+import {
+  getDefaultPageBlock,
+  MouseMode,
+  PageBlockModel,
+} from '@blocksuite/blocks';
 import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
+import { checkEditorElementActive } from '../utils/editor.js';
 
 @customElement('editor-container')
 export class EditorContainer extends NonShadowLitElement {
@@ -85,6 +90,20 @@ export class EditorContainer extends NonShadowLitElement {
         if (e.altKey && e.metaKey && e.code === 'KeyC') {
           e.preventDefault();
         }
+
+        // `esc`  clear selection
+        const pageModel = this.pageBlockModel;
+
+        if (!pageModel) return;
+
+        if (e.code === 'Escape' && checkEditorElementActive()) {
+          const selection = getSelection();
+          selection?.removeAllRanges();
+        }
+
+        const pageBlock = getDefaultPageBlock(pageModel);
+
+        pageBlock.signals.updateSelectedRects.emit([]);
       })
     );
 
