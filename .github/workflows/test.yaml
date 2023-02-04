@@ -47,7 +47,7 @@ jobs:
           COVERAGE: true
 
       - name: Collect code coverage report
-        run: pnpm exec nyc report -t .nyc_output --reporter=text
+        run: pnpm exec nyc report -t .nyc_output
 
       - name: Upload test results
         if: ${{ failure() }}

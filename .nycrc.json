@@ -1,4 +1,4 @@
 {
-  "report-dir": "./coverage",
-  "reporter": ["text", "json-summary"]
+  "report-dir": ".coverage",
+  "reporter": ["text", "json-summary", "html"]
 }
