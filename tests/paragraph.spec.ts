@@ -678,32 +678,32 @@ test('press arrow up in the second line should move caret to the first line', as
         : { insert: 'b', attributes: { bold: true } };
     });
     const text = page.Text.fromDelta(delta);
-    const paragraphId = page.addBlockByFlavour(
-      'affine:paragraph',
-      { text },
-      frame
-    );
-    return paragraphId;
+    page.addBlockByFlavour('affine:paragraph', { text }, frame);
+    page.addBlockByFlavour('affine:paragraph', {}, frame);
   });
 
-  // await focusRichText(page);
-  const locator = page.locator('.ql-editor').nth(0);
-  const box = await locator.boundingBox();
-  if (!box) {
-    throw new Error("Can't get bounding box");
-  }
-  // Click left bottom corner
-  // Go to the start of the second line
-  await page.mouse.click(box.x + 1, box.y + box.height - 1);
-  // await page.keyboard.press('ArrowDown');
-  // await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+  // Focus the empty paragraph
+  await focusRichText(page, 1);
+  await page.keyboard.press('ArrowUp');
+  // Now the caret is at the start of the second line of the first paragraph
 
   await page.keyboard.press('ArrowUp');
   await type(page, '0');
   await page.keyboard.press('ArrowUp');
+  // At title
   await type(page, '1');
   await assertTitle(page, '1');
+
+  // At the first line of the first paragraph
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  // At the second line of the first paragraph
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  // At the second paragraph
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await type(page, '2');
+
   await assertRichTexts(page, [
     '0ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib',
+    '2',
   ]);
 });
