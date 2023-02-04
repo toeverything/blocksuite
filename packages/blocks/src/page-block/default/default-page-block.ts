@@ -76,6 +76,7 @@ export class DefaultPageBlockComponent
 {
   static styles = css`
     .affine-default-viewport {
+      position: relative;
       overflow-x: hidden;
       overflow-y: auto;
       height: 100%;
@@ -181,6 +182,9 @@ export class DefaultPageBlockComponent
 
   @state()
   codeBlockOption!: CodeBlockOption | null;
+
+  @query('.affine-default-viewport')
+  defaultViewportElement!: HTMLDivElement;
 
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
@@ -397,7 +401,7 @@ export class DefaultPageBlockComponent
   };
 
   private _getViewportScrollOffset() {
-    const container = this.children[0];
+    const container = this.defaultViewportElement;
     return {
       left: container.scrollLeft,
       top: container.scrollTop,
@@ -493,7 +497,7 @@ export class DefaultPageBlockComponent
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(
       this.selectedRects,
-      this.viewportScrollOffset.top
+      this.viewportScrollOffset
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects

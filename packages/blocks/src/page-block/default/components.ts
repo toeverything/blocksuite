@@ -22,10 +22,8 @@ import type {
   EmbedEditingState,
 } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BLOCK_ID_ATTR,
-} from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { repeat } from 'lit/directives/repeat.js';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -65,6 +63,7 @@ export function EmbedSelectedRectsContainer(
     <div class="affine-page-selected-embed-rects-container resizable">
       ${rects.map(rect => {
         const style = {
+          position: 'absolute',
           display: 'block',
           left: rect.left + 'px',
           top: rect.top + 'px',
@@ -84,12 +83,15 @@ export function EmbedSelectedRectsContainer(
   `;
 }
 
-export function SelectedRectsContainer(rects: DOMRect[], scrollTop: number) {
+export function SelectedRectsContainer(
+  rects: DOMRect[],
+  scroll: {
+    left: number;
+    top: number;
+  }
+) {
   return html`
     <style>
-      .affine-page-selected-rects-container {
-        position: relative;
-      }
       .affine-page-selected-rects-container > div {
         background: var(--affine-selected-color);
         z-index: 1;
@@ -98,12 +100,12 @@ export function SelectedRectsContainer(rects: DOMRect[], scrollTop: number) {
       }
     </style>
     <div class="affine-page-selected-rects-container">
-      ${rects.map(rect => {
+      ${repeat(rects, rect => {
         const style = {
           position: 'absolute',
           display: 'block',
-          left: BLOCK_CHILDREN_CONTAINER_PADDING_LEFT + 'px',
-          top: scrollTop + rect.top + 'px',
+          left: scroll.left + rect.left + 'px',
+          top: scroll.top + rect.top + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
