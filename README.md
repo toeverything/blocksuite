@@ -1,12 +1,7 @@
+# BlockSuite
+
 <p align="center">
-  <a href="https://block-suite.com">
-    <picture>
-      <source media="(max-width: 499px)" srcset="assets/logo-and-name-v.svg" />
-      <source media="(min-width: 500px)" srcset="assets/logo-and-name-h.svg" />
-      <img src="assets/logo-and-name-v.png" alt="BlockSuite logo and name" />
-    </picture>
-    <h3 align="center">Assemble Anything. Embed Anywhere.</h3>
-  </a>
+  <img src="assets/logo-and-name-h.svg" alt="BlockSuite logo and name" style="max-width: 500px;" />
 </p>
 
 [![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/master)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amaster)
@@ -18,7 +13,7 @@
 
 ---
 
-<img src="assets/logo.svg" style="height: 1em;"> BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
+BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
 - 👉 [Try BlockSuite-based AFFiNE online](https://pathfinder.affine.pro/)
 - 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
