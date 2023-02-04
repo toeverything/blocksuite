@@ -97,19 +97,19 @@ function handleUp(
     //   - Let list be the result of invoking getClientRects() on the same range this method was invoked on.
     //   - If list is empty return a DOMRect object whose x, y, width and height members are zero.
     // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
-    // if (left === 0 && top === 0) {
-    //   if (!(range.startContainer instanceof HTMLElement)) {
-    //     console.warn(
-    //       "Failed to calculate caret position! range.getBoundingClientRect() is zero and it's startContainer not an HTMLElement.",
-    //       range
-    //     );
-    //     focusPreviousBlock(model);
-    //     return;
-    //   }
-    //   const rect = range.startContainer.getBoundingClientRect();
-    //   focusPreviousBlock(model, new Point(rect.left, rect.top));
-    //   return;
-    // }
+    if (left === 0 && top === 0) {
+      if (!(range.startContainer instanceof HTMLElement)) {
+        console.warn(
+          "Failed to calculate caret position! range.getBoundingClientRect() is zero and it's startContainer not an HTMLElement.",
+          range
+        );
+        focusPreviousBlock(model);
+        return;
+      }
+      const rect = range.startContainer.getBoundingClientRect();
+      focusPreviousBlock(model, new Point(rect.left, rect.top));
+      return;
+    }
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
