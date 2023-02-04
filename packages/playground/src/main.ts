@@ -76,8 +76,9 @@ async function main() {
   // instead of using this default setup.
   if (isE2E) return;
 
+  // Open default examples list when no `?init` param is provided
   const exampleList = document.createElement('example-list');
-  window.workspace.signals.pageAdded.once(() => exampleList.remove());
+  workspace.signals.pageAdded.once(() => exampleList.remove());
   document.body.prepend(exampleList);
 
   subscribePage(workspace);

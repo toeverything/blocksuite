@@ -5,7 +5,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import * as examples from '../data/index.js';
 import '@shoelace-style/shoelace/dist/components/card/card.js';
 
-const data = Object.entries(examples);
+const initFunctions = Object.values(examples);
 
 @customElement('example-list')
 export class ExampleList extends LitElement {
@@ -19,32 +19,24 @@ export class ExampleList extends LitElement {
     }
 
     .card {
-      cursor: pointer;
+      width: 300px;
       font-family: var(--sl-input-font-family);
       font-size: 14px;
-      width: 300px;
+      cursor: pointer;
     }
   `;
 
-  protected render() {
+  render() {
     return html`
       <div class="container">
         ${repeat(
-          data,
-          item => item[0],
-          ([name, fn]) => {
-            return html`
-              <sl-card
-                class="card"
-                @click=${() => {
-                  fn(window.workspace);
-                }}
-              >
-                <div slot="header">${fn.displayName}</div>
-                ${fn.description}
-              </sl-card>
-            `;
-          }
+          initFunctions,
+          fn => html`
+            <sl-card class="card" @click=${() => fn(window.workspace)}>
+              <div slot="header">${fn.displayName}</div>
+              ${fn.description}
+            </sl-card>
+          `
         )}
       </div>
     `;
