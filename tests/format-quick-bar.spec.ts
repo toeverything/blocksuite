@@ -1,6 +1,7 @@
 import { expect, Page, test } from '@playwright/test';
 import {
   clickBlockTypeMenuItem,
+  dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
@@ -8,6 +9,7 @@ import {
   initThreeParagraphs,
   pressEnter,
   switchReadonly,
+  type,
   withPressKey,
 } from './utils/actions/index.js';
 import {
@@ -30,6 +32,9 @@ test('should format quick bar show when select text', async ({ page }) => {
   if (!box) {
     throw new Error("formatQuickBar doesn't exist");
   }
+  assertAlmostEqual(box.x, 20, 5);
+  assertAlmostEqual(box.y, 260, 5);
+
   // Click the edge of the format quick bar
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
   // Even not any button is clicked, the format quick bar should't be hidden
@@ -45,7 +50,7 @@ test('should format quick bar show when select text by keyboard', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello world');
+  await type(page, 'hello world');
   await withPressKey(page, 'Shift', async () => {
     let i = 10;
     while (i--) {
@@ -106,7 +111,7 @@ test('should format quick bar hide when type text', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
-  await page.keyboard.type('1');
+  await type(page, '1');
   await expect(formatQuickBar).not.toBeVisible();
 });
 
@@ -335,7 +340,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await expect(linkPopoverInput).toBeVisible();
 
-  await page.keyboard.type('https://www.example.com');
+  await type(page, 'https://www.example.com');
   await pressEnter(page);
 
   await assertStoreMatchJSX(
@@ -591,7 +596,7 @@ test('should format quick bar follow scroll', async ({ page }) => {
   for (let i = 0; i < 20; i++) {
     await pressEnter(page);
   }
-  page.keyboard.type('bottom');
+  type(page, 'bottom');
 
   await scrollToTop(page);
 
@@ -617,4 +622,44 @@ test('should format quick bar follow scroll', async ({ page }) => {
   await clickBlockTypeMenuItem(page, 'Bulleted List');
   await scrollToBottom(page);
   await assertLocatorVisible(page, formatQuickBar, false);
+});
+
+test('should format quick bar position correct at the start of second line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const text = new page.Text('a'.repeat(100));
+    const paragraphId = page.addBlockByFlavour(
+      'affine:paragraph',
+      { text },
+      frame
+    );
+    return paragraphId;
+  });
+  // await focusRichText(page);
+  const locator = page.locator('.ql-editor').nth(0);
+  const textBox = await locator.boundingBox();
+  if (!textBox) {
+    throw new Error("Can't get bounding box");
+  }
+  // Drag to the start of the second line
+  await dragBetweenCoords(
+    page,
+    { x: textBox.x + textBox.width - 1, y: textBox.y + textBox.height - 1 },
+    { x: textBox.x, y: textBox.y + textBox.height - 1 }
+  );
+
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
+
+  const formatBox = await formatQuickBar.boundingBox();
+  if (!formatBox) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(formatBox.x, 20, 5);
+  assertAlmostEqual(formatBox.y, 132, 5);
 });

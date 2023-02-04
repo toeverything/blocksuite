@@ -27,14 +27,15 @@ import {
   initThreeParagraphs,
   redoByClick,
   pressTab,
+  type,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await pressEnter(page);
-  await page.keyboard.type('world');
+  await type(page, 'world');
 
   await assertTitle(page, 'hello');
   await assertRichTexts(page, ['world', '\n']);
@@ -43,7 +44,7 @@ test('init paragraph by page title enter at last', async ({ page }) => {
 test('init paragraph by page title enter in middle', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
@@ -56,7 +57,7 @@ test('init paragraph by page title enter in middle', async ({ page }) => {
 test('drag over paragraph title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
 
@@ -71,7 +72,7 @@ test('drag over paragraph title', async ({ page }) => {
 test('backspace and arrow on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
 
@@ -98,12 +99,12 @@ test('backspace and arrow on title', async ({ page }) => {
 test('backspace on line start of the first block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertTitle(page, 'hello');
   await resetHistory(page);
 
   await focusRichText(page, 0);
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
@@ -132,7 +133,7 @@ test('append new paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertSelection(page, 0, 5, 0);
 
   await pressEnter(page);
@@ -157,11 +158,11 @@ test('insert new paragraph block by enter', async ({ page }) => {
   await assertRichTexts(page, ['\n', '\n', '\n']);
 
   await focusRichText(page, 1);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['\n', 'hello', '\n']);
 
   await pressEnter(page);
-  await page.keyboard.type('world');
+  await type(page, 'world');
   await assertRichTexts(page, ['\n', 'hello', 'world', '\n']);
   await assertBlockChildrenFlavours(page, '1', [
     'affine:paragraph',
@@ -176,7 +177,7 @@ test('split paragraph block by enter', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
   await page.keyboard.press('ArrowLeft');
@@ -204,7 +205,7 @@ test('split paragraph block with selected text by enter', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
   // select 'll'
@@ -235,7 +236,7 @@ test('add multi line by soft enter', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
   await page.keyboard.press('ArrowLeft');
@@ -258,11 +259,11 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   await pressEnter(page);
   await focusRichText(page, 1);
-  await page.keyboard.type('world');
+  await type(page, 'world');
   await assertRichTexts(page, ['hello', 'world']);
 
   // indent
@@ -288,7 +289,7 @@ test('should indent and unindent works with children', async ({ page }) => {
   const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await pressEnter(page);
-  await page.keyboard.type('012');
+  await type(page, '012');
 
   // Focus 789
   await focusRichText(page, 2);
@@ -364,9 +365,9 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
 
   await focusRichText(page, 1);
   await page.keyboard.press('Tab');
@@ -390,7 +391,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   );
   await focusRichText(page, 0);
   await pressEnter(page);
-  await page.keyboard.type('789');
+  await type(page, '789');
   await assertStoreMatchJSX(
     page,
     `
@@ -421,16 +422,16 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
   await page.keyboard.press('Tab');
   await page.waitForTimeout(10);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await focusRichText(page, 0);
   await pressEnter(page);
   await page.keyboard.press('Backspace');
   await page.waitForTimeout(10);
-  await page.keyboard.type('now');
+  await type(page, 'now');
 
   // TODO FIXME wait for frame bounding box update
   await page.waitForTimeout(20);
@@ -463,7 +464,7 @@ test('switch between paragraph types', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   const selector = '.affine-paragraph-block-container';
 
@@ -487,10 +488,10 @@ test('delete at start of paragraph block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   await pressEnter(page);
-  await page.keyboard.type('a');
+  await type(page, 'a');
 
   await clickBlockTypeMenuItem(page, 'H1');
   await focusRichText(page, 1);
@@ -515,10 +516,10 @@ test('delete at start of paragraph immediately following list', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   await pressEnter(page);
-  await page.keyboard.type('a');
+  await type(page, 'a');
 
   await clickBlockTypeMenuItem(page, 'Bulleted List');
   await focusRichText(page, 1);
@@ -566,10 +567,10 @@ test('delete at start of paragraph with content', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
 
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await assertRichTexts(page, ['123', '456']);
 
   await page.keyboard.press('ArrowLeft');
@@ -587,11 +588,11 @@ test('delete at start of paragraph with content', async ({ page }) => {
 test('get focus from page title enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['\n']);
 
   await pressEnter(page);
-  await page.keyboard.type('world');
+  await type(page, 'world');
   await assertRichTexts(page, ['world', '\n']);
 });
 
@@ -600,11 +601,11 @@ test('handling keyup when cursor located in first paragraph', async ({
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertRichTexts(page, ['\n']);
 
   await pressEnter(page);
-  await page.keyboard.type('world');
+  await type(page, 'world');
   await assertRichTexts(page, ['world', '\n']);
   await page.keyboard.press('ArrowUp', { delay: 50 });
   await assertPageTitleFocus(page);
@@ -616,11 +617,11 @@ test('after deleting a text row, cursor should jump to the end of previous list 
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await assertSelection(page, 0, 5, 0);
 
   await pressEnter(page);
-  await page.keyboard.type('w');
+  await type(page, 'w');
   await assertRichTexts(page, ['hello', 'w']);
   await assertSelection(page, 1, 1, 0);
   await page.keyboard.press('ArrowUp');
@@ -631,19 +632,78 @@ test('after deleting a text row, cursor should jump to the end of previous list 
   await assertSelection(page, 0, 5, 0);
 });
 
-test('press tab in paragarph children', async ({ page }) => {
+test('press tab in paragraph children', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await pressEnter(page);
-  await page.keyboard.type('1');
+  await type(page, '1');
   await pressEnter(page);
   await pressTab(page);
-  await page.keyboard.type('2');
+  await type(page, '2');
   await pressEnter(page);
   await pressTab(page);
-  await page.keyboard.type('3');
+  await type(page, '3');
   await page.keyboard.press('ArrowUp', { delay: 50 });
   await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.type('- ');
+  await type(page, '- ');
   await assertRichTexts(page, ['1', '2', '3', '\n']);
+});
+
+test('press left in first paragraph start should not change cursor position', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '1');
+
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await type(page, 'l');
+  await assertRichTexts(page, ['l1']);
+  await assertTitle(page, '');
+});
+
+test('press arrow up in the second line should move caret to the first line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const delta = Array.from({ length: 100 }, (v, i) => {
+      return i % 2 === 0
+        ? { insert: 'i', attributes: { italic: true } }
+        : { insert: 'b', attributes: { bold: true } };
+    });
+    const text = page.Text.fromDelta(delta);
+    const paragraphId = page.addBlockByFlavour(
+      'affine:paragraph',
+      { text },
+      frame
+    );
+    return paragraphId;
+  });
+
+  // await focusRichText(page);
+  const locator = page.locator('.ql-editor').nth(0);
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Can't get bounding box");
+  }
+  // Click left bottom corner
+  // Go to the start of the second line
+  await page.mouse.click(box.x + 1, box.y + box.height - 1);
+  // await page.keyboard.press('ArrowDown');
+  // await page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
+
+  await page.keyboard.press('ArrowUp');
+  await type(page, '0');
+  await page.keyboard.press('ArrowUp');
+  await type(page, '1');
+  await assertTitle(page, '1');
+  await assertRichTexts(page, [
+    '0ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib',
+  ]);
 });

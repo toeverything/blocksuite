@@ -10,6 +10,7 @@
   },
   "exports": {
     ".": "./index.d.ts",
+    "./database": "./src/database.ts",
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
     "./config": "./src/config/index.ts"
@@ -20,6 +21,7 @@
     "access": "public",
     "exports": {
       ".": "./index.d.ts",
+      "./database": "./dist/database.js",
       "./utils": "./dist/utils.js",
       "./debug": "./dist/debug.js",
       "./config": "./dist/config/index.js"

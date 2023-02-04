@@ -5,7 +5,7 @@ import type {
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
-import { pressEnter, SHORT_KEY } from './keyboard.js';
+import { pressEnter, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
@@ -88,6 +88,11 @@ export async function enterPlaygroundRoom(
   }
   url.searchParams.set('room', room);
   await page.goto(url.toString());
+  await page.evaluate(() => {
+    if (typeof window.$blocksuite !== 'object') {
+      throw new Error('window.$blocksuite is not object');
+    }
+  }, []);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -168,6 +173,27 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initEmptyDatabaseState(page: Page, pageId?: string) {
+  const ids = await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlockByFlavour('affine:page');
+    }
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const paragraphId = page.addBlockByFlavour(
+      'affine:database',
+      {
+        title: 'Database 1',
+      },
+      frameId
+    );
+    page.captureSync();
+    return { pageId, frameId, paragraphId };
+  }, pageId);
+  return ids;
+}
+
 export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(() => {
     const { page } = window;
@@ -195,36 +221,36 @@ export async function focusRichText(page: Page, i = 0) {
 
 export async function initThreeParagraphs(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await pressEnter(page);
-  await page.keyboard.type('789');
+  await type(page, '789');
 }
 
 export async function initThreeLists(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('-');
+  await type(page, '-');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await pressEnter(page);
   await page.keyboard.press('Tab', { delay: 50 });
-  await page.keyboard.type('789');
+  await type(page, '789');
 }
 
 export async function initThreeDividers(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('123');
+  await type(page, '123');
 }
 
 export async function getQuillSelectionIndex(page: Page) {
@@ -402,4 +428,32 @@ export async function getBlockModel<Model extends BaseBlockModel>(
   );
   expect(result).not.toBeNull();
   return result as Model;
+}
+
+export async function getIndexCoordinate(
+  page: Page,
+  [richTextIndex, quillIndex]: [number, number],
+  coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
+) {
+  const coord = await page.evaluate(
+    ({ richTextIndex, quillIndex, coordOffSet }) => {
+      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+      const quillBound = richText.quill.getBounds(quillIndex);
+      const richTextBound = richText.getBoundingClientRect();
+      return {
+        x: richTextBound.left + quillBound.left + coordOffSet.x,
+        y:
+          richTextBound.top +
+          quillBound.top +
+          quillBound.height / 2 +
+          coordOffSet.y,
+      };
+    },
+    {
+      richTextIndex,
+      quillIndex,
+      coordOffSet,
+    }
+  );
+  return coord;
 }

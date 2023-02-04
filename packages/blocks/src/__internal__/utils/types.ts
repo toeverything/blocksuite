@@ -29,6 +29,7 @@ export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   readonly: boolean;
+  readonly isCompositionStart?: boolean;
 }
 
 export interface CommonBlockElement extends HTMLElement {

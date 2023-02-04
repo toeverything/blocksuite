@@ -1,6 +1,6 @@
 import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
-import TagSchema = BlockSuiteInternal.TagSchema;
+import type { TagSchema } from '@blocksuite/global/database';
 
 export enum DatabaseBlockDisplayMode {
   Text,

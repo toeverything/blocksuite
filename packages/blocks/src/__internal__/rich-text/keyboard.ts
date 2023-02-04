@@ -204,7 +204,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
   function onKeyRight(this: KeyboardEventThis, range: QuillRange) {
     const textLength = this.quill.getText().length;
     if (range.index + 1 === textLength) {
-      const nextBlock = getNextBlock(model.id);
+      const nextBlock = getNextBlock(model);
       if (!nextBlock) {
         return ALLOW_DEFAULT;
       }

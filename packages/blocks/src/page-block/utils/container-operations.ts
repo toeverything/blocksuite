@@ -360,6 +360,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   } else {
     const LARGE_BOUND = 999999;
     const rect = new DOMRect(0, 0, LARGE_BOUND, LARGE_BOUND);
+    selection.state.focusedBlockIndex = -1; // SELECT_ALL
     selection.selectBlocksByRect(rect);
   }
 
@@ -461,7 +462,7 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {
-          xywh: JSON.stringify([newX, y, w, newModelHeight]),
+          xywh: JSON.stringify([newX, y, w, Math.round(newModelHeight)]),
         });
         offset = newX + w;
       }

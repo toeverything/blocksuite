@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import type { Quill } from 'quill';
 import { uuidv4 } from 'lib0/random.js';
-import { RichTextType, BaseBlockModel } from '../base.js';
+import { BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import {
   Text,
@@ -21,11 +21,10 @@ import {
 import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { debug } from '@blocksuite/global/debug';
-import BlockTag = BlockSuiteInternal.BlockTag;
-import TagSchema = BlockSuiteInternal.TagSchema;
 import type { AwarenessStore } from '../awareness.js';
+import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -155,6 +154,10 @@ export class Page extends Space<PageData> {
     return this._history.canRedo();
   }
 
+  get YText() {
+    return Y.Text;
+  }
+
   get Text() {
     return Text;
   }
@@ -196,17 +199,12 @@ export class Page extends Space<PageData> {
       if (!already) {
         this.tags.set(id, tags);
       }
-      tags.set(tag.type, tag);
+      // Related issue: https://github.com/yjs/yjs/issues/255
+      const tagMap = new Y.Map();
+      tagMap.set('schemaId', tag.schemaId);
+      tagMap.set('value', tag.value);
+      tags.set(tag.schemaId, tagMap);
     });
-  }
-
-  getBlockTags(model: BaseBlockModel): Record<string, BlockTag> {
-    const tags = this.tags.get(model.id);
-    if (!tags) {
-      return {};
-    }
-    // fixme: performance issue
-    return tags.toJSON();
   }
 
   getBlockTagByTagSchema(
@@ -214,7 +212,14 @@ export class Page extends Space<PageData> {
     schema: TagSchema
   ): BlockTag | null {
     const tags = this.tags.get(model.id);
-    return (tags?.get(schema.id) as BlockTag) ?? null;
+    const tagMap = (tags?.get(schema.id) as Y.Map<unknown>) ?? null;
+    if (!tagMap) {
+      return null;
+    }
+    return {
+      schemaId: tagMap.get('schemaId') as string,
+      value: tagMap.get('value') as unknown,
+    };
   }
 
   getTagSchema(id: TagSchema['id']): TagSchema | null {
@@ -222,7 +227,7 @@ export class Page extends Space<PageData> {
   }
 
   setTagSchema(schema: TagSchema) {
-    return this.tagSchema.set(schema.id, schema);
+    this.transact(() => this.tagSchema.set(schema.id, schema));
   }
 
   getBlockById(id: string) {
@@ -332,6 +337,12 @@ export class Page extends Space<PageData> {
     if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
+    if (
+      !this.awarenessStore.getFlag('enable_database') &&
+      flavour === 'affine:database'
+    ) {
+      throw new Error('database is not enabled');
+    }
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = this._idGenerator();
@@ -344,17 +355,9 @@ export class Page extends Space<PageData> {
 
       assertValidChildren(this._yBlocks, clonedProps);
       initInternalProps(yBlock, clonedProps);
-      const schema = this.workspace.flavourSchemaMap.get(flavour);
       const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
-      assertExists(schema);
       assertExists(defaultProps);
-      syncBlockProps(
-        schema,
-        defaultProps,
-        yBlock,
-        clonedProps,
-        this._ignoredKeys
-      );
+      syncBlockProps(defaultProps, yBlock, clonedProps, this._ignoredKeys);
       trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       if (typeof parent === 'string') {
@@ -436,13 +439,8 @@ export class Page extends Space<PageData> {
       return;
     }
     const yBlock = this._yBlocks.get(model.id) as YBlock;
+
     this.transact(() => {
-      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
-      const defaultProps = this.workspace.flavourInitialPropsMap.get(
-        model.flavour
-      );
-      assertExists(schema);
-      assertExists(defaultProps);
       if (props.text instanceof PrelimText) {
         props.text.ready = true;
       } else if (props.text instanceof Text) {
@@ -463,37 +461,36 @@ export class Page extends Space<PageData> {
         yBlock.set('sys:children', yChildren);
       }
 
-      syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
+      const defaultProps = this.workspace.flavourInitialPropsMap.get(
+        model.flavour
+      );
+      assertExists(defaultProps);
+      syncBlockProps(defaultProps, yBlock, props, this._ignoredKeys);
     });
   }
 
-  @debug('CRUD')
-  insertBlock(
-    blockProps: Partial<BaseBlockModel>,
+  addSiblingBlock(
     targetModel: BaseBlockModel,
-    top = true
+    blockProps: Partial<BaseBlockModel>,
+    direction: 'left' | 'right' = 'right'
   ) {
-    const targetParentModel = this.getParent(targetModel);
-    if (targetParentModel === null) {
-      throw new Error('cannot find parent model');
-    }
-    this.transact(() => {
-      const yParent = this._yBlocks.get(targetParentModel.id) as YBlock;
-      const yChildren = yParent.get('sys:children') as Y.Array<string>;
-      const targetIdx = yChildren
-        .toArray()
-        .findIndex(id => id === targetModel.id);
-      assertExists(blockProps.flavour);
-      this.addBlockByFlavour(
-        blockProps.flavour,
-        {
-          type: blockProps.type,
-        },
-        targetParentModel.id,
-        top ? targetIdx : targetIdx + 1
-      );
-      // }
-    });
+    const parent = this.getParent(targetModel);
+    assertExists(blockProps.flavour);
+    assertExists(parent);
+
+    const targetIndex =
+      parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
+    const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
+
+    const id = this.addBlockByFlavour(
+      blockProps.flavour,
+      {
+        type: blockProps.type,
+      },
+      parent.id,
+      insertIndex
+    );
+    return id;
   }
 
   deleteBlockById(id: string) {
@@ -700,31 +697,36 @@ export class Page extends Space<PageData> {
 
     const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
-    const schema = this.workspace.flavourSchemaMap.get(model.flavour);
-    const defaultProps = this.workspace.flavourInitialPropsMap.get(
-      model.flavour
-    );
-    assertExists(schema);
-    assertExists(defaultProps);
     if (model.flavour === 'affine:surface') {
       isSurface = true;
     }
     this._blockMap.set(props.id, model);
-    Object.entries(defaultProps).map(([key, value]) => {
-      const storedValue = yBlock.get(`prop:${key}`);
-      if (storedValue instanceof Y.Text) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (model as any)[key] = new Text(this, storedValue);
-      } else if (storedValue instanceof Y.Array) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (model as any)[key] = storedValue.toArray();
-      }
-    });
 
-    // todo: use schema
+    if (
+      // TODO use schema
+      matchFlavours(model, [
+        'affine:paragraph',
+        'affine:list',
+        'affine:code',
+      ]) &&
+      !yBlock.get('prop:text')
+    ) {
+      this.transact(() => yBlock.set('prop:text', new Y.Text()));
+    }
+
+    const yText = yBlock.get('prop:text') as Y.Text;
+    model.text = new Text(yText);
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
+    }
+
+    // todo: use schema
+    if (model.flavour === 'affine:database') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (model as any).columns = (
+        yBlock.get('prop:columns') as Y.Array<unknown>
+      ).toArray();
     }
 
     const yChildren = yBlock.get('sys:children');
@@ -777,20 +779,13 @@ export class Page extends Space<PageData> {
     const id = event.target.get('sys:id') as string;
     const model = this.getBlockById(id);
     if (!model) return;
-    const schema = this.workspace.flavourSchemaMap.get(model.flavour);
-    const defaultState = this.workspace.flavourInitialPropsMap.get(
-      model.flavour
-    );
-    assertExists(defaultState);
-    assertExists(schema);
 
     const props: Partial<BlockProps> = {};
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
-      if (defaultState[key] === RichTextType) {
-        continue;
-      }
+      // TODO use schema
+      if (key === 'prop:text') continue;
       // Update children
       if (key === 'sys:children') {
         hasChildrenUpdate = true;
@@ -881,6 +876,14 @@ export class Page extends Space<PageData> {
           model.childMap = createChildMap(event.target);
           model.childrenUpdated.emit();
         }
+      }
+    } else {
+      if (event.path.includes('meta:tags')) {
+        // todo: refactor here
+        const blockId = event.path[2] as string;
+        const block = this.getBlockById(blockId);
+        assertExists(block);
+        block.propsUpdated.emit();
       }
     }
   }

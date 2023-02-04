@@ -19,6 +19,7 @@ import {
   undoByKeyboard,
   redoByKeyboard,
   SHORT_KEY,
+  type,
 } from './actions/keyboard.js';
 import { captureHistory } from './actions/misc.js';
 
@@ -278,6 +279,26 @@ export async function assertBlockType(
   expect(actual).toBe(type);
 }
 
+export async function assertBlockProps(
+  page: Page,
+  id: string,
+  props: Record<string, unknown>
+) {
+  const actual = await page.evaluate(
+    ([id, props]) => {
+      const element = document.querySelector(`[data-block-id="${id}"]`);
+      // @ts-ignore
+      const model = element.model as BaseBlockModel;
+      return Object.fromEntries(
+        // @ts-ignore
+        Object.keys(props).map(key => [key, model[key]])
+      );
+    },
+    [id, props] as const
+  );
+  expect(actual).toEqual(props);
+}
+
 export async function assertBlockTypes(page: Page, blockTypes: string[]) {
   const actual = await page.evaluate(() => {
     const elements = document.querySelectorAll('[data-block-id]');
@@ -485,7 +506,7 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   // Clear input before test
   await locator.clear();
   // type/backspace
-  await page.keyboard.type('1234');
+  await type(page, '1234');
   await expect(locator).toHaveValue('1234');
   await captureHistory(page);
   await page.keyboard.press('Backspace');

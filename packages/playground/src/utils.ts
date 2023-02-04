@@ -22,6 +22,21 @@ export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
+
+import * as blocks from '@blocksuite/blocks';
+import * as store from '@blocksuite/store';
+import * as globalUtils from '@blocksuite/global/utils';
+import * as editor from '@blocksuite/editor';
+if (isE2E) {
+  Object.defineProperty(window, '$blocksuite', {
+    value: Object.freeze({
+      store,
+      blocks,
+      global: { utils: globalUtils },
+      editor,
+    }),
+  });
+}
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
@@ -99,7 +114,7 @@ export function getOptions(): Pick<
       enable_set_remote_flag: true,
       enable_drag_handle: true,
       enable_block_hub: true,
-      enable_database: params.get('database') !== null,
+      enable_database: true,
       enable_slash_menu: params.get('slash') !== '0',
       enable_append_flavor_slash: params.get('slash') === '1',
       readonly: {

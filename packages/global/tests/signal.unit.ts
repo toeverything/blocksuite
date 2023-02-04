@@ -31,6 +31,17 @@ describe('signal', () => {
     expect(callback).toBeCalledTimes(1);
   });
 
+  test('listen once with dispose', () => {
+    const signal = new Signal<void>();
+    const callback = vi.fn(() => {
+      throw new Error('');
+    });
+    const disposable = signal.once(callback);
+    disposable.dispose();
+    signal.emit();
+    expect(callback).toBeCalledTimes(0);
+  });
+
   test('subscribe', () => {
     type Data = {
       name: string;

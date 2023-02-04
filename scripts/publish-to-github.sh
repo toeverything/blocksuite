@@ -39,3 +39,8 @@ cd packages/global
 jq '.name = "@blocksuite/global"' package.json > package-modified.json
 replace
 cd ../..
+
+cd packages/virgo
+jq '.name = "@blocksuite/virgo"' package.json > package-modified.json
+replace
+cd ../..

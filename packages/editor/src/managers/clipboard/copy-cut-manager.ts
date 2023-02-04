@@ -172,6 +172,7 @@ export class CopyCutManager {
         e.preventDefault();
         e.stopPropagation();
       } catch (e) {
+        // FIXME: throws `DOMException: Modifications are not allowed for this document` in Firefox
         // TODO handle exception
       }
     } else {

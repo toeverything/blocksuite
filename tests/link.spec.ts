@@ -8,6 +8,7 @@ import {
   pressEnter,
   SHORT_KEY,
   switchReadonly,
+  type,
 } from './utils/actions/index.js';
 import {
   assertKeyboardWorkInInput,
@@ -24,7 +25,7 @@ test('basic link', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type(linkText);
+  await type(page, linkText);
 
   // Create link
   await dragBetweenIndices(page, [0, 0], [0, 8]);
@@ -34,7 +35,7 @@ test('basic link', async ({ page }) => {
   await expect(linkPopoverLocator).toBeVisible();
   const linkPopoverInput = page.locator('.affine-link-popover-input');
   await expect(linkPopoverInput).toBeVisible();
-  await page.keyboard.type(link);
+  await type(page, link);
   await pressEnter(page);
   await expect(linkPopoverLocator).not.toBeVisible();
 
@@ -58,9 +59,9 @@ test('basic link', async ({ page }) => {
   const editLinkPopoverLocator = page.locator('.affine-link-edit-popover');
   await expect(editLinkPopoverLocator).toBeVisible();
   await page.keyboard.press('Tab');
-  await page.keyboard.type(text2);
+  await type(page, text2);
   await page.keyboard.press('Tab');
-  await page.keyboard.type(link2);
+  await type(page, link2);
   await page.keyboard.press('Tab');
   await pressEnter(page);
   const link2Locator = page.locator(`text="${text2}"`);
@@ -101,7 +102,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       });
       const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
 
-      const text = page.Text.fromDelta(page, [
+      const text = page.Text.fromDelta([
         { insert: 'Hello' },
         { insert: str, attributes: { link } },
       ]);
@@ -122,7 +123,7 @@ test('text added after a link should not have link formatting', async ({
   await enterPlaygroundRoom(page);
   const id = await createLinkBlock(page, 'link text', 'http://example.com');
   await focusRichText(page, 0);
-  await page.keyboard.type('after link');
+  await type(page, 'after link');
   await assertStoreMatchJSX(
     page,
     // XXX This snapshot is not exactly correct, but it's close enough for now.
@@ -139,7 +140,7 @@ test('text added after a link should not have link formatting', async ({
         link="http://example.com"
       />
       <text
-        insert="a"
+        insert=" a"
         link={false}
       />
       <text
@@ -160,7 +161,7 @@ test('type character in link should not jump out link node', async ({
   const id = await createLinkBlock(page, 'link text', 'http://example.com');
   await focusRichText(page, 0);
   await page.keyboard.press('ArrowLeft');
-  await page.keyboard.type('IN_LINK');
+  await type(page, 'IN_LINK');
   await assertStoreMatchJSX(
     page,
     `
@@ -195,6 +196,7 @@ test('readonly mode should not trigger link popup', async ({ page }) => {
   await expect(linkPopoverLocator).toBeVisible();
   await switchReadonly(page);
 
+  page.mouse.move(0, 0);
   // XXX Wait for readonly delay
   await page.waitForTimeout(300);
 
@@ -218,7 +220,7 @@ test('should mock selection not stored', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type(linkText);
+  await type(page, linkText);
 
   // Create link
   await dragBetweenIndices(page, [0, 0], [0, 8]);
@@ -239,7 +241,7 @@ test('should mock selection not stored', async ({ page }) => {
     paragraphId
   );
 
-  await page.keyboard.type(link);
+  await type(page, link);
   await pressEnter(page);
 
   // the mock select node should be removed after link created

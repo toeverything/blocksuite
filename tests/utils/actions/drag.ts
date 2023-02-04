@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { getIndexCoordinate } from './misc.js';
 
 export async function dragBetweenCoords(
   page: Page,
@@ -24,44 +25,24 @@ export async function dragBetweenIndices(
   [startRichTextIndex, startQuillIndex]: [number, number],
   [endRichTextIndex, endQuillIndex]: [number, number],
   startCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
-  endCoordOffSet: { x: number; y: number } = { x: 0, y: 0 }
+  endCoordOffSet: { x: number; y: number } = { x: 0, y: 0 },
+  options?: {
+    beforeMouseUp?: () => Promise<void>;
+    steps?: number;
+  }
 ) {
-  const startCoord = await page.evaluate(
-    ({ startRichTextIndex, startQuillIndex, startCoordOffSet }) => {
-      const richText =
-        document.querySelectorAll('rich-text')[startRichTextIndex];
-      const quillBound = richText.quill.getBounds(startQuillIndex);
-      const richTextBound = richText.getBoundingClientRect();
-      return {
-        x: richTextBound.left + quillBound.left + startCoordOffSet.x,
-        y:
-          richTextBound.top +
-          quillBound.top +
-          quillBound.height / 2 +
-          startCoordOffSet.y,
-      };
-    },
-    { startRichTextIndex, startQuillIndex, startCoordOffSet }
+  const startCoord = await getIndexCoordinate(
+    page,
+    [startRichTextIndex, startQuillIndex],
+    startCoordOffSet
+  );
+  const endCoord = await getIndexCoordinate(
+    page,
+    [endRichTextIndex, endQuillIndex],
+    endCoordOffSet
   );
 
-  const endCoord = await page.evaluate(
-    ({ endRichTextIndex, endQuillIndex, endCoordOffSet }) => {
-      const richText = document.querySelectorAll('rich-text')[endRichTextIndex];
-      const quillBound = richText.quill.getBounds(endQuillIndex);
-      const richTextBound = richText.getBoundingClientRect();
-      return {
-        x: richTextBound.left + quillBound.left + endCoordOffSet.x,
-        y:
-          richTextBound.top +
-          quillBound.top +
-          quillBound.height / 2 +
-          endCoordOffSet.y,
-      };
-    },
-    { endRichTextIndex, endQuillIndex, endCoordOffSet }
-  );
-
-  await dragBetweenCoords(page, startCoord, endCoord);
+  await dragBetweenCoords(page, startCoord, endCoord, options);
 }
 
 export async function dragOverTitle(page: Page) {
@@ -90,7 +71,7 @@ export async function dragEmbedResizeByBottomRight(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left + 110, y },
+      to: { x: bottomRightButtonBound.left - 334, y },
     };
   });
   await dragBetweenCoords(page, from, to, {
@@ -107,7 +88,7 @@ export async function dragEmbedResizeByBottomLeft(page: Page) {
     const y = bottomRightButtonBound.top;
     return {
       from: { x: bottomRightButtonBound.left + 5, y: y + 5 },
-      to: { x: bottomRightButtonBound.left - 110, y },
+      to: { x: bottomRightButtonBound.left + 344, y },
     };
   });
   await dragBetweenCoords(page, from, to, {

@@ -13,10 +13,11 @@ import {
   addFrameByClick,
   initEmptyParagraphState,
   dragBetweenIndices,
-  switchReadonly,
   SHORT_KEY,
   captureHistory,
   focusTitle,
+  switchReadonly,
+  type,
 } from './utils/actions/index.js';
 import {
   defaultStore,
@@ -33,7 +34,7 @@ test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   await test.expect(page).toHaveTitle(/BlockSuite/);
   await assertStore(page, defaultStore);
@@ -48,7 +49,7 @@ test('basic init with external text', async ({ page }) => {
     const pageId = page.addBlockByFlavour('affine:page', { title: 'hello' });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
 
-    const text = new page.Text(page, 'world');
+    const text = new page.Text('world');
     page.addBlockByFlavour('affine:paragraph', { text }, frame);
 
     const delta = [
@@ -58,7 +59,7 @@ test('basic init with external text', async ({ page }) => {
     page.addBlock(
       {
         flavour: 'affine:paragraph',
-        text: page.Text.fromDelta(page, delta),
+        text: page.Text.fromDelta(delta),
       },
       frame
     );
@@ -149,7 +150,7 @@ test('basic paired undo/redo', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   await assertText(page, 'hello');
   await undoByKeyboard(page);
@@ -167,7 +168,7 @@ test('undo/redo with keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
 
   await assertText(page, 'hello');
   await undoByKeyboard(page);
@@ -181,9 +182,9 @@ test('undo after adding block twice', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await pressEnter(page);
-  await page.keyboard.type('world');
+  await type(page, 'world');
 
   await undoByKeyboard(page);
   await assertRichTexts(page, ['hello']);
@@ -196,7 +197,7 @@ test('should readonly mode not be able to modify text', async ({ page }) => {
   const { paragraphId } = await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await switchReadonly(page);
 
   await dragBetweenIndices(page, [0, 1], [0, 3]);
@@ -227,9 +228,9 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello');
+  await type(page, 'hello');
   await pressEnter(page);
-  await page.keyboard.type('world');
+  await type(page, 'world');
   await assertRichTexts(page, ['hello', 'world']);
 
   await undoByKeyboard(page);
@@ -249,9 +250,9 @@ test('should undo/redo work on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusTitle(page);
-  await page.keyboard.type('title');
+  await type(page, 'title');
   await focusRichText(page);
-  await page.keyboard.type('hello world');
+  await type(page, 'hello world');
   await captureHistory(page);
   let i = 5;
   while (i--) {
@@ -260,7 +261,7 @@ test('should undo/redo work on title', async ({ page }) => {
 
   await focusTitle(page);
   await captureHistory(page);
-  await page.keyboard.type(' something');
+  await type(page, ' something');
   await undoByKeyboard(page);
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello ']);

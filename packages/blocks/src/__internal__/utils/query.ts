@@ -23,6 +23,9 @@ export function getBlockByPoint(point: IPoint): Element | null | undefined {
   return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
 }
 
+/**
+ * @deprecated Use `page.getParent` instead
+ */
 export function getParentBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
@@ -32,98 +35,96 @@ export function getParentBlockById<T extends ElementTagName>(
 }
 
 /**
- * @deprecated use methods in page instead
+ *
+ * @example
+ * ```md
+ * page
+ * - frame
+ *  - paragraph <- when invoked here, the traverse order will be following
+ *    - child <- 1
+ *  - sibling <- 2
+ * - frame <- 3 (will be skipped)
+ *   - paragraph <- 4
+ * ```
+ *
+ * NOTE: this method will skip the `affine:frame` block
  */
-function getSiblingsById(id: string, ele: Element = document.body) {
-  // TODO : resolve BaseBlockModel type relay
-  const parentBlock = getParentBlockById(id, ele) as ContainerBlock;
-  const children = parentBlock?.model?.children;
-  if (children?.length) {
-    const queryStr = children.map(child => `[${ATTR}='${child.id}']`).join(',');
-    return Array.from(ele.querySelectorAll(queryStr));
+export function getNextBlock(
+  model: BaseBlockModel,
+  map: Record<string, true> = {}
+): BaseBlockModel | null {
+  if (model.id in map) {
+    throw new Error("Can't get next block! There's a loop in the block tree!");
   }
-  return [];
-}
+  map[model.id] = true;
 
-/**
- * @deprecated use {@link page.getPreviousSibling} instead
- */
-export function getPreviousSiblingById<T extends ElementTagName>(
-  id: string,
-  ele: Element = document.body
-) {
-  const siblings = getSiblingsById(id, ele);
-  const currentBlock = getBlockById<T>(id, ele);
-  if (siblings && siblings.length > 0 && currentBlock) {
-    const index = [...siblings].indexOf(currentBlock);
-    return (siblings[index - 1] as HTMLElementTagNameMap[T]) || null;
+  const page = model.page;
+  if (model.children.length) {
+    return model.children[0];
   }
-  return null;
-}
-
-/**
- * @deprecated use {@link page.getNextSibling} instead
- */
-export function getNextSiblingById<T extends ElementTagName>(
-  id: string,
-  ele: HTMLElement = document.body
-) {
-  const siblings = getSiblingsById(id, ele);
-  const currentBlock = getBlockById(id, ele);
-  if (siblings && siblings.length > 0 && currentBlock) {
-    const index = [...siblings].indexOf(currentBlock);
-    return (siblings[index + 1] as HTMLElementTagNameMap[T]) || null;
-  }
-  return null;
-}
-
-export function getNextBlock(blockId: string) {
-  let currentBlock = getBlockById<'affine-paragraph'>(blockId);
-  if (currentBlock?.model.children.length) {
-    return currentBlock.model.children[0];
-  }
+  let currentBlock: typeof model | null = model;
   while (currentBlock) {
-    const parentBlock = getParentBlockById<'affine-paragraph'>(
-      currentBlock.model.id
-    );
-    if (parentBlock) {
-      const nextSiblings = getNextSiblingById<'affine-paragraph'>(
-        currentBlock.model.id
-      );
-      if (nextSiblings) {
-        return nextSiblings.model;
+    const nextSibling = page.getNextSibling(currentBlock);
+    if (nextSibling) {
+      // Assert nextSibling is not possible to be `affine:page`
+      if (matchFlavours(nextSibling, ['affine:frame'])) {
+        return getNextBlock(nextSibling);
       }
+      return nextSibling;
     }
-    currentBlock = parentBlock;
+    currentBlock = page.getParent(currentBlock);
   }
   return null;
 }
 
-export function getPreviousBlock(container: Element, blockId: string) {
-  const parentBlock = getParentBlockById<'affine-paragraph'>(
-    blockId,
-    container
-  );
-  if (parentBlock) {
-    const previousBlock = getPreviousSiblingById<'affine-paragraph'>(
-      blockId,
-      container
+/**
+ *
+ * @example
+ * ```md
+ * page
+ * - frame
+ *   - paragraph <- 5
+ * - frame <- 4 (will be skipped)
+ *  - paragraph <- 3
+ *    - child <- 2
+ *      - child <- 1
+ *  - paragraph <- when invoked here, the traverse order will be above
+ * ```
+ *
+ * NOTE: this method will skip the `affine:frame` and `affine:page` block
+ */
+export function getPreviousBlock(
+  model: BaseBlockModel,
+  map: Record<string, true> = {}
+): BaseBlockModel | null {
+  if (model.id in map) {
+    throw new Error(
+      "Can't get previous block! There's a loop in the block tree!"
     );
-
-    if (previousBlock?.model) {
-      if (previousBlock.model.children.length) {
-        let firstChild =
-          previousBlock.model.children[previousBlock.model.children.length - 1];
-        while (firstChild.children.length) {
-          firstChild = firstChild.children[firstChild.children.length - 1];
-        }
-        return firstChild;
-      }
-      return previousBlock.model;
-    }
-    return parentBlock.model;
   }
-  return null;
+  map[model.id] = true;
+
+  const page = model.page;
+  const parentBlock = page.getParent(model);
+  if (!parentBlock) {
+    return null;
+  }
+  const previousBlock = page.getPreviousSibling(model);
+  if (!previousBlock) {
+    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'])) {
+      return getPreviousBlock(parentBlock);
+    }
+    return parentBlock;
+  }
+  if (previousBlock.children.length) {
+    let lastChild = previousBlock.children[previousBlock.children.length - 1];
+    while (lastChild.children.length) {
+      lastChild = lastChild.children[lastChild.children.length - 1];
+    }
+    // Assume children is not possible to be `affine:frame` or `affine:page`
+    return lastChild;
+  }
+  return previousBlock;
 }
 
 export function getDefaultPageBlock(model: BaseBlockModel) {
@@ -414,6 +415,13 @@ export function isToggleIcon(element: unknown): element is SVGPathElement {
   );
 }
 
+export function isDatabaseInput(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.getAttribute('data-block-is-database-input') === 'true'
+  );
+}
+
 export function isCaptionElement(node: unknown): node is HTMLInputElement {
   if (!(node instanceof Element)) {
     return false;
@@ -421,28 +429,11 @@ export function isCaptionElement(node: unknown): node is HTMLInputElement {
   return node.classList.contains('affine-embed-wrapper-caption');
 }
 
-/**
- * This function is slightly different from {@link isInsideRichText}.
- * It include all of element in editor.
- * This is very useful when wanting to handle edges between blocks.
- *
- * See also {@link isInsideRichText} or {@link isTitleElement}
- */
-export function isInsideBlockContainer(element: unknown): element is Node {
-  const defaultBlockContainer = document.querySelector(
-    '.affine-default-page-block-container'
-  );
-  const edgelessBlockContainer = document.querySelector(
-    '.affine-edgeless-page-block-container'
-  );
-  if (!(element instanceof Node)) {
-    return false;
-  }
-  if (defaultBlockContainer) {
-    return defaultBlockContainer.contains(element);
-  }
-  if (edgelessBlockContainer) {
-    return edgelessBlockContainer.contains(element);
-  }
-  return false;
+export function getElementFromEventTarget(
+  target: EventTarget | null
+): Element | null {
+  if (!target) return null;
+  if (target instanceof Element) return target;
+  if (target instanceof Node) target.parentElement;
+  return null;
 }

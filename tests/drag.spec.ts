@@ -9,6 +9,7 @@ import {
   pressEnter,
   pressShiftTab,
   pressTab,
+  type,
 } from './utils/actions/index.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 
@@ -76,23 +77,23 @@ test('move drag handle in nested block', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('-');
+  await type(page, '-');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('1');
+  await type(page, '1');
   await pressEnter(page);
-  await page.keyboard.type('2');
+  await type(page, '2');
 
   await pressEnter(page);
   await pressTab(page);
-  await page.keyboard.type('21');
+  await type(page, '21');
   await pressEnter(page);
-  await page.keyboard.type('22');
+  await type(page, '22');
   await pressEnter(page);
-  await page.keyboard.type('23');
+  await type(page, '23');
   await pressEnter(page);
   await pressShiftTab(page);
 
-  await page.keyboard.type('3');
+  await type(page, '3');
 
   await assertRichTexts(page, ['1', '2', '21', '22', '23', '3']);
 
@@ -112,23 +113,23 @@ test('move to the last block of each level in multi-level nesting', async ({
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await page.keyboard.type('-');
+  await type(page, '-');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('A');
+  await type(page, 'A');
   await pressEnter(page);
-  await page.keyboard.type('B');
+  await type(page, 'B');
   await pressEnter(page);
-  await page.keyboard.type('C');
-  await pressEnter(page);
-  await pressTab(page);
-  await page.keyboard.type('D');
-  await pressEnter(page);
-  await page.keyboard.type('E');
+  await type(page, 'C');
   await pressEnter(page);
   await pressTab(page);
-  await page.keyboard.type('F');
+  await type(page, 'D');
   await pressEnter(page);
-  await page.keyboard.type('G');
+  await type(page, 'E');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'F');
+  await pressEnter(page);
+  await type(page, 'G');
 
   await assertStoreMatchJSX(
     page,
@@ -353,4 +354,26 @@ test('move to the last block of each level in multi-level nesting', async ({
   );
 
   await assertRichTexts(page, ['C', 'D', 'E', 'F', 'G', 'B', 'A']);
+});
+
+test('should sync selected-blocks to session-manager when clicking drag handle', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 1);
+
+  const handle = await page.locator('affine-drag-handle');
+  await handle.click();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, [
+    '123',
+    `
+`,
+    '789',
+  ]);
 });

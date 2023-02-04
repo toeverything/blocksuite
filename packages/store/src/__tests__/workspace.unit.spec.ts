@@ -420,14 +420,12 @@ describe.concurrent('workspace.search works', async () => {
 
     page.addBlockByFlavour('affine:paragraph', {
       text: new page.Text(
-        page,
         '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
       ),
     });
 
     page.addBlockByFlavour('affine:paragraph', {
       text: new page.Text(
-        page,
         '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
       ),
     });

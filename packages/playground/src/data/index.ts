@@ -5,9 +5,14 @@
  * In these cases, these functions should not be called.
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
-import BlockTag = BlockSuiteInternal.BlockTag;
 
-export function empty(workspace: Workspace) {
+interface InitFn {
+  (workspace: Workspace): Promise<string>;
+  displayName: string;
+  description: string;
+}
+
+export const empty: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -25,9 +30,12 @@ export function empty(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
 
-export function heavy(workspace: Workspace) {
+empty.displayName = 'Empty Editor';
+empty.description = 'Start from empty editor';
+
+export const heavy: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -43,7 +51,7 @@ export function heavy(workspace: Workspace) {
         page.addBlockByFlavour(
           'affine:paragraph',
           {
-            text: new Text(page, 'Hello, world! ' + i),
+            text: new Text('Hello, world! ' + i),
           },
           frameId
         );
@@ -53,7 +61,10 @@ export function heavy(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
+
+heavy.displayName = 'Heavy Example';
+heavy.description = 'Heavy example on thousands of paragraph blocks';
 
 const presetMarkdown = `This playground is designed to:
 
@@ -74,7 +85,7 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export function preset(workspace: Workspace) {
+export const preset: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -98,12 +109,16 @@ export function preset(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
 
-export function database(workspace: Workspace) {
+preset.displayName = 'BlockSuite Starter';
+preset.description = 'Start from friendly introduction';
+
+export const database: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
+      page.awarenessStore.setFlag('enable_database', true);
 
       // Add page block and surface block at root level
       const pageBlockId = page.addBlockByFlavour('affine:page', {
@@ -120,60 +135,83 @@ export function database(workspace: Workspace) {
       const databaseId = page.addBlockByFlavour(
         'affine:database',
         {
-          columns: ['1', '2'],
+          columns: ['column1', 'column3', 'column2'],
         },
         frameId
       );
       const p1 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, '1'),
+          text: new page.Text('text1'),
         },
         databaseId
       );
       const p2 = page.addBlockByFlavour(
         'affine:paragraph',
         {
-          text: new page.Text(page, '2'),
+          text: new page.Text('text2'),
         },
         databaseId
       );
 
       page.setTagSchema({
-        meta: {
+        internalProperty: {
           color: '#ff0000',
           width: 200,
           hide: false,
         },
-        name: 'Select',
-        id: '1',
-        type: 'select',
-        selection: selection,
+        property: {
+          decimal: 0,
+        },
+        name: 'Number',
+        id: 'column1',
+        type: 'number',
       });
       page.setTagSchema({
-        meta: {
+        internalProperty: {
           color: '#ff0000',
           width: 200,
           hide: false,
         },
+        property: {
+          selection: selection,
+        },
         name: 'Select 2',
-        id: '2',
+        id: 'column2',
         type: 'select',
-        selection: selection,
+      });
+      page.setTagSchema({
+        internalProperty: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        property: {},
+        name: 'Select 2',
+        id: 'column3',
+        type: 'rich-text',
       });
 
       page.updateBlockTag(p1, {
-        type: '1',
-        value: 'text1',
+        schemaId: 'column1',
+        value: 0.1,
       });
 
-      page.updateBlockTag<BlockTag<BlockSuiteInternal.SelectTagSchema<Option>>>(
-        p2,
-        {
-          type: '2',
-          value: 'TODO',
-        }
-      );
+      page.updateBlockTag(p2, {
+        schemaId: 'column2',
+        value: 'TODO',
+      });
+
+      const text = new page.YText();
+      text.insert(0, '123', { type: 'base' });
+      text.insert(0, 'code', { type: 'base' });
+      page.updateBlockTag(p2, {
+        schemaId: 'column3',
+        value: text,
+      });
+
+      // Add a paragraph after database
+      page.addBlockByFlavour('affine:paragraph', {}, frameId);
 
       requestAnimationFrame(() => {
         page.resetHistory();
@@ -183,4 +221,7 @@ export function database(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
+
+database.displayName = 'Database Example';
+database.description = 'Database block basic example';

@@ -170,15 +170,23 @@ export class RichText extends NonShadowLitElement {
             // At the edge of the node, need to remove format
             nextEmbedElement !== currentEmbedElement
           ) {
-            model.text?.replace(
-              retain,
-              insertedString.length,
-              // @ts-expect-error
-              !this.host.isCompositionStart
-                ? delta.ops[1]?.insert.toString() || ''
-                : ' ',
-              { [attr]: false }
-            );
+            if (this.host.isCompositionStart) {
+              model.text?.replace(
+                retain,
+                insertedString.length,
+                ' ' + insertedString,
+                {
+                  [attr]: false,
+                }
+              );
+            } else {
+              model.text?.replace(
+                retain,
+                insertedString.length,
+                ' ' + insertedString,
+                { [attr]: false }
+              );
+            }
           }
         }
       }
