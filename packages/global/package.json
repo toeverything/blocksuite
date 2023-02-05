@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
     "test:unit:ui": "vitest --ui",
     "build": "tsc"
   },

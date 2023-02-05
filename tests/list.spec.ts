@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from './utils/playwright.js';
 import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,

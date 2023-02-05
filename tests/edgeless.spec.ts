@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { expect, Page, test } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import { test } from './utils/playwright.js';
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
   dragBetweenCoords,
@@ -187,6 +188,7 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
 
   await switchMouseMode(page);
   const startPoint = await page.evaluate(() => {
+    // @ts-expect-error
     const hitbox = window.std.getShapeBlockHitBox('3');
     if (!hitbox) {
       throw new Error('hitbox is null');
