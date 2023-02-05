@@ -53,10 +53,10 @@ function calcContainerLeft(left: number) {
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
-    a.left <= b.right + offset.x &&
-    a.right >= b.left + offset.x &&
-    a.top <= b.bottom + offset.y &&
-    a.bottom >= b.top + offset.y
+    a.left + offset.x <= b.right &&
+    a.right + offset.x >= b.left &&
+    a.top + offset.y <= b.bottom &&
+    a.bottom + offset.y >= b.top
   );
 }
 
@@ -248,6 +248,7 @@ export class PageSelectionState {
   focusedBlockIndex = -1;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
+  private _endPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
   private _blockCache = new Map<Element, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
@@ -273,6 +274,10 @@ export class PageSelectionState {
     return this._startPoint;
   }
 
+  get endPoint() {
+    return this._endPoint;
+  }
+
   get richTextCache() {
     return this._richTextCache;
   }
@@ -285,9 +290,19 @@ export class PageSelectionState {
     return this._embedCache;
   }
 
-  resetStartRange(e: SelectionEvent) {
+  resetStartRange(
+    e: SelectionEvent,
+    offset: { x: number; y: number } = { x: 0, y: 0 }
+  ) {
+    const x = offset.x + e.x;
+    const y = offset.y + e.y;
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    this._startPoint = { x: e.x, y: e.y };
+    this._startPoint = { x, y };
+    this._endPoint = { x, y };
+  }
+
+  setEndPoint(point: { x: number; y: number }) {
+    this._endPoint = point;
   }
 
   refreshBlockRectCache() {
@@ -304,6 +319,7 @@ export class PageSelectionState {
     this._richTextCache.clear();
     this._startRange = null;
     this._startPoint = null;
+    this._endPoint = null;
     this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
   }
@@ -379,7 +395,11 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
-    this.state.resetStartRange(e);
+    const viewport = this._container.defaultViewportElement;
+    this.state.resetStartRange(e, {
+      x: viewport.scrollLeft,
+      y: viewport.scrollTop,
+    });
     this.state.refreshBlockRectCache();
     resetNativeSelection(null);
     // deactivate quill keyboard event handler
@@ -389,13 +409,34 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
     const current = { x: e.x, y: e.y };
-    const { blockCache, startPoint: start } = this.state;
-    const selectionRect = createSelectionRect(current, start);
+    const viewport = this._container.defaultViewportElement;
+    const { scrollHeight, clientHeight, scrollTop } = viewport;
+    const max = scrollHeight - clientHeight;
+    const top = e.y < 50;
+    const bottom = clientHeight - e.y;
+    if (bottom <= 50) {
+      const d = scrollTop + 10 <= max ? 10 : max - scrollTop;
+      viewport.scrollTop += d;
+      current.y = viewport.scrollTop + e.y;
+    } else if (top) {
+      const d = scrollTop - 10 <= 0 ? scrollTop : 10;
+      viewport.scrollTop -= d;
+      current.y = viewport.scrollTop + e.y;
+    } else {
+      current.y = viewport.scrollTop + e.y;
+    }
 
+    this.state.setEndPoint(current);
+
+    const { blockCache, startPoint: start, endPoint: end } = this.state;
+    const selectionRect = createSelectionRect(end, start);
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,
       selectionRect,
-      e.containerOffset
+      {
+        y: viewport.scrollTop,
+        x: viewport.scrollLeft,
+      }
     );
     const rects = selectedBlocksWithoutSubtrees.map(
       ({ block }) => blockCache.get(block) as DOMRect
@@ -428,7 +469,11 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this.state.resetStartRange(e);
+    const viewport = this._container.defaultViewportElement;
+    this.state.resetStartRange(e, {
+      x: viewport.scrollLeft,
+      y: viewport.scrollTop,
+    });
     if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;

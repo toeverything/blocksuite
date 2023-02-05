@@ -25,18 +25,12 @@ import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { repeat } from 'lit/directives/repeat.js';
 
-export function FrameSelectionRect(
-  rect: DOMRect | null,
-  scroll: {
-    left: number;
-    top: number;
-  }
-) {
+export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
 
   const style = {
-    left: scroll.left + rect.left + 'px',
-    top: scroll.top + rect.top + 'px',
+    left: rect.left + 'px',
+    top: rect.top + 'px',
     width: rect.width + 'px',
     height: rect.height + 'px',
   };

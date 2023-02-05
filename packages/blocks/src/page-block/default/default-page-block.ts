@@ -494,10 +494,7 @@ export class DefaultPageBlockComponent
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
-    const selectionRect = FrameSelectionRect(
-      this.frameSelectionRect,
-      this.viewportScrollOffset
-    );
+    const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(
       this.selectedRects,
       this.viewportScrollOffset

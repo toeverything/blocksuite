@@ -305,12 +305,17 @@ export class DebugMenu extends NonShadowLitElement {
           width: 100%;
           overflow: auto;
           z-index: 1000; /* for debug visibility */
+          pointer-events: none;
         }
 
         .default-toolbar {
           padding: 8px;
           width: 100%;
           min-width: 390px;
+        }
+
+        .default-toolbar > * {
+          pointer-events: auto;
         }
 
         .edgeless-toolbar {
