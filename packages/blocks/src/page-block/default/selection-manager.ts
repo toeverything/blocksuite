@@ -428,6 +428,8 @@ export class DefaultSelectionManager {
 
     this.state.setEndPoint(current);
 
+    assertExists(this.state.endPoint);
+
     const { blockCache, startPoint: start, endPoint: end } = this.state;
     const selectionRect = createSelectionRect(end, start);
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
