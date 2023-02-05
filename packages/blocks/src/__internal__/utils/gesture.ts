@@ -211,6 +211,7 @@ export function initMouseEventHandlers(
   }, 300);
 
   container.addEventListener('mousedown', mouseDownHandler);
+  container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
   document.addEventListener('selectionchange', selectionChangeHandler);
