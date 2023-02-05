@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { expect, Page, test } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import { test } from './utils/playwright.js';
 import {
   dragBetweenIndices,
   enterPlaygroundRoom,

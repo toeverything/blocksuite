@@ -10,5 +10,10 @@ export default defineConfig({
   test: {
     include: ['tests/*.unit.ts'],
     testTimeout: 500,
+    coverage: {
+      provider: 'istanbul', // or 'c8'
+      reporter: ['lcov'],
+      reportsDirectory: '../../.coverage/global',
+    },
   },
 });

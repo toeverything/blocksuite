@@ -8,6 +8,7 @@
     "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
     "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
     "test:unit:ui": "vitest --ui",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"
