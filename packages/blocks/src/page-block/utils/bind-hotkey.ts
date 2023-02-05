@@ -134,6 +134,7 @@ function handleDown(
   // Assume the native selection is collapsed
   if (!selection.state.selectedBlocks.length) {
     // TODO fix event trigger out of editor
+
     const model = getStartModelBySelection();
     if (matchFlavours(model, ['affine:code'])) {
       return;

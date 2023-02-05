@@ -101,8 +101,7 @@ export class EditorContainer extends NonShadowLitElement {
         const selection = getSelection();
 
         const pageBlock = getDefaultPageBlock(pageModel);
-        pageBlock.signals.updateSelectedRects?.emit([]);
-        pageBlock.selection.state.clear();
+        pageBlock.selection.clearRects();
 
         if (selection?.isCollapsed) return;
 
