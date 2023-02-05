@@ -6,11 +6,19 @@ import { VirgoUnitText } from './virgo-unit-text.js';
 import { ZERO_WIDTH_SPACE } from '../constant.js';
 
 function virgoTextStyles(props: BaseArrtiubtes): ReturnType<typeof styleMap> {
+  let textDecorations = '';
+  if (props.underline) {
+    textDecorations += 'underline';
+  }
+  if (props.strikethrough) {
+    textDecorations += ' line-through';
+  }
+
   return styleMap({
     'white-space': 'break-spaces',
     'font-weight': props.bold ? 'bold' : 'normal',
     'font-style': props.italic ? 'italic' : 'normal',
-    'text-decoration': props.underline ? 'underline' : 'none',
+    'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',
   });
 }
 
