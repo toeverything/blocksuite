@@ -113,9 +113,9 @@ export class ListBlockComponent extends NonShadowLitElement {
     this.model.childrenUpdated.on(() => {
       if (this.isToggleEnabled) {
         if (!this.model.children.length) {
-          this.toggleHiddenChildren(false);
+          this.toggleHiddenChildren('hide'); // if there are no children set to hide (so we get a closed disabled arrow)
         } else {
-          this.toggleHiddenChildren(true);
+          this.toggleHiddenChildren('show');
         }
       } else {
         this.requestUpdate();
