@@ -664,6 +664,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.emit(null);
     this._signals.updateEmbedEditingState.emit(null);
     this._signals.updateEmbedRects.emit([]);
+    this.state.clear();
   }
 
   dispose() {
@@ -741,8 +742,6 @@ export class DefaultSelectionManager {
     );
 
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
-      this._signals.updateSelectedRects.emit([]);
-      this._signals.updateEmbedRects.emit([]);
       return;
     }
     this.state.clear();
