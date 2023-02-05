@@ -74,6 +74,19 @@ function toggleStyle(
       }
     );
     root.blur();
+  } else if (type === 'inline-code') {
+    vEditor.formatText(
+      vRange,
+      {
+        type: deltas.every(([d]) => d.attributes.type === 'inline-code')
+          ? 'base'
+          : 'inline-code',
+      },
+      {
+        mode: 'merge',
+      }
+    );
+    root.blur();
   }
 
   vEditor.syncVRange();
@@ -108,70 +121,64 @@ class TextCell extends DatabaseCellLitElement {
       });
       this.vEditor = new VEditor(yText, {
         renderElement,
-        onKeyDown: this._handleKeyDown.bind(this),
+        onKeyDown: this._handleKeyDown,
       });
       this.vEditor.mount(this._container);
       this.vEditor.focusEnd();
     }
   }
 
-  private _handleKeyDown(event: KeyboardEvent) {
+  private _handleKeyDown = (event: KeyboardEvent) => {
     if (!this.vEditor) {
       return;
     }
     const vEditor = this.vEditor;
 
-    // Bold
-    // command + b, ctrl + b
-    if (
-      (event.metaKey || event.ctrlKey) &&
-      (event.key === 'b' || event.key === 'B')
-    ) {
-      event.preventDefault();
-      toggleStyle(vEditor, 'bold');
+    switch (event.key) {
+      // bold ctrl+b
+      case 'B':
+      case 'b':
+        if (event.metaKey || event.ctrlKey) {
+          event.preventDefault();
+          toggleStyle(vEditor, 'bold');
+        }
+        break;
+      // italic ctrl+i
+      case 'I':
+      case 'i':
+        if (event.metaKey || event.ctrlKey) {
+          event.preventDefault();
+          toggleStyle(vEditor, 'italic');
+        }
+        break;
+      // underline ctrl+u
+      case 'U':
+      case 'u':
+        if (event.metaKey || event.ctrlKey) {
+          event.preventDefault();
+          toggleStyle(vEditor, 'underline');
+        }
+        break;
+      // strikethrough ctrl+shift+s
+      case 'S':
+      case 's':
+        if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
+          event.preventDefault();
+          toggleStyle(vEditor, 'strikethrough');
+        }
+        break;
+      // inline code ctrl+shift+e
+      case 'E':
+      case 'e':
+        if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
+          event.preventDefault();
+          toggleStyle(vEditor, 'inline-code');
+        }
+        break;
+      default:
+        break;
     }
-
-    // Italic
-    // command + i, ctrl + i
-    if (
-      (event.metaKey || event.ctrlKey) &&
-      (event.key === 'i' || event.key === 'I')
-    ) {
-      event.preventDefault();
-      toggleStyle(vEditor, 'italic');
-    }
-
-    // Underline
-    // command + u, ctrl + u
-    if (
-      (event.metaKey || event.ctrlKey) &&
-      (event.key === 'u' || event.key === 'U')
-    ) {
-      event.preventDefault();
-      toggleStyle(vEditor, 'underline');
-    }
-
-    // Strikethrough
-    // command + shift + s, ctrl + shift + s
-    if (
-      (event.metaKey || event.ctrlKey) &&
-      event.shiftKey &&
-      (event.key === 's' || event.key === 'S')
-    ) {
-      event.preventDefault();
-      toggleStyle(vEditor, 'strikethrough');
-    }
-
-    // Inline code
-    // command + e, ctrl + e
-    if (
-      (event.metaKey || event.ctrlKey) &&
-      (event.key === 'e' || event.key === 'E')
-    ) {
-      event.preventDefault();
-      toggleStyle(vEditor, 'inline-code');
-    }
-  }
+  };
 
   protected update(changedProperties: Map<string, unknown>) {
     super.update(changedProperties);
@@ -179,7 +186,7 @@ class TextCell extends DatabaseCellLitElement {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.vEditor = new VEditor(this.tag.value as any, {
         renderElement,
-        onKeyDown: this._handleKeyDown.bind(this),
+        onKeyDown: this._handleKeyDown,
       });
 
       this.vEditor.mount(this._container);
