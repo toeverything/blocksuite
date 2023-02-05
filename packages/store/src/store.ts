@@ -76,9 +76,9 @@ const flagsPreset = {
   enable_append_flavor_slash: false,
   enable_database: false,
 
-  enable_toggle_block: true,
+  enable_toggle_block: false,
   enable_hide_children: true,
-  // blocks_with_hidden_children: [],
+  blocks_with_hidden_children: [],
 
   readonly: {},
 } satisfies BlockSuiteFlags;

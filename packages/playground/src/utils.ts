@@ -17,6 +17,7 @@ import {
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
 const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+const featureArgs = (params.get('features') ?? '').split(',');
 
 export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
@@ -105,12 +106,13 @@ export function getOptions(): Pick<
     // because all clients will count id from 0.
     idGenerator = Generator.AutoIncrement;
   }
-
+  const enable_toggle_block = featureArgs.includes('toggle');
   return {
     room,
     providers,
     idGenerator,
     defaultFlags: {
+      enable_toggle_block,
       enable_set_remote_flag: true,
       enable_drag_handle: true,
       enable_block_hub: true,
