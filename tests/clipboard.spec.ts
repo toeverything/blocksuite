@@ -1,5 +1,5 @@
 import './utils/declare-test-window.js';
-import { test } from '@playwright/test';
+import { test } from './utils/playwright.js';
 import {
   SHORT_KEY,
   pressBackspace,
