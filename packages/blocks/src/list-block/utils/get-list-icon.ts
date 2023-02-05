@@ -24,7 +24,9 @@ export function getListIcon({
     class="affine-list-block__prefix ${model.type === 'todo'
       ? 'affine-list-block__todo-prefix'
       : ''}"
-    @click="${(e: MouseEvent) => {
+    @mousedown="${(e: MouseEvent) => {
+      // e.preventDefault();
+      // e.stopPropagation();
       onClick?.(e);
     }}"
   >

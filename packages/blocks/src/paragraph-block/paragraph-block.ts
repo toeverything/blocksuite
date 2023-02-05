@@ -10,7 +10,7 @@ import '../__internal__/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
-const getPlaceholder = (model: ParagraphBlockModel) => {
+const getDefaultPlaceholder = (model: ParagraphBlockModel) => {
   const { type } = model;
   switch (type) {
     case 'h1':
@@ -155,6 +155,9 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
+  @property()
+  placeholder?: string;
+
   firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -169,7 +172,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       this.host,
       () => this.requestUpdate()
     );
-    const placeholder = getPlaceholder(this.model);
+    const placeholder = this.placeholder ?? getDefaultPlaceholder(this.model);
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
