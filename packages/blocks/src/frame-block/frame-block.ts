@@ -8,6 +8,7 @@ import {
   BlockChildrenContainer,
 } from '../__internal__/index.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { tryUpdateFrameSize } from '../page-block/index.js';
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends NonShadowLitElement {
@@ -34,7 +35,10 @@ export class FrameBlockComponent extends NonShadowLitElement {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
-      () => this.requestUpdate()
+      () => {
+        this.requestUpdate();
+        tryUpdateFrameSize(this.host.page, 1);
+      }
     );
 
     return html`

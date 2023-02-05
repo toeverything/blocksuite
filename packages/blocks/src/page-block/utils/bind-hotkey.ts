@@ -1,9 +1,5 @@
 import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-} from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { hotkey } from '../../__internal__/index.js';
 import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
@@ -12,7 +8,7 @@ import {
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
-  getBlockElementByModel,
+  getCurrentRange,
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
@@ -29,8 +25,6 @@ import {
 } from '../utils/index.js';
 import { formatConfig } from './const.js';
 import { updateSelectedTextType } from './container-operations.js';
-
-const { UNDO, REDO } = HOTKEYS;
 
 export function bindCommonHotkey(page: Page) {
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
@@ -54,14 +48,16 @@ export function bindCommonHotkey(page: Page) {
     });
   });
 
-  hotkey.addListener(UNDO, e => {
+  hotkey.addListener(HOTKEYS.UNDO, e => {
     page.undo();
   });
-  hotkey.addListener(REDO, e => {
+
+  hotkey.addListener(HOTKEYS.REDO, e => {
     page.redo();
   });
+
   // !!!
-  // Don't forget to remove hotkeys at `_removeHotkeys`
+  // Don't forget to remove hotkeys at `removeCommonHotKey`
 }
 
 export function removeCommonHotKey() {
@@ -70,65 +66,84 @@ export function removeCommonHotKey() {
     ...paragraphConfig
       .map(({ hotkey: hotkeyStr }) => hotkeyStr)
       .filter((i): i is string => !!i),
-    UNDO,
-    REDO,
+    HOTKEYS.UNDO,
+    HOTKEYS.REDO,
   ]);
 }
 
-export function handleUp(
+function handleUp(
   selection: DefaultSelectionManager,
   signals: DefaultPageSignals,
   e: KeyboardEvent
 ) {
+  // Assume the native selection is collapsed
   const nativeSelection = window.getSelection();
   if (nativeSelection?.anchorNode) {
+    // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
-    const activePreNodeModel = getPreviousBlock(model);
-    const editableContainer = getBlockElementByModel(model)?.querySelector(
-      '.ql-editor'
-    ) as HTMLElement;
+    const previousBlock = getPreviousBlock(model);
     const range = nativeSelection.getRangeAt(0);
-    const { height, left, top } = range.getBoundingClientRect();
-    const newRange = caretRangeFromPoint(left, top - height / 2);
-    if (
-      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
-      if (!activePreNodeModel) {
-        focusTitle();
-      } else {
-        focusPreviousBlock(model, new Point(left, top));
-      }
+    const { left, top } = range.getBoundingClientRect();
+    if (!previousBlock) {
+      focusTitle();
+      return;
     }
+
+    // Workaround select to empty line will get empty range
+    // If at empty line range.getBoundingClientRect will return 0
+    //
+    // You can see the spec here:
+    // The `getBoundingClientRect()` method, when invoked, must return the result of the following algorithm:
+    //   - Let list be the result of invoking getClientRects() on the same range this method was invoked on.
+    //   - If list is empty return a DOMRect object whose x, y, width and height members are zero.
+    // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+    if (left === 0 && top === 0) {
+      if (!(range.startContainer instanceof HTMLElement)) {
+        console.warn(
+          "Failed to calculate caret position! range.getBoundingClientRect() is zero and it's startContainer not an HTMLElement.",
+          range
+        );
+        focusPreviousBlock(model);
+        return;
+      }
+      const rect = range.startContainer.getBoundingClientRect();
+      focusPreviousBlock(model, new Point(rect.left, rect.top));
+      return;
+    }
+    focusPreviousBlock(model, new Point(left, top));
     return;
-  } else {
-    signals.updateSelectedRects.emit([]);
-    const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const page = getDefaultPageBlock(selectedModel);
-    e.preventDefault();
-    focusPreviousBlock(
-      selectedModel,
-      page.lastSelectionPosition instanceof Point
-        ? page.lastSelectionPosition
-        : 'end'
-    );
   }
+  signals.updateSelectedRects.emit([]);
+  const { state } = selection;
+  const selectedModel = getModelByElement(state.selectedBlocks[0]);
+  const page = getDefaultPageBlock(selectedModel);
+  e.preventDefault();
+  focusPreviousBlock(
+    selectedModel,
+    page.lastSelectionPosition instanceof Point
+      ? page.lastSelectionPosition
+      : 'end'
+  );
 }
 
-export function handleDown(
+function handleDown(
   selection: DefaultSelectionManager,
   signals: DefaultPageSignals,
   e: KeyboardEvent
 ) {
+  // Assume the native selection is collapsed
   if (!selection.state.selectedBlocks.length) {
-    const nativeSelection = window.getSelection();
+    // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     if (matchFlavours(model, ['affine:code'])) {
       return;
     }
-    assertExists(nativeSelection);
-    const range = nativeSelection.getRangeAt(0);
+    const range = getCurrentRange();
+    const atLineEdge = isAtLineEdge(range);
+    if (atLineEdge) {
+      focusNextBlock(model, 'start');
+      return;
+    }
     const { left, bottom } = range.getBoundingClientRect();
     focusNextBlock(model, new Point(left, bottom));
   } else {
@@ -321,7 +336,7 @@ export function bindHotkeys(
   });
 
   // !!!
-  // Don't forget to remove hotkeys at `_removeHotkeys`
+  // Don't forget to remove hotkeys at `removeHotkeys`
 }
 
 export function removeHotkeys() {

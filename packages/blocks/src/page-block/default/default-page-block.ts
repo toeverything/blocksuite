@@ -40,6 +40,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { DragHandle } from '../../components/index.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
+import type { BlockHub } from '../../components/index.js';
+import { createBlockHub } from '../utils/components.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -74,6 +76,7 @@ export class DefaultPageBlockComponent
 {
   static styles = css`
     .affine-default-viewport {
+      position: relative;
       overflow-x: hidden;
       overflow-y: auto;
       height: 100%;
@@ -145,8 +148,10 @@ export class DefaultPageBlockComponent
    */
   components: {
     dragHandle: DragHandle | null;
+    blockHub: BlockHub | null;
   } = {
     dragHandle: null,
+    blockHub: null,
   };
 
   @property()
@@ -154,6 +159,12 @@ export class DefaultPageBlockComponent
 
   @state()
   frameSelectionRect: DOMRect | null = null;
+
+  @state()
+  viewportScrollOffset = {
+    left: 0,
+    top: 0,
+  };
 
   @state()
   selectedRects: DOMRect[] = [];
@@ -171,6 +182,9 @@ export class DefaultPageBlockComponent
 
   @state()
   codeBlockOption!: CodeBlockOption | null;
+
+  @query('.affine-default-viewport')
+  defaultViewportElement!: HTMLDivElement;
 
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
@@ -235,9 +249,12 @@ export class DefaultPageBlockComponent
     page.workspace.setPageMeta(page.id, { title });
   }
 
+  // FIXME: keep embed selected rects after scroll
   private _clearSelection = () => {
-    this.selection.state.clear();
-    this.signals.updateSelectedRects.emit([]);
+    // block selection support scroll, therefore we do not clear selection
+    if (this.selection.state.type !== 'block') {
+      this.selection.state.clear();
+    }
     this.signals.updateEmbedRects.emit([]);
     this.signals.updateEmbedEditingState.emit(null);
   };
@@ -301,6 +318,96 @@ export class DefaultPageBlockComponent
     }
   };
 
+  private _initDragHandle = () => {
+    const createHandle = () => {
+      this.components.dragHandle = createDragHandle(this);
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+        if (
+          draggingBlock &&
+          Utils.doesInsideBlockByFlavour(
+            this.page,
+            draggingBlock,
+            'affine:database'
+          )
+        ) {
+          return getAllowSelectedBlocks(
+            this.page.getParent(draggingBlock) as BaseBlockModel
+          );
+        }
+        return getAllowSelectedBlocks(this.model);
+      };
+    };
+    if (
+      this.page.awarenessStore.getFlag('enable_drag_handle') &&
+      !this.components.dragHandle
+    ) {
+      createHandle();
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this.components.dragHandle) {
+              createHandle();
+            }
+          } else {
+            this.components.dragHandle?.remove();
+            this.components.dragHandle = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
+  private _initBlockHub = () => {
+    if (
+      this.page.awarenessStore.getFlag('enable_block_hub') &&
+      !this.components.blockHub
+    ) {
+      this.components.blockHub = createBlockHub(
+        this,
+        this.signals.updateSelectedRects
+      );
+      this.components.blockHub.getAllowedBlocks = () =>
+        getAllowSelectedBlocks(this.model);
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_block_hub,
+        enable => {
+          if (enable) {
+            if (!this.components.blockHub) {
+              this.components.blockHub = createBlockHub(
+                this,
+                this.signals.updateSelectedRects
+              );
+              this.components.blockHub.getAllowedBlocks = () =>
+                getAllowSelectedBlocks(this.model);
+            }
+          } else {
+            this.components.blockHub?.remove();
+            this.components.blockHub = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
+  private _getViewportScrollOffset() {
+    const container = this.defaultViewportElement;
+    return {
+      left: container.scrollLeft,
+      top: container.scrollTop,
+    };
+  }
+
   firstUpdated() {
     autosize(this._title);
     bindHotkeys(this.page, this.selection, this.signals);
@@ -319,6 +426,7 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateSelectedRects.on(rects => {
+      this.viewportScrollOffset = this._getViewportScrollOffset();
       this.selectedRects = rects;
       this.requestUpdate();
     });
@@ -362,51 +470,15 @@ export class DefaultPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
-    const createHandle = () => {
-      this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
-        if (
-          draggingBlock &&
-          Utils.doesInsideBlockByFlavour(
-            this.page,
-            draggingBlock,
-            'affine:database'
-          )
-        ) {
-          return getAllowSelectedBlocks(
-            this.page.getParent(draggingBlock) as BaseBlockModel
-          );
-        }
-        return getAllowSelectedBlocks(this.model);
-      };
-    };
-    if (this.page.awarenessStore.getFlag('enable_drag_handle')) {
-      createHandle();
-    }
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_drag_handle,
-        enable => {
-          if (enable) {
-            if (!this.components.dragHandle) {
-              createHandle();
-            }
-          } else {
-            this.components.dragHandle?.remove();
-            this.components.dragHandle = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
+    this._initDragHandle();
+    this._initBlockHub();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposables.dispose();
     this.components.dragHandle?.remove();
+    this.components.blockHub?.remove();
 
     removeHotkeys();
     this.selection.dispose();
@@ -422,8 +494,14 @@ export class DefaultPageBlockComponent
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
-    const selectionRect = FrameSelectionRect(this.frameSelectionRect);
-    const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
+    const selectionRect = FrameSelectionRect(
+      this.frameSelectionRect,
+      this.viewportScrollOffset
+    );
+    const selectedRectsContainer = SelectedRectsContainer(
+      this.selectedRects,
+      this.viewportScrollOffset
+    );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects
     );
@@ -437,6 +515,7 @@ export class DefaultPageBlockComponent
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
+          ${selectedRectsContainer}
           <div class="affine-default-page-block-title-container">
             <textarea
               ?disabled=${this.readonly}
@@ -450,8 +529,7 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectedRectsContainer} ${selectionRect}
-        ${selectedEmbedContainer}${embedEditingContainer}
+        ${selectionRect} ${selectedEmbedContainer}${embedEditingContainer}
         ${codeBlockOptionContainer}
       </div>
     `;

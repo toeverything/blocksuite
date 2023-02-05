@@ -429,3 +429,31 @@ export async function getBlockModel<Model extends BaseBlockModel>(
   expect(result).not.toBeNull();
   return result as Model;
 }
+
+export async function getIndexCoordinate(
+  page: Page,
+  [richTextIndex, quillIndex]: [number, number],
+  coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
+) {
+  const coord = await page.evaluate(
+    ({ richTextIndex, quillIndex, coordOffSet }) => {
+      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+      const quillBound = richText.quill.getBounds(quillIndex);
+      const richTextBound = richText.getBoundingClientRect();
+      return {
+        x: richTextBound.left + quillBound.left + coordOffSet.x,
+        y:
+          richTextBound.top +
+          quillBound.top +
+          quillBound.height / 2 +
+          coordOffSet.y,
+      };
+    },
+    {
+      richTextIndex,
+      quillIndex,
+      coordOffSet,
+    }
+  );
+  return coord;
+}

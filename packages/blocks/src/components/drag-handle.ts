@@ -3,7 +3,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { IPoint } from '../__internal__/index.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { getBlockElementByModel } from '../__internal__/index.js';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { SelectionEvent } from '../__internal__/index.js';
@@ -122,7 +121,7 @@ export class DragHandle extends LitElement {
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
     getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
-    setSelectedBlocks: (selectedBlocks: Element | null) => void;
+    setSelectedBlocks: (selectedBlocks: EditingState | null) => void;
   }) {
     super();
     this.getDropAllowedBlocks = () => {
@@ -156,7 +155,7 @@ export class DragHandle extends LitElement {
   ) => void;
 
   @property()
-  public setSelectedBlocks: (selectedBlock: Element | null) => void;
+  public setSelectedBlocks: (selectedBlock: EditingState | null) => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -344,9 +343,7 @@ export class DragHandle extends LitElement {
     if (clickDragState) {
       this._cursor = clickDragState.index;
       this._lastSelectedIndex = this._cursor;
-      this.setSelectedBlocks(
-        getBlockElementByModel(clickDragState.model) as HTMLElement
-      );
+      this.setSelectedBlocks(clickDragState);
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }

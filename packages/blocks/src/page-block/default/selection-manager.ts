@@ -18,7 +18,6 @@ import {
   getCurrentRange,
   isTitleElement,
   isDatabaseInput,
-  asyncFocusRichText,
   isDatabase,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -29,7 +28,6 @@ import {
 import type { DefaultPageSignals } from './default-page-block.js';
 import {
   getBlockEditingStateByPosition,
-  getBlockEditingStateByCursor,
   getAllowSelectedBlocks,
 } from './utils.js';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -41,7 +39,6 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import { DisposableGroup } from '@blocksuite/store';
-import { BlockHub } from '../../components/blockhub.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 
 function calcDepth(left: number, containerLeft: number) {
@@ -196,13 +193,13 @@ function clearSubtree(selectedBlocks: Element[], left: number) {
 // find blocks and its subtree
 function findBlocksWithSubtree(
   blockCache: Map<Element, DOMRect>,
-  selectedBlocksWithoutSubtrees: { block: Element; index: number }[] = []
+  selectedBlocksWithoutSubtree: { block: Element; index: number }[] = []
 ) {
   const results = [];
-  const len = selectedBlocksWithoutSubtrees.length;
+  const len = selectedBlocksWithoutSubtree.length;
 
   for (let i = 0; i < len; i++) {
-    const { block, index } = selectedBlocksWithoutSubtrees[i];
+    const { block, index } = selectedBlocksWithoutSubtree[i];
     // find block's subtree
     results.push(
       ...filterSelectedBlockByIndex(
@@ -321,8 +318,6 @@ export class DefaultSelectionManager {
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
 
-  private _blockHub: BlockHub | null = null;
-
   constructor({
     page,
     mouseRoot,
@@ -339,76 +334,6 @@ export class DefaultSelectionManager {
     this._mouseRoot = mouseRoot;
     this._container = container;
 
-    const createBlockHub = () => {
-      this._blockHub = new BlockHub({
-        enable_database: !!this.page.awarenessStore.getFlag('enable_database'),
-        onDropCallback: (e, end) => {
-          const dataTransfer = e.dataTransfer;
-          assertExists(dataTransfer);
-          const data = dataTransfer.getData('affine/block-hub');
-          const blockProps = JSON.parse(data);
-          if (blockProps.flavour === 'affine:database') {
-            if (!page.awarenessStore.getFlag('enable_database')) {
-              console.warn('database block is not enabled');
-              return;
-            }
-          }
-          const targetModel = end.model;
-          const rect = end.position;
-          this.page.captureSync();
-          const distanceToTop = Math.abs(rect.top - e.y);
-          const distanceToBottom = Math.abs(rect.bottom - e.y);
-          const id = this.page.addSiblingBlock(
-            targetModel,
-            blockProps,
-            distanceToTop < distanceToBottom ? 'right' : 'left'
-          );
-          asyncFocusRichText(this.page, id);
-        },
-        getBlockEditingStateByPosition: (blocks, pageX, pageY, skipX) => {
-          return getBlockEditingStateByPosition(blocks, pageX, pageY, {
-            skipX,
-          });
-        },
-        getBlockEditingStateByCursor: (
-          blocks,
-          pageX,
-          pageY,
-          cursor,
-          size,
-          skipX,
-          dragging
-        ) => {
-          return getBlockEditingStateByCursor(blocks, pageX, pageY, cursor, {
-            size,
-            skipX,
-            dragging,
-          });
-        },
-      });
-      this._blockHub.getAllowedBlocks = () => this._allowSelectedBlocks;
-    };
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_block_hub,
-        enable => {
-          if (enable) {
-            if (!this._blockHub) {
-              createBlockHub();
-            }
-          } else {
-            this._blockHub?.remove();
-            this._blockHub = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
-    if (this.page.awarenessStore.getFlag('enable_block_hub')) {
-      createBlockHub();
-    }
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(
       initMouseEventHandlers(
@@ -749,6 +674,30 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
+  // Click on drag-handle button
+  selectBlocksByIndexAndBounding(index: number, boundRect: DOMRect) {
+    this.state.focusedBlockIndex = index;
+
+    const { blockCache, focusedBlockIndex } = this.state;
+
+    if (focusedBlockIndex === -1) {
+      return;
+    }
+
+    this.state.type = 'block';
+    this.state.refreshBlockRectCache();
+
+    const selectedBlocks = filterSelectedBlockByIndex(
+      blockCache,
+      focusedBlockIndex,
+      boundRect,
+      this._containerOffset
+    );
+
+    // only current focused-block
+    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+  }
+
   // Click on the prefix icon of list block
   resetSelectedBlockByRect(
     blockElement: Element,
@@ -765,19 +714,16 @@ export class DefaultSelectionManager {
     this.state.type = pageSelectionType;
     this.state.refreshBlockRectCache();
 
+    const boundRect = blockCache.get(blockElement) as DOMRect;
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      blockCache.get(blockElement) as DOMRect,
+      boundRect,
       this._containerOffset
     );
 
-    const rects = selectedBlocks
-      .slice(0, 1)
-      .map(block => blockCache.get(block) as DOMRect);
-
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, rects);
+    this._setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // `CMD-A`

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { getIndexCoordinate } from './misc.js';
 
 export async function dragBetweenCoords(
   page: Page,
@@ -30,39 +31,15 @@ export async function dragBetweenIndices(
     steps?: number;
   }
 ) {
-  const startCoord = await page.evaluate(
-    ({ startRichTextIndex, startQuillIndex, startCoordOffSet }) => {
-      const richText =
-        document.querySelectorAll('rich-text')[startRichTextIndex];
-      const quillBound = richText.quill.getBounds(startQuillIndex);
-      const richTextBound = richText.getBoundingClientRect();
-      return {
-        x: richTextBound.left + quillBound.left + startCoordOffSet.x,
-        y:
-          richTextBound.top +
-          quillBound.top +
-          quillBound.height / 2 +
-          startCoordOffSet.y,
-      };
-    },
-    { startRichTextIndex, startQuillIndex, startCoordOffSet }
+  const startCoord = await getIndexCoordinate(
+    page,
+    [startRichTextIndex, startQuillIndex],
+    startCoordOffSet
   );
-
-  const endCoord = await page.evaluate(
-    ({ endRichTextIndex, endQuillIndex, endCoordOffSet }) => {
-      const richText = document.querySelectorAll('rich-text')[endRichTextIndex];
-      const quillBound = richText.quill.getBounds(endQuillIndex);
-      const richTextBound = richText.getBoundingClientRect();
-      return {
-        x: richTextBound.left + quillBound.left + endCoordOffSet.x,
-        y:
-          richTextBound.top +
-          quillBound.top +
-          quillBound.height / 2 +
-          endCoordOffSet.y,
-      };
-    },
-    { endRichTextIndex, endQuillIndex, endCoordOffSet }
+  const endCoord = await getIndexCoordinate(
+    page,
+    [endRichTextIndex, endQuillIndex],
+    endCoordOffSet
   );
 
   await dragBetweenCoords(page, startCoord, endCoord, options);

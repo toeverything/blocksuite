@@ -663,3 +663,47 @@ test('press left in first paragraph start should not change cursor position', as
   await assertRichTexts(page, ['l1']);
   await assertTitle(page, '');
 });
+
+test('press arrow up in the second line should move caret to the first line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const delta = Array.from({ length: 100 }, (v, i) => {
+      return i % 2 === 0
+        ? { insert: 'i', attributes: { italic: true } }
+        : { insert: 'b', attributes: { bold: true } };
+    });
+    const text = page.Text.fromDelta(delta);
+    page.addBlockByFlavour('affine:paragraph', { text }, frame);
+    page.addBlockByFlavour('affine:paragraph', {}, frame);
+  });
+
+  // Focus the empty paragraph
+  await focusRichText(page, 1);
+  await page.keyboard.press('ArrowUp');
+  // Now the caret is at the start of the second line of the first paragraph
+
+  await page.keyboard.press('ArrowUp');
+  await type(page, '0');
+  await page.keyboard.press('ArrowUp');
+  // At title
+  await type(page, '1');
+  await assertTitle(page, '1');
+
+  // At the first line of the first paragraph
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  // At the second line of the first paragraph
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  // At the second paragraph
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await type(page, '2');
+
+  await assertRichTexts(page, [
+    '0ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib',
+    '2',
+  ]);
+});

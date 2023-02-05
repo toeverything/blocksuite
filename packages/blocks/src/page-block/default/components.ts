@@ -23,13 +23,20 @@ import type {
 } from './default-page-block.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { repeat } from 'lit/directives/repeat.js';
 
-export function FrameSelectionRect(rect: DOMRect | null) {
+export function FrameSelectionRect(
+  rect: DOMRect | null,
+  scroll: {
+    left: number;
+    top: number;
+  }
+) {
   if (rect === null) return null;
 
   const style = {
-    left: rect.left + 'px',
-    top: rect.top + 'px',
+    left: scroll.left + rect.left + 'px',
+    top: scroll.top + rect.top + 'px',
     width: rect.width + 'px',
     height: rect.height + 'px',
   };
@@ -62,6 +69,7 @@ export function EmbedSelectedRectsContainer(
     <div class="affine-page-selected-embed-rects-container resizable">
       ${rects.map(rect => {
         const style = {
+          position: 'absolute',
           display: 'block',
           left: rect.left + 'px',
           top: rect.top + 'px',
@@ -81,11 +89,16 @@ export function EmbedSelectedRectsContainer(
   `;
 }
 
-export function SelectedRectsContainer(rects: DOMRect[]) {
+export function SelectedRectsContainer(
+  rects: DOMRect[],
+  scroll: {
+    left: number;
+    top: number;
+  }
+) {
   return html`
     <style>
       .affine-page-selected-rects-container > div {
-        position: fixed;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
@@ -93,11 +106,12 @@ export function SelectedRectsContainer(rects: DOMRect[]) {
       }
     </style>
     <div class="affine-page-selected-rects-container">
-      ${rects.map(rect => {
+      ${repeat(rects, rect => {
         const style = {
+          position: 'absolute',
           display: 'block',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
+          left: scroll.left + rect.left + 'px',
+          top: scroll.top + rect.top + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };

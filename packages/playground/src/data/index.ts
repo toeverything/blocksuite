@@ -6,7 +6,13 @@
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
 
-export function empty(workspace: Workspace) {
+interface InitFn {
+  (workspace: Workspace): Promise<string>;
+  displayName: string;
+  description: string;
+}
+
+export const empty: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -24,9 +30,12 @@ export function empty(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
 
-export function heavy(workspace: Workspace) {
+empty.displayName = 'Empty Editor';
+empty.description = 'Start from empty editor';
+
+export const heavy: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -52,7 +61,10 @@ export function heavy(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
+
+heavy.displayName = 'Heavy Example';
+heavy.description = 'Heavy example on thousands of paragraph blocks';
 
 const presetMarkdown = `This playground is designed to:
 
@@ -73,7 +85,7 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export function preset(workspace: Workspace) {
+export const preset: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -97,9 +109,12 @@ export function preset(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
 
-export function database(workspace: Workspace) {
+preset.displayName = 'BlockSuite Starter';
+preset.description = 'Start from friendly introduction';
+
+export const database: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -206,4 +221,7 @@ export function database(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
+
+database.displayName = 'Database Example';
+database.description = 'Database block basic example';
