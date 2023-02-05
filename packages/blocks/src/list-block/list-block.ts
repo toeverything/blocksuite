@@ -111,29 +111,38 @@ export class ListBlockComponent extends NonShadowLitElement {
     // });
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => {
-      if (this.isToggleEnabled && !this.model.children.length) {
-        this.toggleHiddenChildren(true);
+      if (this.isToggleEnabled) {
+        if (!this.model.children.length) {
+          this.toggleHiddenChildren(false);
+        } else {
+          this.toggleHiddenChildren(true);
+        }
       } else {
         this.requestUpdate();
       }
     });
   }
-  toggleHiddenChildren = (forceHidden = false) => {
+  toggleHiddenChildren = (overRide: boolean) => {
     if (!this.isToggleEnabled) return;
 
     const currentBlockID = this.model.id;
+    const hiddenBlockListWithoutThis = this.blocksWithHiddenChildren.filter(
+      (eachBlockID: string) => eachBlockID !== currentBlockID
+    );
 
-    if (forceHidden || !this.hasChildren || this.hasHiddenChildren) {
+    if (
+      !overRide === false &&
+      this.hasChildren &&
+      (overRide === true || !this.hasHiddenChildren)
+    ) {
       this.pageAwarenessStore.setFlag(
         'blocks_with_hidden_children',
-        this.blocksWithHiddenChildren.filter(
-          (eachBlockID: string) => eachBlockID !== currentBlockID // remove current block from hiddenChildren list
-        )
+        hiddenBlockListWithoutThis // remove current block from the hiddenChildren list
       );
     } else {
       this.pageAwarenessStore.setFlag(
         'blocks_with_hidden_children',
-        [...this.blocksWithHiddenChildren, currentBlockID] // add current block to hiddenChildren list
+        [...hiddenBlockListWithoutThis, currentBlockID] // ensure current block is in the hiddenChildren list
       );
     }
     asyncFocusRichText(this.model.page, this.model.id);

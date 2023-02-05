@@ -1,4 +1,3 @@
-import { ParagraphBlockModel } from './../../paragraph-block/paragraph-model';
 // operations used in rich-text level
 
 import { Page, Text } from '@blocksuite/store';
@@ -10,7 +9,13 @@ import {
 } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import type { ListBlockModel, PageBlockModel } from '../../models.js';
+import type {
+  ParagraphBlockModel,
+  ListBlockModel,
+  PageBlockModel,
+  BlockSchema,
+  Flavour,
+} from '../../models.js';
 import {
   ExtendedModel,
   getRichTextByModel,
@@ -25,7 +30,6 @@ import {
   focusTitle,
   getCurrentRange,
 } from '../utils/index.js';
-import type { RichText } from './rich-text.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -46,14 +50,17 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const isToggleBlock = (model as ListBlockModel).type === 'toggle';
   const shouldInheritFlavour =
     matchFlavours(model, ['affine:list']) && !isToggleBlock;
-  const blockProps = shouldInheritFlavour
-    ? { type: model.type }
-    : ({ type: 'text' } as ParagraphBlockModel);
 
-  const id = // If the block has children (or is a toggle block), insert a new block as the first child
-    shouldInheritFlavour && !model.children.length
-      ? page.addBlockByFlavour(model.flavour, blockProps, parent, index + 1)
-      : page.addBlockByFlavour('affine:paragraph', blockProps, model, 0);
+  // If the block should not inherit the flavour, the new child should be paragraph text
+  const blockArgs: [Flavour, { type: string }] = shouldInheritFlavour
+    ? [model.flavour, { type: model.type }]
+    : ['affine:paragraph', { type: 'text' } as ParagraphBlockModel];
+
+  // If the current block has children already (or is a toggle), insert a new block as the first child
+  const asChildOrSibling: [BlockSchema[Flavour], number] =
+    model.children.length || isToggleBlock ? [model, 0] : [parent, index + 1];
+
+  const id = page.addBlockByFlavour(...blockArgs, ...asChildOrSibling);
 
   // if (isToggleBlock) {
   //   const newToggleChild = page.getBlockById(id);
