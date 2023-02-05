@@ -1,3 +1,4 @@
+import { ParagraphBlockModel } from './../../paragraph-block/paragraph-model';
 // operations used in rich-text level
 
 import { Page, Text } from '@blocksuite/store';
@@ -46,17 +47,11 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const shouldInheritFlavour =
     matchFlavours(model, ['affine:list']) && !isToggleBlock;
   const blockProps = shouldInheritFlavour
-    ? {
-        // flavour: model.flavour,
-        type: model.type,
-      }
-    : {
-        // flavour: 'affine:paragraph',
-        type: 'text',
-      };
+    ? { type: model.type }
+    : ({ type: 'text' } as ParagraphBlockModel);
 
   const id = // If the block has children (or is a toggle block), insert a new block as the first child
-    !model.children.length && shouldInheritFlavour
+    shouldInheritFlavour && !model.children.length
       ? page.addBlockByFlavour(model.flavour, blockProps, parent, index + 1)
       : page.addBlockByFlavour('affine:paragraph', blockProps, model, 0);
 
