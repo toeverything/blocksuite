@@ -843,7 +843,11 @@ export function isEmbed(e: SelectionEvent) {
 }
 
 export function isDatabase(e: SelectionEvent) {
-  if ((e.raw.target as HTMLElement).className.startsWith('affine-database')) {
+  const tgt = e.raw.target as HTMLElement;
+  const className =
+    (tgt.className as unknown as SVGAnimatedString).baseVal ??
+    (tgt.className as string);
+  if (className && className.startsWith('affine-database')) {
     return true;
   }
   return false;
