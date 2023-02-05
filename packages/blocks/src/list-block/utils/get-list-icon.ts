@@ -25,14 +25,7 @@ export function getListIcon({
       ? 'affine-list-block__todo-prefix'
       : ''}"
     @click="${(e: MouseEvent) => {
-      // onClick?.(e);
-      // console.log('skipping on click should do in mousedown instead');
-    }}"
-    @mousedown="${(e: MouseEvent) => {
-      // console.log('preventing def icon div');
       onClick?.(e);
-      // e.stopPropagation();
-      // e.preventDefault();
     }}"
   >
     ${(() => {

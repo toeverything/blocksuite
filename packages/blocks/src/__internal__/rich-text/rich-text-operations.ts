@@ -24,6 +24,7 @@ import {
   focusTitle,
   getCurrentRange,
 } from '../utils/index.js';
+import type { RichText } from './rich-text.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -46,18 +47,20 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     matchFlavours(model, ['affine:list']) && !isToggleBlock;
   const blockProps = shouldInheritFlavour
     ? {
-        flavour: model.flavour,
+        // flavour: model.flavour,
         type: model.type,
       }
     : {
-        flavour: 'affine:paragraph',
+        // flavour: 'affine:paragraph',
         type: 'text',
       };
-
+  if (isToggleBlock) {
+    (blockProps as RichText).placeholder = 'Toggle Content';
+  }
   const id = // If the block has children (or is a toggle block), insert a new block as the first child
     !model.children.length && !isToggleBlock
-      ? page.addBlock(blockProps, parent, index + 1)
-      : page.addBlock(blockProps, model, 0);
+      ? page.addBlockByFlavour(model.flavour, blockProps, parent, index + 1)
+      : page.addBlockByFlavour('affine:paragraph', blockProps, model, 0);
 
   asyncFocusRichText(page, id);
 }

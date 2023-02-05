@@ -98,6 +98,9 @@ export class ListBlockComponent extends NonShadowLitElement {
   private get blocksWithHiddenChildren() {
     return this.pageAwarenessStore.getFlag('blocks_with_hidden_children') ?? [];
   }
+  private get hasChildren() {
+    return !!this.model.children.length;
+  }
   private get hasHiddenChildren() {
     return this.blocksWithHiddenChildren?.includes(this.model.id);
   }
@@ -120,7 +123,7 @@ export class ListBlockComponent extends NonShadowLitElement {
 
     const currentBlockID = this.model.id;
 
-    if (forceHidden || this.hasHiddenChildren) {
+    if (forceHidden || !this.hasChildren || this.hasHiddenChildren) {
       this.pageAwarenessStore.setFlag(
         'blocks_with_hidden_children',
         this.blocksWithHiddenChildren.filter(
