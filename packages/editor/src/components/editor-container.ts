@@ -97,17 +97,18 @@ export class EditorContainer extends NonShadowLitElement {
         }
         const pageModel = this.pageBlockModel;
         if (!pageModel) return;
-
-        const selection = getSelection();
-
         const pageBlock = getDefaultPageBlock(pageModel);
         pageBlock.selection.clearRects();
 
-        if (selection?.isCollapsed) return;
-
-        if (checkEditorElementActive()) {
-          selection?.removeAllRanges();
+        const selection = getSelection();
+        if (
+          !selection ||
+          selection.isCollapsed ||
+          !checkEditorElementActive()
+        ) {
+          return;
         }
+        selection.removeAllRanges();
       })
     );
 
