@@ -426,10 +426,28 @@ export class VEditor {
     if (anchorNode instanceof Text && isVText(anchorNode)) {
       anchorText = anchorNode;
       anchorTextOffset = anchorOffset;
+    } else if (
+      anchorNode instanceof HTMLElement &&
+      anchorNode.dataset.virgoElement === 'true'
+    ) {
+      const textNode = getTextNodeFromElement(anchorNode);
+      if (textNode) {
+        anchorText = textNode;
+        anchorTextOffset = anchorOffset;
+      }
     }
     if (focusNode instanceof Text && isVText(focusNode)) {
       focusText = focusNode;
       focusTextOffset = focusOffset;
+    } else if (
+      focusNode instanceof HTMLElement &&
+      focusNode.dataset.virgoElement === 'true'
+    ) {
+      const textNode = getTextNodeFromElement(focusNode);
+      if (textNode) {
+        focusText = textNode;
+        focusTextOffset = focusOffset;
+      }
     }
 
     // case 1
@@ -766,7 +784,7 @@ function getTextNodeFromElement(element: Element): Text | null {
   if (element instanceof HTMLElement && element.dataset.virgoText === 'true') {
     spanElement = element;
   } else {
-    spanElement = element.querySelector('span');
+    spanElement = element.querySelector('[data-virgo-text="true"]');
   }
 
   if (!spanElement) {
