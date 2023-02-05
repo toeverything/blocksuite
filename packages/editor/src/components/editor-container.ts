@@ -93,17 +93,18 @@ export class EditorContainer extends NonShadowLitElement {
 
         // `esc`  clear selection
         const pageModel = this.pageBlockModel;
-
         if (!pageModel) return;
 
-        if (e.code === 'Escape' && checkEditorElementActive()) {
-          const selection = getSelection();
-          selection?.removeAllRanges();
-        }
+        const selection = getSelection();
 
         const pageBlock = getDefaultPageBlock(pageModel);
+        pageBlock.signals.updateSelectedRects?.emit([]);
 
-        pageBlock.signals.updateSelectedRects.emit([]);
+        if (selection?.isCollapsed) return;
+
+        if (e.code === 'Escape' && checkEditorElementActive()) {
+          selection?.removeAllRanges();
+        }
       })
     );
 
