@@ -122,7 +122,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       }
     });
   }
-  toggleHiddenChildren = (overRide: boolean) => {
+  toggleHiddenChildren = (overRide: 'show' | 'hide') => {
     if (!this.isToggleEnabled) return;
 
     const currentBlockID = this.model.id;
@@ -131,9 +131,9 @@ export class ListBlockComponent extends NonShadowLitElement {
     );
 
     if (
-      !overRide === false &&
+      !(overRide === 'hide') &&
       this.hasChildren &&
-      (overRide === true || !this.hasHiddenChildren)
+      (overRide === 'show' || this.hasHiddenChildren)
     ) {
       this.pageAwarenessStore.setFlag(
         'blocks_with_hidden_children',
