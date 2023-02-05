@@ -92,6 +92,9 @@ export class EditorContainer extends NonShadowLitElement {
         }
 
         // `esc`  clear selection
+        if (e.code !== 'Escape') {
+          return;
+        }
         const pageModel = this.pageBlockModel;
         if (!pageModel) return;
 
@@ -99,10 +102,11 @@ export class EditorContainer extends NonShadowLitElement {
 
         const pageBlock = getDefaultPageBlock(pageModel);
         pageBlock.signals.updateSelectedRects?.emit([]);
+        pageBlock.selection.state.clear();
 
         if (selection?.isCollapsed) return;
 
-        if (e.code === 'Escape' && checkEditorElementActive()) {
+        if (checkEditorElementActive()) {
           selection?.removeAllRanges();
         }
       })
