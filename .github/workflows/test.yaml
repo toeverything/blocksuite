@@ -47,7 +47,16 @@ jobs:
           COVERAGE: true
 
       - name: Collect code coverage report
-        run: pnpm exec nyc report -t .nyc_output
+        run: pnpm exec nyc report -t .nyc_output --reporter=lcov
+
+      - name: Upload test coverage results
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          files: ./.coverage/lcov.info
+          flags: unittests # optional
+          name: blocksuite
+          fail_ci_if_error: true
 
       - name: Upload test results
         if: ${{ failure() }}
