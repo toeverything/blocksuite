@@ -52,12 +52,13 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     matchFlavours(model, ['affine:list']) && !isToggleBlock;
 
   // If the block should not inherit the flavour, the new child should be paragraph text
-  const blockArgs: [Flavour, { type: string }] = shouldInheritFlavour
-    ? [model.flavour, { type: model.type }]
-    : ['affine:paragraph', { type: 'text' } as ParagraphBlockModel];
+  const blockArgs: [Flavour, { type: string | undefined }] =
+    shouldInheritFlavour
+      ? [model.flavour, { type: model.type }]
+      : ['affine:paragraph', { type: 'text' } as ParagraphBlockModel];
 
   // If the current block has children already (or is a toggle), insert a new block as the first child
-  const asChildOrSibling: [BlockSchema[Flavour], number] =
+  const asChildOrSibling: [ExtendedModel | BlockSchema[Flavour], number] =
     model.children.length || isToggleBlock ? [model, 0] : [parent, index + 1];
 
   const id = page.addBlockByFlavour(...blockArgs, ...asChildOrSibling);
