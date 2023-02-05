@@ -31,6 +31,64 @@ export function renderElement(delta: DeltaInsert<TextAttributes>): TextElement {
   }
 }
 
+const baseStyle: Array<Exclude<keyof BaseArrtiubtes, 'type'>> = [
+  'bold',
+  'italic',
+  'underline',
+  'strikethrough',
+];
+function toggleStyle(
+  vEditor: VEditor,
+  type: Exclude<keyof BaseArrtiubtes, 'type'> | 'inline-code'
+): void {
+  const vRange = vEditor.getVRange();
+  if (!vRange) {
+    return;
+  }
+
+  const root = vEditor.getRootElement();
+  if (!root) {
+    return;
+  }
+
+  const deltas = vEditor.getDeltasByVRange(vRange);
+
+  if (baseStyle.includes(type as Exclude<keyof BaseArrtiubtes, 'type'>)) {
+    vEditor.formatText(
+      vRange,
+      {
+        type: 'base',
+        [type]: deltas.every(
+          ([d]) =>
+            d.attributes.type === 'base' &&
+            d.attributes[type as Exclude<keyof BaseArrtiubtes, 'type'>]
+        )
+          ? null
+          : true,
+      },
+      {
+        mode: 'merge',
+      }
+    );
+    root.blur();
+  } else if (type === 'inline-code') {
+    vEditor.formatText(
+      vRange,
+      {
+        type: deltas.every(([d]) => d.attributes.type === 'inline-code')
+          ? 'base'
+          : 'inline-code',
+      },
+      {
+        mode: 'merge',
+      }
+    );
+    root.blur();
+  }
+
+  vEditor.syncVRange();
+}
+
 @customElement('rich-text')
 export class RichText extends LitElement {
   vEditor: VEditor;
@@ -87,22 +145,6 @@ export class ToolBar extends LitElement {
     this.vEditor = vEditor;
   }
 
-  private formatBase(vEditor: VEditor, mark: Partial<BaseArrtiubtes>): void {
-    const rangeStatic = vEditor.getVRange();
-    if (!rangeStatic) {
-      return;
-    }
-
-    vEditor.formatText(
-      rangeStatic,
-      { type: 'base', ...mark },
-      {
-        mode: 'merge',
-      }
-    );
-    vEditor.syncVRange();
-  }
-
   protected firstUpdated(): void {
     if (!this.shadowRoot) {
       throw new Error('Cannot find shadow root');
@@ -131,25 +173,19 @@ export class ToolBar extends LitElement {
     }
 
     boldButton.addEventListener('click', () => {
-      this.formatBase(this.vEditor, { bold: true });
+      toggleStyle(this.vEditor, 'bold');
     });
     italicButton.addEventListener('click', () => {
-      this.formatBase(this.vEditor, { italic: true });
+      toggleStyle(this.vEditor, 'italic');
     });
     underlineButton.addEventListener('click', () => {
-      this.formatBase(this.vEditor, { underline: true });
+      toggleStyle(this.vEditor, 'underline');
     });
     strikethroughButton.addEventListener('click', () => {
-      this.formatBase(this.vEditor, { strikethrough: true });
+      toggleStyle(this.vEditor, 'strikethrough');
     });
     inlineCode.addEventListener('click', () => {
-      const vRange = this.vEditor.getVRange();
-
-      if (!vRange) {
-        return;
-      }
-
-      this.vEditor.formatText(vRange, { type: 'inline-code' });
+      toggleStyle(this.vEditor, 'inline-code');
     });
     resetButton.addEventListener('click', () => {
       const rangeStatic = this.vEditor.getVRange();
@@ -159,7 +195,9 @@ export class ToolBar extends LitElement {
       this.vEditor.resetText(rangeStatic);
     });
 
-    const undoManager = new Y.UndoManager(this.vEditor.yText);
+    const undoManager = new Y.UndoManager(this.vEditor.yText, {
+      trackedOrigins: new Set([this.vEditor.yText.doc?.clientID]),
+    });
     undoButton.addEventListener('click', () => {
       undoManager.undo();
     });

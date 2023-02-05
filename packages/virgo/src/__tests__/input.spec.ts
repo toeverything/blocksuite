@@ -3,8 +3,10 @@ import { ZERO_WIDTH_SPACE } from '../constant.js';
 import {
   enterPlayground,
   focusRichText,
+  getDeltaFromFirstEditor,
   pagePress,
   pageType,
+  setFirstEditorRange,
 } from './utils/misc.js';
 
 test('basic input', async ({ page }) => {
@@ -163,4 +165,272 @@ test('readonly mode', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe('abcdefg');
   expect(await editorB.innerText()).toBe('abcdefg');
+});
+
+test('basic text style', async ({ page }) => {
+  await enterPlayground(page);
+  await focusRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+
+  const editorABold = page.getByText('bold').nth(0);
+  const editorAItalic = page.getByText('italic').nth(0);
+  const editorAUnderline = page.getByText('underline').nth(0);
+  const editorAStrikethrough = page.getByText('strikethrough').nth(0);
+  const editorAInlineCode = page.getByText('inline-code').nth(0);
+  const editorAReset = page.getByText('reset').nth(0);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await pageType(page, 'abcdefg');
+
+  expect(await editorA.innerText()).toBe('abcdefg');
+  expect(await editorB.innerText()).toBe('abcdefg');
+
+  let delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'abcdefg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  await setFirstEditorRange(page, { index: 2, length: 3 });
+
+  editorABold.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'base',
+        bold: true,
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAItalic.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'base',
+        bold: true,
+        italic: true,
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAUnderline.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'base',
+        bold: true,
+        italic: true,
+        underline: true,
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAStrikethrough.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'base',
+        bold: true,
+        italic: true,
+        underline: true,
+        strikethrough: true,
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorABold.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'base',
+        italic: true,
+        underline: true,
+        strikethrough: true,
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAItalic.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'base',
+        underline: true,
+        strikethrough: true,
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAUnderline.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'base',
+        strikethrough: true,
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAStrikethrough.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'abcdefg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAReset.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'abcdefg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAInlineCode.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+      attributes: {
+        type: 'base',
+      },
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        type: 'inline-code',
+      },
+    },
+    {
+      insert: 'fg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
+
+  editorAInlineCode.click();
+  delta = await getDeltaFromFirstEditor(page);
+  expect(delta).toEqual([
+    {
+      insert: 'abcdefg',
+      attributes: {
+        type: 'base',
+      },
+    },
+  ]);
 });
