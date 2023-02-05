@@ -214,11 +214,9 @@ export class RichText extends NonShadowLitElement {
   }
 
   render() {
-    return html`
-      <div class="affine-rich-text quill-container ql-container">
-        <slot></slot>
-      </div>
-    `;
+    return html`<div class="affine-rich-text quill-container ql-container">
+      <slot></slot>
+    </div>`;
   }
 }
 

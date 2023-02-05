@@ -35,6 +35,7 @@ interface BindingContext {
   prefix: string;
   suffix: string;
   format: Record<string, unknown>;
+  event: KeyboardEvent;
 }
 
 type KeyboardBindings = Record<
@@ -177,21 +178,6 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onKeyUp(this: KeyboardEventThis, range: QuillRange) {
-    // return PREVENT_DEFAULT;
-    if (range.index >= 0) {
-      return handleKeyUp(model, this.quill.root);
-    }
-    return ALLOW_DEFAULT;
-  }
-
-  function onKeyDown(this: KeyboardEventThis, range: QuillRange) {
-    if (range.index >= 0) {
-      return handleKeyDown(model, this.quill.root);
-    }
-    return ALLOW_DEFAULT;
-  }
-
   function onKeyLeft(this: KeyboardEventThis, range: QuillRange) {
     // range.length === 0 means collapsed selection, if have range length, the cursor is in the start of text
     if (range.index === 0 && range.length === 0) {
@@ -322,12 +308,24 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     up: {
       key: 'up',
       shiftKey: false,
-      handler: onKeyUp,
+      handler(
+        this: KeyboardEventThis,
+        range: QuillRange,
+        context: BindingContext
+      ) {
+        return handleKeyUp(context.event, this.quill.root);
+      },
     },
     down: {
       key: 'down',
       shiftKey: false,
-      handler: onKeyDown,
+      handler(
+        this: KeyboardEventThis,
+        range: QuillRange,
+        context: BindingContext
+      ) {
+        return handleKeyDown(context.event, this.quill.root);
+      },
     },
     left: {
       key: 'left',
