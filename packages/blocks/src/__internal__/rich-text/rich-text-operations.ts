@@ -54,14 +54,21 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
         // flavour: 'affine:paragraph',
         type: 'text',
       };
-  if (isToggleBlock) {
-    (blockProps as RichText).placeholder = 'Toggle Content';
-  }
+
   const id = // If the block has children (or is a toggle block), insert a new block as the first child
-    !model.children.length && !isToggleBlock
+    !model.children.length && shouldInheritFlavour
       ? page.addBlockByFlavour(model.flavour, blockProps, parent, index + 1)
       : page.addBlockByFlavour('affine:paragraph', blockProps, model, 0);
 
+  // if (isToggleBlock) {
+  //   const newToggleChild = page.getBlockById(id);
+  //   const newChildRichText = getRichTextByModel(newToggleChild?.model);
+  //   console.log({ newChildRichText });
+  //   if (newChildRichText) {
+  //     // newToggleChild.setAttribute('placeholder', 'Toggle Content');
+  //     newChildRichText.placeholder = 'Toggle Content';
+  //   }
+  // }
   asyncFocusRichText(page, id);
 }
 

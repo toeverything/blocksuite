@@ -7,6 +7,7 @@ import { matchFlavours } from '@blocksuite/global/utils';
 // XXX: workaround quill lifecycle issue
 export async function asyncFocusRichText(page: Page, id: string) {
   return new Promise<void>(resolve => {
+    // TODO could we return the quill reference or add a way to set placeholder via this fx?
     requestAnimationFrame(() => {
       const adapter = page.richTextAdapters.get(id);
       adapter?.quill.focus();
