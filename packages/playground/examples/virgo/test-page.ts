@@ -145,22 +145,6 @@ export class ToolBar extends LitElement {
     this.vEditor = vEditor;
   }
 
-  private formatBase(vEditor: VEditor, mark: Partial<BaseArrtiubtes>): void {
-    const rangeStatic = vEditor.getVRange();
-    if (!rangeStatic) {
-      return;
-    }
-
-    vEditor.formatText(
-      rangeStatic,
-      { type: 'base', ...mark },
-      {
-        mode: 'merge',
-      }
-    );
-    vEditor.syncVRange();
-  }
-
   protected firstUpdated(): void {
     if (!this.shadowRoot) {
       throw new Error('Cannot find shadow root');
