@@ -50,6 +50,12 @@ export class BlockHub extends NonShadowLitElement {
   @property()
   updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
 
+  @property()
+  bottom = 70;
+
+  @property()
+  right = 24;
+
   @state()
   _expanded = false;
 
@@ -96,7 +102,6 @@ export class BlockHub extends NonShadowLitElement {
   private _timer: number | null = null;
   private _delay = 200; // ms
   private enable_database: boolean;
-  private _bottomDistance = 70;
   private _topDistance = 24;
 
   static styles = css`
@@ -195,7 +200,6 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       padding: 4px;
       position: fixed;
-      right: 24px;
       width: 44px;
       background: var(--affine-page-background);
       box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
@@ -694,14 +698,14 @@ export class BlockHub extends NonShadowLitElement {
   private _onResize = () => {
     const boundingClientRect = document.body.getBoundingClientRect();
     this._maxHeight =
-      boundingClientRect.height - this._topDistance - this._bottomDistance;
+      boundingClientRect.height - this._topDistance - this.bottom;
   };
 
   override render() {
     return html`
       <div
         class="block-hub-menu-container"
-        style="bottom: ${this._bottomDistance}px"
+        style="bottom: ${this.bottom}px; right: ${this.right}px"
       >
         ${this._blockHubMenuTemplate()}
         <div
