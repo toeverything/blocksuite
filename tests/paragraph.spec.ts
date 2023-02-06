@@ -715,3 +715,31 @@ test('press arrow up in the second line should move caret to the first line', as
     '2',
   ]);
 });
+
+test('press arrow down in indent line should  not move caret to the start of line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const p1 = page.addBlockByFlavour('affine:paragraph', {}, frame);
+    const p2 = page.addBlockByFlavour('affine:paragraph', {}, p1);
+    page.addBlockByFlavour('affine:paragraph', {}, p2);
+    page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text('0'),
+      },
+      frame
+    );
+  });
+
+  // Focus the empty child paragraph
+  await focusRichText(page, 2);
+  await page.keyboard.press('ArrowDown');
+  // Now the caret should be at the end of the last paragraph
+  await type(page, '1');
+  await assertRichTexts(page, ['\n', '\n', '\n', '01']);
+});
