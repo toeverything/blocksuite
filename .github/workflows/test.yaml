@@ -46,6 +46,12 @@ jobs:
         env:
           COVERAGE: true
 
+      - name: Run playwright tests in virgo
+        run: pnpm test -- --forbid-only
+        working-directory: packages/virgo
+        env:
+          COVERAGE: true
+
       - name: Collect code coverage report
         run: pnpm exec nyc report -t .nyc_output --reporter=lcov
 
