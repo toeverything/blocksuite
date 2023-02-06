@@ -28,7 +28,11 @@ export class Signal<T = void> implements Disposable {
     (element as HTMLElement).addEventListener(eventName, handler, eventOptions);
     signal._disposables.push({
       dispose: () => {
-        (element as HTMLElement).removeEventListener(eventName, handler);
+        (element as HTMLElement).removeEventListener(
+          eventName,
+          handler,
+          eventOptions
+        );
       },
     });
     return signal;
