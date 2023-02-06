@@ -53,9 +53,7 @@ export type CodeBlockOption = EmbedEditingState;
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
-  updateEmbedRects: Signal<
-    { left: number; top: number; width: number; height: number }[]
-  >;
+  updateEmbedRects: Signal<DOMRect[]>;
   updateEmbedEditingState: Signal<EmbedEditingState | null>;
   updateCodeBlockOption: Signal<CodeBlockOption | null>;
   nativeSelection: Signal<boolean>;
@@ -170,12 +168,7 @@ export class DefaultPageBlockComponent
   selectedRects: DOMRect[] = [];
 
   @state()
-  selectEmbedRects: {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-  }[] = [];
+  selectEmbedRects: DOMRect[] = [];
 
   @state()
   embedEditingState!: EmbedEditingState | null;
@@ -189,9 +182,7 @@ export class DefaultPageBlockComponent
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
-    updateEmbedRects: new Signal<
-      { left: number; top: number; width: number; height: number }[]
-    >(),
+    updateEmbedRects: new Signal<DOMRect[]>(),
     updateEmbedEditingState: new Signal<EmbedEditingState | null>(),
     updateCodeBlockOption: new Signal<CodeBlockOption | null>(),
     nativeSelection: new Signal<boolean>(),
@@ -257,6 +248,10 @@ export class DefaultPageBlockComponent
     }
     this.signals.updateEmbedRects.emit([]);
     this.signals.updateEmbedEditingState.emit(null);
+  };
+
+  private _onResize = () => {
+    this.selection.refreshSelectedBlocksRects();
   };
 
   update(changedProperties: Map<string, unknown>) {
@@ -459,6 +454,7 @@ export class DefaultPageBlockComponent
 
     // TMP: clear selected rects on scroll
     document.addEventListener('wheel', this._clearSelection);
+    window.addEventListener('resize', this._onResize);
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
@@ -486,6 +482,7 @@ export class DefaultPageBlockComponent
       'compositionstart',
       this._handleCompositionStart
     );
+    window.removeEventListener('resize', this._onResize);
     window.removeEventListener('compositionend', this._handleCompositionEnd);
     document.removeEventListener('wheel', this._clearSelection);
   }

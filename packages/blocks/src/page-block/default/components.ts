@@ -50,9 +50,7 @@ export function FrameSelectionRect(rect: DOMRect | null) {
   `;
 }
 
-export function EmbedSelectedRectsContainer(
-  rects: { left: number; top: number; width: number; height: number }[]
-) {
+export function EmbedSelectedRectsContainer(rects: DOMRect[]) {
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {

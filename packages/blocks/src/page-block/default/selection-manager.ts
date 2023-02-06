@@ -411,44 +411,42 @@ export class DefaultSelectionManager {
     const current = { x: e.x, y: e.y };
     const viewport = this._container.defaultViewportElement;
     const { scrollHeight, clientHeight, scrollTop } = viewport;
-    const max = scrollHeight - clientHeight;
-    const top = e.y < 50;
-    const bottom = clientHeight - e.y;
-    if (bottom <= 50) {
+    if (clientHeight - e.y < 50) {
+      const max = scrollHeight - clientHeight;
       const d = scrollTop + 10 <= max ? 10 : max - scrollTop;
       viewport.scrollTop += d;
       current.y = viewport.scrollTop + e.y;
-    } else if (top) {
+    } else if (e.y < 50) {
       const d = scrollTop - 10 <= 0 ? scrollTop : 10;
       viewport.scrollTop -= d;
       current.y = viewport.scrollTop + e.y;
     } else {
       current.y = viewport.scrollTop + e.y;
+
+      this.state.setEndPoint(current);
+
+      assertExists(this.state.endPoint);
+
+      const { blockCache, startPoint: start, endPoint: end } = this.state;
+      const selectionRect = createSelectionRect(end, start);
+      const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
+        blockCache,
+        selectionRect,
+        {
+          y: viewport.scrollTop,
+          x: viewport.scrollLeft,
+        }
+      );
+      const rects = selectedBlocksWithoutSubtrees.map(
+        ({ block }) => blockCache.get(block) as DOMRect
+      );
+
+      this._setSelectedBlocks(
+        findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
+        rects
+      );
+      this._signals.updateFrameSelectionRect.emit(selectionRect);
     }
-
-    this.state.setEndPoint(current);
-
-    assertExists(this.state.endPoint);
-
-    const { blockCache, startPoint: start, endPoint: end } = this.state;
-    const selectionRect = createSelectionRect(end, start);
-    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
-      blockCache,
-      selectionRect,
-      {
-        y: viewport.scrollTop,
-        x: viewport.scrollLeft,
-      }
-    );
-    const rects = selectedBlocksWithoutSubtrees.map(
-      ({ block }) => blockCache.get(block) as DOMRect
-    );
-
-    this._setSelectedBlocks(
-      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
-      rects
-    );
-    this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
@@ -722,6 +720,26 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
+  refreshSelectedBlocksRects() {
+    this.state.refreshBlockRectCache();
+    const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
+
+    if (focusedBlockIndex === -1) {
+      // SELECT_ALL
+      const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
+      const rects = clearSubtree(selectedBlocks, containerLeft).map(
+        block => blockCache.get(block) as DOMRect
+      );
+      this._signals.updateSelectedRects.emit(rects);
+    } else {
+      // only current focused-block
+      const rects = selectedBlocks
+        .slice(0, 1)
+        .map(block => blockCache.get(block) as DOMRect);
+      this._signals.updateSelectedRects.emit(rects);
+    }
+  }
+
   // Click on drag-handle button
   selectBlocksByIndexAndBounding(index: number, boundRect: DOMRect) {
     this.state.focusedBlockIndex = index;
@@ -810,8 +828,6 @@ export class DefaultSelectionManager {
         .map(block => blockCache.get(block) as DOMRect);
       this._setSelectedBlocks(selectedBlocks, rects);
     }
-
-    return;
   }
 
   setFocusedBlockIndexByElement(blockElement: Element) {
