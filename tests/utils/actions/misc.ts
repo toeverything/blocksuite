@@ -6,6 +6,8 @@ import type {
 } from '../../../packages/store/src/index.js';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY, type } from './keyboard.js';
+import type { DeltaInsert, VRange } from '@blocksuite/virgo';
+import type { VEditor } from '@blocksuite/virgo';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
@@ -75,6 +77,11 @@ async function initEmptyEditor(
     workspace.createPage('page0');
   }, flags);
   await waitNextFrame(page);
+}
+
+export async function enterVirgoPlayground(page: Page) {
+  const url = new URL('examples/virgo', DEFAULT_PLAYGROUND);
+  await page.goto(url.toString());
 }
 
 export async function enterPlaygroundRoom(
@@ -456,4 +463,50 @@ export async function getIndexCoordinate(
     }
   );
   return coord;
+}
+
+export async function pageType(page: Page, text: string): Promise<void> {
+  await page.keyboard.type(text, { delay: 50 });
+}
+
+export async function pagePress(page: Page, key: string): Promise<void> {
+  await page.keyboard.press(key, { delay: 50 });
+}
+
+export async function getDeltaFromFirstEditor(
+  page: Page
+): Promise<DeltaInsert> {
+  await page.waitForTimeout(50);
+  return await page.evaluate(() => {
+    const richTextA = document
+      .querySelector('test-page')
+      ?.shadowRoot?.querySelector('rich-text');
+
+    if (!richTextA) {
+      throw new Error('Cannot find editor');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const editor = (richTextA as any).vEditor as VEditor;
+    return editor.yText.toDelta();
+  });
+}
+
+export async function setFirstEditorRange(
+  page: Page,
+  vRange: VRange
+): Promise<void> {
+  await page.evaluate(vRange => {
+    const richTextA = document
+      .querySelector('test-page')
+      ?.shadowRoot?.querySelector('rich-text');
+
+    if (!richTextA) {
+      throw new Error('Cannot find editor');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const editor = (richTextA as any).vEditor as VEditor;
+    editor.setVRange(vRange);
+  }, vRange);
 }

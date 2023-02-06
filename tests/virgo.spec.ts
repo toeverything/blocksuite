@@ -1,16 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { ZERO_WIDTH_SPACE } from '../constant.js';
 import {
-  enterPlayground,
+  enterVirgoPlayground,
   focusRichText,
   getDeltaFromFirstEditor,
   pagePress,
   pageType,
   setFirstEditorRange,
-} from './utils/misc.js';
+} from './utils/actions/misc.js';
 
+const ZERO_WIDTH_SPACE = '\u200B';
 test('basic input', async ({ page }) => {
-  await enterPlayground(page);
+  await enterVirgoPlayground(page);
   await focusRichText(page);
 
   const editorA = page.locator('[data-virgo-root="true"]').nth(0);
@@ -134,7 +134,7 @@ test('basic input', async ({ page }) => {
 });
 
 test('readonly mode', async ({ page }) => {
-  await enterPlayground(page);
+  await enterVirgoPlayground(page);
   await focusRichText(page);
 
   const editorA = page.locator('[data-virgo-root="true"]').nth(0);
@@ -168,7 +168,7 @@ test('readonly mode', async ({ page }) => {
 });
 
 test('basic text style', async ({ page }) => {
-  await enterPlayground(page);
+  await enterVirgoPlayground(page);
   await focusRichText(page);
 
   const editorA = page.locator('[data-virgo-root="true"]').nth(0);

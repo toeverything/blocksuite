@@ -14,7 +14,6 @@
     "lint": "eslint ./ --max-warnings=0",
     "test": "playwright test",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
-    "test:virgo": "pnpm --filter @blocksuite/virgo test",
     "test:unit": "pnpm -r test:unit",
     "test:unit:coverage": "pnpm -r test:unit:coverage",
     "test:headed": "playwright test --headed",
@@ -36,6 +35,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@blocksuite/virgo": "workspace:*",
     "@changesets/cli": "^2.26.0",
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
