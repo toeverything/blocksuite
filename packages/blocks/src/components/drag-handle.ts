@@ -98,7 +98,6 @@ export class DragHandle extends LitElement {
 
     .affine-drag-handle {
       position: absolute;
-      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -306,7 +305,7 @@ export class DragHandle extends LitElement {
       )
     );
 
-    this._dragHandle.style.cursor = 'pointer';
+    this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.top = `${top}px`;
   }
 
