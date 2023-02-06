@@ -286,6 +286,10 @@ export class Workspace {
     this._handlePageEvent();
   }
 
+  get connected(): boolean {
+    return this._store.connected;
+  }
+
   connect = () => {
     this._store.connect();
   };

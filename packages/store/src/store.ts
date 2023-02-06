@@ -84,6 +84,7 @@ export class Store {
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
+  connected = false;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
   constructor({
@@ -132,10 +133,12 @@ export class Store {
 
   connect = () => {
     this.providers.forEach(provider => provider.connect?.());
+    this.connected = true;
   };
 
   disconnect = () => {
     this.providers.forEach(provider => provider.disconnect?.());
+    this.connected = false;
   };
 
   addSpace(space: Space) {
