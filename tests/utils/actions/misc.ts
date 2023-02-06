@@ -80,7 +80,7 @@ async function initEmptyEditor(
 }
 
 export async function enterVirgoPlayground(page: Page) {
-  const url = new URL('examples/virgo', DEFAULT_PLAYGROUND);
+  const url = new URL('examples/virgo/index.html', DEFAULT_PLAYGROUND);
   await page.goto(url.toString());
 }
 
@@ -224,6 +224,23 @@ export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
   await locator.click();
+}
+
+export async function focusVirgoRichText(page: Page): Promise<void> {
+  const editorPosition = await page.evaluate(() => {
+    const editor = document
+      .querySelector('test-page')
+      ?.shadowRoot?.querySelector('rich-text')
+      ?.shadowRoot?.querySelector('[data-virgo-root="true"]');
+
+    if (!editor) {
+      throw new Error('Cannot find editor');
+    }
+
+    return editor.getBoundingClientRect();
+  });
+
+  await page.mouse.click(editorPosition.x + 400, editorPosition.y + 400);
 }
 
 export async function initThreeParagraphs(page: Page) {
