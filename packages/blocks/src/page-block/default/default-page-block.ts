@@ -221,6 +221,9 @@ export class DefaultPageBlockComponent
         flavour: 'affine:paragraph',
         text: new Text(contentRight),
       };
+      // Fixes: https://github.com/toeverything/blocksuite/pull/1008
+      //  A workaround that fixes rich-text still be listened when press enter on title.
+      //  Other solutions like `quill.disable()` or remove all listener when blur will won't work.
       const block = defaultFrame.children.find(block =>
         getRichTextByModel(block)
       );
