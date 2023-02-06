@@ -13,7 +13,7 @@ const config: PlaywrightTestConfig = {
     port: 5173,
     reuseExistingServer: !process.env.CI,
     env: {
-      COVERAGE: process.env.COVERAGE,
+      COVERAGE: process.env.COVERAGE ?? '',
     },
   },
   use: {

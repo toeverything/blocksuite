@@ -12,6 +12,7 @@ importers:
 
   .:
     specifiers:
+      '@blocksuite/virgo': workspace:*
       '@changesets/cli': ^2.26.0
       '@commitlint/cli': ^17.4.2
       '@commitlint/config-conventional': ^17.4.2
@@ -45,6 +46,7 @@ importers:
       vite-plugin-web-components-hmr: ^0.1.2
       vitest: ^0.28.2
     devDependencies:
+      '@blocksuite/virgo': link:packages/virgo
       '@changesets/cli': 2.26.0
       '@commitlint/cli': 17.4.2
       '@commitlint/config-conventional': 17.4.2
