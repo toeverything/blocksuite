@@ -8,6 +8,7 @@ import {
   type,
 } from './utils/actions/index.js';
 
+// Fixes: https://github.com/toeverything/blocksuite/issues/995
 test('prohibit creating divider within quote', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
