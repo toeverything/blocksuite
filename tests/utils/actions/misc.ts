@@ -66,6 +66,9 @@ async function initEmptyEditor(
 
       document.body.appendChild(editor);
       document.body.appendChild(debugMenu);
+      requestAnimationFrame(() => {
+        document.body.appendChild(editor.blockHub);
+      });
 
       window.debugMenu = debugMenu;
       window.editor = editor;

@@ -3,6 +3,7 @@ import type { EditorContainer } from '../components/index.js';
 import { BlockHub } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import { asyncFocusRichText, tryUpdateFrameSize } from '@blocksuite/blocks';
+import { getAllowSelectedBlocks } from '@blocksuite/blocks';
 
 export const checkEditorElementActive = () =>
   document.activeElement?.closest('editor-container') != null;
@@ -44,6 +45,13 @@ export const createBlockHub: (
     assertExists(defaultPageBlock);
     blockHub.updateSelectedRectsSignal =
       defaultPageBlock.signals.updateSelectedRects;
+    blockHub.getAllowedBlocks = () =>
+      getAllowSelectedBlocks(defaultPageBlock.model);
+  } else {
+    const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
+    assertExists(edgelessPageBlock);
+    blockHub.getAllowedBlocks = () =>
+      getAllowSelectedBlocks(edgelessPageBlock.pageModel);
   }
 
   return blockHub;
