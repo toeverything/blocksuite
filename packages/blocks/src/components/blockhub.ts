@@ -47,6 +47,9 @@ export class BlockHub extends NonShadowLitElement {
   @property()
   public getAllowedBlocks: () => BaseBlockModel[];
 
+  @property()
+  updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
+
   @state()
   _expanded = false;
 
@@ -84,7 +87,6 @@ export class BlockHub extends NonShadowLitElement {
   private _blockHubMenuEntry!: HTMLElement;
 
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-  private _updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
@@ -99,7 +101,7 @@ export class BlockHub extends NonShadowLitElement {
 
   static styles = css`
     affine-block-hub {
-      position: fixed;
+      position: absolute;
       z-index: 1;
     }
 
@@ -289,13 +291,10 @@ export class BlockHub extends NonShadowLitElement {
     ${toolTipStyle}
   `;
 
-  constructor(
-    options: {
-      enable_database: boolean;
-      onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-    },
-    updateSelectedRectsSignal?: Signal<DOMRect[]>
-  ) {
+  constructor(options: {
+    enable_database: boolean;
+    onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+  }) {
     super();
     this.enable_database = options.enable_database;
     this.getAllowedBlocks = () => {
@@ -303,9 +302,6 @@ export class BlockHub extends NonShadowLitElement {
       return [];
     };
     this._onDropCallback = options.onDropCallback;
-    updateSelectedRectsSignal &&
-      (this._updateSelectedRectsSignal = updateSelectedRectsSignal);
-    document.body.appendChild(this);
   }
 
   connectedCallback() {
@@ -586,7 +582,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this._updateSelectedRectsSignal && this._updateSelectedRectsSignal.emit([]);
+    this.updateSelectedRectsSignal && this.updateSelectedRectsSignal.emit([]);
   };
 
   private _onMouseDown = (e: MouseEvent) => {

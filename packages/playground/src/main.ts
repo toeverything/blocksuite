@@ -35,6 +35,7 @@ function subscribePage(workspace: Workspace) {
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     document.body.appendChild(debugMenu);
+    requestAnimationFrame(() => document.body.appendChild(editor.blockHub));
 
     [window.editor, window.page] = [editor, page];
   });
