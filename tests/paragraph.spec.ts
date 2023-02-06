@@ -716,7 +716,7 @@ test('press arrow up in the second line should move caret to the first line', as
   ]);
 });
 
-test('press arrow down in indent line should  not move caret to the start of line', async ({
+test('press arrow down in indent line should not move caret to the start of line', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -742,4 +742,16 @@ test('press arrow down in indent line should  not move caret to the start of lin
   // Now the caret should be at the end of the last paragraph
   await type(page, '1');
   await assertRichTexts(page, ['\n', '\n', '\n', '01']);
+
+  await focusRichText(page, 2);
+  // Insert a new long text to wrap the line
+  await page.keyboard.insertText('0'.repeat(100));
+
+  await focusRichText(page, 1);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+
+  await page.keyboard.press('ArrowDown');
+  await type(page, '2');
+  await assertRichTexts(page, ['\n', '\n', '0'.repeat(100), '012']);
 });
