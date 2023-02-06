@@ -12,7 +12,7 @@ export default defineConfig({
     hmrPlugin,
     istanbul({
       cwd: fileURLToPath(new URL('../..', import.meta.url)),
-      include: ['packages/**/src/*'],
+      include: ['packages/**/src/*', 'packages/playground/examples/**/*'],
       exclude: ['node_modules', 'tests'],
       forceBuildInstrument: !!process.env.CI || !!process.env.COVERAGE,
     }),
