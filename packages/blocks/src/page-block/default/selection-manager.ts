@@ -86,7 +86,6 @@ function filterSelectedBlockWithoutSubtree(
 
   const containerLeft = calcContainerLeft(entries[0][1].left);
   let depth = 1;
-  let parentIndex: number | undefined;
   let once = true;
 
   for (let i = 0; i < len; i++) {
@@ -109,18 +108,16 @@ function filterSelectedBlockWithoutSubtree(
           // backward search parent block and remove its subtree
           let n = i;
           while (n--) {
-            if (calcDepth(entries[n][1].left, containerLeft) === currentDepth) {
-              parentIndex = n;
+            const [b, r] = entries[n];
+            if (calcDepth(r.left, containerLeft) === currentDepth) {
+              results.push({ block: b, index: n });
               break;
             } else {
               results.pop();
             }
           }
 
-          assertExists(parentIndex);
-
           depth = currentDepth;
-          results.push({ block: entries[parentIndex][0], index: parentIndex });
         }
       }
       results.push({ block, index: i });
@@ -301,7 +298,11 @@ export class PageSelectionState {
     this._endPoint = { x, y };
   }
 
-  setEndPoint(point: { x: number; y: number }) {
+  setStartPoint(point: { x: number; y: number } | null) {
+    this._startPoint = point;
+  }
+
+  setEndPoint(point: { x: number; y: number } | null) {
     this._endPoint = point;
   }
 
@@ -408,49 +409,35 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     assertExists(this.state.startPoint);
-    const current = { x: e.x, y: e.y };
+    this.state.setEndPoint({ x: e.x, y: e.y });
     const viewport = this._container.defaultViewportElement;
-    const { scrollHeight, clientHeight, scrollTop } = viewport;
-    if (clientHeight - e.y < 50) {
-      const max = scrollHeight - clientHeight;
+    const { scrollHeight, clientHeight, scrollTop, scrollLeft } = viewport;
+    const max = scrollHeight - clientHeight;
+    if (Math.ceil(scrollTop) < max && clientHeight - e.y < 50) {
       const d = scrollTop + 10 <= max ? 10 : max - scrollTop;
       viewport.scrollTop += d;
-      current.y = viewport.scrollTop + e.y;
-    } else if (e.y < 50) {
+      // current.y = viewport.scrollTop + e.y;
+    } else if (scrollTop > 0 && e.y < 50) {
       const d = scrollTop - 10 <= 0 ? scrollTop : 10;
       viewport.scrollTop -= d;
-      current.y = viewport.scrollTop + e.y;
+      // current.y = viewport.scrollTop + e.y;
     } else {
-      current.y = viewport.scrollTop + e.y;
-
-      this.state.setEndPoint(current);
+      // current.y = viewport.scrollTop + e.y;
 
       assertExists(this.state.endPoint);
 
-      const { blockCache, startPoint: start, endPoint: end } = this.state;
-      const selectionRect = createSelectionRect(end, start);
-      const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
-        blockCache,
-        selectionRect,
-        {
-          y: viewport.scrollTop,
-          x: viewport.scrollLeft,
-        }
-      );
-      const rects = selectedBlocksWithoutSubtrees.map(
-        ({ block }) => blockCache.get(block) as DOMRect
-      );
-
-      this._setSelectedBlocks(
-        findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
-        rects
-      );
-      this._signals.updateFrameSelectionRect.emit(selectionRect);
+      const { blockCache, startPoint, endPoint } = this.state;
+      this.selecting(blockCache, startPoint, endPoint, {
+        scrollLeft,
+        scrollTop,
+      });
     }
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
     this.state.type = 'block';
+    this.state.setStartPoint(null);
+    this.state.setEndPoint(null);
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
@@ -566,6 +553,11 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerClick = (e: SelectionEvent) => {
+    // do nothing when clicking on scrollbar
+    if (e.raw.pageX >= this._container.defaultViewportElement.clientWidth) {
+      return;
+    }
+
     this.state.clear();
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
@@ -718,6 +710,51 @@ export class DefaultSelectionManager {
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
     this._disposables.dispose();
+  }
+
+  selecting(
+    blockCache: Map<Element, DOMRect>,
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    offset: { scrollLeft: number; scrollTop: number }
+  ) {
+    const { scrollLeft, scrollTop } = offset;
+    const selectionRect = createSelectionRect(
+      {
+        x: end.x + scrollLeft,
+        y: end.y + scrollTop,
+      },
+      start
+    );
+    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
+      blockCache,
+      selectionRect,
+      {
+        y: scrollTop,
+        x: scrollLeft,
+      }
+    );
+    const rects = selectedBlocksWithoutSubtrees.map(
+      ({ block }) => blockCache.get(block) as DOMRect
+    );
+
+    this._setSelectedBlocks(
+      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
+      rects
+    );
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
+  }
+
+  refreshSelectionRect(offset: { scrollLeft: number; scrollTop: number }) {
+    const { blockCache, startPoint, endPoint } = this.state;
+
+    if (startPoint && endPoint) {
+      this.selecting(blockCache, startPoint, endPoint, offset);
+    } else {
+      this.state.setStartPoint(null);
+      this.state.setEndPoint(null);
+      this._signals.updateFrameSelectionRect.emit(null);
+    }
   }
 
   refreshSelectedBlocksRects() {

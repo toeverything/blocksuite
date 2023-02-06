@@ -254,6 +254,11 @@ export class DefaultPageBlockComponent
     this.selection.refreshSelectedBlocksRects();
   };
 
+  private _onScroll = (e: Event) => {
+    const { scrollLeft, scrollTop } = e.target as Element;
+    this.selection.refreshSelectionRect({ scrollLeft, scrollTop });
+  };
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this.selection = new DefaultSelectionManager({
@@ -452,7 +457,7 @@ export class DefaultPageBlockComponent
       tryUpdateFrameSize(this.page, 1);
     });
 
-    // TMP: clear selected rects on scroll
+    this.defaultViewportElement.addEventListener('scroll', this._onScroll);
     document.addEventListener('wheel', this._clearSelection);
     window.addEventListener('resize', this._onResize);
     window.addEventListener('compositionstart', this._handleCompositionStart);
@@ -482,6 +487,7 @@ export class DefaultPageBlockComponent
       'compositionstart',
       this._handleCompositionStart
     );
+    this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
     window.removeEventListener('resize', this._onResize);
     window.removeEventListener('compositionend', this._handleCompositionEnd);
     document.removeEventListener('wheel', this._clearSelection);
