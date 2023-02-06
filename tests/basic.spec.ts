@@ -115,8 +115,10 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
 
   // wait until pageA content updated
   await assertText(pageA, 'hello');
+  // Fixes: https://github.com/toeverything/blocksuite/issues/1033
+  await pageB.waitForTimeout(1000);
+  await assertText(pageB, 'hello');
   await Promise.all([
-    assertText(pageB, 'hello'),
     assertStore(pageA, defaultStore),
     assertStore(pageB, defaultStore),
   ]);
