@@ -30,7 +30,7 @@ export class ShapeComponent extends LitElement {
       display: flex;
       align-items: center;
       height: 48px;
-      background: #ffffff;
+      background: var(--affine-page-background);
       box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: currentColor;
@@ -54,12 +54,12 @@ export class ShapeComponent extends LitElement {
     }
 
     .icon-container:hover {
-      background: #f7f7f7;
+      background: var(--affine-hover-background);
     }
 
     .icon-container[clicked] {
-      background: #f1eefe;
-      stroke: #5438ff;
+      background: var(--affine-hover-background);
+      stroke: var(--affine-primary-color);
     }
   `;
 
@@ -152,7 +152,8 @@ export class ShapeComponent extends LitElement {
 export class EdgelessToolBar extends LitElement {
   static styles = css`
     :host {
-      position: fixed;
+      position: absolute;
+      z-index: 1;
       bottom: 28px;
       left: calc(50%);
       display: flex;
@@ -202,7 +203,7 @@ export class EdgelessToolBar extends LitElement {
     }
 
     .icon-container[clicked] {
-      color: #5438ff;
+      color: var(--affine-primary-color);
     }
   `;
 

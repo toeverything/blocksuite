@@ -243,7 +243,7 @@ export class EdgelessPageBlockComponent
     // TODO listen awarenessStore update
     if (this.page.awarenessStore.getFlag('enable_toolbar')) {
       this._toolbar = document.createElement('edgeless-toolbar');
-      document.body.appendChild(this._toolbar);
+      this.mouseRoot.appendChild(this._toolbar);
     }
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
