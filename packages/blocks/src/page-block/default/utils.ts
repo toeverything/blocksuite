@@ -166,58 +166,49 @@ function binarySearchBlockEditingState(
       }
     }
 
-    let in_block = y <= detectRect.bottom;
+    const in_block = y >= detectRect.top && y <= detectRect.bottom;
+
     if (in_block) {
-      if (mid !== 0) {
-        // const {
-        //   detectRect: { bottom },
-        // } = getBlockAndRect(blocks, mid - 1);
-        // in_block &&= y >= bottom;
-        in_block &&= y >= detectRect.top;
-      }
+      assertExists(blockRect);
 
-      if (in_block) {
-        assertExists(blockRect);
+      if (!options?.skipX) {
+        if (dragging) {
+          if (block.depth && block.parentIndex !== undefined) {
+            let depth = Math.floor(
+              (blockRect.left - x) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+            );
+            if (depth > 0) {
+              let result = getBlockAndRect(blocks, block.parentIndex);
 
-        if (!options?.skipX) {
-          if (dragging) {
-            if (block.depth && block.parentIndex !== undefined) {
-              let depth = Math.floor(
-                (blockRect.left - x) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
-              );
-              if (depth > 0) {
-                let result = getBlockAndRect(blocks, block.parentIndex);
-
-                while (
-                  depth > 1 &&
-                  result.block.depth &&
-                  result.block.parentIndex !== undefined
-                ) {
-                  result = getBlockAndRect(blocks, result.block.parentIndex);
-                  depth -= 1;
-                }
-
-                return {
-                  index: mid,
-                  position: result.blockRect,
-                  model: result.block,
-                };
+              while (
+                depth > 1 &&
+                result.block.depth &&
+                result.block.parentIndex !== undefined
+              ) {
+                result = getBlockAndRect(blocks, result.block.parentIndex);
+                depth -= 1;
               }
-            }
-          } else {
-            // y-coord is checked before
-            if (!isPointIn(x, detectRect)) {
-              return null;
+
+              return {
+                index: mid,
+                position: result.blockRect,
+                model: result.block,
+              };
             }
           }
+        } else {
+          // y-coord is checked before
+          if (!isPointIn(x, detectRect)) {
+            return null;
+          }
         }
-
-        return {
-          index: mid,
-          position: blockRect,
-          model: block,
-        };
       }
+
+      return {
+        index: mid,
+        position: blockRect,
+        model: block,
+      };
     }
 
     if (detectRect.top > y) {
