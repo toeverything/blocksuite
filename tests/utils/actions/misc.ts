@@ -51,7 +51,7 @@ async function initEmptyEditor(
   await page.evaluate(flags => {
     const { workspace } = window;
 
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as StorePage;
       for (const [key, value] of Object.entries(flags)) {
         page.awarenessStore.setFlag(key as keyof typeof flags, value);
@@ -66,9 +66,8 @@ async function initEmptyEditor(
 
       document.body.appendChild(editor);
       document.body.appendChild(debugMenu);
-      requestAnimationFrame(() => {
-        document.body.appendChild(editor.blockHub);
-      });
+      const blockHub = await editor.createBlockHub();
+      document.body.appendChild(blockHub);
 
       window.debugMenu = debugMenu;
       window.editor = editor;

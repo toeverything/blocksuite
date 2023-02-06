@@ -40,8 +40,6 @@ export class EditorContainer extends NonShadowLitElement {
   @state()
   contentParser = new ContentParser(this);
 
-  blockHub!: BlockHub;
-
   get model() {
     return [this.page.root, this.page.surface] as [
       PageBlockModel | null,
@@ -144,8 +142,13 @@ export class EditorContainer extends NonShadowLitElement {
     this._placeholderInput?.focus();
   }
 
-  protected firstUpdated() {
-    this.blockHub = createBlockHub(this, this.page);
+  public async createBlockHub() {
+    return new Promise<BlockHub>(resolve => {
+      requestAnimationFrame(() => {
+        const blockHub = createBlockHub(this, this.page);
+        resolve(blockHub);
+      });
+    });
   }
 
   override disconnectedCallback() {
