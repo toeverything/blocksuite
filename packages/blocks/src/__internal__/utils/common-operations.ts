@@ -131,7 +131,7 @@ export function convertToDivider(
   model: ExtendedModel,
   prefix: string
 ): boolean {
-  if (matchFlavours(model, ['affine:divider'])) {
+  if (matchFlavours(model, ['affine:divider']) || model.type === 'quote') {
     return false;
   }
   if (!matchFlavours(model, ['affine:divider'])) {
