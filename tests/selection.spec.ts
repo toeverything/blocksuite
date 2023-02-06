@@ -27,6 +27,7 @@ import {
   switchEditorMode,
   type,
   getIndexCoordinate,
+  focusTitle,
 } from './utils/actions/index.js';
 import { expect } from '@playwright/test';
 import {
@@ -36,6 +37,7 @@ import {
   assertAlmostEqual,
   assertDivider,
   assertClipItems,
+  assertTitle,
 } from './utils/asserts.js';
 
 test('click on blank area', async ({ page }) => {
@@ -599,6 +601,18 @@ test('selection on heavy page', async ({ page }) => {
     return container?.children.length;
   });
   expect(rectNum).toBe(5);
+});
+
+// Refs: https://github.com/toeverything/blocksuite/issues/1004
+test('Change title when first content is divider', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '--- ');
+  await assertDivider(page, 1);
+  await focusTitle(page);
+  await type(page, 'title');
+  await assertTitle(page, 'title');
 });
 
 test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
