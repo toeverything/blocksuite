@@ -5,9 +5,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "test:e2e": "playwright test",
-    "test": "pnpm test:e2e"
+    "build": "tsc"
   },
   "keywords": [],
   "author": "toeverything",

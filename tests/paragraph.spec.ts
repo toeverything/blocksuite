@@ -28,6 +28,7 @@ import {
   redoByClick,
   pressTab,
   type,
+  focusTitle,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -39,6 +40,13 @@ test('init paragraph by page title enter at last', async ({ page }) => {
 
   await assertTitle(page, 'hello');
   await assertRichTexts(page, ['world', '\n']);
+
+  //#region Fixes: https://github.com/toeverything/blocksuite/issues/1007
+  await page.keyboard.press('ArrowLeft');
+  await focusTitle(page);
+  await pressEnter(page);
+  await assertRichTexts(page, ['\n', 'world', '\n']);
+  //#endregion
 });
 
 test('init paragraph by page title enter in middle', async ({ page }) => {
@@ -706,4 +714,44 @@ test('press arrow up in the second line should move caret to the first line', as
     '0ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib',
     '2',
   ]);
+});
+
+test('press arrow down in indent line should not move caret to the start of line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const p1 = page.addBlockByFlavour('affine:paragraph', {}, frame);
+    const p2 = page.addBlockByFlavour('affine:paragraph', {}, p1);
+    page.addBlockByFlavour('affine:paragraph', {}, p2);
+    page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text('0'),
+      },
+      frame
+    );
+  });
+
+  // Focus the empty child paragraph
+  await focusRichText(page, 2);
+  await page.keyboard.press('ArrowDown');
+  // Now the caret should be at the end of the last paragraph
+  await type(page, '1');
+  await assertRichTexts(page, ['\n', '\n', '\n', '01']);
+
+  await focusRichText(page, 2);
+  // Insert a new long text to wrap the line
+  await page.keyboard.insertText('0'.repeat(100));
+
+  await focusRichText(page, 1);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+
+  await page.keyboard.press('ArrowDown');
+  await type(page, '2');
+  await assertRichTexts(page, ['\n', '\n', '0'.repeat(100), '012']);
 });

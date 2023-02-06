@@ -15,6 +15,7 @@ import {
   BlockChildrenContainer,
   type BlockHost,
   getCurrentRange,
+  getRichTextByModel,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
@@ -196,7 +197,7 @@ export class DefaultPageBlockComponent
   @query('.affine-default-page-block-title')
   private _title!: HTMLTextAreaElement;
 
-  private _onTitleKeyDown(e: KeyboardEvent) {
+  private async _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = !this.page.isEmpty;
     const { page, model, _title } = this;
 
@@ -211,6 +212,15 @@ export class DefaultPageBlockComponent
         flavour: 'affine:paragraph',
         text: new Text(contentRight),
       };
+      // Fixes: https://github.com/toeverything/blocksuite/pull/1008
+      //  A workaround that fixes rich-text still be listened when press enter on title.
+      //  Other solutions like `quill.disable()` or remove all listener when blur will won't work.
+      const block = defaultFrame.children.find(block =>
+        getRichTextByModel(block)
+      );
+      if (block) {
+        await asyncFocusRichText(this.page, block.id);
+      }
       const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       page.updateBlock(model, { title: contentLeft });
       page.workspace.setPageMeta(page.id, { title: contentLeft });

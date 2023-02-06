@@ -34,7 +34,7 @@ import {
 import type { Workspace } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
-import { assertExists } from '@blocksuite/store/src/__tests__/test-utils-dom';
+import { assertExists } from '@blocksuite/global/utils';
 import type { ShapeType } from '@blocksuite/phasor';
 import {
   CSSColorProperties,
