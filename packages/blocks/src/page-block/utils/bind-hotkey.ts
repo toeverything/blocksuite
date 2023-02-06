@@ -141,11 +141,34 @@ function handleDown(
     const range = getCurrentRange();
     const atLineEdge = isAtLineEdge(range);
     if (atLineEdge) {
-      focusNextBlock(model, 'start');
+      const shiftRangeRect = atLineEdge.getBoundingClientRect();
+      // We can not focus 'start' directly,
+      // because pressing ArrowDown in multiple indent line will cause the cursor to jump to wrong position
+      focusNextBlock(
+        model,
+        new Point(shiftRangeRect.left, shiftRangeRect.bottom)
+      );
       return;
     }
     const { left, bottom } = range.getBoundingClientRect();
+    // Workaround select to empty line will get empty range
+    // If at empty line range.getBoundingClientRect will return 0
+    // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+    if (left === 0 && bottom === 0) {
+      if (!(range.startContainer instanceof HTMLElement)) {
+        console.warn(
+          "Failed to calculate caret position! range.getBoundingClientRect() is zero and it's startContainer not an HTMLElement.",
+          range
+        );
+        focusNextBlock(model, 'start');
+        return;
+      }
+      const rect = range.startContainer.getBoundingClientRect();
+      focusNextBlock(model, new Point(rect.left, rect.top));
+      return;
+    }
     focusNextBlock(model, new Point(left, bottom));
+    return;
   } else {
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
