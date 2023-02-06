@@ -47,7 +47,7 @@ jobs:
           COVERAGE: true
 
       - name: Run playwright tests in virgo
-        run: pnpm test -- --forbid-only
+        run: pnpm test:virgo
         working-directory: packages/virgo
         env:
           COVERAGE: true

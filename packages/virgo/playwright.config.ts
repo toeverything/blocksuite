@@ -8,7 +8,7 @@ const config: PlaywrightTestConfig = {
   testIgnore: ['**.unit.spec.ts'],
   workers: 1,
   webServer: {
-    command: 'pnpm dev',
+    command: 'pnpm --filter @blocksuite/playground dev',
     port: 5173,
     reuseExistingServer: !process.env.CI,
     env: {
