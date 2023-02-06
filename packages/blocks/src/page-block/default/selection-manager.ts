@@ -152,9 +152,9 @@ function filterSelectedBlockByIndex(
     const [block, rect] = entries[i];
     if (once) {
       const richText = block.querySelector('rich-text');
-      assertExists(richText);
-      const richTextRect = richText.getBoundingClientRect();
-      if (intersects(richTextRect, selectionRect, offset)) {
+      const nextRect = richText?.getBoundingClientRect() || rect;
+
+      if (nextRect && intersects(rect, selectionRect, offset)) {
         boundRect = rect;
         results.push(block);
         once = false;
