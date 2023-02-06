@@ -240,11 +240,29 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
-    // TODO listen awarenessStore update
     if (this.page.awarenessStore.getFlag('enable_toolbar')) {
       this._toolbar = document.createElement('edgeless-toolbar');
       this.mouseRoot.appendChild(this._toolbar);
     }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_toolbar,
+        enable => {
+          if (enable) {
+            if (!this._toolbar) {
+              this._toolbar = document.createElement('edgeless-toolbar');
+              this.mouseRoot.appendChild(this._toolbar);
+            }
+          } else {
+            this._toolbar?.remove();
+            this._toolbar = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
