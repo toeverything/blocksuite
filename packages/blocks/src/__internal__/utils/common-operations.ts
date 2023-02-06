@@ -130,7 +130,7 @@ export function convertToDivider(
   model: ExtendedModel,
   prefix: string
 ): boolean {
-  if (matchFlavours(model, ['affine:divider'])) {
+  if (matchFlavours(model, ['affine:divider']) || model.type === 'quote') {
     return false;
   }
   if (!matchFlavours(model, ['affine:divider'])) {
@@ -138,13 +138,10 @@ export function convertToDivider(
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
-    model.text?.insert(' ', model.text?.length);
+    model.text?.insert(' ', prefix.length);
     page.captureSync();
 
-    model.text?.delete(
-      model.text?.length - (prefix.length + 1),
-      prefix.length + 1
-    );
+    model.text?.delete(0, prefix.length + 1);
     const blockProps = {
       flavour: 'affine:divider',
       children: model.children,
