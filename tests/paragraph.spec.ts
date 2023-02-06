@@ -28,6 +28,7 @@ import {
   redoByClick,
   pressTab,
   type,
+  focusTitle,
 } from './utils/actions/index.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
@@ -39,6 +40,13 @@ test('init paragraph by page title enter at last', async ({ page }) => {
 
   await assertTitle(page, 'hello');
   await assertRichTexts(page, ['world', '\n']);
+
+  //#region Fixes: https://github.com/toeverything/blocksuite/issues/1007
+  await page.keyboard.press('ArrowLeft');
+  await focusTitle(page);
+  await pressEnter(page);
+  await assertRichTexts(page, ['\n', 'world', '\n']);
+  //#endregion
 });
 
 test('init paragraph by page title enter in middle', async ({ page }) => {
