@@ -48,7 +48,6 @@ jobs:
 
       - name: Run playwright tests in virgo
         run: pnpm test:virgo
-        working-directory: packages/virgo
         env:
           COVERAGE: true
 
