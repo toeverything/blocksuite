@@ -140,9 +140,10 @@ export async function waitForRemoteUpdateSignal(page: Page) {
         provider => provider instanceof DebugDocProvider
       ) as InstanceType<typeof DebugDocProvider>;
       const callback = window.$blocksuite.blocks.debounce(() => {
+        disposable.dispose();
         resolve();
       }, 100);
-      debugProvider.remoteUpdateSignal.on(callback);
+      const disposable = debugProvider.remoteUpdateSignal.on(callback);
     });
   });
 }
