@@ -18,6 +18,7 @@ import {
   focusTitle,
   switchReadonly,
   type,
+  waitForRemoteUpdateSignal,
 } from './utils/actions/index.js';
 import {
   defaultStore,
@@ -111,12 +112,11 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
   await focusRichText(pageB);
+  const signal = waitForRemoteUpdateSignal(pageA);
   await pageB.keyboard.type('hello');
-
+  await signal;
   // wait until pageA content updated
   await assertText(pageA, 'hello');
-  // Fixes: https://github.com/toeverything/blocksuite/issues/1033
-  await pageB.waitForTimeout(1000);
   await assertText(pageB, 'hello');
   await Promise.all([
     assertStore(pageA, defaultStore),

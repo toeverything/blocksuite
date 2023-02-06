@@ -286,6 +286,14 @@ export class Workspace {
     this._handlePageEvent();
   }
 
+  connect = () => {
+    this._store.connect();
+  };
+
+  disconnect = () => {
+    this._store.disconnect();
+  };
+
   get awarenessStore(): AwarenessStore {
     return this._store.awarenessStore;
   }

@@ -130,6 +130,14 @@ export class Store {
     );
   }
 
+  connect = () => {
+    this.providers.forEach(provider => provider.connect?.());
+  };
+
+  disconnect = () => {
+    this.providers.forEach(provider => provider.disconnect?.());
+  };
+
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
   }

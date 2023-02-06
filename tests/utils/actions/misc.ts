@@ -132,6 +132,21 @@ export async function waitNextFrame(page: Page) {
   await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
 }
 
+export async function waitForRemoteUpdateSignal(page: Page) {
+  return page.evaluate(() => {
+    return new Promise<void>(resolve => {
+      const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
+      const debugProvider = window.workspace.providers.find(
+        provider => provider instanceof DebugDocProvider
+      ) as InstanceType<typeof DebugDocProvider>;
+      const callback = window.$blocksuite.blocks.debounce(() => {
+        resolve();
+      }, 100);
+      debugProvider.remoteUpdateSignal.on(callback);
+    });
+  });
+}
+
 export async function clearLog(page: Page) {
   await page.evaluate(() => console.clear());
 }
