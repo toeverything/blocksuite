@@ -142,7 +142,7 @@ export async function waitForRemoteUpdateSignal(page: Page) {
       const callback = window.$blocksuite.blocks.debounce(() => {
         disposable.dispose();
         resolve();
-      }, 100);
+      }, 500);
       const disposable = debugProvider.remoteUpdateSignal.on(callback);
     });
   });
