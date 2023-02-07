@@ -1,4 +1,5 @@
 import {
+  DefaultPageBlockComponent,
   getDefaultPageBlock,
   getRichTextByModel,
   PageBlockModel,
@@ -43,43 +44,42 @@ class EditorKeydownHandlerStatic {
     const state = pageBlock.selection.state;
     let page: Page;
     for (const block of state.selectedBlocks) {
-      const componentName = block.localName;
-      switch (componentName) {
-        case 'affine-paragraph': {
-          const currentBlock = block as ParagraphBlockComponent;
-          const model = currentBlock.model;
-          page = currentBlock.model.page;
-          const previousSibling = currentBlock.model.page.getPreviousSibling(
-            currentBlock.model
-          );
-          if (!previousSibling || !supportsChildren(previousSibling)) {
-            // Bottom, can not indent, do nothing
-            return;
-          }
+      const currentBlock = block as DefaultPageBlockComponent;
 
-          const parent = page.getParent(model);
-          if (!parent) return;
-
-          page.captureSync();
-
-          // 1. backup target block children and remove them from target block
-          const children = model.children;
-          page.updateBlock(model, {
-            children: [],
-          });
-
-          // 2. remove target block from parent block
-          page.updateBlock(parent, {
-            children: parent.children.filter(child => child.id !== model.id),
-          });
-
-          // 3. append target block and children to previous sibling block
-          page.updateBlock(previousSibling, {
-            children: [...previousSibling.children, model, ...children],
-          });
-        }
+      const model = currentBlock.model;
+      if (!model) return;
+      page = currentBlock.model.page;
+      const previousSibling = currentBlock.model.page.getPreviousSibling(
+        currentBlock.model
+      );
+      if (!previousSibling || !supportsChildren(previousSibling)) {
+        // Bottom, can not indent, do nothing
+        return;
       }
+
+      const parent = page.getParent(model);
+      if (!parent) return;
+
+      page.captureSync();
+
+      // 1. backup target block children and remove them from target block
+      const children = model.children;
+      page.updateBlock(model, {
+        children: [],
+      });
+
+      // 2. remove target block from parent block
+      page.updateBlock(parent, {
+        children: parent.children.filter(child => child.id !== model.id),
+      });
+
+      // 3. append target block and children to previous sibling block
+      page.updateBlock(previousSibling, {
+        children: [...previousSibling.children, model, ...children],
+      });
     }
+
+    e.preventDefault();
   }
 
   resetSelection(e: KeyboardEvent) {
