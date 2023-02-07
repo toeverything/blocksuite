@@ -2,11 +2,10 @@ import { expect, test } from '@playwright/test';
 import {
   enterVirgoPlayground,
   focusVirgoRichText,
-  getDeltaFromFirstEditor,
-  pagePress,
-  pageType,
-  setFirstEditorRange,
-} from './utils/actions/misc.js';
+  getDeltaFromVirgoRichText,
+  setVirgoRichTextRange,
+  type,
+} from './utils/misc.js';
 
 const ZERO_WIDTH_SPACE = '\u200B';
 test('basic input', async ({ page }) => {
@@ -22,7 +21,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
-  await pageType(page, 'abcdefg');
+  await type(page, 'abcdefg');
 
   expect(await editorA.innerText()).toBe('abcdefg');
   expect(await editorB.innerText()).toBe('abcdefg');
@@ -38,10 +37,10 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abcdefg');
 
   await focusVirgoRichText(page);
-  await pagePress(page, 'Backspace');
-  await pagePress(page, 'Backspace');
-  await pagePress(page, 'Backspace');
-  await pagePress(page, 'Backspace');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
 
   expect(await editorA.innerText()).toBe('abc');
   expect(await editorB.innerText()).toBe('abc');
@@ -57,9 +56,9 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc');
 
   await focusVirgoRichText(page);
-  await pagePress(page, 'Enter');
-  await pagePress(page, 'Enter');
-  await pageType(page, 'bbb');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await type(page, 'bbb');
 
   expect(await editorA.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
@@ -75,11 +74,11 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
 
   await focusVirgoRichText(page);
-  await pagePress(page, 'Backspace');
-  await pagePress(page, 'Backspace');
-  await pagePress(page, 'Backspace');
-  await pagePress(page, 'Backspace');
-  await pagePress(page, 'Backspace');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
 
   expect(await editorA.innerText()).toBe('abc');
   expect(await editorB.innerText()).toBe('abc');
@@ -94,12 +93,12 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc');
 
   await focusVirgoRichText(page);
-  await pagePress(page, 'ArrowLeft');
-  await pagePress(page, 'ArrowLeft');
-  await pageType(page, 'bb');
-  await pagePress(page, 'ArrowRight');
-  await pagePress(page, 'ArrowRight');
-  await pageType(page, 'dd');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await type(page, 'bb');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await type(page, 'dd');
 
   expect(await editorA.innerText()).toBe('abbbcdd');
   expect(await editorB.innerText()).toBe('abbbcdd');
@@ -114,10 +113,10 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abbbcdd');
 
   await focusVirgoRichText(page);
-  await pagePress(page, 'ArrowLeft');
-  await pagePress(page, 'ArrowLeft');
-  await pagePress(page, 'Enter');
-  await pagePress(page, 'Enter');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
 
   expect(await editorA.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
   expect(await editorB.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
@@ -143,7 +142,7 @@ test('readonly mode', async ({ page }) => {
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
-  await pageType(page, 'abcdefg');
+  await type(page, 'abcdefg');
 
   expect(await editorA.innerText()).toBe('abcdefg');
   expect(await editorB.innerText()).toBe('abcdefg');
@@ -161,7 +160,7 @@ test('readonly mode', async ({ page }) => {
     (richTextA as any).vEditor.setReadOnly(true);
   });
 
-  await pageType(page, 'aaaa');
+  await type(page, 'aaaa');
 
   expect(await editorA.innerText()).toBe('abcdefg');
   expect(await editorB.innerText()).toBe('abcdefg');
@@ -184,12 +183,12 @@ test('basic text style', async ({ page }) => {
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
 
-  await pageType(page, 'abcdefg');
+  await type(page, 'abcdefg');
 
   expect(await editorA.innerText()).toBe('abcdefg');
   expect(await editorB.innerText()).toBe('abcdefg');
 
-  let delta = await getDeltaFromFirstEditor(page);
+  let delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
@@ -199,10 +198,10 @@ test('basic text style', async ({ page }) => {
     },
   ]);
 
-  await setFirstEditorRange(page, { index: 2, length: 3 });
+  await setVirgoRichTextRange(page, { index: 2, length: 3 });
 
   editorABold.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -226,7 +225,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAItalic.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -251,7 +250,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAUnderline.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -277,7 +276,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAStrikethrough.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -304,7 +303,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorABold.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -330,7 +329,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAItalic.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -355,7 +354,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAUnderline.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -379,7 +378,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAStrikethrough.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
@@ -390,7 +389,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAReset.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
@@ -401,7 +400,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAInlineCode.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'ab',
@@ -424,7 +423,7 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAInlineCode.click();
-  delta = await getDeltaFromFirstEditor(page);
+  delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
