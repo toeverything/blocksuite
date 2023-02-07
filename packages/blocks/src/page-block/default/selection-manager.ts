@@ -601,6 +601,9 @@ export class DefaultSelectionManager {
     );
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
+    if (this._container.components.dragHandle) {
+      this._container.components.dragHandle.showBySelectionEvent(e);
+    }
     if (hoverEditingState?.model.type === 'image') {
       const { position } = hoverEditingState;
       // when image size is too large, the option popup should show inside
@@ -613,12 +616,6 @@ export class DefaultSelectionManager {
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
-    } else {
-      if (this._container.components.dragHandle) {
-        this._container.components.dragHandle.showBySelectionEvent(e);
-      }
-      this._signals.updateEmbedEditingState.emit(null);
-      this._signals.updateCodeBlockOption.emit(null);
     }
   };
 
