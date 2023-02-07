@@ -66,6 +66,18 @@ export class ShapeMenu extends LitElement {
       cursor: not-allowed;
       stroke: var(--affine-disable-color);
     }
+
+    arrow-tool-tip {
+      transform: translateX(-50%) translateY(-50%);
+      left: calc(50%);
+      bottom: 24px;
+      opacity: 0;
+    }
+
+    .icon-container:not([clicked]):hover > arrow-tool-tip {
+      opacity: 1;
+      transition-delay: 200ms;
+    }
   `;
 
   @property()
@@ -134,24 +146,29 @@ export class ShapeMenu extends LitElement {
   render() {
     return html`
       <div class="shape-menu-container">
-        ${ShapeComponentConfig.map(({ name, value, icon, disabled }) => {
-          return html`
-            <div
-              class="icon-container"
-              role=${name}
-              ?disabled=${disabled}
-              ?clicked=${this.selectedShape === name}
-              @click=${() => {
-                if (!disabled) {
-                  if (this.selectedShape === name) this._resetMouseMode();
-                  else this._setMouseMode('shape', name, value);
-                }
-              }}
-            >
-              ${icon}
-            </div>
-          `;
-        })}
+        ${ShapeComponentConfig.map(
+          ({ name, value, icon, tooltip, disabled }) => {
+            return html`
+              <div
+                class="icon-container"
+                role=${name}
+                ?disabled=${disabled}
+                ?clicked=${this.selectedShape === name}
+                @click=${() => {
+                  if (!disabled) {
+                    if (this.selectedShape === name) this._resetMouseMode();
+                    else this._setMouseMode('shape', name, value);
+                  }
+                }}
+              >
+                ${icon}
+                <arrow-tool-tip
+                  .tipText=${disabled ? '(coming soon)' : tooltip}
+                ></arrow-tool-tip>
+              </div>
+            `;
+          }
+        )}
       </div>
     `;
   }
@@ -227,7 +244,7 @@ export class EdgelessToolBar extends LitElement {
       opacity: 0;
     }
 
-    .icon-container:hover > arrow-tool-tip {
+    .icon-container:not([clicked]):hover > arrow-tool-tip {
       opacity: 1;
       transition-delay: 200ms;
     }
@@ -261,7 +278,7 @@ export class EdgelessToolBar extends LitElement {
   render() {
     return html`
       <div class="edgeless-toolbar-container">
-        ${ToolbarConfig.map(({ name, icon, disabled, action }) => {
+        ${ToolbarConfig.map(({ name, icon, disabled, tooltip, action }) => {
           return html`
             <div
               class="icon-container"
@@ -276,7 +293,9 @@ export class EdgelessToolBar extends LitElement {
               }}
             >
               ${icon}
-              <arrow-tool-tip .tipText="${name}"></arrow-tool-tip>
+              <arrow-tool-tip
+                .tipText=${disabled ? '(coming soon)' : tooltip}
+              ></arrow-tool-tip>
             </div>
           `;
         })}
@@ -289,22 +308,26 @@ const ToolbarConfig: Array<{
   name: string;
   icon: TemplateResult<2>;
   disabled: boolean;
+  tooltip: string;
   action?: (toolbar: EdgelessToolBar) => void;
 }> = [
   {
     name: 'selection',
     icon: SelectIcon,
     disabled: true,
+    tooltip: 'Select',
   },
   {
     name: 'text',
     icon: TextIconLarge,
     disabled: true,
+    tooltip: 'Text',
   },
   {
     name: 'shape',
     icon: ShapeIcon,
     disabled: false,
+    tooltip: 'Shape',
     action: (toolbar: EdgelessToolBar) => {
       if (toolbar.secondaryToolBarName === 'shape') {
         assertExists(toolbar.secondaryToolBar);
@@ -331,21 +354,25 @@ const ToolbarConfig: Array<{
   {
     name: 'image',
     icon: ImageIcon,
+    tooltip: 'Image',
     disabled: true,
   },
   {
     name: 'connector',
     icon: ConnectorIcon,
+    tooltip: 'Connector',
     disabled: true,
   },
   {
     name: 'pen',
     icon: PenIcon,
+    tooltip: 'Pen',
     disabled: true,
   },
   {
     name: 'hand',
     icon: HandIcon,
+    tooltip: 'Hand',
     disabled: true,
   },
 ];
@@ -354,12 +381,14 @@ const ShapeComponentConfig: Array<{
   name: string;
   value: ShapeMouseMode['shape'];
   icon: TemplateResult<2>;
+  tooltip: string;
   disabled: boolean;
 }> = [
   {
     name: 'square',
     value: 'rect',
     icon: SquareIcon,
+    tooltip: 'Square',
     disabled: true,
   },
   {
@@ -367,6 +396,7 @@ const ShapeComponentConfig: Array<{
     // TODO update new shape value
     value: 'rect',
     icon: EllipseIcon,
+    tooltip: 'Ellipse',
     disabled: true,
   },
   {
@@ -374,12 +404,14 @@ const ShapeComponentConfig: Array<{
     // TODO update new shape value
     value: 'rect',
     icon: DiamondIcon,
+    tooltip: 'Diamond',
     disabled: true,
   },
   {
     name: 'triangle',
     value: 'triangle',
     icon: TriangleIcon,
+    tooltip: 'Triangle',
     disabled: true,
   },
   {
@@ -387,6 +419,7 @@ const ShapeComponentConfig: Array<{
     // TODO update new shape value
     value: 'rect',
     icon: RoundedRectangleIcon,
+    tooltip: 'Rounded rectangle',
     disabled: false,
   },
 ];

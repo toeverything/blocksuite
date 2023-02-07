@@ -32,13 +32,14 @@ class ArrowToolTip extends LitElement {
     }
 
     .rect {
-      width: 80px;
+      padding: 0 12px;
       height: 32px;
       background: var(--affine-tooltip-background);
       border-radius: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
+      white-space: pre;
       color: var(--affine-page-background);
     }
 
