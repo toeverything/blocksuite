@@ -6,8 +6,6 @@ import type {
 } from '../../../packages/store/src/index.js';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY, type } from './keyboard.js';
-import type { DeltaInsert, VRange } from '@blocksuite/virgo';
-import type { VEditor } from '@blocksuite/virgo';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
@@ -77,11 +75,6 @@ async function initEmptyEditor(
     workspace.createPage('page0');
   }, flags);
   await waitNextFrame(page);
-}
-
-export async function enterVirgoPlayground(page: Page) {
-  const url = new URL('examples/virgo/index.html', DEFAULT_PLAYGROUND);
-  await page.goto(url.toString());
 }
 
 export async function enterPlaygroundRoom(
@@ -240,21 +233,6 @@ export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
   await locator.click();
-}
-
-export async function focusVirgoRichText(page: Page, index = 0): Promise<void> {
-  await page.evaluate(index => {
-    const richTexts = document
-      .querySelector('test-page')
-      ?.shadowRoot?.querySelectorAll('rich-text');
-
-    if (!richTexts) {
-      throw new Error('Cannot find rich-text');
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (richTexts[index] as any).vEditor.focusEnd();
-  }, index);
 }
 
 export async function initThreeParagraphs(page: Page) {
@@ -497,47 +475,4 @@ export async function getIndexCoordinate(
     }
   );
   return coord;
-}
-
-export async function getDeltaFromVirgoRichText(
-  page: Page,
-  index = 0
-): Promise<DeltaInsert> {
-  await page.waitForTimeout(50);
-  return await page.evaluate(index => {
-    const richTexts = document
-      .querySelector('test-page')
-      ?.shadowRoot?.querySelectorAll('rich-text');
-
-    if (!richTexts) {
-      throw new Error('Cannot find rich-text');
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as VEditor;
-    return editor.yText.toDelta();
-  }, index);
-}
-
-export async function setVirgoRichTextRange(
-  page: Page,
-  vRange: VRange,
-  index = 0
-): Promise<void> {
-  await page.evaluate(
-    ([vRange, index]) => {
-      const richTexts = document
-        .querySelector('test-page')
-        ?.shadowRoot?.querySelectorAll('rich-text');
-
-      if (!richTexts) {
-        throw new Error('Cannot find rich-text');
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const editor = (richTexts[index as number] as any).vEditor as VEditor;
-      editor.setVRange(vRange as VRange);
-    },
-    [vRange, index]
-  );
 }

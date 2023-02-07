@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { type } from 'utils/actions/keyboard.js';
 import {
   enterVirgoPlayground,
   focusVirgoRichText,
   getDeltaFromVirgoRichText,
   setVirgoRichTextRange,
-} from './utils/actions/misc.js';
+  type,
+} from './utils/misc.js';
 
 const ZERO_WIDTH_SPACE = '\u200B';
 test('basic input', async ({ page }) => {

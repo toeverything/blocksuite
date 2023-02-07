@@ -553,7 +553,7 @@ async function scrollToTop(page: Page) {
   // the editor will be focused asynchronously,
   // which will cause the scroll container to scroll to the cursor position. That's why we need to
   // wait for a while before scrolling.
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1000);
   await page
     .locator('.affine-default-viewport')
     .evaluate(node =>
@@ -575,7 +575,7 @@ async function scrollToBottom(page: Page) {
   // the editor will be focused asynchronously,
   // which will cause the scroll container to scroll to the cursor position. That's why we need to
   // wait for a while before scrolling.
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1000);
   await page
     .locator('.affine-default-viewport')
     .evaluate(node =>
