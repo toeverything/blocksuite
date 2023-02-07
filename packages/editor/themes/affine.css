@@ -58,6 +58,7 @@
     Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   --affine-paragraph-space: 8px;
   --affine-popover-radius: 10px;
+  --affine-editor-width: 720px;
 
   --affine-zoom: 1;
   --affine-scale: calc(1 / var(--affine-zoom));
