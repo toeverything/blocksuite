@@ -2,17 +2,18 @@ import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { Page, Signal } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import {
   BlockHub,
-  getDefaultPageBlock,
   MouseMode,
+  NonShadowLitElement,
   PageBlockModel,
+  SurfaceBlockModel,
 } from '@blocksuite/blocks';
-import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
+import { DisposableGroup, Page, Signal } from '@blocksuite/store';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
-import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
+
+import { createBlockHub } from '../utils/editor.js';
+import { EditorKeydownHandler } from '../managers/keyboard/keydown-handler.js';
 
 @customElement('editor-container')
 export class EditorContainer extends NonShadowLitElement {
@@ -85,33 +86,7 @@ export class EditorContainer extends NonShadowLitElement {
       )
     );
 
-    // Question: Why do we prevent this?
-    this._disposables.add(
-      Signal.fromEvent(window, 'keydown').on(e => {
-        if (e.altKey && e.metaKey && e.code === 'KeyC') {
-          e.preventDefault();
-        }
-
-        // `esc`  clear selection
-        if (e.code !== 'Escape') {
-          return;
-        }
-        const pageModel = this.pageBlockModel;
-        if (!pageModel) return;
-        const pageBlock = getDefaultPageBlock(pageModel);
-        pageBlock.selection.clearRects();
-
-        const selection = getSelection();
-        if (
-          !selection ||
-          selection.isCollapsed ||
-          !checkEditorElementActive()
-        ) {
-          return;
-        }
-        selection.removeAllRanges();
-      })
-    );
+    EditorKeydownHandler.init(this.pageBlockModel!);
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
