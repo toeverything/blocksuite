@@ -182,7 +182,7 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Block tree update API
   - ✅ Zero cost time travel (undo/redo)
   - ✅ Reusable NPM package
-  - ⚛️ React hooks integration
+  - ✅ React hooks integration
   - 📌 Dynamic block registration
 
 Icons above correspond to the following meanings:
