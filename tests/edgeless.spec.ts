@@ -222,7 +222,6 @@ test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
   const shapeComponentLocator = await page.locator('shape-component');
   await expect(shapeComponentLocator).toBeVisible();
 
-  await switchEditorMode(page);
-  await switchEditorMode(page);
+  await page.click('.icon-container[role="shape"]');
   await expect(shapeComponentLocator).toBeHidden();
 });
