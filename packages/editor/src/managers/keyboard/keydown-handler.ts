@@ -9,9 +9,12 @@ import { checkEditorElementActive } from '../../utils/editor.js';
 
 class EditorKeydownHandlerStatic {
   private pageBlockModel: PageBlockModel | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  private page: Page = null!;
   private handleCallback = (e: KeyboardEvent) => this.handle(e);
-  init(pageBlockModel: PageBlockModel | null) {
+  init(pageBlockModel: PageBlockModel | null, page: Page) {
     this.pageBlockModel = pageBlockModel;
+    this.page = page;
     window.addEventListener('keydown', this.handleCallback);
   }
 
@@ -41,19 +44,13 @@ class EditorKeydownHandlerStatic {
     const pageBlock = getDefaultPageBlock(pageModel);
     const state = pageBlock.selection.state;
 
-    let page: Page;
-    let captureSyncOnce = false;
-
+    const page = this.page;
+    page.captureSync();
     for (const block of state.selectedBlocks) {
       const currentBlock = block as DefaultPageBlockComponent;
 
       const model = currentBlock.model;
       if (!model) continue;
-      page = currentBlock.model.page;
-      if (!captureSyncOnce) {
-        page.captureSync();
-        captureSyncOnce = true;
-      }
 
       handleIndent(page, model, 0, false);
     }

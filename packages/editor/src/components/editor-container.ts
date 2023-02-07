@@ -87,7 +87,7 @@ export class EditorContainer extends NonShadowLitElement {
       )
     );
 
-    EditorKeydownHandler.init(this.pageBlockModel);
+    EditorKeydownHandler.init(this.pageBlockModel, this.page);
 
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
