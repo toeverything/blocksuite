@@ -37,7 +37,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
 
 - 🎁 Examples
   - [Nightly Playground](https://blocksuite-toeverything.vercel.app/?init) ([🔗 source](./packages/playground/src/main.ts))
-  - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/) ([🔗 source](./packages/playground/examples/basic/index.html))
+  - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/) ([🔗 source](./packages/playground/src/examples/basic/index.html))
   - [AFFiNE Alpha Editor](https://pathfinder.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/packages/app))
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
@@ -56,7 +56,7 @@ The `@blocksuite/editor` package contains the editor built into AFFiNE. Its `nig
 pnpm i @blocksuite/editor@nightly
 ```
 
-If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly ([code example here](./packages/playground/examples/basic/index.html)):
+If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly ([code example here](packages/playground/src/examples/basic/index.html)):
 
 ```ts
 import { SimpleAffineEditor } from '@blocksuite/editor';

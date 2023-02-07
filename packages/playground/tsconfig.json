@@ -18,6 +18,6 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true
   },
-  "include": ["./src", "./examples"],
+  "include": ["./src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

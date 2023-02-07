@@ -22,15 +22,18 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
-        'examples/blob': resolve(__dirname, 'examples/blob/index.html'),
-        'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
-        'examples/counter': resolve(__dirname, 'examples/counter/index.html'),
+        'examples/basic': resolve(__dirname, 'src/examples/basic/index.html'),
+        'examples/blob': resolve(__dirname, 'src/examples/blob/index.html'),
+        'examples/canvas': resolve(__dirname, 'src/examples/canvas/index.html'),
+        'examples/counter': resolve(
+          __dirname,
+          'src/examples/counter/index.html'
+        ),
         'examples/workspace': resolve(
           __dirname,
-          'examples/workspace/index.html'
+          'src/examples/workspace/index.html'
         ),
-        'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
+        'examples/virgo': resolve(__dirname, 'src/examples/virgo/index.html'),
       },
     },
   },
