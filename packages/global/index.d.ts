@@ -76,8 +76,8 @@ declare type BlockSuiteFlags = {
 
   enable_toggle_block: boolean;
   enable_hide_children: boolean;
-  blocks_with_hidden_children: string[] | undefined;
 
+  enable_edgeless_toolbar: boolean;
   readonly: Record<string, boolean>;
 };
 

@@ -35,6 +35,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import './toolbar';
+import type { EdgelessToolBar } from './toolbar.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -123,6 +125,8 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
+  private _toolbar: EdgelessToolBar | null = null;
+
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
     bindCommonHotkey(this.page);
@@ -185,6 +189,32 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
+  private _initEdgelessToolBar() {
+    if (this.page.awarenessStore.getFlag('enable_edgeless_toolbar')) {
+      this._toolbar = document.createElement('edgeless-toolbar');
+      this.mouseRoot.appendChild(this._toolbar);
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_edgeless_toolbar,
+        enable => {
+          if (enable) {
+            if (!this._toolbar) {
+              this._toolbar = document.createElement('edgeless-toolbar');
+              this.mouseRoot.appendChild(this._toolbar);
+            }
+          } else {
+            this._toolbar?.remove();
+            this._toolbar = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
@@ -196,6 +226,7 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
+    this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
@@ -246,6 +277,10 @@ export class EdgelessPageBlockComponent
     this._disposables.dispose();
     this._selection.dispose();
     this._removeHotkeys();
+    if (this._toolbar) {
+      this._toolbar.remove();
+      this._toolbar = null;
+    }
   }
 
   render() {

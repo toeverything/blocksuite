@@ -1,7 +1,7 @@
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { css, html } from 'lit';
 import type { CodeBlockModel } from './code-model.js';
-import { toolTipStyle } from '../components/tooltip.js';
+import { toolTipStyle } from '../components/tooltip/tooltip.js';
 import {
   BlockChildrenContainer,
   BlockHost,

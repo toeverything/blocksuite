@@ -15,7 +15,7 @@ import {
   focusCaption,
   toggleWrap,
 } from './utils.js';
-import { toolTipStyle } from '../../components/tooltip.js';
+import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type {
   CodeBlockOption,
   DefaultPageSignals,
