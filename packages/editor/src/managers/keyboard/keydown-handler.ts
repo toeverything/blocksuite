@@ -1,10 +1,7 @@
 import {
   DefaultPageBlockComponent,
   getDefaultPageBlock,
-  getRichTextByModel,
-  handleIndent,
   PageBlockModel,
-  ParagraphBlockComponent,
   supportsChildren,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
