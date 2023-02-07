@@ -256,24 +256,23 @@ export class DefaultPageBlockComponent
     this.signals.updateEmbedRects.emit([]);
     this.signals.updateEmbedEditingState.emit(null);
 
-    const { scrollTop, scrollLeft, scrollHeight, clientHeight } = this
-      .defaultViewportElement as Element;
+    const { scrollTop, scrollLeft, scrollHeight, clientHeight } =
+      this.defaultViewportElement;
+    const max = scrollHeight - clientHeight;
+    let top = e.deltaY / 2;
+    if (top > 0) {
+      if (Math.ceil(scrollTop) === max) return;
+
+      top = Math.min(top, max - scrollTop);
+    }
+    if (top < 0) {
+      if (scrollTop === 0) return;
+
+      top = Math.max(top, -scrollTop);
+    }
+
     const { startPoint, endPoint } = this.selection.state;
-
     if (startPoint && endPoint) {
-      const max = scrollHeight - clientHeight;
-      let top = e.deltaY / 2;
-      if (top > 0) {
-        if (Math.ceil(scrollTop) === max) return;
-
-        top = Math.min(top, max - scrollTop);
-      }
-      if (top < 0) {
-        if (scrollTop === 0) return;
-
-        top = Math.max(top, -scrollTop);
-      }
-
       e.preventDefault();
 
       // FIXME: need smooth
