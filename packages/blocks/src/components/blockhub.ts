@@ -9,7 +9,7 @@ import {
 import { NonShadowLitElement } from '../__internal__/index.js';
 import type { DragIndicator } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
+import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
 import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
 import {
   BulletedListIconLarge,
