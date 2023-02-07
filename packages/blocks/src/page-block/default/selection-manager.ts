@@ -447,7 +447,7 @@ export class DefaultSelectionManager {
 
         this.updateSelectionRect(startPoint, endPoint, {
           scrollLeft,
-          scrollTop,
+          scrollTop: Math.min(scrollTop, max),
         });
       } else if (scrollTop > 0 && y < 50) {
         // up easeInQuad
@@ -458,7 +458,7 @@ export class DefaultSelectionManager {
 
         this.updateSelectionRect(startPoint, endPoint, {
           scrollLeft,
-          scrollTop,
+          scrollTop: Math.max(scrollTop, 0),
         });
       } else {
         auto = false;
