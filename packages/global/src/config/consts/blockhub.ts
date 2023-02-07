@@ -1,4 +1,5 @@
 import type { TemplateResult } from 'lit/html.js';
+
 import {
   BulletedListIcon,
   CodeIcon,

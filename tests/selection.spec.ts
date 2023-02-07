@@ -1,44 +1,45 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
+import { expect } from '@playwright/test';
+
 import {
+  addFrameByClick,
+  copyByKeyboard,
+  dragBetweenCoords,
+  dragBetweenIndices,
   enterPlaygroundRoom,
+  fillLine,
   focusRichText,
+  focusTitle,
+  getCursorBlockIdAndHeight,
+  getIndexCoordinate,
   getQuillSelectionIndex,
   getQuillSelectionText,
-  dragBetweenCoords,
+  getSelectedTextByQuill,
+  initEmptyParagraphState,
+  initThreeLists,
+  initThreeParagraphs,
+  pasteByKeyboard,
   pressEnter,
   pressShiftTab,
-  getCursorBlockIdAndHeight,
-  fillLine,
-  addFrameByClick,
-  initThreeParagraphs,
-  initEmptyParagraphState,
-  undoByKeyboard,
-  resetHistory,
   redoByKeyboard,
-  waitNextFrame,
-  dragBetweenIndices,
-  initThreeLists,
-  copyByKeyboard,
-  pasteByKeyboard,
-  getSelectedTextByQuill,
+  resetHistory,
   SHORT_KEY,
   switchEditorMode,
   type,
-  getIndexCoordinate,
-  focusTitle,
+  undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
-import { expect } from '@playwright/test';
 import {
+  assertAlmostEqual,
   assertBlockCount,
+  assertClipItems,
+  assertDivider,
   assertRichTexts,
   assertSelection,
-  assertAlmostEqual,
-  assertDivider,
-  assertClipItems,
   assertTitle,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);

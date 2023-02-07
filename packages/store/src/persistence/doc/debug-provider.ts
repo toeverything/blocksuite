@@ -1,9 +1,10 @@
-import type * as Y from 'yjs';
-// @ts-ignore
-import { WebrtcProvider, Room } from 'y-webrtc';
 import { isWeb, Signal } from '@blocksuite/global/utils';
-import type { DocProvider } from './index.js';
 import type { Awareness } from 'y-protocols/awareness';
+// @ts-ignore
+import { Room, WebrtcProvider } from 'y-webrtc';
+import type * as Y from 'yjs';
+
+import type { DocProvider } from './index.js';
 
 // When using playground from blocksuite repo, t./idb-provider.js "serve" script in "@blocksuite/store" package.
 // We use our own sync server because a local service for sync makes everything much faster for dev.

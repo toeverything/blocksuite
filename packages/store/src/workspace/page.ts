@@ -1,30 +1,31 @@
-import * as Y from 'yjs';
-import type { Quill } from 'quill';
+import type { BlockTag, TagSchema } from '@blocksuite/global/database';
+import { debug } from '@blocksuite/global/debug';
+import { Signal } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
+import type { Quill } from 'quill';
+import * as Y from 'yjs';
+
+import type { AwarenessStore } from '../awareness.js';
 import { BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import {
-  Text,
   PrelimText,
   RichTextAdapter,
+  Text,
   TextType,
 } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
-import { Signal } from '@blocksuite/global/utils';
 import {
   assertValidChildren,
   initInternalProps,
   syncBlockProps,
-  trySyncTextProp,
   toBlockProps,
+  trySyncTextProp,
 } from '../utils/utils.js';
-import type { PageMeta, Workspace } from './workspace.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { debug } from '@blocksuite/global/debug';
-import type { AwarenessStore } from '../awareness.js';
-import type { BlockTag, TagSchema } from '@blocksuite/global/database';
+import type { PageMeta, Workspace } from './workspace.js';
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 

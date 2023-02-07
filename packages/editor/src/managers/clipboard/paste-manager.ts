@@ -1,16 +1,17 @@
+import {
+  deleteModelsByRange,
+  getStartModelBySelection,
+  handleBlockSplit,
+  SelectionInfo,
+  SelectionUtils,
+} from '@blocksuite/blocks';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { DeltaOperation } from 'quill';
+
 import type { EditorContainer } from '../../components/index.js';
 import { MarkdownUtils } from './markdown-utils.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
-import {
-  SelectionUtils,
-  SelectionInfo,
-  getStartModelBySelection,
-  deleteModelsByRange,
-  handleBlockSplit,
-} from '@blocksuite/blocks';
-import type { DeltaOperation } from 'quill';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 export class PasteManager {
   private _editor: EditorContainer;

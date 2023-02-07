@@ -1,9 +1,10 @@
 import { Signal } from '@blocksuite/global/utils';
+
 import type {
   BlobId,
   BlobProvider,
-  BlobURL,
   BlobSyncStateChangeEvent,
+  BlobURL,
 } from './types.js';
 
 function assertProviderExist(

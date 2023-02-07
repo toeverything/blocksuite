@@ -1,10 +1,11 @@
-import type * as Y from 'yjs';
-import { ZERO_WIDTH_SPACE } from './constant.js';
 import { assertExists, Signal } from '@blocksuite/global/utils';
+import type * as Y from 'yjs';
+
+import { BaseText } from './components/base-text.js';
+import { VirgoLine } from './components/virgo-line.js';
+import { ZERO_WIDTH_SPACE } from './constant.js';
 import type { DeltaInsert, TextAttributes, TextElement } from './types.js';
 import { deltaInsersToChunks } from './utils/convert.js';
-import { VirgoLine } from './components/virgo-line.js';
-import { BaseText } from './components/base-text.js';
 import { baseRenderElement } from './utils/render.js';
 
 export interface VRange {

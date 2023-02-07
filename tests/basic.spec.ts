@@ -1,35 +1,36 @@
 import './utils/declare-test-window.js';
-import { test } from './utils/playwright.js';
+
 import {
-  enterPlaygroundRoom,
+  addFrameByClick,
+  captureHistory,
   disconnectByClick,
+  dragBetweenIndices,
+  enterPlaygroundRoom,
+  focusRichText,
+  focusTitle,
+  initEmptyParagraphState,
+  pressEnter,
   redoByClick,
   redoByKeyboard,
-  undoByClick,
-  undoByKeyboard,
-  focusRichText,
-  waitDefaultPageLoaded,
-  pressEnter,
-  addFrameByClick,
-  initEmptyParagraphState,
-  dragBetweenIndices,
   SHORT_KEY,
-  captureHistory,
-  focusTitle,
   switchReadonly,
   type,
+  undoByClick,
+  undoByKeyboard,
+  waitDefaultPageLoaded,
   waitForRemoteUpdateSignal,
 } from './utils/actions/index.js';
 import {
-  defaultStore,
   assertBlockChildrenIds,
   assertEmpty,
-  assertStore,
-  assertText,
   assertRichTexts,
-  assertTitle,
+  assertStore,
   assertStoreMatchJSX,
+  assertText,
+  assertTitle,
+  defaultStore,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);

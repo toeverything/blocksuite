@@ -1,7 +1,8 @@
-import type { Workspace } from '@blocksuite/store';
-import type { BlockSuiteActionsCreator } from '../../types/index.js';
-import type { Page } from '@blocksuite/store';
 import { builtInSchemas } from '@blocksuite/blocks/models';
+import type { Workspace } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+
+import type { BlockSuiteActionsCreator } from '../../types/index.js';
 
 export interface ManagerState {
   workspaces: Workspace[];

@@ -1,15 +1,17 @@
-import { customElement, property, query, state } from 'lit/decorators.js';
+import '../__internal__/rich-text/rich-text.js';
+
+import { ArrowDownIcon, BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { css, html } from 'lit';
-import type { CodeBlockModel } from './code-model.js';
-import { toolTipStyle } from '../components/tooltip/tooltip.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
 import {
   BlockChildrenContainer,
   BlockHost,
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import '../__internal__/rich-text/rich-text.js';
-import { ArrowDownIcon, BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { toolTipStyle } from '../components/tooltip/tooltip.js';
+import type { CodeBlockModel } from './code-model.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends NonShadowLitElement {

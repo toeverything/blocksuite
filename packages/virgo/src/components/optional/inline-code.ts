@@ -1,8 +1,9 @@
-import { LitElement, html } from 'lit';
-import { property, customElement } from 'lit/decorators.js';
+import { html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
+import { ZERO_WIDTH_SPACE } from '../../constant.js';
 import type { BaseArrtiubtes, DeltaInsert } from '../../types.js';
 import { VirgoUnitText } from '../virgo-unit-text.js';
-import { ZERO_WIDTH_SPACE } from '../../constant.js';
 
 export interface InlineCodeAttributes {
   type: 'inline-code';

@@ -1,9 +1,9 @@
-import { describe, expect, test, vi } from 'vitest';
 import {
   debug,
   disableDebuglog,
   enableDebugLog,
 } from '@blocksuite/global/debug';
+import { describe, expect, test, vi } from 'vitest';
 
 const LOG_TAG = 'tag';
 class A {

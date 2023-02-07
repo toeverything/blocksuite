@@ -1,21 +1,21 @@
 /// <reference types="@blocksuite/global" />
+export * from './awareness.js';
+export * from './base.js';
+export * from './persistence/blob/index.js';
+export * from './persistence/doc/index.js';
 export * from './space.js';
 export * from './store.js';
-export * from './base.js';
-export * from './awareness.js';
-export * from './persistence/blob/index.js';
 export * from './text-adapter.js';
-export * from '@blocksuite/global/utils';
-export * from './persistence/doc/index.js';
-export * from './workspace/index.js';
-export * as Utils from './utils/utils.js';
+export type { IdGenerator } from './utils/id-generator.js';
 export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
-  uuidv4,
   nanoid,
+  uuidv4,
 } from './utils/id-generator.js';
-export type { IdGenerator } from './utils/id-generator.js';
+export * as Utils from './utils/utils.js';
+export * from './workspace/index.js';
+export * from '@blocksuite/global/utils';
 
 const env =
   typeof globalThis !== 'undefined'

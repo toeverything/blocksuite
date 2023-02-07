@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
   clickBlockTypeMenuItem,
   dragBetweenCoords,
@@ -20,6 +20,7 @@ import {
   assertSelection,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);

@@ -1,9 +1,10 @@
-import { LitElement, html } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { BaseArrtiubtes, DeltaInsert } from '../types.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { VirgoUnitText } from './virgo-unit-text.js';
+
 import { ZERO_WIDTH_SPACE } from '../constant.js';
+import type { BaseArrtiubtes, DeltaInsert } from '../types.js';
+import { VirgoUnitText } from './virgo-unit-text.js';
 
 function virgoTextStyles(props: BaseArrtiubtes): ReturnType<typeof styleMap> {
   let textDecorations = '';

@@ -1,26 +1,26 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
+  clickBlockTypeMenuItem,
+  dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
-  selectAllByKeyboard,
-  inlineCode,
-  undoByClick,
-  redoByClick,
-  strikethrough,
-  undoByKeyboard,
-  redoByKeyboard,
-  pressEnter,
-  initThreeParagraphs,
-  dragBetweenIndices,
-  initEmptyParagraphState,
   formatType,
-  clickBlockTypeMenuItem,
-  SHORT_KEY,
+  initEmptyParagraphState,
+  initThreeParagraphs,
+  inlineCode,
   MODIFIER_KEY,
-  resetHistory,
+  pressEnter,
   readClipboardText,
+  redoByClick,
+  redoByKeyboard,
+  resetHistory,
+  selectAllByKeyboard,
+  SHORT_KEY,
+  strikethrough,
   type,
+  undoByClick,
+  undoByKeyboard,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -28,6 +28,7 @@ import {
   assertTextFormat,
   assertTypeFormat,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);

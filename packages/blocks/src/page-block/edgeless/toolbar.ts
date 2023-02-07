@@ -1,6 +1,3 @@
-import { css, html, LitElement, TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import type { Page } from '@blocksuite/store';
 import {
   ConnectorIcon,
   DiamondIcon,
@@ -15,13 +12,17 @@ import {
   TextIconLarge,
   TriangleIcon,
 } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
+import { css, html, LitElement, TemplateResult } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+
 import {
   createEvent,
   MouseMode,
   ShapeMouseMode,
 } from '../../__internal__/index.js';
-import { assertExists } from '@blocksuite/global/utils';
 
 @customElement('shape-menu')
 export class ShapeMenu extends LitElement {

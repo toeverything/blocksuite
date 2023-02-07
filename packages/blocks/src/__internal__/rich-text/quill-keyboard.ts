@@ -1,5 +1,5 @@
-import Quill from 'quill';
 import { isEqual } from '@blocksuite/global/utils';
+import Quill from 'quill';
 
 const Keyboard = Quill.import('modules/keyboard');
 const TextBlot = Quill.import('blots/text');

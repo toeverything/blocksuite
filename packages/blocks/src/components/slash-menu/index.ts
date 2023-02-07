@@ -1,15 +1,17 @@
+import './slash-menu-node.js';
+
 import { BaseBlockModel, PrelimText } from '@blocksuite/store';
+
+import {
+  getQuillIndexByNativeSelection,
+  throttle,
+} from '../../__internal__/utils/index.js';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
   DragDirection,
 } from '../../page-block/utils/position.js';
-import {
-  getQuillIndexByNativeSelection,
-  throttle,
-} from '../../__internal__/utils/index.js';
 import type { SlashMenu } from './slash-menu-node.js';
-import './slash-menu-node.js';
 
 let globalAbortController = new AbortController();
 

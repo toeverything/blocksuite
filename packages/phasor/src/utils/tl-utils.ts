@@ -2,8 +2,9 @@
 // Credits to tldraw
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Vec } from './vec.js';
 import type { StrokePoint } from 'perfect-freehand';
+
+import { Vec } from './vec.js';
 
 const TAU = Math.PI * 2;
 

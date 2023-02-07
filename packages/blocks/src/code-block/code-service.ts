@@ -1,5 +1,6 @@
-import { BaseService } from '../__internal__/service.js';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+
+import { BaseService } from '../__internal__/service/index.js';
 import type { CodeBlockModel } from './code-model.js';
 
 export class CodeBlockService extends BaseService {

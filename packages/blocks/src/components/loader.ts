@@ -1,10 +1,10 @@
-import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import type { BaseBlockModel } from '@blocksuite/store';
 import {
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
 } from '@blocksuite/global/config';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 @customElement('loader-element')
 export class Loader extends LitElement {

@@ -1,8 +1,12 @@
+import * as blocks from '@blocksuite/blocks';
+import * as editor from '@blocksuite/editor';
 import {
-  enableDebugLog,
-  disableDebuglog,
   configDebugLog,
+  disableDebuglog,
+  enableDebugLog,
 } from '@blocksuite/global/debug';
+import * as globalUtils from '@blocksuite/global/utils';
+import * as store from '@blocksuite/store';
 import {
   assertExists,
   DebugDocProvider,
@@ -23,10 +27,6 @@ export const defaultMode =
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 
-import * as blocks from '@blocksuite/blocks';
-import * as store from '@blocksuite/store';
-import * as globalUtils from '@blocksuite/global/utils';
-import * as editor from '@blocksuite/editor';
 if (isE2E) {
   Object.defineProperty(window, '$blocksuite', {
     value: Object.freeze({

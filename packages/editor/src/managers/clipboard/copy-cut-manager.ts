@@ -1,16 +1,17 @@
 import {
   deleteModelsByRange,
+  EmbedBlockModel,
   getCurrentRange,
-  SelectionUtils,
   getServiceOrRegister,
   ListBlockModel,
-  EmbedBlockModel,
+  SelectionUtils,
 } from '@blocksuite/blocks';
+import { matchFlavours } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
+
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
 import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
-import { matchFlavours } from '@blocksuite/global/utils';
 
 export class CopyCutManager {
   private _editor: EditorContainer;

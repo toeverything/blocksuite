@@ -1,11 +1,12 @@
 import { useBlockSuiteStore } from '@blocksuite/react';
+import type { Workspace } from '@blocksuite/store';
+import { Navbar, Text } from '@nextui-org/react';
 import { useEffect } from 'react';
+
 import { NoSsr } from '../components/NoSsr';
 import { PageManger } from '../components/PageManger';
-import { Layout } from '../layouts/Layout';
-import { Navbar, Text } from '@nextui-org/react';
 import { WorkspacesDropdown } from '../components/WorkspacesDropdown';
-import type { Workspace } from '@blocksuite/store';
+import { Layout } from '../layouts/Layout';
 
 declare global {
   interface Window {

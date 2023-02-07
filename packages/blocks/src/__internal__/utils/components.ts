@@ -1,13 +1,16 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-import { html } from 'lit/static-html.js';
-import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost } from './types.js';
+import '../../components/loader.js';
+
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { repeat } from 'lit/directives/repeat.js';
+import { html } from 'lit/static-html.js';
+
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
-import '../../components/loader.js';
-import { BaseService, hasService, registerService } from '../service.js';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import { hasService, registerService } from '../service.js';
+import { BaseService } from '../service/index.js';
+import type { BlockHost } from './types.js';
 
 // TODO support dynamic block types
 export function BlockElement(

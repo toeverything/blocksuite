@@ -1,5 +1,5 @@
-import { BaseElement, HitTestOptions } from '../base-element.js';
 import { isPointIn } from '../../utils/hit-utils.js';
+import { BaseElement, HitTestOptions } from '../base-element.js';
 
 export class DebugElement extends BaseElement {
   type = 'debug' as const;

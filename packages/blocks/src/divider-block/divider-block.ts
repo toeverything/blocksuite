@@ -1,14 +1,14 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import {
   BlockChildrenContainer,
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-
 import type { DividerBlockModel } from './divider-model.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends NonShadowLitElement {

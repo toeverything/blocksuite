@@ -1,7 +1,8 @@
-import type { EdgelessContainer } from './edgeless-page-block.js';
-import type { ViewportState, Selectable, XYWH } from './selection-manager.js';
-import type { TopLevelBlockModel } from '../../__internal__/index.js';
 import type { SurfaceElement } from '@blocksuite/phasor';
+
+import type { TopLevelBlockModel } from '../../__internal__/index.js';
+import type { EdgelessContainer } from './edgeless-page-block.js';
+import type { Selectable, ViewportState, XYWH } from './selection-manager.js';
 
 export const DEFAULT_SPACING = 64;
 

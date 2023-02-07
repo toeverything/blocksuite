@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as Y from 'yjs';
 import type { DeltaOperation, Quill } from 'quill';
+import * as Y from 'yjs';
+
 import type { Space } from './space.js';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';

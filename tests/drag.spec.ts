@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
@@ -13,6 +13,7 @@ import {
   type,
 } from './utils/actions/index.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 // '../packages/blocks/src/__internal__/utils/consts.ts'
 const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;

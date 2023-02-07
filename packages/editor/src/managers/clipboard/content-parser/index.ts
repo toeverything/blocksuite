@@ -1,7 +1,8 @@
-import { marked } from 'marked';
 import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
 import { getServiceOrRegister } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
+import { marked } from 'marked';
+
 import type {
   EditorContainer,
   OpenBlockInfo,

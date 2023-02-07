@@ -1,14 +1,14 @@
-import { html, css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import Quill from 'quill';
-import type { Quill as QuillType } from 'quill';
-import QuillCursors from 'quill-cursors';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { BlockHost } from '../utils/index.js';
-import { createKeyboardBindings } from './keyboard.js';
+import { css, html } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import type { Quill as QuillType } from 'quill';
+import Quill from 'quill';
+import QuillCursors from 'quill-cursors';
 
 import Syntax from '../../code-block/components/syntax-code-block.js';
+import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
+import { createKeyboardBindings } from './keyboard.js';
 import { KeyboardWithEvent } from './quill-keyboard.js';
 
 Quill.register('modules/keyboard', KeyboardWithEvent, true);
