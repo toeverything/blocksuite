@@ -1,5 +1,5 @@
 import { css } from 'lit';
-import { toolTipStyle } from '../tooltip.js';
+import { toolTipStyle } from '../tooltip/tooltip.js';
 
 export const editLinkStyle = css`
   .affine-link-edit-popover {

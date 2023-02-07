@@ -5,17 +5,20 @@ import { fileURLToPath } from 'url';
 import { hmrPlugin } from './scripts/hmr-plugin';
 import istanbul from 'vite-plugin-istanbul';
 
+const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     hmrPlugin,
-    istanbul({
-      cwd: fileURLToPath(new URL('../..', import.meta.url)),
-      include: ['packages/**/src/*'],
-      exclude: ['node_modules', 'tests'],
-      forceBuildInstrument: !!process.env.CI || !!process.env.COVERAGE,
-    }),
+    enableIstanbul &&
+      istanbul({
+        cwd: fileURLToPath(new URL('../..', import.meta.url)),
+        include: ['packages/**/src/*'],
+        exclude: ['node_modules', 'tests'],
+        forceBuildInstrument: true,
+      }),
   ],
   build: {
     sourcemap: true,

@@ -4,9 +4,6 @@ patchedDependencies:
   hotkeys-js@3.10.1:
     hash: otx73r74oyscqvo3amwccrzngy
     path: patches/hotkeys-js@3.10.1.patch
-  quill@1.3.7:
-    hash: p7fvhlmnj5slwuih2pe6pk5gyy
-    path: patches/quill@1.3.7.patch
 
 importers:
 
@@ -106,7 +103,7 @@ importers:
       highlight.js: 11.7.0
       hotkeys-js: 3.10.1_otx73r74oyscqvo3amwccrzngy
       lit: 2.6.1
-      quill: 1.3.7_p7fvhlmnj5slwuih2pe6pk5gyy
+      quill: 1.3.7
       quill-cursors: 4.0.0
       zod: 3.20.2
     devDependencies:
@@ -6275,7 +6272,7 @@ packages:
       fast-diff: 1.1.2
     dev: false
 
-  /quill/1.3.7_p7fvhlmnj5slwuih2pe6pk5gyy:
+  /quill/1.3.7:
     resolution: {integrity: sha512-hG/DVzh/TiknWtE6QmWAF/pxoZKYxfe3J/d/+ShUWkDvvkZQVTPeVmUJVu1uE6DDooC4fWTiCLh84ul89oNz5g==}
     dependencies:
       clone: 2.1.2
@@ -6285,7 +6282,6 @@ packages:
       parchment: 1.1.4
       quill-delta: 3.6.3
     dev: false
-    patched: true
 
   /randombytes/2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}

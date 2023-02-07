@@ -5,13 +5,14 @@ import { choose } from 'lit/directives/choose.js';
 import { Page, Signal } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import {
+  BlockHub,
   getDefaultPageBlock,
   MouseMode,
   PageBlockModel,
 } from '@blocksuite/blocks';
 import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
-import { checkEditorElementActive } from '../utils/editor.js';
+import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 @customElement('editor-container')
 export class EditorContainer extends NonShadowLitElement {
@@ -139,6 +140,15 @@ export class EditorContainer extends NonShadowLitElement {
     );
 
     this._placeholderInput?.focus();
+  }
+
+  public async createBlockHub() {
+    return new Promise<BlockHub>(resolve => {
+      requestAnimationFrame(() => {
+        const blockHub = createBlockHub(this, this.page);
+        resolve(blockHub);
+      });
+    });
   }
 
   override disconnectedCallback() {
