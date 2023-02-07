@@ -18,7 +18,7 @@ import {
   handleKeyUp,
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
-import { Shortcuts } from './shortcuts.js';
+import { markdownConvert } from './markdown-convert.js';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
@@ -89,7 +89,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     context: BindingContext
   ) {
     const { prefix } = context;
-    Shortcuts.match(this.quill, model, prefix);
+    markdownConvert(this.quill, model, prefix);
     return ALLOW_DEFAULT;
   }
 
@@ -99,7 +99,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     context: BindingContext
   ) {
     const { prefix } = context;
-    return Shortcuts.match(this.quill, model, prefix)
+    return markdownConvert(this.quill, model, prefix)
       ? PREVENT_DEFAULT
       : ALLOW_DEFAULT;
   }
