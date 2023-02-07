@@ -26,7 +26,7 @@ const styles = css`
   .slash-menu {
     font-size: var(--affine-font-sm);
     position: absolute;
-    min-width: 173px;
+    min-width: 200px;
     padding: 8px 4px;
     overflow-y: auto;
 
