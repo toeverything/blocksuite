@@ -72,6 +72,8 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
 // See https://github.com/toeverything/blocksuite/pull/904 and
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
 // for more context.
+//
+// TODO: uses `contains` method for checking parent
 function filterSelectedBlockWithoutSubtree(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect,

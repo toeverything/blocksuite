@@ -929,3 +929,27 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
 });
+
+test('should keep selection state on scroll', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 31; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const data = new Array(30).fill(`
+`);
+  data.unshift(...['123', '456', '789']);
+  data.push(...['987', '654', '321']);
+  await assertRichTexts(page, data);
+});

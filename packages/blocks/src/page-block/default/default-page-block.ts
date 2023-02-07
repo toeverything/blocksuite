@@ -247,13 +247,47 @@ export class DefaultPageBlockComponent
   }
 
   // FIXME: keep embed selected rects after scroll
-  private _clearSelection = () => {
+  private _onWheel = (e: WheelEvent) => {
     // block selection support scroll, therefore we do not clear selection
-    if (this.selection.state.type !== 'block') {
+    const isBlockMode = this.selection.state.type === 'block';
+    if (!isBlockMode) {
       this.selection.state.clear();
     }
     this.signals.updateEmbedRects.emit([]);
     this.signals.updateEmbedEditingState.emit(null);
+
+    const { scrollTop, scrollLeft, scrollHeight, clientHeight } = this
+      .defaultViewportElement as Element;
+    const { startPoint, endPoint } = this.selection.state;
+
+    if (startPoint && endPoint) {
+      const max = scrollHeight - clientHeight;
+      let top = e.deltaY / 2;
+      if (top > 0) {
+        if (Math.ceil(scrollTop) === max) return;
+
+        top = Math.min(top, max - scrollTop);
+      }
+      if (top < 0) {
+        if (scrollTop === 0) return;
+
+        top = Math.max(top, -scrollTop);
+      }
+
+      e.preventDefault();
+
+      // FIXME: need smooth
+      this.defaultViewportElement.scrollTop += top;
+
+      this.selection.updateSelectionRect(
+        startPoint,
+        {
+          x: endPoint.x,
+          y: endPoint.y + top,
+        },
+        { scrollLeft, scrollTop }
+      );
+    }
   };
 
   private _onResize = () => {
@@ -426,8 +460,8 @@ export class DefaultPageBlockComponent
       tryUpdateFrameSize(this.page, 1);
     });
 
+    this.defaultViewportElement.addEventListener('wheel', this._onWheel);
     this.defaultViewportElement.addEventListener('scroll', this._onScroll);
-    document.addEventListener('wheel', this._clearSelection);
     window.addEventListener('resize', this._onResize);
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
@@ -450,8 +484,8 @@ export class DefaultPageBlockComponent
 
     removeHotkeys();
     this.selection.dispose();
+    this.defaultViewportElement.removeEventListener('wheel', this._onWheel);
     this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
-    document.removeEventListener('wheel', this._clearSelection);
     window.removeEventListener('resize', this._onResize);
     window.removeEventListener(
       'compositionstart',
