@@ -24,7 +24,7 @@ export class Shortcuts {
   ): boolean {
     const selection = quill.getSelection();
     if (!selection) {
-      return false;
+      return PREVENT_DEFAULT;
     }
     const [line] = quill.getLine(selection.index);
     if (Shortcuts._isValid(prefix, line.domNode.tagName)) {
