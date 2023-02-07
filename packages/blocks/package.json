@@ -1,11 +1,11 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.2",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -38,7 +38,10 @@
     "exports": {
       "./dist/*": "./dist/*",
       "./src/*": "./dist/*.js",
-      ".": "./dist/index.js",
+      ".": {
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      },
       "./std": {
         "types": "./dist/std.d.ts",
         "default": "./dist/std.js"

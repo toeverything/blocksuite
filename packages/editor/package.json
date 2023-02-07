@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.2",
   "description": "Default BlockSuite-based editor built for AFFiNE.",
   "main": "src/index.ts",
   "type": "module",
@@ -33,7 +33,10 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
-      ".": "./dist/index.js",
+      ".": {
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      },
       "./themes/*": "./themes/*"
     },
     "files": [

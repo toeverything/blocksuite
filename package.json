@@ -1,6 +1,16 @@
 {
   "name": "blocksuite",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.2",
+  "workspaces": [
+    "packages/blocks",
+    "packages/editor",
+    "packages/global",
+    "packages/phasor",
+    "packages/playground",
+    "packages/react",
+    "packages/store",
+    "packages/virgo"
+  ],
   "private": true,
   "type": "module",
   "engines": {
@@ -35,6 +45,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@blocksuite/virgo": "workspace:*",
     "@changesets/cli": "^2.26.0",
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
@@ -46,8 +57,8 @@
     "@types/react-dom": "^18.0.10",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
-    "@vitest/coverage-istanbul": "^0.28.4",
     "@vitejs/plugin-react": "^3.0.1",
+    "@vitest/coverage-istanbul": "^0.28.4",
     "@vitest/ui": "^0.28.2",
     "es-module-lexer": "^1.1.0",
     "eslint": "^8.32.0",

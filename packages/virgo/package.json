@@ -1,13 +1,11 @@
 {
   "name": "@blocksuite/virgo",
-  "version": "0.4.0-alpha.0",
+  "version": "0.4.0-alpha.2",
   "description": "A micro editor.",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "test:e2e": "playwright test",
-    "test": "pnpm test:e2e"
+    "build": "tsc"
   },
   "keywords": [],
   "author": "toeverything",

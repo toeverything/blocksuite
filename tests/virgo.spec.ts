@@ -1,17 +1,17 @@
 import { expect, test } from '@playwright/test';
-import { ZERO_WIDTH_SPACE } from '../constant.js';
 import {
-  enterPlayground,
-  focusRichText,
+  enterVirgoPlayground,
+  focusVirgoRichText,
   getDeltaFromFirstEditor,
   pagePress,
   pageType,
   setFirstEditorRange,
-} from './utils/misc.js';
+} from './utils/actions/misc.js';
 
+const ZERO_WIDTH_SPACE = '\u200B';
 test('basic input', async ({ page }) => {
-  await enterPlayground(page);
-  await focusRichText(page);
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
 
   const editorA = page.locator('[data-virgo-root="true"]').nth(0);
   const editorB = page.locator('[data-virgo-root="true"]').nth(1);
@@ -37,7 +37,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abcdefg');
   expect(await editorB.innerText()).toBe('abcdefg');
 
-  await focusRichText(page);
+  await focusVirgoRichText(page);
   await pagePress(page, 'Backspace');
   await pagePress(page, 'Backspace');
   await pagePress(page, 'Backspace');
@@ -56,7 +56,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc');
   expect(await editorB.innerText()).toBe('abc');
 
-  await focusRichText(page);
+  await focusVirgoRichText(page);
   await pagePress(page, 'Enter');
   await pagePress(page, 'Enter');
   await pageType(page, 'bbb');
@@ -74,7 +74,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
 
-  await focusRichText(page);
+  await focusVirgoRichText(page);
   await pagePress(page, 'Backspace');
   await pagePress(page, 'Backspace');
   await pagePress(page, 'Backspace');
@@ -93,7 +93,7 @@ test('basic input', async ({ page }) => {
 
   expect(await editorA.innerText()).toBe('abc');
 
-  await focusRichText(page);
+  await focusVirgoRichText(page);
   await pagePress(page, 'ArrowLeft');
   await pagePress(page, 'ArrowLeft');
   await pageType(page, 'bb');
@@ -113,7 +113,7 @@ test('basic input', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abbbcdd');
   expect(await editorB.innerText()).toBe('abbbcdd');
 
-  await focusRichText(page);
+  await focusVirgoRichText(page);
   await pagePress(page, 'ArrowLeft');
   await pagePress(page, 'ArrowLeft');
   await pagePress(page, 'Enter');
@@ -134,8 +134,8 @@ test('basic input', async ({ page }) => {
 });
 
 test('readonly mode', async ({ page }) => {
-  await enterPlayground(page);
-  await focusRichText(page);
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
 
   const editorA = page.locator('[data-virgo-root="true"]').nth(0);
   const editorB = page.locator('[data-virgo-root="true"]').nth(1);
@@ -168,8 +168,8 @@ test('readonly mode', async ({ page }) => {
 });
 
 test('basic text style', async ({ page }) => {
-  await enterPlayground(page);
-  await focusRichText(page);
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
 
   const editorA = page.locator('[data-virgo-root="true"]').nth(0);
   const editorB = page.locator('[data-virgo-root="true"]').nth(1);

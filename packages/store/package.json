@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.2",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "type": "module",
@@ -47,7 +47,10 @@
     "types": "dist/index.d.ts",
     "exports": {
       "./src/*": "./dist/*.js",
-      ".": "./dist/index.js"
+      ".": {
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      }
     }
   }
 }

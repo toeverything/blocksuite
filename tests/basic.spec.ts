@@ -18,6 +18,7 @@ import {
   focusTitle,
   switchReadonly,
   type,
+  waitForRemoteUpdateSignal,
 } from './utils/actions/index.js';
 import {
   defaultStore,
@@ -111,12 +112,13 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
   await focusRichText(pageB);
+  const signal = waitForRemoteUpdateSignal(pageA);
   await pageB.keyboard.type('hello');
-
+  await signal;
   // wait until pageA content updated
   await assertText(pageA, 'hello');
+  await assertText(pageB, 'hello');
   await Promise.all([
-    assertText(pageB, 'hello'),
     assertStore(pageA, defaultStore),
     assertStore(pageB, defaultStore),
   ]);
