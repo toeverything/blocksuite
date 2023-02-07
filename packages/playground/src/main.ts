@@ -35,6 +35,9 @@ function subscribePage(workspace: Workspace) {
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     document.body.appendChild(debugMenu);
+    editor.createBlockHub().then(blockHub => {
+      document.body.appendChild(blockHub);
+    });
 
     [window.editor, window.page] = [editor, page];
   });

@@ -47,6 +47,15 @@ export class BlockHub extends NonShadowLitElement {
   @property()
   public getAllowedBlocks: () => BaseBlockModel[];
 
+  @property()
+  updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
+
+  @property()
+  bottom = 70;
+
+  @property()
+  right = 24;
+
   @state()
   _expanded = false;
 
@@ -84,7 +93,6 @@ export class BlockHub extends NonShadowLitElement {
   private _blockHubMenuEntry!: HTMLElement;
 
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-  private _updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
@@ -94,12 +102,11 @@ export class BlockHub extends NonShadowLitElement {
   private _timer: number | null = null;
   private _delay = 200; // ms
   private enable_database: boolean;
-  private _bottomDistance = 70;
   private _topDistance = 24;
 
   static styles = css`
     affine-block-hub {
-      position: fixed;
+      position: absolute;
       z-index: 1;
     }
 
@@ -193,7 +200,6 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       padding: 4px;
       position: fixed;
-      right: 24px;
       width: 44px;
       background: var(--affine-page-background);
       box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
@@ -289,13 +295,10 @@ export class BlockHub extends NonShadowLitElement {
     ${toolTipStyle}
   `;
 
-  constructor(
-    options: {
-      enable_database: boolean;
-      onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-    },
-    updateSelectedRectsSignal?: Signal<DOMRect[]>
-  ) {
+  constructor(options: {
+    enable_database: boolean;
+    onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+  }) {
     super();
     this.enable_database = options.enable_database;
     this.getAllowedBlocks = () => {
@@ -303,9 +306,6 @@ export class BlockHub extends NonShadowLitElement {
       return [];
     };
     this._onDropCallback = options.onDropCallback;
-    updateSelectedRectsSignal &&
-      (this._updateSelectedRectsSignal = updateSelectedRectsSignal);
-    document.body.appendChild(this);
   }
 
   connectedCallback() {
@@ -586,7 +586,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this._updateSelectedRectsSignal && this._updateSelectedRectsSignal.emit([]);
+    this.updateSelectedRectsSignal && this.updateSelectedRectsSignal.emit([]);
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -698,14 +698,14 @@ export class BlockHub extends NonShadowLitElement {
   private _onResize = () => {
     const boundingClientRect = document.body.getBoundingClientRect();
     this._maxHeight =
-      boundingClientRect.height - this._topDistance - this._bottomDistance;
+      boundingClientRect.height - this._topDistance - this.bottom;
   };
 
   override render() {
     return html`
       <div
         class="block-hub-menu-container"
-        style="bottom: ${this._bottomDistance}px"
+        style="bottom: ${this.bottom}px; right: ${this.right}px"
       >
         ${this._blockHubMenuTemplate()}
         <div
