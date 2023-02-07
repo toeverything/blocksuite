@@ -24,7 +24,7 @@ export class Shortcuts {
   ): boolean {
     const selection = quill.getSelection();
     if (!selection) {
-      return PREVENT_DEFAULT;
+      return false;
     }
     const [line] = quill.getLine(selection.index);
     if (Shortcuts._isValid(prefix, line.domNode.tagName)) {
@@ -35,7 +35,7 @@ export class Shortcuts {
         }
       }
     }
-    return PREVENT_DEFAULT;
+    return false;
   }
 
   private static _ignoreTags: string[] = ['PRE'];
