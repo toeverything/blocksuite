@@ -672,6 +672,39 @@ test('press left in first paragraph start should not change cursor position', as
   await assertTitle(page, '');
 });
 
+test('press arrow down should move caret to the start of line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text('0'.repeat(100)),
+      },
+      frame
+    );
+    page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text('1'),
+      },
+      frame
+    );
+  });
+
+  // Focus the empty child paragraph
+  await focusRichText(page, 1);
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowDown');
+  await type(page, '2');
+  await assertRichTexts(page, ['0'.repeat(100), '21']);
+});
+
 test('press arrow up in the second line should move caret to the first line', async ({
   page,
 }) => {
@@ -710,10 +743,15 @@ test('press arrow up in the second line should move caret to the first line', as
   await page.keyboard.press('ArrowDown', { delay: 50 });
   await type(page, '2');
 
-  await assertRichTexts(page, [
-    '0ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib',
-    '2',
-  ]);
+  await assertRichTexts(page, ['0' + 'ib'.repeat(50), '2']);
+
+  // Go to the start of the second paragraph
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  // Should be inserted at the start of the second paragraph
+  await type(page, '3');
+  await assertRichTexts(page, ['0' + 'ib'.repeat(50), '32']);
 });
 
 test('press arrow down in indent line should not move caret to the start of line', async ({
@@ -748,9 +786,9 @@ test('press arrow down in indent line should not move caret to the start of line
   await page.keyboard.insertText('0'.repeat(100));
 
   await focusRichText(page, 1);
+  // Through long text
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
-
   await page.keyboard.press('ArrowDown');
   await type(page, '2');
   await assertRichTexts(page, ['\n', '\n', '0'.repeat(100), '012']);
