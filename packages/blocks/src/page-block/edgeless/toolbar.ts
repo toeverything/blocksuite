@@ -219,6 +219,18 @@ export class EdgelessToolBar extends LitElement {
       cursor: not-allowed;
       color: var(--affine-disable-color);
     }
+
+    arrow-tool-tip {
+      transform: translateX(-50%) translateY(-50%);
+      left: calc(50%);
+      bottom: 24px;
+      opacity: 0;
+    }
+
+    .icon-container:hover > arrow-tool-tip {
+      opacity: 1;
+      transition-delay: 200ms;
+    }
   `;
 
   @property()
@@ -264,6 +276,7 @@ export class EdgelessToolBar extends LitElement {
               }}
             >
               ${icon}
+              <arrow-tool-tip .tipText="${name}"></arrow-tool-tip>
             </div>
           `;
         })}
