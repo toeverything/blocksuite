@@ -1,11 +1,12 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
   enterPlaygroundRoom,
   initEmptyDatabaseState,
   undoByClick,
 } from './utils/actions/index.js';
-import { assertBlockProps, assertBlockCount } from './utils/asserts.js';
+import { assertBlockCount, assertBlockProps } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('edit database block title and create new rows', async ({ page }) => {
   await enterPlaygroundRoom(page);

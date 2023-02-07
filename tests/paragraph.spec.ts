@@ -1,35 +1,35 @@
-import { test } from './utils/playwright.js';
-import {
-  assertSelection,
-  assertRichTexts,
-  assertBlockChildrenFlavours,
-  assertBlockChildrenIds,
-  assertClassName,
-  assertBlockType,
-  assertTitle,
-  assertPageTitleFocus,
-  assertStoreMatchJSX,
-  assertKeyboardWorkInInput,
-} from './utils/asserts.js';
 import {
   clickBlockTypeMenuItem,
+  dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
+  initEmptyParagraphState,
+  initThreeParagraphs,
   pressEnter,
-  redoByKeyboard,
   pressShiftEnter,
   pressShiftTab,
+  pressTab,
+  redoByClick,
+  redoByKeyboard,
+  resetHistory,
+  type,
   undoByClick,
   undoByKeyboard,
-  initEmptyParagraphState,
-  dragOverTitle,
-  resetHistory,
-  initThreeParagraphs,
-  redoByClick,
-  pressTab,
-  type,
-  focusTitle,
 } from './utils/actions/index.js';
+import {
+  assertBlockChildrenFlavours,
+  assertBlockChildrenIds,
+  assertBlockType,
+  assertClassName,
+  assertKeyboardWorkInInput,
+  assertPageTitleFocus,
+  assertRichTexts,
+  assertSelection,
+  assertStoreMatchJSX,
+  assertTitle,
+} from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);

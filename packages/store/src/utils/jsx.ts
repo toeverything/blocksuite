@@ -1,4 +1,5 @@
-import { AbstractType, Doc, Map, Text, Array } from 'yjs';
+import { AbstractType, Array, Doc, Map, Text } from 'yjs';
+
 import type { PrefixedBlockProps } from '../workspace/page.js';
 
 type DocRecord = {

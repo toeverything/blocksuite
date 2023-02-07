@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { expect, Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
   dragBetweenCoords,
@@ -22,6 +22,7 @@ import {
   assertRichTexts,
   assertSelection,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 async function getFrameSize(
   page: Page,

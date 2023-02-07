@@ -1,45 +1,47 @@
-import type { Page } from '@blocksuite/store';
-import type { EmbedBlockComponent } from '../../embed-block/index.js';
-import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import '../../components/drag-handle.js';
-import {
-  handleNativeRangeClick,
-  handleNativeRangeDblClick,
-  handleNativeRangeDragMove,
-  initMouseEventHandlers,
-  isBlankArea,
-  isEmbed,
-  resetNativeSelection,
-  SelectionEvent,
-  getBlockElementByModel,
-  getAllBlocks,
-  getDefaultPageBlock,
-  IPoint,
-  getCurrentRange,
-  isTitleElement,
-  isDatabaseInput,
-  isDatabase,
-} from '../../__internal__/index.js';
-import type { RichText } from '../../__internal__/rich-text/rich-text.js';
-import {
-  getNativeSelectionMouseDragInfo,
-  repairContextMenuRange,
-} from '../utils/position.js';
-import type { DefaultPageSignals } from './default-page-block.js';
-import {
-  getBlockEditingStateByPosition,
-  getAllowSelectedBlocks,
-} from './utils.js';
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { DefaultPageBlockComponent } from './default-page-block.js';
-import { EmbedResizeManager } from './embed-resize-manager.js';
+
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+
+import {
+  getAllBlocks,
+  getBlockElementByModel,
+  getCurrentRange,
+  getDefaultPageBlock,
+  handleNativeRangeClick,
+  handleNativeRangeDblClick,
+  handleNativeRangeDragMove,
+  initMouseEventHandlers,
+  IPoint,
+  isBlankArea,
+  isDatabase,
+  isDatabaseInput,
+  isEmbed,
+  isTitleElement,
+  resetNativeSelection,
+  SelectionEvent,
+} from '../../__internal__/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
+import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
+import type { EmbedBlockComponent } from '../../embed-block/index.js';
+import {
+  getNativeSelectionMouseDragInfo,
+  repairContextMenuRange,
+} from '../utils/position.js';
+import type { DefaultPageSignals } from './default-page-block.js';
+import type { DefaultPageBlockComponent } from './default-page-block.js';
+import { EmbedResizeManager } from './embed-resize-manager.js';
+import {
+  getAllowSelectedBlocks,
+  getBlockEditingStateByPosition,
+} from './utils.js';
 
 function calcDepth(left: number, containerLeft: number) {
   return Math.ceil(

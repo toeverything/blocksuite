@@ -1,3 +1,15 @@
+import {
+  BLOCKHUB_LIST_ITEMS,
+  BLOCKHUB_TEXT_ITEMS,
+  BlockHubIcon,
+  BulletedListIconLarge,
+  CrossIcon,
+  DatabaseTableViewIcon,
+  RectIcon,
+  TextIconLarge,
+} from '@blocksuite/global/config';
+import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, TemplateResult } from 'lit';
 import {
   customElement,
@@ -6,27 +18,16 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import { NonShadowLitElement } from '../__internal__/index.js';
-import type { DragIndicator } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
-import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
-import {
-  BulletedListIconLarge,
-  CrossIcon,
-  RectIcon,
-  TextIconLarge,
-  BlockHubIcon,
-  BLOCKHUB_LIST_ITEMS,
-  BLOCKHUB_TEXT_ITEMS,
-  DatabaseTableViewIcon,
-} from '@blocksuite/global/config';
-import type { BaseBlockModel } from '@blocksuite/store';
 import {
   getBlockEditingStateByCursor,
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import type { DragIndicator } from './drag-handle.js';
+import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
 
 type BlockHubItem = {
   flavour: string;

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -9,6 +9,7 @@ import {
   initThreeParagraphs,
 } from './utils/actions/index.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('first level menu always exists, second level menu can be hidden by click firs level menu', async ({
   page,

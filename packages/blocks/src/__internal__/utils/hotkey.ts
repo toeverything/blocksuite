@@ -1,5 +1,6 @@
-import hotkeys from 'hotkeys-js';
 import type { KeyHandler } from 'hotkeys-js';
+import hotkeys from 'hotkeys-js';
+
 import { isCaptionElement, isInsideRichText, isTitleElement } from './query.js';
 
 hotkeys.filter = (event: KeyboardEvent) => {

@@ -1,14 +1,15 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { InlineBlot } from 'parchment';
 import Quill from 'quill';
+
 import {
   ALLOWED_SCHEMES,
   showLinkPopover,
 } from '../../../components/link-popover/index.js';
 import { getDefaultPageBlock, getModelByElement } from '../../utils/index.js';
 import { LinkIcon } from './link-icon.js';
-import { assertExists } from '@blocksuite/global/utils';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {

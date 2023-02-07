@@ -4,12 +4,13 @@ import { PrelimText } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { updateSelectedTextType } from '../../page-block/utils/index.js';
+
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
   asyncFocusRichText,
   getRichTextByModel,
 } from '../../__internal__/utils/index.js';
+import { updateSelectedTextType } from '../../page-block/utils/index.js';
 
 const styles = css`
   .overlay-mask {

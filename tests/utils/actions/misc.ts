@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
+
+import { ConsoleMessage, expect, Page } from '@playwright/test';
+
 import type {
   BaseBlockModel,
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
-import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;

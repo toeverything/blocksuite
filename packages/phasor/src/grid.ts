@@ -1,5 +1,5 @@
-import type { PhasorElement } from './elements/index.js';
 import { GRID_SIZE, IBound } from './consts.js';
+import type { PhasorElement } from './elements/index.js';
 import { intersects, isPointIn } from './utils/hit-utils.js';
 
 function getGridIndex(val: number) {

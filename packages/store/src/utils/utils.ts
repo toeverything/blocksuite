@@ -1,16 +1,17 @@
+import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
+import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
+
+import type { BaseBlockModel } from '../base.js';
+import { PrelimText, Text, TextType } from '../text-adapter.js';
+import type { Workspace } from '../workspace/index.js';
 import type {
   BlockProps,
   PrefixedBlockProps,
   YBlock,
   YBlocks,
 } from '../workspace/page.js';
-import { PrelimText, Text, TextType } from '../text-adapter.js';
-import type { Workspace } from '../workspace/index.js';
-import { fromBase64, toBase64 } from 'lib0/buffer.js';
-import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
 import type { Page } from '../workspace/page.js';
-import type { BaseBlockModel } from '../base.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,

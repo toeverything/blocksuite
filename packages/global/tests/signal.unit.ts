@@ -1,5 +1,5 @@
-import { describe, test, expect, vi } from 'vitest';
 import { Signal } from '@blocksuite/global/utils';
+import { describe, expect, test, vi } from 'vitest';
 describe('signal', () => {
   test('init', () => {
     const signal = new Signal();

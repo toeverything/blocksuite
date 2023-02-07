@@ -1,12 +1,12 @@
-import { test } from './utils/playwright.js';
-import { assertTextContain } from './utils/asserts.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
-  pressEnter,
   initEmptyParagraphState,
+  pressEnter,
   type,
 } from './utils/actions/index.js';
+import { assertTextContain } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 // Fixes: https://github.com/toeverything/blocksuite/issues/995
 test('prohibit creating divider within quote', async ({ page }) => {

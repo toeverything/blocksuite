@@ -1,5 +1,6 @@
-import { html, css, svg } from 'lit';
+import { css, html, svg } from 'lit';
 import { customElement } from 'lit/decorators.js';
+
 import { NonShadowLitElement } from '../../../__internal__/index.js';
 
 const notFoundIcon = svg`<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">

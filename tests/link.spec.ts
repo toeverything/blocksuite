@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect, Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -15,6 +15,7 @@ import {
   assertKeyboardWorkInInput,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 const pressCreateLinkShortCut = async (page: Page) => {
   await page.keyboard.press(`${SHORT_KEY}+k`);

@@ -1,17 +1,18 @@
-import * as Y from 'yjs';
+import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
+import { nanoid } from 'nanoid';
+import * as Y from 'yjs';
+
 import type { IBound } from './consts.js';
+import type { HitTestOptions } from './elements/base-element.js';
 import {
+  DebugElement,
   PhasorElement,
   PhasorElementType,
-  DebugElement,
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
-import { assertExists } from '@blocksuite/global/utils';
-import { nanoid } from 'nanoid';
-import type { HitTestOptions } from './elements/base-element.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;

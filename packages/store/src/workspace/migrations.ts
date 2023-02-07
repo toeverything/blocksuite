@@ -1,7 +1,8 @@
 import * as Y from 'yjs';
-import type { YBlock } from './page.js';
-import { initInternalProps } from '../utils/utils.js';
+
 import { uuidv4 } from '../utils/id-generator.js';
+import { initInternalProps } from '../utils/utils.js';
+import type { YBlock } from './page.js';
 
 interface Migration {
   desc: string;

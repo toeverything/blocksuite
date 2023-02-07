@@ -1,6 +1,10 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import '../__internal__/rich-text/rich-text.js';
+
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import {
   BlockChildrenContainer,
   BlockHost,
@@ -8,12 +12,9 @@ import {
   getDefaultPageBlock,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import '../__internal__/rich-text/rich-text.js';
-
 import type { ListBlockModel } from './list-model.js';
 import { getListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 function selectList(model: ListBlockModel) {
   const selectionManager = getDefaultPageBlock(model).selection;

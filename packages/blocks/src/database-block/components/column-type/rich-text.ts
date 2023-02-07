@@ -1,10 +1,4 @@
 import {
-  DatabaseCellLitElement,
-  defineTagSchemaRenderer,
-} from '../../register.js';
-import { customElement, query } from 'lit/decorators.js';
-import { html, literal } from 'lit/static-html.js';
-import {
   BaseArrtiubtes,
   BaseText,
   DeltaInsert,
@@ -15,6 +9,13 @@ import {
   VEditor,
 } from '@blocksuite/virgo';
 import { css } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
+import { html, literal } from 'lit/static-html.js';
+
+import {
+  DatabaseCellLitElement,
+  defineTagSchemaRenderer,
+} from '../../register.js';
 
 function renderElement(delta: DeltaInsert<TextAttributes>): TextElement {
   switch (delta.attributes.type) {

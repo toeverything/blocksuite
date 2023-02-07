@@ -1,5 +1,5 @@
-import type * as Y from 'yjs';
 import type { Awareness } from 'y-protocols/awareness';
+import type * as Y from 'yjs';
 
 export { DebugDocProvider } from './debug-provider.js';
 export { IndexedDBDocProvider } from './idb-provider.js';

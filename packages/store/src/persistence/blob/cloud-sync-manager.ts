@@ -1,14 +1,15 @@
-import ky from 'ky';
 import { Signal, sleep } from '@blocksuite/global/utils';
+import ky from 'ky';
+
+import type { BlobOptionsGetter } from './duplex-provider.js';
 import type {
   BlobId,
+  BlobProvider,
   IDBInstance,
   PendingTask,
   SyncTask,
-  BlobProvider,
 } from './types.js';
 import { BlobSyncState } from './types.js';
-import type { BlobOptionsGetter } from './duplex-provider.js';
 import { getDatabase } from './utils.js';
 
 export class CloudSyncManager {
