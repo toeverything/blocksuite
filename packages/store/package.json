@@ -47,7 +47,10 @@
     "types": "dist/index.d.ts",
     "exports": {
       "./src/*": "./dist/*.js",
-      ".": "./dist/index.js"
+      ".": {
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      }
     }
   }
 }
