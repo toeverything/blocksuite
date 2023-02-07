@@ -173,10 +173,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
           .model=${this.model}
           .placeholder=${placeholder}
           style=${styleMap({
-            fontWeight:
-              type[0] === 'h' && +type[1] > 0 && +type[1] < 7
-                ? '600'
-                : undefined,
+            fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
           })}
         ></rich-text>
         ${childrenContainer}
