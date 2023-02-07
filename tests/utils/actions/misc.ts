@@ -6,8 +6,6 @@ import type {
 } from '../../../packages/store/src/index.js';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY, type } from './keyboard.js';
-import type { DeltaInsert, VRange } from '@blocksuite/virgo';
-import type { VEditor } from '@blocksuite/virgo';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
@@ -79,11 +77,6 @@ async function initEmptyEditor(
     workspace.createPage('page0');
   }, flags);
   await waitNextFrame(page);
-}
-
-export async function enterVirgoPlayground(page: Page) {
-  const url = new URL('examples/virgo/index.html', DEFAULT_PLAYGROUND);
-  await page.goto(url.toString());
 }
 
 export async function enterPlaygroundRoom(
@@ -242,23 +235,6 @@ export async function focusRichText(page: Page, i = 0) {
   await page.mouse.move(0, 0);
   const locator = page.locator(RICH_TEXT_SELECTOR).nth(i);
   await locator.click();
-}
-
-export async function focusVirgoRichText(page: Page): Promise<void> {
-  const editorPosition = await page.evaluate(() => {
-    const editor = document
-      .querySelector('test-page')
-      ?.shadowRoot?.querySelector('rich-text')
-      ?.shadowRoot?.querySelector('[data-virgo-root="true"]');
-
-    if (!editor) {
-      throw new Error('Cannot find editor');
-    }
-
-    return editor.getBoundingClientRect();
-  });
-
-  await page.mouse.click(editorPosition.x + 400, editorPosition.y + 400);
 }
 
 export async function initThreeParagraphs(page: Page) {
@@ -479,7 +455,10 @@ export async function getIndexCoordinate(
 ) {
   const coord = await page.evaluate(
     ({ richTextIndex, quillIndex, coordOffSet }) => {
-      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+      const richText = document.querySelectorAll('rich-text')[
+        richTextIndex
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
       const quillBound = richText.quill.getBounds(quillIndex);
       const richTextBound = richText.getBoundingClientRect();
       return {
@@ -498,50 +477,4 @@ export async function getIndexCoordinate(
     }
   );
   return coord;
-}
-
-export async function pageType(page: Page, text: string): Promise<void> {
-  await page.keyboard.type(text, { delay: 50 });
-}
-
-export async function pagePress(page: Page, key: string): Promise<void> {
-  await page.keyboard.press(key, { delay: 50 });
-}
-
-export async function getDeltaFromFirstEditor(
-  page: Page
-): Promise<DeltaInsert> {
-  await page.waitForTimeout(50);
-  return await page.evaluate(() => {
-    const richTextA = document
-      .querySelector('test-page')
-      ?.shadowRoot?.querySelector('rich-text');
-
-    if (!richTextA) {
-      throw new Error('Cannot find editor');
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTextA as any).vEditor as VEditor;
-    return editor.yText.toDelta();
-  });
-}
-
-export async function setFirstEditorRange(
-  page: Page,
-  vRange: VRange
-): Promise<void> {
-  await page.evaluate(vRange => {
-    const richTextA = document
-      .querySelector('test-page')
-      ?.shadowRoot?.querySelector('rich-text');
-
-    if (!richTextA) {
-      throw new Error('Cannot find editor');
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTextA as any).vEditor as VEditor;
-    editor.setVRange(vRange);
-  }, vRange);
 }
