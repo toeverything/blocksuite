@@ -547,18 +547,8 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
 });
 
 async function scrollToTop(page: Page) {
-  // await page.mouse.wheel(0, -1000);
+  await page.mouse.wheel(0, -1000);
 
-  // When we type some characters, the character will be rendered asynchronously and then
-  // the editor will be focused asynchronously,
-  // which will cause the scroll container to scroll to the cursor position. That's why we need to
-  // wait for a while before scrolling.
-  await page.waitForTimeout(1000);
-  await page
-    .locator('.affine-default-viewport')
-    .evaluate(node =>
-      node.scrollTo({ left: 0, top: -1000, behavior: 'smooth' })
-    );
   await page.waitForFunction(() => {
     const scrollContainer = document.querySelector('.affine-default-viewport');
     if (!scrollContainer) {
@@ -571,11 +561,6 @@ async function scrollToTop(page: Page) {
 async function scrollToBottom(page: Page) {
   // await page.mouse.wheel(0, 1000);
 
-  // When we type some characters, the character will be rendered asynchronously and then
-  // the editor will be focused asynchronously,
-  // which will cause the scroll container to scroll to the cursor position. That's why we need to
-  // wait for a while before scrolling.
-  await page.waitForTimeout(1000);
   await page
     .locator('.affine-default-viewport')
     .evaluate(node =>
@@ -609,7 +594,6 @@ test('should format quick bar follow scroll', async ({ page }) => {
   for (let i = 0; i < 20; i++) {
     await pressEnter(page);
   }
-  type(page, 'bottom');
 
   await scrollToTop(page);
 
