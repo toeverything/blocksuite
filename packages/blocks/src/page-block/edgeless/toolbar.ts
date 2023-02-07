@@ -61,6 +61,11 @@ export class ShapeComponent extends LitElement {
       background: var(--affine-hover-background);
       stroke: var(--affine-primary-color);
     }
+
+    .icon-container[disabled] {
+      cursor: not-allowed;
+      stroke: var(--affine-disable-color);
+    }
   `;
 
   @property()
@@ -129,14 +134,17 @@ export class ShapeComponent extends LitElement {
   render() {
     return html`
       <div class="shape-component-container">
-        ${ShapeComponentConfig.map(({ name, value, icon }) => {
+        ${ShapeComponentConfig.map(({ name, value, icon, disabled }) => {
           return html`
             <div
               class="icon-container"
+              ?disabled=${disabled}
               ?clicked=${this.selectedShape === name}
               @click=${() => {
-                if (this.selectedShape === name) this._resetMouseMode();
-                else this._setMouseMode('shape', name, value);
+                if (!disabled) {
+                  if (this.selectedShape === name) this._resetMouseMode();
+                  else this._setMouseMode('shape', name, value);
+                }
               }}
             >
               ${icon}
@@ -205,6 +213,11 @@ export class EdgelessToolBar extends LitElement {
     .icon-container[clicked] {
       color: var(--affine-primary-color);
     }
+
+    .icon-container[disabled] {
+      cursor: not-allowed;
+      color: var(--affine-disable-color);
+    }
   `;
 
   @property()
@@ -230,14 +243,17 @@ export class EdgelessToolBar extends LitElement {
   render() {
     return html`
       <div class="edgeless-toolbar-container">
-        ${ToolbarConfig.map(({ name, icon, action }) => {
+        ${ToolbarConfig.map(({ name, icon, disabled, action }) => {
           return html`
             <div
               class="icon-container"
+              ?disabled=${disabled}
               ?clicked=${this._selectedIcon === name}
               @click=${() => {
-                action ? action(this) : this._cleanSecondaryToolBar();
-                this._selectedIcon = this._selectedIcon === name ? '' : name;
+                if (!disabled) {
+                  action ? action(this) : this._cleanSecondaryToolBar();
+                  this._selectedIcon = this._selectedIcon === name ? '' : name;
+                }
               }}
             >
               ${icon}
@@ -252,19 +268,23 @@ export class EdgelessToolBar extends LitElement {
 const ToolbarConfig: Array<{
   name: string;
   icon: TemplateResult<2>;
+  disabled: boolean;
   action?: (toolbar: EdgelessToolBar) => void;
 }> = [
   {
     name: 'selection',
     icon: SelectIcon,
+    disabled: true,
   },
   {
     name: 'text',
     icon: TextIconLarge,
+    disabled: true,
   },
   {
     name: 'shape',
     icon: ShapeIcon,
+    disabled: false,
     action: (toolbar: EdgelessToolBar) => {
       if (toolbar.secondaryToolBarName === 'shape') {
         assertExists(toolbar.secondaryToolBar);
@@ -291,18 +311,22 @@ const ToolbarConfig: Array<{
   {
     name: 'image',
     icon: ImageIcon,
+    disabled: true,
   },
   {
     name: 'connector',
     icon: ConnectorIcon,
+    disabled: true,
   },
   {
     name: 'pen',
     icon: PenIcon,
+    disabled: true,
   },
   {
     name: 'hand',
     icon: HandIcon,
+    disabled: true,
   },
 ];
 
@@ -310,34 +334,40 @@ const ShapeComponentConfig: Array<{
   name: string;
   value: ShapeMouseMode['shape'];
   icon: TemplateResult<2>;
+  disabled: boolean;
 }> = [
   {
     name: 'square',
     value: 'rect',
     icon: SquareIcon,
+    disabled: true,
   },
   {
     name: 'ellipse',
     // TODO update new shape value
     value: 'rect',
     icon: EllipseIcon,
+    disabled: true,
   },
   {
     name: 'diamond',
     // TODO update new shape value
     value: 'rect',
     icon: DiamondIcon,
+    disabled: true,
   },
   {
     name: 'triangle',
     value: 'triangle',
     icon: TriangleIcon,
+    disabled: true,
   },
   {
     name: 'roundedRectangle',
     // TODO update new shape value
     value: 'rect',
     icon: RoundedRectangleIcon,
+    disabled: false,
   },
 ];
 
