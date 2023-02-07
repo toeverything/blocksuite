@@ -39,5 +39,14 @@ export const Editor = ({ page, onInit }: EditorProps) => {
       // do nothing
     };
   }, [onInit, page]);
+
+  useEffect(() => {
+    if (!page.workspace.connected) {
+      page.workspace.connect();
+    }
+    return () => {
+      page.workspace.disconnect();
+    };
+  }, [page]);
   return <div className="editor-wrapper" ref={ref} />;
 };

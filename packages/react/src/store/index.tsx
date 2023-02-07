@@ -1,7 +1,7 @@
 import { useContext, useRef, useMemo, createContext } from 'react';
 import { create, useStore } from 'zustand';
 import { combine, subscribeWithSelector } from 'zustand/middleware';
-import { Workspace } from '@blocksuite/store';
+import { DebugDocProvider, Workspace } from '@blocksuite/store';
 import type { ManagerActions, ManagerState } from './manager/index.js';
 import {
   bindWorkspaceWithPages,
@@ -55,7 +55,7 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
         (room: string) =>
           new Workspace({
             room,
-            providers: [IndexedDBDocProvider],
+            providers: [DebugDocProvider, IndexedDBDocProvider],
           })
       );
       workspaces.forEach(workspace => bindWorkspaceWithPages(workspace));
