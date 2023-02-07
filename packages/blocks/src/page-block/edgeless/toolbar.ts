@@ -138,6 +138,7 @@ export class ShapeComponent extends LitElement {
           return html`
             <div
               class="icon-container"
+              role=${name}
               ?disabled=${disabled}
               ?clicked=${this.selectedShape === name}
               @click=${() => {
@@ -240,6 +241,11 @@ export class EdgelessToolBar extends LitElement {
     }
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._cleanSecondaryToolBar();
+  }
+
   render() {
     return html`
       <div class="edgeless-toolbar-container">
@@ -247,6 +253,7 @@ export class EdgelessToolBar extends LitElement {
           return html`
             <div
               class="icon-container"
+              role=${name}
               ?disabled=${disabled}
               ?clicked=${this._selectedIcon === name}
               @click=${() => {

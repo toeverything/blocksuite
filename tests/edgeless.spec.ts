@@ -210,3 +210,19 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
   });
   expect(exist).toBe(false);
 });
+
+test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await switchEditorMode(page);
+
+  const toolbarLocator = await page.locator('edgeless-toolbar');
+  await expect(toolbarLocator).toBeVisible();
+  await page.click('.icon-container[role="shape"]');
+  const shapeComponentLocator = await page.locator('shape-component');
+  await expect(shapeComponentLocator).toBeVisible();
+
+  await switchEditorMode(page);
+  await switchEditorMode(page);
+  await expect(shapeComponentLocator).toBeHidden();
+});
