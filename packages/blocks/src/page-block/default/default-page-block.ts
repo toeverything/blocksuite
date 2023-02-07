@@ -264,8 +264,7 @@ export class DefaultPageBlockComponent
       if (Math.ceil(scrollTop) === max) return;
 
       top = Math.min(top, max - scrollTop);
-    }
-    if (top < 0) {
+    } else if (top < 0) {
       if (scrollTop === 0) return;
 
       top = Math.max(top, -scrollTop);
