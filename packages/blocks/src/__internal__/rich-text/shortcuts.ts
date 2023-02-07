@@ -35,7 +35,7 @@ export class Shortcuts {
         }
       }
     }
-    return false;
+    return PREVENT_DEFAULT;
   }
 
   private static _ignoreTags: string[] = ['PRE'];
