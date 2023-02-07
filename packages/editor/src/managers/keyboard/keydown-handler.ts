@@ -10,7 +10,7 @@ import { checkEditorElementActive } from '../../utils/editor.js';
 class EditorKeydownHandlerStatic {
   private pageBlockModel: PageBlockModel | null = null;
   private handleCallback = (e: KeyboardEvent) => this.handle(e);
-  init(pageBlockModel: PageBlockModel) {
+  init(pageBlockModel: PageBlockModel | null) {
     this.pageBlockModel = pageBlockModel;
     window.addEventListener('keydown', this.handleCallback);
   }
