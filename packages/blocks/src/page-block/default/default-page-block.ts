@@ -430,7 +430,6 @@ export class DefaultPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
     this._initDragHandle();
-    // this._initBlockHub();
   }
 
   override disconnectedCallback() {
