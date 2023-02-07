@@ -1,6 +1,6 @@
 import type { AppProps } from 'next/app';
 import { BlockSuiteProvider, createBlockSuiteStore } from '@blocksuite/react';
-import { Workspace } from '@blocksuite/store';
+import { DebugDocProvider, Workspace } from '@blocksuite/store';
 import { IndexedDBDocProvider } from '@blocksuite/store';
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import { NextUIProvider } from '@nextui-org/react';
@@ -8,7 +8,10 @@ import { NextUIProvider } from '@nextui-org/react';
 const localWorkspace = new Workspace({
   room: 'local-room',
   isSSR: typeof window === 'undefined',
-  providers: typeof window === 'undefined' ? [] : [IndexedDBDocProvider],
+  providers:
+    typeof window === 'undefined'
+      ? []
+      : [DebugDocProvider, IndexedDBDocProvider],
 });
 
 localWorkspace.register(builtInSchemas);
