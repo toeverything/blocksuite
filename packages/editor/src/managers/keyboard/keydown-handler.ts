@@ -1,8 +1,8 @@
 import {
   DefaultPageBlockComponent,
   getDefaultPageBlock,
+  handleIndent,
   PageBlockModel,
-  supportsChildren,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
 import { checkEditorElementActive } from '../../utils/editor.js';
@@ -40,46 +40,22 @@ class EditorKeydownHandlerStatic {
     if (!pageModel) return;
     const pageBlock = getDefaultPageBlock(pageModel);
     const state = pageBlock.selection.state;
+
     let page: Page;
     let captureSyncOnce = false;
-    // TODO: merge util `handleIndent` at `rich-text-operations.ts`
+
     for (const block of state.selectedBlocks) {
       const currentBlock = block as DefaultPageBlockComponent;
 
       const model = currentBlock.model;
-      if (!model) return;
+      if (!model) continue;
       page = currentBlock.model.page;
       if (!captureSyncOnce) {
         page.captureSync();
         captureSyncOnce = true;
       }
 
-      const previousSibling = currentBlock.model.page.getPreviousSibling(
-        currentBlock.model
-      );
-      if (!previousSibling || !supportsChildren(previousSibling)) {
-        // Bottom, can not indent, do nothing
-        return;
-      }
-
-      const parent = page.getParent(model);
-      if (!parent) return;
-
-      // 1. backup target block children and remove them from target block
-      const children = model.children;
-      page.updateBlock(model, {
-        children: [],
-      });
-
-      // 2. remove target block from parent block
-      page.updateBlock(parent, {
-        children: parent.children.filter(child => child.id !== model.id),
-      });
-
-      // 3. append target block and children to previous sibling block
-      page.updateBlock(previousSibling, {
-        children: [...previousSibling.children, model, ...children],
-      });
+      handleIndent(page, model, 0, false);
     }
 
     e.preventDefault();
