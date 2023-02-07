@@ -493,14 +493,14 @@ export class DefaultPageBlockComponent
 
     removeHotkeys();
     this.selection.dispose();
+    this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
+    document.removeEventListener('wheel', this._clearSelection);
+    window.removeEventListener('resize', this._onResize);
     window.removeEventListener(
       'compositionstart',
       this._handleCompositionStart
     );
-    this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
-    window.removeEventListener('resize', this._onResize);
     window.removeEventListener('compositionend', this._handleCompositionEnd);
-    document.removeEventListener('wheel', this._clearSelection);
   }
 
   render() {

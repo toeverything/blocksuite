@@ -243,6 +243,7 @@ export class PageSelectionState {
   // -1: SELECT_ALL
   // >=0: only current focused-block
   focusedBlockIndex = -1;
+  rafID?: number;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _endPoint: { x: number; y: number } | null = null;
@@ -315,6 +316,12 @@ export class PageSelectionState {
     }
   }
 
+  clearRaf() {
+    if (this.rafID) {
+      this.rafID = void cancelAnimationFrame(this.rafID);
+    }
+  }
+
   clear() {
     this.type = 'none';
     this._richTextCache.clear();
@@ -323,6 +330,7 @@ export class PageSelectionState {
     this._endPoint = null;
     this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
+    this.clearRaf();
   }
 }
 
@@ -396,10 +404,10 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
-    const viewport = this._container.defaultViewportElement;
+    const { scrollTop, scrollLeft } = this._container.defaultViewportElement;
     this.state.resetStartRange(e, {
-      x: viewport.scrollLeft,
-      y: viewport.scrollTop,
+      x: scrollLeft,
+      y: scrollTop,
     });
     this.state.refreshBlockRectCache();
     resetNativeSelection(null);
@@ -408,34 +416,72 @@ export class DefaultSelectionManager {
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
-    assertExists(this.state.startPoint);
-    this.state.setEndPoint({ x: e.x, y: e.y });
+    const { x, y } = e;
+    this.state.setEndPoint({ x, y });
+
     const viewport = this._container.defaultViewportElement;
-    const { scrollHeight, clientHeight, scrollTop, scrollLeft } = viewport;
+    const { scrollHeight, clientHeight, scrollLeft } = viewport;
+    let { scrollTop } = viewport;
     const max = scrollHeight - clientHeight;
-    if (Math.ceil(scrollTop) < max && clientHeight - e.y < 50) {
-      const d = scrollTop + 10 <= max ? 10 : max - scrollTop;
-      viewport.scrollTop += d;
-      // current.y = viewport.scrollTop + e.y;
-    } else if (scrollTop > 0 && e.y < 50) {
-      const d = scrollTop - 10 <= 0 ? scrollTop : 10;
-      viewport.scrollTop -= d;
-      // current.y = viewport.scrollTop + e.y;
-    } else {
-      // current.y = viewport.scrollTop + e.y;
 
-      assertExists(this.state.endPoint);
+    assertExists(this.state.startPoint);
+    assertExists(this.state.endPoint);
 
-      const { blockCache, startPoint, endPoint } = this.state;
-      this.selecting(blockCache, startPoint, endPoint, {
-        scrollLeft,
-        scrollTop,
-      });
-    }
+    const { startPoint, endPoint } = this.state;
+
+    let auto = true;
+    const autoScroll = () => {
+      if (!auto) {
+        this.state.clearRaf();
+        return;
+      } else {
+        this.state.rafID = requestAnimationFrame(autoScroll);
+      }
+
+      if (Math.ceil(scrollTop) < max && clientHeight - y < 50) {
+        // down easeOutQuad
+        const d = (50 - (clientHeight - y)) * 0.25;
+        scrollTop += d;
+        viewport.scrollTop += d;
+        auto = Math.ceil(scrollTop) < max;
+
+        this.updateSelectionRect(startPoint, endPoint, {
+          scrollLeft,
+          scrollTop,
+        });
+      } else if (scrollTop > 0 && y < 50) {
+        // up easeInQuad
+        const d = (y - 50) * 0.25;
+        scrollTop += d;
+        viewport.scrollTop += d;
+        auto = scrollTop > 0;
+
+        this.updateSelectionRect(startPoint, endPoint, {
+          scrollLeft,
+          scrollTop,
+        });
+      } else {
+        auto = false;
+
+        const selectionRect = this.updateSelectionRect(startPoint, endPoint, {
+          scrollLeft,
+          scrollTop,
+        });
+
+        this.selecting(this.state.blockCache, selectionRect, {
+          scrollLeft,
+          scrollTop,
+        });
+      }
+    };
+
+    this.state.clearRaf();
+    this.state.rafID = requestAnimationFrame(autoScroll);
   }
 
   private _onBlockSelectionDragEnd(e: SelectionEvent) {
     this.state.type = 'block';
+    this.state.clearRaf();
     this.state.setStartPoint(null);
     this.state.setEndPoint(null);
     this._signals.updateFrameSelectionRect.emit(null);
@@ -712,20 +758,28 @@ export class DefaultSelectionManager {
     this._disposables.dispose();
   }
 
+  updateSelectionRect(
+    startPoint: { x: number; y: number },
+    endPoint: { x: number; y: number },
+    offset: { scrollLeft: number; scrollTop: number }
+  ): DOMRect {
+    const selectionRect = createSelectionRect(
+      {
+        x: endPoint.x + offset.scrollLeft,
+        y: endPoint.y + offset.scrollTop,
+      },
+      startPoint
+    );
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
+    return selectionRect;
+  }
+
   selecting(
     blockCache: Map<Element, DOMRect>,
-    start: { x: number; y: number },
-    end: { x: number; y: number },
+    selectionRect: DOMRect,
     offset: { scrollLeft: number; scrollTop: number }
   ) {
     const { scrollLeft, scrollTop } = offset;
-    const selectionRect = createSelectionRect(
-      {
-        x: end.x + scrollLeft,
-        y: end.y + scrollTop,
-      },
-      start
-    );
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,
       selectionRect,
@@ -742,14 +796,21 @@ export class DefaultSelectionManager {
       findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
-    this._signals.updateFrameSelectionRect.emit(selectionRect);
   }
 
   refreshSelectionRect(offset: { scrollLeft: number; scrollTop: number }) {
     const { blockCache, startPoint, endPoint } = this.state;
 
     if (startPoint && endPoint) {
-      this.selecting(blockCache, startPoint, endPoint, offset);
+      this.state.refreshBlockRectCache();
+      const selectionRect = createSelectionRect(
+        {
+          x: endPoint.x + offset.scrollLeft,
+          y: endPoint.y + offset.scrollTop,
+        },
+        startPoint
+      );
+      this.selecting(blockCache, selectionRect, offset);
     } else {
       this.state.setStartPoint(null);
       this.state.setEndPoint(null);
