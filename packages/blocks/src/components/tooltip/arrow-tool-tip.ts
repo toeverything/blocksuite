@@ -6,6 +6,17 @@ class ArrowToolTip extends LitElement {
   @property()
   tipText = '';
 
+  /**
+   * need to be positioned by its consumer.
+   * 1. Can append css to its :host, an example can be:
+   * arrow-tool-tip {
+   *   transform: translateX(-50%) translateY(-50%);
+   *   left: calc(50%);
+   *   bottom: calc(-50%);
+   *   opacity: 0;
+   * }
+   * 2. use createPopper() in popper.js to deal with position
+   */
   static styles = css`
     :host {
       position: absolute;
