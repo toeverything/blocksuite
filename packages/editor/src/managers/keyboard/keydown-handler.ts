@@ -20,7 +20,7 @@ class EditorKeydownHandlerStatic {
   }
 
   handle(e: KeyboardEvent) {
-    [this.preventKeyC, this.resetSelection, this.intentSelectedBlock].forEach(
+    [this.preventKeyC, this.resetSelection, this.indentSelectedBlock].forEach(
       fn => {
         fn.call(this, e);
       }
@@ -33,7 +33,7 @@ class EditorKeydownHandlerStatic {
     }
   }
 
-  intentSelectedBlock(e: KeyboardEvent) {
+  indentSelectedBlock(e: KeyboardEvent) {
     if (e.code != 'Tab') return;
 
     const pageModel = this.pageBlockModel;
