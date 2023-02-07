@@ -9,7 +9,7 @@ import { createKeyboardBindings } from './keyboard.js';
 
 import Syntax from '../../code-block/components/syntax-code-block.js';
 import { NonShadowLitElement } from '../utils/lit.js';
-import { KeyboardWithEvent } from './keyboard-with-event.js';
+import { KeyboardWithEvent } from './quill-keyboard.js';
 
 Quill.register('modules/keyboard', KeyboardWithEvent, true);
 Quill.register('modules/cursors', QuillCursors, true);
