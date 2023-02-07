@@ -242,21 +242,19 @@ export async function focusRichText(page: Page, i = 0) {
   await locator.click();
 }
 
-export async function focusVirgoRichText(page: Page): Promise<void> {
-  const editorPosition = await page.evaluate(() => {
-    const editor = document
+export async function focusVirgoRichText(page: Page, index = 0): Promise<void> {
+  await page.evaluate(index => {
+    const richTexts = document
       .querySelector('test-page')
-      ?.shadowRoot?.querySelector('rich-text')
-      ?.shadowRoot?.querySelector('[data-virgo-root="true"]');
+      ?.shadowRoot?.querySelectorAll('rich-text');
 
-    if (!editor) {
-      throw new Error('Cannot find editor');
+    if (!richTexts) {
+      throw new Error('Cannot find rich-text');
     }
 
-    return editor.getBoundingClientRect();
-  });
-
-  await page.mouse.click(editorPosition.x + 400, editorPosition.y + 400);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (richTexts[index] as any).vEditor.focusEnd();
+  }, index);
 }
 
 export async function initThreeParagraphs(page: Page) {
@@ -477,7 +475,10 @@ export async function getIndexCoordinate(
 ) {
   const coord = await page.evaluate(
     ({ richTextIndex, quillIndex, coordOffSet }) => {
-      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+      const richText = document.querySelectorAll('rich-text')[
+        richTextIndex
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
       const quillBound = richText.quill.getBounds(quillIndex);
       const richTextBound = richText.getBoundingClientRect();
       return {
@@ -498,48 +499,45 @@ export async function getIndexCoordinate(
   return coord;
 }
 
-export async function pageType(page: Page, text: string): Promise<void> {
-  await page.keyboard.type(text, { delay: 50 });
-}
-
-export async function pagePress(page: Page, key: string): Promise<void> {
-  await page.keyboard.press(key, { delay: 50 });
-}
-
-export async function getDeltaFromFirstEditor(
-  page: Page
+export async function getDeltaFromVirgoRichText(
+  page: Page,
+  index = 0
 ): Promise<DeltaInsert> {
   await page.waitForTimeout(50);
-  return await page.evaluate(() => {
-    const richTextA = document
+  return await page.evaluate(index => {
+    const richTexts = document
       .querySelector('test-page')
-      ?.shadowRoot?.querySelector('rich-text');
+      ?.shadowRoot?.querySelectorAll('rich-text');
 
-    if (!richTextA) {
-      throw new Error('Cannot find editor');
+    if (!richTexts) {
+      throw new Error('Cannot find rich-text');
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTextA as any).vEditor as VEditor;
+    const editor = (richTexts[index] as any).vEditor as VEditor;
     return editor.yText.toDelta();
-  });
+  }, index);
 }
 
-export async function setFirstEditorRange(
+export async function setVirgoRichTextRange(
   page: Page,
-  vRange: VRange
+  vRange: VRange,
+  index = 0
 ): Promise<void> {
-  await page.evaluate(vRange => {
-    const richTextA = document
-      .querySelector('test-page')
-      ?.shadowRoot?.querySelector('rich-text');
+  await page.evaluate(
+    ([vRange, index]) => {
+      const richTexts = document
+        .querySelector('test-page')
+        ?.shadowRoot?.querySelectorAll('rich-text');
 
-    if (!richTextA) {
-      throw new Error('Cannot find editor');
-    }
+      if (!richTexts) {
+        throw new Error('Cannot find rich-text');
+      }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTextA as any).vEditor as VEditor;
-    editor.setVRange(vRange);
-  }, vRange);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const editor = (richTexts[index as number] as any).vEditor as VEditor;
+      editor.setVRange(vRange as VRange);
+    },
+    [vRange, index]
+  );
 }

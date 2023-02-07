@@ -548,6 +548,12 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
 
 async function scrollToTop(page: Page) {
   // await page.mouse.wheel(0, -1000);
+
+  // When we type some characters, the character will be rendered asynchronously and then
+  // the editor will be focused asynchronously,
+  // which will cause the scroll container to scroll to the cursor position. That's why we need to
+  // wait for a while before scrolling.
+  await page.waitForTimeout(2000);
   await page
     .locator('.affine-default-viewport')
     .evaluate(node =>
@@ -564,6 +570,12 @@ async function scrollToTop(page: Page) {
 
 async function scrollToBottom(page: Page) {
   // await page.mouse.wheel(0, 1000);
+
+  // When we type some characters, the character will be rendered asynchronously and then
+  // the editor will be focused asynchronously,
+  // which will cause the scroll container to scroll to the cursor position. That's why we need to
+  // wait for a while before scrolling.
+  await page.waitForTimeout(2000);
   await page
     .locator('.affine-default-viewport')
     .evaluate(node =>
