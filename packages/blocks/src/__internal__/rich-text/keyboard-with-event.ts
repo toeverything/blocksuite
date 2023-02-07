@@ -1,8 +1,8 @@
 import Quill from 'quill';
-import { TextBlot } from 'parchment';
 import { isEqual } from '@blocksuite/global/utils';
 
 const Keyboard = Quill.import('modules/keyboard');
+const TextBlot = Quill.import('blots/text');
 
 // Patch keyboard event to context for quill 1.3.7
 // See https://github.com/quilljs/quill/commit/90269c7af9fc03e46be257490b2b0aec85d9ecc7
