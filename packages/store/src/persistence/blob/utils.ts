@@ -1,6 +1,7 @@
-import { createStore, del, get, keys, set, clear, values } from 'idb-keyval';
-import type { IDBInstance } from './types.js';
 import { Buffer } from 'buffer';
+import { clear, createStore, del, get, keys, set, values } from 'idb-keyval';
+
+import type { IDBInstance } from './types.js';
 
 export async function sha(input: ArrayBuffer): Promise<string> {
   const hash = await crypto.subtle.digest('SHA-256', input);

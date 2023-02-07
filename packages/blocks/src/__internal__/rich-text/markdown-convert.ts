@@ -1,7 +1,7 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Quill } from 'quill';
 import type { RangeStatic } from 'quill';
-import { assertExists } from '@blocksuite/global/utils';
 
 type Match = {
   name: string;

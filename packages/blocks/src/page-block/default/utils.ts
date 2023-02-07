@@ -5,9 +5,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DragHandle } from '../../components/index.js';
-import { toast } from '../../components/toast.js';
-import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+
 import { getService } from '../../__internal__/service.js';
 import {
   doesInSamePath,
@@ -16,6 +14,9 @@ import {
   getRichTextByModel,
   resetNativeSelection,
 } from '../../__internal__/utils/index.js';
+import { DragHandle } from '../../components/index.js';
+import { toast } from '../../components/toast.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
   CodeBlockOption,
   DefaultPageBlockComponent,

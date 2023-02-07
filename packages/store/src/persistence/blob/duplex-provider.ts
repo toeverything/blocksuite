@@ -1,12 +1,12 @@
 import { assertExists, Signal } from '@blocksuite/global/utils';
-import { CloudSyncManager } from './cloud-sync-manager.js';
 
+import { CloudSyncManager } from './cloud-sync-manager.js';
 import type {
   BlobId,
   BlobProvider,
+  BlobSyncStateChangeEvent,
   BlobURL,
   IDBInstance,
-  BlobSyncStateChangeEvent,
 } from './types.js';
 import { getDatabase, sha } from './utils.js';
 

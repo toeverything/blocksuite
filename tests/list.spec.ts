@@ -1,4 +1,18 @@
-import { test } from './utils/playwright.js';
+import {
+  clickBlockTypeMenuItem,
+  enterPlaygroundRoom,
+  enterPlaygroundWithList,
+  focusRichText,
+  initEmptyParagraphState,
+  pressEnter,
+  pressShiftTab,
+  pressSpace,
+  pressTab,
+  redoByClick,
+  type,
+  undoByClick,
+  undoByKeyboard,
+} from './utils/actions/index.js';
 import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
@@ -9,21 +23,7 @@ import {
   assertStoreMatchJSX,
   assertTextContent,
 } from './utils/asserts.js';
-import {
-  enterPlaygroundRoom,
-  enterPlaygroundWithList,
-  focusRichText,
-  pressEnter,
-  redoByClick,
-  pressShiftTab,
-  undoByClick,
-  undoByKeyboard,
-  pressTab,
-  initEmptyParagraphState,
-  clickBlockTypeMenuItem,
-  pressSpace,
-  type,
-} from './utils/actions/index.js';
+import { test } from './utils/playwright.js';
 
 test('add new bulleted list', async ({ page }) => {
   await enterPlaygroundRoom(page);

@@ -1,6 +1,7 @@
-import * as Y from 'yjs';
 import * as idb from 'lib0/indexeddb.js';
 import { Observable } from 'lib0/observable.js';
+import * as Y from 'yjs';
+
 import type { DocProvider } from './index.js';
 
 const customStoreName = 'custom';

@@ -1,15 +1,17 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import '../__internal__/rich-text/rich-text.js';
+
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import {
   BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import '../__internal__/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { styleMap } from 'lit/directives/style-map.js';
 
 const getDefaultPlaceholder = (model: ParagraphBlockModel) => {
   const { type } = model;

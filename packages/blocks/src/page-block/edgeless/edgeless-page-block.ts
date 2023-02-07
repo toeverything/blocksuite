@@ -1,41 +1,43 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import './toolbar';
+
+import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import { SurfaceManager } from '@blocksuite/phasor';
+import { DisposableGroup, Page, Signal } from '@blocksuite/store';
+import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { Signal, Page, DisposableGroup } from '@blocksuite/store';
-import type {
-  FrameBlockModel,
-  MouseMode,
-  PageBlockModel,
-} from '../../index.js';
-import {
-  EdgelessBlockChildrenContainer,
-  EdgelessHoverRect,
-  EdgelessFrameSelectionRect,
-} from './components.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import {
   BlockHost,
   hotkey,
   resetNativeSelection,
 } from '../../__internal__/index.js';
-import {
-  EdgelessSelectionManager,
-  EdgelessSelectionState,
-  ViewportState,
-  XYWH,
-} from './selection-manager.js';
+import { getService } from '../../__internal__/service.js';
+import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import type {
+  FrameBlockModel,
+  MouseMode,
+  PageBlockModel,
+} from '../../index.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import {
   bindCommonHotkey,
   handleMultiBlockBackspace,
   removeCommonHotKey,
   tryUpdateFrameSize,
 } from '../utils/index.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
-import { getService } from '../../__internal__/service.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import { SurfaceManager } from '@blocksuite/phasor';
-import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
-import './toolbar';
+import {
+  EdgelessBlockChildrenContainer,
+  EdgelessFrameSelectionRect,
+  EdgelessHoverRect,
+} from './components.js';
+import {
+  EdgelessSelectionManager,
+  EdgelessSelectionState,
+  ViewportState,
+  XYWH,
+} from './selection-manager.js';
 import type { EdgelessToolBar } from './toolbar.js';
 
 export interface EdgelessContainer extends HTMLElement {

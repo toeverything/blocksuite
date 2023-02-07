@@ -1,9 +1,9 @@
-import type { Selectable, XYWH } from '../selection-manager.js';
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
+
 import type {
   DefaultMouseMode,
   SelectionEvent,
 } from '../../../__internal__/index.js';
-import { getSelectionBoxBound, isBlock, pick } from '../utils.js';
 import {
   handleNativeRangeClick,
   handleNativeRangeDragMove,
@@ -11,13 +11,14 @@ import {
   resetNativeSelection,
   TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../../utils/position.js';
-import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import type { Selectable, XYWH } from '../selection-manager.js';
+import { getSelectionBoxBound, isBlock, pick } from '../utils.js';
 import { MouseModeController } from './index.js';
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{

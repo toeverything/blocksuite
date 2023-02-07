@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'vitest';
 import { isEqual } from '@blocksuite/global/utils';
+import { describe, expect, test } from 'vitest';
 
 describe('isEqual', () => {
   test('number', () => {

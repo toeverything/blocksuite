@@ -1,22 +1,24 @@
 /// <reference types="./env" />
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
+import './components/example-list.js';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import '@blocksuite/editor/themes/affine.css';
+
+import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import { EditorContainer } from '@blocksuite/editor';
 import { Page, Workspace } from '@blocksuite/store';
+
 import { DebugMenu } from './components/debug-menu.js';
-import './components/example-list.js';
 import {
   defaultMode,
   getOptions,
-  tryInitExternalContent,
   initDebugConfig,
   initParam,
   isE2E,
+  tryInitExternalContent,
 } from './utils.js';
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import '@blocksuite/editor/themes/affine.css';
-import { builtInSchemas, __unstableSchemas } from '@blocksuite/blocks/models';
 
 const options = getOptions();
 initDebugConfig();

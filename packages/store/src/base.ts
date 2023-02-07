@@ -1,8 +1,9 @@
-import type { Page } from './workspace/index.js';
-import type { TextType } from './text-adapter.js';
 import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
+
+import type { TextType } from './text-adapter.js';
+import type { Page } from './workspace/index.js';
 
 const FlavourSchema = z.string();
 const TagSchema = z.object({

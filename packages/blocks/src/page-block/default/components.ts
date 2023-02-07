@@ -1,5 +1,10 @@
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import {
   CaptionIcon,
   CopyIcon,
@@ -7,6 +12,11 @@ import {
   DownloadIcon,
   LineWrapIcon,
 } from '../icons.js';
+import type {
+  CodeBlockOption,
+  DefaultPageSignals,
+  EmbedEditingState,
+} from './default-page-block.js';
 import {
   copyCode,
   copyImage,
@@ -15,15 +25,6 @@ import {
   focusCaption,
   toggleWrap,
 } from './utils.js';
-import { toolTipStyle } from '../../components/tooltip/tooltip.js';
-import type {
-  CodeBlockOption,
-  DefaultPageSignals,
-  EmbedEditingState,
-} from './default-page-block.js';
-import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { repeat } from 'lit/directives/repeat.js';
 
 export function FrameSelectionRect(
   rect: DOMRect | null,

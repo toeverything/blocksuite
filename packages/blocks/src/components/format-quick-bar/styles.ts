@@ -1,4 +1,5 @@
 import { css } from 'lit';
+
 import { toolTipStyle } from '../tooltip/tooltip.js';
 
 const paragraphPanelStyle = css`

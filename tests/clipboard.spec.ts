@@ -1,8 +1,7 @@
 import './utils/declare-test-window.js';
-import { test } from './utils/playwright.js';
+
 import {
-  SHORT_KEY,
-  pressBackspace,
+  captureHistory,
   copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -11,26 +10,28 @@ import {
   initEmptyParagraphState,
   pasteByKeyboard,
   pasteContent,
+  pressBackspace,
   pressEnter,
   pressShiftTab,
+  pressSpace,
   pressTab,
   resetHistory,
   setQuillSelection,
   setSelection,
-  undoByClick,
-  pressSpace,
-  captureHistory,
+  SHORT_KEY,
   type,
+  undoByClick,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
   assertClipItems,
   assertRichTexts,
   assertSelection,
+  assertStoreMatchJSX,
   assertText,
   assertTextFormats,
-  assertStoreMatchJSX,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('clipboard copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);

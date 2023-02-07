@@ -96,6 +96,7 @@ declare namespace BlockSuiteInternal {
   import {
     // Model
     CodeBlockModel,
+    DatabaseBlockModel,
     DividerBlockModel,
     EmbedBlockModel,
     FrameBlockModel,
@@ -103,7 +104,6 @@ declare namespace BlockSuiteInternal {
     PageBlockModel,
     ParagraphBlockModel,
     SurfaceBlockModel,
-    DatabaseBlockModel,
   } from '@blocksuite/blocks/models';
 
   export type BlockModels = {

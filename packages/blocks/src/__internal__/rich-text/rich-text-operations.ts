@@ -1,36 +1,31 @@
 // operations used in rich-text level
 
-import { Page, Text } from '@blocksuite/store';
-import type { Quill } from 'quill';
+import { ParagraphBlockComponent, SelectionUtils } from '@blocksuite/blocks';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import { ParagraphBlockComponent, SelectionUtils } from '@blocksuite/blocks';
+import { Page, Text } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import type {
-  ParagraphBlockModel,
-  ListBlockModel,
-  PageBlockModel,
-  BlockSchema,
-  Flavour,
-} from '../../models.js';
+import type { Quill } from 'quill';
+
+import type { PageBlockModel } from '../../models.js';
 import {
-  ExtendedModel,
-  getRichTextByModel,
-  getPreviousBlock,
   asyncFocusRichText,
+  convertToDivider,
   convertToList,
   convertToParagraph,
-  convertToDivider,
+  ExtendedModel,
   focusBlockByModel,
-  supportsChildren,
-  getModelByElement,
   focusTitle,
-  getCurrentRange,
   getBlockElementByModel,
+  getCurrentRange,
+  getModelByElement,
+  getPreviousBlock,
+  getRichTextByModel,
+  supportsChildren,
 } from '../utils/index.js';
 
 const TOGGLE_PLACEHOLDER = 'Toggle';

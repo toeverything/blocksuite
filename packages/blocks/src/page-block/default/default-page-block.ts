@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
-import { css, html } from 'lit';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
-import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BaseBlockModel,
   DisposableGroup,
@@ -9,7 +9,10 @@ import {
   Signal,
   Text,
 } from '@blocksuite/store';
-import type { PageBlockModel } from '../index.js';
+import autosize from 'autosize';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
 import {
   asyncFocusRichText,
   BlockChildrenContainer,
@@ -20,7 +23,11 @@ import {
   isMultiBlockRange,
   SelectionPosition,
 } from '../../__internal__/index.js';
-import { DefaultSelectionManager } from './selection-manager.js';
+import { getService } from '../../__internal__/service.js';
+import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import type { DragHandle } from '../../components/index.js';
+import type { PageBlockModel } from '../index.js';
+import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
@@ -29,18 +36,12 @@ import {
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components.js';
+import { DefaultSelectionManager } from './selection-manager.js';
 import {
   createDragHandle,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
 } from './utils.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
-import { getService } from '../../__internal__/service.js';
-import autosize from 'autosize';
-import { assertExists } from '@blocksuite/global/utils';
-import type { DragHandle } from '../../components/index.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };

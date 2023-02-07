@@ -1,17 +1,19 @@
+import './button.js';
+import './format-bar-node.js';
+
 import { Signal } from '@blocksuite/store';
-import {
-  calcPositionPointByRange,
-  calcSafeCoordinate,
-  DragDirection,
-} from '../../page-block/utils/position.js';
+
 import {
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
   throttle,
 } from '../../__internal__/utils/index.js';
-import './button.js';
-import './format-bar-node.js';
+import {
+  calcPositionPointByRange,
+  calcSafeCoordinate,
+  DragDirection,
+} from '../../page-block/utils/position.js';
 import type { FormatQuickBar } from './format-bar-node.js';
 
 let formatQuickBarInstance: FormatQuickBar | null = null;

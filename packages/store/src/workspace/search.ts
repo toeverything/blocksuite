@@ -1,6 +1,7 @@
-import FlexSearch from 'flexsearch';
 import type { DocumentSearchOptions } from 'flexsearch';
+import FlexSearch from 'flexsearch';
 import { Doc, Map as YMap, Text as YText } from 'yjs';
+
 import type { YBlock } from './page.js';
 
 const DocumentIndexer = FlexSearch.Document;

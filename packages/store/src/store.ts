@@ -1,21 +1,22 @@
-import type { Space } from './space.js';
-import type { IdGenerator } from './utils/id-generator.js';
+import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
+
+import { AwarenessStore, RawAwarenessState } from './awareness.js';
+import type { BlobOptionsGetter } from './persistence/blob/index.js';
 import type {
   DocProvider,
   DocProviderConstructor,
 } from './persistence/doc/index.js';
-import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
+import type { Space } from './space.js';
+import type { IdGenerator } from './utils/id-generator.js';
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
-  uuidv4,
   nanoid,
+  uuidv4,
 } from './utils/id-generator.js';
-import { merge } from 'merge';
+import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import { BlockSuiteDoc } from './yjs/index.js';
-import { AwarenessStore, RawAwarenessState } from './awareness.js';
-import type { BlobOptionsGetter } from './persistence/blob/index.js';
 
 export interface SerializedStore {
   [key: string]: {

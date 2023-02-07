@@ -1,5 +1,4 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
 import { SHORT_KEY, type } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
@@ -11,6 +10,8 @@ import {
   assertRichTexts,
   assertStoreMatchJSX,
 } from 'utils/asserts.js';
+
+import { test } from './utils/playwright.js';
 
 test.describe('slash menu should show and hide correctly', () => {
   // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests

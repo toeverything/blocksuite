@@ -29,6 +29,7 @@ importers:
       eslint-plugin-lit: ^1.8.2
       eslint-plugin-react: ^7.32.2
       eslint-plugin-react-hooks: ^4.6.0
+      eslint-plugin-simple-import-sort: ^10.0.0
       eslint-plugin-wc: ^1.4.0
       husky: ^8.0.3
       lint-staged: ^13.1.1
@@ -63,6 +64,7 @@ importers:
       eslint-plugin-lit: 1.8.2_eslint@8.33.0
       eslint-plugin-react: 7.32.2_eslint@8.33.0
       eslint-plugin-react-hooks: 4.6.0_eslint@8.33.0
+      eslint-plugin-simple-import-sort: 10.0.0_eslint@8.33.0
       eslint-plugin-wc: 1.4.0_eslint@8.33.0
       husky: 8.0.3
       lint-staged: 13.1.1
@@ -4046,6 +4048,14 @@ packages:
       resolve: 2.0.0-next.4
       semver: 6.3.0
       string.prototype.matchall: 4.0.8
+    dev: true
+
+  /eslint-plugin-simple-import-sort/10.0.0_eslint@8.33.0:
+    resolution: {integrity: sha512-AeTvO9UCMSNzIHRkg8S6c3RPy5YEwKWSQPx3DYghLedo2ZQxowPFLGDN1AZ2evfg6r6mjBSZSLxLFsWSu3acsw==}
+    peerDependencies:
+      eslint: '>=5.0.0'
+    dependencies:
+      eslint: 8.33.0
     dev: true
 
   /eslint-plugin-wc/1.4.0_eslint@8.33.0:

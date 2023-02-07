@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { waitNextFrame } from './misc.js';
 
 export async function undoByClick(page: Page) {

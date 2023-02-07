@@ -1,13 +1,14 @@
+import { html } from 'lit';
+
 import type { ListBlockModel } from '../list-model.js';
+import { getNumberPrefix } from './get-number-prefix.js';
 import {
-  points,
   checkboxChecked,
   checkboxUnchecked,
-  toggleRight,
+  points,
   toggleDown,
+  toggleRight,
 } from './icons.js';
-import { getNumberPrefix } from './get-number-prefix.js';
-import { html } from 'lit';
 
 export function getListIcon({
   model,
@@ -31,8 +32,7 @@ export function getListIcon({
     }}"
   >
     ${(() => {
-      const blocksWithHiddenChildren =
-        model.page.awarenessStore.getFlag('blocks_with_hidden_children') ?? [];
+      const { blocksWithHiddenChildren = [] } = model.page;
       switch (model.type) {
         case 'bulleted':
           return points[deep % points.length];

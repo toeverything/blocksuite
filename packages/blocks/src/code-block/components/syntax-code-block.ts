@@ -1,9 +1,8 @@
-import Quill from 'quill';
-import type { Quill as QuillType } from 'quill';
-
+import { assertExists } from '@blocksuite/global/utils';
 // @ts-ignore
 import type hljs from 'highlight.js';
-import { assertExists } from '@blocksuite/global/utils';
+import type { Quill as QuillType } from 'quill';
+import Quill from 'quill';
 
 const Module = Quill.import('core/module');
 const CodeBlock = Quill.import('formats/code-block');
