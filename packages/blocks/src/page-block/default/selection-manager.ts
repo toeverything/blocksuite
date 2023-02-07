@@ -821,6 +821,8 @@ export class DefaultSelectionManager {
     this.state.refreshBlockRectCache();
     const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
 
+    if (selectedBlocks.length === 0) return;
+
     if (focusedBlockIndex === -1) {
       // SELECT_ALL
       const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
