@@ -2,6 +2,7 @@ import {
   DefaultPageBlockComponent,
   getDefaultPageBlock,
   getRichTextByModel,
+  handleIndent,
   PageBlockModel,
   ParagraphBlockComponent,
   supportsChildren,
@@ -43,12 +44,19 @@ class EditorKeydownHandlerStatic {
     const pageBlock = getDefaultPageBlock(pageModel);
     const state = pageBlock.selection.state;
     let page: Page;
+    let captureSyncOnce = false;
+    // TODO: merge util `handleIndent` at `rich-text-operations.ts`
     for (const block of state.selectedBlocks) {
       const currentBlock = block as DefaultPageBlockComponent;
 
       const model = currentBlock.model;
       if (!model) return;
       page = currentBlock.model.page;
+      if (!captureSyncOnce) {
+        page.captureSync();
+        captureSyncOnce = true;
+      }
+
       const previousSibling = currentBlock.model.page.getPreviousSibling(
         currentBlock.model
       );
@@ -59,8 +67,6 @@ class EditorKeydownHandlerStatic {
 
       const parent = page.getParent(model);
       if (!parent) return;
-
-      page.captureSync();
 
       // 1. backup target block children and remove them from target block
       const children = model.children;
