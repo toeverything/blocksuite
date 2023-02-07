@@ -189,24 +189,14 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
-  update(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
-      this._selection = new EdgelessSelectionManager(this);
-    }
-    if (changedProperties.has('mouseMode')) {
-      this._selection.mouseMode = this.mouseMode;
-    }
-    super.update(changedProperties);
-  }
-
-  firstUpdated() {
-    if (this.page.awarenessStore.getFlag('enable_toolbar')) {
+  private _initEdgelessToolBar() {
+    if (this.page.awarenessStore.getFlag('enable_edgeless_toolbar')) {
       this._toolbar = document.createElement('edgeless-toolbar');
       this.mouseRoot.appendChild(this._toolbar);
     }
     this._disposables.add(
       this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_toolbar,
+        msg => msg.state?.flags.enable_edgeless_toolbar,
         enable => {
           if (enable) {
             if (!this._toolbar) {
@@ -223,6 +213,20 @@ export class EdgelessPageBlockComponent
         }
       )
     );
+  }
+
+  update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
+      this._selection = new EdgelessSelectionManager(this);
+    }
+    if (changedProperties.has('mouseMode')) {
+      this._selection.mouseMode = this.mouseMode;
+    }
+    super.update(changedProperties);
+  }
+
+  firstUpdated() {
+    this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());

@@ -23,10 +23,10 @@ import {
 } from '../../__internal__/index.js';
 import { assertExists } from '@blocksuite/global/utils';
 
-@customElement('shape-component')
-export class ShapeComponent extends LitElement {
+@customElement('shape-menu')
+export class ShapeMenu extends LitElement {
   static styles = css`
-    .shape-component-container {
+    .shape-menu-container {
       display: flex;
       align-items: center;
       height: 48px;
@@ -133,7 +133,7 @@ export class ShapeComponent extends LitElement {
 
   render() {
     return html`
-      <div class="shape-component-container">
+      <div class="shape-menu-container">
         ${ShapeComponentConfig.map(({ name, value, icon, disabled }) => {
           return html`
             <div
@@ -313,7 +313,7 @@ const ToolbarConfig: Array<{
         toolbar.secondaryToolBar = null;
         return;
       }
-      const shapeComponent = document.createElement('shape-component');
+      const shapeComponent = document.createElement('shape-menu');
       toolbar.secondaryToolBarName = 'shape';
       toolbar.secondaryToolBar = shapeComponent;
       document.body.appendChild(shapeComponent);
@@ -394,6 +394,6 @@ const ShapeComponentConfig: Array<{
 declare global {
   interface HTMLElementTagNameMap {
     'edgeless-toolbar': EdgelessToolBar;
-    'shape-component': ShapeComponent;
+    'shape-menu': ShapeMenu;
   }
 }
