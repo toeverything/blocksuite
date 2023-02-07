@@ -81,8 +81,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "hotkeys-js@3.10.1": "patches/hotkeys-js@3.10.1.patch",
-      "quill@1.3.7": "patches/quill@1.3.7.patch"
+      "hotkeys-js@3.10.1": "patches/hotkeys-js@3.10.1.patch"
     }
   }
 }
