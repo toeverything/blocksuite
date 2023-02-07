@@ -88,7 +88,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
   await focusRichText(pageA);
-  await pageA.keyboard.type('hello', { delay: 50 });
+  await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
