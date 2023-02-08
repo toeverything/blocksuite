@@ -2,7 +2,7 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { hotkey } from '../../__internal__/index.js';
+import { getAllBlocks, hotkey } from '../../__internal__/index.js';
 import {
   handleIndent,
   isAtLineEdge,
@@ -21,7 +21,10 @@ import {
   isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultPageSignals } from '../default/default-page-block.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import {
   handleBlockSelectionBatchDelete,
@@ -219,6 +222,34 @@ export function bindHotkeys(
       const model = getModelByElement(block);
       handleIndent(page, model, 0, false);
     }
+
+    const cachedSelectedBlocks = selection.state.selectedBlocks.concat();
+    requestAnimationFrame(() => {
+      const selectBlocks: DefaultPageBlockComponent[] = [];
+      cachedSelectedBlocks.forEach(block => {
+        const newBlock = document.querySelector(
+          `[data-block-id="${(block as DefaultPageBlockComponent).model.id}"]`
+        );
+
+        if (newBlock) {
+          selectBlocks.push(newBlock as DefaultPageBlockComponent);
+        }
+      });
+
+      if (!selectBlocks.length) {
+        return;
+      }
+
+      const pageBlock = getDefaultPageBlock(selectBlocks[0].model);
+      pageBlock.signals.updateSelectedRects.emit(
+        selectBlocks.map(block => {
+          return block.getBoundingClientRect();
+        })
+      );
+      selection.state.refreshBlockRectCache();
+      selection.state.selectedBlocks = selectBlocks;
+    });
+    selection.clearRects();
   });
 
   hotkey.addListener(ENTER, e => {
