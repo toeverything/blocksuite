@@ -112,7 +112,7 @@ export async function updateSelectedTextType(flavour: string, type?: string) {
   updateBlockType(modelsInRange, flavour, type);
 }
 
-async function updateBlockType(
+export async function updateBlockType(
   models: BaseBlockModel[],
   flavour: string,
   type?: string

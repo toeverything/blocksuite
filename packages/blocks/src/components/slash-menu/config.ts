@@ -1,14 +1,13 @@
-import { formatConfig } from '@blocksuite/blocks/page-block/utils/const.js';
 import { paragraphConfig } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { formatConfig } from '../../page-block/utils/const.js';
 import { updateBlockType } from '../../page-block/utils/index.js';
 import { toast } from '../toast.js';
 
 export type SlashItem = {
   name: string;
-
   icon?: TemplateResult<2>;
   action: ({ model }: { model: BaseBlockModel }) => void;
 };
