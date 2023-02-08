@@ -15,6 +15,7 @@ import {
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
+  getModelByElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -381,9 +382,7 @@ export class DefaultSelectionManager {
       for (const block of selectedBlocks) {
         calculatedRects.push(block.getBoundingClientRect());
 
-        if (
-          (block as DefaultPageBlockComponent)?.model instanceof BaseBlockModel
-        ) {
+        if (getModelByElement(block) instanceof BaseBlockModel) {
           this.state.type = 'block';
         }
 
