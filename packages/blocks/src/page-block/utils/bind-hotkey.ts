@@ -2,7 +2,7 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { hotkey } from '../../__internal__/index.js';
+import { getBlockElementByModel, hotkey } from '../../__internal__/index.js';
 import {
   handleIndent,
   isAtLineEdge,
@@ -227,8 +227,8 @@ export function bindHotkeys(
     requestAnimationFrame(() => {
       const selectBlocks: DefaultPageBlockComponent[] = [];
       cachedSelectedBlocks.forEach(block => {
-        const newBlock = document.querySelector(
-          `[data-block-id="${(block as DefaultPageBlockComponent).model.id}"]`
+        const newBlock = getBlockElementByModel(
+          (block as DefaultPageBlockComponent).model
         );
 
         if (newBlock) {
