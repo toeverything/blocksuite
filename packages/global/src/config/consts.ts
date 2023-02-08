@@ -19,6 +19,7 @@ export const HOTKEYS = {
   LEFT: 'left',
   RIGHT: 'right',
   ENTER: 'enter',
+  TAB: 'tab',
 };
 
 export const MOVE_DETECT_THRESHOLD = 2;

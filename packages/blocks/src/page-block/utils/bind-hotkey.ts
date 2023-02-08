@@ -3,7 +3,10 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { hotkey } from '../../__internal__/index.js';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
+import {
+  handleIndent,
+  isAtLineEdge,
+} from '../../__internal__/rich-text/rich-text-operations.js';
 import {
   asyncFocusRichText,
   focusNextBlock,
@@ -18,7 +21,10 @@ import {
   isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultPageSignals } from '../default/default-page-block.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import {
   handleBlockSelectionBatchDelete,
@@ -205,9 +211,22 @@ export function bindHotkeys(
     LEFT,
     RIGHT,
     ENTER,
+    TAB,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
+
+  hotkey.addListener(TAB, () => {
+    page.captureSync();
+    for (const block of selection.state.selectedBlocks) {
+      const currentBlock = block as DefaultPageBlockComponent;
+
+      const model = currentBlock.model;
+      if (!model) continue;
+
+      handleIndent(page, model, 0, false);
+    }
+  });
 
   hotkey.addListener(ENTER, e => {
     const { type, selectedBlocks } = selection.state;

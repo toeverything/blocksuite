@@ -1,5 +1,6 @@
 import {
   BlockHub,
+  getDefaultPageBlock,
   MouseMode,
   NonShadowLitElement,
   PageBlockModel,
@@ -11,8 +12,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { ClipboardManager, ContentParser } from '../managers/index.js';
-import { EditorKeydownHandler } from '../managers/keyboard/keydown-handler.js';
-import { createBlockHub } from '../utils/editor.js';
+import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 @customElement('editor-container')
 export class EditorContainer extends NonShadowLitElement {
@@ -85,6 +85,34 @@ export class EditorContainer extends NonShadowLitElement {
       )
     );
 
+    // Question: Why do we prevent this?
+    this._disposables.add(
+      Signal.fromEvent(window, 'keydown').on(e => {
+        if (e.altKey && e.metaKey && e.code === 'KeyC') {
+          e.preventDefault();
+        }
+
+        // `esc`  clear selection
+        if (e.code !== 'Escape') {
+          return;
+        }
+        const pageModel = this.pageBlockModel;
+        if (!pageModel) return;
+        const pageBlock = getDefaultPageBlock(pageModel);
+        pageBlock.selection.clearRects();
+
+        const selection = getSelection();
+        if (
+          !selection ||
+          selection.isCollapsed ||
+          !checkEditorElementActive()
+        ) {
+          return;
+        }
+        selection.removeAllRanges();
+      })
+    );
+
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
     }
@@ -127,11 +155,6 @@ export class EditorContainer extends NonShadowLitElement {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalCursor(this.page, null);
     this._disposables.dispose();
-    EditorKeydownHandler.dispose();
-  }
-
-  protected firstUpdated(): void {
-    EditorKeydownHandler.init(this.pageBlockModel, this.page);
   }
 
   render() {
