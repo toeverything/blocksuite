@@ -167,12 +167,6 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onIndent(this: KeyboardEventThis) {
-    const index = this.quill.getSelection()?.index;
-    handleIndent(page, model, index);
-    return PREVENT_DEFAULT;
-  }
-
   function onUnindent(this: KeyboardEventThis) {
     const index = this.quill.getSelection()?.index;
     handleUnindent(page, model, index);
@@ -282,7 +276,13 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     tab: {
       key: 'tab',
-      handler: onIndent,
+      handler(range: QuillRange, context: BindingContext) {
+        const index = this.quill.getSelection()?.index;
+        handleIndent(page, model, index);
+        // Avoid triggering hotkey bindings
+        context.event.stopPropagation();
+        return PREVENT_DEFAULT;
+      },
     },
     shiftTab: {
       key: 'tab',
@@ -309,22 +309,14 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     up: {
       key: 'up',
       shiftKey: false,
-      handler(
-        this: KeyboardEventThis,
-        range: QuillRange,
-        context: BindingContext
-      ) {
+      handler(range: QuillRange, context: BindingContext) {
         return handleKeyUp(context.event, this.quill.root);
       },
     },
     down: {
       key: 'down',
       shiftKey: false,
-      handler(
-        this: KeyboardEventThis,
-        range: QuillRange,
-        context: BindingContext
-      ) {
+      handler(range: QuillRange, context: BindingContext) {
         return handleKeyDown(context.event, this.quill.root);
       },
     },
