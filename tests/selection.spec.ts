@@ -408,6 +408,15 @@ test('select text in the same line with dragging leftward and move outside the a
     return frame.getBoundingClientRect().left;
   });
 
+  // `456`
+  const blockRect = await page.evaluate(() => {
+    const block = document.querySelector('[data-block-id="3"]');
+    if (!block) {
+      throw new Error();
+    }
+    return block.getBoundingClientRect();
+  });
+
   await dragBetweenIndices(
     page,
     [1, 3],
@@ -416,7 +425,10 @@ test('select text in the same line with dragging leftward and move outside the a
     { x: 0, y: 0 },
     {
       async beforeMouseUp() {
-        await page.mouse.move(frameLeft - 1, 0);
+        await page.mouse.move(
+          frameLeft - 1,
+          blockRect.top + blockRect.height / 2
+        );
       },
     }
   );
@@ -441,6 +453,15 @@ test('select text in the same line with dragging rightward and move outside the 
     return frame.getBoundingClientRect().right;
   });
 
+  // `456`
+  const blockRect = await page.evaluate(() => {
+    const block = document.querySelector('[data-block-id="3"]');
+    if (!block) {
+      throw new Error();
+    }
+    return block.getBoundingClientRect();
+  });
+
   await dragBetweenIndices(
     page,
     [1, 0],
@@ -449,7 +470,10 @@ test('select text in the same line with dragging rightward and move outside the 
     { x: 0, y: 0 },
     {
       async beforeMouseUp() {
-        await page.mouse.move(frameRight + 1, 0);
+        await page.mouse.move(
+          frameRight + 1,
+          blockRect.top + blockRect.height / 2
+        );
       },
     }
   );
@@ -550,10 +574,10 @@ test('drag to select tagged text, and input character', async ({ page }) => {
 });
 
 test('selection on heavy page', async ({ page }) => {
-  await enterPlaygroundRoom(page);
   await page
     .locator('body')
     .evaluate(element => (element.style.padding = '50px'));
+  await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
   for (let i = 0; i < 5; i++) {
@@ -707,12 +731,10 @@ test('should not crash when mouse over the left side of the list block prefix', 
   await dragBetweenIndices(page, [1, 2], [1, 0]);
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '45');
-  // blur
-  await page.mouse.click(0, 0);
 
   // `456`
-  const prefixIconLeft = await page.evaluate(() => {
-    const block = document.querySelector('[data-block-id="5"]');
+  const prefixIconRect = await page.evaluate(() => {
+    const block = document.querySelector('[data-block-id="4"]');
     if (!block) {
       throw new Error();
     }
@@ -720,7 +742,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
     if (!prefixIcon) {
       throw new Error();
     }
-    return prefixIcon.getBoundingClientRect().left;
+    return prefixIcon.getBoundingClientRect();
   });
 
   await dragBetweenIndices(
@@ -731,7 +753,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
     { x: 0, y: 0 },
     {
       beforeMouseUp: async () => {
-        await page.mouse.move(prefixIconLeft - 1, 0);
+        await page.mouse.move(prefixIconRect.left - 1, prefixIconRect.top);
       },
     }
   );
@@ -831,19 +853,29 @@ test('should select full text of the first block when leaving the affine-frame-b
   await switchEditorMode(page);
   await waitNextFrame(page);
   await page.dblclick('[data-block-id="1"]');
-  await page.mouse.click(0, 0);
   await dragBetweenIndices(page, [2, 1], [0, 2]);
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '34567');
 
-  await page.mouse.click(0, 0);
+  const containerRect = await page.evaluate(() => {
+    const container = document.querySelector('.affine-frame-block-container');
+    if (!container) {
+      throw new Error();
+    }
+    return container.getBoundingClientRect();
+  });
 
   await dragBetweenIndices(
     page,
     [2, 1],
     [0, 2],
     { x: 0, y: 0 },
-    { x: 0, y: -30 } // drag above the top of the first block
+    { x: 0, y: 0 }, // drag above the top of the first block
+    {
+      beforeMouseUp: async () => {
+        await page.mouse.move(containerRect.left, containerRect.top - 30);
+      },
+    }
   );
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '1234567');
