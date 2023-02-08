@@ -241,12 +241,14 @@ export function bindHotkeys(
       }
 
       const pageBlock = getDefaultPageBlock(selectBlocks[0].model);
+
+      selection.state.refreshBlockRectCache();
       pageBlock.signals.updateSelectedRects.emit(
         selectBlocks.map(block => {
           return block.getBoundingClientRect();
         })
       );
-      selection.state.refreshBlockRectCache();
+      selection.state.type = 'block';
       selection.state.selectedBlocks = selectBlocks;
     });
     selection.clearRects();
@@ -284,6 +286,7 @@ export function bindHotkeys(
 
   hotkey.addListener(BACKSPACE, e => {
     const { state } = selection;
+
     if (state.type === 'none') {
       // Will be handled in the `keyboard.onBackspace` function
       return;
@@ -309,6 +312,7 @@ export function bindHotkeys(
         page,
         selectedBlocks.map(block => getModelByElement(block))
       );
+
       e.preventDefault();
       state.clear();
       signals.updateSelectedRects.emit([]);
