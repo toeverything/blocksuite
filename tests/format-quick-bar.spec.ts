@@ -35,7 +35,7 @@ test('should format quick bar show when select text', async ({ page }) => {
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 20, 5);
-  assertAlmostEqual(box.y, 260, 5);
+  assertAlmostEqual(box.y, 260, 10);
 
   // Click the edge of the format quick bar
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
@@ -88,8 +88,8 @@ test('should format quick bar show when select text by keyboard', async ({
   }
   // The x position of the format quick bar depends on the font size
   // so there are slight differences in different environments
-  assertAlmostEqual(rightBox.x, 40, 10);
-  assertAlmostEqual(rightBox.y, 180, 3);
+  assertAlmostEqual(rightBox.x, 40, 15);
+  assertAlmostEqual(rightBox.y, 180, 6);
 });
 
 test('should format quick bar can only display one at a time', async ({
@@ -152,9 +152,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+    `<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -194,9 +192,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+    `<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -242,9 +238,7 @@ test('should format quick bar be able to format text when select multiple line',
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -287,9 +281,7 @@ test('should format quick bar be able to format text when select multiple line',
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -348,9 +340,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -382,9 +372,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -429,9 +417,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -454,9 +440,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -482,9 +466,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"

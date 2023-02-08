@@ -26,6 +26,8 @@ export class ImageBlockComponent extends NonShadowLitElement {
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
     .affine-image-wrapper img {
       max-width: 100%;

@@ -88,24 +88,25 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container {
-      font-size: calc(var(--affine-font-base) - 4px);
-      line-height: calc(var(--affine-line-height-base) - 6px);
+      font-size: var(--affine-font-xs);
+      line-height: var(--affine-line-height);
       position: relative;
       padding: 32px 0;
       background: var(--affine-code-block-background);
       border-radius: 10px;
-      margin-top: calc(var(--affine-paragraph-space) + 3px);
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
 
     .affine-code-block-container pre {
-      font-family: var(--affine-font-mono);
+      font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
     }
 
     .affine-code-block-container .container {
       position: absolute;
       font-size: var(--affine-font-xs);
-      line-height: calc(var(--affine-line-height-base) - 10px);
+      line-height: var(--affine-line-height);
       top: 12px;
       left: 12px;
     }
@@ -122,7 +123,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
       position: absolute;
       text-align: right;
       top: 5.4px;
-      line-height: calc(var(--affine-line-height-base) - 6px);
+      line-height: var(--affine-line-height);
       color: var(--affine-line-number-color);
     }
 
@@ -152,7 +153,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .lang-container {
-      line-height: calc(var(--affine-line-height-base) - 10px);
+      line-height: var(--affine-line-height);
       text-align: justify;
       position: relative;
     }

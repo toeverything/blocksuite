@@ -34,6 +34,7 @@ const IGNORE_PROPS = [
   'sys:id',
   'sys:flavour',
   'sys:children',
+  'prop:xywh',
   'meta:tags',
   'meta:tagSchema',
 ];

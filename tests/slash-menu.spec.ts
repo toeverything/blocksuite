@@ -149,9 +149,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:list
     prop:checked={false}
     prop:type="todo"

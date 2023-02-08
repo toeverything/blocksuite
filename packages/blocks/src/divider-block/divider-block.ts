@@ -19,7 +19,8 @@ export class DividerBlockComponent extends NonShadowLitElement {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      margin-top: var(--affine-paragraph-space);
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
     hr {
       width: 100%;
