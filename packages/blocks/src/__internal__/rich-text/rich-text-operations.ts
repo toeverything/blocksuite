@@ -139,7 +139,7 @@ export function handleIndent(
   page: Page,
   model: ExtendedModel,
   offset = 0,
-  needCaptrue = true
+  needCapture = true
 ) {
   const previousSibling = page.getPreviousSibling(model);
   if (!previousSibling || !supportsChildren(previousSibling)) {
@@ -149,7 +149,7 @@ export function handleIndent(
 
   const parent = page.getParent(model);
   if (!parent) return;
-  if (needCaptrue) page.captureSync();
+  if (needCapture) page.captureSync();
 
   // 1. backup target block children and remove them from target block
   const children = model.children;
