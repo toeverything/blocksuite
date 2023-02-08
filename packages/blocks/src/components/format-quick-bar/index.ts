@@ -121,9 +121,15 @@ export const showFormatQuickBar = async ({
     }
     updatePos();
   };
+
+  const popstateHandler = () => {
+    abortController.abort();
+  };
   document.addEventListener('mousedown', mouseDownHandler);
   document.addEventListener('mouseup', mouseUpHandler);
   document.addEventListener('selectionchange', selectionChangeHandler);
+  // Fix https://github.com/toeverything/AFFiNE/issues/855
+  window.addEventListener('popstate', popstateHandler);
 
   // Mount
   container.appendChild(formatQuickBar);
@@ -137,6 +143,7 @@ export const showFormatQuickBar = async ({
     document.removeEventListener('mousedown', mouseDownHandler);
     document.removeEventListener('mouseup', mouseUpHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
+    window.removeEventListener('popstate', popstateHandler);
     positionUpdatedSignal.dispose();
   });
   return formatQuickBar;

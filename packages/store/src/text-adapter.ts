@@ -9,10 +9,10 @@ type PrelimTextType = 'splitLeft' | 'splitRight';
 export type TextType = PrelimText | Text;
 
 // Removes the pending '\n's if it has no attributes
-export function normQuillDelta(delta: any) {
+export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
   if (delta.length > 0) {
     const d = delta[delta.length - 1];
-    const insert = d.insert;
+    const insert: string = d.insert;
     if (
       d.attributes === undefined &&
       insert !== undefined &&
@@ -199,7 +199,7 @@ export class Text {
   join(other: Text) {
     this._transact(() => {
       const yOther = other._yText;
-      const delta = yOther.toDelta();
+      const delta: DeltaOperation[] = yOther.toDelta();
       delta.splice(0, 0, { retain: this._yText.length });
       this._yText.applyDelta(delta);
       this._yText.meta = { join: true };
@@ -240,7 +240,7 @@ export class Text {
     });
   }
 
-  applyDelta(delta: any) {
+  applyDelta(delta: DeltaOperation[]) {
     this._transact(() => {
       this._yText?.applyDelta(delta);
     });
