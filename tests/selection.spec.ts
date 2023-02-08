@@ -949,9 +949,7 @@ test('should indent multi-selection block', async ({ page }) => {
   await page.mouse.up();
 
   await page.keyboard.press('Tab');
-  await assertRichTexts(page, ['123', '456', '789']);
-  await assertBlockChildrenIds(page, '1', ['2']);
-  await assertBlockChildrenIds(page, '2', ['3', '4']);
+
   await assertStoreMatchJSX(
     page,
     `<affine:page
