@@ -130,9 +130,7 @@ export class EditorContainer extends NonShadowLitElement {
     EditorKeydownHandler.dispose();
   }
 
-  protected firstUpdated(
-    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
-  ): void {
+  protected firstUpdated(): void {
     EditorKeydownHandler.init(this.pageBlockModel, this.page);
   }
 
