@@ -1,9 +1,3 @@
-import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { choose } from 'lit/directives/choose.js';
-
-import { Page, Signal } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import {
   BlockHub,
   getDefaultPageBlock,
@@ -11,6 +5,12 @@ import {
   PageBlockModel,
 } from '@blocksuite/blocks';
 import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
+import { Page, Signal } from '@blocksuite/store';
+import { DisposableGroup } from '@blocksuite/store';
+import { html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
+
 import { ClipboardManager, ContentParser } from '../managers/index.js';
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 

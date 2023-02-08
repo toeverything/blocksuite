@@ -1,5 +1,6 @@
 import { isInsideRichText } from '@blocksuite/blocks/std';
 import { Signal } from '@blocksuite/store';
+
 import { checkEditorElementActive } from '../../utils/editor.js';
 import { ClipboardAction } from './types.js';
 

@@ -1,6 +1,7 @@
 import type { Disposable, Page, Workspace } from '@blocksuite/store';
-import type { BlockSuiteActionsCreator } from '../../types/index.js';
 import { uuidv4 } from '@blocksuite/store';
+
+import type { BlockSuiteActionsCreator } from '../../types/index.js';
 import type { CreateBlockSuiteStore } from '../index.js';
 import { workspacePages } from '../manager/index.js';
 

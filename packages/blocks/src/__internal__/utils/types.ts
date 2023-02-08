@@ -1,8 +1,9 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { ShapeType } from '@blocksuite/phasor';
-import type { Point } from './rect.js';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type { Point } from './rect.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {

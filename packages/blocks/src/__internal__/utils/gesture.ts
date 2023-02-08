@@ -1,6 +1,7 @@
-import { debounce } from './std.js';
 import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
+
 import { isDatabaseInput, isTitleElement } from './query.js';
+import { debounce } from './std.js';
 
 export interface IPoint {
   x: number;

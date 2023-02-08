@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import '@shoelace-style/shoelace/dist/components/card/card.js';
+
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+
 import * as examples from '../data/index.js';
-import '@shoelace-style/shoelace/dist/components/card/card.js';
 
 const initFunctions = Object.values(examples);
 

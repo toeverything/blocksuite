@@ -1,12 +1,13 @@
+import { assertExists } from '@blocksuite/global/utils';
+import { Bound } from '@blocksuite/phasor';
+
 import type {
   SelectionEvent,
   ShapeMouseMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { MouseModeController } from './index.js';
 import type { SelectionArea } from '../selection-manager.js';
-import { assertExists } from '@blocksuite/global/utils';
-import { Bound } from '@blocksuite/phasor';
+import { MouseModeController } from './index.js';
 
 export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   readonly mouseMode = <ShapeMouseMode>{

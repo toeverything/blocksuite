@@ -1,8 +1,9 @@
-import { EditorContainer } from '@blocksuite/editor';
-import { useEffect, useRef } from 'react';
-import type { Page } from '@blocksuite/store';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
+
+import { EditorContainer } from '@blocksuite/editor';
+import type { Page } from '@blocksuite/store';
+import { useEffect, useRef } from 'react';
 
 export type EditorProps = {
   page: Page;

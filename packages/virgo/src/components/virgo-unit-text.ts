@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import { ZERO_WIDTH_SPACE } from '../constant.js';
 import type { BaseArrtiubtes, DeltaInsert } from '../types.js';
 

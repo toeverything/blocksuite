@@ -1,9 +1,9 @@
-import type { AppProps } from 'next/app';
+import { builtInSchemas } from '@blocksuite/blocks/models';
 import { BlockSuiteProvider, createBlockSuiteStore } from '@blocksuite/react';
 import { DebugDocProvider, Workspace } from '@blocksuite/store';
 import { IndexedDBDocProvider } from '@blocksuite/store';
-import { builtInSchemas } from '@blocksuite/blocks/models';
 import { NextUIProvider } from '@nextui-org/react';
+import type { AppProps } from 'next/app';
 
 const localWorkspace = new Workspace({
   room: 'local-room',

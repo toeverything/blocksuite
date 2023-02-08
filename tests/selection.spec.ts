@@ -1,44 +1,46 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
+import { expect } from '@playwright/test';
+
 import {
+  addFrameByClick,
+  copyByKeyboard,
+  dragBetweenCoords,
+  dragBetweenIndices,
   enterPlaygroundRoom,
+  fillLine,
   focusRichText,
+  focusTitle,
+  getCursorBlockIdAndHeight,
+  getIndexCoordinate,
   getQuillSelectionIndex,
   getQuillSelectionText,
-  dragBetweenCoords,
+  getSelectedTextByQuill,
+  initEmptyParagraphState,
+  initThreeLists,
+  initThreeParagraphs,
+  pasteByKeyboard,
   pressEnter,
   pressShiftTab,
-  getCursorBlockIdAndHeight,
-  fillLine,
-  addFrameByClick,
-  initThreeParagraphs,
-  initEmptyParagraphState,
-  undoByKeyboard,
-  resetHistory,
   redoByKeyboard,
-  waitNextFrame,
-  dragBetweenIndices,
-  initThreeLists,
-  copyByKeyboard,
-  pasteByKeyboard,
-  getSelectedTextByQuill,
+  resetHistory,
   SHORT_KEY,
   switchEditorMode,
   type,
-  getIndexCoordinate,
-  focusTitle,
+  undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
-import { expect } from '@playwright/test';
 import {
+  assertAlmostEqual,
   assertBlockCount,
+  assertClipItems,
+  assertDivider,
   assertRichTexts,
   assertSelection,
-  assertAlmostEqual,
-  assertDivider,
-  assertClipItems,
+  assertStoreMatchJSX,
   assertTitle,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -961,6 +963,52 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.up();
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
+});
+
+test('should indent multi-selection block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  const topLeft456 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="3"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left + 1, y: bbox.top + 1 };
+  });
+
+  const bottomRight789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right - 1, y: bbox.bottom - 1 };
+  });
+
+  // from top to bottom
+  await dragBetweenCoords(page, topLeft456, bottomRight789);
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:frame>
+</affine:page>`
+  );
 });
 
 // ↑

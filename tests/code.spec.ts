@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
   addCodeBlock,
   copyByKeyboard,
@@ -19,6 +19,7 @@ import {
   undoByKeyboard,
 } from './utils/actions/index.js';
 import { assertKeyboardWorkInInput, assertRichTexts } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('use debug menu can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);

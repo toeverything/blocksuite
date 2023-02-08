@@ -1,5 +1,6 @@
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import { IconButton } from '../../components/button.js';
 
 // TODO reuse existing button component

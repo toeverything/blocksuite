@@ -1,8 +1,9 @@
-import type { ContentParser } from './index.js';
-import type { OpenBlockInfo } from '../types.js';
-import type { EditorContainer } from '../../../components/index.js';
 import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
+
+import type { EditorContainer } from '../../../components/index.js';
+import type { OpenBlockInfo } from '../types.js';
+import type { ContentParser } from './index.js';
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA

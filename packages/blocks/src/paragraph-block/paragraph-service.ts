@@ -1,5 +1,5 @@
+import { BaseService } from '../__internal__/service/index.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
-import { BaseService } from '../__internal__/service.js';
 
 export class ParagraphBlockService extends BaseService {
   block2html(

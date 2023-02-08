@@ -1,13 +1,13 @@
 import type {
   MouseMode,
-  TopLevelBlockModel,
   SelectionEvent,
+  TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type {
+  EdgelessHoverState,
   EdgelessSelectionState,
   SelectionArea,
-  EdgelessHoverState,
 } from '../selection-manager.js';
 
 export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {

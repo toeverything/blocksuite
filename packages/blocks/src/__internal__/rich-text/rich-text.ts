@@ -1,14 +1,15 @@
-import { html, css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import Quill from 'quill';
-import type { Quill as QuillType } from 'quill';
-import QuillCursors from 'quill-cursors';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { BlockHost } from '../utils/index.js';
-import { createKeyboardBindings } from './keyboard.js';
+import { css, html } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import type { LeafBlot } from 'parchment';
+import type { DeltaStatic, Quill as QuillType } from 'quill';
+import Quill from 'quill';
+import QuillCursors from 'quill-cursors';
 
 import Syntax from '../../code-block/components/syntax-code-block.js';
+import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
+import { createKeyboardBindings } from './keyboard.js';
 import { KeyboardWithEvent } from './quill-keyboard.js';
 
 Quill.register('modules/keyboard', KeyboardWithEvent, true);
@@ -132,13 +133,17 @@ export class RichText extends NonShadowLitElement {
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.quill.on('text-change', (delta: any) => {
+    this.quill.on('text-change', (delta: DeltaStatic) => {
       const selectorMap = {
         code: 'code',
         link: 'link-node',
       } as const;
       let attr: keyof typeof selectorMap | null = null;
+
+      if (!delta.ops) {
+        return;
+      }
+
       if (delta.ops[1]?.attributes?.code) {
         attr = 'code';
       }
@@ -150,17 +155,17 @@ export class RichText extends NonShadowLitElement {
         const retain = delta.ops[0].retain;
         const selector = selectorMap[attr];
         if (retain !== undefined) {
-          const currentLeaf = this.quill.getLeaf(
+          const currentLeaf: [LeafBlot, number] = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length)
           );
-          const nextLeaf = this.quill.getLeaf(
+          const nextLeaf: [LeafBlot, number] = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length) + 1
           );
           const currentParentElement = currentLeaf[0]?.domNode?.parentElement;
           const currentEmbedElement = currentParentElement?.closest(selector);
           const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
           const nextEmbedElement = nextParentElement?.closest(selector);
-          const insertedString = delta.ops[1]?.insert.toString();
+          const insertedString: string = delta.ops[1]?.insert.toString();
 
           // if insert to the same node, no need to handle
           // For example,

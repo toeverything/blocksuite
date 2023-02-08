@@ -1,26 +1,27 @@
 // related component
 import './components/add-column-type-popup.js';
+import './components/cell-container.js';
 
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import type { TagSchema } from '@blocksuite/global/database';
+import { assertEquals } from '@blocksuite/global/utils';
+import { nanoid } from '@blocksuite/store';
+import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import type { DatabaseBlockModel } from './database-model.js';
+import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { html, unsafeStatic } from 'lit/static-html.js';
+
 import { BlockElementWithService, BlockHost } from '../__internal__/index.js';
 import { NonShadowLitElement } from '../__internal__/utils/lit.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { assertEquals } from '@blocksuite/global/utils';
-import { DatabaseBlockDisplayMode } from './database-model.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { EditColumnPopup } from './components/edit-column-popup.js';
-import { createPopper } from '@popperjs/core';
-import { registerInternalRenderer } from './components/column-type/index.js';
 import type { DatabaseAddColumnTypePopup } from './components/add-column-type-popup.js';
-import type { TagSchema } from '@blocksuite/global/database';
-import { html, unsafeStatic } from 'lit/static-html.js';
-import './components/cell-container.js';
-import { getTagSchemaRenderer } from './register.js';
-import { nanoid } from '@blocksuite/store';
 import { DATABASE_ADD_COLUMN_TYPE_POPUP } from './components/add-column-type-popup.js';
+import { registerInternalRenderer } from './components/column-type/index.js';
+import { EditColumnPopup } from './components/edit-column-popup.js';
+import type { DatabaseBlockModel } from './database-model.js';
+import { DatabaseBlockDisplayMode } from './database-model.js';
+import { getTagSchemaRenderer } from './register.js';
 import { onClickOutside } from './utils.js';
 
 const FIRST_LINE_TEXT_WIDTH = 200;

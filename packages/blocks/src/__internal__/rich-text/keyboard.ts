@@ -1,5 +1,9 @@
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
+
+import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
   getCurrentRange,
   getNextBlock,
@@ -7,21 +11,18 @@ import {
   isMultiBlockRange,
   noop,
 } from '../utils/index.js';
+import { markdownConvert } from './markdown-convert.js';
 import {
-  handleLineStartBackspace,
-  handleUnindent,
   handleBlockEndEnter,
   handleBlockSplit,
-  handleSoftEnter,
   handleIndent,
   handleKeyDown,
   handleKeyUp,
+  handleLineStartBackspace,
+  handleSoftEnter,
+  handleUnindent,
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
-import { Shortcuts } from './shortcuts.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { showSlashMenu } from '../../components/slash-menu/index.js';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 interface QuillRange {
   index: number;
@@ -89,7 +90,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     context: BindingContext
   ) {
     const { prefix } = context;
-    Shortcuts.match(this.quill, model, prefix);
+    markdownConvert(this.quill, model, prefix);
     return ALLOW_DEFAULT;
   }
 
@@ -99,7 +100,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     context: BindingContext
   ) {
     const { prefix } = context;
-    return Shortcuts.match(this.quill, model, prefix)
+    return markdownConvert(this.quill, model, prefix)
       ? PREVENT_DEFAULT
       : ALLOW_DEFAULT;
   }

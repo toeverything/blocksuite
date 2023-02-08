@@ -1,28 +1,29 @@
+import '../../__internal__/index.js';
+
+import type { BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
-import type {
-  EdgelessSelectionState,
-  EdgelessHoverState,
-  ViewportState,
-  XYWH,
-} from './selection-manager.js';
 import {
   BlockElement,
   BlockHost,
   getBlockById,
 } from '../../__internal__/index.js';
-import '../../__internal__/index.js';
+import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
+import type {
+  EdgelessHoverState,
+  EdgelessSelectionState,
+  ViewportState,
+  XYWH,
+} from './selection-manager.js';
 import {
-  PADDING_X,
-  PADDING_Y,
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
   isBlock,
+  PADDING_X,
+  PADDING_Y,
 } from './utils.js';
 
 const SHAPE_PADDING = 48;

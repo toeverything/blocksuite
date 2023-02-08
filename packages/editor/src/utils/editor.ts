@@ -1,9 +1,10 @@
-import type { Page } from '@blocksuite/store';
-import type { EditorContainer } from '../components/index.js';
 import { BlockHub } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import { asyncFocusRichText, tryUpdateFrameSize } from '@blocksuite/blocks';
 import { getAllowSelectedBlocks } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
+
+import type { EditorContainer } from '../components/index.js';
 
 export const checkEditorElementActive = () =>
   document.activeElement?.closest('editor-container') != null;

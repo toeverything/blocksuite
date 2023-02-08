@@ -1,11 +1,11 @@
-import { Workspace } from '@blocksuite/store';
 import {
-  SurfaceManager,
   Bound,
   DebugElement,
+  SurfaceManager,
   // Uncomment to batch load mock data
   // initMockData,
 } from '@blocksuite/phasor';
+import { Workspace } from '@blocksuite/store';
 
 const { Y } = Workspace;
 

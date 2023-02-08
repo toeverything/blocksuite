@@ -1,4 +1,4 @@
-import { BaseService } from '../__internal__/service.js';
+import { BaseService } from '../__internal__/service/index.js';
 import type { ListBlockModel } from './list-model.js';
 
 export class ListBlockService extends BaseService {

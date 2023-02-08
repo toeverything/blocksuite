@@ -1,3 +1,5 @@
+import './button';
+
 import {
   ArrowDownIcon,
   CopyIcon,
@@ -7,19 +9,19 @@ import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import {
+  getCurrentRange,
+  getModelsByRange,
+} from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
-import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import {
   DragDirection,
   getFormat,
   updateSelectedTextType,
 } from '../../page-block/utils/index.js';
-import {
-  getCurrentRange,
-  getModelsByRange,
-} from '../../__internal__/utils/index.js';
+import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import { toast } from '../toast.js';
-import './button';
 import { formatQuickBarStyle } from './styles.js';
 
 @customElement('format-quick-bar')

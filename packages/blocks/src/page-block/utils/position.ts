@@ -1,4 +1,5 @@
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
+
 import {
   clamp,
   getCurrentRange,

@@ -1,26 +1,26 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import {
+  clickBlockTypeMenuItem,
+  dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
-  selectAllByKeyboard,
-  inlineCode,
-  undoByClick,
-  redoByClick,
-  strikethrough,
-  undoByKeyboard,
-  redoByKeyboard,
-  pressEnter,
-  initThreeParagraphs,
-  dragBetweenIndices,
-  initEmptyParagraphState,
   formatType,
-  clickBlockTypeMenuItem,
-  SHORT_KEY,
+  initEmptyParagraphState,
+  initThreeParagraphs,
+  inlineCode,
   MODIFIER_KEY,
-  resetHistory,
+  pressEnter,
   readClipboardText,
+  redoByClick,
+  redoByKeyboard,
+  resetHistory,
+  selectAllByKeyboard,
+  SHORT_KEY,
+  strikethrough,
   type,
+  undoByClick,
+  undoByKeyboard,
 } from './utils/actions/index.js';
 import {
   assertRichTexts,
@@ -28,6 +28,7 @@ import {
   assertTextFormat,
   assertTypeFormat,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('rich-text hotkey scope on single press', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -91,9 +92,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -142,9 +141,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -166,9 +163,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -252,9 +247,7 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -291,9 +284,7 @@ test('should single line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -339,9 +330,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -406,9 +395,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text={
       <>
@@ -475,9 +462,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="hello"
     prop:type="h1"
@@ -489,9 +474,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="hello"
     prop:type="h6"
@@ -503,9 +486,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:list
     prop:checked={false}
     prop:text="hello"
@@ -518,9 +499,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:list
     prop:checked={false}
     prop:text="hello"
@@ -533,9 +512,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -573,9 +550,7 @@ test('should cut work single line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="ho"
     prop:type="text"
@@ -589,9 +564,7 @@ test('should cut work single line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="hello"
     prop:type="text"
@@ -614,9 +587,7 @@ test('should cut work multiple line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="19"
     prop:type="text"
@@ -630,9 +601,7 @@ test('should cut work multiple line', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"

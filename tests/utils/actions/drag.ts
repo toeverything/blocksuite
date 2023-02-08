@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { getIndexCoordinate } from './misc.js';
 
 export async function dragBetweenCoords(

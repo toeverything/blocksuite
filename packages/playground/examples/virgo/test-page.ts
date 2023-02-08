@@ -1,6 +1,5 @@
-import * as Y from 'yjs';
-import { LitElement, css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import '@shoelace-style/shoelace';
+
 import {
   BaseArrtiubtes,
   BaseText,
@@ -11,7 +10,9 @@ import {
   TextElement,
   VEditor,
 } from '@blocksuite/virgo';
-import '@shoelace-style/shoelace';
+import { css, html, LitElement } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
+import * as Y from 'yjs';
 
 export function renderElement(delta: DeltaInsert<TextAttributes>): TextElement {
   switch (delta.attributes.type) {

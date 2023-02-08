@@ -3,23 +3,24 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import './declare-test-window.js';
-import { expect, Locator, type Page } from '@playwright/test';
-import type {
-  BaseBlockModel,
-  SerializedStore,
-} from '../../packages/store/src/index.js';
-import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
 
-import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
+import { expect, Locator, type Page } from '@playwright/test';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
+
+import type {
+  BaseBlockModel,
+  SerializedStore,
+} from '../../packages/store/src/index.js';
+import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
+import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
 import {
-  undoByKeyboard,
   redoByKeyboard,
   SHORT_KEY,
   type,
+  undoByKeyboard,
 } from './actions/keyboard.js';
 import { captureHistory } from './actions/misc.js';
 
@@ -56,7 +57,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,32]',
+      'prop:xywh': '[0,0,720,30]',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
