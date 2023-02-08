@@ -448,6 +448,7 @@ export function handleNativeRangeDragMove(
     const newPoint = normalizePointIntoContainer({ x, y }, closestEditor);
     currentRange = caretRangeFromPoint(newPoint.x, newPoint.y);
     if (!currentRange) return;
+    if (currentRange.endContainer.nodeType !== Node.TEXT_NODE) return;
     if (!currentFrame.contains(currentRange.endContainer)) return;
   }
 
