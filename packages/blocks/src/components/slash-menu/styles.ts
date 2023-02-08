@@ -37,16 +37,34 @@ export const styles = css`
     flex-direction: column;
     gap: 5px;
     padding: 12px 16px;
+    color: #8e8d91;
   }
 
   .slash-category-name {
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
-    color: #8e8d91;
     white-space: nowrap;
     cursor: pointer;
     padding: 5px 8px;
     width: 100%;
+  }
+
+  .slash-active-category {
+    position: relative;
+    box-sizing: border-box;
+    color: var(--affine-primary-color);
+  }
+
+  .slash-active-category::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 12px;
+    background: linear-gradient(180deg, #5438ff 0%, #b638ff 100%);
+    border-radius: 0.5px;
   }
 
   .slash-item-container {

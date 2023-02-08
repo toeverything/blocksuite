@@ -147,10 +147,16 @@ export class SlashMenu extends LitElement {
       case 'ArrowUp': {
         this._activeItemIndex =
           (this._activeItemIndex - 1 + configLen) % configLen;
+        this._queryItem(
+          this._filterItems[this._activeItemIndex]
+        )?.scrollIntoView(false);
         break;
       }
       case 'ArrowDown': {
         this._activeItemIndex = (this._activeItemIndex + 1) % configLen;
+        this._queryItem(
+          this._filterItems[this._activeItemIndex]
+        )?.scrollIntoView(false);
         break;
       }
       case 'ArrowRight':
@@ -208,13 +214,48 @@ export class SlashMenu extends LitElement {
       });
   }
 
+  private _queryItem(item: SlashItem) {
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      return null;
+    }
+    return shadowRoot.querySelector(`format-bar-button[text="${item.name}"]`);
+  }
+
   private _categoryTemplate() {
+    const handleClickCategory = (group: {
+      name: string;
+      items: SlashItem[];
+    }) => {
+      const menuGroup = menuGroups.find(g => g.name === group.name);
+      if (!menuGroup) return;
+      const item = menuGroup.items[0];
+      this._queryItem(item)?.scrollIntoView(true);
+      this._activeItemIndex = this._filterItems.findIndex(
+        i => i.name === item.name
+      );
+    };
+
+    const activeCategory = menuGroups.find(group =>
+      group.items.some(
+        item => item.name === this._filterItems[this._activeItemIndex].name
+      )
+    );
+
     return html`<div
       class="slash-category"
       style="${this._searchString.length ? 'max-width: 0; padding: 0;' : ''}"
     >
       ${menuGroups.map(
-        group => html`<div class="slash-category-name">${group.name}</div>`
+        group =>
+          html`<div
+            class="slash-category-name ${activeCategory?.name === group.name
+              ? 'slash-active-category'
+              : ''}"
+            @click=${() => handleClickCategory(group)}
+          >
+            ${group.name}
+          </div>`
       )}
     </div>`;
   }
@@ -249,6 +290,9 @@ export class SlashMenu extends LitElement {
               ?hover=${this._activeItemIndex === index}
               text="${name}"
               data-testid="${name}"
+              @mouseover=${() => {
+                this._activeItemIndex = index;
+              }}
               @click=${() => {
                 this._handleItemClick(index);
               }}
