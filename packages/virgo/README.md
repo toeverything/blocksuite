@@ -1,119 +1,103 @@
 # `@blocksuite/virgo`
 
-Virgo is a mini-editor kernel for direct state synchronization between dom and Y.Text,
-which differs from other rich text frameworks on the market in that its data structures
-are natively supported by CRDTs. For example, if we want to support collaborative editing
-in Slate.js, we need to use a plugin like slate-yjs, which is a wrapper around Yjs. In
-these plugins, all text operations are converted to Yjs operations, which are then
-converted back to Slate.js operations. This usually results in some bugs like undo/redo
-not working properly and hard to maintain the code. However, with Virgo, we can
-directly use Yjs to synchronize the state of the dom, which means that the state in Yjs
-is the single source of truth. This also means that we can just use the Yjs API to
-manipulate the state of the dom, which significantly reduces the complexity of the code.
-That's why we created Virgo and the difference between Virgo and other rich text editors
-like Quill, Slate, Lexical, ProseMirror, etc.
+## Introduction
 
-In blocksuite editor we use Quill to manipulate the dom now but we just use a small part of
-its API. Every line in blocksuite is a single Quill editor, and bind it to a Y.Text for
-collaborative editing. As I said before, it causes some problems so we plan to replace
-Quill with Virgo. What Virgo needs to do is the same as Quill so it just needs to provide a
-line-level state synchronization mechanism because block-level state synchronization is
-handled by other modules in blocksuite. That's why virgo just has limited support
-for block-level text control.
+Virgo is a minimized rich-text editing kernel that synchronizes the state between DOM and [Y.Text](https://docs.yjs.dev/api/shared-types/y.text), which differs from other rich-text editing frameworks in that its data model are _natively_ CRDT. For example, to support collaborative editing in Slate.js, you may need to use a plugin like slate-yjs, a wrapper around [Yjs](https://github.com/yjs/yjs). In these plugins, all text operations should be converted between Yjs and Slate.js operations. This may result in undo/redo properly and hard to maintain the code. However, with Virgo, we can directly synchronize the DOM state between Yjs and DOM, which means that the state in Yjs is the single source of truth. This means that to update, can just calling the `Y.Text` API to manipulate the DOM state, which could significantly reduces the complexity of the editor.
 
-A virgo editor state corresponds to a string in Y.Text, it is easy to convert between
-them. Virgo also provides a Delta format to represent the state of the editor, which is
-also supported by Yjs. So we can use Yjs to manipulate all the states of the text including
-format.
+Initially in BlockSuite, we use [Quill](https://github.com/quilljs/quill) for in-block rich-text editing, which only utilizes a small subset of its APIs. Every paragraph in BlockSuite is managed in a standalone Quill instance, which is attached to a `Y.Text` instance for collaborative editing. Virgo makes this further simpler, since what it needs to do is the same as how we use the Quill subset. It just needs to provide a flat rich-text synchronization mechanism, since the block-tree-level state management is handled by the data store in BlockSuite.
 
-```js
+A virgo editor state corresponds to `Y.Text`, it's easy to convert between them. Virgo also provides a `Delta` format to represent the editor state, which is also supported by Yjs. So we can use Yjs to manipulate all the states of the text including format.
+
+```ts
 const yText = new Y.Text();
-// bind yText to virgo editor, type 'aaa' and press enter and type 'bbb' //
-console.log(yText.toString());
-// 'aaa\nbbb'
+
+// Bind Y.Text to virgo editor, then type 'aaa\nbbb'
+// ...
+console.log(yText.toString()); // 'aaa\nbbb'
+
 console.log(yText.toDelta());
-// [
-//     {
-//         "insert": "aaa",
-//         "attributes": {
-//             "type": "base"
-//         }
-//     },
-//     {
-//         "insert": "\n",
-//         "attributes": {
-//             "type": "line-break"
-//         }
-//     },
-//     {
-//         "insert": "bbb",
-//         "attributes": {
-//             "type": "base"
-//         }
-//     }
-// ]
+/*
+[
+  {
+    insert: 'aaa',
+    attributes: {
+      type: 'base',
+    },
+  },
+  {
+    insert: '\n',
+    attributes: {
+      type: 'line-break',
+    },
+  },
+  {
+    insert: 'bbb',
+    attributes: {
+      type: 'base',
+    },
+  },
+];
+*/
 ```
 
-If you format from the first character to the second character, the string in Y.Text
-the value will still be 'aaa\nbbb' but if we covert it to Deltas you will see the difference.
+If you format from the first character to the second character, the string representation in `Y.Text` will still be `aaa\nbbb`. But if we covert it to Delta, you will see the difference:
 
-```js
-// continue before example, format 'aa' to bold //
-console.log(yText.toString());
-// 'aaa\nbbb'
+```ts
+// Continue the example before, format 'aa' to bold
+// ...
+console.log(yText.toString()); // 'aaa\nbbb'
+
 console.log(yText.toDelta());
-// [
-//     {
-//         "insert": "aa",
-//         "attributes": {
-//             "type": "base",
-//             "bold": true
-//         }
-//     },
-//     {
-//         "insert": "a",
-//         "attributes": {
-//             "type": "base"
-//         }
-//     },
-//     {
-//         "insert": "\n",
-//         "attributes": {
-//             "type": "line-break"
-//         }
-//     },
-//     {
-//         "insert": "bbb",
-//         "attributes": {
-//             "type": "base"
-//         }
-//     }
-// ]
+/*
+[
+  {
+    insert: 'aa',
+    attributes: {
+      type: 'base',
+      bold: true,
+    },
+  },
+  {
+    insert: 'a',
+    attributes: {
+      type: 'base',
+    },
+  },
+  {
+    insert: '\n',
+    attributes: {
+      type: 'line-break',
+    },
+  },
+  {
+    insert: 'bbb',
+    attributes: {
+      type: 'base',
+    },
+  },
+];
+*/
 ```
 
-You will see that there are a type attribute in the Delta format, which is used to
-represent the type of the text like base text (bold, italic, etc.), line-break,
-inline-code, link, etc. This attribute is used to make developers easy to implement
-custom inline elements.
+You will see that there is a `type` attribute in the Delta format, which is used to represent the type of text segements, like base text (bold, italic, line-break, inline-code, link, etc.). This format makes it easy implementing customized inline elements.
 
-## Documentation
+## Usage
 
-If you want to use Virgo in your project for controlling the state of the dom, all
-you need to do is to create a Y.Text from Y.Doc, bind it to the virgo editor, and
-mount it to the dom. Virgo will automatically synchronize the state of the dom
-including text content, format, cursor position, etc.
+To use Virgo in your project, all you need to do is to create a `Y.Text` instance from `Y.Doc`, bind it to the virgo editor, then mount it to the DOM:
 
-```js
-const yDoc = new Y.Doc();
-const yText = yDoc.getText('text');
-const virgo = new Virgo(yText);
+```ts
+import * as Y from 'yjs';
+import { VEditor } from '@blocksuite/virgo';
+
+const doc = new Y.Doc();
+const yText = doc.getText('text');
+const vEditor = new VEditor(yText);
 
 const editorContainer = document.getElementById('editor');
-virgo.mount(editorContainer);
+vEditor.mount(editorContainer);
 ```
 
 You can go to [virgo playground](https://blocksuite-toeverything.vercel.app/examples/virgo/)
-to test it and see the code in [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/virgo).
+for onlinet testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/virgo).
 
-> 🚧 How to implement customed inline elements and complete API documentation is still
-> in progress.
+> 🚧 The documentation about customizing inline elements and detailed APIs are still in progress. Stay tuned!
