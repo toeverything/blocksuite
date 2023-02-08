@@ -7,7 +7,7 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { BaseBlockModel } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
 import {
@@ -371,12 +371,27 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks = (
-    selectedBlocks: Element[],
-    rects: DOMRect[] = []
-  ) => {
+  public setSelectedBlocks = (selectedBlocks: Element[], rects?: DOMRect[]) => {
     this.state.selectedBlocks = selectedBlocks;
-    this._signals.updateSelectedRects.emit(rects);
+
+    if (rects) {
+      this._signals.updateSelectedRects.emit(rects);
+    } else {
+      const calculatedRects = [] as DOMRect[];
+      for (const block of selectedBlocks) {
+        calculatedRects.push(block.getBoundingClientRect());
+
+        if (
+          (block as DefaultPageBlockComponent)?.model instanceof BaseBlockModel
+        ) {
+          this.state.type = 'block';
+        }
+
+        // TODO
+      }
+
+      this._signals.updateSelectedRects.emit(calculatedRects);
+    }
   };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -403,7 +418,7 @@ export class DefaultSelectionManager {
       ({ block }) => blockCache.get(block) as DOMRect
     );
 
-    this._setSelectedBlocks(
+    this.setSelectedBlocks(
       findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
@@ -695,7 +710,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // Click on the prefix icon of list block
@@ -723,7 +738,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // `CMD-A`
@@ -754,13 +769,13 @@ export class DefaultSelectionManager {
       const rects = clearSubtree(selectedBlocks, containerLeft).map(
         block => blockCache.get(block) as DOMRect
       );
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     } else {
       // only current focused-block
       const rects = selectedBlocks
         .slice(0, 1)
         .map(block => blockCache.get(block) as DOMRect);
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     }
 
     return;

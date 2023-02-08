@@ -240,16 +240,8 @@ export function bindHotkeys(
         return;
       }
 
-      const pageBlock = getDefaultPageBlock(selectBlocks[0].model);
-
       selection.state.refreshBlockRectCache();
-      pageBlock.signals.updateSelectedRects.emit(
-        selectBlocks.map(block => {
-          return block.getBoundingClientRect();
-        })
-      );
-      selection.state.type = 'block';
-      selection.state.selectedBlocks = selectBlocks;
+      selection.setSelectedBlocks(selectBlocks);
     });
     selection.clearRects();
   });
