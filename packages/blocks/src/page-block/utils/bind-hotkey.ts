@@ -21,10 +21,7 @@ import {
   isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
-import type {
-  DefaultPageBlockComponent,
-  DefaultPageSignals,
-} from '../default/default-page-block.js';
+import type { DefaultPageSignals } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import {
   handleBlockSelectionBatchDelete,
@@ -219,11 +216,7 @@ export function bindHotkeys(
   hotkey.addListener(TAB, () => {
     page.captureSync();
     for (const block of selection.state.selectedBlocks) {
-      const currentBlock = block as DefaultPageBlockComponent;
-
-      const model = currentBlock.model;
-      if (!model) continue;
-
+      const model = getModelByElement(block);
       handleIndent(page, model, 0, false);
     }
   });
