@@ -1101,7 +1101,6 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-
   await assertRichTexts(page, ['123', '456', '789']);
 
   for (let i = 0; i < 6; i++) {
@@ -1126,7 +1125,6 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
       throw new Error();
     }
     const distance = viewport.scrollHeight - viewport.clientHeight;
-
     const container = viewport.querySelector(
       '.affine-block-children-container'
     );
@@ -1185,7 +1183,6 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-
   await assertRichTexts(page, ['123', '456', '789']);
 
   for (let i = 0; i < 6; i++) {
@@ -1211,19 +1208,16 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     }
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance);
-
     const container = viewport.querySelector(
       'affine-frame .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
     }
-
     const last = container.lastElementChild;
     if (!last) {
       throw new Error();
     }
-
     return [last.getBoundingClientRect(), distance] as const;
   });
 
@@ -1253,7 +1247,6 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1290,7 +1283,6 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1310,7 +1302,6 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-
   await assertRichTexts(page, ['123', '456', '789']);
 
   for (let i = 0; i < 6; i++) {
@@ -1335,14 +1326,12 @@ test('should keep selection state when scrolling forward with the scroll wheel',
       throw new Error();
     }
     const distance = viewport.scrollHeight - viewport.clientHeight;
-
     const container = viewport.querySelector(
       'affine-frame .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
     }
-
     const first = container.firstElementChild;
     if (!first) {
       throw new Error();
@@ -1377,7 +1366,6 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1413,7 +1401,6 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1424,4 +1411,79 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   expect(count0).toBe(count1);
   expect(Math.ceil(scrollTop0)).toBe(distance);
   expect(scrollTop1).toBe(0);
+});
+
+test('should not clear selected rects when clicking on scrollbar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const [viewport, first, distance] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance / 2);
+    const container = viewport.querySelector(
+      'affine-frame .affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    const first = container.firstElementChild;
+    if (!first) {
+      throw new Error();
+    }
+    return [
+      viewport.getBoundingClientRect(),
+      first.getBoundingClientRect(),
+      distance,
+    ] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: first.left - 1,
+      y: first.top - 1,
+    },
+    {
+      x: first.left + 1,
+      y: first.top + distance / 2,
+    }
+  );
+
+  await page.mouse.click(viewport.right, distance / 2);
+
+  const [count, scrollTop] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    return [
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0,
+      viewport.scrollTop,
+    ] as const;
+  });
+
+  expect(count).toBeGreaterThan(0);
+  expect(scrollTop).toBe(distance / 2);
 });
