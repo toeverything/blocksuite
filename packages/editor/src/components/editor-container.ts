@@ -6,7 +6,7 @@ import {
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
-import { html, PropertyValueMap } from 'lit';
+import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
