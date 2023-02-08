@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
 import {
@@ -306,6 +306,7 @@ export class DefaultPageBlockComponent
         mouseRoot: this.mouseRoot,
         signals: this.signals,
         container: this,
+        threshold: SCROLL_THRESHOLD / 2, // 50
       });
     }
 

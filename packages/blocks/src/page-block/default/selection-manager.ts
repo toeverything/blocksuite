@@ -1,9 +1,6 @@
 import '../../components/drag-handle.js';
 
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  SCROLL_THRESHOLD,
-} from '@blocksuite/global/config';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -349,14 +346,14 @@ export class DefaultSelectionManager {
   private readonly _disposables = new DisposableGroup();
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _thresold: number;
+  private readonly _thresold: number; // distance to the upper and lower boundaries of the viewport
 
   constructor({
     page,
     mouseRoot,
     signals,
     container,
-    threshold = SCROLL_THRESHOLD / 2, // 50
+    threshold,
   }: {
     page: Page;
     mouseRoot: HTMLElement;
