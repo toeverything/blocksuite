@@ -2,7 +2,7 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { getAllBlocks, hotkey } from '../../__internal__/index.js';
+import { hotkey } from '../../__internal__/index.js';
 import {
   handleIndent,
   isAtLineEdge,
