@@ -321,6 +321,7 @@ export class DebugMenu extends NonShadowLitElement {
         .edgeless-toolbar {
           align-items: center;
           margin-right: 17px;
+          pointer-events: auto;
         }
 
         .edgeless-toolbar sl-select,

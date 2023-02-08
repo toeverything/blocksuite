@@ -1,6 +1,9 @@
 import '../../components/drag-handle.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  SCROLL_THRESHOLD,
+} from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -346,22 +349,26 @@ export class DefaultSelectionManager {
   private readonly _disposables = new DisposableGroup();
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
+  private readonly _thresold: number;
 
   constructor({
     page,
     mouseRoot,
     signals,
     container,
+    threshold = SCROLL_THRESHOLD / 2, // 50
   }: {
     page: Page;
     mouseRoot: HTMLElement;
     signals: DefaultPageSignals;
     container: DefaultPageBlockComponent;
+    threshold: number;
   }) {
     this.page = page;
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
+    this._thresold = threshold;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(
@@ -442,9 +449,11 @@ export class DefaultSelectionManager {
         this.state.rafID = requestAnimationFrame(autoScroll);
       }
 
-      if (Math.ceil(scrollTop) < max && clientHeight - y < 50) {
-        // down easeOutQuad
-        const d = (50 - (clientHeight - y)) * 0.25;
+      // TODO: for the behavior of scrolling, see the native selection
+      // speed easeOutQuad + easeInQuad
+      if (Math.ceil(scrollTop) < max && clientHeight - y < this._thresold) {
+        // down
+        const d = (this._thresold - (clientHeight - y)) * 0.25;
         scrollTop += d;
         viewport.scrollTop += d;
         auto = Math.ceil(scrollTop) < max;
@@ -453,9 +462,9 @@ export class DefaultSelectionManager {
           scrollLeft,
           scrollTop: Math.min(scrollTop, max),
         });
-      } else if (scrollTop > 0 && y < 50) {
-        // up easeInQuad
-        const d = (y - 50) * 0.25;
+      } else if (scrollTop > 0 && y < this._thresold) {
+        // up
+        const d = (y - this._thresold) * 0.25;
         scrollTop += d;
         viewport.scrollTop += d;
         auto = scrollTop > 0;
@@ -483,7 +492,7 @@ export class DefaultSelectionManager {
     this.state.rafID = requestAnimationFrame(autoScroll);
   }
 
-  private _onBlockSelectionDragEnd(e: SelectionEvent) {
+  private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
     this.state.clearRaf();
     this.state.setStartPoint(null);
@@ -492,7 +501,7 @@ export class DefaultSelectionManager {
     // do not clear selected rects here
   }
 
-  private _onNativeSelectionDragStart(e: SelectionEvent) {
+  private _onNativeSelectionDragStart(_: SelectionEvent) {
     this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
@@ -501,7 +510,7 @@ export class DefaultSelectionManager {
     handleNativeRangeDragMove(this.state.startRange, e);
   }
 
-  private _onNativeSelectionDragEnd(e: SelectionEvent) {
+  private _onNativeSelectionDragEnd(_: SelectionEvent) {
     this._signals.nativeSelection.emit(true);
   }
 
@@ -706,11 +715,11 @@ export class DefaultSelectionManager {
     }
   };
 
-  private _onContainerMouseOut = (e: SelectionEvent) => {
+  private _onContainerMouseOut = (_: SelectionEvent) => {
     // console.log('mouseout', e);
   };
 
-  private _onSelectionChange = (e: Event) => {
+  private _onSelectionChange = (_: Event) => {
     const selection = window.getSelection();
     if (!selection) {
       return;

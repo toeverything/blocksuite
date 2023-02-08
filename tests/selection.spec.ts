@@ -1073,10 +1073,8 @@ test('should keep selection state when scrolling backward', async ({
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await new Promise(resolve => {
-          const count = distance / (10 * 0.25);
-          setTimeout(resolve, (1000 / 60) * count);
-        });
+        const count = distance / (10 * 0.25);
+        await page.waitForTimeout((1000 / 60) * count);
       },
     }
   );
@@ -1157,10 +1155,8 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await new Promise(resolve => {
-          const count = distance / (10 * 0.25);
-          setTimeout(resolve, (1000 / 60) * count);
-        });
+        const count = distance / (10 * 0.25);
+        await page.waitForTimeout((1000 / 60) * count);
       },
     }
   );
@@ -1180,4 +1176,129 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
 
   expect(total).toBe(3 + 5 + 3);
   expect(Math.ceil(scrollTop)).toBe(distance);
+});
+
+// ↑
+test('should keep selection state when scrolling backward with the scroll wheel', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const data = new Array(5).fill(`
+`);
+  data.unshift(...['123', '456', '789']);
+  data.push(...['987', '654', '321']);
+  await assertRichTexts(page, data);
+
+  const [last, distance] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance);
+
+    const container = viewport.querySelector(
+      'affine-frame .affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+
+    const last = container.lastElementChild;
+    if (!last) {
+      throw new Error();
+    }
+
+    return [last.getBoundingClientRect(), distance] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: last.right + 1,
+      y: last.top + 1,
+    },
+    {
+      x: last.right - 1,
+      y: last.top - 1,
+    },
+    {
+      // dont release mouse
+      beforeMouseUp: async () => {
+        await page.mouse.wheel(0, -distance);
+      },
+    }
+  );
+
+  // get count with scroll wheel
+  const [count0, scrollTop0] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    return [
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0,
+      viewport.scrollTop,
+    ] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance);
+  });
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: last.right + 1,
+      y: last.top + 1,
+    },
+    {
+      x: last.right - 1,
+      y: last.top - distance,
+    }
+  );
+
+  // get count with moving mouse
+  const [count1, scrollTop1] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    return [
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0,
+      viewport.scrollTop,
+    ] as const;
+  });
+
+  expect(count0).toBe(count1);
+  expect(scrollTop0).toBe(0);
+  expect(Math.ceil(scrollTop1)).toBe(distance);
 });
