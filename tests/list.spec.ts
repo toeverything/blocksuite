@@ -179,9 +179,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,96]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="123"
@@ -212,9 +210,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,96]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="123"
@@ -251,9 +247,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,72]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="text1"
       prop:type="text"
@@ -273,9 +267,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,72]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="text1"
       prop:type="text"
@@ -297,9 +289,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,72]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="text1"
       prop:type="text"
@@ -328,9 +318,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,72]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="text1"
     prop:type="text"
@@ -348,9 +336,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,72]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="text1"
     prop:type="text"

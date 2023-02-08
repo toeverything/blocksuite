@@ -362,9 +362,7 @@ test('should keep first line format when pasted into a new line', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,130]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="1"
@@ -404,9 +402,7 @@ test('should keep first line format when pasted into a new line', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,170]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="1"
