@@ -1,41 +1,12 @@
-import { paragraphConfig } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { updateSelectedTextType } from '../../page-block/utils/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
-
-const styles = css`
-  .overlay-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: var(--affine-z-index-popover);
-  }
-
-  .slash-menu-container {
-    position: fixed;
-    z-index: var(--affine-z-index-popover);
-  }
-
-  .slash-menu {
-    font-size: var(--affine-font-sm);
-    position: absolute;
-    min-width: 200px;
-    padding: 8px 4px;
-    overflow-y: auto;
-
-    background: var(--affine-popover-background);
-    box-shadow: var(--affine-popover-shadow);
-    border-radius: 0px 10px 10px 10px;
-    z-index: var(--affine-z-index-popover);
-  }
-`;
+import { menuGroups, SlashItem } from './config.js';
+import { styles } from './styles.js';
 
 @customElement('slash-menu')
 export class SlashMenu extends LitElement {
@@ -66,7 +37,7 @@ export class SlashMenu extends LitElement {
   private _activeItemIndex = 0;
 
   @state()
-  private _filterItems: typeof paragraphConfig = paragraphConfig;
+  private _filterItems = menuGroups.flatMap(group => group.items);
 
   @state()
   private _hide = false;
@@ -209,30 +180,43 @@ export class SlashMenu extends LitElement {
   private _handleItemClick(index: number) {
     // Need to remove the search string
     this.abortController.abort(this._searchString);
-    const { flavour, type } = this._filterItems[index];
-    updateSelectedTextType(flavour, type);
+    const { action } = this._filterItems[index];
+    action({ model: this.model });
   }
 
-  private _updateItem(): typeof paragraphConfig {
+  private _updateItem(): SlashItem[] {
     this._activeItemIndex = 0;
     const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
-      return paragraphConfig;
+      return menuGroups.flatMap(group => group.items);
     }
-    return paragraphConfig.filter(({ name }) => {
-      if (
-        name
-          .trim()
-          .toLowerCase()
-          .split('')
-          .filter(char => /[A-Za-z0-9]/.test(char))
-          .join('')
-          .includes(searchStr)
-      ) {
-        return true;
-      }
-      return false;
-    });
+    return menuGroups
+      .flatMap(group => group.items)
+      .filter(({ name }) => {
+        if (
+          name
+            .trim()
+            .toLowerCase()
+            .split('')
+            .filter(char => /[A-Za-z0-9]/.test(char))
+            .join('')
+            .includes(searchStr)
+        ) {
+          return true;
+        }
+        return false;
+      });
+  }
+
+  private _categoryTemplate() {
+    return html`<div
+      class="slash-category"
+      style="${this._searchString.length ? 'max-width: 0; padding: 0;' : ''}"
+    >
+      ${menuGroups.map(
+        group => html`<div class="slash-category-name">${group.name}</div>`
+      )}
+    </div>`;
   }
 
   override render() {
@@ -256,20 +240,23 @@ export class SlashMenu extends LitElement {
         @click="${() => this.abortController.abort()}"
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
-        ${this._filterItems.map(
-          ({ flavour, type, name, icon }, index) => html`<format-bar-button
-            width="100%"
-            style="padding-left: 12px; justify-content: flex-start;"
-            ?hover=${this._activeItemIndex === index}
-            text="${name}"
-            data-testid="${flavour}/${type}"
-            @click=${() => {
-              this._handleItemClick(index);
-            }}
-          >
-            ${icon}
-          </format-bar-button>`
-        )}
+        ${this._categoryTemplate()}
+        <div class="slash-item-container">
+          ${this._filterItems.map(
+            ({ name, icon }, index) => html`<format-bar-button
+              width="100%"
+              style="padding-left: 12px; justify-content: flex-start;"
+              ?hover=${this._activeItemIndex === index}
+              text="${name}"
+              data-testid="${name}"
+              @click=${() => {
+                this._handleItemClick(index);
+              }}
+            >
+              ${icon}
+            </format-bar-button>`
+          )}
+        </div>
       </div>
     </div>`;
   }
