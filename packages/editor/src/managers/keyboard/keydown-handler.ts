@@ -5,6 +5,7 @@ import {
   PageBlockModel,
 } from '@blocksuite/blocks';
 import type { Page } from '@blocksuite/store';
+
 import { checkEditorElementActive } from '../../utils/editor.js';
 
 class EditorKeydownHandlerStatic {
@@ -13,6 +14,7 @@ class EditorKeydownHandlerStatic {
   private page: Page = null!;
   private handleCallback = (e: KeyboardEvent) => this.handle(e);
   init(pageBlockModel: PageBlockModel | null, page: Page) {
+    if (!pageBlockModel) throw new Error('pageBlockModel is null');
     this.pageBlockModel = pageBlockModel;
     this.page = page;
     window.addEventListener('keydown', this.handleCallback);

@@ -1,7 +1,3 @@
-import { html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { choose } from 'lit/directives/choose.js';
-
 import {
   BlockHub,
   MouseMode,
@@ -10,9 +6,11 @@ import {
   SurfaceBlockModel,
 } from '@blocksuite/blocks';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
+import { html, PropertyValueMap } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { choose } from 'lit/directives/choose.js';
 
 import { ClipboardManager, ContentParser } from '../managers/index.js';
-
 import { EditorKeydownHandler } from '../managers/keyboard/keydown-handler.js';
 import { createBlockHub } from '../utils/editor.js';
 
@@ -87,8 +85,6 @@ export class EditorContainer extends NonShadowLitElement {
       )
     );
 
-    EditorKeydownHandler.init(this.pageBlockModel, this.page);
-
     if (!this.page) {
       throw new Error('Missing page for EditorContainer!');
     }
@@ -131,6 +127,12 @@ export class EditorContainer extends NonShadowLitElement {
     super.disconnectedCallback();
     this.page.awarenessStore.setLocalCursor(this.page, null);
     this._disposables.dispose();
+  }
+
+  protected firstUpdated(
+    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
+  ): void {
+    EditorKeydownHandler.init(this.pageBlockModel, this.page);
   }
 
   render() {
