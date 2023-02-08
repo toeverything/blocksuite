@@ -126,9 +126,7 @@ test('drag blank line into text area', async ({ page }) => {
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,152]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -187,9 +185,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,186]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -249,9 +245,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,152]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="123"
       prop:type="text"

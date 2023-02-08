@@ -62,7 +62,7 @@ export class ListBlockComponent extends NonShadowLitElement {
       justify-content: flex-start;
       color: var(--affine-code-color);
       font-size: 14px;
-      line-height: var(--affine-line-height-base);
+      line-height: var(--affine-line-height);
       user-select: none;
     }
     .affine-list-block__todo-prefix {

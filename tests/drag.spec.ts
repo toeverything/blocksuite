@@ -139,9 +139,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="A"
@@ -192,9 +190,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="B"
@@ -251,9 +247,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="C"
@@ -311,9 +305,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="C"

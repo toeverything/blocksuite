@@ -18,7 +18,6 @@ export class EmbedBlockComponent extends NonShadowLitElement {
       outline: none;
       border: 0;
       font-family: inherit;
-      color: inherit;
       text-align: center;
       color: var(--affine-icon-color);
       display: none;

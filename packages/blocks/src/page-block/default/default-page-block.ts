@@ -85,7 +85,7 @@ export class DefaultPageBlockComponent
     .affine-default-page-block-container {
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height-base);
+      line-height: var(--affine-line-height);
       color: var(--affine-text-color);
       font-weight: 400;
       width: 720px;

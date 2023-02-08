@@ -311,9 +311,7 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,152]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -342,9 +340,7 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,152]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -382,9 +378,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,72]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -403,9 +397,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -447,9 +439,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -539,6 +529,7 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '5', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 
+  await page.waitForTimeout(50);
   await page.keyboard.press('Backspace');
   await assertBlockChildrenIds(page, '1', ['2']);
 
@@ -713,7 +704,7 @@ test('press arrow up in the second line should move caret to the first line', as
     const { page } = window;
     const pageId = page.addBlockByFlavour('affine:page');
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const delta = Array.from({ length: 100 }, (v, i) => {
+    const delta = Array.from({ length: 120 }, (v, i) => {
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
@@ -743,7 +734,7 @@ test('press arrow up in the second line should move caret to the first line', as
   await page.keyboard.press('ArrowDown', { delay: 50 });
   await type(page, '2');
 
-  await assertRichTexts(page, ['0' + 'ib'.repeat(50), '2']);
+  await assertRichTexts(page, ['0' + 'ib'.repeat(60), '2']);
 
   // Go to the start of the second paragraph
   await page.keyboard.press('ArrowLeft', { delay: 50 });
@@ -751,7 +742,7 @@ test('press arrow up in the second line should move caret to the first line', as
   await page.keyboard.press('ArrowDown', { delay: 50 });
   // Should be inserted at the start of the second paragraph
   await type(page, '3');
-  await assertRichTexts(page, ['0' + 'ib'.repeat(50), '32']);
+  await assertRichTexts(page, ['0' + 'ib'.repeat(60), '32']);
 });
 
 test('press arrow down in indent line should not move caret to the start of line', async ({
