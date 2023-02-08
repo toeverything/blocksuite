@@ -963,14 +963,17 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await assertRichTexts(page, ['123', '45']);
 });
 
-test('should keep selection state on scroll', async ({ page }) => {
+// ↑
+test('should keep selection state when scrolling backward', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
   await assertRichTexts(page, ['123', '456', '789']);
 
-  for (let i = 0; i < 31; i++) {
+  for (let i = 0; i < 6; i++) {
     await pressEnter(page);
   }
 
@@ -980,9 +983,153 @@ test('should keep selection state on scroll', async ({ page }) => {
   await pressEnter(page);
   await type(page, '321');
 
-  const data = new Array(30).fill(`
+  const data = new Array(5).fill(`
 `);
   data.unshift(...['123', '456', '789']);
   data.push(...['987', '654', '321']);
   await assertRichTexts(page, data);
+
+  const [viewport, container, distance] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance);
+
+    const container = viewport.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    return [
+      viewport.getBoundingClientRect(),
+      container.getBoundingClientRect(),
+      distance,
+    ] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: container.right + 1,
+      y: viewport.height - 1,
+    },
+    {
+      x: container.right - 1,
+      y: 1,
+    },
+    {
+      // dont release mouse
+      beforeMouseUp: async () => {
+        await new Promise(resolve => {
+          const count = distance / (10 * 0.25);
+          setTimeout(resolve, (1000 / 60) * count);
+        });
+      },
+    }
+  );
+
+  const [total, scrollTop] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    return [
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0,
+      viewport.scrollTop,
+    ] as const;
+  });
+
+  expect(total).toBe(3 + 5 + 3);
+  expect(scrollTop).toBe(0);
+});
+
+// ↓
+test('should keep selection state when scrolling forward', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const data = new Array(5).fill(`
+`);
+  data.unshift(...['123', '456', '789']);
+  data.push(...['987', '654', '321']);
+  await assertRichTexts(page, data);
+
+  const [viewport, container, distance] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+
+    const container = viewport.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    return [
+      viewport.getBoundingClientRect(),
+      container.getBoundingClientRect(),
+      distance,
+    ] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: container.right + 1,
+      y: 1,
+    },
+    {
+      x: container.right - 1,
+      y: viewport.height - 1,
+    },
+    {
+      // dont release mouse
+      beforeMouseUp: async () => {
+        await new Promise(resolve => {
+          const count = distance / (10 * 0.25);
+          setTimeout(resolve, (1000 / 60) * count);
+        });
+      },
+    }
+  );
+
+  const [total, scrollTop] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    return [
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0,
+      viewport.scrollTop,
+    ] as const;
+  });
+
+  expect(total).toBe(3 + 5 + 3);
+  expect(Math.ceil(scrollTop)).toBe(distance);
 });
