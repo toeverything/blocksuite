@@ -1,8 +1,8 @@
-import type { SurfaceElement } from '@blocksuite/phasor';
+import type { PhasorElement, XYWH } from '@blocksuite/phasor';
 
 import type { TopLevelBlockModel } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
-import type { Selectable, ViewportState, XYWH } from './selection-manager.js';
+import type { Selectable, ViewportState } from './selection-manager.js';
 
 export const DEFAULT_SPACING = 64;
 
@@ -19,9 +19,9 @@ export function isBlock(
   return !!selectable && 'flavour' in selectable;
 }
 
-export function isSurfaceElement(
+export function isPhasorElement(
   selectable: Selectable | null
-): selectable is SurfaceElement {
+): selectable is PhasorElement {
   return !isBlock(selectable);
 }
 

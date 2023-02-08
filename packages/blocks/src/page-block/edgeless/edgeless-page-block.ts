@@ -2,6 +2,7 @@
 import './toolbar';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import type { XYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -36,7 +37,6 @@ import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
   ViewportState,
-  XYWH,
 } from './selection-manager.js';
 import type { EdgelessToolBar } from './toolbar.js';
 
@@ -294,7 +294,7 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const { _selection, viewport } = this;
+    const { _selection, viewport, surface } = this;
     const { frameSelectionRect } = _selection;
     const selectionState = this._selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = this.viewport;
@@ -341,6 +341,7 @@ export class EdgelessPageBlockComponent
                 .viewport=${viewport}
                 .state=${selectionState}
                 .rect=${selectionState.rect}
+                .surface=${surface}
                 .zoom=${zoom}
                 .readonly=${this.readonly}
               ></edgeless-selected-rect>

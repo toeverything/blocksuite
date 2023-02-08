@@ -12,6 +12,7 @@ import {
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
+import { deserializeXYWH } from './index.js';
 import { Renderer } from './renderer.js';
 
 export class SurfaceManager {
@@ -161,6 +162,14 @@ export class SurfaceManager {
         const yElement = this._yElements.get(id) as Y.Map<unknown>;
         this._handleYElementAdded(yElement);
       } else if (type.action === 'update') {
+        const yElement = this._yElements.get(id) as Y.Map<unknown>;
+        const phasorElement = this._elements.get(id);
+        assertExists(phasorElement);
+        this._renderer.removeElement(phasorElement);
+        phasorElement.setBound(
+          ...deserializeXYWH(yElement.get('xywh') as string)
+        );
+        this._renderer.addElement(phasorElement);
         console.error('update event on yElements is not supported', event);
       } else if (type.action === 'delete') {
         const element = this._elements.get(id);

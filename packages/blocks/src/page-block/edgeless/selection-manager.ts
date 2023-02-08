@@ -1,4 +1,4 @@
-import type { SurfaceElement } from '@blocksuite/phasor';
+import type { PhasorElement } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
 
 import {
@@ -14,7 +14,7 @@ import type { MouseModeController } from './mode-controllers/index.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import { initWheelEventHandlers } from './utils.js';
 
-export type Selectable = TopLevelBlockModel | SurfaceElement;
+export type Selectable = TopLevelBlockModel | PhasorElement;
 
 export interface EdgelessHoverState {
   rect: DOMRect;
@@ -43,8 +43,6 @@ export interface SelectionArea {
   start: DOMPoint;
   end: DOMPoint;
 }
-
-export type XYWH = [number, number, number, number];
 
 const MIN_ZOOM = 0.3;
 

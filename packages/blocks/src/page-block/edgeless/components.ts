@@ -1,8 +1,10 @@
 import '../../__internal__/index.js';
 
+import { SurfaceManager, XYWH } from '@blocksuite/phasor';
+import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -16,12 +18,12 @@ import type {
   EdgelessHoverState,
   EdgelessSelectionState,
   ViewportState,
-  XYWH,
 } from './selection-manager.js';
 import {
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
   isBlock,
+  isPhasorElement,
   PADDING_X,
   PADDING_Y,
 } from './utils.js';
@@ -41,7 +43,7 @@ function getCommonRectStyle(
     width: rect.width + (isSurfaceElement ? 0 : PADDING_X) * zoom + 'px',
     height: rect.height + (isSurfaceElement ? 0 : PADDING_Y) * zoom + 'px',
     borderRadius: `${10 * zoom}px`,
-    pointerEvents: 'none',
+    pointerEvents: isSurfaceElement ? 'all' : 'none',
     boxSizing: 'border-box',
     backgroundColor:
       isSurfaceElement && selected ? 'var(--affine-selected-color)' : '',
@@ -213,6 +215,12 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Object })
   rect!: DOMRect;
 
+  @property({ type: SurfaceManager })
+  surface!: SurfaceManager;
+
+  @query('.affine-edgeless-selected-rect')
+  private _selectedRect!: HTMLDivElement;
+
   private _dragStartInfo: {
     startMouseX: number;
     startMouseY: number;
@@ -298,9 +306,12 @@ export class EdgelessSelectedRect extends LitElement {
     e.stopPropagation();
     if (this.state?.type === 'single') {
       const { rect, selected } = this.state;
-      if (!isBlock(selected)) return;
 
-      const [x, y] = JSON.parse(selected.xywh) as XYWH;
+      const [x, y] = deserializeXYWH(
+        isBlock(selected)
+          ? selected.xywh
+          : (selected.serialize().xywh as string)
+      );
       this._dragStartInfo = {
         startMouseX: e.clientX,
         startMouseY: e.clientY,
@@ -311,6 +322,7 @@ export class EdgelessSelectedRect extends LitElement {
         height: rect.height,
         direction,
       };
+
       // parent ele is the edgeless block container
       this.parentElement?.addEventListener('mousemove', this._onDragMove);
       this.parentElement?.addEventListener('mouseup', this._onDragEnd);
@@ -321,10 +333,12 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       const { viewport } = this;
       const { selected } = this.state;
-      if (!isBlock(selected)) return;
 
-      const { xywh } = selected;
-      const [x, y, w, h] = JSON.parse(xywh) as XYWH;
+      const [x, y, w, h] = deserializeXYWH(
+        isBlock(selected)
+          ? selected.xywh
+          : (selected.serialize().xywh as string)
+      );
       let newX = x;
       let newY = y;
       let newW = w;
@@ -379,43 +393,57 @@ export class EdgelessSelectedRect extends LitElement {
       if (newW === w && newX === x && newY === y && newW === w) {
         return;
       }
-      const frameBlock = getBlockById<'div'>(selected.id);
-      const frameContainer = frameBlock?.parentElement;
-      // first change container`s x/w directly for get frames real height
-      if (frameContainer) {
-        frameContainer.style.width = newW + 'px';
-        frameContainer.style.translate = `translate(${newX}px, ${newY}px) scale(${this.zoom})`;
+
+      if (isBlock(selected)) {
+        const frameBlock = getBlockById<'div'>(selected.id);
+        const frameContainer = frameBlock?.parentElement;
+        // first change container`s x/w directly for get frames real height
+        if (frameContainer) {
+          frameContainer.style.width = newW + 'px';
+          frameContainer.style.translate = `translate(${newX}px, ${newY}px) scale(${this.zoom})`;
+        }
+        // reset the width of the container may trigger animation
+        requestAnimationFrame(() => {
+          // refresh xywh by model
+          if (!this.lock) {
+            selected.page.captureSync();
+            this.lock = true;
+          }
+          if (this.state.type === 'single') {
+            this.state.rect = getSelectionBoxBound(viewport, selected.xywh);
+          } else {
+            console.error('unexpected state.type:', this.state.type);
+          }
+          const newXywh = serializeXYWH(
+            newX,
+            newY,
+            newW,
+            (frameBlock?.getBoundingClientRect().height || 0) / this.zoom
+          );
+          selected.xywh = newXywh;
+          selected.page.updateBlock(selected, { xywh: newXywh });
+        });
+      } else {
+        this.surface.setElementBound(selected.id, {
+          x: newX,
+          y: newY,
+          w: newW,
+          h: newH,
+        });
+        this.state.rect = getSelectionBoxBound(
+          viewport,
+          selected.serialize().xywh as string
+        );
       }
-      // reset the width of the container may trigger animation
-      requestAnimationFrame(() => {
-        // refresh xywh by model
-        if (!this.lock) {
-          selected.page.captureSync();
-          this.lock = true;
-        }
-        if (this.state.type === 'single') {
-          this.state.rect = getSelectionBoxBound(viewport, selected.xywh);
-        } else {
-          console.error('unexpected state.type:', this.state.type);
-        }
-        const newXywh = JSON.stringify([
-          newX,
-          newY,
-          newW,
-          (frameBlock?.getBoundingClientRect().height || 0) / this.zoom,
-        ]);
-        selected.xywh = newXywh;
-        selected.page.updateBlock(selected, { xywh: newXywh });
-      });
     }
   };
 
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
     if (this.state.type === 'single') {
-      if (!isBlock(this.state.selected)) return;
-
-      this.state.selected.page.captureSync();
+      if (isBlock(this.state.selected)) {
+        this.state.selected.page.captureSync();
+      }
     } else {
       console.error('unexpected state.type:', this.state.type);
     }
@@ -423,21 +451,74 @@ export class EdgelessSelectedRect extends LitElement {
     this.parentElement?.removeEventListener('mouseup', this._onDragEnd);
   };
 
+  private _onSelectedRectMouseDown = (event: MouseEvent) => {
+    if (this.state.type !== 'single') {
+      return;
+    }
+    const { selected } = this.state;
+    if (isBlock(selected)) {
+      return;
+    }
+
+    const lastState = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    const mousemove = (e: MouseEvent) => {
+      if (this.state.type !== 'single') {
+        return;
+      }
+      const deltaX = e.clientX - lastState.x;
+      const deltaY = e.clientY - lastState.y;
+      const newX = selected.x + deltaX / this.zoom;
+      const newY = selected.y + deltaY / this.zoom;
+
+      this.surface.setElementBound(selected.id, {
+        x: newX,
+        y: newY,
+        w: selected.w,
+        h: selected.h,
+      });
+      this.state.rect = getSelectionBoxBound(
+        this.viewport,
+        selected.serialize().xywh as string
+      );
+
+      lastState.x = e.clientX;
+      lastState.y = e.clientY;
+    };
+
+    const mouseup = () => {
+      this.parentElement?.removeEventListener('mousemove', mousemove);
+      this.parentElement?.removeEventListener('mouseup', mouseup);
+    };
+
+    this.parentElement?.addEventListener('mousemove', mousemove);
+    this.parentElement?.addEventListener('mouseup', mouseup);
+
+    event.stopPropagation();
+  };
+
   render() {
     if (this.state.type === 'none') return null;
 
+    const _isPhasorElement = isPhasorElement(this.state.selected);
     // const isSurfaceElement = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
-      zIndex: '0',
-      ...getCommonRectStyle(this.rect, this.zoom, false, true),
+      zIndex: _isPhasorElement ? '10' : '0',
+      ...getCommonRectStyle(this.rect, this.zoom, _isPhasorElement, true),
     };
-    const handlers = this._getHandles(this.rect, false);
+    const handlers = this._getHandles(this.rect, _isPhasorElement);
     return html`
       ${this.readonly ? null : handlers}
-      <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>
+      <div
+        class="affine-edgeless-selected-rect"
+        .onmousedown=${this._onSelectedRectMouseDown}
+        style=${styleMap(style)}
+      ></div>
     `;
   }
 }
