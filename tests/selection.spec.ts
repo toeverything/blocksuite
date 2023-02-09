@@ -439,8 +439,7 @@ test('select text in the same line with dragging leftward and move outside the a
   await assertRichTexts(page, ['123', 'abc', '789']);
 });
 
-// FIXME: https://github.com/toeverything/blocksuite/issues/1066
-test.skip('select text in the same line with dragging rightward and move outside the affine-frame', async ({
+test('select text in the same line with dragging rightward and move outside the affine-frame', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
