@@ -14,7 +14,8 @@
     "./database": "./src/database.ts",
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
-    "./config": "./src/config/index.ts"
+    "./config": "./src/config/index.ts",
+    "./error": "./src/error.ts"
   },
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -25,6 +26,7 @@
       "./database": "./dist/database.js",
       "./utils": "./dist/utils.js",
       "./debug": "./dist/debug.js",
+      "./error": "./dist/error.js",
       "./config": "./dist/config/index.js"
     },
     "files": [
