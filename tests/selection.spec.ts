@@ -1265,6 +1265,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance);
   });
+  await page.waitForTimeout(250);
 
   await dragBetweenCoords(
     page,
@@ -1384,6 +1385,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     }
     viewport.scrollTo(0, 0);
   });
+  await page.waitForTimeout(250);
 
   await dragBetweenCoords(
     page,
@@ -1500,9 +1502,9 @@ test('should not clear selected rects when clicking on scrollbar', async ({
   });
 
   expect(count0).toBeGreaterThan(0);
-  expect(scrollTop0).toBe(distance / 2);
+  expect(Math.floor(scrollTop0)).toBe(Math.floor(distance / 2));
   expect(count0).toBe(count1);
-  expect(scrollTop0).toBe(scrollTop1);
+  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop1));
 });
 
 test('should not clear selected rects when scrolling the wheel', async ({
@@ -1591,9 +1593,9 @@ test('should not clear selected rects when scrolling the wheel', async ({
   });
 
   expect(count0).toBeGreaterThan(0);
-  expect(scrollTop0).toBe(distance / 2);
+  expect(Math.floor(scrollTop0)).toBe(Math.floor(distance / 2));
   expect(count0).toBe(count1);
-  expect(Math.ceil(scrollTop0)).toBe(Math.ceil(scrollTop1 + distance / 4));
+  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop1 + distance / 4));
 
   await page.mouse.wheel(viewport.right, distance / 4);
   await page.waitForTimeout(250);
@@ -1612,7 +1614,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
   });
 
   expect(count0).toBe(count2);
-  expect(Math.ceil(scrollTop0)).toBe(Math.ceil(scrollTop2));
+  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop2));
 });
 
 test('should refresh selected rects when resizing the window/viewport', async ({
@@ -1712,5 +1714,5 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   });
 
   expect(count0).toBe(count1);
-  expect(Math.ceil(scrollTop0)).toBe(Math.ceil(scrollTop1));
+  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop1));
 });

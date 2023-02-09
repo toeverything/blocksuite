@@ -449,7 +449,7 @@ export class DefaultSelectionManager {
       // TODO: for the behavior of scrolling, see the native selection
       // speed easeOutQuad + easeInQuad
       if (Math.ceil(scrollTop) < max && clientHeight - y < this._thresold) {
-        // down
+        // ↓
         const d = (this._thresold - (clientHeight - y)) * 0.25;
         scrollTop += d;
         viewport.scrollTop += d;
@@ -460,7 +460,7 @@ export class DefaultSelectionManager {
           scrollTop: Math.min(scrollTop, max),
         });
       } else if (scrollTop > 0 && y < this._thresold) {
-        // up
+        // ↑
         const d = (y - this._thresold) * 0.25;
         scrollTop += d;
         viewport.scrollTop += d;
