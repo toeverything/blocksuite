@@ -465,7 +465,7 @@ export class DefaultPageBlockComponent
     );
     const selectionRect = FrameSelectionRect(
       this.frameSelectionRect,
-      this.defaultViewportElement.scrollTop
+      this.defaultViewportElement?.scrollTop ?? 0
       // We don't need viewport offset as frameSelectionRect is already an absolute rect
       // this.viewportScrollOffset
     );
