@@ -2,6 +2,7 @@
 import './toolbar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import type { XYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -38,7 +39,6 @@ import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
   ViewportState,
-  XYWH,
 } from './selection-manager.js';
 import type { EdgelessToolBar } from './toolbar.js';
 

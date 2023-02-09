@@ -1,5 +1,6 @@
 import '../../__internal__/index.js';
 
+import type { XYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -16,7 +17,6 @@ import type {
   EdgelessHoverState,
   EdgelessSelectionState,
   ViewportState,
-  XYWH,
 } from './selection-manager.js';
 import {
   FRAME_MIN_LENGTH,

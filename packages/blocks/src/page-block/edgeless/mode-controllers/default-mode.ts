@@ -1,4 +1,5 @@
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
+import type { XYWH } from '@blocksuite/phasor';
 
 import type {
   DefaultMouseMode,
@@ -16,7 +17,7 @@ import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../../utils/position.js';
-import type { Selectable, XYWH } from '../selection-manager.js';
+import type { Selectable } from '../selection-manager.js';
 import { getSelectionBoxBound, isBlock, pick } from '../utils.js';
 import { MouseModeController } from './index.js';
 
