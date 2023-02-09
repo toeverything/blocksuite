@@ -7,7 +7,7 @@ replace() {
   #   for example: `3.1.1-alpha.0` into `3.1.1`
   VERSION=$(jq -r '.version' package.json | cut -d "-" -f 1)
 
-  npm --no-git-tag-version version "$VERSION-$BUILD_VERSION"
+  pnpm --no-git-tag-version version "$VERSION-$BUILD_VERSION"
 }
 
 cd packages/blocks
