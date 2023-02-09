@@ -23,7 +23,6 @@ import {
   isMultiBlockRange,
   SelectionPosition,
 } from '../../__internal__/index.js';
-import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getService } from '../../__internal__/service.js';
 import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
@@ -424,26 +423,6 @@ export class DefaultPageBlockComponent
 
     tryUpdateFrameSize(this.page, 1);
     this.addEventListener('keydown', e => {
-      if (e.code === 'Tab' && this.selection.state.type === 'native') {
-        const range = getCurrentRange();
-        const start = range.startContainer as HTMLElement;
-        const end = range.endContainer as HTMLElement;
-        const startModel = start.parentElement?.closest('rich-text')?.model;
-        const endModel = end.parentElement?.closest('rich-text')?.model;
-        if (startModel && endModel) {
-          let currentModel: BaseBlockModel | null = startModel;
-          const models: BaseBlockModel[] = [];
-          while (currentModel) {
-            const next = this.page.getNextSibling(currentModel);
-            models.push(currentModel);
-            if (currentModel.id === endModel.id) {
-              break;
-            }
-            currentModel = next;
-          }
-          handleMultiBlockIndent(this.page, models);
-        }
-      }
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
       tryUpdateFrameSize(this.page, 1);
     });
