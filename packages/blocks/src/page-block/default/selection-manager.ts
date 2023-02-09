@@ -718,6 +718,7 @@ export class DefaultSelectionManager {
     }
   };
 
+  // TODO: Keep selecting blocks?
   private _onContainerMouseOut = (_: SelectionEvent) => {
     // console.log('mouseout', e);
   };
