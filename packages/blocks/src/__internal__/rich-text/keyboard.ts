@@ -255,10 +255,6 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'enter',
       handler: enterMarkdownMatch,
     },
-    spaceMarkdownMatch: {
-      key: ' ',
-      handler: spaceMarkdownMatch,
-    },
     hardEnter: {
       key: 'enter',
       handler() {
@@ -288,6 +284,10 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       key: 'tab',
       shiftKey: true,
       handler: onUnindent,
+    },
+    spaceMarkdownMatch: {
+      key: ' ',
+      handler: spaceMarkdownMatch,
     },
     // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
     'list autofill': {
