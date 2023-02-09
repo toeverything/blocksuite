@@ -1,8 +1,9 @@
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { css, html, unsafeCSS } from 'lit';
-import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
-import style from './style.css?inline';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
 import { SearchIcon } from './icons.js';
 
 // TODO extract to a common list component
@@ -10,7 +11,89 @@ import { SearchIcon } from './icons.js';
 export class LangList extends NonShadowLitElement {
   static get styles() {
     return css`
-      ${unsafeCSS(style)}
+      lang-list {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        background: var(--affine-popover-background);
+        border-radius: 10px;
+        top: 24px;
+        z-index: 1;
+      }
+
+      .lang-list-container {
+        box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
+          -4px -4px 13px rgba(58, 76, 92, 0.02),
+          6px 6px 36px rgba(58, 76, 92, 0.06);
+        border-radius: 0 10px 10px 10px;
+      }
+
+      .lang-list-button-container {
+        position: relative;
+        overflow: scroll;
+        height: 424px;
+        width: 200px;
+        padding-top: 5px;
+        padding-left: 4px;
+        padding-right: 4px;
+        /*scrollbar-color: #fff0 #fff0;*/
+      }
+
+      /*
+      .lang-list-button-container::-webkit-scrollbar {
+        background: none;
+      }
+      */
+
+      .lang-item {
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 12px;
+        margin-bottom: 5px;
+      }
+
+      code-block-button {
+        font-size: var(--affine-font-sm);
+        text-align: justify;
+        line-height: 22px;
+      }
+
+      code-block-button:hover {
+        color: var(--affine-primary-color);
+        background: var(--affine-hover-background);
+      }
+
+      #filter-input {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        width: 192px;
+        border: 1px solid #d0d7e3;
+        border-radius: 10px;
+        padding-left: 44px;
+        padding-top: 4px;
+
+        font-family: var(--affine-font-family);
+        font-size: var(--affine-font-sm);
+        box-sizing: border-box;
+        color: inherit;
+        background: transparent;
+      }
+
+      #filter-input:focus {
+        outline: none;
+      }
+
+      #filter-input::placeholder {
+        color: #888a9e;
+        font-size: var(--affine-font-sm);
+      }
+
+      .search-icon {
+        left: 13.65px;
+        position: absolute;
+        top: 16px;
+      }
     `;
   }
 
@@ -20,7 +103,7 @@ export class LangList extends NonShadowLitElement {
   @property()
   id!: string;
 
-  @property({ type: String })
+  @property()
   selectedLanguage = '';
 
   @property()
@@ -245,7 +328,7 @@ export class LangList extends NonShadowLitElement {
   private _clickHandler(e: MouseEvent) {
     const target = e.target as HTMLElement;
     if (
-      !target.closest('.container')?.closest(`[data-block-id="${this.id}"]`)
+      !target.closest('.container')?.closest(`[${BLOCK_ID_ATTR}="${this.id}"]`)
     ) {
       this._dispose();
     }

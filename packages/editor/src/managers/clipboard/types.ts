@@ -1,3 +1,5 @@
+import type { DeltaOperation } from 'quill';
+
 export enum CLIPBOARD_MIMETYPE {
   BLOCKS_CLIP_WRAPPED = 'blocksuite/x-c+w',
   HTML = 'text/html',
@@ -28,12 +30,13 @@ export interface SelectedBlock {
 
 export type OpenBlockInfo = {
   flavour: string;
-  type: string;
-  text: Record<string, unknown>[];
+  type?: string;
+  text: DeltaOperation[];
   checked?: boolean;
   children: OpenBlockInfo[];
   sourceId?: string;
   caption?: string;
   width?: number;
   height?: number;
+  language?: string;
 };

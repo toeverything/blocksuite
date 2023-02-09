@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as Y from 'yjs';
-import type { AwarenessAdapter } from './awareness.js';
 import type { DeltaOperation, Quill } from 'quill';
+import * as Y from 'yjs';
+
 import type { Space } from './space.js';
 
 type PrelimTextType = 'splitLeft' | 'splitRight';
@@ -9,10 +9,10 @@ type PrelimTextType = 'splitLeft' | 'splitRight';
 export type TextType = PrelimText | Text;
 
 // Removes the pending '\n's if it has no attributes
-export function normQuillDelta(delta: any) {
+export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
   if (delta.length > 0) {
     const d = delta[delta.length - 1];
-    const insert = d.insert;
+    const insert: string = d.insert;
     if (
       d.attributes === undefined &&
       insert !== undefined &&
@@ -114,14 +114,16 @@ declare module 'yjs' {
 }
 
 export class Text {
-  private _space: Space;
   private _yText: Y.Text;
+  /**
+   * @internal
+   */
+  public delayedJobs: (() => void)[] = [];
 
   // TODO toggle transact by options
   private _shouldTransact = true;
 
-  constructor(space: Space, input: Y.Text | string) {
-    this._space = space;
+  constructor(input: Y.Text | string) {
     if (typeof input === 'string') {
       this._yText = new Y.Text(input);
     } else {
@@ -129,9 +131,18 @@ export class Text {
     }
   }
 
-  static fromDelta(space: Space, delta: DeltaOperation[]) {
-    const result = new Text(space, '');
-    result.applyDelta(delta);
+  /**
+   * @internal
+   */
+  public doDelayedJobs() {
+    this.delayedJobs.forEach(cb => cb());
+    this.delayedJobs = [];
+  }
+
+  static fromDelta(delta: DeltaOperation[]) {
+    const result = new Text('');
+    // In the first time, yDoc does not exist.
+    result.delayedJobs.push(() => result.applyDelta(delta));
     return result;
   }
 
@@ -140,18 +151,27 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    const { _space, _shouldTransact } = this;
-    _shouldTransact ? _space.transact(callback) : callback();
+    if (this._shouldTransact) {
+      const doc = this._yText.doc;
+      if (!doc) {
+        throw new Error('cannot find doc');
+      }
+      doc.transact(() => {
+        callback();
+      }, doc.clientID);
+    } else {
+      callback();
+    }
   }
 
   clone() {
-    return new Text(this._space, this._yText.clone());
+    return new Text(this._yText.clone());
   }
 
-  split(index: number): [PrelimText, PrelimText] {
+  split(index: number, length: number): [PrelimText, PrelimText] {
     return [
       new PrelimText('splitLeft', index),
-      new PrelimText('splitRight', index),
+      new PrelimText('splitRight', index + length),
     ];
   }
 
@@ -162,7 +182,7 @@ export class Text {
     });
   }
 
-  insertList(insertTexts: Record<string, unknown>[], index: number) {
+  insertList(insertTexts: DeltaOperation[], index: number) {
     this._transact(() => {
       for (let i = insertTexts.length - 1; i >= 0; i--) {
         this._yText.insert(
@@ -179,7 +199,7 @@ export class Text {
   join(other: Text) {
     this._transact(() => {
       const yOther = other._yText;
-      const delta = yOther.toDelta();
+      const delta: DeltaOperation[] = yOther.toDelta();
       delta.splice(0, 0, { retain: this._yText.length });
       this._yText.applyDelta(delta);
       this._yText.meta = { join: true };
@@ -220,39 +240,48 @@ export class Text {
     });
   }
 
-  applyDelta(delta: any) {
+  applyDelta(delta: DeltaOperation[]) {
     this._transact(() => {
       this._yText?.applyDelta(delta);
     });
   }
 
-  toDelta() {
+  toDelta(): DeltaOperation[] {
     return this._yText?.toDelta() || [];
   }
 
-  sliceToDelta(begin: number, end?: number) {
+  sliceToDelta(begin: number, end?: number): DeltaOperation[] {
+    const result: DeltaOperation[] = [];
     if (end && begin >= end) {
-      return [];
+      return result;
     }
 
     const delta = this.toDelta();
     if (begin < 1 && !end) {
       return delta;
     }
-    const result = [];
+
     if (delta && delta instanceof Array) {
       let charNum = 0;
       for (let i = 0; i < delta.length; i++) {
         const content = delta[i];
-        let contentText = content.insert || '';
+        let contentText: string = content.insert || '';
         const contentLen = contentText.length;
-        if (end && charNum + contentLen > end) {
-          contentText = contentText.slice(0, end - charNum);
-        }
-        if (charNum + contentLen > begin && result.length === 0) {
-          contentText = contentText.slice(begin - charNum);
-        }
-        if (charNum + contentLen > begin && result.length === 0) {
+
+        const isLastOp = end && charNum + contentLen > end;
+        const isFirstOp = charNum + contentLen > begin && result.length === 0;
+        if (isFirstOp && isLastOp) {
+          contentText = contentText.slice(begin - charNum, end - charNum);
+          result.push({
+            ...content,
+            insert: contentText,
+          });
+          break;
+        } else if (isFirstOp || isLastOp) {
+          contentText = isLastOp
+            ? contentText.slice(0, end - charNum)
+            : contentText.slice(begin - charNum);
+
           result.push({
             ...content,
             insert: contentText,
@@ -260,9 +289,11 @@ export class Text {
         } else {
           result.length > 0 && result.push(content);
         }
+
         if (end && charNum + contentLen > end) {
           break;
         }
+
         charNum = charNum + contentLen;
       }
     }
@@ -280,7 +311,6 @@ export class RichTextAdapter {
   readonly yText: Y.Text;
   readonly quill: Quill;
   readonly quillCursors: any;
-  readonly awareness: AwarenessAdapter;
   private _negatedUsedFormats: Record<string, any>;
 
   constructor(space: Space, yText: Y.Text, quill: Quill) {
@@ -288,8 +318,6 @@ export class RichTextAdapter {
     this.yText = yText;
     this.doc = space.doc;
     this.quill = quill;
-
-    this.awareness = space.awareness;
     const quillCursors = quill.getModule('cursors') || null;
     this.quillCursors = quillCursors;
     // This object contains all attributes used in the quill instance
@@ -388,6 +416,7 @@ export class RichTextAdapter {
     return {
       anchor,
       focus,
+      selection,
     };
   }
 

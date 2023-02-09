@@ -1,22 +1,34 @@
 /// <reference types="vite/client" />
-import { html, css, unsafeCSS, PropertyValueMap } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { Signal, Page, Text, BaseBlockModel } from '@blocksuite/store';
-import type { PageBlockModel } from '../index.js';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
+import { Utils } from '@blocksuite/store';
 import {
-  assertExists,
+  BaseBlockModel,
+  DisposableGroup,
+  Page,
+  Signal,
+  Text,
+} from '@blocksuite/store';
+import autosize from 'autosize';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
+import {
   asyncFocusRichText,
-  BLOCK_ID_ATTR,
   BlockChildrenContainer,
   type BlockHost,
   getCurrentRange,
-  getModelsByRange,
+  getRichTextByModel,
   hotkey,
   isMultiBlockRange,
   SelectionPosition,
 } from '../../__internal__/index.js';
-import { DefaultSelectionManager } from './selection-manager.js';
-import { deleteModels, tryUpdateGroupSize } from '../utils/index.js';
+import { getService } from '../../__internal__/service.js';
+import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import type { DragHandle } from '../../components/index.js';
+import type { PageBlockModel } from '../index.js';
+import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
+import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
   EmbedEditingContainer,
@@ -24,15 +36,12 @@ import {
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components.js';
+import { DefaultSelectionManager } from './selection-manager.js';
 import {
-  bindHotkeys,
+  createDragHandle,
+  getAllowSelectedBlocks,
   isControlledKeyboardEvent,
-  removeHotkeys,
 } from './utils.js';
-import style from './style.css?inline';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
-import { getService } from '../../__internal__/service.js';
-import autosize from 'autosize';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -66,7 +75,59 @@ export class DefaultPageBlockComponent
   implements BlockHost
 {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-default-viewport {
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .affine-default-page-block-container {
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
+      color: var(--affine-text-color);
+      font-weight: 400;
+      width: var(--affine-editor-width);
+      margin: 0 auto;
+      /* cursor: crosshair; */
+      cursor: default;
+
+      min-height: calc(100% - 78px);
+      height: auto;
+      overflow: hidden;
+      padding-bottom: 150px;
+    }
+
+    .affine-default-page-block-container > .affine-block-children-container {
+      padding-left: 0;
+    }
+
+    .affine-default-page-block-title {
+      /* autosize will calculate height automatically */
+      height: 0;
+      width: 100%;
+      font-size: 40px;
+      line-height: 50px;
+      font-weight: 700;
+      outline: none;
+      resize: none;
+      border: 0;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .affine-default-page-block-title::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-default-page-block-title:disabled {
+      background-color: transparent;
+    }
+
+    .affine-default-page-block-title-container {
+      margin-top: 78px;
+    }
   `;
 
   @property()
@@ -82,11 +143,26 @@ export class DefaultPageBlockComponent
 
   lastSelectionPosition: SelectionPosition = 'start';
 
+  /**
+   * shard components
+   */
+  components: {
+    dragHandle: DragHandle | null;
+  } = {
+    dragHandle: null,
+  };
+
   @property()
   mouseRoot!: HTMLElement;
 
   @state()
   frameSelectionRect: DOMRect | null = null;
+
+  @state()
+  viewportScrollOffset = {
+    left: 0,
+    top: 0,
+  };
 
   @state()
   selectedRects: DOMRect[] = [];
@@ -105,6 +181,9 @@ export class DefaultPageBlockComponent
   @state()
   codeBlockOption!: CodeBlockOption | null;
 
+  @query('.affine-default-viewport')
+  defaultViewportElement!: HTMLDivElement;
+
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
@@ -118,17 +197,13 @@ export class DefaultPageBlockComponent
 
   public isCompositionStart = false;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   model!: PageBlockModel;
 
   @query('.affine-default-page-block-title')
   private _title!: HTMLTextAreaElement;
 
-  private _onTitleKeyDown(e: KeyboardEvent) {
+  private async _onTitleKeyDown(e: KeyboardEvent) {
     const hasContent = !this.page.isEmpty;
     const { page, model, _title } = this;
 
@@ -138,15 +213,23 @@ export class DefaultPageBlockComponent
       const contentLeft = _title.value.slice(0, titleCursorIndex);
       const contentRight = _title.value.slice(titleCursorIndex);
 
-      const defaultGroup = model.children[0];
+      const defaultFrame = model.children[0];
       const props = {
         flavour: 'affine:paragraph',
-        text: new Text(page, contentRight),
+        text: new Text(contentRight),
       };
-      const newFirstParagraphId = page.addBlock(props, defaultGroup, 0);
+      // Fixes: https://github.com/toeverything/blocksuite/pull/1008
+      //  A workaround that fixes rich-text still be listened when press enter on title.
+      //  Other solutions like `quill.disable()` or remove all listener when blur will won't work.
+      const block = defaultFrame.children.find(block =>
+        getRichTextByModel(block)
+      );
+      if (block) {
+        await asyncFocusRichText(this.page, block.id);
+      }
+      const newFirstParagraphId = page.addBlock(props, defaultFrame, 0);
       page.updateBlock(model, { title: contentLeft });
       page.workspace.setPageMeta(page.id, { title: contentLeft });
-      autosize.update(this._title);
       asyncFocusRichText(this.page, newFirstParagraphId);
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
@@ -160,8 +243,8 @@ export class DefaultPageBlockComponent
     if (!this.model.id) {
       const title = (e.target as HTMLTextAreaElement).value;
       const pageId = page.addBlock({ flavour: 'affine:page', title });
-      const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-      page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+      const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+      page.addBlock({ flavour: 'affine:paragraph' }, frameId);
       return;
     }
 
@@ -173,9 +256,12 @@ export class DefaultPageBlockComponent
     page.workspace.setPageMeta(page.id, { title });
   }
 
+  // FIXME: keep embed selected rects after scroll
   private _clearSelection = () => {
-    this.selection.state.clear();
-    this.signals.updateSelectedRects.emit([]);
+    // block selection support scroll, therefore we do not clear selection
+    if (this.selection.state.type !== 'block') {
+      this.selection.state.clear();
+    }
     this.signals.updateEmbedRects.emit([]);
     this.signals.updateEmbedEditingState.emit(null);
   };
@@ -230,8 +316,7 @@ export class DefaultPageBlockComponent
     ) {
       const range = getCurrentRange();
       if (isMultiBlockRange(range)) {
-        const intersectedModels = getModelsByRange(range);
-        deleteModels(this.page, intersectedModels);
+        deleteModelsByRange(this.page);
       }
       window.removeEventListener('keydown', this._handleNativeKeydown);
     } else if (window.getSelection()?.type !== 'Range') {
@@ -240,15 +325,70 @@ export class DefaultPageBlockComponent
     }
   };
 
+  private _initDragHandle = () => {
+    const createHandle = () => {
+      this.components.dragHandle = createDragHandle(this);
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+        if (
+          draggingBlock &&
+          Utils.doesInsideBlockByFlavour(
+            this.page,
+            draggingBlock,
+            'affine:database'
+          )
+        ) {
+          return getAllowSelectedBlocks(
+            this.page.getParent(draggingBlock) as BaseBlockModel
+          );
+        }
+        return getAllowSelectedBlocks(this.model);
+      };
+    };
+    if (
+      this.page.awarenessStore.getFlag('enable_drag_handle') &&
+      !this.components.dragHandle
+    ) {
+      createHandle();
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_drag_handle,
+        enable => {
+          if (enable) {
+            if (!this.components.dragHandle) {
+              createHandle();
+            }
+          } else {
+            this.components.dragHandle?.remove();
+            this.components.dragHandle = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  };
+
+  private _getViewportScrollOffset() {
+    const container = this.defaultViewportElement;
+    const rect = container.getBoundingClientRect();
+    return {
+      left: container.scrollLeft - rect.left,
+      top: container.scrollTop - rect.top,
+    };
+  }
+
   firstUpdated() {
     autosize(this._title);
-    bindHotkeys(this.page, this.selection, this.signals, this.model);
+    bindHotkeys(this.page, this.selection, this.signals);
 
     hotkey.enableHotkey();
     this.model.propsUpdated.on(() => {
       if (this.model.title !== this._title.value) {
         this._title.value = this.model.title || '';
         this.requestUpdate();
+        autosize.update(this._title);
       }
     });
 
@@ -257,6 +397,7 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateSelectedRects.on(rects => {
+      this.viewportScrollOffset = this._getViewportScrollOffset();
       this.selectedRects = rects;
       this.requestUpdate();
     });
@@ -281,10 +422,10 @@ export class DefaultPageBlockComponent
       }
     });
 
-    tryUpdateGroupSize(this.page, 1);
+    tryUpdateFrameSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateGroupSize(this.page, 1);
+      tryUpdateFrameSize(this.page, 1);
     });
 
     // TMP: clear selected rects on scroll
@@ -292,11 +433,21 @@ export class DefaultPageBlockComponent
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
+    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     focusTextEnd(this._title);
+  }
+
+  private _disposables = new DisposableGroup();
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._initDragHandle();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this._disposables.dispose();
+    this.components.dragHandle?.remove();
 
     removeHotkeys();
     this.selection.dispose();
@@ -308,26 +459,23 @@ export class DefaultPageBlockComponent
     document.removeEventListener('wheel', this._clearSelection);
   }
 
-  protected updated(changedProperties: PropertyValueMap<this>) {
-    const titleInput = this.querySelector('.affine-default-page-block-title');
-
-    if (this.readonly) {
-      titleInput?.setAttribute('disabled', 'disabled');
-    } else {
-      titleInput?.removeAttribute('disabled');
-    }
-  }
-
   render() {
-    this.setAttribute(BLOCK_ID_ATTR, this.model.id);
-
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
-    const selectionRect = FrameSelectionRect(this.frameSelectionRect);
-    const selectedRectsContainer = SelectedRectsContainer(this.selectedRects);
+    const selectionRect = FrameSelectionRect(
+      this.frameSelectionRect,
+      this.defaultViewportElement?.scrollTop ?? 0
+      // We don't need viewport offset as frameSelectionRect is already an absolute rect
+      // this.viewportScrollOffset
+    );
+    const selectedRectsContainer = SelectedRectsContainer(
+      this.selectedRects,
+      this.viewportScrollOffset
+    );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectEmbedRects
+      this.selectEmbedRects,
+      this.viewportScrollOffset
     );
     const embedEditingContainer = EmbedEditingContainer(
       this.embedEditingState,
@@ -339,10 +487,13 @@ export class DefaultPageBlockComponent
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
+          ${selectedRectsContainer}
           <div class="affine-default-page-block-title-container">
             <textarea
+              ?disabled=${this.readonly}
               .value=${this.model.title}
               placeholder="Title"
+              data-block-is-title="true"
               class="affine-default-page-block-title"
               @keydown=${this._onTitleKeyDown}
               @input=${this._onTitleInput}
@@ -350,8 +501,7 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectedRectsContainer} ${selectionRect}
-        ${selectedEmbedContainer}${embedEditingContainer}
+        ${selectionRect} ${selectedEmbedContainer} ${embedEditingContainer}
         ${codeBlockOptionContainer}
       </div>
     `;

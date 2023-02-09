@@ -1,4 +1,5 @@
-import { AbstractType, Doc, Map, Text, Array } from 'yjs';
+import { AbstractType, Array, Doc, Map, Text } from 'yjs';
+
 import type { PrefixedBlockProps } from '../workspace/page.js';
 
 type DocRecord = {
@@ -21,20 +22,27 @@ export interface JSXElement {
 // See https://github.com/facebook/jest/blob/f1263368cc85c3f8b70eaba534ddf593392c44f3/packages/pretty-format/src/plugins/ReactTestComponent.ts#L26-L29
 const testSymbol = Symbol.for('react.test.json');
 
-const isValidRecord = (data: unknown): data is DocRecord => {
+function isValidRecord(data: unknown): data is DocRecord {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
   // TODO enhance this check
   return true;
-};
+}
 
-const IGNORE_PROPS = ['sys:id', 'sys:flavour', 'sys:children'];
+const IGNORE_PROPS = [
+  'sys:id',
+  'sys:flavour',
+  'sys:children',
+  'prop:xywh',
+  'meta:tags',
+  'meta:tagSchema',
+];
 
-export const yDocToJSXNode = (
+export function yDocToJSXNode(
   serializedDoc: Record<string, unknown>,
   nodeId: string
-): JSXElement => {
+): JSXElement {
   if (!isValidRecord(serializedDoc)) {
     throw new Error('Failed to parse doc record! Invalid data.');
   }
@@ -62,9 +70,9 @@ export const yDocToJSXNode = (
     props,
     children: children?.map(id => yDocToJSXNode(serializedDoc, id)) ?? [],
   };
-};
+}
 
-export const serializeYDoc = (doc: Doc) => {
+export function serializeYDoc(doc: Doc) {
   const json: Record<string, unknown> = {};
   doc.share.forEach((value, key) => {
     if (value instanceof Map) {
@@ -74,9 +82,9 @@ export const serializeYDoc = (doc: Doc) => {
     }
   });
   return json;
-};
+}
 
-const serializeYMap = (map: Map<unknown>): unknown => {
+function serializeYMap(map: Map<unknown>) {
   const json: Record<string, unknown> = {};
   map.forEach((value, key) => {
     if (value instanceof Map) {
@@ -92,19 +100,19 @@ const serializeYMap = (map: Map<unknown>): unknown => {
     }
   });
   return json;
-};
+}
 
 type DeltaText = {
   insert: string;
   attributes?: { [format: string]: unknown };
 }[];
 
-const serializeYText = (text: Text): DeltaText => {
+function serializeYText(text: Text): DeltaText {
   const delta = text.toDelta();
   return delta;
-};
+}
 
-const parseDelta = (text: DeltaText) => {
+function parseDelta(text: DeltaText) {
   if (!text.length) {
     return undefined;
   }
@@ -130,4 +138,4 @@ const parseDelta = (text: DeltaText) => {
       },
     })),
   };
-};
+}

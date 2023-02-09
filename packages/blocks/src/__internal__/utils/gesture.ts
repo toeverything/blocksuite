@@ -1,3 +1,8 @@
+import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
+
+import { isDatabaseInput, isTitleElement } from './query.js';
+import { debounce } from './std.js';
+
 export interface IPoint {
   x: number;
   y: number;
@@ -24,7 +29,7 @@ export interface SelectionEvent extends IPoint {
   button?: number;
 }
 
-function isFarEnough(a: IPoint, b: IPoint, d = 2) {
+function isFarEnough(a: IPoint, b: IPoint, d = MOVE_DETECT_THRESHOLD) {
   return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) > d * d;
 }
 
@@ -68,21 +73,15 @@ function toSelectionEvent(
   return selectionEvent;
 }
 
-export function isPageTitle(e: Event) {
-  return (
-    e.target instanceof HTMLTextAreaElement &&
-    e.target.classList.contains('affine-default-page-block-title')
-  );
-}
-export function isInput(e: Event) {
-  return e.target instanceof HTMLTextAreaElement;
-}
-
-function tryPreventDefault(e: MouseEvent) {
-  // workaround page title click
-  if (!isInput(e)) {
-    e.preventDefault();
+function shouldFilterMouseEvent(event: Event): boolean {
+  const target = event.target;
+  if (!target || !(target instanceof HTMLElement)) {
+    return false;
   }
+  if (target.tagName === 'INPUT') {
+    return true;
+  }
+  return false;
 }
 
 export function initMouseEventHandlers(
@@ -94,7 +93,8 @@ export function initMouseEventHandlers(
   onContainerDblClick: (e: SelectionEvent) => void,
   onContainerMouseMove: (e: SelectionEvent) => void,
   onContainerMouseOut: (e: SelectionEvent) => void,
-  onContainerContextMenu: (e: SelectionEvent) => void
+  onContainerContextMenu: (e: SelectionEvent) => void,
+  onSelectionChange: (e: Event) => void
 ) {
   let startX = -Infinity;
   let startY = -Infinity;
@@ -109,7 +109,10 @@ export function initMouseEventHandlers(
     );
 
   const mouseDownHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (shouldFilterMouseEvent(e)) return;
+    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
+      e.preventDefault();
+    }
     const rect = getBoundingClientRect();
 
     startX = e.clientX - rect.left;
@@ -124,7 +127,10 @@ export function initMouseEventHandlers(
   };
 
   const mouseMoveHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (shouldFilterMouseEvent(e)) return;
+    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
+      e.preventDefault();
+    }
     const rect = getBoundingClientRect();
 
     const a = { x: startX, y: startY };
@@ -156,16 +162,19 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    tryPreventDefault(e);
+    if (!isTitleElement(e.target) && !isDatabaseInput(e.target)) {
+      e.preventDefault();
+    }
 
-    if (!isDragging)
-      onContainerClick(
-        toSelectionEvent(e, getBoundingClientRect, startX, startY)
-      );
-    else
+    if (isDragging) {
       onContainerDragEnd(
         toSelectionEvent(e, getBoundingClientRect, startX, startY, last)
       );
+    } else {
+      onContainerClick(
+        toSelectionEvent(e, getBoundingClientRect, startX, startY)
+      );
+    }
 
     startX = startY = -Infinity;
     isDragging = false;
@@ -184,21 +193,36 @@ export function initMouseEventHandlers(
   };
 
   const dblClickHandler = (e: MouseEvent) => {
+    if (shouldFilterMouseEvent(e)) return;
     onContainerDblClick(
       toSelectionEvent(e, getBoundingClientRect, startX, startY)
     );
   };
 
+  const selectionChangeHandler = debounce<
+    Event[],
+    (this: unknown, ...args: Event[]) => void
+  >(e => {
+    if (shouldFilterMouseEvent(e)) return;
+    if (isDragging) {
+      return;
+    }
+
+    onSelectionChange(e as Event);
+  }, 300);
+
   container.addEventListener('mousedown', mouseDownHandler);
   container.addEventListener('mousemove', mouseMoveHandler);
   container.addEventListener('contextmenu', contextMenuHandler);
   container.addEventListener('dblclick', dblClickHandler);
+  document.addEventListener('selectionchange', selectionChangeHandler);
 
   const dispose = () => {
     container.removeEventListener('mousedown', mouseDownHandler);
     container.removeEventListener('mousemove', mouseMoveHandler);
     container.removeEventListener('contextmenu', contextMenuHandler);
     container.removeEventListener('dblclick', dblClickHandler);
+    document.removeEventListener('selectionchange', selectionChangeHandler);
   };
   return dispose;
 }

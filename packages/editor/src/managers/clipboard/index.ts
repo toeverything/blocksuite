@@ -1,10 +1,10 @@
 import type { EditorContainer } from '../../components/index.js';
-import { ClipboardEventDispatcher } from './event-dispatcher.js';
 import { CopyCutManager } from './copy-cut-manager.js';
+import { ClipboardEventDispatcher } from './event-dispatcher.js';
 import { PasteManager } from './paste-manager.js';
 
-export * from './types.js';
 export * from './content-parser/index.js';
+export * from './types.js';
 
 export class ClipboardManager {
   private _editor: EditorContainer;
@@ -40,8 +40,8 @@ export class ClipboardManager {
     return this._clipboardTarget;
   }
 
-  public importMarkdown(text: string, insertPositionId: string) {
-    const blocks = this._editor.contentParser.markdown2Block(text);
+  public async importMarkdown(text: string, insertPositionId: string) {
+    const blocks = await this._editor.contentParser.markdown2Block(text);
     this._paste.insertBlocks(blocks, {
       type: 'Block',
       selectedBlocks: [{ id: insertPositionId, children: [] }],

@@ -1,0 +1,40 @@
+{
+  "name": "@blocksuite/phasor",
+  "version": "0.4.0-alpha.3",
+  "description": "Hybrid canvas renderer.",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e"
+  },
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "yjs": "^13.5.45"
+  },
+  "peerDependencies": {
+    "yjs": "^13"
+  },
+  "exports": {
+    "./src/*": "./src/*.ts",
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      "./src/*": "./dist/*.js",
+      ".": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@blocksuite/global": "workspace:*",
+    "fractional-indexing": "^3.2.0",
+    "nanoid": "^4.0.1",
+    "perfect-freehand": "^1.2.0"
+  }
+}

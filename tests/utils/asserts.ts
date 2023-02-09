@@ -3,18 +3,26 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import './declare-test-window.js';
-import { expect, Locator, type Page } from '@playwright/test';
-import type {
-  BaseBlockModel,
-  SerializedStore,
-} from '../../packages/store/src/index.js';
-import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
 
-import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
+import { expect, Locator, type Page } from '@playwright/test';
 import {
   format as prettyFormat,
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
+
+import type {
+  BaseBlockModel,
+  SerializedStore,
+} from '../../packages/store/src/index.js';
+import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
+import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import {
+  redoByKeyboard,
+  SHORT_KEY,
+  type,
+  undoByKeyboard,
+} from './actions/keyboard.js';
+import { captureHistory } from './actions/misc.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
@@ -27,25 +35,29 @@ export const defaultStore: SerializedStore = {
     versions: {
       'affine:paragraph': 1,
       'affine:page': 1,
+      'affine:database': 1,
       'affine:list': 1,
-      'affine:group': 1,
+      'affine:frame': 1,
       'affine:divider': 1,
       'affine:embed': 1,
-      'affine:shape': 1,
       'affine:code': 1,
+      'affine:surface': 1,
     },
   },
   'space:page0': {
     '0': {
+      'meta:tags': {},
+      'meta:tagSchema': {},
+      'prop:title': '',
       'sys:id': '0',
       'sys:flavour': 'affine:page',
       'sys:children': ['1'],
     },
     '1': {
-      'sys:flavour': 'affine:group',
+      'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,32]',
+      'prop:xywh': '[0,0,720,30]',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',
@@ -268,6 +280,26 @@ export async function assertBlockType(
   expect(actual).toBe(type);
 }
 
+export async function assertBlockProps(
+  page: Page,
+  id: string,
+  props: Record<string, unknown>
+) {
+  const actual = await page.evaluate(
+    ([id, props]) => {
+      const element = document.querySelector(`[data-block-id="${id}"]`);
+      // @ts-ignore
+      const model = element.model as BaseBlockModel;
+      return Object.fromEntries(
+        // @ts-ignore
+        Object.keys(props).map(key => [key, model[key]])
+      );
+    },
+    [id, props] as const
+  );
+  expect(actual).toEqual(props);
+}
+
 export async function assertBlockTypes(page: Page, blockTypes: string[]) {
   const actual = await page.evaluate(() => {
     const elements = document.querySelectorAll('[data-block-id]');
@@ -354,7 +386,7 @@ export async function assertStoreMatchJSX(
   id?: string
 ) {
   const element = (await page.evaluate(
-    id => window.workspace.toJSXElement(id),
+    id => window.workspace.exportJSX(id),
     id
   )) as JSXElement;
 
@@ -411,7 +443,10 @@ export function assertAlmostEqual(
   expected: number,
   precision = 0.001
 ) {
-  expect(Math.abs(actual - expected)).toBeLessThan(precision);
+  expect(
+    Math.abs(actual - expected),
+    `expected: ${expected}, but actual: ${actual}`
+  ).toBeLessThan(precision);
 }
 
 /**
@@ -457,4 +492,48 @@ export async function assertLocatorVisible(
       rect.y + rect.height < bodyRect.y;
     expect(isInVisible).toBe(true);
   }
+}
+
+/**
+ * Assert basic keyboard operation works in input
+ *
+ * NOTICE:
+ *   - it will clear the input value.
+ *   - it will pollute undo/redo history.
+ */
+export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
+  await expect(locator).toBeVisible();
+  await locator.focus();
+  // Clear input before test
+  await locator.clear();
+  // type/backspace
+  await type(page, '1234');
+  await expect(locator).toHaveValue('1234');
+  await captureHistory(page);
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('123');
+
+  // undo/redo
+  await undoByKeyboard(page);
+  await expect(locator).toHaveValue('1234');
+  await redoByKeyboard(page);
+  await expect(locator).toHaveValue('123');
+
+  // keyboard
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('13');
+
+  // copy/cut/paste
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+c`);
+  await page.keyboard.press('Backspace');
+  await expect(locator).toHaveValue('');
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await expect(locator).toHaveValue('13');
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await expect(locator).toHaveValue('');
 }

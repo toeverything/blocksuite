@@ -1,31 +1,17 @@
-import { Utils } from '@blocksuite/store';
+import { matchFlavours } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
+
 import type { Detail } from './types.js';
 
-// workaround ts(2775)
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  Utils.assertExists(val);
-}
-
-export const assertFlavours = Utils.assertFlavours;
-
-export const matchFlavours = Utils.matchFlavours;
-
-const isWeb = typeof window !== 'undefined';
-const isFirefox =
-  isWeb && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-
-export function caretRangeFromPoint(
-  clientX: number,
-  clientY: number
-): Range | null {
-  if (isFirefox) {
-    // @ts-ignore
-    const caret = document.caretPositionFromPoint(clientX, clientY);
-    const range = document.createRange();
-    range.setStart(caret.offsetNode, caret.offset);
-    return range;
-  }
-  return document.caretRangeFromPoint(clientX, clientY);
+/**
+ * Whether the block supports rendering its children.
+ */
+export function supportsChildren(model: BaseBlockModel): boolean {
+  return !matchFlavours(model, [
+    'affine:embed',
+    'affine:divider',
+    'affine:code',
+  ]);
 }
 
 export function almostEqual(a: number, b: number) {
@@ -41,13 +27,6 @@ export function createEvent<
 export function noop() {
   return;
 }
-
-/**
- * Sleep is not a good practice.
- * Please use it sparingly!
- */
-export const sleep = (ms = 0) =>
-  new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * @example
@@ -92,6 +71,39 @@ export const throttle = <
     }
     // Execute the function on the leading edge
     if (leading) {
+      fn.apply(this, args);
+    }
+    timer = setTimeout(setTimer, limit);
+  } as T;
+};
+
+export const debounce = <
+  Args extends unknown[],
+  T extends (this: unknown, ...args: Args) => void
+>(
+  fn: T,
+  limit: number,
+  { leading = true, trailing = true } = {}
+): T => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let lastArgs: Args | null = null;
+
+  const setTimer = () => {
+    if (lastArgs && trailing) {
+      fn(...lastArgs);
+      lastArgs = null;
+      timer = setTimeout(setTimer, limit);
+    } else {
+      timer = null;
+    }
+  };
+
+  return function (this: unknown, ...args: Parameters<T>) {
+    if (timer) {
+      lastArgs = args;
+      clearTimeout(timer);
+    }
+    if (leading && !timer) {
       fn.apply(this, args);
     }
     timer = setTimeout(setTimer, limit);

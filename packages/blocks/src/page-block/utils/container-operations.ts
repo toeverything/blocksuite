@@ -1,11 +1,10 @@
+import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+
 import {
   almostEqual,
-  assertExists,
-  assertFlavours,
   ExtendedModel,
-  matchFlavours,
-  RootBlockModel,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
@@ -26,30 +25,39 @@ import {
   restoreSelection,
   saveBlockSelection,
 } from '../../__internal__/utils/selection.js';
+import type { CodeBlockModel } from '../../code-block/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
-import type { CodeBlockModel } from '../../code-block/index.js';
 
-export function deleteModels(page: Page, models: BaseBlockModel[]) {
-  const selection = window.getSelection();
+export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
+  const models = getModelsByRange(range);
+
   const first = models[0];
-  const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
+  const last = models[models.length - 1];
   const lastRichText = getRichTextByModel(last);
   assertExists(firstRichText);
   assertExists(lastRichText);
-  assertExists(selection);
 
   const firstTextIndex = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset as number,
+    range.startContainer,
+    range.startOffset,
     true
   );
   const endTextIndex = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset as number,
+    range.endContainer,
+    range.endOffset,
     false
   );
+
+  // Only select one block
+  if (models.length === 1) {
+    firstRichText.model.text?.delete(
+      firstTextIndex,
+      endTextIndex - firstTextIndex
+    );
+    return;
+  }
 
   const isFirstRichTextNotEmpty =
     firstRichText.model.text &&
@@ -98,27 +106,43 @@ function mergeTextOfBlocks(
   });
 }
 
-export async function updateSelectedTextType(
-  flavour: string,
-  type: string,
-  page: Page
-) {
+export async function updateSelectedTextType(flavour: string, type?: string) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
+  updateBlockType(modelsInRange, flavour, type);
+}
+
+async function updateBlockType(
+  models: BaseBlockModel[],
+  flavour: string,
+  type?: string
+) {
+  if (!models.length) {
+    return;
+  }
+  const page = models[0].page;
+  const hasSamePage = models.every(model => model.page === page);
+  if (!hasSamePage) {
+    // page check
+    console.error(
+      'Not all models have the same page instanceof, the result for update text type may not be correct',
+      models
+    );
+  }
   page.captureSync();
   if (flavour === 'affine:code') {
-    mergeTextOfBlocks(page, modelsInRange, { flavour: 'affine:code' });
+    mergeTextOfBlocks(page, models, { flavour: 'affine:code' });
     return;
   }
   const selectedBlocks = saveBlockSelection();
   let lastNewId: string | null = null;
-  modelsInRange.forEach(model => {
+  models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {
       const oldId = model.id;
-      const newId = transformBlock(page, model, flavour, type);
+      const newId = transformBlock(model, flavour, type);
 
       // Replace selected block id
       const blocks = selectedBlocks.filter(block => block.id === oldId);
@@ -135,12 +159,8 @@ export async function updateSelectedTextType(
   restoreSelection(selectedBlocks);
 }
 
-export function transformBlock(
-  page: Page,
-  model: BaseBlockModel,
-  flavour: string,
-  type: string
-) {
+function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
+  const page = model.page;
   const parent = page.getParent(model);
   assertExists(parent);
   const blockProps = {
@@ -155,22 +175,16 @@ export function transformBlock(
   return id;
 }
 
-export function handleBackspace(page: Page, e: KeyboardEvent) {
-  // workaround page title
-  if (
-    e.target instanceof HTMLTextAreaElement &&
-    e.target.classList.contains('affine-default-page-block-title')
-  )
-    return;
+/**
+ * Do nothing when selection is collapsed or not multi block selected
+ */
+export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   if (isNoneSelection()) return;
-  if (!isCollapsedSelection() && isRangeSelection()) {
-    const range = getCurrentRange();
-    if (isMultiBlockRange(range)) {
-      e.preventDefault();
-      const intersectedModels = getModelsByRange(range);
-      deleteModels(page, intersectedModels);
-    }
-  }
+  if (isCollapsedSelection()) return;
+  if (!isMultiBlockRange()) return;
+
+  e.preventDefault();
+  deleteModelsByRange(page);
 }
 
 export const getFormat = () => {
@@ -347,6 +361,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   } else {
     const LARGE_BOUND = 999999;
     const rect = new DOMRect(0, 0, LARGE_BOUND, LARGE_BOUND);
+    selection.state.focusedBlockIndex = -1; // SELECT_ALL
     selection.selectBlocksByRect(rect);
   }
 
@@ -424,14 +439,15 @@ export function handleBlockSelectionBatchDelete(
   id && asyncFocusRichText(page, id);
 }
 
-export function tryUpdateGroupSize(page: Page, zoom: number) {
+export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const groups = page.root.children as RootBlockModel[];
+    const frames = page.root.children as TopLevelBlockModel[];
     let offset = 0;
-    groups.forEach(model => {
+    frames.forEach(model => {
       // DO NOT resize shape block
-      if (matchFlavours(model, ['affine:shape'])) return;
+      // FIXME: we don't have shape block for now.
+      // if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();
@@ -447,7 +463,7 @@ export function tryUpdateGroupSize(page: Page, zoom: number) {
       if (!almostEqual(newModelHeight, h)) {
         const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {
-          xywh: JSON.stringify([newX, y, w, newModelHeight]),
+          xywh: JSON.stringify([newX, y, w, Math.round(newModelHeight)]),
         });
         offset = newX + w;
       }

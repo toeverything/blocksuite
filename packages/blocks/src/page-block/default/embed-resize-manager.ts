@@ -1,9 +1,6 @@
-import {
-  assertExists,
-  getModelByElement,
-  IPoint,
-  SelectionEvent,
-} from '../../std.js';
+import { assertExists } from '@blocksuite/global/utils';
+
+import { getModelByElement, IPoint, SelectionEvent } from '../../std.js';
 import type { DefaultPageSignals } from '../index.js';
 import type { PageSelectionState } from './selection-manager.js';
 
@@ -19,9 +16,9 @@ export class EmbedResizeManager {
   };
   private _dragMoveTarget = 'right';
 
-  constructor(state: PageSelectionState, singals: DefaultPageSignals) {
+  constructor(state: PageSelectionState, signals: DefaultPageSignals) {
     this.state = state;
-    this.signals = singals;
+    this.signals = signals;
   }
 
   onStart(e: SelectionEvent) {
@@ -51,7 +48,7 @@ export class EmbedResizeManager {
       width =
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
-    if (width <= 700) {
+    if (width <= 700 && width >= 50) {
       if (this._dragMoveTarget === 'right') {
         left =
           this._dropContainerSize.left -
@@ -72,7 +69,9 @@ export class EmbedResizeManager {
             top: this._dropContainer.getBoundingClientRect().top,
           },
         ]);
-        const activeImg = this.state.activeComponent?.querySelector('img');
+        const activeImg = this.state.activeComponent?.querySelector(
+          '.resizable-img'
+        ) as HTMLDivElement;
         if (activeImg) {
           activeImg.style.width = width + 'px';
           activeImg.style.height = height + 'px';

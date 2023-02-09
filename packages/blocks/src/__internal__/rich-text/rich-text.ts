@@ -1,19 +1,19 @@
-import { html, css, unsafeCSS } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import type { Quill as QuillType } from 'quill';
-import Q from 'quill';
-import QuillCursors from 'quill-cursors';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { BlockHost } from '../utils/index.js';
-import { createKeyboardBindings } from './keyboard.js';
+import { css, html } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import type { LeafBlot } from 'parchment';
+import type { DeltaStatic, Quill as QuillType } from 'quill';
+import Quill from 'quill';
+import QuillCursors from 'quill-cursors';
 
-import style from './styles.css?inline';
 import Syntax from '../../code-block/components/syntax-code-block.js';
+import type { BlockHost } from '../utils/index.js';
 import { NonShadowLitElement } from '../utils/lit.js';
+import { createKeyboardBindings } from './keyboard.js';
+import { KeyboardWithEvent } from './quill-keyboard.js';
 
-const Quill = Q as unknown as typeof QuillType;
-
-Quill.register('modules/cursors', QuillCursors);
+Quill.register('modules/keyboard', KeyboardWithEvent, true);
+Quill.register('modules/cursors', QuillCursors, true);
 const Clipboard = Quill.import('modules/clipboard');
 
 class EmptyClipboard extends Clipboard {
@@ -37,7 +37,50 @@ Quill.register('modules/syntax', Syntax, true);
 @customElement('rich-text')
 export class RichText extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    /*
+ * This style is most simple to reset the default styles of the quill editor
+ * User should custom the styles of the block in the block itself
+ */
+    .ql-container {
+      box-sizing: border-box;
+      height: 100%;
+      margin: 0;
+      position: relative;
+    }
+    .ql-container.ql-disabled .ql-tooltip {
+      visibility: hidden;
+    }
+    .ql-clipboard {
+      left: -100000px;
+      height: 1px;
+      overflow-y: hidden;
+      position: absolute;
+      top: 50%;
+    }
+    .ql-container p {
+      margin: 0;
+      padding: 0;
+    }
+    .ql-editor {
+      box-sizing: border-box;
+      height: 100%;
+      outline: none;
+      tab-size: 4;
+      -moz-tab-size: 4;
+      text-align: left;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 3px 0;
+    }
+    .ql-editor > * {
+      cursor: text;
+    }
+    .ql-editor.ql-blank::before {
+      color: var(--affine-disable-color);
+      content: attr(data-placeholder);
+      pointer-events: none;
+      position: absolute;
+    }
   `;
 
   @query('.affine-rich-text.quill-container')
@@ -45,11 +88,7 @@ export class RichText extends NonShadowLitElement {
 
   quill!: QuillType;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   host!: BlockHost;
 
   @property()
@@ -58,9 +97,7 @@ export class RichText extends NonShadowLitElement {
   @property()
   placeholder?: string;
 
-  @property({
-    hasChanged: () => true,
-  })
+  @property({ hasChanged: () => true })
   modules: Record<string, unknown> = {};
 
   firstUpdated() {
@@ -87,23 +124,26 @@ export class RichText extends NonShadowLitElement {
     });
 
     page.attachRichText(model.id, this.quill);
-    page.awareness.updateLocalCursor();
+    page.awarenessStore.updateLocalCursor(page);
     this.model.propsUpdated.on(() => this.requestUpdate());
 
-    if (this.modules.syntax) {
-      this.quill.formatText(0, this.quill.getLength(), 'code-block', true);
-      this.quill.format('code-block', true);
+    if (this.modules.syntax && this.quill.getText() === '\n') {
+      this.quill.focus();
     }
     // If you type a character after the code or link node,
     // the character should not be inserted into the code or link node.
     // So we check and remove the corresponding format manually.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.quill.on('text-change', (delta: any) => {
+    this.quill.on('text-change', (delta: DeltaStatic) => {
       const selectorMap = {
         code: 'code',
         link: 'link-node',
       } as const;
       let attr: keyof typeof selectorMap | null = null;
+
+      if (!delta.ops) {
+        return;
+      }
+
       if (delta.ops[1]?.attributes?.code) {
         attr = 'code';
       }
@@ -115,17 +155,17 @@ export class RichText extends NonShadowLitElement {
         const retain = delta.ops[0].retain;
         const selector = selectorMap[attr];
         if (retain !== undefined) {
-          const currentLeaf = this.quill.getLeaf(
+          const currentLeaf: [LeafBlot, number] = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length)
           );
-          const nextLeaf = this.quill.getLeaf(
+          const nextLeaf: [LeafBlot, number] = this.quill.getLeaf(
             retain + Number(delta.ops[1]?.insert.toString().length) + 1
           );
           const currentParentElement = currentLeaf[0]?.domNode?.parentElement;
           const currentEmbedElement = currentParentElement?.closest(selector);
           const nextParentElement = nextLeaf[0]?.domNode?.parentElement;
           const nextEmbedElement = nextParentElement?.closest(selector);
-          const insertedString = delta.ops[1]?.insert.toString();
+          const insertedString: string = delta.ops[1]?.insert.toString();
 
           // if insert to the same node, no need to handle
           // For example,
@@ -140,16 +180,23 @@ export class RichText extends NonShadowLitElement {
             model.text?.replace(
               retain,
               insertedString.length,
-              // @ts-expect-error
-              !this.host.isCompositionStart
-                ? delta.ops[1]?.insert.toString() || ''
-                : ' ',
-              { [attr]: false }
+              ' ' + insertedString,
+              {
+                [attr]: false,
+              }
             );
           }
         }
       }
     });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const { model, host } = this;
+    if (this.quill) {
+      host.page.attachRichText(model.id, this.quill);
+    }
   }
 
   override disconnectedCallback() {
@@ -159,21 +206,19 @@ export class RichText extends NonShadowLitElement {
   }
 
   updated() {
-    // Update placeholder if block`s type changed
-    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
-    this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
     if (this.modules.syntax) {
       //@ts-ignore
       this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);
     }
+    // Update placeholder if block`s type changed
+    this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
+    this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
   }
 
   render() {
-    return html`
-      <div class="affine-rich-text quill-container ql-container">
-        <slot></slot>
-      </div>
-    `;
+    return html`<div class="affine-rich-text quill-container ql-container">
+      <slot></slot>
+    </div>`;
   }
 }
 

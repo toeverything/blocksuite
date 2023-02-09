@@ -1,19 +1,45 @@
+import { matchFlavours } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { Quill } from 'quill';
-import { matchFlavours, sleep } from './std.js';
+
 import type { ExtendedModel } from './types.js';
 
 // XXX: workaround quill lifecycle issue
 export async function asyncFocusRichText(page: Page, id: string) {
-  await sleep();
-  const adapter = page.richTextAdapters.get(id);
-  adapter?.quill.focus();
+  return new Promise<void>(resolve => {
+    requestAnimationFrame(() => {
+      const adapter = page.richTextAdapters.get(id);
+      adapter?.quill.focus();
+      resolve();
+    });
+  });
 }
 
 export function isCollapsedAtBlockStart(quill: Quill) {
   return (
     quill.getSelection(true)?.index === 0 && quill.getSelection()?.length === 0
   );
+}
+
+export function doesInSamePath(
+  page: Page,
+  children: BaseBlockModel,
+  father: BaseBlockModel
+): boolean {
+  if (children === father) {
+    return true;
+  }
+  let parent: BaseBlockModel | null;
+  for (;;) {
+    parent = page.getParent(children);
+    if (parent === null) {
+      return false;
+    } else if (parent.id === father.id) {
+      return true;
+    }
+    children = parent;
+  }
 }
 
 export function convertToList(
@@ -38,7 +64,7 @@ export function convertToList(
     const blockProps = {
       flavour: 'affine:list',
       type: listType,
-      text: model?.text?.clone(),
+      text: model.text?.clone(),
       children: model.children,
       ...otherProperties,
     };
@@ -80,7 +106,7 @@ export function convertToParagraph(
     const blockProps = {
       flavour: 'affine:paragraph',
       type: type,
-      text: model?.text?.clone(),
+      text: model.text?.clone(),
       children: model.children,
     };
     page.deleteBlock(model);
@@ -105,7 +131,7 @@ export function convertToDivider(
   model: ExtendedModel,
   prefix: string
 ): boolean {
-  if (matchFlavours(model, ['affine:divider'])) {
+  if (matchFlavours(model, ['affine:divider']) || model.type === 'quote') {
     return false;
   }
   if (!matchFlavours(model, ['affine:divider'])) {

@@ -1,6 +1,7 @@
-import FlexSearch from 'flexsearch';
 import type { DocumentSearchOptions } from 'flexsearch';
+import FlexSearch from 'flexsearch';
 import { Doc, Map as YMap, Text as YText } from 'yjs';
+
 import type { YBlock } from './page.js';
 
 const DocumentIndexer = FlexSearch.Document;
@@ -45,7 +46,7 @@ function tokenize(locale: string) {
   };
 }
 
-export type IndexMetadata = Readonly<{
+export type IndexMeta = Readonly<{
   content: string;
   reference?: string;
   space: string;
@@ -54,7 +55,7 @@ export type IndexMetadata = Readonly<{
 
 export class Indexer {
   private readonly _doc: Doc;
-  private readonly _indexer: FlexSearch.Document<IndexMetadata, string[]>;
+  private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
 
   constructor(
     doc: Doc,
@@ -62,7 +63,7 @@ export class Indexer {
     locale = 'en-US'
   ) {
     this._doc = doc;
-    this._indexer = new DocumentIndexer<IndexMetadata, string[]>({
+    this._indexer = new DocumentIndexer<IndexMeta, string[]>({
       document: {
         id: 'id',
         index: ['content', 'reference', 'space'],

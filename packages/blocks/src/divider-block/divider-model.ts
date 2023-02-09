@@ -1,23 +1,13 @@
-import { Page, BaseBlockModel, IBaseBlockProps } from '@blocksuite/store';
+import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export interface DividerBlockProps extends IBaseBlockProps {
-  flavour: 'affine:divider';
-}
-
-export class DividerBlockModel
-  extends BaseBlockModel
-  implements DividerBlockProps
-{
-  static version = 1;
-  flavour = 'affine:divider' as const;
-  tag = literal`affine-divider`;
-
-  constructor(page: Page, props: Partial<DividerBlockProps>) {
-    super(page, props);
+export const DividerBlockModelSchema = defineBlockSchema(
+  'affine:divider',
+  () => ({}),
+  {
+    version: 1,
+    tag: literal`affine-divider`,
   }
+);
 
-  override block2html(_previousSiblingId: string, _nextSiblingId: string) {
-    return `<hr/>`;
-  }
-}
+export type DividerBlockModel = SchemaToModel<typeof DividerBlockModelSchema>;

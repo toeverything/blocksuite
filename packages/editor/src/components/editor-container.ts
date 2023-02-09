@@ -1,12 +1,19 @@
+import {
+  BlockHub,
+  getDefaultPageBlock,
+  getServiceOrRegister,
+  MouseMode,
+  PageBlockModel,
+} from '@blocksuite/blocks';
+import { NonShadowLitElement, SurfaceBlockModel } from '@blocksuite/blocks';
+import { Page, Signal } from '@blocksuite/store';
+import { DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
-import { Page, Signal } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
-import type { MouseMode, PageBlockModel } from '@blocksuite/blocks';
-import { NonShadowLitElement } from '@blocksuite/blocks';
 import { ClipboardManager, ContentParser } from '../managers/index.js';
+import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
 @customElement('editor-container')
 export class EditorContainer extends NonShadowLitElement {
@@ -24,6 +31,9 @@ export class EditorContainer extends NonShadowLitElement {
     type: 'default',
   };
 
+  @state()
+  showGrid = false;
+
   // TODO only select block
   @state()
   clipboard = new ClipboardManager(this, this);
@@ -32,7 +42,20 @@ export class EditorContainer extends NonShadowLitElement {
   contentParser = new ContentParser(this);
 
   get model() {
-    return this.page.root as PageBlockModel;
+    return [this.page.root, this.page.surface] as [
+      PageBlockModel | null,
+      SurfaceBlockModel | null
+    ];
+  }
+
+  get pageBlockModel(): PageBlockModel | null {
+    return Array.isArray(this.model) ? this.model[0] : this.model;
+  }
+
+  get surfaceBlockModel(): SurfaceBlockModel | null {
+    return Array.isArray(this.model)
+      ? (this.model[1] as SurfaceBlockModel)
+      : null;
   }
 
   @query('.affine-block-placeholder-input')
@@ -40,13 +63,33 @@ export class EditorContainer extends NonShadowLitElement {
 
   private _disposables = new DisposableGroup();
 
-  // disable shadow DOM to workaround quill
-  createRenderRoot() {
-    return this;
+  override firstUpdated() {
+    // todo: refactor to a better solution
+    getServiceOrRegister('affine:code');
+  }
+
+  protected update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('readonly')) {
+      this.page.awarenessStore.setReadonly(this.page, this.readonly);
+    }
+    super.update(changedProperties);
   }
 
   override connectedCallback() {
     super.connectedCallback();
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.readonly[this.page.prefixedId],
+        rd => {
+          if (typeof rd === 'boolean' && rd !== this.readonly) {
+            this.readonly = rd;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
 
     // Question: Why do we prevent this?
     this._disposables.add(
@@ -54,6 +97,25 @@ export class EditorContainer extends NonShadowLitElement {
         if (e.altKey && e.metaKey && e.code === 'KeyC') {
           e.preventDefault();
         }
+
+        // `esc`  clear selection
+        if (e.code !== 'Escape') {
+          return;
+        }
+        const pageModel = this.pageBlockModel;
+        if (!pageModel) return;
+        const pageBlock = getDefaultPageBlock(pageModel);
+        pageBlock.selection.clearRects();
+
+        const selection = getSelection();
+        if (
+          !selection ||
+          selection.isCollapsed ||
+          !checkEditorElementActive()
+        ) {
+          return;
+        }
+        selection.removeAllRanges();
       })
     );
 
@@ -68,6 +130,14 @@ export class EditorContainer extends NonShadowLitElement {
       })
     );
 
+    this._disposables.add(
+      Signal.fromEvent(window, 'affine:switch-edgeless-display-mode').on(
+        ({ detail }) => {
+          this.showGrid = detail;
+        }
+      )
+    );
+
     // subscribe store
     this._disposables.add(
       this.page.signals.rootAdded.on(() => {
@@ -78,10 +148,19 @@ export class EditorContainer extends NonShadowLitElement {
     this._placeholderInput?.focus();
   }
 
+  public async createBlockHub() {
+    return new Promise<BlockHub>(resolve => {
+      requestAnimationFrame(() => {
+        const blockHub = createBlockHub(this, this.page);
+        resolve(blockHub);
+      });
+    });
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.page.awarenessStore.setLocalCursor(this.page, null);
     this._disposables.dispose();
-    this._disposables = new DisposableGroup();
   }
 
   render() {
@@ -91,7 +170,7 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-default-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.model}
+        .model=${this.pageBlockModel as PageBlockModel}
         .readonly=${this.readonly}
       ></affine-default-page>
     `;
@@ -100,9 +179,11 @@ export class EditorContainer extends NonShadowLitElement {
       <affine-edgeless-page
         .mouseRoot=${this as HTMLElement}
         .page=${this.page}
-        .model=${this.model}
+        .pageModel=${this.pageBlockModel as PageBlockModel}
+        .surfaceModel=${this.surfaceBlockModel as SurfaceBlockModel}
         .mouseMode=${this.mouseMode}
         .readonly=${this.readonly}
+        .showGrid=${this.showGrid}
       ></affine-edgeless-page>
     `;
 

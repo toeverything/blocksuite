@@ -1,13 +1,15 @@
 // Test page entry located in playground/examples/workspace/index.html
+import './test-app';
+
+import { assertExists } from '@blocksuite/global/utils';
+
+import {
+  nextFrame,
+  runOnce,
+  testSerial,
+} from '../../__tests__/test-utils-dom.js';
 import { Workspace } from '../workspace.js';
 import type { TestApp } from './test-app.js';
-import {
-  testSerial,
-  runOnce,
-  nextFrame,
-} from '../../__tests__/test-utils-dom.js';
-import { assertExists } from '../../utils/utils.js';
-import './test-app';
 
 let i = 0;
 

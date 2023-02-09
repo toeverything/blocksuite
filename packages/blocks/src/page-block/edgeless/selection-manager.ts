@@ -1,45 +1,43 @@
-import {
-  SelectionEvent,
-  initMouseEventHandlers,
-  MouseMode,
-  RootBlockModel,
-  matchFlavours,
-  getBlockById,
-} from '../../__internal__/index.js';
-import { initWheelEventHandlers } from './utils.js';
-import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { DefaultSelectionController } from './selection-manager/default.js';
-import { ShapeSelectionController } from './selection-manager/shape.js';
-import type {
-  HoverState,
-  SelectionController,
-} from './selection-manager/index.js';
-import type { ShapeBlockModel } from '../../shape-block/index.js';
+import type { SurfaceElement } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
 
-export { HoverState };
+import {
+  initMouseEventHandlers,
+  MouseMode,
+  noop,
+  SelectionEvent,
+  TopLevelBlockModel,
+} from '../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import { DefaultModeController } from './mode-controllers/default-mode.js';
+import type { MouseModeController } from './mode-controllers/index.js';
+import { ShapeModeController } from './mode-controllers/shape-mode.js';
+import { initWheelEventHandlers } from './utils.js';
 
-interface NoneBlockSelectionState {
-  // No selected block
+export type Selectable = TopLevelBlockModel | SurfaceElement;
+
+export interface EdgelessHoverState {
+  rect: DOMRect;
+  content: Selectable;
+}
+
+/* Indicates there is no selected block */
+interface NoneSelectionState {
   type: 'none';
 }
 
-interface SingleBlockSelectionState {
-  // There is one block that be selected
+/* Indicates there is one selected block */
+interface SingleSelectionState {
   type: 'single';
-  // Which block that be selected
-  selected: RootBlockModel;
-  // Current viewport
-  viewport: ViewportState;
-  // Rect of the selected block
+  /* The selected block or surface element */
+  selected: Selectable;
+  /* Rect of the selected content */
   rect: DOMRect;
-  // True if the block is active (like double click)
+  /* True if the selected content is active (like after double click) */
   active: boolean;
 }
 
-export type BlockSelectionState =
-  | NoneBlockSelectionState
-  | SingleBlockSelectionState;
+export type EdgelessSelectionState = NoneSelectionState | SingleSelectionState;
 
 export interface SelectionArea {
   start: DOMPoint;
@@ -130,13 +128,13 @@ export class EdgelessSelectionManager {
     type: 'default',
   };
   private _container: EdgelessPageBlockComponent;
-  private _selectionManagers: Record<MouseMode['type'], SelectionController>;
+  private _controllers: Record<MouseMode['type'], MouseModeController>;
 
   private _mouseDisposeCallback: () => void;
   private _selectionUpdateCallback: Disposable;
   private _wheelDisposeCallback: () => void;
 
-  private _previousSelectedShape: ShapeBlockModel | null = null;
+  private _prevSelectedShapeId: string | null = null;
 
   get isActive() {
     return this.currentController.isActive;
@@ -149,7 +147,7 @@ export class EdgelessSelectionManager {
   set mouseMode(mode: MouseMode) {
     this._mouseMode = mode;
     // sync mouse mode
-    this._selectionManagers[this._mouseMode.type].mouseMode = this._mouseMode;
+    this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
   }
 
   get blockSelectionState() {
@@ -157,7 +155,7 @@ export class EdgelessSelectionManager {
   }
 
   get currentController() {
-    return this._selectionManagers[this.mouseMode.type];
+    return this._controllers[this.mouseMode.type];
   }
 
   get hoverState() {
@@ -166,7 +164,7 @@ export class EdgelessSelectionManager {
   }
 
   get isHoveringShape(): boolean {
-    return this.currentController.hoverState?.block.flavour === 'affine:shape';
+    return false;
   }
 
   get frameSelectionRect() {
@@ -182,9 +180,9 @@ export class EdgelessSelectionManager {
 
   constructor(container: EdgelessPageBlockComponent) {
     this._container = container;
-    this._selectionManagers = {
-      default: new DefaultSelectionController(this._container),
-      shape: new ShapeSelectionController(this._container),
+    this._controllers = {
+      default: new DefaultModeController(this._container),
+      shape: new ShapeModeController(this._container),
     };
     this._mouseDisposeCallback = initMouseEventHandlers(
       this._container,
@@ -195,27 +193,30 @@ export class EdgelessSelectionManager {
       this._onContainerDblClick,
       this._onContainerMouseMove,
       this._onContainerMouseOut,
-      this._onContainerContextMenu
+      this._onContainerContextMenu,
+      noop
     );
     this._selectionUpdateCallback = this._container.signals.updateSelection.on(
       state => {
-        if (this._previousSelectedShape) {
+        if (this._prevSelectedShapeId) {
+          /*
           const element = getBlockById<'affine-shape'>(
-            this._previousSelectedShape.id
+            this._prevSelectedShapeId
           );
           if (element) {
             element.selected = false;
           }
-          this._previousSelectedShape = null;
+          */
+          this._prevSelectedShapeId = null;
         }
         if (state.type === 'single') {
-          if (matchFlavours(state.selected, ['affine:shape'])) {
-            const element = getBlockById<'affine-shape'>(state.selected.id);
-            if (element) {
-              element.selected = true;
-            }
-            this._previousSelectedShape = state.selected as ShapeBlockModel;
-          }
+          // if (matchFlavours(state.selected, ['affine:shape'])) {
+          //   const element = getBlockById<'affine-shape'>(state.selected.id);
+          //   if (element) {
+          //     element.selected = true;
+          //   }
+          //   this._previousSelectedShape = state.selected as ShapeBlockModel;
+          // }
         }
       }
     );
@@ -223,23 +224,20 @@ export class EdgelessSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    if (this._container.readonly) {
-      return;
-    }
+    if (this._container.readonly) return;
+
     return this.currentController.onContainerDragStart(e);
   };
 
   private _onContainerDragMove = (e: SelectionEvent) => {
-    if (this._container.readonly) {
-      return;
-    }
+    if (this._container.readonly) return;
+
     return this.currentController.onContainerDragMove(e);
   };
 
   private _onContainerDragEnd = (e: SelectionEvent) => {
-    if (this._container.readonly) {
-      return;
-    }
+    if (this._container.readonly) return;
+
     return this.currentController.onContainerDragEnd(e);
   };
 
@@ -256,17 +254,15 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerMouseMove = (e: SelectionEvent) => {
-    return this._selectionManagers[this.mouseMode.type].onContainerMouseMove(e);
+    return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
   };
 
   private _onContainerMouseOut = (e: SelectionEvent) => {
-    return this._selectionManagers[this.mouseMode.type].onContainerMouseOut(e);
+    return this._controllers[this.mouseMode.type].onContainerMouseOut(e);
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
-    return this._selectionManagers[this.mouseMode.type].onContainerContextMenu(
-      e
-    );
+    return this._controllers[this.mouseMode.type].onContainerContextMenu(e);
   };
 
   dispose() {

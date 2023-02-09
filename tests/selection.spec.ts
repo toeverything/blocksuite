@@ -1,37 +1,46 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
+
 import {
+  addFrameByClick,
+  copyByKeyboard,
+  dragBetweenCoords,
+  dragBetweenIndices,
   enterPlaygroundRoom,
+  fillLine,
   focusRichText,
+  focusTitle,
+  getCursorBlockIdAndHeight,
+  getIndexCoordinate,
   getQuillSelectionIndex,
   getQuillSelectionText,
-  dragBetweenCoords,
+  getSelectedTextByQuill,
+  initEmptyParagraphState,
+  initThreeLists,
+  initThreeParagraphs,
+  pasteByKeyboard,
   pressEnter,
   pressShiftTab,
-  getCursorBlockIdAndHeight,
-  fillLine,
-  addGroupByClick,
-  initThreeParagraphs,
-  initEmptyParagraphState,
-  undoByKeyboard,
-  resetHistory,
   redoByKeyboard,
+  resetHistory,
+  SHORT_KEY,
+  switchEditorMode,
+  type,
+  undoByKeyboard,
   waitNextFrame,
-  dragBetweenIndices,
-  initThreeLists,
-  copyByKeyboard,
-  pasteByKeyboard,
-  getSelectedTextByQuill,
-  withCtrlOrMeta,
 } from './utils/actions/index.js';
-import { expect } from '@playwright/test';
 import {
+  assertAlmostEqual,
   assertBlockCount,
+  assertClipItems,
+  assertDivider,
   assertRichTexts,
   assertSelection,
-  assertAlmostEqual,
-  assertDivider,
+  assertStoreMatchJSX,
+  assertTitle,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -192,9 +201,9 @@ test('cursor move up and down', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('arrow down test 1');
+  await type(page, 'arrow down test 1');
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 2');
+  await type(page, 'arrow down test 2');
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
@@ -217,15 +226,15 @@ test('cursor move to up and down with children block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('arrow down test 1');
+  await type(page, 'arrow down test 1');
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 2');
+  await type(page, 'arrow down test 2');
   await page.keyboard.press('Tab');
   for (let i = 0; i <= 17; i++) {
     await page.keyboard.press('ArrowRight');
   }
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 3');
+  await type(page, 'arrow down test 3');
   await pressShiftTab(page);
   for (let i = 0; i < 2; i++) {
     await page.keyboard.press('ArrowRight');
@@ -253,9 +262,9 @@ test('cursor move left and right', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('arrow down test 1');
+  await type(page, 'arrow down test 1');
   await pressEnter(page);
-  await page.keyboard.type('arrow down test 2');
+  await type(page, 'arrow down test 2');
   for (let i = 0; i < 18; i++) {
     await page.keyboard.press('ArrowLeft');
   }
@@ -298,10 +307,10 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test.skip('cursor move up and down through group', async ({ page }) => {
+test.skip('cursor move up and down through frame', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await addGroupByClick(page);
+  await addFrameByClick(page);
   await focusRichText(page, 0);
   let currentId: string | null = null;
   const [id] = await getCursorBlockIdAndHeight(page);
@@ -317,7 +326,7 @@ test('double click choose words', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('hello block suite');
+  await type(page, 'hello block suite');
   await assertRichTexts(page, ['hello block suite']);
   const helloPosition = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
@@ -346,11 +355,14 @@ test('select all and delete', async ({ page }) => {
   await page.evaluate(() => {
     const defaultPage = document.querySelector('affine-default-page')!;
     const rect = defaultPage.getBoundingClientRect();
+    // dont focus any block
+    defaultPage.selection.state.focusedBlockIndex = -1;
     defaultPage.selection.selectBlocksByRect(rect);
   });
+
   await page.keyboard.press('Backspace');
   await focusRichText(page, 0);
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   await assertRichTexts(page, ['abc']);
 });
 
@@ -362,7 +374,7 @@ test('select all text with dragging and delete', async ({ page }) => {
 
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   await page.keyboard.press('Backspace', { delay: 50 });
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
 });
@@ -377,12 +389,12 @@ test('select text leaving a few words in the last line and delete', async ({
 
   await dragBetweenIndices(page, [0, 0], [2, 1]);
   await page.keyboard.press('Backspace');
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc89\n');
 });
 
-test('select text in the same line with dragging leftward and move outside the editor-container', async ({
+test('select text in the same line with dragging leftward and move outside the affine-frame', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -390,20 +402,32 @@ test('select text in the same line with dragging leftward and move outside the e
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
+  const frameLeft = await page.evaluate(() => {
+    const frame = document.querySelector('affine-frame');
+    if (!frame) {
+      throw new Error();
+    }
+    return frame.getBoundingClientRect().left;
+  });
+
   await dragBetweenIndices(
     page,
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    { x: -50, y: 0 }
+    { x: 0, y: 0 },
+    {
+      async beforeMouseUp() {
+        await page.mouse.move(frameLeft - 1, 0);
+      },
+    }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
-  await page.keyboard.type('abc');
-  const textOne = await getQuillSelectionText(page);
-  expect(textOne).toBe('abc\n');
+  await type(page, 'abc');
+  await assertRichTexts(page, ['123', 'abc', '789']);
 });
 
-test('select text in the same line with dragging rightward and move outside the editor-container', async ({
+test('select text in the same line with dragging rightward and move outside the affine-frame', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -411,15 +435,28 @@ test('select text in the same line with dragging rightward and move outside the 
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
+  const frameRight = await page.evaluate(() => {
+    const frame = document.querySelector('affine-frame');
+    if (!frame) {
+      throw new Error();
+    }
+    return frame.getBoundingClientRect().right;
+  });
+
   await dragBetweenIndices(
     page,
     [1, 0],
     [1, 3],
     { x: 0, y: 0 },
-    { x: 50, y: 0 }
+    { x: 0, y: 0 },
+    {
+      async beforeMouseUp() {
+        await page.mouse.move(frameRight + 1, 0);
+      },
+    }
   );
   await page.keyboard.press('Backspace', { delay: 50 });
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('abc\n');
 });
@@ -436,7 +473,7 @@ test('select text in the same line with dragging rightward and press enter creat
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left - 30, y: bbox.top - 20 };
+    return { x: bbox.left - 20, y: bbox.top - 20 };
   });
   const below789 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="4"] p');
@@ -448,7 +485,7 @@ test('select text in the same line with dragging rightward and press enter creat
     steps: 50,
   });
   await page.keyboard.press('Enter', { delay: 50 });
-  await page.keyboard.type('abc');
+  await type(page, 'abc');
   await assertRichTexts(page, ['123', '456', '789', 'abc']);
 });
 
@@ -491,9 +528,9 @@ test('drag to select tagged text, and copy', async ({ page }) => {
   await assertRichTexts(page, ['123456789']);
 
   await dragBetweenIndices(page, [0, 1], [0, 3]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('C'));
+  page.keyboard.press(`${SHORT_KEY}+C`);
   const textOne = await getSelectedTextByQuill(page);
   expect(textOne).toBe('12345');
 });
@@ -507,9 +544,9 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   await assertRichTexts(page, ['123456789']);
 
   await dragBetweenIndices(page, [0, 1], [0, 3]);
-  await withCtrlOrMeta(page, () => page.keyboard.press('B'));
+  page.keyboard.press(`${SHORT_KEY}+B`);
   await dragBetweenIndices(page, [0, 0], [0, 5]);
-  await page.keyboard.type('1');
+  await type(page, '1');
   const textOne = await getQuillSelectionText(page);
   expect(textOne).toBe('16789\n');
 });
@@ -568,11 +605,23 @@ test('selection on heavy page', async ({ page }) => {
   expect(rectNum).toBe(5);
 });
 
+// Refs: https://github.com/toeverything/blocksuite/issues/1004
+test('Change title when first content is divider', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '--- ');
+  await assertDivider(page, 1);
+  await focusTitle(page);
+  await type(page, 'title');
+  await assertTitle(page, 'title');
+});
+
 test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('--- ');
+  await type(page, '--- ');
   await assertDivider(page, 1);
   await page.keyboard.press('ArrowUp');
   await copyByKeyboard(page);
@@ -585,10 +634,11 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('--- ');
+  await type(page, '--- ');
   await assertDivider(page, 1);
-  await page.keyboard.press('Enter');
-  await page.keyboard.type('--- ');
+
+  await pressEnter(page);
+  await type(page, '--- ');
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('Backspace');
@@ -602,14 +652,328 @@ test('should delete line with content after divider should not lost content', as
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await page.keyboard.type('--- ');
-  await page.keyboard.type('123');
+  await type(page, '--- ');
+  await type(page, '123');
   await assertDivider(page, 1);
   // Jump to line start
-  await withCtrlOrMeta(page, () => page.keyboard.press('ArrowLeft'));
+  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`);
   await page.keyboard.press('Backspace');
   await page.waitForTimeout(10);
   await page.keyboard.press('Backspace');
   await assertDivider(page, 0);
   await assertRichTexts(page, ['\n', '123']);
+});
+
+test('the cursor should move to closest editor block when clicking outside container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const rect = await page.evaluate(() => {
+    const secondRichText = document.querySelector(
+      '[data-block-id="3"] .ql-editor'
+    );
+    if (!secondRichText) {
+      throw new Error();
+    }
+
+    return secondRichText.getBoundingClientRect();
+  });
+
+  await page.mouse.move(rect.left - 50, rect.top + 5);
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123456', '789']);
+
+  await undoByKeyboard(page);
+  await page.mouse.move(rect.right + 50, rect.top + 5);
+  await page.mouse.down();
+  await page.mouse.up();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '45', '789']);
+});
+
+test('should not crash when mouse over the left side of the list block prefix', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await dragBetweenIndices(page, [1, 2], [1, 0]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '45');
+  // blur
+  await page.mouse.click(0, 0);
+
+  // `456`
+  const prefixIconLeft = await page.evaluate(() => {
+    const block = document.querySelector('[data-block-id="5"]');
+    if (!block) {
+      throw new Error();
+    }
+    const prefixIcon = block.querySelector('.affine-list-block__prefix ');
+    if (!prefixIcon) {
+      throw new Error();
+    }
+    return prefixIcon.getBoundingClientRect().left;
+  });
+
+  await dragBetweenIndices(
+    page,
+    [1, 2],
+    [1, 0],
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    {
+      beforeMouseUp: async () => {
+        await page.mouse.move(prefixIconLeft - 1, 0);
+      },
+    }
+  );
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '45');
+});
+
+test('should set the last block to end the range after when leaving the affine-frame', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [0, 2], [2, 1]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '34567');
+  // blur
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 2],
+    [2, 1],
+    { x: 0, y: 0 },
+    { x: 0, y: 30 } // drag below the bottom of the last block
+  );
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '3456789');
+});
+
+test('should set the first block to start the range before when leaving the affine-frame-block-container', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(page, [2, 1], [0, 2]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '34567');
+  // blur
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [2, 1],
+    [0, 2],
+    { x: 0, y: 0 },
+    { x: 0, y: -30 } // drag above the top of the first block
+  );
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '1234567');
+});
+
+test('should select texts on cross-frame dragging', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { pageId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await initEmptyParagraphState(page, pageId);
+
+  // focus last block in first frame
+  await focusRichText(page, 2);
+  // goto next frame
+  await page.keyboard.press('ArrowDown');
+  await type(page, 'ABC');
+
+  await assertRichTexts(page, ['123', '456', '789', 'ABC']);
+
+  // blur
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 2],
+    [3, 1],
+    { x: 0, y: 0 },
+    { x: 0, y: 30 } // drag below the bottom of the last block
+  );
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '3456789ABC');
+});
+
+test('should select full text of the first block when leaving the affine-frame-block-container in edgeless mode', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+  await waitNextFrame(page);
+  await page.dblclick('[data-block-id="1"]');
+  await page.mouse.click(0, 0);
+  await dragBetweenIndices(page, [2, 1], [0, 2]);
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '34567');
+
+  await page.mouse.click(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [2, 1],
+    [0, 2],
+    { x: 0, y: 0 },
+    { x: 0, y: -30 } // drag above the top of the first block
+  );
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '1234567');
+});
+
+test('should add a new line when clicking the bottom of the last non-text block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await pressEnter(page);
+
+  // code block
+  await type(page, '```');
+  await pressEnter(page);
+
+  const locator = page.locator('affine-code');
+  await expect(locator).toBeVisible();
+
+  const rect = await page.evaluate(() => {
+    const secondRichText = document.querySelector('affine-code');
+    if (!secondRichText) {
+      throw new Error();
+    }
+
+    return secondRichText.getBoundingClientRect();
+  });
+  await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
+  await type(page, 'ABC');
+  await assertRichTexts(page, [
+    '123',
+    '456',
+    '789',
+    `
+`, // code block
+    'ABC',
+  ]);
+});
+
+test('should select texts on dragging around the page', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const coord = await getIndexCoordinate(page, [1, 2]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.up();
+  expect(await getSelectedTextByQuill(page)).toBe('45');
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x - 20, coord.y);
+  // ↓
+  await page.mouse.move(coord.x - 20, coord.y + 90);
+  await page.mouse.up();
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '45']);
+
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.down();
+  // →
+  await page.mouse.move(coord.x + 20, coord.y);
+  // ↓
+  await page.mouse.move(coord.x + 20, coord.y + 90);
+  await page.mouse.up();
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '45']);
+});
+
+test('should indent multi-selection block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  const topLeft456 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="3"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left + 1, y: bbox.top + 1 };
+  });
+
+  const bottomRight789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right - 1, y: bbox.bottom - 1 };
+  });
+
+  // from top to bottom
+  await dragBetweenCoords(page, topLeft456, bottomRight789);
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:frame>
+</affine:page>`
+  );
 });

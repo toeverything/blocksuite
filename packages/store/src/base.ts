@@ -1,26 +1,87 @@
-import type { Page } from './workspace/index.js';
+import { Signal } from '@blocksuite/global/utils';
+import type * as Y from 'yjs';
+import { z } from 'zod';
+
 import type { TextType } from './text-adapter.js';
-import { Signal } from './utils/signal.js';
+import type { Page } from './workspace/index.js';
+
+const FlavourSchema = z.string();
+const TagSchema = z.object({
+  _$litStatic$: z.string(),
+  r: z.symbol(),
+});
+
+export const BlockSchema = z.object({
+  version: z.number(),
+  model: z.object({
+    flavour: FlavourSchema,
+    tag: TagSchema,
+    props: z.function().returns(z.record(z.any())),
+  }),
+});
 
 // ported from lit
 interface StaticValue {
   _$litStatic$: string;
-  r: unknown;
+  r: symbol;
 }
 
-export interface IBaseBlockProps {
-  flavour: string;
-  type: string;
-  id: string;
-  children: IBaseBlockProps[];
+export type SchemaToModel<
+  Schema extends {
+    model: {
+      props: () => Record<string, unknown>;
+      flavour: string;
+    };
+  }
+> = BaseBlockModel &
+  ReturnType<Schema['model']['props']> & {
+    flavour: Schema['model']['flavour'];
+  };
 
-  // TODO use schema
-  text?: TextType;
+export function defineBlockSchema<
+  Flavour extends string,
+  Props extends Record<string, unknown>,
+  Metadata extends Readonly<{
+    version: number;
+    tag: StaticValue;
+  }>
+>(
+  flavour: Flavour,
+  props: () => Props,
+  metadata: Metadata
+): {
+  version: number;
+  model: {
+    props: () => Props;
+    flavour: Flavour;
+  } & Metadata;
+};
+
+export function defineBlockSchema(
+  flavour: string,
+  props: () => Record<string, unknown>,
+  metadata: {
+    version: number;
+    tag: StaticValue;
+  }
+): z.infer<typeof BlockSchema> {
+  const schema = {
+    version: metadata.version,
+    model: {
+      flavour,
+      tag: metadata.tag,
+      props,
+    },
+  } satisfies z.infer<typeof BlockSchema>;
+  BlockSchema.parse(schema);
+  return schema;
 }
 
-export class BaseBlockModel implements IBaseBlockProps {
+export class BaseBlockModel<Props = unknown>
+  implements BlockSuiteInternal.IBaseBlockProps
+{
   static version: number;
-  flavour!: string;
+  flavour!: keyof BlockSuiteInternal.BlockModels & string;
   tag!: StaticValue;
   id: string;
 
@@ -29,15 +90,24 @@ export class BaseBlockModel implements IBaseBlockProps {
   childrenUpdated = new Signal();
   childMap = new Map<string, number>();
 
-  type!: string;
+  type?: string;
   children: BaseBlockModel[];
   // TODO use schema
+  tags?: Y.Map<Y.Map<unknown>>;
+  tagSchema?: Y.Map<unknown>;
   text?: TextType;
   sourceId?: string;
 
-  constructor(page: Page, props: Partial<IBaseBlockProps>) {
+  // TODO: separate from model
+  parentIndex?: number;
+  depth?: number;
+
+  constructor(
+    page: Page,
+    props: Pick<BlockSuiteInternal.IBaseBlockProps, 'id'>
+  ) {
     this.page = page;
-    this.id = props.id as string;
+    this.id = props.id;
     this.children = [];
   }
 
@@ -54,55 +124,6 @@ export class BaseBlockModel implements IBaseBlockProps {
       return this;
     }
     return this.children[this.children.length - 1].lastChild();
-  }
-
-  block2html(
-    childText: string,
-    _previousSiblingId: string,
-    _nextSiblingId: string,
-    begin?: number,
-    end?: number
-  ) {
-    const delta = this.text?.sliceToDelta(begin || 0, end);
-    const text = delta.reduce((html: string, item: Record<string, unknown>) => {
-      return html + this._deltaLeaf2Html(item);
-    }, '');
-    return `${text}${childText}`;
-  }
-
-  block2Text(childText: string, begin?: number, end?: number) {
-    const text = (this.text?.toString() || '').slice(begin || 0, end);
-    return `${text}${childText}`;
-  }
-
-  _deltaLeaf2Html(deltaLeaf: Record<string, unknown>) {
-    let text = deltaLeaf.insert;
-    const attributes: Record<string, boolean> = deltaLeaf.attributes as Record<
-      string,
-      boolean
-    >;
-    if (!attributes) {
-      return text;
-    }
-    if (attributes.code) {
-      text = `<code>${text}</code>`;
-    }
-    if (attributes.bold) {
-      text = `<strong>${text}</strong>`;
-    }
-    if (attributes.italic) {
-      text = `<em>${text}</em>`;
-    }
-    if (attributes.underline) {
-      text = `<u>${text}</u>`;
-    }
-    if (attributes.strikethrough) {
-      text = `<s>${text}</s>`;
-    }
-    if (attributes.link) {
-      text = `<a href='${attributes.link}'>${text}</a>`;
-    }
-    return text;
   }
 
   dispose() {

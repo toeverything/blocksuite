@@ -1,11 +1,21 @@
+import type { FrameBlockComponent } from '@blocksuite/blocks';
+import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+  nonTextBlock,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+
 import type { RichText } from '../rich-text/rich-text.js';
+import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   getBlockElementByModel,
-  getContainerByModel,
   getCurrentRange,
   getDefaultPageBlock,
+  getElementFromEventTarget,
   getModelByElement,
   getModelsByRange,
   getNextBlock,
@@ -14,12 +24,6 @@ import {
   getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-  sleep,
-} from './std.js';
 import type {
   DomSelectionType,
   SelectedBlock,
@@ -27,81 +31,12 @@ import type {
   SelectionPosition,
 } from './types.js';
 
-const SCROLL_THRESHOLD = 100;
-
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-function forwardSelect(newRange: Range, range: Range) {
-  if (!(newRange.endContainer.nodeType === Node.TEXT_NODE)) {
-    const lastTextNode = getLastTextNode(newRange.endContainer);
-    if (lastTextNode) {
-      newRange = document.createRange();
-      newRange.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
-      newRange.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
-    }
-  }
-  range.setEnd(newRange.endContainer, newRange.endOffset);
-}
-
-function backwardSelect(newRange: Range, range: Range) {
-  if (!(newRange.startContainer.nodeType === Node.TEXT_NODE)) {
-    const firstTextNode = getFirstTextNode(newRange.startContainer);
-    if (firstTextNode) {
-      newRange = document.createRange();
-      newRange.setStart(firstTextNode, 0);
-      newRange.setEnd(firstTextNode, 0);
-    }
-  }
-  range.setStart(newRange.endContainer, newRange.endOffset);
-}
-
-function fixCurrentRangeToText(
-  clientX: number,
-  clientY: number,
-  offset: IPoint,
-  range: Range,
-  isForward: boolean
-) {
-  const endContainer = isForward ? range.endContainer : range.startContainer;
-  let newRange: Range | null = range;
-  if (endContainer.nodeType !== Node.TEXT_NODE) {
-    const texts = Array.from(
-      (range.commonAncestorContainer as HTMLElement).querySelectorAll(
-        '.ql-editor'
-      )
-    );
-    if (texts.length) {
-      const text = isForward
-        ? texts.reverse().find(t => {
-            const rect = t.getBoundingClientRect();
-            return clientY >= rect.top; // handle both drag downward, and rightward
-          })
-        : texts.find(t => {
-            const rect = t.getBoundingClientRect();
-            return clientY <= rect.bottom; // handle both drag upwards and leftward
-          });
-      if (!text) {
-        throw new Error('Failed to focus text node!');
-      }
-      const rect = text.getBoundingClientRect();
-      const newY = isForward
-        ? rect.bottom - offset.y - 6
-        : rect.top - offset.y + 6;
-      newRange = caretRangeFromPoint(clientX, newY);
-      if (isForward && newRange) {
-        forwardSelect(newRange, range);
-      } else if (!isForward && newRange) {
-        backwardSelect(newRange, range);
-      }
-    }
-  }
-  return range;
-}
-
-function setStartRange(editableContainer: Element) {
+export function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
   let firstNode = editableContainer.firstChild;
   while (firstNode?.firstChild) {
@@ -114,7 +49,7 @@ function setStartRange(editableContainer: Element) {
   return newRange;
 }
 
-function setEndRange(editableContainer: Element) {
+export function setEndRange(editableContainer: Element) {
   const newRange = document.createRange();
   let lastNode = editableContainer.lastChild;
   while (lastNode?.lastChild) {
@@ -143,8 +78,9 @@ async function setNewTop(y: number, editableContainer: Element) {
         scrollContainer.scrollTop =
           scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
         // set scroll may has a animation, wait for over
-        await sleep();
-        finalBottom = editableContainer.getBoundingClientRect().bottom;
+        requestAnimationFrame(() => {
+          finalBottom = editableContainer.getBoundingClientRect().bottom;
+        });
       }
       return finalBottom - lineHeight / 2;
     }
@@ -154,12 +90,30 @@ async function setNewTop(y: number, editableContainer: Element) {
         scrollContainer.scrollTop =
           scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
         // set scroll may has a animation, wait for over
-        await sleep();
-        finalTop = editableContainer.getBoundingClientRect().top;
+        requestAnimationFrame(() => {
+          finalTop = editableContainer.getBoundingClientRect().top;
+        });
       }
       return finalTop + lineHeight / 2;
     }
   }
+}
+
+/**
+ * As the title is a text area, this function does not yet have support for `SelectionPosition`.
+ */
+export function focusTitle(index = Infinity) {
+  const titleElement = document.querySelector(
+    '.affine-default-page-block-title'
+  ) as HTMLTextAreaElement | null;
+  if (!titleElement) {
+    throw new Error("Can't find title element");
+  }
+  if (index > titleElement.value.length) {
+    index = titleElement.value.length;
+  }
+  titleElement.setSelectionRange(index, index);
+  titleElement.focus();
 }
 
 export async function focusRichText(
@@ -198,26 +152,33 @@ export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end'
 ) {
+  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
+    throw new Error("Can't focus frame or page!");
+  }
   const defaultPageBlock = getDefaultPageBlock(model);
-  if (matchFlavours(model, ['affine:embed', 'affine:divider'])) {
+  if (
+    matchFlavours(model, [
+      'affine:embed',
+      'affine:divider',
+      'affine:code',
+      'affine:database',
+    ])
+  ) {
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
-    const embedElement = getBlockElementByModel(model);
-    assertExists(embedElement);
-    defaultPageBlock.selection.state.selectedBlocks.push(embedElement);
+    const element = getBlockElementByModel(model);
+    assertExists(element);
+    defaultPageBlock.selection.state.selectedBlocks.push(element);
+    if (matchFlavours(model, ['affine:database'])) {
+      const elements = model.children
+        .map(child => getBlockElementByModel(child))
+        .filter((element): element is HTMLElement => element !== null);
+      defaultPageBlock.selection.state.selectedBlocks.push(...elements);
+    }
     defaultPageBlock.selection.state.type = 'block';
     resetNativeSelection(null);
     (document.activeElement as HTMLTextAreaElement).blur();
-    return;
-  }
-  // TODO maybe the section can merge to the above
-  if (matchFlavours(model, ['affine:code'])) {
-    const selectionManager = defaultPageBlock.selection;
-    const codeBlockElement = getBlockElementByModel(model) as HTMLElement;
-    const blockRect = codeBlockElement.getBoundingClientRect();
-    selectionManager.resetSelectedBlockByRect(blockRect, 'focus');
-    resetNativeSelection(null);
     return;
   }
 
@@ -225,6 +186,9 @@ export function focusBlockByModel(
   const editableContainer = element?.querySelector('[contenteditable]');
   defaultPageBlock.selection.state.clear();
   if (editableContainer) {
+    defaultPageBlock.selection.setFocusedBlockIndexByElement(
+      element as Element
+    );
     focusRichText(editableContainer, position);
   }
 }
@@ -234,7 +198,6 @@ export function focusPreviousBlock(
   position?: SelectionPosition
 ) {
   const page = getDefaultPageBlock(model);
-  const container = getContainerByModel(model);
 
   let nextPosition = position;
   if (nextPosition) {
@@ -243,7 +206,7 @@ export function focusPreviousBlock(
     nextPosition = page.lastSelectionPosition;
   }
 
-  const preNodeModel = getPreviousBlock(container, model.id);
+  const preNodeModel = getPreviousBlock(model);
   if (preNodeModel && nextPosition) {
     focusBlockByModel(preNodeModel, nextPosition);
   }
@@ -260,7 +223,7 @@ export function focusNextBlock(
   } else if (page.lastSelectionPosition) {
     nextPosition = page.lastSelectionPosition;
   }
-  const nextNodeModel = getNextBlock(model.id);
+  const nextNodeModel = getNextBlock(model);
 
   if (nextNodeModel) {
     focusBlockByModel(nextNodeModel, nextPosition);
@@ -315,7 +278,7 @@ export function isRangeSelection() {
  *
  * Please check the difference between {@link isMultiLineRange} before use this function
  */
-export function isMultiBlockRange(range: Range) {
+export function isMultiBlockRange(range = getCurrentRange()) {
   return getModelsByRange(range).length > 1;
 }
 
@@ -331,7 +294,7 @@ export function isMultiBlockRange(range: Range) {
  * this function will return true,
  * but {@link isMultiBlockRange} will return false.
  */
-export function isMultiLineRange(range: Range) {
+export function isMultiLineRange(range = getCurrentRange()) {
   // Get the selection height
   const { height } = range.getBoundingClientRect();
 
@@ -382,9 +345,10 @@ export function getSelectInfo(page: Page): SelectionInfo {
   let selectedBlocks: SelectedBlock[] = [];
   let selectedModels: BaseBlockModel[] = [];
   const pageBlock = getDefaultPageBlock(page.root);
-  const { state } = pageBlock.selection;
+  // FIXME: missing selection in edgeless mode
+  const state = pageBlock.selection?.state;
   const nativeSelection = window.getSelection();
-  if (state.type === 'block') {
+  if (state?.type === 'block') {
     type = 'Block';
     const { selectedBlocks } = state;
     selectedModels = selectedBlocks.map(block => getModelByElement(block));
@@ -419,43 +383,114 @@ export function getSelectInfo(page: Page): SelectionInfo {
   };
 }
 
-export function handleNativeRangeDragMove(
-  startRange: Range | null,
-  e: SelectionEvent
+function handleInFrameDragMove(
+  startContainer: Node,
+  startOffset: number,
+  endContainer: Node,
+  endOffset: number,
+  currentRange: Range,
+  isBackward: boolean
 ) {
-  const isForward = e.x > e.start.x || e.y > e.start.y;
-  assertExists(startRange);
-  const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  if (isForward) {
-    currentRange?.setStart(startContainer, startOffset);
+  if (isBackward) {
+    currentRange.setEnd(endContainer, endOffset);
   } else {
-    currentRange?.setEnd(endContainer, endOffset);
-  }
-  if (currentRange) {
-    currentRange = fixCurrentRangeToText(
-      e.raw.clientX,
-      e.raw.clientY,
-      e.containerOffset,
-      currentRange,
-      isForward
-    );
+    currentRange.setStart(startContainer, startOffset);
   }
   resetNativeSelection(currentRange);
 }
 
-function isBlankAreaBetweenBlocks(startContainer: Node) {
-  if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-paragraph-block-container');
+export function handleNativeRangeDragMove(
+  startRange: Range | null,
+  e: SelectionEvent
+) {
+  const isEdgelessMode = !!document.querySelector('affine-edgeless-page');
+
+  // Range from current mouse position
+  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  if (!currentRange) return;
+
+  assertExists(startRange);
+  const { startContainer, startOffset, endContainer, endOffset } = startRange;
+  const _startContainer = (
+    startContainer.nodeType === Node.TEXT_NODE
+      ? startContainer.parentElement
+      : startContainer
+  ) as HTMLElement;
+  const startFrame = _startContainer.closest('affine-frame');
+  if (!startFrame) return;
+
+  const { clientX: x, clientY: y } = e.raw;
+
+  let currentFrame: FrameBlockComponent | null | undefined = null;
+  let shouldUpdateCurrentRange = false;
+
+  if (isEdgelessMode) {
+    currentFrame = startFrame;
+    shouldUpdateCurrentRange = true;
+  } else {
+    const el = document.elementFromPoint(x, y);
+    if (el?.classList.contains('quill-container')) {
+      return;
+    }
+    currentFrame = el?.closest('affine-frame');
+    const currentEditor = el?.closest('.ql-editor');
+    // if we are not pointing at an editor, we should update the current range
+    // if we are not even pointing at a frame, we should find one and update the current range
+    shouldUpdateCurrentRange = !currentFrame || !currentEditor;
+    currentFrame ??= getClosestFrame(y);
+  }
+  if (!currentFrame) return;
+
+  if (shouldUpdateCurrentRange) {
+    const closestEditor = getClosestEditor(y, currentFrame);
+    if (!closestEditor) return;
+
+    const newPoint = normalizePointIntoContainer({ x, y }, closestEditor);
+    currentRange = caretRangeFromPoint(newPoint.x, newPoint.y);
+    if (!currentRange) return;
+    if (currentRange.endContainer.nodeType !== Node.TEXT_NODE) return;
+    if (!currentFrame.contains(currentRange.endContainer)) return;
+  }
+
+  // Forward: ↓ →, Backward: ← ↑
+  const isBackward = currentRange.comparePoint(endContainer, endOffset) === 1;
+  handleInFrameDragMove(
+    startContainer,
+    startOffset,
+    endContainer,
+    endOffset,
+    currentRange,
+    isBackward
+  );
 }
 
-function isBlankAreaAfterLastBlock(startContainer: HTMLElement) {
-  return startContainer.tagName === 'AFFINE-GROUP';
-}
+/**
+ * This function is used to normalize the point into the reasonable range of the container.
+ *
+ * It will set the point to the top-left or bottom-right corner
+ * when the point is out of the horizontal range of container.
+ */
+function normalizePointIntoContainer(point: IPoint, container: Element) {
+  const { top, left, right, bottom } = container.getBoundingClientRect();
+  const newPoint = { ...point };
+  const { x, y } = point;
 
-function isBlankAreaBeforeFirstBlock(startContainer: HTMLElement) {
-  if (!(startContainer instanceof HTMLElement)) return false;
-  return startContainer.className.includes('affine-group-block-container');
+  // need this offset to avoid the point is out of the container
+  if (y < top) {
+    newPoint.y = top + 4;
+    newPoint.x = left + 4;
+  } else if (y > bottom) {
+    newPoint.y = bottom - 4;
+    newPoint.x = right - 4;
+  } else {
+    if (x < left) {
+      newPoint.x = left;
+    } else if (x > right) {
+      newPoint.x = right;
+    }
+  }
+
+  return newPoint;
 }
 
 export function isBlankArea(e: SelectionEvent) {
@@ -463,35 +498,60 @@ export function isBlankArea(e: SelectionEvent) {
   return cursor !== 'text';
 }
 
-export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
-  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-  const startContainer = range?.startContainer;
-  // if not left click
-  if (e.button) {
+// Retarget selection back to the nearest block
+// when user clicks on the edge of page (page mode) or frame (edgeless mode).
+// See https://github.com/toeverything/blocksuite/pull/878
+function handleClickRetargeting(page: Page, e: SelectionEvent) {
+  const targetEl = getElementFromEventTarget(e.raw.target);
+  const block = targetEl?.closest(`[${BLOCK_ID_ATTR}]`) as {
+    model?: BaseBlockModel;
+    pageModel?: BaseBlockModel;
+  } | null;
+  const parentModel = block?.model || block?.pageModel;
+  if (!parentModel) return;
+
+  const shouldRetarget = matchFlavours(parentModel, [
+    'affine:frame',
+    'affine:page',
+  ]);
+  if (!shouldRetarget) return;
+
+  const { clientX, clientY } = e.raw;
+
+  const horizontalElement = getClosestEditor(clientY);
+  if (!horizontalElement) return;
+
+  const model = getModelByElement(horizontalElement);
+  const rect = horizontalElement.getBoundingClientRect();
+  if (matchFlavours(model, nonTextBlock) && clientY > rect.bottom) {
+    const parent = page.getParent(model);
+    assertExists(parent);
+    const id = page.addBlockByFlavour('affine:paragraph', {}, parent.id);
+    asyncFocusRichText(page, id);
     return;
   }
+
+  if (clientX < rect.left) {
+    const range = setStartRange(horizontalElement);
+    resetNativeSelection(range);
+  } else {
+    const range = setEndRange(horizontalElement);
+    resetNativeSelection(range);
+  }
+}
+
+export function handleNativeRangeClick(page: Page, e: SelectionEvent) {
+  // if not left click
+  if (e.button) return;
+
+  const range = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  const startContainer = range?.startContainer;
   // click on rich text
   if (startContainer instanceof Node) {
     resetNativeSelection(range);
   }
 
-  if (!(startContainer instanceof HTMLElement)) return;
-
-  if (
-    isBlankAreaBetweenBlocks(startContainer) ||
-    isBlankAreaBeforeFirstBlock(startContainer)
-  ) {
-    focusRichTextByOffset(startContainer, e.raw.clientX);
-  } else if (isBlankAreaAfterLastBlock(startContainer)) {
-    const { root } = page;
-    const lastChild = root?.lastChild();
-    assertExists(lastChild);
-    if (matchFlavours(lastChild, ['affine:paragraph', 'affine:list'])) {
-      const block = getBlockElementByModel(lastChild);
-      if (!block) return;
-      focusRichTextByOffset(block, e.raw.clientX);
-    }
-  }
+  handleClickRetargeting(page, e);
 }
 
 export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
@@ -742,6 +802,7 @@ function getCurrentCharIndex(
   const currentCharIndex = wordText.indexOf(currentChar);
   return [currentCharIndex, wordText] as const;
 }
+
 /**
  * left first search all leaf text nodes
  * @example
@@ -778,6 +839,13 @@ export function getSplicedTitle(title: HTMLTextAreaElement) {
 
 export function isEmbed(e: SelectionEvent) {
   if ((e.raw.target as HTMLElement).classList.contains('resize')) {
+    return true;
+  }
+  return false;
+}
+
+export function isDatabase(e: SelectionEvent) {
+  if ((e.raw.target as HTMLElement).className.startsWith('affine-database')) {
     return true;
   }
   return false;
@@ -837,4 +905,83 @@ export function restoreSelection(selectedBlocks: SelectedBlock[]) {
   range.setEnd(endNode, endOffset);
   resetNativeSelection(range);
   return range;
+}
+
+/**
+ * Get the closest element in the horizontal position
+ */
+export function getHorizontalClosestElement<
+  K extends keyof HTMLElementTagNameMap
+>(
+  clientY: number,
+  selectors: K,
+  container?: Element
+): HTMLElementTagNameMap[K] | null;
+export function getHorizontalClosestElement<
+  K extends keyof SVGElementTagNameMap
+>(
+  clientY: number,
+  selectors: K,
+  container?: Element
+): SVGElementTagNameMap[K] | null;
+export function getHorizontalClosestElement<E extends Element = Element>(
+  clientY: number,
+  selectors: string,
+  container?: Element
+): E | null;
+export function getHorizontalClosestElement(
+  clientY: number,
+  selector: string,
+  container: Element = document.body
+) {
+  // sort for binary search (In fact, it is generally orderly, just in case)
+  const elements = Array.from(container.querySelectorAll(selector)).sort(
+    (a, b) =>
+      // getBoundingClientRect here actually run so fast because of the browser cache
+      a.getBoundingClientRect().top > b.getBoundingClientRect().top ? 1 : -1
+  );
+
+  // short circuit
+  const len = elements.length;
+  if (len === 0) return null;
+  if (len === 1) return elements[0];
+
+  if (clientY < elements[0].getBoundingClientRect().top) return elements[0];
+  if (clientY > elements[len - 1].getBoundingClientRect().bottom)
+    return elements[len - 1];
+
+  // binary search
+  let left = 0;
+  let right = len - 1;
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const minElement = elements[mid];
+    if (
+      clientY <= minElement.getBoundingClientRect().bottom &&
+      (mid === 0 || clientY > elements[mid - 1].getBoundingClientRect().bottom)
+    ) {
+      return elements[mid];
+    }
+    if (minElement.getBoundingClientRect().top > clientY) {
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get the closest editor element in the horizontal position
+ */
+export function getClosestEditor(clientY: number, container = document.body) {
+  return getHorizontalClosestElement(clientY, '.ql-editor', container);
+}
+
+/**
+ * Get the closest frame element in the horizontal position
+ */
+export function getClosestFrame(clientY: number) {
+  return getHorizontalClosestElement(clientY, 'affine-frame');
 }

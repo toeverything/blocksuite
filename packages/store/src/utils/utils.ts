@@ -1,39 +1,17 @@
+import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
+import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
+
 import type { BaseBlockModel } from '../base.js';
+import { PrelimText, Text, TextType } from '../text-adapter.js';
+import type { Workspace } from '../workspace/index.js';
 import type {
   BlockProps,
   PrefixedBlockProps,
   YBlock,
   YBlocks,
 } from '../workspace/page.js';
-import { PrelimText, Text, TextType } from '../text-adapter.js';
-import type { Workspace } from '../workspace/index.js';
-import { fromBase64, toBase64 } from 'lib0/buffer.js';
-
-const SYS_KEYS = new Set(['id', 'flavour', 'children']);
-
-// https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
-function isPrimitive(
-  a: unknown
-): a is null | undefined | boolean | number | string {
-  return a !== Object(a);
-}
-
-export function assertExists<T>(val: T | null | undefined): asserts val is T {
-  if (val === null || val === undefined) {
-    throw new Error('val does not exist');
-  }
-}
-
-export function assertFlavours(model: BaseBlockModel, allowed: string[]) {
-  if (!allowed.includes(model.flavour)) {
-    throw new Error(`model flavour ${model.flavour} is not allowed`);
-  }
-}
-
-export function matchFlavours(model: BaseBlockModel, expected: string[]) {
-  return expected.includes(model.flavour);
-}
+import type { Page } from '../workspace/page.js';
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -48,9 +26,13 @@ export function assertValidChildren(
   });
 }
 
-export function initSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
+export function initInternalProps(yBlock: YBlock, props: Partial<BlockProps>) {
   yBlock.set('sys:id', props.id);
   yBlock.set('sys:flavour', props.flavour);
+  if (props.flavour === 'affine:page') {
+    yBlock.set('meta:tags', new Y.Map());
+    yBlock.set('meta:tagSchema', new Y.Map());
+  }
 
   const yChildren = new Y.Array();
   yBlock.set('sys:children', yChildren);
@@ -60,64 +42,41 @@ export function initSysProps(yBlock: YBlock, props: Partial<BlockProps>) {
 }
 
 export function syncBlockProps(
+  // schema: z.infer<typeof BlockSchema>,
+  defaultProps: Record<string, unknown>,
   yBlock: YBlock,
   props: Partial<BlockProps>,
   ignoredKeys: Set<string>
 ) {
   Object.keys(props).forEach(key => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
+    const value = props[key];
 
     // TODO use schema
     if (key === 'text') return;
-
-    if (!isPrimitive(props[key])) {
+    if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // TODO compare with current yBlock value
-    if (props[key] !== undefined) {
-      yBlock.set('prop:' + key, props[key]);
+    if (value !== undefined) {
+      if (Array.isArray(value)) {
+        yBlock.set(`prop:${key}`, Y.Array.from(value));
+      } else {
+        yBlock.set(`prop:${key}`, value);
+      }
     }
   });
 
-  // TODO use schema
-  if (
-    props.flavour === 'affine:paragraph' &&
-    !props.type &&
-    !yBlock.has('prop:type')
-  ) {
-    yBlock.set('prop:type', 'text');
-  }
-  if (props.flavour === 'affine:list' && !yBlock.has('prop:type')) {
-    yBlock.set('prop:type', props.type ?? 'bulleted');
-  }
-
-  if (props.flavour === 'affine:list' && !yBlock.has('prop:checked')) {
-    yBlock.set('prop:checked', props.checked ?? false);
-  }
-  if (props.flavour === 'affine:group' && !yBlock.has('prop:xywh')) {
-    yBlock.set('prop:xywh', props.xywh ?? '[0,0,720,480]');
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:width')) {
-    yBlock.set('prop:width', props.width ?? 20);
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:sourceId')) {
-    yBlock.set('prop:sourceId', props.sourceId ?? '');
-  }
-  if (props.flavour === 'affine:embed' && !yBlock.has('prop:caption')) {
-    yBlock.set('prop:caption', props.caption ?? '');
-  }
-  if (props.flavour === 'affine:shape') {
-    if (!yBlock.has('prop:xywh')) {
-      yBlock.set('prop:xywh', props.xywh ?? '[0,0,50,50]');
+  // set default value
+  Object.entries(defaultProps).forEach(([key, value]) => {
+    if (!yBlock.has(`prop:${key}`)) {
+      if (Array.isArray(value)) {
+        yBlock.set(`prop:${key}`, Y.Array.from(value));
+      } else {
+        yBlock.set(`prop:${key}`, value);
+      }
     }
-    if (!yBlock.has('prop:type')) {
-      yBlock.set('prop:type', props.type ?? 'rectangle');
-    }
-    if (!yBlock.has('prop:color')) {
-      yBlock.set('prop:color', props.color ?? 'black');
-    }
-  }
+  });
 }
 
 export function trySyncTextProp(
@@ -131,6 +90,7 @@ export function trySyncTextProp(
   if (text instanceof Text) {
     // @ts-ignore
     yBlock.set('prop:text', text._yText);
+    text.doDelayedJobs();
     return;
   }
 
@@ -155,7 +115,7 @@ export function trySyncTextProp(
     // @ts-ignore
     const yBase = base._yText;
 
-    // attach meta state for identifing split
+    // attach meta state for identifying split
     // otherwise local change from y-side will be ignored by TextAdapter
     // @ts-ignore
     yBase.meta = { split: true };
@@ -168,16 +128,15 @@ export function trySyncTextProp(
     yRight.delete(0, right.index);
 
     // delete the right-half part of `yBase`, making it the new left
-    yBase.delete(right.index, yBase.length - right.index);
+    yBase.delete(left.index, yBase.length - left.index);
 
     // cleanup
     splitSet.clear();
   }
 }
 
-export function toBlockProps(
-  prefixedProps: PrefixedBlockProps
-): Partial<BlockProps> {
+export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
+  const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
   Object.keys(prefixedProps).forEach(key => {
     if (prefixedProps[key]) {
@@ -189,7 +148,12 @@ export function toBlockProps(
     if (SYS_KEYS.has(prefixedKey)) return;
 
     const key = prefixedKey.replace('prop:', '');
-    props[key] = prefixedProps[prefixedKey];
+    const realValue = yBlock.get(prefixedKey);
+    if (realValue instanceof Y.Array) {
+      props[key] = realValue.toArray();
+    } else {
+      props[key] = prefixedProps[prefixedKey];
+    }
   });
 
   return props;
@@ -201,4 +165,18 @@ export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
 
 export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
   Y.applyUpdateV2(workspace.doc, fromBase64(update));
+}
+
+export function doesInsideBlockByFlavour(
+  page: Page,
+  block: BaseBlockModel,
+  flavour: keyof BlockSuiteInternal.BlockModels
+): boolean {
+  const parent = page.getParent(block);
+  if (parent === null) {
+    return false;
+  } else if (matchFlavours(parent, [flavour])) {
+    return true;
+  }
+  return doesInsideBlockByFlavour(page, parent, flavour);
 }

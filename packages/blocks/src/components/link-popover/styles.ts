@@ -1,5 +1,6 @@
 import { css } from 'lit';
-import { toolTipStyle } from '../tooltip.js';
+
+import { toolTipStyle } from '../tooltip/tooltip.js';
 
 export const editLinkStyle = css`
   .affine-link-edit-popover {
@@ -99,9 +100,10 @@ export const linkPopoverStyle = css`
   .overlay-mask {
     position: fixed;
     top: 0;
-    bottom: 0;
     left: 0;
-    right: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--affine-z-index-popover);
   }
   .affine-edit-text-area {
     border: 1px solid var(--affine-border-color);
@@ -180,6 +182,7 @@ export const linkPopoverStyle = css`
     align-items: center;
     user-select: none;
     cursor: pointer;
+    white-space: nowrap;
     overflow: hidden;
   }
 

@@ -1,5 +1,6 @@
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import { IconButton } from '../button.js';
 
 @customElement('format-bar-button')
@@ -11,6 +12,7 @@ export class FormatBarButton extends IconButton {
       width: var(--button-width);
       height: var(--button-height);
       fill: var(--affine-icon-color);
+      white-space: nowrap;
     }
   `;
 

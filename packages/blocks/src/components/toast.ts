@@ -1,5 +1,4 @@
 import { css, html, TemplateResult } from 'lit';
-import { sleep } from '../__internal__/utils/index.js';
 
 let ToastContainer: HTMLDivElement | null = null;
 
@@ -14,7 +13,7 @@ const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
     template.innerHTML = html;
   } else {
     const { strings, values } = html;
-    const v = [...values, '']; // + last emtpty part
+    const v = [...values, '']; // + last empty part
     const htmlString = strings.reduce((acc, cur, i) => acc + cur + v[i], '');
     template.innerHTML = htmlString;
   }
@@ -92,9 +91,15 @@ export const toast = (message: string, duration = 2500) => {
     element.style.maxHeight = '0';
     element.style.margin = '0';
     element.style.padding = '0';
-    // wait for transition
-    await sleep(230);
-    element.remove();
+    element.addEventListener(
+      'transitionend',
+      () => {
+        element.remove();
+      },
+      {
+        once: true,
+      }
+    );
   }, duration);
   return element;
 };

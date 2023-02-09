@@ -48,6 +48,13 @@ export class IconButton extends LitElement {
       cursor: not-allowed;
     }
 
+    /* You can add a 'hover' attribute to the button to show the hover style */
+    :host([hover]) {
+      background: var(--affine-hover-background);
+      fill: var(--affine-primary-color);
+      color: var(--affine-primary-color);
+    }
+
     /* You can add a 'active' attribute to the button to revert the active style */
     :host([active]) {
       fill: var(--affine-primary-color);
@@ -65,12 +72,11 @@ export class IconButton extends LitElement {
   @property()
   text: string | null = null;
 
-  @property({ type: Boolean })
+  @property()
   disabled = false;
 
   constructor() {
     super();
-    this.tabIndex = 0;
     this.addEventListener('keypress', event => {
       if (this.disabled) {
         return;
@@ -83,6 +89,7 @@ export class IconButton extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
+    this.tabIndex = 0;
 
     this.style.setProperty(
       '--button-size',

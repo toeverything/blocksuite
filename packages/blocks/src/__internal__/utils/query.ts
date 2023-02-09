@@ -1,9 +1,11 @@
+import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { LeafBlot } from 'parchment';
+
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import { BLOCK_ID_ATTR as ATTR } from './consts.js';
-import { assertExists, matchFlavours } from './std.js';
-import { ShapeBlockTag } from '../../index.js';
+import type { IPoint } from './gesture.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -11,23 +13,20 @@ interface ContainerBlock {
   model?: BaseBlockModel;
 }
 
-export function getShapeBlockHitBox(id: string): SVGPathElement | null {
-  const shapeBlock = getBlockById<'affine-shape'>(id);
-  if (shapeBlock?.tagName !== ShapeBlockTag.toUpperCase()) {
-    throw new Error(`data-block-id: ${id} is not shape block`);
-  }
-  return (
-    shapeBlock.shadowRoot?.querySelector('.affine-shape-block-hit-box') ?? null
-  );
-}
-
 export function getBlockById<T extends ElementTagName>(
   id: string,
-  ele: Element = document.body
+  container: Element = document.body
 ) {
-  return ele.querySelector<T>(`[${ATTR}="${id}"]` as T);
+  return container.querySelector<T>(`[${ATTR}="${id}"]` as T);
 }
 
+export function getBlockByPoint(point: IPoint): Element | null | undefined {
+  return document.elementFromPoint(point.x, point.y)?.closest(`[${ATTR}]`);
+}
+
+/**
+ * @deprecated Use `page.getParent` instead
+ */
 export function getParentBlockById<T extends ElementTagName>(
   id: string,
   ele: Element = document.body
@@ -37,98 +36,96 @@ export function getParentBlockById<T extends ElementTagName>(
 }
 
 /**
- * @deprecated use methods in page instead
+ *
+ * @example
+ * ```md
+ * page
+ * - frame
+ *  - paragraph <- when invoked here, the traverse order will be following
+ *    - child <- 1
+ *  - sibling <- 2
+ * - frame <- 3 (will be skipped)
+ *   - paragraph <- 4
+ * ```
+ *
+ * NOTE: this method will skip the `affine:frame` block
  */
-function getSiblingsById(id: string, ele: Element = document.body) {
-  // TODO : resolve BaseBlockModel type relay
-  const parentBlock = getParentBlockById(id, ele) as ContainerBlock;
-  const children = parentBlock?.model?.children;
-  if (children?.length) {
-    const queryStr = children.map(child => `[${ATTR}='${child.id}']`).join(',');
-    return Array.from(ele.querySelectorAll(queryStr));
+export function getNextBlock(
+  model: BaseBlockModel,
+  map: Record<string, true> = {}
+): BaseBlockModel | null {
+  if (model.id in map) {
+    throw new Error("Can't get next block! There's a loop in the block tree!");
   }
-  return [];
-}
+  map[model.id] = true;
 
-/**
- * @deprecated use {@link page.getPreviousSibling} instead
- */
-export function getPreviousSiblingById<T extends ElementTagName>(
-  id: string,
-  ele: Element = document.body
-) {
-  const siblings = getSiblingsById(id, ele);
-  const currentBlock = getBlockById<T>(id, ele);
-  if (siblings && siblings.length > 0 && currentBlock) {
-    const index = [...siblings].indexOf(currentBlock);
-    return (siblings[index - 1] as HTMLElementTagNameMap[T]) || null;
+  const page = model.page;
+  if (model.children.length) {
+    return model.children[0];
   }
-  return null;
-}
-
-/**
- * @deprecated use {@link page.getNextSibling} instead
- */
-export function getNextSiblingById<T extends ElementTagName>(
-  id: string,
-  ele: HTMLElement = document.body
-) {
-  const siblings = getSiblingsById(id, ele);
-  const currentBlock = getBlockById(id, ele);
-  if (siblings && siblings.length > 0 && currentBlock) {
-    const index = [...siblings].indexOf(currentBlock);
-    return (siblings[index + 1] as HTMLElementTagNameMap[T]) || null;
-  }
-  return null;
-}
-
-export function getNextBlock(blockId: string) {
-  let currentBlock = getBlockById<'affine-paragraph'>(blockId);
-  if (currentBlock?.model.children.length) {
-    return currentBlock.model.children[0];
-  }
+  let currentBlock: typeof model | null = model;
   while (currentBlock) {
-    const parentBlock = getParentBlockById<'affine-paragraph'>(
-      currentBlock.model.id
-    );
-    if (parentBlock) {
-      const nextSiblings = getNextSiblingById<'affine-paragraph'>(
-        currentBlock.model.id
-      );
-      if (nextSiblings) {
-        return nextSiblings.model;
+    const nextSibling = page.getNextSibling(currentBlock);
+    if (nextSibling) {
+      // Assert nextSibling is not possible to be `affine:page`
+      if (matchFlavours(nextSibling, ['affine:frame'])) {
+        return getNextBlock(nextSibling);
       }
+      return nextSibling;
     }
-    currentBlock = parentBlock;
+    currentBlock = page.getParent(currentBlock);
   }
   return null;
 }
 
-export function getPreviousBlock(container: Element, blockId: string) {
-  const parentBlock = getParentBlockById<'affine-paragraph'>(
-    blockId,
-    container
-  );
-  if (parentBlock) {
-    const previousBlock = getPreviousSiblingById<'affine-paragraph'>(
-      blockId,
-      container
+/**
+ *
+ * @example
+ * ```md
+ * page
+ * - frame
+ *   - paragraph <- 5
+ * - frame <- 4 (will be skipped)
+ *  - paragraph <- 3
+ *    - child <- 2
+ *      - child <- 1
+ *  - paragraph <- when invoked here, the traverse order will be above
+ * ```
+ *
+ * NOTE: this method will skip the `affine:frame` and `affine:page` block
+ */
+export function getPreviousBlock(
+  model: BaseBlockModel,
+  map: Record<string, true> = {}
+): BaseBlockModel | null {
+  if (model.id in map) {
+    throw new Error(
+      "Can't get previous block! There's a loop in the block tree!"
     );
-
-    if (previousBlock?.model) {
-      if (previousBlock.model.children.length) {
-        let firstChild =
-          previousBlock.model.children[previousBlock.model.children.length - 1];
-        while (firstChild.children.length) {
-          firstChild = firstChild.children[firstChild.children.length - 1];
-        }
-        return firstChild;
-      }
-      return previousBlock.model;
-    }
-    return parentBlock.model;
   }
-  return null;
+  map[model.id] = true;
+
+  const page = model.page;
+  const parentBlock = page.getParent(model);
+  if (!parentBlock) {
+    return null;
+  }
+  const previousBlock = page.getPreviousSibling(model);
+  if (!previousBlock) {
+    if (matchFlavours(parentBlock, ['affine:frame', 'affine:page'])) {
+      return getPreviousBlock(parentBlock);
+    }
+    return parentBlock;
+  }
+  if (previousBlock.children.length) {
+    let lastChild = previousBlock.children[previousBlock.children.length - 1];
+    while (lastChild.children.length) {
+      lastChild = lastChild.children[lastChild.children.length - 1];
+    }
+    // Assume children is not possible to be `affine:frame` or `affine:page`
+    return lastChild;
+  }
+  return previousBlock;
 }
 
 export function getDefaultPageBlock(model: BaseBlockModel) {
@@ -218,7 +215,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
-        blockElement?.tagName !== 'AFFINE-GROUP'
+        blockElement?.tagName !== 'AFFINE-FRAME'
       ) {
         intersectedModels.push(block.model);
       }
@@ -305,7 +302,7 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number,
-  isStart: boolean
+  isStart = true
 ) {
   if (
     ele instanceof Element &&
@@ -328,7 +325,7 @@ export function getQuillIndexByNativeSelection(
       // @ts-ignore
       !lastNode.getAttributeNode('contenteditable'))
   ) {
-    if (ele instanceof Element && ele.hasAttribute('data-block-id')) {
+    if (ele instanceof Element && ele.hasAttribute(ATTR)) {
       offset = 0;
       break;
     }
@@ -376,13 +373,7 @@ export function getTextNodeBySelectedBlock(selectedBlock: SelectedBlock) {
   }
   const quill = richText.quill;
 
-  const [leaf, leafOffset]: [
-    {
-      // Blot
-      domNode: HTMLElement;
-    },
-    number
-  ] = quill.getLeaf(offset);
+  const [leaf, leafOffset]: [LeafBlot, number] = quill.getLeaf(offset);
   return [leaf.domNode, leafOffset] as const;
 }
 
@@ -390,7 +381,53 @@ export function getAllBlocks() {
   const blocks = Array.from(document.querySelectorAll(`[${ATTR}]`));
   return blocks.filter(item => {
     return (
-      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-GROUP'
+      item.tagName !== 'AFFINE-DEFAULT-PAGE' && item.tagName !== 'AFFINE-FRAME'
     );
   });
+}
+
+export function isInsideRichText(element: unknown): element is RichText {
+  // Fool-proofing
+  if (element instanceof Event) {
+    throw new Error('Did you mean "event.target"?');
+  }
+
+  if (!element || !(element instanceof Element)) {
+    return false;
+  }
+  const richText = element.closest('rich-text');
+  return !!richText;
+}
+
+export function isTitleElement(
+  element: unknown
+): element is HTMLTextAreaElement | HTMLInputElement {
+  return (
+    (element instanceof HTMLTextAreaElement ||
+      element instanceof HTMLInputElement) &&
+    element.getAttribute('data-block-is-title') === 'true'
+  );
+}
+
+export function isDatabaseInput(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.getAttribute('data-block-is-database-input') === 'true'
+  );
+}
+
+export function isCaptionElement(node: unknown): node is HTMLInputElement {
+  if (!(node instanceof Element)) {
+    return false;
+  }
+  return node.classList.contains('affine-embed-wrapper-caption');
+}
+
+export function getElementFromEventTarget(
+  target: EventTarget | null
+): Element | null {
+  if (!target) return null;
+  if (target instanceof Element) return target;
+  if (target instanceof Node) target.parentElement;
+  return null;
 }

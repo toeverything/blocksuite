@@ -1,5 +1,6 @@
 import { css } from 'lit';
-import { toolTipStyle } from '../tooltip.js';
+
+import { toolTipStyle } from '../tooltip/tooltip.js';
 
 const paragraphPanelStyle = css`
   .paragraph-button > svg:nth-child(2) {
@@ -13,11 +14,9 @@ const paragraphPanelStyle = css`
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     position: absolute;
-    width: 173px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    min-width: 173px;
     padding: 8px 4px;
+    overflow-y: auto;
 
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);

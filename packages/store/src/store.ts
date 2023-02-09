@@ -1,13 +1,21 @@
+import { merge } from 'merge';
+import { Awareness } from 'y-protocols/awareness.js';
+
+import { AwarenessStore, RawAwarenessState } from './awareness.js';
+import type { BlobOptionsGetter } from './persistence/blob/index.js';
+import type {
+  DocProvider,
+  DocProviderConstructor,
+} from './persistence/doc/index.js';
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
-import { Awareness } from 'y-protocols/awareness.js';
-import type { DocProvider, DocProviderConstructor } from './doc-providers.js';
-import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
+  nanoid,
   uuidv4,
 } from './utils/id-generator.js';
+import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import { BlockSuiteDoc } from './yjs/index.js';
 
 export interface SerializedStore {
@@ -20,6 +28,8 @@ export enum Generator {
   /**
    * Default mode, generator for the unpredictable id
    */
+  NanoID = 'nanoID',
+
   UUIDv4 = 'uuidV4',
   /**
    * This generator is trying to fix the real-time collaboration on debug mode.
@@ -45,21 +55,38 @@ export interface SSROptions {
   isSSR?: boolean;
 }
 
-export interface StoreOptions extends SSROptions {
+export interface StoreOptions<
+  Flags extends Record<string, unknown> = BlockSuiteFlags
+> extends SSROptions {
   room?: string;
   providers?: DocProviderConstructor[];
-  awareness?: Awareness;
+  awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
+  defaultFlags?: Partial<Flags>;
+  blobOptionsGetter?: BlobOptionsGetter;
 }
 
 const DEFAULT_ROOM = 'virgo-default';
+
+const flagsPreset = {
+  enable_set_remote_flag: true,
+  enable_drag_handle: true,
+  enable_block_hub: true,
+  enable_surface: true,
+  enable_edgeless_toolbar: true,
+  enable_slash_menu: false,
+  enable_append_flavor_slash: false,
+  enable_database: false,
+  readonly: {},
+} satisfies BlockSuiteFlags;
 
 export class Store {
   readonly doc = new BlockSuiteDoc();
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
-  readonly awareness: Awareness;
+  readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
+  connected = false;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
   constructor({
@@ -67,8 +94,14 @@ export class Store {
     providers = [],
     awareness,
     idGenerator,
+    defaultFlags,
   }: StoreOptions = {}) {
-    this.awareness = awareness ?? new Awareness(this.doc);
+    this.awarenessStore = new AwarenessStore(
+      this,
+      awareness ?? new Awareness<RawAwarenessState>(this.doc),
+      merge(flagsPreset, defaultFlags)
+    );
+
     switch (idGenerator) {
       case Generator.AutoIncrement: {
         this.idGenerator = createAutoIncrementIdGenerator();
@@ -80,17 +113,35 @@ export class Store {
         );
         break;
       }
-      case Generator.UUIDv4:
-      default: {
+      case Generator.UUIDv4: {
         this.idGenerator = uuidv4;
         break;
       }
+      case Generator.NanoID:
+      default: {
+        this.idGenerator = nanoid;
+        break;
+      }
     }
+
     this.providers = providers.map(
       ProviderConstructor =>
-        new ProviderConstructor(room, this.doc, { awareness: this.awareness })
+        new ProviderConstructor(room, this.doc, {
+          // @ts-expect-error
+          awareness: this.awarenessStore.awareness,
+        })
     );
   }
+
+  connect = () => {
+    this.providers.forEach(provider => provider.connect?.());
+    this.connected = true;
+  };
+
+  disconnect = () => {
+    this.providers.forEach(provider => provider.disconnect?.());
+    this.connected = false;
+  };
 
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
@@ -101,17 +152,10 @@ export class Store {
   }
 
   /**
-   * @internal Only for testing
-   */
-  serializeDoc() {
-    return serializeYDoc(this.doc) as unknown as SerializedStore;
-  }
-
-  /**
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
    */
-  toJSXElement(id = '0') {
-    const json = this.serializeDoc();
+  exportJSX(id = '0') {
+    const json = serializeYDoc(this.doc) as unknown as SerializedStore;
     if (!('space:page0' in json)) {
       throw new Error("Failed to convert to JSX: 'space:page0' not found");
     }

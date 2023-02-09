@@ -1,0 +1,56 @@
+import { init, parse } from 'es-module-lexer';
+import micromatch from 'micromatch';
+import path from 'path';
+import type { Plugin } from 'vite';
+const isMatch = micromatch.isMatch;
+
+export function fineTuneHmr({
+  include,
+  exclude,
+}: {
+  include: string[];
+  exclude: string[];
+}): Plugin {
+  let root = '';
+  const plugin: Plugin = {
+    name: 'add-hot-for-pure-exports',
+    apply: 'serve',
+    configResolved(config) {
+      root = config.root;
+    },
+    async configureServer() {
+      await init;
+    },
+    transform: async (code, id, options) => {
+      // only handle js/ts files
+      const includeGlob = include.map(i => path.resolve(root, i));
+      const excludeGlob = exclude.map(i => path.resolve(root, i));
+      const isInScope = isMatch(id, includeGlob) && !isMatch(id, excludeGlob);
+      if (!isInScope) return;
+      if (!(id.endsWith('.js') || id.endsWith('.ts'))) return;
+      // only handle files which not contains Lit elements
+      if (code.includes('import.meta.hot')) return;
+
+      const [imports, exports] = parse(code, id);
+      if (exports.length === 0 && imports.length > 0) {
+        const modules = imports.map(i => i.n);
+        const modulesEndsWithTs = modules
+          .filter(Boolean)
+          .map(m => m.replace(/\.js$/, '.ts'));
+        const preamble = `
+          if (import.meta.hot) {
+            import.meta.hot.accept(${JSON.stringify(
+              modulesEndsWithTs
+            )}, data => {
+              // some update logic
+            });
+          }
+          `;
+
+        return preamble + '\n' + code;
+      }
+    },
+  };
+
+  return plugin;
+}

@@ -1,28 +1,33 @@
 /// <reference types="vite/client" />
-import { html, css, unsafeCSS } from 'lit';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import {
-  BLOCK_ID_ATTR,
   BlockChildrenContainer,
   BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-
 import type { DividerBlockModel } from './divider-model.js';
-
-import style from './style.css?inline';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends NonShadowLitElement {
   static styles = css`
-    ${unsafeCSS(style)}
+    .affine-divider-block-container {
+      width: 100%;
+      height: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+    }
+    hr {
+      width: 100%;
+    }
   `;
 
-  @property({
-    hasChanged() {
-      return true;
-    },
-  })
+  @property({ hasChanged: () => true })
   model!: DividerBlockModel;
 
   @property()

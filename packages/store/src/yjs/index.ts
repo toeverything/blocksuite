@@ -1,4 +1,7 @@
+import { debug } from '@blocksuite/global/debug';
+import type { Transaction } from 'yjs';
 import * as Y from 'yjs';
+
 import { createYMapProxy, ProxyConfig } from './proxy.js';
 
 export type BlockSuiteDocAllowedValue =
@@ -21,5 +24,10 @@ export class BlockSuiteDoc<
   >(key: Key, config?: ProxyConfig<Value>): Value {
     const map = super.getMap(key);
     return createYMapProxy(map, config);
+  }
+
+  @debug('transact')
+  transact(f: (arg0: Transaction) => void, origin?: number) {
+    super.transact(f, origin);
   }
 }

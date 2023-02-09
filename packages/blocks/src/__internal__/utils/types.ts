@@ -1,9 +1,9 @@
+import type { ShapeType } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { Point } from './rect.js';
-import type { GroupBlockModel } from '../../group-block/index.js';
-import type { ShapeBlockModel } from '../../shape-block/index.js';
-import type { ColorStyle, TDShapeType } from './shape.js';
+
+import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { BlockServiceInstance, ServiceFlavour } from '../../models.js';
+import type { Point } from './rect.js';
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export type SelectionOptions = {
@@ -11,19 +11,9 @@ export type SelectionOptions = {
   from?: 'previous' | 'next';
 };
 
-export interface BaseService {
-  isLoaded: boolean;
+export interface IService {
+  onLoad?: () => Promise<void>;
 }
-
-export interface AsyncService extends BaseService {
-  load: () => Promise<void>;
-}
-
-export interface SyncService extends BaseService {
-  isLoaded: true;
-}
-
-export type Service = SyncService | AsyncService;
 
 /** Common context interface definition for block models. */
 
@@ -40,6 +30,7 @@ export interface BlockHost extends BlockHostContext {
   page: Page;
   flavour: string;
   readonly: boolean;
+  readonly isCompositionStart?: boolean;
 }
 
 export interface CommonBlockElement extends HTMLElement {
@@ -77,7 +68,7 @@ export interface BlockSelectionInfo {
 }
 
 // blocks that would only appear under the edgeless container root
-export type RootBlockModel = GroupBlockModel | ShapeBlockModel;
+export type TopLevelBlockModel = FrameBlockModel;
 
 export type DefaultMouseMode = {
   type: 'default';
@@ -85,8 +76,8 @@ export type DefaultMouseMode = {
 
 export type ShapeMouseMode = {
   type: 'shape';
-  shape: TDShapeType;
-  color: ColorStyle | `#${string}`;
+  shape: ShapeType;
+  color: `#${string}`;
 };
 
 export type MouseMode = DefaultMouseMode | ShapeMouseMode;
@@ -94,6 +85,7 @@ export type MouseMode = DefaultMouseMode | ShapeMouseMode;
 declare global {
   interface WindowEventMap {
     'affine.switch-mouse-mode': CustomEvent<MouseMode>;
+    'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
   }
 }
 

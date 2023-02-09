@@ -1,12 +1,15 @@
 export * from './components/index.js';
 export * from './managers/index.js';
+
 const env =
   typeof globalThis !== 'undefined'
     ? globalThis
     : typeof window !== 'undefined'
     ? window
-    : typeof global !== 'undefined'
-    ? global
+    : // @ts-ignore
+    typeof global !== 'undefined'
+    ? // @ts-ignore
+      global
     : {};
 const importIdentifier = '__ $BLOCKSUITE_EDITOR$ __';
 

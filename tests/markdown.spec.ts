@@ -1,10 +1,10 @@
-import { test } from '@playwright/test';
 import {
-  resetHistory,
   enterPlaygroundRoom,
   focusRichText,
   getCursorBlockIdAndHeight,
   initEmptyParagraphState,
+  resetHistory,
+  type,
   undoByClick,
   undoByKeyboard,
 } from './utils/actions/index.js';
@@ -15,6 +15,7 @@ import {
   assertTextContain,
   assertTextFormat,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('markdown shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -24,7 +25,7 @@ test('markdown shortcut', async ({ page }) => {
 
   let id: string | null = null;
 
-  await page.keyboard.type('[] ');
+  await type(page, '[] ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'todo');
   await undoByClick(page);
@@ -32,7 +33,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('[ ] ');
+  await type(page, '[ ] ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'todo');
   await undoByClick(page);
@@ -40,7 +41,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('[x] ');
+  await type(page, '[x] ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'todo');
   await undoByClick(page);
@@ -48,7 +49,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('* ');
+  await type(page, '* ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'bulleted');
   await undoByClick(page);
@@ -56,7 +57,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('- ');
+  await type(page, '- ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'bulleted');
   await undoByClick(page);
@@ -64,7 +65,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('1. ');
+  await type(page, '1. ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'numbered');
   await undoByClick(page);
@@ -72,7 +73,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('20. ');
+  await type(page, '20. ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'numbered');
   await undoByClick(page);
@@ -80,7 +81,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('# ');
+  await type(page, '# ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h1');
   await undoByClick(page);
@@ -88,7 +89,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('## ');
+  await type(page, '## ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h2');
   await undoByClick(page);
@@ -96,7 +97,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('### ');
+  await type(page, '### ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h3');
   await undoByClick(page);
@@ -104,7 +105,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('#### ');
+  await type(page, '#### ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h4');
   await undoByClick(page);
@@ -112,7 +113,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('##### ');
+  await type(page, '##### ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h5');
   await undoByClick(page);
@@ -120,7 +121,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('###### ');
+  await type(page, '###### ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'h6');
   await undoByClick(page);
@@ -128,7 +129,7 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('> ');
+  await type(page, '> ');
   [id] = await getCursorBlockIdAndHeight(page);
   await assertBlockType(page, id, 'quote');
   await undoByClick(page);
@@ -136,12 +137,12 @@ test('markdown shortcut', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('--- ');
+  await type(page, '--- ');
   await undoByClick(page);
   await assertRichTexts(page, ['--- ']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
-  await page.keyboard.type('*** ');
+  await type(page, '*** ');
   await undoByClick(page);
   await assertRichTexts(page, ['*** ']);
   await undoByClick(page);
@@ -154,72 +155,72 @@ test('markdown inline-text', async ({ page }) => {
   await focusRichText(page);
   await resetHistory(page);
 
-  await page.keyboard.type('***test*** ');
+  await type(page, '***test*** ');
   await assertTextFormat(page, 0, 0, { bold: true, italic: true });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByKeyboard(page);
   await assertRichTexts(page, ['***test*** ']);
   await undoByKeyboard(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('**test** ');
+  await type(page, '**test** ');
   await assertTextFormat(page, 0, 0, { bold: true });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['**test** ']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('*test* ');
+  await type(page, '*test* ');
   await assertTextFormat(page, 0, 0, { italic: true });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['*test* ']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('~~test~~ ');
+  await type(page, '~~test~~ ');
   await assertTextFormat(page, 0, 0, { strike: true });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['~~test~~ ']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('~test~ ');
+  await type(page, '~test~ ');
   await assertTextFormat(page, 0, 0, { underline: true });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['~test~ ']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('`test` ');
+  await type(page, '`test` ');
   await assertTextFormat(page, 0, 0, { code: true });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['`test` ']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('[test](www.test.com) ');
+  await type(page, '[test](www.test.com) ');
   await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 6, {});
   await undoByClick(page);
   await assertRichTexts(page, ['[test](www.test.com) ']);
   await undoByClick(page);
   await assertRichTexts(page, ['\n']);
 
-  await page.keyboard.type('www.test.com ');
+  await type(page, 'www.test.com ');
   await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
-  await page.keyboard.type('test');
+  await type(page, 'test');
   await assertTextFormat(page, 0, 13, {});
   await undoByClick(page);
   await assertTextContain(page, 'www.test.com ');

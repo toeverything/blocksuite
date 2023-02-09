@@ -1,23 +1,64 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
-import type { Page as StorePage } from '../../../packages/store/src/index.js';
-import type { Page } from '@playwright/test';
-import { pressEnter } from './keyboard.js';
+
+import { ConsoleMessage, expect, Page } from '@playwright/test';
+
+import type {
+  BaseBlockModel,
+  Page as StorePage,
+} from '../../../packages/store/src/index.js';
+import { pressEnter, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
 const RICH_TEXT_SELECTOR = '.ql-editor';
+const TITLE_SELECTOR = '.affine-default-page-block-title';
+
+function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
+  if (!process.env.CI) {
+    return true;
+  }
+  const ignoredMessages = [
+    // basic.spec.ts
+    "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
+    // embed.spec.ts
+    'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    // embed.spec.ts
+    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
+    // clipboard.spec.ts
+    "TypeError: Cannot read properties of null (reading 'model')",
+    // basic.spec.ts › should readonly mode not be able to modify text
+    'cannot modify data in readonly mode',
+    // Firefox warn on quill
+    // See https://github.com/quilljs/quill/issues/2030
+    '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
+  ];
+  return ignoredMessages.some(msg => message.text().startsWith(msg));
+}
 
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
 
-async function initEmptyEditor(page: Page) {
-  await page.evaluate(() => {
+/**
+ * @example
+ * ```ts
+ * await initEmptyEditor(page, { enable_some_flag: true });
+ * ```
+ */
+async function initEmptyEditor(
+  page: Page,
+  flags: Partial<BlockSuiteFlags> = {}
+) {
+  await page.evaluate(flags => {
     const { workspace } = window;
 
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as StorePage;
+      for (const [key, value] of Object.entries(flags)) {
+        page.awarenessStore.setFlag(key as keyof typeof flags, value);
+      }
+
       const editor = document.createElement('editor-container');
       editor.page = page;
 
@@ -27,6 +68,8 @@ async function initEmptyEditor(page: Page) {
 
       document.body.appendChild(editor);
       document.body.appendChild(debugMenu);
+      const blockHub = await editor.createBlockHub();
+      document.body.appendChild(blockHub);
 
       window.debugMenu = debugMenu;
       window.editor = editor;
@@ -34,21 +77,34 @@ async function initEmptyEditor(page: Page) {
     });
 
     workspace.createPage('page0');
-  });
+  }, flags);
   await waitNextFrame(page);
 }
 
-export async function enterPlaygroundRoom(page: Page, room?: string) {
+export async function enterPlaygroundRoom(
+  page: Page,
+  flags?: Partial<BlockSuiteFlags>,
+  room?: string
+) {
   const url = new URL(DEFAULT_PLAYGROUND);
   if (!room) {
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
   await page.goto(url.toString());
+  await page.evaluate(() => {
+    if (typeof window.$blocksuite !== 'object') {
+      throw new Error('window.$blocksuite is not object');
+    }
+  }, []);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
   page.on('console', message => {
+    const ignore = shamefullyIgnoreConsoleMessage(message);
+    if (!ignore) {
+      throw new Error('Unexpected console message: ' + message.text());
+    }
     if (message.type() === 'warning') {
       console.warn(message.text());
     }
@@ -57,7 +113,7 @@ export async function enterPlaygroundRoom(page: Page, room?: string) {
     }
   });
 
-  await initEmptyEditor(page);
+  await initEmptyEditor(page, flags);
   return room;
 }
 
@@ -73,8 +129,30 @@ export async function waitNextFrame(page: Page) {
   await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
 }
 
+export async function waitForRemoteUpdateSignal(page: Page) {
+  return page.evaluate(() => {
+    return new Promise<void>(resolve => {
+      const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
+      const debugProvider = window.workspace.providers.find(
+        provider => provider instanceof DebugDocProvider
+      ) as InstanceType<typeof DebugDocProvider>;
+      const callback = window.$blocksuite.blocks.debounce(() => {
+        disposable.dispose();
+        resolve();
+      }, 500);
+      const disposable = debugProvider.remoteUpdateSignal.on(callback);
+    });
+  });
+}
+
 export async function clearLog(page: Page) {
   await page.evaluate(() => console.clear());
+}
+
+export async function captureHistory(page: Page) {
+  await page.evaluate(() => {
+    window.page.captureSync();
+  });
 }
 
 export async function resetHistory(page: Page) {
@@ -92,24 +170,47 @@ export async function enterPlaygroundWithList(page: Page) {
   await page.evaluate(() => {
     const { page } = window;
     const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
     for (let i = 0; i < 3; i++) {
-      page.addBlock({ flavour: 'affine:list' }, groupId);
+      page.addBlock({ flavour: 'affine:list' }, frameId);
     }
   });
   await waitNextFrame(page);
 }
 
-export async function initEmptyParagraphState(page: Page) {
-  const ids = await page.evaluate(() => {
+export async function initEmptyParagraphState(page: Page, pageId?: string) {
+  const ids = await page.evaluate(pageId => {
     const { page } = window;
     page.captureSync();
-    const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, groupId);
+    if (!pageId) {
+      pageId = page.addBlock({ flavour: 'affine:page' });
+    }
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, frameId);
     page.captureSync();
-    return { pageId, groupId, paragraphId };
-  });
+    return { pageId, frameId, paragraphId };
+  }, pageId);
+  return ids;
+}
+
+export async function initEmptyDatabaseState(page: Page, pageId?: string) {
+  const ids = await page.evaluate(pageId => {
+    const { page } = window;
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlockByFlavour('affine:page');
+    }
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const paragraphId = page.addBlockByFlavour(
+      'affine:database',
+      {
+        title: 'Database 1',
+      },
+      frameId
+    );
+    page.captureSync();
+    return { pageId, frameId, paragraphId };
+  }, pageId);
   return ids;
 }
 
@@ -118,13 +219,18 @@ export async function initEmptyCodeBlockState(page: Page) {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock({ flavour: 'affine:page' });
-    const groupId = page.addBlock({ flavour: 'affine:group' }, pageId);
-    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, groupId);
+    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const codeBlockId = page.addBlock({ flavour: 'affine:code' }, frameId);
     page.captureSync();
-    return { pageId, groupId, codeBlockId };
+    return { pageId, frameId, codeBlockId };
   });
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
+}
+
+export async function focusTitle(page: Page) {
+  const locator = page.locator(TITLE_SELECTOR);
+  await locator.click();
 }
 
 export async function focusRichText(page: Page, i = 0) {
@@ -135,36 +241,36 @@ export async function focusRichText(page: Page, i = 0) {
 
 export async function initThreeParagraphs(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await pressEnter(page);
-  await page.keyboard.type('789');
+  await type(page, '789');
 }
 
 export async function initThreeLists(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('-');
+  await type(page, '-');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('456');
+  await type(page, '456');
   await pressEnter(page);
   await page.keyboard.press('Tab', { delay: 50 });
-  await page.keyboard.type('789');
+  await type(page, '789');
 }
 
 export async function initThreeDividers(page: Page) {
   await focusRichText(page);
-  await page.keyboard.type('123');
+  await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('---');
+  await type(page, '---');
   await page.keyboard.press('Space', { delay: 50 });
-  await page.keyboard.type('123');
+  await type(page, '123');
 }
 
 export async function getQuillSelectionIndex(page: Page) {
@@ -223,6 +329,7 @@ export async function pasteContent(
   await page.evaluate(
     ({ clipData }) => {
       const e = {
+        target: document.body,
         preventDefault: () => null,
         stopPropagation: () => null,
         clipboardData: {
@@ -234,7 +341,7 @@ export async function pasteContent(
       };
       document
         .getElementsByTagName('editor-container')[0]
-        .clipboard['_clipboardEventDispatcher']['_pasteHandler'](
+        .clipboard['_clipboardEventDispatcher']['_onPaste'](
           e as unknown as ClipboardEvent
         );
     },
@@ -283,4 +390,93 @@ export async function setSelection(
     },
     { anchorBlockId, anchorOffset, focusBlockId, focusOffset }
   );
+}
+
+export async function readClipboardText(page: Page) {
+  await page.evaluate(() => {
+    const textarea = document.createElement('textarea');
+    textarea.setAttribute('id', 'textarea-test');
+    document.body.appendChild(textarea);
+  });
+  const textarea = page.locator('#textarea-test');
+  await textarea.focus();
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  const text = await textarea.inputValue();
+  await page.evaluate(() => {
+    const textarea = document.querySelector('#textarea-test');
+    textarea?.remove();
+  });
+  return text;
+}
+
+export const getCenterPosition: (
+  page: Page,
+  selector: string
+) => Promise<{ x: number; y: number }> = async (
+  page: Page,
+  selector: string
+) => {
+  return await page.evaluate((selector: string) => {
+    const bbox = document
+      .querySelector(selector)
+      ?.getBoundingClientRect() as DOMRect;
+    return {
+      x: bbox.left + bbox.width / 2,
+      y: bbox.top + bbox.height / 2,
+    };
+  }, selector);
+};
+
+export const getBoundingClientRect: (
+  page: Page,
+  selector: string
+) => Promise<DOMRect> = async (page: Page, selector: string) => {
+  return await page.evaluate((selector: string) => {
+    return document.querySelector(selector)?.getBoundingClientRect() as DOMRect;
+  }, selector);
+};
+
+export async function getBlockModel<Model extends BaseBlockModel>(
+  page: Page,
+  blockId: string
+) {
+  const result: BaseBlockModel | null | undefined = await page.evaluate(
+    blockId => {
+      return window.page?.getBlockById(blockId);
+    },
+    blockId
+  );
+  expect(result).not.toBeNull();
+  return result as Model;
+}
+
+export async function getIndexCoordinate(
+  page: Page,
+  [richTextIndex, quillIndex]: [number, number],
+  coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
+) {
+  const coord = await page.evaluate(
+    ({ richTextIndex, quillIndex, coordOffSet }) => {
+      const richText = document.querySelectorAll('rich-text')[
+        richTextIndex
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
+      const quillBound = richText.quill.getBounds(quillIndex);
+      const richTextBound = richText.getBoundingClientRect();
+      return {
+        x: richTextBound.left + quillBound.left + coordOffSet.x,
+        y:
+          richTextBound.top +
+          quillBound.top +
+          quillBound.height / 2 +
+          coordOffSet.y,
+      };
+    },
+    {
+      richTextIndex,
+      quillIndex,
+      coordOffSet,
+    }
+  );
+  return coord;
 }

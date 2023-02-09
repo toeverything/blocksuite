@@ -1,5 +1,6 @@
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
 import { createEvent } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
 import { ConfirmIcon, EditIcon, UnlinkIcon } from './icons.js';
@@ -247,11 +248,19 @@ export class LinkPopover extends LitElement {
         ${this.previewLink}
       </div>
       <span class="affine-link-popover-dividing-line"></span>
-      <icon-button class="has-tool-tip" @click=${this._onUnlink}>
+      <icon-button
+        class="has-tool-tip"
+        data-testid="unlink"
+        @click=${this._onUnlink}
+      >
         ${UnlinkIcon}
         <tool-tip inert role="tooltip">Remove</tool-tip>
       </icon-button>
-      <icon-button class="has-tool-tip" @click=${this._onEdit}>
+      <icon-button
+        class="has-tool-tip"
+        data-testid="edit"
+        @click=${this._onEdit}
+      >
         ${EditIcon}
         <tool-tip inert role="tooltip">Edit link</tool-tip>
       </icon-button>

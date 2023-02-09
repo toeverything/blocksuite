@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { waitNextFrame } from './misc.js';
 
 export async function undoByClick(page: Page) {
@@ -17,8 +18,8 @@ export async function connectByClick(page: Page) {
   await clickTestOperationsMenuItem(page, 'Connect');
 }
 
-export async function addGroupByClick(page: Page) {
-  await clickTestOperationsMenuItem(page, 'Add Group');
+export async function addFrameByClick(page: Page) {
+  await clickTestOperationsMenuItem(page, 'Add Frame');
 }
 
 export async function clickTestOperationsMenuItem(page: Page, name: string) {
@@ -71,7 +72,17 @@ export async function switchShapeType(page: Page, shapeType: string) {
 }
 
 export async function switchReadonly(page: Page) {
-  await clickTestOperationsMenuItem(page, 'Toggle Readonly');
+  page.evaluate(() => {
+    const defaultPage = document.querySelector(
+      'affine-default-page'
+    ) as HTMLElement & {
+      page: {
+        awarenessStore: { setFlag: (key: string, value: unknown) => void };
+      };
+    };
+    const page = defaultPage.page;
+    page.awarenessStore.setFlag('readonly', { 'space:page0': true });
+  });
 }
 
 export async function activeEmbed(page: Page) {

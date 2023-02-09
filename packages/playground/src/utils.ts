@@ -1,65 +1,103 @@
+import * as blocks from '@blocksuite/blocks';
+import * as editor from '@blocksuite/editor';
 import {
+  configDebugLog,
+  disableDebuglog,
+  enableDebugLog,
+} from '@blocksuite/global/debug';
+import * as globalUtils from '@blocksuite/global/utils';
+import * as store from '@blocksuite/store';
+import {
+  assertExists,
   DebugDocProvider,
   DocProviderConstructor,
   Generator,
   IndexedDBDocProvider,
   StoreOptions,
+  Utils,
+  Workspace,
 } from '@blocksuite/store';
 
 const params = new URLSearchParams(location.search);
-const room = params.get('room') ?? 'playground';
-const url = new URL(window.location.href);
+const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
+const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+
 export const defaultMode =
-  url.searchParams.get('mode') === 'edgeless' ? 'edgeless' : 'page';
+  params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
 export const initParam = params.get('init');
-export const isE2E = params.get('room')?.includes('playwright');
+export const isE2E = room.startsWith('playwright');
+
+if (isE2E) {
+  Object.defineProperty(window, '$blocksuite', {
+    value: Object.freeze({
+      store,
+      blocks,
+      global: { utils: globalUtils },
+      editor,
+    }),
+  });
+}
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
+export function initDebugConfig() {
+  Object.defineProperty(globalThis, 'enableDebugLog', {
+    value: enableDebugLog,
+  });
+  Object.defineProperty(globalThis, 'disableDebugLog', {
+    value: disableDebuglog,
+  });
+  Object.defineProperty(globalThis, 'configDebugLog', {
+    value: configDebugLog,
+  });
+
+  // Uncomment this line or paste it into console to enable debug log.
+  // enableDebugLog(['CRUD']);
+}
+
+async function initWithMarkdownContent(workspace: Workspace, url: URL) {
+  const { empty: emptyInit } = await import('./data/index.js');
+
+  const pageId = await emptyInit(workspace);
+  const page = workspace.getPage(pageId);
+  assertExists(page);
+  assertExists(page.root);
+  const content = await fetch(url).then(res => res.text());
+  return window.editor.clipboard.importMarkdown(content, page.root.id);
+}
+
+export async function tryInitExternalContent(
+  workspace: Workspace,
+  initParam: string
+) {
+  if (isValidUrl(initParam)) {
+    const url = new URL(initParam);
+    await initWithMarkdownContent(workspace, url);
+  } else if (isBase64.test(initParam)) {
+    Utils.applyYjsUpdateV2(workspace, initParam);
+  }
+}
+
 /**
- * Specified by `?syncModes=debug` or `?syncModes=indexeddb,debug`
- * Default is debug (using webrtc)
+ * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
+ * We use webrtcDocProvider by default if the `providers` param is missing.
  */
 export function getOptions(): Pick<
   StoreOptions,
-  'providers' | 'idGenerator' | 'room'
+  'providers' | 'idGenerator' | 'room' | 'defaultFlags'
 > {
   const providers: DocProviderConstructor[] = [];
+  let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
-  /**
-   * Specified using "uuidv4" when providers have indexeddb.
-   * Because when persistent data applied to ydoc, we need generator different id for block.
-   * Otherwise, the block id will conflict.
-   */
-  let forceUUIDv4 = false;
+  if (providerArgs.includes('webrtc')) {
+    providers.push(DebugDocProvider);
+    idGenerator = Generator.AutoIncrementByClientId; // works in multi-user mode
+  }
 
-  const modes = (params.get('syncModes') ?? 'debug').split(',');
-
-  modes.forEach(mode => {
-    switch (mode) {
-      case 'debug':
-        providers.push(DebugDocProvider);
-        break;
-      case 'indexeddb':
-        providers.push(IndexedDBDocProvider);
-        forceUUIDv4 = true;
-        break;
-      case 'websocket': {
-        console.warn(
-          'Websocket provider is not maintained in BlockSuite currently.'
-        );
-        break;
-      }
-      default:
-        throw new TypeError(
-          `Unknown provider ("${mode}") supplied in search param ?syncModes=... (for example "debug" and "indexeddb")`
-        );
-    }
-  });
-
-  let idGenerator = forceUUIDv4
-    ? Generator.UUIDv4
-    : Generator.AutoIncrementByClientId;
+  if (providerArgs.includes('indexeddb')) {
+    providers.push(IndexedDBDocProvider);
+    idGenerator = Generator.UUIDv4; // works in production
+  }
 
   if (isE2E) {
     // We need a predictable id generator in single page test environment.
@@ -72,5 +110,27 @@ export function getOptions(): Pick<
     room,
     providers,
     idGenerator,
+    defaultFlags: {
+      enable_set_remote_flag: true,
+      enable_drag_handle: true,
+      enable_block_hub: true,
+      enable_database: true,
+      enable_edgeless_toolbar: true,
+      enable_slash_menu: params.get('slash') !== '0',
+      enable_append_flavor_slash: params.get('slash') === '1',
+      readonly: {
+        'space:page0': false,
+      },
+    },
   };
+}
+
+export function isValidUrl(urlLike: string) {
+  let url;
+  try {
+    url = new URL(urlLike);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
 }
