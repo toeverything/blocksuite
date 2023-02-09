@@ -1,6 +1,11 @@
 import '../../__internal__/index.js';
 
-import type { XYWH } from '@blocksuite/phasor';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+  SurfaceManager,
+  XYWH,
+} from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Page } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
@@ -22,6 +27,7 @@ import type {
 import {
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
+  getXywh,
   isBlock,
   PADDING_X,
   PADDING_Y,
@@ -199,6 +205,9 @@ export class EdgelessSelectedRect extends LitElement {
   @property({ type: Page })
   page!: Page;
 
+  @property({ type: SurfaceManager })
+  surface!: SurfaceManager;
+
   @property({ type: Boolean })
   lock!: boolean;
 
@@ -302,9 +311,8 @@ export class EdgelessSelectedRect extends LitElement {
     e.stopPropagation();
     if (this.state?.type === 'single') {
       const { rect, selected } = this.state;
-      if (!isBlock(selected)) return;
+      const [x, y] = deserializeXYWH(getXywh(selected));
 
-      const [x, y] = JSON.parse(selected.xywh) as XYWH;
       this._dragStartInfo = {
         startMouseX: e.clientX,
         startMouseY: e.clientY,
@@ -325,10 +333,9 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       const { viewport } = this;
       const { selected } = this.state;
-      if (!isBlock(selected)) return;
 
-      const { xywh } = selected;
-      const [x, y, w, h] = JSON.parse(xywh) as XYWH;
+      const xywh = getXywh(selected);
+      const [x, y, w, h] = deserializeXYWH(xywh);
       let newX = x;
       let newY = y;
       let newW = w;
@@ -379,10 +386,30 @@ export class EdgelessSelectedRect extends LitElement {
         newH = FRAME_MIN_LENGTH;
         newY = y;
       }
+
       // if xywh do not change, no need to update
       if (newW === w && newX === x && newY === y && newW === w) {
         return;
       }
+
+      if (!isBlock(selected)) {
+        if (!this.lock) {
+          this.page.captureSync();
+          this.lock = true;
+        }
+        this.surface.setElementBound(selected.id, {
+          x: newX,
+          y: newY,
+          w: newW,
+          h: newH,
+        });
+        this.state.rect = getSelectionBoxBound(
+          viewport,
+          serializeXYWH(newX, newY, newW, newH)
+        );
+        return;
+      }
+
       const frameBlock = getBlockById<'div'>(selected.id);
       const frameContainer = frameBlock?.parentElement;
       // first change container`s x/w directly for get frames real height
@@ -417,8 +444,6 @@ export class EdgelessSelectedRect extends LitElement {
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
     if (this.state.type === 'single') {
-      if (!isBlock(this.state.selected)) return;
-
       this.page.captureSync();
     } else {
       console.error('unexpected state.type:', this.state.type);
@@ -430,15 +455,16 @@ export class EdgelessSelectedRect extends LitElement {
   render() {
     if (this.state.type === 'none') return null;
 
+    const isSurfaceElement = !isBlock(this.state.selected);
     // const isSurfaceElement = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
       zIndex: '0',
-      ...getCommonRectStyle(this.rect, this.zoom, false, true),
+      ...getCommonRectStyle(this.rect, this.zoom, isSurfaceElement, true),
     };
-    const handlers = this._getHandles(this.rect, false);
+    const handlers = this._getHandles(this.rect, isSurfaceElement);
     return html`
       ${this.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>

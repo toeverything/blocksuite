@@ -349,6 +349,7 @@ export class EdgelessPageBlockComponent
                 .rect=${selectionState.rect}
                 .zoom=${zoom}
                 .readonly=${this.readonly}
+                .surface=${this.surface}
               ></edgeless-selected-rect>
             `
           : null}

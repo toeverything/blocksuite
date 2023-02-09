@@ -1,8 +1,9 @@
 import type { SurfaceElement } from '@blocksuite/phasor';
+import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
 
 import type { TopLevelBlockModel } from '../../__internal__/index.js';
 import type { EdgelessContainer } from './edgeless-page-block.js';
-import type { Selectable, ViewportState, XYWH } from './selection-manager.js';
+import type { Selectable, ViewportState } from './selection-manager.js';
 
 export const DEFAULT_SPACING = 64;
 
@@ -26,7 +27,7 @@ export function isSurfaceElement(
 }
 
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
-  const a = JSON.parse(block.xywh) as [number, number, number, number];
+  const a = deserializeXYWH(block.xywh);
   const [ax, ay, aw, ah] = a;
   const paddedW = aw + PADDING_X;
   const paddedH = ah + PADDING_Y;
@@ -48,7 +49,7 @@ export function pick(
 }
 
 export function getSelectionBoxBound(viewport: ViewportState, xywh: string) {
-  const [modelX, modelY, modelW, modelH] = JSON.parse(xywh) as XYWH;
+  const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const [x, y] = viewport.toViewCoord(modelX, modelY);
   return new DOMRect(x, y, modelW * viewport.zoom, modelH * viewport.zoom);
 }
@@ -77,4 +78,10 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
   container.addEventListener('wheel', wheelHandler);
   const dispose = () => container.removeEventListener('wheel', wheelHandler);
   return dispose;
+}
+
+export function getXywh(element: Selectable) {
+  return isBlock(element)
+    ? element.xywh
+    : serializeXYWH(element.x, element.y, element.w, element.h);
 }
