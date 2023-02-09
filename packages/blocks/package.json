@@ -11,10 +11,12 @@
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
+  "peerDependencies": {
+    "@blocksuite/store": "workspace:*"
+  },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
-    "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@popperjs/core": "^2.11.6",
     "autosize": "^5.0.2",
@@ -53,6 +55,7 @@
     }
   },
   "devDependencies": {
+    "@blocksuite/store": "workspace:*",
     "@types/autosize": "^4.0.1",
     "parchment": "^2.0.1"
   }
