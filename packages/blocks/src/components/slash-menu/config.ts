@@ -4,7 +4,7 @@ import {
   DuplicateIcon,
   NowIcon,
   paragraphConfig,
-  PasteIcon,
+  // PasteIcon,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -13,7 +13,12 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { Page, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { getRichTextByModel } from '../../__internal__/utils/index.js';
+import {
+  getCurrentRange,
+  getRichTextByModel,
+  resetNativeSelection,
+} from '../../__internal__/utils/index.js';
+import { copyBlock } from '../../page-block/default/utils.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import { updateBlockType } from '../../page-block/utils/index.js';
 import { toast } from '../toast.js';
@@ -140,18 +145,22 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         name: 'Copy',
         icon: CopyIcon,
         divider: true,
-        action: () => {
-          // TODO Copy
+        action: async ({ model }) => {
+          const curRange = getCurrentRange();
+          await copyBlock(model);
+          resetNativeSelection(curRange);
           toast('Copied to clipboard');
         },
       },
-      {
-        name: 'Paste',
-        icon: PasteIcon,
-        action: () => {
-          // TODO Paste
-        },
-      },
+      // {
+      //   name: 'Paste',
+      //   icon: PasteIcon,
+      //   action: async ({ model }) => {
+      //     const copiedText = await navigator.clipboard.readText();
+      //     console.log('copiedText', copiedText);
+      //     insertContent(model, copiedText);
+      //   },
+      // },
       {
         name: 'Duplicate',
         icon: DuplicateIcon,
