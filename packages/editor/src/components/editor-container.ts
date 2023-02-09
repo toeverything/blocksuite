@@ -1,6 +1,7 @@
 import {
   BlockHub,
   getDefaultPageBlock,
+  getServiceOrRegister,
   MouseMode,
   PageBlockModel,
 } from '@blocksuite/blocks';
@@ -61,6 +62,11 @@ export class EditorContainer extends NonShadowLitElement {
   private _placeholderInput!: HTMLInputElement;
 
   private _disposables = new DisposableGroup();
+
+  override firstUpdated() {
+    // todo: refactor to a better solution
+    getServiceOrRegister('affine:code');
+  }
 
   protected update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('readonly')) {
