@@ -13,6 +13,7 @@ import {
   getBlockById,
   getBlockElementByModel,
   getRichTextByModel,
+  OpenBlockInfo,
   resetNativeSelection,
 } from '../../__internal__/utils/index.js';
 import { DragHandle } from '../../components/index.js';
@@ -330,14 +331,14 @@ function getTextDelta(model: BaseBlockModel) {
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
-  const copyData = {
+  const copyData: { data: OpenBlockInfo[] } = {
     data: [
       {
         type: model.type,
         flavour: model.flavour,
         sourceId: model.sourceId,
         text: delta,
-        children: model.children,
+        children: [],
       },
     ],
   };

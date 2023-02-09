@@ -1,3 +1,4 @@
+import type { OpenBlockInfo } from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   getStartModelBySelection,
@@ -11,7 +12,7 @@ import type { DeltaOperation } from 'quill';
 
 import type { EditorContainer } from '../../components/index.js';
 import { MarkdownUtils } from './markdown-utils.js';
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo } from './types.js';
+import { CLIPBOARD_MIMETYPE } from './types.js';
 
 export class PasteManager {
   private _editor: EditorContainer;
