@@ -206,10 +206,12 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
     }
     case 'block': {
       page.captureSync();
+      const models = [] as BaseBlockModel[];
       for (const block of selection.state.selectedBlocks) {
         const model = getModelByElement(block);
-        handleIndent(page, model, 0, false);
+        models.push(model);
       }
+      handleMultiBlockIndent(page, models);
 
       const cachedSelectedBlocks = selection.state.selectedBlocks.concat();
       requestAnimationFrame(() => {
@@ -218,16 +220,13 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
           const newBlock = getBlockElementByModel(
             (block as DefaultPageBlockComponent).model
           );
-
           if (newBlock) {
             selectBlocks.push(newBlock as DefaultPageBlockComponent);
           }
         });
-
         if (!selectBlocks.length) {
           return;
         }
-
         selection.state.refreshBlockRectCache();
         selection.setSelectedBlocks(selectBlocks);
       });

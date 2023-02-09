@@ -177,6 +177,7 @@ export function handleIndent(
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
   const previousSibling = page.getPreviousSibling(models[0]);
+
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
