@@ -464,8 +464,9 @@ export class DefaultPageBlockComponent
       this.requestUpdate()
     );
     const selectionRect = FrameSelectionRect(
-      this.frameSelectionRect,
-      this.viewportScrollOffset
+      this.frameSelectionRect
+      // We don't need viewport offset as frameSelectionRect is already an absolute rect
+      // this.viewportScrollOffset
     );
     const selectedRectsContainer = SelectedRectsContainer(
       this.selectedRects,
@@ -499,7 +500,7 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectionRect} ${selectedEmbedContainer}${embedEditingContainer}
+        ${selectionRect} ${selectedEmbedContainer} ${embedEditingContainer}
         ${codeBlockOptionContainer}
       </div>
     `;
