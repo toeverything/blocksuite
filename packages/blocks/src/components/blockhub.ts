@@ -52,6 +52,9 @@ export class BlockHub extends NonShadowLitElement {
   updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
 
   @property()
+  blockHubStatusUpdated: Signal<boolean> = new Signal<boolean>();
+
+  @property()
   bottom = 70;
 
   @property()
@@ -87,9 +90,6 @@ export class BlockHub extends NonShadowLitElement {
   @query('.block-hub-icons-container')
   private _blockHubIconsContainer!: HTMLElement;
 
-  @query('.block-hub-menu-container')
-  private _blockHubMenuContainer!: HTMLElement;
-
   @query('[role="menu-entry"]')
   private _blockHubMenuEntry!: HTMLElement;
 
@@ -101,8 +101,8 @@ export class BlockHub extends NonShadowLitElement {
   private _lastModelState: EditingState | null = null;
   private _cursor: number | null = 0;
   private _timer: number | null = null;
-  private _delay = 200; // ms
-  private enable_database: boolean;
+  private _delay = 200;
+  private readonly enable_database: boolean;
   private _topDistance = 24;
 
   static styles = css`
@@ -174,6 +174,7 @@ export class BlockHub extends NonShadowLitElement {
 
     .affine-block-hub-container .description {
       font-size: var(--affine-font-xs);
+      color: var(---affine-icon-color);
     }
 
     .grabbing {
@@ -203,8 +204,6 @@ export class BlockHub extends NonShadowLitElement {
       position: fixed;
       width: 44px;
       background: var(--affine-page-background);
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.04);
       border-radius: 10px;
     }
 
@@ -280,16 +279,11 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .block-hub-icons-container {
-      position: relative;
-      opacity: 0;
-      top: 100px;
+      position: absolute;
+      bottom: 100%;
       height: 0px;
+      overflow: hidden;
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
-    }
-
-    .block-hub-icons-container[transition] {
-      opacity: 1;
-      top: 0px;
     }
 
     ${centeredToolTipStyle}
@@ -409,22 +403,17 @@ export class BlockHub extends NonShadowLitElement {
    * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
    */
   private _onTransitionStart = (e: TransitionEvent) => {
-    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
-    if (e.propertyName === 'opacity') {
-      return;
-    }
     if (this._timer) {
       clearTimeout(this._timer);
     }
     if (!this._expanded) {
-      // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
-      this._blockHubMenuContainer.style.padding = '0px 4px';
       this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.height = '0px';
+        this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
     } else {
-      this._blockHubIconsContainer.style.height = 'unset';
-      this._blockHubMenuContainer.style.padding = '4px';
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.overflow = 'unset';
+      }, this._delay);
     }
   };
 
@@ -437,8 +426,14 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   private _blockHubMenuTemplate = () => {
+    const menuNum = this.enable_database ? 4 : 3;
+    const height = menuNum * 44 + 10;
     return html`
-      <div class="block-hub-icons-container" ?transition=${this._expanded}>
+      <div
+        class="block-hub-icons-container"
+        ?transition=${this._expanded}
+        style="height: ${this._expanded ? `${height}px` : '0px'};"
+      >
         <div
           class="block-hub-icon-container has-tool-tip ${this._isGrabbing
             ? 'grabbing'
@@ -562,12 +557,23 @@ export class BlockHub extends NonShadowLitElement {
     }
   };
 
+  public toggleMenu(open: boolean) {
+    if (open) {
+      this._expanded = true;
+    } else {
+      this._expanded = false;
+      this._cardVisibleType = null;
+      this._isCardListVisible = false;
+    }
+  }
+
   private _onBlockHubButtonClick = (e: MouseEvent) => {
     this._expanded = !this._expanded;
     if (!this._expanded) {
       this._cardVisibleType = null;
       this._isCardListVisible = false;
     }
+    this.blockHubStatusUpdated.emit(this._expanded);
   };
 
   private _onDragStart = (event: DragEvent) => {
@@ -706,12 +712,13 @@ export class BlockHub extends NonShadowLitElement {
     return html`
       <div
         class="block-hub-menu-container"
-        style="bottom: ${this.bottom}px; right: ${this.right}px"
+        style="bottom: ${this.bottom}px; right: ${this.right}px;"
       >
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
           role="menu-entry"
+          style="cursor:pointer;"
         >
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
