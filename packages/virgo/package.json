@@ -5,18 +5,19 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "playwright test"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "yjs": "^13.5.45",
-    "lit": "^2.6.1"
+    "lit": "^2.6.1",
+    "yjs": "^13.5.45"
   },
   "peerDependencies": {
-    "yjs": "^13",
-    "lit": "^2"
+    "lit": "^2",
+    "yjs": "^13"
   },
   "exports": {
     "./*": "./src/*.ts",
@@ -32,6 +33,7 @@
     }
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*"
+    "@blocksuite/global": "workspace:*",
+    "zod": "^3.20.2"
   }
 }

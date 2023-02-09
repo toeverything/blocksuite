@@ -294,8 +294,10 @@ importers:
       '@blocksuite/global': workspace:*
       lit: ^2.6.1
       yjs: ^13.5.45
+      zod: ^3.20.2
     dependencies:
       '@blocksuite/global': link:../global
+      zod: 3.20.2
     devDependencies:
       lit: 2.6.1
       yjs: 13.5.45
