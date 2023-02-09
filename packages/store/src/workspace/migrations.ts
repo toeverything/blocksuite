@@ -1,3 +1,4 @@
+import { MigrationError } from '@blocksuite/global/error';
 import * as Y from 'yjs';
 
 import { uuidv4 } from '../utils/id-generator.js';
@@ -97,9 +98,7 @@ export function tryMigrate(doc: Y.Doc) {
       }
     } catch (err) {
       console.error(err);
-      throw new Error(
-        `Migration "${migration.desc}" failed, please report to https://github.com/toeverything/blocksuite/issues`
-      );
+      throw new MigrationError(migration.desc);
     }
   }
 }
