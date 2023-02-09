@@ -177,6 +177,14 @@ class Syntax extends Module {
     this.highlight(false, options.codeBlockElement);
   }
 
+  setLang(lang: string) {
+    if (this._language === lang) {
+      return;
+    }
+    this._language = lang;
+    this.highlight(true, this._codeBlockElement);
+  }
+
   highlight(forceRefresh: boolean, container: HTMLElement) {
     const quill = this.quill;
     if (quill.selection.composing) return;

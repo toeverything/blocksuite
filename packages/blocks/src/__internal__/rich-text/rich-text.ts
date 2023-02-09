@@ -206,6 +206,10 @@ export class RichText extends NonShadowLitElement {
   }
 
   updated() {
+    if (this.modules.syntax) {
+      //@ts-ignore
+      this.quill.theme.modules.syntax.setLang(this.modules.syntax.language);
+    }
     // Update placeholder if block`s type changed
     this.quill?.root.setAttribute('data-placeholder', this.placeholder ?? '');
     this.quill?.root.setAttribute('contenteditable', `${!this.host.readonly}`);
