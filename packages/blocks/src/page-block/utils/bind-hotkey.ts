@@ -2,8 +2,9 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { hotkey } from '../../__internal__/index.js';
+import { getBlockElementByModel, hotkey } from '../../__internal__/index.js';
 import {
+  handleIndent,
   handleMultiBlockIndent,
   isAtLineEdge,
 } from '../../__internal__/rich-text/rich-text-operations.js';
@@ -21,7 +22,10 @@ import {
   isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultPageSignals } from '../default/default-page-block.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import {
   handleBlockSelectionBatchDelete,
@@ -174,6 +178,63 @@ function handleDown(
         : 'start'
     );
     return;
+  }
+}
+
+function handleTab(page: Page, selection: DefaultSelectionManager) {
+  switch (selection.state.type) {
+    case 'native': {
+      const range = getCurrentRange();
+      const start = range.startContainer;
+      const end = range.endContainer;
+      const startModel = getModelByElement(start.parentElement as HTMLElement);
+      const endModel = getModelByElement(end.parentElement as HTMLElement);
+      if (startModel && endModel) {
+        let currentModel: BaseBlockModel | null = startModel;
+        const models: BaseBlockModel[] = [];
+        while (currentModel) {
+          const next = page.getNextSibling(currentModel);
+          models.push(currentModel);
+          if (currentModel.id === endModel.id) {
+            break;
+          }
+          currentModel = next;
+        }
+        handleMultiBlockIndent(page, models);
+      }
+      break;
+    }
+    case 'block': {
+      page.captureSync();
+      for (const block of selection.state.selectedBlocks) {
+        const model = getModelByElement(block);
+        handleIndent(page, model, 0, false);
+      }
+
+      const cachedSelectedBlocks = selection.state.selectedBlocks.concat();
+      requestAnimationFrame(() => {
+        const selectBlocks: DefaultPageBlockComponent[] = [];
+        cachedSelectedBlocks.forEach(block => {
+          const newBlock = getBlockElementByModel(
+            (block as DefaultPageBlockComponent).model
+          );
+
+          if (newBlock) {
+            selectBlocks.push(newBlock as DefaultPageBlockComponent);
+          }
+        });
+
+        if (!selectBlocks.length) {
+          return;
+        }
+
+        selection.state.refreshBlockRectCache();
+        selection.setSelectedBlocks(selectBlocks);
+      });
+      selection.clearRects();
+
+      break;
+    }
   }
 }
 
@@ -344,29 +405,7 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
-  hotkey.addListener(TAB, () => {
-    // native selection
-    if (selection.state.type === 'native') {
-      const range = getCurrentRange();
-      const start = range.startContainer;
-      const end = range.endContainer;
-      const startModel = getModelByElement(start.parentElement as HTMLElement);
-      const endModel = getModelByElement(end.parentElement as HTMLElement);
-      if (startModel && endModel) {
-        let currentModel: BaseBlockModel | null = startModel;
-        const models: BaseBlockModel[] = [];
-        while (currentModel) {
-          const next = page.getNextSibling(currentModel);
-          models.push(currentModel);
-          if (currentModel.id === endModel.id) {
-            break;
-          }
-          currentModel = next;
-        }
-        handleMultiBlockIndent(page, models);
-      }
-    }
-  });
+  hotkey.addListener(TAB, () => handleTab(page, selection));
 
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
