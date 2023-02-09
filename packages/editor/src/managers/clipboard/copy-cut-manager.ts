@@ -1,3 +1,4 @@
+import type { OpenBlockInfo } from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   EmbedBlockModel,
@@ -11,7 +12,7 @@ import type { DeltaOperation } from 'quill';
 
 import type { EditorContainer } from '../../components/index.js';
 import { ClipboardItem } from './item.js';
-import { CLIPBOARD_MIMETYPE, OpenBlockInfo, SelectedBlock } from './types.js';
+import { CLIPBOARD_MIMETYPE, SelectedBlock } from './types.js';
 
 export class CopyCutManager {
   private _editor: EditorContainer;

@@ -5,6 +5,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { PrelimText } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
@@ -12,6 +13,7 @@ import {
   getBlockById,
   getBlockElementByModel,
   getRichTextByModel,
+  OpenBlockInfo,
   resetNativeSelection,
 } from '../../__internal__/utils/index.js';
 import { DragHandle } from '../../components/index.js';
@@ -310,6 +312,40 @@ export async function copyImage(model: EmbedBlockModel) {
     { mimeType: copyType, data: copyData },
   ]);
   copySuccess && toast('Copied image to clipboard');
+}
+
+function getTextDelta(model: BaseBlockModel) {
+  if (!model.text) {
+    return [];
+  }
+  if (model.text instanceof PrelimText) {
+    return [
+      {
+        insert: '',
+      },
+    ];
+  }
+  return model.text.toDelta();
+}
+
+export async function copyBlock(model: BaseBlockModel) {
+  const copyType = 'blocksuite/x-c+w';
+  const delta = getTextDelta(model);
+  const copyData: { data: OpenBlockInfo[] } = {
+    data: [
+      {
+        type: model.type,
+        flavour: model.flavour,
+        sourceId: model.sourceId,
+        text: delta,
+        children: [],
+      },
+    ],
+  };
+  const copySuccess = performNativeCopy([
+    { mimeType: copyType, data: JSON.stringify(copyData) },
+  ]);
+  return copySuccess;
 }
 
 interface ClipboardItem {
