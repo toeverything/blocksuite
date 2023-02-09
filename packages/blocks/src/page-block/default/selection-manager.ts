@@ -373,17 +373,45 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  public setSelectedBlocks = (
+  private _computeSelectionType(
+    selectedBlocks: Element[],
+    selectionType?: PageSelectionType
+  ): PageSelectionType {
+    let newSelectionType: PageSelectionType = selectionType ?? 'native';
+    const isOnlyBlock = selectedBlocks.length === 1;
+    for (const block of selectedBlocks) {
+      if (selectionType) continue;
+      if (!('model' in block)) continue;
+
+      // Calculate selection type
+      const model = getModelByElement(block);
+      newSelectionType = 'block';
+
+      // Other selection types are possible if only one block is selected
+      if (!isOnlyBlock) continue;
+
+      const flavour = model.flavour;
+      switch (flavour) {
+        case 'affine:embed': {
+          newSelectionType = 'embed';
+          break;
+        }
+        case 'affine:database': {
+          newSelectionType = 'database';
+          break;
+        }
+      }
+    }
+    return newSelectionType;
+  }
+
+  setSelectedBlocks(
     selectedBlocks: Element[],
     rects?: DOMRect[],
-    pageSelectionType?: PageSelectionType
-  ) => {
+    selectionType?: PageSelectionType
+  ) {
     this.state.selectedBlocks = selectedBlocks;
-    this.state.type = pageSelectionType ?? this.state.type;
-
-    // if (!selectedBlocks.length) {
-    //   return this.clearRects();
-    // }
+    this.state.type = selectionType ?? this.state.type;
 
     if (rects) {
       this._signals.updateSelectedRects.emit(rects);
@@ -391,43 +419,17 @@ export class DefaultSelectionManager {
     }
 
     const calculatedRects = [] as DOMRect[];
-    let newStateType: PageSelectionType = pageSelectionType ?? 'native';
-    const isOnlyBlock = selectedBlocks.length === 1;
     for (const block of selectedBlocks) {
       calculatedRects.push(block.getBoundingClientRect());
-
-      if (pageSelectionType) {
-        continue;
-      }
-
-      // calculate the type of selection
-      if (!('model' in block)) {
-        continue;
-      }
-
-      const model = getModelByElement(block);
-      newStateType = 'block';
-
-      // Other selection types are possible only for one block
-      if (!isOnlyBlock) {
-        continue;
-      }
-
-      const flavour = model.flavour;
-      switch (flavour) {
-        case 'affine:embed': {
-          newStateType = 'embed';
-          break;
-        }
-        case 'affine:database': {
-          newStateType = 'database';
-          break;
-        }
-      }
     }
-    this.state.type = newStateType;
+
+    const newSelectionType = this._computeSelectionType(
+      selectedBlocks,
+      selectionType
+    );
+    this.state.type = newSelectionType;
     this._signals.updateSelectedRects.emit(calculatedRects);
-  };
+  }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';

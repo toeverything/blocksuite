@@ -38,10 +38,10 @@ The below-signed are contributors to a code repository that is part of the proje
 
 ---
 
-- Innei, @Innei, 2023/02/09
-
 <!--
 Example:
 
-* Yifeng Wang, @doodlewind, 2022/09/11
+- Yifeng Wang, @doodlewind, 2022/09/11
 -->
+
+- Innei, @Innei, 2023/02/09
