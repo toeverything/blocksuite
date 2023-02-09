@@ -436,9 +436,6 @@ export class HtmlParser {
         text: [
           {
             insert: content,
-            attributes: {
-              'code-block': true,
-            },
           },
         ],
         children: [],
