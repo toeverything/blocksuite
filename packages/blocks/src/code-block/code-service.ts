@@ -12,10 +12,8 @@ export class CodeBlockService extends BaseService {
   };
 
   setLang(model: CodeBlockModel, lang: string) {
-    model.language = lang;
+    model.page.updateBlock(model, { language: lang });
   }
-
-  // TODO block2html
 
   override block2html(
     block: CodeBlockModel,
