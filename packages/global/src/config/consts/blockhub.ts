@@ -180,7 +180,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
   },
   {
     flavour: 'affine:code',
-    type: 'code',
+    type: null,
     name: 'Code Block',
     description: 'Capture a code snippet.',
     icon: CodeBlockIcon,

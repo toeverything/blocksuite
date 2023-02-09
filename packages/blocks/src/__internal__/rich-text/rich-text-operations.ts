@@ -706,8 +706,6 @@ export function tryMatchSpaceHotkey(
       isConverted = convertToList(page, model, 'bulleted', prefix);
       break;
     case '***':
-      isConverted = convertToDivider(page, model, prefix);
-      break;
     case '---':
       isConverted = convertToDivider(page, model, prefix);
       break;
