@@ -284,21 +284,25 @@ export class SlashMenu extends LitElement {
         ${this._categoryTemplate()}
         <div class="slash-item-container">
           ${this._filterItems.map(
-            ({ name, icon }, index) => html`<format-bar-button
-              width="100%"
-              style="padding-left: 12px; justify-content: flex-start;"
-              ?hover=${this._activeItemIndex === index}
-              text="${name}"
-              data-testid="${name}"
-              @mouseover=${() => {
-                this._activeItemIndex = index;
-              }}
-              @click=${() => {
-                this._handleItemClick(index);
-              }}
-            >
-              ${icon}
-            </format-bar-button>`
+            ({ name, icon, divider }, index) => html`<div
+                class="slash-item-divider"
+                ?hidden=${!divider || !!this._searchString.length}
+              ></div>
+              <format-bar-button
+                width="100%"
+                style="padding-left: 12px; justify-content: flex-start;"
+                ?hover=${this._activeItemIndex === index}
+                text="${name}"
+                data-testid="${name}"
+                @mouseover=${() => {
+                  this._activeItemIndex = index;
+                }}
+                @click=${() => {
+                  this._handleItemClick(index);
+                }}
+              >
+                ${icon}
+              </format-bar-button>`
           )}
         </div>
       </div>

@@ -21,6 +21,7 @@ import { toast } from '../toast.js';
 export type SlashItem = {
   name: string;
   icon: TemplateResult<1>;
+  divider?: boolean;
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
 };
 
@@ -53,9 +54,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
   },
   {
     name: 'Style',
-    items: formatConfig.map(({ name, icon, id, action }) => ({
+    items: formatConfig.map(({ name, icon, id }, idx) => ({
       name,
       icon,
+      divider: idx === 0,
       action: ({ model }) => {
         if (!model.text) {
           return;
@@ -72,9 +74,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     name: 'List',
     items: paragraphConfig
       .filter(i => i.flavour === 'affine:list')
-      .map(({ name, icon, flavour, type }) => ({
+      .map(({ name, icon, flavour, type }, idx) => ({
         name,
         icon,
+        divider: idx === 0,
         action: ({ model }) => updateBlockType([model], flavour, type),
       })),
   },
@@ -84,6 +87,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Today',
         icon: TodayIcon,
+        divider: true,
         action: ({ model }) => {
           const date = new Date();
           const strTime = date.toISOString().split('T')[0];
@@ -135,6 +139,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Copy',
         icon: CopyIcon,
+        divider: true,
         action: () => {
           // TODO Copy
           toast('Copied to clipboard');
