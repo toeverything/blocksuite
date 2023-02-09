@@ -187,7 +187,7 @@ export class SlashMenu extends LitElement {
     // Need to remove the search string
     this.abortController.abort(this._searchString);
     const { action } = this._filterItems[index];
-    action({ model: this.model });
+    action({ page: this.model.page, model: this.model });
   }
 
   private _updateItem(): SlashItem[] {
