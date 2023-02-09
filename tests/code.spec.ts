@@ -18,7 +18,11 @@ import {
   type,
   undoByKeyboard,
 } from './utils/actions/index.js';
-import { assertKeyboardWorkInInput, assertRichTexts } from './utils/asserts.js';
+import {
+  assertKeyboardWorkInInput,
+  assertRichTexts,
+  assertStoreMatchJSX,
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 test('use debug menu can create code block', async ({ page }) => {
@@ -117,6 +121,20 @@ test('change code language can work', async ({ page }) => {
 
   await page.mouse.move(position.x, position.y);
   await expect(page.locator(codeLangSelector)).toHaveText('Rust');
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:code
+      prop:language="Rust"
+    />
+  </affine:frame>
+</affine:page>`
+  );
 });
 
 test('language select list can disappear when click other place', async ({

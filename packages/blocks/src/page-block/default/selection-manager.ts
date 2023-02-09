@@ -7,14 +7,14 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
+import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
   getAllBlocks,
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
+  getModelByElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -35,8 +35,10 @@ import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../utils/position.js';
-import type { DefaultPageSignals } from './default-page-block.js';
-import type { DefaultPageBlockComponent } from './default-page-block.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import {
   getAllowSelectedBlocks,
@@ -330,6 +332,7 @@ export class PageSelectionState {
   }
 
   clearBlockSelection() {
+    this.type = 'none';
     this._startPoint = null;
     this._endPoint = null;
     this.focusedBlockIndex = -1;
@@ -409,13 +412,63 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks = (
+  private _computeSelectionType(
     selectedBlocks: Element[],
-    rects: DOMRect[] = []
-  ) => {
+    selectionType?: PageSelectionType
+  ): PageSelectionType {
+    let newSelectionType: PageSelectionType = selectionType ?? 'native';
+    const isOnlyBlock = selectedBlocks.length === 1;
+    for (const block of selectedBlocks) {
+      if (selectionType) continue;
+      if (!('model' in block)) continue;
+
+      // Calculate selection type
+      const model = getModelByElement(block);
+      newSelectionType = 'block';
+
+      // Other selection types are possible if only one block is selected
+      if (!isOnlyBlock) continue;
+
+      const flavour = model.flavour;
+      switch (flavour) {
+        case 'affine:embed': {
+          newSelectionType = 'embed';
+          break;
+        }
+        case 'affine:database': {
+          newSelectionType = 'database';
+          break;
+        }
+      }
+    }
+    return newSelectionType;
+  }
+
+  setSelectedBlocks(
+    selectedBlocks: Element[],
+    rects?: DOMRect[],
+    selectionType?: PageSelectionType
+  ) {
     this.state.selectedBlocks = selectedBlocks;
-    this._signals.updateSelectedRects.emit(rects);
-  };
+    this.state.type = selectionType ?? this.state.type;
+
+    if (rects) {
+      this._signals.updateSelectedRects.emit(rects);
+      return;
+    }
+
+    const calculatedRects = [] as DOMRect[];
+    for (const block of selectedBlocks) {
+      calculatedRects.push(block.getBoundingClientRect());
+    }
+
+    const newSelectionType = this._computeSelectionType(
+      selectedBlocks,
+      selectionType
+    );
+    this.state.type = newSelectionType;
+    this._signals.updateSelectedRects.emit(calculatedRects);
+  }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
@@ -439,10 +492,10 @@ export class DefaultSelectionManager {
     let { scrollTop } = viewport;
     const max = scrollHeight - clientHeight;
 
-    assertExists(this.state.startPoint);
-    assertExists(this.state.endPoint);
-
     const { startPoint, endPoint } = this.state;
+
+    assertExists(startPoint);
+    assertExists(endPoint);
 
     let auto = true;
     const autoScroll = () => {
@@ -809,7 +862,7 @@ export class DefaultSelectionManager {
       ({ block }) => blockCache.get(block) as DOMRect
     );
 
-    this._setSelectedBlocks(
+    this.setSelectedBlocks(
       findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
@@ -878,7 +931,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // Click on the prefix icon of list block
@@ -906,7 +959,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // `CMD-A`
@@ -937,13 +990,13 @@ export class DefaultSelectionManager {
       const rects = clearSubtree(selectedBlocks, containerLeft).map(
         block => blockCache.get(block) as DOMRect
       );
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     } else {
       // only current focused-block
       const rects = selectedBlocks
         .slice(0, 1)
         .map(block => blockCache.get(block) as DOMRect);
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     }
   }
 

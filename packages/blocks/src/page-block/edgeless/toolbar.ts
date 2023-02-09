@@ -307,7 +307,7 @@ export class EdgelessToolBar extends LitElement {
 
 const ToolbarConfig: Array<{
   name: string;
-  icon: TemplateResult<2>;
+  icon: TemplateResult<1>;
   disabled: boolean;
   tooltip: string;
   action?: (toolbar: EdgelessToolBar) => void;
@@ -381,7 +381,7 @@ const ToolbarConfig: Array<{
 const ShapeComponentConfig: Array<{
   name: string;
   value: ShapeMouseMode['shape'];
-  icon: TemplateResult<2>;
+  icon: TemplateResult<1>;
   tooltip: string;
   disabled: boolean;
 }> = [

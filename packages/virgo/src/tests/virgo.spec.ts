@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 
+import { ZERO_WIDTH_SPACE } from '../constant.js';
 import {
   enterVirgoPlayground,
   focusVirgoRichText,
@@ -8,7 +9,6 @@ import {
   type,
 } from './utils/misc.js';
 
-const ZERO_WIDTH_SPACE = '\u200B';
 test('basic input', async ({ page }) => {
   await enterVirgoPlayground(page);
   await focusVirgoRichText(page);
@@ -60,6 +60,8 @@ test('basic input', async ({ page }) => {
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
   await type(page, 'bbb');
+
+  page.waitForTimeout(100);
 
   expect(await editorA.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
@@ -179,7 +181,6 @@ test('basic text style', async ({ page }) => {
   const editorAUnderline = page.getByText('underline').nth(0);
   const editorAStrikethrough = page.getByText('strikethrough').nth(0);
   const editorAInlineCode = page.getByText('inline-code').nth(0);
-  const editorAReset = page.getByText('reset').nth(0);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -193,9 +194,6 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -206,22 +204,15 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'base',
         bold: true,
       },
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -230,23 +221,16 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'base',
         bold: true,
         italic: true,
       },
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -255,14 +239,10 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'base',
         bold: true,
         italic: true,
         underline: true,
@@ -270,9 +250,6 @@ test('basic text style', async ({ page }) => {
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -281,14 +258,10 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'base',
         bold: true,
         italic: true,
         underline: true,
@@ -297,9 +270,6 @@ test('basic text style', async ({ page }) => {
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -308,14 +278,10 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'base',
         italic: true,
         underline: true,
         strikethrough: true,
@@ -323,9 +289,6 @@ test('basic text style', async ({ page }) => {
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -334,23 +297,16 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'base',
         underline: true,
         strikethrough: true,
       },
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -359,22 +315,15 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'base',
         strikethrough: true,
       },
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -383,20 +332,6 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
-      attributes: {
-        type: 'base',
-      },
-    },
-  ]);
-
-  editorAReset.click();
-  delta = await getDeltaFromVirgoRichText(page);
-  expect(delta).toEqual([
-    {
-      insert: 'abcdefg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -405,21 +340,15 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'ab',
-      attributes: {
-        type: 'base',
-      },
     },
     {
       insert: 'cde',
       attributes: {
-        type: 'inline-code',
+        inlineCode: true,
       },
     },
     {
       insert: 'fg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 
@@ -428,9 +357,6 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
-      attributes: {
-        type: 'base',
-      },
     },
   ]);
 });
