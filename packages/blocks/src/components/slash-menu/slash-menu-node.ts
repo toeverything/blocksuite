@@ -244,7 +244,9 @@ export class SlashMenu extends LitElement {
 
     return html`<div
       class="slash-category"
-      style="${this._searchString.length ? 'max-width: 0; padding: 0;' : ''}"
+      style="${this._searchString.length
+        ? 'max-width: 0; padding: 0; margin: 0;'
+        : ''}"
     >
       ${menuGroups.map(
         group =>
