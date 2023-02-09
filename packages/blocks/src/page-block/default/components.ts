@@ -58,7 +58,11 @@ export function FrameSelectionRect(
 }
 
 export function EmbedSelectedRectsContainer(
-  rects: { left: number; top: number; width: number; height: number }[]
+  rects: { left: number; top: number; width: number; height: number }[],
+  scroll: {
+    left: number;
+    top: number;
+  }
 ) {
   return html`
     <style>
@@ -72,8 +76,8 @@ export function EmbedSelectedRectsContainer(
         const style = {
           position: 'absolute',
           display: 'block',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
+          left: scroll.left + rect.left + 'px',
+          top: scroll.top + rect.top + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };

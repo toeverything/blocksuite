@@ -372,9 +372,10 @@ export class DefaultPageBlockComponent
 
   private _getViewportScrollOffset() {
     const container = this.defaultViewportElement;
+    const rect = container.getBoundingClientRect();
     return {
-      left: container.scrollLeft,
-      top: container.scrollTop,
+      left: container.scrollLeft - rect.left,
+      top: container.scrollTop - rect.top,
     };
   }
 
@@ -471,7 +472,8 @@ export class DefaultPageBlockComponent
       this.viewportScrollOffset
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectEmbedRects
+      this.selectEmbedRects,
+      this.viewportScrollOffset
     );
     const embedEditingContainer = EmbedEditingContainer(
       this.embedEditingState,
