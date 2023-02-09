@@ -1,5 +1,4 @@
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import type { Page } from '@blocksuite/store';
 
 import { BaseService } from '../__internal__/service/index.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -12,11 +11,9 @@ export class CodeBlockService extends BaseService {
     this.hljs = await import('highlight.js');
   };
 
-  setLang(page: Page, model: CodeBlockModel, lang: string) {
-    page.updateBlock(model, { language: lang });
+  setLang(model: CodeBlockModel, lang: string) {
+    model.page.updateBlock(model, { language: lang });
   }
-
-  // TODO block2html
 
   override block2html(
     block: CodeBlockModel,

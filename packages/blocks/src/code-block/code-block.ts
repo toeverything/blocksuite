@@ -257,7 +257,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
                 @selected-language-changed=${(e: CustomEvent) => {
                   this.host
                     .getService('affine:code')
-                    .setLang(this.host.page, this.model, e.detail.language);
+                    .setLang(this.model, e.detail.language);
                 }}
                 @dispose=${() => {
                   this.showLangList = 'hidden';
