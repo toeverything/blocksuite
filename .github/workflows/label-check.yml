@@ -1,5 +1,6 @@
 name: Label Checker
 on:
+  merge_group:
   pull_request:
     types:
       - labeled
