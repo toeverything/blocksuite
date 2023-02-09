@@ -1,4 +1,14 @@
-import { paragraphConfig } from '@blocksuite/global/config';
+import {
+  CopyIcon,
+  DeleteIcon,
+  DuplicateIcon,
+  NowIcon,
+  paragraphConfig,
+  PasteIcon,
+  TodayIcon,
+  TomorrowIcon,
+  YesterdayIcon,
+} from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -8,7 +18,7 @@ import { toast } from '../toast.js';
 
 export type SlashItem = {
   name: string;
-  icon?: TemplateResult<2>;
+  icon: TemplateResult<1>;
   action: ({ model }: { model: BaseBlockModel }) => void;
 };
 
@@ -57,6 +67,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     items: [
       {
         name: 'Today',
+        icon: TodayIcon,
         action: ({ model }) => {
           if (!model.text) {
             return;
@@ -69,6 +80,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
       {
         name: 'Tomorrow',
+        icon: TomorrowIcon,
         action: ({ model }) => {
           if (!model.text) {
             return;
@@ -82,6 +94,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
       {
         name: 'Yesterday',
+        icon: YesterdayIcon,
         action: ({ model }) => {
           if (!model.text) {
             return;
@@ -95,6 +108,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
       {
         name: 'Now',
+        icon: NowIcon,
         action: ({ model }) => {
           if (!model.text) {
             return;
@@ -120,6 +134,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     items: [
       {
         name: 'Copy',
+        icon: CopyIcon,
         action: () => {
           // TODO Copy
           toast('Copied to clipboard');
@@ -127,18 +142,21 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
       {
         name: 'Paste',
+        icon: PasteIcon,
         action: () => {
           // TODO Paste
         },
       },
       {
         name: 'Duplicate',
+        icon: DuplicateIcon,
         action: () => {
           // TODO Duplicate
         },
       },
       {
         name: 'Delete',
+        icon: DeleteIcon,
         action: () => {
           // TODO Delete
         },
