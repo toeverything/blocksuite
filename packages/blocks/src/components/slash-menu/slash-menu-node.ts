@@ -147,14 +147,14 @@ export class SlashMenu extends LitElement {
       case 'ArrowUp': {
         this._activeItemIndex =
           (this._activeItemIndex - 1 + configLen) % configLen;
-        this._queryItem(
+        this._queryItemEle(
           this._filterItems[this._activeItemIndex]
         )?.scrollIntoView(false);
         break;
       }
       case 'ArrowDown': {
         this._activeItemIndex = (this._activeItemIndex + 1) % configLen;
-        this._queryItem(
+        this._queryItemEle(
           this._filterItems[this._activeItemIndex]
         )?.scrollIntoView(false);
         break;
@@ -214,7 +214,7 @@ export class SlashMenu extends LitElement {
       });
   }
 
-  private _queryItem(item: SlashItem) {
+  private _queryItemEle(item: SlashItem) {
     const shadowRoot = this.shadowRoot;
     if (!shadowRoot) {
       return null;
@@ -230,7 +230,7 @@ export class SlashMenu extends LitElement {
       const menuGroup = menuGroups.find(g => g.name === group.name);
       if (!menuGroup) return;
       const item = menuGroup.items[0];
-      this._queryItem(item)?.scrollIntoView(true);
+      this._queryItemEle(item)?.scrollIntoView(true);
       this._activeItemIndex = this._filterItems.findIndex(
         i => i.name === item.name
       );
@@ -275,6 +275,28 @@ export class SlashMenu extends LitElement {
       maxHeight: this.maxHeight,
     });
 
+    const btnItems = this._filterItems.map(
+      ({ name, icon, divider }, index) => html`<div
+          class="slash-item-divider"
+          ?hidden=${!divider || !!this._searchString.length}
+        ></div>
+        <format-bar-button
+          width="100%"
+          style="padding-left: 12px; justify-content: flex-start;"
+          ?hover=${this._activeItemIndex === index}
+          text="${name}"
+          data-testid="${name}"
+          @mouseover=${() => {
+            this._activeItemIndex = index;
+          }}
+          @click=${() => {
+            this._handleItemClick(index);
+          }}
+        >
+          ${icon}
+        </format-bar-button>`
+    );
+
     return html`<div class="slash-menu-container" style="${containerStyles}">
       <div
         class="overlay-mask"
@@ -282,29 +304,7 @@ export class SlashMenu extends LitElement {
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
         ${this._categoryTemplate()}
-        <div class="slash-item-container">
-          ${this._filterItems.map(
-            ({ name, icon, divider }, index) => html`<div
-                class="slash-item-divider"
-                ?hidden=${!divider || !!this._searchString.length}
-              ></div>
-              <format-bar-button
-                width="100%"
-                style="padding-left: 12px; justify-content: flex-start;"
-                ?hover=${this._activeItemIndex === index}
-                text="${name}"
-                data-testid="${name}"
-                @mouseover=${() => {
-                  this._activeItemIndex = index;
-                }}
-                @click=${() => {
-                  this._handleItemClick(index);
-                }}
-              >
-                ${icon}
-              </format-bar-button>`
-          )}
-        </div>
+        <div class="slash-item-container">${btnItems}</div>
       </div>
     </div>`;
   }
