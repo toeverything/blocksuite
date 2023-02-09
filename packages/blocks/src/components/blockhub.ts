@@ -412,7 +412,7 @@ export class BlockHub extends NonShadowLitElement {
       }, this._delay);
     } else {
       this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.overflow = 'unset';
+        this._blockHubIconsContainer.style.removeProperty('overflow');
       }, this._delay);
     }
   };
