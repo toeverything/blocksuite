@@ -28,6 +28,7 @@ export const styles = css`
   }
 
   .slash-category {
+    position: relative;
     overflow: hidden;
     box-sizing: border-box;
     width: 150px;
@@ -35,9 +36,20 @@ export const styles = css`
     transition: max-width 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding: 12px 16px;
     color: #8e8d91;
+    gap: 5px;
+    padding: 0 16px;
+    padding-right: 0;
+    margin-right: 16px;
+  }
+  .slash-category::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    right: 0;
+    height: 100%;
+    width: 1px;
+    background-color: #e3e2e4;
   }
 
   .slash-category-name {
