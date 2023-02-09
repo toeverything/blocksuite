@@ -4,7 +4,6 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { getBlockElementByModel, hotkey } from '../../__internal__/index.js';
 import {
-  handleIndent,
   handleMultiBlockIndent,
   isAtLineEdge,
 } from '../../__internal__/rich-text/rich-text-operations.js';
