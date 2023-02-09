@@ -7,14 +7,14 @@ import {
   matchFlavours,
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
+import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
   getAllBlocks,
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
+  getModelByElement,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -35,8 +35,10 @@ import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../utils/position.js';
-import type { DefaultPageSignals } from './default-page-block.js';
-import type { DefaultPageBlockComponent } from './default-page-block.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import {
   getAllowSelectedBlocks,
@@ -371,12 +373,57 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks = (
+  public setSelectedBlocks = (
     selectedBlocks: Element[],
-    rects: DOMRect[] = []
+    rects?: DOMRect[],
+    pageSelectionType?: PageSelectionType
   ) => {
+    if (!selectedBlocks.length) {
+      return this.clearRects();
+    }
     this.state.selectedBlocks = selectedBlocks;
-    this._signals.updateSelectedRects.emit(rects);
+
+    if (rects) {
+      this._signals.updateSelectedRects.emit(rects);
+    } else {
+      const calculatedRects = [] as DOMRect[];
+      let newStateType: PageSelectionType = pageSelectionType ?? 'native';
+      const isOnlyBlock = selectedBlocks.length === 1;
+      for (const block of selectedBlocks) {
+        calculatedRects.push(block.getBoundingClientRect());
+
+        if (pageSelectionType) {
+          continue;
+        }
+
+        // calculate the type of selection
+        if (!('model' in block)) {
+          continue;
+        }
+
+        const model = getModelByElement(block);
+        newStateType = 'block';
+
+        // Other selection types are possible only for one block
+        if (!isOnlyBlock) {
+          continue;
+        }
+
+        const flavour = model.flavour;
+        switch (flavour) {
+          case 'affine:embed': {
+            newStateType = 'embed';
+            break;
+          }
+          case 'affine:database': {
+            newStateType = 'database';
+            break;
+          }
+        }
+      }
+      this.state.type = newStateType;
+      this._signals.updateSelectedRects.emit(calculatedRects);
+    }
   };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
@@ -403,7 +450,7 @@ export class DefaultSelectionManager {
       ({ block }) => blockCache.get(block) as DOMRect
     );
 
-    this._setSelectedBlocks(
+    this.setSelectedBlocks(
       findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
@@ -663,6 +710,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.emit(null);
     this._signals.updateEmbedEditingState.emit(null);
     this._signals.updateEmbedRects.emit([]);
+    this.state.type = 'none';
     this.state.clear();
   }
 
@@ -695,7 +743,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // Click on the prefix icon of list block
@@ -723,7 +771,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // `CMD-A`
@@ -754,13 +802,13 @@ export class DefaultSelectionManager {
       const rects = clearSubtree(selectedBlocks, containerLeft).map(
         block => blockCache.get(block) as DOMRect
       );
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     } else {
       // only current focused-block
       const rects = selectedBlocks
         .slice(0, 1)
         .map(block => blockCache.get(block) as DOMRect);
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     }
 
     return;
