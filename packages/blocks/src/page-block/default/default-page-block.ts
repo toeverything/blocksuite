@@ -372,9 +372,10 @@ export class DefaultPageBlockComponent
 
   private _getViewportScrollOffset() {
     const container = this.defaultViewportElement;
+    const rect = container.getBoundingClientRect();
     return {
-      left: container.scrollLeft,
-      top: container.scrollTop,
+      left: container.scrollLeft - rect.left,
+      top: container.scrollTop - rect.top,
     };
   }
 
@@ -463,15 +464,17 @@ export class DefaultPageBlockComponent
       this.requestUpdate()
     );
     const selectionRect = FrameSelectionRect(
-      this.frameSelectionRect,
-      this.viewportScrollOffset
+      this.frameSelectionRect
+      // We don't need viewport offset as frameSelectionRect is already an absolute rect
+      // this.viewportScrollOffset
     );
     const selectedRectsContainer = SelectedRectsContainer(
       this.selectedRects,
       this.viewportScrollOffset
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectEmbedRects
+      this.selectEmbedRects,
+      this.viewportScrollOffset
     );
     const embedEditingContainer = EmbedEditingContainer(
       this.embedEditingState,
@@ -497,7 +500,7 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectionRect} ${selectedEmbedContainer}${embedEditingContainer}
+        ${selectionRect} ${selectedEmbedContainer} ${embedEditingContainer}
         ${codeBlockOptionContainer}
       </div>
     `;
