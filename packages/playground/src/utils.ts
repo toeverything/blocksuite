@@ -117,7 +117,6 @@ export function getOptions(): Pick<
       enable_database: true,
       enable_edgeless_toolbar: true,
       enable_slash_menu: params.get('slash') !== '0',
-      enable_append_flavor_slash: params.get('slash') === '1',
       readonly: {
         'space:page0': false,
       },

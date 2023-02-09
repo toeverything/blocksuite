@@ -141,7 +141,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(12);
+  await expect(slashItems).toHaveCount(26);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
@@ -169,11 +169,11 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
 
   // search should reset the active item
-  await type(page, 'od');
+  await type(page, 'code');
   await expect(slashItems).toHaveCount(2);
-  await expect(slashItems).toHaveText(['To-do List', 'Code Block']);
+  await expect(slashItems).toHaveText(['Code Block', 'Code']);
   await expect(slashItems.first()).toHaveAttribute('hover', '');
-  await type(page, 'o');
+  await type(page, 'b');
   await expect(slashItems).toHaveCount(1);
   // assert backspace works
   await page.keyboard.press('Backspace');
