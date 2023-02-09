@@ -71,4 +71,18 @@ export const styles = css`
     overflow-y: auto;
     width: 200px;
   }
+
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: #b1b1b1;
+  }
+
+  .slash-item-divider {
+    border: 1px dashed #e3e2e4;
+    margin: 8px 0;
+  }
 `;
