@@ -2,6 +2,8 @@ name: Pull Request title adheres to guidelines
 
 on:
   merge_group:
+    branches:
+      - master
   pull_request:
     types:
       - opened
