@@ -26,12 +26,12 @@ import {
   toggleWrap,
 } from './utils.js';
 
-export function FrameSelectionRect(rect: DOMRect | null) {
+export function FrameSelectionRect(rect: DOMRect | null, scrollTop: number) {
   if (rect === null) return null;
 
   const style = {
     left: rect.left + 'px',
-    top: rect.top + 'px',
+    top: scrollTop + rect.top + 'px',
     width: rect.width + 'px',
     height: rect.height + 'px',
   };
