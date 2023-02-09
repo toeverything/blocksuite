@@ -27,6 +27,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   };
 
   private _startRange: Range | null = null;
+  private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
+  private _lock = false;
 
   private _pick(x: number, y: number) {
     const { viewport, surface } = this._edgeless;
@@ -116,9 +118,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDragStart(e: SelectionEvent): void {
-    const { viewport } = this._edgeless;
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const selected = pick(this._blocks, modelX, modelY);
+    const selected = this._pick(e.x, e.y);
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
@@ -133,6 +133,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       resetNativeSelection(null);
     }
     this._startRange = caretRangeFromPoint(e.x, e.y);
+    this._dragLastPos = {
+      x: e.x,
+      y: e.y,
+    };
   }
 
   onContainerDragMove(e: SelectionEvent): void {
@@ -140,6 +144,48 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       case 'none':
         break;
       case 'single':
+        if (
+          !isBlock(this.blockSelectionState.selected) &&
+          this.blockSelectionState.active
+        ) {
+          if (!this._lock) {
+            this._lock = true;
+            this._page.captureSync();
+          }
+          const deltaX = this._dragLastPos.x - e.x;
+          const deltaY = this._dragLastPos.y - e.y;
+          this._edgeless.surface.setElementBound(
+            this.blockSelectionState.selected.id,
+            {
+              x:
+                this.blockSelectionState.selected.x -
+                deltaX / this._edgeless.viewport.zoom,
+              y:
+                this.blockSelectionState.selected.y -
+                deltaY / this._edgeless.viewport.zoom,
+              w: this.blockSelectionState.selected.w,
+              h: this.blockSelectionState.selected.h,
+            }
+          );
+          this._blockSelectionState = {
+            ...this.blockSelectionState,
+            rect: getSelectionBoxBound(
+              this._edgeless.viewport,
+              serializeXYWH(
+                this.blockSelectionState.selected.x -
+                  deltaX / this._edgeless.viewport.zoom,
+                this.blockSelectionState.selected.y -
+                  deltaY / this._edgeless.viewport.zoom,
+                this.blockSelectionState.selected.w,
+                this.blockSelectionState.selected.h
+              )
+            ),
+          };
+          this._edgeless.signals.updateSelection.emit(
+            this._blockSelectionState
+          );
+          break;
+        }
         if (
           this.blockSelectionState.active
           // && !matchFlavours(this.blockSelectionState.selected, ['affine:shape'])
@@ -178,9 +224,17 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     if (this._frameSelectionState) {
       this._updateFrameSelectionState(e.x, e.y);
     }
+    this._dragLastPos = {
+      x: e.x,
+      y: e.y,
+    };
   }
 
   onContainerDragEnd(e: SelectionEvent): void {
+    if (this._lock) {
+      this._page.captureSync();
+      this._lock = false;
+    }
     if (this.isActive) {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
