@@ -292,13 +292,16 @@ export class PageSelectionState {
     return this._embedCache;
   }
 
-  resetStartRange(
+  resetStartRange(e: SelectionEvent) {
+    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  }
+
+  resetStartPoint(
     e: SelectionEvent,
     offset: { x: number; y: number } = { x: 0, y: 0 }
   ) {
     const x = offset.x + e.x;
     const y = offset.y + e.y;
-    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
     this._startPoint = { x, y };
     this._endPoint = { x, y };
   }
@@ -326,15 +329,19 @@ export class PageSelectionState {
     }
   }
 
-  clear() {
-    this.type = 'none';
-    this._richTextCache.clear();
-    this._startRange = null;
+  clearBlockSelection() {
     this._startPoint = null;
     this._endPoint = null;
     this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
     this.clearRaf();
+  }
+
+  clear() {
+    this.type = 'none';
+    this._richTextCache.clear();
+    this._startRange = null;
+    this.clearBlockSelection();
   }
 }
 
@@ -413,7 +420,7 @@ export class DefaultSelectionManager {
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
     const { scrollTop, scrollLeft } = this._container.defaultViewportElement;
-    this.state.resetStartRange(e, {
+    this.state.resetStartPoint(e, {
       x: scrollLeft,
       y: scrollTop,
     });
@@ -499,6 +506,9 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(_: SelectionEvent) {
+    if (this.state.type === 'block') {
+      this.clearRects();
+    }
     this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
@@ -512,11 +522,7 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    const viewport = this._container.defaultViewportElement;
-    this.state.resetStartRange(e, {
-      x: viewport.scrollLeft,
-      y: viewport.scrollTop,
-    });
+    this.state.resetStartRange(e);
     if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;
@@ -754,7 +760,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.emit(null);
     this._signals.updateEmbedEditingState.emit(null);
     this._signals.updateEmbedRects.emit([]);
-    this.state.clear();
+    this.state.clearBlockSelection();
   }
 
   dispose() {

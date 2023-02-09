@@ -1084,7 +1084,6 @@ test('should keep selection state when scrolling backward', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1164,7 +1163,6 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1341,7 +1339,6 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     if (!first) {
       throw new Error();
     }
-
     return [first.getBoundingClientRect(), distance] as const;
   });
 
@@ -1481,7 +1478,6 @@ test('should not clear selected rects when clicking on scrollbar', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1496,7 +1492,6 @@ test('should not clear selected rects when clicking on scrollbar', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1571,7 +1566,6 @@ test('should not clear selected rects when scrolling the wheel', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1587,7 +1581,6 @@ test('should not clear selected rects when scrolling the wheel', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1608,7 +1601,6 @@ test('should not clear selected rects when scrolling the wheel', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1681,7 +1673,6 @@ test('should refresh selected rects when resizing the window/viewport', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1708,7 +1699,6 @@ test('should refresh selected rects when resizing the window/viewport', async ({
     if (!viewport) {
       throw new Error();
     }
-
     return [
       viewport.querySelector('.affine-page-selected-rects-container')?.children
         .length || 0,
@@ -1718,4 +1708,128 @@ test('should refresh selected rects when resizing the window/viewport', async ({
 
   expect(count0).toBe(count1);
   expect(scrollTop0).toBeCloseTo(scrollTop1, -0.01);
+});
+
+test('should clear block selection before native selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  // `123`
+  const first = await page.evaluate(() => {
+    const first = document.querySelector('[data-block-id="2"]');
+    if (!first) {
+      throw new Error();
+    }
+    return first.getBoundingClientRect();
+  });
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: first.left - 1,
+      y: first.top - 1,
+    },
+    {
+      x: first.left + 1,
+      y: first.top + 1,
+    }
+  );
+
+  const count0 = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return (
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0
+    );
+  });
+
+  await dragBetweenIndices(
+    page,
+    [1, 3],
+    [1, 0],
+    { x: 0, y: 0 },
+    { x: 0, y: 0 }
+  );
+
+  const count1 = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return (
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0
+    );
+  });
+
+  expect(count0).toBe(1);
+  expect(count1).toBe(0);
+});
+
+test('should clear native selection before block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await dragBetweenIndices(
+    page,
+    [1, 3],
+    [1, 0],
+    { x: 0, y: 0 },
+    { x: 0, y: 0 }
+  );
+
+  const text0 = await getQuillSelectionText(page);
+
+  await page.mouse.click(0, 0);
+
+  // `123`
+  const first = await page.evaluate(() => {
+    const first = document.querySelector('[data-block-id="2"]');
+    if (!first) {
+      throw new Error();
+    }
+    return first.getBoundingClientRect();
+  });
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: first.left - 1,
+      y: first.top - 1,
+    },
+    {
+      x: first.left + 1,
+      y: first.top + 1,
+    }
+  );
+
+  const blockCount = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return (
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0
+    );
+  });
+
+  const textCount = await page.evaluate(() => {
+    return window.getSelection()?.rangeCount || 0;
+  });
+
+  expect(text0).toBe('456\n');
+  expect(textCount).toBe(0);
+  expect(blockCount).toBe(1);
 });
