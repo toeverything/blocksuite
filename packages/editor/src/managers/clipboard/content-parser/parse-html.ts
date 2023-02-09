@@ -77,7 +77,9 @@ export class HtmlParser {
     }
 
     const tagName = node.tagName;
-    if (node instanceof Text || INLINE_TAGS.includes(tagName)) {
+    const isInlineOrLeaf =
+      node instanceof Text || INLINE_TAGS.includes(tagName);
+    if (isInlineOrLeaf && node.textContent?.length) {
       result = await this._contentParser.getParserHtmlText2Block(
         'commonParser'
       )?.({
@@ -130,15 +132,6 @@ export class HtmlParser {
             });
           }
           break;
-        case 'DIV':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'commonParser'
-          )?.({
-            element: node,
-            flavour: 'affine:paragraph',
-            type: 'text',
-          });
-          break;
         case 'LI':
           result = await this._contentParser.getParserHtmlText2Block(
             'listItemParser'
@@ -173,22 +166,34 @@ export class HtmlParser {
       return result;
     }
 
-    // if node.children all is inline element, merage them to a paragraph
-    if (
-      node.children.length > 0 &&
-      Array.from(node.children).every(
-        child =>
-          INLINE_TAGS.includes(child.tagName) ||
-          (child.tagName.includes('-') && checkWebComponentIfInline(child))
-      )
-    ) {
-      const allInlineResult = await this._commonHTML2Block(
-        node,
-        'affine:paragraph',
-        'text'
-      );
-      if (allInlineResult) {
-        return [allInlineResult];
+    // If node.childNodes are all inline elements or text nodes, merge them into one paragraph.
+    if (node.childNodes.length > 0) {
+      const hasNonInlineOrNonLeaf = Array.from(node.childNodes).some(child => {
+        if (child.nodeType === Node.TEXT_NODE) {
+          return false;
+        }
+
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          const childElement = child as Element;
+          const isInlineElement =
+            INLINE_TAGS.includes(childElement.tagName) ||
+            (childElement.tagName.includes('-') &&
+              checkWebComponentIfInline(childElement));
+          return !isInlineElement;
+        }
+
+        return true;
+      });
+
+      if (!hasNonInlineOrNonLeaf) {
+        const allInlineResult = await this._commonHTML2Block(
+          node,
+          'affine:paragraph',
+          'text'
+        );
+        if (allInlineResult) {
+          return [allInlineResult];
+        }
       }
     }
 
