@@ -1174,7 +1174,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
 
   expect(total).toBe(3 + 5 + 3);
   // See https://jestjs.io/docs/expect#tobeclosetonumber-numdigits
-  // Math.abs(scrollTop - distance) < Math.pow(10, -1 * -0.01)/2
+  // Math.abs(scrollTop - distance) < Math.pow(10, -1 * -0.01)/2 = 0.511646496140377
   expect(scrollTop).toBeCloseTo(distance, -0.01);
 });
 
@@ -1222,6 +1222,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     }
     return [last.getBoundingClientRect(), distance] as const;
   });
+  await page.waitForTimeout(250);
 
   await page.mouse.move(0, 0);
 
@@ -1238,7 +1239,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await page.mouse.wheel(0, -distance);
+        await page.mouse.wheel(0, -distance * 2);
         await page.waitForTimeout(250);
       },
     }
@@ -1277,7 +1278,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     },
     {
       x: last.right - 1,
-      y: last.top - distance,
+      y: last.top - 1 - distance,
     }
   );
 
@@ -1359,7 +1360,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     {
       // dont release mouse
       beforeMouseUp: async () => {
-        await page.mouse.wheel(0, distance);
+        await page.mouse.wheel(0, distance * 2);
         await page.waitForTimeout(250);
       },
     }
@@ -1397,7 +1398,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     },
     {
       x: first.left + 1,
-      y: first.top + distance,
+      y: first.top + 1 + distance,
     }
   );
 
