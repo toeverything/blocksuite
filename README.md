@@ -198,7 +198,7 @@ See [BUILDING.md](BUILDING.md) for instructions on how to build BlockSuite from 
 
 ## Contributing
 
-BlockSuite accepts pull requests on GitHub. Before you start contributing, please make sure you have read and accepted our [Contributor License Agreement](./.github/CLA.md). To indicate your agreement, simply edit this file and submit a pull request.
+BlockSuite accepts pull requests on GitHub. Before you start contributing, please make sure you have read and accepted our [Contributor License Agreement](https://github.com/toeverything/blocksuite/edit/master/.github/CLA.md). To indicate your agreement, simply edit this file and submit a pull request.
 
 ## License
 
