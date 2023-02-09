@@ -2,6 +2,7 @@ import '../../__internal__/index.js';
 
 import type { XYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { Page } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -195,6 +196,9 @@ export function EdgelessBlockChildrenContainer(
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
+  @property({ type: Page })
+  page!: Page;
+
   @property({ type: Boolean })
   lock!: boolean;
 
@@ -390,7 +394,7 @@ export class EdgelessSelectedRect extends LitElement {
       requestAnimationFrame(() => {
         // refresh xywh by model
         if (!this.lock) {
-          selected.page.captureSync();
+          this.page.captureSync();
           this.lock = true;
         }
         if (this.state.type === 'single') {
@@ -405,7 +409,7 @@ export class EdgelessSelectedRect extends LitElement {
           (frameBlock?.getBoundingClientRect().height || 0) / this.zoom,
         ]);
         selected.xywh = newXywh;
-        selected.page.updateBlock(selected, { xywh: newXywh });
+        this.page.updateBlock(selected, { xywh: newXywh });
       });
     }
   };
@@ -415,7 +419,7 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       if (!isBlock(this.state.selected)) return;
 
-      this.state.selected.page.captureSync();
+      this.page.captureSync();
     } else {
       console.error('unexpected state.type:', this.state.type);
     }
