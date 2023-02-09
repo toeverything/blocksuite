@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Virgo is a minimized rich-text editing kernel that synchronizes the state between DOM and [Y.Text](https://docs.yjs.dev/api/shared-types/y.text), which differs from other rich-text editing frameworks in that its data model are _natively_ CRDT. For example, to support collaborative editing in Slate.js, you may need to use a plugin like slate-yjs, a wrapper around [Yjs](https://github.com/yjs/yjs). In these plugins, all text operations should be converted between Yjs and Slate.js operations. This may result in undo/redo properly and hard to maintain the code. However, with Virgo, we can directly synchronize the DOM state between Yjs and DOM, which means that the state in Yjs is the single source of truth. This means that to update, can just calling the `Y.Text` API to manipulate the DOM state, which could significantly reduces the complexity of the editor.
+Virgo is a minimized rich-text editing kernel that synchronizes the state between DOM and [Y.Text](https://docs.yjs.dev/api/shared-types/y.text), which differs from other rich-text editing frameworks in that its data model are _natively_ CRDT. For example, to support collaborative editing in Slate.js, you may need to use a plugin like slate-yjs, a wrapper around [Yjs](https://github.com/yjs/yjs). In these plugins, all text operations should be converted between Yjs and Slate.js operations. This may result in undo/redo properly and hard to maintain the code. However, with Virgo, we can directly synchronize the DOM state between Yjs and DOM, which means that the state in Yjs is the single source of truth. It signify that to update, can just calling the `Y.Text` API to manipulate the DOM state, which could significantly reduces the complexity of the editor.
 
 Initially in BlockSuite, we use [Quill](https://github.com/quilljs/quill) for in-block rich-text editing, which only utilizes a small subset of its APIs. Every paragraph in BlockSuite is managed in a standalone Quill instance, which is attached to a `Y.Text` instance for collaborative editing. Virgo makes this further simpler, since what it needs to do is the same as how we use the Quill subset. It just needs to provide a flat rich-text synchronization mechanism, since the block-tree-level state management is handled by the data store in BlockSuite.
 
@@ -19,22 +19,7 @@ console.log(yText.toDelta());
 /*
 [
   {
-    insert: 'aaa',
-    attributes: {
-      type: 'base',
-    },
-  },
-  {
-    insert: '\n',
-    attributes: {
-      type: 'line-break',
-    },
-  },
-  {
-    insert: 'bbb',
-    attributes: {
-      type: 'base',
-    },
+    insert: 'aaa\nbbb',
   },
 ];
 */
@@ -53,27 +38,11 @@ console.log(yText.toDelta());
   {
     insert: 'aa',
     attributes: {
-      type: 'base',
       bold: true,
     },
   },
   {
-    insert: 'a',
-    attributes: {
-      type: 'base',
-    },
-  },
-  {
-    insert: '\n',
-    attributes: {
-      type: 'line-break',
-    },
-  },
-  {
-    insert: 'bbb',
-    attributes: {
-      type: 'base',
-    },
+    insert: 'a\nbbb',
   },
 ];
 */

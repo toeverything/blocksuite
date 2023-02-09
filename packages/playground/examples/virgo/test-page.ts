@@ -1,46 +1,13 @@
 import '@shoelace-style/shoelace';
 
-import {
-  BaseArrtiubtes,
-  BaseText,
-  DeltaInsert,
-  InlineCode,
-  InlineCodeAttributes,
-  TextAttributes,
-  TextElement,
-  VEditor,
-} from '@blocksuite/virgo';
+import { TextAttributes, VEditor } from '@blocksuite/virgo';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
-export function renderElement(delta: DeltaInsert<TextAttributes>): TextElement {
-  switch (delta.attributes.type) {
-    case 'base': {
-      const baseText = new BaseText();
-      baseText.delta = delta as DeltaInsert<BaseArrtiubtes>;
-      return baseText;
-    }
-    case 'inline-code': {
-      const inlineCode = new InlineCode();
-      inlineCode.delta = delta as DeltaInsert<InlineCodeAttributes>;
-      return inlineCode;
-    }
-
-    default:
-      throw new Error(`Unknown text type: ${delta.attributes.type}`);
-  }
-}
-
-const baseStyle: Array<Exclude<keyof BaseArrtiubtes, 'type'>> = [
-  'bold',
-  'italic',
-  'underline',
-  'strikethrough',
-];
 function toggleStyle(
   vEditor: VEditor,
-  type: Exclude<keyof BaseArrtiubtes, 'type'> | 'inline-code'
+  attrs: NonNullable<TextAttributes>
 ): void {
   const vRange = vEditor.getVRange();
   if (!vRange) {
@@ -53,39 +20,35 @@ function toggleStyle(
   }
 
   const deltas = vEditor.getDeltasByVRange(vRange);
+  let oldAttributes: NonNullable<TextAttributes> = {};
 
-  if (baseStyle.includes(type as Exclude<keyof BaseArrtiubtes, 'type'>)) {
-    vEditor.formatText(
-      vRange,
-      {
-        type: 'base',
-        [type]: deltas.every(
-          ([d]) =>
-            d.attributes.type === 'base' &&
-            d.attributes[type as Exclude<keyof BaseArrtiubtes, 'type'>]
-        )
-          ? null
-          : true,
-      },
-      {
-        mode: 'merge',
-      }
-    );
-    root.blur();
-  } else if (type === 'inline-code') {
-    vEditor.formatText(
-      vRange,
-      {
-        type: deltas.every(([d]) => d.attributes.type === 'inline-code')
-          ? 'base'
-          : 'inline-code',
-      },
-      {
-        mode: 'merge',
-      }
-    );
-    root.blur();
+  for (const [delta] of deltas) {
+    const attributes = delta.attributes;
+
+    if (!attributes) {
+      continue;
+    }
+
+    oldAttributes = { ...attributes };
   }
+
+  const newAttributes = Object.fromEntries(
+    Object.entries(attrs).map(([k, v]) => {
+      if (
+        typeof v === 'boolean' &&
+        v === (oldAttributes as { [k: string]: unknown })[k]
+      ) {
+        return [k, !v];
+      } else {
+        return [k, v];
+      }
+    })
+  );
+
+  vEditor.formatText(vRange, newAttributes, {
+    mode: 'merge',
+  });
+  root.blur();
 
   vEditor.syncVRange();
 }
@@ -174,19 +137,19 @@ export class ToolBar extends LitElement {
     }
 
     boldButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, 'bold');
+      toggleStyle(this.vEditor, { bold: true });
     });
     italicButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, 'italic');
+      toggleStyle(this.vEditor, { italic: true });
     });
     underlineButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, 'underline');
+      toggleStyle(this.vEditor, { underline: true });
     });
     strikethroughButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, 'strikethrough');
+      toggleStyle(this.vEditor, { strikethrough: true });
     });
     inlineCode.addEventListener('click', () => {
-      toggleStyle(this.vEditor, 'inline-code');
+      toggleStyle(this.vEditor, { inlineCode: true });
     });
     resetButton.addEventListener('click', () => {
       const rangeStatic = this.vEditor.getVRange();
@@ -266,10 +229,10 @@ export class TestPage extends LitElement {
     });
 
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new VEditor(textA, { renderElement });
+    const editorA = new VEditor(textA);
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new VEditor(textB, { renderElement });
+    const editorB = new VEditor(textB);
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);
