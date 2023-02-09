@@ -378,52 +378,52 @@ export class DefaultSelectionManager {
     rects?: DOMRect[],
     pageSelectionType?: PageSelectionType
   ) => {
-    if (!selectedBlocks.length) {
-      return this.clearRects();
-    }
+    // if (!selectedBlocks.length) {
+    //   return this.clearRects();
+    // }
     this.state.selectedBlocks = selectedBlocks;
 
     if (rects) {
       this._signals.updateSelectedRects.emit(rects);
-    } else {
-      const calculatedRects = [] as DOMRect[];
-      let newStateType: PageSelectionType = pageSelectionType ?? 'native';
-      const isOnlyBlock = selectedBlocks.length === 1;
-      for (const block of selectedBlocks) {
-        calculatedRects.push(block.getBoundingClientRect());
+      return;
+    }
+    const calculatedRects = [] as DOMRect[];
+    let newStateType: PageSelectionType = pageSelectionType ?? 'native';
+    const isOnlyBlock = selectedBlocks.length === 1;
+    for (const block of selectedBlocks) {
+      calculatedRects.push(block.getBoundingClientRect());
 
-        if (pageSelectionType) {
-          continue;
+      if (pageSelectionType) {
+        continue;
+      }
+
+      // calculate the type of selection
+      if (!('model' in block)) {
+        continue;
+      }
+
+      const model = getModelByElement(block);
+      newStateType = 'block';
+
+      // Other selection types are possible only for one block
+      if (!isOnlyBlock) {
+        continue;
+      }
+
+      const flavour = model.flavour;
+      switch (flavour) {
+        case 'affine:embed': {
+          newStateType = 'embed';
+          break;
         }
-
-        // calculate the type of selection
-        if (!('model' in block)) {
-          continue;
-        }
-
-        const model = getModelByElement(block);
-        newStateType = 'block';
-
-        // Other selection types are possible only for one block
-        if (!isOnlyBlock) {
-          continue;
-        }
-
-        const flavour = model.flavour;
-        switch (flavour) {
-          case 'affine:embed': {
-            newStateType = 'embed';
-            break;
-          }
-          case 'affine:database': {
-            newStateType = 'database';
-            break;
-          }
+        case 'affine:database': {
+          newStateType = 'database';
+          break;
         }
       }
-      this.state.type = newStateType;
-      this._signals.updateSelectedRects.emit(calculatedRects);
     }
+    this.state.type = newStateType;
+    this._signals.updateSelectedRects.emit(calculatedRects);
   };
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
