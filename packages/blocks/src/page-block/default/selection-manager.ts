@@ -770,6 +770,9 @@ export class DefaultSelectionManager {
     endPoint: { x: number; y: number },
     offset: { scrollLeft: number; scrollTop: number }
   ): DOMRect {
+    if (this.state.focusedBlockIndex !== -1) {
+      this.state.focusedBlockIndex = -1;
+    }
     const selectionRect = createSelectionRect(
       {
         x: endPoint.x + offset.scrollLeft,
@@ -831,8 +834,8 @@ export class DefaultSelectionManager {
 
     if (selectedBlocks.length === 0) return;
 
+    // just refresh selected blocks
     if (focusedBlockIndex === -1) {
-      // SELECT_ALL
       const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
       const rects = clearSubtree(selectedBlocks, containerLeft).map(
         block => blockCache.get(block) as DOMRect

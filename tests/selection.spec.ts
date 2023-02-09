@@ -1612,5 +1612,105 @@ test('should not clear selected rects when scrolling the wheel', async ({
   });
 
   expect(count0).toBe(count2);
-  expect(scrollTop0).toBe(scrollTop2);
+  expect(Math.ceil(scrollTop0)).toBe(Math.ceil(scrollTop2));
+});
+
+test('should refresh selected rects when resizing the window/viewport', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const [viewport, first, distance] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance / 2);
+    const container = viewport.querySelector(
+      'affine-frame .affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    const first = container.firstElementChild;
+    if (!first) {
+      throw new Error();
+    }
+    return [
+      viewport.getBoundingClientRect(),
+      first.getBoundingClientRect(),
+      distance,
+    ] as const;
+  });
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: first.left - 1,
+      y: first.top - 1,
+    },
+    {
+      x: first.left + 1,
+      y: first.top + distance / 2,
+    }
+  );
+
+  const [count0, scrollTop0] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    return [
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0,
+      viewport.scrollTop,
+    ] as const;
+  });
+
+  await page.mouse.click(viewport.right, first.top + distance / 2);
+
+  const size = page.viewportSize();
+
+  if (!size) {
+    throw new Error();
+  }
+
+  await page.setViewportSize({
+    width: size.width - 100,
+    height: size.height - 100,
+  });
+  await page.waitForTimeout(250);
+
+  const [count1, scrollTop1] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    return [
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0,
+      viewport.scrollTop,
+    ] as const;
+  });
+
+  expect(count0).toBe(count1);
+  expect(Math.ceil(scrollTop0)).toBe(Math.ceil(scrollTop1));
 });

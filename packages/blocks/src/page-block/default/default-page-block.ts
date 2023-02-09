@@ -290,7 +290,9 @@ export class DefaultPageBlockComponent
     }
   };
 
-  private _onResize = () => {
+  // See https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
+  // May need optimization
+  private _onResize = (_: Event) => {
     this.selection.refreshSelectedBlocksRects();
   };
 
