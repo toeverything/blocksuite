@@ -205,13 +205,10 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
       break;
     }
     case 'block': {
-      page.captureSync();
-      const models = [] as BaseBlockModel[];
-      for (const block of selection.state.selectedBlocks) {
-        const model = getModelByElement(block);
-        models.push(model);
-      }
-      handleMultiBlockIndent(page, models);
+      handleMultiBlockIndent(
+        page,
+        selection.state.selectedBlocks.map(block => getModelByElement(block))
+      );
 
       const cachedSelectedBlocks = selection.state.selectedBlocks.concat();
       requestAnimationFrame(() => {
