@@ -378,15 +378,18 @@ export class DefaultSelectionManager {
     rects?: DOMRect[],
     pageSelectionType?: PageSelectionType
   ) => {
+    this.state.selectedBlocks = selectedBlocks;
+    this.state.type = pageSelectionType ?? this.state.type;
+
     // if (!selectedBlocks.length) {
     //   return this.clearRects();
     // }
-    this.state.selectedBlocks = selectedBlocks;
 
     if (rects) {
       this._signals.updateSelectedRects.emit(rects);
       return;
     }
+
     const calculatedRects = [] as DOMRect[];
     let newStateType: PageSelectionType = pageSelectionType ?? 'native';
     const isOnlyBlock = selectedBlocks.length === 1;
