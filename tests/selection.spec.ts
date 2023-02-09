@@ -1173,7 +1173,7 @@ test('should keep selection state when scrolling forward', async ({ page }) => {
   });
 
   expect(total).toBe(3 + 5 + 3);
-  expect(Math.ceil(scrollTop)).toBe(distance);
+  expect(scrollTop).toBeCloseTo(distance);
 });
 
 // ↑
@@ -1294,7 +1294,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
 
   expect(count0).toBe(count1);
   expect(scrollTop0).toBe(0);
-  expect(Math.ceil(scrollTop1)).toBe(distance);
+  expect(scrollTop1).toBeCloseTo(distance);
 });
 
 // ↓
@@ -1413,7 +1413,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   });
 
   expect(count0).toBe(count1);
-  expect(Math.ceil(scrollTop0)).toBe(distance);
+  expect(scrollTop0).toBeCloseTo(distance);
   expect(scrollTop1).toBe(0);
 });
 
@@ -1502,9 +1502,9 @@ test('should not clear selected rects when clicking on scrollbar', async ({
   });
 
   expect(count0).toBeGreaterThan(0);
-  expect(Math.floor(scrollTop0)).toBe(Math.floor(distance / 2));
+  expect(scrollTop0).toBeCloseTo(distance / 2);
   expect(count0).toBe(count1);
-  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop1));
+  expect(scrollTop0).toBeCloseTo(scrollTop1);
 });
 
 test('should not clear selected rects when scrolling the wheel', async ({
@@ -1593,9 +1593,9 @@ test('should not clear selected rects when scrolling the wheel', async ({
   });
 
   expect(count0).toBeGreaterThan(0);
-  expect(Math.floor(scrollTop0)).toBe(Math.floor(distance / 2));
+  expect(scrollTop0).toBeCloseTo(distance / 2);
   expect(count0).toBe(count1);
-  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop1 + distance / 4));
+  expect(scrollTop0).toBeCloseTo(scrollTop1 + distance / 4);
 
   await page.mouse.wheel(viewport.right, distance / 4);
   await page.waitForTimeout(250);
@@ -1614,7 +1614,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
   });
 
   expect(count0).toBe(count2);
-  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop2));
+  expect(scrollTop0).toBeCloseTo(scrollTop2);
 });
 
 test('should refresh selected rects when resizing the window/viewport', async ({
@@ -1714,5 +1714,5 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   });
 
   expect(count0).toBe(count1);
-  expect(Math.floor(scrollTop0)).toBe(Math.floor(scrollTop1));
+  expect(scrollTop0).toBeCloseTo(scrollTop1);
 });
