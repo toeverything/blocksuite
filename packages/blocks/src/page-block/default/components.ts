@@ -51,7 +51,13 @@ export function FrameSelectionRect(rect: DOMRect | null) {
   `;
 }
 
-export function EmbedSelectedRectsContainer(rects: DOMRect[]) {
+export function EmbedSelectedRectsContainer(
+  rects: { left: number; top: number; width: number; height: number }[],
+  scroll: {
+    left: number;
+    top: number;
+  }
+) {
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
@@ -64,8 +70,8 @@ export function EmbedSelectedRectsContainer(rects: DOMRect[]) {
         const style = {
           position: 'absolute',
           display: 'block',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
+          left: scroll.left + rect.left + 'px',
+          top: scroll.top + rect.top + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };

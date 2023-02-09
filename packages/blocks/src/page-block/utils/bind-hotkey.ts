@@ -3,7 +3,10 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { hotkey } from '../../__internal__/index.js';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
+import {
+  handleMultiBlockIndent,
+  isAtLineEdge,
+} from '../../__internal__/rich-text/rich-text-operations.js';
 import {
   asyncFocusRichText,
   focusNextBlock,
@@ -205,6 +208,7 @@ export function bindHotkeys(
     LEFT,
     RIGHT,
     ENTER,
+    TAB,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -340,6 +344,30 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
+  hotkey.addListener(TAB, () => {
+    // native selection
+    if (selection.state.type === 'native') {
+      const range = getCurrentRange();
+      const start = range.startContainer;
+      const end = range.endContainer;
+      const startModel = getModelByElement(start.parentElement as HTMLElement);
+      const endModel = getModelByElement(end.parentElement as HTMLElement);
+      if (startModel && endModel) {
+        let currentModel: BaseBlockModel | null = startModel;
+        const models: BaseBlockModel[] = [];
+        while (currentModel) {
+          const next = page.getNextSibling(currentModel);
+          models.push(currentModel);
+          if (currentModel.id === endModel.id) {
+            break;
+          }
+          currentModel = next;
+        }
+        handleMultiBlockIndent(page, models);
+      }
+    }
+  });
+
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
   });
@@ -365,5 +393,6 @@ export function removeHotkeys() {
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
     HOTKEYS.ENTER,
+    HOTKEYS.TAB,
   ]);
 }
