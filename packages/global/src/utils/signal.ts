@@ -16,7 +16,7 @@ export class Signal<T = void> implements Disposable {
     handler: (e: WindowEventMap[N]) => void,
     options?: boolean | AddEventListenerOptions
   ): Disposable;
-  static disposableListener<N extends keyof HTMLElementEventMap>(
+  static disposableListener<N extends keyof DocumentEventMap>(
     element: Document,
     eventName: N,
     handler: (e: DocumentEventMap[N]) => void,
