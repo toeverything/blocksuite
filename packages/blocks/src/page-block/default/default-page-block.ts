@@ -422,7 +422,7 @@ export class DefaultPageBlockComponent
     );
   };
 
-  updateViewPortState() {
+  updateViewportState() {
     const viewport = this.defaultViewportElement;
     const { scrollLeft, scrollTop, scrollHeight, clientHeight } = viewport;
     const { top, left } = viewport.getBoundingClientRect();
@@ -488,7 +488,7 @@ export class DefaultPageBlockComponent
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
           if (target === this.defaultViewportElement) {
-            this.updateViewPortState();
+            this.updateViewportState();
             this.selection.refreshSelectedBlocksRects();
             break;
           }

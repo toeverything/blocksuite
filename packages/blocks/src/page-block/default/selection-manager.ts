@@ -474,7 +474,7 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
-    this._container.updateViewPortState();
+    this._container.updateViewportState();
     const { scrollLeft, scrollTop } = this._container.viewportState;
     this.state.resetStartPoint(e, {
       scrollTop,
