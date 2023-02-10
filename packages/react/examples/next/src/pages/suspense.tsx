@@ -36,18 +36,13 @@ const promise = new Promise<Page>(resolve => {
 let pagePromiseLike: Promise<Page> | Page = promise;
 
 const Loading = () => {
-  console.log('loading');
   return <div>Loading editor after 5 seconds...</div>;
-};
-
-const PromiseEditor = () => {
-  return <Editor page={() => pagePromiseLike} />;
 };
 
 const SuspensePage = () => {
   return (
     <Layout>
-      <PromiseEditor />
+      <Editor page={() => pagePromiseLike} />
     </Layout>
   );
 };
