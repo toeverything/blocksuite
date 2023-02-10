@@ -1,9 +1,9 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import { DisposableGroup, Signal } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { menuGroups, SlashItem } from './config.js';
 import { styles } from './styles.js';
@@ -44,13 +44,16 @@ export class SlashMenu extends LitElement {
 
   private _searchString = '';
 
-  // Just a temp variable
-  private _richText?: RichText;
+  private _disposableGroup = new DisposableGroup();
 
   override connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('keydown', this._escapeListener);
-    window.addEventListener('mousedown', this._clickAwayListener);
+    this._disposableGroup.add(
+      Signal.disposableListener(window, 'keydown', this._escapeListener)
+    );
+    this._disposableGroup.add(
+      Signal.disposableListener(window, 'mousedown', this._clickAwayListener)
+    );
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -60,21 +63,20 @@ export class SlashMenu extends LitElement {
       );
       return;
     }
-    this._richText = richText;
-    richText.addEventListener('keydown', this._keyDownListener, {
-      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-      capture: true,
-    });
-    richText.addEventListener('focusout', this._clickAwayListener);
+    this._disposableGroup.add(
+      Signal.disposableListener(richText, 'keydown', this._keyDownListener, {
+        // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
+        capture: true,
+      })
+    );
+    this._disposableGroup.add(
+      Signal.disposableListener(richText, 'focusout', this._clickAwayListener)
+    );
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener('keydown', this._escapeListener);
-    this._richText?.removeEventListener('keydown', this._keyDownListener, {
-      capture: true,
-    });
-    this._richText?.removeEventListener('focusout', this._clickAwayListener);
+    this._disposableGroup.dispose();
   }
 
   // Handle click outside
