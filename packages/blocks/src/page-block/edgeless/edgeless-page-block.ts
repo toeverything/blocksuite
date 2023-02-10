@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import './toolbar';
+import './toolbar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import { SurfaceManager } from '@blocksuite/phasor';
