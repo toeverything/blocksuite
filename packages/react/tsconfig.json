@@ -1,10 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // Workaround TS error about "The inferred type of 'xxx' cannot be named without a reference to 'xxx'"
-    // For more detail see https://github.com/microsoft/TypeScript/issues/42873#issuecomment-906308997
     "baseUrl": ".",
-    "rootDir": "./src/",
     "outDir": "./dist/",
     "jsx": "react-jsx",
     "noEmit": false

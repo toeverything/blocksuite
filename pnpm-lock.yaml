@@ -208,12 +208,12 @@ importers:
       react-dom: ^18.2.0
       zustand: ^4.3.2
     dependencies:
-      '@blocksuite/blocks': link:../blocks
-      '@blocksuite/editor': link:../editor
       '@blocksuite/global': link:../global
-      '@blocksuite/store': link:../store
       zustand: 4.3.2_react@18.2.0
     devDependencies:
+      '@blocksuite/blocks': link:../blocks
+      '@blocksuite/editor': link:../editor
+      '@blocksuite/store': link:../store
       '@types/react': 18.0.27
       '@types/react-dom': 18.0.10
       react: 18.2.0
