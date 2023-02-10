@@ -141,6 +141,9 @@ export class SlashMenu extends LitElement {
     const configLen = this._filterItems.length;
     switch (e.key) {
       case 'Enter': {
+        if (e.isComposing) {
+          return;
+        }
         this._handleItemClick(this._activeItemIndex);
         break;
       }
