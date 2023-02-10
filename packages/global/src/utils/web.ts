@@ -1,6 +1,10 @@
 export const isWeb = typeof window !== 'undefined';
 export const isFirefox =
   isWeb && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+export const isSafari =
+  isWeb &&
+  !isFirefox &&
+  navigator.userAgent.toLowerCase().indexOf('safari') > -1;
 
 declare global {
   interface Document {

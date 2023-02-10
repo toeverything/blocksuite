@@ -3,7 +3,11 @@ import {
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
 } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  isSafari,
+  matchFlavours,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { PrelimText } from '@blocksuite/store';
 
@@ -235,13 +239,12 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   let blockRect: DOMRect | null = null;
   let detectRect: DOMRect | null = null;
   if (hasOptionBar(block)) {
-    blockRect = getBlockWithOptionBarRect(
-      hoverDom,
-      block
-    ).getBoundingClientRect();
+    blockRect = getBoundingClientRectCompatibleWithSafari(
+      getBlockWithOptionBarRect(hoverDom, block)
+    );
     detectRect = getDetectRect(block, blockRect);
   } else {
-    blockRect = hoverDom.getBoundingClientRect() as DOMRect;
+    blockRect = getBoundingClientRectCompatibleWithSafari(hoverDom) as DOMRect;
     if (block.flavour === 'affine:database') {
       // in a database block, `.affine-database-block-title` which is its own editing area
       detectRect = hoverDom
@@ -507,3 +510,9 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
     },
   });
 }
+
+// See https://github.com/toeverything/blocksuite/issues/902
+export const getBoundingClientRectCompatibleWithSafari = isSafari
+  ? (block: Element): DOMRect =>
+      (block.firstElementChild || block).getBoundingClientRect()
+  : (block: Element): DOMRect => block.getBoundingClientRect();

@@ -4,6 +4,7 @@ import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config
 import {
   assertExists,
   caretRangeFromPoint,
+  isSafari,
   matchFlavours,
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
@@ -43,6 +44,7 @@ import { EmbedResizeManager } from './embed-resize-manager.js';
 import {
   getAllowSelectedBlocks,
   getBlockEditingStateByPosition,
+  getBoundingClientRectCompatibleWithSafari,
 } from './utils.js';
 
 function calcDepth(left: number, containerLeft: number) {
@@ -182,7 +184,7 @@ function filterSelectedBlockByIndex(
 function clearSubtree(selectedBlocks: Element[], left: number) {
   return selectedBlocks.filter((block, index) => {
     if (index === 0) return true;
-    const currentLeft = block.getBoundingClientRect().left;
+    const currentLeft = getBoundingClientRectCompatibleWithSafari(block).left;
     if (currentLeft > left) {
       return false;
     } else if (currentLeft < left) {
@@ -298,7 +300,7 @@ export class PageSelectionState {
     this._blockCache.clear();
     const allBlocks = getAllBlocks();
     for (const block of allBlocks) {
-      const rect = block.getBoundingClientRect();
+      const rect = getBoundingClientRectCompatibleWithSafari(block);
       this._blockCache.set(block, rect);
     }
   }
@@ -420,7 +422,7 @@ export class DefaultSelectionManager {
 
     const calculatedRects = [] as DOMRect[];
     for (const block of selectedBlocks) {
-      calculatedRects.push(block.getBoundingClientRect());
+      calculatedRects.push(getBoundingClientRectCompatibleWithSafari(block));
     }
 
     const newSelectionType = this._computeSelectionType(
@@ -831,7 +833,7 @@ export class DefaultSelectionManager {
   getBlockWithIndexByElement(blockElement: Element) {
     const entries = Array.from(this.state.blockCache.entries());
     const len = entries.length;
-    const boundRect = blockElement.getBoundingClientRect();
+    const boundRect = getBoundingClientRectCompatibleWithSafari(blockElement);
     const top = boundRect.top;
 
     if (!boundRect) return null;
