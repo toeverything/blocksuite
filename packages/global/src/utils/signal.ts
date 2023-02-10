@@ -16,6 +16,12 @@ export class Signal<T = void> implements Disposable {
     handler: (e: WindowEventMap[N]) => void,
     options?: boolean | AddEventListenerOptions
   ): Disposable;
+  static disposableListener<N extends keyof DocumentEventMap>(
+    element: Document,
+    eventName: N,
+    handler: (e: DocumentEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): Disposable;
   static disposableListener<N extends keyof HTMLElementEventMap>(
     element: HTMLElement,
     eventName: N,
@@ -23,7 +29,7 @@ export class Signal<T = void> implements Disposable {
     eventOptions?: boolean | AddEventListenerOptions
   ): Disposable;
   static disposableListener(
-    element: HTMLElement | Window,
+    element: HTMLElement | Window | Document,
     eventName: string,
     handler: (e: Event) => void,
     eventOptions?: boolean | AddEventListenerOptions

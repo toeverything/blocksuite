@@ -8,7 +8,12 @@ import {
   RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
-import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  DisposableGroup,
+  isFirefox,
+  Signal,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, TemplateResult } from 'lit';
 import {
@@ -105,8 +110,10 @@ export class BlockHub extends NonShadowLitElement {
   private _cursor: number | null = 0;
   private _timer: number | null = null;
   private _delay = 200;
-  private readonly enable_database: boolean;
+  private readonly _enable_database: boolean;
+  private _mouseRoot: HTMLElement;
   private _topDistance = 24;
+  private _disposables: DisposableGroup = new DisposableGroup();
 
   static styles = css`
     affine-block-hub {
@@ -304,11 +311,13 @@ export class BlockHub extends NonShadowLitElement {
   `;
 
   constructor(options: {
+    mouseRoot: HTMLElement;
     enable_database: boolean;
     onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
   }) {
     super();
-    this.enable_database = options.enable_database;
+    this._mouseRoot = options.mouseRoot;
+    this._enable_database = options.enable_database;
     this.getAllowedBlocks = () => {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
@@ -318,96 +327,108 @@ export class BlockHub extends NonShadowLitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addEventListener('dragstart', this._onDragStart);
-    this.addEventListener('drag', this._onDrag);
-    this.addEventListener('dragend', this._onDragEnd);
+    const disposables = this._disposables;
+    disposables.add(
+      Signal.disposableListener(this, 'dragstart', this._onDragStart)
+    );
+    disposables.add(Signal.disposableListener(this, 'drag', this._onDrag));
+    disposables.add(
+      Signal.disposableListener(this, 'dragend', this._onDragEnd)
+    );
 
-    document.addEventListener('dragover', this._onDragOver);
-    document.addEventListener('drop', this._onDrop);
+    disposables.add(
+      Signal.disposableListener(this._mouseRoot, 'dragover', this._onDragOver)
+    );
+    disposables.add(
+      Signal.disposableListener(this._mouseRoot, 'drop', this._onDrop)
+    );
     isFirefox &&
-      document.addEventListener('dragover', this._onDragOverDocument);
-    this.addEventListener('mousedown', this._onMouseDown);
+      disposables.add(
+        Signal.disposableListener(
+          this._mouseRoot,
+          'dragover',
+          this._onDragOverDocument
+        )
+      );
+    disposables.add(
+      Signal.disposableListener(this, 'mousedown', this._onMouseDown)
+    );
     this._onResize();
   }
 
   protected firstUpdated() {
+    const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
-      card.addEventListener('mousedown', this._onCardMouseDown);
-      card.addEventListener('mouseup', this._onCardMouseUp);
+      disposables.add(
+        Signal.disposableListener(card, 'mousedown', this._onCardMouseDown)
+      );
+      disposables.add(
+        Signal.disposableListener(card, 'mouseup', this._onCardMouseUp)
+      );
     });
     for (const blockHubMenu of this._blockHubMenus) {
-      blockHubMenu.addEventListener('mouseover', this._onBlockHubMenuMouseOver);
+      disposables.add(
+        Signal.disposableListener(
+          blockHubMenu,
+          'mouseover',
+          this._onBlockHubMenuMouseOver
+        )
+      );
       if (blockHubMenu.getAttribute('type') === 'blank') {
-        blockHubMenu.addEventListener('mousedown', this._onBlankMenuMouseDown);
-        blockHubMenu.addEventListener('mouseup', this._onBlankMenuMouseUp);
+        disposables.add(
+          Signal.disposableListener(
+            blockHubMenu,
+            'mousedown',
+            this._onBlankMenuMouseDown
+          )
+        );
+        disposables.add(
+          Signal.disposableListener(
+            blockHubMenu,
+            'mouseup',
+            this._onBlankMenuMouseUp
+          )
+        );
       }
     }
-    this._blockHubMenuEntry.addEventListener(
-      'mouseover',
-      this._onBlockHubEntryMouseOver
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubMenuEntry,
+        'mouseover',
+        this._onBlockHubEntryMouseOver
+      )
     );
-
-    document.addEventListener('click', this._onClick);
-    this._blockHubButton.addEventListener('click', this._onBlockHubButtonClick);
+    disposables.add(
+      Signal.disposableListener(document, 'click', this._onClick)
+    );
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubButton,
+        'click',
+        this._onBlockHubButtonClick
+      )
+    );
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubIconsContainer,
+        'transitionstart',
+        this._onTransitionStart
+      )
+    );
+    disposables.add(
+      Signal.disposableListener(window, 'resize', this._onResize)
+    );
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
     if (!this._indicator) {
       this._indicatorHTMLTemplate = html` <affine-drag-indicator></affine-drag-indicator>`;
     }
-    this._blockHubIconsContainer.addEventListener(
-      'transitionstart',
-      this._onTransitionStart
-    );
-    window.addEventListener('resize', this._onResize);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener('dragstart', this._onDragStart);
-    this.removeEventListener('drag', this._onDrag);
-    this.removeEventListener('dragend', this._onDragEnd);
-
-    // FIXME: do not listen on the document
-    document.removeEventListener('dragover', this._onDragOver);
-    document.removeEventListener('drop', this._onDrop);
-    isFirefox &&
-      document.removeEventListener('dragover', this._onDragOverDocument);
-    this.removeEventListener('mousedown', this._onMouseDown);
-    window.removeEventListener('resize', this._onResize);
-
-    if (this.hasUpdated) {
-      this._blockHubCards.forEach(card => {
-        card.removeEventListener('mousedown', this._onCardMouseDown);
-        card.removeEventListener('mouseup', this._onCardMouseUp);
-      });
-      for (const blockHubMenu of this._blockHubMenus) {
-        blockHubMenu.removeEventListener(
-          'mouseover',
-          this._onBlockHubMenuMouseOver
-        );
-        if (blockHubMenu.getAttribute('type') === 'blank') {
-          blockHubMenu.removeEventListener(
-            'mousedown',
-            this._onBlankMenuMouseDown
-          );
-          blockHubMenu.removeEventListener('mouseup', this._onBlankMenuMouseUp);
-        }
-      }
-      this._blockHubMenuEntry.removeEventListener(
-        'mouseover',
-        this._onBlockHubEntryMouseOver
-      );
-      document.removeEventListener('click', this._onClick);
-      this._blockHubButton.removeEventListener(
-        'click',
-        this._onBlockHubButtonClick
-      );
-      this._blockHubIconsContainer.removeEventListener(
-        'transitionstart',
-        this._onTransitionStart
-      );
-    }
+    this._disposables.dispose();
   }
 
   /**
@@ -442,7 +463,7 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   private _blockHubMenuTemplate = () => {
-    const menuNum = this.enable_database ? 4 : 3;
+    const menuNum = this._enable_database ? 4 : 3;
     const height = menuNum * 44 + 10;
     return html`
       <div
@@ -485,7 +506,7 @@ export class BlockHub extends NonShadowLitElement {
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
           ${BulletedListIconLarge}
         </div>
-        ${this.enable_database
+        ${this._enable_database
           ? html`
               <div
                 class="block-hub-icon-container has-tool-tip"
