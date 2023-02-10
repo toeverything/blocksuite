@@ -38,6 +38,7 @@ import {
 import type {
   DefaultPageBlockComponent,
   DefaultPageSignals,
+  ViewportState,
 } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import {
@@ -76,6 +77,8 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
 // See https://github.com/toeverything/blocksuite/pull/904 and
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
 // for more context.
+//
+// The `selectionRect` is a rect of drag-and-drop selection.
 //
 // TODO: checks the parent by `contains` method
 function filterSelectedBlockWithoutSubtree(
@@ -133,12 +136,16 @@ function filterSelectedBlockWithoutSubtree(
   return results;
 }
 
-// find the current focused block and its substree
+// Find the current focused block and its substree.
+// The `selectionRect` is a rect of block element.
 function filterSelectedBlockByIndex(
   blockCache: Map<Element, DOMRect>,
   focusedBlockIndex: number,
   selectionRect: DOMRect,
-  offset: IPoint
+  offset: IPoint = {
+    x: 0,
+    y: 0,
+  }
 ): Element[] {
   // SELECT_ALL
   if (focusedBlockIndex === -1) {
@@ -208,8 +215,7 @@ function findBlocksWithSubtree(
       ...filterSelectedBlockByIndex(
         blockCache,
         index,
-        blockCache.get(block) as DOMRect,
-        { x: 0, y: 0 }
+        blockCache.get(block) as DOMRect
       )
     );
   }
@@ -300,10 +306,15 @@ export class PageSelectionState {
 
   resetStartPoint(
     e: SelectionEvent,
-    offset: { x: number; y: number } = { x: 0, y: 0 }
+    offset: { scrollLeft: number; scrollTop: number } = {
+      scrollLeft: 0,
+      scrollTop: 0,
+    }
   ) {
-    const x = offset.x + e.x;
-    const y = offset.y + e.y;
+    const { scrollLeft, scrollTop } = offset;
+    let { x, y } = e;
+    x += scrollLeft;
+    y += scrollTop;
     this._startPoint = { x, y };
     this._endPoint = { x, y };
   }
@@ -403,15 +414,6 @@ export class DefaultSelectionManager {
     return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
   }
 
-  private get _containerOffset() {
-    const containerRect = this._mouseRoot.getBoundingClientRect();
-    const containerOffset = {
-      x: containerRect.left,
-      y: containerRect.top,
-    };
-    return containerOffset;
-  }
-
   private _computeSelectionType(
     selectedBlocks: Element[],
     selectionType?: PageSelectionType
@@ -472,10 +474,11 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
-    const { scrollTop, scrollLeft } = this._container.defaultViewportElement;
+    this._container.updateViewPortState();
+    const { scrollLeft, scrollTop } = this._container.viewportState;
     this.state.resetStartPoint(e, {
-      x: scrollLeft,
-      y: scrollTop,
+      scrollTop,
+      scrollLeft,
     });
     this.state.refreshBlockRectCache();
     resetNativeSelection(null);
@@ -485,12 +488,13 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
     const { x, y } = e;
-    this.state.setEndPoint({ x, y });
 
-    const viewport = this._container.defaultViewportElement;
-    const { scrollHeight, clientHeight, scrollLeft } = viewport;
-    let { scrollTop } = viewport;
+    const { defaultViewportElement: viewport, viewportState } = this._container;
+    const { scrollHeight, clientHeight, scrollLeft } = viewportState;
+    let { scrollTop } = viewportState;
     const max = scrollHeight - clientHeight;
+
+    this.state.setEndPoint({ x: x + scrollLeft, y: y + scrollTop });
 
     const { startPoint, endPoint } = this.state;
 
@@ -510,38 +514,26 @@ export class DefaultSelectionManager {
       // speed easeOutQuad + easeInQuad
       if (Math.ceil(scrollTop) < max && clientHeight - y < this._thresold) {
         // ↓
+        auto = Math.ceil(scrollTop) < max;
         const d = (this._thresold - (clientHeight - y)) * 0.25;
         scrollTop += d;
-        viewport.scrollTop += d;
-        auto = Math.ceil(scrollTop) < max;
-
-        this.updateSelectionRect(startPoint, endPoint, {
-          scrollLeft,
-          scrollTop: Math.min(scrollTop, max),
-        });
+        endPoint.y += d;
+        viewportState.scrollTop += d;
+        viewport.scrollTop = viewportState.scrollTop;
+        this.updateSelectionRect(startPoint, endPoint);
       } else if (scrollTop > 0 && y < this._thresold) {
         // ↑
+        auto = scrollTop > 0;
         const d = (y - this._thresold) * 0.25;
         scrollTop += d;
-        viewport.scrollTop += d;
-        auto = scrollTop > 0;
-
-        this.updateSelectionRect(startPoint, endPoint, {
-          scrollLeft,
-          scrollTop: Math.max(scrollTop, 0),
-        });
+        endPoint.y += d;
+        viewportState.scrollTop += d;
+        viewport.scrollTop = viewportState.scrollTop;
+        this.updateSelectionRect(startPoint, endPoint);
       } else {
         auto = false;
-
-        const selectionRect = this.updateSelectionRect(startPoint, endPoint, {
-          scrollLeft,
-          scrollTop,
-        });
-
-        this.selecting(this.state.blockCache, selectionRect, {
-          scrollLeft,
-          scrollTop,
-        });
+        const selectionRect = this.updateSelectionRect(startPoint, endPoint);
+        this.selecting(this.state.blockCache, selectionRect, viewportState);
       }
     };
 
@@ -827,19 +819,12 @@ export class DefaultSelectionManager {
 
   updateSelectionRect(
     startPoint: { x: number; y: number },
-    endPoint: { x: number; y: number },
-    offset: { scrollLeft: number; scrollTop: number }
+    endPoint: { x: number; y: number }
   ): DOMRect {
     if (this.state.focusedBlockIndex !== -1) {
       this.state.focusedBlockIndex = -1;
     }
-    const selectionRect = createSelectionRect(
-      {
-        x: endPoint.x + offset.scrollLeft,
-        y: endPoint.y + offset.scrollTop,
-      },
-      startPoint
-    );
+    const selectionRect = createSelectionRect(endPoint, startPoint);
     this._signals.updateFrameSelectionRect.emit(selectionRect);
     return selectionRect;
   }
@@ -847,15 +832,16 @@ export class DefaultSelectionManager {
   selecting(
     blockCache: Map<Element, DOMRect>,
     selectionRect: DOMRect,
-    offset: { scrollLeft: number; scrollTop: number }
+    viewportState: ViewportState
   ) {
-    const { scrollLeft, scrollTop } = offset;
+    const { scrollLeft, scrollTop, left, top } = viewportState;
     const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
       blockCache,
       selectionRect,
+      // subtracting the left/top of the container is required.
       {
-        y: scrollTop,
-        x: scrollLeft,
+        y: scrollTop - top,
+        x: scrollLeft - left,
       }
     );
     const rects = selectedBlocksWithoutSubtrees.map(
@@ -868,25 +854,20 @@ export class DefaultSelectionManager {
     );
   }
 
-  refreshSelectionRect(offset: { scrollLeft: number; scrollTop: number }) {
+  refreshSelectionRect(viewportState: ViewportState) {
     if (this.state.type !== 'block') return;
 
     const { blockCache, startPoint, endPoint } = this.state;
 
     if (startPoint && endPoint) {
       this.state.refreshBlockRectCache();
-      const selectionRect = createSelectionRect(
-        {
-          x: endPoint.x + offset.scrollLeft,
-          y: endPoint.y + offset.scrollTop,
-        },
-        startPoint
-      );
-      this.selecting(blockCache, selectionRect, offset);
+      const selectionRect = createSelectionRect(endPoint, startPoint);
+      this.selecting(blockCache, selectionRect, viewportState);
     } else {
       this.state.setStartPoint(null);
       this.state.setEndPoint(null);
       this._signals.updateFrameSelectionRect.emit(null);
+      this.refreshSelectedBlocksRects();
     }
   }
 
@@ -931,8 +912,7 @@ export class DefaultSelectionManager {
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      boundRect,
-      this._containerOffset
+      boundRect
     );
 
     // only current focused-block
@@ -959,8 +939,7 @@ export class DefaultSelectionManager {
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      boundRect,
-      this._containerOffset
+      boundRect
     );
 
     // only current focused-block
@@ -974,11 +953,7 @@ export class DefaultSelectionManager {
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      hitRect,
-      {
-        x: 0,
-        y: 0,
-      }
+      hitRect
     );
 
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {

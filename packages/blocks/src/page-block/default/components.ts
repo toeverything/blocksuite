@@ -16,6 +16,7 @@ import type {
   CodeBlockOption,
   DefaultPageSignals,
   EmbedEditingState,
+  ViewportState,
 } from './default-page-block.js';
 import {
   copyCode,
@@ -53,11 +54,9 @@ export function FrameSelectionRect(rect: DOMRect | null) {
 
 export function EmbedSelectedRectsContainer(
   rects: { left: number; top: number; width: number; height: number }[],
-  scroll: {
-    left: number;
-    top: number;
-  }
+  viewportState: ViewportState
 ) {
+  const { left, top, scrollLeft, scrollTop } = viewportState;
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
@@ -70,8 +69,8 @@ export function EmbedSelectedRectsContainer(
         const style = {
           position: 'absolute',
           display: 'block',
-          left: scroll.left + rect.left + 'px',
-          top: scroll.top + rect.top + 'px',
+          left: rect.left - left + scrollLeft + 'px',
+          top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
@@ -90,11 +89,9 @@ export function EmbedSelectedRectsContainer(
 
 export function SelectedRectsContainer(
   rects: DOMRect[],
-  scroll: {
-    left: number;
-    top: number;
-  }
+  viewportState: ViewportState
 ) {
+  const { left, top, scrollLeft, scrollTop } = viewportState;
   return html`
     <style>
       .affine-page-selected-rects-container > div {
@@ -109,8 +106,8 @@ export function SelectedRectsContainer(
         const style = {
           position: 'absolute',
           display: 'block',
-          left: scroll.left + rect.left + 'px',
-          top: scroll.top + rect.top + 'px',
+          left: rect.left - left + scrollLeft + 'px',
+          top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };

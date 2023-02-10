@@ -48,6 +48,17 @@ export interface EmbedEditingState {
   model: BaseBlockModel;
 }
 
+export interface ViewportState {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+  // scrollWidth: 0,
+  // clientWidth: 0,
+}
+
 export type CodeBlockOption = EmbedEditingState;
 
 export interface DefaultPageSignals {
@@ -146,8 +157,10 @@ export class DefaultPageBlockComponent
    */
   components: {
     dragHandle: DragHandle | null;
+    resizeObserver: ResizeObserver | null;
   } = {
     dragHandle: null,
+    resizeObserver: null,
   };
 
   @property()
@@ -157,9 +170,13 @@ export class DefaultPageBlockComponent
   frameSelectionRect: DOMRect | null = null;
 
   @state()
-  viewportScrollOffset = {
+  viewportState: ViewportState = {
     left: 0,
     top: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+    scrollHeight: 0,
+    clientHeight: 0,
   };
 
   @state()
@@ -258,8 +275,7 @@ export class DefaultPageBlockComponent
       return;
     }
 
-    const { scrollTop, scrollLeft, scrollHeight, clientHeight } =
-      this.defaultViewportElement;
+    const { scrollTop, scrollHeight, clientHeight } = this.viewportState;
     const max = scrollHeight - clientHeight;
     let top = e.deltaY / 2;
     if (top > 0) {
@@ -276,29 +292,29 @@ export class DefaultPageBlockComponent
     if (startPoint && endPoint) {
       e.preventDefault();
 
+      this.viewportState.scrollTop += top;
       // FIXME: need smooth
       this.defaultViewportElement.scrollTop += top;
 
-      this.selection.updateSelectionRect(
-        startPoint,
-        {
-          x: endPoint.x,
-          y: endPoint.y + top,
-        },
-        { scrollLeft, scrollTop }
-      );
+      endPoint.y += top;
+      this.selection.updateSelectionRect(startPoint, endPoint);
+      return;
     }
+
+    // trigger native scroll
   };
 
   // See https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
   // May need optimization
-  private _onResize = (_: Event) => {
-    this.selection.refreshSelectedBlocksRects();
-  };
+  // private _onResize = (_: Event) => {
+  //   this.selection.refreshSelectedBlocksRects();
+  // };
 
   private _onScroll = (e: Event) => {
     const { scrollLeft, scrollTop } = e.target as Element;
-    this.selection.refreshSelectionRect({ scrollLeft, scrollTop });
+    this.viewportState.scrollLeft = scrollLeft;
+    this.viewportState.scrollTop = scrollTop;
+    this.selection.refreshSelectionRect(this.viewportState);
   };
 
   update(changedProperties: Map<string, unknown>) {
@@ -406,12 +422,17 @@ export class DefaultPageBlockComponent
     );
   };
 
-  private _getViewportScrollOffset() {
-    const container = this.defaultViewportElement;
-    const rect = container.getBoundingClientRect();
-    return {
-      left: container.scrollLeft - rect.left,
-      top: container.scrollTop - rect.top,
+  updateViewPortState() {
+    const viewport = this.defaultViewportElement;
+    const { scrollLeft, scrollTop, scrollHeight, clientHeight } = viewport;
+    const { top, left } = viewport.getBoundingClientRect();
+    this.viewportState = {
+      top,
+      left,
+      scrollTop,
+      scrollLeft,
+      scrollHeight,
+      clientHeight,
     };
   }
 
@@ -433,7 +454,6 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateSelectedRects.on(rects => {
-      this.viewportScrollOffset = this._getViewportScrollOffset();
       this.selectedRects = rects;
       this.requestUpdate();
     });
@@ -464,9 +484,23 @@ export class DefaultPageBlockComponent
       tryUpdateFrameSize(this.page, 1);
     });
 
+    const resizeObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => {
+        for (const { target } of entries) {
+          if (target === this.defaultViewportElement) {
+            this.updateViewPortState();
+            this.selection.refreshSelectedBlocksRects();
+            break;
+          }
+        }
+      }
+    );
+    resizeObserver.observe(this.defaultViewportElement);
+    this.components.resizeObserver = resizeObserver;
+
     this.defaultViewportElement.addEventListener('wheel', this._onWheel);
     this.defaultViewportElement.addEventListener('scroll', this._onScroll);
-    window.addEventListener('resize', this._onResize);
+    // window.addEventListener('resize', this._onResize);
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
@@ -488,9 +522,11 @@ export class DefaultPageBlockComponent
 
     removeHotkeys();
     this.selection.dispose();
+    this.components.resizeObserver?.disconnect();
+    this.components.resizeObserver = null;
     this.defaultViewportElement.removeEventListener('wheel', this._onWheel);
     this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
-    window.removeEventListener('resize', this._onResize);
+    // window.removeEventListener('resize', this._onResize);
     window.removeEventListener(
       'compositionstart',
       this._handleCompositionStart
@@ -505,11 +541,11 @@ export class DefaultPageBlockComponent
     const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(
       this.selectedRects,
-      this.viewportScrollOffset
+      this.viewportState
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects,
-      this.viewportScrollOffset
+      this.viewportState
     );
     const embedEditingContainer = EmbedEditingContainer(
       this.embedEditingState,

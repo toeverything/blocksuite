@@ -1878,3 +1878,64 @@ test('should clear native selection before block selection', async ({
   expect(textCount).toBe(0);
   expect(blockCount).toBe(1);
 });
+
+test('should not be misaligned when the editor container has padding or margin', async ({
+  page,
+}) => {
+  await page.locator('body').evaluate(element => {
+    element.style.margin = '50px';
+    element.style.padding = '50px';
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  // `123`, `789`
+  const [first, last] = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const container = viewport.querySelector(
+      'affine-frame .affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    const first = container.firstElementChild;
+    if (!first) {
+      throw new Error();
+    }
+    const last = container.lastElementChild;
+    if (!last) {
+      throw new Error();
+    }
+    return [first.getBoundingClientRect(), last.getBoundingClientRect()];
+  });
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: first.left - 1,
+      y: first.top - 1,
+    },
+    {
+      x: last.left + 1,
+      y: last.top + 1,
+    }
+  );
+
+  const count = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    return (
+      viewport.querySelector('.affine-page-selected-rects-container')?.children
+        .length || 0
+    );
+  });
+
+  expect(count).toBe(3);
+});
