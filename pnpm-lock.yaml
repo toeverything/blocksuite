@@ -137,12 +137,12 @@ importers:
 
   packages/global:
     specifiers:
-      '@blocksuite/icons': 2.1.0-alpha.5
+      '@blocksuite/icons': '=2.1.0-alpha.7'
       ansi-colors: ^4.1.3
       lit: ^2.6.1
       zod: ^3.20.2
     dependencies:
-      '@blocksuite/icons': 2.1.0-alpha.5_lit@2.6.1
+      '@blocksuite/icons': 2.1.0-alpha.7_lit@2.6.1
       ansi-colors: 4.1.3
       zod: 3.20.2
     devDependencies:
@@ -639,8 +639,8 @@ packages:
       to-fast-properties: 2.0.0
     dev: true
 
-  /@blocksuite/icons/2.1.0-alpha.5_lit@2.6.1:
-    resolution: {integrity: sha512-iJIvZFl2TrmoRgwP5N03PWCKH8LHhd4JvAc0Lp/o3p3WjkALp09490zlykxOg/wBRCNRCGbphfrpm9eaCbNJkA==}
+  /@blocksuite/icons/2.1.0-alpha.7_lit@2.6.1:
+    resolution: {integrity: sha512-eDgihw2be6jrlOdFlBPgonxUzHhE793Kaqj5sTmdCiBuc+4fxrKyRwFdU4KHiSb7MSUGcgvjmmyZaaBA7bdqqA==}
     peerDependencies:
       lit: ^2.6.1
       react: ^18.2.0
