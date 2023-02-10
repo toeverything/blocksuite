@@ -9,6 +9,7 @@
     "test:unit:ui": "vitest --ui",
     "build": "tsc"
   },
+  "sideEffects": false,
   "exports": {
     ".": "./index.d.ts",
     "./database": "./src/database.ts",
