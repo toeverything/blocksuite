@@ -343,8 +343,6 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(UP, e => {
-    console.log('e');
-
     handleUp(selection, signals, e);
   });
   hotkey.addListener(DOWN, e => {
