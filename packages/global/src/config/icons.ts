@@ -1,3 +1,4 @@
+import { Bold } from '@blocksuite/icons/auto/24/lit/Bold';
 import { BulletedList } from '@blocksuite/icons/auto/24/lit/BulletedList';
 import { CodeBlock } from '@blocksuite/icons/auto/24/lit/CodeBlock';
 import { DatabaseTableView } from '@blocksuite/icons/auto/24/lit/DatabaseTableView';
@@ -7,11 +8,14 @@ import { Heading3 } from '@blocksuite/icons/auto/24/lit/Heading3';
 import { Heading4 } from '@blocksuite/icons/auto/24/lit/Heading4';
 import { Heading5 } from '@blocksuite/icons/auto/24/lit/Heading5';
 import { Heading6 } from '@blocksuite/icons/auto/24/lit/Heading6';
+import { Italic } from '@blocksuite/icons/auto/24/lit/Italic';
 import { NumberedList } from '@blocksuite/icons/auto/24/lit/NumberedList';
 import { Quote } from '@blocksuite/icons/auto/24/lit/Quote';
 import { RoundedRectangle } from '@blocksuite/icons/auto/24/lit/RoundedRectangle';
+import { StrikeThrough } from '@blocksuite/icons/auto/24/lit/StrikeThrough';
 import { Text } from '@blocksuite/icons/auto/24/lit/Text';
 import { TodoList } from '@blocksuite/icons/auto/24/lit/TodoList';
+import { UnderLine } from '@blocksuite/icons/auto/24/lit/UnderLine';
 import { css, html, svg } from 'lit';
 
 // Use icons from `@blocksuite/icons`
@@ -71,17 +75,12 @@ export const DividerIcon = html`<svg
 
 // Format icons
 
-import { Bold } from '@blocksuite/icons/auto/24/lit/Bold';
 export const BoldIcon = Bold(20);
-
-import { Italic } from '@blocksuite/icons/auto/24/lit/Italic';
 
 export const ItalicIcon = Italic(20);
 
-import { UnderLine } from '@blocksuite/icons/auto/24/lit/UnderLine';
 export const UnderlineIcon = UnderLine(20);
 
-import { StrikeThrough } from '@blocksuite/icons/auto/24/lit/StrikeThrough';
 export const StrikethroughIcon = StrikeThrough(20);
 
 export const InlineCodeIcon = html`<svg
