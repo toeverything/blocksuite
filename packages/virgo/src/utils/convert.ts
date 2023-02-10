@@ -1,7 +1,6 @@
 import type { DeltaInsert } from '../types.js';
 
-// TODO unit test
-function transformDelta(delta: DeltaInsert): (DeltaInsert | '\n')[] {
+export function transformDelta(delta: DeltaInsert): (DeltaInsert | '\n')[] {
   const result: (DeltaInsert | '\n')[] = [];
 
   let tmpString = delta.insert;
@@ -32,7 +31,7 @@ function transformDelta(delta: DeltaInsert): (DeltaInsert | '\n')[] {
 /**
  * convert a delta insert array to chunks, each chunk is a line
  */
-export function deltaInsersToChunks(delta: DeltaInsert[]): DeltaInsert[][] {
+export function deltaInsertsToChunks(delta: DeltaInsert[]): DeltaInsert[][] {
   if (delta.length === 0) {
     return [[]];
   }

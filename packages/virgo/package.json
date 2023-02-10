@@ -6,7 +6,11 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "playwright test"
+    "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:unit:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e"
   },
   "keywords": [],
   "author": "toeverything",
