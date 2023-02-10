@@ -35,7 +35,7 @@
     ]
   },
   "dependencies": {
-    "@blocksuite/icons": "2.1.0-alpha.1",
+    "@blocksuite/icons": "2.1.0-alpha.2",
     "ansi-colors": "^4.1.3",
     "zod": "^3.20.2"
   },
