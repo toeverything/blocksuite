@@ -99,14 +99,14 @@ export class ListBlockComponent extends NonShadowLitElement {
   private get isToggleEnabled() {
     return this.pageAwarenessStore.getFlag('enable_toggle_block');
   }
-  private get blocksWithHiddenChildren() {
-    return this.pageAwarenessStore.getFlag('blocks_with_hidden_children') ?? [];
+  private get blocksWithHiddenChildrenOnPage() {
+    return [...this.model.page.blocksWithHiddenChildren]; // AwarenessStore.getFlag('blocks_with_hidden_children') ?? [];
   }
   private get hasChildren() {
     return !!this.model.children.length;
   }
   private get hasHiddenChildren() {
-    return this.blocksWithHiddenChildren?.includes(this.model.id);
+    return this.blocksWithHiddenChildrenOnPage?.includes(this.model.id);
   }
 
   firstUpdated() {
@@ -130,24 +130,22 @@ export class ListBlockComponent extends NonShadowLitElement {
     if (!this.isToggleEnabled) return;
 
     const currentBlockID = this.model.id;
-    const hiddenBlockListWithoutThis = this.blocksWithHiddenChildren.filter(
-      (eachBlockID: string) => eachBlockID !== currentBlockID
-    );
+    const hiddenBlockListWithoutThis =
+      this.blocksWithHiddenChildrenOnPage.filter(
+        (eachBlockID: string) => eachBlockID !== currentBlockID
+      );
 
     if (
       !(overRide === 'hide') &&
       this.hasChildren &&
       (overRide === 'show' || this.hasHiddenChildren)
     ) {
-      this.pageAwarenessStore.setFlag(
-        'blocks_with_hidden_children',
-        hiddenBlockListWithoutThis // remove current block from the hiddenChildren list
-      );
+      this.model.page.blocksWithHiddenChildren = hiddenBlockListWithoutThis; // remove current block from the hiddenChildren list
     } else {
-      this.pageAwarenessStore.setFlag(
-        'blocks_with_hidden_children',
-        [...hiddenBlockListWithoutThis, currentBlockID] // ensure current block is in the hiddenChildren list
-      );
+      this.model.page.blocksWithHiddenChildren = [
+        ...hiddenBlockListWithoutThis,
+        currentBlockID,
+      ]; // ensure current block is in the hiddenChildren list
     }
     asyncFocusRichText(this.model.page, this.model.id);
     this.requestUpdate();
