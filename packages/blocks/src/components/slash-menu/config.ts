@@ -59,21 +59,22 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
   },
   {
     name: 'Style',
-    items: formatConfig.map(({ name, icon, id }, idx) => ({
-      name,
-      icon,
-      divider: idx === 0,
-      action: ({ model }) => {
-        if (!model.text) {
-          return;
-        }
-        const len = model.text.length;
-        // TODO check if the format is already applied and remove it
-        model.text.format(0, len, {
-          [id]: true,
-        });
-      },
-    })),
+    items: formatConfig
+      .filter(i => !['Link', 'Code'].includes(i.name))
+      .map(({ name, icon, id }, idx) => ({
+        name,
+        icon,
+        divider: idx === 0,
+        action: ({ model }) => {
+          if (!model.text) {
+            return;
+          }
+          const len = model.text.length;
+          model.text.format(0, len, {
+            [id]: true,
+          });
+        },
+      })),
   },
   {
     name: 'List',
