@@ -128,11 +128,17 @@ export function getPreviousBlock(
   return previousBlock;
 }
 
+/**
+ * Note: this method will return `DefaultPageBlockComponent` | `EdgelessPageBlockComponent`!
+ *
+ * @deprecated This method only works in the paper mode!
+ */
 export function getDefaultPageBlock(model: BaseBlockModel) {
   assertExists(model.page.root);
   const page = document.querySelector(
     `[${ATTR}="${model.page.root.id}"]`
   ) as DefaultPageBlockComponent;
+  // | EdgelessPageBlockComponent | null;
   return page;
 }
 
