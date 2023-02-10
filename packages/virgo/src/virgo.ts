@@ -5,7 +5,7 @@ import { BaseText } from './components/base-text.js';
 import { VirgoLine } from './components/virgo-line.js';
 import { ZERO_WIDTH_SPACE } from './constant.js';
 import type { DeltaInsert, TextAttributes, TextElement } from './types.js';
-import { deltaInsersToChunks } from './utils/convert.js';
+import { deltaInsertsToChunks } from './utils/convert.js';
 import { baseRenderElement } from './utils/render.js';
 
 export interface VRange {
@@ -804,7 +804,7 @@ function renderDeltas(
   rootElement: HTMLElement,
   render: (delta: DeltaInsert) => TextElement
 ) {
-  const chunks = deltaInsersToChunks(deltas);
+  const chunks = deltaInsertsToChunks(deltas);
 
   // every chunk is a line
   const lines: VirgoLine[] = [];
