@@ -135,12 +135,7 @@ export function handleBlockSplit(
  *  └─ [ ]
  * ```
  */
-export function handleIndent(
-  page: Page,
-  model: ExtendedModel,
-  offset = 0,
-  needCapture = true
-) {
+export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   const previousSibling = page.getPreviousSibling(model);
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
@@ -149,7 +144,7 @@ export function handleIndent(
 
   const parent = page.getParent(model);
   if (!parent) return;
-  if (needCapture) page.captureSync();
+  page.captureSync();
 
   // 1. backup target block children and remove them from target block
   const children = model.children;
