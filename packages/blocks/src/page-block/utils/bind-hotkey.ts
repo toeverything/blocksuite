@@ -79,7 +79,10 @@ export function removeCommonHotKey() {
   ]);
 }
 
-function handleUp(e: KeyboardEvent, selection?: DefaultSelectionManager) {
+export function handleUp(
+  e: KeyboardEvent,
+  selection?: DefaultSelectionManager
+) {
   // Assume the native selection is collapsed
   const hasNativeSelection = !!window.getSelection()?.rangeCount;
   if (hasNativeSelection) {
@@ -140,7 +143,10 @@ function handleUp(e: KeyboardEvent, selection?: DefaultSelectionManager) {
   }
 }
 
-function handleDown(e: KeyboardEvent, selection?: DefaultSelectionManager) {
+export function handleDown(
+  e: KeyboardEvent,
+  selection?: DefaultSelectionManager
+) {
   // Assume the native selection is collapsed
   const hasNativeSelection = !!window.getSelection()?.rangeCount;
   if (hasNativeSelection) {
