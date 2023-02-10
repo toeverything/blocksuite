@@ -14,6 +14,7 @@ export const createBlockHub: (
   page: Page
 ) => BlockHub = (editor: EditorContainer, page: Page) => {
   const blockHub = new BlockHub({
+    mouseRoot: editor,
     enable_database: !!page.awarenessStore.getFlag('enable_database'),
     onDropCallback: (e, end) => {
       const dataTransfer = e.dataTransfer;
