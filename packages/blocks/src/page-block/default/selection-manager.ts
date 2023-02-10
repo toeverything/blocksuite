@@ -661,7 +661,7 @@ export class DefaultSelectionManager {
 
   private _onContainerClick = (e: SelectionEvent) => {
     // do nothing when clicking on scrollbar
-    if (e.raw.pageX >= this._container.defaultViewportElement.clientWidth) {
+    if (e.raw.pageX >= this._container.viewportState.clientWidth) {
       return;
     }
 
@@ -807,6 +807,10 @@ export class DefaultSelectionManager {
     this._signals.updateEmbedEditingState.emit(null);
     this._signals.updateEmbedRects.emit([]);
     this.state.clearBlockSelection();
+  }
+
+  clear() {
+    this.state.clear();
   }
 
   dispose() {

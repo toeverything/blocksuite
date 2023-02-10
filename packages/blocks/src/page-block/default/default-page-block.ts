@@ -55,8 +55,8 @@ export interface ViewportState {
   scrollTop: number;
   scrollHeight: number;
   clientHeight: number;
-  // scrollWidth: 0,
-  // clientWidth: 0,
+  clientWidth: number;
+  // scrollWidth: number,
 }
 
 export type CodeBlockOption = EmbedEditingState;
@@ -177,6 +177,7 @@ export class DefaultPageBlockComponent
     scrollTop: 0,
     scrollHeight: 0,
     clientHeight: 0,
+    clientWidth: 0,
   };
 
   @state()
@@ -424,7 +425,8 @@ export class DefaultPageBlockComponent
 
   updateViewportState() {
     const viewport = this.defaultViewportElement;
-    const { scrollLeft, scrollTop, scrollHeight, clientHeight } = viewport;
+    const { scrollLeft, scrollTop, scrollHeight, clientHeight, clientWidth } =
+      viewport;
     const { top, left } = viewport.getBoundingClientRect();
     this.viewportState = {
       top,
@@ -433,6 +435,7 @@ export class DefaultPageBlockComponent
       scrollLeft,
       scrollHeight,
       clientHeight,
+      clientWidth,
     };
   }
 
@@ -521,9 +524,12 @@ export class DefaultPageBlockComponent
     this.components.dragHandle?.remove();
 
     removeHotkeys();
+    this.selection.clear();
     this.selection.dispose();
-    this.components.resizeObserver?.disconnect();
-    this.components.resizeObserver = null;
+    if (this.components.resizeObserver) {
+      this.components.resizeObserver.disconnect();
+      this.components.resizeObserver = null;
+    }
     this.defaultViewportElement.removeEventListener('wheel', this._onWheel);
     this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
     // window.removeEventListener('resize', this._onResize);
