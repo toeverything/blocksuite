@@ -93,7 +93,7 @@ export class EditorContainer extends NonShadowLitElement {
 
     // Question: Why do we prevent this?
     this._disposables.add(
-      Signal.fromEvent(window, 'keydown').on(e => {
+      Signal.disposableListener(window, 'keydown', e => {
         if (e.altKey && e.metaKey && e.code === 'KeyC') {
           e.preventDefault();
         }
@@ -125,13 +125,19 @@ export class EditorContainer extends NonShadowLitElement {
 
     // connect mouse mode event changes
     this._disposables.add(
-      Signal.fromEvent(window, 'affine.switch-mouse-mode').on(({ detail }) => {
-        this.mouseMode = detail;
-      })
+      Signal.disposableListener(
+        window,
+        'affine.switch-mouse-mode',
+        ({ detail }) => {
+          this.mouseMode = detail;
+        }
+      )
     );
 
     this._disposables.add(
-      Signal.fromEvent(window, 'affine:switch-edgeless-display-mode').on(
+      Signal.disposableListener(
+        window,
+        'affine:switch-edgeless-display-mode',
         ({ detail }) => {
           this.showGrid = detail;
         }

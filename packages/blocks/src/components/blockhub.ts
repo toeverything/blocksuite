@@ -386,7 +386,7 @@ export class BlockHub extends NonShadowLitElement {
           blockHubMenu.removeEventListener('mouseup', this._onBlankMenuMouseUp);
         }
       }
-      this._blockHubMenuEntry.addEventListener(
+      this._blockHubMenuEntry.removeEventListener(
         'mouseover',
         this._onBlockHubEntryMouseOver
       );
