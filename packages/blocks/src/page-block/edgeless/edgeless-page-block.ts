@@ -11,7 +11,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   BlockHost,
   focusBlockByModelEdgeless,
-  focusPreviousBlock,
   getNextBlock,
   getPreviousBlock,
   getStartModelBySelection,

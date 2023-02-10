@@ -3,11 +3,7 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 
-import type {
-  DefaultPageBlockComponent,
-  EdgelessPageBlockComponent,
-  SelectedBlock,
-} from '../../index.js';
+import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
 
