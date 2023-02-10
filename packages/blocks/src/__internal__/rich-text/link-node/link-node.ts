@@ -1,3 +1,4 @@
+import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -9,7 +10,6 @@ import {
   showLinkPopover,
 } from '../../../components/link-popover/index.js';
 import { getDefaultPageBlock, getModelByElement } from '../../utils/index.js';
-import { LinkIcon } from './link-icon.js';
 
 @customElement('link-node')
 export class LinkNodeComponent extends LitElement {
@@ -124,7 +124,7 @@ export class LinkNodeComponent extends LitElement {
 
   render() {
     return html`<a href=${this.href} rel="noopener noreferrer" target="_blank"
-      >${LinkIcon}<slot></slot
+      >${FontLinkIcon}<slot></slot
     ></a>`;
   }
 }

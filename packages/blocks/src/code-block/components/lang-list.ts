@@ -1,10 +1,9 @@
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR, SearchIcon } from '@blocksuite/global/config';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { createEvent, NonShadowLitElement } from '../../__internal__/index.js';
-import { SearchIcon } from './icons.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
