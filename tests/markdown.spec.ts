@@ -1,13 +1,12 @@
-import { test } from '@playwright/test';
 import {
-  resetHistory,
   enterPlaygroundRoom,
   focusRichText,
   getCursorBlockIdAndHeight,
   initEmptyParagraphState,
+  resetHistory,
+  type,
   undoByClick,
   undoByKeyboard,
-  type,
 } from './utils/actions/index.js';
 import {
   assertBlockType,
@@ -16,6 +15,7 @@ import {
   assertTextContain,
   assertTextFormat,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('markdown shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);

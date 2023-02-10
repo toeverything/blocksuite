@@ -1,14 +1,16 @@
+import './link-node';
+
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { ParentBlot } from 'parchment';
+
 import { showLinkPopover } from '../../../components/link-popover/index.js';
 import {
   getRichTextByModel,
   getStartModelBySelection,
   isRangeSelection,
 } from '../../utils/index.js';
-import './link-node';
 import { MockSelectNode } from './mock-select-node.js';
-import { assertExists } from '@blocksuite/global/utils';
 
 export async function createLink(page: Page) {
   // TODO may allow user creating a link with text

@@ -1,34 +1,35 @@
-import { test } from '@playwright/test';
-import {
-  assertSelection,
-  assertRichTexts,
-  assertBlockChildrenFlavours,
-  assertBlockChildrenIds,
-  assertClassName,
-  assertBlockType,
-  assertTitle,
-  assertPageTitleFocus,
-  assertStoreMatchJSX,
-  assertKeyboardWorkInInput,
-} from './utils/asserts.js';
 import {
   clickBlockTypeMenuItem,
+  dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
+  initEmptyParagraphState,
+  initThreeParagraphs,
   pressEnter,
-  redoByKeyboard,
   pressShiftEnter,
   pressShiftTab,
+  pressTab,
+  redoByClick,
+  redoByKeyboard,
+  resetHistory,
+  type,
   undoByClick,
   undoByKeyboard,
-  initEmptyParagraphState,
-  dragOverTitle,
-  resetHistory,
-  initThreeParagraphs,
-  redoByClick,
-  pressTab,
-  type,
 } from './utils/actions/index.js';
+import {
+  assertBlockChildrenFlavours,
+  assertBlockChildrenIds,
+  assertBlockType,
+  assertClassName,
+  assertKeyboardWorkInInput,
+  assertPageTitleFocus,
+  assertRichTexts,
+  assertSelection,
+  assertStoreMatchJSX,
+  assertTitle,
+} from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('init paragraph by page title enter at last', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -39,6 +40,13 @@ test('init paragraph by page title enter at last', async ({ page }) => {
 
   await assertTitle(page, 'hello');
   await assertRichTexts(page, ['world', '\n']);
+
+  //#region Fixes: https://github.com/toeverything/blocksuite/issues/1007
+  await page.keyboard.press('ArrowLeft');
+  await focusTitle(page);
+  await pressEnter(page);
+  await assertRichTexts(page, ['\n', 'world', '\n']);
+  //#endregion
 });
 
 test('init paragraph by page title enter in middle', async ({ page }) => {
@@ -303,9 +311,7 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,152]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -334,9 +340,7 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,152]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -374,9 +378,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,72]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -395,9 +397,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -439,9 +439,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,112]"
->
+<affine:frame>
   <affine:paragraph
     prop:text="123"
     prop:type="text"
@@ -531,6 +529,7 @@ test('delete at start of paragraph immediately following list', async ({
   await assertBlockType(page, '5', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '5']);
 
+  await page.waitForTimeout(50);
   await page.keyboard.press('Backspace');
   await assertBlockChildrenIds(page, '1', ['2']);
 
@@ -664,6 +663,39 @@ test('press left in first paragraph start should not change cursor position', as
   await assertTitle(page, '');
 });
 
+test('press arrow down should move caret to the start of line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text('0'.repeat(100)),
+      },
+      frame
+    );
+    page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text('1'),
+      },
+      frame
+    );
+  });
+
+  // Focus the empty child paragraph
+  await focusRichText(page, 1);
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowDown');
+  await type(page, '2');
+  await assertRichTexts(page, ['0'.repeat(100), '21']);
+});
+
 test('press arrow up in the second line should move caret to the first line', async ({
   page,
 }) => {
@@ -672,7 +704,7 @@ test('press arrow up in the second line should move caret to the first line', as
     const { page } = window;
     const pageId = page.addBlockByFlavour('affine:page');
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
-    const delta = Array.from({ length: 100 }, (v, i) => {
+    const delta = Array.from({ length: 120 }, (v, i) => {
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
@@ -702,8 +734,53 @@ test('press arrow up in the second line should move caret to the first line', as
   await page.keyboard.press('ArrowDown', { delay: 50 });
   await type(page, '2');
 
-  await assertRichTexts(page, [
-    '0ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib',
-    '2',
-  ]);
+  await assertRichTexts(page, ['0' + 'ib'.repeat(60), '2']);
+
+  // Go to the start of the second paragraph
+  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await page.keyboard.press('ArrowDown', { delay: 50 });
+  // Should be inserted at the start of the second paragraph
+  await type(page, '3');
+  await assertRichTexts(page, ['0' + 'ib'.repeat(60), '32']);
+});
+
+test('press arrow down in indent line should not move caret to the start of line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const p1 = page.addBlockByFlavour('affine:paragraph', {}, frame);
+    const p2 = page.addBlockByFlavour('affine:paragraph', {}, p1);
+    page.addBlockByFlavour('affine:paragraph', {}, p2);
+    page.addBlockByFlavour(
+      'affine:paragraph',
+      {
+        text: new page.Text('0'),
+      },
+      frame
+    );
+  });
+
+  // Focus the empty child paragraph
+  await focusRichText(page, 2);
+  await page.keyboard.press('ArrowDown');
+  // Now the caret should be at the end of the last paragraph
+  await type(page, '1');
+  await assertRichTexts(page, ['\n', '\n', '\n', '01']);
+
+  await focusRichText(page, 2);
+  // Insert a new long text to wrap the line
+  await page.keyboard.insertText('0'.repeat(100));
+
+  await focusRichText(page, 1);
+  // Through long text
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await type(page, '2');
+  await assertRichTexts(page, ['\n', '\n', '0'.repeat(100), '012']);
 });

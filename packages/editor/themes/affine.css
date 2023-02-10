@@ -1,6 +1,11 @@
+@font-face {
+  font-family: 'color-emoji';
+  src: local('Apple Color Emoji'), local('Segoe UI Emoji'),
+    local('Segoe UI Symbol'), local('Noto Color Emoji');
+  unicode-range: U+1F000-1F644, U+203C-3299;
+}
+
 :root {
-  --affine-zoom: 1;
-  --affine-scale: calc(1 / var(--affine-zoom));
   --affine-theme-mode: light;
   --affine-editor-mode: page;
   --affine-primary-color: #6880ff;
@@ -8,45 +13,60 @@
   --affine-popover-background: #fff;
   --affine-hover-background: #f1f3ff;
   --affine-code-background: #f2f5f9;
+  --affine-tooltip-background: #6880ff;
   --affine-code-block-background: #fafbfd;
-  /* TODO add corresponding variable in AFFINE */
   --affine-block-hub-background: #fbfbfc;
-  /* TODO add corresponding variable in AFFINE */
   --affine-block-hub-hover-background: #f8f9ff;
-  --affine-text-color: #3a4c5c;
+  --affine-text-color: #28293d;
   --affine-edgeless-text-color: #3a4c5c;
   --affine-link-color: #6880ff;
   --affine-link-color2: #6880ff;
   --affine-link-visited-color: #abb8fe;
-  --affine-icon-color: #888a94;
+  --affine-icon-color: #555770;
   --affine-block-handle-color: #c7c3d9;
   --affine-popover-color: #4c6275;
-  --affine-code-color: #48749b;
+  --affine-input-color: #4c6275;
+  --affine-code-color: #517ea6;
   --affine-quote-color: #4c6275;
   --affine-selected-color: rgba(104, 128, 255, 0.1);
-  --affine-placeholder-color: #c7c7c7;
-  --affine-border-color: #d0d7e3;
-  --affine-disable-color: #c0c0c0;
-  --affine-line-number-color: #888a9e;
+  --affine-placeholder-color: #555770;
+  --affine-border-color: #555770;
+  --affine-disable-color: #555770;
+  --affine-tooltip-color: #fff;
+  --affine-line-number-color: #555770;
   --affine-modal-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
     -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   --affine-popover-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
     -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
-  --affine-font-xs: 12px;
-  --affine-font-sm: 16px;
-  --affine-font-base: 18px;
-  --affine-line-height-base: 26px;
+  --affine-tooltip-shadow: 1px 1px 4px rgba(0, 0, 0, 0.14);
+  --affine-font-h1: 28px;
+  --affine-font-h2: 26px;
+  --affine-font-h3: 24px;
+  --affine-font-h4: 22px;
+  --affine-font-h5: 20px;
+  --affine-font-h6: 18px;
+  --affine-font-base: 16px;
+  --affine-font-sm: 14px;
+  --affine-font-xs: 14px;
+  --affine-line-height: calc(1em + 8px);
   --affine-z-index-modal: 1000;
   --affine-z-index-popover: 100;
-  --affine-font-family: Avenir Next, Poppins, apple-system, BlinkMacSystemFont,
+  --affine-font-family: color-emoji, Avenir Next, Poppins, apple-system,
+    BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei,
+    Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Segoe UI Symbol, Noto Color Emoji;
+  --affine-font-number-family: Roboto Mono, apple-system, BlinkMacSystemFont,
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
     Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
-  --affine-font-mono: Space Mono, Consolas, Menlo, Monaco, Courier, monospace;
+  --affine-font-code-family: Space Mono, Consolas, Menlo, Monaco, Courier,
+    monospace, apple-system, BlinkMacSystemFont, Helvetica Neue, Tahoma,
+    PingFang SC, Microsoft Yahei, Arial, Hiragino Sans GB, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   --affine-paragraph-space: 8px;
   --affine-popover-radius: 10px;
+  --affine-editor-width: 720px;
 
-  --affine-tooltip-color: #fff;
-  --affine-tooltip-background: var(--affine-primary-color);
-  --affine-tooltip-shadow: 1px 1px 4px rgba(0, 0, 0, 0.14);
+  --affine-zoom: 1;
+  --affine-scale: calc(1 / var(--affine-zoom));
 }

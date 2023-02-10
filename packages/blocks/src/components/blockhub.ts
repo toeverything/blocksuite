@@ -1,3 +1,15 @@
+import {
+  BLOCKHUB_LIST_ITEMS,
+  BLOCKHUB_TEXT_ITEMS,
+  BlockHubIcon,
+  BulletedListIconLarge,
+  CrossIcon,
+  DatabaseTableViewIcon,
+  RectIcon,
+  TextIconLarge,
+} from '@blocksuite/global/config';
+import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, TemplateResult } from 'lit';
 import {
   customElement,
@@ -6,27 +18,16 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import { NonShadowLitElement } from '../__internal__/index.js';
-import type { DragIndicator } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
-import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
-import {
-  BulletedListIconLarge,
-  CrossIcon,
-  RectIcon,
-  TextIconLarge,
-  BlockHubIcon,
-  BLOCKHUB_LIST_ITEMS,
-  BLOCKHUB_TEXT_ITEMS,
-  DatabaseTableViewIcon,
-} from '@blocksuite/global/config';
-import type { BaseBlockModel } from '@blocksuite/store';
 import {
   getBlockEditingStateByCursor,
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import type { DragIndicator } from './drag-handle.js';
+import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
 
 type BlockHubItem = {
   flavour: string;
@@ -46,6 +47,18 @@ export class BlockHub extends NonShadowLitElement {
    */
   @property()
   public getAllowedBlocks: () => BaseBlockModel[];
+
+  @property()
+  updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
+
+  @property()
+  blockHubStatusUpdated: Signal<boolean> = new Signal<boolean>();
+
+  @property()
+  bottom = 70;
+
+  @property()
+  right = 24;
 
   @state()
   _expanded = false;
@@ -84,7 +97,6 @@ export class BlockHub extends NonShadowLitElement {
   private _blockHubMenuEntry!: HTMLElement;
 
   private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-  private _updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
@@ -92,14 +104,13 @@ export class BlockHub extends NonShadowLitElement {
   private _lastModelState: EditingState | null = null;
   private _cursor: number | null = 0;
   private _timer: number | null = null;
-  private _delay = 200; // ms
-  private enable_database: boolean;
-  private _bottomDistance = 70;
+  private _delay = 200;
+  private readonly enable_database: boolean;
   private _topDistance = 24;
 
   static styles = css`
     affine-block-hub {
-      position: fixed;
+      position: absolute;
       z-index: 1;
     }
 
@@ -166,6 +177,7 @@ export class BlockHub extends NonShadowLitElement {
 
     .affine-block-hub-container .description {
       font-size: var(--affine-font-xs);
+      color: var(---affine-icon-color);
     }
 
     .grabbing {
@@ -191,13 +203,10 @@ export class BlockHub extends NonShadowLitElement {
       flex-flow: column;
       justify-content: center;
       align-items: center;
-      padding: 4px;
+      padding: 0px 4px;
       position: fixed;
-      right: 24px;
       width: 44px;
       background: var(--affine-page-background);
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.04);
       border-radius: 10px;
     }
 
@@ -207,6 +216,8 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       margin-bottom: 8px;
       position: relative;
+      background: var(--affine-page-background);
+      border-radius: 5px;
       fill: var(--affine-line-number-color);
       height: 36px;
     }
@@ -273,29 +284,21 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .block-hub-icons-container {
-      position: relative;
-      opacity: 0;
-      top: 100px;
+      position: absolute;
+      bottom: 100%;
       height: 0px;
+      overflow: hidden;
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
-    }
-
-    .block-hub-icons-container[transition] {
-      opacity: 1;
-      top: 0px;
     }
 
     ${centeredToolTipStyle}
     ${toolTipStyle}
   `;
 
-  constructor(
-    options: {
-      enable_database: boolean;
-      onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-    },
-    updateSelectedRectsSignal?: Signal<DOMRect[]>
-  ) {
+  constructor(options: {
+    enable_database: boolean;
+    onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+  }) {
     super();
     this.enable_database = options.enable_database;
     this.getAllowedBlocks = () => {
@@ -303,9 +306,6 @@ export class BlockHub extends NonShadowLitElement {
       return [];
     };
     this._onDropCallback = options.onDropCallback;
-    updateSelectedRectsSignal &&
-      (this._updateSelectedRectsSignal = updateSelectedRectsSignal);
-    document.body.appendChild(this);
   }
 
   connectedCallback() {
@@ -386,7 +386,7 @@ export class BlockHub extends NonShadowLitElement {
           blockHubMenu.removeEventListener('mouseup', this._onBlankMenuMouseUp);
         }
       }
-      this._blockHubMenuEntry.addEventListener(
+      this._blockHubMenuEntry.removeEventListener(
         'mouseover',
         this._onBlockHubEntryMouseOver
       );
@@ -408,10 +408,6 @@ export class BlockHub extends NonShadowLitElement {
    * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
    */
   private _onTransitionStart = (e: TransitionEvent) => {
-    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
-    if (e.propertyName === 'opacity') {
-      return;
-    }
     if (this._timer) {
       clearTimeout(this._timer);
     }
@@ -419,11 +415,13 @@ export class BlockHub extends NonShadowLitElement {
       // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
       this._blockHubMenuContainer.style.padding = '0px 4px';
       this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.height = '0px';
+        this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
     } else {
-      this._blockHubIconsContainer.style.height = 'unset';
       this._blockHubMenuContainer.style.padding = '4px';
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.overflow = 'unset';
+      }, this._delay);
     }
   };
 
@@ -436,8 +434,14 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   private _blockHubMenuTemplate = () => {
+    const menuNum = this.enable_database ? 4 : 3;
+    const height = menuNum * 44 + 10;
     return html`
-      <div class="block-hub-icons-container" ?transition=${this._expanded}>
+      <div
+        class="block-hub-icons-container"
+        ?transition=${this._expanded}
+        style="height: ${this._expanded ? `${height}px` : '0px'};"
+      >
         <div
           class="block-hub-icon-container has-tool-tip ${this._isGrabbing
             ? 'grabbing'
@@ -561,12 +565,23 @@ export class BlockHub extends NonShadowLitElement {
     }
   };
 
+  public toggleMenu(open: boolean) {
+    if (open) {
+      this._expanded = true;
+    } else {
+      this._expanded = false;
+      this._cardVisibleType = null;
+      this._isCardListVisible = false;
+    }
+  }
+
   private _onBlockHubButtonClick = (e: MouseEvent) => {
     this._expanded = !this._expanded;
     if (!this._expanded) {
       this._cardVisibleType = null;
       this._isCardListVisible = false;
     }
+    this.blockHubStatusUpdated.emit(this._expanded);
   };
 
   private _onDragStart = (event: DragEvent) => {
@@ -586,7 +601,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this._updateSelectedRectsSignal && this._updateSelectedRectsSignal.emit([]);
+    this.updateSelectedRectsSignal && this.updateSelectedRectsSignal.emit([]);
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -698,19 +713,20 @@ export class BlockHub extends NonShadowLitElement {
   private _onResize = () => {
     const boundingClientRect = document.body.getBoundingClientRect();
     this._maxHeight =
-      boundingClientRect.height - this._topDistance - this._bottomDistance;
+      boundingClientRect.height - this._topDistance - this.bottom;
   };
 
   override render() {
     return html`
       <div
         class="block-hub-menu-container"
-        style="bottom: ${this._bottomDistance}px"
+        style="bottom: ${this.bottom}px; right: ${this.right}px;"
       >
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
           role="menu-entry"
+          style="cursor:pointer;"
         >
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip

@@ -1,8 +1,9 @@
+import type { RowHost } from '@blocksuite/global/database';
+import { assertExists } from '@blocksuite/global/utils';
+import { css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import type { RowHost } from '@blocksuite/global/database';
-import { css } from 'lit';
-import { assertExists } from '@blocksuite/global/utils';
+
 import { DatabaseCellLitElement, getTagSchemaRenderer } from '../register.js';
 import { onClickOutside } from '../utils.js';
 

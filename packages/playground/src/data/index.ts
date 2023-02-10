@@ -203,8 +203,8 @@ export const database: InitFn = (workspace: Workspace) => {
       });
 
       const text = new page.YText();
-      text.insert(0, '123', { type: 'base' });
-      text.insert(0, 'code', { type: 'base' });
+      text.insert(0, '123');
+      text.insert(0, 'code');
       page.updateBlockTag(p2, {
         schemaId: 'column3',
         value: text,

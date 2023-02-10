@@ -1,6 +1,7 @@
-import type { PageMeta, Workspace } from '../workspace.js';
-import { LitElement, html, PropertyValues } from 'lit';
+import { html, LitElement, PropertyValues } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+
+import type { PageMeta, Workspace } from '../workspace.js';
 
 @customElement('test-app')
 export class TestApp extends LitElement {

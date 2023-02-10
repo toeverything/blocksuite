@@ -10,7 +10,7 @@
 
 ## Prerequisites
 
-We suggest develop our product under node.js LTS(Long-term support) version
+We suggest develop our product under Node.js LTS(Long-term support) version.
 
 ### Option 1: Manually install node.js
 
@@ -20,7 +20,7 @@ install [Node LTS version](https://nodejs.org/en/download)
 
 ### Option 2: Use node version manager
 
-install [nvm](https://github.com/nvm-sh/nvm)
+Install [nvm](https://github.com/nvm-sh/nvm):
 
 ```sh
 nvm install --lts

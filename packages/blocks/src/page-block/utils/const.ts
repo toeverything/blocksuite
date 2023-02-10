@@ -1,6 +1,3 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { handleFormat } from '../../page-block/utils/index.js';
-import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import {
   BoldIcon,
   InlineCodeIcon,
@@ -9,6 +6,10 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+
+import { createLink } from '../../__internal__/rich-text/link-node/index.js';
+import { handleFormat } from '../../page-block/utils/index.js';
 
 type ActionProps = {
   page: Page;

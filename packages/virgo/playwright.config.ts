@@ -16,4 +16,11 @@ const config: PlaywrightTestConfig = {
   },
 };
 
+if (process.env.CI) {
+  config.webServer = {
+    command: 'pnpm dev',
+    port: 5173,
+  };
+}
+
 export default config;

@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
+
+import { ConsoleMessage, expect, Page } from '@playwright/test';
+
 import type {
   BaseBlockModel,
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
-import { ConsoleMessage, expect, Page } from '@playwright/test';
 import { pressEnter, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
@@ -51,7 +53,7 @@ async function initEmptyEditor(
   await page.evaluate(flags => {
     const { workspace } = window;
 
-    workspace.signals.pageAdded.once(pageId => {
+    workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as StorePage;
       for (const [key, value] of Object.entries(flags)) {
         page.awarenessStore.setFlag(key as keyof typeof flags, value);
@@ -66,6 +68,8 @@ async function initEmptyEditor(
 
       document.body.appendChild(editor);
       document.body.appendChild(debugMenu);
+      const blockHub = await editor.createBlockHub();
+      document.body.appendChild(blockHub);
 
       window.debugMenu = debugMenu;
       window.editor = editor;
@@ -123,6 +127,22 @@ export async function waitEmbedLoaded(page: Page) {
 
 export async function waitNextFrame(page: Page) {
   await page.waitForTimeout(NEXT_FRAME_TIMEOUT);
+}
+
+export async function waitForRemoteUpdateSignal(page: Page) {
+  return page.evaluate(() => {
+    return new Promise<void>(resolve => {
+      const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
+      const debugProvider = window.workspace.providers.find(
+        provider => provider instanceof DebugDocProvider
+      ) as InstanceType<typeof DebugDocProvider>;
+      const callback = window.$blocksuite.blocks.debounce(() => {
+        disposable.dispose();
+        resolve();
+      }, 500);
+      const disposable = debugProvider.remoteUpdateSignal.on(callback);
+    });
+  });
 }
 
 export async function clearLog(page: Page) {
@@ -437,7 +457,10 @@ export async function getIndexCoordinate(
 ) {
   const coord = await page.evaluate(
     ({ richTextIndex, quillIndex, coordOffSet }) => {
-      const richText = document.querySelectorAll('rich-text')[richTextIndex];
+      const richText = document.querySelectorAll('rich-text')[
+        richTextIndex
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
       const quillBound = richText.quill.getBounds(quillIndex);
       const richTextBound = richText.getBoundingClientRect();
       return {

@@ -1,5 +1,5 @@
+import type { BlobOptions, BlobOptionsGetter } from './duplex-provider.js';
 import { DuplexBlobProvider } from './duplex-provider.js';
-import type { BlobOptionsGetter, BlobOptions } from './duplex-provider.js';
 import { BlobStorage } from './storage.js';
 
 const CLOUD_ENDPOINT_GETTER = (k: string) => ({ api: '/api/workspace' }[k]);
@@ -21,5 +21,5 @@ export async function getBlobStorage(
 }
 
 export { BlobStorage } from './storage.js';
-export type { BlobOptionsGetter, BlobOptions };
+export type { BlobOptions, BlobOptionsGetter };
 export { BlobSyncState } from './types.js';

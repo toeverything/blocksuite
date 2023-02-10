@@ -1,34 +1,36 @@
 import './utils/declare-test-window.js';
-import { test } from '@playwright/test';
+
 import {
-  enterPlaygroundRoom,
+  addFrameByClick,
+  captureHistory,
   disconnectByClick,
+  dragBetweenIndices,
+  enterPlaygroundRoom,
+  focusRichText,
+  focusTitle,
+  initEmptyParagraphState,
+  pressEnter,
   redoByClick,
   redoByKeyboard,
-  undoByClick,
-  undoByKeyboard,
-  focusRichText,
-  waitDefaultPageLoaded,
-  pressEnter,
-  addFrameByClick,
-  initEmptyParagraphState,
-  dragBetweenIndices,
   SHORT_KEY,
-  captureHistory,
-  focusTitle,
   switchReadonly,
   type,
+  undoByClick,
+  undoByKeyboard,
+  waitDefaultPageLoaded,
+  waitForRemoteUpdateSignal,
 } from './utils/actions/index.js';
 import {
-  defaultStore,
   assertBlockChildrenIds,
   assertEmpty,
-  assertStore,
-  assertText,
   assertRichTexts,
-  assertTitle,
+  assertStore,
   assertStoreMatchJSX,
+  assertText,
+  assertTitle,
+  defaultStore,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('basic input', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -87,7 +89,7 @@ test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
   await focusRichText(pageA);
-  await pageA.keyboard.type('hello');
+  await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
@@ -111,12 +113,13 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
   await focusRichText(pageB);
+  const signal = waitForRemoteUpdateSignal(pageA);
   await pageB.keyboard.type('hello');
-
+  await signal;
   // wait until pageA content updated
   await assertText(pageA, 'hello');
+  await assertText(pageB, 'hello');
   await Promise.all([
-    assertText(pageB, 'hello'),
     assertStore(pageA, defaultStore),
     assertStore(pageB, defaultStore),
   ]);

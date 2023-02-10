@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -10,5 +11,10 @@ export default defineConfig({
   test: {
     include: ['tests/*.unit.ts'],
     testTimeout: 500,
+    coverage: {
+      provider: 'istanbul', // or 'c8'
+      reporter: ['lcov'],
+      reportsDirectory: '../../.coverage/global',
+    },
   },
 });

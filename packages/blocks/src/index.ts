@@ -13,26 +13,27 @@ import './surface-block';
 import './components/slash-menu';
 import './database-block';
 
-export * from './counter-block/index.js';
-export * from './embed-block/index.js';
-export * from './paragraph-block/index.js';
-export * from './page-block/index.js';
-export * from './list-block/index.js';
-export * from './frame-block/index.js';
+export * from './__internal__/rich-text/rich-text-operations.js';
+export { getServiceOrRegister } from './__internal__/service.js';
+export type { BaseService } from './__internal__/service/index.js';
+export * from './__internal__/utils/common-operations.js';
+export * from './__internal__/utils/lit.js';
+export * from './__internal__/utils/query.js';
+export * as SelectionUtils from './__internal__/utils/selection.js';
+export * from './__internal__/utils/std.js';
+export * from './__internal__/utils/types.js';
 export * from './code-block/index.js';
+export * from './components/index.js';
+export * from './counter-block/index.js';
+export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './embed-block/image/index.js';
+export * from './embed-block/index.js';
+export * from './frame-block/index.js';
+export * from './list-block/index.js';
+export * from './page-block/index.js';
+export * from './paragraph-block/index.js';
 export * from './surface-block/index.js';
-export * from './database-block/index.js';
-export * as SelectionUtils from './__internal__/utils/selection.js';
-export * from './__internal__/utils/types.js';
-export * from './__internal__/utils/common-operations.js';
-export * from './__internal__/utils/std.js';
-export * from './__internal__/utils/query.js';
-export * from './__internal__/utils/lit.js';
-export * from './__internal__/rich-text/rich-text-operations.js';
-export type { BaseService } from './__internal__/service.js';
-export { getServiceOrRegister } from './__internal__/service.js';
 
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'

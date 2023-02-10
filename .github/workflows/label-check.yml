@@ -4,6 +4,8 @@ on:
     types:
       - labeled
       - unlabeled
+    branches:
+      - master
 
 jobs:
   check_labels:

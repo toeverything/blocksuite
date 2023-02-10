@@ -1,17 +1,19 @@
 import './utils/declare-test-window.js';
-import { test, Page, expect } from '@playwright/test';
+
+import { expect, Page } from '@playwright/test';
+
 import {
   activeEmbed,
   dragEmbedResizeByBottomLeft,
   dragEmbedResizeByBottomRight,
   enterPlaygroundRoom,
+  focusRichText,
+  initEmptyParagraphState,
   moveToImage,
   pressEnter,
   redoByKeyboard,
   type,
   undoByKeyboard,
-  focusRichText,
-  initEmptyParagraphState,
 } from './utils/actions/index.js';
 import {
   assertImageOption,
@@ -21,6 +23,7 @@ import {
   assertRichImage,
   assertRichTexts,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 async function initImageState(page: Page) {
   await initEmptyParagraphState(page);

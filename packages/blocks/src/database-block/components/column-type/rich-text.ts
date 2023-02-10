@@ -1,48 +1,16 @@
+import { TextAttributes, VEditor } from '@blocksuite/virgo';
+import { css } from 'lit';
+import { customElement, query } from 'lit/decorators.js';
+import { html, literal } from 'lit/static-html.js';
+
 import {
   DatabaseCellLitElement,
   defineTagSchemaRenderer,
 } from '../../register.js';
-import { customElement, query } from 'lit/decorators.js';
-import { html, literal } from 'lit/static-html.js';
-import {
-  BaseArrtiubtes,
-  BaseText,
-  DeltaInsert,
-  InlineCode,
-  InlineCodeAttributes,
-  TextAttributes,
-  TextElement,
-  VEditor,
-} from '@blocksuite/virgo';
-import { css } from 'lit';
 
-function renderElement(delta: DeltaInsert<TextAttributes>): TextElement {
-  switch (delta.attributes.type) {
-    case 'base': {
-      const baseText = new BaseText();
-      baseText.delta = delta as DeltaInsert<BaseArrtiubtes>;
-      return baseText;
-    }
-    case 'inline-code': {
-      const inlineCode = new InlineCode();
-      inlineCode.delta = delta as DeltaInsert<InlineCodeAttributes>;
-      return inlineCode;
-    }
-
-    default:
-      throw new Error(`Unknown text type: ${delta.attributes.type}`);
-  }
-}
-
-const baseStyle: Array<Exclude<keyof BaseArrtiubtes, 'type'>> = [
-  'bold',
-  'italic',
-  'underline',
-  'strikethrough',
-];
 function toggleStyle(
   vEditor: VEditor,
-  type: Exclude<keyof BaseArrtiubtes, 'type'> | 'inline-code'
+  attrs: NonNullable<TextAttributes>
 ): void {
   const vRange = vEditor.getVRange();
   if (!vRange) {
@@ -55,39 +23,35 @@ function toggleStyle(
   }
 
   const deltas = vEditor.getDeltasByVRange(vRange);
+  let oldAttributes: NonNullable<TextAttributes> = {};
 
-  if (baseStyle.includes(type as Exclude<keyof BaseArrtiubtes, 'type'>)) {
-    vEditor.formatText(
-      vRange,
-      {
-        type: 'base',
-        [type]: deltas.every(
-          ([d]) =>
-            d.attributes.type === 'base' &&
-            d.attributes[type as Exclude<keyof BaseArrtiubtes, 'type'>]
-        )
-          ? null
-          : true,
-      },
-      {
-        mode: 'merge',
-      }
-    );
-    root.blur();
-  } else if (type === 'inline-code') {
-    vEditor.formatText(
-      vRange,
-      {
-        type: deltas.every(([d]) => d.attributes.type === 'inline-code')
-          ? 'base'
-          : 'inline-code',
-      },
-      {
-        mode: 'merge',
-      }
-    );
-    root.blur();
+  for (const [delta] of deltas) {
+    const attributes = delta.attributes;
+
+    if (!attributes) {
+      continue;
+    }
+
+    oldAttributes = { ...attributes };
   }
+
+  const newAttributes = Object.fromEntries(
+    Object.entries(attrs).map(([k, v]) => {
+      if (
+        typeof v === 'boolean' &&
+        v === (oldAttributes as { [k: string]: unknown })[k]
+      ) {
+        return [k, !v];
+      } else {
+        return [k, v];
+      }
+    })
+  );
+
+  vEditor.formatText(vRange, newAttributes, {
+    mode: 'merge',
+  });
+  root.blur();
 
   vEditor.syncVRange();
 }
@@ -120,7 +84,6 @@ class TextCell extends DatabaseCellLitElement {
         value: yText,
       });
       this.vEditor = new VEditor(yText, {
-        renderElement,
         onKeyDown: this._handleKeyDown,
       });
       this.vEditor.mount(this._container);
@@ -140,7 +103,7 @@ class TextCell extends DatabaseCellLitElement {
       case 'b':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(vEditor, 'bold');
+          toggleStyle(this.vEditor, { bold: true });
         }
         break;
       // italic ctrl+i
@@ -148,7 +111,7 @@ class TextCell extends DatabaseCellLitElement {
       case 'i':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(vEditor, 'italic');
+          toggleStyle(this.vEditor, { italic: true });
         }
         break;
       // underline ctrl+u
@@ -156,7 +119,7 @@ class TextCell extends DatabaseCellLitElement {
       case 'u':
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault();
-          toggleStyle(vEditor, 'underline');
+          toggleStyle(this.vEditor, { underline: true });
         }
         break;
       // strikethrough ctrl+shift+s
@@ -164,7 +127,7 @@ class TextCell extends DatabaseCellLitElement {
       case 's':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, 'strikethrough');
+          toggleStyle(vEditor, { strikethrough: true });
         }
         break;
       // inline code ctrl+shift+e
@@ -172,7 +135,7 @@ class TextCell extends DatabaseCellLitElement {
       case 'e':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, 'inline-code');
+          toggleStyle(vEditor, { inlineCode: true });
         }
         break;
       default:
@@ -185,7 +148,6 @@ class TextCell extends DatabaseCellLitElement {
     if (this.tag && !this.vEditor) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.vEditor = new VEditor(this.tag.value as any, {
-        renderElement,
         onKeyDown: this._handleKeyDown,
       });
 

@@ -1,8 +1,12 @@
 import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { hotkey } from '../../__internal__/index.js';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
+
+import { getBlockElementByModel, hotkey } from '../../__internal__/index.js';
+import {
+  handleMultiBlockIndent,
+  isAtLineEdge,
+} from '../../__internal__/rich-text/rich-text-operations.js';
 import {
   asyncFocusRichText,
   focusNextBlock,
@@ -12,11 +16,15 @@ import {
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
+  getRichTextByModel,
   getStartModelBySelection,
   isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultPageSignals } from '../default/default-page-block.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import {
   handleBlockSelectionBatchDelete,
@@ -139,13 +147,23 @@ function handleDown(
       return;
     }
     const range = getCurrentRange();
+    // We can not focus 'start' directly,
+    // because pressing ArrowDown in multi-level indent line will cause the cursor to jump to wrong position
     const atLineEdge = isAtLineEdge(range);
-    if (atLineEdge) {
-      focusNextBlock(model, 'start');
+    const { left, bottom } = range.getBoundingClientRect();
+    // Workaround select to empty line will get empty range
+    // If at empty line `range.getBoundingClientRect()` will return 0
+    // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+    const isAtEmptyLine = left === 0 && bottom === 0;
+    if (atLineEdge || isAtEmptyLine) {
+      const richText = getRichTextByModel(model);
+      assertExists(richText);
+      const richTextRect = richText.getBoundingClientRect();
+      focusNextBlock(model, new Point(richTextRect.left, richTextRect.top));
       return;
     }
-    const { left, bottom } = range.getBoundingClientRect();
     focusNextBlock(model, new Point(left, bottom));
+    return;
   } else {
     signals.updateSelectedRects.emit([]);
     const { state } = selection;
@@ -159,6 +177,59 @@ function handleDown(
         : 'start'
     );
     return;
+  }
+}
+
+function handleTab(page: Page, selection: DefaultSelectionManager) {
+  switch (selection.state.type) {
+    case 'native': {
+      const range = getCurrentRange();
+      const start = range.startContainer;
+      const end = range.endContainer;
+      const startModel = getModelByElement(start.parentElement as HTMLElement);
+      const endModel = getModelByElement(end.parentElement as HTMLElement);
+      if (startModel && endModel) {
+        let currentModel: BaseBlockModel | null = startModel;
+        const models: BaseBlockModel[] = [];
+        while (currentModel) {
+          const next = page.getNextSibling(currentModel);
+          models.push(currentModel);
+          if (currentModel.id === endModel.id) {
+            break;
+          }
+          currentModel = next;
+        }
+        handleMultiBlockIndent(page, models);
+      }
+      break;
+    }
+    case 'block': {
+      handleMultiBlockIndent(
+        page,
+        selection.state.selectedBlocks.map(block => getModelByElement(block))
+      );
+
+      const cachedSelectedBlocks = selection.state.selectedBlocks.concat();
+      requestAnimationFrame(() => {
+        const selectBlocks: DefaultPageBlockComponent[] = [];
+        cachedSelectedBlocks.forEach(block => {
+          const newBlock = getBlockElementByModel(
+            (block as DefaultPageBlockComponent).model
+          );
+          if (newBlock) {
+            selectBlocks.push(newBlock as DefaultPageBlockComponent);
+          }
+        });
+        if (!selectBlocks.length) {
+          return;
+        }
+        selection.state.refreshBlockRectCache();
+        selection.setSelectedBlocks(selectBlocks);
+      });
+      selection.clearRects();
+
+      break;
+    }
   }
 }
 
@@ -193,6 +264,7 @@ export function bindHotkeys(
     LEFT,
     RIGHT,
     ENTER,
+    TAB,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -328,6 +400,8 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
+  hotkey.addListener(TAB, () => handleTab(page, selection));
+
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
   });
@@ -353,5 +427,6 @@ export function removeHotkeys() {
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
     HOTKEYS.ENTER,
+    HOTKEYS.TAB,
   ]);
 }
