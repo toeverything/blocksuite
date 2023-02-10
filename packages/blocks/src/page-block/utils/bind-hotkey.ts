@@ -79,18 +79,14 @@ export function removeCommonHotKey() {
   ]);
 }
 
-function handleUp(
-  selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  e: KeyboardEvent
-) {
+function handleUp(e: KeyboardEvent, selection?: DefaultSelectionManager) {
   // Assume the native selection is collapsed
-  const nativeSelection = window.getSelection();
-  if (nativeSelection?.anchorNode) {
+  const hasNativeSelection = !!window.getSelection()?.rangeCount;
+  if (hasNativeSelection) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     const previousBlock = getPreviousBlock(model);
-    const range = nativeSelection.getRangeAt(0);
+    const range = getCurrentRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock) {
       focusTitle();
@@ -129,27 +125,25 @@ function handleUp(
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
-
-  signals.updateSelectedRects.emit([]);
-  const { state } = selection;
-  const selectedModel = getModelByElement(state.selectedBlocks[0]);
-  const page = getDefaultPageBlock(selectedModel);
-  e.preventDefault();
-  focusPreviousBlock(
-    selectedModel,
-    page.lastSelectionPosition instanceof Point
-      ? page.lastSelectionPosition
-      : 'end'
-  );
+  if (selection) {
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const page = getDefaultPageBlock(selectedModel);
+    selection.clearRects();
+    focusPreviousBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'end'
+    );
+    e.preventDefault();
+  }
 }
 
-function handleDown(
-  selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  e: KeyboardEvent
-) {
+function handleDown(e: KeyboardEvent, selection?: DefaultSelectionManager) {
   // Assume the native selection is collapsed
-  if (!selection.state.selectedBlocks.length) {
+  const hasNativeSelection = !!window.getSelection()?.rangeCount;
+  if (hasNativeSelection) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     if (matchFlavours(model, ['affine:code'])) {
@@ -191,20 +185,27 @@ function handleDown(
     }
     focusNextBlock(model, new Point(left, bottom));
     return;
-  } else {
-    signals.updateSelectedRects.emit([]);
+  }
+  if (selection) {
     const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const lastEle = state.selectedBlocks.at(-1);
+    if (!lastEle) {
+      throw new Error(
+        "Failed to handleDown! Can't find last selected element!"
+      );
+    }
+    const selectedModel = getModelByElement(lastEle);
+    selection.clearRects();
     const page = getDefaultPageBlock(selectedModel);
-    e.preventDefault();
     focusNextBlock(
       selectedModel,
       page.lastSelectionPosition instanceof Point
         ? page.lastSelectionPosition
         : 'start'
     );
-    return;
+    e.preventDefault();
   }
+  return;
 }
 
 function handleTab(page: Page, selection: DefaultSelectionManager) {
@@ -369,10 +370,10 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(UP, e => {
-    handleUp(selection, signals, e);
+    handleUp(e, selection);
   });
   hotkey.addListener(DOWN, e => {
-    handleDown(selection, signals, e);
+    handleDown(e, selection);
   });
   hotkey.addListener(LEFT, e => {
     let model: BaseBlockModel | null = null;
