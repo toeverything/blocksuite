@@ -1,17 +1,17 @@
 /// <reference types="@blocksuite/global" />
 // manual import to avoid being tree-shaken
-import './page-block';
-import './counter-block';
-import './paragraph-block';
-import './list-block';
-import './frame-block';
-import './divider-block';
-import './__internal__/rich-text/link-node';
-import './embed-block';
-import './embed-block/image';
-import './surface-block';
-import './components/slash-menu';
-import './database-block';
+import './page-block/index.js';
+import './counter-block/index.js';
+import './paragraph-block/index.js';
+import './list-block/index.js';
+import './frame-block/index.js';
+import './divider-block/index.js';
+import './__internal__/rich-text/link-node/index.js';
+import './embed-block/index.js';
+import './embed-block/image/index.js';
+import './surface-block/index.js';
+import './components/slash-menu/index.js';
+import './database-block/index.js';
 
 export * from './__internal__/rich-text/rich-text-operations.js';
 export { getServiceOrRegister } from './__internal__/service.js';
