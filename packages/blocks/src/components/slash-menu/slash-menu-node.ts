@@ -54,6 +54,12 @@ export class SlashMenu extends LitElement {
     this._disposableGroup.add(
       Signal.disposableListener(window, 'mousedown', this._clickAwayListener)
     );
+    this._disposableGroup.add(
+      Signal.disposableListener(window, 'keydown', this._keyDownListener, {
+        // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
+        capture: true,
+      })
+    );
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -154,14 +160,14 @@ export class SlashMenu extends LitElement {
           (this._activeItemIndex - 1 + configLen) % configLen;
         this._queryItemEle(
           this._filterItems[this._activeItemIndex]
-        )?.scrollIntoView(false);
+        )?.scrollIntoView();
         break;
       }
       case 'ArrowDown': {
         this._activeItemIndex = (this._activeItemIndex + 1) % configLen;
         this._queryItemEle(
           this._filterItems[this._activeItemIndex]
-        )?.scrollIntoView(false);
+        )?.scrollIntoView();
         break;
       }
       case 'ArrowRight':
