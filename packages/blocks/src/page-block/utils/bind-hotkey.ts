@@ -121,6 +121,7 @@ function handleUp(
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
+
   signals.updateSelectedRects.emit([]);
   const { state } = selection;
   const selectedModel = getModelByElement(state.selectedBlocks[0]);

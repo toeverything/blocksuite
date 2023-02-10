@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+
 import { expect, Page } from '@playwright/test';
 
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
@@ -225,4 +226,30 @@ test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
 
   await page.click('.icon-container[role="shape"]');
   await expect(shapeComponentLocator).toBeHidden();
+});
+
+test('edgeless arrow up/down', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+
+  await type(page, 'hello');
+  await page.keyboard.press('Enter');
+  await type(page, 'world');
+  await page.keyboard.press('Enter');
+  await type(page, 'foo');
+
+  await switchEditorMode(page);
+
+  await page.click('.affine-edgeless-block-child');
+  await page.click('[data-block-id="2"]');
+
+  await page.keyboard.press('ArrowDown');
+
+  assertSelection(page, 1, 4, 0);
+  await page.keyboard.press('ArrowUp');
+  assertSelection(page, 0, 4, 0);
+  await page.keyboard.press('ArrowUp');
+  assertSelection(page, 0, 4, 0);
 });
