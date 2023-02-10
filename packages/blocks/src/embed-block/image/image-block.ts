@@ -128,7 +128,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
   host!: BlockHost;
 
   @query('.resizable-img')
-  private _resizeImg!: HTMLElement;
+  resizeImg!: HTMLElement;
 
   @state()
   private _source!: string;

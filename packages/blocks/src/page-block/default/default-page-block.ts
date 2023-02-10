@@ -266,13 +266,14 @@ export class DefaultPageBlockComponent
   }
 
   // FIXME: keep embed selected rects after scroll
+  // TODO: disable it on scroll's thresold
   private _onWheel = (e: WheelEvent) => {
     if (this.selection.state.type !== 'block') {
       this.selection.state.clear();
-      if (this.selection.state.type !== 'embed') {
-        this.signals.updateEmbedRects.emit([]);
-        this.signals.updateEmbedEditingState.emit(null);
-      }
+      // if (this.selection.state.type !== 'embed') {
+      this.signals.updateEmbedRects.emit([]);
+      this.signals.updateEmbedEditingState.emit(null);
+      // }
       return;
     }
 
@@ -312,10 +313,16 @@ export class DefaultPageBlockComponent
   // };
 
   private _onScroll = (e: Event) => {
+    const type = this.selection.state.type;
     const { scrollLeft, scrollTop } = e.target as Element;
     this.viewportState.scrollLeft = scrollLeft;
     this.viewportState.scrollTop = scrollTop;
-    this.selection.refreshSelectionRect(this.viewportState);
+    if (type === 'block') {
+      this.selection.refreshSelectionRectAndSelecting(this.viewportState);
+      // Why? Clicling on the image and the `type` is set to `block`.
+      // See _onContainerClick
+      this.selection.refresEmbedRects();
+    }
   };
 
   update(changedProperties: Map<string, unknown>) {

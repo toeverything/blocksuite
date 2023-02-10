@@ -60,15 +60,14 @@ export function EmbedSelectedRectsContainer(
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
-        position: fixed;
+        position: absolute;
+        display: block;
         border: 2px solid var(--affine-primary-color);
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable">
       ${rects.map(rect => {
         const style = {
-          position: 'absolute',
-          display: 'block',
           left: rect.left - left + scrollLeft + 'px',
           top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',
@@ -95,6 +94,8 @@ export function SelectedRectsContainer(
   return html`
     <style>
       .affine-page-selected-rects-container > div {
+        position: absolute;
+        display: block;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
@@ -104,8 +105,6 @@ export function SelectedRectsContainer(
     <div class="affine-page-selected-rects-container">
       ${repeat(rects, rect => {
         const style = {
-          position: 'absolute',
-          display: 'block',
           left: rect.left - left + scrollLeft + 'px',
           top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',

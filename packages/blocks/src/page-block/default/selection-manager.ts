@@ -30,7 +30,10 @@ import {
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
-import type { EmbedBlockComponent } from '../../embed-block/index.js';
+import type {
+  EmbedBlockComponent,
+  ImageBlockComponent,
+} from '../../embed-block/index.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
@@ -342,7 +345,7 @@ export class PageSelectionState {
     }
   }
 
-  clearBlockSelection() {
+  clearSelectedBlocks() {
     this.type = 'none';
     this._startPoint = null;
     this._endPoint = null;
@@ -351,11 +354,17 @@ export class PageSelectionState {
     this.clearRaf();
   }
 
+  clearEmbedBlocks() {
+    this.type = 'none';
+    this.selectEmbeds = [];
+  }
+
   clear() {
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
-    this.clearBlockSelection();
+    this.clearEmbedBlocks();
+    this.clearSelectedBlocks();
   }
 }
 
@@ -514,21 +523,19 @@ export class DefaultSelectionManager {
       // speed easeOutQuad + easeInQuad
       if (Math.ceil(scrollTop) < max && clientHeight - y < this._thresold) {
         // ↓
-        auto = Math.ceil(scrollTop) < max;
         const d = (this._thresold - (clientHeight - y)) * 0.25;
         scrollTop += d;
         endPoint.y += d;
-        viewportState.scrollTop += d;
-        viewport.scrollTop = viewportState.scrollTop;
+        auto = Math.ceil(scrollTop) < max;
+        viewport.scrollTop = scrollTop;
         this.updateSelectionRect(startPoint, endPoint);
       } else if (scrollTop > 0 && y < this._thresold) {
         // ↑
-        auto = scrollTop > 0;
         const d = (y - this._thresold) * 0.25;
         scrollTop += d;
         endPoint.y += d;
-        viewportState.scrollTop += d;
-        viewport.scrollTop = viewportState.scrollTop;
+        auto = scrollTop > 0;
+        viewport.scrollTop = scrollTop;
         this.updateSelectionRect(startPoint, endPoint);
       } else {
         auto = false;
@@ -703,11 +710,14 @@ export class DefaultSelectionManager {
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
+        this.state.selectEmbeds.push(
+          this.state.activeComponent as EmbedBlockComponent
+        );
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
       } else {
+        this.state.selectedBlocks.push(this.state.activeComponent);
         this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       }
-      this.state.selectedBlocks.push(this.state.activeComponent);
       return;
     }
     const target = e.raw.target;
@@ -806,7 +816,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.emit(null);
     this._signals.updateEmbedEditingState.emit(null);
     this._signals.updateEmbedRects.emit([]);
-    this.state.clearBlockSelection();
+    this.state.clearSelectedBlocks();
   }
 
   clear() {
@@ -858,7 +868,7 @@ export class DefaultSelectionManager {
     );
   }
 
-  refreshSelectionRect(viewportState: ViewportState) {
+  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
     if (this.state.type !== 'block') return;
 
     const { blockCache, startPoint, endPoint } = this.state;
@@ -897,6 +907,18 @@ export class DefaultSelectionManager {
         .slice(0, 1)
         .map(block => blockCache.get(block) as DOMRect);
       this._signals.updateSelectedRects.emit(rects);
+    }
+  }
+
+  // The embed may need to be refactored.
+  refresEmbedRects() {
+    const { activeComponent, selectEmbeds } = this.state;
+    if (activeComponent && selectEmbeds.length) {
+      const image = activeComponent as ImageBlockComponent;
+      if (image.model.type === 'image') {
+        const rect = image.resizeImg.getBoundingClientRect();
+        this._signals.updateEmbedRects.emit([rect]);
+      }
     }
   }
 
