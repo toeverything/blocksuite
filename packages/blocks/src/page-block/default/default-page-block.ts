@@ -249,13 +249,14 @@ export class DefaultPageBlockComponent
 
   // FIXME: keep embed selected rects after scroll
   private _onWheel = (e: WheelEvent) => {
-    // block selection support scroll, therefore we do not clear selection
-    const isBlockMode = this.selection.state.type === 'block';
-    if (!isBlockMode) {
+    if (this.selection.state.type !== 'block') {
       this.selection.state.clear();
+      if (this.selection.state.type !== 'embed') {
+        this.signals.updateEmbedRects.emit([]);
+        this.signals.updateEmbedEditingState.emit(null);
+      }
+      return;
     }
-    this.signals.updateEmbedRects.emit([]);
-    this.signals.updateEmbedEditingState.emit(null);
 
     const { scrollTop, scrollLeft, scrollHeight, clientHeight } =
       this.defaultViewportElement;
