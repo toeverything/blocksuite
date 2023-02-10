@@ -1,5 +1,11 @@
-import { useBlockSuiteStore } from '@blocksuite/react';
-import type { Workspace } from '@blocksuite/store';
+import { builtInSchemas } from '@blocksuite/blocks/models';
+import {
+  BlockSuiteProvider,
+  createBlockSuiteStore,
+  useBlockSuiteStore,
+} from '@blocksuite/react';
+import { Workspace } from '@blocksuite/store';
+import { DebugDocProvider, IndexedDBDocProvider } from '@blocksuite/store';
 import { Navbar, Text } from '@nextui-org/react';
 import { useEffect } from 'react';
 
@@ -14,7 +20,18 @@ declare global {
   }
 }
 
-export default function Home() {
+const localWorkspace = new Workspace({
+  room: 'local-room',
+  isSSR: typeof window === 'undefined',
+  providers:
+    typeof window === 'undefined'
+      ? []
+      : [DebugDocProvider, IndexedDBDocProvider],
+});
+
+localWorkspace.register(builtInSchemas);
+
+const HomeInner = () => {
   const workspace = useBlockSuiteStore(store => store.currentWorkspace);
   useEffect(() => {
     if (!window.workspace) {
@@ -37,5 +54,15 @@ export default function Home() {
         <PageManger />
       </NoSsr>
     </Layout>
+  );
+};
+
+export default function Home() {
+  return (
+    <BlockSuiteProvider
+      createStore={() => createBlockSuiteStore(localWorkspace)}
+    >
+      <HomeInner />
+    </BlockSuiteProvider>
   );
 }
