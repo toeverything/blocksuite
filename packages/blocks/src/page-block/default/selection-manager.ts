@@ -869,6 +869,8 @@ export class DefaultSelectionManager {
   }
 
   refreshSelectionRect(offset: { scrollLeft: number; scrollTop: number }) {
+    if (this.state.type !== 'block') return;
+
     const { blockCache, startPoint, endPoint } = this.state;
 
     if (startPoint && endPoint) {
@@ -890,6 +892,9 @@ export class DefaultSelectionManager {
 
   refreshSelectedBlocksRects() {
     this.state.refreshBlockRectCache();
+
+    if (this.state.type !== 'block') return;
+
     const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
 
     if (selectedBlocks.length === 0) return;
