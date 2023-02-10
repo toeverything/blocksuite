@@ -1,3 +1,4 @@
+import { RoundedRectangle } from '@blocksuite/icons/auto/24/lit/RoundedRectangle';
 import { html, svg } from 'lit';
 
 // Use icons from `@blocksuite/icons`
@@ -683,11 +684,4 @@ export const TriangleIcon = html`<svg
   <path d="M12 4L20.6603 19H3.33975L12 4Z" stroke-width="1.5" />
 </svg>`;
 
-export const RoundedRectangleIcon = html`<svg
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <rect x="3" y="5" width="18" height="14" rx="2" stroke-width="1.5" />
-</svg>`;
+export const RoundedRectangleIcon = RoundedRectangle(24);
