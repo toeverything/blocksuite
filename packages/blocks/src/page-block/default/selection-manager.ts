@@ -4,7 +4,6 @@ import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config
 import {
   assertExists,
   caretRangeFromPoint,
-  isSafari,
   matchFlavours,
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
