@@ -97,9 +97,17 @@ function handleUp(
       return;
     }
 
-    // Workaround select to empty line will get empty range
-    // If at empty line range.getBoundingClientRect will return 0
+    // Workaround: focus to empty line will get empty range rect
     //
+    // See the following example:
+    // - long text
+    //   wrap line
+    // - |    <- caret at empty line,
+    //           if you press ArrowUp,
+    //           the cursor should jump to the start of `wrap line`,
+    //           instead of the start of `long text`!
+    //
+    // If at empty line range.getBoundingClientRect will return 0
     // You can see the spec here:
     // The `getBoundingClientRect()` method, when invoked, must return the result of the following algorithm:
     //   - Let list be the result of invoking getClientRects() on the same range this method was invoked on.
@@ -148,14 +156,32 @@ function handleDown(
       return;
     }
     const range = getCurrentRange();
-    // We can not focus 'start' directly,
-    // because pressing ArrowDown in multi-level indent line will cause the cursor to jump to wrong position
     const atLineEdge = isAtLineEdge(range);
     const { left, bottom } = range.getBoundingClientRect();
-    // Workaround select to empty line will get empty range
+    const isAtEmptyLine = left === 0 && bottom === 0;
+    // Workaround: at line edge will return wrong rect
+    // See the following example:
+    // - long text
+    //   |wrap line    <- caret at empty line,
+    //                    if you press ArrowDown,
+    //                    the cursor should jump to the start of `next line`,
+    //                    instead of the end of `next line`!
+    // - next line
+    //
+    // Workaround: focus to empty line will get empty range,
+    // we can not focus 'start' directly,
+    // because pressing ArrowDown in multi-level indent line will cause the cursor to jump to wrong position
     // If at empty line `range.getBoundingClientRect()` will return 0
     // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
-    const isAtEmptyLine = left === 0 && bottom === 0;
+    //
+    // See the following example:
+    // - text
+    //   - child
+    //     - |   <- caret at empty line,
+    //              if you press ArrowDown,
+    //              the cursor should jump to the end of `next`,
+    //              instead of the start of `next`!
+    // - next
     if (atLineEdge || isAtEmptyLine) {
       const richText = getRichTextByModel(model);
       assertExists(richText);
