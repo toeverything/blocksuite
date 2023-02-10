@@ -3,7 +3,11 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
 
-import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
+import type {
+  DefaultPageBlockComponent,
+  EdgelessPageBlockComponent,
+  SelectedBlock,
+} from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
 
@@ -133,6 +137,15 @@ export function getDefaultPageBlock(model: BaseBlockModel) {
   const page = document.querySelector(
     `[${ATTR}="${model.page.root.id}"]`
   ) as DefaultPageBlockComponent;
+  return page;
+}
+
+// TODO: 是不是可以改改 根据 有无 selection 就能区分 default 和 edgeless
+export function getEdgelessPageBlock(model: BaseBlockModel) {
+  assertExists(model.page.root);
+  const page = document.querySelector(
+    `[${ATTR}="${model.page.root.id}"]`
+  ) as EdgelessPageBlockComponent;
   return page;
 }
 

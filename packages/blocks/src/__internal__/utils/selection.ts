@@ -15,6 +15,7 @@ import {
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
+  getEdgelessPageBlock,
   getElementFromEventTarget,
   getModelByElement,
   getModelsByRange,
@@ -148,6 +149,41 @@ export async function focusRichText(
   resetNativeSelection(range);
 }
 
+export function focusBlockByModelEdgeless(
+  model: BaseBlockModel,
+  position: SelectionPosition = 'end'
+) {
+  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
+    throw new Error("Can't focus frame or page!");
+  }
+  const defaultPageBlock = getEdgelessPageBlock(model);
+  console.dir(defaultPageBlock);
+
+  if (
+    matchFlavours(model, [
+      'affine:embed',
+      'affine:divider',
+      'affine:code',
+      'affine:database',
+    ])
+  ) {
+    const element = getBlockElementByModel(model);
+    assertExists(element);
+
+    resetNativeSelection(null);
+    (document.activeElement as HTMLTextAreaElement).blur();
+    return;
+  }
+
+  const element = getBlockElementByModel(model);
+  console.log(element, 'element');
+
+  const editableContainer = element?.querySelector('[contenteditable]');
+
+  if (editableContainer) {
+    focusRichText(editableContainer, position);
+  }
+}
 export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end'

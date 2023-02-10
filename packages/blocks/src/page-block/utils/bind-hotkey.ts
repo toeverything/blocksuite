@@ -121,6 +121,7 @@ function handleUp(
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
+
   signals.updateSelectedRects.emit([]);
   const { state } = selection;
   const selectedModel = getModelByElement(state.selectedBlocks[0]);
@@ -342,6 +343,8 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(UP, e => {
+    console.log('e');
+
     handleUp(selection, signals, e);
   });
   hotkey.addListener(DOWN, e => {

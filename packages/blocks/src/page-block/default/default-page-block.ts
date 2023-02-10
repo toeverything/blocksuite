@@ -381,6 +381,7 @@ export class DefaultPageBlockComponent
 
   firstUpdated() {
     autosize(this._title);
+
     bindHotkeys(this.page, this.selection, this.signals);
 
     hotkey.enableHotkey();
