@@ -149,14 +149,12 @@ export class BlockHub extends NonShadowLitElement {
 
     .card-container {
       display: flex;
+      position: relative;
       align-items: center;
       width: 256px;
       height: 54px;
       background: var(--affine-page-background);
-      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08),
-        4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08);
       border-radius: 10px;
       padding: 8px 12px;
       margin-bottom: 16px;
@@ -166,6 +164,8 @@ export class BlockHub extends NonShadowLitElement {
     .card-container:hover {
       background: var(--affine-block-hub-hover-background);
       fill: var(--affine-primary-color);
+      top: -2px;
+      left: -2px;
     }
 
     .card-description-container {
@@ -178,6 +178,14 @@ export class BlockHub extends NonShadowLitElement {
     .affine-block-hub-container .description {
       font-size: var(--affine-font-xs);
       color: var(---affine-icon-color);
+    }
+
+    .card-container:hover.grabbing {
+      top: unset;
+      left: unset;
+      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
+        -4px -4px 13px rgba(58, 76, 92, 0.02),
+        6px 6px 36px rgba(58, 76, 92, 0.06);
     }
 
     .grabbing {
