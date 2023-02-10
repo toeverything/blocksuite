@@ -394,17 +394,7 @@ export function getAllowSelectedBlocks(
   model: BaseBlockModel
 ): BaseBlockModel[] {
   const result: BaseBlockModel[] = [];
-  const blocksWithHiddenChildren =
-    model.page.awarenessStore.getFlag('blocks_with_hidden_children') ?? [];
-  const blocks = model.children?.filter(eachChild => {
-    const parent = model.page.getParent(eachChild);
-    if (!parent) return true;
-    return !blocksWithHiddenChildren.includes(parent.id); //TODO handle recursion?
-    // filter out all blocks whose parents have hidden children to avoid mousemove errors
-  });
-  if (!blocks) {
-    return [];
-  }
+  const blocks = model.children.slice();
 
   const dfs = (
     blocks: BaseBlockModel[],

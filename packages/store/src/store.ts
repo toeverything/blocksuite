@@ -80,7 +80,6 @@ const flagsPreset = {
 
   enable_toggle_block: false,
   enable_hide_children: true,
-  blocks_with_hidden_children: [],
 
   readonly: {},
 } satisfies BlockSuiteFlags;

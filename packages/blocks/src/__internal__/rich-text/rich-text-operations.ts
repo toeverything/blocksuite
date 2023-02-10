@@ -11,7 +11,13 @@ import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { Quill } from 'quill';
 
-import type { PageBlockModel } from '../../models.js';
+import type {
+  BlockSchema,
+  Flavour,
+  ListBlockModel,
+  PageBlockModel,
+  ParagraphBlockModel,
+} from '../../models.js';
 import {
   asyncFocusRichText,
   convertToDivider,
