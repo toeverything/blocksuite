@@ -44,7 +44,7 @@ export const formatQuickBarStyle = css`
   .divider {
     width: 1px;
     height: 100%;
-    background-color: #e0e6eb;
+    background-color: var(--affine-border-color);
   }
 
   ${paragraphPanelStyle}
