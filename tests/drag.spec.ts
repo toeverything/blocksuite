@@ -16,7 +16,7 @@ import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 // '../packages/blocks/src/__internal__/utils/consts.ts'
-const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
+const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 0;
 
 test('only have one drag handle in screen', async ({ page }) => {
   await enterPlaygroundRoom(page);
