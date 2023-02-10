@@ -7,38 +7,6 @@ export class Signal<T = void> implements Disposable {
   private _callbacks: ((v: T) => unknown)[] = [];
   private _disposables: Disposable[] = [];
 
-  static fromEvent<N extends keyof WindowEventMap>(
-    element: Window,
-    eventName: N,
-    options?: boolean | AddEventListenerOptions
-  ): Signal<WindowEventMap[N]>;
-  static fromEvent<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement,
-    eventName: N,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Signal<HTMLElementEventMap[N]>;
-  static fromEvent<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement | Window,
-    eventName: N,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): Signal<HTMLElementEventMap[N]> {
-    const signal = new Signal<HTMLElementEventMap[N]>();
-    const handler = (ev: HTMLElementEventMap[N]) => {
-      signal.emit(ev);
-    };
-    (element as HTMLElement).addEventListener(eventName, handler, eventOptions);
-    signal._disposables.push({
-      dispose: () => {
-        (element as HTMLElement).removeEventListener(
-          eventName,
-          handler,
-          eventOptions
-        );
-      },
-    });
-    return signal;
-  }
-
   /**
    * This is method will return a disposable that will remove the listener
    */
