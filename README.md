@@ -1,7 +1,11 @@
 # BlockSuite
 
 <p align="center">
-  <img src="assets/logo-and-name-h.svg" alt="BlockSuite logo and name" width="500" />
+  <picture style="width: 500px">
+      <source media="(prefers-color-scheme: light)" srcset="assets/logo-and-name-h.svg" />
+      <source media="(prefers-color-scheme: dark)" srcset="assets/logo-and-name-h-white.svg" />
+    <img src="assets/logo-and-name-h.svg" alt="BlockSuite logo and name" />
+  </picture>
 </p>
 
 [![Codecov](https://codecov.io/gh/toeverything/blocksuite/branch/master/graph/badge.svg?token=T86JYCDSMN)](https://codecov.io/gh/toeverything/blocksuite)
