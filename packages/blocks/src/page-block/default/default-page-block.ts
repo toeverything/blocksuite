@@ -101,7 +101,6 @@ export class DefaultPageBlockComponent
 
     .affine-default-page-block-container > .affine-block-children-container {
       padding-left: 0;
-      margin-left: -26px;
     }
 
     .affine-default-page-block-title {
