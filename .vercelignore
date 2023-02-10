@@ -3,6 +3,4 @@
 .gitignore
 .husky
 .vscode
-tests
-__tests__
-*.spec.ts
+/tests
