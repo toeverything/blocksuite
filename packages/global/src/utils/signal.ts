@@ -6,6 +6,7 @@ export class Signal<T = void> implements Disposable {
   private _emitting = false;
   private _callbacks: ((v: T) => unknown)[] = [];
   private _disposables: Disposable[] = [];
+
   static fromEvent<N extends keyof WindowEventMap>(
     element: Window,
     eventName: N,
@@ -36,6 +37,35 @@ export class Signal<T = void> implements Disposable {
       },
     });
     return signal;
+  }
+
+  /**
+   * This is method will return a disposable that will remove the listener
+   */
+  static disposableListener<N extends keyof WindowEventMap>(
+    element: Window,
+    eventName: N,
+    handler: (e: WindowEventMap[N]) => void,
+    options?: boolean | AddEventListenerOptions
+  ): Disposable;
+  static disposableListener<N extends keyof HTMLElementEventMap>(
+    element: HTMLElement,
+    eventName: N,
+    handler: (e: HTMLElementEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): Disposable;
+  static disposableListener(
+    element: HTMLElement | Window,
+    eventName: string,
+    handler: (e: Event) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): Disposable {
+    element.addEventListener(eventName, handler, eventOptions);
+    return {
+      dispose: () => {
+        element.removeEventListener(eventName, handler, eventOptions);
+      },
+    };
   }
 
   filter(testFun: (v: T) => boolean): Signal<T> {
