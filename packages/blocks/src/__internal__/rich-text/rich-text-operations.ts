@@ -1,7 +1,6 @@
 // operations used in rich-text level
 
 import { Page, Text } from '@blocksuite/store';
-import type { Quill } from 'quill';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -9,13 +8,14 @@ import {
 } from '@blocksuite/global/utils';
 import { ParagraphBlockComponent, SelectionUtils } from '@blocksuite/blocks';
 import { Utils } from '@blocksuite/store';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import type { Quill } from 'quill';
+
 import type {
-  ParagraphBlockModel,
-  ListBlockModel,
-  PageBlockModel,
   BlockSchema,
   Flavour,
+  ListBlockModel,
+  PageBlockModel,
+  ParagraphBlockModel,
 } from '../../models.js';
 import {
   ExtendedModel,

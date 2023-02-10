@@ -98,8 +98,8 @@ export class ListBlockComponent extends NonShadowLitElement {
   private get isToggleEnabled() {
     return this.pageAwarenessStore.getFlag('enable_toggle_block');
   }
-  private get blocksWithHiddenChildren() {
-    return this.pageAwarenessStore.getFlag('blocks_with_hidden_children') ?? [];
+  private get blocksWithHiddenChildrenOnPage() {
+    return [...this.model.page.blocksWithHiddenChildren];
   }
   private get hasChildren() {
     return !!this.model.children.length;
@@ -143,10 +143,15 @@ export class ListBlockComponent extends NonShadowLitElement {
         hiddenBlockListWithoutThis // remove current block from the hiddenChildren list
       );
     } else {
-      this.pageAwarenessStore.setFlag(
-        'blocks_with_hidden_children',
-        [...hiddenBlockListWithoutThis, currentBlockID] // ensure current block is in the hiddenChildren list
-      );
+      this.model.page.blocksWithHiddenChildren = [
+        ...hiddenBlockListWithoutThis,
+        currentBlockID,
+      ]; // ensure current block is in the hiddenChildren list
+
+      // attempt to avoid mouse move / selection errors
+      // for (const eachChildBlock of this.model.children) {
+      //   eachChildBlock.selection.dispose();
+      // }
     }
     asyncFocusRichText(this.model.page, this.model.id);
     this.requestUpdate();
