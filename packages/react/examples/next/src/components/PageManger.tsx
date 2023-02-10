@@ -95,7 +95,7 @@ export const PageManger = () => {
       />
       <Box css={{ bg: 'white' }}>
         <Editor
-          page={currentPage}
+          page={() => currentPage}
           onInit={async (page, editor) => {
             const pageBlockId = page.addBlockByFlavour('affine:page', {
               title: 'Welcome to BlockSuite React example',

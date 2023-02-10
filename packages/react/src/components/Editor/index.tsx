@@ -3,23 +3,40 @@ import '@blocksuite/editor/themes/affine.css';
 
 import { EditorContainer } from '@blocksuite/editor';
 import type { Page } from '@blocksuite/store';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+function noop() {
+  // do nothing
+}
 
 export type EditorProps = {
-  page: Page;
+  page: () => Page | Promise<Page>;
   onInit?: (page: Page, editor: Readonly<EditorContainer>) => void;
 };
 
-export const Editor = ({ page, onInit }: EditorProps) => {
+export const Editor = (props: EditorProps) => {
+  const [page, setPage] = useState<Page | null>(null);
+  const editorRef = useRef<EditorContainer | null>(null);
+  if (editorRef.current === null) {
+    editorRef.current = new EditorContainer();
+  }
   const ref = useRef<HTMLDivElement>(null);
+
+  const maybePage = props.page();
+  if (maybePage instanceof Promise) {
+    throw maybePage;
+  } else if (page === null) {
+    setPage(maybePage);
+  }
+
   useEffect(() => {
-    if (ref.current) {
-      const container = ref.current;
-      const editor = new EditorContainer();
+    if (editorRef.current && ref.current && page) {
+      console.log('page', page);
+      const editor = editorRef.current;
       editor.page = page;
       if (page.root === null) {
-        if (onInit) {
-          onInit(page, editor);
+        if (props.onInit) {
+          props.onInit(page, editor);
         } else {
           const pageBlockId = page.addBlockByFlavour('affine:page');
           const frameId = page.addBlockByFlavour(
@@ -31,22 +48,28 @@ export const Editor = ({ page, onInit }: EditorProps) => {
           page.resetHistory();
         }
       }
+    }
+    return noop;
+  }, [page, props]);
+
+  useEffect(() => {
+    if (editorRef.current && ref.current && page) {
+      const editor = editorRef.current;
+      const container = ref.current;
       container.appendChild(editor);
       return () => {
         container.removeChild(editor);
       };
     }
-    return () => {
-      // do nothing
-    };
-  }, [onInit, page]);
+    return noop;
+  });
 
   useEffect(() => {
-    if (!page.workspace.connected) {
+    if (page && !page.workspace.connected) {
       page.workspace.connect();
     }
     return () => {
-      page.workspace.disconnect();
+      page?.workspace.disconnect();
     };
   }, [page]);
   return <div className="editor-wrapper" ref={ref} />;
