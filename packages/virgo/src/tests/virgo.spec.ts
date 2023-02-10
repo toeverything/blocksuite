@@ -169,7 +169,7 @@ test('readonly mode', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abcdefg');
 });
 
-test('basic text style', async ({ page }) => {
+test('basic styles', async ({ page }) => {
   await enterVirgoPlayground(page);
   await focusVirgoRichText(page);
 
@@ -181,6 +181,9 @@ test('basic text style', async ({ page }) => {
   const editorAUnderline = page.getByText('underline').nth(0);
   const editorAStrikethrough = page.getByText('strikethrough').nth(0);
   const editorAInlineCode = page.getByText('inline-code').nth(0);
+
+  const editorAUndo = page.getByText('undo').nth(0);
+  const editorARedo = page.getByText('redo').nth(0);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
   expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
@@ -273,6 +276,60 @@ test('basic text style', async ({ page }) => {
     },
   ]);
 
+  editorAInlineCode.click();
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strikethrough: true,
+        inlineCode: true,
+      },
+    },
+    {
+      insert: 'fg',
+    },
+  ]);
+
+  editorAUndo.click({
+    clickCount: 5,
+  });
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'abcdefg',
+    },
+  ]);
+
+  editorARedo.click({
+    clickCount: 5,
+  });
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'ab',
+    },
+    {
+      insert: 'cde',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strikethrough: true,
+        inlineCode: true,
+      },
+    },
+    {
+      insert: 'fg',
+    },
+  ]);
+
   editorABold.click();
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
@@ -285,6 +342,7 @@ test('basic text style', async ({ page }) => {
         italic: true,
         underline: true,
         strikethrough: true,
+        inlineCode: true,
       },
     },
     {
@@ -303,6 +361,7 @@ test('basic text style', async ({ page }) => {
       attributes: {
         underline: true,
         strikethrough: true,
+        inlineCode: true,
       },
     },
     {
@@ -320,6 +379,7 @@ test('basic text style', async ({ page }) => {
       insert: 'cde',
       attributes: {
         strikethrough: true,
+        inlineCode: true,
       },
     },
     {
@@ -328,14 +388,6 @@ test('basic text style', async ({ page }) => {
   ]);
 
   editorAStrikethrough.click();
-  delta = await getDeltaFromVirgoRichText(page);
-  expect(delta).toEqual([
-    {
-      insert: 'abcdefg',
-    },
-  ]);
-
-  editorAInlineCode.click();
   delta = await getDeltaFromVirgoRichText(page);
   expect(delta).toEqual([
     {
@@ -357,6 +409,182 @@ test('basic text style', async ({ page }) => {
   expect(delta).toEqual([
     {
       insert: 'abcdefg',
+    },
+  ]);
+});
+
+test('overlapping styles', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+
+  const editorABold = page.getByText('bold').nth(0);
+  const editorAItalic = page.getByText('italic').nth(0);
+
+  const editorAUndo = page.getByText('undo').nth(0);
+  const editorARedo = page.getByText('redo').nth(0);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await type(page, 'abcdefghijk');
+
+  expect(await editorA.innerText()).toBe('abcdefghijk');
+  expect(await editorB.innerText()).toBe('abcdefghijk');
+
+  let delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'abcdefghijk',
+    },
+  ]);
+
+  await setVirgoRichTextRange(page, { index: 1, length: 3 });
+  editorABold.click();
+
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'a',
+    },
+    {
+      insert: 'bcd',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'efghijk',
+    },
+  ]);
+
+  await setVirgoRichTextRange(page, { index: 7, length: 3 });
+  editorABold.click();
+
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'a',
+    },
+    {
+      insert: 'bcd',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'efg',
+    },
+    {
+      insert: 'hij',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'k',
+    },
+  ]);
+
+  await setVirgoRichTextRange(page, { index: 3, length: 5 });
+  editorAItalic.click();
+
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'a',
+    },
+    {
+      insert: 'bc',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'd',
+      attributes: {
+        bold: true,
+        italic: true,
+      },
+    },
+    {
+      insert: 'efg',
+      attributes: {
+        italic: true,
+      },
+    },
+    {
+      insert: 'h',
+      attributes: {
+        bold: true,
+        italic: true,
+      },
+    },
+    {
+      insert: 'ij',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'k',
+    },
+  ]);
+
+  editorAUndo.click({
+    clickCount: 3,
+  });
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'abcdefghijk',
+    },
+  ]);
+
+  editorARedo.click({
+    clickCount: 3,
+  });
+  delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'a',
+    },
+    {
+      insert: 'bc',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'd',
+      attributes: {
+        bold: true,
+        italic: true,
+      },
+    },
+    {
+      insert: 'efg',
+      attributes: {
+        italic: true,
+      },
+    },
+    {
+      insert: 'h',
+      attributes: {
+        bold: true,
+        italic: true,
+      },
+    },
+    {
+      insert: 'ij',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'k',
     },
   ]);
 });
