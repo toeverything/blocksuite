@@ -108,6 +108,10 @@ export class SlashMenu extends LitElement {
    *   and if the following key is not the backspace key, the slash menu will be closed
    */
   private _keyDownListener = (e: KeyboardEvent) => {
+    // This listener be bind to the window and the rich text element
+    // So we need to ensure that the event is triggered once.
+    // We also need to prevent the event from triggering the keyboard bindings action
+    e.stopPropagation();
     if (this._hide) {
       if (e.key !== 'Backspace') {
         this.abortController.abort();
@@ -179,8 +183,6 @@ export class SlashMenu extends LitElement {
     }
     // prevent arrow key from moving cursor
     e.preventDefault();
-    // prevent the event from triggering the keyboard bindings action
-    e.stopPropagation();
   };
 
   /**
