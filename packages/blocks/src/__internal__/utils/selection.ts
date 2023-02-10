@@ -15,7 +15,6 @@ import {
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
-  getEdgelessPageBlock,
   getElementFromEventTarget,
   getModelByElement,
   getModelsByRange,
@@ -156,8 +155,6 @@ export function focusBlockByModelEdgeless(
   if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
     throw new Error("Can't focus frame or page!");
   }
-  const defaultPageBlock = getEdgelessPageBlock(model);
-  console.dir(defaultPageBlock);
 
   if (
     matchFlavours(model, [
@@ -176,7 +173,6 @@ export function focusBlockByModelEdgeless(
   }
 
   const element = getBlockElementByModel(model);
-  console.log(element, 'element');
 
   const editableContainer = element?.querySelector('[contenteditable]');
 

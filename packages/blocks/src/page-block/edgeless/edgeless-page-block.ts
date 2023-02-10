@@ -12,6 +12,7 @@ import {
   BlockHost,
   focusBlockByModelEdgeless,
   focusPreviousBlock,
+  getNextBlock,
   getPreviousBlock,
   getStartModelBySelection,
   hotkey,
@@ -153,44 +154,35 @@ export class EdgelessPageBlockComponent
       // TODO fix event trigger out of editor
       const model = getStartModelBySelection();
       const previousBlock = getPreviousBlock(model);
+
       const range = nativeSelection.getRangeAt(0);
-      const { left, top } = range.getBoundingClientRect();
+      const { left, bottom } = range.getBoundingClientRect();
       if (!previousBlock) {
         // edgeless no title
         // focusTitle();
         return;
       }
 
-      // Workaround select to empty line will get empty range
-      // If at empty line range.getBoundingClientRect will return 0
-      //
-      // You can see the spec here:
-      // The `getBoundingClientRect()` method, when invoked, must return the result of the following algorithm:
-      //   - Let list be the result of invoking getClientRects() on the same range this method was invoked on.
-      //   - If list is empty return a DOMRect object whose x, y, width and height members are zero.
-      // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
-      if (left === 0 && top === 0) {
-        if (!(range.startContainer instanceof HTMLElement)) {
-          console.warn(
-            "Failed to calculate caret position! range.getBoundingClientRect() is zero and it's startContainer not an HTMLElement.",
-            range
-          );
-          focusPreviousBlock(model);
-          return;
-        }
-        const rect = range.startContainer.getBoundingClientRect();
-        focusPreviousBlock(model, new Point(rect.left, rect.top));
-        return;
-      }
-      focusBlockByModelEdgeless(model, new Point(left, top));
-
-      console.log(model);
-
+      focusBlockByModelEdgeless(previousBlock, new Point(left, bottom));
       return;
     }
   };
 
-  private _handleDown = (e: KeyboardEvent) => {};
+  private _handleDown = (e: KeyboardEvent) => {
+    const nativeSelection = window.getSelection();
+    if (nativeSelection?.anchorNode) {
+      // TODO fix event trigger out of editor
+      const model = getStartModelBySelection();
+      const nextBlock = getNextBlock(model);
+      if (!nextBlock) return;
+
+      const range = nativeSelection.getRangeAt(0);
+      const { left, top } = range.getBoundingClientRect();
+
+      focusBlockByModelEdgeless(nextBlock, new Point(left, top));
+      return;
+    }
+  };
 
   private _handleBackspace = (e: KeyboardEvent) => {
     if (this._selection.blockSelectionState.type === 'single') {

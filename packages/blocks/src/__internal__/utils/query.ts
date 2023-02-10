@@ -140,15 +140,6 @@ export function getDefaultPageBlock(model: BaseBlockModel) {
   return page;
 }
 
-// TODO: 是不是可以改改 根据 有无 selection 就能区分 default 和 edgeless
-export function getEdgelessPageBlock(model: BaseBlockModel) {
-  assertExists(model.page.root);
-  const page = document.querySelector(
-    `[${ATTR}="${model.page.root.id}"]`
-  ) as EdgelessPageBlockComponent;
-  return page;
-}
-
 export function getContainerByModel(model: BaseBlockModel) {
   assertExists(model.page.root);
   const page = document.querySelector(
