@@ -90,6 +90,9 @@ export class BlockHub extends NonShadowLitElement {
   @query('.block-hub-icons-container')
   private _blockHubIconsContainer!: HTMLElement;
 
+  @query('.block-hub-menu-container')
+  private _blockHubMenuContainer!: HTMLElement;
+
   @query('[role="menu-entry"]')
   private _blockHubMenuEntry!: HTMLElement;
 
@@ -200,7 +203,7 @@ export class BlockHub extends NonShadowLitElement {
       flex-flow: column;
       justify-content: center;
       align-items: center;
-      padding: 4px;
+      padding: 0px 4px;
       position: fixed;
       width: 44px;
       background: var(--affine-page-background);
@@ -213,6 +216,8 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       margin-bottom: 8px;
       position: relative;
+      background: var(--affine-page-background);
+      border-radius: 5px;
       fill: var(--affine-line-number-color);
       height: 36px;
     }
@@ -407,10 +412,13 @@ export class BlockHub extends NonShadowLitElement {
       clearTimeout(this._timer);
     }
     if (!this._expanded) {
+      // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
+      this._blockHubMenuContainer.style.padding = '0px 4px';
       this._timer = window.setTimeout(() => {
         this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
     } else {
+      this._blockHubMenuContainer.style.padding = '4px';
       this._timer = window.setTimeout(() => {
         this._blockHubIconsContainer.style.overflow = 'unset';
       }, this._delay);

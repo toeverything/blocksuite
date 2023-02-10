@@ -40,7 +40,7 @@ class ArrowToolTip extends LitElement {
       justify-content: center;
       align-items: center;
       white-space: pre;
-      color: var(--affine-page-background);
+      color: var(--affine-tooltip-color);
     }
 
     .arrow {

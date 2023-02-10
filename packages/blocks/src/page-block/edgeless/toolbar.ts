@@ -193,7 +193,7 @@ export class EdgelessToolBar extends LitElement {
       display: flex;
       align-items: center;
       height: 48px;
-      background: #ffffff;
+      background: var(--affine-page-background);
       box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: currentColor;
