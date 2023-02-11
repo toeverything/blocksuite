@@ -1,3 +1,5 @@
+// This file should be sync with quill keyboard module between v1.3.7 and v2
+// PLEASE DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING
 import { isEqual } from '@blocksuite/global/utils';
 import Quill from 'quill';
 
@@ -20,6 +22,8 @@ export class KeyboardWithEvent extends Keyboard {
     return binding.key === evt.key || binding.key === evt.which;
   }
 
+  // Remove the legacy `normalize` function,
+  // Avoid the binding key to be normalized to keyCode
   // See https://github.com/quilljs/quill/blob/d2f689fb4744cdada96c632a8bccf6d476932d7b/modules/keyboard.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addBinding(keyBinding: any, context: any, handler: any) {
@@ -148,6 +152,7 @@ function normalize(binding: any): any {
   } else if (typeof binding === 'object') {
     binding = { ...binding };
 
+    // XXX It will break keyboard bindings for 'Z' and 'Y'
     // Patch https://github.com/quilljs/quill/blob/0148738cb22d52808f35873adb620ca56b1ae061/modules/history.js#L20-L25
     if (['Z', 'Y'].includes(binding.key)) {
       binding.key = binding.key.toLowerCase();
