@@ -33,7 +33,7 @@ export function getListIcon({
   >
     ${(() => {
       const blocksWithHiddenChildren =
-        model.page.awarenessStore.getFlag('blocks_with_hidden_children') ?? [];
+        model.page.blocksWithHiddenChildren ?? [];
       switch (model.type) {
         case 'bulleted':
           return points[deep % points.length];
