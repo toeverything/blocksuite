@@ -1,6 +1,7 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { Detail } from './types.js';
 import { matchFlavours } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
+
+import type { Detail } from './types.js';
 
 /**
  * Whether the block supports rendering its children.

@@ -1,5 +1,5 @@
-import { BaseElement, HitTestOptions } from '../base-element.js';
 import { isPointIn } from '../../utils/hit-utils.js';
+import { BaseElement, HitTestOptions } from '../base-element.js';
 import { getRectanglePath } from './rect-utils.js';
 import { DashStyle, ShapeStyles, SizeStyle } from './shape-style.js';
 

@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.3",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "type": "module",
@@ -8,6 +8,7 @@
     "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
     "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
     "test:unit:ui": "vitest --ui",
     "test:e2e": "playwright test",
     "test": "pnpm test:unit && pnpm test:e2e"
@@ -22,16 +23,16 @@
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
     "ky": "^0.33.2",
-    "lib0": "^0.2.60",
+    "lib0": "^0.2.62",
     "merge": "^2.1.1",
-    "nanoid": "^4.0.0",
+    "nanoid": "^4.0.1",
     "y-protocols": "^1.0.5",
     "y-webrtc": "^10.2.4",
     "zod": "^3.20.2"
   },
   "devDependencies": {
     "lit": "^2.6.1",
-    "yjs": "^13.5.44"
+    "yjs": "^13.5.45"
   },
   "peerDependencies": {
     "yjs": "^13"
@@ -46,7 +47,10 @@
     "types": "dist/index.d.ts",
     "exports": {
       "./src/*": "./dist/*.js",
-      ".": "./dist/index.js"
+      ".": {
+        "module": "./dist/index.js",
+        "import": "./dist/index.js"
+      }
     }
   }
 }

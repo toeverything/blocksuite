@@ -1,8 +1,7 @@
 import './utils/declare-test-window.js';
-import { test } from '@playwright/test';
+
 import {
-  SHORT_KEY,
-  pressBackspace,
+  captureHistory,
   copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -11,26 +10,28 @@ import {
   initEmptyParagraphState,
   pasteByKeyboard,
   pasteContent,
+  pressBackspace,
   pressEnter,
   pressShiftTab,
+  pressSpace,
   pressTab,
   resetHistory,
   setQuillSelection,
   setSelection,
-  undoByClick,
-  pressSpace,
-  captureHistory,
+  SHORT_KEY,
   type,
+  undoByClick,
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
   assertClipItems,
   assertRichTexts,
   assertSelection,
+  assertStoreMatchJSX,
   assertText,
   assertTextFormats,
-  assertStoreMatchJSX,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('clipboard copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -361,9 +362,7 @@ test('should keep first line format when pasted into a new line', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,130]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="1"
@@ -403,9 +402,7 @@ test('should keep first line format when pasted into a new line', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,170]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="1"

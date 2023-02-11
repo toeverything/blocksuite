@@ -1,9 +1,9 @@
-import type { Selectable, XYWH } from '../selection-manager.js';
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
+
 import type {
   DefaultMouseMode,
   SelectionEvent,
 } from '../../../__internal__/index.js';
-import { getSelectionBoxBound, isBlock, pick } from '../utils.js';
 import {
   handleNativeRangeClick,
   handleNativeRangeDragMove,
@@ -11,13 +11,14 @@ import {
   resetNativeSelection,
   TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../../utils/position.js';
-import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import type { Selectable, XYWH } from '../selection-manager.js';
+import { getSelectionBoxBound, isBlock, pick } from '../utils.js';
 import { MouseModeController } from './index.js';
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
   readonly mouseMode = <DefaultMouseMode>{
@@ -105,7 +106,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     repairContextMenuRange(e);
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(_: SelectionEvent): void {
     noop();
   }
 
@@ -126,7 +127,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
-    this._startRange = caretRangeFromPoint(e.x, e.y);
+    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   }
 
   onContainerDragMove(e: SelectionEvent): void {
@@ -199,7 +200,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._edgeless.signals.hoverUpdated.emit();
   }
 
-  onContainerMouseOut(e: SelectionEvent): void {
+  onContainerMouseOut(_: SelectionEvent): void {
     noop();
   }
 

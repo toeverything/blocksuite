@@ -1,6 +1,6 @@
 import { IBound, MIN_ZOOM } from './consts.js';
-import { GridManager } from './grid.js';
 import type { PhasorElement } from './elements/index.js';
+import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 
 export class Renderer {

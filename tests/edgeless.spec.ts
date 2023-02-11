@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { expect, Page, test } from '@playwright/test';
+
+import { expect, Page } from '@playwright/test';
+
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
   dragBetweenCoords,
@@ -21,6 +23,7 @@ import {
   assertRichTexts,
   assertSelection,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 async function getFrameSize(
   page: Page,
@@ -187,6 +190,7 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
 
   await switchMouseMode(page);
   const startPoint = await page.evaluate(() => {
+    // @ts-expect-error
     const hitbox = window.std.getShapeBlockHitBox('3');
     if (!hitbox) {
       throw new Error('hitbox is null');
@@ -207,4 +211,45 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
     return document.querySelector('[data-block-id="3"]') != null;
   });
   expect(exist).toBe(false);
+});
+
+test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await switchEditorMode(page);
+
+  const toolbarLocator = await page.locator('edgeless-toolbar');
+  await expect(toolbarLocator).toBeVisible();
+  await page.click('.icon-container[role="shape"]');
+  const shapeComponentLocator = await page.locator('shape-menu');
+  await expect(shapeComponentLocator).toBeVisible();
+
+  await page.click('.icon-container[role="shape"]');
+  await expect(shapeComponentLocator).toBeHidden();
+});
+
+test('edgeless arrow up/down', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+
+  await type(page, 'hello');
+  await page.keyboard.press('Enter');
+  await type(page, 'world');
+  await page.keyboard.press('Enter');
+  await type(page, 'foo');
+
+  await switchEditorMode(page);
+
+  await page.click('.affine-edgeless-block-child');
+  await page.click('[data-block-id="2"]');
+
+  await page.keyboard.press('ArrowDown');
+
+  assertSelection(page, 1, 4, 0);
+  await page.keyboard.press('ArrowUp');
+  assertSelection(page, 0, 4, 0);
+  await page.keyboard.press('ArrowUp');
+  assertSelection(page, 0, 4, 0);
 });

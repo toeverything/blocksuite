@@ -1,8 +1,9 @@
 import type { TemplateResult } from 'lit/html.js';
+
 import {
   ArrowRightIcon,
   BulletedListIcon,
-  CodeIcon,
+  CodeBlockIcon,
   DividerIcon,
   H1Icon,
   H2Icon,
@@ -25,7 +26,7 @@ export type BlockConfig<
   type: ALLProps[Flavour]['type'];
   name: string;
   hotkey: string | null;
-  icon: TemplateResult<2>;
+  icon: TemplateResult<1>;
 };
 
 export const paragraphConfig = [
@@ -48,7 +49,6 @@ export const paragraphConfig = [
     type: 'h2',
     name: 'Heading 2',
     hotkey: 'command+option+2,ctrl+shift+2',
-
     icon: H2Icon,
   },
   {
@@ -112,7 +112,7 @@ export const paragraphConfig = [
     type: undefined,
     name: 'Code Block',
     hotkey: 'command+option+c,ctrl+alt+c',
-    icon: CodeIcon,
+    icon: CodeBlockIcon,
   },
   {
     flavour: 'affine:paragraph',
@@ -188,10 +188,10 @@ export const BLOCKHUB_TEXT_ITEMS = [
   },
   {
     flavour: 'affine:code',
-    type: 'code',
+    type: null,
     name: 'Code Block',
     description: 'Capture a code snippet.',
-    icon: CodeIcon,
+    icon: CodeBlockIcon,
     toolTip: 'Drag to insert Code Block',
   },
   {

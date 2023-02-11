@@ -1,7 +1,8 @@
-import { html, css } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import type { EmbedBlockModel } from './embed-model.js';
+
 import { NonShadowLitElement } from '../__internal__/index.js';
+import type { EmbedBlockModel } from './embed-model.js';
 
 @customElement('affine-embed')
 export class EmbedBlockComponent extends NonShadowLitElement {
@@ -17,7 +18,6 @@ export class EmbedBlockComponent extends NonShadowLitElement {
       outline: none;
       border: 0;
       font-family: inherit;
-      color: inherit;
       text-align: center;
       color: var(--affine-icon-color);
       display: none;

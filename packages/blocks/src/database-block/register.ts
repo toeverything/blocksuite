@@ -1,10 +1,11 @@
-import type { Page } from '@blocksuite/store';
 import type { BlockTag, RowHost, TagSchema } from '@blocksuite/global/database';
-import { LitElement } from 'lit';
-import type { literal } from 'lit/static-html.js';
-import { property } from 'lit/decorators.js';
-import type { DatabaseBlockModel } from './database-model.js';
+import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { LitElement } from 'lit';
+import { property } from 'lit/decorators.js';
+import type { literal } from 'lit/static-html.js';
+
+import type { DatabaseBlockModel } from './database-model.js';
 
 export abstract class DatabaseCellLitElement extends LitElement {
   static tag: ReturnType<typeof literal>;

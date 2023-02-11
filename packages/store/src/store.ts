@@ -1,21 +1,22 @@
-import type { Space } from './space.js';
-import type { IdGenerator } from './utils/id-generator.js';
+import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
+
+import { AwarenessStore, RawAwarenessState } from './awareness.js';
+import type { BlobOptionsGetter } from './persistence/blob/index.js';
 import type {
   DocProvider,
   DocProviderConstructor,
 } from './persistence/doc/index.js';
-import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
+import type { Space } from './space.js';
+import type { IdGenerator } from './utils/id-generator.js';
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
-  uuidv4,
   nanoid,
+  uuidv4,
 } from './utils/id-generator.js';
-import { merge } from 'merge';
+import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
 import { BlockSuiteDoc } from './yjs/index.js';
-import { AwarenessStore, RawAwarenessState } from './awareness.js';
-import type { BlobOptionsGetter } from './persistence/blob/index.js';
 
 export interface SerializedStore {
   [key: string]: {
@@ -72,8 +73,8 @@ const flagsPreset = {
   enable_drag_handle: true,
   enable_block_hub: true,
   enable_surface: true,
+  enable_edgeless_toolbar: true,
   enable_slash_menu: false,
-  enable_append_flavor_slash: false,
   enable_database: false,
 
   enable_toggle_block: false,
@@ -88,6 +89,7 @@ export class Store {
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
+  connected = false;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
   constructor({
@@ -133,6 +135,16 @@ export class Store {
         })
     );
   }
+
+  connect = () => {
+    this.providers.forEach(provider => provider.connect?.());
+    this.connected = true;
+  };
+
+  disconnect = () => {
+    this.providers.forEach(provider => provider.disconnect?.());
+    this.connected = false;
+  };
 
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);

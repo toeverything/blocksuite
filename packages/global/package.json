@@ -1,19 +1,22 @@
 {
   "name": "@blocksuite/global",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.3",
   "types": "./index.d.ts",
   "type": "module",
   "scripts": {
     "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
     "test:unit:ui": "vitest --ui",
     "build": "tsc"
   },
+  "sideEffects": false,
   "exports": {
     ".": "./index.d.ts",
     "./database": "./src/database.ts",
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
-    "./config": "./src/config/index.ts"
+    "./config": "./src/config/index.ts",
+    "./error": "./src/error.ts"
   },
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -24,6 +27,7 @@
       "./database": "./dist/database.js",
       "./utils": "./dist/utils.js",
       "./debug": "./dist/debug.js",
+      "./error": "./dist/error.js",
       "./config": "./dist/config/index.js"
     },
     "files": [

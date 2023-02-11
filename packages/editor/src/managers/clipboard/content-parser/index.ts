@@ -1,12 +1,10 @@
-import { marked } from 'marked';
 import type { BaseService, PageBlockModel } from '@blocksuite/blocks';
+import type { OpenBlockInfo } from '@blocksuite/blocks';
 import { getServiceOrRegister } from '@blocksuite/blocks';
 import { BaseBlockModel, Signal } from '@blocksuite/store';
-import type {
-  EditorContainer,
-  OpenBlockInfo,
-  SelectedBlock,
-} from '../../../index.js';
+import { marked } from 'marked';
+
+import type { EditorContainer, SelectedBlock } from '../../../index.js';
 import { FileExporter } from '../../file-exporter/file-exporter.js';
 import { HtmlParser } from './parse-html.js';
 

@@ -1,13 +1,13 @@
 // operations used in rich-text level
 
-import { Page, Text } from '@blocksuite/store';
+import { ParagraphBlockComponent, SelectionUtils } from '@blocksuite/blocks';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import { ParagraphBlockComponent, SelectionUtils } from '@blocksuite/blocks';
-import { Utils } from '@blocksuite/store';
+import { Page, Text, Utils } from '@blocksuite/store';
 import type { Quill } from 'quill';
 
 import type {
@@ -18,19 +18,19 @@ import type {
   ParagraphBlockModel,
 } from '../../models.js';
 import {
-  ExtendedModel,
-  getRichTextByModel,
-  getPreviousBlock,
   asyncFocusRichText,
+  convertToDivider,
   convertToList,
   convertToParagraph,
-  convertToDivider,
+  ExtendedModel,
   focusBlockByModel,
-  supportsChildren,
-  getModelByElement,
   focusTitle,
-  getCurrentRange,
   getBlockElementByModel,
+  getCurrentRange,
+  getModelByElement,
+  getPreviousBlock,
+  getRichTextByModel,
+  supportsChildren,
 } from '../utils/index.js';
 
 const TOGGLE_PLACEHOLDER = 'Toggle';
@@ -197,6 +197,55 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     assertExists(model);
     const richText = getRichTextByModel(model);
     richText?.quill.setSelection(offset, 0);
+  });
+}
+
+export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
+  const previousSibling = page.getPreviousSibling(models[0]);
+
+  if (!previousSibling || !supportsChildren(previousSibling)) {
+    // Bottom, can not indent, do nothing
+    return;
+  }
+  if (
+    !models.every((model, idx, array) => {
+      const previousModel = array.at(idx - 1);
+      if (!previousModel) {
+        return false;
+      }
+      const p1 = page.getParent(model);
+      const p2 = page.getParent(previousModel);
+      return p1 && p2 && p1.id === p2.id;
+    })
+  ) {
+    return;
+  }
+  page.captureSync();
+  const parent = page.getParent(models[0]);
+  assertExists(parent);
+  models.forEach(model => {
+    // 1. backup target block children and remove them from target block
+    const children = model.children;
+    page.updateBlock(model, {
+      children: [],
+    });
+
+    // 2. remove target block from parent block
+    page.updateBlock(parent, {
+      children: parent.children.filter(child => child.id !== model.id),
+    });
+
+    // 3. append target block and children to previous sibling block
+    page.updateBlock(previousSibling, {
+      children: [...previousSibling.children, model, ...children],
+    });
+
+    // FIXME: after quill onload
+    requestAnimationFrame(() => {
+      assertExists(model);
+      const richText = getRichTextByModel(model);
+      richText?.quill.setSelection(0, 0);
+    });
   });
 }
 
@@ -698,8 +747,6 @@ export function tryMatchSpaceHotkey(
       placeholderToSet = TOGGLE_PLACEHOLDER;
       break;
     case '***':
-      isConverted = convertToDivider(page, model, prefix);
-      break;
     case '---':
       isConverted = convertToDivider(page, model, prefix);
       break;

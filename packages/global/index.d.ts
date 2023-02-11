@@ -76,8 +76,8 @@ declare type BlockSuiteFlags = {
 
   enable_toggle_block: boolean;
   enable_hide_children: boolean;
-  blocks_with_hidden_children: string[] | undefined;
 
+  enable_edgeless_toolbar: boolean;
   readonly: Record<string, boolean>;
 };
 
@@ -96,6 +96,7 @@ declare namespace BlockSuiteInternal {
   import {
     // Model
     CodeBlockModel,
+    DatabaseBlockModel,
     DividerBlockModel,
     EmbedBlockModel,
     FrameBlockModel,
@@ -103,7 +104,6 @@ declare namespace BlockSuiteInternal {
     PageBlockModel,
     ParagraphBlockModel,
     SurfaceBlockModel,
-    DatabaseBlockModel,
   } from '@blocksuite/blocks/models';
 
   export type BlockModels = {

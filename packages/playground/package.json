@@ -1,6 +1,7 @@
 {
   "name": "@blocksuite/playground",
   "private": true,
+  "version": "0.4.0-alpha.3",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -16,11 +17,11 @@
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@lit-labs/react": "^1.1.1",
-    "@shoelace-style/shoelace": "2.0.0-beta.88",
+    "@shoelace-style/shoelace": "2.0.0",
     "lit": "^2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "yjs": "^13.5.44"
+    "yjs": "^13.5.45"
   },
   "license": "MPL-2.0",
   "devDependencies": {

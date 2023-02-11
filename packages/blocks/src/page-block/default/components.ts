@@ -1,12 +1,20 @@
-import { html } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
+import { BLOCK_ID_ATTR, CopyIcon, DeleteIcon } from '@blocksuite/global/config';
 import {
   CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
   DownloadIcon,
   LineWrapIcon,
-} from '../icons.js';
+} from '@blocksuite/global/config';
+import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import type {
+  CodeBlockOption,
+  DefaultPageSignals,
+  EmbedEditingState,
+} from './default-page-block.js';
 import {
   copyCode,
   copyImage,
@@ -15,28 +23,13 @@ import {
   focusCaption,
   toggleWrap,
 } from './utils.js';
-import { toolTipStyle } from '../../components/tooltip.js';
-import type {
-  CodeBlockOption,
-  DefaultPageSignals,
-  EmbedEditingState,
-} from './default-page-block.js';
-import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { repeat } from 'lit/directives/repeat.js';
 
-export function FrameSelectionRect(
-  rect: DOMRect | null,
-  scroll: {
-    left: number;
-    top: number;
-  }
-) {
+export function FrameSelectionRect(rect: DOMRect | null, scrollTop: number) {
   if (rect === null) return null;
 
   const style = {
-    left: scroll.left + rect.left + 'px',
-    top: scroll.top + rect.top + 'px',
+    left: rect.left + 'px',
+    top: scrollTop + rect.top + 'px',
     width: rect.width + 'px',
     height: rect.height + 'px',
   };
@@ -57,7 +50,11 @@ export function FrameSelectionRect(
 }
 
 export function EmbedSelectedRectsContainer(
-  rects: { left: number; top: number; width: number; height: number }[]
+  rects: { left: number; top: number; width: number; height: number }[],
+  scroll: {
+    left: number;
+    top: number;
+  }
 ) {
   return html`
     <style>
@@ -71,8 +68,8 @@ export function EmbedSelectedRectsContainer(
         const style = {
           position: 'absolute',
           display: 'block',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
+          left: scroll.left + rect.left + 'px',
+          top: scroll.top + rect.top + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
