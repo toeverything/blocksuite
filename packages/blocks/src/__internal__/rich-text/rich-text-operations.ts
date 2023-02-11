@@ -7,7 +7,7 @@ import {
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import { Page, Text, Utils } from '@blocksuite/store';
+import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
 import type { Quill } from 'quill';
 
 import type {
