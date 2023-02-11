@@ -142,19 +142,22 @@ const SHORTKEY = /Mac/i.test(navigator.platform) ? 'metaKey' : 'ctrlKey';
 
 // See https://github.com/quilljs/quill/blob/d2f689fb4744cdada96c632a8bccf6d476932d7b/modules/keyboard.ts#L757-L774
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalize(binding: unknown): any {
+function normalize(binding: any): any {
   if (typeof binding === 'string' || typeof binding === 'number') {
     binding = { key: binding };
   } else if (typeof binding === 'object') {
     binding = { ...binding };
+
+    // Patch https://github.com/quilljs/quill/blob/0148738cb22d52808f35873adb620ca56b1ae061/modules/history.js#L20-L25
+    if (['Z', 'Y'].includes(binding.key)) {
+      binding.key = binding.key.toLowerCase();
+    }
+    // End patch
   } else {
     return null;
   }
-  // @ts-expect-error
   if (binding.shortKey) {
-    // @ts-expect-error
     binding[SHORTKEY] = binding.shortKey;
-    // @ts-expect-error
     delete binding.shortKey;
   }
   return binding;
