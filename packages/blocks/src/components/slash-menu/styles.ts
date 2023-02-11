@@ -16,7 +16,7 @@ export const styles = css`
   }
 
   .slash-menu {
-    font-size: var(--affine-font-sm);
+    font-size: var(--affine-font-base);
     position: absolute;
     padding: 8px 4px;
     display: flex;
@@ -45,11 +45,11 @@ export const styles = css`
   .slash-category::before {
     content: '';
     position: absolute;
-    top: 9px;
+    top: 10px;
     right: 0;
     height: 100%;
     width: 1px;
-    background-color: #e3e2e4;
+    background-color: var(--affine-border-color);
   }
 
   .slash-category-name {
@@ -94,7 +94,7 @@ export const styles = css`
   }
 
   .slash-item-divider {
-    border: 1px dashed #e3e2e4;
+    border: 1px dashed var(--affine-border-color);
     margin: 8px 0;
   }
 `;

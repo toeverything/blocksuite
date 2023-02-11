@@ -1,8 +1,5 @@
 name: Label Checker
 on:
-  merge_group:
-    branches:
-      - master
   pull_request:
     types:
       - labeled

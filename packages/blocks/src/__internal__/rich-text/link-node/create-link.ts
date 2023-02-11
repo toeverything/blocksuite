@@ -1,4 +1,4 @@
-import './link-node';
+import './link-node.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';

@@ -1,17 +1,15 @@
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR, CopyIcon, DeleteIcon } from '@blocksuite/global/config';
+import {
+  CaptionIcon,
+  DownloadIcon,
+  LineWrapIcon,
+} from '@blocksuite/global/config';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { toolTipStyle } from '../../components/tooltip/tooltip.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import {
-  CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
-  DownloadIcon,
-  LineWrapIcon,
-} from '../icons.js';
 import type {
   CodeBlockOption,
   DefaultPageSignals,

@@ -136,29 +136,6 @@ export class ToolBar extends LitElement {
       throw new Error('Cannot find button');
     }
 
-    boldButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, { bold: true });
-    });
-    italicButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, { italic: true });
-    });
-    underlineButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, { underline: true });
-    });
-    strikethroughButton.addEventListener('click', () => {
-      toggleStyle(this.vEditor, { strikethrough: true });
-    });
-    inlineCode.addEventListener('click', () => {
-      toggleStyle(this.vEditor, { inlineCode: true });
-    });
-    resetButton.addEventListener('click', () => {
-      const rangeStatic = this.vEditor.getVRange();
-      if (!rangeStatic) {
-        return;
-      }
-      this.vEditor.resetText(rangeStatic);
-    });
-
     const undoManager = new Y.UndoManager(this.vEditor.yText, {
       trackedOrigins: new Set([this.vEditor.yText.doc?.clientID]),
     });
@@ -167,6 +144,35 @@ export class ToolBar extends LitElement {
     });
     redoButton.addEventListener('click', () => {
       undoManager.redo();
+    });
+
+    boldButton.addEventListener('click', () => {
+      undoManager.stopCapturing();
+      toggleStyle(this.vEditor, { bold: true });
+    });
+    italicButton.addEventListener('click', () => {
+      undoManager.stopCapturing();
+      toggleStyle(this.vEditor, { italic: true });
+    });
+    underlineButton.addEventListener('click', () => {
+      undoManager.stopCapturing();
+      toggleStyle(this.vEditor, { underline: true });
+    });
+    strikethroughButton.addEventListener('click', () => {
+      undoManager.stopCapturing();
+      toggleStyle(this.vEditor, { strikethrough: true });
+    });
+    inlineCode.addEventListener('click', () => {
+      undoManager.stopCapturing();
+      toggleStyle(this.vEditor, { inlineCode: true });
+    });
+    resetButton.addEventListener('click', () => {
+      undoManager.stopCapturing();
+      const rangeStatic = this.vEditor.getVRange();
+      if (!rangeStatic) {
+        return;
+      }
+      this.vEditor.resetText(rangeStatic);
     });
   }
 

@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'color-emoji';
+  src: local('Apple Color Emoji'), local('Segoe UI Emoji'),
+    local('Segoe UI Symbol'), local('Noto Color Emoji');
+  unicode-range: U+1F000-1F644, U+203C-3299;
+}
+
 :root {
   --affine-theme-mode: light;
   --affine-editor-mode: page;
@@ -23,7 +30,7 @@
   --affine-quote-color: #4c6275;
   --affine-selected-color: rgba(104, 128, 255, 0.1);
   --affine-placeholder-color: #555770;
-  --affine-border-color: #555770;
+  --affine-border-color: #e3e2e4;
   --affine-disable-color: #555770;
   --affine-tooltip-color: #fff;
   --affine-line-number-color: #555770;
@@ -44,9 +51,9 @@
   --affine-line-height: calc(1em + 8px);
   --affine-z-index-modal: 1000;
   --affine-z-index-popover: 100;
-  --affine-font-family: Avenir Next, Poppins, apple-system, BlinkMacSystemFont,
-    Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,
-    Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+  --affine-font-family: color-emoji, Avenir Next, Poppins, apple-system,
+    BlinkMacSystemFont, Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei,
+    Arial, Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
   --affine-font-number-family: Roboto Mono, apple-system, BlinkMacSystemFont,
     Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,

@@ -156,6 +156,7 @@ export function focusBlockByModel(
     throw new Error("Can't focus frame or page!");
   }
   const defaultPageBlock = getDefaultPageBlock(model);
+  // If focus on a follow block, we should select the block
   if (
     matchFlavours(model, [
       'affine:embed',
@@ -164,6 +165,11 @@ export function focusBlockByModel(
       'affine:database',
     ])
   ) {
+    if (!defaultPageBlock.selection) {
+      // TODO fix this
+      // In the edgeless mode
+      return;
+    }
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
@@ -184,11 +190,12 @@ export function focusBlockByModel(
 
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  defaultPageBlock.selection.state.clear();
+  defaultPageBlock.selection && defaultPageBlock.selection.state.clear();
   if (editableContainer) {
-    defaultPageBlock.selection.setFocusedBlockIndexByElement(
-      element as Element
-    );
+    defaultPageBlock.selection &&
+      defaultPageBlock.selection.setFocusedBlockIndexByElement(
+        element as Element
+      );
     focusRichText(editableContainer, position);
   }
 }

@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import './toolbar';
+import './toolbar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import { SurfaceManager } from '@blocksuite/phasor';
@@ -23,7 +23,9 @@ import type {
 import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import {
   bindCommonHotkey,
+  handleDown,
   handleMultiBlockBackspace,
+  handleUp,
   removeCommonHotKey,
   tryUpdateFrameSize,
 } from '../utils/index.js';
@@ -131,11 +133,14 @@ export class EdgelessPageBlockComponent
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
+    hotkey.addListener(HOTKEYS.UP, e => handleUp(e));
+    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e));
     bindCommonHotkey(this.page);
   }
 
   private _removeHotkeys() {
-    hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
+    hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
+
     removeCommonHotKey();
   }
 

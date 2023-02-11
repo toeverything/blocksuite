@@ -79,27 +79,34 @@ export function removeCommonHotKey() {
   ]);
 }
 
-function handleUp(
-  selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  e: KeyboardEvent
+export function handleUp(
+  e: KeyboardEvent,
+  selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  const nativeSelection = window.getSelection();
-  if (nativeSelection?.anchorNode) {
+  const hasNativeSelection = !!window.getSelection()?.rangeCount;
+  if (hasNativeSelection) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     const previousBlock = getPreviousBlock(model);
-    const range = nativeSelection.getRangeAt(0);
+    const range = getCurrentRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock) {
       focusTitle();
       return;
     }
 
-    // Workaround select to empty line will get empty range
-    // If at empty line range.getBoundingClientRect will return 0
+    // Workaround: focus to empty line will get empty range rect
     //
+    // See the following example:
+    // - long text
+    //   wrap line
+    // - |    <- caret at empty line,
+    //           if you press ArrowUp,
+    //           the cursor should jump to the start of `wrap line`,
+    //           instead of the start of `long text`!
+    //
+    // If at empty line range.getBoundingClientRect will return 0
     // You can see the spec here:
     // The `getBoundingClientRect()` method, when invoked, must return the result of the following algorithm:
     //   - Let list be the result of invoking getClientRects() on the same range this method was invoked on.
@@ -121,40 +128,60 @@ function handleUp(
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
-  signals.updateSelectedRects.emit([]);
-  const { state } = selection;
-  const selectedModel = getModelByElement(state.selectedBlocks[0]);
-  const page = getDefaultPageBlock(selectedModel);
-  e.preventDefault();
-  focusPreviousBlock(
-    selectedModel,
-    page.lastSelectionPosition instanceof Point
-      ? page.lastSelectionPosition
-      : 'end'
-  );
+  if (selection) {
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const page = getDefaultPageBlock(selectedModel);
+    selection.clearRects();
+    focusPreviousBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'end'
+    );
+    e.preventDefault();
+  }
 }
 
-function handleDown(
-  selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  e: KeyboardEvent
+export function handleDown(
+  e: KeyboardEvent,
+  selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  if (!selection.state.selectedBlocks.length) {
+  const hasNativeSelection = !!window.getSelection()?.rangeCount;
+  if (hasNativeSelection) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     if (matchFlavours(model, ['affine:code'])) {
       return;
     }
     const range = getCurrentRange();
-    // We can not focus 'start' directly,
-    // because pressing ArrowDown in multi-level indent line will cause the cursor to jump to wrong position
     const atLineEdge = isAtLineEdge(range);
     const { left, bottom } = range.getBoundingClientRect();
-    // Workaround select to empty line will get empty range
+    const isAtEmptyLine = left === 0 && bottom === 0;
+    // Workaround: at line edge will return wrong rect
+    // See the following example:
+    // - long text
+    //   |wrap line    <- caret at empty line,
+    //                    if you press ArrowDown,
+    //                    the cursor should jump to the start of `next line`,
+    //                    instead of the end of `next line`!
+    // - next line
+    //
+    // Workaround: focus to empty line will get empty range,
+    // we can not focus 'start' directly,
+    // because pressing ArrowDown in multi-level indent line will cause the cursor to jump to wrong position
     // If at empty line `range.getBoundingClientRect()` will return 0
     // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
-    const isAtEmptyLine = left === 0 && bottom === 0;
+    //
+    // See the following example:
+    // - text
+    //   - child
+    //     - |   <- caret at empty line,
+    //              if you press ArrowDown,
+    //              the cursor should jump to the end of `next`,
+    //              instead of the start of `next`!
+    // - next
     if (atLineEdge || isAtEmptyLine) {
       const richText = getRichTextByModel(model);
       assertExists(richText);
@@ -164,20 +191,27 @@ function handleDown(
     }
     focusNextBlock(model, new Point(left, bottom));
     return;
-  } else {
-    signals.updateSelectedRects.emit([]);
+  }
+  if (selection) {
     const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const lastEle = state.selectedBlocks.at(-1);
+    if (!lastEle) {
+      throw new Error(
+        "Failed to handleDown! Can't find last selected element!"
+      );
+    }
+    const selectedModel = getModelByElement(lastEle);
+    selection.clearRects();
     const page = getDefaultPageBlock(selectedModel);
-    e.preventDefault();
     focusNextBlock(
       selectedModel,
       page.lastSelectionPosition instanceof Point
         ? page.lastSelectionPosition
         : 'start'
     );
-    return;
+    e.preventDefault();
   }
+  return;
 }
 
 function handleTab(page: Page, selection: DefaultSelectionManager) {
@@ -343,10 +377,10 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(UP, e => {
-    handleUp(selection, signals, e);
+    handleUp(e, selection);
   });
   hotkey.addListener(DOWN, e => {
-    handleDown(selection, signals, e);
+    handleDown(e, selection);
   });
   hotkey.addListener(LEFT, e => {
     let model: BaseBlockModel | null = null;

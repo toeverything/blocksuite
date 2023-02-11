@@ -1,4 +1,4 @@
-import './button';
+import './button.js';
 
 import {
   ArrowDownIcon,
