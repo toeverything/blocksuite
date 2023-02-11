@@ -174,9 +174,13 @@ export class SlashMenu extends LitElement {
         )?.scrollIntoView();
         break;
       }
-      case 'ArrowRight':
       case 'ArrowLeft':
-        this.abortController.abort();
+        this._activeItemIndex = -1;
+        return;
+      case 'ArrowRight':
+        if (this._activeItemIndex < 0) {
+          this._activeItemIndex = 0;
+        }
         return;
       default:
         throw new Error(`Unknown key: ${e.key}`);
@@ -197,6 +201,9 @@ export class SlashMenu extends LitElement {
   };
 
   private _handleItemClick(index: number) {
+    if (index < 0 || index >= this._filterItems.length) {
+      return;
+    }
     // Need to remove the search string
     this.abortController.abort(this._searchString);
     const { action } = this._filterItems[index];
