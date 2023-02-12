@@ -228,9 +228,18 @@ function isPointIn(x: number, detectRect: DOMRect) {
   return x >= detectRect.left && x <= detectRect.left + detectRect.width;
 }
 
+const offscreen = document.createElement('div');
+
 function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   const block = blocks[mid];
-  const hoverDom = getBlockById(block.id);
+  let hoverDom = getBlockById(block.id);
+
+  // Give an empty position (xywh=0,0,0,0) for invisible blocks.
+  // Block may be hidden, e.g., inside a toggle list, see https://github.com/toeverything/blocksuite/pull/1139)
+  if (!hoverDom) {
+    hoverDom = offscreen;
+  }
+
   assertExists(hoverDom);
   let blockRect: DOMRect | null = null;
   let detectRect: DOMRect | null = null;
