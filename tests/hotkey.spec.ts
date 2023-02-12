@@ -632,3 +632,20 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await page.keyboard.press(`${SHORT_KEY}+Enter`);
   await assertRichTexts(page, ['1', '23', '\n']);
 });
+
+test('should bracket complete works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '([{');
+  // type without selection should not trigger bracket complete
+  await assertRichTexts(page, ['([{']);
+
+  await dragBetweenIndices(page, [0, 1], [0, 2]);
+  await type(page, '(');
+  await assertRichTexts(page, ['(([){']);
+
+  await type(page, ')');
+  // Should not trigger bracket complete when type right bracket
+  await assertRichTexts(page, ['(()){']);
+});
