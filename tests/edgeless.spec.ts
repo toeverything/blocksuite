@@ -247,9 +247,9 @@ test('edgeless arrow up/down', async ({ page }) => {
 
   await page.keyboard.press('ArrowDown');
 
-  assertSelection(page, 1, 4, 0);
+  await assertSelection(page, 1, 4, 0);
   await page.keyboard.press('ArrowUp');
-  assertSelection(page, 0, 4, 0);
+  await assertSelection(page, 0, 4, 0);
   await page.keyboard.press('ArrowUp');
-  assertSelection(page, 0, 4, 0);
+  await assertSelection(page, 0, 4, 0);
 });
