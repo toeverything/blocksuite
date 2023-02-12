@@ -18,6 +18,7 @@
   "license": "MPL-2.0",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.3",
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",

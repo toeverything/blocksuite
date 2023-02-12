@@ -9,19 +9,13 @@ import * as Y from 'yjs';
 import type { AwarenessStore } from '../awareness.js';
 import { BaseBlockModel } from '../base.js';
 import { Space, StackItem } from '../space.js';
-import {
-  PrelimText,
-  RichTextAdapter,
-  Text,
-  TextType,
-} from '../text-adapter.js';
+import { RichTextAdapter, Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
   initInternalProps,
   syncBlockProps,
   toBlockProps,
-  trySyncTextProp,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
@@ -34,7 +28,7 @@ export type YBlocks = Y.Map<YBlock>;
 export type BlockProps = Record<string, any> & {
   id: string;
   flavour: string;
-  text?: void | TextType;
+  text?: Text;
   children?: BaseBlockModel[];
 };
 
@@ -59,7 +53,6 @@ export class Page extends Space<PageData> {
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | BaseBlockModel[] | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _splitSet = new Set<Text | PrelimText>();
   private _synced = false;
 
   // TODO use schema
@@ -359,7 +352,6 @@ export class Page extends Space<PageData> {
       const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
       assertExists(defaultProps);
       syncBlockProps(defaultProps, yBlock, clonedProps, this._ignoredKeys);
-      trySyncTextProp(this._splitSet, yBlock, clonedProps.text);
 
       if (typeof parent === 'string') {
         parent = this._blockMap.get(parent);
@@ -442,9 +434,7 @@ export class Page extends Space<PageData> {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
     this.transact(() => {
-      if (props.text instanceof PrelimText) {
-        props.text.ready = true;
-      } else if (props.text instanceof Text) {
+      if (props.text instanceof Text) {
         model.text = props.text;
         yBlock.set('prop:text', props.text.yText);
       }
@@ -575,10 +565,6 @@ export class Page extends Space<PageData> {
     const adapter = this.richTextAdapters.get(id);
     adapter?.destroy();
     this.richTextAdapters.delete(id);
-  }
-
-  markTextSplit(base: Text, left: PrelimText, right: PrelimText) {
-    this._splitSet.add(base).add(left).add(right);
   }
 
   syncFromExistingDoc() {
