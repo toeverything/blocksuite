@@ -44,8 +44,6 @@ export interface SelectionArea {
   end: DOMPoint;
 }
 
-export type XYWH = [number, number, number, number];
-
 const MIN_ZOOM = 0.3;
 
 export class ViewportState {
