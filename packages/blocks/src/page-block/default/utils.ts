@@ -5,7 +5,6 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { PrelimText } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
@@ -317,13 +316,6 @@ export async function copyImage(model: EmbedBlockModel) {
 function getTextDelta(model: BaseBlockModel) {
   if (!model.text) {
     return [];
-  }
-  if (model.text instanceof PrelimText) {
-    return [
-      {
-        insert: '',
-      },
-    ];
   }
   return model.text.toDelta();
 }

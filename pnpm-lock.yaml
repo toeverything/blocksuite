@@ -259,6 +259,7 @@ importers:
   packages/store:
     specifiers:
       '@blocksuite/global': workspace:*
+      '@blocksuite/virgo': workspace:*
       '@types/flexsearch': ^0.7.3
       buffer: ^6.0.3
       flexsearch: 0.7.21
@@ -274,6 +275,7 @@ importers:
       zod: ^3.20.2
     dependencies:
       '@blocksuite/global': link:../global
+      '@blocksuite/virgo': link:../virgo
       '@types/flexsearch': 0.7.3
       buffer: 6.0.3
       flexsearch: 0.7.21

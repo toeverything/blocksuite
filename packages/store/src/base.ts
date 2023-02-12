@@ -2,7 +2,7 @@ import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
-import type { TextType } from './text-adapter.js';
+import type { Text } from './text-adapter.js';
 import type { Page } from './workspace/index.js';
 
 const FlavourSchema = z.string();
@@ -95,7 +95,7 @@ export class BaseBlockModel<Props = unknown>
   // TODO use schema
   tags?: Y.Map<Y.Map<unknown>>;
   tagSchema?: Y.Map<unknown>;
-  text?: TextType;
+  text?: Text;
   sourceId?: string;
 
   // TODO: separate from model

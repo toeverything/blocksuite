@@ -74,7 +74,7 @@ declare type BlockSuiteFlags = {
 };
 
 declare namespace BlockSuiteInternal {
-  import type { TextType } from '@blocksuite/store';
+  import type { Text } from '@blocksuite/store';
   interface IBaseBlockProps {
     flavour: string;
     type?: string;
@@ -82,7 +82,7 @@ declare namespace BlockSuiteInternal {
     children: IBaseBlockProps[];
 
     // TODO use schema
-    text?: TextType;
+    text?: Text;
   }
 
   import {
