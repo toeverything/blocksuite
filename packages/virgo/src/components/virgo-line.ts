@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import type { TextElement } from '../types.js';
 
 @customElement('virgo-line')

@@ -1,4 +1,5 @@
 import color from 'ansi-colors';
+
 import { assertEquals, assertExists } from './utils.js';
 
 let enabled = false;

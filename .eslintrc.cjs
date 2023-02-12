@@ -50,6 +50,7 @@ module.exports = {
     'packages/store/dist/*',
     'packages/blocks/dist/*',
     'packages/editor/dist/*',
+    'packages/global/dist/*',
     'packages/react/dist/*',
     'packages/react/examples/next/.next/*',
     'packages/phasor/dist/*',
@@ -88,8 +89,10 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['react', '@typescript-eslint'],
+  plugins: ['react', '@typescript-eslint', 'simple-import-sort'],
   rules: {
+    'simple-import-sort/imports': 'error',
+    'simple-import-sort/exports': 'error',
     '@typescript-eslint/no-restricted-imports': [
       'error',
       {

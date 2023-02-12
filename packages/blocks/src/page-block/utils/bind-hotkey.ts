@@ -1,8 +1,12 @@
 import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { hotkey } from '../../__internal__/index.js';
-import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
+
+import { getBlockElementByModel, hotkey } from '../../__internal__/index.js';
+import {
+  handleMultiBlockIndent,
+  isAtLineEdge,
+} from '../../__internal__/rich-text/rich-text-operations.js';
 import {
   asyncFocusRichText,
   focusNextBlock,
@@ -12,11 +16,15 @@ import {
   getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
+  getRichTextByModel,
   getStartModelBySelection,
   isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultPageSignals } from '../default/default-page-block.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import {
   handleBlockSelectionBatchDelete,
@@ -71,27 +79,34 @@ export function removeCommonHotKey() {
   ]);
 }
 
-function handleUp(
-  selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  e: KeyboardEvent
+export function handleUp(
+  e: KeyboardEvent,
+  selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  const nativeSelection = window.getSelection();
-  if (nativeSelection?.anchorNode) {
+  const hasNativeSelection = !!window.getSelection()?.rangeCount;
+  if (hasNativeSelection) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     const previousBlock = getPreviousBlock(model);
-    const range = nativeSelection.getRangeAt(0);
+    const range = getCurrentRange();
     const { left, top } = range.getBoundingClientRect();
     if (!previousBlock) {
       focusTitle();
       return;
     }
 
-    // Workaround select to empty line will get empty range
-    // If at empty line range.getBoundingClientRect will return 0
+    // Workaround: focus to empty line will get empty range rect
     //
+    // See the following example:
+    // - long text
+    //   wrap line
+    // - |    <- caret at empty line,
+    //           if you press ArrowUp,
+    //           the cursor should jump to the start of `wrap line`,
+    //           instead of the start of `long text`!
+    //
+    // If at empty line range.getBoundingClientRect will return 0
     // You can see the spec here:
     // The `getBoundingClientRect()` method, when invoked, must return the result of the following algorithm:
     //   - Let list be the result of invoking getClientRects() on the same range this method was invoked on.
@@ -113,26 +128,28 @@ function handleUp(
     focusPreviousBlock(model, new Point(left, top));
     return;
   }
-  signals.updateSelectedRects.emit([]);
-  const { state } = selection;
-  const selectedModel = getModelByElement(state.selectedBlocks[0]);
-  const page = getDefaultPageBlock(selectedModel);
-  e.preventDefault();
-  focusPreviousBlock(
-    selectedModel,
-    page.lastSelectionPosition instanceof Point
-      ? page.lastSelectionPosition
-      : 'end'
-  );
+  if (selection) {
+    const { state } = selection;
+    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const page = getDefaultPageBlock(selectedModel);
+    selection.clearRects();
+    focusPreviousBlock(
+      selectedModel,
+      page.lastSelectionPosition instanceof Point
+        ? page.lastSelectionPosition
+        : 'end'
+    );
+    e.preventDefault();
+  }
 }
 
-function handleDown(
-  selection: DefaultSelectionManager,
-  signals: DefaultPageSignals,
-  e: KeyboardEvent
+export function handleDown(
+  e: KeyboardEvent,
+  selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  if (!selection.state.selectedBlocks.length) {
+  const hasNativeSelection = !!window.getSelection()?.rangeCount;
+  if (hasNativeSelection) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     if (matchFlavours(model, ['affine:code'])) {
@@ -140,48 +157,113 @@ function handleDown(
     }
     const range = getCurrentRange();
     const atLineEdge = isAtLineEdge(range);
-    if (atLineEdge) {
-      const shiftRangeRect = atLineEdge.getBoundingClientRect();
-      // We can not focus 'start' directly,
-      // because pressing ArrowDown in multiple indent line will cause the cursor to jump to wrong position
-      focusNextBlock(
-        model,
-        new Point(shiftRangeRect.left, shiftRangeRect.bottom)
-      );
-      return;
-    }
     const { left, bottom } = range.getBoundingClientRect();
-    // Workaround select to empty line will get empty range
-    // If at empty line range.getBoundingClientRect will return 0
+    const isAtEmptyLine = left === 0 && bottom === 0;
+    // Workaround: at line edge will return wrong rect
+    // See the following example:
+    // - long text
+    //   |wrap line    <- caret at empty line,
+    //                    if you press ArrowDown,
+    //                    the cursor should jump to the start of `next line`,
+    //                    instead of the end of `next line`!
+    // - next line
+    //
+    // Workaround: focus to empty line will get empty range,
+    // we can not focus 'start' directly,
+    // because pressing ArrowDown in multi-level indent line will cause the cursor to jump to wrong position
+    // If at empty line `range.getBoundingClientRect()` will return 0
     // https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
-    if (left === 0 && bottom === 0) {
-      if (!(range.startContainer instanceof HTMLElement)) {
-        console.warn(
-          "Failed to calculate caret position! range.getBoundingClientRect() is zero and it's startContainer not an HTMLElement.",
-          range
-        );
-        focusNextBlock(model, 'start');
-        return;
-      }
-      const rect = range.startContainer.getBoundingClientRect();
-      focusNextBlock(model, new Point(rect.left, rect.top));
+    //
+    // See the following example:
+    // - text
+    //   - child
+    //     - |   <- caret at empty line,
+    //              if you press ArrowDown,
+    //              the cursor should jump to the end of `next`,
+    //              instead of the start of `next`!
+    // - next
+    if (atLineEdge || isAtEmptyLine) {
+      const richText = getRichTextByModel(model);
+      assertExists(richText);
+      const richTextRect = richText.getBoundingClientRect();
+      focusNextBlock(model, new Point(richTextRect.left, richTextRect.top));
       return;
     }
     focusNextBlock(model, new Point(left, bottom));
     return;
-  } else {
-    signals.updateSelectedRects.emit([]);
+  }
+  if (selection) {
     const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
+    const lastEle = state.selectedBlocks.at(-1);
+    if (!lastEle) {
+      throw new Error(
+        "Failed to handleDown! Can't find last selected element!"
+      );
+    }
+    const selectedModel = getModelByElement(lastEle);
+    selection.clearRects();
     const page = getDefaultPageBlock(selectedModel);
-    e.preventDefault();
     focusNextBlock(
       selectedModel,
       page.lastSelectionPosition instanceof Point
         ? page.lastSelectionPosition
         : 'start'
     );
-    return;
+    e.preventDefault();
+  }
+  return;
+}
+
+function handleTab(page: Page, selection: DefaultSelectionManager) {
+  switch (selection.state.type) {
+    case 'native': {
+      const range = getCurrentRange();
+      const start = range.startContainer;
+      const end = range.endContainer;
+      const startModel = getModelByElement(start.parentElement as HTMLElement);
+      const endModel = getModelByElement(end.parentElement as HTMLElement);
+      if (startModel && endModel) {
+        let currentModel: BaseBlockModel | null = startModel;
+        const models: BaseBlockModel[] = [];
+        while (currentModel) {
+          const next = page.getNextSibling(currentModel);
+          models.push(currentModel);
+          if (currentModel.id === endModel.id) {
+            break;
+          }
+          currentModel = next;
+        }
+        handleMultiBlockIndent(page, models);
+      }
+      break;
+    }
+    case 'block': {
+      handleMultiBlockIndent(
+        page,
+        selection.state.selectedBlocks.map(block => getModelByElement(block))
+      );
+
+      const cachedSelectedBlocks = selection.state.selectedBlocks.concat();
+      requestAnimationFrame(() => {
+        const selectBlocks: DefaultPageBlockComponent[] = [];
+        cachedSelectedBlocks.forEach(block => {
+          const newBlock = getBlockElementByModel(
+            (block as DefaultPageBlockComponent).model
+          );
+          if (newBlock) {
+            selectBlocks.push(newBlock as DefaultPageBlockComponent);
+          }
+        });
+        if (!selectBlocks.length) {
+          return;
+        }
+        selection.state.refreshBlockRectCache();
+        selection.setSelectedBlocks(selectBlocks);
+      });
+      selection.clearRects();
+
+      break;
+    }
   }
 }
 
@@ -216,6 +298,7 @@ export function bindHotkeys(
     LEFT,
     RIGHT,
     ENTER,
+    TAB,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -293,10 +376,10 @@ export function bindHotkeys(
   });
 
   hotkey.addListener(UP, e => {
-    handleUp(selection, signals, e);
+    handleUp(e, selection);
   });
   hotkey.addListener(DOWN, e => {
-    handleDown(selection, signals, e);
+    handleDown(e, selection);
   });
   hotkey.addListener(LEFT, e => {
     let model: BaseBlockModel | null = null;
@@ -351,6 +434,8 @@ export function bindHotkeys(
     model && focusNextBlock(model, 'start');
   });
 
+  hotkey.addListener(TAB, () => handleTab(page, selection));
+
   hotkey.addListener(SHIFT_UP, e => {
     // TODO expand selection up
   });
@@ -376,5 +461,6 @@ export function removeHotkeys() {
     HOTKEYS.LEFT,
     HOTKEYS.RIGHT,
     HOTKEYS.ENTER,
+    HOTKEYS.TAB,
   ]);
 }

@@ -1,16 +1,18 @@
-import { html, css } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import type { EmbedBlockModel } from '../index.js';
-import {
-  type BlockHost,
-  NonShadowLitElement,
-  BlockChildrenContainer,
-} from '../../__internal__/index.js';
-import { assertExists } from '@blocksuite/global/utils';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import type { Disposable } from '@blocksuite/global/utils';
 import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
+
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
+import {
+  BlockChildrenContainer,
+  type BlockHost,
+  NonShadowLitElement,
+} from '../../__internal__/index.js';
+import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
@@ -24,6 +26,8 @@ export class ImageBlockComponent extends NonShadowLitElement {
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
     }
     .affine-image-wrapper img {
       max-width: 100%;

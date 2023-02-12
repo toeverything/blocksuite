@@ -1,5 +1,4 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
 import { SHORT_KEY, type } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
@@ -11,6 +10,8 @@ import {
   assertRichTexts,
   assertStoreMatchJSX,
 } from 'utils/asserts.js';
+
+import { test } from './utils/playwright.js';
 
 test.describe('slash menu should show and hide correctly', () => {
   // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests
@@ -140,7 +141,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(12);
+  await expect(slashItems).toHaveCount(25);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
@@ -148,9 +149,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:list
     prop:checked={false}
     prop:type="todo"
@@ -170,11 +169,11 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
 
   // search should reset the active item
-  await type(page, 'od');
+  await type(page, 'code');
   await expect(slashItems).toHaveCount(2);
-  await expect(slashItems).toHaveText(['To-do List', 'Code Block']);
+  await expect(slashItems).toHaveText(['Code Block', 'Code']);
   await expect(slashItems.first()).toHaveAttribute('hover', '');
-  await type(page, 'o');
+  await type(page, 'b');
   await expect(slashItems).toHaveCount(1);
   // assert backspace works
   await page.keyboard.press('Backspace');

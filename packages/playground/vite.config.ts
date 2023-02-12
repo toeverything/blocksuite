@@ -1,21 +1,26 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import path, { resolve } from 'node:path';
+
+import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
-import { hmrPlugin } from './scripts/hmr-plugin';
+import { defineConfig } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
+
+import { hmrPlugin } from './scripts/hmr-plugin';
+
+const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     hmrPlugin,
-    istanbul({
-      cwd: fileURLToPath(new URL('../..', import.meta.url)),
-      include: ['packages/**/src/*'],
-      exclude: ['node_modules', 'tests'],
-      forceBuildInstrument: !!process.env.CI || !!process.env.COVERAGE,
-    }),
+    enableIstanbul &&
+      istanbul({
+        cwd: fileURLToPath(new URL('../..', import.meta.url)),
+        include: ['packages/**/src/*'],
+        exclude: ['node_modules', 'tests'],
+        forceBuildInstrument: true,
+      }),
   ],
   build: {
     sourcemap: true,

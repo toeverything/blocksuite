@@ -1,11 +1,12 @@
+import { createPopper } from '@popperjs/core';
+import { css } from 'lit';
+import { customElement } from 'lit/decorators.js';
+import { html, literal } from 'lit/static-html.js';
+
 import {
   DatabaseCellLitElement,
   defineTagSchemaRenderer,
 } from '../../register.js';
-import { customElement } from 'lit/decorators.js';
-import { html, literal } from 'lit/static-html.js';
-import { css } from 'lit';
-import { createPopper } from '@popperjs/core';
 
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellLitElement {

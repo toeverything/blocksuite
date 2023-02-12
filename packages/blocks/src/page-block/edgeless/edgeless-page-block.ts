@@ -1,40 +1,46 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import './toolbar.js';
+
+import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import type { XYWH } from '@blocksuite/phasor';
+import { SurfaceManager } from '@blocksuite/phasor';
+import { DisposableGroup, Page, Signal } from '@blocksuite/store';
+import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { Signal, Page, DisposableGroup } from '@blocksuite/store';
-import type {
-  FrameBlockModel,
-  MouseMode,
-  PageBlockModel,
-} from '../../index.js';
-import {
-  EdgelessBlockChildrenContainer,
-  EdgelessHoverRect,
-  EdgelessFrameSelectionRect,
-} from './components.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import {
   BlockHost,
   hotkey,
   resetNativeSelection,
 } from '../../__internal__/index.js';
+import { getService } from '../../__internal__/service.js';
+import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import type {
+  FrameBlockModel,
+  MouseMode,
+  PageBlockModel,
+} from '../../index.js';
+import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import {
+  bindCommonHotkey,
+  handleDown,
+  handleMultiBlockBackspace,
+  handleUp,
+  removeCommonHotKey,
+  tryUpdateFrameSize,
+} from '../utils/index.js';
+import {
+  EdgelessBlockChildrenContainer,
+  EdgelessFrameSelectionRect,
+  EdgelessHoverRect,
+} from './components.js';
 import {
   EdgelessSelectionManager,
   EdgelessSelectionState,
   ViewportState,
-  XYWH,
 } from './selection-manager.js';
-import {
-  bindCommonHotkey,
-  handleMultiBlockBackspace,
-  removeCommonHotKey,
-  tryUpdateFrameSize,
-} from '../utils/index.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
-import { getService } from '../../__internal__/service.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import type { SurfaceBlockModel } from '../../surface-block/surface-model.js';
-import { SurfaceManager } from '@blocksuite/phasor';
-import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
+import type { EdgelessToolBar } from './toolbar.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -61,7 +67,7 @@ export class EdgelessPageBlockComponent
       height: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height-base);
+      line-height: var(--affine-line-height);
       color: var(--affine-edgeless-text-color);
       font-weight: 400;
     }
@@ -123,13 +129,18 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
+  private _toolbar: EdgelessToolBar | null = null;
+
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
+    hotkey.addListener(HOTKEYS.UP, e => handleUp(e));
+    hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e));
     bindCommonHotkey(this.page);
   }
 
   private _removeHotkeys() {
-    hotkey.removeListener([HOTKEYS.BACKSPACE], this.flavour);
+    hotkey.removeListener(Object.values(HOTKEYS), this.flavour);
+
     removeCommonHotKey();
   }
 
@@ -185,6 +196,32 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
+  private _initEdgelessToolBar() {
+    if (this.page.awarenessStore.getFlag('enable_edgeless_toolbar')) {
+      this._toolbar = document.createElement('edgeless-toolbar');
+      this.mouseRoot.appendChild(this._toolbar);
+    }
+    this._disposables.add(
+      this.page.awarenessStore.signals.update.subscribe(
+        msg => msg.state?.flags.enable_edgeless_toolbar,
+        enable => {
+          if (enable) {
+            if (!this._toolbar) {
+              this._toolbar = document.createElement('edgeless-toolbar');
+              this.mouseRoot.appendChild(this._toolbar);
+            }
+          } else {
+            this._toolbar?.remove();
+            this._toolbar = null;
+          }
+        },
+        {
+          filter: msg => msg.id === this.page.doc.clientID,
+        }
+      )
+    );
+  }
+
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
@@ -196,6 +233,7 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
+    this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
@@ -246,6 +284,10 @@ export class EdgelessPageBlockComponent
     this._disposables.dispose();
     this._selection.dispose();
     this._removeHotkeys();
+    if (this._toolbar) {
+      this._toolbar.remove();
+      this._toolbar = null;
+    }
   }
 
   render() {
@@ -257,7 +299,7 @@ export class EdgelessPageBlockComponent
       this.viewport
     );
 
-    const { _selection, viewport } = this;
+    const { _selection, viewport, page } = this;
     const { frameSelectionRect } = _selection;
     const selectionState = this._selection.blockSelectionState;
     const { zoom, viewportX, viewportY } = this.viewport;
@@ -301,11 +343,13 @@ export class EdgelessPageBlockComponent
         ${selectionState.type !== 'none'
           ? html`
               <edgeless-selected-rect
+                .page=${page}
                 .viewport=${viewport}
                 .state=${selectionState}
                 .rect=${selectionState.rect}
                 .zoom=${zoom}
                 .readonly=${this.readonly}
+                .surface=${this.surface}
               ></edgeless-selected-rect>
             `
           : null}

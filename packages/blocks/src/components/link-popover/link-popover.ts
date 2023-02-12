@@ -1,8 +1,9 @@
+import { ConfirmIcon, EditIcon, UnlinkIcon } from '@blocksuite/global/config';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
 import { createEvent } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
-import { ConfirmIcon, EditIcon, UnlinkIcon } from './icons.js';
 import { linkPopoverStyle } from './styles.js';
 
 export const ALLOWED_SCHEMES = [

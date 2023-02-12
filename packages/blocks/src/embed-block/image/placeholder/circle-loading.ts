@@ -1,5 +1,6 @@
-import { html, css } from 'lit';
+import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
+
 import { NonShadowLitElement } from '../../../__internal__/index.js';
 
 const ELEMENT_TAG = 'affine-image-block-circle-loading' as const;

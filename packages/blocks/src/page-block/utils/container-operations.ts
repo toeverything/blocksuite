@@ -1,4 +1,6 @@
+import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+
 import {
   almostEqual,
   ExtendedModel,
@@ -23,10 +25,9 @@ import {
   restoreSelection,
   saveBlockSelection,
 } from '../../__internal__/utils/selection.js';
+import type { CodeBlockModel } from '../../code-block/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
-import type { CodeBlockModel } from '../../code-block/index.js';
-import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 
 export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
   const models = getModelsByRange(range);
@@ -111,7 +112,7 @@ export async function updateSelectedTextType(flavour: string, type?: string) {
   updateBlockType(modelsInRange, flavour, type);
 }
 
-async function updateBlockType(
+export async function updateBlockType(
   models: BaseBlockModel[],
   flavour: string,
   type?: string

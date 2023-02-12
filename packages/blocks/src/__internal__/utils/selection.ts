@@ -1,5 +1,15 @@
+import type { FrameBlockComponent } from '@blocksuite/blocks';
+import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+  nonTextBlock,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+
 import type { RichText } from '../rich-text/rich-text.js';
+import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   getBlockElementByModel,
@@ -20,15 +30,6 @@ import type {
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-  nonTextBlock,
-} from '@blocksuite/global/utils';
-import { asyncFocusRichText } from './common-operations.js';
-import type { FrameBlockComponent } from '@blocksuite/blocks';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -155,6 +156,7 @@ export function focusBlockByModel(
     throw new Error("Can't focus frame or page!");
   }
   const defaultPageBlock = getDefaultPageBlock(model);
+  // If focus on a follow block, we should select the block
   if (
     matchFlavours(model, [
       'affine:embed',
@@ -163,6 +165,11 @@ export function focusBlockByModel(
       'affine:database',
     ])
   ) {
+    if (!defaultPageBlock.selection) {
+      // TODO fix this
+      // In the edgeless mode
+      return;
+    }
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
@@ -183,11 +190,12 @@ export function focusBlockByModel(
 
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  defaultPageBlock.selection.state.clear();
+  defaultPageBlock.selection && defaultPageBlock.selection.state.clear();
   if (editableContainer) {
-    defaultPageBlock.selection.setFocusedBlockIndexByElement(
-      element as Element
-    );
+    defaultPageBlock.selection &&
+      defaultPageBlock.selection.setFocusedBlockIndexByElement(
+        element as Element
+      );
     focusRichText(editableContainer, position);
   }
 }
@@ -447,6 +455,7 @@ export function handleNativeRangeDragMove(
     const newPoint = normalizePointIntoContainer({ x, y }, closestEditor);
     currentRange = caretRangeFromPoint(newPoint.x, newPoint.y);
     if (!currentRange) return;
+    if (currentRange.endContainer.nodeType !== Node.TEXT_NODE) return;
     if (!currentFrame.contains(currentRange.endContainer)) return;
   }
 

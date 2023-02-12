@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
-import { css, html } from 'lit';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
-import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BaseBlockModel,
   DisposableGroup,
@@ -9,7 +9,10 @@ import {
   Signal,
   Text,
 } from '@blocksuite/store';
-import type { PageBlockModel } from '../index.js';
+import autosize from 'autosize';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
 import {
   asyncFocusRichText,
   BlockChildrenContainer,
@@ -20,7 +23,11 @@ import {
   isMultiBlockRange,
   SelectionPosition,
 } from '../../__internal__/index.js';
-import { DefaultSelectionManager } from './selection-manager.js';
+import { getService } from '../../__internal__/service.js';
+import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
+import type { DragHandle } from '../../components/index.js';
+import type { PageBlockModel } from '../index.js';
+import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
@@ -29,18 +36,12 @@ import {
   FrameSelectionRect,
   SelectedRectsContainer,
 } from './components.js';
+import { DefaultSelectionManager } from './selection-manager.js';
 import {
   createDragHandle,
   getAllowSelectedBlocks,
   isControlledKeyboardEvent,
 } from './utils.js';
-import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
-import { getService } from '../../__internal__/service.js';
-import autosize from 'autosize';
-import { assertExists } from '@blocksuite/global/utils';
-import type { DragHandle } from '../../components/index.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -84,10 +85,10 @@ export class DefaultPageBlockComponent
     .affine-default-page-block-container {
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height-base);
+      line-height: var(--affine-line-height);
       color: var(--affine-text-color);
       font-weight: 400;
-      width: 720px;
+      width: var(--affine-editor-width);
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
@@ -371,14 +372,16 @@ export class DefaultPageBlockComponent
 
   private _getViewportScrollOffset() {
     const container = this.defaultViewportElement;
+    const rect = container.getBoundingClientRect();
     return {
-      left: container.scrollLeft,
-      top: container.scrollTop,
+      left: container.scrollLeft - rect.left,
+      top: container.scrollTop - rect.top,
     };
   }
 
   firstUpdated() {
     autosize(this._title);
+
     bindHotkeys(this.page, this.selection, this.signals);
 
     hotkey.enableHotkey();
@@ -463,14 +466,17 @@ export class DefaultPageBlockComponent
     );
     const selectionRect = FrameSelectionRect(
       this.frameSelectionRect,
-      this.viewportScrollOffset
+      this.defaultViewportElement?.scrollTop ?? 0
+      // We don't need viewport offset as frameSelectionRect is already an absolute rect
+      // this.viewportScrollOffset
     );
     const selectedRectsContainer = SelectedRectsContainer(
       this.selectedRects,
       this.viewportScrollOffset
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectEmbedRects
+      this.selectEmbedRects,
+      this.viewportScrollOffset
     );
     const embedEditingContainer = EmbedEditingContainer(
       this.embedEditingState,
@@ -496,7 +502,7 @@ export class DefaultPageBlockComponent
           </div>
           ${childrenContainer}
         </div>
-        ${selectionRect} ${selectedEmbedContainer}${embedEditingContainer}
+        ${selectionRect} ${selectedEmbedContainer} ${embedEditingContainer}
         ${codeBlockOptionContainer}
       </div>
     `;

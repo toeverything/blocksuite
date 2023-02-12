@@ -1,45 +1,49 @@
-import type { Page } from '@blocksuite/store';
-import type { EmbedBlockComponent } from '../../embed-block/index.js';
-import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import '../../components/drag-handle.js';
-import {
-  handleNativeRangeClick,
-  handleNativeRangeDblClick,
-  handleNativeRangeDragMove,
-  initMouseEventHandlers,
-  isBlankArea,
-  isEmbed,
-  resetNativeSelection,
-  SelectionEvent,
-  getBlockElementByModel,
-  getAllBlocks,
-  getDefaultPageBlock,
-  IPoint,
-  getCurrentRange,
-  isTitleElement,
-  isDatabaseInput,
-  isDatabase,
-} from '../../__internal__/index.js';
-import type { RichText } from '../../__internal__/rich-text/rich-text.js';
-import {
-  getNativeSelectionMouseDragInfo,
-  repairContextMenuRange,
-} from '../utils/position.js';
-import type { DefaultPageSignals } from './default-page-block.js';
-import {
-  getBlockEditingStateByPosition,
-  getAllowSelectedBlocks,
-} from './utils.js';
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { DefaultPageBlockComponent } from './default-page-block.js';
-import { EmbedResizeManager } from './embed-resize-manager.js';
+
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import { DisposableGroup } from '@blocksuite/store';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import type { Page } from '@blocksuite/store';
+import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
+
+import {
+  getAllBlocks,
+  getBlockElementByModel,
+  getCurrentRange,
+  getDefaultPageBlock,
+  getModelByElement,
+  handleNativeRangeClick,
+  handleNativeRangeDblClick,
+  handleNativeRangeDragMove,
+  initMouseEventHandlers,
+  IPoint,
+  isBlankArea,
+  isDatabase,
+  isDatabaseInput,
+  isEmbed,
+  isTitleElement,
+  resetNativeSelection,
+  SelectionEvent,
+} from '../../__internal__/index.js';
+import type { RichText } from '../../__internal__/rich-text/rich-text.js';
+import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
+import type { EmbedBlockComponent } from '../../embed-block/index.js';
+import {
+  getNativeSelectionMouseDragInfo,
+  repairContextMenuRange,
+} from '../utils/position.js';
+import type {
+  DefaultPageBlockComponent,
+  DefaultPageSignals,
+} from './default-page-block.js';
+import { EmbedResizeManager } from './embed-resize-manager.js';
+import {
+  getAllowSelectedBlocks,
+  getBlockEditingStateByPosition,
+} from './utils.js';
 
 function calcDepth(left: number, containerLeft: number) {
   return Math.ceil(
@@ -369,13 +373,63 @@ export class DefaultSelectionManager {
     return containerOffset;
   }
 
-  private _setSelectedBlocks = (
+  private _computeSelectionType(
     selectedBlocks: Element[],
-    rects: DOMRect[] = []
-  ) => {
+    selectionType?: PageSelectionType
+  ): PageSelectionType {
+    let newSelectionType: PageSelectionType = selectionType ?? 'native';
+    const isOnlyBlock = selectedBlocks.length === 1;
+    for (const block of selectedBlocks) {
+      if (selectionType) continue;
+      if (!('model' in block)) continue;
+
+      // Calculate selection type
+      const model = getModelByElement(block);
+      newSelectionType = 'block';
+
+      // Other selection types are possible if only one block is selected
+      if (!isOnlyBlock) continue;
+
+      const flavour = model.flavour;
+      switch (flavour) {
+        case 'affine:embed': {
+          newSelectionType = 'embed';
+          break;
+        }
+        case 'affine:database': {
+          newSelectionType = 'database';
+          break;
+        }
+      }
+    }
+    return newSelectionType;
+  }
+
+  setSelectedBlocks(
+    selectedBlocks: Element[],
+    rects?: DOMRect[],
+    selectionType?: PageSelectionType
+  ) {
     this.state.selectedBlocks = selectedBlocks;
-    this._signals.updateSelectedRects.emit(rects);
-  };
+    this.state.type = selectionType ?? this.state.type;
+
+    if (rects) {
+      this._signals.updateSelectedRects.emit(rects);
+      return;
+    }
+
+    const calculatedRects = [] as DOMRect[];
+    for (const block of selectedBlocks) {
+      calculatedRects.push(block.getBoundingClientRect());
+    }
+
+    const newSelectionType = this._computeSelectionType(
+      selectedBlocks,
+      selectionType
+    );
+    this.state.type = newSelectionType;
+    this._signals.updateSelectedRects.emit(calculatedRects);
+  }
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
@@ -401,7 +455,7 @@ export class DefaultSelectionManager {
       ({ block }) => blockCache.get(block) as DOMRect
     );
 
-    this._setSelectedBlocks(
+    this.setSelectedBlocks(
       findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
       rects
     );
@@ -601,6 +655,9 @@ export class DefaultSelectionManager {
     );
     if ((e.raw.target as HTMLElement).closest('.embed-editing-state')) return;
 
+    if (this._container.components.dragHandle) {
+      this._container.components.dragHandle.showBySelectionEvent(e);
+    }
     if (hoverEditingState?.model.type === 'image') {
       const { position } = hoverEditingState;
       // when image size is too large, the option popup should show inside
@@ -613,12 +670,6 @@ export class DefaultSelectionManager {
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
-    } else {
-      if (this._container.components.dragHandle) {
-        this._container.components.dragHandle.showBySelectionEvent(e);
-      }
-      this._signals.updateEmbedEditingState.emit(null);
-      this._signals.updateCodeBlockOption.emit(null);
     }
   };
 
@@ -664,6 +715,7 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.emit(null);
     this._signals.updateEmbedEditingState.emit(null);
     this._signals.updateEmbedRects.emit([]);
+    this.state.type = 'none';
     this.state.clear();
   }
 
@@ -696,7 +748,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // Click on the prefix icon of list block
@@ -724,7 +776,7 @@ export class DefaultSelectionManager {
     );
 
     // only current focused-block
-    this._setSelectedBlocks(selectedBlocks, [boundRect]);
+    this.setSelectedBlocks(selectedBlocks, [boundRect]);
   }
 
   // `CMD-A`
@@ -755,13 +807,13 @@ export class DefaultSelectionManager {
       const rects = clearSubtree(selectedBlocks, containerLeft).map(
         block => blockCache.get(block) as DOMRect
       );
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     } else {
       // only current focused-block
       const rects = selectedBlocks
         .slice(0, 1)
         .map(block => blockCache.get(block) as DOMRect);
-      this._setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, rects);
     }
 
     return;

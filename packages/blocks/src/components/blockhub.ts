@@ -1,3 +1,20 @@
+import {
+  BLOCKHUB_LIST_ITEMS,
+  BLOCKHUB_TEXT_ITEMS,
+  BlockHubIcon,
+  BulletedListIconLarge,
+  CrossIcon,
+  DatabaseTableViewIcon,
+  RectIcon,
+  TextIconLarge,
+} from '@blocksuite/global/config';
+import {
+  assertExists,
+  DisposableGroup,
+  isFirefox,
+  Signal,
+} from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, TemplateResult } from 'lit';
 import {
   customElement,
@@ -6,27 +23,16 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import { NonShadowLitElement } from '../__internal__/index.js';
-import type { DragIndicator } from './drag-handle.js';
 import type { EditingState } from '../page-block/default/utils.js';
-import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
-import { assertExists, isFirefox, Signal } from '@blocksuite/global/utils';
-import {
-  BulletedListIconLarge,
-  CrossIcon,
-  RectIcon,
-  TextIconLarge,
-  BlockHubIcon,
-  BLOCKHUB_LIST_ITEMS,
-  BLOCKHUB_TEXT_ITEMS,
-  DatabaseTableViewIcon,
-} from '@blocksuite/global/config';
-import type { BaseBlockModel } from '@blocksuite/store';
 import {
   getBlockEditingStateByCursor,
   getBlockEditingStateByPosition,
 } from '../page-block/default/utils.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import type { DragIndicator } from './drag-handle.js';
+import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
 
 type BlockHubItem = {
   flavour: string;
@@ -49,6 +55,9 @@ export class BlockHub extends NonShadowLitElement {
 
   @property()
   updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
+
+  @property()
+  blockHubStatusUpdated: Signal<boolean> = new Signal<boolean>();
 
   @property()
   bottom = 70;
@@ -100,9 +109,11 @@ export class BlockHub extends NonShadowLitElement {
   private _lastModelState: EditingState | null = null;
   private _cursor: number | null = 0;
   private _timer: number | null = null;
-  private _delay = 200; // ms
-  private enable_database: boolean;
+  private _delay = 200;
+  private readonly _enable_database: boolean;
+  private _mouseRoot: HTMLElement;
   private _topDistance = 24;
+  private _disposables: DisposableGroup = new DisposableGroup();
 
   static styles = css`
     affine-block-hub {
@@ -145,14 +156,12 @@ export class BlockHub extends NonShadowLitElement {
 
     .card-container {
       display: flex;
+      position: relative;
       align-items: center;
       width: 256px;
       height: 54px;
       background: var(--affine-page-background);
-      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08),
-        4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08);
       border-radius: 10px;
       padding: 8px 12px;
       margin-bottom: 16px;
@@ -162,6 +171,8 @@ export class BlockHub extends NonShadowLitElement {
     .card-container:hover {
       background: var(--affine-block-hub-hover-background);
       fill: var(--affine-primary-color);
+      top: -2px;
+      left: -2px;
     }
 
     .card-description-container {
@@ -173,6 +184,15 @@ export class BlockHub extends NonShadowLitElement {
 
     .affine-block-hub-container .description {
       font-size: var(--affine-font-xs);
+      color: var(---affine-icon-color);
+    }
+
+    .card-container:hover.grabbing {
+      top: unset;
+      left: unset;
+      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
+        -4px -4px 13px rgba(58, 76, 92, 0.02),
+        6px 6px 36px rgba(58, 76, 92, 0.06);
     }
 
     .grabbing {
@@ -198,12 +218,10 @@ export class BlockHub extends NonShadowLitElement {
       flex-flow: column;
       justify-content: center;
       align-items: center;
-      padding: 4px;
+      padding: 0px 4px;
       position: fixed;
       width: 44px;
       background: var(--affine-page-background);
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.04);
       border-radius: 10px;
     }
 
@@ -213,6 +231,8 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       margin-bottom: 8px;
       position: relative;
+      background: var(--affine-page-background);
+      border-radius: 5px;
       fill: var(--affine-line-number-color);
       height: 36px;
     }
@@ -279,16 +299,11 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .block-hub-icons-container {
-      position: relative;
-      opacity: 0;
-      top: 100px;
+      position: absolute;
+      bottom: 100%;
       height: 0px;
+      overflow: hidden;
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
-    }
-
-    .block-hub-icons-container[transition] {
-      opacity: 1;
-      top: 0px;
     }
 
     ${centeredToolTipStyle}
@@ -296,11 +311,13 @@ export class BlockHub extends NonShadowLitElement {
   `;
 
   constructor(options: {
+    mouseRoot: HTMLElement;
     enable_database: boolean;
     onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
   }) {
     super();
-    this.enable_database = options.enable_database;
+    this._mouseRoot = options.mouseRoot;
+    this._enable_database = options.enable_database;
     this.getAllowedBlocks = () => {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
@@ -310,96 +327,108 @@ export class BlockHub extends NonShadowLitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addEventListener('dragstart', this._onDragStart);
-    this.addEventListener('drag', this._onDrag);
-    this.addEventListener('dragend', this._onDragEnd);
+    const disposables = this._disposables;
+    disposables.add(
+      Signal.disposableListener(this, 'dragstart', this._onDragStart)
+    );
+    disposables.add(Signal.disposableListener(this, 'drag', this._onDrag));
+    disposables.add(
+      Signal.disposableListener(this, 'dragend', this._onDragEnd)
+    );
 
-    document.addEventListener('dragover', this._onDragOver);
-    document.addEventListener('drop', this._onDrop);
+    disposables.add(
+      Signal.disposableListener(this._mouseRoot, 'dragover', this._onDragOver)
+    );
+    disposables.add(
+      Signal.disposableListener(this._mouseRoot, 'drop', this._onDrop)
+    );
     isFirefox &&
-      document.addEventListener('dragover', this._onDragOverDocument);
-    this.addEventListener('mousedown', this._onMouseDown);
+      disposables.add(
+        Signal.disposableListener(
+          this._mouseRoot,
+          'dragover',
+          this._onDragOverDocument
+        )
+      );
+    disposables.add(
+      Signal.disposableListener(this, 'mousedown', this._onMouseDown)
+    );
     this._onResize();
   }
 
   protected firstUpdated() {
+    const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
-      card.addEventListener('mousedown', this._onCardMouseDown);
-      card.addEventListener('mouseup', this._onCardMouseUp);
+      disposables.add(
+        Signal.disposableListener(card, 'mousedown', this._onCardMouseDown)
+      );
+      disposables.add(
+        Signal.disposableListener(card, 'mouseup', this._onCardMouseUp)
+      );
     });
     for (const blockHubMenu of this._blockHubMenus) {
-      blockHubMenu.addEventListener('mouseover', this._onBlockHubMenuMouseOver);
+      disposables.add(
+        Signal.disposableListener(
+          blockHubMenu,
+          'mouseover',
+          this._onBlockHubMenuMouseOver
+        )
+      );
       if (blockHubMenu.getAttribute('type') === 'blank') {
-        blockHubMenu.addEventListener('mousedown', this._onBlankMenuMouseDown);
-        blockHubMenu.addEventListener('mouseup', this._onBlankMenuMouseUp);
+        disposables.add(
+          Signal.disposableListener(
+            blockHubMenu,
+            'mousedown',
+            this._onBlankMenuMouseDown
+          )
+        );
+        disposables.add(
+          Signal.disposableListener(
+            blockHubMenu,
+            'mouseup',
+            this._onBlankMenuMouseUp
+          )
+        );
       }
     }
-    this._blockHubMenuEntry.addEventListener(
-      'mouseover',
-      this._onBlockHubEntryMouseOver
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubMenuEntry,
+        'mouseover',
+        this._onBlockHubEntryMouseOver
+      )
     );
-
-    document.addEventListener('click', this._onClick);
-    this._blockHubButton.addEventListener('click', this._onBlockHubButtonClick);
+    disposables.add(
+      Signal.disposableListener(document, 'click', this._onClick)
+    );
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubButton,
+        'click',
+        this._onBlockHubButtonClick
+      )
+    );
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubIconsContainer,
+        'transitionstart',
+        this._onTransitionStart
+      )
+    );
+    disposables.add(
+      Signal.disposableListener(window, 'resize', this._onResize)
+    );
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
     if (!this._indicator) {
       this._indicatorHTMLTemplate = html` <affine-drag-indicator></affine-drag-indicator>`;
     }
-    this._blockHubIconsContainer.addEventListener(
-      'transitionstart',
-      this._onTransitionStart
-    );
-    window.addEventListener('resize', this._onResize);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener('dragstart', this._onDragStart);
-    this.removeEventListener('drag', this._onDrag);
-    this.removeEventListener('dragend', this._onDragEnd);
-
-    // FIXME: do not listen on the document
-    document.removeEventListener('dragover', this._onDragOver);
-    document.removeEventListener('drop', this._onDrop);
-    isFirefox &&
-      document.removeEventListener('dragover', this._onDragOverDocument);
-    this.removeEventListener('mousedown', this._onMouseDown);
-    window.removeEventListener('resize', this._onResize);
-
-    if (this.hasUpdated) {
-      this._blockHubCards.forEach(card => {
-        card.removeEventListener('mousedown', this._onCardMouseDown);
-        card.removeEventListener('mouseup', this._onCardMouseUp);
-      });
-      for (const blockHubMenu of this._blockHubMenus) {
-        blockHubMenu.removeEventListener(
-          'mouseover',
-          this._onBlockHubMenuMouseOver
-        );
-        if (blockHubMenu.getAttribute('type') === 'blank') {
-          blockHubMenu.removeEventListener(
-            'mousedown',
-            this._onBlankMenuMouseDown
-          );
-          blockHubMenu.removeEventListener('mouseup', this._onBlankMenuMouseUp);
-        }
-      }
-      this._blockHubMenuEntry.addEventListener(
-        'mouseover',
-        this._onBlockHubEntryMouseOver
-      );
-      document.removeEventListener('click', this._onClick);
-      this._blockHubButton.removeEventListener(
-        'click',
-        this._onBlockHubButtonClick
-      );
-      this._blockHubIconsContainer.removeEventListener(
-        'transitionstart',
-        this._onTransitionStart
-      );
-    }
+    this._disposables.dispose();
   }
 
   /**
@@ -408,10 +437,6 @@ export class BlockHub extends NonShadowLitElement {
    * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
    */
   private _onTransitionStart = (e: TransitionEvent) => {
-    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
-    if (e.propertyName === 'opacity') {
-      return;
-    }
     if (this._timer) {
       clearTimeout(this._timer);
     }
@@ -419,11 +444,13 @@ export class BlockHub extends NonShadowLitElement {
       // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
       this._blockHubMenuContainer.style.padding = '0px 4px';
       this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.height = '0px';
+        this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
     } else {
-      this._blockHubIconsContainer.style.height = 'unset';
       this._blockHubMenuContainer.style.padding = '4px';
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.overflow = 'unset';
+      }, this._delay);
     }
   };
 
@@ -436,8 +463,14 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   private _blockHubMenuTemplate = () => {
+    const menuNum = this._enable_database ? 4 : 3;
+    const height = menuNum * 44 + 10;
     return html`
-      <div class="block-hub-icons-container" ?transition=${this._expanded}>
+      <div
+        class="block-hub-icons-container"
+        ?transition=${this._expanded}
+        style="height: ${this._expanded ? `${height}px` : '0px'};"
+      >
         <div
           class="block-hub-icon-container has-tool-tip ${this._isGrabbing
             ? 'grabbing'
@@ -473,7 +506,7 @@ export class BlockHub extends NonShadowLitElement {
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
           ${BulletedListIconLarge}
         </div>
-        ${this.enable_database
+        ${this._enable_database
           ? html`
               <div
                 class="block-hub-icon-container has-tool-tip"
@@ -561,12 +594,23 @@ export class BlockHub extends NonShadowLitElement {
     }
   };
 
+  public toggleMenu(open: boolean) {
+    if (open) {
+      this._expanded = true;
+    } else {
+      this._expanded = false;
+      this._cardVisibleType = null;
+      this._isCardListVisible = false;
+    }
+  }
+
   private _onBlockHubButtonClick = (e: MouseEvent) => {
     this._expanded = !this._expanded;
     if (!this._expanded) {
       this._cardVisibleType = null;
       this._isCardListVisible = false;
     }
+    this.blockHubStatusUpdated.emit(this._expanded);
   };
 
   private _onDragStart = (event: DragEvent) => {
@@ -705,12 +749,13 @@ export class BlockHub extends NonShadowLitElement {
     return html`
       <div
         class="block-hub-menu-container"
-        style="bottom: ${this.bottom}px; right: ${this.right}px"
+        style="bottom: ${this.bottom}px; right: ${this.right}px;"
       >
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
           role="menu-entry"
+          style="cursor:pointer;"
         >
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip

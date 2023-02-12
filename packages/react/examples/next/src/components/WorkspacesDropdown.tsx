@@ -1,8 +1,8 @@
-import { Dropdown } from '@nextui-org/react';
-import { useBlockSuiteStore } from '@blocksuite/react';
-import React from 'react';
-import { IndexedDBDocProvider, uuidv4, Workspace } from '@blocksuite/store';
 import { builtInSchemas } from '@blocksuite/blocks/models';
+import { useBlockSuiteStore } from '@blocksuite/react';
+import { IndexedDBDocProvider, uuidv4, Workspace } from '@blocksuite/store';
+import { Dropdown } from '@nextui-org/react';
+import React from 'react';
 
 export const DisplayRoomName = ({ room }: { room: string | undefined }) => {
   return (

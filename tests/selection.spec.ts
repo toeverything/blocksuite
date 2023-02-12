@@ -1,44 +1,48 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
+import { expect } from '@playwright/test';
+
 import {
+  addFrameByClick,
+  copyByKeyboard,
+  doubleClickBlockById,
+  dragBetweenCoords,
+  dragBetweenIndices,
   enterPlaygroundRoom,
+  fillLine,
   focusRichText,
+  focusTitle,
+  getCursorBlockIdAndHeight,
+  getIndexCoordinate,
   getQuillSelectionIndex,
   getQuillSelectionText,
-  dragBetweenCoords,
+  getSelectedTextByQuill,
+  initEmptyEdgelessState,
+  initEmptyParagraphState,
+  initThreeLists,
+  initThreeParagraphs,
+  pasteByKeyboard,
   pressEnter,
   pressShiftTab,
-  getCursorBlockIdAndHeight,
-  fillLine,
-  addFrameByClick,
-  initThreeParagraphs,
-  initEmptyParagraphState,
-  undoByKeyboard,
-  resetHistory,
   redoByKeyboard,
-  waitNextFrame,
-  dragBetweenIndices,
-  initThreeLists,
-  copyByKeyboard,
-  pasteByKeyboard,
-  getSelectedTextByQuill,
+  resetHistory,
   SHORT_KEY,
   switchEditorMode,
   type,
-  getIndexCoordinate,
-  focusTitle,
+  undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
-import { expect } from '@playwright/test';
 import {
+  assertAlmostEqual,
   assertBlockCount,
+  assertClipItems,
+  assertDivider,
   assertRichTexts,
   assertSelection,
-  assertAlmostEqual,
-  assertDivider,
-  assertClipItems,
+  assertStoreMatchJSX,
   assertTitle,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('click on blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -49,7 +53,7 @@ test('click on blank area', async ({ page }) => {
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top + 5 };
+    return { x: bbox.left, y: bbox.top + 5 }; // deepscan-disable-line NULL_POINTER
   });
   await page.mouse.click(above123.x, above123.y);
   await assertSelection(page, 0, 0, 0);
@@ -824,13 +828,13 @@ test('should select full text of the first block when leaving the affine-frame-b
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const ids = await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
   await waitNextFrame(page);
-  await page.dblclick('[data-block-id="1"]');
+  await doubleClickBlockById(page, ids.frameId);
   await page.mouse.click(0, 0);
   await dragBetweenIndices(page, [2, 1], [0, 2]);
   await copyByKeyboard(page);
@@ -928,4 +932,91 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.up();
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
+});
+
+test('should indent native multi-selection block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  const topLeft456 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="3"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.left + 1, y: bbox.top + 1 };
+  });
+
+  const bottomRight789 = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="4"] p');
+    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: bbox.right - 1, y: bbox.bottom - 1 };
+  });
+
+  // from top to bottom
+  await dragBetweenCoords(page, topLeft456, bottomRight789);
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:frame>
+</affine:page>`
+  );
+});
+
+test('should indent multi-selection block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  const coord = await getIndexCoordinate(page, [1, 2]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 30, coord.y - 10);
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x + 20, coord.y + 50);
+  await page.mouse.up();
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:frame>
+</affine:page>`
+  );
 });

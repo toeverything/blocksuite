@@ -1,11 +1,11 @@
 {
   "name": "@blocksuite/react",
-  "version": "0.4.0-alpha.2",
+  "version": "0.4.0-alpha.3",
   "description": "A React Component & Hooks Library for BlockSuite editor built for AFFiNE.",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "sideEffects": [
@@ -15,19 +15,22 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
-    "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/editor": "workspace:*",
-    "@blocksuite/store": "workspace:*",
     "zustand": "^4.3.2"
   },
   "devDependencies": {
-    "@types/react": "^18.0.26",
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/editor": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "peerDependencies": {
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/editor": "workspace:*",
+    "@blocksuite/store": "workspace:*",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },

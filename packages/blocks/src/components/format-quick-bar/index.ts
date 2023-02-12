@@ -1,17 +1,19 @@
+import './button.js';
+import './format-bar-node.js';
+
 import { Signal } from '@blocksuite/store';
-import {
-  calcPositionPointByRange,
-  calcSafeCoordinate,
-  DragDirection,
-} from '../../page-block/utils/position.js';
+
 import {
   getContainerByModel,
   getCurrentRange,
   getModelsByRange,
   throttle,
 } from '../../__internal__/utils/index.js';
-import './button.js';
-import './format-bar-node.js';
+import {
+  calcPositionPointByRange,
+  calcSafeCoordinate,
+  DragDirection,
+} from '../../page-block/utils/position.js';
 import type { FormatQuickBar } from './format-bar-node.js';
 
 let formatQuickBarInstance: FormatQuickBar | null = null;
@@ -119,9 +121,15 @@ export const showFormatQuickBar = async ({
     }
     updatePos();
   };
+
+  const popstateHandler = () => {
+    abortController.abort();
+  };
   document.addEventListener('mousedown', mouseDownHandler);
   document.addEventListener('mouseup', mouseUpHandler);
   document.addEventListener('selectionchange', selectionChangeHandler);
+  // Fix https://github.com/toeverything/AFFiNE/issues/855
+  window.addEventListener('popstate', popstateHandler);
 
   // Mount
   container.appendChild(formatQuickBar);
@@ -135,6 +143,7 @@ export const showFormatQuickBar = async ({
     document.removeEventListener('mousedown', mouseDownHandler);
     document.removeEventListener('mouseup', mouseUpHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
+    window.removeEventListener('popstate', popstateHandler);
     positionUpdatedSignal.dispose();
   });
   return formatQuickBar;

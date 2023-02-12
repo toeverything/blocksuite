@@ -1,0 +1,6 @@
+.changeset
+.codesandbox
+.gitignore
+.husky
+.vscode
+/tests

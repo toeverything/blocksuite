@@ -1,5 +1,9 @@
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
+
+import { showSlashMenu } from '../../components/slash-menu/index.js';
 import {
   getCurrentRange,
   getNextBlock,
@@ -7,21 +11,18 @@ import {
   isMultiBlockRange,
   noop,
 } from '../utils/index.js';
+import { markdownConvert } from './markdown-convert.js';
 import {
-  handleLineStartBackspace,
-  handleUnindent,
   handleBlockEndEnter,
   handleBlockSplit,
-  handleSoftEnter,
   handleIndent,
   handleKeyDown,
   handleKeyUp,
+  handleLineStartBackspace,
+  handleSoftEnter,
+  handleUnindent,
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
-import { Shortcuts } from './shortcuts.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { showSlashMenu } from '../../components/slash-menu/index.js';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 
 interface QuillRange {
   index: number;
@@ -38,20 +39,22 @@ interface BindingContext {
   event: KeyboardEvent;
 }
 
-type KeyboardBindings = Record<
-  string,
-  {
-    key: string | number;
-    handler: KeyboardBindingHandler;
-    prefix?: RegExp;
-    suffix?: RegExp;
-    shortKey?: boolean;
-    shiftKey?: boolean;
-    altKey?: boolean;
-    metaKey?: boolean;
-    ctrlKey?: boolean;
-  }
->;
+type KeyboardBinding = {
+  /**
+   * See https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
+   */
+  key: number | string | string[];
+  handler: KeyboardBindingHandler;
+  prefix?: RegExp;
+  suffix?: RegExp;
+  shortKey?: boolean | null;
+  shiftKey?: boolean | null;
+  altKey?: boolean | null;
+  metaKey?: boolean | null;
+  ctrlKey?: boolean | null;
+};
+
+type KeyboardBindings = Record<string, KeyboardBinding>;
 
 interface KeyboardEventThis {
   quill: Quill;
@@ -89,7 +92,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     context: BindingContext
   ) {
     const { prefix } = context;
-    Shortcuts.match(this.quill, model, prefix);
+    markdownConvert(this.quill, model, prefix);
     return ALLOW_DEFAULT;
   }
 
@@ -99,7 +102,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     context: BindingContext
   ) {
     const { prefix } = context;
-    return Shortcuts.match(this.quill, model, prefix)
+    return markdownConvert(this.quill, model, prefix)
       ? PREVENT_DEFAULT
       : ALLOW_DEFAULT;
   }
@@ -230,7 +233,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     // See https://quilljs.com/docs/modules/keyboard/#configuration
     // The defaultOptions can found at https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L334-L607
     'code exit': {
-      key: 'enter',
+      key: 'Enter',
       // override default quill behavior
       handler: () => ALLOW_DEFAULT,
     },
@@ -251,21 +254,17 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
 
     enterMarkdownMatch: {
-      key: 'enter',
+      key: 'Enter',
       handler: enterMarkdownMatch,
     },
-    spaceMarkdownMatch: {
-      key: ' ',
-      handler: spaceMarkdownMatch,
-    },
     hardEnter: {
-      key: 'enter',
+      key: 'Enter',
       handler() {
         return hardEnter(this.quill);
       },
     },
     softEnter: {
-      key: 'enter',
+      key: 'Enter',
       shiftKey: true,
       handler() {
         return onSoftEnter(this.quill);
@@ -273,40 +272,38 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     // shortKey+enter
     insertLineAfter: {
-      key: 'enter',
+      key: 'Enter',
       shortKey: true,
       handler() {
         return hardEnter(this.quill, true);
       },
     },
     tab: {
-      key: 'tab',
+      key: 'Tab',
       handler: onIndent,
     },
     shiftTab: {
-      key: 'tab',
+      key: 'Tab',
       shiftKey: true,
       handler: onUnindent,
+    },
+    spaceMarkdownMatch: {
+      key: ' ',
+      handler: spaceMarkdownMatch,
     },
     // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
     'list autofill': {
       key: ' ',
-      shiftKey: false,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
-      handler: onSpace,
-    },
-    'list autofill shift': {
-      key: ' ',
-      shiftKey: true,
+      shiftKey: null,
       prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
       handler: onSpace,
     },
     backspace: {
-      key: 'backspace',
+      key: 'Backspace',
       handler: onBackspace,
     },
     up: {
-      key: 'up',
+      key: 'ArrowUp',
       shiftKey: false,
       handler(
         this: KeyboardEventThis,
@@ -317,7 +314,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       },
     },
     down: {
-      key: 'down',
+      key: 'ArrowDown',
       shiftKey: false,
       handler(
         this: KeyboardEventThis,
@@ -328,19 +325,18 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       },
     },
     left: {
-      key: 'left',
+      key: 'ArrowLeft',
       shiftKey: false,
       handler: onKeyLeft,
     },
     right: {
-      key: 'right',
+      key: 'ArrowRight',
       shiftKey: false,
       handler: onKeyRight,
     },
 
     slash: {
-      // Slash '/'
-      key: 191,
+      key: '/',
       // prefix non digit or empty string
       // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
       // prefix: /[^\d]$|^(?![\s\S])/,

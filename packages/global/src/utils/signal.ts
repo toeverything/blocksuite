@@ -6,36 +6,40 @@ export class Signal<T = void> implements Disposable {
   private _emitting = false;
   private _callbacks: ((v: T) => unknown)[] = [];
   private _disposables: Disposable[] = [];
-  static fromEvent<N extends keyof WindowEventMap>(
+
+  /**
+   * This is method will return a disposable that will remove the listener
+   */
+  static disposableListener<N extends keyof WindowEventMap>(
     element: Window,
     eventName: N,
+    handler: (e: WindowEventMap[N]) => void,
     options?: boolean | AddEventListenerOptions
-  ): Signal<WindowEventMap[N]>;
-  static fromEvent<N extends keyof HTMLElementEventMap>(
+  ): Disposable;
+  static disposableListener<N extends keyof DocumentEventMap>(
+    element: Document,
+    eventName: N,
+    handler: (e: DocumentEventMap[N]) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): Disposable;
+  static disposableListener<N extends keyof HTMLElementEventMap>(
     element: HTMLElement,
     eventName: N,
+    handler: (e: HTMLElementEventMap[N]) => void,
     eventOptions?: boolean | AddEventListenerOptions
-  ): Signal<HTMLElementEventMap[N]>;
-  static fromEvent<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement | Window,
-    eventName: N,
+  ): Disposable;
+  static disposableListener(
+    element: HTMLElement | Window | Document,
+    eventName: string,
+    handler: (e: Event) => void,
     eventOptions?: boolean | AddEventListenerOptions
-  ): Signal<HTMLElementEventMap[N]> {
-    const signal = new Signal<HTMLElementEventMap[N]>();
-    const handler = (ev: HTMLElementEventMap[N]) => {
-      signal.emit(ev);
-    };
-    (element as HTMLElement).addEventListener(eventName, handler, eventOptions);
-    signal._disposables.push({
+  ): Disposable {
+    element.addEventListener(eventName, handler, eventOptions);
+    return {
       dispose: () => {
-        (element as HTMLElement).removeEventListener(
-          eventName,
-          handler,
-          eventOptions
-        );
+        element.removeEventListener(eventName, handler, eventOptions);
       },
-    });
-    return signal;
+    };
   }
 
   filter(testFun: (v: T) => boolean): Signal<T> {

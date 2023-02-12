@@ -1,7 +1,8 @@
+import type { TagSchema } from '@blocksuite/global/database';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { TagSchema } from '@blocksuite/global/database';
+
 import { listTagSchemaRenderer } from '../register.js';
 import { onClickOutside } from '../utils.js';
 

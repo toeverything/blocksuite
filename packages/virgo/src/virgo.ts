@@ -1,10 +1,11 @@
-import type * as Y from 'yjs';
-import { ZERO_WIDTH_SPACE } from './constant.js';
 import { assertExists, Signal } from '@blocksuite/global/utils';
-import type { DeltaInsert, TextAttributes, TextElement } from './types.js';
-import { deltaInsersToChunks } from './utils/convert.js';
-import { VirgoLine } from './components/virgo-line.js';
+import type * as Y from 'yjs';
+
 import { BaseText } from './components/base-text.js';
+import { VirgoLine } from './components/virgo-line.js';
+import { ZERO_WIDTH_SPACE } from './constant.js';
+import type { DeltaInsert, TextAttributes, TextElement } from './types.js';
+import { deltaInsertsToChunks } from './utils/convert.js';
 import { baseRenderElement } from './utils/render.js';
 
 export interface VRange {
@@ -55,7 +56,9 @@ export class VEditor {
     }
 
     if (onKeyDown) {
-      this._onKeyDown = onKeyDown;
+      this._onKeyDown = e => {
+        onKeyDown(e);
+      };
     }
 
     this.signals = {
@@ -123,16 +126,6 @@ export class VEditor {
     this._rootElement?.replaceChildren();
 
     this._rootElement = null;
-  }
-
-  getBaseElement(node: Node): TextElement | null {
-    const element = node.parentElement?.closest('[data-virgo-element="true"]');
-
-    if (element) {
-      return element as TextElement;
-    }
-
-    return null;
   }
 
   getNativeSelection(): Selection | null {
@@ -219,34 +212,23 @@ export class VEditor {
     });
   }
 
-  // TODO add support for formatting
   insertText(vRange: VRange, text: string): void {
-    const currentDelta = this.getDeltaByRangeIndex(vRange.index);
-
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      if (
-        vRange.index > 0 &&
-        currentDelta &&
-        currentDelta.attributes.type !== 'line-break'
-      ) {
-        this.yText.insert(vRange.index, text, currentDelta.attributes);
-      } else {
-        this.yText.insert(vRange.index, text, { type: 'base' });
-      }
+      this.yText.insert(vRange.index, text);
     });
   }
 
   insertLineBreak(vRange: VRange): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, '\n', { type: 'line-break' });
+      this.yText.insert(vRange.index, '\n');
     });
   }
 
   formatText(
     vRange: VRange,
-    attributes: TextAttributes,
+    attributes: NonNullable<TextAttributes>,
     options: {
       match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
@@ -256,10 +238,6 @@ export class VEditor {
     const deltas = this.getDeltasByVRange(vRange);
 
     for (const [delta, deltaVRange] of deltas) {
-      if (delta.attributes.type === 'line-break') {
-        continue;
-      }
-
       if (match(delta, deltaVRange)) {
         const targetVRange = {
           index: Math.max(vRange.index, deltaVRange.index),
@@ -296,14 +274,15 @@ export class VEditor {
 
     const unset = Object.fromEntries(
       coverDeltas.flatMap(delta =>
-        Object.keys(delta.attributes).map(key => [key, null])
+        delta.attributes
+          ? Object.keys(delta.attributes).map(key => [key, null])
+          : []
       )
     );
 
     this._transact(() => {
       this.yText.format(vRange.index, vRange.length, {
         ...unset,
-        type: 'base',
       });
     });
   }
@@ -634,16 +613,11 @@ export class VEditor {
   private _onYTextChange = () => {
     assertExists(this._rootElement);
 
-    const deltas = (this.yText.toDelta() as DeltaInsert[]).flatMap(d => {
-      if (d.attributes.type === 'line-break') {
-        return d.insert
-          .split('')
-          .map(c => ({ insert: c, attributes: d.attributes }));
-      }
-      return d;
-    }) as DeltaInsert[];
-
-    renderDeltas(deltas, this._rootElement, this._renderElement);
+    renderDeltas(
+      this.yText.toDelta() as DeltaInsert[],
+      this._rootElement,
+      this._renderElement
+    );
   };
 
   private _onSelectionChange = () => {
@@ -830,7 +804,7 @@ function renderDeltas(
   rootElement: HTMLElement,
   render: (delta: DeltaInsert) => TextElement
 ) {
-  const chunks = deltaInsersToChunks(deltas);
+  const chunks = deltaInsertsToChunks(deltas);
 
   // every chunk is a line
   const lines: VirgoLine[] = [];

@@ -1,5 +1,6 @@
 import { css } from 'lit';
-import { toolTipStyle } from '../tooltip.js';
+
+import { toolTipStyle } from '../tooltip/tooltip.js';
 
 const paragraphPanelStyle = css`
   .paragraph-button > svg:nth-child(2) {
@@ -43,7 +44,7 @@ export const formatQuickBarStyle = css`
   .divider {
     width: 1px;
     height: 100%;
-    background-color: #e0e6eb;
+    background-color: var(--affine-border-color);
   }
 
   ${paragraphPanelStyle}

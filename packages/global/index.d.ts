@@ -69,10 +69,7 @@ declare type BlockSuiteFlags = {
   enable_surface: boolean;
   enable_block_hub: boolean;
   enable_slash_menu: boolean;
-  /**
-   * @deprecated Will be removed after slash menu is stable
-   */
-  enable_append_flavor_slash: boolean;
+  enable_edgeless_toolbar: boolean;
   readonly: Record<string, boolean>;
 };
 
@@ -91,6 +88,7 @@ declare namespace BlockSuiteInternal {
   import {
     // Model
     CodeBlockModel,
+    DatabaseBlockModel,
     DividerBlockModel,
     EmbedBlockModel,
     FrameBlockModel,
@@ -98,7 +96,6 @@ declare namespace BlockSuiteInternal {
     PageBlockModel,
     ParagraphBlockModel,
     SurfaceBlockModel,
-    DatabaseBlockModel,
   } from '@blocksuite/blocks/models';
 
   export type BlockModels = {

@@ -1,22 +1,27 @@
 {
   "name": "@blocksuite/virgo",
-  "version": "0.4.0-alpha.2",
+  "version": "0.4.0-alpha.3",
   "description": "A micro editor.",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test:unit": "vitest --run",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:unit:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:unit && pnpm test:e2e"
   },
   "keywords": [],
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "yjs": "^13.5.44",
-    "lit": "^2.6.1"
+    "lit": "^2.6.1",
+    "yjs": "^13.5.45"
   },
   "peerDependencies": {
-    "yjs": "^13",
-    "lit": "^2"
+    "lit": "^2",
+    "yjs": "^13"
   },
   "exports": {
     "./*": "./src/*.ts",
@@ -32,6 +37,7 @@
     }
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*"
+    "@blocksuite/global": "workspace:*",
+    "zod": "^3.20.2"
   }
 }

@@ -1,8 +1,8 @@
+import { CounterBlock } from '@blocksuite/blocks';
+import { createComponent, type EventName } from '@lit-labs/react';
 import * as React from 'react';
 import { useCallback } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { CounterBlock } from '@blocksuite/blocks';
-import { createComponent, type EventName } from '@lit-labs/react';
 
 const CounterBlockComponent = createComponent(
   React,

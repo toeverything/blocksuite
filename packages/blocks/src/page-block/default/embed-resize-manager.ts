@@ -1,7 +1,8 @@
+import { assertExists } from '@blocksuite/global/utils';
+
 import { getModelByElement, IPoint, SelectionEvent } from '../../std.js';
 import type { DefaultPageSignals } from '../index.js';
 import type { PageSelectionState } from './selection-manager.js';
-import { assertExists } from '@blocksuite/global/utils';
 
 export class EmbedResizeManager {
   state: PageSelectionState;
@@ -24,11 +25,10 @@ export class EmbedResizeManager {
     this._originPosition.x = e.raw.pageX;
     this._originPosition.y = e.raw.pageY;
     this._dropContainer = (e.raw.target as HTMLElement).closest('.resizes');
-    this._dropContainerSize.w = this._dropContainer?.getBoundingClientRect()
-      .width as number;
-    this._dropContainerSize.h = this._dropContainer?.getBoundingClientRect()
-      .height as number;
-    this._dropContainerSize.left = this._dropContainer?.offsetLeft as number;
+    const rect = this._dropContainer?.getBoundingClientRect() as DOMRect;
+    this._dropContainerSize.w = rect.width;
+    this._dropContainerSize.h = rect.height;
+    this._dropContainerSize.left = rect.left;
     if ((e.raw.target as HTMLElement).className.includes('right')) {
       this._dragMoveTarget = 'right';
     } else {

@@ -1,5 +1,6 @@
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import { IconButton } from '../button.js';
 
 @customElement('format-bar-button')

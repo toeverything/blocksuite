@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+
 import { expect, Page } from '@playwright/test';
-import { test } from './utils/playwright.js';
+
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
+  clickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  initEmptyParagraphState,
+  initEmptyEdgelessState,
   pressEnter,
   redoByClick,
   switchEditorMode,
@@ -22,6 +24,7 @@ import {
   assertRichTexts,
   assertSelection,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 async function getFrameSize(
   page: Page,
@@ -45,7 +48,7 @@ async function getFrameSize(
 
 test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  await initEmptyEdgelessState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
@@ -63,7 +66,7 @@ test('switch to edgeless mode', async ({ page }) => {
 
 test('cursor for active and inactive state', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  await initEmptyEdgelessState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await pressEnter(page);
@@ -90,15 +93,19 @@ test('cursor for active and inactive state', async ({ page }) => {
   await assertNativeSelectionRangeCount(page, 1);
 });
 
-test('resize the block', async ({ page }) => {
+test('resize block in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const ids = await initEmptyParagraphState(page);
+  const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await page.click('[data-block-id="1"]');
+  await page.mouse.move(100, 100); // FIXME: no update until mousemove
+
+  expect(ids.frameId).toBe('2'); // 0 for page, 1 for surface
+  await clickBlockById(page, ids.frameId);
+
   const oldXywh = await getFrameSize(page, ids);
   const leftHandle = page.locator('[aria-label="handle-left"]');
   const box = await leftHandle.boundingBox();
@@ -125,7 +132,7 @@ test('resize the block', async ({ page }) => {
 
 test.skip('add shape blocks', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  await initEmptyEdgelessState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
@@ -180,7 +187,7 @@ test.skip('add shape blocks', async ({ page }) => {
 
 test.skip('delete shape block by keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
   await switchMouseMode(page);
@@ -209,4 +216,48 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
     return document.querySelector('[data-block-id="3"]') != null;
   });
   expect(exist).toBe(false);
+});
+
+test('edgeless toolbar menu shows up and close normally', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const toolbarLocator = page.locator('edgeless-toolbar');
+  await expect(toolbarLocator).toBeVisible();
+  await page.click('.icon-container[role="shape"]');
+  const shapeComponentLocator = page.locator('shape-menu');
+  await expect(shapeComponentLocator).toBeVisible();
+
+  await page.click('.icon-container[role="shape"]');
+  await expect(shapeComponentLocator).toBeHidden();
+});
+
+test('edgeless arrow up/down', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+
+  await focusRichText(page);
+
+  await type(page, 'hello');
+  await pressEnter(page);
+  await type(page, 'world');
+  await pressEnter(page);
+  await type(page, 'foo');
+
+  await switchEditorMode(page);
+
+  await page.click('.affine-edgeless-block-child');
+  // 0 for page, 1 for surface, 2 for frame, 3 for paragraph
+  expect(ids.paragraphId).toBe('3');
+  await clickBlockById(page, ids.paragraphId);
+
+  await page.keyboard.press('ArrowDown');
+  await assertSelection(page, 1, 4, 0);
+
+  await page.keyboard.press('ArrowUp');
+  await assertSelection(page, 0, 4, 0);
+
+  await page.keyboard.press('ArrowUp');
+  await assertSelection(page, 0, 4, 0);
 });

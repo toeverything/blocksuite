@@ -1,14 +1,17 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import '../__internal__/rich-text/rich-text.js';
+
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
 import {
   BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
 } from '../__internal__/index.js';
-import '../__internal__/rich-text/rich-text.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 const getPlaceholder = (model: ParagraphBlockModel) => {
   const { type } = model;
@@ -40,60 +43,54 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       background-color: var(--affine-selected-color);
     }
     .h1 {
-      font-size: calc(var(--affine-font-base) + 12px);
-      line-height: calc(var(--affine-line-height-base) + 14px);
-      margin-top: calc(var(--affine-paragraph-space) + 20px);
-      font-weight: 600;
+      font-size: var(--affine-font-h1);
+      line-height: calc(1em + 12px);
+      margin-top: calc(var(--affine-paragraph-space) + 24px);
       --affine-link-color: var(--affine-link-color2);
     }
     .h1 code {
       font-size: calc(var(--affine-font-base) + 8px);
     }
     .h2 {
-      font-size: calc(var(--affine-font-base) + 10px);
-      line-height: calc(var(--affine-line-height-base) + 12px);
-      margin-top: calc(var(--affine-paragraph-space) + 18px);
-      font-weight: 600;
+      font-size: var(--affine-font-h2);
+      line-height: calc(1em + 10px);
+      margin-top: calc(var(--affine-paragraph-space) + 20px);
       --affine-link-color: var(--affine-link-color2);
     }
     .h2 code {
       font-size: calc(var(--affine-font-base) + 6px);
     }
     .h3 {
-      font-size: calc(var(--affine-font-base) + 8px);
-      line-height: calc(var(--affine-line-height-base) + 10px);
+      font-size: var(--affine-font-h3);
+      line-height: calc(1em + 8px);
       margin-top: calc(var(--affine-paragraph-space) + 16px);
-      font-weight: 600;
       --affine-link-color: var(--affine-link-color2);
     }
     .h3 code {
       font-size: calc(var(--affine-font-base) + 4px);
     }
     .h4 {
-      font-size: calc(var(--affine-font-base) + 6px);
-      line-height: calc(var(--affine-line-height-base) + 8px);
-      margin-top: calc(var(--affine-paragraph-space) + 14px);
-      font-weight: 600;
+      font-size: var(--affine-font-h4);
+      line-height: calc(1em + 10px);
+      margin-top: calc(var(--affine-paragraph-space) + 12px);
       --affine-link-color: var(--affine-link-color2);
     }
     .h4 code {
       font-size: calc(var(--affine-font-base) + 2px);
     }
     .h5 {
-      font-size: calc(var(--affine-font-base) + 4px);
-      line-height: calc(var(--affine-line-height-base) + 4px);
-      margin-top: calc(var(--affine-paragraph-space) + 12px);
-      font-weight: 600;
+      font-size: var(--affine-font-h5);
+      line-height: calc(1em + 8px);
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
       --affine-link-color: var(--affine-link-color2);
     }
     .h5 code {
       font-size: calc(var(--affine-font-base));
     }
     .h6 {
-      font-size: calc(var(--affine-font-base) + 2px);
-      line-height: calc(var(--affine-line-height-base) + 2px);
-      margin-top: calc(var(--affine-paragraph-space) + 10px);
-      font-weight: 600;
+      font-size: var(--affine-font-h6);
+      line-height: calc(1em + 8px);
+      margin-top: calc(var(--affine-paragraph-space) + 4px);
       --affine-link-color: var(--affine-link-color2);
     }
     .h6 code {
@@ -103,7 +100,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       font-size: 18px;
       line-height: 26px;
       padding-left: 12px;
-      margin-top: 18px;
+      margin-top: var(--affine-paragraph-space);
       position: relative;
     }
     .quote::after {
@@ -128,7 +125,7 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
     code {
       background: var(--affine-code-background);
       color: var(--affine-code-color);
-      font-family: var(--affine-font-mono);
+      font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
       padding: 0 5px;
       border-radius: 5px;
@@ -177,6 +174,9 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
           .host=${this.host}
           .model=${this.model}
           .placeholder=${placeholder}
+          style=${styleMap({
+            fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
+          })}
         ></rich-text>
         ${childrenContainer}
       </div>
