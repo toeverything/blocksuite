@@ -5,10 +5,6 @@ import { EditorContainer } from '@blocksuite/editor';
 import type { Page } from '@blocksuite/store';
 import { useEffect, useRef, useState } from 'react';
 
-function noop() {
-  // do nothing
-}
-
 export type EditorProps = {
   page: () => Page | Promise<Page>;
   onInit?: (page: Page, editor: Readonly<EditorContainer>) => void;
@@ -30,39 +26,38 @@ export const Editor = (props: EditorProps) => {
   }
 
   useEffect(() => {
-    if (editorRef.current && ref.current && page) {
-      console.log('page', page);
-      const editor = editorRef.current;
-      editor.page = page;
-      if (page.root === null) {
-        if (props.onInit) {
-          props.onInit(page, editor);
-        } else {
-          const pageBlockId = page.addBlockByFlavour('affine:page');
-          const frameId = page.addBlockByFlavour(
-            'affine:frame',
-            {},
-            pageBlockId
-          );
-          page.addBlockByFlavour('affine:paragraph', {}, frameId);
-          page.resetHistory();
-        }
+    const editor = editorRef.current;
+    if (!editor || !ref.current || !page) {
+      return;
+    }
+
+    editor.page = page;
+    if (page.root === null) {
+      if (props.onInit) {
+        props.onInit(page, editor);
+      } else {
+        const pageBlockId = page.addBlockByFlavour('affine:page');
+        const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
+        page.addBlockByFlavour('affine:paragraph', {}, frameId);
+        page.resetHistory();
       }
     }
-    return noop;
+    return;
   }, [page, props]);
 
   useEffect(() => {
-    if (editorRef.current && ref.current && page) {
-      const editor = editorRef.current;
-      const container = ref.current;
-      container.appendChild(editor);
-      return () => {
-        container.removeChild(editor);
-      };
+    const editor = editorRef.current;
+    const container = ref.current;
+
+    if (!editor || !container || !page) {
+      return;
     }
-    return noop;
-  });
+
+    container.appendChild(editor);
+    return () => {
+      container.removeChild(editor);
+    };
+  }, [page]);
 
   useEffect(() => {
     if (page && !page.workspace.connected) {

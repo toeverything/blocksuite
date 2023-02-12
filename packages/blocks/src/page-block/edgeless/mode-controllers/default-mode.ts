@@ -113,7 +113,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     repairContextMenuRange(e);
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(_: SelectionEvent): void {
     noop();
   }
 
@@ -132,11 +132,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
       resetNativeSelection(null);
     }
-    this._startRange = caretRangeFromPoint(e.x, e.y);
-    this._dragLastPos = {
-      x: e.x,
-      y: e.y,
-    };
+
+    const [x, y] = [e.raw.clientX, e.raw.clientY];
+    this._startRange = caretRangeFromPoint(x, y);
+    this._dragLastPos = { x, y };
   }
 
   onContainerDragMove(e: SelectionEvent): void {
@@ -259,7 +258,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._edgeless.signals.hoverUpdated.emit();
   }
 
-  onContainerMouseOut(e: SelectionEvent): void {
+  onContainerMouseOut(_: SelectionEvent): void {
     noop();
   }
 
