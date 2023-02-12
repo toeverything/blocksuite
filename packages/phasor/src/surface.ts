@@ -13,6 +13,7 @@ import {
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
+import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
@@ -54,7 +55,7 @@ export class SurfaceManager {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
-      const xywh = `${bound.x},${bound.y},${bound.w},${bound.h}`;
+      const xywh = serializeXYWH(bound.x, bound.y, bound.w, bound.h);
       yElement.set('xywh', xywh);
     });
   }
@@ -188,7 +189,7 @@ export class SurfaceManager {
 
         if (key === 'xywh') {
           const xywh = yElement.get(key) as string;
-          const [x, y, w, h] = xywh.split(',').map(Number);
+          const [x, y, w, h] = deserializeXYWH(xywh);
 
           // refresh grid manager
           this._renderer.removeElement(element);

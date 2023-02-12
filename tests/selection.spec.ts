@@ -5,6 +5,7 @@ import { expect } from '@playwright/test';
 import {
   addFrameByClick,
   copyByKeyboard,
+  doubleClickBlockById,
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -16,6 +17,7 @@ import {
   getQuillSelectionIndex,
   getQuillSelectionText,
   getSelectedTextByQuill,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeLists,
   initThreeParagraphs,
@@ -51,7 +53,7 @@ test('click on blank area', async ({ page }) => {
   const above123 = await page.evaluate(() => {
     const paragraph = document.querySelector('[data-block-id="2"] p');
     const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left, y: bbox.top + 5 };
+    return { x: bbox.left, y: bbox.top + 5 }; // deepscan-disable-line NULL_POINTER
   });
   await page.mouse.click(above123.x, above123.y);
   await assertSelection(page, 0, 0, 0);
@@ -848,13 +850,14 @@ test('should select full text of the first block when leaving the affine-frame-b
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const ids = await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
   await waitNextFrame(page);
-  await page.dblclick('[data-block-id="1"]');
+  await doubleClickBlockById(page, ids.frameId);
+  await page.mouse.click(0, 0);
   await dragBetweenIndices(page, [2, 1], [0, 2]);
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '34567');

@@ -11,6 +11,7 @@ import {
   isMultiBlockRange,
   noop,
 } from '../utils/index.js';
+import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import { markdownConvert } from './markdown-convert.js';
 import {
   handleBlockEndEnter,
@@ -24,10 +25,10 @@ import {
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 
-interface QuillRange {
-  index: number;
-  length: number;
-}
+// Type definitions is ported from quill
+// https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46
+
+type QuillRange = RangeStatic;
 
 interface BindingContext {
   collapsed: boolean;
@@ -39,20 +40,23 @@ interface BindingContext {
   event: KeyboardEvent;
 }
 
-type KeyboardBindings = Record<
-  string,
-  {
-    key: string | number;
-    handler: KeyboardBindingHandler;
-    prefix?: RegExp;
-    suffix?: RegExp;
-    shortKey?: boolean;
-    shiftKey?: boolean;
-    altKey?: boolean;
-    metaKey?: boolean;
-    ctrlKey?: boolean;
-  }
->;
+type KeyboardBinding = {
+  /**
+   * See https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
+   */
+  key: number | string | string[];
+  collapsed?: boolean;
+  handler: KeyboardBindingHandler;
+  prefix?: RegExp;
+  suffix?: RegExp;
+  shortKey?: boolean | null;
+  shiftKey?: boolean | null;
+  altKey?: boolean | null;
+  metaKey?: boolean | null;
+  ctrlKey?: boolean | null;
+};
+
+export type KeyboardBindings = Record<string, KeyboardBinding>;
 
 interface KeyboardEventThis {
   quill: Quill;
@@ -231,7 +235,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     // See https://quilljs.com/docs/modules/keyboard/#configuration
     // The defaultOptions can found at https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L334-L607
     'code exit': {
-      key: 'enter',
+      key: 'Enter',
       // override default quill behavior
       handler: () => ALLOW_DEFAULT,
     },
@@ -252,17 +256,17 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
 
     enterMarkdownMatch: {
-      key: 'enter',
+      key: 'Enter',
       handler: enterMarkdownMatch,
     },
     hardEnter: {
-      key: 'enter',
+      key: 'Enter',
       handler() {
         return hardEnter(this.quill);
       },
     },
     softEnter: {
-      key: 'enter',
+      key: 'Enter',
       shiftKey: true,
       handler() {
         return onSoftEnter(this.quill);
@@ -270,18 +274,18 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     // shortKey+enter
     insertLineAfter: {
-      key: 'enter',
+      key: 'Enter',
       shortKey: true,
       handler() {
         return hardEnter(this.quill, true);
       },
     },
     tab: {
-      key: 'tab',
+      key: 'Tab',
       handler: onIndent,
     },
     shiftTab: {
-      key: 'tab',
+      key: 'Tab',
       shiftKey: true,
       handler: onUnindent,
     },
@@ -292,22 +296,16 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     // https://github.com/quilljs/quill/blob/v1.3.7/modules/keyboard.js#L249-L282
     'list autofill': {
       key: ' ',
-      shiftKey: false,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
-      handler: onSpace,
-    },
-    'list autofill shift': {
-      key: ' ',
-      shiftKey: true,
+      shiftKey: null,
       prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
       handler: onSpace,
     },
     backspace: {
-      key: 'backspace',
+      key: 'Backspace',
       handler: onBackspace,
     },
     up: {
-      key: 'up',
+      key: 'ArrowUp',
       shiftKey: false,
       handler(
         this: KeyboardEventThis,
@@ -318,7 +316,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       },
     },
     down: {
-      key: 'down',
+      key: 'ArrowDown',
       shiftKey: false,
       handler(
         this: KeyboardEventThis,
@@ -329,19 +327,18 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
       },
     },
     left: {
-      key: 'left',
+      key: 'ArrowLeft',
       shiftKey: false,
       handler: onKeyLeft,
     },
     right: {
-      key: 'right',
+      key: 'ArrowRight',
       shiftKey: false,
       handler: onKeyRight,
     },
 
     slash: {
-      // Slash '/'
-      key: 191,
+      key: '/',
       // prefix non digit or empty string
       // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
       // prefix: /[^\d]$|^(?![\s\S])/,
@@ -366,6 +363,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         return ALLOW_DEFAULT;
       },
     },
+    ...createBracketAutoCompleteBindings(model),
   };
 
   return keyboardBindings;

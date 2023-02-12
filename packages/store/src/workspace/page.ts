@@ -446,8 +446,7 @@ export class Page extends Space<PageData> {
         props.text.ready = true;
       } else if (props.text instanceof Text) {
         model.text = props.text;
-        // @ts-ignore
-        yBlock.set('prop:text', props.text._yText);
+        yBlock.set('prop:text', props.text.yText);
       }
 
       // TODO diff children changes
