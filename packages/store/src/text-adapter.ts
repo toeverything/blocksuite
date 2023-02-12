@@ -150,6 +150,10 @@ export class Text {
     return this._yText.length;
   }
 
+  get yText() {
+    return this._yText;
+  }
+
   private _transact(callback: () => void) {
     if (this._shouldTransact) {
       const doc = this._yText.doc;

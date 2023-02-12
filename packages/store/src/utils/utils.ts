@@ -88,8 +88,7 @@ export function trySyncTextProp(
 
   // update by clone
   if (text instanceof Text) {
-    // @ts-ignore
-    yBlock.set('prop:text', text._yText);
+    yBlock.set('prop:text', text.yText);
     text.doDelayedJobs();
     return;
   }
