@@ -3,10 +3,9 @@ import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 import {
-  asyncFocusRichText,
   BlockChildrenContainer,
   BlockHost,
   getBlockElementByModel,
@@ -14,7 +13,7 @@ import {
   NonShadowLitElement,
 } from '../__internal__/index.js';
 import type { ListBlockModel } from './list-model.js';
-import { getListIcon } from './utils/get-list-icon.js';
+import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 function selectList(model: ListBlockModel) {
@@ -90,98 +89,38 @@ export class ListBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  private get pageAwarenessStore() {
-    return this.host.page.awarenessStore;
-  }
-  private get isToggleEnabled() {
-    return this.pageAwarenessStore.getFlag('enable_toggle_block');
-  }
-  private get blocksWithHiddenChildrenOnPage() {
-    return [...this.model.page.blocksWithHiddenChildren];
-  }
-  private get hasChildren() {
-    return !!this.model.children.length;
-  }
-  private get hasHiddenChildren() {
-    return this.blocksWithHiddenChildrenOnPage?.includes(this.model.id);
-  }
+  @state()
+  showChildren = true;
+
+  private _onClickIcon = () => {
+    if (this.model.type === 'toggle') {
+      this.showChildren = !this.showChildren;
+      return;
+    } else if (this.model.type === 'todo') {
+      this.host.page.captureSync();
+      const checkedPropObj = { checked: !this.model.checked };
+      this.host.page.updateBlock(this.model, checkedPropObj);
+      return;
+    }
+    selectList(this.model);
+  };
 
   firstUpdated() {
-    // this.pageAwarenessStore.awareness.on('change', () => {
-    //   this.requestUpdate();
-    // });
     this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => {
-      if (this.isToggleEnabled) {
-        if (!this.model.children.length) {
-          this.toggleHiddenChildren('hide'); // if there are no children set to hide (so we get a closed disabled arrow)
-        } else {
-          this.toggleHiddenChildren('show');
-        }
-      } else {
-        this.requestUpdate();
-      }
-    });
+    this.model.childrenUpdated.on(() => this.requestUpdate());
   }
-  toggleHiddenChildren = (overRide?: 'show' | 'hide') => {
-    if (!this.isToggleEnabled) return;
-
-    const currentBlockID = this.model.id;
-    const hiddenBlockListWithoutThis =
-      this.blocksWithHiddenChildrenOnPage.filter(
-        (eachBlockID: string) => eachBlockID !== currentBlockID
-      );
-
-    if (
-      !(overRide === 'hide') &&
-      this.hasChildren &&
-      (overRide === 'show' || this.hasHiddenChildren)
-    ) {
-      this.model.page.blocksWithHiddenChildren = hiddenBlockListWithoutThis; // remove current block from the hiddenChildren list
-    } else {
-      this.model.page.blocksWithHiddenChildren = [
-        ...hiddenBlockListWithoutThis,
-        currentBlockID,
-      ]; // ensure current block is in the hiddenChildren list
-
-      // attempt to avoid mouse move / selection errors
-      // for (const eachChildBlock of this.model.children) {
-      //   eachChildBlock.selection.dispose();
-      // }
-    }
-    asyncFocusRichText(this.model.page, this.model.id);
-    this.requestUpdate();
-  };
 
   render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     const { deep, index } = getListInfo(this.host, this.model);
-    const listIcon = getListIcon({
-      model: this.model,
-      deep,
-      index,
-      onClick: evt => {
-        // evt.preventDefault();
-        // evt.stopPropagation();
-        if (this.model.type === 'toggle') {
-          // this.host.page.captureSync();
-          this.toggleHiddenChildren();
-          return;
-        } else if (this.model.type === 'todo') {
-          this.host.page.captureSync();
-          const checkedPropObj = { checked: !this.model.checked };
-          this.host.page.updateBlock(this.model, checkedPropObj);
-          return;
-        }
-        selectList(this.model);
-      },
-    });
-    const childrenContainer =
-      this.model.type === 'toggle' && this.hasHiddenChildren
-        ? null
-        : BlockChildrenContainer(this.model, this.host, () =>
-            this.requestUpdate()
-          );
+    const { model, showChildren, _onClickIcon } = this;
+    const listIcon = ListIcon(model, deep, index, showChildren, _onClickIcon);
+
+    const childrenContainer = this.showChildren
+      ? BlockChildrenContainer(this.model, this.host, () =>
+          this.requestUpdate()
+        )
+      : null;
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
 

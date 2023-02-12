@@ -76,8 +76,6 @@ export class Page extends Space<PageData> {
     updated: new Signal(),
   };
 
-  public blocksWithHiddenChildren: string[] = [];
-
   constructor(
     workspace: Workspace,
     id: string,

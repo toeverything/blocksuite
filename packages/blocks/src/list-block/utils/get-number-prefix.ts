@@ -37,18 +37,12 @@ export function number2roman(num: number) {
   return romanStr;
 }
 
-function getPrefix(deep: number, index: number) {
+function getPrefix(depth: number, index: number) {
   const map = [() => index + 1, number2letter, () => number2roman(index + 1)];
-  return map[deep % map.length](index);
+  return map[depth % map.length](index);
 }
 
-export function getNumberPrefix({
-  index,
-  deep,
-}: {
-  index: number;
-  deep: number;
-}) {
-  const prefix = getPrefix(deep, index);
+export function getNumberPrefix(index: number, depth: number) {
+  const prefix = getPrefix(depth, index);
   return `${prefix} .`;
 }

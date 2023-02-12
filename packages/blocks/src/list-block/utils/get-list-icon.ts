@@ -10,47 +10,38 @@ import {
   toggleRight,
 } from './icons.js';
 
-export function getListIcon({
-  model,
-  index,
-  deep,
-  onClick,
-}: {
-  model: ListBlockModel;
-  index: number;
-  deep: number;
-  onClick?: (e: MouseEvent) => void;
-}) {
-  return html`<div
-    class="affine-list-block__prefix ${model.type === 'todo'
-      ? 'affine-list-block__todo-prefix'
-      : ''}"
-    @mousedown="${(e: MouseEvent) => {
-      // e.preventDefault();
-      // e.stopPropagation();
-      onClick?.(e);
-    }}"
-  >
-    ${(() => {
-      const blocksWithHiddenChildren =
-        model.page.blocksWithHiddenChildren ?? [];
-      switch (model.type) {
-        case 'bulleted':
-          return points[deep % points.length];
-        case 'numbered':
-          return getNumberPrefix({
-            deep,
-            index,
-          });
-        case 'todo':
-          return model.checked ? checkboxChecked() : checkboxUnchecked();
-        case 'toggle':
-          return blocksWithHiddenChildren.includes(model.id)
-            ? toggleRight(!!model.children.length)
-            : toggleDown();
-        default:
-          return '';
-      }
-    })()}
-  </div>`;
+export function ListIcon(
+  model: ListBlockModel,
+  index: number,
+  depth: number,
+  showChildren: boolean,
+  onClick: (e: MouseEvent) => void
+) {
+  const icon = (() => {
+    switch (model.type) {
+      case 'bulleted':
+        return points[depth % points.length];
+      case 'numbered':
+        return getNumberPrefix(depth, index);
+      case 'todo':
+        return model.checked ? checkboxChecked() : checkboxUnchecked();
+      case 'toggle':
+        return showChildren
+          ? toggleDown()
+          : toggleRight(model.children.length > 0);
+      default:
+        return '';
+    }
+  })();
+
+  return html`
+    <div
+      class="affine-list-block__prefix ${model.type === 'todo'
+        ? 'affine-list-block__todo-prefix'
+        : ''}"
+      @mousedown="${(e: MouseEvent) => onClick(e)}"
+    >
+      ${icon}
+    </div>
+  `;
 }
