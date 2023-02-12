@@ -5,10 +5,6 @@ import * as Y from 'yjs';
 
 import type { Space } from './space.js';
 
-type PrelimTextType = 'splitLeft' | 'splitRight';
-
-export type TextType = PrelimText | Text;
-
 // Removes the pending '\n's if it has no attributes
 export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
   if (delta.length > 0) {
@@ -32,66 +28,6 @@ export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
     }
   }
   return delta;
-}
-
-const UNSUPPORTED_MSG = 'PrelimText does not support ';
-
-export class PrelimText {
-  ready = false;
-  type: PrelimTextType;
-  index: number;
-  constructor(type: PrelimTextType, index: number) {
-    this.type = type;
-    this.index = index;
-  }
-
-  get length() {
-    return 0;
-  }
-
-  clone() {
-    throw new Error(UNSUPPORTED_MSG + 'clone');
-  }
-
-  insert() {
-    throw new Error(UNSUPPORTED_MSG + 'insert');
-  }
-
-  insertList() {
-    throw new Error(UNSUPPORTED_MSG + 'insertList');
-  }
-
-  split() {
-    throw new Error(UNSUPPORTED_MSG + 'split');
-  }
-
-  join() {
-    throw new Error(UNSUPPORTED_MSG + 'join');
-  }
-
-  clear() {
-    throw new Error(UNSUPPORTED_MSG + 'clear');
-  }
-
-  delete() {
-    throw new Error(UNSUPPORTED_MSG + 'delete');
-  }
-
-  replace() {
-    throw new Error(UNSUPPORTED_MSG + 'replace');
-  }
-
-  format() {
-    throw new Error(UNSUPPORTED_MSG + 'format');
-  }
-
-  applyDelta() {
-    throw new Error(UNSUPPORTED_MSG + 'applyDelta');
-  }
-
-  sliceToDelta() {
-    throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
-  }
 }
 
 declare module 'yjs' {
