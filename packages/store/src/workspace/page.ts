@@ -220,8 +220,10 @@ export class Page extends Space<PageData> {
     return (this.tagSchema.get(id) ?? null) as TagSchema | null;
   }
 
-  setTagSchema(schema: TagSchema) {
-    this.transact(() => this.tagSchema.set(schema.id, schema));
+  setTagSchema(schema: Omit<TagSchema, 'id'>): string {
+    const id = this._idGenerator();
+    this.transact(() => this.tagSchema.set(id, { ...schema, id }));
+    return id;
   }
 
   getBlockById(id: string) {
