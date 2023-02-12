@@ -45,6 +45,7 @@ type KeyboardBinding = {
    * See https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
    */
   key: number | string | string[];
+  collapsed?: boolean;
   handler: KeyboardBindingHandler;
   prefix?: RegExp;
   suffix?: RegExp;

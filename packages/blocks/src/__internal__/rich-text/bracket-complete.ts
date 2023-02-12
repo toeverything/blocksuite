@@ -86,28 +86,27 @@ const bracketPairs: BracketPair[] = [
 export function createBracketAutoCompleteBindings(
   model: BaseBlockModel
 ): KeyboardBindings {
-  return bracketPairs.reduce((acc, pair) => {
-    return {
-      ...acc,
-      [pair.name]: {
-        key: pair.left,
-        // Input some brackets need to press shift key
-        shiftKey: null,
-        collapsed: false,
-        handler(range) {
-          if (!model.text) {
-            return ALLOW_DEFAULT;
-          }
-          model.text.insert(pair.left, range.index);
-          model.text.insert(pair.right, range.index + range.length + 1);
+  const bindings: KeyboardBindings = {};
 
-          const curRange = getCurrentRange();
-          // move cursor to the end of the inserted text
-          curRange.setStart(curRange.startContainer, curRange.startOffset + 1);
-          resetNativeSelection(curRange);
-          return PREVENT_DEFAULT;
-        },
+  bracketPairs.forEach(pair => {
+    bindings[pair.name] = {
+      key: pair.left,
+      // Input some brackets need to press shift key
+      shiftKey: null,
+      collapsed: false,
+      handler(range) {
+        if (!model.text) return ALLOW_DEFAULT;
+
+        model.text.insert(pair.left, range.index);
+        model.text.insert(pair.right, range.index + range.length + 1);
+
+        const curRange = getCurrentRange();
+        // move cursor to the end of the inserted text
+        curRange.setStart(curRange.startContainer, curRange.startOffset + 1);
+        resetNativeSelection(curRange);
+        return PREVENT_DEFAULT;
       },
-    } satisfies KeyboardBindings;
-  }, {});
+    };
+  });
+  return bindings;
 }
