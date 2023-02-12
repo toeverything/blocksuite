@@ -162,6 +162,7 @@ export async function resetHistory(page: Page) {
   });
 }
 
+// XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
 export async function enterPlaygroundWithList(page: Page) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
@@ -169,27 +170,45 @@ export async function enterPlaygroundWithList(page: Page) {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlock({ flavour: 'affine:page' });
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
+    const pageId = page.addBlockByFlavour('affine:page');
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
     for (let i = 0; i < 3; i++) {
-      page.addBlock({ flavour: 'affine:list' }, frameId);
+      page.addBlockByFlavour('affine:list', {}, frameId);
     }
   });
   await waitNextFrame(page);
 }
 
+// XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
 export async function initEmptyParagraphState(page: Page, pageId?: string) {
   const ids = await page.evaluate(pageId => {
     const { page } = window;
     page.captureSync();
+
     if (!pageId) {
-      pageId = page.addBlock({ flavour: 'affine:page' });
+      pageId = page.addBlockByFlavour('affine:page');
     }
-    const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
-    const paragraphId = page.addBlock({ flavour: 'affine:paragraph' }, frameId);
+
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
     page.captureSync();
     return { pageId, frameId, paragraphId };
   }, pageId);
+  return ids;
+}
+
+export async function initEmptyEdgelessState(page: Page) {
+  const ids = await page.evaluate(() => {
+    const { page } = window;
+
+    const pageId = page.addBlockByFlavour('affine:page');
+    page.addBlockByFlavour('affine:surface', {}, null);
+    const frameId = page.addBlockByFlavour('affine:frame', {}, pageId);
+    const paragraphId = page.addBlockByFlavour('affine:paragraph', {}, frameId);
+    page.resetHistory();
+
+    return { pageId, frameId, paragraphId };
+  });
   return ids;
 }
 
