@@ -12,6 +12,7 @@ import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
+  getCurrentRange,
   getRichTextByModel,
   OpenBlockInfo,
   resetNativeSelection,
@@ -408,8 +409,13 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   assertExists(richText);
   const quill = richText.quill;
   quill.setSelection(0, quill.getLength());
-  document.dispatchEvent(new ClipboardEvent('copy'));
-  resetNativeSelection(null);
+  document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
+
+  const range = getCurrentRange();
+  range.setStart(richText, 0);
+  range.setEnd(richText, 0);
+  resetNativeSelection(range);
+
   toast('Copied to clipboard');
 }
 
