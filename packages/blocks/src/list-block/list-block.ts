@@ -90,9 +90,6 @@ export class ListBlockComponent extends NonShadowLitElement {
   @property()
   host!: BlockHost;
 
-  @property()
-  placeholder?: string;
-
   private get pageAwarenessStore() {
     return this.host.page.awarenessStore;
   }
@@ -187,7 +184,6 @@ export class ListBlockComponent extends NonShadowLitElement {
           );
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
-    const placeholder = this.placeholder ?? '';
 
     return html`
       <div
@@ -201,11 +197,7 @@ export class ListBlockComponent extends NonShadowLitElement {
           }`}
         >
           ${listIcon}
-          <rich-text
-            .host=${this.host}
-            .model=${this.model}
-            .placeholder=${placeholder}
-          ></rich-text>
+          <rich-text .host=${this.host} .model=${this.model}></rich-text>
         </div>
         ${childrenContainer}
       </div>

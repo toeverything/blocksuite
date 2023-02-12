@@ -1,6 +1,5 @@
 // operations used in rich-text level
 
-import { ParagraphBlockComponent, SelectionUtils } from '@blocksuite/blocks';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import {
   assertExists,
@@ -25,33 +24,12 @@ import {
   ExtendedModel,
   focusBlockByModel,
   focusTitle,
-  getBlockElementByModel,
   getCurrentRange,
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
   supportsChildren,
 } from '../utils/index.js';
-
-const TOGGLE_PLACEHOLDER = 'Toggle';
-const TOGGLE_CHILD_PLACEHOLDER = 'Empty Toggle';
-
-export function setPlaceholder(page: Page, id: string, placeholder: string) {
-  let newToggleChild = page.getBlockById(id); // as ParagraphBlockComponent;
-  setTimeout(() => {
-    if (!newToggleChild) {
-      const { selectedBlocks } = SelectionUtils.getSelectInfo(page); // await getCursorBlockIdAndHeight(page);
-      newToggleChild = page.getBlockById(selectedBlocks[0].id);
-    }
-    if (newToggleChild) {
-      const newChildBlockElement = newToggleChild
-        ? (getBlockElementByModel(newToggleChild) as ParagraphBlockComponent)
-        : null;
-      console.log({ newToggleChild, newChildBlockElement });
-      if (newChildBlockElement) newChildBlockElement.placeholder = placeholder;
-    }
-  }, 200);
-}
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -85,9 +63,6 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
 
   const id = page.addBlockByFlavour(...blockArgs, ...asChildOrSibling);
 
-  if (isToggleBlock) {
-    setPlaceholder(page, id, TOGGLE_CHILD_PLACEHOLDER);
-  }
   asyncFocusRichText(page, id);
 }
 
@@ -720,7 +695,6 @@ export function tryMatchSpaceHotkey(
     return ALLOW_DEFAULT;
   }
   let isConverted = false;
-  let placeholderToSet = '';
   switch (prefix.trim()) {
     case '[]':
     case '[ ]':
@@ -744,7 +718,6 @@ export function tryMatchSpaceHotkey(
           hideChildren: false,
         });
       }
-      placeholderToSet = TOGGLE_PLACEHOLDER;
       break;
     case '***':
     case '---':
@@ -773,9 +746,6 @@ export function tryMatchSpaceHotkey(
       break;
     default:
       isConverted = convertToList(page, model, 'numbered', prefix);
-  }
-  if (placeholderToSet) {
-    setPlaceholder(page, model.id, placeholderToSet);
   }
 
   return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
