@@ -1,67 +1,85 @@
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
-import {
-  ALLOW_DEFAULT,
-  getCurrentRange,
-  resetNativeSelection,
-  PREVENT_DEFAULT,
-} from '../index.js';
+
+import { getCurrentRange, resetNativeSelection } from '../index.js';
 import type { KeyboardBindings } from './keyboard.js';
 
 type BracketPair = {
   name: string;
   left: string;
-  leftCode: number;
   right: string;
-  shiftKey?: boolean;
 };
 
-// keyCode refer to https://www.toptal.com/developers/keycode/for/%5B
 const bracketPairs: BracketPair[] = [
   {
     name: 'parenthesis',
     left: '(',
-    leftCode: 57,
     right: ')',
-    shiftKey: true,
   },
   {
     name: 'square bracket',
     left: '[',
-    leftCode: 219,
     right: ']',
   },
   {
     name: 'curly bracket',
     left: '{',
-    leftCode: 219,
     right: '}',
-    shiftKey: true,
-  },
-  {
-    name: 'double quote',
-    left: '"',
-    leftCode: 222,
-    right: '"',
-    shiftKey: true,
   },
   {
     name: 'single quote',
     left: "'",
-    leftCode: 222,
     right: "'",
   },
   {
-    name: 'backtick',
-    left: '`',
-    leftCode: 192,
-    right: '`',
+    name: 'double quote',
+    left: '"',
+    right: '"',
   },
+  // {
+  //   name: 'backtick',
+  //   left: '`',
+  //   right: '`',
+  // },
   {
     name: 'angle bracket',
     left: '<',
-    leftCode: 188,
     right: '>',
-    shiftKey: true,
+  },
+  {
+    name: 'fullwidth single quote',
+    left: '‘',
+    right: '’',
+  },
+  {
+    name: 'fullwidth double quote',
+    left: '“',
+    right: '”',
+  },
+  {
+    name: 'fullwidth parenthesis',
+    left: '（',
+    right: '）',
+  },
+  {
+    name: 'fullwidth square bracket',
+    left: '【',
+    right: '】',
+  },
+  {
+    name: 'fullwidth angle bracket',
+    left: '《',
+    right: '》',
+  },
+  {
+    name: 'corner bracket',
+    left: '「',
+    right: '」',
+  },
+  {
+    name: 'white corner bracket',
+    left: '『',
+    right: '』',
   },
 ];
 
@@ -72,8 +90,9 @@ export function createBracketAutoCompleteBindings(
     return {
       ...acc,
       [pair.name]: {
-        key: pair.leftCode,
-        shiftKey: pair.shiftKey,
+        key: pair.left,
+        // Input some brackets need to press shift key
+        shiftKey: null,
         collapsed: false,
         handler(range) {
           if (!model.text) {
