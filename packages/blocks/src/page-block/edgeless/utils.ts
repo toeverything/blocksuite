@@ -14,7 +14,7 @@ export const PADDING_Y = 48;
 // XXX: edgeless frame min length
 export const FRAME_MIN_LENGTH = 20;
 
-export function isBlock(
+export function isTopLevelBlock(
   selectable: Selectable | null
 ): selectable is TopLevelBlockModel {
   return !!selectable && 'flavour' in selectable;
@@ -23,7 +23,7 @@ export function isBlock(
 export function isSurfaceElement(
   selectable: Selectable | null
 ): selectable is SurfaceElement {
-  return !isBlock(selectable);
+  return !isTopLevelBlock(selectable);
 }
 
 function isPointIn(block: { xywh: string }, x: number, y: number): boolean {
@@ -80,8 +80,8 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
   return dispose;
 }
 
-export function getXywh(element: Selectable) {
-  return isBlock(element)
+export function getXYWH(element: Selectable) {
+  return isTopLevelBlock(element)
     ? element.xywh
     : serializeXYWH(element.x, element.y, element.w, element.h);
 }

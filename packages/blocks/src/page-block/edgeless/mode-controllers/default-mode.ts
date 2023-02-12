@@ -18,7 +18,12 @@ import {
   repairContextMenuRange,
 } from '../../utils/position.js';
 import type { Selectable } from '../selection-manager.js';
-import { getSelectionBoxBound, getXywh, isBlock, pick } from '../utils.js';
+import {
+  getSelectionBoxBound,
+  getXYWH,
+  isTopLevelBlock,
+  pick,
+} from '../utils.js';
 import { MouseModeController } from './index.js';
 
 export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
@@ -53,7 +58,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _updateHoverState(content: Selectable | null) {
     if (content) {
-      if (isBlock(content)) {
+      if (isTopLevelBlock(content)) {
         this._hoverState = {
           rect: getSelectionBoxBound(this._edgeless.viewport, content.xywh),
           content,
@@ -67,7 +72,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
     const { viewport } = this._edgeless;
 
-    const xywh = getXywh(selected);
+    const xywh = getXYWH(selected);
 
     switch (this.blockSelectionState.type) {
       case 'none':
@@ -144,7 +149,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
       case 'single':
         if (
-          !isBlock(this.blockSelectionState.selected) &&
+          !isTopLevelBlock(this.blockSelectionState.selected) &&
           this.blockSelectionState.active
         ) {
           if (!this._lock) {
@@ -195,7 +200,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         // for inactive selection, drag move selected frame
         else if (!this._frameSelectionState) {
           const selected = this.blockSelectionState.selected;
-          if (isBlock(selected)) {
+          if (isTopLevelBlock(selected)) {
             const block = selected;
             const [modelX, modelY, modelW, modelH] = JSON.parse(
               block.xywh
@@ -265,7 +270,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   syncBlockSelectionRect() {
     if (this.blockSelectionState.type === 'single') {
       const selected = this.blockSelectionState.selected;
-      if (isBlock(selected)) {
+      if (isTopLevelBlock(selected)) {
         const block = selected;
         const rect = getSelectionBoxBound(this._edgeless.viewport, block.xywh);
         this.blockSelectionState.rect = rect;

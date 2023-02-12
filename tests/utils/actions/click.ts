@@ -14,6 +14,10 @@ export async function clickBlockById(page: Page, id: string) {
   await page.click(`[data-block-id="${id}"]`);
 }
 
+export async function doubleClickBlockById(page: Page, id: string) {
+  await page.click(`[data-block-id="${id}"]`);
+}
+
 export async function disconnectByClick(page: Page) {
   await clickTestOperationsMenuItem(page, 'Disconnect');
 }

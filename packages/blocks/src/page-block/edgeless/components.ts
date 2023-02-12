@@ -27,8 +27,8 @@ import type {
 import {
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
-  getXywh,
-  isBlock,
+  getXYWH,
+  isTopLevelBlock,
   PADDING_X,
   PADDING_Y,
 } from './utils.js';
@@ -311,7 +311,7 @@ export class EdgelessSelectedRect extends LitElement {
     e.stopPropagation();
     if (this.state?.type === 'single') {
       const { rect, selected } = this.state;
-      const [x, y] = deserializeXYWH(getXywh(selected));
+      const [x, y] = deserializeXYWH(getXYWH(selected));
 
       this._dragStartInfo = {
         startMouseX: e.clientX,
@@ -334,7 +334,7 @@ export class EdgelessSelectedRect extends LitElement {
       const { viewport } = this;
       const { selected } = this.state;
 
-      const xywh = getXywh(selected);
+      const xywh = getXYWH(selected);
       const [x, y, w, h] = deserializeXYWH(xywh);
       let newX = x;
       let newY = y;
@@ -392,7 +392,7 @@ export class EdgelessSelectedRect extends LitElement {
         return;
       }
 
-      if (!isBlock(selected)) {
+      if (!isTopLevelBlock(selected)) {
         if (!this.lock) {
           this.page.captureSync();
           this.lock = true;
@@ -455,7 +455,7 @@ export class EdgelessSelectedRect extends LitElement {
   render() {
     if (this.state.type === 'none') return null;
 
-    const isSurfaceElement = !isBlock(this.state.selected);
+    const isSurfaceElement = !isTopLevelBlock(this.state.selected);
     // const isSurfaceElement = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
