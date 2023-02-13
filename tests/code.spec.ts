@@ -244,13 +244,14 @@ test('use keyboard copy inside code block copy plain text', async ({
   }
   await page.keyboard.up('Shift');
   await copyByKeyboard(page);
+  await page.keyboard.press('ArrowRight');
   await pressEnter(page);
   await pressEnter(page);
   await pasteByKeyboard(page);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
+  <affine:page
   prop:title=""
 >
   <affine:frame>
@@ -258,6 +259,9 @@ test('use keyboard copy inside code block copy plain text', async ({
       prop:language="JavaScript"
       prop:text={
         <>
+          <text
+            insert="use"
+          />
           <text
             code-block={true}
             insert="
