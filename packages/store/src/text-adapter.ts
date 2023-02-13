@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { DeltaInsert } from '@blocksuite/virgo';
 import type { DeltaOperation, Quill } from 'quill';
 import * as Y from 'yjs';
 
 import type { Space } from './space.js';
-
-type PrelimTextType = 'splitLeft' | 'splitRight';
-
-export type TextType = PrelimText | Text;
 
 // Removes the pending '\n's if it has no attributes
 export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
@@ -33,66 +30,6 @@ export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
   return delta;
 }
 
-const UNSUPPORTED_MSG = 'PrelimText does not support ';
-
-export class PrelimText {
-  ready = false;
-  type: PrelimTextType;
-  index: number;
-  constructor(type: PrelimTextType, index: number) {
-    this.type = type;
-    this.index = index;
-  }
-
-  get length() {
-    return 0;
-  }
-
-  clone() {
-    throw new Error(UNSUPPORTED_MSG + 'clone');
-  }
-
-  insert() {
-    throw new Error(UNSUPPORTED_MSG + 'insert');
-  }
-
-  insertList() {
-    throw new Error(UNSUPPORTED_MSG + 'insertList');
-  }
-
-  split() {
-    throw new Error(UNSUPPORTED_MSG + 'split');
-  }
-
-  join() {
-    throw new Error(UNSUPPORTED_MSG + 'join');
-  }
-
-  clear() {
-    throw new Error(UNSUPPORTED_MSG + 'clear');
-  }
-
-  delete() {
-    throw new Error(UNSUPPORTED_MSG + 'delete');
-  }
-
-  replace() {
-    throw new Error(UNSUPPORTED_MSG + 'replace');
-  }
-
-  format() {
-    throw new Error(UNSUPPORTED_MSG + 'format');
-  }
-
-  applyDelta() {
-    throw new Error(UNSUPPORTED_MSG + 'applyDelta');
-  }
-
-  sliceToDelta() {
-    throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
-  }
-}
-
 declare module 'yjs' {
   interface Text {
     /**
@@ -115,10 +52,6 @@ declare module 'yjs' {
 
 export class Text {
   private _yText: Y.Text;
-  /**
-   * @internal
-   */
-  public delayedJobs: (() => void)[] = [];
 
   // TODO toggle transact by options
   private _shouldTransact = true;
@@ -131,19 +64,10 @@ export class Text {
     }
   }
 
-  /**
-   * @internal
-   */
-  public doDelayedJobs() {
-    this.delayedJobs.forEach(cb => cb());
-    this.delayedJobs = [];
-  }
-
   static fromDelta(delta: DeltaOperation[]) {
-    const result = new Text('');
-    // In the first time, yDoc does not exist.
-    result.delayedJobs.push(() => result.applyDelta(delta));
-    return result;
+    const result = new Y.Text();
+    result.applyDelta(delta);
+    return new Text(result);
   }
 
   get length() {
@@ -172,11 +96,56 @@ export class Text {
     return new Text(this._yText.clone());
   }
 
-  split(index: number, length: number): [PrelimText, PrelimText] {
-    return [
-      new PrelimText('splitLeft', index),
-      new PrelimText('splitRight', index + length),
-    ];
+  /**
+   * Here are three cases for point position(index + length):
+   * [{insert: 'abc', ...}, {insert: 'def', ...}, {insert: 'ghi', ...}]
+   * 1. abc|de|fghi
+   *    left: [{insert: 'abc', ...}]
+   *    right: [{insert: 'f', ...}, {insert: 'ghi', ...}]
+   * 2. abc|def|ghi
+   *    left: [{insert: 'abc', ...}]
+   *    right: [{insert: 'ghi', ...}]
+   * 3. abc|defg|hi
+   *    left: [{insert: 'abc', ...}]
+   *    right: [{insert: 'hi', ...}]
+   */
+  split(index: number, length: number): Text {
+    const deltas = this._yText.toDelta();
+
+    if (deltas instanceof Array) {
+      let tmpIndex = 0;
+      const rightDeltas: DeltaInsert[] = [];
+      for (let i = 0; i < deltas.length; i++) {
+        const insert = deltas[i].insert;
+        if (typeof insert === 'string') {
+          if (tmpIndex + insert.length >= index + length) {
+            const insertRight = insert.slice(index + length - tmpIndex);
+            rightDeltas.push({
+              insert: insertRight,
+              attributes: deltas[i].attributes,
+            });
+            rightDeltas.push(...deltas.slice(i + 1));
+            break;
+          }
+          tmpIndex += insert.length;
+        } else {
+          throw new Error(
+            'This text cannot be split because it contains non-string insert.'
+          );
+        }
+      }
+
+      this.delete(index, this.length - index);
+      const rightYText = new Y.Text();
+      rightYText.applyDelta(rightDeltas);
+      const rightText = new Text(rightYText);
+
+      return rightText;
+    } else {
+      throw new Error(
+        'This text cannot be split because we failed to get the deltas of it.'
+      );
+    }
   }
 
   insert(content: string, index: number, attributes?: Record<string, unknown>) {

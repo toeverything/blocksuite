@@ -1,6 +1,6 @@
 import './slash-menu-node.js';
 
-import { BaseBlockModel, PrelimText } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   getQuillIndexByNativeSelection,
@@ -76,7 +76,7 @@ function onAbort(
   }
   const searchStr = '/' + e.target.reason;
   const text = model.text;
-  if (!text || text instanceof PrelimText) {
+  if (!text) {
     console.warn(
       'Failed to clean slash search text! No text found for model',
       model

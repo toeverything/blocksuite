@@ -41,3 +41,33 @@ test('edit database block title and create new rows', async ({ page }) => {
   await undoByClick(page);
   await assertBlockCount(page, 'paragraph', 0);
 });
+
+test('database rich text column', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+  const databaseElement = page.locator('affine-database');
+  const addRowButton = databaseElement.locator(
+    '[data-test-id="affine-database-add-row-button"]'
+  );
+  const addColumnButton = databaseElement.locator(
+    '[data-test-id="affine-database-add-column-button"]'
+  );
+  await addColumnButton.click();
+  await page
+    .locator('affine-database-add-column-type-popup')
+    .locator('div[data-type="rich-text"]')
+    .click();
+  await addRowButton.click();
+  const richTextCell = page.locator('affine-database-rich-text-cell');
+  await richTextCell.click();
+  await richTextCell.type('hello', { delay: 50 });
+  const text1 = await page.evaluate(() => {
+    return window.page.tags.toJSON()[4][3].value;
+  });
+  expect(text1).toBe('hello');
+  await richTextCell.type(' world', { delay: 50 });
+  const text2 = await page.evaluate(() => {
+    return window.page.tags.toJSON()[4][3].value;
+  });
+  expect(() => expect(text2).toBe('hello world'));
+});

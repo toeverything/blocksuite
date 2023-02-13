@@ -588,3 +588,30 @@ test('overlapping styles', async ({ page }) => {
     },
   ]);
 });
+
+test('input continuous spaces', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await type(page, 'abc   def');
+
+  expect(await editorA.innerText()).toBe('abc   def');
+  expect(await editorB.innerText()).toBe('abc   def');
+
+  await focusVirgoRichText(page);
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+
+  await page.keyboard.press('Enter');
+
+  expect(await editorA.innerText()).toBe('abc  \n' + ' def');
+  expect(await editorB.innerText()).toBe('abc  \n' + ' def');
+});

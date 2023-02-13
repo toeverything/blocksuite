@@ -1,7 +1,12 @@
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { ZERO_WIDTH_SPACE } from '../constant.js';
+
+const unitTextStyles = styleMap({
+  whiteSpace: 'pre',
+});
 
 @customElement('virgo-unit-text')
 export class VirgoUnitText extends LitElement {
@@ -11,7 +16,9 @@ export class VirgoUnitText extends LitElement {
   render() {
     // we need to avoid \n appearing before and after the span element, which will
     // cause the sync problem about the cursor position
-    return html`<span data-virgo-text="true">${this.str}</span>`;
+    return html`<span style=${unitTextStyles} data-virgo-text="true"
+      >${this.str}</span
+    >`;
   }
 
   createRenderRoot() {
