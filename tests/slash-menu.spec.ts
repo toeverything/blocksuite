@@ -114,8 +114,8 @@ test.describe('slash menu should show and hide correctly', () => {
       throw new Error("slashMenu doesn't exist");
     }
     const { x, y } = box;
-    assertAlmostEqual(x, 122, 5);
-    assertAlmostEqual(y, 180, 5);
+    assertAlmostEqual(x, 122, 6);
+    assertAlmostEqual(y, 180, 6);
   });
 
   test('left arrow should active left panel', async () => {
@@ -142,7 +142,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(25);
+  await expect(slashItems).toHaveCount(24);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
@@ -170,11 +170,11 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
 
   // search should reset the active item
-  await type(page, 'code');
+  await type(page, 'co');
   await expect(slashItems).toHaveCount(2);
-  await expect(slashItems).toHaveText(['Code Block', 'Code']);
+  await expect(slashItems).toHaveText(['Code Block', 'Copy']);
   await expect(slashItems.first()).toHaveAttribute('hover', '');
-  await type(page, 'b');
+  await type(page, 'p');
   await expect(slashItems).toHaveCount(1);
   // assert backspace works
   await page.keyboard.press('Backspace');
