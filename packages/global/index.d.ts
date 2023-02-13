@@ -85,7 +85,7 @@ declare namespace BlockSuiteInternal {
     text?: Text;
   }
 
-  import {
+  import type {
     // Model
     CodeBlockModel,
     DatabaseBlockModel,
