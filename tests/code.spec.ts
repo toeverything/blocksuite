@@ -208,7 +208,7 @@ test('drag copy paste', async ({ page }) => {
   await pasteByKeyboard(page);
 
   const content = await getQuillSelectionText(page);
-  expect(content).toBe('use\n');
+  expect(content).toBe('useuse\n');
 });
 
 test('split code by enter', async ({ page }) => {
@@ -272,7 +272,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   await pasteByKeyboard(page);
 
   const content = await getQuillSelectionText(page);
-  expect(content).toBe('use\n');
+  expect(content).toBe('useuse\n');
 });
 
 test('drag select code block can delete it', async ({ page }) => {

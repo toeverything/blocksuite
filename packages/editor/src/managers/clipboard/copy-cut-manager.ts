@@ -58,7 +58,6 @@ export class CopyCutManager {
     const htmlClip = await this._getHtmlClip(selectedBlocks);
     htmlClip && clips.push(htmlClip);
 
-    console.log(clips);
     return clips;
   }
 
