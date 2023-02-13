@@ -7,6 +7,7 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getCenterPosition,
   getQuillSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
@@ -211,6 +212,130 @@ test('drag copy paste', async ({ page }) => {
   expect(content).toBe('useuse\n');
 });
 
+test('keyboard selection and copy paste', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'use');
+  await page.keyboard.down('Shift');
+  for (let i = 0; i < 'use'.length; i++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.up('Shift');
+  await copyByKeyboard(page);
+  await pasteByKeyboard(page);
+
+  const content = await getQuillSelectionText(page);
+  expect(content).toBe('useuse\n');
+});
+
+test('use keyboard copy inside code block copy plain text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'use');
+  await page.keyboard.down('Shift');
+  for (let i = 0; i < 'use'.length; i++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.up('Shift');
+  await copyByKeyboard(page);
+  await pressEnter(page);
+  await pressEnter(page);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:code
+      prop:language="JavaScript"
+      prop:text={
+        <>
+          <text
+            code-block={true}
+            insert="
+"
+          />
+        </>
+      }
+    />
+    <affine:paragraph
+      prop:text="use"
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
+
+test('use code block copy menu of code block copy whole code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await page.keyboard.type('use');
+  await pressEnter(page);
+  await pressEnter(page);
+  await page.keyboard.type('12345');
+
+  const codeBlockPosition = await getCenterPosition(page, 'affine-code');
+  await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
+
+  const position = await getCenterPosition(
+    page,
+    '.code-block-option > format-bar-button:nth-child(1)'
+  );
+
+  await page.mouse.move(position.x, position.y);
+  await page.waitForTimeout(50);
+  await page.mouse.click(position.x, position.y);
+
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:code
+      prop:language="JavaScript"
+      prop:text={
+        <>
+          <text
+            insert="use"
+          />
+          <text
+            code-block={true}
+            insert="
+"
+          />
+        </>
+      }
+    />
+    <affine:paragraph
+      prop:text="12345"
+      prop:type="text"
+    />
+    <affine:code
+      prop:language="JavaScript"
+      prop:text="use"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
+
 test('split code by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
@@ -255,24 +380,6 @@ test('split code with selection by enter', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['he\no\n']);
-});
-
-test('keyboard selection and copy paste', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyCodeBlockState(page);
-  await focusRichText(page);
-
-  await type(page, 'use');
-  await page.keyboard.down('Shift');
-  for (let i = 0; i < 'use'.length; i++) {
-    await page.keyboard.press('ArrowLeft');
-  }
-  await page.keyboard.up('Shift');
-  await copyByKeyboard(page);
-  await pasteByKeyboard(page);
-
-  const content = await getQuillSelectionText(page);
-  expect(content).toBe('useuse\n');
 });
 
 test('drag select code block can delete it', async ({ page }) => {
