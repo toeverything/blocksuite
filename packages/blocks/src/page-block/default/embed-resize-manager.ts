@@ -61,12 +61,12 @@ export class EmbedResizeManager {
       height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
       if (this._dropContainer) {
         this.signals.updateEmbedRects.emit([
-          {
-            width: width,
-            height: height,
-            left: left,
-            top: this._dropContainer.getBoundingClientRect().top,
-          },
+          new DOMRect(
+            left,
+            this._dropContainer.getBoundingClientRect().top,
+            width,
+            height
+          ),
         ]);
         const activeImg = this.state.activeComponent?.querySelector(
           '.resizable-img'

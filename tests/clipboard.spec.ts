@@ -328,7 +328,7 @@ test('copy & paste outside editor', async ({ page }) => {
     const input = document.createElement('input');
     input.setAttribute('id', 'input-test');
     input.value = '123';
-    document.querySelector('.debug-menu')?.appendChild(input);
+    document.body.appendChild(input);
   });
   await page.focus('#input-test');
   await page.dblclick('#input-test');
