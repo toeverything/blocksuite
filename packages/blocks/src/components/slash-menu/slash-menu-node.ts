@@ -55,9 +55,6 @@ export class SlashMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposableGroup.add(
-      Signal.disposableListener(window, 'keydown', this._escapeListener)
-    );
-    this._disposableGroup.add(
       Signal.disposableListener(window, 'mousedown', this._clickAwayListener)
     );
     this._disposableGroup.add(
@@ -109,11 +106,16 @@ export class SlashMenu extends LitElement {
    * The slash menu will be closed in the following keyboard cases:
    * - Press the space key
    * - Press the backspace key and the search string is empty
-   * - Press the escape key (handled by {@link _escapeListener})
+   * - Press the escape key
    * - When the search item is empty, the slash menu will be hidden temporarily,
    *   and if the following key is not the backspace key, the slash menu will be closed
    */
   private _keyDownListener = (e: KeyboardEvent) => {
+    if (e.key === '/') {
+      // Can not stopPropagation here,
+      // otherwise the rich text will not be able to trigger a new the slash menu
+      return;
+    }
     // This listener be bind to the window and the rich text element
     // So we need to ensure that the event is triggered once.
     // We also need to prevent the event from triggering the keyboard bindings action
@@ -128,7 +130,7 @@ export class SlashMenu extends LitElement {
       this._hide = false;
       return;
     }
-    if (e.key === ' ') {
+    if (e.key === ' ' || e.key === 'Escape') {
       this.abortController.abort();
       return;
     }
@@ -215,17 +217,6 @@ export class SlashMenu extends LitElement {
     }
     // prevent arrow key from moving cursor
     e.preventDefault();
-  };
-
-  /**
-   * Handle press esc
-   */
-  private _escapeListener = (e: KeyboardEvent) => {
-    if (e.key !== 'Escape') {
-      return;
-    }
-    this.abortController.abort();
-    window.removeEventListener('keyup', this._escapeListener);
   };
 
   private _getGroupIndexByItem(item: SlashItem) {
