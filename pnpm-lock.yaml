@@ -177,6 +177,7 @@ importers:
       lit: ^2.6.1
       react: ^18.2.0
       react-dom: ^18.2.0
+      shepherd.js: ^11.0.1
       yjs: ^13.5.45
     dependencies:
       '@blocksuite/blocks': link:../blocks
@@ -190,6 +191,7 @@ importers:
       lit: 2.6.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      shepherd.js: 11.0.1
       yjs: 13.5.45
     devDependencies:
       '@types/dat.gui': 0.7.7
@@ -3600,6 +3602,11 @@ packages:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
     dev: true
 
+  /deepmerge/4.3.0:
+    resolution: {integrity: sha512-z2wJZXrmeHdvYJp/Ux55wIjqo81G5Bp4c+oELTW+7ar6SogWHajt5a9gO3s3IDaGSAXjDk0vlQKN3rms8ab3og==}
+    engines: {node: '>=0.10.0'}
+    dev: false
+
   /default-require-extensions/3.0.1:
     resolution: {integrity: sha512-eXTJmRbm2TIt9MgWTsOH1wEuhew6XGZcMeGKCtLedIg/NCsg1iBePXkceTdK4Fii7pzmN9tGsZhKzZ4h7O/fxw==}
     engines: {node: '>=8'}
@@ -6635,6 +6642,14 @@ packages:
   /shell-quote/1.7.4:
     resolution: {integrity: sha512-8o/QEhSSRb1a5i7TFR0iM4G16Z0vYB2OQVs4G3aAFXjn3T6yEx8AZxy1PgDF7I00LZHYA3WxaSYIf5e5sAX8Rw==}
     dev: true
+
+  /shepherd.js/11.0.1:
+    resolution: {integrity: sha512-K387AM8A0IbEje9ZRHIGOQHLzFkMoNtQlxZp5Rgw4FGnfReq8C4mPJHX6qA5OFKg+1atI7VjGonbJDzYEghd6Q==}
+    engines: {node: 12.* || 14.* || >= 16}
+    dependencies:
+      '@floating-ui/dom': 1.1.0
+      deepmerge: 4.3.0
+    dev: false
 
   /side-channel/1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
