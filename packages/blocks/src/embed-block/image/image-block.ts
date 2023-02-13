@@ -128,7 +128,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
   host!: BlockHost;
 
   @query('.resizable-img')
-  resizeImg!: HTMLElement;
+  private _resizeImg!: HTMLElement;
 
   @state()
   private _source!: string;
@@ -211,8 +211,8 @@ export class ImageBlockComponent extends NonShadowLitElement {
       this._imageState = 'failed';
     }
     if (width && height) {
-      this.resizeImg.style.width = width + 'px';
-      this.resizeImg.style.height = height + 'px';
+      this._resizeImg.style.width = width + 'px';
+      this._resizeImg.style.height = height + 'px';
     }
   }
 
@@ -225,16 +225,16 @@ export class ImageBlockComponent extends NonShadowLitElement {
     );
     const { width, height } = this.model;
 
-    if (this.resizeImg) {
+    if (this._resizeImg) {
       if (this._imageState !== 'ready') {
-        this.resizeImg.style.width = 'unset';
-        this.resizeImg.style.height = 'unset';
+        this._resizeImg.style.width = 'unset';
+        this._resizeImg.style.height = 'unset';
       } else if (width && height) {
-        this.resizeImg.style.width = width + 'px';
-        this.resizeImg.style.height = height + 'px';
+        this._resizeImg.style.width = width + 'px';
+        this._resizeImg.style.height = height + 'px';
       } else {
-        this.resizeImg.style.width = 'unset';
-        this.resizeImg.style.height = 'unset';
+        this._resizeImg.style.width = 'unset';
+        this._resizeImg.style.height = 'unset';
       }
     }
 
