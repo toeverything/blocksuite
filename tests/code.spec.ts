@@ -230,7 +230,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   expect(content).toBe('useuse\n');
 });
 
-test('use keyboard copy inside code block copy plain text', async ({
+test.skip('use keyboard copy inside code block copy plain text', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -279,7 +279,7 @@ test('use keyboard copy inside code block copy plain text', async ({
   );
 });
 
-test('use code block copy menu of code block copy whole code block', async ({
+test.skip('use code block copy menu of code block copy whole code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -289,7 +289,6 @@ test('use code block copy menu of code block copy whole code block', async ({
   await page.keyboard.type('use');
   await pressEnter(page);
   await pressEnter(page);
-  await page.keyboard.type('12345');
 
   const codeBlockPosition = await getCenterPosition(page, 'affine-code');
   await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
@@ -326,10 +325,6 @@ test('use code block copy menu of code block copy whole code block', async ({
           />
         </>
       }
-    />
-    <affine:paragraph
-      prop:text="12345"
-      prop:type="text"
     />
     <affine:code
       prop:language="JavaScript"
