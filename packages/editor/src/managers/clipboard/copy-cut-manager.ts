@@ -58,6 +58,7 @@ export class CopyCutManager {
     const htmlClip = await this._getHtmlClip(selectedBlocks);
     htmlClip && clips.push(htmlClip);
 
+    console.log(clips);
     return clips;
   }
 
@@ -160,6 +161,17 @@ export class CopyCutManager {
         height: (model as EmbedBlockModel).height,
       });
     }
+    if (model.flavour === 'affine:code') {
+      // convert code block style to raw text
+      const rawText: DeltaOperation[] = [];
+      delta.map(op => {
+        rawText.push({ insert: op.insert });
+      });
+
+      Object.assign(result, {
+        rawText,
+      });
+    }
 
     return result;
   }
@@ -169,6 +181,9 @@ export class CopyCutManager {
     if (clipboardData) {
       try {
         clipItems.forEach(clip => {
+          if (clip.mimeType === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
+            clip = this._handleCodeBlockRawCopy(clip);
+          }
           clipboardData.setData(clip.mimeType, clip.data);
         });
         e.preventDefault();
@@ -183,6 +198,24 @@ export class CopyCutManager {
         e.stopPropagation();
       }
     }
+  }
+
+  private _handleCodeBlockRawCopy(clip: ClipboardItem) {
+    const openBlockInfos = JSON.parse(clip.data).data as OpenBlockInfo[];
+    openBlockInfos.forEach(openBlockInfo => {
+      if (openBlockInfo.flavour === 'affine:code') {
+        const rawText = openBlockInfo.rawText;
+        if (!rawText) return;
+        openBlockInfo.flavour = 'affine:paragraph';
+        openBlockInfo.text = rawText;
+      }
+    });
+    return new ClipboardItem(
+      CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
+      JSON.stringify({
+        data: openBlockInfos,
+      })
+    );
   }
 
   // TODO: Optimization
