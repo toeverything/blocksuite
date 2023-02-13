@@ -1,6 +1,7 @@
 import {
   CopyIcon,
   DeleteIcon,
+  DividerIcon,
   DuplicateIcon,
   NowIcon,
   paragraphConfig,
@@ -45,17 +46,32 @@ function insertContent(model: BaseBlockModel, text: string) {
   quill.setSelection(index + text.length, 0);
 }
 
+const dividerItem: SlashItem = {
+  name: 'Divider',
+  icon: DividerIcon,
+  action({ page, model }) {
+    const parent = page.getParent(model);
+    if (!parent) {
+      return;
+    }
+    const index = parent.children.indexOf(model);
+    page.addBlockByFlavour('affine:divider', {}, parent, index + 1);
+  },
+};
+
 export const menuGroups: { name: string; items: SlashItem[] }[] = [
   {
     name: 'Text',
-    // TODO append divider convertToDivider
-    items: paragraphConfig
-      .filter(i => i.flavour !== 'affine:list')
-      .map(({ name, icon, flavour, type }) => ({
-        name,
-        icon,
-        action: ({ model }) => updateBlockType([model], flavour, type),
-      })),
+    items: [
+      ...paragraphConfig
+        .filter(i => i.flavour !== 'affine:list')
+        .map<SlashItem>(({ name, icon, flavour, type }) => ({
+          name,
+          icon,
+          action: ({ model }) => updateBlockType([model], flavour, type),
+        })),
+      dividerItem,
+    ],
   },
   {
     name: 'Style',
