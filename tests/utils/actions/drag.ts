@@ -63,10 +63,10 @@ export async function dragOverTitle(page: Page) {
   });
 }
 
-export async function dragEmbedResizeByBottomRight(page: Page) {
+export async function dragEmbedResizeByTopRight(page: Page) {
   const { from, to } = await page.evaluate(() => {
     const bottomRightButton = document.querySelector(
-      '.bottom-right'
+      '.top-right'
     ) as HTMLInputElement;
     const bottomRightButtonBound = bottomRightButton.getBoundingClientRect();
     const y = bottomRightButtonBound.top;
@@ -80,10 +80,10 @@ export async function dragEmbedResizeByBottomRight(page: Page) {
   });
 }
 
-export async function dragEmbedResizeByBottomLeft(page: Page) {
+export async function dragEmbedResizeByTopLeft(page: Page) {
   const { from, to } = await page.evaluate(() => {
     const bottomRightButton = document.querySelector(
-      '.bottom-left'
+      '.top-left'
     ) as HTMLInputElement;
     const bottomRightButtonBound = bottomRightButton.getBoundingClientRect();
     const y = bottomRightButtonBound.top;
