@@ -131,29 +131,6 @@ export const database: InitFn = (workspace: Workspace) => {
 
       type Option = 'Done' | 'TODO' | 'WIP';
       const selection = ['Done', 'TODO', 'WIP'] as Option[];
-      // Add database block inside frame block
-      const databaseId = page.addBlockByFlavour(
-        'affine:database',
-        {
-          columns: ['column1', 'column3', 'column2'],
-        },
-        frameId
-      );
-      const p1 = page.addBlockByFlavour(
-        'affine:paragraph',
-        {
-          text: new page.Text('text1'),
-        },
-        databaseId
-      );
-      const p2 = page.addBlockByFlavour(
-        'affine:paragraph',
-        {
-          text: new page.Text('text2'),
-        },
-        databaseId
-      );
-
       const col1 = page.setTagSchema({
         internalProperty: {
           color: '#ff0000',
@@ -188,6 +165,28 @@ export const database: InitFn = (workspace: Workspace) => {
         name: 'Select 2',
         type: 'rich-text',
       });
+      // Add database block inside frame block
+      const databaseId = page.addBlockByFlavour(
+        'affine:database',
+        {
+          columns: [col1, col2, col3],
+        },
+        frameId
+      );
+      const p1 = page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text('text1'),
+        },
+        databaseId
+      );
+      const p2 = page.addBlockByFlavour(
+        'affine:paragraph',
+        {
+          text: new page.Text('text2'),
+        },
+        databaseId
+      );
 
       page.updateBlockTag(p1, {
         schemaId: col1,
