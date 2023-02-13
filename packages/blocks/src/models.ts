@@ -38,6 +38,7 @@ export type {
   ListBlockModel,
   PageBlockModel,
   ParagraphBlockModel,
+  SurfaceBlockModel,
 };
 
 /** Default first party model types built for affine */
