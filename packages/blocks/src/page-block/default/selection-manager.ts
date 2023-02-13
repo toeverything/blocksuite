@@ -713,11 +713,9 @@ export class DefaultSelectionManager {
         this.state.selectEmbeds.push(
           this.state.activeComponent as EmbedBlockComponent
         );
-        this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
-      } else {
-        this.state.selectedBlocks.push(this.state.activeComponent);
-        this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       }
+      this.state.selectedBlocks.push(this.state.activeComponent);
+      this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       return;
     }
     const target = e.raw.target;
