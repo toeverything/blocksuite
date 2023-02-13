@@ -276,10 +276,13 @@ export class SlashMenu extends LitElement {
     ) {
       return;
     }
+    // Need to remove the search string
+    // We must to do clean the slash string before we do the action
+    // Otherwise, the action may change the model and cause the slash string to be changed
+    this.abortController.abort(this._searchString);
+
     const { action } = this._filterItems[index];
     action({ page: this.model.page, model: this.model });
-    // Need to remove the search string
-    this.abortController.abort(this._searchString);
   }
 
   private _handleClickCategory(group: { name: string; items: SlashItem[] }) {
