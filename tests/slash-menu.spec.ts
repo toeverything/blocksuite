@@ -108,26 +108,27 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test('left arrow should close the slash menu', async () => {
-    await page.keyboard.press('ArrowLeft');
-    await expect(slashMenu).not.toBeVisible();
-    await assertRichTexts(page, ['/']);
-  });
-
-  test('right arrow should close the slash menu', async () => {
-    await page.keyboard.press('ArrowRight');
-    await expect(slashMenu).not.toBeVisible();
-    await assertRichTexts(page, ['/']);
-  });
-
   test('should slash menu position correct', async () => {
     const box = await slashMenu.boundingBox();
     if (!box) {
       throw new Error("slashMenu doesn't exist");
     }
     const { x, y } = box;
-    assertAlmostEqual(x, 122, 10);
-    assertAlmostEqual(y, 180, 10);
+    assertAlmostEqual(x, 122, 5);
+    assertAlmostEqual(y, 180, 5);
+  });
+
+  test('left arrow should active left panel', async () => {
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowRight');
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const activatedItem = slashItems.nth(-3);
+    await expect(activatedItem).toHaveText(['Copy']);
+    await expect(activatedItem).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
   });
 });
 
