@@ -69,6 +69,5 @@ test('database rich text column', async ({ page }) => {
   const text2 = await page.evaluate(() => {
     return window.page.tags.toJSON()[4][3].value;
   });
-  // fixme(Flrande): error is not thrown
-  expect(() => expect(text2).toBe('hello world')).toThrow();
+  expect(() => expect(text2).toBe('hello world'));
 });
