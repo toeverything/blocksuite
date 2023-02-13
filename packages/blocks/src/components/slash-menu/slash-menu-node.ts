@@ -34,7 +34,10 @@ export class SlashMenu extends LitElement {
   slashMenuElement!: HTMLElement;
 
   @state()
-  private _activeItemIndex = 0;
+  private _leftPanelActivated = false;
+
+  @state()
+  private _activatedItemIndex = 0;
 
   @state()
   private _filterItems = menuGroups.flatMap(group => group.items);
@@ -42,6 +45,9 @@ export class SlashMenu extends LitElement {
   @state()
   private _hide = false;
 
+  /**
+   * Does not include the slash character
+   */
   private _searchString = '';
 
   private _disposableGroup = new DisposableGroup();
@@ -134,6 +140,7 @@ export class SlashMenu extends LitElement {
       this._filterItems = this._updateItem();
       return;
     }
+    // Assume input a character, append it to the search string
     if (e.key.length === 1) {
       this._searchString += e.key;
       this._filterItems = this._updateItem();
@@ -153,33 +160,54 @@ export class SlashMenu extends LitElement {
     const configLen = this._filterItems.length;
     switch (e.key) {
       case 'Enter': {
+        e.preventDefault();
         if (e.isComposing) {
           return;
         }
-        this._handleItemClick(this._activeItemIndex);
+        this._handleClickItem(this._activatedItemIndex);
         break;
       }
       case 'ArrowUp': {
-        this._activeItemIndex =
-          (this._activeItemIndex - 1 + configLen) % configLen;
-        this._queryItemEle(
-          this._filterItems[this._activeItemIndex]
-        )?.scrollIntoView();
+        e.preventDefault();
+        if (this._leftPanelActivated) {
+          const nowGroupIdx = this._getGroupIndexByItem(
+            this._filterItems[this._activatedItemIndex]
+          );
+          this._handleClickCategory(
+            menuGroups[
+              (nowGroupIdx - 1 + menuGroups.length) % menuGroups.length
+            ]
+          );
+          return;
+        }
+        this._activatedItemIndex =
+          (this._activatedItemIndex - 1 + configLen) % configLen;
+        this._scrollToItem(this._filterItems[this._activatedItemIndex]);
         break;
       }
       case 'ArrowDown': {
-        this._activeItemIndex = (this._activeItemIndex + 1) % configLen;
-        this._queryItemEle(
-          this._filterItems[this._activeItemIndex]
-        )?.scrollIntoView();
+        e.preventDefault();
+        if (this._leftPanelActivated) {
+          const nowGroupIdx = this._getGroupIndexByItem(
+            this._filterItems[this._activatedItemIndex]
+          );
+          this._handleClickCategory(
+            menuGroups[(nowGroupIdx + 1) % menuGroups.length]
+          );
+          return;
+        }
+        this._activatedItemIndex = (this._activatedItemIndex + 1) % configLen;
+        this._scrollToItem(this._filterItems[this._activatedItemIndex]);
         break;
       }
       case 'ArrowLeft':
-        this._activeItemIndex = -1;
+        e.preventDefault();
+        this._leftPanelActivated = true;
         return;
       case 'ArrowRight':
-        if (this._activeItemIndex < 0) {
-          this._activeItemIndex = 0;
+        e.preventDefault();
+        if (this._leftPanelActivated) {
+          this._leftPanelActivated = false;
         }
         return;
       default:
@@ -200,18 +228,12 @@ export class SlashMenu extends LitElement {
     window.removeEventListener('keyup', this._escapeListener);
   };
 
-  private _handleItemClick(index: number) {
-    if (index < 0 || index >= this._filterItems.length) {
-      return;
-    }
-    // Need to remove the search string
-    this.abortController.abort(this._searchString);
-    const { action } = this._filterItems[index];
-    action({ page: this.model.page, model: this.model });
+  private _getGroupIndexByItem(item: SlashItem) {
+    return menuGroups.findIndex(group => group.items.includes(item));
   }
 
   private _updateItem(): SlashItem[] {
-    this._activeItemIndex = 0;
+    this._activatedItemIndex = 0;
     const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
       return menuGroups.flatMap(group => group.items);
@@ -234,31 +256,46 @@ export class SlashMenu extends LitElement {
       });
   }
 
-  private _queryItemEle(item: SlashItem) {
+  private _scrollToItem(item: SlashItem) {
     const shadowRoot = this.shadowRoot;
     if (!shadowRoot) {
-      return null;
+      return;
     }
-    return shadowRoot.querySelector(`format-bar-button[text="${item.name}"]`);
+    const ele = shadowRoot.querySelector(
+      `format-bar-button[text="${item.name}"]`
+    );
+    // TODO scroll if needed
+    ele?.scrollIntoView(true);
+  }
+
+  private _handleClickItem(index: number) {
+    if (
+      this._leftPanelActivated ||
+      index < 0 ||
+      index >= this._filterItems.length
+    ) {
+      return;
+    }
+    const { action } = this._filterItems[index];
+    action({ page: this.model.page, model: this.model });
+    // Need to remove the search string
+    this.abortController.abort(this._searchString);
+  }
+
+  private _handleClickCategory(group: { name: string; items: SlashItem[] }) {
+    const menuGroup = menuGroups.find(g => g.name === group.name);
+    if (!menuGroup) return;
+    const item = menuGroup.items[0];
+    this._scrollToItem(item);
+    this._activatedItemIndex = this._filterItems.findIndex(
+      i => i.name === item.name
+    );
   }
 
   private _categoryTemplate() {
-    const handleClickCategory = (group: {
-      name: string;
-      items: SlashItem[];
-    }) => {
-      const menuGroup = menuGroups.find(g => g.name === group.name);
-      if (!menuGroup) return;
-      const item = menuGroup.items[0];
-      this._queryItemEle(item)?.scrollIntoView(true);
-      this._activeItemIndex = this._filterItems.findIndex(
-        i => i.name === item.name
-      );
-    };
-
-    const activeCategory = menuGroups.find(group =>
+    const activatedCategory = menuGroups.find(group =>
       group.items.some(
-        item => item.name === this._filterItems[this._activeItemIndex].name
+        item => item.name === this._filterItems[this._activatedItemIndex].name
       )
     );
 
@@ -271,10 +308,10 @@ export class SlashMenu extends LitElement {
       ${menuGroups.map(
         group =>
           html`<div
-            class="slash-category-name ${activeCategory?.name === group.name
+            class="slash-category-name ${activatedCategory?.name === group.name
               ? 'slash-active-category'
               : ''}"
-            @click=${() => handleClickCategory(group)}
+            @click=${() => this._handleClickCategory(group)}
           >
             ${group.name}
           </div>`
@@ -305,14 +342,17 @@ export class SlashMenu extends LitElement {
         <format-bar-button
           width="100%"
           style="padding-left: 12px; justify-content: flex-start;"
-          ?hover=${this._activeItemIndex === index}
+          ?hover=${!this._leftPanelActivated &&
+          this._activatedItemIndex === index}
           text="${name}"
           data-testid="${name}"
-          @mouseover=${() => {
-            this._activeItemIndex = index;
+          @mousemove=${() => {
+            // Use `mousemove` instead of `mouseover` to avoid navigate conflict in left panel
+            this._leftPanelActivated = false;
+            this._activatedItemIndex = index;
           }}
           @click=${() => {
-            this._handleItemClick(index);
+            this._handleClickItem(index);
           }}
         >
           ${icon}
