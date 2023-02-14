@@ -10,10 +10,9 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
-import {
+import type {
   BaseBlockModel,
   SerializedStore,
-  Text,
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
@@ -23,14 +22,17 @@ import {
   type,
   undoByKeyboard,
 } from './actions/keyboard.js';
-import { captureHistory } from './actions/misc.js';
+import {
+  captureHistory,
+  virgoEditorInnerTextToString,
+} from './actions/misc.js';
 
 export const defaultStore: SerializedStore = {
   'space:meta': {
     pages: [
       {
         id: 'page0',
-        title: new Text(''),
+        title: '',
       },
     ],
     versions: {
@@ -75,9 +77,9 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const locator = page.locator('.affine-default-page-block-title').nth(0);
-  const actual = await locator.inputValue();
-  expect(actual).toBe(text);
+  const vEditor = page.locator('affine-default-page [data-virgo-root="true"]');
+  const vText = virgoEditorInnerTextToString(await vEditor.innerText());
+  expect(vText).toBe(text);
 }
 
 export async function assertText(page: Page, text: string) {

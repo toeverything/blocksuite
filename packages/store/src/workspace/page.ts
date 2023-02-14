@@ -441,6 +441,12 @@ export class Page extends Space<PageData> {
         yBlock.set('prop:text', props.text.yText);
       }
 
+      if (props.title instanceof Text) {
+        (model as BlockSuiteInternal.BlockModels['affine:page']).title =
+          props.title;
+        yBlock.set('prop:title', props.title.yText);
+      }
+
       // TODO diff children changes
       // All child nodes will be deleted in the current behavior, then added again.
       // Through diff children changes, the experience can be improved.

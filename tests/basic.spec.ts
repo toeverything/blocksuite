@@ -48,7 +48,9 @@ test('basic init with external text', async ({ page }) => {
 
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page', { title: 'hello' });
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text('hello'),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
 
     const text = new page.Text('world');

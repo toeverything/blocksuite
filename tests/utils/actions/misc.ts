@@ -501,3 +501,7 @@ export async function getIndexCoordinate(
   );
   return coord;
 }
+
+export function virgoEditorInnerTextToString(innerText: string): string {
+  return innerText.replace('\u200B', '');
+}

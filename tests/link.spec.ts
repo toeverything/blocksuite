@@ -96,7 +96,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       const { page } = window;
       const pageId = page.addBlock({
         flavour: 'affine:page',
-        title: 'title',
+        title: new page.Text('title'),
       });
       const frameId = page.addBlock({ flavour: 'affine:frame' }, pageId);
 
