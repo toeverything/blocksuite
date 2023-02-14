@@ -255,8 +255,19 @@ export class SlashMenu extends LitElement {
     const ele = shadowRoot.querySelector(
       `format-bar-button[text="${item.name}"]`
     );
-    // TODO scroll if needed
-    ele?.scrollIntoView(true);
+    if (!ele) {
+      return;
+    }
+    // `scrollIntoViewIfNeeded` is not a standard API
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
+    if (
+      'scrollIntoViewIfNeeded' in ele &&
+      ele.scrollIntoViewIfNeeded instanceof Function
+    ) {
+      ele.scrollIntoViewIfNeeded();
+      return;
+    }
+    ele.scrollIntoView(true);
   }
 
   private _handleClickItem(index: number) {
