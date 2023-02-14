@@ -33,7 +33,7 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
     // Fixme: https://github.com/toeverything/blocksuite/issues/1126
-    'Error: Unexpected console message: Failed to clean slash search text!',
+    'Failed to clean slash search text!',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
