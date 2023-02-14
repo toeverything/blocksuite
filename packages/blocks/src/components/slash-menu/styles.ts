@@ -18,7 +18,7 @@ export const styles = css`
   .slash-menu {
     font-size: var(--affine-font-base);
     position: absolute;
-    padding-top: 15px;
+    padding-top: 12px;
     display: flex;
 
     background: var(--affine-popover-background);
@@ -80,7 +80,7 @@ export const styles = css`
   .slash-item-container {
     box-sizing: border-box;
     overflow-y: auto;
-    padding: 0 8px;
+    padding: 0 8px 4px;
     width: 200px;
   }
 
