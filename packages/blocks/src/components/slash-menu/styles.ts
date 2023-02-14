@@ -18,13 +18,14 @@ export const styles = css`
   .slash-menu {
     font-size: var(--affine-font-base);
     position: absolute;
-    padding: 8px 4px;
+    padding-top: 12px;
     display: flex;
 
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);
     border-radius: 0px 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
+    transition: max-height 0.2s ease-in-out;
   }
 
   .slash-category {
@@ -38,9 +39,7 @@ export const styles = css`
     flex-direction: column;
     color: #8e8d91;
     gap: 5px;
-    padding: 0 16px;
-    padding-right: 0;
-    margin-right: 16px;
+    margin-bottom: 20px;
   }
   .slash-category::before {
     content: '';
@@ -48,7 +47,7 @@ export const styles = css`
     top: 10px;
     right: 0;
     height: 100%;
-    width: 1px;
+    width: 2px;
     background-color: var(--affine-border-color);
   }
 
@@ -57,8 +56,7 @@ export const styles = css`
     font-size: var(--affine-font-sm);
     white-space: nowrap;
     cursor: pointer;
-    padding: 5px 8px;
-    width: 100%;
+    padding: 4px 20px;
   }
 
   .slash-active-category {
@@ -76,11 +74,13 @@ export const styles = css`
     width: 2px;
     height: 12px;
     background: linear-gradient(180deg, #5438ff 0%, #b638ff 100%);
-    border-radius: 0.5px;
+    border-radius: 1px;
   }
 
   .slash-item-container {
+    box-sizing: border-box;
     overflow-y: auto;
+    padding: 0 8px 4px;
     width: 200px;
   }
 
