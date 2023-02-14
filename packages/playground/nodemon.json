@@ -1,7 +1,7 @@
 {
   "verbose": true,
   "ignore": ["*.test.js", "**/fixtures/**"],
-  "watch": ["./src"],
+  "watch": ["./mock"],
   "ext": "ts",
   "delay": 1000,
   "execMap": {

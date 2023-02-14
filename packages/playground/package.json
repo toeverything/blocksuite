@@ -1,12 +1,14 @@
 {
   "name": "@blocksuite/playground",
-  "private": true,
   "version": "0.4.0-alpha.3",
+  "private": true,
+  "license": "MPL-2.0",
   "type": "module",
   "scripts": {
+    "build": "tsc --project ./tsconfig.json && vite build",
     "dev": "vite --host",
     "dev:hmr": "WC_HMR=1 vite",
-    "build": "tsc --project ./tsconfig.json && vite build",
+    "mock": "PORT=8081 nodemon mock/index.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -18,15 +20,20 @@
     "@blocksuite/virgo": "workspace:*",
     "@lit-labs/react": "^1.1.1",
     "@shoelace-style/shoelace": "2.0.0",
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
     "lit": "^2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "yjs": "^13.5.45"
   },
-  "license": "MPL-2.0",
   "devDependencies": {
+    "@types/body-parser": "^1.19.2",
     "@types/dat.gui": "^0.7.7",
+    "@types/express": "^4.17.17",
     "@types/micromatch": "^4.0.2",
-    "dat.gui": "^0.7.9"
+    "@types/node": "^18.13.0",
+    "dat.gui": "^0.7.9",
+    "nodemon": "^2.0.20"
   }
 }
