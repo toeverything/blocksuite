@@ -38,7 +38,7 @@ export const CSSColorProperties: Array<{
   },
   {
     name: 'blockHubBackground',
-    cssProperty: '--affine-block-hub-background',
+    cssProperty: ' --affine-hub-background',
   },
   {
     name: 'blockHubHoverBackground',
