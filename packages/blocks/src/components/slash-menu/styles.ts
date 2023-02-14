@@ -18,7 +18,7 @@ export const styles = css`
   .slash-menu {
     font-size: var(--affine-font-base);
     position: absolute;
-    padding: 8px 4px;
+    padding: 8px 0;
     display: flex;
 
     background: var(--affine-popover-background);
@@ -38,9 +38,6 @@ export const styles = css`
     flex-direction: column;
     color: #8e8d91;
     gap: 5px;
-    padding: 0 16px;
-    padding-right: 0;
-    margin-right: 16px;
   }
   .slash-category::before {
     content: '';
@@ -57,8 +54,7 @@ export const styles = css`
     font-size: var(--affine-font-sm);
     white-space: nowrap;
     cursor: pointer;
-    padding: 5px 8px;
-    width: 100%;
+    padding: 5px 20px;
   }
 
   .slash-active-category {
@@ -80,7 +76,9 @@ export const styles = css`
   }
 
   .slash-item-container {
+    box-sizing: border-box;
     overflow-y: auto;
+    padding: 0 8px;
     width: 200px;
   }
 
