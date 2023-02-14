@@ -127,7 +127,7 @@ class SyntaxCodeBlock extends CodeBlock {
     mockElement.classList.add('.affine-code-block-container');
     // HTMLElement should append to DOM in order to get scrollWidth, which is 0px otherwise
     this.domNode.appendChild(mockElement);
-    mockElement.style.width = '0px';
+    mockElement.style.width = '0';
     mockElement.style.whiteSpace = 'pre';
     mockElement.style.position = 'fixed';
     // hide mock element
