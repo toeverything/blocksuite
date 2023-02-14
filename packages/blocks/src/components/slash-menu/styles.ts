@@ -25,6 +25,7 @@ export const styles = css`
     box-shadow: var(--affine-popover-shadow);
     border-radius: 0px 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
+    transition: max-height 0.2s ease-in-out;
   }
 
   .slash-category {
