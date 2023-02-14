@@ -15,7 +15,10 @@ export async function dragBetweenCoords(
   const steps = options?.steps ?? 1;
   const { x: x1, y: y1 } = from;
   const { x: x2, y: y2 } = to;
-  options?.click && (await page.mouse.click(x1, y1));
+  if (options?.click) {
+    await page.waitForTimeout(500);
+    await page.mouse.click(x1, y1);
+  }
   await page.mouse.move(x1, y1);
   await page.mouse.down();
   await page.mouse.move(x2, y2, { steps });
