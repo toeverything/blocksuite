@@ -2086,3 +2086,77 @@ test('should keep native range selection when scrolling forward with the scroll 
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '123456789');
 });
+
+// #1159
+test('should be removed when the embed block is selected in native selection', async ({
+  page,
+}) => {
+  const room = await enterPlaygroundRoom(page);
+  const { pageId, frameId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  const MOCK_IMAGE_ID = '_e2e_test_image_id_';
+  await page.route(
+    `**/api/workspace/${room}/blob/${MOCK_IMAGE_ID}`,
+    async route => {
+      return route.fulfill({
+        status: 200,
+        body: Buffer.from(
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
+          'base64'
+        ),
+      });
+    }
+  );
+
+  await page.evaluate(
+    ([pageId, frameId, sourceId]) => {
+      const { page } = window;
+      page.addBlock(
+        {
+          flavour: 'affine:embed',
+          type: 'image',
+          width: 200,
+          height: 180,
+          sourceId,
+        },
+        frameId
+      );
+      page.captureSync();
+    },
+    [pageId, frameId, MOCK_IMAGE_ID] as const
+  );
+
+  await page.waitForTimeout(100);
+
+  const rect = await page.evaluate(() => {
+    const image = document.querySelector('affine-image');
+    if (!image) {
+      throw new Error();
+    }
+    return image.getBoundingClientRect();
+  });
+
+  await page.mouse.click(
+    rect.left + rect.width / 2,
+    rect.top + rect.height / 2
+  );
+
+  await pressEnter(page);
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  await dragBetweenIndices(
+    page,
+    [1, 1], // 4|56
+    [4, 1], // 6|54
+    { x: 0, y: 0 },
+    { x: 0, y: 0 }
+  );
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, ['123', '454', '321']);
+});

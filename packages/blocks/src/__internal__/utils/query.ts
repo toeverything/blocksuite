@@ -209,7 +209,8 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
         ? blockElement?.querySelector(
             '.affine-default-page-block-title-container'
           )
-        : blockElement?.querySelector('rich-text');
+        : blockElement?.querySelector('rich-text') ||
+          blockElement?.querySelector('affine-embed');
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
