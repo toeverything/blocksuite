@@ -23,7 +23,7 @@ if (env[importIdentifier] === true) {
 
 if (typeof window === 'undefined') {
   throw new Error(
-    'Seems like you are import @blocksuite/editor in SSR mode. Which is not supported for now.'
+    'Seems like you are importing @blocksuite/editor in SSR mode. Which is not supported for now.'
   );
 }
 
