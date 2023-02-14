@@ -76,7 +76,7 @@ export const editLinkStyle = css`
 `;
 
 export const linkPopoverStyle = css`
-  .overlay-container {
+  .popover-container {
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
     font-style: normal;

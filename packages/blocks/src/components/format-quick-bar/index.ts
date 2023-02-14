@@ -4,8 +4,8 @@ import './format-bar-node.js';
 import { Signal } from '@blocksuite/store';
 
 import {
-  getContainerByModel,
   getCurrentRange,
+  getDefaultPageBlock,
   getModelsByRange,
   throttle,
 } from '../../__internal__/utils/index.js';
@@ -88,11 +88,8 @@ export const showFormatQuickBar = async ({
   if (!models.length) {
     return;
   }
-  const editorContainer = getContainerByModel(models[0]);
-  // TODO need a better way to get the editor scroll container
-  const scrollContainer = editorContainer.querySelector(
-    '.affine-default-viewport'
-  );
+  const pageBlock = getDefaultPageBlock(models[0]);
+  const scrollContainer = pageBlock.defaultViewportElement;
 
   if (scrollContainer) {
     // Note: in edgeless mode, the scroll container is not exist!
