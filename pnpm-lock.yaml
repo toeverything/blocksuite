@@ -148,7 +148,7 @@ importers:
 
   packages/mock:
     specifiers:
-      '@blocksuite/global': workspace:0.4.0-alpha.3
+      '@blocksuite/global': workspace:*
       '@types/body-parser': ^1.19.2
       '@types/express': ^4.17.17
       '@types/node': ^18.13.0

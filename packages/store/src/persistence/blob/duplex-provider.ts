@@ -1,4 +1,5 @@
 import { assertExists, Signal } from '@blocksuite/global/utils';
+import { sha } from '@blocksuite/global/utils';
 
 import { CloudSyncManager } from './cloud-sync-manager.js';
 import type {
@@ -8,7 +9,7 @@ import type {
   BlobURL,
   IDBInstance,
 } from './types.js';
-import { getDatabase, sha } from './utils.js';
+import { getDatabase } from './utils.js';
 
 export type BlobOptions = Record<'api' | 'token', string>;
 
