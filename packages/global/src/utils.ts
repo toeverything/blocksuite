@@ -1,3 +1,4 @@
+export { sha } from './utils/crypto.js';
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
 export { Signal } from './utils/signal.js';

@@ -4,7 +4,7 @@
   "version": "0.4.0-alpha.3",
   "type": "module",
   "scripts": {
-    "start": "PORT=8081 nodemon src/index.mts"
+    "start": "PORT=8081 nodemon src/index.ts"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.2",
@@ -15,6 +15,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@blocksuite/global": "workspace:0.4.0-alpha.3",
     "body-parser": "^1.20.1",
     "express": "^4.18.2"
   }

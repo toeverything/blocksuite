@@ -1,5 +1,5 @@
-import { createHash } from 'node:crypto';
-
+/// <reference types="@blocksuite/global" />
+import { sha } from '@blocksuite/global/utils';
 import bodyParser from 'body-parser';
 import express from 'express';
 
@@ -13,14 +13,6 @@ app.use(
 );
 
 const cache = {} as Record<string, Record<string, Buffer>>;
-
-async function sha(input: Buffer): Promise<string> {
-  const hash = createHash('sha256');
-  hash.update(input);
-  const buffer = hash.digest();
-
-  return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
-}
 
 app.put('/api/workspace/:roomId/blob', (req, res) => {
   const roomId = req.params.roomId;
