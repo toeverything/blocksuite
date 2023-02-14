@@ -59,13 +59,13 @@ export class PasteManager {
   };
 
   /* FIXME
-    private get _selection() {
-      const page =
-        document.querySelector<DefaultPageBlockComponent>('default-page-block');
-      if (!page) throw new Error('No page block');
-      return page.selection;
-    }
-    */
+      private get _selection() {
+        const page =
+          document.querySelector<DefaultPageBlockComponent>('default-page-block');
+        if (!page) throw new Error('No page block');
+        return page.selection;
+      }
+      */
 
   private _clipboardEvent2Blocks(
     e: ClipboardEvent
@@ -312,7 +312,8 @@ export class PasteManager {
           const lastBlock = this._editor.page.getBlockById(lastId);
           if (
             lastBlock?.flavour !== 'affine:embed' &&
-            lastBlock?.flavour !== 'affine:divider'
+            lastBlock?.flavour !== 'affine:divider' &&
+            blocks[0].flavour !== 'affine:code'
           ) {
             selectedBlock?.text?.delete(
               endIndex + insertLen,
