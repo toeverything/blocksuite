@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 export async function sha(input: ArrayBufferLike): Promise<string> {
   let sha256: Buffer;
   if (typeof window === 'undefined') {
