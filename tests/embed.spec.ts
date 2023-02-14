@@ -4,8 +4,8 @@ import { expect, Page } from '@playwright/test';
 
 import {
   activeEmbed,
-  dragEmbedResizeByBottomLeft,
-  dragEmbedResizeByBottomRight,
+  dragEmbedResizeByTopLeft,
+  dragEmbedResizeByTopRight,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
@@ -60,14 +60,14 @@ test('can drag resize image by left menu', async ({ page }) => {
   await assertRichDragButton(page);
   await assertImageSize(page, { width: 678, height: 509 });
 
-  await dragEmbedResizeByBottomLeft(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await dragEmbedResizeByTopLeft(page);
+  await assertImageSize(page, { width: 355, height: 289 });
 
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 678, height: 509 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await assertImageSize(page, { width: 355, height: 289 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -79,14 +79,14 @@ test('can drag resize image by right menu', async ({ page }) => {
   await assertRichDragButton(page);
   await assertImageSize(page, { width: 678, height: 509 });
 
-  await dragEmbedResizeByBottomRight(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await dragEmbedResizeByTopRight(page);
+  await assertImageSize(page, { width: 355, height: 289 });
 
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 678, height: 509 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await assertImageSize(page, { width: 355, height: 289 });
 });
 
 test('can click and delete image', async ({ page }) => {

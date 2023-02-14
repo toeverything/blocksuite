@@ -5,7 +5,6 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { PrelimText } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
@@ -327,16 +326,10 @@ function getTextDelta(model: BaseBlockModel) {
   if (!model.text) {
     return [];
   }
-  if (model.text instanceof PrelimText) {
-    return [
-      {
-        insert: '',
-      },
-    ];
-  }
   return model.text.toDelta();
 }
 
+// TODO merge with copy-cut-manager
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
@@ -353,6 +346,7 @@ export async function copyBlock(model: BaseBlockModel) {
   };
   const copySuccess = performNativeCopy([
     { mimeType: copyType, data: JSON.stringify(copyData) },
+    { mimeType: 'text/plain', data: model.text?.toString() || '' },
   ]);
   return copySuccess;
 }

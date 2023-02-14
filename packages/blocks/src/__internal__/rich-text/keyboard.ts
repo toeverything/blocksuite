@@ -11,6 +11,7 @@ import {
   isMultiBlockRange,
   noop,
 } from '../utils/index.js';
+import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import { markdownConvert } from './markdown-convert.js';
 import {
   handleBlockEndEnter,
@@ -24,10 +25,10 @@ import {
   tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 
-interface QuillRange {
-  index: number;
-  length: number;
-}
+// Type definitions is ported from quill
+// https://github.com/quilljs/quill/blob/6159f6480482dde0530920dc41033ebc6611a9e7/modules/keyboard.ts#L15-L46
+
+type QuillRange = RangeStatic;
 
 interface BindingContext {
   collapsed: boolean;
@@ -44,6 +45,7 @@ type KeyboardBinding = {
    * See https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
    */
   key: number | string | string[];
+  collapsed?: boolean;
   handler: KeyboardBindingHandler;
   prefix?: RegExp;
   suffix?: RegExp;
@@ -54,7 +56,7 @@ type KeyboardBinding = {
   ctrlKey?: boolean | null;
 };
 
-type KeyboardBindings = Record<string, KeyboardBinding>;
+export type KeyboardBindings = Record<string, KeyboardBinding>;
 
 interface KeyboardEventThis {
   quill: Quill;
@@ -362,6 +364,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         return ALLOW_DEFAULT;
       },
     },
+    ...createBracketAutoCompleteBindings(model),
   };
 
   return keyboardBindings;

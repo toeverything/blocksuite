@@ -97,10 +97,8 @@ export function handleBlockSplit(
   const parent = page.getParent(model);
   if (!parent) return;
 
-  const [left, right] = model.text.split(splitIndex, splitLength);
   page.captureSync();
-  page.markTextSplit(model.text, left, right);
-  page.updateBlock(model, { text: left });
+  const right = model.text.split(splitIndex, splitLength);
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;

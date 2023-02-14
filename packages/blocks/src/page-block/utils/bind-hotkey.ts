@@ -299,6 +299,7 @@ export function bindHotkeys(
     RIGHT,
     ENTER,
     TAB,
+    SPACE,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -441,6 +442,12 @@ export function bindHotkeys(
   });
   hotkey.addListener(SHIFT_DOWN, e => {
     // TODO expand selection down
+  });
+  // disable it on block selection
+  hotkey.addListener(SPACE, e => {
+    if (selection.state.type === 'block') {
+      e.preventDefault();
+    }
   });
 
   // !!!
