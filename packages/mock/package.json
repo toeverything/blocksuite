@@ -1,0 +1,21 @@
+{
+  "name": "@blocksuite/mock",
+  "private": true,
+  "version": "0.4.0-alpha.3",
+  "type": "module",
+  "scripts": {
+    "start": "PORT=8081 nodemon src/index.mts"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.2",
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.13.0",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2"
+  }
+}

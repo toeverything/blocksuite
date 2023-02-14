@@ -9,7 +9,8 @@
     "packages/playground",
     "packages/react",
     "packages/store",
-    "packages/virgo"
+    "packages/virgo",
+    "packages/mock"
   ],
   "private": true,
   "type": "module",
@@ -19,7 +20,8 @@
   "packageManager": "pnpm@7.23.0",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
-    "dev": "run-p serve dev:playground",
+    "mock": "pnpm --filter @blocksuite/mock start",
+    "dev": "run-p mock serve dev:playground",
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "lint": "eslint ./ --max-warnings=0",
     "test": "playwright test",

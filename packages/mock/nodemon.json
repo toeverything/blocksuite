@@ -1,0 +1,11 @@
+{
+  "verbose": true,
+  "ignore": ["*.test.js", "**/fixtures/**"],
+  "watch": ["src"],
+  "ext": "ts,mts",
+  "delay": 1000,
+  "execMap": {
+    "ts": "ts-node",
+    "mts": "ts-node-esm"
+  }
+}

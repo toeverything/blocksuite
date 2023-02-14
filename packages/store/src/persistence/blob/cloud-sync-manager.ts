@@ -85,6 +85,9 @@ export class CloudSyncManager {
           });
           const response = await this._fetcher.put(`${this._workspace}/blob`, {
             body: task.blob,
+            headers: {
+              'Content-Type': 'application/octet-stream',
+            },
           });
 
           if (response.status === 200) {

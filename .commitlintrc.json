@@ -14,7 +14,8 @@
         "react",
         "next-example",
         "store",
-        "virgo"
+        "virgo",
+        "mock"
       ]
     ]
   }
