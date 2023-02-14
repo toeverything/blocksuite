@@ -225,6 +225,10 @@ export class CopyCutManager {
     const curRange = getCurrentRange();
 
     let success = false;
+    /**
+     * temp element is used to receive copy event dispatched by document.execCommand('copy'); In this way, we can
+     * get the clipboardData binding with system memory.
+     */
     const tempElem = document.createElement('textarea');
     document.body.appendChild(tempElem);
     // https://w3c.github.io/clipboard-apis/#to-fire-a-clipboard-event:~:text=Let%20target%20be,node%20has%20focus.
