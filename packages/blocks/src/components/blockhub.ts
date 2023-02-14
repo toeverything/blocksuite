@@ -133,13 +133,13 @@ export class BlockHub extends NonShadowLitElement {
       fill: var(--affine-icon-color);
       font-size: var(--affine-font-sm);
       background: var(--affine-hub-background);
-      box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
+      box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
       border-radius: 10px;
     }
 
     .affine-block-hub-container[type='text'] {
       top: unset;
-      bottom: 0px;
+      bottom: 0;
       transform: unset;
       right: calc(100% + 4px);
     }
@@ -166,10 +166,13 @@ export class BlockHub extends NonShadowLitElement {
       width: 250px;
       height: 54px;
       background: var(--affine-page-background);
-      box-shadow: 0px 0px 6px rgba(66, 65, 73, 0.08);
+      box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
       border-radius: 10px;
       margin-bottom: 12px;
       cursor: grab;
+      top: 0;
+      left: 0;
+      transition: all 0.1s ease-in-out;
     }
 
     .card-icon-container {
@@ -206,7 +209,7 @@ export class BlockHub extends NonShadowLitElement {
       top: unset;
       left: unset;
       box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
-        0px 0px 12px rgba(66, 65, 73, 0.08);
+        0 0 12px rgba(66, 65, 73, 0.08);
     }
 
     .grabbing {
@@ -303,7 +306,7 @@ export class BlockHub extends NonShadowLitElement {
       right: unset;
       top: 10px;
       transform: translateX(calc(-100% - 7px));
-      border-radius: 10px 10px 0px 10px;
+      border-radius: 10px 10px 0 10px;
     }
 
     .block-hub-icons-container {
@@ -447,7 +450,7 @@ export class BlockHub extends NonShadowLitElement {
     }
     if (!this._expanded) {
       // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
-      this._blockHubMenuContainer.style.padding = '0px 4px';
+      this._blockHubMenuContainer.style.padding = '0 4px';
       this._timer = window.setTimeout(() => {
         this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
@@ -474,7 +477,7 @@ export class BlockHub extends NonShadowLitElement {
       <div
         class="block-hub-icons-container"
         ?transition=${this._expanded}
-        style="height: ${this._expanded ? `${height}px` : '0px'};"
+        style="height: ${this._expanded ? `${height}px` : '0'};"
       >
         <div
           class="block-hub-icon-container has-tool-tip ${this._isGrabbing
