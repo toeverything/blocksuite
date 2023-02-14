@@ -1,6 +1,7 @@
-import express from 'express';
-import bodyParser from 'body-parser';
 import { createHash } from 'node:crypto';
+
+import bodyParser from 'body-parser';
+import express from 'express';
 
 const PORT: number = +(process.env.PORT ?? 3000);
 

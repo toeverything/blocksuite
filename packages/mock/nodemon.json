@@ -5,7 +5,6 @@
   "ext": "ts,mts",
   "delay": 1000,
   "execMap": {
-    "ts": "ts-node",
-    "mts": "ts-node-esm"
+    "ts": "ts-node-esm"
   }
 }

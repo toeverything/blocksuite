@@ -41,7 +41,7 @@
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown",
-    "*.{ts,tsx,js,jsx}": "npx eslint --cache --fix"
+    "*.{ts,mts,tsx,js,jsx}": "npx eslint --cache --fix"
   },
   "keywords": [],
   "author": "toeverything",
