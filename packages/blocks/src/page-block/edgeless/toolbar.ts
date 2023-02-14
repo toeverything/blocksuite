@@ -164,7 +164,7 @@ export class ShapeMenu extends LitElement {
               >
                 ${icon}
                 <arrow-tool-tip
-                  .tipText=${disabled ? '(coming soon)' : tooltip}
+                  .tipText=${disabled ? '(Coming soon)' : tooltip}
                 ></arrow-tool-tip>
               </div>
             `;
@@ -295,7 +295,7 @@ export class EdgelessToolBar extends LitElement {
             >
               ${icon}
               <arrow-tool-tip
-                .tipText=${disabled ? '(coming soon)' : tooltip}
+                .tipText=${disabled ? '(Coming soon)' : tooltip}
               ></arrow-tool-tip>
             </div>
           `;
