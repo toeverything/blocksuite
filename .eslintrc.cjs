@@ -7,7 +7,6 @@ const allPackages = [
   'react',
   'store',
   'virgo',
-  'mock',
 ];
 
 const createPattern = packageName => [
