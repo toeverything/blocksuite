@@ -227,10 +227,7 @@ export class CopyCutManager {
 
     let success = false;
     const tempElem = document.createElement('textarea');
-    tempElem.value = 'temp';
     document.body.appendChild(tempElem);
-    tempElem.select();
-    tempElem.setSelectionRange(0, tempElem.value.length);
 
     const listener = function (e: ClipboardEvent) {
       const clipboardData = e.clipboardData;

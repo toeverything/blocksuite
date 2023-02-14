@@ -321,6 +321,7 @@ function getTextDelta(model: BaseBlockModel) {
   return model.text.toDelta();
 }
 
+// TODO merge with copy-cut-manager
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
@@ -337,6 +338,7 @@ export async function copyBlock(model: BaseBlockModel) {
   };
   const copySuccess = performNativeCopy([
     { mimeType: copyType, data: JSON.stringify(copyData) },
+    { mimeType: 'text/plain', data: model.text?.toString() || '' },
   ]);
   return copySuccess;
 }
@@ -457,6 +459,8 @@ export function getAllowSelectedBlocks(
 
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
+    // drag handle should be the same level with editor-container
+    container: defaultPageBlock.mouseRoot.parentElement as HTMLElement,
     getBlockEditingStateByCursor(
       blocks,
       pageX,

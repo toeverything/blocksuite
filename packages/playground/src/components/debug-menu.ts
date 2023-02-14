@@ -305,6 +305,7 @@ export class DebugMenu extends NonShadowLitElement {
           width: 100%;
           overflow: auto;
           z-index: 1000; /* for debug visibility */
+          pointer-events: none;
         }
 
         .default-toolbar {
@@ -313,9 +314,14 @@ export class DebugMenu extends NonShadowLitElement {
           min-width: 390px;
         }
 
+        .default-toolbar > * {
+          pointer-events: auto;
+        }
+
         .edgeless-toolbar {
           align-items: center;
           margin-right: 17px;
+          pointer-events: auto;
         }
 
         .edgeless-toolbar sl-select,

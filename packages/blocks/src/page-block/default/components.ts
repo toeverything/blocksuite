@@ -14,6 +14,7 @@ import type {
   CodeBlockOption,
   DefaultPageSignals,
   EmbedEditingState,
+  ViewportState,
 } from './default-page-block.js';
 import {
   copyCode,
@@ -24,12 +25,12 @@ import {
   toggleWrap,
 } from './utils.js';
 
-export function FrameSelectionRect(rect: DOMRect | null, scrollTop: number) {
+export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
 
   const style = {
     left: rect.left + 'px',
-    top: scrollTop + rect.top + 'px',
+    top: rect.top + 'px',
     width: rect.width + 'px',
     height: rect.height + 'px',
   };
@@ -51,25 +52,22 @@ export function FrameSelectionRect(rect: DOMRect | null, scrollTop: number) {
 
 export function EmbedSelectedRectsContainer(
   rects: { left: number; top: number; width: number; height: number }[],
-  scroll: {
-    left: number;
-    top: number;
-  }
+  viewportState: ViewportState
 ) {
+  const { left, top, scrollLeft, scrollTop } = viewportState;
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
-        position: fixed;
+        position: absolute;
+        display: block;
         border: 2px solid var(--affine-primary-color);
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable">
       ${rects.map(rect => {
         const style = {
-          position: 'absolute',
-          display: 'block',
-          left: scroll.left + rect.left + 'px',
-          top: scroll.top + rect.top + 'px',
+          left: rect.left - left + scrollLeft + 'px',
+          top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
@@ -88,14 +86,14 @@ export function EmbedSelectedRectsContainer(
 
 export function SelectedRectsContainer(
   rects: DOMRect[],
-  scroll: {
-    left: number;
-    top: number;
-  }
+  viewportState: ViewportState
 ) {
+  const { left, top, scrollLeft, scrollTop } = viewportState;
   return html`
     <style>
       .affine-page-selected-rects-container > div {
+        position: absolute;
+        display: block;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
@@ -105,10 +103,8 @@ export function SelectedRectsContainer(
     <div class="affine-page-selected-rects-container">
       ${repeat(rects, rect => {
         const style = {
-          position: 'absolute',
-          display: 'block',
-          left: scroll.left + rect.left + 'px',
-          top: scroll.top + rect.top + 'px',
+          left: rect.left - left + scrollLeft + 'px',
+          top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };

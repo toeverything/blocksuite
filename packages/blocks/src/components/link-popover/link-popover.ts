@@ -21,8 +21,6 @@ const MAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
 // For more detail see https://stackoverflow.com/questions/8667070/javascript-regular-expression-to-validate-url
-
-// For more detail see https://stackoverflow.com/questions/8667070/javascript-regular-expression-to-validate-url
 const URL_REGEX = new RegExp(
   '^' +
     // protocol identifier (optional)
