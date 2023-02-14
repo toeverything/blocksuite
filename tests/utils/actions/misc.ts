@@ -7,7 +7,7 @@ import type {
   BaseBlockModel,
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
-import { pressEnter, SHORT_KEY, type } from './keyboard.js';
+import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
@@ -277,7 +277,20 @@ export async function initThreeLists(page: Page) {
   await pressEnter(page);
   await type(page, '456');
   await pressEnter(page);
-  await page.keyboard.press('Tab', { delay: 50 });
+  await pressTab(page);
+  await type(page, '789');
+}
+
+export async function insertThreeLevelLists(page: Page, i = 0) {
+  await focusRichText(page, i);
+  await type(page, '-');
+  await page.keyboard.press('Space', { delay: 50 });
+  await type(page, '123');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, '456');
+  await pressEnter(page);
+  await pressTab(page);
   await type(page, '789');
 }
 

@@ -8,6 +8,7 @@ import {
   SelectionUtils,
 } from '@blocksuite/blocks';
 import { matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
 
 import type { EditorContainer } from '../../components/index.js';
@@ -22,13 +23,13 @@ export class CopyCutManager {
   }
 
   /* FIXME
-  private get _selection() {
-    const page =
-      document.querySelector<DefaultPageBlockComponent>('default-page-block');
-    if (!page) throw new Error('No page block');
-    return page.selection;
-  }
-  */
+          private get _selection() {
+            const page =
+              document.querySelector<DefaultPageBlockComponent>('default-page-block');
+            if (!page) throw new Error('No page block');
+            return page.selection;
+          }
+          */
 
   public handleCopy = async (e: ClipboardEvent) => {
     const clips = await this._getClipItems();
@@ -160,6 +161,17 @@ export class CopyCutManager {
         height: (model as EmbedBlockModel).height,
       });
     }
+    if (model.flavour === 'affine:code') {
+      // convert code block style to raw text
+      const rawText: DeltaOperation[] = [];
+      delta.map(op => {
+        rawText.push({ insert: op.insert });
+      });
+
+      Object.assign(result, {
+        rawText,
+      });
+    }
 
     return result;
   }
@@ -169,6 +181,9 @@ export class CopyCutManager {
     if (clipboardData) {
       try {
         clipItems.forEach(clip => {
+          if (clip.mimeType === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
+            clip = this._handleCodeBlockRawCopy(clip);
+          }
           clipboardData.setData(clip.mimeType, clip.data);
         });
         e.preventDefault();
@@ -183,6 +198,26 @@ export class CopyCutManager {
         e.stopPropagation();
       }
     }
+  }
+
+  private _handleCodeBlockRawCopy(clip: ClipboardItem) {
+    const openBlockInfos = JSON.parse(clip.data).data as OpenBlockInfo[];
+    if (
+      openBlockInfos.length === 1 &&
+      openBlockInfos[0].flavour === 'affine:code'
+    ) {
+      const openBlockInfo = openBlockInfos[0];
+      const rawText = openBlockInfo.rawText;
+      assertExists(rawText);
+      openBlockInfo.flavour = 'affine:paragraph';
+      openBlockInfo.text = rawText;
+    }
+    return new ClipboardItem(
+      CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
+      JSON.stringify({
+        data: openBlockInfos,
+      })
+    );
   }
 
   // TODO: Optimization
