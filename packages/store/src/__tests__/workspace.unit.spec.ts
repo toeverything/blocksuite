@@ -396,9 +396,7 @@ describe('workspace.exportJSX works', async () => {
     page.addBlockByFlavour('affine:paragraph');
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
-      <affine:page
-        prop:title=""
-      >
+      <affine:page>
         <affine:paragraph
           prop:type="text"
         />

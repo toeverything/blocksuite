@@ -57,6 +57,10 @@ export function syncBlockProps(
       yBlock.set(`prop:${key}`, value.yText);
       return;
     }
+    if (key === 'title' && value instanceof Text) {
+      yBlock.set(`prop:${key}`, value.yText);
+      return;
+    }
     if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
@@ -76,6 +80,10 @@ export function syncBlockProps(
       if (Array.isArray(value)) {
         yBlock.set(`prop:${key}`, Y.Array.from(value));
       } else {
+        if (key === 'title' && value instanceof Text) {
+          yBlock.set(`prop:${key}`, value.yText);
+          return;
+        }
         yBlock.set(`prop:${key}`, value);
       }
     }

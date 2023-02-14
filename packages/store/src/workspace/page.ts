@@ -707,6 +707,11 @@ export class Page extends Space<PageData> {
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
+
+      const titleText = yBlock.get('prop:title') as Y.Text;
+      (model as BlockSuiteInternal.BlockModels['affine:page']).title = new Text(
+        titleText
+      );
     }
 
     // todo: use schema

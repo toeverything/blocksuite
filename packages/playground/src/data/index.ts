@@ -18,7 +18,10 @@ export const empty: InitFn = (workspace: Workspace) => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
-      const pageBlockId = page.addBlockByFlavour('affine:page', { title: '' });
+      const pageBlockId = page.addBlockByFlavour('affine:page', {
+        title: new Text(),
+      });
+
       page.addBlockByFlavour('affine:surface', {}, null);
 
       // Add frame block inside page block
@@ -92,7 +95,7 @@ export const preset: InitFn = (workspace: Workspace) => {
 
       // Add page block and surface block at root level
       const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: 'Welcome to BlockSuite playground',
+        title: new Text('Welcome to BlockSuite playground'),
       });
       page.addBlockByFlavour('affine:surface', {}, null);
 
@@ -122,7 +125,7 @@ export const database: InitFn = (workspace: Workspace) => {
 
       // Add page block and surface block at root level
       const pageBlockId = page.addBlockByFlavour('affine:page', {
-        title: 'Welcome to BlockSuite playground',
+        title: new Text('Welcome to BlockSuite playground'),
       });
       page.addBlockByFlavour('affine:surface', {}, null);
 

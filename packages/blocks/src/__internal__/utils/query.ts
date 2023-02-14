@@ -400,14 +400,13 @@ export function isInsideRichText(element: unknown): element is RichText {
   return !!richText;
 }
 
-export function isTitleElement(
-  element: unknown
-): element is HTMLTextAreaElement | HTMLInputElement {
-  return (
-    (element instanceof HTMLTextAreaElement ||
-      element instanceof HTMLInputElement) &&
-    element.getAttribute('data-block-is-title') === 'true'
-  );
+export function isTitleElement(element: unknown): boolean {
+  const titleElement = document.querySelector('[data-block-is-title="true"]');
+  if (!titleElement) {
+    throw new Error('Failed to get title element');
+  }
+
+  return titleElement.contains(element as Node);
 }
 
 export function isDatabaseInput(element: unknown): boolean {

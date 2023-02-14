@@ -561,7 +561,6 @@ export class DefaultSelectionManager {
     if (this.state.type === 'block') {
       this.clearRects();
     }
-    this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
 
@@ -787,6 +786,15 @@ export class DefaultSelectionManager {
     if (!selection) {
       return;
     }
+
+    // filter out selection change event from title
+    if (
+      isTitleElement(selection.anchorNode) ||
+      isTitleElement(selection.focusNode)
+    ) {
+      return;
+    }
+
     // Exclude selection change outside the editor
     if (!selection.containsNode(this._container, true)) {
       return;

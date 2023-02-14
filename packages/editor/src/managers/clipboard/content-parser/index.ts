@@ -31,7 +31,10 @@ export class ContentParser {
     const htmlContent = await this.block2Html(
       this._getSelectedBlock(root).children[0].children
     );
-    FileExporter.exportHtml((root as PageBlockModel).title, htmlContent);
+    FileExporter.exportHtml(
+      (root as PageBlockModel).title.toString(),
+      htmlContent
+    );
   }
 
   public async onExportMarkdown() {
@@ -41,7 +44,7 @@ export class ContentParser {
       this._getSelectedBlock(root).children[0].children
     );
     FileExporter.exportHtmlAsMarkdown(
-      (root as PageBlockModel).title,
+      (root as PageBlockModel).title.toString(),
       htmlContent
     );
   }

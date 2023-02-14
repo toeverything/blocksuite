@@ -72,9 +72,7 @@ test('basic link', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text={

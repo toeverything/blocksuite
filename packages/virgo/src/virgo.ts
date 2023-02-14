@@ -56,9 +56,7 @@ export class VEditor {
     }
 
     if (onKeyDown) {
-      this._onKeyDown = e => {
-        onKeyDown(e);
-      };
+      this._onKeyDown = onKeyDown;
     }
 
     this.signals = {
@@ -652,9 +650,8 @@ export class VEditor {
     }
   };
 
-  private _onUpdateVRange = ([newRangStatic, origin]: UpdateVRangeProp) => {
-    this._vRange = newRangStatic;
-
+  private _onUpdateVRange = ([newVRange, origin]: UpdateVRangeProp) => {
+    this._vRange = newVRange;
     if (origin === 'native') {
       return;
     }
@@ -663,10 +660,22 @@ export class VEditor {
     this._rootElement?.blur();
 
     const fn = () => {
+      if (!newVRange) {
+        return;
+      }
+
       // when using input method _vRange will return to the starting point,
-      // so we need to reassign
-      this._vRange = newRangStatic;
-      this.syncVRange();
+      // so we need to resync
+      const newRange = this.toDomRange(newVRange);
+      if (newRange) {
+        const selectionRoot = findDocumentOrShadowRoot(this);
+        // @ts-ignore
+        const selection = selectionRoot.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
     };
 
     // updates in lit are performed asynchronously

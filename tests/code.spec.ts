@@ -125,9 +125,7 @@ test('change code language can work', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
-<affine:page
-  prop:title=""
->
+<affine:page>
   <affine:frame>
     <affine:code
       prop:language="Rust"

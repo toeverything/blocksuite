@@ -993,9 +993,7 @@ test('should indent native multi-selection block', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page
-  prop:title=""
->
+    `<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
@@ -1034,9 +1032,7 @@ test('should indent multi-selection block', async ({ page }) => {
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page
-  prop:title=""
->
+    `<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"

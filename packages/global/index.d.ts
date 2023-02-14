@@ -124,6 +124,7 @@ declare type ParagraphType =
   | 'h6';
 
 declare namespace BlockSuiteModelProps {
+  import type { Text } from '@blocksuite/store';
   interface CodeBlockModel {
     language: string;
   }
@@ -149,7 +150,7 @@ declare namespace BlockSuiteModelProps {
   }
 
   interface PageBlockModel {
-    title: string;
+    title: Text;
   }
 
   interface ParagraphBlockModel {

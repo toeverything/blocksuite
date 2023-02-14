@@ -10,9 +10,10 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
-import type {
+import {
   BaseBlockModel,
   SerializedStore,
+  Text,
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
@@ -29,7 +30,7 @@ export const defaultStore: SerializedStore = {
     pages: [
       {
         id: 'page0',
-        title: '',
+        title: new Text(''),
       },
     ],
     versions: {
@@ -334,7 +335,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const markdownVisitor = (node: PrefixedBlockProps): string => {
     // TODO use schema
     if (node['sys:flavour'] === 'affine:page') {
-      return (node['prop:title'] as string) ?? '';
+      return (node['prop:title'] as Text).toString() ?? '';
     }
     if (!('prop:type' in node)) {
       return '[? unknown node]';
