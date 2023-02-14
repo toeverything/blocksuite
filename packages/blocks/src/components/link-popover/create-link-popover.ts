@@ -3,24 +3,34 @@ import {
   getModelByElement,
   noop,
 } from '../../__internal__/utils/index.js';
-import type { LinkDetail } from './link-popover.js';
+import { calcSafeCoordinate } from '../../page-block/utils/position.js';
+import type { LinkDetail, LinkPopover } from './link-popover.js';
+
+const updatePosition = (ele: LinkPopover, anchorEl: HTMLElement) => {
+  const rect = anchorEl.getBoundingClientRect();
+  const offsetY = 5;
+  const safeCoordinate = calcSafeCoordinate({
+    positioningPoint: { x: rect.x, y: rect.top + rect.height + offsetY },
+    objRect: ele.popoverContainer?.getBoundingClientRect(),
+    offsetY,
+  });
+  ele.left = `${safeCoordinate.x}px`;
+  ele.top = `${safeCoordinate.y}px`;
+};
 
 const createEditLinkElement = (
   anchorEl: HTMLElement,
   container: HTMLElement,
   { showMask, previewLink }: { showMask: boolean; previewLink: string }
 ) => {
-  const rect = anchorEl.getBoundingClientRect();
-  const bodyRect = document.body.getBoundingClientRect();
-  const offset = rect.top - bodyRect.top + rect.height;
-  const offsetY = 5;
-
   const ele = document.createElement('edit-link-panel');
-  ele.left = `${rect.left}px`;
-  ele.top = `${offset + offsetY}px`;
   ele.showMask = showMask;
   ele.previewLink = previewLink;
   container.appendChild(ele);
+
+  requestAnimationFrame(() => {
+    updatePosition(ele, anchorEl);
+  });
   return ele;
 };
 
@@ -125,6 +135,9 @@ export const showLinkPopover = async ({
       editLinkEle.showMask = true;
       editLinkEle.text = text;
       unsubscribeHoverAbort();
+      requestAnimationFrame(() => {
+        updatePosition(editLinkEle, anchorEl);
+      });
     });
 
     editLinkEle.addEventListener('updateLink', e => {
