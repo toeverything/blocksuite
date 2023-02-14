@@ -453,6 +453,8 @@ export function getAllowSelectedBlocks(
 
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
+    // drag handle should be the same level with editor-container
+    container: defaultPageBlock.mouseRoot.parentElement as HTMLElement,
     getBlockEditingStateByCursor(
       blocks,
       pageX,
