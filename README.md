@@ -165,9 +165,9 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
 - Block-level editing
   - ✅ Inline text format bar
   - ⚛️ Block-level selection
-  - ⚛️ Block drag handle
-  - ⚛️ Block hub
-  - ⚛️ Inline slash menu
+  - ✅ Block drag handle
+  - ✅ Block hub
+  - ✅ Inline slash menu
 - Rich-content
   - ⚛️ Image block
   - 🚧 Database block
