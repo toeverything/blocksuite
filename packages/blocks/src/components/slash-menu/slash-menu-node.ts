@@ -159,13 +159,50 @@ export class SlashMenu extends LitElement {
     }
 
     if (
-      !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'].includes(
-        e.key
-      )
+      ![
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'Enter',
+        'Tab',
+      ].includes(e.key)
     ) {
       return;
     }
     const configLen = this._filterItems.length;
+
+    const handleCursorUp = () => {
+      e.preventDefault();
+      if (this._leftPanelActivated) {
+        const nowGroupIdx = this._getGroupIndexByItem(
+          this._filterItems[this._activatedItemIndex]
+        );
+        this._handleClickCategory(
+          menuGroups[(nowGroupIdx - 1 + menuGroups.length) % menuGroups.length]
+        );
+        return;
+      }
+      this._activatedItemIndex =
+        (this._activatedItemIndex - 1 + configLen) % configLen;
+      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+    };
+
+    const handleCursorDown = () => {
+      e.preventDefault();
+      if (this._leftPanelActivated) {
+        const nowGroupIdx = this._getGroupIndexByItem(
+          this._filterItems[this._activatedItemIndex]
+        );
+        this._handleClickCategory(
+          menuGroups[(nowGroupIdx + 1) % menuGroups.length]
+        );
+        return;
+      }
+      this._activatedItemIndex = (this._activatedItemIndex + 1) % configLen;
+      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+    };
+
     switch (e.key) {
       case 'Enter': {
         e.preventDefault();
@@ -175,39 +212,25 @@ export class SlashMenu extends LitElement {
         this._handleClickItem(this._activatedItemIndex);
         break;
       }
+      case 'Tab': {
+        if (e.shiftKey) {
+          handleCursorUp();
+        } else {
+          handleCursorDown();
+        }
+        break;
+      }
+
       case 'ArrowUp': {
-        e.preventDefault();
-        if (this._leftPanelActivated) {
-          const nowGroupIdx = this._getGroupIndexByItem(
-            this._filterItems[this._activatedItemIndex]
-          );
-          this._handleClickCategory(
-            menuGroups[
-              (nowGroupIdx - 1 + menuGroups.length) % menuGroups.length
-            ]
-          );
-          return;
-        }
-        this._activatedItemIndex =
-          (this._activatedItemIndex - 1 + configLen) % configLen;
-        this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+        handleCursorUp();
         break;
       }
+
       case 'ArrowDown': {
-        e.preventDefault();
-        if (this._leftPanelActivated) {
-          const nowGroupIdx = this._getGroupIndexByItem(
-            this._filterItems[this._activatedItemIndex]
-          );
-          this._handleClickCategory(
-            menuGroups[(nowGroupIdx + 1) % menuGroups.length]
-          );
-          return;
-        }
-        this._activatedItemIndex = (this._activatedItemIndex + 1) % configLen;
-        this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+        handleCursorDown();
         break;
       }
+
       case 'ArrowLeft':
         e.preventDefault();
         this._leftPanelActivated = true;
