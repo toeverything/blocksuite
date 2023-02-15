@@ -317,7 +317,7 @@ export class PasteManager {
           ) {
             selectedBlock?.text?.delete(
               endIndex + insertLen,
-              selectedBlock?.text?.length
+              Math.max(0, selectedBlock.text.length - endIndex - insertLen)
             );
             position = lastBlock?.text?.length || 0;
             lastBlock?.text?.insertList(endtexts, lastBlock?.text?.length);
