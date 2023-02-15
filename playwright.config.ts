@@ -10,7 +10,7 @@ const config: PlaywrightTestConfig = {
   timeout: process.env.CI ? 50_000 : 30_000,
   webServer: {
     command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
-    port: 5173,
+    port: process.env.CI ? 4173 : 5173,
     reuseExistingServer: !process.env.CI,
     env: {
       COVERAGE: process.env.COVERAGE ?? '',
