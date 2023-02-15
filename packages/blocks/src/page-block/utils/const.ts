@@ -9,7 +9,7 @@ import {
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
-import { handleFormat } from '../../page-block/utils/index.js';
+import { getFormat, handleFormat } from '../../page-block/utils/index.js';
 
 type ActionProps = {
   page: Page;
@@ -26,7 +26,7 @@ export const formatConfig = [
     name: 'Bold',
     icon: BoldIcon,
     hotkey: 'command+b,ctrl+b',
-    activeWhen: (format: Record<string, unknown>) => 'bold' in format,
+    activeWhen: () => 'bold' in getFormat(),
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'bold');
@@ -37,7 +37,7 @@ export const formatConfig = [
     name: 'Italic',
     icon: ItalicIcon,
     hotkey: 'command+i,ctrl+i',
-    activeWhen: (format: Record<string, unknown>) => 'italic' in format,
+    activeWhen: () => 'italic' in getFormat(),
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'italic');
@@ -48,7 +48,7 @@ export const formatConfig = [
     name: 'Underline',
     icon: UnderlineIcon,
     hotkey: 'command+u,ctrl+u',
-    activeWhen: (format: Record<string, unknown>) => 'underline' in format,
+    activeWhen: () => 'underline' in getFormat(),
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'underline');
@@ -59,7 +59,7 @@ export const formatConfig = [
     name: 'Strikethrough',
     icon: StrikethroughIcon,
     hotkey: 'command+shift+s,ctrl+shift+s',
-    activeWhen: (format: Record<string, unknown>) => 'strike' in format,
+    activeWhen: () => 'strike' in getFormat(),
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'strike');
@@ -70,7 +70,7 @@ export const formatConfig = [
     name: 'Code',
     icon: InlineCodeIcon,
     hotkey: 'command+e,ctrl+e',
-    activeWhen: (format: Record<string, unknown>) => 'code' in format,
+    activeWhen: () => 'code' in getFormat(),
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'code');
@@ -81,7 +81,7 @@ export const formatConfig = [
     name: 'Link',
     icon: LinkIcon,
     hotkey: 'command+k,ctrl+k',
-    activeWhen: (format: Record<string, unknown>) => 'link' in format,
+    activeWhen: () => 'link' in getFormat(),
     // Only can show link button when selection is in one line paragraph
     showWhen: (models: BaseBlockModel[]) =>
       models.length === 1 && noneCodeBlockSelected(models),

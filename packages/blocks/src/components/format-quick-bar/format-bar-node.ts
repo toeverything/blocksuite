@@ -206,7 +206,7 @@ export class FormatQuickBar extends LitElement {
         ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
-          ?active=${activeWhen(this.format)}
+          ?active=${activeWhen()}
           @click=${() => {
             action({
               page,
