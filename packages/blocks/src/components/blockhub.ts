@@ -2,7 +2,7 @@ import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
   BlockHubIcon,
-  CollapseDownIcon,
+  CrossIcon,
   DatabaseTableViewIcon,
   NumberedListIconLarge,
   RectIcon,
@@ -765,7 +765,7 @@ export class BlockHub extends NonShadowLitElement {
           role="menu-entry"
           style="cursor:pointer;"
         >
-          ${this._expanded ? CollapseDownIcon : BlockHubIcon}
+          ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
             class=${this._expanded ? 'invisible' : ''}
             inert
