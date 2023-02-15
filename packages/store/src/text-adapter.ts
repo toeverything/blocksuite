@@ -97,6 +97,8 @@ export class Text {
   }
 
   /**
+   * NOTE: The string included in [index, index + length) will be deleted.
+   *
    * Here are three cases for point position(index + length):
    * [{insert: 'abc', ...}, {insert: 'def', ...}, {insert: 'ghi', ...}]
    * 1. abc|de|fghi
