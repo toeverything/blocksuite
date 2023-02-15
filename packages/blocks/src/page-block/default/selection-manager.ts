@@ -11,7 +11,6 @@ import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
   getAllBlocks,
-  getBlockById,
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
@@ -36,10 +35,8 @@ import type {
   ImageBlockComponent,
 } from '../../embed-block/index.js';
 import {
-  getDragDirection,
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
-  SelectedBlockType,
 } from '../utils/position.js';
 import type {
   DefaultPageBlockComponent,
