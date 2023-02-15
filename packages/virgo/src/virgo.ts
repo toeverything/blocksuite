@@ -291,7 +291,7 @@ export class VEditor {
    * sync the dom selection from vRange for **this Editor**
    */
   syncVRange(): void {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       if (this._vRange) {
         const newRange = this.toDomRange(this._vRange);
 
