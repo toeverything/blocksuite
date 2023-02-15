@@ -32,7 +32,7 @@ export class ShapeMenu extends LitElement {
       align-items: center;
       height: 48px;
       background: var(--affine-page-background);
-      box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14);
+      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: currentColor;
     }
@@ -194,7 +194,7 @@ export class EdgelessToolBar extends LitElement {
       align-items: center;
       height: 48px;
       background: var(--affine-page-background);
-      box-shadow: 0px 0px 12px rgba(66, 65, 73, 0.14);
+      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: currentColor;
     }

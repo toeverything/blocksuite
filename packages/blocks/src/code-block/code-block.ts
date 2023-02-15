@@ -164,8 +164,8 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .code-block-option {
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.04);
+      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.08),
+        0 3px 16px -6px rgba(24, 39, 75, 0.04);
       border-radius: 10px;
       list-style: none;
       padding: 4px;
