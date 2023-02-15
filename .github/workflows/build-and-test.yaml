@@ -21,10 +21,51 @@ on:
       - 'packages/react/examples/**'
 
 jobs:
-  main-test:
+  build-next:
+    name: Build Next.js Example
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Next.js Example
+        run: pnpm run build
+        working-directory: packages/react/examples/next
+
+  build-playground:
+    name: Build Playground
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Playground
+        run: pnpm run build:playground
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: playground-artifact
+          path: ./packages/playground/dist
+
+  e2e-test:
     name: Playground E2E test
     runs-on: self-hosted
-
+    needs:
+      - build-playground
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -37,6 +78,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: playground-artifact
+          path: ./packages/playground/dist
 
       - name: Install playwright browsers
         run: npx playwright install chromium

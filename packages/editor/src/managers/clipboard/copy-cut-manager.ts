@@ -22,15 +22,14 @@ export class CopyCutManager {
     this._editor = editor;
   }
 
-  /* FIXME
-          private get _selection() {
-            const page =
-              document.querySelector<DefaultPageBlockComponent>('default-page-block');
-            if (!page) throw new Error('No page block');
-            return page.selection;
-          }
-          */
-
+  /** FIXME
+   * private get _selection() {
+   *       const page =
+   *         document.querySelector<DefaultPageBlockComponent>('default-page-block');
+   *       if (!page) throw new Error('No page block');
+   *       return page.selection;
+   *     }
+   */
   public handleCopy = async (e: ClipboardEvent) => {
     const clips = await this._getClipItems();
     if (!clips.length) {
@@ -226,9 +225,14 @@ export class CopyCutManager {
     const curRange = getCurrentRange();
 
     let success = false;
+    /**
+     * temp element is used to receive copy event dispatched by document.execCommand('copy'); In this way, we can
+     * get the clipboardData binding with system memory.
+     */
     const tempElem = document.createElement('textarea');
     document.body.appendChild(tempElem);
-
+    // https://w3c.github.io/clipboard-apis/#to-fire-a-clipboard-event:~:text=Let%20target%20be,node%20has%20focus.
+    tempElem.select();
     const listener = function (e: ClipboardEvent) {
       const clipboardData = e.clipboardData;
       if (clipboardData) {

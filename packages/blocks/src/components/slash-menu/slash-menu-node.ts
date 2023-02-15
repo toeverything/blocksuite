@@ -19,7 +19,7 @@ export class SlashMenu extends LitElement {
   top: string | null = null;
 
   @property()
-  maxHeight: string | null = null;
+  maxHeight: number | null = null;
 
   @property()
   position: 'top' | 'bottom' = 'bottom';
@@ -255,8 +255,19 @@ export class SlashMenu extends LitElement {
     const ele = shadowRoot.querySelector(
       `format-bar-button[text="${item.name}"]`
     );
-    // TODO scroll if needed
-    ele?.scrollIntoView(true);
+    if (!ele) {
+      return;
+    }
+    // `scrollIntoViewIfNeeded` is not a standard API
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
+    if (
+      'scrollIntoViewIfNeeded' in ele &&
+      ele.scrollIntoViewIfNeeded instanceof Function
+    ) {
+      ele.scrollIntoViewIfNeeded();
+      return;
+    }
+    ele.scrollIntoView(true);
   }
 
   private _handleClickItem(index: number) {
@@ -287,6 +298,8 @@ export class SlashMenu extends LitElement {
   }
 
   private _categoryTemplate() {
+    const showCategory = !this._searchString.length;
+
     const activatedCategory = menuGroups.find(group =>
       group.items.some(
         item => item.name === this._filterItems[this._activatedItemIndex].name
@@ -295,9 +308,7 @@ export class SlashMenu extends LitElement {
 
     return html`<div
       class="slash-category"
-      style="${this._searchString.length
-        ? 'max-width: 0; padding: 0; margin: 0;'
-        : ''}"
+      style="${!showCategory ? 'max-width: 0; padding: 0; margin: 0;' : ''}"
     >
       ${menuGroups.map(
         group =>
@@ -317,6 +328,11 @@ export class SlashMenu extends LitElement {
     if (this._hide) {
       return html``;
     }
+
+    const MAX_HEIGHT_WITH_CATEGORY = 408;
+    const MAX_HEIGHT = 344;
+    const showCategory = !this._searchString.length;
+
     const containerStyles = styleMap({
       left: this.left,
       top: this.top,
@@ -325,7 +341,12 @@ export class SlashMenu extends LitElement {
     const slashMenuStyles = styleMap({
       top: this.position === 'bottom' ? '100%' : null,
       bottom: this.position !== 'bottom' ? '100%' : null,
-      maxHeight: this.maxHeight,
+      maxHeight: this.maxHeight
+        ? `${Math.min(
+            this.maxHeight,
+            showCategory ? MAX_HEIGHT_WITH_CATEGORY : MAX_HEIGHT
+          )}px`
+        : null,
     });
 
     const btnItems = this._filterItems.map(
