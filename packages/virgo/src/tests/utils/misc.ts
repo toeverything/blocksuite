@@ -1,12 +1,14 @@
 import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
+const PORT = process.env.CI ? 4173 : 5173;
+const DEFAULT_PLAYGROUND = `http://localhost:${PORT}/`;
 
 export async function type(page: Page, content: string) {
   await page.keyboard.type(content, { delay: 50 });
 }
 
 export async function enterVirgoPlayground(page: Page) {
-  const url = new URL('examples/virgo/index.html', 'http://localhost:5173/');
+  const url = new URL('examples/virgo/index.html', DEFAULT_PLAYGROUND);
   await page.goto(url.toString());
 }
 

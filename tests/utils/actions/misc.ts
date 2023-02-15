@@ -10,7 +10,8 @@ import type {
 import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
-const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
+const PORT = process.env.CI ? 4173 : 5173;
+const DEFAULT_PLAYGROUND = `http://localhost:${PORT}/`;
 const RICH_TEXT_SELECTOR = '.ql-editor';
 const TITLE_SELECTOR = '.affine-default-page-block-title';
 
