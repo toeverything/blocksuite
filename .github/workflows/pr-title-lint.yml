@@ -1,4 +1,4 @@
-name: Pull Request title adheres to guidelines
+name: Pull request title lint
 
 on:
   pull_request:
