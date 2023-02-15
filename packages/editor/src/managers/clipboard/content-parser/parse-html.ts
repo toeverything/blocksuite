@@ -453,6 +453,7 @@ export class HtmlParser {
       let resp;
       try {
         resp = await fetch(imgUrl, {
+          cache: 'no-cache',
           mode: 'cors',
           headers: {
             Origin: window.location.origin,
