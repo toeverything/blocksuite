@@ -5,6 +5,7 @@ import type { TextAttributes } from '@blocksuite/virgo';
 import {
   almostEqual,
   ExtendedModel,
+  getDefaultPageBlock,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
@@ -314,7 +315,52 @@ function formatModelsByRange(
   restoreSelection(selectedBlocks);
 }
 
+function getFormatByBlock(model: BaseBlockModel) {
+  const richText = getRichTextByModel(model);
+  assertExists(richText);
+  const { quill } = richText;
+
+  const format = quill.getFormat({
+    index: 0,
+    length: quill.getLength() - 1,
+  });
+  return format;
+}
+
+/**
+ * @deprecated merger with {@link formatModelsByBlock}
+ */
+function formatModelsByBlock(
+  models: BaseBlockModel[],
+  page: Page,
+  key: string
+) {
+  page.captureSync();
+  models.forEach(model => {
+    const richtext = getRichTextByModel(model);
+    if (!richtext) return;
+
+    model.text?.format(0, richtext.quill.getLength() - 1, {
+      [key]: !getFormatByBlock(model)[key],
+    });
+  });
+}
+
 export function handleFormat(page: Page, key: keyof TextAttributes) {
+  if (!hasNativeSelection()) return;
+  if (page.root) {
+    const pageBlock = getDefaultPageBlock(page.root);
+    const selectedBlock = pageBlock.selection.state.selectedBlocks;
+    if (selectedBlock.length) {
+      const models = selectedBlock
+        .map(element => getModelByElement(element))
+        .filter(model => {
+          return !(model.flavour === 'affine:code');
+        });
+      formatModelsByBlock(models, page, key);
+      return;
+    }
+  }
   if (!hasNativeSelection()) return;
 
   if (isRangeNativeSelection()) {
