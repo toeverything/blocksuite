@@ -3,6 +3,7 @@ import {
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
+  ImageIcon,
   NowIcon,
   paragraphConfig,
   // PasteIcon,
@@ -103,6 +104,25 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         divider: idx === 0,
         action: ({ model }) => updateBlockType([model], flavour, type),
       })),
+  },
+  {
+    name: 'Image & File',
+    items: [
+      {
+        name: 'Image',
+        icon: ImageIcon,
+        divider: true,
+        async action({ page, model }) {
+          const parent = page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          const index = parent.children.indexOf(model);
+          const props = await uploadImageFromLocal('affine:embed', page.blobs);
+          page.addBlockByFlavour('affine:divider', props, parent, index + 1);
+        },
+      },
+    ],
   },
   {
     name: 'Date & Time',
