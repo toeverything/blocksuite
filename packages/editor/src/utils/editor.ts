@@ -7,6 +7,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
+type Props = Partial<BaseBlockModel>;
+
 export const checkEditorElementActive = () =>
   document.activeElement?.closest('editor-container') != null;
 
@@ -29,7 +31,7 @@ export const createBlockHub: (
         }
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
-        props = await handleImageInsert(editor, props);
+        props = await uploadImageFromLocal(editor);
       }
       const targetModel = end.model;
       const rect = end.position;
@@ -77,12 +79,10 @@ export const createImageInputElement = () => {
   return fileInput;
 };
 
-export const handleImageInsert = async <
-  Props extends Partial<BaseBlockModel> = Partial<BaseBlockModel>
->(
-  editor: EditorContainer,
-  props: Props
+export const uploadImageFromLocal = async (
+  editor: EditorContainer
 ): Promise<Props | Array<Props>> => {
+  const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
   const fileInput = createImageInputElement();
   document.body.appendChild(fileInput);
 
@@ -99,14 +99,13 @@ export const handleImageInsert = async <
     const files = fileInput.files;
     if (files.length === 1) {
       const id = await storage.set(files[0]);
-      props.sourceId = id;
-      resolvePromise(props);
+      resolvePromise({ ...baseProps, sourceId: id });
     } else {
       const res = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const id = await storage.set(file);
-        res.push({ ...props, sourceId: id });
+        res.push({ ...baseProps, sourceId: id });
       }
       resolvePromise(res);
     }
