@@ -3,6 +3,7 @@ import { asyncFocusRichText, tryUpdateFrameSize } from '@blocksuite/blocks';
 import { getAllowSelectedBlocks } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -16,16 +17,19 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enable_database: !!page.awarenessStore.getFlag('enable_database'),
-    onDropCallback: (e, end) => {
+    onDropCallback: async (e, end) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
-      const blockProps = JSON.parse(data);
-      if (blockProps.flavour === 'affine:database') {
+      const props = JSON.parse(data);
+      if (props.flavour === 'affine:database') {
         if (!page.awarenessStore.getFlag('enable_database')) {
           console.warn('database block is not enabled');
           return;
         }
+      }
+      if (props.flavour === 'affine:embed' && props.type === 'image') {
+        await handleImageInsert(editor, props);
       }
       const targetModel = end.model;
       const rect = end.position;
@@ -34,7 +38,7 @@ export const createBlockHub: (
       const distanceToBottom = Math.abs(rect.bottom - e.y);
       const id = page.addSiblingBlock(
         targetModel,
-        blockProps,
+        props,
         distanceToTop < distanceToBottom ? 'right' : 'left'
       );
       asyncFocusRichText(page, id);
@@ -57,4 +61,48 @@ export const createBlockHub: (
   }
 
   return blockHub;
+};
+
+function createImageInputElement() {
+  const fileInput: HTMLInputElement = document.createElement('input');
+  fileInput.type = 'file';
+  // fileInput.multiple = true;
+  fileInput.accept = 'image/*';
+  fileInput.style.position = 'fixed';
+  fileInput.style.left = '0';
+  fileInput.style.top = '0';
+  fileInput.style.opacity = '0.001';
+  return fileInput;
+}
+
+const handleImageInsert = async (
+  editor: EditorContainer,
+  props: Partial<BaseBlockModel>
+) => {
+  const fileInput = createImageInputElement();
+  document.body.appendChild(fileInput);
+
+  let resolvePromise: (value: void | PromiseLike<void>) => void;
+  const pending = new Promise<void>(resolve => {
+    resolvePromise = resolve;
+  });
+  const onChange = async () => {
+    if (!fileInput.files) return;
+    const storage = await editor.page.blobs;
+    assertExists(storage);
+    const files = fileInput.files;
+    const id = await storage.set(files[0]);
+    props.sourceId = id;
+    resolvePromise();
+
+    fileInput.removeEventListener('change', onChange);
+    fileInput.remove();
+  };
+
+  fileInput.addEventListener('change', onChange);
+
+  fileInput.click();
+  await pending;
+  console.log(props);
+  return props;
 };

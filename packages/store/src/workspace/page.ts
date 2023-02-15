@@ -313,6 +313,24 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  // 需要加一个 addBlocksByFlavour
+  // @debug('CRUD')
+  // public addBlocksByFlavour<
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+  //     Flavour extends keyof ALLProps & string = keyof ALLProps & string
+  // >(
+  //     flavour: Flavour,
+  //     blockProps: Partial<
+  //         ALLProps[Flavour] &
+  //         Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
+  //     > = {},
+  //     parent?: BaseBlockModel | string | null,
+  //     parentIndex?: number
+  // ) {
+  //
+  // }
+
   @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -463,22 +481,21 @@ export class Page extends Space<PageData> {
 
   addSiblingBlock(
     targetModel: BaseBlockModel,
-    blockProps: Partial<BaseBlockModel>,
+    props: Partial<BaseBlockModel>,
     direction: 'left' | 'right' = 'right'
   ) {
     const parent = this.getParent(targetModel);
-    assertExists(blockProps.flavour);
+    assertExists(props.flavour);
     assertExists(parent);
 
     const targetIndex =
       parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
 
+    const { flavour, ...blockProps } = props;
     const id = this.addBlockByFlavour(
-      blockProps.flavour,
-      {
-        type: blockProps.type,
-      },
+      flavour,
+      blockProps,
       parent.id,
       insertIndex
     );
