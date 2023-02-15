@@ -321,7 +321,7 @@ export class Page extends Space<PageData> {
   >(
     blocks: Array<{
       flavour: Flavour;
-      blockProps: Partial<
+      blockProps?: Partial<
         ALLProps[Flavour] &
           Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
       >;
