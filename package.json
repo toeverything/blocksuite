@@ -19,6 +19,8 @@
   "packageManager": "pnpm@7.23.0",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
+    "preview": "run-p serve preview:playground",
+    "preview:playground": "pnpm --filter @blocksuite/playground preview",
     "dev": "run-p serve dev:playground",
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "lint": "eslint ./ --max-warnings=0",
@@ -45,6 +47,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@blocksuite/global": "workspace:0.4.0-alpha.3",
     "@blocksuite/virgo": "workspace:*",
     "@changesets/cli": "^2.26.0",
     "@commitlint/cli": "^17.4.2",
