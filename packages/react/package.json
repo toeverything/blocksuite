@@ -11,7 +11,10 @@
   "sideEffects": [
     "./dist/editor.js"
   ],
-  "keywords": [],
+  "keywords": [
+    "react",
+    "editor"
+  ],
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
