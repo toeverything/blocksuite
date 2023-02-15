@@ -1,11 +1,13 @@
+import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import { test } from '@playwright/test';
 
 import { collectTestResult } from '../../../__tests__/test-utils-node.js';
 
-const PORT = process.env.CI ? 4173 : 5173;
-const DEFAULT_PLAYGROUND = `http://localhost:${PORT}/`;
 // checkout test-entry.ts for actual test cases
-const blobExamplePage = `${DEFAULT_PLAYGROUND}/examples/blob/`;
+const blobExamplePage = new URL(
+  '/examples/blob',
+  getDefaultPlaygroundURL(!!process.env.CI)
+).toString();
 
 test('blob storage basics', async ({ page }) => {
   await page.goto(blobExamplePage);

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 
 import type {
@@ -10,8 +11,7 @@ import type {
 import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
-const PORT = process.env.CI ? 4173 : 5173;
-const DEFAULT_PLAYGROUND = `http://localhost:${PORT}/`;
+const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
 const RICH_TEXT_SELECTOR = '.ql-editor';
 const TITLE_SELECTOR = '.affine-default-page-block-title';
 

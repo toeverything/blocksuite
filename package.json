@@ -47,6 +47,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@blocksuite/global": "workspace:0.4.0-alpha.3",
     "@blocksuite/virgo": "workspace:*",
     "@changesets/cli": "^2.26.0",
     "@commitlint/cli": "^17.4.2",
