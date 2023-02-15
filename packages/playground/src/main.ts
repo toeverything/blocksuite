@@ -52,8 +52,7 @@ async function initPageContentByParam(workspace: Workspace, param: string) {
   >;
   // Load the preset playground documentation when `?init` param provided
   if (param === '') {
-    await initFunctions.preset(workspace);
-    return;
+    param = 'preset';
   }
 
   // Load built-in init function when `?init=heavy` param provided
