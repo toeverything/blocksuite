@@ -22,7 +22,7 @@ test.describe('slash menu should show and hide correctly', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    await enterPlaygroundRoom(page, { enable_slash_menu: true });
+    await enterPlaygroundRoom(page);
     const id = await initEmptyParagraphState(page);
     paragraphId = id.paragraphId;
     slashMenu = page.locator(`.slash-menu`);
@@ -130,10 +130,21 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(activatedItem).toHaveAttribute('hover', '');
     await assertRichTexts(page, ['/']);
   });
+
+  test('can input search input after click menu', async () => {
+    const box = await slashMenu.boundingBox();
+    if (!box) {
+      throw new Error("slashMenu doesn't exist");
+    }
+    const { x, y, height } = box;
+    await page.mouse.click(x + 10, y + height - 10);
+    await type(page, 'a');
+    await assertRichTexts(page, ['/a']);
+  });
 });
 
 test('should slash menu search and keyboard works', async ({ page }) => {
-  await enterPlaygroundRoom(page, { enable_slash_menu: true });
+  await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   const slashMenu = page.locator(`.slash-menu`);
