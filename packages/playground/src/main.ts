@@ -45,29 +45,24 @@ function subscribePage(workspace: Workspace) {
   });
 }
 
-async function initPageContentByParam(workspace: Workspace) {
+async function initPageContentByParam(workspace: Workspace, param: string) {
   const initFunctions = (await import('./data/index.js')) as Record<
     string,
     (workspace: Workspace) => Promise<string>
   >;
-
-  // No `?init` param provided
-  if (initParam === null) return;
-
   // Load the preset playground documentation when `?init` param provided
-  if (initParam === '') {
-    await initFunctions.preset(workspace);
-    return;
+  if (param === '') {
+    param = 'preset';
   }
 
   // Load built-in init function when `?init=heavy` param provided
-  if (initFunctions[initParam]) {
-    await initFunctions[initParam]?.(workspace);
+  if (initFunctions[param]) {
+    await initFunctions[param](workspace);
     return;
   }
 
   // Try to load base64 content or markdown content from url
-  await tryInitExternalContent(workspace, initParam);
+  await tryInitExternalContent(workspace, param);
 }
 
 async function main() {
@@ -83,14 +78,16 @@ async function main() {
   // instead of using this default setup.
   if (isE2E) return;
 
+  subscribePage(workspace);
+  if (initParam !== null) {
+    await initPageContentByParam(workspace, initParam);
+    return;
+  }
+
   // Open default examples list when no `?init` param is provided
   const exampleList = document.createElement('example-list');
   workspace.signals.pageAdded.once(() => exampleList.remove());
   document.body.prepend(exampleList);
-
-  subscribePage(workspace);
-
-  await initPageContentByParam(workspace);
 }
 
 main();
