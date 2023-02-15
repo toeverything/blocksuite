@@ -1,13 +1,11 @@
 import { BlockHub } from '@blocksuite/blocks';
 import { asyncFocusRichText, tryUpdateFrameSize } from '@blocksuite/blocks';
 import { getAllowSelectedBlocks } from '@blocksuite/blocks';
+import { uploadImageFromLocal } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
-
-type Props = Partial<BaseBlockModel>;
 
 export const checkEditorElementActive = () =>
   document.activeElement?.closest('editor-container') != null;
@@ -31,7 +29,7 @@ export const createBlockHub: (
         }
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
-        props = await uploadImageFromLocal(editor);
+        props = await uploadImageFromLocal(page);
       }
       const targetModel = end.model;
       const rect = end.position;
@@ -65,56 +63,4 @@ export const createBlockHub: (
   }
 
   return blockHub;
-};
-
-export const createImageInputElement = () => {
-  const fileInput: HTMLInputElement = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.multiple = true;
-  fileInput.accept = 'image/*';
-  fileInput.style.position = 'fixed';
-  fileInput.style.left = '0';
-  fileInput.style.top = '0';
-  fileInput.style.opacity = '0.001';
-  return fileInput;
-};
-
-export const uploadImageFromLocal = async (
-  editor: EditorContainer
-): Promise<Props | Array<Props>> => {
-  const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
-  const fileInput = createImageInputElement();
-  document.body.appendChild(fileInput);
-
-  let resolvePromise: (
-    value: Props | Array<Props> | PromiseLike<Props | Array<Props>>
-  ) => void;
-  const pending = new Promise<Props | Array<Props>>(resolve => {
-    resolvePromise = resolve;
-  });
-  const onChange = async () => {
-    if (!fileInput.files) return;
-    const storage = await editor.page.blobs;
-    assertExists(storage);
-    const files = fileInput.files;
-    if (files.length === 1) {
-      const id = await storage.set(files[0]);
-      resolvePromise({ ...baseProps, sourceId: id });
-    } else {
-      const res = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const id = await storage.set(file);
-        res.push({ ...baseProps, sourceId: id });
-      }
-      resolvePromise(res);
-    }
-
-    fileInput.removeEventListener('change', onChange);
-    fileInput.remove();
-  };
-
-  fileInput.addEventListener('change', onChange);
-  fileInput.click();
-  return await pending;
 };
