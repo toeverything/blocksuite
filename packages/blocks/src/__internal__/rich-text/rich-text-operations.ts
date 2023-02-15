@@ -72,13 +72,7 @@ export function handleSoftEnter(
     return;
   }
   page.captureSync();
-  const shouldFormatCode = matchFlavours(model, ['affine:code']);
-  model.text.replace(
-    index,
-    length,
-    '\n',
-    shouldFormatCode ? { 'code-block': true } : {}
-  );
+  model.text.replace(index, length, '\n');
 }
 
 export function handleBlockSplit(
