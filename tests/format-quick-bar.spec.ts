@@ -610,7 +610,9 @@ test('should format quick bar position correct at the start of second line', asy
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     const text = new page.Text('a'.repeat(100));
     const paragraphId = page.addBlockByFlavour(

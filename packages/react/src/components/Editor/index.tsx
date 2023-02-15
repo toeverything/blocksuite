@@ -36,7 +36,9 @@ export const Editor = (props: EditorProps) => {
       if (props.onInit) {
         props.onInit(page, editor);
       } else {
-        const pageBlockId = page.addBlockByFlavour('affine:page');
+        const pageBlockId = page.addBlockByFlavour('affine:page', {
+          title: new page.Text(),
+        });
         const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
         page.addBlockByFlavour('affine:paragraph', {}, frameId);
         page.resetHistory();

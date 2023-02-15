@@ -76,14 +76,15 @@ test('basic init with external text', async ({ page }) => {
 test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
-  await pageA.keyboard.type('hello');
+  pageA.waitForLoadState('domcontentloaded');
+  await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
   await enterPlaygroundRoom(pageB, {}, room);
   await waitDefaultPageLoaded(pageB);
   await assertTitle(pageB, 'hello');
 
-  await pageB.keyboard.type(' world');
+  await type(pageB, ' world');
   await assertTitle(pageA, 'hello world');
 });
 

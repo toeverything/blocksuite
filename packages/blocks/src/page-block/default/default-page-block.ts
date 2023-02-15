@@ -205,17 +205,16 @@ export class DefaultPageBlockComponent
     const { model } = this;
     const title = model.title;
 
-    if (title && this._titleContainer) {
-      this._titleVEditor = new VEditor(title.yText, {
-        onKeyDown: this._onTitleKeyDown,
+    this._titleVEditor = new VEditor(title.yText, {
+      onKeyDown: this._onTitleKeyDown,
+    });
+    this._titleVEditor.mount(this._titleContainer);
+    this.model.title.yText.observe(() => {
+      this.page.workspace.setPageMeta(this.page.id, {
+        title: this.model.title.toString(),
       });
-      this._titleVEditor.mount(this._titleContainer);
-      this.model.title.yText.observe(() => {
-        this.page.workspace.setPageMeta(this.page.id, {
-          title: this.model.title.toString(),
-        });
-      });
-    }
+    });
+    this._titleVEditor.focusEnd();
   }
 
   private _onTitleKeyDown = (e: KeyboardEvent) => {
@@ -309,13 +308,15 @@ export class DefaultPageBlockComponent
     }
   };
 
-  willUpdate(changedProperties: Map<string, unknown>) {
+  updated(changedProperties: Map<string, unknown>) {
     if (this._titleVEditor && changedProperties.has('readonly')) {
       this._titleVEditor.setReadOnly(this.readonly);
     }
 
     if (changedProperties.has('model')) {
-      this.initTitleVEditor();
+      if (this.model && !this._titleVEditor) {
+        this.initTitleVEditor();
+      }
     }
   }
 
@@ -439,7 +440,7 @@ export class DefaultPageBlockComponent
         for (const { target } of entries) {
           if (target === this.defaultViewportElement) {
             this.updateViewportState();
-            this.selection.refreshSelectedBlocksRects();
+            this.selection?.refreshSelectedBlocksRects();
             break;
           }
         }

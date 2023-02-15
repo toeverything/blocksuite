@@ -77,7 +77,7 @@ export async function assertEmpty(page: Page) {
 }
 
 export async function assertTitle(page: Page, text: string) {
-  const vEditor = page.locator('affine-default-page [data-virgo-root="true"]');
+  const vEditor = page.locator('[data-block-is-title="true"]');
   const vText = virgoEditorInnerTextToString(await vEditor.innerText());
   expect(vText).toBe(text);
 }

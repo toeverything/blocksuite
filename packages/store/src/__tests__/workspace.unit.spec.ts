@@ -37,7 +37,11 @@ function waitOnce<T>(signal: Signal<T>) {
 }
 
 async function createRoot(page: Page) {
-  queueMicrotask(() => page.addBlockByFlavour('affine:page'));
+  queueMicrotask(() =>
+    page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    })
+  );
   const root = await waitOnce(page.signals.rootAdded);
   return root;
 }
@@ -90,7 +94,9 @@ describe.concurrent('basic', () => {
 describe.concurrent('addBlock', () => {
   it('can add single model', async () => {
     const page = await createTestPage();
-    page.addBlockByFlavour('affine:page');
+    page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
@@ -106,7 +112,7 @@ describe.concurrent('addBlock', () => {
 
   it('can add model with props', async () => {
     const page = await createTestPage();
-    page.addBlockByFlavour('affine:page', { title: 'hello' });
+    page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
 
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
@@ -122,7 +128,9 @@ describe.concurrent('addBlock', () => {
 
   it('can add multi models', async () => {
     const page = await createTestPage();
-    page.addBlockByFlavour('affine:page');
+    page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     page.addBlockByFlavour('affine:paragraph');
 
     assert.deepEqual(serialize(page)[spaceId], {
@@ -147,7 +155,11 @@ describe.concurrent('addBlock', () => {
   it('can observe signal events', async () => {
     const page = await createTestPage();
 
-    queueMicrotask(() => page.addBlockByFlavour('affine:page'));
+    queueMicrotask(() =>
+      page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      })
+    );
     const block = await waitOnce(page.signals.rootAdded);
     if (Array.isArray(block)) {
       throw new Error('');
@@ -158,7 +170,11 @@ describe.concurrent('addBlock', () => {
   it('can add block to root', async () => {
     const page = await createTestPage();
 
-    queueMicrotask(() => page.addBlockByFlavour('affine:page'));
+    queueMicrotask(() =>
+      page.addBlockByFlavour('affine:page', {
+        title: new page.Text(),
+      })
+    );
     const roots = await waitOnce(page.signals.rootAdded);
     const root = Array.isArray(roots) ? roots[0] : roots;
     if (Array.isArray(root)) {
@@ -184,7 +200,9 @@ describe.concurrent('addBlock', () => {
     // @ts-ignore
     assert.equal(workspace._pages.size, 2);
 
-    page0.addBlockByFlavour('affine:page');
+    page0.addBlockByFlavour('affine:page', {
+      title: new page0.Text(),
+    });
     workspace.removePage(page0.id);
 
     // @ts-expect-error
@@ -255,7 +273,9 @@ describe.concurrent('deleteBlock', () => {
   it('can delete single model', async () => {
     const page = await createTestPage();
 
-    page.addBlockByFlavour('affine:page');
+    page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     assert.deepEqual(serialize(page)[spaceId], {
       '0': {
         'meta:tags': {},
@@ -369,7 +389,7 @@ describe('workspace.exportJSX works', async () => {
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
 
-    page.addBlockByFlavour('affine:page', { title: 'hello' });
+    page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(`
       <affine:page
@@ -391,7 +411,9 @@ describe('workspace.exportJSX works', async () => {
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
 
-    page.addBlockByFlavour('affine:page');
+    page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     page.addBlockByFlavour('affine:paragraph');
     page.addBlockByFlavour('affine:paragraph');
 
@@ -414,7 +436,7 @@ describe.concurrent('workspace.search works', async () => {
     const workspace = new Workspace(options).register(BlockSchema);
     const page = await createPage(workspace);
 
-    page.addBlockByFlavour('affine:page', { title: 'hello' });
+    page.addBlockByFlavour('affine:page', { title: new page.Text('hello') });
 
     page.addBlockByFlavour('affine:paragraph', {
       text: new page.Text(

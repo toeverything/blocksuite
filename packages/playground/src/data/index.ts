@@ -28,7 +28,11 @@ export const empty: InitFn = (workspace: Workspace) => {
       const frameId = page.addBlockByFlavour('affine:frame', {}, pageBlockId);
       // Add paragraph block inside frame block
       page.addBlockByFlavour('affine:paragraph', {}, frameId);
-      resolve(pageId);
+
+      requestAnimationFrame(() => {
+        page.resetHistory();
+        resolve(pageId);
+      });
     });
 
     workspace.createPage('page0');
@@ -44,7 +48,9 @@ export const heavy: InitFn = (workspace: Workspace) => {
       const page = workspace.getPage(pageId) as Page;
 
       // Add page block and surface block at root level
-      const pageBlockId = page.addBlockByFlavour('affine:page');
+      const pageBlockId = page.addBlockByFlavour('affine:page', {
+        title: new Text(),
+      });
       page.addBlockByFlavour('affine:surface', {}, null);
 
       // Add frame block inside page block

@@ -669,7 +669,9 @@ test('press arrow down should move caret to the start of line', async ({
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     page.addBlockByFlavour(
       'affine:paragraph',
@@ -702,7 +704,9 @@ test('press arrow up in the second line should move caret to the first line', as
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     const delta = Array.from({ length: 120 }, (v, i) => {
       return i % 2 === 0
@@ -751,7 +755,9 @@ test('press arrow down in indent line should not move caret to the start of line
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
-    const pageId = page.addBlockByFlavour('affine:page');
+    const pageId = page.addBlockByFlavour('affine:page', {
+      title: new page.Text(),
+    });
     const frame = page.addBlockByFlavour('affine:frame', {}, pageId);
     const p1 = page.addBlockByFlavour('affine:paragraph', {}, frame);
     const p2 = page.addBlockByFlavour('affine:paragraph', {}, p1);
