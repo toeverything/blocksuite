@@ -1,7 +1,7 @@
 import './button.js';
 import './format-bar-node.js';
 
-import { Signal } from '@blocksuite/store';
+import { BaseBlockModel, Signal } from '@blocksuite/store';
 
 import {
   getCurrentRange,
@@ -23,6 +23,7 @@ export const showFormatQuickBar = async ({
   direction = 'right-bottom',
   container = document.body,
   abortController = new AbortController(),
+  selectedModels,
 }: {
   anchorEl?:
     | {
@@ -33,6 +34,7 @@ export const showFormatQuickBar = async ({
   direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
+  selectedModels?: BaseBlockModel[];
 }) => {
   // Reuse previous format quick bar
   if (formatQuickBarInstance) {
@@ -46,6 +48,7 @@ export const showFormatQuickBar = async ({
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;
   formatQuickBar.direction = direction;
+  formatQuickBar.selectedModels = selectedModels;
 
   formatQuickBarInstance = formatQuickBar;
   abortController.signal.addEventListener('abort', () => {
@@ -84,7 +87,7 @@ export const showFormatQuickBar = async ({
     formatQuickBar.top = `${safeCoordinate.y}px`;
   }, 10);
 
-  const models = getModelsByRange(getCurrentRange());
+  const models = selectedModels ?? getModelsByRange(getCurrentRange());
   if (!models.length) {
     return;
   }
@@ -130,6 +133,7 @@ export const showFormatQuickBar = async ({
 
   // Mount
   container.appendChild(formatQuickBar);
+
   requestAnimationFrame(() => {
     updatePos();
   });

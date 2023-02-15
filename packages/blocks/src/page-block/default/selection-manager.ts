@@ -11,6 +11,7 @@ import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
   getAllBlocks,
+  getBlockById,
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
@@ -35,8 +36,10 @@ import type {
   ImageBlockComponent,
 } from '../../embed-block/index.js';
 import {
+  getDragDirection,
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
+  SelectedBlockType,
 } from '../utils/position.js';
 import type {
   DefaultPageBlockComponent,
@@ -685,7 +688,18 @@ export class DefaultSelectionManager {
       // const anchor = ['rightDown', 'leftDown'].includes(direction)
       //   ? selectedBlocks[selectedBlocks.length - 1]
       //   : selectedBlocks[0];
-      // showFormatQuickBar({ anchorEl: anchor });
+      const firstBlock = this.state.selectedBlocks[0];
+      if (!firstBlock) {
+        return;
+      }
+
+      showFormatQuickBar({
+        direction: 'right-bottom',
+        anchorEl: firstBlock,
+        selectedModels: this.state.selectedBlocks.map(block =>
+          getModelByElement(block)
+        ),
+      });
     }
   }
 

@@ -53,6 +53,9 @@ export class FormatQuickBar extends LitElement {
   @property()
   direction!: DragDirection;
 
+  @property()
+  selectedModels?: BaseBlockModel[];
+
   @state()
   models: BaseBlockModel[] = [];
 
@@ -83,14 +86,13 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    // TODO handle multiple selection
-    const models = getModelsByRange(getCurrentRange());
+    const models = this.selectedModels ?? getModelsByRange(getCurrentRange());
     this.models = models;
     if (!models.length) {
       return;
     }
+    this.format = getFormat(this.selectedModels);
     const startModel = models[0];
-    this.format = getFormat();
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
 
@@ -255,6 +257,8 @@ export class FormatQuickBar extends LitElement {
               abortController: this.abortController,
               format: this.format,
             });
+            // format state need to update after format
+            this.format = getFormat(this.selectedModels);
             this.positionUpdated.emit();
           }}
         >
