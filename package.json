@@ -9,8 +9,7 @@
     "packages/playground",
     "packages/react",
     "packages/store",
-    "packages/virgo",
-    "packages/mock"
+    "packages/virgo"
   ],
   "private": true,
   "type": "module",
