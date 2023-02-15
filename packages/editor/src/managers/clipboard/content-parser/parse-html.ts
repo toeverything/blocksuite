@@ -452,7 +452,12 @@ export class HtmlParser {
       const imgUrl = (element as HTMLImageElement).src;
       let resp;
       try {
-        resp = await fetch(imgUrl, { mode: 'cors' });
+        resp = await fetch(imgUrl, {
+          mode: 'cors',
+          headers: {
+            Origin: window.location.origin,
+          },
+        });
       } catch (error) {
         console.error(error);
         return result;
