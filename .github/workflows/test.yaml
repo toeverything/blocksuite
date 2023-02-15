@@ -21,6 +21,28 @@ on:
       - 'packages/react/examples/**'
 
 jobs:
+  build-playground:
+    name: Build Playground
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.9.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Playground
+        run: pnpm run build:playground
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: playground-artifact
+          path: ./packages/playground/dist
+
   main-test:
     name: Playground E2E test
     runs-on: self-hosted
@@ -34,6 +56,12 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: playground-artifact
+          path: ./packages/playground/dist
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

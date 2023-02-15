@@ -9,7 +9,7 @@ const config: PlaywrightTestConfig = {
   fullyParallel: true,
   timeout: process.env.CI ? 50_000 : 30_000,
   webServer: {
-    command: 'pnpm dev',
+    command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
     port: 5173,
     reuseExistingServer: !process.env.CI,
     env: {

@@ -19,6 +19,8 @@
   "packageManager": "pnpm@7.23.0",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
+    "preview": "run-p serve preview:playground",
+    "preview:playground": "pnpm --filter @blocksuite/playground preview",
     "dev": "run-p serve dev:playground",
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "lint": "eslint ./ --max-warnings=0",
