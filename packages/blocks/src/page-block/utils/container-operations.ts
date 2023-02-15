@@ -328,7 +328,7 @@ function getFormatByBlock(model: BaseBlockModel) {
 }
 
 /**
- * @deprecated merger with {@link formatModelsByBlock}
+ * @deprecated merger with {@link formatModelsByRange}
  */
 function formatModelsByBlock(
   models: BaseBlockModel[],
@@ -347,7 +347,7 @@ function formatModelsByBlock(
 }
 
 export function handleFormat(page: Page, key: keyof TextAttributes) {
-  if (!hasNativeSelection()) return;
+  // 0. check exist block selection
   if (page.root) {
     const pageBlock = getDefaultPageBlock(page.root);
     const selectedBlock = pageBlock.selection.state.selectedBlocks;
@@ -361,8 +361,10 @@ export function handleFormat(page: Page, key: keyof TextAttributes) {
       return;
     }
   }
+  // 1. check exist native selection
   if (!hasNativeSelection()) return;
 
+  // 2. check exist range selection
   if (isRangeNativeSelection()) {
     const models = getModelsByRange(getCurrentRange()).filter(model => {
       return !(model.flavour === 'affine:code');
