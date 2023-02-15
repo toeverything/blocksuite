@@ -92,6 +92,11 @@ export type OpenBlockInfo = {
     retain?: number;
     attributes?: TextAttributes;
   }[];
+  rawText?: {
+    insert: string;
+    delete?: number;
+    retain?: number;
+  }[];
   checked?: boolean;
   children: OpenBlockInfo[];
   sourceId?: string;

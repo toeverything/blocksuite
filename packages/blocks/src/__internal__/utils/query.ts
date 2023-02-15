@@ -143,10 +143,7 @@ export function getDefaultPageBlock(model: BaseBlockModel) {
 }
 
 export function getContainerByModel(model: BaseBlockModel) {
-  assertExists(model.page.root);
-  const page = document.querySelector(
-    `[${ATTR}="${model.page.root.id}"]`
-  ) as DefaultPageBlockComponent;
+  const page = getDefaultPageBlock(model);
   const container = page.closest('editor-container');
   assertExists(container);
   return container;
