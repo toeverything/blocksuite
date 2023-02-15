@@ -199,7 +199,6 @@ const matches: Match[] = [
       quill.setSelection(startIndex + annotatedText.length + 1, 0);
 
       model.text?.delete(startIndex + annotatedText.length, 1);
-      model.text?.delete(selection.index, 1);
       model.text?.delete(selection.index - 1, 1);
       model.text?.delete(startIndex, 1);
       quill.format('underline', false);

@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { SHORT_KEY, type } from 'utils/actions/keyboard.js';
+import { SHORT_KEY, type, withPressKey } from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -129,6 +129,23 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(activatedItem).toHaveText(['Copy']);
     await expect(activatedItem).toHaveAttribute('hover', '');
     await assertRichTexts(page, ['/']);
+  });
+
+  test('press tab should move up and down', async () => {
+    await page.keyboard.press('Tab');
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItem0 = slashItems.nth(0);
+    const slashItem1 = slashItems.nth(1);
+    await expect(slashItem0).not.toHaveAttribute('hover', '');
+    await expect(slashItem1).toHaveAttribute('hover', '');
+
+    await assertRichTexts(page, ['/']);
+    await withPressKey(page, 'Shift', () => page.keyboard.press('Tab'));
+    await expect(slashMenu).toBeVisible();
+    await expect(slashItem0).toHaveAttribute('hover', '');
+    await expect(slashItem1).not.toHaveAttribute('hover', '');
   });
 
   test('can input search input after click menu', async () => {
