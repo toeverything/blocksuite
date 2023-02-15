@@ -170,10 +170,11 @@ export class SlashMenu extends LitElement {
     ) {
       return;
     }
+    // prevent arrow key from moving cursor
+    e.preventDefault();
     const configLen = this._filterItems.length;
 
     const handleCursorUp = () => {
-      e.preventDefault();
       if (this._leftPanelActivated) {
         const nowGroupIdx = this._getGroupIndexByItem(
           this._filterItems[this._activatedItemIndex]
@@ -189,7 +190,6 @@ export class SlashMenu extends LitElement {
     };
 
     const handleCursorDown = () => {
-      e.preventDefault();
       if (this._leftPanelActivated) {
         const nowGroupIdx = this._getGroupIndexByItem(
           this._filterItems[this._activatedItemIndex]
@@ -205,12 +205,11 @@ export class SlashMenu extends LitElement {
 
     switch (e.key) {
       case 'Enter': {
-        e.preventDefault();
         if (e.isComposing) {
           return;
         }
         this._handleClickItem(this._activatedItemIndex);
-        break;
+        return;
       }
       case 'Tab': {
         if (e.shiftKey) {
@@ -218,25 +217,23 @@ export class SlashMenu extends LitElement {
         } else {
           handleCursorDown();
         }
-        break;
+        return;
       }
 
       case 'ArrowUp': {
         handleCursorUp();
-        break;
+        return;
       }
 
       case 'ArrowDown': {
         handleCursorDown();
-        break;
+        return;
       }
 
       case 'ArrowLeft':
-        e.preventDefault();
         this._leftPanelActivated = true;
         return;
       case 'ArrowRight':
-        e.preventDefault();
         if (this._leftPanelActivated) {
           this._leftPanelActivated = false;
         }
@@ -244,8 +241,6 @@ export class SlashMenu extends LitElement {
       default:
         throw new Error(`Unknown key: ${e.key}`);
     }
-    // prevent arrow key from moving cursor
-    e.preventDefault();
   };
 
   private _getGroupIndexByItem(item: SlashItem) {
