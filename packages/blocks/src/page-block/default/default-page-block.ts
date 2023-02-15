@@ -268,6 +268,12 @@ export class DefaultPageBlockComponent
   // FIXME: keep embed selected rects after scroll
   // TODO: disable it on scroll's thresold
   private _onWheel = (e: WheelEvent) => {
+    if (this.selection.state.type === 'native') {
+      if (this.selection.state.startRange && this.selection.state.rangePoint) {
+        return;
+      }
+    }
+
     if (this.selection.state.type !== 'block') {
       this.selection.state.clear();
       // if (this.selection.state.type !== 'embed') {
@@ -313,15 +319,29 @@ export class DefaultPageBlockComponent
   // };
 
   private _onScroll = (e: Event) => {
-    const type = this.selection.state.type;
+    const { selection, viewportState } = this;
+    const { type } = selection.state;
     const { scrollLeft, scrollTop } = e.target as Element;
-    this.viewportState.scrollLeft = scrollLeft;
-    this.viewportState.scrollTop = scrollTop;
+    viewportState.scrollLeft = scrollLeft;
+    viewportState.scrollTop = scrollTop;
     if (type === 'block') {
-      this.selection.refreshSelectionRectAndSelecting(this.viewportState);
+      selection.refreshSelectionRectAndSelecting(viewportState);
       // Why? Clicling on the image and the `type` is set to `block`.
       // See _onContainerClick
-      this.selection.refresEmbedRects();
+      selection.refresEmbedRects();
+    } else if (type === 'native') {
+      const { startRange, rangePoint } = selection.state;
+      if (startRange && rangePoint) {
+        // Create a synthetic `mousemove` MouseEvent
+        const evt = new MouseEvent('mousemove', {
+          // bubbles: false,
+          // cancelable: false,
+          clientX: rangePoint.x,
+          clientY: rangePoint.y,
+        });
+        this.mouseRoot.dispatchEvent(evt);
+      }
+      return;
     }
   };
 
