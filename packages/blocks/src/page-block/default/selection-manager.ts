@@ -655,6 +655,7 @@ export class DefaultSelectionManager {
     }
     this._showFormatQuickBar(e);
   };
+  private blockSelectionFormatBarAbortController: AbortController | null = null;
 
   private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
@@ -666,36 +667,28 @@ export class DefaultSelectionManager {
 
       showFormatQuickBar({ direction });
     } else if (this.state.type === 'block') {
-      // TODO handle block selection
-      // const direction = getDragDirection(e);
-      // const { selectedRichTexts } = this._getSelectedBlockInfo(e);
-      // if (selectedRichTexts.length === 0) {
-      //   // Selecting nothing
-      //   return;
-      // }
-      // const selectedBlocks = selectedRichTexts.map(richText => {
-      //   return getBlockById(richText.model.id) as unknown as HTMLElement;
-      // });
-      // const selectedType: SelectedBlockType = selectedBlocks.every(block => {
-      //   return /paragraph-block/i.test(block.tagName);
-      // })
-      //   ? 'text'
-      //   : 'other';
-      // console.log(`selectedType: ${selectedType}`, this.state.type);
-      // const anchor = ['rightDown', 'leftDown'].includes(direction)
-      //   ? selectedBlocks[selectedBlocks.length - 1]
-      //   : selectedBlocks[0];
-      const firstBlock = this.state.selectedBlocks[0];
+      const blocks = this.state.selectedBlocks;
+
+      if (!blocks.length) {
+        return;
+      }
+      const firstBlock = blocks[0];
+      const lastBlock = blocks[blocks.length - 1];
       if (!firstBlock) {
         return;
       }
+      const direction = e.start.y < e.y ? 'right-bottom' : 'right-top';
+
+      this.blockSelectionFormatBarAbortController?.abort();
+      this.blockSelectionFormatBarAbortController = new AbortController();
 
       showFormatQuickBar({
-        direction: 'right-bottom',
-        anchorEl: firstBlock,
+        direction,
+        anchorEl: direction === 'right-bottom' ? lastBlock : firstBlock,
         selectedModels: this.state.selectedBlocks.map(block =>
           getModelByElement(block)
         ),
+        abortController: this.blockSelectionFormatBarAbortController,
       });
     }
   }
