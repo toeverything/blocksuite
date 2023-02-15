@@ -13,10 +13,10 @@ on:
 
 jobs:
   add-to-project:
-    name: Add issue to project
+    name: Add issues and pull requests to GitHub project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@RELEASE_VERSION
+      - uses: actions/add-to-project@0.4.0
         with:
           # You can target a repository in a different organization
           # to the issue
