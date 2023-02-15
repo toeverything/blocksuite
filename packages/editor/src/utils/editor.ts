@@ -21,7 +21,7 @@ export const createBlockHub: (
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
-      const props = JSON.parse(data);
+      let props = JSON.parse(data);
       if (props.flavour === 'affine:database') {
         if (!page.awarenessStore.getFlag('enable_database')) {
           console.warn('database block is not enabled');
@@ -29,19 +29,21 @@ export const createBlockHub: (
         }
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
-        await handleImageInsert(editor, props);
+        props = await handleImageInsert(editor, props);
       }
       const targetModel = end.model;
       const rect = end.position;
       page.captureSync();
       const distanceToTop = Math.abs(rect.top - e.y);
       const distanceToBottom = Math.abs(rect.bottom - e.y);
-      const id = page.addSiblingBlock(
+      const id = page.addSiblingBlocks(
         targetModel,
         props,
         distanceToTop < distanceToBottom ? 'right' : 'left'
       );
-      asyncFocusRichText(page, id);
+      if (!Array.isArray(id)) {
+        await asyncFocusRichText(page, id);
+      }
       tryUpdateFrameSize(page, 1);
     },
   });
@@ -66,7 +68,7 @@ export const createBlockHub: (
 function createImageInputElement() {
   const fileInput: HTMLInputElement = document.createElement('input');
   fileInput.type = 'file';
-  // fileInput.multiple = true;
+  fileInput.multiple = true;
   fileInput.accept = 'image/*';
   fileInput.style.position = 'fixed';
   fileInput.style.left = '0';
@@ -75,15 +77,19 @@ function createImageInputElement() {
   return fileInput;
 }
 
-const handleImageInsert = async (
+const handleImageInsert = async <
+  Props extends Partial<BaseBlockModel> = Partial<BaseBlockModel>
+>(
   editor: EditorContainer,
-  props: Partial<BaseBlockModel>
-) => {
+  props: Props
+): Promise<Props | Array<Props>> => {
   const fileInput = createImageInputElement();
   document.body.appendChild(fileInput);
 
-  let resolvePromise: (value: void | PromiseLike<void>) => void;
-  const pending = new Promise<void>(resolve => {
+  let resolvePromise: (
+    value: Props | Array<Props> | PromiseLike<Props | Array<Props>>
+  ) => void;
+  const pending = new Promise<Props | Array<Props>>(resolve => {
     resolvePromise = resolve;
   });
   const onChange = async () => {
@@ -91,18 +97,25 @@ const handleImageInsert = async (
     const storage = await editor.page.blobs;
     assertExists(storage);
     const files = fileInput.files;
-    const id = await storage.set(files[0]);
-    props.sourceId = id;
-    resolvePromise();
+    if (files.length === 1) {
+      const id = await storage.set(files[0]);
+      props.sourceId = id;
+      resolvePromise(props);
+    } else {
+      const res = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const id = await storage.set(file);
+        res.push({ ...props, sourceId: id });
+      }
+      resolvePromise(res);
+    }
 
     fileInput.removeEventListener('change', onChange);
     fileInput.remove();
   };
 
   fileInput.addEventListener('change', onChange);
-
   fileInput.click();
-  await pending;
-  console.log(props);
-  return props;
+  return await pending;
 };
