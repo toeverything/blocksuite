@@ -30,19 +30,22 @@ export const createBlockHub: (
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
         props = await uploadImageFromLocal(page);
+      } else {
+        props = [props];
       }
+
       const targetModel = end.model;
       const rect = end.position;
       page.captureSync();
       const distanceToTop = Math.abs(rect.top - e.y);
       const distanceToBottom = Math.abs(rect.bottom - e.y);
-      const id = page.addSiblingBlocks(
+      const ids = page.addSiblingBlocks(
         targetModel,
         props,
         distanceToTop < distanceToBottom ? 'right' : 'left'
       );
-      if (!Array.isArray(id)) {
-        await asyncFocusRichText(page, id);
+      if (ids.length === 1) {
+        await asyncFocusRichText(page, ids[0]);
       }
       tryUpdateFrameSize(page, 1);
     },

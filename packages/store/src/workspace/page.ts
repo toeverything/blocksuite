@@ -494,9 +494,9 @@ export class Page extends Space<PageData> {
 
   addSiblingBlocks(
     targetModel: BaseBlockModel,
-    props: Partial<BaseBlockModel> | Array<Partial<BaseBlockModel>>,
+    props: Array<Partial<BaseBlockModel>>,
     direction: 'left' | 'right' = 'right'
-  ): string | string[] {
+  ): string[] {
     const parent = this.getParent(targetModel);
     assertExists(parent);
 
@@ -504,7 +504,7 @@ export class Page extends Space<PageData> {
       parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
     const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
 
-    if (Array.isArray(props)) {
+    if (props.length > 1) {
       const blocks: Array<{
         flavour: keyof BlockSuiteModelProps.ALL;
         blockProps: Partial<
@@ -520,15 +520,15 @@ export class Page extends Space<PageData> {
       const ids = this.addBlocksByFlavour(blocks, parent.id, insertIndex);
       return ids;
     } else {
-      assertExists(props.flavour);
-      const { flavour, ...blockProps } = props;
+      assertExists(props[0].flavour);
+      const { flavour, ...blockProps } = props[0];
       const id = this.addBlockByFlavour(
         flavour,
         blockProps,
         parent.id,
         insertIndex
       );
-      return id;
+      return [id];
     }
   }
 

@@ -13,19 +13,17 @@ export const createImageInputElement = () => {
   return fileInput;
 };
 
-type Props = Partial<BaseBlockModel>;
+export type Props = Partial<BaseBlockModel>;
 
 export const uploadImageFromLocal = async (
   page: Page
-): Promise<Props | Array<Props>> => {
+): Promise<Array<Props>> => {
   const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
   const fileInput = createImageInputElement();
   document.body.appendChild(fileInput);
 
-  let resolvePromise: (
-    value: Props | Array<Props> | PromiseLike<Props | Array<Props>>
-  ) => void;
-  const pending = new Promise<Props | Array<Props>>(resolve => {
+  let resolvePromise: (value: Array<Props> | PromiseLike<Array<Props>>) => void;
+  const pending = new Promise<Array<Props>>(resolve => {
     resolvePromise = resolve;
   });
   const onChange = async () => {
@@ -35,7 +33,7 @@ export const uploadImageFromLocal = async (
     const files = fileInput.files;
     if (files.length === 1) {
       const id = await storage.set(files[0]);
-      resolvePromise({ ...baseProps, sourceId: id });
+      resolvePromise([{ ...baseProps, sourceId: id }]);
     } else {
       const res = [];
       for (let i = 0; i < files.length; i++) {
