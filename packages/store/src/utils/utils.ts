@@ -3,7 +3,7 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 
 import type { BaseBlockModel } from '../base.js';
-import { PrelimText, Text, TextType } from '../text-adapter.js';
+import { Text } from '../text-adapter.js';
 import type { Workspace } from '../workspace/index.js';
 import type {
   BlockProps,
@@ -53,7 +53,10 @@ export function syncBlockProps(
     const value = props[key];
 
     // TODO use schema
-    if (key === 'text') return;
+    if (key === 'text' && value instanceof Text) {
+      yBlock.set(`prop:${key}`, value.yText);
+      return;
+    }
     if (!isPrimitive(value) && !Array.isArray(value)) {
       throw new Error('Only top level primitives are supported for now');
     }
@@ -77,62 +80,6 @@ export function syncBlockProps(
       }
     }
   });
-}
-
-export function trySyncTextProp(
-  splitSet: Set<Text | PrelimText>,
-  yBlock: YBlock,
-  text?: TextType | void
-) {
-  if (!text) return;
-
-  // update by clone
-  if (text instanceof Text) {
-    // @ts-ignore
-    yBlock.set('prop:text', text._yText);
-    text.doDelayedJobs();
-    return;
-  }
-
-  // update by split
-  if (text instanceof PrelimText) {
-    const iter = splitSet.values();
-    const base = iter.next().value as Text;
-    const left = iter.next().value as PrelimText;
-    const right = iter.next().value as PrelimText;
-
-    if (!left.ready) {
-      throw new Error('PrelimText left is not ready');
-    }
-    if (
-      left.type !== 'splitLeft' ||
-      right.type !== 'splitRight' ||
-      right !== text
-    ) {
-      throw new Error('Unmatched text entity');
-    }
-
-    // @ts-ignore
-    const yBase = base._yText;
-
-    // attach meta state for identifying split
-    // otherwise local change from y-side will be ignored by TextAdapter
-    // @ts-ignore
-    yBase.meta = { split: true };
-
-    // clone the original text to `yRight` and add it to the doc first
-    const yRight = yBase.clone();
-    yBlock.set('prop:text', yRight);
-
-    // delete the left-half part of `yRight`, making it the new right
-    yRight.delete(0, right.index);
-
-    // delete the right-half part of `yBase`, making it the new left
-    yBase.delete(left.index, yBase.length - left.index);
-
-    // cleanup
-    splitSet.clear();
-  }
 }
 
 export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {

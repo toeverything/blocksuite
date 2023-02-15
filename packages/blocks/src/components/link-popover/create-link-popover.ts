@@ -1,22 +1,36 @@
-import { noop } from '../../__internal__/utils/index.js';
-import type { LinkDetail } from './link-popover.js';
+import {
+  getDefaultPageBlock,
+  getModelByElement,
+  noop,
+} from '../../__internal__/utils/index.js';
+import { calcSafeCoordinate } from '../../page-block/utils/position.js';
+import type { LinkDetail, LinkPopover } from './link-popover.js';
+
+const updatePosition = (ele: LinkPopover, anchorEl: HTMLElement) => {
+  const rect = anchorEl.getBoundingClientRect();
+  const offsetY = 5;
+  const safeCoordinate = calcSafeCoordinate({
+    positioningPoint: { x: rect.x, y: rect.top + rect.height + offsetY },
+    objRect: ele.popoverContainer?.getBoundingClientRect(),
+    offsetY,
+  });
+  ele.left = `${safeCoordinate.x}px`;
+  ele.top = `${safeCoordinate.y}px`;
+};
 
 const createEditLinkElement = (
   anchorEl: HTMLElement,
   container: HTMLElement,
   { showMask, previewLink }: { showMask: boolean; previewLink: string }
 ) => {
-  const rect = anchorEl.getBoundingClientRect();
-  const bodyRect = document.body.getBoundingClientRect();
-  const offset = rect.top - bodyRect.top + rect.height;
-  const offsetY = 5;
-
   const ele = document.createElement('edit-link-panel');
-  ele.left = `${rect.left}px`;
-  ele.top = `${offset + offsetY}px`;
   ele.showMask = showMask;
   ele.previewLink = previewLink;
   container.appendChild(ele);
+
+  requestAnimationFrame(() => {
+    updatePosition(ele, anchorEl);
+  });
   return ele;
 };
 
@@ -42,18 +56,27 @@ const bindHoverState = (
     }, hoverCloseDelay);
   };
 
+  const abortHandler = () => {
+    controller.abort();
+  };
+
   target.addEventListener('mouseover', handleMouseEnter);
   target.addEventListener('mouseout', handleMouseLeave);
 
   popover.addEventListener('mouseover', handleMouseEnter);
   popover.addEventListener('mouseout', handleMouseLeave);
 
+  const model = getModelByElement(target);
+  const pageBlock = getDefaultPageBlock(model);
+  const viewPort = pageBlock.defaultViewportElement;
+  viewPort?.addEventListener('scroll', abortHandler);
   return () => {
     target.removeEventListener('mouseover', handleMouseEnter);
     target.removeEventListener('mouseout', handleMouseLeave);
 
     popover.removeEventListener('mouseover', handleMouseEnter);
     popover.removeEventListener('mouseout', handleMouseLeave);
+    viewPort?.removeEventListener('scroll', abortHandler);
   };
 };
 
@@ -64,7 +87,7 @@ export const showLinkPopover = async ({
   link = '',
   showMask = true,
   interactionKind = 'always',
-  signal = new AbortController(),
+  abortController = new AbortController(),
 }: {
   anchorEl: HTMLElement;
   container?: HTMLElement;
@@ -78,12 +101,12 @@ export const showLinkPopover = async ({
    * Whether to show the popover on hover or always.
    */
   interactionKind?: 'always' | 'hover';
-  signal?: AbortController;
+  abortController?: AbortController;
 }): Promise<LinkDetail> => {
   if (!anchorEl) {
     throw new Error("Can't show tooltip without anchor element!");
   }
-  if (signal.signal.aborted) {
+  if (abortController.signal.aborted) {
     return Promise.resolve({ type: 'cancel' });
   }
 
@@ -94,17 +117,17 @@ export const showLinkPopover = async ({
 
   const unsubscribeHoverAbort =
     interactionKind === 'hover'
-      ? bindHoverState(anchorEl, editLinkEle, signal)
+      ? bindHoverState(anchorEl, editLinkEle, abortController)
       : noop;
 
   return new Promise(res => {
-    signal.signal.addEventListener('abort', () => {
+    abortController.signal.addEventListener('abort', () => {
       editLinkEle.remove();
       res({ type: 'cancel' });
     });
 
     editLinkEle.addEventListener('editLink', e => {
-      if (signal.signal.aborted) {
+      if (abortController.signal.aborted) {
         return;
       }
 
@@ -112,10 +135,13 @@ export const showLinkPopover = async ({
       editLinkEle.showMask = true;
       editLinkEle.text = text;
       unsubscribeHoverAbort();
+      requestAnimationFrame(() => {
+        updatePosition(editLinkEle, anchorEl);
+      });
     });
 
     editLinkEle.addEventListener('updateLink', e => {
-      if (signal.signal.aborted) {
+      if (abortController.signal.aborted) {
         return;
       }
       editLinkEle.remove();

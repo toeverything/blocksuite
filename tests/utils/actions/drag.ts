@@ -9,11 +9,13 @@ export async function dragBetweenCoords(
   options?: {
     beforeMouseUp?: () => Promise<void>;
     steps?: number;
+    click?: boolean;
   }
 ) {
   const steps = options?.steps ?? 1;
   const { x: x1, y: y1 } = from;
   const { x: x2, y: y2 } = to;
+  options?.click && (await page.mouse.click(x1, y1));
   await page.mouse.move(x1, y1);
   await page.mouse.down();
   await page.mouse.move(x2, y2, { steps });
@@ -30,6 +32,7 @@ export async function dragBetweenIndices(
   options?: {
     beforeMouseUp?: () => Promise<void>;
     steps?: number;
+    click?: boolean;
   }
 ) {
   const startCoord = await getIndexCoordinate(
@@ -63,10 +66,10 @@ export async function dragOverTitle(page: Page) {
   });
 }
 
-export async function dragEmbedResizeByBottomRight(page: Page) {
+export async function dragEmbedResizeByTopRight(page: Page) {
   const { from, to } = await page.evaluate(() => {
     const bottomRightButton = document.querySelector(
-      '.bottom-right'
+      '.top-right'
     ) as HTMLInputElement;
     const bottomRightButtonBound = bottomRightButton.getBoundingClientRect();
     const y = bottomRightButtonBound.top;
@@ -80,10 +83,10 @@ export async function dragEmbedResizeByBottomRight(page: Page) {
   });
 }
 
-export async function dragEmbedResizeByBottomLeft(page: Page) {
+export async function dragEmbedResizeByTopLeft(page: Page) {
   const { from, to } = await page.evaluate(() => {
     const bottomRightButton = document.querySelector(
-      '.bottom-left'
+      '.top-left'
     ) as HTMLInputElement;
     const bottomRightButtonBound = bottomRightButton.getBoundingClientRect();
     const y = bottomRightButtonBound.top;

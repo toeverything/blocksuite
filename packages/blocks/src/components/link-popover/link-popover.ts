@@ -21,8 +21,6 @@ const MAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
 // For more detail see https://stackoverflow.com/questions/8667070/javascript-regular-expression-to-validate-url
-
-// For more detail see https://stackoverflow.com/questions/8667070/javascript-regular-expression-to-validate-url
 const URL_REGEX = new RegExp(
   '^' +
     // protocol identifier (optional)
@@ -100,10 +98,10 @@ export class LinkPopover extends LitElement {
   static styles = linkPopoverStyle;
 
   @property()
-  left = '0px';
+  left = '0';
 
   @property()
-  top = '0px';
+  top = '0';
 
   @property()
   type: 'create' | 'edit' = 'create';
@@ -131,6 +129,9 @@ export class LinkPopover extends LitElement {
 
   @query('#link-input')
   linkInput: HTMLInputElement | undefined;
+
+  @query('.popover-container')
+  popoverContainer: HTMLDivElement | undefined;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -327,7 +328,7 @@ export class LinkPopover extends LitElement {
       <div class="overlay-root">
         ${mask}
         <div
-          class="overlay-container"
+          class="popover-container"
           style="position: absolute; left: ${this.left}; top: ${this.top};${this
             .style.cssText}"
         >

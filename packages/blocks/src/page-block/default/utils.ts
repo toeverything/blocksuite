@@ -5,13 +5,13 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { PrelimText } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
+  getCurrentRange,
   getRichTextByModel,
   OpenBlockInfo,
   resetNativeSelection,
@@ -318,16 +318,10 @@ function getTextDelta(model: BaseBlockModel) {
   if (!model.text) {
     return [];
   }
-  if (model.text instanceof PrelimText) {
-    return [
-      {
-        insert: '',
-      },
-    ];
-  }
   return model.text.toDelta();
 }
 
+// TODO merge with copy-cut-manager
 export async function copyBlock(model: BaseBlockModel) {
   const copyType = 'blocksuite/x-c+w';
   const delta = getTextDelta(model);
@@ -344,6 +338,7 @@ export async function copyBlock(model: BaseBlockModel) {
   };
   const copySuccess = performNativeCopy([
     { mimeType: copyType, data: JSON.stringify(copyData) },
+    { mimeType: 'text/plain', data: model.text?.toString() || '' },
   ]);
   return copySuccess;
 }
@@ -408,8 +403,13 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   assertExists(richText);
   const quill = richText.quill;
   quill.setSelection(0, quill.getLength());
-  document.dispatchEvent(new ClipboardEvent('copy'));
-  resetNativeSelection(null);
+  document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
+
+  const range = getCurrentRange();
+  range.setStart(richText, 0);
+  range.setEnd(richText, 0);
+  resetNativeSelection(range);
+
   toast('Copied to clipboard');
 }
 
@@ -459,6 +459,8 @@ export function getAllowSelectedBlocks(
 
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
+    // drag handle should be the same level with editor-container
+    container: defaultPageBlock.mouseRoot.parentElement as HTMLElement,
     getBlockEditingStateByCursor(
       blocks,
       pageX,

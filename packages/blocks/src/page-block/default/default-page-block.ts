@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { Utils } from '@blocksuite/store';
 import {
@@ -48,14 +48,23 @@ export interface EmbedEditingState {
   model: BaseBlockModel;
 }
 
+export interface ViewportState {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+  clientWidth: number;
+  // scrollWidth: number,
+}
+
 export type CodeBlockOption = EmbedEditingState;
 
 export interface DefaultPageSignals {
   updateFrameSelectionRect: Signal<DOMRect | null>;
   updateSelectedRects: Signal<DOMRect[]>;
-  updateEmbedRects: Signal<
-    { left: number; top: number; width: number; height: number }[]
-  >;
+  updateEmbedRects: Signal<DOMRect[]>;
   updateEmbedEditingState: Signal<EmbedEditingState | null>;
   updateCodeBlockOption: Signal<CodeBlockOption | null>;
   nativeSelection: Signal<boolean>;
@@ -148,8 +157,10 @@ export class DefaultPageBlockComponent
    */
   components: {
     dragHandle: DragHandle | null;
+    resizeObserver: ResizeObserver | null;
   } = {
     dragHandle: null,
+    resizeObserver: null,
   };
 
   @property()
@@ -159,21 +170,21 @@ export class DefaultPageBlockComponent
   frameSelectionRect: DOMRect | null = null;
 
   @state()
-  viewportScrollOffset = {
+  viewportState: ViewportState = {
     left: 0,
     top: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+    scrollHeight: 0,
+    clientHeight: 0,
+    clientWidth: 0,
   };
 
   @state()
   selectedRects: DOMRect[] = [];
 
   @state()
-  selectEmbedRects: {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-  }[] = [];
+  selectEmbedRects: DOMRect[] = [];
 
   @state()
   embedEditingState!: EmbedEditingState | null;
@@ -187,9 +198,7 @@ export class DefaultPageBlockComponent
   signals: DefaultPageSignals = {
     updateFrameSelectionRect: new Signal<DOMRect | null>(),
     updateSelectedRects: new Signal<DOMRect[]>(),
-    updateEmbedRects: new Signal<
-      { left: number; top: number; width: number; height: number }[]
-    >(),
+    updateEmbedRects: new Signal<DOMRect[]>(),
     updateEmbedEditingState: new Signal<EmbedEditingState | null>(),
     updateCodeBlockOption: new Signal<CodeBlockOption | null>(),
     nativeSelection: new Signal<boolean>(),
@@ -257,13 +266,63 @@ export class DefaultPageBlockComponent
   }
 
   // FIXME: keep embed selected rects after scroll
-  private _clearSelection = () => {
-    // block selection support scroll, therefore we do not clear selection
+  // TODO: disable it on scroll's thresold
+  private _onWheel = (e: WheelEvent) => {
     if (this.selection.state.type !== 'block') {
       this.selection.state.clear();
+      // if (this.selection.state.type !== 'embed') {
+      this.signals.updateEmbedRects.emit([]);
+      this.signals.updateEmbedEditingState.emit(null);
+      // }
+      return;
     }
-    this.signals.updateEmbedRects.emit([]);
-    this.signals.updateEmbedEditingState.emit(null);
+
+    const { scrollTop, scrollHeight, clientHeight } = this.viewportState;
+    const max = scrollHeight - clientHeight;
+    let top = e.deltaY / 2;
+    if (top > 0) {
+      if (Math.ceil(scrollTop) === max) return;
+
+      top = Math.min(top, max - scrollTop);
+    } else if (top < 0) {
+      if (scrollTop === 0) return;
+
+      top = Math.max(top, -scrollTop);
+    }
+
+    const { startPoint, endPoint } = this.selection.state;
+    if (startPoint && endPoint) {
+      e.preventDefault();
+
+      this.viewportState.scrollTop += top;
+      // FIXME: need smooth
+      this.defaultViewportElement.scrollTop += top;
+
+      endPoint.y += top;
+      this.selection.updateSelectionRect(startPoint, endPoint);
+      return;
+    }
+
+    // trigger native scroll
+  };
+
+  // See https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
+  // May need optimization
+  // private _onResize = (_: Event) => {
+  //   this.selection.refreshSelectedBlocksRects();
+  // };
+
+  private _onScroll = (e: Event) => {
+    const type = this.selection.state.type;
+    const { scrollLeft, scrollTop } = e.target as Element;
+    this.viewportState.scrollLeft = scrollLeft;
+    this.viewportState.scrollTop = scrollTop;
+    if (type === 'block') {
+      this.selection.refreshSelectionRectAndSelecting(this.viewportState);
+      // Why? Clicling on the image and the `type` is set to `block`.
+      // See _onContainerClick
+      this.selection.refresEmbedRects();
+    }
   };
 
   update(changedProperties: Map<string, unknown>) {
@@ -273,6 +332,7 @@ export class DefaultPageBlockComponent
         mouseRoot: this.mouseRoot,
         signals: this.signals,
         container: this,
+        threshold: SCROLL_THRESHOLD / 2, // 50
       });
     }
 
@@ -370,12 +430,19 @@ export class DefaultPageBlockComponent
     );
   };
 
-  private _getViewportScrollOffset() {
-    const container = this.defaultViewportElement;
-    const rect = container.getBoundingClientRect();
-    return {
-      left: container.scrollLeft - rect.left,
-      top: container.scrollTop - rect.top,
+  updateViewportState() {
+    const viewport = this.defaultViewportElement;
+    const { scrollLeft, scrollTop, scrollHeight, clientHeight, clientWidth } =
+      viewport;
+    const { top, left } = viewport.getBoundingClientRect();
+    this.viewportState = {
+      top,
+      left,
+      scrollTop,
+      scrollLeft,
+      scrollHeight,
+      clientHeight,
+      clientWidth,
     };
   }
 
@@ -398,7 +465,6 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateSelectedRects.on(rects => {
-      this.viewportScrollOffset = this._getViewportScrollOffset();
       this.selectedRects = rects;
       this.requestUpdate();
     });
@@ -429,8 +495,23 @@ export class DefaultPageBlockComponent
       tryUpdateFrameSize(this.page, 1);
     });
 
-    // TMP: clear selected rects on scroll
-    document.addEventListener('wheel', this._clearSelection);
+    const resizeObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => {
+        for (const { target } of entries) {
+          if (target === this.defaultViewportElement) {
+            this.updateViewportState();
+            this.selection.refreshSelectedBlocksRects();
+            break;
+          }
+        }
+      }
+    );
+    resizeObserver.observe(this.defaultViewportElement);
+    this.components.resizeObserver = resizeObserver;
+
+    this.defaultViewportElement.addEventListener('wheel', this._onWheel);
+    this.defaultViewportElement.addEventListener('scroll', this._onScroll);
+    // window.addEventListener('resize', this._onResize);
     window.addEventListener('compositionstart', this._handleCompositionStart);
     window.addEventListener('compositionend', this._handleCompositionEnd);
 
@@ -451,32 +532,34 @@ export class DefaultPageBlockComponent
     this.components.dragHandle?.remove();
 
     removeHotkeys();
+    this.selection.clear();
     this.selection.dispose();
+    if (this.components.resizeObserver) {
+      this.components.resizeObserver.disconnect();
+      this.components.resizeObserver = null;
+    }
+    this.defaultViewportElement.removeEventListener('wheel', this._onWheel);
+    this.defaultViewportElement.removeEventListener('scroll', this._onScroll);
+    // window.removeEventListener('resize', this._onResize);
     window.removeEventListener(
       'compositionstart',
       this._handleCompositionStart
     );
     window.removeEventListener('compositionend', this._handleCompositionEnd);
-    document.removeEventListener('wheel', this._clearSelection);
   }
 
   render() {
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
-    const selectionRect = FrameSelectionRect(
-      this.frameSelectionRect,
-      this.defaultViewportElement?.scrollTop ?? 0
-      // We don't need viewport offset as frameSelectionRect is already an absolute rect
-      // this.viewportScrollOffset
-    );
+    const selectionRect = FrameSelectionRect(this.frameSelectionRect);
     const selectedRectsContainer = SelectedRectsContainer(
       this.selectedRects,
-      this.viewportScrollOffset
+      this.viewportState
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this.selectEmbedRects,
-      this.viewportScrollOffset
+      this.viewportState
     );
     const embedEditingContainer = EmbedEditingContainer(
       this.embedEditingState,

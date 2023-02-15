@@ -1,6 +1,6 @@
 import './slash-menu-node.js';
 
-import { BaseBlockModel, PrelimText } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   getQuillIndexByNativeSelection,
@@ -13,7 +13,6 @@ import {
 } from '../../page-block/utils/position.js';
 import type { SlashMenu } from './slash-menu-node.js';
 
-const MAX_HEIGHT = 344;
 let globalAbortController = new AbortController();
 
 function updateSlashMenuPosition(slashMenu: SlashMenu, range: Range) {
@@ -46,7 +45,7 @@ function updateSlashMenuPosition(slashMenu: SlashMenu, range: Range) {
 
   slashMenu.left = `${safeCoordinate.x}px`;
   slashMenu.top = `${safeCoordinate.y}px`;
-  slashMenu.maxHeight = `${Math.min(height, MAX_HEIGHT)}px`;
+  slashMenu.maxHeight = height;
   slashMenu.position = placement;
 }
 
@@ -76,7 +75,7 @@ function onAbort(
   }
   const searchStr = '/' + e.target.reason;
   const text = model.text;
-  if (!text || text instanceof PrelimText) {
+  if (!text) {
     console.warn(
       'Failed to clean slash search text! No text found for model',
       model

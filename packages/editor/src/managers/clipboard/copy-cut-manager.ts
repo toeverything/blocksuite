@@ -8,6 +8,7 @@ import {
   SelectionUtils,
 } from '@blocksuite/blocks';
 import { matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { DeltaOperation } from 'quill';
 
 import type { EditorContainer } from '../../components/index.js';
@@ -21,15 +22,14 @@ export class CopyCutManager {
     this._editor = editor;
   }
 
-  /* FIXME
-  private get _selection() {
-    const page =
-      document.querySelector<DefaultPageBlockComponent>('default-page-block');
-    if (!page) throw new Error('No page block');
-    return page.selection;
-  }
-  */
-
+  /** FIXME
+   * private get _selection() {
+   *       const page =
+   *         document.querySelector<DefaultPageBlockComponent>('default-page-block');
+   *       if (!page) throw new Error('No page block');
+   *       return page.selection;
+   *     }
+   */
   public handleCopy = async (e: ClipboardEvent) => {
     const clips = await this._getClipItems();
     if (!clips.length) {
@@ -160,6 +160,17 @@ export class CopyCutManager {
         height: (model as EmbedBlockModel).height,
       });
     }
+    if (model.flavour === 'affine:code') {
+      // convert code block style to raw text
+      const rawText: DeltaOperation[] = [];
+      delta.map(op => {
+        rawText.push({ insert: op.insert });
+      });
+
+      Object.assign(result, {
+        rawText,
+      });
+    }
 
     return result;
   }
@@ -169,6 +180,9 @@ export class CopyCutManager {
     if (clipboardData) {
       try {
         clipItems.forEach(clip => {
+          if (clip.mimeType === CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED) {
+            clip = this._handleCodeBlockRawCopy(clip);
+          }
           clipboardData.setData(clip.mimeType, clip.data);
         });
         e.preventDefault();
@@ -185,18 +199,40 @@ export class CopyCutManager {
     }
   }
 
+  private _handleCodeBlockRawCopy(clip: ClipboardItem) {
+    const openBlockInfos = JSON.parse(clip.data).data as OpenBlockInfo[];
+    if (
+      openBlockInfos.length === 1 &&
+      openBlockInfos[0].flavour === 'affine:code'
+    ) {
+      const openBlockInfo = openBlockInfos[0];
+      const rawText = openBlockInfo.rawText;
+      assertExists(rawText);
+      openBlockInfo.flavour = 'affine:paragraph';
+      openBlockInfo.text = rawText;
+    }
+    return new ClipboardItem(
+      CLIPBOARD_MIMETYPE.BLOCKS_CLIP_WRAPPED,
+      JSON.stringify({
+        data: openBlockInfos,
+      })
+    );
+  }
+
   // TODO: Optimization
   // TODO: is not compatible with safari
   private _copyToClipboardFromPc(clips: ClipboardItem[]): boolean {
     const curRange = getCurrentRange();
 
     let success = false;
+    /**
+     * temp element is used to receive copy event dispatched by document.execCommand('copy'); In this way, we can
+     * get the clipboardData binding with system memory.
+     */
     const tempElem = document.createElement('textarea');
-    tempElem.value = 'temp';
     document.body.appendChild(tempElem);
+    // https://w3c.github.io/clipboard-apis/#to-fire-a-clipboard-event:~:text=Let%20target%20be,node%20has%20focus.
     tempElem.select();
-    tempElem.setSelectionRange(0, tempElem.value.length);
-
     const listener = function (e: ClipboardEvent) {
       const clipboardData = e.clipboardData;
       if (clipboardData) {

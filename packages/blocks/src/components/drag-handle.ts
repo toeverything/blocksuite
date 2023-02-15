@@ -114,6 +114,7 @@ export class DragHandle extends LitElement {
   `;
 
   constructor(options: {
+    container: HTMLElement;
     onDropCallback: (
       e: DragEvent,
       startModelState: EditingState,
@@ -133,7 +134,7 @@ export class DragHandle extends LitElement {
     this._getBlockEditingStateByPosition =
       options.getBlockEditingStateByPosition;
     this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
-    document.body.appendChild(this);
+    options.container.appendChild(this);
   }
 
   /**

@@ -59,13 +59,13 @@ export class PasteManager {
   };
 
   /* FIXME
-    private get _selection() {
-      const page =
-        document.querySelector<DefaultPageBlockComponent>('default-page-block');
-      if (!page) throw new Error('No page block');
-      return page.selection;
-    }
-    */
+      private get _selection() {
+        const page =
+          document.querySelector<DefaultPageBlockComponent>('default-page-block');
+        if (!page) throw new Error('No page block');
+        return page.selection;
+      }
+      */
 
   private _clipboardEvent2Blocks(
     e: ClipboardEvent
@@ -221,20 +221,36 @@ export class PasteManager {
           },
           0
         );
-        //This is a temporary processing of the divider block, subsequent refactoring of the divider will remove it
-        if (
-          blocks[0].flavour === 'affine:divider' ||
-          blocks[0].flavour === 'affine:embed'
+        // when the cursor is inside code block, insert raw texts into code block
+        if (selectedBlock.flavour === 'affine:code') {
+          const texts: DeltaOperation[] = [];
+          const dfs = (blocks: OpenBlockInfo[]) => {
+            blocks.forEach(block => {
+              texts.push(...block.text, { insert: '\n' });
+              if (block.children.length !== 0) {
+                dfs(block.children);
+              }
+            });
+          };
+          dfs(blocks);
+          texts.splice(texts.length - 1, 1);
+          selectedBlock?.text?.insertList(texts, endIndex);
+        } else if (
+          ['affine:divider', 'affine:embed', 'affine:code'].includes(
+            blocks[0].flavour
+          )
         ) {
-          selectedBlock?.text?.insertList(insertTexts, endIndex);
+          if (['affine:divider', 'affine:embed'].includes(blocks[0].flavour))
+            selectedBlock?.text?.insertList(insertTexts, endIndex);
+
           selectedBlock &&
             this._addBlocks(blocks[0].children, selectedBlock, 0, addBlockIds);
 
           parent &&
             this._addBlocks(blocks.slice(0), parent, index, addBlockIds);
           const lastBlockModel = this._editor.page.getBlockById(lastBlock.id);
-          // On pasting image,  replace the last empty focused paragraph instead of appending a new image block,
-          // if this paragraph is empty.
+          // On pasting 'affine:divider', 'affine:embed', 'affine:code' block,  replace the last empty focused paragraph
+          // instead of appending a new image block, if this paragraph is empty.
           if (
             lastBlockModel &&
             matchFlavours(lastBlockModel, ['affine:paragraph']) &&
@@ -296,7 +312,8 @@ export class PasteManager {
           const lastBlock = this._editor.page.getBlockById(lastId);
           if (
             lastBlock?.flavour !== 'affine:embed' &&
-            lastBlock?.flavour !== 'affine:divider'
+            lastBlock?.flavour !== 'affine:divider' &&
+            blocks[0].flavour !== 'affine:code'
           ) {
             selectedBlock?.text?.delete(
               endIndex + insertLen,

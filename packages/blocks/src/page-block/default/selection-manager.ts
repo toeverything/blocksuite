@@ -30,7 +30,10 @@ import {
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
-import type { EmbedBlockComponent } from '../../embed-block/index.js';
+import type {
+  EmbedBlockComponent,
+  ImageBlockComponent,
+} from '../../embed-block/index.js';
 import {
   getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
@@ -38,6 +41,7 @@ import {
 import type {
   DefaultPageBlockComponent,
   DefaultPageSignals,
+  ViewportState,
 } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import {
@@ -57,10 +61,10 @@ function calcContainerLeft(left: number) {
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
-    a.left <= b.right + offset.x &&
-    a.right >= b.left + offset.x &&
-    a.top <= b.bottom + offset.y &&
-    a.bottom >= b.top + offset.y
+    a.left + offset.x <= b.right &&
+    a.right + offset.x >= b.left &&
+    a.top + offset.y <= b.bottom &&
+    a.bottom + offset.y >= b.top
   );
 }
 
@@ -76,6 +80,10 @@ function contains(bound: DOMRect, a: DOMRect, offset: IPoint) {
 // See https://github.com/toeverything/blocksuite/pull/904 and
 // https://github.com/toeverything/blocksuite/issues/839#issuecomment-1411742112
 // for more context.
+//
+// The `selectionRect` is a rect of drag-and-drop selection.
+//
+// TODO: checks the parent by `contains` method
 function filterSelectedBlockWithoutSubtree(
   blockCache: Map<Element, DOMRect>,
   selectionRect: DOMRect,
@@ -90,7 +98,6 @@ function filterSelectedBlockWithoutSubtree(
 
   const containerLeft = calcContainerLeft(entries[0][1].left);
   let depth = 1;
-  let parentIndex: number | undefined;
   let once = true;
 
   for (let i = 0; i < len; i++) {
@@ -113,18 +120,16 @@ function filterSelectedBlockWithoutSubtree(
           // backward search parent block and remove its subtree
           let n = i;
           while (n--) {
-            if (calcDepth(entries[n][1].left, containerLeft) === currentDepth) {
-              parentIndex = n;
+            const [b, r] = entries[n];
+            if (calcDepth(r.left, containerLeft) === currentDepth) {
+              results.push({ block: b, index: n });
               break;
             } else {
               results.pop();
             }
           }
 
-          assertExists(parentIndex);
-
           depth = currentDepth;
-          results.push({ block: entries[parentIndex][0], index: parentIndex });
         }
       }
       results.push({ block, index: i });
@@ -134,12 +139,16 @@ function filterSelectedBlockWithoutSubtree(
   return results;
 }
 
-// find the current focused block and its substree
+// Find the current focused block and its substree.
+// The `selectionRect` is a rect of block element.
 function filterSelectedBlockByIndex(
   blockCache: Map<Element, DOMRect>,
   focusedBlockIndex: number,
   selectionRect: DOMRect,
-  offset: IPoint
+  offset: IPoint = {
+    x: 0,
+    y: 0,
+  }
 ): Element[] {
   // SELECT_ALL
   if (focusedBlockIndex === -1) {
@@ -209,8 +218,7 @@ function findBlocksWithSubtree(
       ...filterSelectedBlockByIndex(
         blockCache,
         index,
-        blockCache.get(block) as DOMRect,
-        { x: 0, y: 0 }
+        blockCache.get(block) as DOMRect
       )
     );
   }
@@ -250,8 +258,10 @@ export class PageSelectionState {
   // -1: SELECT_ALL
   // >=0: only current focused-block
   focusedBlockIndex = -1;
+  rafID?: number;
   private _startRange: Range | null = null;
   private _startPoint: { x: number; y: number } | null = null;
+  private _endPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
   private _blockCache = new Map<Element, DOMRect>();
   private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
@@ -277,6 +287,10 @@ export class PageSelectionState {
     return this._startPoint;
   }
 
+  get endPoint() {
+    return this._endPoint;
+  }
+
   get richTextCache() {
     return this._richTextCache;
   }
@@ -291,7 +305,29 @@ export class PageSelectionState {
 
   resetStartRange(e: SelectionEvent) {
     this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
-    this._startPoint = { x: e.x, y: e.y };
+  }
+
+  resetStartPoint(
+    e: SelectionEvent,
+    offset: { scrollLeft: number; scrollTop: number } = {
+      scrollLeft: 0,
+      scrollTop: 0,
+    }
+  ) {
+    const { scrollLeft, scrollTop } = offset;
+    let { x, y } = e;
+    x += scrollLeft;
+    y += scrollTop;
+    this._startPoint = { x, y };
+    this._endPoint = { x, y };
+  }
+
+  setStartPoint(point: { x: number; y: number } | null) {
+    this._startPoint = point;
+  }
+
+  setEndPoint(point: { x: number; y: number } | null) {
+    this._endPoint = point;
   }
 
   refreshBlockRectCache() {
@@ -303,13 +339,32 @@ export class PageSelectionState {
     }
   }
 
+  clearRaf() {
+    if (this.rafID) {
+      this.rafID = void cancelAnimationFrame(this.rafID);
+    }
+  }
+
+  clearSelectedBlocks() {
+    this.type = 'none';
+    this._startPoint = null;
+    this._endPoint = null;
+    this.focusedBlockIndex = -1;
+    this.selectedBlocks = [];
+    this.clearRaf();
+  }
+
+  clearEmbedBlocks() {
+    this.type = 'none';
+    this.selectEmbeds = [];
+  }
+
   clear() {
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
-    this._startPoint = null;
-    this.focusedBlockIndex = -1;
-    this.selectedBlocks = [];
+    this.clearEmbedBlocks();
+    this.clearSelectedBlocks();
   }
 }
 
@@ -321,22 +376,26 @@ export class DefaultSelectionManager {
   private readonly _disposables = new DisposableGroup();
   private readonly _signals: DefaultPageSignals;
   private readonly _embedResizeManager: EmbedResizeManager;
+  private readonly _thresold: number; // distance to the upper and lower boundaries of the viewport
 
   constructor({
     page,
     mouseRoot,
     signals,
     container,
+    threshold,
   }: {
     page: Page;
     mouseRoot: HTMLElement;
     signals: DefaultPageSignals;
     container: DefaultPageBlockComponent;
+    threshold: number;
   }) {
     this.page = page;
     this._signals = signals;
     this._mouseRoot = mouseRoot;
     this._container = container;
+    this._thresold = threshold;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, signals);
     this._disposables.add(
@@ -362,15 +421,6 @@ export class DefaultSelectionManager {
    */
   private get _allowSelectedBlocks(): BaseBlockModel[] {
     return this.page.root ? getAllowSelectedBlocks(this.page.root) : [];
-  }
-
-  private get _containerOffset() {
-    const containerRect = this._mouseRoot.getBoundingClientRect();
-    const containerOffset = {
-      x: containerRect.left,
-      y: containerRect.top,
-    };
-    return containerOffset;
   }
 
   private _computeSelectionType(
@@ -433,7 +483,12 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragStart(e: SelectionEvent) {
     this.state.type = 'block';
-    this.state.resetStartRange(e);
+    this._container.updateViewportState();
+    const { scrollLeft, scrollTop } = this._container.viewportState;
+    this.state.resetStartPoint(e, {
+      scrollTop,
+      scrollLeft,
+    });
     this.state.refreshBlockRectCache();
     resetNativeSelection(null);
     // deactivate quill keyboard event handler
@@ -441,34 +496,71 @@ export class DefaultSelectionManager {
   }
 
   private _onBlockSelectionDragMove(e: SelectionEvent) {
-    assertExists(this.state.startPoint);
-    const current = { x: e.x, y: e.y };
-    const { blockCache, startPoint: start } = this.state;
-    const selectionRect = createSelectionRect(current, start);
+    const { x, y } = e;
 
-    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
-      blockCache,
-      selectionRect,
-      e.containerOffset
-    );
-    const rects = selectedBlocksWithoutSubtrees.map(
-      ({ block }) => blockCache.get(block) as DOMRect
-    );
+    const { defaultViewportElement: viewport, viewportState } = this._container;
+    const { scrollHeight, clientHeight, scrollLeft } = viewportState;
+    let { scrollTop } = viewportState;
+    const max = scrollHeight - clientHeight;
 
-    this.setSelectedBlocks(
-      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
-      rects
-    );
-    this._signals.updateFrameSelectionRect.emit(selectionRect);
+    this.state.setEndPoint({ x: x + scrollLeft, y: y + scrollTop });
+
+    const { startPoint, endPoint } = this.state;
+
+    assertExists(startPoint);
+    assertExists(endPoint);
+
+    let auto = true;
+    const autoScroll = () => {
+      if (!auto) {
+        this.state.clearRaf();
+        return;
+      } else {
+        this.state.rafID = requestAnimationFrame(autoScroll);
+      }
+
+      // TODO: for the behavior of scrolling, see the native selection
+      // speed easeOutQuad + easeInQuad
+      if (Math.ceil(scrollTop) < max && clientHeight - y < this._thresold) {
+        // ↓
+        const d = (this._thresold - (clientHeight - y)) * 0.25;
+        scrollTop += d;
+        endPoint.y += d;
+        auto = Math.ceil(scrollTop) < max;
+        viewport.scrollTop = scrollTop;
+        this.updateSelectionRect(startPoint, endPoint);
+      } else if (scrollTop > 0 && y < this._thresold) {
+        // ↑
+        const d = (y - this._thresold) * 0.25;
+        scrollTop += d;
+        endPoint.y += d;
+        auto = scrollTop > 0;
+        viewport.scrollTop = scrollTop;
+        this.updateSelectionRect(startPoint, endPoint);
+      } else {
+        auto = false;
+        const selectionRect = this.updateSelectionRect(startPoint, endPoint);
+        this.selecting(this.state.blockCache, selectionRect, viewportState);
+      }
+    };
+
+    this.state.clearRaf();
+    this.state.rafID = requestAnimationFrame(autoScroll);
   }
 
-  private _onBlockSelectionDragEnd(e: SelectionEvent) {
+  private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
+    this.state.clearRaf();
+    this.state.setStartPoint(null);
+    this.state.setEndPoint(null);
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
 
-  private _onNativeSelectionDragStart(e: SelectionEvent) {
+  private _onNativeSelectionDragStart(_: SelectionEvent) {
+    if (this.state.type === 'block') {
+      this.clearRects();
+    }
     this._signals.nativeSelection.emit(false);
     this.state.type = 'native';
   }
@@ -477,7 +569,7 @@ export class DefaultSelectionManager {
     handleNativeRangeDragMove(this.state.startRange, e);
   }
 
-  private _onNativeSelectionDragEnd(e: SelectionEvent) {
+  private _onNativeSelectionDragEnd(_: SelectionEvent) {
     this._signals.nativeSelection.emit(true);
   }
 
@@ -575,6 +667,11 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerClick = (e: SelectionEvent) => {
+    // do nothing when clicking on scrollbar
+    if (e.raw.pageX >= this._container.viewportState.clientWidth) {
+      return;
+    }
+
     this.state.clear();
     this._signals.updateSelectedRects.emit([]);
     this._signals.updateEmbedRects.emit([]);
@@ -613,11 +710,15 @@ export class DefaultSelectionManager {
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
+        this.state.selectEmbeds.push(
+          this.state.activeComponent as EmbedBlockComponent
+        );
+        this.state.selectedBlocks.push(this.state.activeComponent);
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
       } else {
-        this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
+        this.state.selectedBlocks.push(this.state.activeComponent);
       }
-      this.state.selectedBlocks.push(this.state.activeComponent);
+      this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       return;
     }
     const target = e.raw.target;
@@ -670,14 +771,18 @@ export class DefaultSelectionManager {
     } else if (hoverEditingState?.model.flavour === 'affine:code') {
       hoverEditingState.position.x = hoverEditingState.position.right + 12;
       this._signals.updateCodeBlockOption.emit(hoverEditingState);
+    } else {
+      this._signals.updateEmbedEditingState.emit(null);
+      this._signals.updateCodeBlockOption.emit(null);
     }
   };
 
-  private _onContainerMouseOut = (e: SelectionEvent) => {
+  // TODO: Keep selecting blocks?
+  private _onContainerMouseOut = (_: SelectionEvent) => {
     // console.log('mouseout', e);
   };
 
-  private _onSelectionChange = (e: Event) => {
+  private _onSelectionChange = (_: Event) => {
     const selection = window.getSelection();
     if (!selection) {
       return;
@@ -715,7 +820,10 @@ export class DefaultSelectionManager {
     this._signals.updateFrameSelectionRect.emit(null);
     this._signals.updateEmbedEditingState.emit(null);
     this._signals.updateEmbedRects.emit([]);
-    this.state.type = 'none';
+    this.state.clearSelectedBlocks();
+  }
+
+  clear() {
     this.state.clear();
   }
 
@@ -725,6 +833,97 @@ export class DefaultSelectionManager {
     this._signals.updateEmbedEditingState.dispose();
     this._signals.updateEmbedRects.dispose();
     this._disposables.dispose();
+  }
+
+  updateSelectionRect(
+    startPoint: { x: number; y: number },
+    endPoint: { x: number; y: number }
+  ): DOMRect {
+    if (this.state.focusedBlockIndex !== -1) {
+      this.state.focusedBlockIndex = -1;
+    }
+    const selectionRect = createSelectionRect(endPoint, startPoint);
+    this._signals.updateFrameSelectionRect.emit(selectionRect);
+    return selectionRect;
+  }
+
+  selecting(
+    blockCache: Map<Element, DOMRect>,
+    selectionRect: DOMRect,
+    viewportState: ViewportState
+  ) {
+    const { scrollLeft, scrollTop, left, top } = viewportState;
+    const selectedBlocksWithoutSubtrees = filterSelectedBlockWithoutSubtree(
+      blockCache,
+      selectionRect,
+      // subtracting the left/top of the container is required.
+      {
+        y: scrollTop - top,
+        x: scrollLeft - left,
+      }
+    );
+    const rects = selectedBlocksWithoutSubtrees.map(
+      ({ block }) => blockCache.get(block) as DOMRect
+    );
+
+    this.setSelectedBlocks(
+      findBlocksWithSubtree(blockCache, selectedBlocksWithoutSubtrees),
+      rects
+    );
+  }
+
+  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
+    if (this.state.type !== 'block') return;
+
+    const { blockCache, startPoint, endPoint } = this.state;
+
+    if (startPoint && endPoint) {
+      this.state.refreshBlockRectCache();
+      const selectionRect = createSelectionRect(endPoint, startPoint);
+      this.selecting(blockCache, selectionRect, viewportState);
+    } else {
+      this.state.setStartPoint(null);
+      this.state.setEndPoint(null);
+      this._signals.updateFrameSelectionRect.emit(null);
+      this.refreshSelectedBlocksRects();
+    }
+  }
+
+  refreshSelectedBlocksRects() {
+    this.state.refreshBlockRectCache();
+
+    if (this.state.type !== 'block') return;
+
+    const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
+
+    if (selectedBlocks.length === 0) return;
+
+    // just refresh selected blocks
+    if (focusedBlockIndex === -1) {
+      const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
+      const rects = clearSubtree(selectedBlocks, containerLeft).map(
+        block => blockCache.get(block) as DOMRect
+      );
+      this._signals.updateSelectedRects.emit(rects);
+    } else {
+      // only current focused-block
+      const rects = selectedBlocks
+        .slice(0, 1)
+        .map(block => blockCache.get(block) as DOMRect);
+      this._signals.updateSelectedRects.emit(rects);
+    }
+  }
+
+  // The embed may need to be refactored.
+  refresEmbedRects() {
+    const { activeComponent, selectEmbeds } = this.state;
+    if (activeComponent && selectEmbeds.length) {
+      const image = activeComponent as ImageBlockComponent;
+      if (image.model.type === 'image') {
+        const rect = image.getBoundingClientRect();
+        this._signals.updateEmbedRects.emit([rect]);
+      }
+    }
   }
 
   // Click on drag-handle button
@@ -743,8 +942,7 @@ export class DefaultSelectionManager {
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      boundRect,
-      this._containerOffset
+      boundRect
     );
 
     // only current focused-block
@@ -771,8 +969,7 @@ export class DefaultSelectionManager {
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      boundRect,
-      this._containerOffset
+      boundRect
     );
 
     // only current focused-block
@@ -786,11 +983,7 @@ export class DefaultSelectionManager {
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
-      hitRect,
-      {
-        x: 0,
-        y: 0,
-      }
+      hitRect
     );
 
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
@@ -815,8 +1008,6 @@ export class DefaultSelectionManager {
         .map(block => blockCache.get(block) as DOMRect);
       this.setSelectedBlocks(selectedBlocks, rects);
     }
-
-    return;
   }
 
   setFocusedBlockIndexByElement(blockElement: Element) {

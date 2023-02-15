@@ -2,9 +2,9 @@ import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
   BlockHubIcon,
-  BulletedListIconLarge,
   CrossIcon,
   DatabaseTableViewIcon,
+  NumberedListIconLarge,
   RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
@@ -122,9 +122,9 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .affine-block-hub-container {
-      width: 280px;
+      width: 274px;
       position: absolute;
-      right: calc(100% + 10px);
+      right: calc(100% + 8px);
       top: calc(50%);
       overflow-y: auto;
       transform: translateY(-50%);
@@ -132,40 +132,54 @@ export class BlockHub extends NonShadowLitElement {
       justify-content: center;
       fill: var(--affine-icon-color);
       font-size: var(--affine-font-sm);
-      background: var(--affine-block-hub-background);
-      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      background: var(--affine-hub-background);
+      box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
       border-radius: 10px;
     }
 
     .affine-block-hub-container[type='text'] {
       top: unset;
-      bottom: 0px;
+      bottom: 0;
       transform: unset;
-      right: calc(100% + 5.5px);
+      right: calc(100% + 4px);
     }
 
     .visible {
-      display: flex;
+      display: block;
     }
 
     .invisible {
       display: none;
     }
 
+    .card-container-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
     .card-container {
       display: flex;
       position: relative;
       align-items: center;
-      width: 256px;
+      width: 250px;
       height: 54px;
       background: var(--affine-page-background);
-      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
       border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       cursor: grab;
+      top: 0;
+      left: 0;
+      transition: all 0.1s ease-in-out;
+    }
+
+    .card-icon-container {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      right: 12px;
     }
 
     .card-container:hover {
@@ -177,22 +191,25 @@ export class BlockHub extends NonShadowLitElement {
 
     .card-description-container {
       display: block;
-      width: 200px;
+      width: 190px;
       color: var(--affine-text-color);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
+      margin: 8px 0 8px 12px;
       text-align: justify;
     }
 
     .affine-block-hub-container .description {
-      font-size: var(--affine-font-xs);
-      color: var(---affine-icon-color);
+      font-size: var(--affine-font-sm);
+      line-height: var(--affine-line-height);
+      color: var(--affine-secondary-text-color);
     }
 
     .card-container:hover.grabbing {
       top: unset;
       left: unset;
-      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
+        0 0 12px rgba(66, 65, 73, 0.08);
     }
 
     .grabbing {
@@ -205,7 +222,8 @@ export class BlockHub extends NonShadowLitElement {
 
     .affine-block-hub-title-container {
       margin: 16px 0 20px 12px;
-      color: var(--affine-line-number-color);
+      color: var(--affine-secondary-text-color);
+      font-size: var(--affine-font-base);
     }
 
     .prominent {
@@ -218,7 +236,6 @@ export class BlockHub extends NonShadowLitElement {
       flex-flow: column;
       justify-content: center;
       align-items: center;
-      padding: 0px 4px;
       position: fixed;
       width: 44px;
       background: var(--affine-page-background);
@@ -235,12 +252,6 @@ export class BlockHub extends NonShadowLitElement {
       border-radius: 5px;
       fill: var(--affine-line-number-color);
       height: 36px;
-    }
-
-    .block-hub-icon-container:first-child {
-      background: var(--affine-code-block-background);
-      border: 0.5px solid var(--affine-border-color);
-      border-radius: 5px;
     }
 
     .block-hub-icon-container[selected='true'] {
@@ -295,13 +306,10 @@ export class BlockHub extends NonShadowLitElement {
       right: unset;
       top: 10px;
       transform: translateX(calc(-100% - 7px));
-      border-radius: 10px 10px 0px 10px;
+      border-radius: 10px 10px 0 10px;
     }
 
     .block-hub-icons-container {
-      position: absolute;
-      bottom: 100%;
-      height: 0px;
       overflow: hidden;
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
     }
@@ -442,7 +450,7 @@ export class BlockHub extends NonShadowLitElement {
     }
     if (!this._expanded) {
       // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
-      this._blockHubMenuContainer.style.padding = '0px 4px';
+      this._blockHubMenuContainer.style.padding = '0 4px';
       this._timer = window.setTimeout(() => {
         this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
@@ -469,7 +477,7 @@ export class BlockHub extends NonShadowLitElement {
       <div
         class="block-hub-icons-container"
         ?transition=${this._expanded}
-        style="height: ${this._expanded ? `${height}px` : '0px'};"
+        style="height: ${this._expanded ? `${height}px` : '0'};"
       >
         <div
           class="block-hub-icon-container has-tool-tip ${this._isGrabbing
@@ -504,7 +512,7 @@ export class BlockHub extends NonShadowLitElement {
           selected=${this._cardVisibleType === 'list' ? 'true' : 'false'}
         >
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
-          ${BulletedListIconLarge}
+          ${NumberedListIconLarge}
         </div>
         ${this._enable_database
           ? html`
@@ -551,37 +559,37 @@ export class BlockHub extends NonShadowLitElement {
         style="${styles}"
         type=${type}
       >
-        <div>
-          <div class="affine-block-hub-title-container">${title}</div>
-          ${blockHubItems.map(
-            ({ flavour, type, name, description, icon, toolTip }, index) => {
-              return html`
+        <div class="affine-block-hub-title-container">${title}</div>
+        ${blockHubItems.map(
+          ({ flavour, type, name, description, icon, toolTip }, index) => {
+            return html`
+              <div
+                class="card-container-wrapper"
+                style="z-index: ${blockHubItems.length - index}"
+              >
                 <div
-                  class="has-tool-tip"
+                  class="card-container has-tool-tip ${this._isGrabbing
+                    ? 'grabbing'
+                    : ''}"
                   draggable="true"
                   affine-flavour=${flavour}
                   affine-type=${type}
-                  style="z-index: ${blockHubItems.length - index}"
                 >
-                  <div
-                    class="card-container ${this._isGrabbing ? 'grabbing' : ''}"
-                  >
-                    <div class="card-description-container">
-                      <div>${name}</div>
-                      <div class="description">${description}</div>
-                    </div>
-                    ${icon}
+                  <div class="card-description-container">
+                    <div>${name}</div>
+                    <div class="description">${description}</div>
                   </div>
+                  <div class="card-icon-container">${icon}</div>
                   <centered-tool-tip
                     tip-position="bottom"
                     style=${this._showToolTip ? '' : 'display: none'}
                     >${toolTip}
                   </centered-tool-tip>
                 </div>
-              `;
-            }
-          )}
-        </div>
+              </div>
+            `;
+          }
+        )}
       </div>
     `;
   };

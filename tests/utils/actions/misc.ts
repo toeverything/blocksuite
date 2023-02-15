@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import { getDefaultPlaygroundURL } from '@blocksuite/global/utils';
 import { ConsoleMessage, expect, Page } from '@playwright/test';
 
 import type {
   BaseBlockModel,
   Page as StorePage,
 } from '../../../packages/store/src/index.js';
-import { pressEnter, SHORT_KEY, type } from './keyboard.js';
+import { pressEnter, pressTab, SHORT_KEY, type } from './keyboard.js';
 
 const NEXT_FRAME_TIMEOUT = 100;
-const DEFAULT_PLAYGROUND = 'http://localhost:5173/';
+const DEFAULT_PLAYGROUND = getDefaultPlaygroundURL(!!process.env.CI).toString();
 const RICH_TEXT_SELECTOR = '.ql-editor';
 const TITLE_SELECTOR = '.affine-default-page-block-title';
 
@@ -32,6 +33,8 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // Firefox warn on quill
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
+    // Fixme: https://github.com/toeverything/blocksuite/issues/1126
+    'Failed to clean slash search text!',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -275,7 +278,20 @@ export async function initThreeLists(page: Page) {
   await pressEnter(page);
   await type(page, '456');
   await pressEnter(page);
-  await page.keyboard.press('Tab', { delay: 50 });
+  await pressTab(page);
+  await type(page, '789');
+}
+
+export async function insertThreeLevelLists(page: Page, i = 0) {
+  await focusRichText(page, i);
+  await type(page, '-');
+  await page.keyboard.press('Space', { delay: 50 });
+  await type(page, '123');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, '456');
+  await pressEnter(page);
+  await pressTab(page);
   await type(page, '789');
 }
 

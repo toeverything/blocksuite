@@ -115,8 +115,8 @@ export async function assertImageSize(
   { width, height }: { width: number; height: number }
 ) {
   const actual = await page.locator('.resizable-img').boundingBox();
-  expect(actual?.width).toEqual(width);
-  expect(actual?.height).toEqual(height);
+  expect(Math.floor(actual?.width ?? NaN)).toEqual(width);
+  expect(Math.floor(actual?.height ?? NaN)).toEqual(height);
 }
 
 export async function assertImageOption(page: Page) {

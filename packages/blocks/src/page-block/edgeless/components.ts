@@ -169,7 +169,7 @@ function EdgelessBlockChild(
     transformOrigin: '0 0',
     width: modelW + (isSurfaceElement ? SHAPE_PADDING : PADDING_X) + 'px',
     height: modelH + (isSurfaceElement ? SHAPE_PADDING : PADDING_Y) + 'px',
-    padding: isSurfaceElement ? '0px' : `${PADDING_X / 2}px`,
+    padding: isSurfaceElement ? '0' : `${PADDING_X / 2}px`,
     background: isSurfaceElement ? 'transparent' : 'white',
     pointerEvents: isSurfaceElement ? 'none' : 'all',
     zIndex: '0',
