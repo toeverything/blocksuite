@@ -43,10 +43,11 @@ jobs:
           name: playground-artifact
           path: ./packages/playground/dist
 
-  main-test:
+  e2e-test:
     name: Playground E2E test
     runs-on: self-hosted
-
+    needs:
+      - build-playground
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
