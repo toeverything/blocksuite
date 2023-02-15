@@ -65,7 +65,7 @@ export const createBlockHub: (
   return blockHub;
 };
 
-function createImageInputElement() {
+export const createImageInputElement = () => {
   const fileInput: HTMLInputElement = document.createElement('input');
   fileInput.type = 'file';
   fileInput.multiple = true;
@@ -75,9 +75,9 @@ function createImageInputElement() {
   fileInput.style.top = '0';
   fileInput.style.opacity = '0.001';
   return fileInput;
-}
+};
 
-const handleImageInsert = async <
+export const handleImageInsert = async <
   Props extends Partial<BaseBlockModel> = Partial<BaseBlockModel>
 >(
   editor: EditorContainer,
