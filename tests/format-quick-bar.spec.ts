@@ -6,6 +6,7 @@ import {
   dragBetweenIndices,
   enterPlaygroundRoom,
   focusRichText,
+  getIndexCoordinate,
   initEmptyParagraphState,
   initThreeParagraphs,
   pressEnter,
@@ -662,4 +663,39 @@ test('should format quick bar action status updated while undo', async ({
   await expect(boldBtn).toHaveAttribute('active', '');
   await undoByKeyboard(page);
   await expect(boldBtn).not.toHaveAttribute('active', '');
+});
+
+test('should format quick bar show when do block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  const coord = await getIndexCoordinate(page, [1, 2]);
+
+  //
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x, coord.y);
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x - 20, coord.y);
+  await page.mouse.up();
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  await expect(formatQuickBar).toBeVisible();
+
+  const box = await formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(box.x, 20, 5);
+  assertAlmostEqual(box.y, 144, 116);
+
+  // Click the edge of the format quick bar
+  await page.mouse.click(box.x + 4, box.y + box.height / 2);
+  // Even not any button is clicked, the format quick bar should't be hidden
+  await expect(formatQuickBar).toBeVisible();
+
+  await page.mouse.click(0, 0);
+  await expect(formatQuickBar).not.toBeVisible();
 });
