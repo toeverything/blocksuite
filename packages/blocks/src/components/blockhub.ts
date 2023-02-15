@@ -242,6 +242,10 @@ export class BlockHub extends NonShadowLitElement {
       border-radius: 10px;
     }
 
+    .block-hub-menu-container[expanded] {
+      box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
+    }
+
     .block-hub-icon-container {
       display: flex;
       justify-content: center;
@@ -275,10 +279,15 @@ export class BlockHub extends NonShadowLitElement {
       fill: var(--affine-line-number-color);
     }
 
+    .block-hub-menu-container[expanded] .new-icon {
+      border-radius: 5px;
+    }
+
     .new-icon:hover {
       box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
         -4px -4px 13px rgba(58, 76, 92, 0.02),
         6px 6px 36px rgba(58, 76, 92, 0.06);
+      fill: var(--affine-primary-color);
       background: var(--affine-page-background);
     }
 
@@ -757,6 +766,7 @@ export class BlockHub extends NonShadowLitElement {
     return html`
       <div
         class="block-hub-menu-container"
+        ?expanded=${this._expanded}
         style="bottom: ${this.bottom}px; right: ${this.right}px;"
       >
         ${this._blockHubMenuTemplate()}
