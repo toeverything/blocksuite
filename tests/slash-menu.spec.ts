@@ -131,6 +131,28 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
+  test('press tab should move up and down', async () => {
+    await page.keyboard.press('Tab');
+
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const activatedItem = slashItems.nth(1);
+    await expect(activatedItem).toHaveText(['Heading 1']);
+
+    await assertRichTexts(page, ['/']);
+
+    await page.keyboard.down('Shift');
+    await page.keyboard.press('Tab');
+
+    await expect(slashMenu).toBeVisible();
+    {
+      const slashItems = slashMenu.locator('format-bar-button');
+      const activatedItem = slashItems.nth(0);
+      await expect(activatedItem).toHaveText(['Text']);
+    }
+  });
+
   test('can input search input after click menu', async () => {
     const box = await slashMenu.boundingBox();
     if (!box) {
