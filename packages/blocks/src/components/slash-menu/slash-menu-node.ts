@@ -63,6 +63,12 @@ export class SlashMenu extends LitElement {
         capture: true,
       })
     );
+    this._disposableGroup.add(
+      Signal.disposableListener(this, 'mousedown', e => {
+        // Prevent input from losing focus
+        e.preventDefault();
+      })
+    );
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
