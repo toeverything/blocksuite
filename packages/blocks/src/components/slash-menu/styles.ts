@@ -25,7 +25,7 @@ export const styles = css`
     box-shadow: var(--affine-popover-shadow);
     border-radius: 0 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
-    transition: max-height 0.2s ease-in-out;
+    /* transition: max-height 0.2s ease-in-out; */
   }
 
   .slash-category {
@@ -34,12 +34,12 @@ export const styles = css`
     box-sizing: border-box;
     width: 150px;
     max-width: 150px;
-    transition: max-width 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
     color: #8e8d91;
     gap: 5px;
     margin-bottom: 20px;
+    /* transition: max-width 0.2s ease-in-out; */
   }
   .slash-category::before {
     content: '';
@@ -47,7 +47,7 @@ export const styles = css`
     top: 10px;
     right: 0;
     height: 100%;
-    width: 2px;
+    width: 1px;
     background-color: var(--affine-border-color);
   }
 
@@ -57,6 +57,9 @@ export const styles = css`
     white-space: nowrap;
     cursor: pointer;
     padding: 4px 20px;
+  }
+  .slash-category-name:hover {
+    color: var(--affine-popover-color);
   }
 
   .slash-active-category {
@@ -71,7 +74,7 @@ export const styles = css`
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 2px;
+    width: 1.5px;
     height: 12px;
     background: linear-gradient(180deg, #5438ff 0%, #b638ff 100%);
     border-radius: 1px;
@@ -94,7 +97,7 @@ export const styles = css`
   }
 
   .slash-item-divider {
-    border: 1px dashed var(--affine-border-color);
+    border-top: 1px dashed var(--affine-border-color);
     margin: 8px 0;
   }
 `;
