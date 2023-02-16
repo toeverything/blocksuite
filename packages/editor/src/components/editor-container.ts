@@ -1,5 +1,4 @@
 import {
-  BlockHub,
   getDefaultPageBlock,
   getServiceOrRegister,
   MouseMode,
@@ -155,12 +154,8 @@ export class EditorContainer extends NonShadowLitElement {
   }
 
   public async createBlockHub() {
-    return new Promise<BlockHub>(resolve => {
-      requestAnimationFrame(() => {
-        const blockHub = createBlockHub(this, this.page);
-        resolve(blockHub);
-      });
-    });
+    await this.updateComplete;
+    return createBlockHub(this, this.page);
   }
 
   override disconnectedCallback() {
