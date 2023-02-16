@@ -16,8 +16,10 @@ import {
   asyncFocusRichText,
   BlockChildrenContainer,
   type BlockHost,
+  getCurrentRange,
   getRichTextByModel,
   hotkey,
+  isMultiBlockRange,
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
@@ -25,7 +27,7 @@ import { NonShadowLitElement } from '../../__internal__/utils/lit.js';
 import type { DragHandle } from '../../components/index.js';
 import type { PageBlockModel } from '../index.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
-import { tryUpdateFrameSize } from '../utils/index.js';
+import { deleteModelsByRange, tryUpdateFrameSize } from '../utils/index.js';
 import {
   CodeBlockOptionContainer,
   EmbedEditingContainer,
@@ -34,7 +36,11 @@ import {
   SelectedRectsContainer,
 } from './components.js';
 import { DefaultSelectionManager } from './selection-manager.js';
-import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
+import {
+  createDragHandle,
+  getAllowSelectedBlocks,
+  isControlledKeyboardEvent,
+} from './utils.js';
 
 export interface EmbedEditingState {
   position: { x: number; y: number };
@@ -363,6 +369,30 @@ export class DefaultPageBlockComponent
     this.isCompositionStart = false;
   };
 
+  // Fixes: https://github.com/toeverything/blocksuite/issues/200
+  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
+  //  that have pop-up for selecting local characters.
+  // So we could just hook on the keydown event and detect whether user input a new character.
+  private _handleNativeKeydown = (e: KeyboardEvent) => {
+    if (isControlledKeyboardEvent(e)) {
+      return;
+    }
+    // Only the length of character buttons is 1
+    if (
+      (e.key.length === 1 || e.key === 'Enter') &&
+      window.getSelection()?.type === 'Range'
+    ) {
+      const range = getCurrentRange();
+      if (isMultiBlockRange(range)) {
+        deleteModelsByRange(this.page);
+      }
+      window.removeEventListener('keydown', this._handleNativeKeydown);
+    } else if (window.getSelection()?.type !== 'Range') {
+      // remove, user don't have native selection
+      window.removeEventListener('keydown', this._handleNativeKeydown);
+    }
+  };
+
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
@@ -448,6 +478,14 @@ export class DefaultPageBlockComponent
     this.signals.updateCodeBlockOption.on(codeBlockOption => {
       this.codeBlockOption = codeBlockOption;
       this.requestUpdate();
+    });
+
+    this.signals.nativeSelection.on(bind => {
+      if (bind) {
+        window.addEventListener('keydown', this._handleNativeKeydown);
+      } else {
+        window.removeEventListener('keydown', this._handleNativeKeydown);
+      }
     });
 
     tryUpdateFrameSize(this.page, 1);
