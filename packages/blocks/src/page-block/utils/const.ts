@@ -7,7 +7,7 @@ import {
   UnderlineIcon,
 } from '@blocksuite/global/config';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { TextAttributes } from '@blocksuite/virgo/types.js';
+import type { TextAttributes } from '@blocksuite/virgo';
 
 import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import { handleFormat } from '../../page-block/utils/index.js';
