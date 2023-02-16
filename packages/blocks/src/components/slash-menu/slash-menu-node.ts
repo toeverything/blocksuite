@@ -331,8 +331,7 @@ export class SlashMenu extends LitElement {
     );
 
     return html`<div
-      class="slash-category"
-      style="${!showCategory ? 'max-width: 0; padding: 0; margin: 0;' : ''}"
+      class="slash-category ${!showCategory ? 'slash-category-hide' : ''}"
     >
       ${menuGroups.map(
         group =>
