@@ -8,10 +8,7 @@ import {
   defineTagSchemaRenderer,
 } from '../../register.js';
 
-function toggleStyle(
-  vEditor: VEditor,
-  attrs: NonNullable<TextAttributes>
-): void {
+function toggleStyle(vEditor: VEditor, attrs: TextAttributes): void {
   const vRange = vEditor.getVRange();
   if (!vRange) {
     return;
@@ -23,7 +20,7 @@ function toggleStyle(
   }
 
   const deltas = vEditor.getDeltasByVRange(vRange);
-  let oldAttributes: NonNullable<TextAttributes> = {};
+  let oldAttributes: TextAttributes = {};
 
   for (const [delta] of deltas) {
     const attributes = delta.attributes;
