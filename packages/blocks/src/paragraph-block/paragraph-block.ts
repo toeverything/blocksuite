@@ -97,7 +97,6 @@ export class ParagraphBlockComponent extends NonShadowLitElement {
       font-size: calc(var(--affine-font-base) - 2px);
     }
     .quote {
-      font-size: 18px;
       line-height: 26px;
       padding-left: 12px;
       margin-top: var(--affine-paragraph-space);
