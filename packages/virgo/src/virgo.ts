@@ -226,7 +226,7 @@ export class VEditor {
 
   formatText(
     vRange: VRange,
-    attributes: NonNullable<TextAttributes>,
+    attributes: TextAttributes,
     options: {
       match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
@@ -289,7 +289,7 @@ export class VEditor {
    * sync the dom selection from vRange for **this Editor**
    */
   syncVRange(): void {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       if (this._vRange) {
         const newRange = this.toDomRange(this._vRange);
 

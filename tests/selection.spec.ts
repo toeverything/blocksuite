@@ -1940,3 +1940,147 @@ test('should not be misaligned when the editor container has padding or margin',
 
   expect(count).toBe(3);
 });
+
+// ↑
+test('should keep native range selection when scrolling backward with the scroll wheel', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const data = new Array(5).fill(`
+`);
+  data.unshift(...['123', '456', '789']);
+  data.push(...['987', '654', '321']);
+  await assertRichTexts(page, data);
+
+  const blockHeight = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance);
+    const container = viewport.querySelector(
+      'affine-frame .affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    const first = container.firstElementChild;
+    if (!first) {
+      throw new Error();
+    }
+    const second = first.nextElementSibling;
+    if (!second) {
+      throw new Error();
+    }
+    return (
+      second.getBoundingClientRect().top - first.getBoundingClientRect().top
+    );
+  });
+  await page.waitForTimeout(250);
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [10, 3],
+    [10, 0],
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    {
+      // dont release mouse
+      beforeMouseUp: async () => {
+        await page.mouse.wheel(0, -blockHeight * 2);
+        await page.waitForTimeout(250);
+      },
+    }
+  );
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '987654321');
+});
+
+// ↓
+test('should keep native range selection when scrolling forward with the scroll wheel', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  for (let i = 0; i < 6; i++) {
+    await pressEnter(page);
+  }
+
+  await type(page, '987');
+  await pressEnter(page);
+  await type(page, '654');
+  await pressEnter(page);
+  await type(page, '321');
+
+  const data = new Array(5).fill(`
+`);
+  data.unshift(...['123', '456', '789']);
+  data.push(...['987', '654', '321']);
+  await assertRichTexts(page, data);
+
+  const blockHeight = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const container = viewport.querySelector(
+      'affine-frame .affine-block-children-container'
+    );
+    if (!container) {
+      throw new Error();
+    }
+    const first = container.firstElementChild;
+    if (!first) {
+      throw new Error();
+    }
+    const second = first.nextElementSibling;
+    if (!second) {
+      throw new Error();
+    }
+    return (
+      second.getBoundingClientRect().top - first.getBoundingClientRect().top
+    );
+  });
+  await page.waitForTimeout(250);
+
+  await page.mouse.move(0, 0);
+
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [0, 3],
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    {
+      // dont release mouse
+      beforeMouseUp: async () => {
+        await page.mouse.wheel(0, blockHeight * 2);
+        await page.waitForTimeout(250);
+      },
+    }
+  );
+
+  await copyByKeyboard(page);
+  await assertClipItems(page, 'text/plain', '123456789');
+});

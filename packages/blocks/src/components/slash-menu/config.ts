@@ -3,6 +3,7 @@ import {
   DeleteIcon,
   DividerIcon,
   DuplicateIcon,
+  ImageIcon,
   NowIcon,
   paragraphConfig,
   // PasteIcon,
@@ -18,6 +19,7 @@ import {
   getCurrentRange,
   getRichTextByModel,
   resetNativeSelection,
+  uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 // import { formatConfig } from '../../page-block/utils/const.js';
@@ -103,6 +105,25 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         divider: idx === 0,
         action: ({ model }) => updateBlockType([model], flavour, type),
       })),
+  },
+  {
+    name: 'Image & File',
+    items: [
+      {
+        name: 'Image',
+        icon: ImageIcon,
+        divider: true,
+        async action({ page, model }) {
+          const parent = page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          parent.children.indexOf(model);
+          const props = await uploadImageFromLocal(page);
+          page.addSiblingBlocks(model, props);
+        },
+      },
+    ],
   },
   {
     name: 'Date & Time',

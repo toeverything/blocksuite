@@ -135,6 +135,7 @@ export class DragHandle extends LitElement {
       options.getBlockEditingStateByPosition;
     this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
     options.container.appendChild(this);
+    this._container = options.container;
   }
 
   /**
@@ -176,6 +177,7 @@ export class DragHandle extends LitElement {
   private _indicator!: DragIndicator;
   private _cursor: number | null = 0;
   private _lastSelectedIndex = -1;
+  private _container: HTMLElement;
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -207,8 +209,11 @@ export class DragHandle extends LitElement {
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
-      this.style.left = `${rect.left - DRAG_HANDLE_WIDTH - 20}px`;
-      this.style.top = `${rect.top}px`;
+      const containerRect = this._container.getBoundingClientRect();
+      this.style.left = `${
+        rect.left - containerRect.left - DRAG_HANDLE_WIDTH - 20
+      }px`;
+      this.style.top = `${rect.top - containerRect.top}px`;
       this.style.opacity = `${(
         1 -
         (event.raw.pageX - rect.left) / rect.width
@@ -324,8 +329,9 @@ export class DragHandle extends LitElement {
         this._cursor = newModelState.index;
         const rect = this._startModelState.position;
         this.style.display = 'block';
-        this.style.left = `${rect.left - 20}px`;
-        this.style.top = `${rect.top + 8}px`;
+        const containerRect = this._container.getBoundingClientRect();
+        this.style.left = `${rect.left - containerRect.left - 20}px`;
+        this.style.top = `${rect.top - containerRect.top + 8}px`;
       }
     }
   };
