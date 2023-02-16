@@ -11,9 +11,8 @@ export const baseTextAttributes = z.object({
   bold: z.boolean().optional(),
   italic: z.boolean().optional(),
   underline: z.boolean().optional(),
-  strikethrough: z.boolean().optional(),
-  inlineCode: z.boolean().optional(),
-  color: z.string().optional(),
+  strike: z.boolean().optional(),
+  code: z.boolean().optional(),
   link: z.string().optional(),
 });
 
@@ -26,12 +25,12 @@ function virgoTextStyles(
   if (props.underline) {
     textDecorations += 'underline';
   }
-  if (props.strikethrough) {
+  if (props.strike) {
     textDecorations += ' line-through';
   }
 
   let inlineCodeStyle = {};
-  if (props.inlineCode) {
+  if (props.code) {
     inlineCodeStyle = {
       'font-family':
         '"SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace',
