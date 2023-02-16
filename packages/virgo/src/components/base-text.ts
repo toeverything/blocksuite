@@ -22,8 +22,6 @@ export type BaseTextAttributes = z.infer<typeof baseTextAttributes>;
 function virgoTextStyles(
   props: BaseTextAttributes
 ): ReturnType<typeof styleMap> {
-  if (!props) return styleMap({});
-
   let textDecorations = '';
   if (props.underline) {
     textDecorations += 'underline';
