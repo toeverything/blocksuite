@@ -1,7 +1,6 @@
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
-import { Signal } from '@blocksuite/global/utils';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours, Signal } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import type { Quill } from 'quill';
 import * as Y from 'yjs';
@@ -20,6 +19,7 @@ import {
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { tryMigrate } from './migrations.js';
 import type { PageMeta, Workspace } from './workspace.js';
+
 export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
@@ -314,6 +314,37 @@ export class Page extends Space<PageData> {
   }
 
   @debug('CRUD')
+  public addBlocksByFlavour<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
+    Flavour extends keyof ALLProps & string = keyof ALLProps & string
+  >(
+    blocks: Array<{
+      flavour: Flavour;
+      blockProps?: Partial<
+        ALLProps[Flavour] &
+          Omit<BlockSuiteInternal.IBaseBlockProps, 'flavour' | 'id'>
+      >;
+    }>,
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ): string[] {
+    const ids: string[] = [];
+    blocks.forEach(block => {
+      const id = this.addBlockByFlavour<ALLProps, Flavour>(
+        block.flavour,
+        block.blockProps ?? {},
+        parent,
+        parentIndex
+      );
+      ids.push(id);
+      typeof parentIndex === 'number' && parentIndex++;
+    });
+
+    return ids;
+  }
+
+  @debug('CRUD')
   public addBlockByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ALLProps extends Record<string, any> = BlockSuiteModelProps.ALL,
@@ -326,7 +357,7 @@ export class Page extends Space<PageData> {
     > = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
-  ) {
+  ): string {
     if (this.awarenessStore.isReadonly(this)) {
       throw new Error('cannot modify data in readonly mode');
     }
@@ -467,28 +498,44 @@ export class Page extends Space<PageData> {
     });
   }
 
-  addSiblingBlock(
+  addSiblingBlocks(
     targetModel: BaseBlockModel,
-    blockProps: Partial<BaseBlockModel>,
-    direction: 'left' | 'right' = 'right'
-  ) {
+    props: Array<Partial<BaseBlockModel>>,
+    place: 'after' | 'before' = 'after'
+  ): string[] {
     const parent = this.getParent(targetModel);
-    assertExists(blockProps.flavour);
     assertExists(parent);
 
     const targetIndex =
       parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
-    const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
+    const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
-    const id = this.addBlockByFlavour(
-      blockProps.flavour,
-      {
-        type: blockProps.type,
-      },
-      parent.id,
-      insertIndex
-    );
-    return id;
+    if (props.length > 1) {
+      const blocks: Array<{
+        flavour: keyof BlockSuiteModelProps.ALL;
+        blockProps: Partial<
+          BlockSuiteModelProps.ALL &
+            Omit<BlockSuiteInternal.IBaseBlockProps, 'id' | 'flavour'>
+        >;
+      }> = [];
+      props.forEach(prop => {
+        const { flavour, ...blockProps } = prop;
+        assertExists(flavour);
+        blocks.push({ flavour, blockProps });
+      });
+      const ids = this.addBlocksByFlavour(blocks, parent.id, insertIndex);
+      return ids;
+    } else {
+      assertExists(props[0].flavour);
+      const { flavour, ...blockProps } = props[0];
+      const id = this.addBlockByFlavour(
+        flavour,
+        blockProps,
+        parent.id,
+        insertIndex
+      );
+      return [id];
+    }
   }
 
   deleteBlockById(id: string) {

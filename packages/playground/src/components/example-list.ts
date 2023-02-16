@@ -34,7 +34,14 @@ export class ExampleList extends LitElement {
         ${repeat(
           initFunctions,
           fn => html`
-            <sl-card class="card" @click=${() => fn(window.workspace)}>
+            <sl-card
+              class="card"
+              @click=${() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('init', fn.id);
+                window.location.search = urlParams.toString();
+              }}
+            >
               <div slot="header">${fn.displayName}</div>
               ${fn.description}
             </sl-card>

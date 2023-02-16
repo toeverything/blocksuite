@@ -1,6 +1,7 @@
 import { BlockHub } from '@blocksuite/blocks';
 import { asyncFocusRichText, tryUpdateFrameSize } from '@blocksuite/blocks';
 import { getAllowSelectedBlocks } from '@blocksuite/blocks';
+import { uploadImageFromLocal } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -16,28 +17,36 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enable_database: !!page.awarenessStore.getFlag('enable_database'),
-    onDropCallback: (e, end) => {
+    onDropCallback: async (e, end) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
-      const blockProps = JSON.parse(data);
-      if (blockProps.flavour === 'affine:database') {
+      let props = JSON.parse(data);
+      if (props.flavour === 'affine:database') {
         if (!page.awarenessStore.getFlag('enable_database')) {
           console.warn('database block is not enabled');
           return;
         }
       }
+      if (props.flavour === 'affine:embed' && props.type === 'image') {
+        props = await uploadImageFromLocal(page);
+      } else {
+        props = [props];
+      }
+
       const targetModel = end.model;
       const rect = end.position;
       page.captureSync();
       const distanceToTop = Math.abs(rect.top - e.y);
       const distanceToBottom = Math.abs(rect.bottom - e.y);
-      const id = page.addSiblingBlock(
+      const ids = page.addSiblingBlocks(
         targetModel,
-        blockProps,
-        distanceToTop < distanceToBottom ? 'right' : 'left'
+        props,
+        distanceToTop < distanceToBottom ? 'before' : 'after'
       );
-      asyncFocusRichText(page, id);
+      if (ids.length === 1) {
+        await asyncFocusRichText(page, ids[0]);
+      }
       tryUpdateFrameSize(page, 1);
     },
   });

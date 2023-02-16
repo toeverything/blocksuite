@@ -260,6 +260,7 @@ export class PageSelectionState {
   focusedBlockIndex = -1;
   rafID?: number;
   private _startRange: Range | null = null;
+  private _rangePoint: { x: number; y: number } | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _endPoint: { x: number; y: number } | null = null;
   private _richTextCache = new Map<RichText, DOMRect>();
@@ -283,6 +284,10 @@ export class PageSelectionState {
     return this._startRange;
   }
 
+  get rangePoint() {
+    return this._rangePoint;
+  }
+
   get startPoint() {
     return this._startPoint;
   }
@@ -304,7 +309,14 @@ export class PageSelectionState {
   }
 
   resetStartRange(e: SelectionEvent) {
-    this._startRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+    const { clientX, clientY } = e.raw;
+    this._startRange = caretRangeFromPoint(clientX, clientY);
+    // Save the last coordinates so that we can send them when scrolling through the wheel
+    this.updateRangePoint(clientX, clientY);
+  }
+
+  updateRangePoint(x: number, y: number) {
+    this._rangePoint = { x, y };
   }
 
   resetStartPoint(
@@ -363,6 +375,7 @@ export class PageSelectionState {
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
+    this._rangePoint = null;
     this.clearEmbedBlocks();
     this.clearSelectedBlocks();
   }
@@ -565,6 +578,7 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
+    this.state.updateRangePoint(e.raw.clientX, e.raw.clientY);
     handleNativeRangeDragMove(this.state.startRange, e);
   }
 

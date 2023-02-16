@@ -10,6 +10,7 @@ import {
   H4Icon,
   H5Icon,
   H6Icon,
+  ImageIcon,
   NumberedListIcon,
   QuoteIcon,
   TextIcon,
@@ -228,5 +229,16 @@ export const BLOCKHUB_LIST_ITEMS = [
     description: 'Track tasks with a to-do list.',
     icon: TodoIcon,
     toolTip: 'Drag to insert To-do List.',
+  },
+];
+
+export const BLOCKHUB_FILE_ITEMS = [
+  {
+    flavour: 'affine:embed',
+    type: 'image',
+    name: 'Image',
+    description: 'Upload images.',
+    icon: ImageIcon,
+    toolTip: 'Drag to insert Image.',
   },
 ];
