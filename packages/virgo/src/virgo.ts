@@ -131,15 +131,9 @@ export class VEditor {
 
   getNativeSelection(): Selection | null {
     const selectionRoot = findDocumentOrShadowRoot(this);
-    // @ts-ignore
     const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return null;
-    }
-
-    if (selection.rangeCount === 0) {
-      return null;
-    }
+    if (!selection) return null;
+    if (selection.rangeCount === 0) return null;
 
     return selection;
   }
@@ -298,7 +292,6 @@ export class VEditor {
 
         if (newRange) {
           const selectionRoot = findDocumentOrShadowRoot(this);
-          // @ts-ignore
           const selection = selectionRoot.getSelection();
           if (selection) {
             selection.removeAllRanges();
@@ -628,18 +621,11 @@ export class VEditor {
     }
 
     const selectionRoot = findDocumentOrShadowRoot(this);
-    // @ts-ignore
     const selection = selectionRoot.getSelection();
-    if (!selection) {
-      return;
-    }
-
-    if (selection.rangeCount === 0) {
-      return;
-    }
+    if (!selection) return;
+    if (selection.rangeCount === 0) return;
 
     const { anchorNode, focusNode } = selection;
-
     if (
       !this._rootElement.contains(anchorNode) ||
       !this._rootElement.contains(focusNode)
@@ -690,7 +676,6 @@ export class VEditor {
       const newRange = this.toDomRange(newVRange);
       if (newRange) {
         const selectionRoot = findDocumentOrShadowRoot(this);
-        // @ts-ignore
         const selection = selectionRoot.getSelection();
         if (selection) {
           selection.removeAllRanges();
@@ -809,7 +794,7 @@ function isVText(text: Text) {
   return text.parentElement?.dataset.virgoText === 'true' ?? false;
 }
 
-function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
+function findDocumentOrShadowRoot(editor: VEditor): Document {
   const el = editor.getRootElement();
 
   if (!el) {
@@ -820,8 +805,7 @@ function findDocumentOrShadowRoot(editor: VEditor): Document | ShadowRoot {
 
   if (
     (root instanceof Document || root instanceof ShadowRoot) &&
-    // @ts-ignore
-    root.getSelection != null
+    'getSelection' in root
   ) {
     return root;
   }
