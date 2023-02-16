@@ -156,7 +156,9 @@ export async function updateBlockType(
   if (lastNewId) {
     await asyncFocusRichText(page, lastNewId);
   }
-  restoreSelection(selectedBlocks);
+  requestAnimationFrame(() => {
+    restoreSelection(selectedBlocks);
+  });
 }
 
 function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
@@ -295,7 +297,9 @@ function formatModelsByRange(
       [key]: !isFormatActive,
     });
   }
-  restoreSelection(selectedBlocks);
+  requestAnimationFrame(() => {
+    restoreSelection(selectedBlocks);
+  });
 }
 
 export function handleFormat(page: Page, key: string) {
