@@ -107,6 +107,7 @@ export class DefaultPageBlockComponent
       border: 0;
       font-family: inherit;
       color: inherit;
+      cursor: text;
     }
 
     .affine-default-page-block-title::placeholder {

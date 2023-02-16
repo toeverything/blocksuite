@@ -166,9 +166,11 @@ export async function updateBlockType(
     }
   });
   if (lastNewId) {
-    await asyncFocusRichText(page, lastNewId);
+    asyncFocusRichText(page, lastNewId);
   }
-  restoreSelection(selectedBlocks);
+  requestAnimationFrame(() => {
+    restoreSelection(selectedBlocks);
+  });
 }
 
 function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {

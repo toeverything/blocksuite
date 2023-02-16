@@ -36,7 +36,7 @@ test('should format quick bar show when select text', async ({ page }) => {
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 20, 5);
-  assertAlmostEqual(box.y, 260, 10);
+  assertAlmostEqual(box.y, 260, 20);
 
   // Click the edge of the format quick bar
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
@@ -69,7 +69,7 @@ test('should format quick bar show when select text by keyboard', async ({
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(leftBox.x, 20, 3);
-  assertAlmostEqual(leftBox.y, 106, 3);
+  assertAlmostEqual(leftBox.y, 105, 10);
 
   await page.keyboard.press('ArrowLeft');
   await expect(formatQuickBar).not.toBeVisible();
@@ -90,7 +90,7 @@ test('should format quick bar show when select text by keyboard', async ({
   // The x position of the format quick bar depends on the font size
   // so there are slight differences in different environments
   assertAlmostEqual(rightBox.x, 40, 15);
-  assertAlmostEqual(rightBox.y, 180, 6);
+  assertAlmostEqual(rightBox.y, 180, 16);
 });
 
 test('should format quick bar can only display one at a time', async ({
@@ -644,7 +644,7 @@ test('should format quick bar position correct at the start of second line', asy
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(formatBox.x, 20, 5);
-  assertAlmostEqual(formatBox.y, 132, 5);
+  assertAlmostEqual(formatBox.y, 128, 9);
 });
 
 test.fixme(

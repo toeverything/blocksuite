@@ -375,11 +375,13 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
         const title = pageModel.title;
 
         page.captureSync();
+        let textLength = 0;
         if (text) {
+          textLength = text.length;
           title.join(text);
         }
         page.deleteBlock(model);
-        focusTitle(title.length);
+        focusTitle(title.length - textLength);
       }
     }
 

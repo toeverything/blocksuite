@@ -76,7 +76,7 @@ test('basic init with external text', async ({ page }) => {
 test('basic multi user state', async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
-  pageA.waitForLoadState('domcontentloaded');
+  await waitDefaultPageLoaded(pageA);
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();

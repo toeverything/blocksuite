@@ -400,7 +400,7 @@ export function isInsideRichText(element: unknown): element is RichText {
 export function isInsideTitleElement(element: unknown): boolean {
   const titleElement = document.querySelector('[data-block-is-title="true"]');
   if (!titleElement) {
-    throw new Error('Failed to get title element');
+    return false;
   }
 
   return titleElement.contains(element as Node);
