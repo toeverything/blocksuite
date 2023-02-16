@@ -84,7 +84,7 @@ export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-function mergeCodeBlocks(page: Page, models: BaseBlockModel[]) {
+function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
   const parent = page.getParent(models[0]);
   assertExists(parent);
   const index = parent.children.indexOf(models[0]);
@@ -99,12 +99,13 @@ function mergeCodeBlocks(page: Page, models: BaseBlockModel[]) {
     .join('\n');
   models.map(model => page.deleteBlock(model));
 
-  page.addBlockByFlavour(
+  const id = page.addBlockByFlavour(
     'affine:code',
     { text: new Text(text) },
     parent,
     index
   );
+  return id;
 }
 
 export async function updateSelectedTextType(flavour: string, type?: string) {
@@ -131,11 +132,21 @@ export async function updateBlockType(
     );
   }
   page.captureSync();
+  const selectedBlocks = saveBlockSelection();
   if (flavour === 'affine:code') {
-    mergeCodeBlocks(page, models);
+    const id = mergeToCodeBlocks(page, models);
+    requestAnimationFrame(() =>
+      restoreSelection([
+        {
+          id,
+          startPos: 0,
+          endPos: 0,
+          children: [],
+        },
+      ])
+    );
     return;
   }
-  const selectedBlocks = saveBlockSelection();
   let lastNewId: string | null = null;
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);

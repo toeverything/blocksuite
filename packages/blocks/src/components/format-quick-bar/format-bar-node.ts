@@ -155,10 +155,6 @@ export class FormatQuickBar extends LitElement {
         return;
       }
       updateSelectedTextType(flavour, type);
-      if (flavour === 'affine:code') {
-        // Selection will lost after turning to code block
-        this.abortController.abort();
-      }
       this.paragraphType = `${flavour}/${type}`;
       this.positionUpdated.emit();
     };
