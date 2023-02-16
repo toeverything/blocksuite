@@ -934,7 +934,7 @@ export class DefaultSelectionManager {
     if (activeComponent && selectEmbeds.length) {
       const image = activeComponent as ImageBlockComponent;
       if (image.model.type === 'image') {
-        const rect = image.getBoundingClientRect();
+        const rect = image.resizeImg.getBoundingClientRect();
         this._signals.updateEmbedRects.emit([rect]);
       }
     }

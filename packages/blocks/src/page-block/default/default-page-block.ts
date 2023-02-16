@@ -521,6 +521,7 @@ export class DefaultPageBlockComponent
           if (target === this.defaultViewportElement) {
             this.updateViewportState();
             this.selection.refreshSelectedBlocksRects();
+            this.selection.refresEmbedRects();
             break;
           }
         }
