@@ -228,7 +228,7 @@ export class VEditor {
 
   formatText(
     vRange: VRange,
-    attributes: NonNullable<TextAttributes>,
+    attributes: TextAttributes,
     options: {
       match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
