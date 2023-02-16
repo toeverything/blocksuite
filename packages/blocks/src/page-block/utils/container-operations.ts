@@ -1,5 +1,6 @@
 import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import type { TextAttributes } from '@blocksuite/virgo';
 
 import {
   almostEqual,
@@ -25,7 +26,6 @@ import {
   restoreSelection,
   saveBlockSelection,
 } from '../../__internal__/utils/selection.js';
-import type { CodeBlockModel } from '../../code-block/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
@@ -138,7 +138,7 @@ export async function updateBlockType(
   const selectedBlocks = saveBlockSelection();
   let lastNewId: string | null = null;
   models.forEach(model => {
-    assertFlavours(model, ['affine:paragraph', 'affine:list']);
+    assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {
@@ -188,8 +188,11 @@ export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   deleteModelsByRange(page);
 }
 
-export const getFormat = () => {
+export const getFormat = (): TextAttributes => {
   const models = getModelsByRange(getCurrentRange());
+  if (!models.length) {
+    return {};
+  }
   if (models.length === 1) {
     const richText = getRichTextByModel(models[0]);
     assertExists(richText);
@@ -258,7 +261,7 @@ export const getFormat = () => {
 function formatModelsByRange(
   models: BaseBlockModel[],
   page: Page,
-  key: string
+  key: keyof TextAttributes
 ) {
   const selection = window.getSelection();
   const selectedBlocks = saveBlockSelection(selection);
@@ -299,7 +302,7 @@ function formatModelsByRange(
   restoreSelection(selectedBlocks);
 }
 
-export function handleFormat(page: Page, key: string) {
+export function handleFormat(page: Page, key: keyof TextAttributes) {
   if (isNoneSelection()) return;
 
   if (isRangeSelection()) {
