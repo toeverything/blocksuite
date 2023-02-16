@@ -297,9 +297,7 @@ function formatModelsByRange(
       [key]: !isFormatActive,
     });
   }
-  requestAnimationFrame(() => {
-    restoreSelection(selectedBlocks);
-  });
+  restoreSelection(selectedBlocks);
 }
 
 export function handleFormat(page: Page, key: string) {
