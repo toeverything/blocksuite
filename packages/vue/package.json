@@ -1,0 +1,46 @@
+{
+  "name": "@blocksuite/vue",
+  "version": "0.4.0-alpha.4",
+  "description": "A vue Component & Hooks Library for BlockSuite editor built for AFFiNE.",
+  "main": "src/index.ts",
+  "type": "module",
+  "sideEffects": [
+    "./dist/editor.js"
+  ],
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MPL-2.0",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/editor": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "vue": "^3.2.45",
+    "zustand": "^4.3.2"
+  },
+  "peerDependencies": {
+    "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/editor": "workspace:*",
+    "@blocksuite/store": "workspace:*",
+    "vue": ">=3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.12",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vitejs/plugin-vue-jsx": "^3.0.0",
+    "@vue/runtime-dom": "*",
+    "@vue/tsconfig": "^0.1.3",
+    "vite": "^4.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": "./dist/index.js",
+      "./editor": "./dist/editor.js"
+    }
+  }
+}

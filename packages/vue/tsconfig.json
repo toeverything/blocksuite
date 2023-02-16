@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist/",
+    "jsx": "preserve",
+    "noEmit": false,
+    "types": ["vue"]
+  },
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "references": [
+    {
+      "path": "./tsconfig.config.json"
+    }
+  ]
+}
