@@ -272,6 +272,7 @@ test('should undo/redo work on title', async ({ page }) => {
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello ']);
 
+  await focusRichText(page);
   await undoByKeyboard(page);
   await assertTitle(page, 'title');
   await assertRichTexts(page, ['hello world']);
