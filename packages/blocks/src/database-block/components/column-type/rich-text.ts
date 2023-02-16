@@ -124,7 +124,7 @@ class TextCell extends DatabaseCellLitElement {
       case 's':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, { strikethrough: true });
+          toggleStyle(vEditor, { strike: true });
         }
         break;
       // inline code ctrl+shift+e
@@ -132,7 +132,7 @@ class TextCell extends DatabaseCellLitElement {
       case 'e':
         if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
           event.preventDefault();
-          toggleStyle(vEditor, { inlineCode: true });
+          toggleStyle(vEditor, { code: true });
         }
         break;
       default:

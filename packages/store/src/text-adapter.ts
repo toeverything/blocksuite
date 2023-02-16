@@ -84,7 +84,9 @@ export class Text {
     if (this._shouldTransact) {
       const doc = this._yText.doc;
       if (!doc) {
-        throw new Error('cannot find doc');
+        throw new Error(
+          'Failed to transact text! yText is not attached to a doc'
+        );
       }
       doc.transact(() => {
         callback();
@@ -416,11 +418,13 @@ export class RichTextAdapter {
     state: any,
     origin: any
   ) => {
+    // eventType === 'text-change' &&
+    //   console.trace('quill event', eventType, delta, state, origin);
     const { yText } = this;
 
     if (delta && delta.ops) {
       // update content
-      const ops = delta.ops;
+      const ops = transformDelta(delta, yText).ops;
       ops.forEach((op: any) => {
         if (op.attributes !== undefined) {
           for (const key in op.attributes) {
@@ -462,4 +466,9 @@ export class RichTextAdapter {
     this.yText.unobserve(this._yObserver);
     this.quill.off('editor-change', this._quillObserver as any);
   }
+}
+
+function transformDelta(delta: any, yText: Y.Text) {
+  // delta.ops.forEach((op: any) => (op.attributes = undefined));
+  return delta;
 }

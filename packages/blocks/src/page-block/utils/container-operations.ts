@@ -1,5 +1,6 @@
 import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
+import type { TextAttributes } from '@blocksuite/virgo';
 
 import {
   almostEqual,
@@ -25,7 +26,6 @@ import {
   restoreSelection,
   saveBlockSelection,
 } from '../../__internal__/utils/selection.js';
-import type { CodeBlockModel } from '../../code-block/index.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
@@ -84,26 +84,28 @@ export function deleteModelsByRange(page: Page, range = getCurrentRange()) {
   firstRichText.quill.setSelection(firstTextIndex, 0);
 }
 
-function mergeTextOfBlocks(
-  page: Page,
-  models: BaseBlockModel[],
-  blockProps: Record<string, unknown>
-) {
+function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
   const parent = page.getParent(models[0]);
   assertExists(parent);
   const index = parent.children.indexOf(models[0]);
-  const id = page.addBlock(blockProps, parent, index);
-  const codeBlock = page.getBlockById(id) as CodeBlockModel;
+  const text = models
+    .map(model => {
+      if (model.text instanceof Text) {
+        return model.text.toString();
+      }
+      return null;
+    })
+    .filter(Boolean)
+    .join('\n');
+  models.map(model => page.deleteBlock(model));
 
-  models.forEach(model => {
-    if (model.text instanceof Text) {
-      const text = codeBlock.text;
-      assertExists(text);
-      text.join(model.text);
-      text.insert('\n', text.length);
-    }
-    page.deleteBlock(model);
-  });
+  const id = page.addBlockByFlavour(
+    'affine:code',
+    { text: new Text(text) },
+    parent,
+    index
+  );
+  return id;
 }
 
 export async function updateSelectedTextType(flavour: string, type?: string) {
@@ -130,11 +132,21 @@ export async function updateBlockType(
     );
   }
   page.captureSync();
+  const selectedBlocks = saveBlockSelection();
   if (flavour === 'affine:code') {
-    mergeTextOfBlocks(page, models, { flavour: 'affine:code' });
+    const id = mergeToCodeBlocks(page, models);
+    requestAnimationFrame(() =>
+      restoreSelection([
+        {
+          id,
+          startPos: 0,
+          endPos: 0,
+          children: [],
+        },
+      ])
+    );
     return;
   }
-  const selectedBlocks = saveBlockSelection();
   let lastNewId: string | null = null;
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
@@ -187,8 +199,11 @@ export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   deleteModelsByRange(page);
 }
 
-export const getFormat = () => {
+export const getFormat = (): TextAttributes => {
   const models = getModelsByRange(getCurrentRange());
+  if (!models.length) {
+    return {};
+  }
   if (models.length === 1) {
     const richText = getRichTextByModel(models[0]);
     assertExists(richText);
@@ -257,7 +272,7 @@ export const getFormat = () => {
 function formatModelsByRange(
   models: BaseBlockModel[],
   page: Page,
-  key: string
+  key: keyof TextAttributes
 ) {
   const selection = window.getSelection();
   const selectedBlocks = saveBlockSelection(selection);
@@ -298,7 +313,7 @@ function formatModelsByRange(
   restoreSelection(selectedBlocks);
 }
 
-export function handleFormat(page: Page, key: string) {
+export function handleFormat(page: Page, key: keyof TextAttributes) {
   if (isNoneSelection()) return;
 
   if (isRangeSelection()) {

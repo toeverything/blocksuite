@@ -2,6 +2,7 @@ import './button.js';
 
 import {
   ArrowDownIcon,
+  BlockConfig,
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
@@ -137,6 +138,27 @@ export class FormatQuickBar extends LitElement {
       bottom: this.showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
       maxHeight: this.paragraphPanelMaxHeight,
     });
+    const updateParagraphType = (
+      flavour: BlockConfig['flavour'],
+      type?: string
+    ) => {
+      if (!this.page) {
+        throw new Error('Failed to format paragraph! Page not found.');
+      }
+      if (this.paragraphType === `${flavour}/${type}`) {
+        // Already in the target format, convert back to text
+        const { flavour: defaultFlavour, type: defaultType } =
+          paragraphConfig[0];
+        if (this.paragraphType === defaultType) return;
+        updateSelectedTextType(defaultFlavour, defaultType);
+        this.paragraphType = `${defaultFlavour}/${defaultType}`;
+        return;
+      }
+      updateSelectedTextType(flavour, type);
+      this.paragraphType = `${flavour}/${type}`;
+      this.positionUpdated.emit();
+    };
+
     return html` <div
       class="paragraph-panel"
       style="${styles}"
@@ -149,23 +171,7 @@ export class FormatQuickBar extends LitElement {
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
           data-testid="${flavour}/${type}"
-          @click=${() => {
-            if (!this.page) {
-              throw new Error('Failed to format paragraph! Page not found.');
-            }
-            if (this.paragraphType === `${flavour}/${type}`) {
-              // Already in the target format, convert back to text
-              const { flavour: defaultFlavour, type: defaultType } =
-                paragraphConfig[0];
-              if (this.paragraphType === defaultType) return;
-              updateSelectedTextType(defaultFlavour, defaultType);
-              this.paragraphType = `${defaultFlavour}/${defaultType}`;
-              return;
-            }
-            updateSelectedTextType(flavour, type);
-            this.paragraphType = `${flavour}/${type}`;
-            this.positionUpdated.emit();
-          }}
+          @click=${() => updateParagraphType(flavour, type)}
         >
           ${icon}
         </format-bar-button>`

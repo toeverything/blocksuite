@@ -160,11 +160,11 @@ export class ToolBar extends LitElement {
     });
     strikethroughButton.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { strikethrough: true });
+      toggleStyle(this.vEditor, { strike: true });
     });
     inlineCode.addEventListener('click', () => {
       undoManager.stopCapturing();
-      toggleStyle(this.vEditor, { inlineCode: true });
+      toggleStyle(this.vEditor, { code: true });
     });
     resetButton.addEventListener('click', () => {
       undoManager.stopCapturing();
