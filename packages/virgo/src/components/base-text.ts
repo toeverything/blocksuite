@@ -7,17 +7,15 @@ import { ZERO_WIDTH_SPACE } from '../constant.js';
 import type { DeltaInsert } from '../types.js';
 import { VirgoUnitText } from './virgo-unit-text.js';
 
-export const baseTextAttributes = z
-  .object({
-    bold: z.boolean().optional(),
-    italic: z.boolean().optional(),
-    underline: z.boolean().optional(),
-    strikethrough: z.boolean().optional(),
-    inlineCode: z.boolean().optional(),
-    color: z.string().optional(),
-    link: z.string().optional(),
-  })
-  .optional();
+export const baseTextAttributes = z.object({
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  underline: z.boolean().optional(),
+  strikethrough: z.boolean().optional(),
+  inlineCode: z.boolean().optional(),
+  color: z.string().optional(),
+  link: z.string().optional(),
+});
 
 export type BaseTextAttributes = z.infer<typeof baseTextAttributes>;
 
@@ -67,12 +65,13 @@ export class BaseText extends LitElement {
   render() {
     const unitText = new VirgoUnitText();
     unitText.str = this.delta.insert;
+    const style = this.delta.attributes
+      ? virgoTextStyles(this.delta.attributes)
+      : styleMap({});
 
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
-    return html`<span
-      data-virgo-element="true"
-      style=${virgoTextStyles(this.delta.attributes)}
+    return html`<span data-virgo-element="true" style=${style}
       >${unitText}</span
     >`;
   }
