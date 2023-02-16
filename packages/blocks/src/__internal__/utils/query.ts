@@ -397,11 +397,9 @@ export function isInsideRichText(element: unknown): element is RichText {
   return !!richText;
 }
 
-export function isInsideTitleElement(element: unknown): boolean {
+export function isInsidePageTitle(element: unknown): boolean {
   const titleElement = document.querySelector('[data-block-is-title="true"]');
-  if (!titleElement) {
-    return false;
-  }
+  if (!titleElement) return false;
 
   return titleElement.contains(element as Node);
 }

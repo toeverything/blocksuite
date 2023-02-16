@@ -3,14 +3,12 @@ import hotkeys from 'hotkeys-js';
 
 import {
   isCaptionElement,
+  isInsidePageTitle,
   isInsideRichText,
-  isInsideTitleElement,
 } from './query.js';
 
 hotkeys.filter = (event: KeyboardEvent) => {
-  if (shouldFilterHotKey(event)) {
-    return false;
-  }
+  if (shouldFilterHotkey(event)) return false;
   return true;
 };
 
@@ -22,7 +20,7 @@ function isUndoRedo(event: KeyboardEvent) {
   return false;
 }
 
-function shouldFilterHotKey(event: KeyboardEvent) {
+function shouldFilterHotkey(event: KeyboardEvent) {
   const target = event.target;
   // Not sure if this is the right thing to do
   if (!target) {
@@ -33,7 +31,7 @@ function shouldFilterHotKey(event: KeyboardEvent) {
   // - code block language search input
   // - image caption
   // - link create/edit popover
-  if (!isInsideRichText(event.target) && !isInsideTitleElement(event.target)) {
+  if (!isInsideRichText(event.target) && !isInsidePageTitle(event.target)) {
     // TODO Remove ad-hoc
     // This ad-hoc should be moved to the caption input for processing
     // Enter on caption should jump out of input
@@ -42,7 +40,7 @@ function shouldFilterHotKey(event: KeyboardEvent) {
       return false;
     }
     // undo/redo should work in page title
-    if (isInsideTitleElement(event.target) && isUndoRedo(event)) {
+    if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
       event.preventDefault();
       return false;
     }

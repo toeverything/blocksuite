@@ -1,6 +1,6 @@
 import { MOVE_DETECT_THRESHOLD } from '@blocksuite/global/config';
 
-import { isDatabaseInput, isInsideTitleElement } from './query.js';
+import { isDatabaseInput, isInsidePageTitle } from './query.js';
 import { debounce } from './std.js';
 
 export interface IPoint {
@@ -110,7 +110,7 @@ export function initMouseEventHandlers(
 
   const mouseDownHandler = (e: MouseEvent) => {
     if (shouldFilterMouseEvent(e)) return;
-    if (!isInsideTitleElement(e.target) && !isDatabaseInput(e.target)) {
+    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
     const rect = getBoundingClientRect();
@@ -128,7 +128,7 @@ export function initMouseEventHandlers(
 
   const mouseMoveHandler = (e: MouseEvent) => {
     if (shouldFilterMouseEvent(e)) return;
-    if (!isInsideTitleElement(e.target) && !isDatabaseInput(e.target)) {
+    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
     const rect = getBoundingClientRect();
@@ -162,7 +162,7 @@ export function initMouseEventHandlers(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    if (!isInsideTitleElement(e.target) && !isDatabaseInput(e.target)) {
+    if (!isInsidePageTitle(e.target) && !isDatabaseInput(e.target)) {
       e.preventDefault();
     }
 

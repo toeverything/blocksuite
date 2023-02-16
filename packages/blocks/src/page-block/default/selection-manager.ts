@@ -24,7 +24,7 @@ import {
   isDatabase,
   isDatabaseInput,
   isEmbed,
-  isInsideTitleElement,
+  isInsidePageTitle,
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
@@ -588,7 +588,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDragStart = (e: SelectionEvent) => {
     this.state.resetStartRange(e);
-    if (isInsideTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
+    if (isInsidePageTitle(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;
     }
@@ -735,7 +735,7 @@ export class DefaultSelectionManager {
       return;
     }
     const target = e.raw.target;
-    if (isInsideTitleElement(target) || isDatabaseInput(target)) {
+    if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       return;
     }
     if (e.keys.shift) return;
@@ -803,8 +803,8 @@ export class DefaultSelectionManager {
 
     // filter out selection change event from title
     if (
-      isInsideTitleElement(selection.anchorNode) ||
-      isInsideTitleElement(selection.focusNode)
+      isInsidePageTitle(selection.anchorNode) ||
+      isInsidePageTitle(selection.focusNode)
     ) {
       return;
     }
