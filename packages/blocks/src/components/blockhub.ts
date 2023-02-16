@@ -131,7 +131,7 @@ export class BlockHub extends NonShadowLitElement {
       position: absolute;
       right: calc(100% + 8px);
       top: calc(50%);
-      overflow-y: auto;
+      overflow-y: unset;
       transform: translateY(-50%);
       display: none;
       justify-content: center;
@@ -581,9 +581,10 @@ export class BlockHub extends NonShadowLitElement {
     type: string,
     title: string
   ) => {
+    const shouldScroll = this._maxHeight < 800;
     const styles = styleMap({
       maxHeight: `${this._maxHeight}px`,
-      overflowY: this._maxHeight < 800 ? 'scroll' : 'unset',
+      overflowY: shouldScroll ? 'scroll' : 'unset',
     });
     return html`
       <div
@@ -597,10 +598,7 @@ export class BlockHub extends NonShadowLitElement {
         ${blockHubItems.map(
           ({ flavour, type, name, description, icon, toolTip }, index) => {
             return html`
-              <div
-                class="card-container-wrapper"
-                style="z-index: ${blockHubItems.length - index}"
-              >
+              <div class="card-container-wrapper">
                 <div
                   class="card-container has-tool-tip ${this._isGrabbing
                     ? 'grabbing'
@@ -615,8 +613,13 @@ export class BlockHub extends NonShadowLitElement {
                   </div>
                   <div class="card-icon-container">${icon}</div>
                   <centered-tool-tip
-                    tip-position="bottom"
-                    style=${this._showToolTip ? '' : 'display: none'}
+                    tip-position=${shouldScroll &&
+                    index === blockHubItems.length - 1
+                      ? 'top'
+                      : 'bottom'}
+                    style="display: ${this._showToolTip
+                      ? ''
+                      : 'none'}; z-index: ${blockHubItems.length - index}"
                     >${toolTip}
                   </centered-tool-tip>
                 </div>
