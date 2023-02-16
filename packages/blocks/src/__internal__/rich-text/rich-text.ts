@@ -42,10 +42,11 @@ export class RichText extends NonShadowLitElement {
  * User should custom the styles of the block in the block itself
  */
     .ql-container {
+      position: relative;
       box-sizing: border-box;
       height: 100%;
       margin: 0;
-      position: relative;
+      overflow: visible;
     }
     .ql-container.ql-disabled .ql-tooltip {
       visibility: hidden;
