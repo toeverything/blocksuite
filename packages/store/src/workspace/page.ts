@@ -467,11 +467,13 @@ export class Page extends Space<PageData> {
     const yBlock = this._yBlocks.get(model.id) as YBlock;
 
     this.transact(() => {
+      // TODO use schema
       if (props.text instanceof Text) {
         model.text = props.text;
         yBlock.set('prop:text', props.text.yText);
       }
 
+      // TODO use schema
       if (props.title instanceof Text) {
         (model as BlockSuiteInternal.BlockModels['affine:page']).title =
           props.title;
@@ -757,6 +759,8 @@ export class Page extends Space<PageData> {
 
     const yText = yBlock.get('prop:text') as Y.Text;
     model.text = new Text(yText);
+
+    // TODO use schema
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
@@ -767,7 +771,7 @@ export class Page extends Space<PageData> {
       );
     }
 
-    // todo: use schema
+    // TODO use schema
     if (model.flavour === 'affine:database') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (model as any).columns = (
