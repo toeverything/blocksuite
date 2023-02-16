@@ -42,7 +42,7 @@ export const createBlockHub: (
       const ids = page.addSiblingBlocks(
         targetModel,
         props,
-        distanceToTop < distanceToBottom ? 'right' : 'left'
+        distanceToTop < distanceToBottom ? 'before' : 'after'
       );
       if (ids.length === 1) {
         await asyncFocusRichText(page, ids[0]);

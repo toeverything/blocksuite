@@ -120,7 +120,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           parent.children.indexOf(model);
           const props = await uploadImageFromLocal(page);
-          page.addSiblingBlocks(model, props, 'left');
+          page.addSiblingBlocks(model, props);
         },
       },
     ],

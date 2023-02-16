@@ -495,14 +495,14 @@ export class Page extends Space<PageData> {
   addSiblingBlocks(
     targetModel: BaseBlockModel,
     props: Array<Partial<BaseBlockModel>>,
-    direction: 'left' | 'right' = 'right'
+    place: 'after' | 'before' = 'after'
   ): string[] {
     const parent = this.getParent(targetModel);
     assertExists(parent);
 
     const targetIndex =
       parent?.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
-    const insertIndex = direction === 'right' ? targetIndex : targetIndex + 1;
+    const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
 
     if (props.length > 1) {
       const blocks: Array<{
