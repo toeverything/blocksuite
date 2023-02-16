@@ -79,7 +79,6 @@ export class FormatQuickBar extends LitElement {
     if (!models.length) {
       return;
     }
-    this.format = getFormat();
     const startModel = models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
@@ -199,22 +198,20 @@ export class FormatQuickBar extends LitElement {
     </format-bar-button>`;
 
     const paragraphPanel = this._paragraphPanelTemplate();
-
+    const format = getFormat();
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
         ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
-          ?active=${activeWhen()}
+          ?active=${activeWhen(format)}
           @click=${() => {
             action({
               page,
               abortController: this.abortController,
-              format: this.format,
+              format,
             });
-            // format state need to update after format
-            this.format = getFormat();
             this.positionUpdated.emit();
           }}
         >
