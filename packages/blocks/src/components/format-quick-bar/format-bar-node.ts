@@ -198,6 +198,9 @@ export class FormatQuickBar extends LitElement {
     </format-bar-button>`;
 
     const paragraphPanel = this._paragraphPanelTemplate();
+    // XXX
+    // It's unsafe to get format in the render function
+    // Refactor it after redo/undo event is implemented
     const format = getFormat();
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
@@ -213,6 +216,9 @@ export class FormatQuickBar extends LitElement {
               format,
             });
             this.positionUpdated.emit();
+            // Workaround for the issue that the format bar status is not updated
+            // Remove it after redo/undo event is implemented
+            this.requestUpdate();
           }}
         >
           ${icon}
