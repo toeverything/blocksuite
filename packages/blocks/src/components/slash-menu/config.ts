@@ -19,6 +19,7 @@ import {
   getCurrentRange,
   getRichTextByModel,
   resetNativeSelection,
+  uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 // import { formatConfig } from '../../page-block/utils/const.js';
@@ -117,9 +118,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           if (!parent) {
             return;
           }
-          const index = parent.children.indexOf(model);
-          const props = await uploadImageFromLocal('affine:embed', page.blobs);
-          page.addBlockByFlavour('affine:divider', props, parent, index + 1);
+          parent.children.indexOf(model);
+          const props = await uploadImageFromLocal(page);
+          page.addSiblingBlocks(model, props, 'left');
         },
       },
     ],
