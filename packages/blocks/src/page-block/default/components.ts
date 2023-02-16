@@ -191,9 +191,8 @@ export function EmbedEditingContainer(
 export function CodeBlockOptionContainer(
   codeBlockOption: CodeBlockOption | null
 ) {
-  if (!codeBlockOption) {
-    return html``;
-  }
+  if (!codeBlockOption) return null;
+
   const style = {
     left: codeBlockOption.position.x + 'px',
     top: codeBlockOption.position.y + 'px',
@@ -201,9 +200,8 @@ export function CodeBlockOptionContainer(
   const syntaxElem = document.querySelector(
     `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
   );
-  if (!syntaxElem) {
-    return html``;
-  }
+  if (!syntaxElem) return null;
+
   const isWrapped = syntaxElem.classList.contains('wrap');
   return html`
     <style>
