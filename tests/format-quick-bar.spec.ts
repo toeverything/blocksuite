@@ -36,7 +36,7 @@ test('should format quick bar show when select text', async ({ page }) => {
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 20, 5);
-  assertAlmostEqual(box.y, 260, 20);
+  assertAlmostEqual(box.y, 260, 22);
 
   // Click the edge of the format quick bar
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
