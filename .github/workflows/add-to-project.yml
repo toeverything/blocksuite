@@ -13,6 +13,7 @@ jobs:
   add-to-project:
     name: Add issues and pull requests
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     steps:
       - uses: actions/add-to-project@v0.4.0
         with:
