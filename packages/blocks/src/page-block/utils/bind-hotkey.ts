@@ -152,7 +152,10 @@ export function handleDown(
   if (hasNativeSelection) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
-    if (matchFlavours(model, ['affine:code'])) {
+    if (
+      matchFlavours(model, ['affine:code']) ||
+      matchFlavours(model, ['affine:page'])
+    ) {
       return;
     }
     const range = getCurrentRange();
