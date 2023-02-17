@@ -249,7 +249,7 @@ export class DebugMenu extends NonShadowLitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
-    this._styleMenu = new GUI();
+    this._styleMenu = new GUI({ hideable: false });
     this._styleMenu.width = 350;
     const style = document.documentElement.style;
     const sizeFolder = this._styleMenu.addFolder('Size');

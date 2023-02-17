@@ -158,31 +158,28 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           }
           const deltaX = this._dragLastPos.x - e.x;
           const deltaY = this._dragLastPos.y - e.y;
+          const boundX =
+            this.blockSelectionState.selected.x -
+            deltaX / this._edgeless.viewport.zoom;
+          const boundY =
+            this.blockSelectionState.selected.y -
+            deltaY / this._edgeless.viewport.zoom;
+          const boundW = this.blockSelectionState.selected.w;
+          const boundH = this.blockSelectionState.selected.h;
           this._edgeless.surface.setElementBound(
             this.blockSelectionState.selected.id,
             {
-              x:
-                this.blockSelectionState.selected.x -
-                deltaX / this._edgeless.viewport.zoom,
-              y:
-                this.blockSelectionState.selected.y -
-                deltaY / this._edgeless.viewport.zoom,
-              w: this.blockSelectionState.selected.w,
-              h: this.blockSelectionState.selected.h,
+              x: boundX,
+              y: boundY,
+              w: boundW,
+              h: boundH,
             }
           );
           this._blockSelectionState = {
             ...this.blockSelectionState,
             rect: getSelectionBoxBound(
               this._edgeless.viewport,
-              serializeXYWH(
-                this.blockSelectionState.selected.x -
-                  deltaX / this._edgeless.viewport.zoom,
-                this.blockSelectionState.selected.y -
-                  deltaY / this._edgeless.viewport.zoom,
-                this.blockSelectionState.selected.w,
-                this.blockSelectionState.selected.h
-              )
+              serializeXYWH(boundX, boundY, boundW, boundH)
             ),
           };
           this._edgeless.signals.updateSelection.emit(

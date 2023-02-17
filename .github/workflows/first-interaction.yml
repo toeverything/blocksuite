@@ -1,0 +1,24 @@
+name: First Interaction
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    branches: [master]
+    types: [opened]
+
+jobs:
+  check_for_first_interaction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/first-interaction@main
+        with:
+          repo-token: ${{ secrets.BOT_TOKEN }}
+          issue-message: |
+            Hello! Thank you for filing an issue.
+            If this is a bug report, please include relevant logs to help us debug the problem.
+          pr-message: |
+            Hello! Thank you for your contribution.
+
+            In order for us to review and merge your suggested changes, please sign at https://github.com/toeverything/blocksuite/blob/master/.github/CLA.md

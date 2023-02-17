@@ -38,7 +38,7 @@ export class ExampleList extends LitElement {
               class="card"
               @click=${() => {
                 const urlParams = new URLSearchParams(window.location.search);
-                urlParams.set('init', fn.name);
+                urlParams.set('init', fn.id);
                 window.location.search = urlParams.toString();
               }}
             >

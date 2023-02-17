@@ -1,9 +1,11 @@
 import {
+  BLOCKHUB_FILE_ITEMS,
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
   BlockHubIcon,
   CrossIcon,
   DatabaseTableViewIcon,
+  ImageIcon,
   NumberedListIconLarge,
   RectIcon,
   TextIconLarge,
@@ -43,7 +45,7 @@ type BlockHubItem = {
   toolTip: string;
 };
 
-export type CardListType = 'blank' | 'list' | 'text' | 'database';
+export type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
 
 @customElement('affine-block-hub')
 export class BlockHub extends NonShadowLitElement {
@@ -101,7 +103,10 @@ export class BlockHub extends NonShadowLitElement {
   @query('[role="menu-entry"]')
   private _blockHubMenuEntry!: HTMLElement;
 
-  private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+  private readonly _onDropCallback: (
+    e: DragEvent,
+    lastModelState: EditingState
+  ) => Promise<void>;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
@@ -126,7 +131,7 @@ export class BlockHub extends NonShadowLitElement {
       position: absolute;
       right: calc(100% + 8px);
       top: calc(50%);
-      overflow-y: auto;
+      overflow-y: unset;
       transform: translateY(-50%);
       display: none;
       justify-content: center;
@@ -180,6 +185,11 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       position: absolute;
       right: 12px;
+    }
+
+    .card-icon-container > svg {
+      width: 20px;
+      height: 20px;
     }
 
     .card-container:hover {
@@ -330,7 +340,10 @@ export class BlockHub extends NonShadowLitElement {
   constructor(options: {
     mouseRoot: HTMLElement;
     enable_database: boolean;
-    onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
+    onDropCallback: (
+      e: DragEvent,
+      lastModelState: EditingState
+    ) => Promise<void>;
   }) {
     super();
     this._mouseRoot = options.mouseRoot;
@@ -480,7 +493,7 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   private _blockHubMenuTemplate = () => {
-    const menuNum = this._enable_database ? 4 : 3;
+    const menuNum = this._enable_database ? 5 : 4;
     const height = menuNum * 44 + 10;
     return html`
       <div
@@ -523,6 +536,18 @@ export class BlockHub extends NonShadowLitElement {
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
           ${NumberedListIconLarge}
         </div>
+        <div
+          class="block-hub-icon-container"
+          type="file"
+          selected=${this._cardVisibleType === 'file' ? 'true' : 'false'}
+        >
+          ${this._blockHubCardTemplate(
+            BLOCKHUB_FILE_ITEMS,
+            'file',
+            'Image or file'
+          )}
+          ${ImageIcon}
+        </div>
         ${this._enable_database
           ? html`
               <div
@@ -556,9 +581,10 @@ export class BlockHub extends NonShadowLitElement {
     type: string,
     title: string
   ) => {
+    const shouldScroll = this._maxHeight < 800;
     const styles = styleMap({
       maxHeight: `${this._maxHeight}px`,
-      overflowY: this._maxHeight < 800 ? 'scroll' : 'unset',
+      overflowY: shouldScroll ? 'scroll' : 'unset',
     });
     return html`
       <div
@@ -572,10 +598,7 @@ export class BlockHub extends NonShadowLitElement {
         ${blockHubItems.map(
           ({ flavour, type, name, description, icon, toolTip }, index) => {
             return html`
-              <div
-                class="card-container-wrapper"
-                style="z-index: ${blockHubItems.length - index}"
-              >
+              <div class="card-container-wrapper">
                 <div
                   class="card-container has-tool-tip ${this._isGrabbing
                     ? 'grabbing'
@@ -590,8 +613,13 @@ export class BlockHub extends NonShadowLitElement {
                   </div>
                   <div class="card-icon-container">${icon}</div>
                   <centered-tool-tip
-                    tip-position="bottom"
-                    style=${this._showToolTip ? '' : 'display: none'}
+                    tip-position=${shouldScroll &&
+                    index === blockHubItems.length - 1
+                      ? 'top'
+                      : 'bottom'}
+                    style="display: ${this._showToolTip
+                      ? ''
+                      : 'none'}; z-index: ${blockHubItems.length - index}"
                     >${toolTip}
                   </centered-tool-tip>
                 </div>

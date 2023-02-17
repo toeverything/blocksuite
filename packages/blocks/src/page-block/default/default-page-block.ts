@@ -569,6 +569,8 @@ export class DefaultPageBlockComponent
   }
 
   render() {
+    const { readonly } = this;
+
     const childrenContainer = BlockChildrenContainer(this.model, this, () =>
       this.requestUpdate()
     );
@@ -582,12 +584,13 @@ export class DefaultPageBlockComponent
       this.viewportState
     );
     const embedEditingContainer = EmbedEditingContainer(
-      this.embedEditingState,
+      readonly ? null : this.embedEditingState,
       this.signals
     );
     const codeBlockOptionContainer = CodeBlockOptionContainer(
-      this.codeBlockOption
+      readonly ? null : this.codeBlockOption
     );
+
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">

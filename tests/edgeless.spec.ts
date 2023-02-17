@@ -261,3 +261,30 @@ test('edgeless arrow up/down', async ({ page }) => {
   await page.keyboard.press('ArrowUp');
   await assertSelection(page, 0, 4, 0);
 });
+
+test('selection box of shape element sync on fast dragging', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await switchMouseMode(page);
+  await dragBetweenCoords(
+    page,
+    { x: 150, y: 150 },
+    { x: 700, y: 500 },
+    { click: true }
+  );
+
+  const box = await page
+    .locator('.affine-edgeless-selected-rect')
+    .boundingBox();
+  if (!box) {
+    throw new Error('box is null');
+  }
+  const { x, y, width, height } = box;
+  expect([x, y, width, height]).toStrictEqual([650, 450, 100, 100]);
+});

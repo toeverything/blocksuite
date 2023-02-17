@@ -6,7 +6,7 @@
 
 ```tsx
 import dynamic from 'next/dynamic';
-import { useBlockSuiteStore } from './index';
+import { useBlockSuiteStore } from '@blocksuite/react';
 
 export const Editor = dynamic(
   async () => (await import('@blocksuite/react/editor')).Editor,

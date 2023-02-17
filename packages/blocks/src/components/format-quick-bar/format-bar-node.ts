@@ -2,10 +2,17 @@ import './button.js';
 
 import {
   ArrowDownIcon,
+  BlockConfig,
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  DisposableGroup,
+  Page,
+  Signal,
+} from '@blocksuite/store';
+import type { TextAttributes } from '@blocksuite/virgo';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -13,6 +20,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   getCurrentRange,
   getModelsByRange,
+  getRichTextByModel,
 } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
@@ -66,10 +74,12 @@ export class FormatQuickBar extends LitElement {
   paragraphPanelMaxHeight: string | null = null;
 
   @state()
-  format: Record<string, unknown> = {};
+  format: TextAttributes = {};
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
+
+  private _disposableGroup = new DisposableGroup();
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -79,8 +89,8 @@ export class FormatQuickBar extends LitElement {
     if (!models.length) {
       return;
     }
-    this.format = getFormat();
     const startModel = models[0];
+    this.format = getFormat();
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
 
@@ -88,10 +98,38 @@ export class FormatQuickBar extends LitElement {
       // Prevent click event from making selection lost
       e.preventDefault();
     });
-    // TODO add transition
     this.abortController.signal.addEventListener('abort', () => {
       this.remove();
     });
+
+    const mutationObserver = new MutationObserver(() => {
+      this.format = getFormat();
+    });
+    models.forEach(model => {
+      const richText = getRichTextByModel(model);
+      if (!richText) {
+        console.warn(
+          'Format quick bar may not work properly! Cannot find rich text node by model. model:',
+          model
+        );
+        return;
+      }
+      mutationObserver.observe(richText, {
+        // One or more children have been added to and/or removed
+        // from the tree.
+        childList: true,
+        // Omit (or set to false) to observe only changes to the parent node
+        subtree: true,
+      });
+    });
+    this._disposableGroup.add(() => {
+      mutationObserver.disconnect();
+    });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposableGroup.dispose();
   }
 
   private _onHover() {
@@ -138,6 +176,27 @@ export class FormatQuickBar extends LitElement {
       bottom: this.showParagraphPanel === 'top' ? 'calc(100% + 4px)' : null,
       maxHeight: this.paragraphPanelMaxHeight,
     });
+    const updateParagraphType = (
+      flavour: BlockConfig['flavour'],
+      type?: string
+    ) => {
+      if (!this.page) {
+        throw new Error('Failed to format paragraph! Page not found.');
+      }
+      if (this.paragraphType === `${flavour}/${type}`) {
+        // Already in the target format, convert back to text
+        const { flavour: defaultFlavour, type: defaultType } =
+          paragraphConfig[0];
+        if (this.paragraphType === defaultType) return;
+        updateSelectedTextType(defaultFlavour, defaultType);
+        this.paragraphType = `${defaultFlavour}/${defaultType}`;
+        return;
+      }
+      updateSelectedTextType(flavour, type);
+      this.paragraphType = `${flavour}/${type}`;
+      this.positionUpdated.emit();
+    };
+
     return html` <div
       class="paragraph-panel"
       style="${styles}"
@@ -150,23 +209,7 @@ export class FormatQuickBar extends LitElement {
           style="padding-left: 12px; justify-content: flex-start;"
           text="${name}"
           data-testid="${flavour}/${type}"
-          @click=${() => {
-            if (!this.page) {
-              throw new Error('Failed to format paragraph! Page not found.');
-            }
-            if (this.paragraphType === `${flavour}/${type}`) {
-              // Already in the target format, convert back to text
-              const { flavour: defaultFlavour, type: defaultType } =
-                paragraphConfig[0];
-              if (this.paragraphType === defaultType) return;
-              updateSelectedTextType(defaultFlavour, defaultType);
-              this.paragraphType = `${defaultFlavour}/${defaultType}`;
-              return;
-            }
-            updateSelectedTextType(flavour, type);
-            this.paragraphType = `${flavour}/${type}`;
-            this.positionUpdated.emit();
-          }}
+          @click=${() => updateParagraphType(flavour, type)}
         >
           ${icon}
         </format-bar-button>`
@@ -199,22 +242,19 @@ export class FormatQuickBar extends LitElement {
     </format-bar-button>`;
 
     const paragraphPanel = this._paragraphPanelTemplate();
-
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
         ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
-          ?active=${activeWhen()}
+          ?active=${activeWhen(this.format)}
           @click=${() => {
             action({
               page,
               abortController: this.abortController,
               format: this.format,
             });
-            // format state need to update after format
-            this.format = getFormat();
             this.positionUpdated.emit();
           }}
         >

@@ -114,6 +114,9 @@ export class VEditor {
     this._rootElement.addEventListener('keydown', this._onKeyDown, {
       signal: this._rootElementAbort.signal,
     });
+    this._rootElement.addEventListener('paste', this._onPaste, {
+      signal: this._rootElementAbort.signal,
+    });
   }
 
   unmount(): void {
@@ -228,7 +231,7 @@ export class VEditor {
 
   formatText(
     vRange: VRange,
-    attributes: NonNullable<TextAttributes>,
+    attributes: TextAttributes,
     options: {
       match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
@@ -649,6 +652,23 @@ export class VEditor {
     const vRange = this.toVRange(selection);
     if (vRange) {
       this.signals.updateVRange.emit([vRange, 'native']);
+    }
+  };
+
+  private _onPaste = (event: ClipboardEvent) => {
+    const data = event.clipboardData?.getData('text/plain');
+    if (data) {
+      const vRange = this._vRange;
+      if (vRange) {
+        this.insertText(vRange, data);
+        this.signals.updateVRange.emit([
+          {
+            index: vRange.index + data.length,
+            length: 0,
+          },
+          'input',
+        ]);
+      }
     }
   };
 
