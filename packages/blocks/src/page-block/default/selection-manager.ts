@@ -357,7 +357,7 @@ export class PageSelectionState {
     }
   }
 
-  clearNativeRange() {
+  clearNative() {
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
@@ -365,26 +365,30 @@ export class PageSelectionState {
     resetNativeSelection(null);
   }
 
-  clearSelectedBlocks() {
-    this.type = 'none';
+  clearBlockSelectionRect() {
+    this.clearRaf();
     this._startPoint = null;
     this._endPoint = null;
+  }
+
+  clearBlock() {
+    this.type = 'none';
     this._activeComponent = null;
     this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
-    this.clearRaf();
+    this.clearBlockSelectionRect();
   }
 
-  clearEmbedBlocks() {
+  clearEmbed() {
     this.type = 'none';
     this.selectEmbeds = [];
     this._activeComponent = null;
   }
 
   clear() {
-    this.clearNativeRange();
-    this.clearEmbedBlocks();
-    this.clearSelectedBlocks();
+    this.clearBlock();
+    this.clearEmbed();
+    this.clearNative();
   }
 }
 
@@ -569,9 +573,7 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
-    this.state.clearRaf();
-    this.state.setStartPoint(null);
-    this.state.setEndPoint(null);
+    this.state.clearBlockSelectionRect();
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
@@ -840,15 +842,15 @@ export class DefaultSelectionManager {
     const { state, _signals } = this;
     const { type } = state;
     if (type === 'block') {
-      state.clearSelectedBlocks();
+      state.clearBlock();
       _signals.updateSelectedRects.emit([]);
       _signals.updateFrameSelectionRect.emit(null);
     } else if (type === 'embed') {
-      state.clearEmbedBlocks();
+      state.clearEmbed();
       _signals.updateEmbedRects.emit([]);
       _signals.updateEmbedEditingState.emit(null);
     } else if (type === 'native') {
-      state.clearNativeRange();
+      state.clearNative();
     }
   }
 
