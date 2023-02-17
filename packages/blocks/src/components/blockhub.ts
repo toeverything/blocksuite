@@ -683,6 +683,24 @@ export class BlockHub extends NonShadowLitElement {
       this._currentPageX = e.pageX;
       this._currentPageY = e.pageY;
     }
+
+    this._refreshCursor(e);
+  };
+
+  private _refreshCursor = (e: MouseEvent) => {
+    let x = e.pageX;
+    let y = e.pageY;
+    if (isFirefox) {
+      x = this._currentPageX;
+      y = this._currentPageY;
+    }
+    const blocks = this.getAllowedBlocks();
+    const modelState = getBlockEditingStateByPosition(blocks, x, y, {
+      skipX: true,
+    });
+    modelState
+      ? (this._cursor = modelState.index)
+      : (this._cursor = blocks.length - 1);
   };
 
   private _onDrag = (e: DragEvent) => {
