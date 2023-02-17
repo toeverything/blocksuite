@@ -645,22 +645,21 @@ test('should format quick bar position correct at the start of second line', asy
   assertAlmostEqual(formatBox.y, 132, 5);
 });
 
-test.fixme(
-  'should format quick bar action status updated while undo',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
-    await type(page, 'helloworld');
-    await dragBetweenIndices(page, [0, 1], [0, 6]);
+test('should format quick bar action status updated while undo', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'helloworld');
+  await dragBetweenIndices(page, [0, 1], [0, 6]);
 
-    const formatQuickBar = page.locator(`.format-quick-bar`);
-    const boldBtn = formatQuickBar.locator(`[data-testid=bold]`);
+  const formatQuickBar = page.locator(`.format-quick-bar`);
+  const boldBtn = formatQuickBar.locator(`[data-testid=bold]`);
 
-    await expect(boldBtn).not.toHaveAttribute('active', '');
-    await boldBtn.click();
-    await expect(boldBtn).toHaveAttribute('active', '');
-    await undoByKeyboard(page);
-    await expect(boldBtn).not.toHaveAttribute('active', '');
-  }
-);
+  await expect(boldBtn).not.toHaveAttribute('active', '');
+  await boldBtn.click();
+  await expect(boldBtn).toHaveAttribute('active', '');
+  await undoByKeyboard(page);
+  await expect(boldBtn).not.toHaveAttribute('active', '');
+});
