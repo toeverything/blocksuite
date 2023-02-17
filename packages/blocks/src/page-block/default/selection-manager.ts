@@ -611,7 +611,7 @@ export class DefaultSelectionManager {
     this._container.components.dragHandle?.setPointerEvents('none');
 
     // clear selection first
-    this.clearSelection();
+    this.clear();
 
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
@@ -693,7 +693,7 @@ export class DefaultSelectionManager {
     }
 
     // clear selection first
-    this.clearSelection();
+    this.clear();
 
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
@@ -750,7 +750,7 @@ export class DefaultSelectionManager {
 
   private _onContainerDblClick = (e: SelectionEvent) => {
     // clear selection first
-    this.clearSelection();
+    this.clear();
 
     if (e.raw.target instanceof HTMLTextAreaElement) return;
     const range = handleNativeRangeDblClick(this.page, e);
@@ -835,8 +835,8 @@ export class DefaultSelectionManager {
     });
   };
 
-  // `block`, `embed`, `native`
-  clearSelection() {
+  // clear selection: `block`, `embed`, `native`
+  clear() {
     const { state, _signals } = this;
     const { type } = state;
     if (type === 'block') {
@@ -845,8 +845,8 @@ export class DefaultSelectionManager {
       _signals.updateFrameSelectionRect.emit(null);
     } else if (type === 'embed') {
       state.clearEmbedBlocks();
-      _signals.updateEmbedEditingState.emit(null);
       _signals.updateEmbedRects.emit([]);
+      _signals.updateEmbedEditingState.emit(null);
     } else if (type === 'native') {
       state.clearNativeRange();
     }
@@ -1021,7 +1021,7 @@ export class DefaultSelectionManager {
     }
 
     // clear selection first
-    this.clearSelection();
+    this.clear();
     this.state.type = 'block';
 
     if (focusedBlockIndex === -1) {
