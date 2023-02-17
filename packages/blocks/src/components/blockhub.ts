@@ -131,7 +131,7 @@ export class BlockHub extends NonShadowLitElement {
       position: absolute;
       right: calc(100% + 8px);
       top: calc(50%);
-      overflow-y: auto;
+      overflow-y: unset;
       transform: translateY(-50%);
       display: none;
       justify-content: center;
@@ -581,9 +581,10 @@ export class BlockHub extends NonShadowLitElement {
     type: string,
     title: string
   ) => {
+    const shouldScroll = this._maxHeight < 800;
     const styles = styleMap({
       maxHeight: `${this._maxHeight}px`,
-      overflowY: this._maxHeight < 800 ? 'scroll' : 'unset',
+      overflowY: shouldScroll ? 'scroll' : 'unset',
     });
     return html`
       <div
@@ -597,10 +598,7 @@ export class BlockHub extends NonShadowLitElement {
         ${blockHubItems.map(
           ({ flavour, type, name, description, icon, toolTip }, index) => {
             return html`
-              <div
-                class="card-container-wrapper"
-                style="z-index: ${blockHubItems.length - index}"
-              >
+              <div class="card-container-wrapper">
                 <div
                   class="card-container has-tool-tip ${this._isGrabbing
                     ? 'grabbing'
@@ -615,8 +613,13 @@ export class BlockHub extends NonShadowLitElement {
                   </div>
                   <div class="card-icon-container">${icon}</div>
                   <centered-tool-tip
-                    tip-position="bottom"
-                    style=${this._showToolTip ? '' : 'display: none'}
+                    tip-position=${shouldScroll &&
+                    index === blockHubItems.length - 1
+                      ? 'top'
+                      : 'bottom'}
+                    style="display: ${this._showToolTip
+                      ? ''
+                      : 'none'}; z-index: ${blockHubItems.length - index}"
                     >${toolTip}
                   </centered-tool-tip>
                 </div>
@@ -680,6 +683,24 @@ export class BlockHub extends NonShadowLitElement {
       this._currentPageX = e.pageX;
       this._currentPageY = e.pageY;
     }
+
+    this._refreshCursor(e);
+  };
+
+  private _refreshCursor = (e: MouseEvent) => {
+    let x = e.pageX;
+    let y = e.pageY;
+    if (isFirefox) {
+      x = this._currentPageX;
+      y = this._currentPageY;
+    }
+    const blocks = this.getAllowedBlocks();
+    const modelState = getBlockEditingStateByPosition(blocks, x, y, {
+      skipX: true,
+    });
+    modelState
+      ? (this._cursor = modelState.index)
+      : (this._cursor = blocks.length - 1);
   };
 
   private _onDrag = (e: DragEvent) => {
@@ -806,7 +827,7 @@ export class BlockHub extends NonShadowLitElement {
             inert
             tip-position="left"
             role="tooltip"
-            >insert blocks
+            >Insert blocks
           </tool-tip>
         </div>
         ${this._blockHubCardTemplate(BLOCKHUB_TEXT_ITEMS, 'text', 'Text block')}
