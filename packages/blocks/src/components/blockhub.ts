@@ -781,7 +781,7 @@ export class BlockHub extends NonShadowLitElement {
             inert
             tip-position="left"
             role="tooltip"
-            >insert blocks
+            >Insert blocks
           </tool-tip>
         </div>
         ${this._blockHubCardTemplate(BLOCKHUB_TEXT_ITEMS, 'text', 'Text block')}
