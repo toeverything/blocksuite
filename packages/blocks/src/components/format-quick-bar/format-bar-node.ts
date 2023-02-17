@@ -6,7 +6,13 @@ import {
   CopyIcon,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  DisposableGroup,
+  Page,
+  Signal,
+} from '@blocksuite/store';
+import type { TextAttributes } from '@blocksuite/virgo/types.js';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -14,6 +20,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   getCurrentRange,
   getModelsByRange,
+  getRichTextByModel,
 } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
@@ -67,10 +74,12 @@ export class FormatQuickBar extends LitElement {
   paragraphPanelMaxHeight: string | null = null;
 
   @state()
-  format: Record<string, unknown> = {};
+  format: TextAttributes = {};
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
+
+  private _disposableGroup = new DisposableGroup();
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -88,10 +97,38 @@ export class FormatQuickBar extends LitElement {
       // Prevent click event from making selection lost
       e.preventDefault();
     });
-    // TODO add transition
     this.abortController.signal.addEventListener('abort', () => {
       this.remove();
     });
+
+    const mutationObserver = new MutationObserver(() => {
+      this.format = getFormat();
+    });
+    models.forEach(model => {
+      const richText = getRichTextByModel(model);
+      if (!richText) {
+        console.warn(
+          'Format quick bar may not work properly! Cannot find rich text node by model. model:',
+          model
+        );
+        return;
+      }
+      mutationObserver.observe(richText, {
+        // One or more children have been added to and/or removed
+        // from the tree.
+        childList: true,
+        // Omit (or set to false) to observe only changes to the parent node
+        subtree: true,
+      });
+    });
+    this._disposableGroup.add(() => {
+      mutationObserver.disconnect();
+    });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._disposableGroup.dispose();
   }
 
   private _onHover() {
@@ -204,27 +241,20 @@ export class FormatQuickBar extends LitElement {
     </format-bar-button>`;
 
     const paragraphPanel = this._paragraphPanelTemplate();
-    // XXX
-    // It's unsafe to get format in the render function
-    // Refactor it after redo/undo event is implemented
-    const format = getFormat();
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
         ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
           class="has-tool-tip"
           data-testid=${id}
-          ?active=${activeWhen(format)}
+          ?active=${activeWhen(this.format)}
           @click=${() => {
             action({
               page,
               abortController: this.abortController,
-              format,
+              format: this.format,
             });
             this.positionUpdated.emit();
-            // Workaround for the issue that the format bar status is not updated
-            // Remove it after redo/undo event is implemented
-            this.requestUpdate();
           }}
         >
           ${icon}
