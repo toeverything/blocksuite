@@ -184,7 +184,7 @@ export class DefaultPageBlockComponent
   selectedRects: DOMRect[] = [];
 
   @state()
-  selectEmbedRects: DOMRect[] = [];
+  selectedEmbedRects: DOMRect[] = [];
 
   @state()
   embedEditingState!: EmbedEditingState | null;
@@ -480,7 +480,10 @@ export class DefaultPageBlockComponent
       this.requestUpdate();
     });
     this.signals.updateEmbedRects.on(rects => {
-      this.selectEmbedRects = rects;
+      this.selectedEmbedRects = rects;
+      if (rects.length === 0) {
+        this.embedEditingState = null;
+      }
       this.requestUpdate();
     });
     this.signals.updateEmbedEditingState.on(embedEditingState => {
@@ -571,7 +574,7 @@ export class DefaultPageBlockComponent
       this.viewportState
     );
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this.selectEmbedRects,
+      this.selectedEmbedRects,
       this.viewportState
     );
     const embedEditingContainer = EmbedEditingContainer(
