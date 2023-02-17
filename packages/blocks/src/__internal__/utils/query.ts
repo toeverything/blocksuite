@@ -297,6 +297,9 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
   return text;
 }
 
+/**
+ * FIXME: Use it carefully, it will skip soft enter!
+ */
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number,

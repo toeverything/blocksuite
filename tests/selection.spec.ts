@@ -1841,8 +1841,6 @@ test('should clear native selection before block selection', async ({
 
   const text0 = await getQuillSelectionText(page);
 
-  await page.mouse.click(0, 0);
-
   // `123`
   const first = await page.evaluate(() => {
     const first = document.querySelector('[data-block-id="2"]');
@@ -1855,11 +1853,11 @@ test('should clear native selection before block selection', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
+      x: first.right + 1,
       y: first.top - 1,
     },
     {
-      x: first.left + 1,
+      x: first.right - 1,
       y: first.top + 1,
     }
   );

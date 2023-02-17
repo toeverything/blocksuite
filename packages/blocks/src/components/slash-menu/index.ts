@@ -3,7 +3,7 @@ import './slash-menu-node.js';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
-  getQuillIndexByNativeSelection,
+  getRichTextByModel,
   throttle,
 } from '../../__internal__/utils/index.js';
 import {
@@ -82,11 +82,17 @@ function onAbort(
     );
     return;
   }
-  const idx = getQuillIndexByNativeSelection(
-    range.startContainer,
-    // minus 1 to remove the slash
-    range.startOffset - 1
-  );
+  const richText = getRichTextByModel(model);
+  const quill = richText?.quill;
+  if (!quill) {
+    console.warn(
+      'Failed to clean slash search text! No quill found for model, model:',
+      model
+    );
+    return;
+  }
+  const { index: curIdx } = quill.getSelection();
+  const idx = curIdx - searchStr.length;
 
   const textStr = text.toString().slice(idx, idx + searchStr.length);
   if (textStr !== searchStr) {
