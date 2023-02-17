@@ -132,7 +132,7 @@ export function handleUp(
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
     const page = getDefaultPageBlock(selectedModel);
-    selection.clearRects();
+    selection.clear();
     focusPreviousBlock(
       selectedModel,
       page.lastSelectionPosition instanceof Point
@@ -204,7 +204,7 @@ export function handleDown(
       );
     }
     const selectedModel = getModelByElement(lastEle);
-    selection.clearRects();
+    selection.clear();
     const page = getDefaultPageBlock(selectedModel);
     focusNextBlock(
       selectedModel,
@@ -260,11 +260,11 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         if (!selectBlocks.length) {
           return;
         }
+        selection.state.type = 'block';
         selection.state.refreshBlockRectCache();
         selection.setSelectedBlocks(selectBlocks);
       });
-      selection.clearRects();
-
+      selection.clear();
       break;
     }
   }
@@ -308,17 +308,32 @@ export function bindHotkeys(
   bindCommonHotkey(page);
 
   hotkey.addListener(ENTER, e => {
-    const { type, selectedBlocks } = selection.state;
     const targetInput = e.target;
     // TODO caption ad-hoc should be moved to the caption input for processing
     const isCaption = isCaptionElement(targetInput);
+    const { state } = selection;
+    let element: Element | null = null;
+
     // select blocks or focus caption input, then enter will create a new block.
-    if ((type === 'block' && selectedBlocks.length) || isCaption) {
+    if (state.type === 'block') {
+      const { selectedBlocks } = state;
+      if (selectedBlocks.length) {
+        element = selectedBlocks[selectedBlocks.length - 1];
+      }
+    } else if (state.type === 'embed') {
+      const { selectEmbeds } = state;
+      if (selectEmbeds.length) {
+        element = selectEmbeds[selectEmbeds.length - 1];
+      }
+    }
+
+    if (!element && isCaption) {
+      element = targetInput;
+    }
+
+    if (element) {
       e.stopPropagation();
       e.preventDefault();
-      const element = isCaption
-        ? targetInput
-        : selectedBlocks[selectedBlocks.length - 1];
       const model = getModelByElement(element);
       const parentModel = page.getParent(model);
       const index = parentModel?.children.indexOf(model);
@@ -331,8 +346,7 @@ export function bindHotkeys(
         index + 1
       );
       asyncFocusRichText(page, id);
-      selection.state.clear();
-      selection.clearRects();
+      selection.clear();
       return;
     }
   });
@@ -348,6 +362,7 @@ export function bindHotkeys(
       return;
     }
 
+    let blocks: Element[] | null = null;
     if (state.type === 'block') {
       // XXX Ad-hoc for code block
       // At the beginning of the code block,
@@ -358,17 +373,24 @@ export function bindHotkeys(
         return;
       }
       const { selectedBlocks } = state;
+      if (selectedBlocks.length) {
+        blocks = selectedBlocks;
+      }
+    } else if (state.type === 'embed') {
+      const { selectEmbeds } = state;
+      if (selectEmbeds.length) {
+        blocks = selectEmbeds;
+      }
+    }
 
-      // delete selected blocks
+    if (blocks && blocks.length) {
+      e.preventDefault();
+      // delete blocks
       handleBlockSelectionBatchDelete(
         page,
-        selectedBlocks.map(block => getModelByElement(block))
+        blocks.map(block => getModelByElement(block))
       );
-      e.preventDefault();
-      state.clear();
-      signals.updateSelectedRects.emit([]);
-      signals.updateEmbedRects.emit([]);
-      signals.updateEmbedEditingState.emit(null);
+      selection.clear();
       return;
     }
   });

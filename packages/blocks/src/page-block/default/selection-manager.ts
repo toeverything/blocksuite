@@ -357,27 +357,38 @@ export class PageSelectionState {
     }
   }
 
-  clearSelectedBlocks() {
-    this.type = 'none';
-    this._startPoint = null;
-    this._endPoint = null;
-    this.focusedBlockIndex = -1;
-    this.selectedBlocks = [];
-    this.clearRaf();
-  }
-
-  clearEmbedBlocks() {
-    this.type = 'none';
-    this.selectEmbeds = [];
-  }
-
-  clear() {
+  clearNative() {
     this.type = 'none';
     this._richTextCache.clear();
     this._startRange = null;
     this._rangePoint = null;
-    this.clearEmbedBlocks();
-    this.clearSelectedBlocks();
+    resetNativeSelection(null);
+  }
+
+  clearBlockSelectionRect() {
+    this.clearRaf();
+    this._startPoint = null;
+    this._endPoint = null;
+  }
+
+  clearBlock() {
+    this.type = 'none';
+    this._activeComponent = null;
+    this.focusedBlockIndex = -1;
+    this.selectedBlocks = [];
+    this.clearBlockSelectionRect();
+  }
+
+  clearEmbed() {
+    this.type = 'none';
+    this.selectEmbeds = [];
+    this._activeComponent = null;
+  }
+
+  clear() {
+    this.clearBlock();
+    this.clearEmbed();
+    this.clearNative();
   }
 }
 
@@ -503,7 +514,6 @@ export class DefaultSelectionManager {
       scrollLeft,
     });
     this.state.refreshBlockRectCache();
-    resetNativeSelection(null);
     // deactivate quill keyboard event handler
     (document.activeElement as HTMLDivElement).blur();
   }
@@ -563,18 +573,15 @@ export class DefaultSelectionManager {
 
   private _onBlockSelectionDragEnd(_: SelectionEvent) {
     this.state.type = 'block';
-    this.state.clearRaf();
-    this.state.setStartPoint(null);
-    this.state.setEndPoint(null);
+    this.state.clearBlockSelectionRect();
     this._signals.updateFrameSelectionRect.emit(null);
     // do not clear selected rects here
   }
 
-  private _onNativeSelectionDragStart(_: SelectionEvent) {
-    if (this.state.type === 'block') {
-      this.clearRects();
-    }
+  private _onNativeSelectionDragStart(e: SelectionEvent) {
+    this.state.resetStartRange(e);
     this.state.type = 'native';
+    this._signals.nativeSelection.emit(false);
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
@@ -605,6 +612,9 @@ export class DefaultSelectionManager {
 
     // disable dragHandle button
     this._container.components.dragHandle?.setPointerEvents('none');
+
+    // clear selection first
+    this.clear();
 
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
@@ -685,9 +695,8 @@ export class DefaultSelectionManager {
       return;
     }
 
-    this.state.clear();
-    this._signals.updateSelectedRects.emit([]);
-    this._signals.updateEmbedRects.emit([]);
+    // clear selection first
+    this.clear();
 
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
@@ -716,22 +725,22 @@ export class DefaultSelectionManager {
       clickBlockInfo &&
       matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
     ) {
-      this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
 
       this.state.activeComponent = getBlockElementByModel(clickBlockInfo.model);
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
+        this.state.type = 'embed';
         this.state.selectEmbeds.push(
           this.state.activeComponent as EmbedBlockComponent
         );
-        this.state.selectedBlocks.push(this.state.activeComponent);
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
       } else {
+        this.state.type = 'block';
         this.state.selectedBlocks.push(this.state.activeComponent);
+        this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       }
-      this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       return;
     }
     const target = e.raw.target;
@@ -743,8 +752,9 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
-    this.state.clear();
-    this._signals.updateSelectedRects.emit([]);
+    // clear selection first
+    this.clear();
+
     if (e.raw.target instanceof HTMLTextAreaElement) return;
     const range = handleNativeRangeDblClick(this.page, e);
     if (!range || range.collapsed) {
@@ -837,16 +847,21 @@ export class DefaultSelectionManager {
     });
   };
 
-  clearRects() {
-    this._signals.updateSelectedRects.emit([]);
-    this._signals.updateFrameSelectionRect.emit(null);
-    this._signals.updateEmbedEditingState.emit(null);
-    this._signals.updateEmbedRects.emit([]);
-    this.state.clearSelectedBlocks();
-  }
-
+  // clear selection: `block`, `embed`, `native`
   clear() {
-    this.state.clear();
+    const { state, _signals } = this;
+    const { type } = state;
+    if (type === 'block') {
+      state.clearBlock();
+      _signals.updateSelectedRects.emit([]);
+      _signals.updateFrameSelectionRect.emit(null);
+    } else if (type === 'embed') {
+      state.clearEmbed();
+      _signals.updateEmbedRects.emit([]);
+      _signals.updateEmbedEditingState.emit(null);
+    } else if (type === 'native') {
+      state.clearNative();
+    }
   }
 
   dispose() {
@@ -894,9 +909,16 @@ export class DefaultSelectionManager {
     );
   }
 
-  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
-    if (this.state.type !== 'block') return;
+  refresh() {
+    const { type } = this.state;
+    if (type === 'block') {
+      this.refreshSelectedBlocksRects();
+    } else if (type === 'embed') {
+      this.refresEmbedRects();
+    }
+  }
 
+  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
     const { blockCache, startPoint, endPoint } = this.state;
 
     if (startPoint && endPoint) {
@@ -913,8 +935,6 @@ export class DefaultSelectionManager {
 
   refreshSelectedBlocksRects() {
     this.state.refreshBlockRectCache();
-
-    if (this.state.type !== 'block') return;
 
     const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
 
@@ -942,7 +962,7 @@ export class DefaultSelectionManager {
     if (activeComponent && selectEmbeds.length) {
       const image = activeComponent as ImageBlockComponent;
       if (image.model.type === 'image') {
-        const rect = image.getBoundingClientRect();
+        const rect = image.resizeImg.getBoundingClientRect();
         this._signals.updateEmbedRects.emit([rect]);
       }
     }
@@ -1011,10 +1031,10 @@ export class DefaultSelectionManager {
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
       return;
     }
-    this.state.clear();
-    this.state.type = 'block';
 
-    this._signals.updateEmbedRects.emit([]);
+    // clear selection first
+    this.clear();
+    this.state.type = 'block';
 
     if (focusedBlockIndex === -1) {
       // SELECT_ALL
