@@ -357,10 +357,19 @@ export class PageSelectionState {
     }
   }
 
+  clearNativeRange() {
+    this.type = 'none';
+    this._richTextCache.clear();
+    this._startRange = null;
+    this._rangePoint = null;
+    resetNativeSelection(null);
+  }
+
   clearSelectedBlocks() {
     this.type = 'none';
     this._startPoint = null;
     this._endPoint = null;
+    this._activeComponent = null;
     this.focusedBlockIndex = -1;
     this.selectedBlocks = [];
     this.clearRaf();
@@ -369,13 +378,11 @@ export class PageSelectionState {
   clearEmbedBlocks() {
     this.type = 'none';
     this.selectEmbeds = [];
+    this._activeComponent = null;
   }
 
   clear() {
-    this.type = 'none';
-    this._richTextCache.clear();
-    this._startRange = null;
-    this._rangePoint = null;
+    this.clearNativeRange();
     this.clearEmbedBlocks();
     this.clearSelectedBlocks();
   }
@@ -503,7 +510,6 @@ export class DefaultSelectionManager {
       scrollLeft,
     });
     this.state.refreshBlockRectCache();
-    resetNativeSelection(null);
     // deactivate quill keyboard event handler
     (document.activeElement as HTMLDivElement).blur();
   }
@@ -570,12 +576,10 @@ export class DefaultSelectionManager {
     // do not clear selected rects here
   }
 
-  private _onNativeSelectionDragStart(_: SelectionEvent) {
-    if (this.state.type === 'block') {
-      this.clearRects();
-    }
-    this._signals.nativeSelection.emit(false);
+  private _onNativeSelectionDragStart(e: SelectionEvent) {
+    this.state.resetStartRange(e);
     this.state.type = 'native';
+    this._signals.nativeSelection.emit(false);
   }
 
   private _onNativeSelectionDragMove(e: SelectionEvent) {
@@ -588,7 +592,6 @@ export class DefaultSelectionManager {
   }
 
   private _onContainerDragStart = (e: SelectionEvent) => {
-    this.state.resetStartRange(e);
     if (isTitleElement(e.raw.target) || isDatabaseInput(e.raw.target)) {
       this.state.type = 'none';
       return;
@@ -606,6 +609,9 @@ export class DefaultSelectionManager {
 
     // disable dragHandle button
     this._container.components.dragHandle?.setPointerEvents('none');
+
+    // clear selection first
+    this.clearSelection();
 
     if (isBlankArea(e)) {
       this._onBlockSelectionDragStart(e);
@@ -686,9 +692,8 @@ export class DefaultSelectionManager {
       return;
     }
 
-    this.state.clear();
-    this._signals.updateSelectedRects.emit([]);
-    this._signals.updateEmbedRects.emit([]);
+    // clear selection first
+    this.clearSelection();
 
     // mouseRoot click will blur all captions
     const allCaptions = Array.from(
@@ -717,22 +722,22 @@ export class DefaultSelectionManager {
       clickBlockInfo &&
       matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
     ) {
-      this.state.type = 'block';
       window.getSelection()?.removeAllRanges();
 
       this.state.activeComponent = getBlockElementByModel(clickBlockInfo.model);
 
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
+        this.state.type = 'embed';
         this.state.selectEmbeds.push(
           this.state.activeComponent as EmbedBlockComponent
         );
-        this.state.selectedBlocks.push(this.state.activeComponent);
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
       } else {
+        this.state.type = 'block';
         this.state.selectedBlocks.push(this.state.activeComponent);
+        this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       }
-      this._signals.updateSelectedRects.emit([clickBlockInfo.position]);
       return;
     }
     const target = e.raw.target;
@@ -744,8 +749,9 @@ export class DefaultSelectionManager {
   };
 
   private _onContainerDblClick = (e: SelectionEvent) => {
-    this.state.clear();
-    this._signals.updateSelectedRects.emit([]);
+    // clear selection first
+    this.clearSelection();
+
     if (e.raw.target instanceof HTMLTextAreaElement) return;
     const range = handleNativeRangeDblClick(this.page, e);
     if (!range || range.collapsed) {
@@ -829,16 +835,21 @@ export class DefaultSelectionManager {
     });
   };
 
-  clearRects() {
-    this._signals.updateSelectedRects.emit([]);
-    this._signals.updateFrameSelectionRect.emit(null);
-    this._signals.updateEmbedEditingState.emit(null);
-    this._signals.updateEmbedRects.emit([]);
-    this.state.clearSelectedBlocks();
-  }
-
-  clear() {
-    this.state.clear();
+  // `block`, `embed`, `native`
+  clearSelection() {
+    const { state, _signals } = this;
+    const { type } = state;
+    if (type === 'block') {
+      state.clearSelectedBlocks();
+      _signals.updateSelectedRects.emit([]);
+      _signals.updateFrameSelectionRect.emit(null);
+    } else if (type === 'embed') {
+      state.clearEmbedBlocks();
+      _signals.updateEmbedEditingState.emit(null);
+      _signals.updateEmbedRects.emit([]);
+    } else if (type === 'native') {
+      state.clearNativeRange();
+    }
   }
 
   dispose() {
@@ -886,9 +897,16 @@ export class DefaultSelectionManager {
     );
   }
 
-  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
-    if (this.state.type !== 'block') return;
+  refresh() {
+    const type = this.state.type;
+    if (type === 'block') {
+      this.refreshSelectedBlocksRects();
+    } else if (type === 'embed') {
+      this.refresEmbedRects();
+    }
+  }
 
+  refreshSelectionRectAndSelecting(viewportState: ViewportState) {
     const { blockCache, startPoint, endPoint } = this.state;
 
     if (startPoint && endPoint) {
@@ -905,8 +923,6 @@ export class DefaultSelectionManager {
 
   refreshSelectedBlocksRects() {
     this.state.refreshBlockRectCache();
-
-    if (this.state.type !== 'block') return;
 
     const { blockCache, focusedBlockIndex, selectedBlocks } = this.state;
 
@@ -1003,10 +1019,10 @@ export class DefaultSelectionManager {
     if (this.state.blockCache.size === this.state.selectedBlocks.length) {
       return;
     }
-    this.state.clear();
-    this.state.type = 'block';
 
-    this._signals.updateEmbedRects.emit([]);
+    // clear selection first
+    this.clearSelection();
+    this.state.type = 'block';
 
     if (focusedBlockIndex === -1) {
       // SELECT_ALL

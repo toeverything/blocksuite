@@ -268,45 +268,40 @@ export class DefaultPageBlockComponent
   // FIXME: keep embed selected rects after scroll
   // TODO: disable it on scroll's thresold
   private _onWheel = (e: WheelEvent) => {
-    if (this.selection.state.type === 'native') {
-      if (this.selection.state.startRange && this.selection.state.rangePoint) {
-        return;
+    const { selection } = this;
+    const { state } = selection;
+    const { type } = state;
+
+    if (type === 'native') {
+      return;
+    }
+
+    if (type === 'block') {
+      const { viewportState, defaultViewportElement } = this;
+      const { scrollTop, scrollHeight, clientHeight } = viewportState;
+      const max = scrollHeight - clientHeight;
+      let top = e.deltaY / 2;
+      if (top > 0) {
+        if (Math.ceil(scrollTop) === max) return;
+
+        top = Math.min(top, max - scrollTop);
+      } else if (top < 0) {
+        if (scrollTop === 0) return;
+
+        top = Math.max(top, -scrollTop);
       }
-    }
 
-    if (this.selection.state.type !== 'block') {
-      this.selection.state.clear();
-      // if (this.selection.state.type !== 'embed') {
-      this.signals.updateEmbedRects.emit([]);
-      this.signals.updateEmbedEditingState.emit(null);
-      // }
-      return;
-    }
+      const { startPoint, endPoint } = state;
+      if (startPoint && endPoint) {
+        e.preventDefault();
 
-    const { scrollTop, scrollHeight, clientHeight } = this.viewportState;
-    const max = scrollHeight - clientHeight;
-    let top = e.deltaY / 2;
-    if (top > 0) {
-      if (Math.ceil(scrollTop) === max) return;
+        viewportState.scrollTop += top;
+        // FIXME: need smooth
+        defaultViewportElement.scrollTop += top;
 
-      top = Math.min(top, max - scrollTop);
-    } else if (top < 0) {
-      if (scrollTop === 0) return;
-
-      top = Math.max(top, -scrollTop);
-    }
-
-    const { startPoint, endPoint } = this.selection.state;
-    if (startPoint && endPoint) {
-      e.preventDefault();
-
-      this.viewportState.scrollTop += top;
-      // FIXME: need smooth
-      this.defaultViewportElement.scrollTop += top;
-
-      endPoint.y += top;
-      this.selection.updateSelectionRect(startPoint, endPoint);
-      return;
+        endPoint.y += top;
+        selection.updateSelectionRect(startPoint, endPoint);
+      }
     }
 
     // trigger native scroll
@@ -315,7 +310,6 @@ export class DefaultPageBlockComponent
   // See https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
   // May need optimization
   // private _onResize = (_: Event) => {
-  //   this.selection.refreshSelectedBlocksRects();
   // };
 
   private _onScroll = (e: Event) => {
@@ -324,24 +318,21 @@ export class DefaultPageBlockComponent
     const { scrollLeft, scrollTop } = e.target as Element;
     viewportState.scrollLeft = scrollLeft;
     viewportState.scrollTop = scrollTop;
+
     if (type === 'block') {
       selection.refreshSelectionRectAndSelecting(viewportState);
-      // Why? Clicling on the image and the `type` is set to `block`.
-      // See _onContainerClick
+    } else if (type === 'embed') {
       selection.refresEmbedRects();
     } else if (type === 'native') {
       const { startRange, rangePoint } = selection.state;
       if (startRange && rangePoint) {
         // Create a synthetic `mousemove` MouseEvent
         const evt = new MouseEvent('mousemove', {
-          // bubbles: false,
-          // cancelable: false,
           clientX: rangePoint.x,
           clientY: rangePoint.y,
         });
         this.mouseRoot.dispatchEvent(evt);
       }
-      return;
     }
   };
 
@@ -520,8 +511,7 @@ export class DefaultPageBlockComponent
         for (const { target } of entries) {
           if (target === this.defaultViewportElement) {
             this.updateViewportState();
-            this.selection.refreshSelectedBlocksRects();
-            this.selection.refresEmbedRects();
+            this.selection.refresh();
             break;
           }
         }
@@ -553,7 +543,7 @@ export class DefaultPageBlockComponent
     this.components.dragHandle?.remove();
 
     removeHotkeys();
-    this.selection.clear();
+    this.selection.clearSelection();
     this.selection.dispose();
     if (this.components.resizeObserver) {
       this.components.resizeObserver.disconnect();
