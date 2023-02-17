@@ -49,7 +49,7 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
   );
 
   if (typeof window !== 'undefined') {
-    const str = localStorage.getItem('blocksuite-react') ?? '';
+    const str = localStorage.getItem('blocksuite-react') ?? '[]';
     try {
       const data = JSON.parse(str);
       const workspaces: Workspace[] = data.map(
