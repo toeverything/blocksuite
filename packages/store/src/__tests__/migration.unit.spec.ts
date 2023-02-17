@@ -73,4 +73,17 @@ describe('migration', () => {
     expect(hasSurface).toBe(true);
     expect(hasShape).toBe(false);
   });
+
+  test('migrate to new page title', async () => {
+    const doc = await loadBinary('legacy-page-title');
+
+    assert.equal(
+      doc.getMap('space:page0').toJSON()['624813625:0']['prop:title'],
+      'Welcome to BlockSuite playground'
+    );
+    assert.equal(
+      doc.getMap('space:meta').toJSON()['pages'][0]['title'],
+      'Welcome to BlockSuite playground'
+    );
+  });
 });
