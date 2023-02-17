@@ -898,7 +898,7 @@ export class DefaultSelectionManager {
   }
 
   refresh() {
-    const type = this.state.type;
+    const { type } = this.state;
     if (type === 'block') {
       this.refreshSelectedBlocksRects();
     } else if (type === 'embed') {
