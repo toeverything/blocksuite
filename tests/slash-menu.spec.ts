@@ -1,5 +1,10 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { SHORT_KEY, type, withPressKey } from 'utils/actions/keyboard.js';
+import {
+  pressEnter,
+  SHORT_KEY,
+  type,
+  withPressKey,
+} from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -207,4 +212,25 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   // assert backspace works
   await page.keyboard.press('Backspace');
   await expect(slashItems).toHaveCount(2);
+});
+
+// https://github.com/toeverything/blocksuite/issues/1126
+test('should clean slash string after soft enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await page.keyboard.press('Shift+Enter');
+  await type(page, '/copy');
+  await pressEnter(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello\n"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
 });
