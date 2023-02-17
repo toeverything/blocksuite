@@ -90,6 +90,7 @@ export class FormatQuickBar extends LitElement {
       return;
     }
     const startModel = models[0];
+    this.format = getFormat();
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
 
