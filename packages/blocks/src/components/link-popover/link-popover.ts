@@ -205,8 +205,8 @@ export class LinkPopover extends LitElement {
     this.disableConfirm = false;
   }
 
-  private _onKeyup(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
+  private _onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter' && !e.isComposing) {
       this._onConfirm();
     }
     if (!this.linkInput) {
@@ -235,7 +235,7 @@ export class LinkPopover extends LitElement {
         spellcheck="false"
         placeholder="Paste or type a link"
         value=${this.previewLink}
-        @keyup=${this._onKeyup}
+        @keydown=${this._onKeydown}
       />
       <span class="affine-link-popover-dividing-line"></span>
       ${this.confirmBtnTemplate()}
@@ -294,7 +294,7 @@ export class LinkPopover extends LitElement {
           type="text"
           placeholder="Enter text"
           value=${this.text}
-          @keyup=${this._onKeyup}
+          @keydown=${this._onKeydown}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-text-text" for="text-input">Text</label>
@@ -307,7 +307,7 @@ export class LinkPopover extends LitElement {
           spellcheck="false"
           placeholder="Paste or type a link"
           value=${this.previewLink}
-          @keyup=${this._onKeyup}
+          @keydown=${this._onKeydown}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-link-text" for="link-input">Link</label>
