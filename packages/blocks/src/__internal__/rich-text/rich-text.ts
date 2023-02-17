@@ -41,6 +41,9 @@ export class RichText extends NonShadowLitElement {
  * This style is most simple to reset the default styles of the quill editor
  * User should custom the styles of the block in the block itself
  */
+    .ql-cursor-flag {
+      display: none;
+    }
     .ql-container {
       box-sizing: border-box;
       height: 100%;
