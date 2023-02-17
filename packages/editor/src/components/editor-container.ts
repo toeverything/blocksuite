@@ -104,7 +104,7 @@ export class EditorContainer extends NonShadowLitElement {
         const pageModel = this.pageBlockModel;
         if (!pageModel) return;
         const pageBlock = getDefaultPageBlock(pageModel);
-        pageBlock.selection.clearRects();
+        pageBlock.selection.clear();
 
         const selection = getSelection();
         if (

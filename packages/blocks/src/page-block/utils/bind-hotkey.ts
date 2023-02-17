@@ -132,7 +132,7 @@ export function handleUp(
     const { state } = selection;
     const selectedModel = getModelByElement(state.selectedBlocks[0]);
     const page = getDefaultPageBlock(selectedModel);
-    selection.clearRects();
+    selection.clear();
     focusPreviousBlock(
       selectedModel,
       page.lastSelectionPosition instanceof Point
@@ -201,7 +201,7 @@ export function handleDown(
       );
     }
     const selectedModel = getModelByElement(lastEle);
-    selection.clearRects();
+    selection.clear();
     const page = getDefaultPageBlock(selectedModel);
     focusNextBlock(
       selectedModel,
@@ -257,10 +257,11 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
         if (!selectBlocks.length) {
           return;
         }
+        selection.state.type = 'block';
         selection.state.refreshBlockRectCache();
         selection.setSelectedBlocks(selectBlocks);
       });
-      selection.clearRects();
+      selection.clear();
 
       break;
     }
@@ -328,8 +329,7 @@ export function bindHotkeys(
         index + 1
       );
       asyncFocusRichText(page, id);
-      selection.state.clear();
-      selection.clearRects();
+      selection.clear();
       return;
     }
   });

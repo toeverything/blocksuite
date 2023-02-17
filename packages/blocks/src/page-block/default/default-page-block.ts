@@ -543,7 +543,7 @@ export class DefaultPageBlockComponent
     this.components.dragHandle?.remove();
 
     removeHotkeys();
-    this.selection.clearSelection();
+    this.selection.clear();
     this.selection.dispose();
     if (this.components.resizeObserver) {
       this.components.resizeObserver.disconnect();
