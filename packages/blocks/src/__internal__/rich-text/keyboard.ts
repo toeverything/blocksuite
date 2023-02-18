@@ -12,7 +12,7 @@ import {
   noop,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
-import { markdownConvert } from './markdown-convert.js';
+import { markdownConvert, tryMatchSpaceHotkey } from './markdown-convert.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,
@@ -22,7 +22,6 @@ import {
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
-  tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 
 // Type definitions is ported from quill

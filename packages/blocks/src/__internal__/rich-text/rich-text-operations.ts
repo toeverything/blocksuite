@@ -1,21 +1,12 @@
 // operations used in rich-text level
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-} from '@blocksuite/global/utils';
-import { BaseBlockModel, Page, Text } from '@blocksuite/store';
-import { Utils } from '@blocksuite/store';
-import type { Quill } from 'quill';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
 import {
   asyncFocusRichText,
-  convertToDivider,
-  convertToList,
-  convertToParagraph,
   ExtendedModel,
   focusBlockByModel,
   focusTitle,
@@ -567,24 +558,32 @@ export function isAtLineEdge(range: Range) {
 function checkFirstLine(range: Range, container: Element) {
   if (!range.collapsed) {
     throw new Error(
-      'Failed to determine if the caret is at the last line! expected a collapsed range but got' +
+      'Failed to determine if the caret is at the first line! expected a collapsed range but got' +
         range
     );
   }
-  const { height, left, top } = range.getBoundingClientRect();
-  if (left === 0 && top === 0) {
+  if (!container.contains(range.commonAncestorContainer)) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected the range to be inside the container but got' +
+        range +
+        ' and ' +
+        container
+    );
+  }
+  const containerRect = container.getBoundingClientRect();
+  const rangeRect = range.getBoundingClientRect();
+  if (rangeRect.left === 0 && rangeRect.top === 0) {
     // Workaround select to empty line will get empty range
     // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
 
     // At empty line, it is the first line and also is the last line
     return true;
   }
-  const shiftRange = caretRangeFromPoint(left + 1, top - height / 2);
+  const lineHeight = rangeRect.height;
   // If the caret at the start of second line, as known as line edge,
   // the range bounding rect may be incorrect, we need to check the scenario.
   const isFirstLine =
-    (!shiftRange || !container.contains(shiftRange.startContainer)) &&
-    !isAtLineEdge(range);
+    containerRect.top > rangeRect.top - lineHeight / 2 && !isAtLineEdge(range);
   return isFirstLine;
 }
 
@@ -595,17 +594,26 @@ function checkLastLine(range: Range, container: HTMLElement) {
         range
     );
   }
-  const { bottom, left, height } = range.getBoundingClientRect();
-  if (left === 0 && bottom === 0) {
+  if (!container.contains(range.commonAncestorContainer)) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected the range to be inside the container but got' +
+        range +
+        ' and ' +
+        container
+    );
+  }
+  const containerRect = container.getBoundingClientRect();
+  const rangeRect = range.getBoundingClientRect();
+  if (rangeRect.left === 0 && rangeRect.bottom === 0) {
     // Workaround select to empty line will get empty range
     // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
 
     // At empty line, it is the first line and also is the last line
     return true;
   }
-  const shiftRange = caretRangeFromPoint(left + 1, bottom + height / 2);
+  const lineHeight = rangeRect.height;
   const isLastLineWithoutEdge =
-    !shiftRange || !container.contains(shiftRange.startContainer);
+    rangeRect.bottom + lineHeight / 2 > containerRect.bottom;
   if (isLastLineWithoutEdge) {
     // If the caret is at the first line of the block,
     // default behavior will move the caret to the start of the line,
@@ -618,12 +626,9 @@ function checkLastLine(range: Range, container: HTMLElement) {
   }
   // If the caret is at the line edge, the range bounding rect is wrong,
   // we need to check the next range again.
-  const nextRect = atLineEdgeRange.getBoundingClientRect();
-  const nextShiftRange = caretRangeFromPoint(
-    nextRect.left + 1,
-    nextRect.bottom + nextRect.height / 2
-  );
-  return !nextShiftRange || !container.contains(nextShiftRange.startContainer);
+  const nextRangeRect = atLineEdgeRange.getBoundingClientRect();
+  const nextLineHeight = nextRangeRect.height;
+  return nextRangeRect.bottom + nextLineHeight / 2 > containerRect.bottom;
 }
 
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
@@ -665,67 +670,4 @@ export function handleKeyDown(
   // Avoid triggering hotkey bindings
   event.stopPropagation();
   return ALLOW_DEFAULT;
-}
-
-export function tryMatchSpaceHotkey(
-  page: Page,
-  model: ExtendedModel,
-  quill: Quill,
-  prefix: string,
-  range: { index: number; length: number }
-) {
-  const [, offset] = quill.getLine(range.index);
-  if (offset > prefix.length) {
-    return ALLOW_DEFAULT;
-  }
-  if (matchFlavours(model, ['affine:code'])) {
-    return ALLOW_DEFAULT;
-  }
-  let isConverted = false;
-  switch (prefix.trim()) {
-    case '[]':
-    case '[ ]':
-      isConverted = convertToList(page, model, 'todo', prefix, {
-        checked: false,
-      });
-      break;
-    case '[x]':
-      isConverted = convertToList(page, model, 'todo', prefix, {
-        checked: true,
-      });
-      break;
-    case '-':
-    case '*':
-      isConverted = convertToList(page, model, 'bulleted', prefix);
-      break;
-    case '***':
-    case '---':
-      isConverted = convertToDivider(page, model, prefix);
-      break;
-    case '#':
-      isConverted = convertToParagraph(page, model, 'h1', prefix);
-      break;
-    case '##':
-      isConverted = convertToParagraph(page, model, 'h2', prefix);
-      break;
-    case '###':
-      isConverted = convertToParagraph(page, model, 'h3', prefix);
-      break;
-    case '####':
-      isConverted = convertToParagraph(page, model, 'h4', prefix);
-      break;
-    case '#####':
-      isConverted = convertToParagraph(page, model, 'h5', prefix);
-      break;
-    case '######':
-      isConverted = convertToParagraph(page, model, 'h6', prefix);
-      break;
-    case '>':
-      isConverted = convertToParagraph(page, model, 'quote', prefix);
-      break;
-    default:
-      isConverted = convertToList(page, model, 'numbered', prefix);
-  }
-
-  return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
 }
