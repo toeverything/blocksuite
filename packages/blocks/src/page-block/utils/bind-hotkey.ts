@@ -3,10 +3,8 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { getBlockElementByModel, hotkey } from '../../__internal__/index.js';
-import {
-  handleMultiBlockIndent,
-  isAtLineEdge,
-} from '../../__internal__/rich-text/rich-text-operations.js';
+import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
+import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
   focusNextBlock,
