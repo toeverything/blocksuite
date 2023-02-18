@@ -1,7 +1,14 @@
-import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { Quill } from 'quill';
-import type { RangeStatic } from 'quill';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Quill, RangeStatic } from 'quill';
+
+import {
+  convertToDivider,
+  convertToList,
+  convertToParagraph,
+  ExtendedModel,
+} from '../utils/index.js';
 
 type Match = {
   name: string;
@@ -361,4 +368,67 @@ export function markdownConvert(
     }
   }
   return false;
+}
+
+export function tryMatchSpaceHotkey(
+  page: Page,
+  model: ExtendedModel,
+  quill: Quill,
+  prefix: string,
+  range: { index: number; length: number }
+) {
+  const [, offset] = quill.getLine(range.index);
+  if (offset > prefix.length) {
+    return ALLOW_DEFAULT;
+  }
+  if (matchFlavours(model, ['affine:code'])) {
+    return ALLOW_DEFAULT;
+  }
+  let isConverted = false;
+  switch (prefix.trim()) {
+    case '[]':
+    case '[ ]':
+      isConverted = convertToList(page, model, 'todo', prefix, {
+        checked: false,
+      });
+      break;
+    case '[x]':
+      isConverted = convertToList(page, model, 'todo', prefix, {
+        checked: true,
+      });
+      break;
+    case '-':
+    case '*':
+      isConverted = convertToList(page, model, 'bulleted', prefix);
+      break;
+    case '***':
+    case '---':
+      isConverted = convertToDivider(page, model, prefix);
+      break;
+    case '#':
+      isConverted = convertToParagraph(page, model, 'h1', prefix);
+      break;
+    case '##':
+      isConverted = convertToParagraph(page, model, 'h2', prefix);
+      break;
+    case '###':
+      isConverted = convertToParagraph(page, model, 'h3', prefix);
+      break;
+    case '####':
+      isConverted = convertToParagraph(page, model, 'h4', prefix);
+      break;
+    case '#####':
+      isConverted = convertToParagraph(page, model, 'h5', prefix);
+      break;
+    case '######':
+      isConverted = convertToParagraph(page, model, 'h6', prefix);
+      break;
+    case '>':
+      isConverted = convertToParagraph(page, model, 'quote', prefix);
+      break;
+    default:
+      isConverted = convertToList(page, model, 'numbered', prefix);
+  }
+
+  return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
 }
