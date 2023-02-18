@@ -267,9 +267,9 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   syncBlockSelectionRect() {
     if (this.blockSelectionState.type === 'single') {
       const selected = this.blockSelectionState.selected;
-      if (isTopLevelBlock(selected)) {
-        const block = selected;
-        const rect = getSelectionBoxBound(this._edgeless.viewport, block.xywh);
+      if (!isTopLevelBlock(selected)) {
+        const xywh = getXYWH(selected);
+        const rect = getSelectionBoxBound(this._edgeless.viewport, xywh);
         this.blockSelectionState.rect = rect;
         this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
       }
