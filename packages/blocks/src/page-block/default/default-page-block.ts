@@ -108,10 +108,6 @@ export class DefaultPageBlockComponent
       padding-bottom: 150px;
     }
 
-    .affine-default-page-block-container > .affine-block-children-container {
-      padding-left: 0;
-    }
-
     .affine-default-page-block-title {
       /* autosize will calculate height automatically */
       height: 0;
