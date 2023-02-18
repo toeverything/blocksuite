@@ -417,6 +417,18 @@ export class VEditor {
         anchorText = textNode;
         anchorTextOffset = anchorOffset;
       }
+    } else if (
+      anchorNode instanceof HTMLElement &&
+      anchorNode.parentElement instanceof VirgoLine
+    ) {
+      const firstTextElement = anchorNode.querySelector('v-text');
+      if (firstTextElement) {
+        const textNode = getTextNodeFromElement(firstTextElement);
+        if (textNode) {
+          anchorText = textNode;
+          anchorTextOffset = 0;
+        }
+      }
     }
     if (focusNode instanceof Text && isVText(focusNode)) {
       focusText = focusNode;
@@ -430,8 +442,19 @@ export class VEditor {
         focusText = textNode;
         focusTextOffset = focusOffset;
       }
+    } else if (
+      focusNode instanceof HTMLElement &&
+      focusNode.parentElement instanceof VirgoLine
+    ) {
+      const firstTextElement = focusNode.querySelector('v-text');
+      if (firstTextElement) {
+        const textNode = getTextNodeFromElement(firstTextElement);
+        if (textNode) {
+          anchorText = textNode;
+          anchorTextOffset = 0;
+        }
+      }
     }
-
     // case 1
     if (anchorText && focusText) {
       const anchorDomPoint = textPointToDomPoint(
