@@ -317,13 +317,16 @@ importers:
       '@vue/runtime-dom': '*'
       '@vue/tsconfig': ^0.1.3
       vite: ^4.0.0
+      vite-tsconfig-paths: 4.0.5
       vue: ^3.2.45
+      vue-zustand: 0.4.0
       zustand: ^4.3.2
     dependencies:
       '@blocksuite/blocks': link:../blocks
       '@blocksuite/editor': link:../editor
       '@blocksuite/store': link:../store
       vue: 3.2.47
+      vue-zustand: 0.4.0_vue@3.2.47+zustand@4.3.2
       zustand: 4.3.2
     devDependencies:
       '@types/node': 18.13.0
@@ -332,6 +335,7 @@ importers:
       '@vue/runtime-dom': 3.2.47
       '@vue/tsconfig': 0.1.3_@types+node@18.13.0
       vite: 4.1.1_@types+node@18.13.0
+      vite-tsconfig-paths: 4.0.5
 
 packages:
 
@@ -7448,6 +7452,17 @@ packages:
       yn: 3.1.1
     dev: true
 
+  /tsconfck/2.0.2:
+    resolution: {integrity: sha512-H3DWlwKpow+GpVLm/2cpmok72pwRr1YFROV3YzAmvzfGFiC1zEM/mc9b7+1XnrxuXtEbhJ7xUSIqjPFbedp7aQ==}
+    engines: {node: ^14.13.1 || ^16 || >=18, pnpm: ^7.18.0}
+    hasBin: true
+    peerDependencies:
+      typescript: ^4.3.5
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dev: true
+
   /tsconfig-paths/3.14.1:
     resolution: {integrity: sha512-fxDhWnFSLt3VuTwtvJt5fpwxBHg5AdKWMsgcPOOIilyjymcYVZoCQF8fvFRezCNfblEXmi+PcM1eYHeOAgXCOQ==}
     dependencies:
@@ -7691,6 +7706,17 @@ packages:
       - supports-color
     dev: true
 
+  /vite-tsconfig-paths/4.0.5:
+    resolution: {integrity: sha512-/L/eHwySFYjwxoYt1WRJniuK/jPv+WGwgRGBYx3leciR5wBeqntQpUE6Js6+TJemChc+ter7fDBKieyEWDx4yQ==}
+    dependencies:
+      debug: 4.3.4
+      globrex: 0.1.2
+      tsconfck: 2.0.2
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+    dev: true
+
   /vite/4.1.1_@types+node@18.13.0:
     resolution: {integrity: sha512-LM9WWea8vsxhr782r9ntg+bhSFS06FJgCvvB0+8hf8UWtvaiDagKYWXndjfX6kGl74keHJUcpzrQliDXZlF5yg==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -7780,6 +7806,16 @@ packages:
       - supports-color
       - terser
     dev: true
+
+  /vue-zustand/0.4.0_vue@3.2.47+zustand@4.3.2:
+    resolution: {integrity: sha512-w5qakMGZq9OUxChGjoMucc0llmjEY98X5UFI5s/fvOVgVUtxJbr1qH0veKqZ0rBXBdKLdk+Np2zCPu0ktqoHrQ==}
+    peerDependencies:
+      vue: '>=3.2.0'
+      zustand: '>=4.3.0'
+    dependencies:
+      vue: 3.2.47
+      zustand: 4.3.2
+    dev: false
 
   /vue/3.2.47:
     resolution: {integrity: sha512-60188y/9Dc9WVrAZeUVSDxRQOZ+z+y5nO2ts9jWXSTkMvayiWxCWOWtBQoYjLeccfXkiiPZWAHcV+WTPhkqJHQ==}

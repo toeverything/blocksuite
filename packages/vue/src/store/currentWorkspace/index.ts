@@ -1,7 +1,7 @@
 import type { Disposable, Page, Workspace } from '@blocksuite/store';
 import { uuidv4 } from '@blocksuite/store';
+import { watch } from 'vue';
 
-import type { BlockSuiteActionsCreator } from '../../types/index.js';
 import type { CreateBlockSuiteStore } from '../index.js';
 import { workspacePages } from '../manager/index.js';
 
@@ -26,14 +26,14 @@ export interface CurrentWorkspaceActions {
   deletePage: (id: string) => void;
 }
 
-export const createCurrentWorkspaceActions: BlockSuiteActionsCreator<
-  CurrentWorkspaceActions
-> = (set, get, store) => {
+export const createCurrentWorkspaceActions = (
+  store: CreateBlockSuiteStore
+): CurrentWorkspaceActions => {
   return {
     setCurrentWorkspace: (workspace: Workspace) => {
-      if (get().workspaces.some(ws => ws === workspace)) {
+      if (store.workspaces.some(ws => ws === workspace)) {
         const pages = workspacePages.get(workspace);
-        set({
+        Object.assign(store, {
           currentWorkspace: workspace,
           currentPage: null,
           pages: pages ? [...pages] : [],
@@ -41,15 +41,13 @@ export const createCurrentWorkspaceActions: BlockSuiteActionsCreator<
       }
     },
     setCurrentPage: page => {
-      set({
-        currentPage: page,
-      });
+      store.currentPage = page;
     },
     createPage: (id = uuidv4()) => {
-      get().currentWorkspace.createPage(id);
+      store.currentWorkspace.createPage(id);
     },
     deletePage: id => {
-      get().currentWorkspace.removePage(id);
+      store.currentWorkspace.removePage(id);
     },
   };
 };
@@ -60,32 +58,22 @@ export const currentWorkspaceSideEffect = (
 ) => {
   const dispose: Disposable[] = [
     workspace.signals.pageAdded.on(id => {
-      store.setState(state => {
-        return {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          pages: [...state.pages, workspace.getPage(id)!],
-        };
-      });
+      store.pages.push(workspace.getPage(id)!);
     }),
     workspace.signals.pageRemoved.on(id => {
-      store.setState(state => {
-        const index = state.pages.findIndex(page => page.id === id);
-        state.pages.splice(index, 1);
-        if (state.currentPage?.id === id) {
-          return {
-            pages: [...state.pages],
-            currentPage: null,
-          };
-        } else {
-          return {
-            pages: [...state.pages],
-          };
-        }
-      });
+      const index = store.pages.findIndex(page => page.id === id);
+      store.pages.splice(index, 1);
+      if (store.currentPage?.id === id) {
+        store.currentPage = null;
+        store.pages = [...store.pages];
+      } else {
+        store.pages = [...store.pages];
+      }
     }),
   ];
-  store.subscribe(
-    store => store.currentWorkspace,
+
+  watch(
+    () => store.currentWorkspace,
     (workspace, prev) => {
       if (prev !== workspace) {
         dispose.forEach(d => d.dispose());
@@ -93,27 +81,19 @@ export const currentWorkspaceSideEffect = (
       const disposeAdded = workspace.signals.pageAdded.on(id => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const page = workspace.getPage(id)!;
-        store.setState(state => {
-          return {
-            pages: [...state.pages, page],
-          };
-        });
+        store.pages = store.pages.concat(page);
       });
       const disposeRemoved = workspace.signals.pageRemoved.on(id => {
-        store.setState(state => {
-          const index = state.pages.findIndex(page => page.id === id);
-          state.pages.splice(index, 1);
-          if (state.currentPage?.id === id) {
-            return {
-              pages: [...state.pages],
-              currentPage: null,
-            };
-          } else {
-            return {
-              pages: [...state.pages],
-            };
-          }
-        });
+        const index = store.pages.findIndex(page => page.id === id);
+        store.pages.splice(index, 1);
+        if (store.currentPage?.id === id) {
+          Object.assign(store, {
+            pages: [...store.pages],
+            currentPage: null,
+          });
+        } else {
+          store.pages = [...store.pages];
+        }
       });
       dispose.push(disposeAdded, disposeRemoved);
     }

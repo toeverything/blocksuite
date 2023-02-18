@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "preserve",
+    "noEmit": true,
+    "types": ["vue"],
+    "paths": {
+      "@blocksuite/vue/*": ["../src/*"],
+      "@blocksuite/vue": ["../src/index.ts"]
+    }
+  },
+  "include": [
+    "./**.tsx",
+    "./**.vue",
+    "./**.ts",
+    "./**/*.tsx",
+    "./**/*.vue",
+    "./**/*.ts"
+  ]
+}

@@ -31,23 +31,23 @@ export type EditorProps = ExtractPropTypes<typeof editorProps>;
 export const Editor = defineComponent({
   props: editorProps,
   setup(props) {
-    const editorRef = ref<HTMLDivElement>();
+    const $containerRef = ref<HTMLDivElement>();
 
     const pageRef = ref<Page>();
     const editorIns: EditorContainer = new EditorContainer();
 
     watchEffect(() => {
       const maybePage = props.page?.();
-      if (pageRef.value === null) {
+      if (pageRef.value === undefined) {
         pageRef.value = maybePage;
       }
     });
 
     watch(
-      () => [pageRef.value],
+      () => [pageRef.value, $containerRef.value],
       () => {
         const editor = editorIns;
-        if (!editor || !editorRef.value || !pageRef.value) {
+        if (!editor || !$containerRef.value || !pageRef.value) {
           return;
         }
         const page = pageRef.value;
@@ -66,26 +66,30 @@ export const Editor = defineComponent({
             page.resetHistory();
           }
         }
-      }
+      },
+      { immediate: true }
     );
 
-    watch(
-      () => pageRef.value,
+    const mountDomDisposer = watch(
+      () => [pageRef.value, $containerRef.value],
       () => {
         const editor = editorIns;
-        const container = editorRef.value;
+        const container = $containerRef.value;
 
         if (!editor || !container || !pageRef.value) {
           return;
         }
 
         container.appendChild(editor);
-      }
+
+        mountDomDisposer();
+      },
+      { immediate: true, flush: 'post' }
     );
 
     onBeforeUnmount(() => {
       const editor = editorIns;
-      const container = editorRef.value;
+      const container = $containerRef.value;
 
       if (!editor || !container || !pageRef.value) {
         return;
@@ -101,7 +105,8 @@ export const Editor = defineComponent({
         if (page && !page.workspace.connected) {
           page.workspace.connect();
         }
-      }
+      },
+      { immediate: true }
     );
 
     onBeforeUnmount(() => {
@@ -112,7 +117,7 @@ export const Editor = defineComponent({
 
     return () => {
       // eslint-disable-next-line react/no-unknown-property
-      return <div class="editor-wrapper" ref={editorRef} />;
+      return <div class="editor-wrapper" ref={$containerRef} />;
     };
   },
 });

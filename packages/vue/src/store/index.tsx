@@ -1,26 +1,33 @@
 import { builtInSchemas } from '@blocksuite/blocks/models';
 import { assertExists } from '@blocksuite/global/utils';
-import { DebugDocProvider, Workspace } from '@blocksuite/store';
-import { IndexedDBDocProvider } from '@blocksuite/store';
-import { defineComponent, inject, InjectionKey, PropType, provide } from 'vue';
-import { create, useStore } from 'zustand';
-import { combine, subscribeWithSelector } from 'zustand/middleware';
+import {
+  DebugDocProvider,
+  IndexedDBDocProvider,
+  Workspace,
+} from '@blocksuite/store';
+import {
+  defineComponent,
+  inject,
+  InjectionKey,
+  PropType,
+  provide,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
 
 import type {
   CurrentWorkspaceActions,
   CurrentWorkspaceState,
 } from './currentWorkspace/index.js';
 import {
-  createCurrentWorkspaceActions,
   createCurrentWorkspaceState,
   currentWorkspaceSideEffect,
 } from './currentWorkspace/index.js';
 import type { ManagerActions, ManagerState } from './manager/index.js';
-import {
-  bindWorkspaceWithPages,
-  createManagerActions,
-  createManagerState,
-} from './manager/index.js';
+import { bindWorkspaceWithPages, createManagerState } from './manager/index.js';
+
+const StoreKey = 'block-suite-vue';
 
 export interface BlockSuiteState extends ManagerState, CurrentWorkspaceState {}
 
@@ -29,27 +36,13 @@ export interface BlockSuiteActions
     CurrentWorkspaceActions {}
 
 export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
-  const store = create(
-    subscribeWithSelector(
-      combine<
-        BlockSuiteState,
-        BlockSuiteActions,
-        [['zustand/subscribeWithSelector', never]]
-      >(
-        {
-          ...createManagerState(defaultWorkspace),
-          ...createCurrentWorkspaceState(defaultWorkspace),
-        },
-        (set, get, store) => ({
-          ...createManagerActions(set, get, store),
-          ...createCurrentWorkspaceActions(set, get, store),
-        })
-      )
-    )
-  );
+  const store = reactive({
+    ...createManagerState(defaultWorkspace),
+    ...createCurrentWorkspaceState(defaultWorkspace),
+  });
 
   if (typeof window !== 'undefined') {
-    const str = localStorage.getItem('blocksuite-react') ?? '';
+    const str = localStorage.getItem(StoreKey) ?? '';
     try {
       const data = JSON.parse(str);
       const workspaces: Workspace[] = data.map(
@@ -61,22 +54,16 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
       );
       workspaces.forEach(workspace => bindWorkspaceWithPages(workspace));
       workspaces.forEach(workspace => workspace.register(builtInSchemas));
-      window.setTimeout(
-        () =>
-          store.setState({
-            workspaces,
-          }),
-        0
-      );
+      window.setTimeout(() => (store.workspaces = workspaces), 0);
     } catch (e) {
       // ignore
     }
 
-    store.subscribe(
-      store => store.workspaces,
+    watch(
+      () => store.workspaces,
       workspaces => {
         const rooms = workspaces.map(workspace => workspace.room);
-        localStorage.setItem('blocksuite-react', JSON.stringify(rooms));
+        localStorage.setItem(StoreKey, JSON.stringify(rooms));
       }
     );
   }
@@ -87,9 +74,6 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
 };
 
 export type CreateBlockSuiteStore = ReturnType<typeof createBlockSuiteStore>;
-export type ReturnedBlockSuiteState = ReturnType<
-  CreateBlockSuiteStore['getState']
->;
 
 export const BlockSuiteProviderKey: InjectionKey<{
   store: CreateBlockSuiteStore;
@@ -111,16 +95,11 @@ export const BlockSuiteProvider = defineComponent({
   },
 });
 
-export function useBlockSuiteStore(): ReturnedBlockSuiteState;
-export function useBlockSuiteStore<U>(
-  selector: (state: ReturnedBlockSuiteState) => U,
-  equalityFn?: (a: U, b: U) => boolean
-): U;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useBlockSuiteStore(selector?: any, equalityFn?: any) {
+export function useBlockSuiteStore() {
   const store = inject(BlockSuiteProviderKey);
   assertExists(store?.store);
-  return useStore(store.store, selector, equalityFn);
+  return store.store;
 }
 
 export function useBlockSuiteStoreApi() {

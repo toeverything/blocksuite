@@ -1,8 +1,7 @@
 import { builtInSchemas } from '@blocksuite/blocks/models';
-import type { Workspace } from '@blocksuite/store';
-import type { Page } from '@blocksuite/store';
+import type { Page, Workspace } from '@blocksuite/store';
 
-import type { BlockSuiteActionsCreator } from '../../types/index.js';
+import type { CreateBlockSuiteStore } from '../index.jsx';
 
 export interface ManagerState {
   workspaces: Workspace[];
@@ -55,23 +54,16 @@ export interface ManagerActions {
   deleteWorkspace: (workspace: Workspace) => void;
 }
 
-export const createManagerActions: BlockSuiteActionsCreator<
-  ManagerActions
-> = set => ({
+export const createManagerActions = (
+  store: CreateBlockSuiteStore
+): ManagerActions => ({
   addWorkspace: (workspace: Workspace) => {
     bindWorkspaceWithPages(workspace);
     workspace.register(builtInSchemas);
-    set(state => ({
-      workspaces: [...state.workspaces, workspace],
-    }));
+    store.workspaces = [...store.workspaces, workspace];
   },
   deleteWorkspace: (workspace: Workspace) => {
-    set(state => {
-      const index = state.workspaces.findIndex(ws => ws === workspace);
-      state.workspaces.splice(index, 1);
-      return {
-        workspaces: [...state.workspaces],
-      };
-    });
+    const index = store.workspaces.findIndex(ws => ws === workspace);
+    store.workspaces.splice(index, 1);
   },
 });
