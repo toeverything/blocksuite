@@ -587,7 +587,7 @@ export class DefaultPageBlockComponent
 
     return html`
       <div class="affine-default-viewport">
-        <div class="affine-default-page-block-container">
+        <div class="affine-default-page-block-container" contenteditable="true">
           ${selectedRectsContainer}
           <div class="affine-default-page-block-title-container">
             <textarea
