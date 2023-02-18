@@ -342,6 +342,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         // Compatible with CJK IME
         '、',
       ],
+      shiftKey: null,
       // prefix non digit or empty string
       // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
       // prefix: /[^\d]$|^(?![\s\S])/,
