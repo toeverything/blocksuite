@@ -174,6 +174,8 @@ export class EdgelessPageBlockComponent
   private _clearSelection() {
     requestAnimationFrame(() => {
       if (!this._selection.isActive) {
+        this._selection.blockSelectionState.type = 'none';
+        this.signals.updateSelection.emit(this._selection.blockSelectionState);
         resetNativeSelection(null);
       }
     });
