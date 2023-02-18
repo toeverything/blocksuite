@@ -33,8 +33,6 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     // Firefox warn on quill
     // See https://github.com/quilljs/quill/issues/2030
     '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
-    // Fixme: https://github.com/toeverything/blocksuite/issues/1126
-    'Failed to clean slash search text!',
   ];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
@@ -446,20 +444,21 @@ export async function readClipboardText(page: Page) {
 
 export const getCenterPosition: (
   page: Page,
+  // TODO use `locator` directly
   selector: string
 ) => Promise<{ x: number; y: number }> = async (
   page: Page,
   selector: string
 ) => {
-  return await page.evaluate((selector: string) => {
-    const bbox = document
-      .querySelector(selector)
-      ?.getBoundingClientRect() as DOMRect;
-    return {
-      x: bbox.left + bbox.width / 2,
-      y: bbox.top + bbox.height / 2,
-    };
-  }, selector);
+  const locator = page.locator(selector);
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Failed to getCenterPosition! Can't get bounding box");
+  }
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2,
+  };
 };
 
 export const getBoundingClientRect: (
