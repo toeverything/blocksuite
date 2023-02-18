@@ -567,24 +567,32 @@ export function isAtLineEdge(range: Range) {
 function checkFirstLine(range: Range, container: Element) {
   if (!range.collapsed) {
     throw new Error(
-      'Failed to determine if the caret is at the last line! expected a collapsed range but got' +
+      'Failed to determine if the caret is at the first line! expected a collapsed range but got' +
         range
     );
   }
-  const { height, left, top } = range.getBoundingClientRect();
-  if (left === 0 && top === 0) {
+  if (!container.contains(range.commonAncestorContainer)) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected the range to be inside the container but got' +
+        range +
+        ' and ' +
+        container
+    );
+  }
+  const containerRect = container.getBoundingClientRect();
+  const rangeRect = range.getBoundingClientRect();
+  if (rangeRect.left === 0 && rangeRect.top === 0) {
     // Workaround select to empty line will get empty range
     // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
 
     // At empty line, it is the first line and also is the last line
     return true;
   }
-  const shiftRange = caretRangeFromPoint(left + 1, top - height / 2);
+  const lineHeight = rangeRect.height;
   // If the caret at the start of second line, as known as line edge,
   // the range bounding rect may be incorrect, we need to check the scenario.
   const isFirstLine =
-    (!shiftRange || !container.contains(shiftRange.startContainer)) &&
-    !isAtLineEdge(range);
+    containerRect.top > rangeRect.top - lineHeight / 2 && !isAtLineEdge(range);
   return isFirstLine;
 }
 
@@ -595,17 +603,26 @@ function checkLastLine(range: Range, container: HTMLElement) {
         range
     );
   }
-  const { bottom, left, height } = range.getBoundingClientRect();
-  if (left === 0 && bottom === 0) {
+  if (!container.contains(range.commonAncestorContainer)) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected the range to be inside the container but got' +
+        range +
+        ' and ' +
+        container
+    );
+  }
+  const containerRect = container.getBoundingClientRect();
+  const rangeRect = range.getBoundingClientRect();
+  if (rangeRect.left === 0 && rangeRect.bottom === 0) {
     // Workaround select to empty line will get empty range
     // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
 
     // At empty line, it is the first line and also is the last line
     return true;
   }
-  const shiftRange = caretRangeFromPoint(left + 1, bottom + height / 2);
+  const lineHeight = rangeRect.height;
   const isLastLineWithoutEdge =
-    !shiftRange || !container.contains(shiftRange.startContainer);
+    rangeRect.bottom + lineHeight / 2 > containerRect.bottom;
   if (isLastLineWithoutEdge) {
     // If the caret is at the first line of the block,
     // default behavior will move the caret to the start of the line,
@@ -618,12 +635,9 @@ function checkLastLine(range: Range, container: HTMLElement) {
   }
   // If the caret is at the line edge, the range bounding rect is wrong,
   // we need to check the next range again.
-  const nextRect = atLineEdgeRange.getBoundingClientRect();
-  const nextShiftRange = caretRangeFromPoint(
-    nextRect.left + 1,
-    nextRect.bottom + nextRect.height / 2
-  );
-  return !nextShiftRange || !container.contains(nextShiftRange.startContainer);
+  const nextRangeRect = atLineEdgeRange.getBoundingClientRect();
+  const nextLineHeight = nextRangeRect.height;
+  return nextRangeRect.bottom + nextLineHeight / 2 > containerRect.bottom;
 }
 
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
