@@ -112,11 +112,13 @@ export async function assertRichDragButton(page: Page) {
 
 export async function assertImageSize(
   page: Page,
-  { width, height }: { width: number; height: number }
+  size: { width: number; height: number }
 ) {
   const actual = await page.locator('.resizable-img').boundingBox();
-  expect(Math.floor(actual?.width ?? NaN)).toEqual(width);
-  expect(Math.floor(actual?.height ?? NaN)).toEqual(height);
+  expect(size).toEqual({
+    width: Math.floor(actual?.width ?? NaN),
+    height: Math.floor(actual?.height ?? NaN),
+  });
 }
 
 export async function assertImageOption(page: Page) {
