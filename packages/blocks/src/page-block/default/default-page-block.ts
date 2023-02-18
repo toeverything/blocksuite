@@ -8,7 +8,7 @@ import {
   Page,
   Signal,
 } from '@blocksuite/store';
-import { VEditor } from '@blocksuite/virgo';
+import { VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -116,8 +116,11 @@ export class DefaultPageBlockComponent
       cursor: text;
     }
 
-    .affine-default-page-block-title::placeholder {
+    .affine-default-page-block-title-empty::before {
+      content: 'Title';
       color: var(--affine-placeholder-color);
+      position: absolute;
+      opacity: 0.5;
     }
 
     .affine-default-page-block-title:disabled {
@@ -575,9 +578,11 @@ export class DefaultPageBlockComponent
           ${selectedRectsContainer}
           <div class="affine-default-page-block-title-container">
             <div
-              placeholder="Title"
               data-block-is-title="true"
-              class="affine-default-page-block-title"
+              class="affine-default-page-block-title ${!this._titleContainer ||
+              this._titleContainer.innerText === ZERO_WIDTH_SPACE
+                ? 'affine-default-page-block-title-empty'
+                : ''}"
             ></div>
           </div>
           ${childrenContainer}
