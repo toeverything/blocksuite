@@ -131,8 +131,8 @@ export class DefaultPageBlockComponent
       margin-top: 78px;
     }
 
-    // This css is used to make text in title line break automatically,
-    // but in Virgo there is still just one line so the link break from this css is just visual.
+    /* This css is used to make text in title line break automatically, */
+    /* but in Virgo there is still just one line so the link break from this css is just visual. */
     .affine-default-page-block-title virgo-unit-text > span {
       white-space: pre-line !important;
     }
