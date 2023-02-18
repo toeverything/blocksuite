@@ -17,6 +17,12 @@ Quill.register('modules/cursors', QuillCursors, true);
 const Clipboard = Quill.import('modules/clipboard');
 
 class EmptyClipboard extends Clipboard {
+  constructor(quill: QuillType, options: unknown) {
+    super(quill, options);
+    // Revert https://github.com/quilljs/quill/blob/0148738cb22d52808f35873adb620ca56b1ae061/modules/clipboard.js#LL62C3-L62C58
+    this.container.setAttribute('contenteditable', false);
+  }
+
   onPaste() {
     // No need to execute
   }
