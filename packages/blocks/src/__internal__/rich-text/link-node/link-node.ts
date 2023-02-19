@@ -123,7 +123,11 @@ export class LinkNodeComponent extends LitElement {
   }
 
   render() {
-    return html`<a href=${this.href} rel="noopener noreferrer" target="_blank"
+    return html`<a
+      href=${this.href}
+      rel="noopener noreferrer"
+      target="_blank"
+      style="white-space: nowrap;"
       >${FontLinkIcon}<slot></slot
     ></a>`;
   }
