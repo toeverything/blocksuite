@@ -264,15 +264,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     noop();
   }
 
-  syncBlockSelectionRect() {
+  // Selection rect can be used for both top-level blocks and surface elements
+  syncSelectionRect() {
     if (this.blockSelectionState.type === 'single') {
       const selected = this.blockSelectionState.selected;
-      if (isTopLevelBlock(selected)) {
-        const block = selected;
-        const rect = getSelectionBoxBound(this._edgeless.viewport, block.xywh);
-        this.blockSelectionState.rect = rect;
-        this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
-      }
+
+      const xywh = getXYWH(selected);
+      const rect = getSelectionBoxBound(this._edgeless.viewport, xywh);
+      this.blockSelectionState.rect = rect;
+      this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
     }
 
     this._updateHoverState(this._hoverState?.content ?? null);
