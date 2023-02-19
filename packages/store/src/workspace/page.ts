@@ -1,12 +1,12 @@
 import type { BlockTag, TagSchema } from '@blocksuite/global/database';
 import { debug } from '@blocksuite/global/debug';
-import { assertExists, matchFlavours, Signal } from '@blocksuite/global/utils';
+import { assertExists, Signal } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import type { Quill } from 'quill';
 import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
-import { BaseBlockModel } from '../base.js';
+import { BaseBlockModel, internalPrimitives } from '../base.js';
 import { Space, StackItem } from '../space.js';
 import { RichTextAdapter, Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
@@ -317,6 +317,14 @@ export class Page extends Space<PageData> {
     return parent.children.slice(index + 1);
   }
 
+  getSchemaByFlavour(flavour: string) {
+    return this.workspace.flavourSchemaMap.get(flavour);
+  }
+
+  getInitialPropsMapByFlavour(flavour: string) {
+    return this.workspace.flavourInitialPropsMap.get(flavour);
+  }
+
   @debug('CRUD')
   public addBlocksByFlavour<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -388,7 +396,15 @@ export class Page extends Space<PageData> {
       initInternalProps(yBlock, clonedProps);
       const defaultProps = this.workspace.flavourInitialPropsMap.get(flavour);
       assertExists(defaultProps);
-      syncBlockProps(defaultProps, yBlock, clonedProps, this._ignoredKeys);
+      const schema = this.getSchemaByFlavour(flavour);
+      assertExists(schema);
+      syncBlockProps(
+        schema,
+        defaultProps,
+        yBlock,
+        clonedProps,
+        this._ignoredKeys
+      );
 
       if (typeof parent === 'string') {
         parent = this._blockMap.get(parent);
@@ -492,7 +508,9 @@ export class Page extends Space<PageData> {
         model.flavour
       );
       assertExists(defaultProps);
-      syncBlockProps(defaultProps, yBlock, props, this._ignoredKeys);
+      const schema = this.workspace.flavourSchemaMap.get(model.flavour);
+      assertExists(schema);
+      syncBlockProps(schema, defaultProps, yBlock, props, this._ignoredKeys);
     });
   }
 
@@ -721,7 +739,7 @@ export class Page extends Space<PageData> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     blockModel.flavour = schema.model.flavour as any;
     blockModel.tag = schema.model.tag;
-    const modelProps = schema.model.props();
+    const modelProps = schema.model.props(internalPrimitives);
     Object.entries(modelProps).forEach(([key, value]) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (blockModel as any)[key] = props[key] ?? value;
@@ -744,20 +762,17 @@ export class Page extends Space<PageData> {
     }
     this._blockMap.set(props.id, model);
 
-    if (
-      // TODO use schema
-      matchFlavours(model, [
-        'affine:paragraph',
-        'affine:list',
-        'affine:code',
-      ]) &&
-      !yBlock.get('prop:text')
-    ) {
-      this.transact(() => yBlock.set('prop:text', new Y.Text()));
-    }
+    const initialProps = this.workspace.flavourInitialPropsMap.get(
+      model.flavour
+    );
+    assertExists(initialProps);
+    Object.entries(initialProps).forEach(([key, value]) => {
+      if (value instanceof Text) {
+        const yText = yBlock.get(`prop:${key}`) as Y.Text;
+        Object.assign(model, { [key]: new Text(yText) });
+      }
+    });
 
-    const yText = yBlock.get('prop:text') as Y.Text;
-    model.text = new Text(yText);
     if (model.flavour === 'affine:page') {
       model.tags = yBlock.get('meta:tags') as Y.Map<Y.Map<unknown>>;
       model.tagSchema = yBlock.get('meta:tagSchema') as Y.Map<unknown>;
