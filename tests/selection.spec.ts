@@ -244,20 +244,20 @@ test('cursor move to up and down with children block', async ({ page }) => {
   await page.keyboard.press('ArrowUp');
   const indexOne = await getQuillSelectionIndex(page);
   const textOne = await getQuillSelectionText(page);
-  await expect(textOne).toBe('arrow down test 2\n');
-  await expect(indexOne).toBe(13);
+  expect(textOne).toBe('arrow down test 2\n');
+  expect(indexOne).toBe(13);
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press('ArrowLeft');
   }
   await page.keyboard.press('ArrowUp');
   const indexTwo = await getQuillSelectionIndex(page);
   const textTwo = await getQuillSelectionText(page);
-  await expect(textTwo).toBe('arrow down test 1\n');
-  await expect(indexTwo).toBeGreaterThanOrEqual(12);
-  await expect(indexTwo).toBeLessThanOrEqual(17);
+  expect(textTwo).toBe('arrow down test 1\n');
+  expect(indexTwo).toBeGreaterThanOrEqual(12);
+  expect(indexTwo).toBeLessThanOrEqual(17);
   await page.keyboard.press('ArrowDown');
   const textThree = await getQuillSelectionText(page);
-  await expect(textThree).toBe('arrow down test 2\n');
+  expect(textThree).toBe('arrow down test 2\n');
 });
 
 test('cursor move left and right', async ({ page }) => {
@@ -271,10 +271,10 @@ test('cursor move left and right', async ({ page }) => {
     await page.keyboard.press('ArrowLeft');
   }
   const indexOne = await getQuillSelectionIndex(page);
-  await expect(indexOne).toBe(17);
+  expect(indexOne).toBe(17);
   await page.keyboard.press('ArrowRight');
   const indexTwo = await getQuillSelectionIndex(page);
-  await expect(indexTwo).toBe(0);
+  expect(indexTwo).toBe(0);
 });
 
 test('cursor move up at edge of the second line', async ({ page }) => {
@@ -288,7 +288,7 @@ test('cursor move up at edge of the second line', async ({ page }) => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowUp');
     const [currentId] = await getCursorBlockIdAndHeight(page);
-    await expect(currentId).toBe(id);
+    expect(currentId).toBe(id);
   }
 });
 
@@ -305,7 +305,7 @@ test('cursor move down at edge of the last line', async ({ page }) => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowDown');
     const [currentId] = await getCursorBlockIdAndHeight(page);
-    await expect(currentId).toBe(id);
+    expect(currentId).toBe(id);
   }
 });
 
@@ -318,10 +318,10 @@ test.skip('cursor move up and down through frame', async ({ page }) => {
   const [id] = await getCursorBlockIdAndHeight(page);
   await page.keyboard.press('ArrowDown');
   currentId = (await getCursorBlockIdAndHeight(page))[0];
-  await expect(id).not.toBe(currentId);
+  expect(id).not.toBe(currentId);
   await page.keyboard.press('ArrowUp');
   currentId = (await getCursorBlockIdAndHeight(page))[0];
-  await expect(id).toBe(currentId);
+  expect(id).toBe(currentId);
 });
 
 test('double click choose words', async ({ page }) => {

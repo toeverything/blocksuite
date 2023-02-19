@@ -615,3 +615,52 @@ test('input continuous spaces', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc  \n' + ' def');
   expect(await editorB.innerText()).toBe('abc  \n' + ' def');
 });
+
+test('select from the start of line using shift+arrow', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await type(page, 'abc');
+  await page.keyboard.press('Enter', { delay: 50 });
+  await type(page, 'def');
+  await page.keyboard.press('Enter', { delay: 50 });
+  await type(page, 'ghi');
+
+  expect(await editorA.innerText()).toBe('abc\ndef\nghi');
+  expect(await editorB.innerText()).toBe('abc\ndef\nghi');
+
+  /**
+   * abc
+   * def
+   * |ghi
+   */
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+
+  /**
+   * |abc
+   * def
+   * |ghi
+   */
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+
+  /**
+   * a|bc
+   * def
+   * |ghi
+   */
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Backspace');
+
+  expect(await editorA.innerText()).toBe('aghi');
+  expect(await editorB.innerText()).toBe('aghi');
+});

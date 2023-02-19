@@ -99,10 +99,6 @@ export class DefaultPageBlockComponent
       padding-bottom: 150px;
     }
 
-    .affine-default-page-block-container > .affine-block-children-container {
-      padding-left: 0;
-    }
-
     .affine-default-page-block-title {
       width: 100%;
       font-size: 40px;

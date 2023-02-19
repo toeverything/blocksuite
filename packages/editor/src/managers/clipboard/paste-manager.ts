@@ -7,7 +7,7 @@ import {
   SelectionUtils,
 } from '@blocksuite/blocks';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { BaseBlockModel, Text } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
 import type { EditorContainer } from '../../components/index.js';
@@ -384,9 +384,14 @@ export class PasteManager {
       };
       const id = this._editor.page.addBlock(blockProps, parent, index + i);
       const model = this._editor.page.getBlockById(id);
-      if (model && !matchFlavours(model, ['affine:embed', 'affine:divider'])) {
+
+      const flavour = model?.flavour;
+      const initialProps =
+        flavour && this._editor.page.getInitialPropsMapByFlavour(flavour);
+      if (initialProps && initialProps.text instanceof Text) {
         block.text && model?.text?.applyDelta(block.text);
       }
+
       addBlockIds.push(id);
       model && this._addBlocks(block.children, model, 0, addBlockIds);
     }

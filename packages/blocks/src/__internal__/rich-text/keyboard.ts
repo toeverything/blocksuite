@@ -12,7 +12,7 @@ import {
   noop,
 } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
-import { markdownConvert } from './markdown-convert.js';
+import { markdownConvert, tryMatchSpaceHotkey } from './markdown-convert.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,
@@ -22,7 +22,6 @@ import {
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
-  tryMatchSpaceHotkey,
 } from './rich-text-operations.js';
 
 // Type definitions is ported from quill
@@ -343,6 +342,7 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
         // Compatible with CJK IME
         '、',
       ],
+      shiftKey: null,
       // prefix non digit or empty string
       // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
       // prefix: /[^\d]$|^(?![\s\S])/,

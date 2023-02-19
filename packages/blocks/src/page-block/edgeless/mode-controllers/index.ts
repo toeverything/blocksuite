@@ -67,5 +67,5 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerMouseOut(e: SelectionEvent): void;
   abstract onContainerContextMenu(e: SelectionEvent): void;
 
-  abstract syncBlockSelectionRect(): void;
+  abstract syncSelectionRect(): void;
 }
