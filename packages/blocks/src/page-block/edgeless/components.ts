@@ -1,28 +1,36 @@
+import '../../__internal__/index.js';
+
+import {
+  deserializeXYWH,
+  serializeXYWH,
+  SurfaceManager,
+  XYWH,
+} from '@blocksuite/phasor';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { Page } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
-import type {
-  EdgelessSelectionState,
-  EdgelessHoverState,
-  ViewportState,
-  XYWH,
-} from './selection-manager.js';
 import {
   BlockElement,
   BlockHost,
   getBlockById,
 } from '../../__internal__/index.js';
-import '../../__internal__/index.js';
+import type { FrameBlockModel, TopLevelBlockModel } from '../../index.js';
+import type {
+  EdgelessHoverState,
+  EdgelessSelectionState,
+  ViewportState,
+} from './selection-manager.js';
 import {
-  PADDING_X,
-  PADDING_Y,
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
-  isBlock,
+  getXYWH,
+  isTopLevelBlock,
+  PADDING_X,
+  PADDING_Y,
 } from './utils.js';
 
 const SHAPE_PADDING = 48;
@@ -161,7 +169,7 @@ function EdgelessBlockChild(
     transformOrigin: '0 0',
     width: modelW + (isSurfaceElement ? SHAPE_PADDING : PADDING_X) + 'px',
     height: modelH + (isSurfaceElement ? SHAPE_PADDING : PADDING_Y) + 'px',
-    padding: isSurfaceElement ? '0px' : `${PADDING_X / 2}px`,
+    padding: isSurfaceElement ? '0' : `${PADDING_X / 2}px`,
     background: isSurfaceElement ? 'transparent' : 'white',
     pointerEvents: isSurfaceElement ? 'none' : 'all',
     zIndex: '0',
@@ -194,6 +202,12 @@ export function EdgelessBlockChildrenContainer(
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends LitElement {
+  @property({ type: Page })
+  page!: Page;
+
+  @property({ type: SurfaceManager })
+  surface!: SurfaceManager;
+
   @property({ type: Boolean })
   lock!: boolean;
 
@@ -297,9 +311,8 @@ export class EdgelessSelectedRect extends LitElement {
     e.stopPropagation();
     if (this.state?.type === 'single') {
       const { rect, selected } = this.state;
-      if (!isBlock(selected)) return;
+      const [x, y] = deserializeXYWH(getXYWH(selected));
 
-      const [x, y] = JSON.parse(selected.xywh) as XYWH;
       this._dragStartInfo = {
         startMouseX: e.clientX,
         startMouseY: e.clientY,
@@ -320,10 +333,9 @@ export class EdgelessSelectedRect extends LitElement {
     if (this.state.type === 'single') {
       const { viewport } = this;
       const { selected } = this.state;
-      if (!isBlock(selected)) return;
 
-      const { xywh } = selected;
-      const [x, y, w, h] = JSON.parse(xywh) as XYWH;
+      const xywh = getXYWH(selected);
+      const [x, y, w, h] = deserializeXYWH(xywh);
       let newX = x;
       let newY = y;
       let newW = w;
@@ -374,10 +386,30 @@ export class EdgelessSelectedRect extends LitElement {
         newH = FRAME_MIN_LENGTH;
         newY = y;
       }
+
       // if xywh do not change, no need to update
       if (newW === w && newX === x && newY === y && newW === w) {
         return;
       }
+
+      if (!isTopLevelBlock(selected)) {
+        if (!this.lock) {
+          this.page.captureSync();
+          this.lock = true;
+        }
+        this.surface.setElementBound(selected.id, {
+          x: newX,
+          y: newY,
+          w: newW,
+          h: newH,
+        });
+        this.state.rect = getSelectionBoxBound(
+          viewport,
+          serializeXYWH(newX, newY, newW, newH)
+        );
+        return;
+      }
+
       const frameBlock = getBlockById<'div'>(selected.id);
       const frameContainer = frameBlock?.parentElement;
       // first change container`s x/w directly for get frames real height
@@ -389,7 +421,7 @@ export class EdgelessSelectedRect extends LitElement {
       requestAnimationFrame(() => {
         // refresh xywh by model
         if (!this.lock) {
-          selected.page.captureSync();
+          this.page.captureSync();
           this.lock = true;
         }
         if (this.state.type === 'single') {
@@ -404,7 +436,7 @@ export class EdgelessSelectedRect extends LitElement {
           (frameBlock?.getBoundingClientRect().height || 0) / this.zoom,
         ]);
         selected.xywh = newXywh;
-        selected.page.updateBlock(selected, { xywh: newXywh });
+        this.page.updateBlock(selected, { xywh: newXywh });
       });
     }
   };
@@ -412,9 +444,7 @@ export class EdgelessSelectedRect extends LitElement {
   private _onDragEnd = (_: MouseEvent) => {
     this.lock = false;
     if (this.state.type === 'single') {
-      if (!isBlock(this.state.selected)) return;
-
-      this.state.selected.page.captureSync();
+      this.page.captureSync();
     } else {
       console.error('unexpected state.type:', this.state.type);
     }
@@ -425,15 +455,16 @@ export class EdgelessSelectedRect extends LitElement {
   render() {
     if (this.state.type === 'none') return null;
 
+    const isSurfaceElement = !isTopLevelBlock(this.state.selected);
     // const isSurfaceElement = this.state.selected.flavour === 'affine:shape';
     const style = {
       border: `${
         this.state.active ? 2 : 1
       }px solid var(--affine-primary-color)`,
       zIndex: '0',
-      ...getCommonRectStyle(this.rect, this.zoom, false, true),
+      ...getCommonRectStyle(this.rect, this.zoom, isSurfaceElement, true),
     };
-    const handlers = this._getHandles(this.rect, false);
+    const handlers = this._getHandles(this.rect, isSurfaceElement);
     return html`
       ${this.readonly ? null : handlers}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}></div>

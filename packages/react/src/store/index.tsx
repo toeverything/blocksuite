@@ -1,13 +1,11 @@
-import { useContext, useRef, useMemo, createContext } from 'react';
+import { builtInSchemas } from '@blocksuite/blocks/models';
+import { assertExists } from '@blocksuite/global/utils';
+import { DebugDocProvider, Workspace } from '@blocksuite/store';
+import { IndexedDBDocProvider } from '@blocksuite/store';
+import { createContext, useContext, useMemo, useRef } from 'react';
 import { create, useStore } from 'zustand';
 import { combine, subscribeWithSelector } from 'zustand/middleware';
-import { Workspace } from '@blocksuite/store';
-import type { ManagerActions, ManagerState } from './manager/index.js';
-import {
-  bindWorkspaceWithPages,
-  createManagerActions,
-  createManagerState,
-} from './manager/index.js';
+
 import type {
   CurrentWorkspaceActions,
   CurrentWorkspaceState,
@@ -17,9 +15,12 @@ import {
   createCurrentWorkspaceState,
   currentWorkspaceSideEffect,
 } from './currentWorkspace/index.js';
-import { IndexedDBDocProvider } from '@blocksuite/store';
-import { builtInSchemas } from '@blocksuite/blocks/models';
-import { assertExists } from '@blocksuite/global/utils';
+import type { ManagerActions, ManagerState } from './manager/index.js';
+import {
+  bindWorkspaceWithPages,
+  createManagerActions,
+  createManagerState,
+} from './manager/index.js';
 
 export interface BlockSuiteState extends ManagerState, CurrentWorkspaceState {}
 
@@ -48,14 +49,14 @@ export const createBlockSuiteStore = (defaultWorkspace: Workspace) => {
   );
 
   if (typeof window !== 'undefined') {
-    const str = localStorage.getItem('blocksuite-react') ?? '';
+    const str = localStorage.getItem('blocksuite-react') ?? '[]';
     try {
       const data = JSON.parse(str);
       const workspaces: Workspace[] = data.map(
         (room: string) =>
           new Workspace({
             room,
-            providers: [IndexedDBDocProvider],
+            providers: [DebugDocProvider, IndexedDBDocProvider],
           })
       );
       workspaces.forEach(workspace => bindWorkspaceWithPages(workspace));

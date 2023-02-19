@@ -1,44 +1,12 @@
-import { paragraphConfig } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { PrelimText } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { DisposableGroup, Signal } from '@blocksuite/store';
+import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { updateSelectedTextType } from '../../page-block/utils/index.js';
-import type { RichText } from '../../__internal__/rich-text/rich-text.js';
-import {
-  asyncFocusRichText,
-  getRichTextByModel,
-} from '../../__internal__/utils/index.js';
 
-const styles = css`
-  .overlay-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: var(--affine-z-index-popover);
-  }
-
-  .slash-menu-container {
-    position: fixed;
-    z-index: var(--affine-z-index-popover);
-  }
-
-  .slash-menu {
-    font-size: var(--affine-font-sm);
-    position: absolute;
-    min-width: 173px;
-    padding: 8px 4px;
-    overflow-y: auto;
-
-    background: var(--affine-popover-background);
-    box-shadow: var(--affine-popover-shadow);
-    border-radius: 0px 10px 10px 10px;
-    z-index: var(--affine-z-index-popover);
-  }
-`;
+import { getRichTextByModel } from '../../__internal__/utils/index.js';
+import { menuGroups, SlashItem } from './config.js';
+import { styles } from './styles.js';
 
 @customElement('slash-menu')
 export class SlashMenu extends LitElement {
@@ -51,7 +19,7 @@ export class SlashMenu extends LitElement {
   top: string | null = null;
 
   @property()
-  maxHeight: string | null = null;
+  maxHeight: number | null = null;
 
   @property()
   position: 'top' | 'bottom' = 'bottom';
@@ -66,23 +34,41 @@ export class SlashMenu extends LitElement {
   slashMenuElement!: HTMLElement;
 
   @state()
-  private _activeItemIndex = 0;
+  private _leftPanelActivated = false;
 
   @state()
-  private _filterItems: typeof paragraphConfig = paragraphConfig;
+  private _activatedItemIndex = 0;
+
+  @state()
+  private _filterItems = menuGroups.flatMap(group => group.items);
 
   @state()
   private _hide = false;
 
+  /**
+   * Does not include the slash character
+   */
   private _searchString = '';
 
-  // Just a temp variable
-  private _richText?: RichText;
+  private _disposableGroup = new DisposableGroup();
 
   override connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('keydown', this._escapeListener);
-    window.addEventListener('mousedown', this._clickAwayListener);
+    this._disposableGroup.add(
+      Signal.disposableListener(window, 'mousedown', this._clickAwayListener)
+    );
+    this._disposableGroup.add(
+      Signal.disposableListener(window, 'keydown', this._keyDownListener, {
+        // Workaround: Use capture to prevent the event from triggering the hotkey bindings action
+        capture: true,
+      })
+    );
+    this._disposableGroup.add(
+      Signal.disposableListener(this, 'mousedown', e => {
+        // Prevent input from losing focus
+        e.preventDefault();
+      })
+    );
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -92,21 +78,20 @@ export class SlashMenu extends LitElement {
       );
       return;
     }
-    this._richText = richText;
-    richText.addEventListener('keydown', this._keyDownListener, {
-      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-      capture: true,
-    });
-    richText.addEventListener('focusout', this._clickAwayListener);
+    this._disposableGroup.add(
+      Signal.disposableListener(richText, 'keydown', this._keyDownListener, {
+        // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
+        capture: true,
+      })
+    );
+    this._disposableGroup.add(
+      Signal.disposableListener(richText, 'focusout', this._clickAwayListener)
+    );
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener('keydown', this._escapeListener);
-    this._richText?.removeEventListener('keydown', this._keyDownListener, {
-      capture: true,
-    });
-    this._richText?.removeEventListener('focusout', this._clickAwayListener);
+    this._disposableGroup.dispose();
   }
 
   // Handle click outside
@@ -127,11 +112,20 @@ export class SlashMenu extends LitElement {
    * The slash menu will be closed in the following keyboard cases:
    * - Press the space key
    * - Press the backspace key and the search string is empty
-   * - Press the escape key (handled by {@link _escapeListener})
+   * - Press the escape key
    * - When the search item is empty, the slash menu will be hidden temporarily,
    *   and if the following key is not the backspace key, the slash menu will be closed
    */
   private _keyDownListener = (e: KeyboardEvent) => {
+    if (e.key === '/') {
+      // Can not stopPropagation here,
+      // otherwise the rich text will not be able to trigger a new the slash menu
+      return;
+    }
+    // This listener be bind to the window and the rich text element
+    // So we need to ensure that the event is triggered once.
+    // We also need to prevent the event from triggering the keyboard bindings action
+    e.stopPropagation();
     if (this._hide) {
       if (e.key !== 'Backspace') {
         this.abortController.abort();
@@ -142,7 +136,7 @@ export class SlashMenu extends LitElement {
       this._hide = false;
       return;
     }
-    if (e.key === ' ') {
+    if (e.key === ' ' || e.key === 'Escape') {
       this.abortController.abort();
       return;
     }
@@ -154,6 +148,7 @@ export class SlashMenu extends LitElement {
       this._filterItems = this._updateItem();
       return;
     }
+    // Assume input a character, append it to the search string
     if (e.key.length === 1) {
       this._searchString += e.key;
       this._filterItems = this._updateItem();
@@ -164,122 +159,203 @@ export class SlashMenu extends LitElement {
     }
 
     if (
-      !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'].includes(
-        e.key
-      )
+      ![
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'Enter',
+        'Tab',
+      ].includes(e.key)
     ) {
       return;
     }
+    // prevent arrow key from moving cursor
+    e.preventDefault();
     const configLen = this._filterItems.length;
+
+    const handleCursorUp = () => {
+      if (this._leftPanelActivated) {
+        const nowGroupIdx = this._getGroupIndexByItem(
+          this._filterItems[this._activatedItemIndex]
+        );
+        this._handleClickCategory(
+          menuGroups[(nowGroupIdx - 1 + menuGroups.length) % menuGroups.length]
+        );
+        return;
+      }
+      this._activatedItemIndex =
+        (this._activatedItemIndex - 1 + configLen) % configLen;
+      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+    };
+
+    const handleCursorDown = () => {
+      if (this._leftPanelActivated) {
+        const nowGroupIdx = this._getGroupIndexByItem(
+          this._filterItems[this._activatedItemIndex]
+        );
+        this._handleClickCategory(
+          menuGroups[(nowGroupIdx + 1) % menuGroups.length]
+        );
+        return;
+      }
+      this._activatedItemIndex = (this._activatedItemIndex + 1) % configLen;
+      this._scrollToItem(this._filterItems[this._activatedItemIndex]);
+    };
+
     switch (e.key) {
       case 'Enter': {
-        this._handleItemClick(this._activeItemIndex);
-        break;
+        if (e.isComposing) {
+          return;
+        }
+        this._handleClickItem(this._activatedItemIndex);
+        return;
       }
+      case 'Tab': {
+        if (e.shiftKey) {
+          handleCursorUp();
+        } else {
+          handleCursorDown();
+        }
+        return;
+      }
+
       case 'ArrowUp': {
-        this._activeItemIndex =
-          (this._activeItemIndex - 1 + configLen) % configLen;
-        break;
+        handleCursorUp();
+        return;
       }
+
       case 'ArrowDown': {
-        this._activeItemIndex = (this._activeItemIndex + 1) % configLen;
-        break;
+        handleCursorDown();
+        return;
       }
-      case 'ArrowRight':
+
       case 'ArrowLeft':
-        this.abortController.abort();
+        this._leftPanelActivated = true;
+        return;
+      case 'ArrowRight':
+        if (this._leftPanelActivated) {
+          this._leftPanelActivated = false;
+        }
         return;
       default:
         throw new Error(`Unknown key: ${e.key}`);
     }
-    // prevent arrow key from moving cursor
-    e.preventDefault();
-    // prevent the event from triggering the keyboard bindings action
-    e.stopPropagation();
   };
 
-  /**
-   * Handle press esc
-   */
-  private _escapeListener = (e: KeyboardEvent) => {
-    if (e.key !== 'Escape') {
-      return;
-    }
-    this.abortController.abort();
-    window.removeEventListener('keyup', this._escapeListener);
-  };
-
-  private _handleItemClick(index: number) {
-    // Need to remove the search string
-    this.abortController.abort(this._searchString);
-    const { flavour, type } = this._filterItems[index];
-
-    // @deprecated
-    // WARNING: This flag is a simple prototype implementation, just for proof of product.
-    if (this.model.page.awarenessStore.getFlag('enable_append_flavor_slash')) {
-      // Add new block
-      const page = this.model.page;
-      const parent = page.getParent(this.model);
-      if (!parent) {
-        throw new Error('Failed add block!');
-      }
-      // TODO merge with `handleBlockSplit` and it will the issue of children not extending.
-      const richText = getRichTextByModel(this.model);
-      if (!richText) {
-        throw new Error("Can't get richText instance!");
-      }
-      const quill = richText.quill;
-      const selection = quill.getSelection();
-      const text = this.model.text;
-      if (!text || text instanceof PrelimText) {
-        throw new Error("Can't get text or text is PrelimText!");
-      }
-      const [left, right] = text.split(selection.index, 0);
-      page.captureSync();
-      page.markTextSplit(text, left, right);
-      page.updateBlock(this.model, { text: left });
-
-      const index = parent.children.indexOf(this.model);
-      const id = page.addBlockByFlavour(
-        flavour,
-        { type, text: right },
-        parent,
-        index + 1
-      );
-      asyncFocusRichText(page, id);
-      return;
-    }
-    // End of deprecated
-
-    updateSelectedTextType(flavour, type);
+  private _getGroupIndexByItem(item: SlashItem) {
+    return menuGroups.findIndex(group => group.items.includes(item));
   }
 
-  private _updateItem(): typeof paragraphConfig {
-    this._activeItemIndex = 0;
+  private _updateItem(): SlashItem[] {
+    this._activatedItemIndex = 0;
     const searchStr = this._searchString.toLowerCase();
     if (!searchStr) {
-      return paragraphConfig;
+      return menuGroups.flatMap(group => group.items);
     }
-    return paragraphConfig.filter(({ name }) => {
-      if (
-        name
-          .trim()
-          .toLowerCase()
-          .split('')
-          .filter(char => /[A-Za-z0-9]/.test(char))
-          .join('')
-          .includes(searchStr)
-      ) {
-        return true;
-      }
-      return false;
-    });
+    return menuGroups
+      .flatMap(group => group.items)
+      .filter(({ name }) => {
+        if (
+          name
+            .trim()
+            .toLowerCase()
+            .split('')
+            .filter(char => /[A-Za-z0-9]/.test(char))
+            .join('')
+            .includes(searchStr)
+        ) {
+          return true;
+        }
+        return false;
+      });
+  }
+
+  private _scrollToItem(item: SlashItem) {
+    const shadowRoot = this.shadowRoot;
+    if (!shadowRoot) {
+      return;
+    }
+    const ele = shadowRoot.querySelector(
+      `format-bar-button[text="${item.name}"]`
+    );
+    if (!ele) {
+      return;
+    }
+    // `scrollIntoViewIfNeeded` is not a standard API
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoViewIfNeeded
+    if (
+      'scrollIntoViewIfNeeded' in ele &&
+      ele.scrollIntoViewIfNeeded instanceof Function
+    ) {
+      ele.scrollIntoViewIfNeeded();
+      return;
+    }
+    ele.scrollIntoView(true);
+  }
+
+  private _handleClickItem(index: number) {
+    if (
+      this._leftPanelActivated ||
+      index < 0 ||
+      index >= this._filterItems.length
+    ) {
+      return;
+    }
+    // Need to remove the search string
+    // We must to do clean the slash string before we do the action
+    // Otherwise, the action may change the model and cause the slash string to be changed
+    this.abortController.abort(this._searchString);
+
+    const { action } = this._filterItems[index];
+    action({ page: this.model.page, model: this.model });
+  }
+
+  private _handleClickCategory(group: { name: string; items: SlashItem[] }) {
+    const menuGroup = menuGroups.find(g => g.name === group.name);
+    if (!menuGroup) return;
+    const item = menuGroup.items[0];
+    this._scrollToItem(item);
+    this._activatedItemIndex = this._filterItems.findIndex(
+      i => i.name === item.name
+    );
+  }
+
+  private _categoryTemplate() {
+    const showCategory = !this._searchString.length;
+
+    const activatedCategory = menuGroups.find(group =>
+      group.items.some(
+        item => item.name === this._filterItems[this._activatedItemIndex].name
+      )
+    );
+
+    return html`<div
+      class="slash-category ${!showCategory ? 'slash-category-hide' : ''}"
+    >
+      ${menuGroups.map(
+        group =>
+          html`<div
+            class="slash-category-name ${activatedCategory?.name === group.name
+              ? 'slash-active-category'
+              : ''}"
+            @click=${() => this._handleClickCategory(group)}
+          >
+            ${group.name}
+          </div>`
+      )}
+    </div>`;
   }
 
   override render() {
     if (this._hide) {
       return html``;
     }
+
+    const MAX_HEIGHT_WITH_CATEGORY = 408;
+    const MAX_HEIGHT = 344;
+    const showCategory = !this._searchString.length;
+
     const containerStyles = styleMap({
       left: this.left,
       top: this.top,
@@ -288,8 +364,38 @@ export class SlashMenu extends LitElement {
     const slashMenuStyles = styleMap({
       top: this.position === 'bottom' ? '100%' : null,
       bottom: this.position !== 'bottom' ? '100%' : null,
-      maxHeight: this.maxHeight,
+      maxHeight: this.maxHeight
+        ? `${Math.min(
+            this.maxHeight,
+            showCategory ? MAX_HEIGHT_WITH_CATEGORY : MAX_HEIGHT
+          )}px`
+        : null,
     });
+
+    const btnItems = this._filterItems.map(
+      ({ name, icon, divider }, index) => html`<div
+          class="slash-item-divider"
+          ?hidden=${!divider || !!this._searchString.length}
+        ></div>
+        <format-bar-button
+          width="100%"
+          style="padding-left: 12px; justify-content: flex-start;"
+          ?hover=${!this._leftPanelActivated &&
+          this._activatedItemIndex === index}
+          text="${name}"
+          data-testid="${name}"
+          @mousemove=${() => {
+            // Use `mousemove` instead of `mouseover` to avoid navigate conflict in left panel
+            this._leftPanelActivated = false;
+            this._activatedItemIndex = index;
+          }}
+          @click=${() => {
+            this._handleClickItem(index);
+          }}
+        >
+          ${icon}
+        </format-bar-button>`
+    );
 
     return html`<div class="slash-menu-container" style="${containerStyles}">
       <div
@@ -297,20 +403,8 @@ export class SlashMenu extends LitElement {
         @click="${() => this.abortController.abort()}"
       ></div>
       <div class="slash-menu" style="${slashMenuStyles}">
-        ${this._filterItems.map(
-          ({ flavour, type, name, icon }, index) => html`<format-bar-button
-            width="100%"
-            style="padding-left: 12px; justify-content: flex-start;"
-            ?hover=${this._activeItemIndex === index}
-            text="${name}"
-            data-testid="${flavour}/${type}"
-            @click=${() => {
-              this._handleItemClick(index);
-            }}
-          >
-            ${icon}
-          </format-bar-button>`
-        )}
+        ${this._categoryTemplate()}
+        <div class="slash-item-container">${btnItems}</div>
       </div>
     </div>`;
   }

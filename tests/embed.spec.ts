@@ -1,17 +1,19 @@
 import './utils/declare-test-window.js';
-import { test, Page, expect } from '@playwright/test';
+
+import { expect, Page } from '@playwright/test';
+
 import {
   activeEmbed,
-  dragEmbedResizeByBottomLeft,
-  dragEmbedResizeByBottomRight,
+  dragEmbedResizeByTopLeft,
+  dragEmbedResizeByTopRight,
   enterPlaygroundRoom,
+  focusRichText,
+  initEmptyParagraphState,
   moveToImage,
   pressEnter,
   redoByKeyboard,
   type,
   undoByKeyboard,
-  focusRichText,
-  initEmptyParagraphState,
 } from './utils/actions/index.js';
 import {
   assertImageOption,
@@ -21,6 +23,7 @@ import {
   assertRichImage,
   assertRichTexts,
 } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 async function initImageState(page: Page) {
   await initEmptyParagraphState(page);
@@ -55,16 +58,16 @@ test('can drag resize image by left menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 678, height: 509 });
+  await assertImageSize(page, { width: 704, height: 528 });
 
-  await dragEmbedResizeByBottomLeft(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await dragEmbedResizeByTopLeft(page);
+  await assertImageSize(page, { width: 365, height: 274 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 678, height: 509 });
+  await assertImageSize(page, { width: 704, height: 528 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await assertImageSize(page, { width: 365, height: 274 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -74,16 +77,16 @@ test('can drag resize image by right menu', async ({ page }) => {
 
   await activeEmbed(page);
   await assertRichDragButton(page);
-  await assertImageSize(page, { width: 678, height: 509 });
+  await assertImageSize(page, { width: 704, height: 528 });
 
-  await dragEmbedResizeByBottomRight(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await dragEmbedResizeByTopRight(page);
+  await assertImageSize(page, { width: 365, height: 274 });
 
   await undoByKeyboard(page);
-  await assertImageSize(page, { width: 678, height: 509 });
+  await assertImageSize(page, { width: 704, height: 528 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 339, height: 254.5 });
+  await assertImageSize(page, { width: 365, height: 274 });
 });
 
 test('can click and delete image', async ({ page }) => {

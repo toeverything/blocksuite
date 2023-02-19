@@ -1,15 +1,17 @@
-import { BaseBlockModel, PrelimText } from '@blocksuite/store';
+import './slash-menu-node.js';
+
+import type { BaseBlockModel } from '@blocksuite/store';
+
+import {
+  getRichTextByModel,
+  throttle,
+} from '../../__internal__/utils/index.js';
 import {
   calcSafeCoordinate,
   compareTopAndBottomSpace,
   DragDirection,
 } from '../../page-block/utils/position.js';
-import {
-  getQuillIndexByNativeSelection,
-  throttle,
-} from '../../__internal__/utils/index.js';
 import type { SlashMenu } from './slash-menu-node.js';
-import './slash-menu-node.js';
 
 let globalAbortController = new AbortController();
 
@@ -43,7 +45,7 @@ function updateSlashMenuPosition(slashMenu: SlashMenu, range: Range) {
 
   slashMenu.left = `${safeCoordinate.x}px`;
   slashMenu.top = `${safeCoordinate.y}px`;
-  slashMenu.maxHeight = `${height}px`;
+  slashMenu.maxHeight = height;
   slashMenu.position = placement;
 }
 
@@ -73,18 +75,24 @@ function onAbort(
   }
   const searchStr = '/' + e.target.reason;
   const text = model.text;
-  if (!text || text instanceof PrelimText) {
+  if (!text) {
     console.warn(
       'Failed to clean slash search text! No text found for model',
       model
     );
     return;
   }
-  const idx = getQuillIndexByNativeSelection(
-    range.startContainer,
-    // minus 1 to remove the slash
-    range.startOffset - 1
-  );
+  const richText = getRichTextByModel(model);
+  const quill = richText?.quill;
+  if (!quill) {
+    console.warn(
+      'Failed to clean slash search text! No quill found for model, model:',
+      model
+    );
+    return;
+  }
+  const { index: curIdx } = quill.getSelection();
+  const idx = curIdx - searchStr.length;
 
   const textStr = text.toString().slice(idx, idx + searchStr.length);
   if (textStr !== searchStr) {

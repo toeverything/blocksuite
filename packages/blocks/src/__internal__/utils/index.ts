@@ -4,13 +4,14 @@
  *
  * Simply put, `import '@blocksuite/blocks/std.ts'` should work well in the Next.js
  */
-export * from './types.js';
 export * from './common-operations.js';
-export * from './rect.js';
-export * from './hotkey.js';
-export * from './query.js';
 export * from './components.js';
+export * from './filesys.js';
 export * from './gesture.js';
+export * from './hotkey.js';
+export * from './lit.js';
+export * from './query.js';
+export * from './rect.js';
 export * from './selection.js';
 export * from './std.js';
-export * from './lit.js';
+export * from './types.js';

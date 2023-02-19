@@ -2,8 +2,11 @@ name: Label Checker
 on:
   pull_request:
     types:
+      - opened
       - labeled
       - unlabeled
+    branches:
+      - master
 
 jobs:
   check_labels:

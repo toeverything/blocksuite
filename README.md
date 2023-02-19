@@ -1,5 +1,14 @@
 # BlockSuite
 
+<p align="center">
+  <picture style="width: 500px">
+    <source media="(prefers-color-scheme: light)" srcset="assets/logo-and-name-h.svg" />
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-and-name-h-white.svg" />
+    <img src="assets/logo-and-name-h.svg" width="500" alt="BlockSuite logo and name" />
+  </picture>
+</p>
+
+[![Codecov](https://codecov.io/gh/toeverything/blocksuite/branch/master/graph/badge.svg?token=T86JYCDSMN)](https://codecov.io/gh/toeverything/blocksuite)
 [![Checks Status](https://img.shields.io/github/checks-status/toeverything/blocksuite/master)](https://github.com/toeverything/blocksuite/actions?query=branch%3Amaster)
 [![Issues Closed](https://img.shields.io/github/issues-closed/toeverything/blocksuite?color=6880ff)](https://github.com/toeverything/blocksuite/issues?q=is%3Aissue+is%3Aclosed)
 [![NPM Latest Release](https://img.shields.io/npm/v/@blocksuite/store.svg?maxAge=300&color=6880ff)](./packages/store/package.json)
@@ -7,20 +16,22 @@
 [![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 [![Join Telegram](https://img.shields.io/badge/join-telegram-blue)](https://t.me/AffineDev)
 
-💠 BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
+---
+
+BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
 - 👉 [Try BlockSuite-based AFFiNE online](https://pathfinder.affine.pro/)
 - 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
 
-> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned!
+> ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned or [see our roadmap here](https://github.com/orgs/toeverything/projects/10/views/6)!
 
 ## Introduction
 
 BlockSuite works very differently than traditional rich text frameworks:
 
-- For the data model, BlockSuite does not implement the [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html) pattern but instead provides a [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)-based block tree based directly on [Yjs](https://github.com/yjs/yjs), supporting zero-cost time travel and real-time collaboration out of the box. Its data persistence layer is also designed to be [local-first](https://martin.kleppmann.com/papers/local-first.pdf).
-- For rich text editing, multiple different nodes in the BlockSuite block tree can be connected to different rich text editing components, thus modeling rich text content as multiple _UI components_ instead of a single _UI container_, eliminating the use of the dangerous monolith [`contenteditale`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable).
-- For the rendering layer, BlockSuite does not assume that content can only be rendered through the DOM. It not only implements a basic document editing UI based on [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but also develops a hybrid [canvas-based renderer](./packages/phasor/) for parts of the whiteboard content. Both renderers can coexist on the same page and are updated from the same store.
+- For the data model, using BlockSuite does not require working with data-driven DSLs (e.g., _operations_, _actions_, _commmands_, _transforms_...). Instead, by using [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) as the single source of truth, BlockSuite provides a strongly-typed block tree model based on [Yjs](https://github.com/yjs/yjs). In BlockSuite, manipulating blocks is as easy as updating a todo list. Meanwhile, by taking full advantage of CRDT, it supports zero-cost time travel, real-time collaboration, and pluggable persistence backends right out of the box.
+- For rich text editing, BlockSuite orchestrates rich text content into discrete blocks. In BlockSuite, a document with 100 paragraphs can be rendered into 100 text blocks, aka 100 rich text editor instances, eliminating the classic practice of putting all content into one dangerous [`contenteditale`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) monolith.
+- At the rendering layer, BlockSuite is framework agnostic. It does not assume that the block tree can only be rendered through the DOM. It not only implements its entire document editing UI based on [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), but also provides a hybrid [canvas-based renderer](./packages/phasor/) for parts of the whiteboard content. Both renderers can coexist on the same page and share the same centralized data store.
 
 BlockSuite is not intended to be yet another plugin-based rich text editing framework. Instead, **it encourages building various collaborative applications directly through whatever UI framework you're comfortable with**. To this end, we will try to open-source more foundational modules as reusable packages for this in the BlockSuite project.
 
@@ -35,6 +46,7 @@ Although BlockSuite is still in its early stages, you can already use the `@bloc
   - [Multiple Workspace Example with React](https://blocksuite-react.vercel.app/) ([🔗 source](./packages/react/))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
+- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10/views/6)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Telegram Group](https://t.me/AffineDev)
@@ -146,6 +158,8 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
 
 ## Current Status (`@blocksuite/editor`)
 
+> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10/views/6).
+
 - Basic text editing
   - ✅ Paragraph with inline style
   - ✅ Nested list
@@ -153,17 +167,17 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Markdown shortcuts
 - Block-level editing
   - ✅ Inline text format bar
-  - ⚛️ Block-level selection
+  - ✅ Inline slash menu
+  - ✅ Block hub
   - ⚛️ Block drag handle
-  - ⚛️ Block hub
-  - ⚛️ Inline slash menu
+  - ⚛️ Block-level selection
 - Rich-content
-  - ⚛️ Image block
+  - ✅ Image block
   - 🚧 Database block
   - 📌 Third-party embedded block
 - Whiteboard (edgeless mode)
   - ✅ Zooming and panning
-  - ⚛️ Frame block
+  - ✅ Frame block
   - ⚛️ Shape element
   - 🚧 Handwriting element
   - 📌 Grouping
@@ -175,7 +189,7 @@ For React developers, check out the [`@blocksuite/react`](./packages/react/READM
   - ✅ Block tree update API
   - ✅ Zero cost time travel (undo/redo)
   - ✅ Reusable NPM package
-  - ⚛️ React hooks integration
+  - ✅ React hooks integration
   - 📌 Dynamic block registration
 
 Icons above correspond to the following meanings:
@@ -188,6 +202,10 @@ Icons above correspond to the following meanings:
 ## Building
 
 See [BUILDING.md](BUILDING.md) for instructions on how to build BlockSuite from source code.
+
+## Contributing
+
+BlockSuite accepts pull requests on GitHub. **Before you start contributing, please make sure you have read and accepted our [Contributor License Agreement](https://github.com/toeverything/blocksuite/edit/master/.github/CLA.md).** To indicate your agreement, simply edit this file and submit a pull request.
 
 ## License
 

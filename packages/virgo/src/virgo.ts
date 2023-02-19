@@ -1,10 +1,11 @@
-import type * as Y from 'yjs';
-import { ZERO_WIDTH_SPACE } from './constant.js';
 import { assertExists, Signal } from '@blocksuite/global/utils';
-import type { DeltaInsert, TextAttributes, TextElement } from './types.js';
-import { deltaInsersToChunks } from './utils/convert.js';
-import { VirgoLine } from './components/virgo-line.js';
+import type * as Y from 'yjs';
+
 import { BaseText } from './components/base-text.js';
+import { VirgoLine } from './components/virgo-line.js';
+import { ZERO_WIDTH_SPACE } from './constant.js';
+import type { DeltaInsert, TextAttributes, TextElement } from './types.js';
+import { deltaInsertsToChunks } from './utils/convert.js';
 import { baseRenderElement } from './utils/render.js';
 
 export interface VRange {
@@ -31,6 +32,9 @@ export class VEditor {
   private _isReadOnly = false;
   private _renderElement: (delta: DeltaInsert) => TextElement =
     baseRenderElement;
+  private _onKeyDown: (event: KeyboardEvent) => void = () => {
+    return;
+  };
 
   signals: {
     updateVRange: Signal<UpdateVRangeProp>;
@@ -39,11 +43,22 @@ export class VEditor {
 
   constructor(
     yText: VEditor['yText'],
-    renderElement?: (delta: DeltaInsert) => TextElement
+    opts: {
+      renderElement?: (delta: DeltaInsert) => TextElement;
+      onKeyDown?: (event: KeyboardEvent) => void;
+    } = {}
   ) {
     this.yText = yText;
+    const { renderElement, onKeyDown } = opts;
+
     if (renderElement) {
       this._renderElement = renderElement;
+    }
+
+    if (onKeyDown) {
+      this._onKeyDown = e => {
+        onKeyDown(e);
+      };
     }
 
     this.signals = {
@@ -95,6 +110,13 @@ export class VEditor {
         signal: this._rootElementAbort.signal,
       }
     );
+
+    this._rootElement.addEventListener('keydown', this._onKeyDown, {
+      signal: this._rootElementAbort.signal,
+    });
+    this._rootElement.addEventListener('paste', this._onPaste, {
+      signal: this._rootElementAbort.signal,
+    });
   }
 
   unmount(): void {
@@ -107,16 +129,6 @@ export class VEditor {
     this._rootElement?.replaceChildren();
 
     this._rootElement = null;
-  }
-
-  getBaseElement(node: Node): TextElement | null {
-    const element = node.parentElement?.closest('[data-virgo-element="true"]');
-
-    if (element) {
-      return element as TextElement;
-    }
-
-    return null;
   }
 
   getNativeSelection(): Selection | null {
@@ -157,7 +169,7 @@ export class VEditor {
     for (let i = 0; i < deltas.length; i++) {
       const delta = deltas[i];
       if (
-        index + delta.insert.length >= vRange.index &&
+        index + delta.insert.length > vRange.index &&
         index < vRange.index + vRange.length
       ) {
         result.push([delta, { index, length: delta.insert.length }]);
@@ -203,28 +215,17 @@ export class VEditor {
     });
   }
 
-  // TODO add support for formatting
   insertText(vRange: VRange, text: string): void {
-    const currentDelta = this.getDeltaByRangeIndex(vRange.index);
-
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      if (
-        vRange.index > 0 &&
-        currentDelta &&
-        currentDelta.attributes.type !== 'line-break'
-      ) {
-        this.yText.insert(vRange.index, text, currentDelta.attributes);
-      } else {
-        this.yText.insert(vRange.index, text, { type: 'base' });
-      }
+      this.yText.insert(vRange.index, text);
     });
   }
 
   insertLineBreak(vRange: VRange): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);
-      this.yText.insert(vRange.index, '\n', { type: 'line-break' });
+      this.yText.insert(vRange.index, '\n');
     });
   }
 
@@ -240,10 +241,6 @@ export class VEditor {
     const deltas = this.getDeltasByVRange(vRange);
 
     for (const [delta, deltaVRange] of deltas) {
-      if (delta.attributes.type === 'line-break') {
-        continue;
-      }
-
       if (match(delta, deltaVRange)) {
         const targetVRange = {
           index: Math.max(vRange.index, deltaVRange.index),
@@ -280,14 +277,15 @@ export class VEditor {
 
     const unset = Object.fromEntries(
       coverDeltas.flatMap(delta =>
-        Object.keys(delta.attributes).map(key => [key, null])
+        delta.attributes
+          ? Object.keys(delta.attributes).map(key => [key, null])
+          : []
       )
     );
 
     this._transact(() => {
       this.yText.format(vRange.index, vRange.length, {
         ...unset,
-        type: 'base',
       });
     });
   }
@@ -296,7 +294,7 @@ export class VEditor {
    * sync the dom selection from vRange for **this Editor**
    */
   syncVRange(): void {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       if (this._vRange) {
         const newRange = this.toDomRange(this._vRange);
 
@@ -410,12 +408,53 @@ export class VEditor {
     if (anchorNode instanceof Text && isVText(anchorNode)) {
       anchorText = anchorNode;
       anchorTextOffset = anchorOffset;
+    } else if (
+      anchorNode instanceof HTMLElement &&
+      anchorNode.dataset.virgoElement === 'true'
+    ) {
+      const textNode = getTextNodeFromElement(anchorNode);
+      if (textNode) {
+        anchorText = textNode;
+        anchorTextOffset = anchorOffset;
+      }
+    } else if (
+      anchorNode instanceof HTMLElement &&
+      anchorNode.parentElement instanceof VirgoLine
+    ) {
+      const firstTextElement = anchorNode.querySelector('v-text');
+      if (firstTextElement) {
+        const textNode = getTextNodeFromElement(firstTextElement);
+        if (textNode) {
+          anchorText = textNode;
+          anchorTextOffset = 0;
+        }
+      }
     }
     if (focusNode instanceof Text && isVText(focusNode)) {
       focusText = focusNode;
       focusTextOffset = focusOffset;
+    } else if (
+      focusNode instanceof HTMLElement &&
+      focusNode.dataset.virgoElement === 'true'
+    ) {
+      const textNode = getTextNodeFromElement(focusNode);
+      if (textNode) {
+        focusText = textNode;
+        focusTextOffset = focusOffset;
+      }
+    } else if (
+      focusNode instanceof HTMLElement &&
+      focusNode.parentElement instanceof VirgoLine
+    ) {
+      const firstTextElement = focusNode.querySelector('v-text');
+      if (firstTextElement) {
+        const textNode = getTextNodeFromElement(firstTextElement);
+        if (textNode) {
+          anchorText = textNode;
+          anchorTextOffset = 0;
+        }
+      }
     }
-
     // case 1
     if (anchorText && focusText) {
       const anchorDomPoint = textPointToDomPoint(
@@ -600,16 +639,11 @@ export class VEditor {
   private _onYTextChange = () => {
     assertExists(this._rootElement);
 
-    const deltas = (this.yText.toDelta() as DeltaInsert[]).flatMap(d => {
-      if (d.attributes.type === 'line-break') {
-        return d.insert
-          .split('')
-          .map(c => ({ insert: c, attributes: d.attributes }));
-      }
-      return d;
-    }) as DeltaInsert[];
-
-    renderDeltas(deltas, this._rootElement, this._renderElement);
+    renderDeltas(
+      this.yText.toDelta() as DeltaInsert[],
+      this._rootElement,
+      this._renderElement
+    );
   };
 
   private _onSelectionChange = () => {
@@ -641,6 +675,23 @@ export class VEditor {
     const vRange = this.toVRange(selection);
     if (vRange) {
       this.signals.updateVRange.emit([vRange, 'native']);
+    }
+  };
+
+  private _onPaste = (event: ClipboardEvent) => {
+    const data = event.clipboardData?.getData('text/plain');
+    if (data) {
+      const vRange = this._vRange;
+      if (vRange) {
+        this.insertText(vRange, data);
+        this.signals.updateVRange.emit([
+          {
+            index: vRange.index + data.length,
+            length: 0,
+          },
+          'input',
+        ]);
+      }
     }
   };
 
@@ -750,7 +801,7 @@ function getTextNodeFromElement(element: Element): Text | null {
   if (element instanceof HTMLElement && element.dataset.virgoText === 'true') {
     spanElement = element;
   } else {
-    spanElement = element.querySelector('span');
+    spanElement = element.querySelector('[data-virgo-text="true"]');
   }
 
   if (!spanElement) {
@@ -796,7 +847,7 @@ function renderDeltas(
   rootElement: HTMLElement,
   render: (delta: DeltaInsert) => TextElement
 ) {
-  const chunks = deltaInsersToChunks(deltas);
+  const chunks = deltaInsertsToChunks(deltas);
 
   // every chunk is a line
   const lines: VirgoLine[] = [];

@@ -9,9 +9,12 @@ const config: PlaywrightTestConfig = {
   fullyParallel: true,
   timeout: process.env.CI ? 50_000 : 30_000,
   webServer: {
-    command: 'pnpm dev',
-    port: 5173,
+    command: process.env.CI ? 'pnpm preview' : 'pnpm dev',
+    port: process.env.CI ? 4173 : 5173,
     reuseExistingServer: !process.env.CI,
+    env: {
+      COVERAGE: process.env.COVERAGE ?? '',
+    },
   },
   use: {
     browserName:
@@ -34,8 +37,8 @@ const config: PlaywrightTestConfig = {
 };
 
 if (process.env.CI) {
-  config.retries = 2;
-  // config.workers = 2;
+  config.retries = 3;
+  config.workers = 8;
 }
 
 export default config;

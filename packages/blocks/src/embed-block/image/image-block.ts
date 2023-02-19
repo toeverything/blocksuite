@@ -1,16 +1,18 @@
-import { html, css } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import type { EmbedBlockModel } from '../index.js';
-import {
-  type BlockHost,
-  NonShadowLitElement,
-  BlockChildrenContainer,
-} from '../../__internal__/index.js';
-import { assertExists } from '@blocksuite/global/utils';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import type { Disposable } from '@blocksuite/global/utils';
 import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
+
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import type { Disposable } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+
+import {
+  BlockChildrenContainer,
+  type BlockHost,
+  NonShadowLitElement,
+} from '../../__internal__/index.js';
+import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends NonShadowLitElement {
@@ -24,6 +26,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
     }
     .affine-image-wrapper img {
       max-width: 100%;
@@ -51,8 +54,8 @@ export class ImageBlockComponent extends NonShadowLitElement {
     }
 
     .embed-editing-state {
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.8),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.4);
+      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.8),
+        0 3px 16px -6px rgba(24, 39, 75, 0.4);
       border-radius: 10px;
       list-style: none;
       padding: 4px;
@@ -124,7 +127,7 @@ export class ImageBlockComponent extends NonShadowLitElement {
   host!: BlockHost;
 
   @query('.resizable-img')
-  private _resizeImg!: HTMLElement;
+  public readonly resizeImg!: HTMLElement;
 
   @state()
   private _source!: string;
@@ -207,8 +210,8 @@ export class ImageBlockComponent extends NonShadowLitElement {
       this._imageState = 'failed';
     }
     if (width && height) {
-      this._resizeImg.style.width = width + 'px';
-      this._resizeImg.style.height = height + 'px';
+      this.resizeImg.style.width = width + 'px';
+      this.resizeImg.style.height = height + 'px';
     }
   }
 
@@ -221,16 +224,16 @@ export class ImageBlockComponent extends NonShadowLitElement {
     );
     const { width, height } = this.model;
 
-    if (this._resizeImg) {
+    if (this.resizeImg) {
       if (this._imageState !== 'ready') {
-        this._resizeImg.style.width = 'unset';
-        this._resizeImg.style.height = 'unset';
+        this.resizeImg.style.width = 'unset';
+        this.resizeImg.style.height = 'unset';
       } else if (width && height) {
-        this._resizeImg.style.width = width + 'px';
-        this._resizeImg.style.height = height + 'px';
+        this.resizeImg.style.width = width + 'px';
+        this.resizeImg.style.height = height + 'px';
       } else {
-        this._resizeImg.style.width = 'unset';
-        this._resizeImg.style.height = 'unset';
+        this.resizeImg.style.width = 'unset';
+        this.resizeImg.style.height = 'unset';
       }
     }
 

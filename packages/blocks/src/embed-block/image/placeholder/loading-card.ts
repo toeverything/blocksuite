@@ -1,7 +1,9 @@
-import { html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { NonShadowLitElement } from '../../../__internal__/index.js';
 import './circle-loading.js';
+
+import { css, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
+import { NonShadowLitElement } from '../../../__internal__/index.js';
 
 const ELEMENT_TAG = 'affine-image-block-loading-card' as const;
 

@@ -1,17 +1,19 @@
-import * as Y from 'yjs';
+import { assertExists } from '@blocksuite/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
+import { nanoid } from 'nanoid';
+import * as Y from 'yjs';
+
 import type { IBound } from './consts.js';
+import type { HitTestOptions } from './elements/base-element.js';
 import {
+  DebugElement,
   PhasorElement,
   PhasorElementType,
-  DebugElement,
   ShapeElement,
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
-import { assertExists } from '@blocksuite/global/utils';
-import { nanoid } from 'nanoid';
-import type { HitTestOptions } from './elements/base-element.js';
+import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
   private _renderer: Renderer;
@@ -53,7 +55,7 @@ export class SurfaceManager {
     this._transact(() => {
       const yElement = this._yElements.get(id) as Y.Map<unknown>;
       assertExists(yElement);
-      const xywh = `${bound.x},${bound.y},${bound.w},${bound.h}`;
+      const xywh = serializeXYWH(bound.x, bound.y, bound.w, bound.h);
       yElement.set('xywh', xywh);
     });
   }
@@ -187,7 +189,7 @@ export class SurfaceManager {
 
         if (key === 'xywh') {
           const xywh = yElement.get(key) as string;
-          const [x, y, w, h] = xywh.split(',').map(Number);
+          const [x, y, w, h] = deserializeXYWH(xywh);
 
           // refresh grid manager
           this._renderer.removeElement(element);

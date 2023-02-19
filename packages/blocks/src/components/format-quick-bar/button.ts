@@ -1,5 +1,6 @@
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
 import { IconButton } from '../button.js';
 
 @customElement('format-bar-button')
@@ -25,8 +26,15 @@ export class FormatBarButton extends IconButton {
   @property()
   active = false;
 
+  private readonly _mousedown = (e: MouseEvent) => {
+    // prevents catching or bubbling in editor-container
+    e.stopPropagation();
+  };
+
   override connectedCallback() {
     super.connectedCallback();
+
+    this.addEventListener('mousedown', this._mousedown);
 
     this.style.setProperty(
       '--button-width',
@@ -36,6 +44,11 @@ export class FormatBarButton extends IconButton {
       '--button-height',
       typeof this.height === 'string' ? this.height : `${this.height}px`
     );
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('mousedown', this._mousedown);
   }
 }
 

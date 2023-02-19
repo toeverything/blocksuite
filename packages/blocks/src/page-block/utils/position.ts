@@ -1,3 +1,5 @@
+import { caretRangeFromPoint } from '@blocksuite/global/utils';
+
 import {
   clamp,
   getCurrentRange,
@@ -5,7 +7,7 @@ import {
   resetNativeSelection,
   SelectionEvent,
 } from '../../__internal__/index.js';
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
+import { isAtLineEdge } from '../../__internal__/rich-text/rich-text-operations.js';
 
 export function repairContextMenuRange(e: SelectionEvent) {
   const selection = window.getSelection() as Selection;
@@ -112,24 +114,40 @@ export function calcPositionPointByRange(
     lineRange.setStart(startContainer, startOffset);
     lineRange.setEnd(endContainer, endOffset);
   } else {
+    // Use target node
     lineRange.setStart(targetNode, offset);
+
+    // Workaround select to empty line will get empty range
+    // If range is empty, range.getBoundingClientRect of range will return the empty value({ x: 0, y: 0 ...})
+    const isTextLikeNode =
+      targetNode.nodeType === Node.TEXT_NODE ||
+      targetNode.nodeType === Node.COMMENT_NODE ||
+      targetNode.nodeType === Node.CDATA_SECTION_NODE;
+    if (!isTextLikeNode) {
+      // Fallback to use whole range
+      lineRange.setStart(startContainer, startOffset);
+      lineRange.setEnd(endContainer, endOffset);
+    }
+
+    // Workaround line edge range
+    // When selecting from left to the end of right, the edge rect is expected
+    // But when selecting from right to the start of left, the edge rect is not expected
+    if (direction.includes('left')) {
+      // Shift the range when the selection is selected to the left edge of the line
+      const maybeShiftRange = isAtLineEdge(lineRange);
+      if (maybeShiftRange) {
+        lineRange.setStart(
+          maybeShiftRange.startContainer,
+          maybeShiftRange.startOffset
+        );
+        lineRange.setEnd(
+          maybeShiftRange.endContainer,
+          maybeShiftRange.endOffset
+        );
+      }
+    }
   }
 
-  // XXX the workaround is very ugly, please improve after you find a way to identify the range is empty
-  // Workaround select to empty line will get empty range
-  // If range is empty, range.getBoundingClientRect of range will return the empty value({ x: 0, y: 0 ...})
-  const tmpRect = lineRange.getBoundingClientRect();
-  const isWrongRect =
-    tmpRect.x === 0 &&
-    tmpRect.y === 0 &&
-    tmpRect.width === 0 &&
-    tmpRect.height === 0;
-
-  if (isWrongRect) {
-    // Fallback to use whole range
-    lineRange.setStart(startContainer, startOffset);
-    lineRange.setEnd(endContainer, endOffset);
-  }
   // resetNativeSelection(lineRange);
 
   const lineRect = lineRange.getBoundingClientRect();

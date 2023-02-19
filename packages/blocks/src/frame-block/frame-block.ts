@@ -1,13 +1,15 @@
 /// <reference types="vite/client" />
-import { html, css } from 'lit';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { FrameBlockModel } from './frame-model.js';
+
 import {
+  BlockChildrenContainer,
   type BlockHost,
   NonShadowLitElement,
-  BlockChildrenContainer,
 } from '../__internal__/index.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { tryUpdateFrameSize } from '../page-block/index.js';
+import type { FrameBlockModel } from './frame-model.js';
 
 @customElement('affine-frame')
 export class FrameBlockComponent extends NonShadowLitElement {
@@ -34,7 +36,10 @@ export class FrameBlockComponent extends NonShadowLitElement {
     const childrenContainer = BlockChildrenContainer(
       this.model,
       this.host,
-      () => this.requestUpdate()
+      () => {
+        this.requestUpdate();
+        tryUpdateFrameSize(this.host.page, 1);
+      }
     );
 
     return html`

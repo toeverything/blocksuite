@@ -1,5 +1,15 @@
+import type { FrameBlockComponent } from '@blocksuite/blocks';
+import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
+import {
+  assertExists,
+  caretRangeFromPoint,
+  matchFlavours,
+  nonTextBlock,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+
 import type { RichText } from '../rich-text/rich-text.js';
+import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   getBlockElementByModel,
@@ -20,103 +30,11 @@ import type {
   SelectionInfo,
   SelectionPosition,
 } from './types.js';
-import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-  nonTextBlock,
-} from '@blocksuite/global/utils';
-import { asyncFocusRichText } from './common-operations.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
-
-// Find the first block or last block inside the frame,
-// so that we can select the full text of the block when moving outside of the frame.
-function findFrameBoundaryText(
-  clientY: number,
-  isBackward: boolean,
-  container: HTMLElement
-) {
-  let textBlock: HTMLElement | null = null;
-
-  if (isBackward) {
-    const elem = container
-      .querySelector('.ql-editor')
-      ?.closest(`[${BLOCK_ID_ATTR}]`) as HTMLElement;
-    if (elem) {
-      const rect = elem.getBoundingClientRect();
-      // handle dragging backward
-      if (clientY <= rect.top) {
-        textBlock = elem;
-      }
-    }
-  } else {
-    const textBlocks = container.querySelectorAll('.ql-editor');
-    if (textBlocks.length) {
-      const elem = textBlocks[textBlocks.length - 1].closest(
-        `[${BLOCK_ID_ATTR}]`
-      ) as HTMLElement;
-      if (elem) {
-        const rect = elem.getBoundingClientRect();
-        // handle dragging forward
-        if (clientY >= rect.bottom) {
-          textBlock = elem;
-        }
-      }
-    }
-  }
-
-  const text = textBlock?.querySelector('.ql-editor');
-  assertExists(text);
-  return text;
-}
-
-function computeCrossFrameRange(
-  clientX: number,
-  clientY: number,
-  offset: IPoint,
-  startRange: Range,
-  currentRange: Range,
-  isBackward: boolean,
-  container: HTMLElement
-) {
-  const text = findFrameBoundaryText(clientY, isBackward, container);
-  const rect = text.getBoundingClientRect();
-
-  // Pick a position inside the text rect
-  const newY = isBackward
-    ? rect.bottom - offset.y - 6
-    : rect.top - offset.y + 6;
-  const newRange = caretRangeFromPoint(clientX, newY);
-
-  if (!newRange || !text.firstChild) return currentRange;
-
-  // Select the full text of the first block,
-  // when dragging backward outside of the first block in frame
-  if (isBackward && text.firstChild.firstChild) {
-    newRange.setStartBefore(text.firstChild.firstChild);
-    newRange.setEnd(startRange.startContainer, startRange.startOffset);
-  }
-  // Select the full text of the last block,
-  // when dragging forward outside of the last block in frame
-  else if (!isBackward && text.firstChild.lastChild) {
-    newRange.setStart(startRange.startContainer, startRange.startOffset);
-    // should update `endOffset`
-    if (text.firstChild.firstChild === text.firstChild.lastChild) {
-      newRange.setEnd(
-        text.firstChild.firstChild,
-        text.firstChild.firstChild.textContent?.length || 0
-      );
-    } else {
-      newRange.setEndAfter(text.firstChild.lastChild);
-    }
-  }
-  return newRange;
-}
 
 export function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
@@ -238,6 +156,7 @@ export function focusBlockByModel(
     throw new Error("Can't focus frame or page!");
   }
   const defaultPageBlock = getDefaultPageBlock(model);
+  // If focus on a follow block, we should select the block
   if (
     matchFlavours(model, [
       'affine:embed',
@@ -246,6 +165,11 @@ export function focusBlockByModel(
       'affine:database',
     ])
   ) {
+    if (!defaultPageBlock.selection) {
+      // TODO fix this
+      // In the edgeless mode
+      return;
+    }
     defaultPageBlock.selection.state.clear();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && defaultPageBlock.signals.updateSelectedRects.emit([rect]);
@@ -266,11 +190,12 @@ export function focusBlockByModel(
 
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  defaultPageBlock.selection.state.clear();
+  defaultPageBlock.selection && defaultPageBlock.selection.state.clear();
   if (editableContainer) {
-    defaultPageBlock.selection.setFocusedBlockIndexByElement(
-      element as Element
-    );
+    defaultPageBlock.selection &&
+      defaultPageBlock.selection.setFocusedBlockIndexByElement(
+        element as Element
+      );
     focusRichText(editableContainer, position);
   }
 }
@@ -465,53 +390,6 @@ export function getSelectInfo(page: Page): SelectionInfo {
   };
 }
 
-// Forward: ↓ → leave `affine-frame`
-// Backward: ← ↑ leave `.affine-default-page-block-title-container`
-function handleCrossFrameDragMove(
-  e: SelectionEvent,
-  container: HTMLElement,
-  startRange: Range,
-  currentRange: Range,
-  isBackward: boolean
-) {
-  let isFrame = container.tagName === 'AFFINE-FRAME';
-
-  if (isBackward) {
-    // Reassign container when moving to title,
-    // if you want to select a title you can rewrite this piece of logic
-    if (
-      container.classList.contains('affine-default-page-block-title-container')
-    ) {
-      isFrame = true;
-      container = container
-        .closest('.affine-default-page-block-container')
-        ?.querySelector('affine-frame') as HTMLElement;
-      assertExists(container);
-    } else if (container.classList.contains('affine-frame-block-container')) {
-      // In edgeless mode, there is no header.
-      isFrame = true;
-      container = container.parentElement as HTMLElement;
-      assertExists(container);
-    }
-  }
-
-  if (isFrame) {
-    const newRange = computeCrossFrameRange(
-      e.raw.clientX,
-      e.raw.clientY,
-      e.containerOffset,
-      startRange,
-      currentRange,
-      isBackward,
-      container
-    );
-    resetNativeSelection(newRange);
-  } else {
-    // ignore other elements, e.g., `.affine-frame-block-container`, `.affine-list-block__prefix`
-    return;
-  }
-}
-
 function handleInFrameDragMove(
   startContainer: Node,
   startOffset: number,
@@ -532,36 +410,94 @@ export function handleNativeRangeDragMove(
   startRange: Range | null,
   e: SelectionEvent
 ) {
+  const isEdgelessMode = !!document.querySelector('affine-edgeless-page');
+
   // Range from current mouse position
-  const currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
+  let currentRange = caretRangeFromPoint(e.raw.clientX, e.raw.clientY);
   if (!currentRange) return;
 
   assertExists(startRange);
   const { startContainer, startOffset, endContainer, endOffset } = startRange;
-  const container = currentRange.commonAncestorContainer as HTMLElement;
+  const _startContainer = (
+    startContainer.nodeType === Node.TEXT_NODE
+      ? startContainer.parentElement
+      : startContainer
+  ) as HTMLElement;
+  const startFrame = _startContainer.closest('affine-frame');
+  if (!startFrame) return;
+
+  const { clientX: x, clientY: y } = e.raw;
+
+  let currentFrame: FrameBlockComponent | null | undefined = null;
+  let shouldUpdateCurrentRange = false;
+
+  if (isEdgelessMode) {
+    currentFrame = startFrame;
+    shouldUpdateCurrentRange = true;
+  } else {
+    const el = document.elementFromPoint(x, y);
+    if (el?.classList.contains('quill-container')) {
+      return;
+    }
+    currentFrame = el?.closest('affine-frame');
+    const currentEditor = el?.closest('.ql-editor');
+    // if we are not pointing at an editor, we should update the current range
+    // if we are not even pointing at a frame, we should find one and update the current range
+    shouldUpdateCurrentRange = !currentFrame || !currentEditor;
+    currentFrame ??= getClosestFrame(y);
+  }
+  if (!currentFrame) return;
+
+  if (shouldUpdateCurrentRange) {
+    const closestEditor = getClosestEditor(y, currentFrame);
+    if (!closestEditor) return;
+
+    const newPoint = normalizePointIntoContainer({ x, y }, closestEditor);
+    currentRange = caretRangeFromPoint(newPoint.x, newPoint.y);
+    if (!currentRange) return;
+    if (currentRange.endContainer.nodeType !== Node.TEXT_NODE) return;
+    if (!currentFrame.contains(currentRange.endContainer)) return;
+  }
+
   // Forward: ↓ →, Backward: ← ↑
   const isBackward = currentRange.comparePoint(endContainer, endOffset) === 1;
+  handleInFrameDragMove(
+    startContainer,
+    startOffset,
+    endContainer,
+    endOffset,
+    currentRange,
+    isBackward
+  );
+}
 
-  // Handle native range state on cross-block dragging,
-  // see https://github.com/toeverything/blocksuite/pull/845
-  if (container.nodeType === Node.TEXT_NODE) {
-    handleInFrameDragMove(
-      startContainer,
-      startOffset,
-      endContainer,
-      endOffset,
-      currentRange,
-      isBackward
-    );
+/**
+ * This function is used to normalize the point into the reasonable range of the container.
+ *
+ * It will set the point to the top-left or bottom-right corner
+ * when the point is out of the horizontal range of container.
+ */
+function normalizePointIntoContainer(point: IPoint, container: Element) {
+  const { top, left, right, bottom } = container.getBoundingClientRect();
+  const newPoint = { ...point };
+  const { x, y } = point;
+
+  // need this offset to avoid the point is out of the container
+  if (y < top) {
+    newPoint.y = top + 4;
+    newPoint.x = left + 4;
+  } else if (y > bottom) {
+    newPoint.y = bottom - 4;
+    newPoint.x = right - 4;
   } else {
-    handleCrossFrameDragMove(
-      e,
-      container,
-      startRange,
-      currentRange,
-      isBackward
-    );
+    if (x < left) {
+      newPoint.x = left;
+    } else if (x > right) {
+      newPoint.x = right;
+    }
   }
+
+  return newPoint;
 }
 
 export function isBlankArea(e: SelectionEvent) {
@@ -1048,4 +984,11 @@ export function getHorizontalClosestElement(
  */
 export function getClosestEditor(clientY: number, container = document.body) {
   return getHorizontalClosestElement(clientY, '.ql-editor', container);
+}
+
+/**
+ * Get the closest frame element in the horizontal position
+ */
+export function getClosestFrame(clientY: number) {
+  return getHorizontalClosestElement(clientY, 'affine-frame');
 }

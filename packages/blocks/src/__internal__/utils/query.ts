@@ -1,10 +1,11 @@
+import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { LeafBlot } from 'parchment';
+
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import { BLOCK_ID_ATTR as ATTR } from '@blocksuite/global/config';
 import type { IPoint } from './gesture.js';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -127,19 +128,22 @@ export function getPreviousBlock(
   return previousBlock;
 }
 
+/**
+ * Note: this method will return `DefaultPageBlockComponent` | `EdgelessPageBlockComponent`!
+ *
+ * @deprecated This method only works in the paper mode!
+ */
 export function getDefaultPageBlock(model: BaseBlockModel) {
   assertExists(model.page.root);
   const page = document.querySelector(
     `[${ATTR}="${model.page.root.id}"]`
   ) as DefaultPageBlockComponent;
+  // | EdgelessPageBlockComponent | null;
   return page;
 }
 
 export function getContainerByModel(model: BaseBlockModel) {
-  assertExists(model.page.root);
-  const page = document.querySelector(
-    `[${ATTR}="${model.page.root.id}"]`
-  ) as DefaultPageBlockComponent;
+  const page = getDefaultPageBlock(model);
   const container = page.closest('editor-container');
   assertExists(container);
   return container;
@@ -161,12 +165,7 @@ export function getBlockElementByModel(model: BaseBlockModel) {
 }
 
 export function getStartModelBySelection() {
-  const selection = window.getSelection() as Selection;
-  if (selection.rangeCount === 0) {
-    throw new Error("Can't get start model by selection, rangeCount is 0");
-  }
-
-  const range = selection.getRangeAt(0);
+  const range = getCurrentRange();
   const startContainer =
     range.startContainer instanceof Text
       ? (range.startContainer.parentElement as HTMLElement)
@@ -298,6 +297,9 @@ function textWithoutNode(parentNode: Node, currentNode: Node) {
   return text;
 }
 
+/**
+ * FIXME: Use it carefully, it will skip soft enter!
+ */
 export function getQuillIndexByNativeSelection(
   ele: Node | null | undefined,
   nodeOffset: number,

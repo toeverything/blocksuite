@@ -1,25 +1,40 @@
-import { css, html, TemplateResult } from 'lit';
-import { customElement, property, query, queryAll } from 'lit/decorators.js';
-import { NonShadowLitElement } from '../__internal__/index.js';
-import type {
-  DragHandleGetModelStateCallback,
-  DragHandleGetModelStateWithCursorCallback,
-  DragIndicator,
-} from './drag-handle.js';
-import type { EditingState } from '../page-block/default/utils.js';
-import { centeredToolTipStyle, toolTipStyle } from './tooltip.js';
-import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import {
-  BulletedListIconLarge,
-  CrossIcon,
-  RectIcon,
-  TextIconLarge,
-  BlockHubIcon,
+  BLOCKHUB_FILE_ITEMS,
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
-  DatabaseTableView,
+  BlockHubIcon,
+  CrossIcon,
+  DatabaseTableViewIcon,
+  ImageIcon,
+  NumberedListIconLarge,
+  RectIcon,
+  TextIconLarge,
 } from '@blocksuite/global/config';
+import {
+  assertExists,
+  DisposableGroup,
+  isFirefox,
+  Signal,
+} from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { css, html, TemplateResult } from 'lit';
+import {
+  customElement,
+  property,
+  query,
+  queryAll,
+  state,
+} from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { NonShadowLitElement } from '../__internal__/index.js';
+import type { EditingState } from '../page-block/default/utils.js';
+import {
+  getBlockEditingStateByCursor,
+  getBlockEditingStateByPosition,
+} from '../page-block/default/utils.js';
+import type { DragIndicator } from './drag-handle.js';
+import { centeredToolTipStyle, toolTipStyle } from './tooltip/tooltip.js';
 
 type BlockHubItem = {
   flavour: string;
@@ -30,7 +45,7 @@ type BlockHubItem = {
   toolTip: string;
 };
 
-export type CardListType = 'blank' | 'list' | 'text' | 'database';
+export type CardListType = 'blank' | 'list' | 'text' | 'database' | 'file';
 
 @customElement('affine-block-hub')
 export class BlockHub extends NonShadowLitElement {
@@ -39,6 +54,36 @@ export class BlockHub extends NonShadowLitElement {
    */
   @property()
   public getAllowedBlocks: () => BaseBlockModel[];
+
+  @property()
+  updateSelectedRectsSignal: Signal<DOMRect[]> | null = null;
+
+  @property()
+  blockHubStatusUpdated: Signal<boolean> = new Signal<boolean>();
+
+  @property()
+  bottom = 70;
+
+  @property()
+  right = 24;
+
+  @state()
+  _expanded = false;
+
+  @state()
+  _isGrabbing = false;
+
+  @state()
+  _isCardListVisible = false;
+
+  @state()
+  _cardVisibleType: CardListType | null = null;
+
+  @state()
+  _showToolTip = true;
+
+  @state()
+  _maxHeight = 2000;
 
   @queryAll('.card-container')
   private _blockHubCards!: Array<HTMLElement>;
@@ -58,104 +103,137 @@ export class BlockHub extends NonShadowLitElement {
   @query('[role="menu-entry"]')
   private _blockHubMenuEntry!: HTMLElement;
 
-  private _onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-  private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
-    null;
-  private _getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback | null =
-    null;
-
+  private readonly _onDropCallback: (
+    e: DragEvent,
+    lastModelState: EditingState
+  ) => Promise<void>;
   private _currentPageX = 0;
   private _currentPageY = 0;
   private _indicator!: DragIndicator;
   private _indicatorHTMLTemplate!: TemplateResult<1>;
   private _lastModelState: EditingState | null = null;
   private _cursor: number | null = 0;
-  private _expanded = false;
-  private _isGrabbing = false;
-  private _isCardListVisible = false;
-  private _cardVisibleType: CardListType | null = null;
-  private _showToolTip = true;
   private _timer: number | null = null;
-  private _delay = 200; // ms
+  private _delay = 200;
+  private readonly _enable_database: boolean;
+  private _mouseRoot: HTMLElement;
+  private _topDistance = 24;
+  private _disposables: DisposableGroup = new DisposableGroup();
 
   static styles = css`
     affine-block-hub {
-      position: fixed;
+      position: absolute;
       z-index: 1;
     }
 
     .affine-block-hub-container {
-      width: 280px;
+      width: 274px;
       position: absolute;
-      right: calc(100% + 10px);
+      right: calc(100% + 8px);
       top: calc(50%);
+      overflow-y: unset;
       transform: translateY(-50%);
       display: none;
       justify-content: center;
       fill: var(--affine-icon-color);
       font-size: var(--affine-font-sm);
-      background: var(--affine-block-hub-background);
-      box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      background: var(--affine-hub-background);
+      box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
       border-radius: 10px;
     }
 
     .affine-block-hub-container[type='text'] {
       top: unset;
-      bottom: 0px;
+      bottom: 0;
       transform: unset;
-      right: calc(100% + 5.5px);
+      right: calc(100% + 4px);
     }
 
     .visible {
-      display: flex;
+      display: block;
     }
 
     .invisible {
       display: none;
     }
 
+    .card-container-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
     .card-container {
       display: flex;
+      position: relative;
       align-items: center;
-      width: 256px;
+      width: 250px;
       height: 54px;
-      // TODO 颜色待定
-      background: #ffffff;
-      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.08),
-        4px 4px 7px rgba(58, 76, 92, 0.04),
-        -4px -4px 13px rgba(58, 76, 92, 0.02),
-        6px 6px 36px rgba(58, 76, 92, 0.06);
+      background: var(--affine-page-background);
+      box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
       border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       cursor: grab;
+      top: 0;
+      left: 0;
+      transition: all 0.1s ease-in-out;
+    }
+
+    .card-icon-container {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      right: 12px;
+    }
+
+    .card-icon-container > svg {
+      width: 20px;
+      height: 20px;
     }
 
     .card-container:hover {
       background: var(--affine-block-hub-hover-background);
       fill: var(--affine-primary-color);
+      top: -2px;
+      left: -2px;
     }
 
     .card-description-container {
       display: block;
-      width: 200px;
+      width: 190px;
       color: var(--affine-text-color);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
+      margin: 8px 0 8px 12px;
       text-align: justify;
     }
 
     .affine-block-hub-container .description {
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
+      line-height: var(--affine-line-height);
+      color: var(--affine-secondary-text-color);
+    }
+
+    .card-container:hover.grabbing {
+      top: unset;
+      left: unset;
+      box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
+        0 0 12px rgba(66, 65, 73, 0.08);
     }
 
     .grabbing {
       cursor: grabbing;
     }
 
+    .grab {
+      cursor: grab;
+    }
+
     .affine-block-hub-title-container {
       margin: 16px 0 20px 12px;
-      color: var(--affine-line-number-color);
+      color: var(--affine-secondary-text-color);
+      font-size: var(--affine-font-base);
     }
 
     .prominent {
@@ -168,15 +246,14 @@ export class BlockHub extends NonShadowLitElement {
       flex-flow: column;
       justify-content: center;
       align-items: center;
-      padding: 4px;
       position: fixed;
-      right: 24px;
-      bottom: 70px;
       width: 44px;
-      background: #ffffff;
-      box-shadow: 0px 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0px 3px 16px -6px rgba(24, 39, 75, 0.04);
+      background: var(--affine-page-background);
       border-radius: 10px;
+    }
+
+    .block-hub-menu-container[expanded] {
+      box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
     }
 
     .block-hub-icon-container {
@@ -185,13 +262,18 @@ export class BlockHub extends NonShadowLitElement {
       align-items: center;
       margin-bottom: 8px;
       position: relative;
+      background: var(--affine-page-background);
+      border-radius: 5px;
       fill: var(--affine-line-number-color);
       height: 36px;
     }
 
     .block-hub-icon-container[selected='true'] {
-      background: var(--affine-code-block-background);
-      border: 0.5px solid #d0d7e3;
+      fill: var(--affine-primary-color);
+    }
+
+    .block-hub-icon-container:hover {
+      background: var(--affine-hover-background);
       border-radius: 5px;
     }
 
@@ -202,16 +284,21 @@ export class BlockHub extends NonShadowLitElement {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: #ffffff;
+      background: var(--affine-page-background);
       border-radius: 10px;
       fill: var(--affine-line-number-color);
+    }
+
+    .block-hub-menu-container[expanded] .new-icon {
+      border-radius: 5px;
     }
 
     .new-icon:hover {
       box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
         -4px -4px 13px rgba(58, 76, 92, 0.02),
         6px 6px 36px rgba(58, 76, 92, 0.06);
-      background: #ffffff;
+      fill: var(--affine-primary-color);
+      background: var(--affine-page-background);
     }
 
     .icon-expanded {
@@ -220,7 +307,7 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     .icon-expanded:hover {
-      background: #f1f3fe;
+      background: var(--affine-hover-background);
       box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
         -4px -4px 13px rgba(58, 76, 92, 0.02),
         6px 6px 36px rgba(58, 76, 92, 0.06);
@@ -238,125 +325,140 @@ export class BlockHub extends NonShadowLitElement {
       right: unset;
       top: 10px;
       transform: translateX(calc(-100% - 7px));
-      border-radius: 10px 10px 0px 10px;
+      border-radius: 10px 10px 0 10px;
     }
 
     .block-hub-icons-container {
-      position: relative;
-      opacity: 0;
-      top: 100px;
-      height: 0px;
+      overflow: hidden;
       transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
-    }
-
-    .block-hub-icons-container[transition] {
-      opacity: 1;
-      top: 0px;
     }
 
     ${centeredToolTipStyle}
     ${toolTipStyle}
   `;
 
-  private enable_database: boolean;
-
   constructor(options: {
+    mouseRoot: HTMLElement;
     enable_database: boolean;
-    onDropCallback: (e: DragEvent, lastModelState: EditingState) => void;
-    getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
-    getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
+    onDropCallback: (
+      e: DragEvent,
+      lastModelState: EditingState
+    ) => Promise<void>;
   }) {
     super();
-    this.enable_database = options.enable_database;
+    this._mouseRoot = options.mouseRoot;
+    this._enable_database = options.enable_database;
     this.getAllowedBlocks = () => {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
     };
     this._onDropCallback = options.onDropCallback;
-    this._getBlockEditingStateByPosition =
-      options.getBlockEditingStateByPosition;
-    this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
-    document.body.appendChild(this);
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this.addEventListener('dragstart', this._onDragStart);
-    this.addEventListener('drag', this._onDrag);
-    this.addEventListener('dragend', this._onDragEnd);
+    const disposables = this._disposables;
+    disposables.add(
+      Signal.disposableListener(this, 'dragstart', this._onDragStart)
+    );
+    disposables.add(Signal.disposableListener(this, 'drag', this._onDrag));
+    disposables.add(
+      Signal.disposableListener(this, 'dragend', this._onDragEnd)
+    );
 
-    document.addEventListener('dragover', this._onDragOver);
-    document.addEventListener('drop', this._onDrop);
+    disposables.add(
+      Signal.disposableListener(this._mouseRoot, 'dragover', this._onDragOver)
+    );
+    disposables.add(
+      Signal.disposableListener(this._mouseRoot, 'drop', this._onDrop)
+    );
     isFirefox &&
-      document.addEventListener('dragover', this._onDragOverDocument);
-    this.addEventListener('mousedown', this._onMouseDown);
+      disposables.add(
+        Signal.disposableListener(
+          this._mouseRoot,
+          'dragover',
+          this._onDragOverDocument
+        )
+      );
+    disposables.add(
+      Signal.disposableListener(this, 'mousedown', this._onMouseDown)
+    );
+    this._onResize();
   }
 
   protected firstUpdated() {
+    const disposables = this._disposables;
     this._blockHubCards.forEach(card => {
-      card.addEventListener('mousedown', this._onCardMouseDown);
-      card.addEventListener('mouseup', this._onCardMouseUp);
+      disposables.add(
+        Signal.disposableListener(card, 'mousedown', this._onCardMouseDown)
+      );
+      disposables.add(
+        Signal.disposableListener(card, 'mouseup', this._onCardMouseUp)
+      );
     });
     for (const blockHubMenu of this._blockHubMenus) {
-      blockHubMenu.addEventListener('mouseover', this._onBlockHubMenuMouseOver);
+      disposables.add(
+        Signal.disposableListener(
+          blockHubMenu,
+          'mouseover',
+          this._onBlockHubMenuMouseOver
+        )
+      );
+      if (blockHubMenu.getAttribute('type') === 'blank') {
+        disposables.add(
+          Signal.disposableListener(
+            blockHubMenu,
+            'mousedown',
+            this._onBlankMenuMouseDown
+          )
+        );
+        disposables.add(
+          Signal.disposableListener(
+            blockHubMenu,
+            'mouseup',
+            this._onBlankMenuMouseUp
+          )
+        );
+      }
     }
-    this._blockHubMenuEntry.addEventListener(
-      'mouseover',
-      this._onBlockHubEntryMouseOver
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubMenuEntry,
+        'mouseover',
+        this._onBlockHubEntryMouseOver
+      )
     );
-
-    document.addEventListener('click', this._onClick);
-    this._blockHubButton.addEventListener('click', this._onBlockHubButtonClick);
+    disposables.add(
+      Signal.disposableListener(document, 'click', this._onClick)
+    );
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubButton,
+        'click',
+        this._onBlockHubButtonClick
+      )
+    );
+    disposables.add(
+      Signal.disposableListener(
+        this._blockHubIconsContainer,
+        'transitionstart',
+        this._onTransitionStart
+      )
+    );
+    disposables.add(
+      Signal.disposableListener(window, 'resize', this._onResize)
+    );
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
     if (!this._indicator) {
       this._indicatorHTMLTemplate = html` <affine-drag-indicator></affine-drag-indicator>`;
     }
-    this._blockHubIconsContainer.addEventListener(
-      'transitionstart',
-      this._onTransitionStart
-    );
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener('dragstart', this._onDragStart);
-    this.removeEventListener('drag', this._onDrag);
-    this.removeEventListener('dragend', this._onDragEnd);
-
-    // FIXME: do not listen on the document
-    document.removeEventListener('dragover', this._onDragOver);
-    document.removeEventListener('drop', this._onDrop);
-    isFirefox &&
-      document.removeEventListener('dragover', this._onDragOverDocument);
-    this.removeEventListener('mousedown', this._onMouseDown);
-
-    if (this.hasUpdated) {
-      this._blockHubCards.forEach(card => {
-        card.removeEventListener('mousedown', this._onCardMouseDown);
-        card.removeEventListener('mouseup', this._onCardMouseUp);
-      });
-      for (const blockHubMenu of this._blockHubMenus) {
-        blockHubMenu.removeEventListener(
-          'mouseover',
-          this._onBlockHubMenuMouseOver
-        );
-      }
-      this._blockHubMenuEntry.addEventListener(
-        'mouseover',
-        this._onBlockHubEntryMouseOver
-      );
-      document.removeEventListener('click', this._onClick);
-      this._blockHubButton.removeEventListener(
-        'click',
-        this._onBlockHubButtonClick
-      );
-      this._blockHubIconsContainer.removeEventListener(
-        'transitionstart',
-        this._onTransitionStart
-      );
-    }
+    this._disposables.dispose();
   }
 
   /**
@@ -365,22 +467,20 @@ export class BlockHub extends NonShadowLitElement {
    * to exceeds its actual visual height. So currently we manually set the height of those whose opacity is 0 to 0px.
    */
   private _onTransitionStart = (e: TransitionEvent) => {
-    // see: https://stackoverflow.com/questions/40530990/transitionend-event-with-multiple-transitions-detect-last-transition
-    if (e.propertyName === 'opacity') {
-      return;
-    }
     if (this._timer) {
       clearTimeout(this._timer);
     }
     if (!this._expanded) {
       // when the _blockHubMenuContainer is unexpanded, should cancel the vertical padding making it a square
-      this._blockHubMenuContainer.style.padding = '0px 4px';
+      this._blockHubMenuContainer.style.padding = '0 4px';
       this._timer = window.setTimeout(() => {
-        this._blockHubIconsContainer.style.height = '0px';
+        this._blockHubIconsContainer.style.overflow = 'hidden';
       }, this._delay);
     } else {
-      this._blockHubIconsContainer.style.height = 'unset';
       this._blockHubMenuContainer.style.padding = '4px';
+      this._timer = window.setTimeout(() => {
+        this._blockHubIconsContainer.style.overflow = 'unset';
+      }, this._delay);
     }
   };
 
@@ -393,10 +493,18 @@ export class BlockHub extends NonShadowLitElement {
   }
 
   private _blockHubMenuTemplate = () => {
+    const menuNum = this._enable_database ? 5 : 4;
+    const height = menuNum * 44 + 10;
     return html`
-      <div class="block-hub-icons-container" ?transition=${this._expanded}>
+      <div
+        class="block-hub-icons-container"
+        ?transition=${this._expanded}
+        style="height: ${this._expanded ? `${height}px` : '0'};"
+      >
         <div
-          class="block-hub-icon-container has-tool-tip"
+          class="block-hub-icon-container has-tool-tip ${this._isGrabbing
+            ? 'grabbing'
+            : 'grab'}"
           selected=${this._cardVisibleType === 'blank' ? 'true' : 'false'}
           type="blank"
           draggable="true"
@@ -426,9 +534,21 @@ export class BlockHub extends NonShadowLitElement {
           selected=${this._cardVisibleType === 'list' ? 'true' : 'false'}
         >
           ${this._blockHubCardTemplate(BLOCKHUB_LIST_ITEMS, 'list', 'List')}
-          ${BulletedListIconLarge}
+          ${NumberedListIconLarge}
         </div>
-        ${this.enable_database
+        <div
+          class="block-hub-icon-container"
+          type="file"
+          selected=${this._cardVisibleType === 'file' ? 'true' : 'false'}
+        >
+          ${this._blockHubCardTemplate(
+            BLOCKHUB_FILE_ITEMS,
+            'file',
+            'Image or file'
+          )}
+          ${ImageIcon}
+        </div>
+        ${this._enable_database
           ? html`
               <div
                 class="block-hub-icon-container has-tool-tip"
@@ -439,7 +559,7 @@ export class BlockHub extends NonShadowLitElement {
                   ? 'true'
                   : 'false'}
               >
-                ${DatabaseTableView}
+                ${DatabaseTableViewIcon}
                 <tool-tip
                   inert
                   role="tooltip"
@@ -461,44 +581,52 @@ export class BlockHub extends NonShadowLitElement {
     type: string,
     title: string
   ) => {
+    const shouldScroll = this._maxHeight < 800;
+    const styles = styleMap({
+      maxHeight: `${this._maxHeight}px`,
+      overflowY: shouldScroll ? 'scroll' : 'unset',
+    });
     return html`
       <div
         class="affine-block-hub-container ${this._shouldCardDisplay(type)
           ? 'visible'
           : ''}"
+        style="${styles}"
         type=${type}
       >
-        <div>
-          <div class="affine-block-hub-title-container">${title}</div>
-          ${blockHubItems.map(
-            ({ flavour, type, name, description, icon, toolTip }, index) => {
-              return html`
+        <div class="affine-block-hub-title-container">${title}</div>
+        ${blockHubItems.map(
+          ({ flavour, type, name, description, icon, toolTip }, index) => {
+            return html`
+              <div class="card-container-wrapper">
                 <div
-                  class="has-tool-tip"
+                  class="card-container has-tool-tip ${this._isGrabbing
+                    ? 'grabbing'
+                    : ''}"
                   draggable="true"
                   affine-flavour=${flavour}
                   affine-type=${type}
-                  style="z-index: ${blockHubItems.length - index}"
                 >
-                  <div
-                    class="card-container ${this._isGrabbing ? 'grabbing' : ''}"
-                  >
-                    <div class="card-description-container">
-                      <div>${name}</div>
-                      <div class="description">${description}</div>
-                    </div>
-                    ${icon}
+                  <div class="card-description-container">
+                    <div>${name}</div>
+                    <div class="description">${description}</div>
                   </div>
+                  <div class="card-icon-container">${icon}</div>
                   <centered-tool-tip
-                    tip-position="bottom"
-                    style=${this._showToolTip ? '' : 'display: none'}
+                    tip-position=${shouldScroll &&
+                    index === blockHubItems.length - 1
+                      ? 'top'
+                      : 'bottom'}
+                    style="display: ${this._showToolTip
+                      ? ''
+                      : 'none'}; z-index: ${blockHubItems.length - index}"
                     >${toolTip}
                   </centered-tool-tip>
                 </div>
-              `;
-            }
-          )}
-        </div>
+              </div>
+            `;
+          }
+        )}
       </div>
     `;
   };
@@ -508,9 +636,18 @@ export class BlockHub extends NonShadowLitElement {
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
       this._isCardListVisible = false;
       this._cardVisibleType = null;
-      this.requestUpdate();
     }
   };
+
+  public toggleMenu(open: boolean) {
+    if (open) {
+      this._expanded = true;
+    } else {
+      this._expanded = false;
+      this._cardVisibleType = null;
+      this._isCardListVisible = false;
+    }
+  }
 
   private _onBlockHubButtonClick = (e: MouseEvent) => {
     this._expanded = !this._expanded;
@@ -518,7 +655,7 @@ export class BlockHub extends NonShadowLitElement {
       this._cardVisibleType = null;
       this._isCardListVisible = false;
     }
-    this.requestUpdate();
+    this.blockHubStatusUpdated.emit(this._expanded);
   };
 
   private _onDragStart = (event: DragEvent) => {
@@ -538,7 +675,7 @@ export class BlockHub extends NonShadowLitElement {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this.requestUpdate();
+    this.updateSelectedRectsSignal && this.updateSelectedRectsSignal.emit([]);
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -546,6 +683,24 @@ export class BlockHub extends NonShadowLitElement {
       this._currentPageX = e.pageX;
       this._currentPageY = e.pageY;
     }
+
+    this._refreshCursor(e);
+  };
+
+  private _refreshCursor = (e: MouseEvent) => {
+    let x = e.pageX;
+    let y = e.pageY;
+    if (isFirefox) {
+      x = this._currentPageX;
+      y = this._currentPageY;
+    }
+    const blocks = this.getAllowedBlocks();
+    const modelState = getBlockEditingStateByPosition(blocks, x, y, {
+      skipX: true,
+    });
+    modelState
+      ? (this._cursor = modelState.index)
+      : (this._cursor = blocks.length - 1);
   };
 
   private _onDrag = (e: DragEvent) => {
@@ -559,21 +714,20 @@ export class BlockHub extends NonShadowLitElement {
     }
 
     const modelState = this._cursor
-      ? this._getBlockEditingStateByCursor?.(
+      ? getBlockEditingStateByCursor(
           this.getAllowedBlocks(),
           x,
           y,
           this._cursor,
-          5,
-          false,
-          true
+          {
+            size: 5,
+            skipX: false,
+            dragging: true,
+          }
         )
-      : this._getBlockEditingStateByPosition?.(
-          this.getAllowedBlocks(),
-          x,
-          y,
-          true
-        );
+      : getBlockEditingStateByPosition(this.getAllowedBlocks(), x, y, {
+          skipX: true,
+        });
 
     if (modelState) {
       this._cursor = modelState.index;
@@ -607,7 +761,6 @@ export class BlockHub extends NonShadowLitElement {
     }
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
-    this.requestUpdate();
   };
 
   private _onDrop = (e: DragEvent) => {
@@ -615,18 +768,26 @@ export class BlockHub extends NonShadowLitElement {
     if (!e.dataTransfer.getData('affine/block-hub')) {
       return;
     }
-    assertExists(this._lastModelState);
+    if (!this._lastModelState) {
+      return;
+    }
     this._onDropCallback(e, this._lastModelState);
   };
 
   private _onCardMouseDown = (e: Event) => {
     this._isGrabbing = true;
-    this.requestUpdate();
   };
 
   private _onCardMouseUp = (e: Event) => {
     this._isGrabbing = false;
-    this.requestUpdate();
+  };
+
+  private _onBlankMenuMouseDown = () => {
+    this._isGrabbing = true;
+  };
+
+  private _onBlankMenuMouseUp = () => {
+    this._isGrabbing = false;
   };
 
   private _onBlockHubMenuMouseOver = (e: Event) => {
@@ -635,21 +796,30 @@ export class BlockHub extends NonShadowLitElement {
     assertExists(cardType);
     this._isCardListVisible = true;
     this._cardVisibleType = cardType as CardListType;
-    this.requestUpdate();
   };
 
   private _onBlockHubEntryMouseOver = () => {
     this._isCardListVisible = false;
-    this.requestUpdate();
+  };
+
+  private _onResize = () => {
+    const boundingClientRect = document.body.getBoundingClientRect();
+    this._maxHeight =
+      boundingClientRect.height - this._topDistance - this.bottom;
   };
 
   override render() {
     return html`
-      <div class="block-hub-menu-container">
+      <div
+        class="block-hub-menu-container"
+        ?expanded=${this._expanded}
+        style="bottom: ${this.bottom}px; right: ${this.right}px;"
+      >
         ${this._blockHubMenuTemplate()}
         <div
           class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
           role="menu-entry"
+          style="cursor:pointer;"
         >
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
@@ -657,7 +827,7 @@ export class BlockHub extends NonShadowLitElement {
             inert
             tip-position="left"
             role="tooltip"
-            >insert blocks
+            >Insert blocks
           </tool-tip>
         </div>
         ${this._blockHubCardTemplate(BLOCKHUB_TEXT_ITEMS, 'text', 'Text block')}

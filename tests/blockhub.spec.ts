@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
+
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -8,6 +9,7 @@ import {
   initThreeParagraphs,
 } from './utils/actions/index.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 test('first level menu always exists, second level menu can be hidden by click firs level menu', async ({
   page,
@@ -44,28 +46,24 @@ test('blockHub card items should appear and disappear properly with correspondin
   await focusRichText(page);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
-  await page.waitForTimeout(200);
-  const blankMenu = '.block-hub-icon-container:nth-child(1)';
-  const textMenu = '.block-hub-icon-container:nth-child(2)';
-  const listMenu = '.block-hub-icon-container:nth-child(3)';
+  const blankMenu = page.locator('.block-hub-icon-container:nth-child(1)');
+  const textMenu = page.locator('.block-hub-icon-container:nth-child(2)');
+  const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
 
-  const textMenuRect = await getCenterPosition(page, textMenu);
-  await page.mouse.move(textMenuRect.x, textMenuRect.y);
+  await textMenu.hover();
   const blockHubTextContainer = page.locator(
     '.affine-block-hub-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
-  const listMenuRect = await getCenterPosition(page, listMenu);
-  await page.mouse.move(listMenuRect.x, listMenuRect.y);
+  await listMenu.hover();
   const blockHubListContainer = page.locator(
     '.affine-block-hub-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
   await expect(blockHubTextContainer).toBeHidden();
 
-  const blankMenuRect = await getCenterPosition(page, blankMenu);
-  await page.mouse.move(blankMenuRect.x, blankMenuRect.y);
+  await blankMenu.hover();
   await expect(blockHubTextContainer).toBeHidden();
   await expect(blockHubListContainer).toBeHidden();
 });
@@ -78,11 +76,9 @@ test('blockHub card items can disappear when clicking blank area', async ({
   await focusRichText(page);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
-  await page.waitForTimeout(200);
-  const textMenu = '.block-hub-icon-container:nth-child(2)';
+  const textMenu = page.locator('.block-hub-icon-container:nth-child(2)');
 
-  const textMenuRect = await getCenterPosition(page, textMenu);
-  await page.mouse.move(textMenuRect.x, textMenuRect.y);
+  await textMenu.hover();
   const blockHubTextContainer = page.locator(
     '.affine-block-hub-container[type="text"]'
   );
@@ -117,15 +113,14 @@ test('drag blank line into text area', async ({ page }) => {
     { steps: 50 }
   );
 
+  await page.waitForTimeout(50);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,112]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="123"
       prop:type="text"
@@ -146,7 +141,7 @@ test('drag blank line into text area', async ({ page }) => {
   );
 });
 
-test('drag quote block from text menu into text area and blockHub text cards will disappear', async ({
+test('drag Heading1 block from text menu into text area and blockHub text cards will disappear', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -165,17 +160,18 @@ test('drag quote block from text menu into text area and blockHub text cards wil
   );
   await expect(blockHubTextContainer).toBeVisible();
 
-  const quotePos = await getCenterPosition(
+  const headingPos = await getCenterPosition(
     page,
-    '.has-tool-tip[affine-flavour="affine:paragraph"][affine-type="quote"]'
+    '.has-tool-tip[affine-flavour="affine:paragraph"][affine-type="h1"]'
   );
   const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
   await dragBetweenCoords(
     page,
-    { x: quotePos.x, y: quotePos.y },
+    { x: headingPos.x, y: headingPos.y },
     { x: targetPos.x, y: targetPos.y + 5 },
     { steps: 50 }
   );
+  await page.waitForTimeout(50);
 
   await assertStoreMatchJSX(
     page,
@@ -183,15 +179,13 @@ test('drag quote block from text menu into text area and blockHub text cards wil
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,112]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="123"
       prop:type="text"
     />
     <affine:paragraph
-      prop:type="quote"
+      prop:type="h1"
     />
     <affine:paragraph
       prop:text="456"
@@ -217,10 +211,8 @@ test('drag numbered list block from list menu into text area and blockHub list c
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
   await page.waitForTimeout(200);
-  const listMenu = '.block-hub-icon-container:nth-child(3)';
-
-  const listMenuRect = await getCenterPosition(page, listMenu);
-  await page.mouse.move(listMenuRect.x, listMenuRect.y);
+  const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
+  await listMenu.hover();
   const blockHubListContainer = page.locator(
     '.affine-block-hub-container[type="list"]'
   );
@@ -237,6 +229,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
     { x: targetPos.x, y: targetPos.y + 5 },
     { steps: 50 }
   );
+  await page.waitForTimeout(50);
 
   await assertStoreMatchJSX(
     page,
@@ -244,9 +237,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,112]"
-  >
+  <affine:frame>
     <affine:paragraph
       prop:text="123"
       prop:type="text"

@@ -1,5 +1,6 @@
-import { BaseElement, HitTestOptions } from '../base-element.js';
 import { isPointIn } from '../../utils/hit-utils.js';
+import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
+import { BaseElement, HitTestOptions } from '../base-element.js';
 
 export class DebugElement extends BaseElement {
   type = 'debug' as const;
@@ -19,7 +20,7 @@ export class DebugElement extends BaseElement {
       id: this.id,
       index: this.index,
       type: this.type,
-      xywh: `${this.x},${this.y},${this.w},${this.h}`,
+      xywh: serializeXYWH(this.x, this.y, this.w, this.h),
       color: this.color,
     };
   }
@@ -28,7 +29,7 @@ export class DebugElement extends BaseElement {
     const element = new DebugElement(data.id as string);
     element.index = data.index as string;
 
-    const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
+    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     element.setBound(x, y, w, h);
     element.color = data.color as string;
     return element;

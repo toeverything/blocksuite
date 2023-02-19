@@ -6,7 +6,14 @@
  */
 import { Page, Text, Workspace } from '@blocksuite/store';
 
-export function empty(workspace: Workspace) {
+export interface InitFn {
+  (workspace: Workspace): Promise<string>;
+  id: string;
+  displayName: string;
+  description: string;
+}
+
+export const empty: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -24,9 +31,13 @@ export function empty(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
 
-export function heavy(workspace: Workspace) {
+empty.id = 'empty';
+empty.displayName = 'Empty Editor';
+empty.description = 'Start from empty editor';
+
+export const heavy: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -52,7 +63,11 @@ export function heavy(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
+
+heavy.id = 'heavy';
+heavy.displayName = 'Heavy Example';
+heavy.description = 'Heavy example on thousands of paragraph blocks';
 
 const presetMarkdown = `This playground is designed to:
 
@@ -73,7 +88,7 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export function preset(workspace: Workspace) {
+export const preset: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -97,9 +112,13 @@ export function preset(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
 
-export function database(workspace: Workspace) {
+preset.id = 'preset';
+preset.displayName = 'BlockSuite Starter';
+preset.description = 'Start from friendly introduction';
+
+export const database: InitFn = (workspace: Workspace) => {
   return new Promise<string>(resolve => {
     workspace.signals.pageAdded.once(async pageId => {
       const page = workspace.getPage(pageId) as Page;
@@ -116,11 +135,45 @@ export function database(workspace: Workspace) {
 
       type Option = 'Done' | 'TODO' | 'WIP';
       const selection = ['Done', 'TODO', 'WIP'] as Option[];
+      const col1 = page.setTagSchema({
+        internalProperty: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        property: {
+          decimal: 0,
+        },
+        name: 'Number',
+        type: 'number',
+      });
+      const col2 = page.setTagSchema({
+        internalProperty: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        property: {
+          selection: selection,
+        },
+        name: 'Select 2',
+        type: 'select',
+      });
+      const col3 = page.setTagSchema({
+        internalProperty: {
+          color: '#ff0000',
+          width: 200,
+          hide: false,
+        },
+        property: {},
+        name: 'Select 2',
+        type: 'rich-text',
+      });
       // Add database block inside frame block
       const databaseId = page.addBlockByFlavour(
         'affine:database',
         {
-          columns: ['column1', 'column3', 'column2'],
+          columns: [col1, col2, col3],
         },
         frameId
       );
@@ -139,59 +192,21 @@ export function database(workspace: Workspace) {
         databaseId
       );
 
-      page.setTagSchema({
-        internalProperty: {
-          color: '#ff0000',
-          width: 200,
-          hide: false,
-        },
-        property: {
-          decimal: 0,
-        },
-        name: 'Number',
-        id: 'column1',
-        type: 'number',
-      });
-      page.setTagSchema({
-        internalProperty: {
-          color: '#ff0000',
-          width: 200,
-          hide: false,
-        },
-        property: {
-          selection: selection,
-        },
-        name: 'Select 2',
-        id: 'column2',
-        type: 'select',
-      });
-      page.setTagSchema({
-        internalProperty: {
-          color: '#ff0000',
-          width: 200,
-          hide: false,
-        },
-        property: {},
-        name: 'Select 2',
-        id: 'column3',
-        type: 'rich-text',
-      });
-
       page.updateBlockTag(p1, {
-        schemaId: 'column1',
+        schemaId: col1,
         value: 0.1,
       });
 
       page.updateBlockTag(p2, {
-        schemaId: 'column2',
+        schemaId: col2,
         value: 'TODO',
       });
 
       const text = new page.YText();
-      text.insert(0, '123', { type: 'base' });
-      text.insert(0, 'code', { type: 'base' });
+      text.insert(0, '123');
+      text.insert(0, 'code');
       page.updateBlockTag(p2, {
-        schemaId: 'column3',
+        schemaId: col3,
         value: text,
       });
 
@@ -206,4 +221,8 @@ export function database(workspace: Workspace) {
 
     workspace.createPage('page0');
   });
-}
+};
+
+database.id = 'database';
+database.displayName = 'Database Example';
+database.description = 'Database block basic example';

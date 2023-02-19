@@ -1,5 +1,5 @@
-import { describe, test, expect, vi } from 'vitest';
 import { Signal } from '@blocksuite/global/utils';
+import { describe, expect, test, vi } from 'vitest';
 describe('signal', () => {
   test('init', () => {
     const signal = new Signal();
@@ -29,6 +29,17 @@ describe('signal', () => {
     signal.emit(5);
     signal.emit(6);
     expect(callback).toBeCalledTimes(1);
+  });
+
+  test('listen once with dispose', () => {
+    const signal = new Signal<void>();
+    const callback = vi.fn(() => {
+      throw new Error('');
+    });
+    const disposable = signal.once(callback);
+    disposable.dispose();
+    signal.emit();
+    expect(callback).toBeCalledTimes(0);
   });
 
   test('subscribe', () => {

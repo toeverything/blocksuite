@@ -1,8 +1,9 @@
-import type { Page } from './workspace/index.js';
-import type { TextType } from './text-adapter.js';
 import { Signal } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
+
+import { Text } from './text-adapter.js';
+import type { Page } from './workspace/index.js';
 
 const FlavourSchema = z.string();
 const TagSchema = z.object({
@@ -10,14 +11,32 @@ const TagSchema = z.object({
   r: z.symbol(),
 });
 
+export interface InternalPrimitives {
+  Text: (input?: Y.Text | string) => Text;
+}
+
+export const internalPrimitives: InternalPrimitives = Object.freeze({
+  Text: (input: Y.Text | string = '') => new Text(input),
+});
+
 export const BlockSchema = z.object({
   version: z.number(),
   model: z.object({
     flavour: FlavourSchema,
     tag: TagSchema,
-    props: z.function().returns(z.record(z.any())),
+    props: z
+      .function()
+      .args(z.custom<InternalPrimitives>())
+      .returns(z.record(z.any())),
   }),
 });
+
+export type PropsSetter<Props extends Record<string, unknown>> = (
+  props: Props
+) => Partial<Props>;
+export type PropsGetter<Props extends Record<string, unknown>> = (
+  internalPrimitives: InternalPrimitives
+) => Props;
 
 // ported from lit
 interface StaticValue {
@@ -28,7 +47,7 @@ interface StaticValue {
 export type SchemaToModel<
   Schema extends {
     model: {
-      props: () => Record<string, unknown>;
+      props: PropsGetter<Record<string, unknown>>;
       flavour: string;
     };
   }
@@ -46,19 +65,19 @@ export function defineBlockSchema<
   }>
 >(
   flavour: Flavour,
-  props: () => Props,
+  props: (internalPrimitives: InternalPrimitives) => Props,
   metadata: Metadata
 ): {
   version: number;
   model: {
-    props: () => Props;
+    props: PropsGetter<Props>;
     flavour: Flavour;
   } & Metadata;
 };
 
 export function defineBlockSchema(
   flavour: string,
-  props: () => Record<string, unknown>,
+  props: (internalPrimitives: InternalPrimitives) => Record<string, unknown>,
   metadata: {
     version: number;
     tag: StaticValue;
@@ -94,7 +113,7 @@ export class BaseBlockModel<Props = unknown>
   // TODO use schema
   tags?: Y.Map<Y.Map<unknown>>;
   tagSchema?: Y.Map<unknown>;
-  text?: TextType;
+  text?: Text;
   sourceId?: string;
 
   // TODO: separate from model

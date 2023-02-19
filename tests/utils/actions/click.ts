@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+
 import { waitNextFrame } from './misc.js';
 
 export async function undoByClick(page: Page) {
@@ -7,6 +8,14 @@ export async function undoByClick(page: Page) {
 
 export async function redoByClick(page: Page) {
   await page.click('sl-button[content="Redo"]');
+}
+
+export async function clickBlockById(page: Page, id: string) {
+  await page.click(`[data-block-id="${id}"]`);
+}
+
+export async function doubleClickBlockById(page: Page, id: string) {
+  await page.click(`[data-block-id="${id}"]`);
 }
 
 export async function disconnectByClick(page: Page) {

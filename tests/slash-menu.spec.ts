@@ -1,5 +1,10 @@
-import { expect, Locator, Page, test } from '@playwright/test';
-import { SHORT_KEY, type } from 'utils/actions/keyboard.js';
+import { expect, Locator, Page } from '@playwright/test';
+import {
+  pressEnter,
+  SHORT_KEY,
+  type,
+  withPressKey,
+} from 'utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -11,6 +16,8 @@ import {
   assertStoreMatchJSX,
 } from 'utils/asserts.js';
 
+import { test } from './utils/playwright.js';
+
 test.describe('slash menu should show and hide correctly', () => {
   // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests
   test.describe.configure({ mode: 'serial' });
@@ -20,7 +27,7 @@ test.describe('slash menu should show and hide correctly', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    await enterPlaygroundRoom(page, { enable_slash_menu: true });
+    await enterPlaygroundRoom(page);
     const id = await initEmptyParagraphState(page);
     paragraphId = id.paragraphId;
     slashMenu = page.locator(`.slash-menu`);
@@ -106,31 +113,60 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test('left arrow should close the slash menu', async () => {
-    await page.keyboard.press('ArrowLeft');
-    await expect(slashMenu).not.toBeVisible();
-    await assertRichTexts(page, ['/']);
-  });
-
-  test('right arrow should close the slash menu', async () => {
-    await page.keyboard.press('ArrowRight');
-    await expect(slashMenu).not.toBeVisible();
-    await assertRichTexts(page, ['/']);
-  });
-
   test('should slash menu position correct', async () => {
     const box = await slashMenu.boundingBox();
     if (!box) {
       throw new Error("slashMenu doesn't exist");
     }
     const { x, y } = box;
-    assertAlmostEqual(x, 122, 10);
-    assertAlmostEqual(y, 180, 10);
+    assertAlmostEqual(x, 95, 6);
+    assertAlmostEqual(y, 180, 6);
+  });
+
+  test('left arrow should active left panel', async () => {
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowRight');
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const activatedItem = slashItems.nth(-3);
+    await expect(activatedItem).toHaveText(['Copy']);
+    await expect(activatedItem).toHaveAttribute('hover', '');
+    await assertRichTexts(page, ['/']);
+  });
+
+  test('press tab should move up and down', async () => {
+    await page.keyboard.press('Tab');
+    await expect(slashMenu).toBeVisible();
+
+    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItem0 = slashItems.nth(0);
+    const slashItem1 = slashItems.nth(1);
+    await expect(slashItem0).not.toHaveAttribute('hover', '');
+    await expect(slashItem1).toHaveAttribute('hover', '');
+
+    await assertRichTexts(page, ['/']);
+    await withPressKey(page, 'Shift', () => page.keyboard.press('Tab'));
+    await expect(slashMenu).toBeVisible();
+    await expect(slashItem0).toHaveAttribute('hover', '');
+    await expect(slashItem1).not.toHaveAttribute('hover', '');
+  });
+
+  test('can input search input after click menu', async () => {
+    const box = await slashMenu.boundingBox();
+    if (!box) {
+      throw new Error("slashMenu doesn't exist");
+    }
+    const { x, y, height } = box;
+    await page.mouse.click(x + 10, y + height - 10);
+    await type(page, 'a');
+    await assertRichTexts(page, ['/a']);
   });
 });
 
 test('should slash menu search and keyboard works', async ({ page }) => {
-  await enterPlaygroundRoom(page, { enable_slash_menu: true });
+  await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   const slashMenu = page.locator(`.slash-menu`);
@@ -139,7 +175,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await type(page, '/');
   await expect(slashMenu).toBeVisible();
   // Update the snapshot if you add new slash commands
-  await expect(slashItems).toHaveCount(12);
+  await expect(slashItems).toHaveCount(21);
   await type(page, 'todo');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['To-do List']);
@@ -147,9 +183,7 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
-  prop:xywh="[0,0,720,32]"
->
+<affine:frame>
   <affine:list
     prop:checked={false}
     prop:type="todo"
@@ -169,13 +203,34 @@ test('should slash menu search and keyboard works', async ({ page }) => {
   await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
 
   // search should reset the active item
-  await type(page, 'od');
+  await type(page, 'co');
   await expect(slashItems).toHaveCount(2);
-  await expect(slashItems).toHaveText(['To-do List', 'Code Block']);
+  await expect(slashItems).toHaveText(['Code Block', 'Copy']);
   await expect(slashItems.first()).toHaveAttribute('hover', '');
-  await type(page, 'o');
+  await type(page, 'p');
   await expect(slashItems).toHaveCount(1);
   // assert backspace works
   await page.keyboard.press('Backspace');
   await expect(slashItems).toHaveCount(2);
+});
+
+// https://github.com/toeverything/blocksuite/issues/1126
+test('should clean slash string after soft enter', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await page.keyboard.press('Shift+Enter');
+  await type(page, '/copy');
+  await pressEnter(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text="hello\n"
+  prop:type="text"
+/>`,
+    paragraphId
+  );
 });

@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+
 import { BlockSuiteDoc } from '../yjs/index.js';
 
 describe('blocksuite yjs', () => {

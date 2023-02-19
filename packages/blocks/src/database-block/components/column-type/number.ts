@@ -1,6 +1,7 @@
+import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
-import { css, html } from 'lit';
+
 import {
   DatabaseCellLitElement,
   defineTagSchemaRenderer,

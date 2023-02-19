@@ -1,11 +1,12 @@
-import * as Y from 'yjs';
-import type { RelativePosition } from 'yjs';
-import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 import { Signal } from '@blocksuite/global/utils';
 import { merge } from 'merge';
-import { uuidv4 } from './utils/id-generator.js';
+import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
+import type { RelativePosition } from 'yjs';
+import * as Y from 'yjs';
+
 import type { Space } from './space.js';
 import type { Store } from './store.js';
+import { uuidv4 } from './utils/id-generator.js';
 
 export interface SelectionRange {
   id: string;

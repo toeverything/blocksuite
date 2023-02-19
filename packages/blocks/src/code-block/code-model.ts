@@ -3,7 +3,8 @@ import { literal } from 'lit/static-html.js';
 
 export const CodeBlockModelSchema = defineBlockSchema(
   'affine:code',
-  () => ({
+  internal => ({
+    text: internal.Text(),
     language: 'JavaScript',
   }),
   {

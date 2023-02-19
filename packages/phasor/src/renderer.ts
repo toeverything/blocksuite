@@ -1,6 +1,6 @@
 import { IBound, MIN_ZOOM } from './consts.js';
-import { GridManager } from './grid.js';
 import type { PhasorElement } from './elements/index.js';
+import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 
 export class Renderer {
@@ -148,7 +148,7 @@ export class Renderer {
     ctx.save();
 
     ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, width, height);
-    ctx.translate(-width / 2 / zoom, -height / 2 / zoom);
+    ctx.translate(-width / dpr / zoom, -height / dpr / zoom);
 
     const elements = this.gridManager.search(viewBound);
     for (const element of elements) {

@@ -1,7 +1,8 @@
 import type { TemplateResult } from 'lit/html.js';
+
 import {
   BulletedListIcon,
-  CodeIcon,
+  CodeBlockIcon,
   DividerIcon,
   H1Icon,
   H2Icon,
@@ -9,7 +10,8 @@ import {
   H4Icon,
   H5Icon,
   H6Icon,
-  NumberedIcon,
+  ImageIcon,
+  NumberedListIcon,
   QuoteIcon,
   TextIcon,
   TodoIcon,
@@ -24,7 +26,7 @@ export type BlockConfig<
   type: ALLProps[Flavour]['type'];
   name: string;
   hotkey: string | null;
-  icon: TemplateResult<2>;
+  icon: TemplateResult<1>;
 };
 
 export const paragraphConfig = [
@@ -47,7 +49,6 @@ export const paragraphConfig = [
     type: 'h2',
     name: 'Heading 2',
     hotkey: 'command+option+2,ctrl+shift+2',
-
     icon: H2Icon,
   },
   {
@@ -90,7 +91,7 @@ export const paragraphConfig = [
     type: 'numbered',
     name: 'Numbered List',
     hotkey: 'command+option+9,ctrl+shift+9',
-    icon: NumberedIcon,
+    icon: NumberedListIcon,
   },
   {
     flavour: 'affine:list',
@@ -104,7 +105,7 @@ export const paragraphConfig = [
     type: undefined,
     name: 'Code Block',
     hotkey: 'command+option+c,ctrl+alt+c',
-    icon: CodeIcon,
+    icon: CodeBlockIcon,
   },
   {
     flavour: 'affine:paragraph',
@@ -134,7 +135,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     flavour: 'affine:paragraph',
     type: 'h1',
     name: 'Heading 1',
-    description: 'Heading in the largest font.',
+    description: 'Headings in the largest font.',
     icon: H1Icon,
     toolTip: 'Drag to insert Heading 1',
   },
@@ -142,7 +143,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     flavour: 'affine:paragraph',
     type: 'h2',
     name: 'Heading 2',
-    description: 'Heading in second largest font.',
+    description: 'Headings in the 2nd font size.',
     icon: H2Icon,
     toolTip: 'Drag to insert Heading 2',
   },
@@ -150,7 +151,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     flavour: 'affine:paragraph',
     type: 'h3',
     name: 'Heading 3',
-    description: 'Heading in third largest font.',
+    description: 'Headings in the 3rd font size.',
     icon: H3Icon,
     toolTip: 'Drag to insert Heading 3',
   },
@@ -158,7 +159,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     flavour: 'affine:paragraph',
     type: 'h4',
     name: 'Heading 4',
-    description: 'Heading in forth largest font.',
+    description: 'Heading in the 4th font size.',
     icon: H4Icon,
     toolTip: 'Drag to insert Heading 4',
   },
@@ -166,7 +167,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     flavour: 'affine:paragraph',
     type: 'h5',
     name: 'Heading 5',
-    description: 'Heading in fifth largest font.',
+    description: 'Heading in the 5th font size.',
     icon: H5Icon,
     toolTip: 'Drag to insert Heading 5',
   },
@@ -174,16 +175,16 @@ export const BLOCKHUB_TEXT_ITEMS = [
     flavour: 'affine:paragraph',
     type: 'h6',
     name: 'Heading 6',
-    description: 'Heading in sixth largest font.',
+    description: 'Heading in the 6th font size.',
     icon: H6Icon,
     toolTip: 'Drag to insert Heading 6',
   },
   {
     flavour: 'affine:code',
-    type: 'code',
+    type: null,
     name: 'Code Block',
     description: 'Capture a code snippet.',
-    icon: CodeIcon,
+    icon: CodeBlockIcon,
     toolTip: 'Drag to insert Code Block',
   },
   {
@@ -209,7 +210,7 @@ export const BLOCKHUB_LIST_ITEMS = [
     flavour: 'affine:list',
     type: 'bulleted',
     name: 'Bulleted List',
-    description: 'a simple bulleted list.',
+    description: 'A simple bulleted list.',
     icon: BulletedListIcon,
     toolTip: 'Drag to insert Bulleted List.',
   },
@@ -217,8 +218,8 @@ export const BLOCKHUB_LIST_ITEMS = [
     flavour: 'affine:list',
     type: 'numbered',
     name: 'Numbered List',
-    description: 'A list with numbering.',
-    icon: NumberedIcon,
+    description: '1. A list with numbering.',
+    icon: NumberedListIcon,
     toolTip: 'Drag to insert Numbered List.',
   },
   {
@@ -228,5 +229,16 @@ export const BLOCKHUB_LIST_ITEMS = [
     description: 'Track tasks with a to-do list.',
     icon: TodoIcon,
     toolTip: 'Drag to insert To-do List.',
+  },
+];
+
+export const BLOCKHUB_FILE_ITEMS = [
+  {
+    flavour: 'affine:embed',
+    type: 'image',
+    name: 'Image',
+    description: 'Upload images.',
+    icon: ImageIcon,
+    toolTip: 'Drag to insert Image.',
   },
 ];

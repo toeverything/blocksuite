@@ -1,17 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as Y from 'yjs';
+import type { DeltaInsert, TextAttributes } from '@blocksuite/virgo';
 import type { DeltaOperation, Quill } from 'quill';
+import * as Y from 'yjs';
+
 import type { Space } from './space.js';
 
-type PrelimTextType = 'splitLeft' | 'splitRight';
-
-export type TextType = PrelimText | Text;
-
 // Removes the pending '\n's if it has no attributes
-export function normQuillDelta(delta: any) {
+export function normQuillDelta(delta: DeltaOperation[]): DeltaOperation[] {
   if (delta.length > 0) {
     const d = delta[delta.length - 1];
-    const insert = d.insert;
+    const insert: string = d.insert;
     if (
       d.attributes === undefined &&
       insert !== undefined &&
@@ -30,66 +28,6 @@ export function normQuillDelta(delta: any) {
     }
   }
   return delta;
-}
-
-const UNSUPPORTED_MSG = 'PrelimText does not support ';
-
-export class PrelimText {
-  ready = false;
-  type: PrelimTextType;
-  index: number;
-  constructor(type: PrelimTextType, index: number) {
-    this.type = type;
-    this.index = index;
-  }
-
-  get length() {
-    return 0;
-  }
-
-  clone() {
-    throw new Error(UNSUPPORTED_MSG + 'clone');
-  }
-
-  insert() {
-    throw new Error(UNSUPPORTED_MSG + 'insert');
-  }
-
-  insertList() {
-    throw new Error(UNSUPPORTED_MSG + 'insertList');
-  }
-
-  split() {
-    throw new Error(UNSUPPORTED_MSG + 'split');
-  }
-
-  join() {
-    throw new Error(UNSUPPORTED_MSG + 'join');
-  }
-
-  clear() {
-    throw new Error(UNSUPPORTED_MSG + 'clear');
-  }
-
-  delete() {
-    throw new Error(UNSUPPORTED_MSG + 'delete');
-  }
-
-  replace() {
-    throw new Error(UNSUPPORTED_MSG + 'replace');
-  }
-
-  format() {
-    throw new Error(UNSUPPORTED_MSG + 'format');
-  }
-
-  applyDelta() {
-    throw new Error(UNSUPPORTED_MSG + 'applyDelta');
-  }
-
-  sliceToDelta() {
-    throw new Error(UNSUPPORTED_MSG + 'sliceToDelta');
-  }
 }
 
 declare module 'yjs' {
@@ -114,10 +52,6 @@ declare module 'yjs' {
 
 export class Text {
   private _yText: Y.Text;
-  /**
-   * @internal
-   */
-  public delayedJobs: (() => void)[] = [];
 
   // TODO toggle transact by options
   private _shouldTransact = true;
@@ -130,30 +64,27 @@ export class Text {
     }
   }
 
-  /**
-   * @internal
-   */
-  public doDelayedJobs() {
-    this.delayedJobs.forEach(cb => cb());
-    this.delayedJobs = [];
-  }
-
   static fromDelta(delta: DeltaOperation[]) {
-    const result = new Text('');
-    // In the first time, yDoc does not exist.
-    result.delayedJobs.push(() => result.applyDelta(delta));
-    return result;
+    const result = new Y.Text();
+    result.applyDelta(delta);
+    return new Text(result);
   }
 
   get length() {
     return this._yText.length;
   }
 
+  get yText() {
+    return this._yText;
+  }
+
   private _transact(callback: () => void) {
     if (this._shouldTransact) {
       const doc = this._yText.doc;
       if (!doc) {
-        throw new Error('cannot find doc');
+        throw new Error(
+          'Failed to transact text! yText is not attached to a doc'
+        );
       }
       doc.transact(() => {
         callback();
@@ -167,21 +98,95 @@ export class Text {
     return new Text(this._yText.clone());
   }
 
-  split(index: number, length: number): [PrelimText, PrelimText] {
-    return [
-      new PrelimText('splitLeft', index),
-      new PrelimText('splitRight', index + length),
-    ];
+  /**
+   * NOTE: The string included in [index, index + length) will be deleted.
+   *
+   * Here are three cases for point position(index + length):
+   * [{insert: 'abc', ...}, {insert: 'def', ...}, {insert: 'ghi', ...}]
+   * 1. abc|de|fghi
+   *    left: [{insert: 'abc', ...}]
+   *    right: [{insert: 'f', ...}, {insert: 'ghi', ...}]
+   * 2. abc|def|ghi
+   *    left: [{insert: 'abc', ...}]
+   *    right: [{insert: 'ghi', ...}]
+   * 3. abc|defg|hi
+   *    left: [{insert: 'abc', ...}]
+   *    right: [{insert: 'hi', ...}]
+   */
+  split(index: number, length = 0): Text {
+    if (index < 0 || length < 0 || index + length > this._yText.length) {
+      throw new Error(
+        'Failed to split text! Index or length out of range, index: ' +
+          index +
+          ', length: ' +
+          length +
+          ', text length: ' +
+          this._yText.length
+      );
+    }
+    const deltas = this._yText.toDelta();
+    if (!(deltas instanceof Array)) {
+      throw new Error(
+        'This text cannot be split because we failed to get the deltas of it.'
+      );
+    }
+    let tmpIndex = 0;
+    const rightDeltas: DeltaInsert[] = [];
+    for (let i = 0; i < deltas.length; i++) {
+      const insert = deltas[i].insert;
+      if (typeof insert === 'string') {
+        if (tmpIndex + insert.length >= index + length) {
+          const insertRight = insert.slice(index + length - tmpIndex);
+          rightDeltas.push({
+            insert: insertRight,
+            attributes: deltas[i].attributes,
+          });
+          rightDeltas.push(...deltas.slice(i + 1));
+          break;
+        }
+        tmpIndex += insert.length;
+      } else {
+        throw new Error(
+          'This text cannot be split because it contains non-string insert.'
+        );
+      }
+    }
+
+    this.delete(index, this.length - index);
+    const rightYText = new Y.Text();
+    rightYText.applyDelta(rightDeltas);
+    const rightText = new Text(rightYText);
+
+    return rightText;
   }
 
   insert(content: string, index: number, attributes?: Record<string, unknown>) {
+    if (!content.length) {
+      return;
+    }
+    if (index < 0 || index > this._yText.length) {
+      throw new Error(
+        'Failed to insert text! Index or length out of range, index: ' +
+          index +
+          ', length: ' +
+          length +
+          ', text length: ' +
+          this._yText.length
+      );
+    }
     this._transact(() => {
       this._yText.insert(index, content, attributes);
       this._yText.meta = { split: true };
     });
   }
 
+  /**
+   * @deprecated Use {@link insert} or {@link applyDelta} instead.
+   */
   insertList(insertTexts: DeltaOperation[], index: number) {
+    if (!insertTexts.length) {
+      return;
+    }
     this._transact(() => {
       for (let i = insertTexts.length - 1; i >= 0; i--) {
         this._yText.insert(
@@ -198,7 +203,7 @@ export class Text {
   join(other: Text) {
     this._transact(() => {
       const yOther = other._yText;
-      const delta = yOther.toDelta();
+      const delta: DeltaOperation[] = yOther.toDelta();
       delta.splice(0, 0, { retain: this._yText.length });
       this._yText.applyDelta(delta);
       this._yText.meta = { join: true };
@@ -206,6 +211,19 @@ export class Text {
   }
 
   format(index: number, length: number, format: any) {
+    if (length === 0) {
+      return;
+    }
+    if (index < 0 || length < 0 || index + length > this._yText.length) {
+      throw new Error(
+        'Failed to format text! Index or length out of range, index: ' +
+          index +
+          ', length: ' +
+          length +
+          ', text length: ' +
+          this._yText.length
+      );
+    }
     this._transact(() => {
       this._yText.format(index, length, format);
       this._yText.meta = { format: true };
@@ -213,6 +231,19 @@ export class Text {
   }
 
   delete(index: number, length: number) {
+    if (length === 0) {
+      return;
+    }
+    if (index < 0 || length < 0 || index + length > this._yText.length) {
+      throw new Error(
+        'Failed to delete text! Index or length out of range, index: ' +
+          index +
+          ', length: ' +
+          length +
+          ', text length: ' +
+          this._yText.length
+      );
+    }
     this._transact(() => {
       this._yText.delete(index, length);
       this._yText.meta = { delete: true };
@@ -223,8 +254,19 @@ export class Text {
     index: number,
     length: number,
     content: string,
-    attributes?: Record<string, unknown>
+    attributes?: TextAttributes
   ) {
+    if (index < 0 || length < 0 || index + length > this._yText.length) {
+      throw new Error(
+        'Failed to replace text! The length of the text is' +
+          this._yText.length +
+          ', but you are trying to replace from' +
+          index +
+          'to' +
+          index +
+          length
+      );
+    }
     this._transact(() => {
       this._yText.delete(index, length);
       this._yText.insert(index, content, attributes);
@@ -239,7 +281,7 @@ export class Text {
     });
   }
 
-  applyDelta(delta: any) {
+  applyDelta(delta: DeltaOperation[]) {
     this._transact(() => {
       this._yText?.applyDelta(delta);
     });
@@ -377,11 +419,13 @@ export class RichTextAdapter {
     state: any,
     origin: any
   ) => {
+    // eventType === 'text-change' &&
+    //   console.trace('quill event', eventType, delta, state, origin);
     const { yText } = this;
 
     if (delta && delta.ops) {
       // update content
-      const ops = delta.ops;
+      const ops = transformDelta(delta, yText).ops;
       ops.forEach((op: any) => {
         if (op.attributes !== undefined) {
           for (const key in op.attributes) {
@@ -423,4 +467,9 @@ export class RichTextAdapter {
     this.yText.unobserve(this._yObserver);
     this.quill.off('editor-change', this._quillObserver as any);
   }
+}
+
+function transformDelta(delta: any, yText: Y.Text) {
+  // delta.ops.forEach((op: any) => (op.attributes = undefined));
+  return delta;
 }

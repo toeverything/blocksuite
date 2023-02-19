@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+
 import {
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
@@ -12,6 +13,7 @@ import {
   type,
 } from './utils/actions/index.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
+import { test } from './utils/playwright.js';
 
 // '../packages/blocks/src/__internal__/utils/consts.ts'
 const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
@@ -137,9 +139,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="A"
@@ -190,9 +190,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="B"
@@ -249,9 +247,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="C"
@@ -309,9 +305,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page
   prop:title=""
 >
-  <affine:frame
-    prop:xywh="[0,0,720,228]"
-  >
+  <affine:frame>
     <affine:list
       prop:checked={false}
       prop:text="C"
@@ -354,4 +348,26 @@ test('move to the last block of each level in multi-level nesting', async ({
   );
 
   await assertRichTexts(page, ['C', 'D', 'E', 'F', 'G', 'B', 'A']);
+});
+
+test('should sync selected-blocks to session-manager when clicking drag handle', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 1);
+
+  const handle = await page.locator('affine-drag-handle');
+  await handle.click();
+
+  await page.keyboard.press('Backspace');
+  await assertRichTexts(page, [
+    '123',
+    `
+`,
+    '789',
+  ]);
 });

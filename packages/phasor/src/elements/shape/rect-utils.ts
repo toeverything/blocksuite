@@ -1,7 +1,8 @@
-import { Vec } from '../../utils/vec.js';
-import Utils from '../../utils/tl-utils.js';
-import { getShapeStyle, ShapeStyles } from './shape-style.js';
 import { getStroke } from 'perfect-freehand';
+
+import Utils from '../../utils/tl-utils.js';
+import { Vec } from '../../utils/vec.js';
+import { getShapeStyle, ShapeStyles } from './shape-style.js';
 
 function getRectangleDrawPoints(
   id: string,

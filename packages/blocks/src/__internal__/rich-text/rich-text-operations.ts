@@ -1,28 +1,20 @@
 // operations used in rich-text level
 
-import { Page, Text } from '@blocksuite/store';
-import type { Quill } from 'quill';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-} from '@blocksuite/global/utils';
-import { Utils } from '@blocksuite/store';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { BaseBlockModel, Page, Text, Utils } from '@blocksuite/store';
+
 import type { PageBlockModel } from '../../models.js';
 import {
-  ExtendedModel,
-  getRichTextByModel,
-  getPreviousBlock,
-  getNextBlock,
   asyncFocusRichText,
-  convertToList,
-  convertToParagraph,
-  convertToDivider,
+  ExtendedModel,
   focusBlockByModel,
-  supportsChildren,
-  getModelByElement,
   focusTitle,
+  getCurrentRange,
+  getModelByElement,
+  getPreviousBlock,
+  getRichTextByModel,
+  supportsChildren,
 } from '../utils/index.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -71,13 +63,7 @@ export function handleSoftEnter(
     return;
   }
   page.captureSync();
-  const shouldFormatCode = matchFlavours(model, ['affine:code']);
-  model.text.replace(
-    index,
-    length,
-    '\n',
-    shouldFormatCode ? { 'code-block': true } : {}
-  );
+  model.text.replace(index, length, '\n');
 }
 
 export function handleBlockSplit(
@@ -91,10 +77,8 @@ export function handleBlockSplit(
   const parent = page.getParent(model);
   if (!parent) return;
 
-  const [left, right] = model.text.split(splitIndex, splitLength);
   page.captureSync();
-  page.markTextSplit(model.text, left, right);
-  page.updateBlock(model, { text: left });
+  const right = model.text.split(splitIndex, splitLength);
 
   let newParent = parent;
   let newBlockIndex = newParent.children.indexOf(model) + 1;
@@ -166,6 +150,55 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     assertExists(model);
     const richText = getRichTextByModel(model);
     richText?.quill.setSelection(offset, 0);
+  });
+}
+
+export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
+  const previousSibling = page.getPreviousSibling(models[0]);
+
+  if (!previousSibling || !supportsChildren(previousSibling)) {
+    // Bottom, can not indent, do nothing
+    return;
+  }
+  if (
+    !models.every((model, idx, array) => {
+      const previousModel = array.at(idx - 1);
+      if (!previousModel) {
+        return false;
+      }
+      const p1 = page.getParent(model);
+      const p2 = page.getParent(previousModel);
+      return p1 && p2 && p1.id === p2.id;
+    })
+  ) {
+    return;
+  }
+  page.captureSync();
+  const parent = page.getParent(models[0]);
+  assertExists(parent);
+  models.forEach(model => {
+    // 1. backup target block children and remove them from target block
+    const children = model.children;
+    page.updateBlock(model, {
+      children: [],
+    });
+
+    // 2. remove target block from parent block
+    page.updateBlock(parent, {
+      children: parent.children.filter(child => child.id !== model.id),
+    });
+
+    // 3. append target block and children to previous sibling block
+    page.updateBlock(previousSibling, {
+      children: [...previousSibling.children, model, ...children],
+    });
+
+    // FIXME: after quill onload
+    requestAnimationFrame(() => {
+      assertExists(model);
+      const richText = getRichTextByModel(model);
+      richText?.quill.setSelection(0, 0);
+    });
   });
 }
 
@@ -359,151 +392,282 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   );
 }
 
-// We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
-// but only one bounding rect.
-// If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
-export function isAtLineEdge(range: Range) {
-  if (
-    range.startOffset > 0 &&
-    Number(range.startContainer.textContent?.length) - range.startOffset > 0
-  ) {
-    const prevRange = range.cloneRange();
-    prevRange.setStart(range.startContainer, range.startOffset - 1);
-    prevRange.setEnd(range.startContainer, range.startOffset - 1);
-    const nextRange = range.cloneRange();
-    nextRange.setStart(range.endContainer, range.endOffset + 1);
-    nextRange.setEnd(range.endContainer, range.endOffset + 1);
-    return (
-      prevRange.getBoundingClientRect().top !==
-      nextRange.getBoundingClientRect().top
-    );
+function findTextNode(node: Node): Node | null {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node;
   }
-  return false;
-}
-
-export function handleKeyUp(model: ExtendedModel, editableContainer: Element) {
-  const selection = window.getSelection();
-  const preNodeModel = getPreviousBlock(model);
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { height, left, top } = range.getBoundingClientRect();
-
-    const newRange = caretRangeFromPoint(left, top - height / 2);
-    if (
-      (!newRange || !editableContainer.contains(newRange.startContainer)) &&
-      !isAtLineEdge(range)
-    ) {
-      if (
-        preNodeModel &&
-        matchFlavours(model, ['affine:embed', 'affine:divider'])
-      ) {
-        return ALLOW_DEFAULT;
-      }
-      return PREVENT_DEFAULT;
+  // Try to find the text node in the child nodes
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const textNode = findTextNode(node.childNodes[i]);
+    if (textNode) {
+      return textNode;
     }
   }
+  return null;
+}
+
+/**
+ * Find the next text node from the given node.
+ *
+ * Note: this function will skip the given node itself. And the boundary node will be included.
+ */
+function findNextTextNode(
+  node: Node,
+  checkWalkBoundary = (node: Node) => node === document.body
+): Node | null {
+  while (node.parentNode) {
+    const parentNode = node.parentNode;
+    if (!parentNode) {
+      console.warn('Failed to find text node from node! no parent node', node);
+      return null;
+    }
+    const nodeIdx = Array.from(parentNode.childNodes).indexOf(
+      node as ChildNode
+    );
+    if (nodeIdx === -1) {
+      console.warn('Failed to find text node from node! no node index', node);
+      return null;
+    }
+    for (let i = nodeIdx + 1; i < parentNode.childNodes.length; i++) {
+      const textNode = findTextNode(parentNode.childNodes[i]);
+      if (textNode) {
+        return textNode;
+      }
+    }
+
+    if (checkWalkBoundary(parentNode)) {
+      return null;
+    }
+    node = parentNode;
+  }
+  return null;
+}
+
+/**
+ * Try to shift the range to the next caret point.
+ * If the range is already at the end of the block, return null.
+ *
+ * NOTE: In extreme situations, this function need to traverse the DOM tree.
+ * It may cause performance issues, so use it carefully.
+ *
+ * You can see the definition of the range in the spec for more details.
+ * https://www.w3.org/TR/2000/REC-DOM-Level-2-Traversal-Range-20001113/ranges.html
+ */
+function shiftRange(range: Range): Range | null {
+  if (!range.collapsed) {
+    throw new Error('Failed to shift range! expected a collapsed range');
+  }
+  const startContainer = range.startContainer;
+
+  // If the startNode is a Node of type Text, Comment, or CDataSection,
+  // then startOffset is the number of characters from the start of startNode.
+  // For other Node types, startOffset is the number of child nodes between the start of the startNode.
+  // https://developer.mozilla.org/en-US/docs/Web/API/Range/setStart
+  const isTextLikeNode =
+    startContainer.nodeType === Node.TEXT_NODE ||
+    startContainer.nodeType === Node.COMMENT_NODE ||
+    startContainer.nodeType === Node.CDATA_SECTION_NODE;
+  if (!isTextLikeNode) {
+    // Although we can shift the range if the node is a not text node.
+    // But in most normal situations, the node should be a text node.
+    // To simplify the processing, we just skip the case.
+    // If we really need to support this case, we can add it later.
+    //
+    // If in the empty line, the startContainer is a `<p><br></p>` node,
+    // it's expected but hard to distinguish, so we remove the warning temporarily.
+    // console.warn(
+    //   'Failed to shiftRange! Unexpected startContainer nodeType',
+    //   startContainer
+    // );
+    return null;
+  }
+  const textContent = startContainer.textContent;
+  if (typeof textContent !== 'string') {
+    // If the node is a `document` or a `doctype`, textContent returns `null`.
+    // See https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent
+    throw new Error('Failed to shift range! unexpected startContainer');
+  }
+
+  // const maxOffset = isTextLikeNode
+  //   ? textContent.length
+  //   : startContainer.childNodes.length;
+  const maxOffset = textContent.length;
+
+  if (maxOffset > range.startOffset) {
+    // Just shift to the next character simply
+    const nextRange = range.cloneRange();
+    nextRange.setStart(range.startContainer, range.startOffset + 1);
+    nextRange.setEnd(range.startContainer, range.startOffset + 1);
+    return nextRange;
+  }
+
+  // If the range is already at the end of the node,
+  // we need traverse the DOM tree to find the next text node.
+  // And this may be inefficient.
+  const nextTextNode = findNextTextNode(
+    startContainer,
+    (node: Node) =>
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/contentEditable
+      node instanceof HTMLElement && node.contentEditable === 'true'
+  );
+  if (!nextTextNode) {
+    return null;
+  }
+
+  const nextRange = range.cloneRange();
+  nextRange.setStart(nextTextNode, 0);
+  nextRange.setEnd(nextTextNode, 0);
+  return nextRange;
+}
+
+/**
+ * It will return the next range if the cursor is at the edge of the block, otherwise return false.
+ *
+ * We should determine if the cursor is at the edge of the block, since a cursor at edge may have two cursor points
+ * but only one bounding rect.
+ * If a cursor is at the edge of a block, its previous cursor rect will not equal to the next one.
+ *
+ * See the following example:
+ * ```markdown
+ * long text| <- `range.getBoundingClientRect()` will return rect at here
+ * |line wrap <- caret at the start of the second line
+ * ```
+ *
+ * See https://stackoverflow.com/questions/59767515/incorrect-positioning-of-getboundingclientrect-after-newline-character
+ */
+export function isAtLineEdge(range: Range) {
+  if (!range.collapsed) {
+    console.warn(
+      'Failed to determine if the caret is at line edge! expected a collapsed range but got',
+      range
+    );
+    return false;
+  }
+  const nextRange = shiftRange(range);
+  if (!nextRange) {
+    return false;
+  }
+  const nextRangeRect = nextRange.getBoundingClientRect();
+  const noLineEdge = range.getBoundingClientRect().top === nextRangeRect.top;
+  if (noLineEdge) {
+    return false;
+  }
+  return nextRange;
+}
+
+function checkFirstLine(range: Range, container: Element) {
+  if (!range.collapsed) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected a collapsed range but got' +
+        range
+    );
+  }
+  if (!container.contains(range.commonAncestorContainer)) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected the range to be inside the container but got' +
+        range +
+        ' and ' +
+        container
+    );
+  }
+  const containerRect = container.getBoundingClientRect();
+  const rangeRect = range.getBoundingClientRect();
+  if (rangeRect.left === 0 && rangeRect.top === 0) {
+    // Workaround select to empty line will get empty range
+    // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+
+    // At empty line, it is the first line and also is the last line
+    return true;
+  }
+  const lineHeight = rangeRect.height;
+  // If the caret at the start of second line, as known as line edge,
+  // the range bounding rect may be incorrect, we need to check the scenario.
+  const isFirstLine =
+    containerRect.top > rangeRect.top - lineHeight / 2 && !isAtLineEdge(range);
+  return isFirstLine;
+}
+
+function checkLastLine(range: Range, container: HTMLElement) {
+  if (!range.collapsed) {
+    throw new Error(
+      'Failed to determine if the caret is at the last line! expected a collapsed range but got' +
+        range
+    );
+  }
+  if (!container.contains(range.commonAncestorContainer)) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected the range to be inside the container but got' +
+        range +
+        ' and ' +
+        container
+    );
+  }
+  const containerRect = container.getBoundingClientRect();
+  const rangeRect = range.getBoundingClientRect();
+  if (rangeRect.left === 0 && rangeRect.bottom === 0) {
+    // Workaround select to empty line will get empty range
+    // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
+
+    // At empty line, it is the first line and also is the last line
+    return true;
+  }
+  const lineHeight = rangeRect.height;
+  const isLastLineWithoutEdge =
+    rangeRect.bottom + lineHeight / 2 > containerRect.bottom;
+  if (isLastLineWithoutEdge) {
+    // If the caret is at the first line of the block,
+    // default behavior will move the caret to the start of the line,
+    // which is not expected. so we need to prevent default behavior.
+    return true;
+  }
+  const atLineEdgeRange = isAtLineEdge(range);
+  if (!atLineEdgeRange) {
+    return false;
+  }
+  // If the caret is at the line edge, the range bounding rect is wrong,
+  // we need to check the next range again.
+  const nextRangeRect = atLineEdgeRange.getBoundingClientRect();
+  const nextLineHeight = nextRangeRect.height;
+  return nextRangeRect.bottom + nextLineHeight / 2 > containerRect.bottom;
+}
+
+export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
+  const range = getCurrentRange();
+  if (!range.collapsed) {
+    // If the range is not collapsed,
+    // we assume that the caret is at the start of the range.
+    range.collapse(true);
+  }
+  const isFirstLine = checkFirstLine(range, editableContainer);
+  if (isFirstLine) {
+    // If the caret is at the first line of the block,
+    // default behavior will move the caret to the start of the line,
+    // which is not expected. so we need to prevent default behavior.
+    return PREVENT_DEFAULT;
+  }
+  // Avoid triggering hotkey bindings
+  event.stopPropagation();
   return ALLOW_DEFAULT;
 }
 
 export function handleKeyDown(
-  model: ExtendedModel,
-  textContainer: HTMLElement
+  event: KeyboardEvent,
+  editableContainer: HTMLElement
 ) {
-  const selection = window.getSelection();
-  if (selection) {
-    const range = selection.getRangeAt(0);
-    const { bottom, left, height } = range.getBoundingClientRect();
-    // if cursor is on the last line and has no text, height is 0
-
-    // TODO resolve compatible problem
-    const newRange = caretRangeFromPoint(left, bottom + height / 2);
-    if (!newRange || !textContainer.contains(newRange.startContainer)) {
-      const nextBlock = getNextBlock(model);
-      if (!nextBlock) {
-        return ALLOW_DEFAULT;
-      }
-      if (matchFlavours(nextBlock, ['affine:divider'])) {
-        return PREVENT_DEFAULT;
-      }
-      return PREVENT_DEFAULT;
-    }
-    // if cursor is at the edge of a block, it may out of the textContainer after keydown
-    if (isAtLineEdge(range)) {
-      const {
-        height,
-        left,
-        bottom: nextBottom,
-      } = newRange.getBoundingClientRect();
-      const nextRange = caretRangeFromPoint(left, nextBottom + height / 2);
-      if (!nextRange || !textContainer.contains(nextRange.startContainer)) {
-        return PREVENT_DEFAULT;
-      }
-    }
+  const range = getCurrentRange();
+  if (!range.collapsed) {
+    // If the range is not collapsed,
+    // we assume that the caret is at the end of the range.
+    range.collapse();
   }
+  const isLastLine = checkLastLine(range, editableContainer);
+  if (isLastLine) {
+    // If the caret is at the last line of the block,
+    // default behavior will move the caret to the end of the line,
+    // which is not expected. so we need to prevent default behavior.
+    return PREVENT_DEFAULT;
+  }
+  // Avoid triggering hotkey bindings
+  event.stopPropagation();
   return ALLOW_DEFAULT;
-}
-
-export function tryMatchSpaceHotkey(
-  page: Page,
-  model: ExtendedModel,
-  quill: Quill,
-  prefix: string,
-  range: { index: number; length: number }
-) {
-  const [, offset] = quill.getLine(range.index);
-  if (offset > prefix.length) {
-    return ALLOW_DEFAULT;
-  }
-  if (matchFlavours(model, ['affine:code'])) {
-    return ALLOW_DEFAULT;
-  }
-  let isConverted = false;
-  switch (prefix.trim()) {
-    case '[]':
-    case '[ ]':
-      isConverted = convertToList(page, model, 'todo', prefix, {
-        checked: false,
-      });
-      break;
-    case '[x]':
-      isConverted = convertToList(page, model, 'todo', prefix, {
-        checked: true,
-      });
-      break;
-    case '-':
-    case '*':
-      isConverted = convertToList(page, model, 'bulleted', prefix);
-      break;
-    case '***':
-      isConverted = convertToDivider(page, model, prefix);
-      break;
-    case '---':
-      isConverted = convertToDivider(page, model, prefix);
-      break;
-    case '#':
-      isConverted = convertToParagraph(page, model, 'h1', prefix);
-      break;
-    case '##':
-      isConverted = convertToParagraph(page, model, 'h2', prefix);
-      break;
-    case '###':
-      isConverted = convertToParagraph(page, model, 'h3', prefix);
-      break;
-    case '####':
-      isConverted = convertToParagraph(page, model, 'h4', prefix);
-      break;
-    case '#####':
-      isConverted = convertToParagraph(page, model, 'h5', prefix);
-      break;
-    case '######':
-      isConverted = convertToParagraph(page, model, 'h6', prefix);
-      break;
-    case '>':
-      isConverted = convertToParagraph(page, model, 'quote', prefix);
-      break;
-    default:
-      isConverted = convertToList(page, model, 'numbered', prefix);
-  }
-
-  return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
 }

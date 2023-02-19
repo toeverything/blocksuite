@@ -1,8 +1,9 @@
+import { ConfirmIcon, EditIcon, UnlinkIcon } from '@blocksuite/global/config';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
 import { createEvent } from '../../__internal__/utils/index.js';
 import { toast } from '../toast.js';
-import { ConfirmIcon, EditIcon, UnlinkIcon } from './icons.js';
 import { linkPopoverStyle } from './styles.js';
 
 export const ALLOWED_SCHEMES = [
@@ -18,8 +19,6 @@ export const ALLOWED_SCHEMES = [
 // For more detail see https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression/1917982#1917982
 const MAIL_REGEX =
   /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-
-// For more detail see https://stackoverflow.com/questions/8667070/javascript-regular-expression-to-validate-url
 
 // For more detail see https://stackoverflow.com/questions/8667070/javascript-regular-expression-to-validate-url
 const URL_REGEX = new RegExp(
@@ -99,10 +98,10 @@ export class LinkPopover extends LitElement {
   static styles = linkPopoverStyle;
 
   @property()
-  left = '0px';
+  left = '0';
 
   @property()
-  top = '0px';
+  top = '0';
 
   @property()
   type: 'create' | 'edit' = 'create';
@@ -130,6 +129,9 @@ export class LinkPopover extends LitElement {
 
   @query('#link-input')
   linkInput: HTMLInputElement | undefined;
+
+  @query('.popover-container')
+  popoverContainer: HTMLDivElement | undefined;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -203,8 +205,8 @@ export class LinkPopover extends LitElement {
     this.disableConfirm = false;
   }
 
-  private _onKeyup(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
+  private _onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter' && !e.isComposing) {
       this._onConfirm();
     }
     if (!this.linkInput) {
@@ -233,7 +235,7 @@ export class LinkPopover extends LitElement {
         spellcheck="false"
         placeholder="Paste or type a link"
         value=${this.previewLink}
-        @keyup=${this._onKeyup}
+        @keydown=${this._onKeydown}
       />
       <span class="affine-link-popover-dividing-line"></span>
       ${this.confirmBtnTemplate()}
@@ -292,7 +294,7 @@ export class LinkPopover extends LitElement {
           type="text"
           placeholder="Enter text"
           value=${this.text}
-          @keyup=${this._onKeyup}
+          @keydown=${this._onKeydown}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-text-text" for="text-input">Text</label>
@@ -305,7 +307,7 @@ export class LinkPopover extends LitElement {
           spellcheck="false"
           placeholder="Paste or type a link"
           value=${this.previewLink}
-          @keyup=${this._onKeyup}
+          @keydown=${this._onKeydown}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-link-text" for="link-input">Link</label>
@@ -326,7 +328,7 @@ export class LinkPopover extends LitElement {
       <div class="overlay-root">
         ${mask}
         <div
-          class="overlay-container"
+          class="popover-container"
           style="position: absolute; left: ${this.left}; top: ${this.top};${this
             .style.cssText}"
         >

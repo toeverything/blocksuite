@@ -1,7 +1,7 @@
-export { isFirefox, isWeb, caretRangeFromPoint } from './utils/web.js';
-export { Signal } from './utils/signal.js';
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup, flattenDisposable } from './utils/disposable.js';
+export { Signal } from './utils/signal.js';
+export { caretRangeFromPoint, isFirefox, isWeb } from './utils/web.js';
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
@@ -98,3 +98,6 @@ export function isEqual<T extends Allowed, U extends T>(
 export async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const getDefaultPlaygroundURL = (isE2E: boolean): URL =>
+  new URL(`http://localhost:${isE2E ? 4173 : 5173}/`);

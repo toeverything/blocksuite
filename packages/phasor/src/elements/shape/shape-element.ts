@@ -1,5 +1,6 @@
-import { BaseElement, HitTestOptions } from '../base-element.js';
 import { isPointIn } from '../../utils/hit-utils.js';
+import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
+import { BaseElement, HitTestOptions } from '../base-element.js';
 import { getRectanglePath } from './rect-utils.js';
 import { DashStyle, ShapeStyles, SizeStyle } from './shape-style.js';
 
@@ -53,7 +54,7 @@ export class ShapeElement extends BaseElement {
       index: this.index,
       type: this.type,
       shapeType: this.shapeType,
-      xywh: `${this.x},${this.y},${this.w},${this.h}`,
+      xywh: serializeXYWH(this.x, this.y, this.w, this.h),
       color: this.color,
     };
   }
@@ -63,7 +64,7 @@ export class ShapeElement extends BaseElement {
     const element = new ShapeElement(data.id as string, shapeType);
     element.index = data.index as string;
 
-    const [x, y, w, h] = (data.xywh as string).split(',').map(v => Number(v));
+    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
     element.setBound(x, y, w, h);
     element.color = data.color as `#${string}`;
     return element;

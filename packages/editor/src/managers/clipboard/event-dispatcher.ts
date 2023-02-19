@@ -1,5 +1,7 @@
 import { isInsideRichText } from '@blocksuite/blocks/std';
 import { Signal } from '@blocksuite/store';
+
+import { checkEditorElementActive } from '../../utils/editor.js';
 import { ClipboardAction } from './types.js';
 
 export class ClipboardEventDispatcher {
@@ -38,7 +40,7 @@ export class ClipboardEventDispatcher {
   }
 
   static editorElementActive(): boolean {
-    return document.activeElement?.closest('editor-container') != null;
+    return checkEditorElementActive();
   }
 
   private _isValidClipboardEvent(e: ClipboardEvent) {

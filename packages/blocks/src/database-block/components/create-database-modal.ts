@@ -1,8 +1,8 @@
 /**
  * When user select blocks and click `create database` in quick bar, this form will pop up
  */
-import { customElement, property } from 'lit/decorators.js';
 import { html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 export const CREATE_DATABASE_MODAL_TAG =
   'affine-create-database-modal' as const;

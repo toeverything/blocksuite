@@ -1,13 +1,17 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-import { html } from 'lit/static-html.js';
-import { repeat } from 'lit/directives/repeat.js';
-import type { BlockHost } from './types.js';
+import '../../components/loader.js';
+
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { matchFlavours } from '@blocksuite/store';
+import { repeat } from 'lit/directives/repeat.js';
+import { html } from 'lit/static-html.js';
+
 import type { EmbedBlockModel } from '../../embed-block/index.js';
 import { blockService } from '../../models.js';
-import '../../components/loader.js';
-import { BaseService, hasService, registerService } from '../service.js';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import { hasService, registerService } from '../service.js';
+import { BaseService } from '../service/index.js';
+import type { BlockHost } from './types.js';
 
 // TODO support dynamic block types
 export function BlockElement(
@@ -80,18 +84,18 @@ export function BlockChildrenContainer(
   host: BlockHost,
   onLoaded: () => void
 ) {
-  return html`
-    <style>
-      .affine-block-children-container {
-        padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px;
-      }
-    </style>
-    <div class="affine-block-children-container">
-      ${repeat(
-        model.children,
-        child => child.id,
-        child => BlockElementWithService(child, host, onLoaded)
-      )}
-    </div>
-  `;
+  const paddingLeft = matchFlavours(model, ['affine:page', 'affine:frame'])
+    ? 0
+    : BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+
+  return html`<div
+    class="affine-block-children-container"
+    style="padding-left: ${paddingLeft}px;"
+  >
+    ${repeat(
+      model.children,
+      child => child.id,
+      child => BlockElementWithService(child, host, onLoaded)
+    )}
+  </div>`;
 }

@@ -1,10 +1,10 @@
 import type { EditorContainer } from '../../components/index.js';
-import { ClipboardEventDispatcher } from './event-dispatcher.js';
 import { CopyCutManager } from './copy-cut-manager.js';
+import { ClipboardEventDispatcher } from './event-dispatcher.js';
 import { PasteManager } from './paste-manager.js';
 
-export * from './types.js';
 export * from './content-parser/index.js';
+export * from './types.js';
 
 export class ClipboardManager {
   private _editor: EditorContainer;

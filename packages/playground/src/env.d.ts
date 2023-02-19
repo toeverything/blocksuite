@@ -1,5 +1,5 @@
-import type { Page, Workspace, BlockSchema } from '@blocksuite/store';
 import type { EditorContainer } from '@blocksuite/editor';
+import type { BlockSchema, Page, Workspace } from '@blocksuite/store';
 import type { z } from 'zod';
 
 declare global {

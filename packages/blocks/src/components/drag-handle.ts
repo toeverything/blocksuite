@@ -1,12 +1,12 @@
-import { css, html, LitElement, svg } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import type { IPoint } from '../__internal__/index.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import type { EditingState } from '../page-block/default/utils.js';
-import { getBlockElementByModel } from '../__internal__/index.js';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { css, html, LitElement, svg } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import type { IPoint } from '../__internal__/index.js';
 import type { SelectionEvent } from '../__internal__/index.js';
+import type { EditingState } from '../page-block/default/utils.js';
 
 const handleIcon = svg`
 <path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
@@ -99,7 +99,6 @@ export class DragHandle extends LitElement {
 
     .affine-drag-handle {
       position: absolute;
-      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -115,6 +114,7 @@ export class DragHandle extends LitElement {
   `;
 
   constructor(options: {
+    container: HTMLElement;
     onDropCallback: (
       e: DragEvent,
       startModelState: EditingState,
@@ -122,7 +122,7 @@ export class DragHandle extends LitElement {
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
     getBlockEditingStateByCursor: DragHandleGetModelStateWithCursorCallback;
-    setSelectedBlocks: (selectedBlocks: Element | null) => void;
+    setSelectedBlocks: (selectedBlocks: EditingState | null) => void;
   }) {
     super();
     this.getDropAllowedBlocks = () => {
@@ -134,7 +134,8 @@ export class DragHandle extends LitElement {
     this._getBlockEditingStateByPosition =
       options.getBlockEditingStateByPosition;
     this._getBlockEditingStateByCursor = options.getBlockEditingStateByCursor;
-    document.body.appendChild(this);
+    options.container.appendChild(this);
+    this._container = options.container;
   }
 
   /**
@@ -156,7 +157,7 @@ export class DragHandle extends LitElement {
   ) => void;
 
   @property()
-  public setSelectedBlocks: (selectedBlock: Element | null) => void;
+  public setSelectedBlocks: (selectedBlock: EditingState | null) => void;
 
   @query('.affine-drag-handle')
   private _dragHandle!: HTMLDivElement;
@@ -176,6 +177,7 @@ export class DragHandle extends LitElement {
   private _indicator!: DragIndicator;
   private _cursor: number | null = 0;
   private _lastSelectedIndex = -1;
+  private _container: HTMLElement;
 
   private _getBlockEditingStateByPosition: DragHandleGetModelStateCallback | null =
     null;
@@ -207,8 +209,11 @@ export class DragHandle extends LitElement {
       this.style.display = 'block';
       this.style.height = `${rect.height}px`;
       this.style.width = `${DRAG_HANDLE_WIDTH}px`;
-      this.style.left = `${rect.left - DRAG_HANDLE_WIDTH - 20}px`;
-      this.style.top = `${rect.top}px`;
+      const containerRect = this._container.getBoundingClientRect();
+      this.style.left = `${
+        rect.left - containerRect.left - DRAG_HANDLE_WIDTH - 20
+      }px`;
+      this.style.top = `${rect.top - containerRect.top}px`;
       this.style.opacity = `${(
         1 -
         (event.raw.pageX - rect.left) / rect.width
@@ -307,7 +312,7 @@ export class DragHandle extends LitElement {
       )
     );
 
-    this._dragHandle.style.cursor = 'pointer';
+    this._dragHandle.style.cursor = 'grab';
     this._dragHandle.style.top = `${top}px`;
   }
 
@@ -324,8 +329,9 @@ export class DragHandle extends LitElement {
         this._cursor = newModelState.index;
         const rect = this._startModelState.position;
         this.style.display = 'block';
-        this.style.left = `${rect.left - 20}px`;
-        this.style.top = `${rect.top + 8}px`;
+        const containerRect = this._container.getBoundingClientRect();
+        this.style.left = `${rect.left - containerRect.left - 20}px`;
+        this.style.top = `${rect.top - containerRect.top + 8}px`;
       }
     }
   };
@@ -344,9 +350,7 @@ export class DragHandle extends LitElement {
     if (clickDragState) {
       this._cursor = clickDragState.index;
       this._lastSelectedIndex = this._cursor;
-      this.setSelectedBlocks(
-        getBlockElementByModel(clickDragState.model) as HTMLElement
-      );
+      this.setSelectedBlocks(clickDragState);
       this._dragHandleOver.style.display = 'block';
       this._dragHandleNormal.style.display = 'none';
     }

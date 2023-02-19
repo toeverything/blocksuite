@@ -1,5 +1,6 @@
 import { css } from 'lit';
-import { toolTipStyle } from '../tooltip.js';
+
+import { toolTipStyle } from '../tooltip/tooltip.js';
 
 const paragraphPanelStyle = css`
   .paragraph-button > svg:nth-child(2) {
@@ -19,7 +20,7 @@ const paragraphPanelStyle = css`
 
     background: var(--affine-popover-background);
     box-shadow: var(--affine-popover-shadow);
-    border-radius: 0px 10px 10px 10px;
+    border-radius: 0 10px 10px 10px;
     z-index: var(--affine-z-index-popover);
   }
 `;
@@ -43,7 +44,7 @@ export const formatQuickBarStyle = css`
   .divider {
     width: 1px;
     height: 100%;
-    background-color: #e0e6eb;
+    background-color: var(--affine-border-color);
   }
 
   ${paragraphPanelStyle}

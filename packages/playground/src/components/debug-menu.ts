@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { html, css } from 'lit';
-import { GUI } from 'dat.gui';
-import { customElement, property, query, state } from 'lit/decorators.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
@@ -14,33 +11,36 @@ import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
+
+import {
+  createEvent,
+  type FrameBlockModel,
+  getCurrentRange,
+  getModelsByRange,
+  MouseMode,
+  NonShadowLitElement,
+  ShapeMouseMode,
+  updateSelectedTextType,
+} from '@blocksuite/blocks';
+import type { EditorContainer } from '@blocksuite/editor';
+import {
+  CSSColorProperties,
+  CSSSizeProperties,
+  plate,
+} from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
+import type { ShapeType } from '@blocksuite/phasor';
+import type { Workspace } from '@blocksuite/store';
+import { Utils } from '@blocksuite/store';
 import type {
   SlColorPicker,
   SlDropdown,
   SlSelect,
 } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-
-import {
-  createEvent,
-  getCurrentRange,
-  getModelsByRange,
-  type FrameBlockModel,
-  MouseMode,
-  ShapeMouseMode,
-  updateSelectedTextType,
-  NonShadowLitElement,
-} from '@blocksuite/blocks';
-import type { Workspace } from '@blocksuite/store';
-import { Utils } from '@blocksuite/store';
-import type { EditorContainer } from '@blocksuite/editor';
-import { assertExists } from '@blocksuite/store/src/__tests__/test-utils-dom';
-import type { ShapeType } from '@blocksuite/phasor';
-import {
-  CSSColorProperties,
-  CSSSizeProperties,
-  plate,
-} from '@blocksuite/global/config';
+import { GUI } from 'dat.gui';
+import { css, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
@@ -249,7 +249,7 @@ export class DebugMenu extends NonShadowLitElement {
       this.canUndo = this.page.canUndo;
       this.canRedo = this.page.canRedo;
     });
-    this._styleMenu = new GUI();
+    this._styleMenu = new GUI({ hideable: false });
     this._styleMenu.width = 350;
     const style = document.documentElement.style;
     const sizeFolder = this._styleMenu.addFolder('Size');
@@ -305,6 +305,7 @@ export class DebugMenu extends NonShadowLitElement {
           width: 100%;
           overflow: auto;
           z-index: 1000; /* for debug visibility */
+          pointer-events: none;
         }
 
         .default-toolbar {
@@ -313,8 +314,14 @@ export class DebugMenu extends NonShadowLitElement {
           min-width: 390px;
         }
 
+        .default-toolbar > * {
+          pointer-events: auto;
+        }
+
         .edgeless-toolbar {
           align-items: center;
+          margin-right: 17px;
+          pointer-events: auto;
         }
 
         .edgeless-toolbar sl-select,

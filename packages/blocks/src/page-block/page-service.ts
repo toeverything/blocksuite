@@ -1,4 +1,4 @@
-import { BaseService } from '../__internal__/service.js';
+import { BaseService } from '../__internal__/service/index.js';
 import type { PageBlockModel } from './page-model.js';
 
 export class PageBlockService extends BaseService {

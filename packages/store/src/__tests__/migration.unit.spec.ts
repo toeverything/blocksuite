@@ -1,7 +1,8 @@
-import * as Y from 'yjs';
-import { describe, assert, test, expect } from 'vitest';
-import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { assert, describe, expect, test } from 'vitest';
+import * as Y from 'yjs';
+
 import { tryMigrate } from '../workspace/migrations.js';
 
 async function loadBinary(name: string) {

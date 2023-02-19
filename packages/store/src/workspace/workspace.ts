@@ -1,19 +1,20 @@
-import * as Y from 'yjs';
-import { Store, StoreOptions } from '../store.js';
-import { Space } from '../space.js';
-import { Page } from './page.js';
 import { Signal } from '@blocksuite/global/utils';
-import { Indexer, QueryContent } from './search.js';
-import {
-  BlobStorage,
-  BlobOptionsGetter,
-  getBlobStorage,
-  BlobSyncState,
-} from '../persistence/blob/index.js';
-import type { BlockSuiteDoc } from '../yjs/index.js';
-import { AwarenessStore, BlobUploadState } from '../awareness.js';
+import * as Y from 'yjs';
 import type { z } from 'zod';
-import { BlockSchema } from '../base.js';
+
+import { AwarenessStore, BlobUploadState } from '../awareness.js';
+import { BlockSchema, internalPrimitives } from '../base.js';
+import {
+  BlobOptionsGetter,
+  BlobStorage,
+  BlobSyncState,
+  getBlobStorage,
+} from '../persistence/blob/index.js';
+import { Space } from '../space.js';
+import { Store, StoreOptions } from '../store.js';
+import type { BlockSuiteDoc } from '../yjs/index.js';
+import { Page } from './page.js';
+import { Indexer, QueryContent } from './search.js';
 
 export interface PageMeta {
   id: string;
@@ -286,6 +287,18 @@ export class Workspace {
     this._handlePageEvent();
   }
 
+  get connected(): boolean {
+    return this._store.connected;
+  }
+
+  connect = () => {
+    this._store.connect();
+  };
+
+  disconnect = () => {
+    this._store.disconnect();
+  };
+
   get awarenessStore(): AwarenessStore {
     return this._store.awarenessStore;
   }
@@ -313,7 +326,7 @@ export class Workspace {
       this.flavourSchemaMap.set(schema.model.flavour, schema);
       this.flavourInitialPropsMap.set(
         schema.model.flavour,
-        schema.model.props()
+        schema.model.props(internalPrimitives)
       );
     });
     return this;

@@ -1,12 +1,27 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import path, { resolve } from 'node:path';
+
+import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
+import { defineConfig } from 'vite';
+import istanbul from 'vite-plugin-istanbul';
+
 import { hmrPlugin } from './scripts/hmr-plugin';
+
+const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), hmrPlugin],
+  plugins: [
+    react(),
+    hmrPlugin,
+    enableIstanbul &&
+      istanbul({
+        cwd: fileURLToPath(new URL('../..', import.meta.url)),
+        include: ['packages/**/src/*'],
+        exclude: ['node_modules', 'tests'],
+        forceBuildInstrument: true,
+      }),
+  ],
   build: {
     sourcemap: true,
     rollupOptions: {
@@ -34,6 +49,21 @@ export default defineConfig({
       ),
       '@blocksuite/global/*': path.resolve(
         fileURLToPath(new URL('../global/src/*', import.meta.url))
+      ),
+      '@blocksuite/store': path.resolve(
+        fileURLToPath(new URL('../store/src', import.meta.url))
+      ),
+      '@blocksuite/phasor': path.resolve(
+        fileURLToPath(new URL('../phasor/src', import.meta.url))
+      ),
+      '@blocksuite/phasor/*': path.resolve(
+        fileURLToPath(new URL('../phasor/src/*', import.meta.url))
+      ),
+      '@blocksuite/virgo': path.resolve(
+        fileURLToPath(new URL('../virgo/src', import.meta.url))
+      ),
+      '@blocksuite/virgo/*': path.resolve(
+        fileURLToPath(new URL('../virgo/src/*', import.meta.url))
       ),
     },
   },

@@ -5,17 +5,20 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DragHandle } from '../../components/index.js';
-import { toast } from '../../components/toast.js';
-import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+
 import { getService } from '../../__internal__/service.js';
 import {
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
+  getCurrentRange,
   getRichTextByModel,
+  OpenBlockInfo,
   resetNativeSelection,
 } from '../../__internal__/utils/index.js';
+import { DragHandle } from '../../components/index.js';
+import { toast } from '../../components/toast.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type {
   CodeBlockOption,
   DefaultPageBlockComponent,
@@ -166,58 +169,49 @@ function binarySearchBlockEditingState(
       }
     }
 
-    let in_block = y <= detectRect.bottom;
+    const in_block = y >= detectRect.top && y <= detectRect.bottom;
+
     if (in_block) {
-      if (mid !== 0) {
-        // const {
-        //   detectRect: { bottom },
-        // } = getBlockAndRect(blocks, mid - 1);
-        // in_block &&= y >= bottom;
-        in_block &&= y >= detectRect.top;
-      }
+      assertExists(blockRect);
 
-      if (in_block) {
-        assertExists(blockRect);
+      if (!options?.skipX) {
+        if (dragging) {
+          if (block.depth && block.parentIndex !== undefined) {
+            let depth = Math.floor(
+              (blockRect.left - x) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+            );
+            if (depth > 0) {
+              let result = getBlockAndRect(blocks, block.parentIndex);
 
-        if (!options?.skipX) {
-          if (dragging) {
-            if (block.depth && block.parentIndex !== undefined) {
-              let depth = Math.floor(
-                (blockRect.left - x) / BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
-              );
-              if (depth > 0) {
-                let result = getBlockAndRect(blocks, block.parentIndex);
-
-                while (
-                  depth > 1 &&
-                  result.block.depth &&
-                  result.block.parentIndex !== undefined
-                ) {
-                  result = getBlockAndRect(blocks, result.block.parentIndex);
-                  depth -= 1;
-                }
-
-                return {
-                  index: mid,
-                  position: result.blockRect,
-                  model: result.block,
-                };
+              while (
+                depth > 1 &&
+                result.block.depth &&
+                result.block.parentIndex !== undefined
+              ) {
+                result = getBlockAndRect(blocks, result.block.parentIndex);
+                depth -= 1;
               }
-            }
-          } else {
-            // y-coord is checked before
-            if (!isPointIn(x, detectRect)) {
-              return null;
+
+              return {
+                index: mid,
+                position: result.blockRect,
+                model: result.block,
+              };
             }
           }
+        } else {
+          // y-coord is checked before
+          if (!isPointIn(x, detectRect)) {
+            return null;
+          }
         }
-
-        return {
-          index: mid,
-          position: blockRect,
-          model: block,
-        };
       }
+
+      return {
+        index: mid,
+        position: blockRect,
+        model: block,
+      };
     }
 
     if (detectRect.top > y) {
@@ -320,6 +314,35 @@ export async function copyImage(model: EmbedBlockModel) {
   copySuccess && toast('Copied image to clipboard');
 }
 
+function getTextDelta(model: BaseBlockModel) {
+  if (!model.text) {
+    return [];
+  }
+  return model.text.toDelta();
+}
+
+// TODO merge with copy-cut-manager
+export async function copyBlock(model: BaseBlockModel) {
+  const copyType = 'blocksuite/x-c+w';
+  const delta = getTextDelta(model);
+  const copyData: { data: OpenBlockInfo[] } = {
+    data: [
+      {
+        type: model.type,
+        flavour: model.flavour,
+        sourceId: model.sourceId,
+        text: delta,
+        children: [],
+      },
+    ],
+  };
+  const copySuccess = performNativeCopy([
+    { mimeType: copyType, data: JSON.stringify(copyData) },
+    { mimeType: 'text/plain', data: model.text?.toString() || '' },
+  ]);
+  return copySuccess;
+}
+
 interface ClipboardItem {
   mimeType: string;
   data: string;
@@ -380,8 +403,13 @@ export function copyCode(codeBlockOption: CodeBlockOption) {
   assertExists(richText);
   const quill = richText.quill;
   quill.setSelection(0, quill.getLength());
-  document.dispatchEvent(new ClipboardEvent('copy'));
-  resetNativeSelection(null);
+  document.body.dispatchEvent(new ClipboardEvent('copy', { bubbles: true }));
+
+  const range = getCurrentRange();
+  range.setStart(richText, 0);
+  range.setEnd(richText, 0);
+  resetNativeSelection(range);
+
   toast('Copied to clipboard');
 }
 
@@ -431,6 +459,8 @@ export function getAllowSelectedBlocks(
 
 export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
   return new DragHandle({
+    // drag handle should be the same level with editor-container
+    container: defaultPageBlock.mouseRoot.parentElement as HTMLElement,
     getBlockEditingStateByCursor(
       blocks,
       pageX,
@@ -468,10 +498,14 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.signals.updateEmbedEditingState.emit(null);
       defaultPageBlock.signals.updateEmbedRects.emit([]);
     },
-    setSelectedBlocks(selectedBlocks: Element | null): void {
-      defaultPageBlock.signals.updateSelectedRects.emit(
-        selectedBlocks ? [selectedBlocks.getBoundingClientRect()] : []
-      );
+    setSelectedBlocks(selectedBlocks: EditingState | null): void {
+      if (selectedBlocks) {
+        const { position, index } = selectedBlocks;
+        defaultPageBlock.selection.selectBlocksByIndexAndBounding(
+          index,
+          position
+        );
+      }
     },
   });
 }

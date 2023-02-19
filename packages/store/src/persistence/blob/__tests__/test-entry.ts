@@ -1,14 +1,14 @@
 // Test page entry located in playground/examples/blob/index.html
-import { getBlobStorage } from '../index.js';
 import {
-  testSerial,
-  runOnce,
-  loadTestImageBlob,
-  loadImage,
   assertColor,
   assertExists,
   disableButtonsAfterClick,
+  loadImage,
+  loadTestImageBlob,
+  runOnce,
+  testSerial,
 } from '../../../__tests__/test-utils-dom.js';
+import { getBlobStorage } from '../index.js';
 
 const optionsGetters = {
   noop: () => void 0,

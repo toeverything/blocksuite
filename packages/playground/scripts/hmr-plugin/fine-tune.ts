@@ -1,7 +1,6 @@
 import { init, parse } from 'es-module-lexer';
 import micromatch from 'micromatch';
 import path from 'path';
-
 import type { Plugin } from 'vite';
 const isMatch = micromatch.isMatch;
 

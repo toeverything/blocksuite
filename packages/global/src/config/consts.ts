@@ -1,5 +1,5 @@
-export * from './consts/blockhub.js';
 export * from './consts/affine-style-consts.js';
+export * from './consts/blockhub.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id' as const;
 export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading' as const;
@@ -19,6 +19,8 @@ export const HOTKEYS = {
   LEFT: 'left',
   RIGHT: 'right',
   ENTER: 'enter',
+  TAB: 'tab',
+  SPACE: 'space',
 };
 
 export const MOVE_DETECT_THRESHOLD = 2;

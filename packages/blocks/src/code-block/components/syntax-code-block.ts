@@ -1,9 +1,8 @@
-import Quill from 'quill';
-import type { Quill as QuillType } from 'quill';
-
+import { assertExists } from '@blocksuite/global/utils';
 // @ts-ignore
 import type hljs from 'highlight.js';
-import { assertExists } from '@blocksuite/global/utils';
+import type { Quill as QuillType } from 'quill';
+import Quill from 'quill';
 
 const Module = Quill.import('core/module');
 const CodeBlock = Quill.import('formats/code-block');
@@ -128,7 +127,7 @@ class SyntaxCodeBlock extends CodeBlock {
     mockElement.classList.add('.affine-code-block-container');
     // HTMLElement should append to DOM in order to get scrollWidth, which is 0px otherwise
     this.domNode.appendChild(mockElement);
-    mockElement.style.width = '0px';
+    mockElement.style.width = '0';
     mockElement.style.whiteSpace = 'pre';
     mockElement.style.position = 'fixed';
     // hide mock element
@@ -176,6 +175,14 @@ class Syntax extends Module {
       }, this.options.interval);
     });
     this.highlight(false, options.codeBlockElement);
+  }
+
+  setLang(lang: string) {
+    if (this._language === lang) {
+      return;
+    }
+    this._language = lang;
+    this.highlight(true, this._codeBlockElement);
   }
 
   highlight(forceRefresh: boolean, container: HTMLElement) {

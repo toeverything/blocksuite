@@ -1,12 +1,21 @@
-import { html } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
+import { BLOCK_ID_ATTR, CopyIcon, DeleteIcon } from '@blocksuite/global/config';
 import {
   CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
   DownloadIcon,
   LineWrapIcon,
-} from '../icons.js';
+} from '@blocksuite/global/config';
+import { html } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
+
+import { toolTipStyle } from '../../components/tooltip/tooltip.js';
+import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import type {
+  CodeBlockOption,
+  DefaultPageSignals,
+  EmbedEditingState,
+  ViewportState,
+} from './default-page-block.js';
 import {
   copyCode,
   copyImage,
@@ -15,14 +24,6 @@ import {
   focusCaption,
   toggleWrap,
 } from './utils.js';
-import { toolTipStyle } from '../../components/tooltip.js';
-import type {
-  CodeBlockOption,
-  DefaultPageSignals,
-  EmbedEditingState,
-} from './default-page-block.js';
-import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 
 export function FrameSelectionRect(rect: DOMRect | null) {
   if (rect === null) return null;
@@ -50,21 +51,23 @@ export function FrameSelectionRect(rect: DOMRect | null) {
 }
 
 export function EmbedSelectedRectsContainer(
-  rects: { left: number; top: number; width: number; height: number }[]
+  rects: { left: number; top: number; width: number; height: number }[],
+  viewportState: ViewportState
 ) {
+  const { left, top, scrollLeft, scrollTop } = viewportState;
   return html`
     <style>
       .affine-page-selected-embed-rects-container > div {
-        position: fixed;
+        position: absolute;
+        display: block;
         border: 2px solid var(--affine-primary-color);
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable">
       ${rects.map(rect => {
         const style = {
-          display: 'block',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
+          left: rect.left - left + scrollLeft + 'px',
+          top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
@@ -81,11 +84,16 @@ export function EmbedSelectedRectsContainer(
   `;
 }
 
-export function SelectedRectsContainer(rects: DOMRect[]) {
+export function SelectedRectsContainer(
+  rects: DOMRect[],
+  viewportState: ViewportState
+) {
+  const { left, top, scrollLeft, scrollTop } = viewportState;
   return html`
     <style>
       .affine-page-selected-rects-container > div {
-        position: fixed;
+        position: absolute;
+        display: block;
         background: var(--affine-selected-color);
         z-index: 1;
         pointer-events: none;
@@ -93,11 +101,10 @@ export function SelectedRectsContainer(rects: DOMRect[]) {
       }
     </style>
     <div class="affine-page-selected-rects-container">
-      ${rects.map(rect => {
+      ${repeat(rects, rect => {
         const style = {
-          display: 'block',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
+          left: rect.left - left + scrollLeft + 'px',
+          top: rect.top - top + scrollTop + 'px',
           width: rect.width + 'px',
           height: rect.height + 'px',
         };
@@ -184,9 +191,8 @@ export function EmbedEditingContainer(
 export function CodeBlockOptionContainer(
   codeBlockOption: CodeBlockOption | null
 ) {
-  if (!codeBlockOption) {
-    return html``;
-  }
+  if (!codeBlockOption) return null;
+
   const style = {
     left: codeBlockOption.position.x + 'px',
     top: codeBlockOption.position.y + 'px',
@@ -194,9 +200,8 @@ export function CodeBlockOptionContainer(
   const syntaxElem = document.querySelector(
     `[${BLOCK_ID_ATTR}="${codeBlockOption.model.id}"] .ql-syntax`
   );
-  if (!syntaxElem) {
-    return html``;
-  }
+  if (!syntaxElem) return null;
+
   const isWrapped = syntaxElem.classList.contains('wrap');
   return html`
     <style>

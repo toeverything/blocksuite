@@ -1,17 +1,18 @@
+import type { SurfaceElement } from '@blocksuite/phasor';
+import type { Disposable } from '@blocksuite/store';
+
 import {
-  SelectionEvent,
   initMouseEventHandlers,
   MouseMode,
-  TopLevelBlockModel,
   noop,
+  SelectionEvent,
+  TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { initWheelEventHandlers } from './utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
-import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
-import type { Disposable } from '@blocksuite/store';
-import type { SurfaceElement } from '@blocksuite/phasor';
+import { ShapeModeController } from './mode-controllers/shape-mode.js';
+import { initWheelEventHandlers } from './utils.js';
 
 export type Selectable = TopLevelBlockModel | SurfaceElement;
 
@@ -42,8 +43,6 @@ export interface SelectionArea {
   start: DOMPoint;
   end: DOMPoint;
 }
-
-export type XYWH = [number, number, number, number];
 
 const MIN_ZOOM = 0.3;
 
@@ -244,8 +243,8 @@ export class EdgelessSelectionManager {
     return this.currentController.onContainerClick(e);
   };
 
-  syncBlockSelectionRect() {
-    return this.currentController.syncBlockSelectionRect();
+  syncSelectionRect() {
+    return this.currentController.syncSelectionRect();
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {

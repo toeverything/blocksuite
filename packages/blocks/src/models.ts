@@ -1,42 +1,44 @@
 /// <reference types="@blocksuite/global" />
 // Import models only, the bundled file should not include anything else.
+import type { BlockSchema } from '@blocksuite/store';
+import type { z } from 'zod';
+
+import type { BaseService } from './__internal__/service/index.js';
 import {
   CodeBlockModel,
   CodeBlockModelSchema,
 } from './code-block/code-model.js';
+import { CodeBlockService } from './code-block/code-service.js';
+import type { DatabaseBlockModel } from './database-block/database-model.js';
+import { DatabaseBlockModelSchema } from './database-block/database-model.js';
 import type { DividerBlockModel } from './divider-block/divider-model.js';
+import { DividerBlockModelSchema } from './divider-block/divider-model.js';
+import { DividerBlockService } from './divider-block/divider-service.js';
 import type { EmbedBlockModel } from './embed-block/embed-model.js';
+import { EmbedBlockModelSchema } from './embed-block/embed-model.js';
 import type { FrameBlockModel } from './frame-block/frame-model.js';
+import { FrameBlockModelSchema } from './frame-block/frame-model.js';
 import type { ListBlockModel } from './list-block/list-model.js';
+import { ListBlockModelSchema } from './list-block/list-model.js';
+import { ListBlockService } from './list-block/list-service.js';
 import type { PageBlockModel } from './page-block/page-model.js';
+import { PageBlockModelSchema } from './page-block/page-model.js';
 import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
+import { ParagraphBlockModelSchema } from './paragraph-block/paragraph-model.js';
 import { ParagraphBlockService } from './paragraph-block/paragraph-service.js';
 import type { SurfaceBlockModel } from './surface-block/surface-model.js';
-import type { DatabaseBlockModel } from './database-block/database-model.js';
-import { CodeBlockService } from './code-block/code-service.js';
-import type { BaseService } from './__internal__/service.js';
-import { ListBlockService } from './list-block/list-service.js';
-import { DividerBlockService } from './divider-block/divider-service.js';
-import { ParagraphBlockModelSchema } from './paragraph-block/paragraph-model.js';
-import { PageBlockModelSchema } from './page-block/page-model.js';
-import { ListBlockModelSchema } from './list-block/list-model.js';
-import { FrameBlockModelSchema } from './frame-block/frame-model.js';
-import { DividerBlockModelSchema } from './divider-block/divider-model.js';
-import { EmbedBlockModelSchema } from './embed-block/embed-model.js';
 import { SurfaceBlockModelSchema } from './surface-block/surface-model.js';
-import { DatabaseBlockModelSchema } from './database-block/database-model.js';
-import type { z } from 'zod';
-import type { BlockSchema } from '@blocksuite/store';
 
 export type {
   CodeBlockModel,
+  DatabaseBlockModel,
   DividerBlockModel,
   EmbedBlockModel,
   FrameBlockModel,
   ListBlockModel,
   PageBlockModel,
   ParagraphBlockModel,
-  DatabaseBlockModel,
+  SurfaceBlockModel,
 };
 
 /** Default first party model types built for affine */
