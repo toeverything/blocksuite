@@ -111,7 +111,11 @@ export class Page extends Space<PageData> {
   }
 
   get root() {
-    return Array.isArray(this._root) ? this._root[0] : this._root;
+    const root = Array.isArray(this._root) ? this._root[0] : this._root;
+    if (root && root.flavour !== 'affine:page') {
+      console.error('data broken');
+    }
+    return root;
   }
 
   get surface() {
@@ -727,13 +731,16 @@ export class Page extends Space<PageData> {
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
-    const isRoot = this._blockMap.size === 0;
+    let isRoot = false;
     let isSurface = false;
 
     const props = toBlockProps(yBlock) as BlockProps;
     const model = this._createBlockModel({ ...props, id });
     if (model.flavour === 'affine:surface') {
       isSurface = true;
+    }
+    if (model.flavour === 'affine:page') {
+      isRoot = true;
     }
     this._blockMap.set(props.id, model);
 
