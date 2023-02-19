@@ -1,4 +1,4 @@
-import { defineBlockSchema, SchemaToModel, Text } from '@blocksuite/store';
+import { defineBlockSchema, SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 export const PageBlockModelSchema = defineBlockSchema(
