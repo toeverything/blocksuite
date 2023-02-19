@@ -635,13 +635,29 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abc\ndef\nghi');
   expect(await editorB.innerText()).toBe('abc\ndef\nghi');
 
+  /**
+   * abc
+   * def
+   * |ghi
+   */
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
 
+  /**
+   * |abc
+   * def
+   * |ghi
+   */
   await page.keyboard.down('Shift');
   await page.keyboard.press('ArrowUp');
   await page.keyboard.press('ArrowUp');
+
+  /**
+   * a|bc
+   * def
+   * |ghi
+   */
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Backspace');
 
