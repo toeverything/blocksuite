@@ -11,12 +11,12 @@
     "serve": "pnpm --filter @blocksuite/store serve",
     "dev": "run-p serve dev:playground",
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
-    "lint": "eslint ./ --max-warnings=0",
+    "lint": "eslint ./ --max-warnings=0 --cache",
     "test": "playwright test",
     "test:unit": "pnpm -r test:unit",
     "test:headed": "playwright test --headed",
     "test:store": "pnpm --filter @blocksuite/store test",
-    "format": "prettier --write packages tests",
+    "format": "prettier --write packages tests --cache",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,phasor,playground,store,react,global}/dist",
@@ -26,7 +26,7 @@
     "postinstall": "husky install"
   },
   "lint-staged": {
-    "*": "prettier --write --ignore-unknown",
+    "*": "prettier --write --ignore-unknown --cache",
     "*.{ts,tsx,js,jsx}": "npx eslint --cache --fix"
   },
   "keywords": [],
