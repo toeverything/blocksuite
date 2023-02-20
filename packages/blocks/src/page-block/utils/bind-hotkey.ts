@@ -318,9 +318,9 @@ export function bindHotkeys(
         element = selectedBlocks[selectedBlocks.length - 1];
       }
     } else if (state.type === 'embed') {
-      const { selectEmbeds } = state;
-      if (selectEmbeds.length) {
-        element = selectEmbeds[selectEmbeds.length - 1];
+      const { selectedEmbeds } = state;
+      if (selectedEmbeds.length) {
+        element = selectedEmbeds[selectedEmbeds.length - 1];
       }
     }
 
@@ -374,9 +374,9 @@ export function bindHotkeys(
         blocks = selectedBlocks;
       }
     } else if (state.type === 'embed') {
-      const { selectEmbeds } = state;
-      if (selectEmbeds.length) {
-        blocks = selectEmbeds;
+      const { selectedEmbeds } = state;
+      if (selectedEmbeds.length) {
+        blocks = selectedEmbeds;
       }
     }
 

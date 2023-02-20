@@ -318,7 +318,7 @@ export class DefaultPageBlockComponent
     if (type === 'block') {
       selection.refreshSelectionRectAndSelecting(viewportState);
     } else if (type === 'embed') {
-      selection.refresEmbedRects();
+      selection.refresEmbedRects(this.embedEditingState);
     } else if (type === 'native') {
       const { startRange, rangePoint } = selection.state;
       if (startRange && rangePoint) {
@@ -575,7 +575,8 @@ export class DefaultPageBlockComponent
     );
     const embedEditingContainer = EmbedEditingContainer(
       readonly ? null : this.embedEditingState,
-      this.signals
+      this.signals,
+      this.viewportState
     );
     const codeBlockOptionContainer = CodeBlockOptionContainer(
       readonly ? null : this.codeBlockOption
