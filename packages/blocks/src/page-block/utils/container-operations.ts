@@ -10,13 +10,13 @@ import {
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import {
   getBlockElementByModel,
-  getCurrentRange,
   getModelByElement,
   getModelsByRange,
   getParentBlockById,
   getQuillIndexByNativeSelection,
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
+import { getCurrentRange } from '../../__internal__/utils/selection.js';
 import {
   checkHasNativeSelection,
   isCollapsedSelection,
