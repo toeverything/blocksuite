@@ -262,10 +262,25 @@ export function focusRichTextStart(richText: RichText) {
   resetNativeSelection(range);
 }
 
-export function isNoneSelection() {
+/**
+ * Return true if has native selection in the document.
+ *
+ * @example
+ * ```ts
+ * const hasNativeSelection = checkHasNativeSelection();
+ * if (hasNativeSelection) {
+ *   // do something
+ * }
+ * ```
+ */
+export function checkHasNativeSelection() {
   const selection = window.getSelection();
-  if (!selection) return true;
-  return selection.type === 'None';
+  if (!selection) return false;
+
+  // The `selection.rangeCount` attribute must return 0
+  // if this is empty or either focus or anchor is not in the document tree,
+  // and must return 1 otherwise.
+  return !!selection.rangeCount;
 }
 
 export function isCollapsedSelection() {

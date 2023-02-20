@@ -18,9 +18,9 @@ import {
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
 import {
+  checkHasNativeSelection,
   isCollapsedSelection,
   isMultiBlockRange,
-  isNoneSelection,
   isRangeSelection,
   resetNativeSelection,
   restoreSelection,
@@ -191,7 +191,7 @@ function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
  * Do nothing when selection is collapsed or not multi block selected
  */
 export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
-  if (isNoneSelection()) return;
+  if (!checkHasNativeSelection()) return;
   if (isCollapsedSelection()) return;
   if (!isMultiBlockRange()) return;
 
@@ -199,8 +199,9 @@ export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   deleteModelsByRange(page);
 }
 
-export const getFormat = (): TextAttributes => {
-  const models = getModelsByRange(getCurrentRange());
+export const getFormat = (
+  models = getModelsByRange(getCurrentRange())
+): TextAttributes => {
   if (!models.length) {
     return {};
   }
@@ -314,7 +315,7 @@ function formatModelsByRange(
 }
 
 export function handleFormat(page: Page, key: keyof TextAttributes) {
-  if (isNoneSelection()) return;
+  if (!checkHasNativeSelection()) return;
 
   if (isRangeSelection()) {
     const models = getModelsByRange(getCurrentRange()).filter(model => {
