@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/components/card/card.js';
 
+import { Workspace } from '@blocksuite/store';
+import { fileOpen } from 'browser-fs-access';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -9,8 +11,8 @@ import * as examples from '../data/index.js';
 
 const initFunctions = Object.values(examples);
 
-@customElement('example-list')
-export class ExampleList extends LitElement {
+@customElement('start-panel')
+export class StartPanel extends LitElement {
   static styles = css`
     .container {
       display: flex;
@@ -48,12 +50,23 @@ export class ExampleList extends LitElement {
           `
         )}
       </div>
+      <button
+        @click=${async () => {
+          const file = await fileOpen({
+            extensions: ['.ydoc'],
+          });
+          const buffer = await file.arrayBuffer();
+          Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
+        }}
+      >
+        import from yjs binary file
+      </button>
     `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'example-list': ExampleList;
+    'start-panel': StartPanel;
   }
 }

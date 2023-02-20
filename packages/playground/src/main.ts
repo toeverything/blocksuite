@@ -1,7 +1,7 @@
 /// <reference types="./env" />
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
-import './components/example-list.js';
+import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
 
@@ -91,7 +91,7 @@ async function main() {
   }
 
   // Open default examples list when no `?init` param is provided
-  const exampleList = document.createElement('example-list');
+  const exampleList = document.createElement('start-panel');
   workspace.signals.pageAdded.once(() => exampleList.remove());
   document.body.prepend(exampleList);
 }
