@@ -216,6 +216,11 @@ export class SurfaceManager {
     }
   };
 
+  dispose() {
+    this._yElements.unobserveDeep(this._handleYEvents);
+    this._renderer.dispose();
+  }
+
   /** @internal Only for testing */
   initDefaultGestureHandler() {
     const { _renderer } = this;
