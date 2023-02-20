@@ -266,8 +266,8 @@ export function focusRichTextStart(richText: RichText) {
  *
  * @example
  * ```ts
- * const hasNativeSelection = checkHasNativeSelection();
- * if (hasNativeSelection) {
+ * const isNativeSelection = hasNativeSelection();
+ * if (isNativeSelection) {
  *   // do something
  * }
  * ```

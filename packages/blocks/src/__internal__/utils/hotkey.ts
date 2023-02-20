@@ -45,6 +45,7 @@ function shouldFilterHotKey(event: KeyboardEvent) {
     // Some event dispatch from body
     // for example, press backspace to remove block-level selection
     if (event.target === document.body) {
+      // TODO filter arrow key
       return false;
     }
     return true;
