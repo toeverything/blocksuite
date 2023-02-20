@@ -691,7 +691,11 @@ export class DefaultSelectionManager {
 
   private _onContainerClick = (e: SelectionEvent) => {
     // do nothing when clicking on scrollbar
-    if (e.raw.pageX >= this._container.viewportState.clientWidth) {
+    if (
+      e.raw.pageX >=
+      this._container.viewportState.clientWidth +
+        this._container.viewportState.left
+    ) {
       return;
     }
 
