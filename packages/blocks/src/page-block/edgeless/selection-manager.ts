@@ -243,8 +243,8 @@ export class EdgelessSelectionManager {
     return this.currentController.onContainerClick(e);
   };
 
-  syncBlockSelectionRect() {
-    return this.currentController.syncBlockSelectionRect();
+  syncSelectionRect() {
+    return this.currentController.syncSelectionRect();
   }
 
   private _onContainerDblClick = (e: SelectionEvent) => {

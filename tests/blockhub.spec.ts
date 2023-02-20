@@ -46,28 +46,24 @@ test('blockHub card items should appear and disappear properly with correspondin
   await focusRichText(page);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
-  await page.waitForTimeout(200);
-  const blankMenu = '.block-hub-icon-container:nth-child(1)';
-  const textMenu = '.block-hub-icon-container:nth-child(2)';
-  const listMenu = '.block-hub-icon-container:nth-child(3)';
+  const blankMenu = page.locator('.block-hub-icon-container:nth-child(1)');
+  const textMenu = page.locator('.block-hub-icon-container:nth-child(2)');
+  const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
 
-  const textMenuRect = await getCenterPosition(page, textMenu);
-  await page.mouse.move(textMenuRect.x, textMenuRect.y);
+  await textMenu.hover();
   const blockHubTextContainer = page.locator(
     '.affine-block-hub-container[type="text"]'
   );
   await expect(blockHubTextContainer).toBeVisible();
 
-  const listMenuRect = await getCenterPosition(page, listMenu);
-  await page.mouse.move(listMenuRect.x, listMenuRect.y);
+  await listMenu.hover();
   const blockHubListContainer = page.locator(
     '.affine-block-hub-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
   await expect(blockHubTextContainer).toBeHidden();
 
-  const blankMenuRect = await getCenterPosition(page, blankMenu);
-  await page.mouse.move(blankMenuRect.x, blankMenuRect.y);
+  await blankMenu.hover();
   await expect(blockHubTextContainer).toBeHidden();
   await expect(blockHubListContainer).toBeHidden();
 });
@@ -80,11 +76,9 @@ test('blockHub card items can disappear when clicking blank area', async ({
   await focusRichText(page);
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
-  await page.waitForTimeout(200);
-  const textMenu = '.block-hub-icon-container:nth-child(2)';
+  const textMenu = page.locator('.block-hub-icon-container:nth-child(2)');
 
-  const textMenuRect = await getCenterPosition(page, textMenu);
-  await page.mouse.move(textMenuRect.x, textMenuRect.y);
+  await textMenu.hover();
   const blockHubTextContainer = page.locator(
     '.affine-block-hub-container[type="text"]'
   );
@@ -217,10 +211,8 @@ test('drag numbered list block from list menu into text area and blockHub list c
 
   await page.click('.block-hub-menu-container [role="menu-entry"]');
   await page.waitForTimeout(200);
-  const listMenu = '.block-hub-icon-container:nth-child(3)';
-
-  const listMenuRect = await getCenterPosition(page, listMenu);
-  await page.mouse.move(listMenuRect.x, listMenuRect.y);
+  const listMenu = page.locator('.block-hub-icon-container:nth-child(3)');
+  await listMenu.hover();
   const blockHubListContainer = page.locator(
     '.affine-block-hub-container[type="list"]'
   );

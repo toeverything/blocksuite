@@ -238,7 +238,7 @@ export class EdgelessPageBlockComponent
     this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
-      frame.propsUpdated.on(() => this._selection.syncBlockSelectionRect());
+      frame.propsUpdated.on(() => this._selection.syncSelectionRect());
     });
 
     this.signals.viewportUpdated.on(() => {
@@ -246,7 +246,7 @@ export class EdgelessPageBlockComponent
 
       this._syncSurfaceViewport();
 
-      this._selection.syncBlockSelectionRect();
+      this._selection.syncSelectionRect();
       this.requestUpdate();
     });
     this.signals.hoverUpdated.on(() => this.requestUpdate());

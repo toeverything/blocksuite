@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.4.0-alpha.4",
+  "version": "0.4.1",
   "workspaces": [
     "packages/blocks",
     "packages/editor",
@@ -23,14 +23,14 @@
     "preview:playground": "pnpm --filter @blocksuite/playground preview",
     "dev": "run-p serve dev:playground",
     "dev:playground": "pnpm --filter @blocksuite/playground dev:hmr",
-    "lint": "eslint ./ --max-warnings=0",
+    "lint": "eslint ./ --max-warnings=0 --cache",
     "test": "playwright test",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "test:unit": "pnpm -r test:unit",
     "test:unit:coverage": "pnpm -r test:unit:coverage",
     "test:headed": "playwright test --headed",
     "test:store": "pnpm --filter @blocksuite/store test",
-    "format": "prettier --write packages tests",
+    "format": "prettier --write --cache packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,phasor,playground,store,react,global}/dist",
@@ -40,7 +40,7 @@
     "postinstall": "husky install"
   },
   "lint-staged": {
-    "*": "prettier --write --ignore-unknown",
+    "*": "prettier --write --cache --ignore-unknown",
     "*.{ts,tsx,js,jsx}": "npx eslint --cache --fix"
   },
   "keywords": [],
@@ -87,5 +87,8 @@
     "patchedDependencies": {
       "hotkeys-js@3.10.1": "patches/hotkeys-js@3.10.1.patch"
     }
+  },
+  "stackblitz": {
+    "startCommand": "pnpm --filter='./packages/playground' run dev"
   }
 }
