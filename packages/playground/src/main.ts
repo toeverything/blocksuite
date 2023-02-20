@@ -1,7 +1,7 @@
 /// <reference types="./env" />
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
-import './components/example-list.js';
+import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
 
@@ -26,7 +26,13 @@ initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
-  workspace.signals.pageAdded.once(pageId => {
+  const dispose = workspace.signals.pageAdded.on(pageId => {
+    if (typeof globalThis.targetPageId === 'string') {
+      if (pageId !== globalThis.targetPageId) {
+        // if there's `targetPageId` which not same as the `pageId`
+        return;
+      }
+    }
     const page = workspace.getPage(pageId) as Page;
 
     const editor = new EditorContainer();
@@ -43,6 +49,7 @@ function subscribePage(workspace: Workspace) {
     });
 
     [window.editor, window.page] = [editor, page];
+    dispose.dispose();
   });
 }
 
@@ -91,7 +98,7 @@ async function main() {
   }
 
   // Open default examples list when no `?init` param is provided
-  const exampleList = document.createElement('example-list');
+  const exampleList = document.createElement('start-panel');
   workspace.signals.pageAdded.once(() => exampleList.remove());
   document.body.prepend(exampleList);
 }

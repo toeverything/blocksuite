@@ -9,8 +9,8 @@ import * as examples from '../data/index.js';
 
 const initFunctions = Object.values(examples);
 
-@customElement('example-list')
-export class ExampleList extends LitElement {
+@customElement('start-panel')
+export class StartPanel extends LitElement {
   static styles = css`
     .container {
       display: flex;
@@ -54,6 +54,6 @@ export class ExampleList extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'example-list': ExampleList;
+    'start-panel': StartPanel;
   }
 }
