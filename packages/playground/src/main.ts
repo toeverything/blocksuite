@@ -26,7 +26,7 @@ initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
-  workspace.signals.pageAdded.once(pageId => {
+  const dispose = workspace.signals.pageAdded.on(pageId => {
     if (typeof globalThis.targetPageId === 'string') {
       if (pageId !== globalThis.targetPageId) {
         // if there's `targetPageId` which not same as the `pageId`
@@ -49,6 +49,7 @@ function subscribePage(workspace: Workspace) {
     });
 
     [window.editor, window.page] = [editor, page];
+    dispose.dispose();
   });
 }
 
