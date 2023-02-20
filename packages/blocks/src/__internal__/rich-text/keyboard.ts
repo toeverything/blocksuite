@@ -170,13 +170,19 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     return PREVENT_DEFAULT;
   }
 
-  function onIndent(this: KeyboardEventThis) {
+  function onTab(this: KeyboardEventThis) {
+    if (matchFlavours(model, ['affine:code'])) {
+      return ALLOW_DEFAULT;
+    }
     const index = this.quill.getSelection()?.index;
     handleIndent(page, model, index);
     return PREVENT_DEFAULT;
   }
 
-  function onUnindent(this: KeyboardEventThis) {
+  function onShiftTab(this: KeyboardEventThis) {
+    if (matchFlavours(model, ['affine:code'])) {
+      return ALLOW_DEFAULT;
+    }
     const index = this.quill.getSelection()?.index;
     handleUnindent(page, model, index);
     return PREVENT_DEFAULT;
@@ -281,12 +287,12 @@ export function createKeyboardBindings(page: Page, model: BaseBlockModel) {
     },
     tab: {
       key: 'Tab',
-      handler: onIndent,
+      handler: onTab,
     },
     shiftTab: {
       key: 'Tab',
       shiftKey: true,
-      handler: onUnindent,
+      handler: onShiftTab,
     },
     spaceMarkdownMatch: {
       key: ' ',
