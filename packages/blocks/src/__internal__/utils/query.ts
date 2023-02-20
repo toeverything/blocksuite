@@ -6,6 +6,7 @@ import type { LeafBlot } from 'parchment';
 import type { DefaultPageBlockComponent, SelectedBlock } from '../../index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import type { IPoint } from './gesture.js';
+import { getCurrentRange } from './selection.js';
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
@@ -261,25 +262,6 @@ export function getDOMRectByLine(
     const subList = list.slice(flag);
     return subList.reduce(mergeRect);
   }
-}
-
-export function getCurrentRange(selection = window.getSelection()) {
-  // When called on an <iframe> that is not displayed (e.g., where display: none is set) Firefox will return null
-  // See https://developer.mozilla.org/en-US/docs/Web/API/Window/getSelection for more details
-  if (!selection) {
-    throw new Error('Failed to get current range, selection is null');
-  }
-  // Before the user has clicked a freshly loaded page, the rangeCount is 0.
-  // The rangeCount will usually be 1.
-  // But scripting can be used to make the selection contain more than one range.
-  // See https://developer.mozilla.org/en-US/docs/Web/API/Selection/rangeCount for more details.
-  if (selection.rangeCount === 0) {
-    throw new Error('Failed to get current range, rangeCount is 0');
-  }
-  if (selection.rangeCount > 1) {
-    console.warn('getCurrentRange may be wrong, rangeCount > 1');
-  }
-  return selection.getRangeAt(0);
 }
 
 function textWithoutNode(parentNode: Node, currentNode: Node) {

@@ -2,11 +2,13 @@ import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { getBlockElementByModel, hotkey } from '../../__internal__/index.js';
 import {
-  handleMultiBlockIndent,
-  isAtLineEdge,
-} from '../../__internal__/rich-text/rich-text-operations.js';
+  getBlockElementByModel,
+  hasNativeSelection,
+  hotkey,
+} from '../../__internal__/index.js';
+import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
+import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
   asyncFocusRichText,
   focusNextBlock,
@@ -84,8 +86,7 @@ export function handleUp(
   selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  const hasNativeSelection = !!window.getSelection()?.rangeCount;
-  if (hasNativeSelection) {
+  if (hasNativeSelection()) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     const previousBlock = getPreviousBlock(model);
@@ -148,8 +149,7 @@ export function handleDown(
   selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  const hasNativeSelection = !!window.getSelection()?.rangeCount;
-  if (hasNativeSelection) {
+  if (hasNativeSelection()) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     if (matchFlavours(model, ['affine:code'])) {
