@@ -3,8 +3,8 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import {
-  checkHasNativeSelection,
   getBlockElementByModel,
+  hasNativeSelection,
   hotkey,
 } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
@@ -86,7 +86,7 @@ export function handleUp(
   selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  if (checkHasNativeSelection()) {
+  if (hasNativeSelection()) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     const previousBlock = getPreviousBlock(model);
@@ -149,7 +149,7 @@ export function handleDown(
   selection?: DefaultSelectionManager
 ) {
   // Assume the native selection is collapsed
-  if (checkHasNativeSelection()) {
+  if (hasNativeSelection()) {
     // TODO fix event trigger out of editor
     const model = getStartModelBySelection();
     if (matchFlavours(model, ['affine:code'])) {

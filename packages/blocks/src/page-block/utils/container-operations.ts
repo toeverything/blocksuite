@@ -18,10 +18,10 @@ import {
 } from '../../__internal__/utils/query.js';
 import { getCurrentRange } from '../../__internal__/utils/selection.js';
 import {
-  checkHasNativeSelection,
-  isCollapsedSelection,
+  hasNativeSelection,
+  isCollapsedNativeSelection,
   isMultiBlockRange,
-  isRangeSelection,
+  isRangeNativeSelection,
   resetNativeSelection,
   restoreSelection,
   saveBlockSelection,
@@ -191,8 +191,8 @@ function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
  * Do nothing when selection is collapsed or not multi block selected
  */
 export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
-  if (!checkHasNativeSelection()) return;
-  if (isCollapsedSelection()) return;
+  if (!hasNativeSelection()) return;
+  if (isCollapsedNativeSelection()) return;
   if (!isMultiBlockRange()) return;
 
   e.preventDefault();
@@ -315,9 +315,9 @@ function formatModelsByRange(
 }
 
 export function handleFormat(page: Page, key: keyof TextAttributes) {
-  if (!checkHasNativeSelection()) return;
+  if (!hasNativeSelection()) return;
 
-  if (isRangeSelection()) {
+  if (isRangeNativeSelection()) {
     const models = getModelsByRange(getCurrentRange()).filter(model => {
       return !(model.flavour === 'affine:code');
     });

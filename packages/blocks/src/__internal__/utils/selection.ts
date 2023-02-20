@@ -272,7 +272,7 @@ export function focusRichTextStart(richText: RichText) {
  * }
  * ```
  */
-export function checkHasNativeSelection() {
+export function hasNativeSelection() {
   const selection = window.getSelection();
   if (!selection) return false;
 
@@ -282,13 +282,13 @@ export function checkHasNativeSelection() {
   return !!selection.rangeCount;
 }
 
-export function isCollapsedSelection() {
+export function isCollapsedNativeSelection() {
   const selection = window.getSelection();
   if (!selection) return false;
   return selection.isCollapsed;
 }
 
-export function isRangeSelection() {
+export function isRangeNativeSelection() {
   const selection = window.getSelection();
   if (!selection) return false;
   return !selection.isCollapsed;
