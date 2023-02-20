@@ -174,8 +174,6 @@ export class EdgelessPageBlockComponent
   private _clearSelection() {
     requestAnimationFrame(() => {
       if (!this._selection.isActive) {
-        this._selection.blockSelectionState.type = 'none';
-        this.signals.updateSelection.emit(this._selection.blockSelectionState);
         resetNativeSelection(null);
       }
     });
@@ -253,7 +251,7 @@ export class EdgelessPageBlockComponent
     this.signals.updateSelection.on(() => this.requestUpdate());
     this.signals.shapeUpdated.on(() => this.requestUpdate());
     const historyDisposable = this.page.signals.historyUpdated.on(() => {
-      this._clearSelection();
+      this._selection.syncSelectionRect();
       this.requestUpdate();
     });
     this._disposables.add(historyDisposable);
