@@ -1,6 +1,3 @@
-import type { Disposable } from '@blocksuite/global/utils';
-import { Signal } from '@blocksuite/global/utils';
-
 import { IBound, MIN_ZOOM } from './consts.js';
 import type { PhasorElement } from './elements/index.js';
 import { GridManager } from './grid.js';
@@ -19,7 +16,7 @@ export class Renderer {
   private _centerY = 0.0;
   private _shouldUpdate = false;
 
-  private _disposeResizeListener!: Disposable;
+  private _canvasResizeObserver!: ResizeObserver;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -30,21 +27,23 @@ export class Renderer {
 
     this._loop();
 
-    this._disposeResizeListener = Signal.disposableListener(
-      window,
-      'resize',
-      () => {
-        const oldWidth = this.width;
-        const oldHeight = this.height;
+    this._canvasResizeObserver = new ResizeObserver(() => {
+      const oldWidth = this.width;
+      const oldHeight = this.height;
 
-        this._initSize();
+      this._initSize();
 
-        this.setCenter(
-          this._centerX - (oldWidth - this.width) / 2,
-          this._centerY - (oldHeight - this.height) / 2
-        );
-      }
-    );
+      this.setCenter(
+        this._centerX - (oldWidth - this.width) / 2,
+        this._centerY - (oldHeight - this.height) / 2
+      );
+
+      // Re-render once canvas's size changed. Otherwise, it will flicker.
+      // Because the observer is called after the element rendered, but the canvas's content is not flush.
+      this._render();
+      this._shouldUpdate = false;
+    });
+    this._canvasResizeObserver.observe(this.canvas);
   }
 
   get width() {
@@ -203,6 +202,6 @@ export class Renderer {
   }
 
   dispose() {
-    this._disposeResizeListener.dispose();
+    this._canvasResizeObserver.disconnect();
   }
 }
