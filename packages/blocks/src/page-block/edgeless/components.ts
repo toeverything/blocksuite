@@ -28,6 +28,7 @@ import {
   FRAME_MIN_LENGTH,
   getSelectionBoxBound,
   getXYWH,
+  isSurfaceElement,
   isTopLevelBlock,
   PADDING_X,
   PADDING_Y,
@@ -61,10 +62,10 @@ export function EdgelessHoverRect(
 ) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
-  // const isSurfaceElement = hoverState.block.flavour === 'affine:shape';
+  const isInSurface = isSurfaceElement(hoverState.content);
 
   const style = {
-    ...getCommonRectStyle(rect, zoom, false),
+    ...getCommonRectStyle(rect, zoom, isInSurface),
     border: '1px solid var(--affine-primary-color)',
   };
 
