@@ -1,4 +1,5 @@
 import * as blocks from '@blocksuite/blocks';
+import { __unstableSchemas, builtInSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
 import {
   configDebugLog,
@@ -31,6 +32,8 @@ export const isE2E = room.startsWith('playwright');
 declare global {
   // eslint-disable-next-line no-var
   var targetPageId: string | undefined;
+  // eslint-disable-next-line no-var
+  var debugWorkspace: Workspace | undefined;
 }
 
 if (isE2E) {
@@ -43,7 +46,7 @@ if (isE2E) {
     }),
   });
 } else {
-  Object.defineProperty(globalThis, 'importFromFile', {
+  Object.defineProperty(globalThis, 'openFromFile', {
     value: async function importFromFile(pageId?: string) {
       const file = await fileOpen({
         extensions: ['.ydoc'],
@@ -53,6 +56,21 @@ if (isE2E) {
         globalThis.targetPageId = pageId;
       }
       Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
+    },
+  });
+  Object.defineProperty(globalThis, 'debugFromFile', {
+    value: async function debuggerFromFile() {
+      const file = await fileOpen({
+        extensions: ['.ydoc'],
+      });
+      const buffer = await file.arrayBuffer();
+      const workspace = new Workspace({
+        room: 'temporary',
+      })
+        .register(builtInSchemas)
+        .register(__unstableSchemas);
+      Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
+      globalThis.debugWorkspace = workspace;
     },
   });
 }
