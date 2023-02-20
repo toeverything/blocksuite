@@ -58,29 +58,17 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _updateHoverState(content: Selectable | null) {
-    if (content) {
-      if (isTopLevelBlock(content)) {
-        this._hoverState = {
-          rect: getSelectionBoxBound(this._edgeless.viewport, content.xywh),
-          content,
-        };
-      }
-    } else {
-      this._hoverState = null;
-    }
-  }
-
-  private _updateShapeHoverState(content: Selectable | null) {
     if (!content) {
       this._hoverState = null;
-    } else {
-      const { viewport } = this._edgeless;
-      const xywh = getXYWH(content);
-      this._hoverState = {
-        rect: getSelectionBoxBound(viewport, xywh),
-        content,
-      };
+      return;
     }
+
+    const { viewport } = this._edgeless;
+    const xywh = getXYWH(content);
+    this._hoverState = {
+      rect: getSelectionBoxBound(viewport, xywh),
+      content,
+    };
   }
 
   private _handleClickOnSelected(selected: Selectable, e: SelectionEvent) {
@@ -288,15 +276,11 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerMouseMove(e: SelectionEvent): void {
     const { viewport } = this._edgeless;
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-    const shapes = this._surface.pick(modelX, modelY);
+
+    const shape = this._surface.pickTop(modelX, modelY);
     const blocks = pick(this._blocks, modelX, modelY);
 
-    // hover shapes
-    this._updateShapeHoverState(shapes[0]);
-    if (shapes.length <= 0) {
-      // hover blocks
-      this._updateHoverState(blocks);
-    }
+    this._updateHoverState(shape ?? blocks);
     this._edgeless.signals.hoverUpdated.emit();
   }
 
@@ -315,7 +299,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._edgeless.signals.updateSelection.emit(this.blockSelectionState);
     }
 
-    this._updateHoverState(this._hoverState?.content ?? null);
-    this._updateShapeHoverState(this._hoverState?.content ?? null);
+    this._updateHoverState(this._hoverState?.content || null);
   }
 }

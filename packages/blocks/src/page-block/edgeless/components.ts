@@ -62,11 +62,10 @@ export function EdgelessHoverRect(
 ) {
   if (!hoverState) return null;
   const rect = hoverState.rect;
-  // const isSurfaceElement = hoverState.block.flavour === 'affine:shape';
-  const isSurfaceEl = isSurfaceElement(hoverState.content);
+  const isInSurface = isSurfaceElement(hoverState.content);
 
   const style = {
-    ...getCommonRectStyle(rect, zoom, isSurfaceEl),
+    ...getCommonRectStyle(rect, zoom, isInSurface),
     border: '1px solid var(--affine-primary-color)',
   };
 
