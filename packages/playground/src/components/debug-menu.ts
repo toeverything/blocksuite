@@ -15,10 +15,10 @@ import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
 import {
   createEvent,
   type FrameBlockModel,
-  getCurrentRange,
   getModelsByRange,
   MouseMode,
   NonShadowLitElement,
+  SelectionUtils,
   ShapeMouseMode,
   updateSelectedTextType,
 } from '@blocksuite/blocks';
@@ -155,7 +155,7 @@ export class DebugMenu extends NonShadowLitElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    const range = getCurrentRange();
+    const range = SelectionUtils.getCurrentRange();
     const startModel = getModelsByRange(range)[0];
     const parent = this.page.getParent(startModel);
     const index = parent?.children.indexOf(startModel);
