@@ -28,6 +28,11 @@ export const defaultMode =
 export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 
+declare global {
+  // eslint-disable-next-line no-var
+  var targetPageId: string | undefined;
+}
+
 if (isE2E) {
   Object.defineProperty(window, '$blocksuite', {
     value: Object.freeze({
@@ -39,11 +44,14 @@ if (isE2E) {
   });
 } else {
   Object.defineProperty(globalThis, 'importFromFile', {
-    value: async function importFromFile() {
+    value: async function importFromFile(pageId?: string) {
       const file = await fileOpen({
         extensions: ['.ydoc'],
       });
       const buffer = await file.arrayBuffer();
+      if (pageId) {
+        globalThis.targetPageId = pageId;
+      }
       Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
     },
   });

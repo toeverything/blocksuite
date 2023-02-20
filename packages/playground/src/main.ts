@@ -27,6 +27,12 @@ initDebugConfig();
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
   workspace.signals.pageAdded.once(pageId => {
+    if (typeof globalThis.targetPageId === 'string') {
+      if (pageId !== globalThis.targetPageId) {
+        // if there's `targetPageId` which not same as the `pageId`
+        return;
+      }
+    }
     const page = workspace.getPage(pageId) as Page;
 
     const editor = new EditorContainer();
