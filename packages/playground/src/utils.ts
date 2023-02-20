@@ -17,6 +17,7 @@ import {
   Utils,
   Workspace,
 } from '@blocksuite/store';
+import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
@@ -35,6 +36,16 @@ if (isE2E) {
       global: { utils: globalUtils },
       editor,
     }),
+  });
+} else {
+  Object.defineProperty(globalThis, 'importFromFile', {
+    value: async function importFromFile() {
+      const file = await fileOpen({
+        extensions: ['.ydoc'],
+      });
+      const buffer = await file.arrayBuffer();
+      Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
+    },
   });
 }
 export const isBase64 =

@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/components/card/card.js';
 
-import { Workspace } from '@blocksuite/store';
-import { fileOpen } from 'browser-fs-access';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -50,17 +48,6 @@ export class StartPanel extends LitElement {
           `
         )}
       </div>
-      <button
-        @click=${async () => {
-          const file = await fileOpen({
-            extensions: ['.ydoc'],
-          });
-          const buffer = await file.arrayBuffer();
-          Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
-        }}
-      >
-        import from yjs binary file
-      </button>
     `;
   }
 }
