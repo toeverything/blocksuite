@@ -215,9 +215,15 @@ export class TestPage extends LitElement {
 
     .editors > div {
       height: 600px;
+      width: 600px;
       display: grid;
       grid-template-rows: 100px 1fr;
       overflow-y: scroll;
+    }
+
+    .editors tool-bar,
+    .editors rich-text {
+      width: 570px;
     }
   `;
 
