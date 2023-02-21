@@ -13,7 +13,6 @@ import { asyncFocusRichText } from './common-operations.js';
 import type { IPoint, SelectionEvent } from './gesture.js';
 import {
   getBlockElementByModel,
-  getCurrentRange,
   getDefaultPageBlock,
   getElementFromEventTarget,
   getModelByElement,
@@ -262,19 +261,34 @@ export function focusRichTextStart(richText: RichText) {
   resetNativeSelection(range);
 }
 
-export function isNoneSelection() {
+/**
+ * Return true if has native selection in the document.
+ *
+ * @example
+ * ```ts
+ * const isNativeSelection = hasNativeSelection();
+ * if (isNativeSelection) {
+ *   // do something
+ * }
+ * ```
+ */
+export function hasNativeSelection() {
   const selection = window.getSelection();
-  if (!selection) return true;
-  return selection.type === 'None';
+  if (!selection) return false;
+
+  // The `selection.rangeCount` attribute must return 0
+  // if this is empty or either focus or anchor is not in the document tree,
+  // and must return 1 otherwise.
+  return !!selection.rangeCount;
 }
 
-export function isCollapsedSelection() {
+export function isCollapsedNativeSelection() {
   const selection = window.getSelection();
   if (!selection) return false;
   return selection.isCollapsed;
 }
 
-export function isRangeSelection() {
+export function isRangeNativeSelection() {
   const selection = window.getSelection();
   if (!selection) return false;
   return !selection.isCollapsed;
@@ -310,6 +324,25 @@ export function isMultiLineRange(range = getCurrentRange()) {
   // Get the base line height
   const { height: oneLineHeight } = oneLineRange.getBoundingClientRect();
   return height > oneLineHeight;
+}
+
+export function getCurrentRange(selection = window.getSelection()) {
+  // When called on an <iframe> that is not displayed (e.g., where display: none is set) Firefox will return null
+  // See https://developer.mozilla.org/en-US/docs/Web/API/Window/getSelection for more details
+  if (!selection) {
+    throw new Error('Failed to get current range, selection is null');
+  }
+  // Before the user has clicked a freshly loaded page, the rangeCount is 0.
+  // The rangeCount will usually be 1.
+  // But scripting can be used to make the selection contain more than one range.
+  // See https://developer.mozilla.org/en-US/docs/Web/API/Selection/rangeCount for more details.
+  if (selection.rangeCount === 0) {
+    throw new Error('Failed to get current range, rangeCount is 0');
+  }
+  if (selection.rangeCount > 1) {
+    console.warn('getCurrentRange may be wrong, rangeCount > 1');
+  }
+  return selection.getRangeAt(0);
 }
 
 function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {

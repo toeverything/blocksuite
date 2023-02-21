@@ -2,7 +2,6 @@ import type { OpenBlockInfo } from '@blocksuite/blocks';
 import {
   deleteModelsByRange,
   EmbedBlockModel,
-  getCurrentRange,
   getServiceOrRegister,
   ListBlockModel,
   SelectionUtils,
@@ -223,7 +222,7 @@ export class CopyCutManager {
   // TODO: Optimization
   // TODO: is not compatible with safari
   private _copyToClipboardFromPc(clips: ClipboardItem[]): boolean {
-    const curRange = getCurrentRange();
+    const curRange = SelectionUtils.getCurrentRange();
 
     let success = false;
     /**

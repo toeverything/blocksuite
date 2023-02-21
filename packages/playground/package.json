@@ -18,6 +18,7 @@
     "@blocksuite/virgo": "workspace:*",
     "@lit-labs/react": "^1.1.1",
     "@shoelace-style/shoelace": "2.0.0",
+    "browser-fs-access": "^0.32.1",
     "lit": "^2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

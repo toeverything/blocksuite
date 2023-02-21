@@ -283,6 +283,7 @@ export class EdgelessPageBlockComponent
     this.signals.shapeUpdated.dispose();
     this._disposables.dispose();
     this._selection.dispose();
+    this.surface.dispose();
     this._removeHotkeys();
     if (this._toolbar) {
       this._toolbar.remove();

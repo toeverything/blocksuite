@@ -531,3 +531,16 @@ test('should ctrl+enter works in code block', async ({ page }) => {
   // but expected
   await assertRichTexts(page, ['const a = 10;\n\n']);
 });
+
+test('should tab works in code block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'const a = 10;');
+  await assertRichTexts(page, ['const a = 10;\n']);
+  await page.keyboard.press('Tab');
+  await assertRichTexts(page, ['  const a = 10;\n']);
+  await page.keyboard.press(`Shift+Tab`);
+  await assertRichTexts(page, ['const a = 10;\n']);
+});

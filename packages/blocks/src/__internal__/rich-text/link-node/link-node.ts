@@ -128,7 +128,7 @@ export class LinkNodeComponent extends LitElement {
       rel="noopener noreferrer"
       target="_blank"
       style="white-space: nowrap;"
-      >${FontLinkIcon}<slot></slot
+      >${FontLinkIcon}<slot style="white-space: normal;"></slot
     ></a>`;
   }
 }
