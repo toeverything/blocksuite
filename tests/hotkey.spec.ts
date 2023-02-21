@@ -16,6 +16,7 @@ import {
   redoByKeyboard,
   resetHistory,
   selectAllByKeyboard,
+  setSelection,
   SHORT_KEY,
   strikethrough,
   type,
@@ -654,18 +655,48 @@ test('undo should clear block selection', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
+
   await type(page, 'hello');
-  await dragBetweenIndices(page, [0, 0], [0, 5]);
-  await strikethrough(page);
-  await assertTextFormat(page, 0, 0, { strike: true });
+  await page.keyboard.down('Enter');
+  await page.keyboard.down('Enter');
 
-  await undoByClick(page);
-  await assertTextFormat(page, 0, 0, {});
+  await type(page, 'world');
+  await page.keyboard.down('Enter');
 
-  await redoByClick(page);
-  await assertTextFormat(page, 0, 0, { strike: true });
+  await page.keyboard.down('ArrowUp');
 
-  // the format should be removed after trigger the hotkey again
-  await strikethrough(page);
-  await assertTextFormat(page, 0, 0, {});
+  const rect = await page.evaluate(() => {
+    const secondRichText = document.querySelector(
+      '[data-block-id="2"] .ql-editor'
+    );
+    if (!secondRichText) {
+      throw new Error();
+    }
+
+    return secondRichText.getBoundingClientRect();
+  });
+
+  await page.mouse.move(rect.left - 5, rect.top - 5);
+  await page.mouse.down();
+  await page.mouse.move(rect.left + 5, rect.top + rect.height);
+  await page.mouse.up();
+
+  await redoByKeyboard(page);
+  let selectedBlocks = await page.evaluate(() => {
+    const selectedBlocks = document.querySelectorAll(
+      '.affine-page-selected-rects-container > *'
+    );
+    return Array.from(selectedBlocks).length === 1;
+  });
+  expect(selectedBlocks).toBe(true);
+
+  await undoByKeyboard(page);
+
+  selectedBlocks = await page.evaluate(() => {
+    const selectedBlocks = document.querySelectorAll(
+      '.affine-page-selected-rects-container > *'
+    );
+    return Array.from(selectedBlocks).length === 0;
+  });
+  expect(selectedBlocks).toBe(true);
 });
