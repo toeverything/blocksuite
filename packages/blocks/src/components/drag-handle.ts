@@ -170,7 +170,7 @@ export class DragHandle extends LitElement {
   private _dragHandleNormal!: HTMLDivElement;
 
   @property()
-  private _dragging = false;
+  private _draggingElement: HTMLElement | null = null;
 
   private _currentPageX = 0;
   private _currentPageY = 0;
@@ -240,7 +240,10 @@ export class DragHandle extends LitElement {
     this._lastModelState = null;
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
-    this._dragging = false;
+    if (this._draggingElement) {
+      this._draggingElement.style.opacity = '1';
+      this._draggingElement = null;
+    }
   }
 
   public setPointerEvents(value: 'auto' | 'none') {
@@ -372,18 +375,20 @@ export class DragHandle extends LitElement {
   private _onDragStart = (e: DragEvent) => {
     if (e.dataTransfer && this._startModelState) {
       e.dataTransfer.effectAllowed = 'move';
-      const draggingElement = document.querySelector(
+      this._draggingElement = document.querySelector(
         `[${BLOCK_ID_ATTR}="${this._startModelState.model.id}"]`
       );
-      if (draggingElement) {
-        e.dataTransfer.setDragImage(draggingElement, 0, 0);
+      if (this._draggingElement) {
+        // hack: set opacity to 0.9 to remove dragging element's shadow
+        // maybe the dragging element also has opacity?
+        this._draggingElement.style.opacity = '0.9';
+        e.dataTransfer.setDragImage(this._draggingElement, 0, 0);
       }
     }
   };
 
   private _onDrag = (e: DragEvent) => {
     this._dragHandle.style.cursor = 'grabbing';
-    this._dragging = true;
     let x = e.pageX;
     let y = e.pageY;
     if (isFirefox) {
