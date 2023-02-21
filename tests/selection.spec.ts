@@ -2184,3 +2184,37 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   });
   expect(rectNum).toBe(1);
 });
+
+test('should switch to native range selection when dbclicking the text', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello block suite');
+  await assertRichTexts(page, ['hello block suite']);
+  const helloPosition = await page.evaluate(() => {
+    const paragraph = document.querySelector('[data-block-id="2"] p');
+    const rect = paragraph?.getBoundingClientRect() as DOMRect;
+    return { x: rect.left + 2, y: rect.top + 8 };
+  });
+  await page.mouse.dblclick(helloPosition.x, helloPosition.y);
+  const text = await page.evaluate(() => {
+    let text = '';
+    const selection = window.getSelection();
+    if (selection) {
+      text = selection.toString();
+    }
+    return text;
+  });
+  const selType = await page.evaluate(() => {
+    const page = document.querySelector('affine-default-page');
+    if (!page) {
+      throw new Error();
+    }
+    return page.selection.state.type;
+  });
+
+  expect(text).toBe('hello');
+  expect(selType).toBe('native');
+});

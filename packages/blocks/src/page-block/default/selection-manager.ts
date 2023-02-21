@@ -260,7 +260,7 @@ export class PageSelectionState {
   // >=0: only current focused-block
   focusedBlockIndex = -1;
   rafID?: number;
-  private _startRange: Range | null = null;
+  startRange: Range | null = null;
   private _rangePoint: { x: number; y: number } | null = null;
   private _startPoint: { x: number; y: number } | null = null;
   private _endPoint: { x: number; y: number } | null = null;
@@ -279,10 +279,6 @@ export class PageSelectionState {
 
   set activeComponent(component: HTMLElement | null) {
     this._activeComponent = component;
-  }
-
-  get startRange() {
-    return this._startRange;
   }
 
   get rangePoint() {
@@ -311,7 +307,7 @@ export class PageSelectionState {
 
   resetStartRange(e: SelectionEvent) {
     const { clientX, clientY } = e.raw;
-    this._startRange = caretRangeFromPoint(clientX, clientY);
+    this.startRange = caretRangeFromPoint(clientX, clientY);
     // Save the last coordinates so that we can send them when scrolling through the wheel
     this.updateRangePoint(clientX, clientY);
   }
@@ -361,7 +357,7 @@ export class PageSelectionState {
   clearNative() {
     this.type = 'none';
     this._richTextCache.clear();
-    this._startRange = null;
+    this.startRange = null;
     this._rangePoint = null;
     resetNativeSelection(null);
   }
@@ -767,6 +763,9 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
+
+    this.state.type = 'native';
+    this.state.startRange = range;
     showFormatQuickBar({ direction: 'center-bottom' });
   };
 
