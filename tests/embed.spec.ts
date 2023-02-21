@@ -9,6 +9,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
+  insertThreeLevelLists,
   moveToImage,
   pressEnter,
   redoByKeyboard,
@@ -280,4 +281,77 @@ test('image get message from awareness', async ({ page, browser }) => {
 
   const img = page.locator('.affine-image-wrapper img');
   await expect(img).toBeVisible();
+});
+
+test('popup menu should follow position of image when scrolling', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await activeEmbed(page);
+  await pressEnter(page);
+  await insertThreeLevelLists(page, 0);
+  await pressEnter(page);
+  await insertThreeLevelLists(page, 3);
+
+  await page.evaluate(async () => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    viewport.scrollTo(0, 0);
+  });
+
+  await page.waitForTimeout(150);
+
+  const rect = await page.evaluate(async () => {
+    const image = document.querySelector('.affine-image-wrapper img');
+    if (!image) {
+      throw new Error();
+    }
+    return image.getBoundingClientRect();
+  });
+
+  await page.mouse.move(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+  await page.waitForTimeout(150);
+
+  const menu = page.locator('.embed-editing-state');
+
+  expect(menu).toBeVisible();
+
+  await page.evaluate(async () => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    const distance = viewport.scrollHeight - viewport.clientHeight;
+    viewport.scrollTo(0, distance / 2);
+  });
+
+  await page.waitForTimeout(150);
+
+  const [imageRect, menuRect] = await page.evaluate(async () => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+
+    const image = document.querySelector('.affine-image-wrapper img');
+    if (!image) {
+      throw new Error();
+    }
+
+    const menu = document.querySelector('.embed-editing-state');
+    if (!menu) {
+      throw new Error();
+    }
+    return [
+      image.getBoundingClientRect(),
+      menu.getBoundingClientRect(),
+    ] as const;
+  });
+
+  // < 1.059180567624251
+  expect(imageRect.top).toBeCloseTo(menuRect.top, -0.325);
 });
