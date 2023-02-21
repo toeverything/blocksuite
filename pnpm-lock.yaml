@@ -175,6 +175,7 @@ importers:
       '@shoelace-style/shoelace': 2.0.0
       '@types/dat.gui': ^0.7.7
       '@types/micromatch': ^4.0.2
+      browser-fs-access: ^0.32.1
       dat.gui: ^0.7.9
       lit: ^2.6.1
       react: ^18.2.0
@@ -189,6 +190,7 @@ importers:
       '@blocksuite/virgo': link:../virgo
       '@lit-labs/react': 1.1.1
       '@shoelace-style/shoelace': 2.0.0
+      browser-fs-access: 0.32.1
       lit: 2.6.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -3205,6 +3207,10 @@ packages:
     dependencies:
       wcwidth: 1.0.1
     dev: true
+
+  /browser-fs-access/0.32.1:
+    resolution: {integrity: sha512-NGzbF/ZpAjmgJIS17rlBpv5kkoBzIAyALzT4GrJpj4OIZYQq3Gqrx8pube6mtfqksARw8YK40GpTZR2fKtFA4w==}
+    dev: false
 
   /browserslist/4.21.4:
     resolution: {integrity: sha512-CBHJJdDmgjl3daYjN5Cp5kbTf1mUhZoS+beLklHIvkOWscs83YAhLlF3Wsh/lciQYAcbBJgTOD44VtG31ZM4Hw==}

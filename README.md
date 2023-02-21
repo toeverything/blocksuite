@@ -118,8 +118,8 @@ import { EditorContainer } from '@blocksuite/editor';
  */
 function createInitialPage(workspace: Workspace) {
   // Events are being emitted using signals.
-  workspace.signals.pageAdded.once(id => {
-    const page = workspace.getPage(id) as Page;
+  workspace.signals.pageAdded.once(pageId => {
+    const page = workspace.getPage(pageId) as Page;
 
     // Block types are defined and registered in BlockSchema.
     const pageBlockId = page.addBlock({ flavour: 'affine:page' });
