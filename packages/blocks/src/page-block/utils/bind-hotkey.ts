@@ -485,7 +485,6 @@ function clearSelection(page: Page) {
   if ('selection' in defaultPageBlock) {
     // this is not EdgelessPageBlockComponent
     defaultPageBlock.selection.clear();
-    defaultPageBlock.selection.state.clear();
   }
 }
 export function removeHotkeys() {
