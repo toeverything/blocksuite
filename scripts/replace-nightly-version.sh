@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# ALL_PACKAGES
+packages=(
+  "blocks"
+  "editor"
+  "global"
+  "phasor"
+  # "playground" # NOT PUBLISHED
+  "react"
+  "store"
+  "virgo"
+)
+
 replace() {
   mv package-modified.json package.json
 
@@ -10,37 +22,10 @@ replace() {
   pnpm version "$VERSION-$BUILD_VERSION" --no-git-tag-version  --no-commit-hooks
 }
 
-cd packages/blocks
-jq '.name = "@blocksuite/blocks"' package.json > package-modified.json
-replace
-cd ../..
-
-cd packages/phasor
-jq '.name = "@blocksuite/phasor"' package.json > package-modified.json
-replace
-cd ../..
-
-cd packages/editor
-jq '.name = "@blocksuite/editor"' package.json > package-modified.json
-replace
-cd ../..
-
-cd packages/store
-jq '.name = "@blocksuite/store"' package.json > package-modified.json
-replace
-cd ../..
-
-cd packages/react
-jq '.name = "@blocksuite/react"' package.json > package-modified.json
-replace
-cd ../..
-
-cd packages/global
-jq '.name = "@blocksuite/global"' package.json > package-modified.json
-replace
-cd ../..
-
-cd packages/virgo
-jq '.name = "@blocksuite/virgo"' package.json > package-modified.json
-replace
-cd ../..
+for package in "${packages[@]}"
+do
+  cd "packages/$package"
+  jq ".name = \"@blocksuite/${package}\"" package.json > package-modified.json
+  replace
+  cd ../../
+done

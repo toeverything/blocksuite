@@ -1,6 +1,7 @@
 {
   "name": "blocksuite",
   "version": "0.4.1",
+  "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/blocks",
     "packages/editor",
