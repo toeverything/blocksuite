@@ -1,3 +1,4 @@
+// ALL_PACKAGES
 const allPackages = [
   'blocks',
   'editor',
