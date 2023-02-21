@@ -35,7 +35,6 @@
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "rm -rf dist packages/{blocks,editor,phasor,playground,store,react,global}/dist",
-    "release": "pnpm build && pnpm publish -r",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "husky install"
   },

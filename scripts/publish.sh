@@ -15,6 +15,13 @@ packages=(
 for package in "${packages[@]}"
 do
   cd "packages/$package"
-  npm publish
+  pnpm build
+
+  if [ "$NIGHTLY" = "true" ]; then
+    npm publish --tag nightly
+  else
+    npm publish
+  fi
+
   cd ../../
 done
