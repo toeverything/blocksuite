@@ -116,20 +116,27 @@ export function SelectedRectsContainer(
 
 export function EmbedEditingContainer(
   embedEditingState: EmbedEditingState | null,
-  signals: DefaultPageSignals
+  signals: DefaultPageSignals,
+  viewportState: ViewportState
 ) {
   if (!embedEditingState) return null;
 
+  const { left, top, scrollLeft, scrollTop } = viewportState;
+  const {
+    position: { x, y },
+    model,
+  } = embedEditingState;
   const style = {
-    left: embedEditingState.position.x + 'px',
-    top: embedEditingState.position.y + 'px',
+    left: x - left + scrollLeft + 'px',
+    top: y - top + scrollTop + 'px',
   };
 
   return html`
     <style>
       .affine-embed-editing-state-container > div {
-          position: fixed;
-          z-index: 1;
+        position: absolute;
+        display: block;
+        z-index: 1;
       }
 
       ${toolTipStyle}
@@ -141,7 +148,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            focusCaption(embedEditingState.model);
+            focusCaption(model);
             signals.updateEmbedRects.emit([]);
           }}
         >
@@ -152,7 +159,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            downloadImage(embedEditingState.model);
+            downloadImage(model);
           }}
         >
           ${DownloadIcon}
@@ -164,7 +171,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click=${() => {
-            copyImage(embedEditingState.model as EmbedBlockModel);
+            copyImage(model as EmbedBlockModel);
           }}
         >
           ${CopyIcon}
@@ -176,7 +183,7 @@ export function EmbedEditingContainer(
           class="has-tool-tip"
           width="100%"
           @click="${() => {
-            embedEditingState.model.page.deleteBlock(embedEditingState.model);
+            model.page.deleteBlock(model);
             signals.updateEmbedRects.emit([]);
           }}"
         >

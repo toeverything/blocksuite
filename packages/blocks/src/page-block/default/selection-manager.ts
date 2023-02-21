@@ -41,6 +41,7 @@ import {
 import type {
   DefaultPageBlockComponent,
   DefaultPageSignals,
+  EmbedEditingState,
   ViewportState,
 } from './default-page-block.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
@@ -253,7 +254,7 @@ type PageSelectionType = 'native' | 'block' | 'none' | 'embed' | 'database';
 
 export class PageSelectionState {
   type: PageSelectionType;
-  selectEmbeds: EmbedBlockComponent[] = [];
+  selectedEmbeds: EmbedBlockComponent[] = [];
   selectedBlocks: Element[] = [];
   // -1: SELECT_ALL
   // >=0: only current focused-block
@@ -381,7 +382,7 @@ export class PageSelectionState {
 
   clearEmbed() {
     this.type = 'none';
-    this.selectEmbeds = [];
+    this.selectedEmbeds = [];
     this._activeComponent = null;
   }
 
@@ -735,7 +736,7 @@ export class DefaultSelectionManager {
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
         this.state.type = 'embed';
-        this.state.selectEmbeds.push(
+        this.state.selectedEmbeds.push(
           this.state.activeComponent as EmbedBlockComponent
         );
         this._signals.updateEmbedRects.emit([clickBlockInfo.position]);
@@ -950,13 +951,21 @@ export class DefaultSelectionManager {
     }
   }
 
-  // The embed may need to be refactored.
-  refresEmbedRects() {
-    const { activeComponent, selectEmbeds } = this.state;
-    if (activeComponent && selectEmbeds.length) {
+  refresEmbedRects(hoverEditingState: EmbedEditingState | null = null) {
+    const { activeComponent, selectedEmbeds } = this.state;
+    if (activeComponent && selectedEmbeds.length) {
       const image = activeComponent as ImageBlockComponent;
       if (image.model.type === 'image') {
         const rect = image.resizeImg.getBoundingClientRect();
+
+        // updates editing
+        if (hoverEditingState) {
+          const { model, position } = hoverEditingState;
+          if (model === image.model) {
+            position.y = rect.y;
+          }
+        }
+
         this._signals.updateEmbedRects.emit([rect]);
       }
     }
