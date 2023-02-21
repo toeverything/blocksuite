@@ -649,3 +649,23 @@ test('should bracket complete works', async ({ page }) => {
   // Should not trigger bracket complete when type right bracket
   await assertRichTexts(page, ['(()){']);
 });
+
+test('undo should clear block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await dragBetweenIndices(page, [0, 0], [0, 5]);
+  await strikethrough(page);
+  await assertTextFormat(page, 0, 0, { strike: true });
+
+  await undoByClick(page);
+  await assertTextFormat(page, 0, 0, {});
+
+  await redoByClick(page);
+  await assertTextFormat(page, 0, 0, { strike: true });
+
+  // the format should be removed after trigger the hotkey again
+  await strikethrough(page);
+  await assertTextFormat(page, 0, 0, {});
+});

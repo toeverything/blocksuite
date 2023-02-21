@@ -60,12 +60,12 @@ export function bindCommonHotkey(page: Page) {
 
   hotkey.addListener(HOTKEYS.UNDO, e => {
     page.undo();
-    clearSelection(page);
+    if (page.canUndo) clearSelection(page);
   });
 
   hotkey.addListener(HOTKEYS.REDO, e => {
     page.redo();
-    clearSelection(page);
+    if (page.canRedo) clearSelection(page);
   });
 
   // !!!
