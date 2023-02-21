@@ -34,7 +34,7 @@
     "format": "prettier --write --cache packages tests",
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
-    "clean": "rm -rf dist packages/{blocks,editor,phasor,playground,store,react,global}/dist",
+    "clean": "./scripts/clean.sh",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "husky install"
   },
