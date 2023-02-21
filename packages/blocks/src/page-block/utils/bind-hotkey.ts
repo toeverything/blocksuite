@@ -59,13 +59,13 @@ export function bindCommonHotkey(page: Page) {
   });
 
   hotkey.addListener(HOTKEYS.UNDO, e => {
-    page.undo();
     if (page.canUndo) clearSelection(page);
+    page.undo();
   });
 
   hotkey.addListener(HOTKEYS.REDO, e => {
-    page.redo();
     if (page.canRedo) clearSelection(page);
+    page.redo();
   });
 
   // !!!
