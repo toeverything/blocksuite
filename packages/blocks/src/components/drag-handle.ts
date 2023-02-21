@@ -1,3 +1,4 @@
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, svg } from 'lit';
@@ -168,6 +169,9 @@ export class DragHandle extends LitElement {
   @query('.affine-drag-handle-normal')
   private _dragHandleNormal!: HTMLDivElement;
 
+  @property()
+  private _dragging = false;
+
   private _currentPageX = 0;
   private _currentPageY = 0;
 
@@ -236,6 +240,7 @@ export class DragHandle extends LitElement {
     this._lastModelState = null;
     this._indicator.cursorPosition = null;
     this._indicator.targetRect = null;
+    this._dragging = false;
   }
 
   public setPointerEvents(value: 'auto' | 'none') {
@@ -365,13 +370,20 @@ export class DragHandle extends LitElement {
   };
 
   private _onDragStart = (e: DragEvent) => {
-    if (e.dataTransfer) {
+    if (e.dataTransfer && this._startModelState) {
       e.dataTransfer.effectAllowed = 'move';
+      const draggingElement = document.querySelector(
+        `[${BLOCK_ID_ATTR}="${this._startModelState.model.id}"]`
+      );
+      if (draggingElement) {
+        e.dataTransfer.setDragImage(draggingElement, 0, 0);
+      }
     }
   };
 
   private _onDrag = (e: DragEvent) => {
     this._dragHandle.style.cursor = 'grabbing';
+    this._dragging = true;
     let x = e.pageX;
     let y = e.pageY;
     if (isFirefox) {
@@ -431,7 +443,7 @@ export class DragHandle extends LitElement {
       </style>
       <div class="affine-drag-handle-line"></div>
       <div class="affine-drag-handle" draggable="true">
-        <div class="affine-drag-handle-normal" draggable="true">
+        <div class="affine-drag-handle-normal">
           <svg
             width="16"
             height="18"
@@ -451,7 +463,7 @@ export class DragHandle extends LitElement {
           </svg>
         </div>
 
-        <div class="affine-drag-handle-hover" draggable="true">
+        <div class="affine-drag-handle-hover">
           <svg
             class="handle-hover"
             width="16"
