@@ -74,20 +74,20 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   const codeLocator = page.locator('affine-code');
   await expect(codeLocator).toBeVisible();
 
-  const position = await page.evaluate(() => {
-    const codeBlock = document.querySelector('affine-code');
-    const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
-    return {
-      x: bbox.left + bbox.width / 2,
-      y: bbox.top + bbox.height / 2,
-    };
-  });
+  const codeRect = await codeLocator.boundingBox();
+  if (!codeRect) {
+    throw new Error('Failed to get bounding box of code block.');
+  }
+  const position = {
+    x: codeRect.x + codeRect.width / 2,
+    y: codeRect.y + codeRect.height / 2,
+  };
   await page.mouse.move(position.x, position.y);
 
   const locator = page.locator('code-block-button');
   await expect(locator).toBeVisible();
-  const laguageText = await locator.innerText();
-  expect(laguageText).toEqual('TypeScript');
+  const languageText = await locator.innerText();
+  expect(languageText).toEqual('TypeScript');
 });
 
 test('use more than three backticks can not create code block', async ({
