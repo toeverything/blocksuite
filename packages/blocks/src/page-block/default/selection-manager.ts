@@ -305,13 +305,6 @@ export class PageSelectionState {
     return this._embedCache;
   }
 
-  resetStartRange(e: SelectionEvent) {
-    const { clientX, clientY } = e.raw;
-    this.startRange = caretRangeFromPoint(clientX, clientY);
-    // Save the last coordinates so that we can send them when scrolling through the wheel
-    this.updateRangePoint(clientX, clientY);
-  }
-
   updateRangePoint(x: number, y: number) {
     this._rangePoint = { x, y };
   }
@@ -576,8 +569,14 @@ export class DefaultSelectionManager {
   }
 
   private _onNativeSelectionDragStart(e: SelectionEvent) {
-    this.state.resetStartRange(e);
+    const { clientX, clientY } = e.raw;
+    const range = caretRangeFromPoint(clientX, clientY);
+
     this.state.type = 'native';
+    // Save the last coordinates so that we can send them when scrolling through the wheel
+    this.state.startRange = range;
+    this.state.updateRangePoint(clientX, clientY);
+
     this._signals.nativeSelection.emit(false);
   }
 
