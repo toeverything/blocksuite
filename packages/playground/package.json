@@ -28,6 +28,7 @@
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",
     "@types/micromatch": "^4.0.2",
-    "dat.gui": "^0.7.9"
+    "dat.gui": "^0.7.9",
+    "magic-string": "^0.29.0"
   }
 }

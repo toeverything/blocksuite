@@ -3,6 +3,7 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { Quill, RangeStatic } from 'quill';
 
+import { getCodeLaguage } from '../../code-block/utils/code-laguages.js';
 import {
   convertToDivider,
   convertToList,
@@ -251,7 +252,7 @@ const matches: Match[] = [
   },
   {
     name: 'codeblock',
-    pattern: /^```[a-zA-Z0-9]*$/g,
+    pattern: /^```([a-zA-Z0-9]*)$/g,
     action: (
       model: BaseBlockModel,
       quill: Quill,
@@ -262,16 +263,19 @@ const matches: Match[] = [
       if (model.flavour === 'affine:paragraph' && model.type === 'quote') {
         return false;
       }
+      const match = pattern.exec(text);
       const page = model.page;
       page.captureSync();
       const parent = page.getParent(model);
       assertExists(parent);
       const index = parent.children.indexOf(model);
-      const blockProps = {
-        flavour: 'affine:code',
-      };
       page.deleteBlock(model);
-      page.addBlock(blockProps, parent, index);
+      page.addBlockByFlavour(
+        'affine:code',
+        { language: getCodeLaguage(match?.[1] || '') || 'JavaScript' },
+        parent,
+        index
+      );
       return true;
     },
   },

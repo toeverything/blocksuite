@@ -63,6 +63,33 @@ test('use markdown syntax with trailing characters can create code block', async
   await expect(locator).toBeVisible();
 });
 
+test('support ```[lang] to add code block with language', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '```ts');
+  await type(page, ' ');
+
+  const codeLocator = page.locator('affine-code');
+  await expect(codeLocator).toBeVisible();
+
+  const codeRect = await codeLocator.boundingBox();
+  if (!codeRect) {
+    throw new Error('Failed to get bounding box of code block.');
+  }
+  const position = {
+    x: codeRect.x + codeRect.width / 2,
+    y: codeRect.y + codeRect.height / 2,
+  };
+  await page.mouse.move(position.x, position.y);
+
+  const locator = page.locator('code-block-button');
+  await expect(locator).toBeVisible();
+  const languageText = await locator.innerText();
+  expect(languageText).toEqual('TypeScript');
+});
+
 test('use more than three backticks can not create code block', async ({
   page,
 }) => {
@@ -333,6 +360,22 @@ test.skip('use code block copy menu of code block copy whole code block', async 
   </affine:frame>
 </affine:page>`
   );
+});
+
+test('code block copy button can work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'use');
+  const position = await getCenterPosition(
+    page,
+    '.code-block-option > format-bar-button:nth-child(1)'
+  );
+  await page.mouse.click(position.x, position.y);
+  await focusRichText(page);
+  await pasteByKeyboard(page);
+  await assertRichTexts(page, ['useuse\n']);
 });
 
 test('split code by enter', async ({ page }) => {

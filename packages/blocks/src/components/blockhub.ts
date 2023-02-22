@@ -213,6 +213,7 @@ export class BlockHub extends NonShadowLitElement {
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       color: var(--affine-secondary-text-color);
+      white-space: pre;
     }
 
     .card-container:hover.grabbing {
@@ -518,7 +519,7 @@ export class BlockHub extends NonShadowLitElement {
             tip-position="left"
             style="top: 5px"
             ?hidden=${!this._showToolTip}
-            >Drag to Insert blank line
+            >Drag to insert blank line
           </tool-tip>
         </div>
         <div
