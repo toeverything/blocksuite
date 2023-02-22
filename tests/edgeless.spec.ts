@@ -307,3 +307,37 @@ test('hover state for shape element', async ({ page }) => {
   const { x, y, width, height } = box;
   expect([x, y, width, height]).toStrictEqual([100, 100, 100, 100]);
 });
+
+test('hovering on shape should not have effect on underlying block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  await switchEditorMode(page);
+
+  const block = page.locator('.affine-edgeless-block-child');
+  const blockBox = await block.boundingBox();
+  if (blockBox === null) throw new Error();
+
+  const { x, y } = blockBox;
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
+  await switchMouseMode(page);
+
+  await page.mouse.move(x + 50, y + 50);
+
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  const box = await hoverRect.boundingBox();
+  if (box === null) throw new Error();
+
+  await expect(hoverRect).toHaveCount(1);
+
+  const { width, height } = box;
+  expect([width, height]).toStrictEqual([100, 100]);
+});
