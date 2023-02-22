@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Phasor Canvas Example</title>
     <style>
+      html,
+      body {
+        overscroll-behavior-x: none;
+      }
       #container {
         position: relative;
         margin: auto;
@@ -13,12 +17,19 @@
         width: 600px;
         height: 400px;
         border: 1px #ddd solid;
+        overflow: hidden;
+      }
+      #hover-rect {
+        position: absolute;
+        pointer-events: none;
+        border: 1px solid #000;
       }
     </style>
   </head>
   <body>
     <div id="container">
       <canvas></canvas>
+      <div id="hover-rect"></div>
     </div>
     <br />
     <script type="module">
