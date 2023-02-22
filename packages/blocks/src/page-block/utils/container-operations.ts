@@ -1,3 +1,4 @@
+import { getServiceOrRegister } from '@blocksuite/blocks';
 import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
@@ -26,6 +27,7 @@ import {
   restoreSelection,
   saveBlockSelection,
 } from '../../__internal__/utils/selection.js';
+import type { BlockSchema, ParagraphBlockModel } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
@@ -108,7 +110,10 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
   return id;
 }
 
-export async function updateSelectedTextType(flavour: string, type?: string) {
+export async function updateSelectedTextType(
+  flavour: keyof BlockSchema,
+  type?: string
+) {
   const range = getCurrentRange();
   const modelsInRange = getModelsByRange(range);
   updateBlockType(modelsInRange, flavour, type);
@@ -116,7 +121,7 @@ export async function updateSelectedTextType(flavour: string, type?: string) {
 
 export async function updateBlockType(
   models: BaseBlockModel[],
-  flavour: string,
+  flavour: keyof BlockSchema,
   type?: string
 ) {
   if (!models.length) {
@@ -168,6 +173,14 @@ export async function updateBlockType(
   if (lastNewId) {
     await asyncFocusRichText(page, lastNewId);
   }
+
+  models.forEach(async model => {
+    if (model.flavour === 'affine:paragraph' && type) {
+      const service = await getServiceOrRegister(model.flavour);
+      service.updateTypeEffect(model as ParagraphBlockModel, type);
+    }
+  });
+
   restoreSelection(selectedBlocks);
 }
 
