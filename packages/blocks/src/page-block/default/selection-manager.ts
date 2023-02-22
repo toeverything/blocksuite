@@ -10,11 +10,13 @@ import type { Page } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
+  flatSelectedBlocks,
   getAllBlocks,
   getBlockElementByModel,
   getCurrentRange,
   getDefaultPageBlock,
   getModelByElement,
+  getSelectInfo,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -645,6 +647,8 @@ export class DefaultSelectionManager {
 
     if (this.state.type === 'native') {
       this._onNativeSelectionDragEnd(e);
+
+      this.updateLocalSelection();
     } else if (this.state.type === 'block') {
       this._onBlockSelectionDragEnd(e);
     } else if (this.state.type === 'embed') {
@@ -814,6 +818,9 @@ export class DefaultSelectionManager {
     if (!selection) {
       return;
     }
+
+    this.updateLocalSelection();
+
     // Exclude selection change outside the editor
     if (!selection.containsNode(this._container, true)) {
       return;
@@ -1095,5 +1102,19 @@ export class DefaultSelectionManager {
     }
 
     return null;
+  }
+
+  updateLocalSelection() {
+    const page = this.page;
+    const selectInfo = getSelectInfo(page);
+    if (
+      selectInfo.type === 'Range' ||
+      (selectInfo.type === 'Caret' && selectInfo.selectedBlocks.length > 0)
+    ) {
+      page.awarenessStore.setLocalCursor(
+        page,
+        flatSelectedBlocks(selectInfo.selectedBlocks)
+      );
+    }
   }
 }

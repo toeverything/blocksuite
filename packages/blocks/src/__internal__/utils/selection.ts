@@ -1025,3 +1025,23 @@ export function getClosestEditor(clientY: number, container = document.body) {
 export function getClosestFrame(clientY: number) {
   return getHorizontalClosestElement(clientY, 'affine-frame');
 }
+
+/**
+ * flat the selected blocks
+ */
+export function flatSelectedBlocks(
+  selectedBlocks: SelectedBlock[]
+): Omit<SelectedBlock, 'children'>[] {
+  const result: Omit<SelectedBlock, 'children'>[] = [];
+  for (const block of selectedBlocks) {
+    result.push({
+      id: block.id,
+      startPos: block.startPos,
+      endPos: block.endPos,
+    });
+    if (block.children.length > 0) {
+      result.push(...flatSelectedBlocks(block.children));
+    }
+  }
+  return result;
+}

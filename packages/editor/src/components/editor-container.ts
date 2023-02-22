@@ -188,11 +188,16 @@ export class EditorContainer extends NonShadowLitElement {
       ></affine-edgeless-page>
     `;
 
+    const remoteSelectionContainer = html`
+      <remote-selection .page=${this.page}></remote-selection>
+    `;
+
     const blockRoot = html`
       ${choose(this.mode, [
         ['page', () => pageContainer],
         ['edgeless', () => edgelessContainer],
       ])}
+      ${remoteSelectionContainer}
     `;
 
     return html`

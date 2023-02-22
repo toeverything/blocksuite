@@ -622,13 +622,6 @@ export class Page extends Space<PageData> {
 
     const adapter = new RichTextAdapter(this, yText, quill);
     this.richTextAdapters.set(id, adapter);
-
-    quill.on('selection-change', () => {
-      const cursor = adapter.getCursor();
-      if (!cursor) return;
-
-      this.awarenessStore.setLocalCursor(this, { ...cursor, id });
-    });
   };
 
   /** Cancel the connection between the rich text editor instance and YText. */

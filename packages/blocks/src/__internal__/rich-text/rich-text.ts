@@ -127,7 +127,6 @@ export class RichText extends NonShadowLitElement {
     });
 
     page.attachRichText(model.id, this.quill);
-    page.awarenessStore.updateLocalCursor(page);
     this.model.propsUpdated.on(() => this.requestUpdate());
 
     if (this.modules.syntax && this.quill.getText() === '\n') {
