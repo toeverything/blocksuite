@@ -11,7 +11,6 @@ import {
   almostEqual,
   BlockRange,
   ExtendedModel,
-  getDefaultPageBlock,
   TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
@@ -24,18 +23,16 @@ import {
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
 import {
+  getCurrentBlockRange,
   getCurrentRange,
-  nativeRangeToBlockRange,
-  updateBlockRange,
-} from '../../__internal__/utils/selection.js';
-import {
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
-  isRangeNativeSelection,
+  nativeRangeToBlockRange,
   resetNativeSelection,
   restoreSelection,
   saveBlockRange,
+  updateBlockRange,
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema, ParagraphBlockModel } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
@@ -221,6 +218,9 @@ export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   deleteModelsByRange(page);
 }
 
+/**
+ * @deprecated
+ */
 function getFormatByModel(model: BaseBlockModel) {
   const richText = getRichTextByModel(model);
   assertExists(richText);
@@ -263,7 +263,7 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
     const { quill } = richText;
     const format = quill.getFormat(
       blockRange.startOffset,
-      blockRange.endOffset
+      blockRange.endOffset - blockRange.startOffset
     );
     return format;
   }
@@ -274,15 +274,17 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
     assertExists(startRichText);
     const startFormat = startRichText.quill.getFormat(
       blockRange.startOffset,
-      startRichText.quill.getLength() - 1
+      startRichText.quill.getLength() - blockRange.startOffset
     );
     formatArr.push(startFormat);
+    console.log('start', startFormat);
   }
   if (!matchFlavours(blockRange.endModel, ['affine:code'])) {
     const endRichText = getRichTextByModel(blockRange.endModel);
     assertExists(endRichText);
     const endFormat = endRichText.quill.getFormat(0, blockRange.endOffset);
     formatArr.push(endFormat);
+    console.log('endFormat', endFormat, formatArr);
   }
   blockRange.betweenModels
     .filter(model => !model.text || model.text.length)
@@ -296,6 +298,8 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
       );
       formatArr.push(format);
     });
+  console.log('formatArr', formatArr);
+
   return mergeFormat(formatArr);
 }
 
@@ -355,63 +359,50 @@ function formatModelsByRange(
   restoreSelection(selectedBlocks);
 }
 
-/**
- * @deprecated merger with {@link formatModelsByRange}
- */
-function formatModelsByBlock(
-  models: BaseBlockModel[],
-  page: Page,
-  key: string
-) {
-  page.captureSync();
-  models.forEach(model => {
-    const richtext = getRichTextByModel(model);
-    if (!richtext) return;
+function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
+  const { startModel, startOffset, endModel, endOffset, betweenModels } =
+    blockRange;
+  // edge case 1: collapsed range
+  if (startModel === endModel && startOffset === endOffset) {
+    // Collapsed range
+    return;
+  }
+  const format = getCombinedFormat(blockRange);
 
-    model.text?.format(0, richtext.quill.getLength() - 1, {
-      [key]: !getFormatByModel(model)[key],
+  // edge case 2: same model
+  if (startModel === endModel) {
+    if (matchFlavours(startModel, ['affine:code'])) return;
+    startModel.text?.format(startOffset, endOffset - startOffset, {
+      [key]: !format[key],
     });
-  });
+    return;
+  }
+  // common case
+  // format start model
+  const savedBlockRange = saveBlockRange();
+  if (!matchFlavours(startModel, ['affine:code'])) {
+    startModel.text?.format(startOffset, startModel.text.length - startOffset, {
+      [key]: !format[key],
+    });
+  }
+  // format end model
+  if (!matchFlavours(endModel, ['affine:code'])) {
+    endModel.text?.format(0, endOffset, { [key]: !format[key] });
+  }
+  // format between models
+  betweenModels
+    .filter(model => !matchFlavours(model, ['affine:code']))
+    .forEach(model => {
+      model.text?.format(0, model.text.length, { [key]: !format[key] });
+    });
+  restoreSelection(savedBlockRange);
 }
 
 export function handleFormat(page: Page, key: keyof TextAttributes) {
-  // 0. check exist block selection
-  if (page.root) {
-    const pageBlock = getDefaultPageBlock(page.root);
-    const selectedBlock = pageBlock.selection.state.selectedBlocks;
-    if (selectedBlock.length) {
-      const models = selectedBlock
-        .map(element => getModelByElement(element))
-        .filter(model => {
-          return !(model.flavour === 'affine:code');
-        });
-      formatModelsByBlock(models, page, key);
-      return;
-    }
-  }
-  // 1. check exist native selection
-  if (!hasNativeSelection()) return;
-
-  // 2. check exist range selection
-  if (isRangeNativeSelection()) {
-    const models = getModelsByRange(getCurrentRange()).filter(model => {
-      return !(model.flavour === 'affine:code');
-    });
-    if (models.length === 1) {
-      const richText = getRichTextByModel(models[0]);
-      assertExists(richText);
-      const { quill } = richText;
-      const range = quill.getSelection();
-      assertExists(range);
-      page.captureSync();
-
-      const { index, length } = range;
-      const format = quill.getFormat(range);
-      models[0].text?.format(index, length, { [key]: !format[key] });
-    } else {
-      formatModelsByRange(models, page, key);
-    }
-  }
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) return;
+  page.captureSync();
+  formatBlockRange(blockRange, key);
 }
 
 /**
