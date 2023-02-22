@@ -9,6 +9,7 @@ import type { TextAttributes } from '@blocksuite/virgo';
 
 import {
   almostEqual,
+  BlockRange,
   ExtendedModel,
   getDefaultPageBlock,
   TopLevelBlockModel,
@@ -24,6 +25,7 @@ import {
 } from '../../__internal__/utils/query.js';
 import {
   getCurrentRange,
+  nativeRangeToBlockRange,
   updateBlockRange,
 } from '../../__internal__/utils/selection.js';
 import {
@@ -219,7 +221,7 @@ export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
   deleteModelsByRange(page);
 }
 
-function getFormatByBlock(model: BaseBlockModel) {
+function getFormatByModel(model: BaseBlockModel) {
   const richText = getRichTextByModel(model);
   assertExists(richText);
   const { quill } = richText;
@@ -236,7 +238,7 @@ function getFormatByBlock(model: BaseBlockModel) {
  *
  * Used for format quick bar.
  */
-export function mergeFormat(formatArr: TextAttributes[]): TextAttributes {
+function mergeFormat(formatArr: TextAttributes[]): TextAttributes {
   if (!formatArr.length) {
     return {};
   }
@@ -254,95 +256,61 @@ export function mergeFormat(formatArr: TextAttributes[]): TextAttributes {
   });
 }
 
-/**
- * Get full text format of multiple blocks. Format will be active only when all blocks have the same format.
- *
- * @deprecated Use `getCombinedFormatFromRange` instead
- */
-export function getCombinedFormatFromModels(
-  models: BaseBlockModel[]
-): TextAttributes {
-  return mergeFormat(
-    models
-      .filter(model => !matchFlavours(model, ['affine:code']))
-      .filter(model => model.text && model.text.toString().length)
-      .map(model => {
-        const richText = getRichTextByModel(model);
-        assertExists(richText);
-        const { quill } = richText;
-        const format = quill.getFormat(0, quill.getLength() - 1);
-        return format;
-      })
-  );
-}
-
-export function getCombinedFormatFromRange(): TextAttributes {
-  const range = getCurrentRange();
-  const models = getModelsByRange(range);
-  if (!models.length) {
-    return {};
-  }
-  if (models.length === 1) {
-    const richText = getRichTextByModel(models[0]);
+export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
+  if (blockRange.startModel === blockRange.endModel) {
+    const richText = getRichTextByModel(blockRange.startModel);
     assertExists(richText);
     const { quill } = richText;
-    const quillRange = quill.getSelection();
-    if (!quillRange) {
-      // Maybe block selection
-      return richText.quill.getFormat(0, richText.quill.getLength() - 1);
-    }
-    const format = quill.getFormat(quillRange);
+    const format = quill.getFormat(
+      blockRange.startOffset,
+      blockRange.endOffset
+    );
     return format;
   }
-  const first = models[0];
-  const last = models[models.length - 1];
-  const firstRichText = getRichTextByModel(first);
-  const lastRichText = getRichTextByModel(last);
-  assertExists(firstRichText);
-  assertExists(lastRichText);
-
-  const firstIndex = getQuillIndexByNativeSelection(
-    range.startContainer,
-    range.startOffset,
-    true
-  );
-  const endIndex = getQuillIndexByNativeSelection(
-    range.endContainer,
-    range.endOffset,
-    false
-  );
-  const firstFormat = firstRichText.quill.getFormat(
-    firstIndex,
-    firstRichText.quill.getLength() - firstIndex - 1
-  );
-  const lastFormat = lastRichText.quill.getFormat(0, endIndex);
-
   const formatArr = [];
   // Skip code block
-  !(models[0].flavour === 'affine:code') && formatArr.push(firstFormat);
-  !(models[models.length - 1].flavour === 'affine:code') &&
-    formatArr.push(lastFormat);
-
-  for (let i = 1; i < models.length - 1; i++) {
-    const richText = getRichTextByModel(models[i]);
-    assertExists(richText);
-    const content = richText.quill.getText();
-    if (!content || content === '\n') {
-      // empty line should not be included
-      continue;
-    }
-    // Skip code block
-    if (models[i].flavour === 'affine:code') {
-      continue;
-    }
-    const format = richText.quill.getFormat(0, richText.quill.getLength() - 1);
-    formatArr.push(format);
+  if (!matchFlavours(blockRange.startModel, ['affine:code'])) {
+    const startRichText = getRichTextByModel(blockRange.startModel);
+    assertExists(startRichText);
+    const startFormat = startRichText.quill.getFormat(
+      blockRange.startOffset,
+      startRichText.quill.getLength() - 1
+    );
+    formatArr.push(startFormat);
   }
-  // const allFormat = formatArr.every(item => item[key]);
-  const allFormat = mergeFormat(formatArr);
-  return allFormat;
+  if (!matchFlavours(blockRange.endModel, ['affine:code'])) {
+    const endRichText = getRichTextByModel(blockRange.endModel);
+    assertExists(endRichText);
+    const endFormat = endRichText.quill.getFormat(0, blockRange.endOffset);
+    formatArr.push(endFormat);
+  }
+  blockRange.betweenModels
+    .filter(model => !model.text || model.text.length)
+    .filter(model => !matchFlavours(model, ['affine:code']))
+    .forEach(model => {
+      const richText = getRichTextByModel(model);
+      assertExists(richText);
+      const format = richText.quill.getFormat(
+        0,
+        richText.quill.getLength() - 1
+      );
+      formatArr.push(format);
+    });
+  return mergeFormat(formatArr);
 }
 
+/**
+ * @deprecated Use getCombinedFormat directly
+ */
+export function getCombinedFormatFromRange(): TextAttributes {
+  const range = getCurrentRange();
+  const blockRange = nativeRangeToBlockRange(range);
+  return getCombinedFormat(blockRange);
+}
+
+/**
+ * @deprecated
+ */
 function formatModelsByRange(
   models: BaseBlockModel[],
   page: Page,
@@ -401,7 +369,7 @@ function formatModelsByBlock(
     if (!richtext) return;
 
     model.text?.format(0, richtext.quill.getLength() - 1, {
-      [key]: !getFormatByBlock(model)[key],
+      [key]: !getFormatByModel(model)[key],
     });
   });
 }
