@@ -213,6 +213,7 @@ export class BlockHub extends NonShadowLitElement {
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       color: var(--affine-secondary-text-color);
+      white-space: pre;
     }
 
     .card-container:hover.grabbing {
