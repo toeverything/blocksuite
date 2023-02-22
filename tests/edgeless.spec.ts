@@ -4,7 +4,7 @@ import { expect, Page } from '@playwright/test';
 
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
-  assertHoverRect,
+  assertEdgelessHoverRect,
   clickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -280,10 +280,7 @@ test('selection box of shape element sync on fast dragging', async ({
     { click: true }
   );
 
-  const box = await page
-    .locator('.affine-edgeless-selected-rect')
-    .boundingBox();
-  assertHoverRect(box, ['x', 'y', 'width', 'height'], [650, 450, 100, 100]);
+  await assertEdgelessHoverRect(page, 650, 450, 100, 100);
 });
 
 test('hover state for shape element', async ({ page }) => {
@@ -296,11 +293,7 @@ test('hover state for shape element', async ({ page }) => {
   await switchMouseMode(page);
 
   await page.mouse.move(150, 150);
-
-  const hoverRect = page.locator('.affine-edgeless-hover-rect');
-  const box = await hoverRect.boundingBox();
-
-  assertHoverRect(box, ['x', 'y', 'width', 'height'], [100, 100, 100, 100]);
+  await assertEdgelessHoverRect(page, 100, 100, 100, 100);
 });
 
 test('hovering on shape should not have effect on underlying block', async ({
@@ -326,11 +319,5 @@ test('hovering on shape should not have effect on underlying block', async ({
   await switchMouseMode(page);
 
   await page.mouse.move(x + 50, y + 50);
-
-  const hoverRect = page.locator('.affine-edgeless-hover-rect');
-  const box = await hoverRect.boundingBox();
-
-  assertHoverRect(box, ['width', 'height'], [100, 100]);
-
-  await expect(hoverRect).toHaveCount(1);
+  await assertEdgelessHoverRect(page, x, y, 100, 100);
 });

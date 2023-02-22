@@ -515,13 +515,19 @@ export async function getIndexCoordinate(
   return coord;
 }
 
-type BoundingBox = Record<'x' | 'y' | 'width' | 'height', number>;
-export const assertHoverRect = (
-  box: BoundingBox | null,
-  boxKeys: (keyof BoundingBox)[],
-  values: number[]
-) => {
-  if (box === null) throw new Error('Unexpected box value: box is null');
+export async function assertEdgelessHoverRect(
+  page: Page,
+  x: number,
+  y: number,
+  w: number,
+  h: number
+) {
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  const box = await hoverRect.boundingBox();
+  if (!box) throw new Error('Missing edgeless hover rect');
 
-  expect(boxKeys.map(key => box[key])).toStrictEqual(values);
-};
+  expect(box.x).toBeCloseTo(x, 0);
+  expect(box.y).toBeCloseTo(y, 0);
+  expect(box.width).toBeCloseTo(w, 0);
+  expect(box.height).toBeCloseTo(h, 0);
+}
