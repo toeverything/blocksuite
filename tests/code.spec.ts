@@ -335,6 +335,22 @@ test.skip('use code block copy menu of code block copy whole code block', async 
   );
 });
 
+test('code block copy button can work', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'use');
+  const position = await getCenterPosition(
+    page,
+    '.code-block-option > format-bar-button:nth-child(1)'
+  );
+  await page.mouse.click(position.x, position.y);
+  await focusRichText(page);
+  await pasteByKeyboard(page);
+  await assertRichTexts(page, ['useuse\n']);
+});
+
 test('split code by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
