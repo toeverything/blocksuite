@@ -4,6 +4,7 @@ import { expect, Page } from '@playwright/test';
 
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
+  assertEdgelessHoverRect,
   clickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -279,12 +280,44 @@ test('selection box of shape element sync on fast dragging', async ({
     { click: true }
   );
 
-  const box = await page
-    .locator('.affine-edgeless-selected-rect')
-    .boundingBox();
-  if (!box) {
-    throw new Error('box is null');
-  }
-  const { x, y, width, height } = box;
-  expect([x, y, width, height]).toStrictEqual([650, 450, 100, 100]);
+  await assertEdgelessHoverRect(page, 650, 450, 100, 100);
+});
+
+test('hover state for shape element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await switchMouseMode(page);
+
+  await page.mouse.move(150, 150);
+  await assertEdgelessHoverRect(page, 100, 100, 100, 100);
+});
+
+test('hovering on shape should not have effect on underlying block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+
+  await type(page, 'hello');
+  await assertRichTexts(page, ['hello']);
+
+  await switchEditorMode(page);
+
+  const block = page.locator('.affine-edgeless-block-child');
+  const blockBox = await block.boundingBox();
+  if (blockBox === null) throw new Error('Unexpected box value: box is null');
+
+  const { x, y } = blockBox;
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
+  await switchMouseMode(page);
+
+  await page.mouse.move(x + 50, y + 50);
+  await assertEdgelessHoverRect(page, x, y, 100, 100);
 });
