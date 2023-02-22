@@ -2193,12 +2193,10 @@ test('should switch to native range selection when dbclicking the text', async (
   await focusRichText(page);
   await type(page, 'hello block suite');
   await assertRichTexts(page, ['hello block suite']);
-
-  const helloPosition = await page.evaluate(() => {
-    const paragraph = document.querySelector('[data-block-id="2"] p');
-    const rect = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: rect.left + 2, y: rect.top + 8 };
-  });
+  const helloLocator = page.locator('[data-block-id="2"] p');
+  const helloRect = await helloLocator.boundingBox();
+  if (!helloRect) throw Error();
+  const helloPosition = { x: helloRect.x + 2, y: helloRect.y + 8 };
   await page.mouse.dblclick(helloPosition.x, helloPosition.y);
   const text = await page.evaluate(() => {
     let text = '';
