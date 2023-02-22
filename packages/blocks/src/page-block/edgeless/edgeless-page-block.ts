@@ -251,7 +251,7 @@ export class EdgelessPageBlockComponent
     this.signals.updateSelection.on(() => this.requestUpdate());
     this.signals.shapeUpdated.on(() => this.requestUpdate());
     const historyDisposable = this.page.signals.historyUpdated.on(() => {
-      this._clearSelection();
+      this._selection.syncSelectionRect();
       this.requestUpdate();
     });
     this._disposables.add(historyDisposable);
