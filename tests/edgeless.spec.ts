@@ -288,3 +288,22 @@ test('selection box of shape element sync on fast dragging', async ({
   const { x, y, width, height } = box;
   expect([x, y, width, height]).toStrictEqual([650, 450, 100, 100]);
 });
+
+test('hover state for shape element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await switchMouseMode(page);
+  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+  await switchMouseMode(page);
+
+  await page.mouse.move(150, 150);
+
+  const hoverRect = page.locator('.affine-edgeless-hover-rect');
+  const box = await hoverRect.boundingBox();
+  if (box === null) throw new Error();
+
+  const { x, y, width, height } = box;
+  expect([x, y, width, height]).toStrictEqual([100, 100, 100, 100]);
+});
