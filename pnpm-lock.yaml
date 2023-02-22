@@ -41,7 +41,7 @@ importers:
       typescript: ^4.9.5
       vite: ^4.1.1
       vite-plugin-istanbul: ^4.0.0
-      vite-plugin-web-components-hmr: ^0.1.2
+      vite-plugin-web-components-hmr: ^0.1.3
       vitest: ^0.28.5
     devDependencies:
       '@blocksuite/global': link:packages/global
@@ -76,7 +76,7 @@ importers:
       typescript: 4.9.5
       vite: 4.1.1_@types+node@18.13.0
       vite-plugin-istanbul: 4.0.0_vite@4.1.1
-      vite-plugin-web-components-hmr: 0.1.2_vite@4.1.1
+      vite-plugin-web-components-hmr: 0.1.3_vite@4.1.1
       vitest: 0.28.5_@vitest+ui@0.28.5
 
   packages/blocks:
@@ -526,12 +526,31 @@ packages:
       '@babel/types': 7.20.7
     dev: true
 
+  /@babel/plugin-syntax-class-properties/7.12.13_@babel+core@7.20.12:
+    resolution: {integrity: sha512-fm4idjKla0YahUNgFNLCB0qySdsoPiZP3iQE3rky0mBUtMZ23yDJ9SJdg6dXTSDnulOVqiF3Hgr9nbXvXTQZYA==}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.20.12
+      '@babel/helper-plugin-utils': 7.19.0
+    dev: true
+
   /@babel/plugin-syntax-class-properties/7.12.13_@babel+core@7.20.7:
     resolution: {integrity: sha512-fm4idjKla0YahUNgFNLCB0qySdsoPiZP3iQE3rky0mBUtMZ23yDJ9SJdg6dXTSDnulOVqiF3Hgr9nbXvXTQZYA==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.20.7
+      '@babel/helper-plugin-utils': 7.19.0
+    dev: true
+
+  /@babel/plugin-syntax-import-assertions/7.20.0_@babel+core@7.20.12:
+    resolution: {integrity: sha512-IUh1vakzNoWalR8ch/areW7qFopR2AEw03JlG7BbrDqmQ4X3q9uuipQwSGrUn7oGiemKjtSLDhNtQHzMHr1JdQ==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.20.12
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 
@@ -542,6 +561,16 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.20.7
+      '@babel/helper-plugin-utils': 7.19.0
+    dev: true
+
+  /@babel/plugin-syntax-top-level-await/7.14.5_@babel+core@7.20.12:
+    resolution: {integrity: sha512-hx++upLv5U1rgYfwe1xBQUhRmU41NEvpUvrp8jkrSCdvGSnM5/qdRMtylJ6PG5OFkBaHkbTAKTnd3/YyESRHFw==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.20.12
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 
@@ -6882,15 +6911,15 @@ packages:
       - supports-color
     dev: true
 
-  /vite-plugin-web-components-hmr/0.1.2_vite@4.1.1:
-    resolution: {integrity: sha512-y2KpQQtJQysGcr64b6/uQfDpaiTLkK2exmDMg2N7r1i2Eez2Hku2r+JXtnZSMTcTyFnlQ0YSH6TirPx9KveJtg==}
+  /vite-plugin-web-components-hmr/0.1.3_vite@4.1.1:
+    resolution: {integrity: sha512-UF+YYOFyaie6cT7XPatRz2Xo1Fh3TdTwOdCq1Z0EjzMfdAlUiUdF3crkN0DdEhctWBvq18CHxJZUTKw7x1zSRQ==}
     peerDependencies:
       vite: '>=2'
     dependencies:
-      '@babel/core': 7.20.7
-      '@babel/plugin-syntax-class-properties': 7.12.13_@babel+core@7.20.7
-      '@babel/plugin-syntax-import-assertions': 7.20.0_@babel+core@7.20.7
-      '@babel/plugin-syntax-top-level-await': 7.14.5_@babel+core@7.20.7
+      '@babel/core': 7.20.12
+      '@babel/plugin-syntax-class-properties': 7.12.13_@babel+core@7.20.12
+      '@babel/plugin-syntax-import-assertions': 7.20.0_@babel+core@7.20.12
+      '@babel/plugin-syntax-top-level-await': 7.14.5_@babel+core@7.20.12
       picomatch: 2.3.1
       vite: 4.1.1_@types+node@18.13.0
     transitivePeerDependencies:
