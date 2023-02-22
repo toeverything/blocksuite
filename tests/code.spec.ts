@@ -63,6 +63,33 @@ test('use markdown syntax with trailing characters can create code block', async
   await expect(locator).toBeVisible();
 });
 
+test('support ```[lang] to add code block with language', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '```ts');
+  await type(page, ' ');
+
+  const codeLocator = page.locator('affine-code');
+  await expect(codeLocator).toBeVisible();
+
+  const codeRect = await codeLocator.boundingBox();
+  if (!codeRect) {
+    throw new Error('Failed to get bounding box of code block.');
+  }
+  const position = {
+    x: codeRect.x + codeRect.width / 2,
+    y: codeRect.y + codeRect.height / 2,
+  };
+  await page.mouse.move(position.x, position.y);
+
+  const locator = page.locator('code-block-button');
+  await expect(locator).toBeVisible();
+  const languageText = await locator.innerText();
+  expect(languageText).toEqual('TypeScript');
+});
+
 test('use more than three backticks can not create code block', async ({
   page,
 }) => {
