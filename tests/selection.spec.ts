@@ -2086,3 +2086,59 @@ test('should keep native range selection when scrolling forward with the scroll 
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '123456789');
 });
+
+test('should not draw rect for sub selected blocks when entering tab key', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  const coord = await getIndexCoordinate(page, [1, 2]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 30, coord.y - 10);
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x + 20, coord.y + 50);
+  await page.mouse.up();
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page
+  prop:title=""
+>
+  <affine:frame>
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:frame>
+</affine:page>`
+  );
+
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 40, coord.y - 40);
+  await page.mouse.down();
+  await page.keyboard.press('Tab');
+
+  const rectNum = await page.evaluate(() => {
+    const container = document.querySelector(
+      '.affine-page-selected-rects-container'
+    );
+    return container?.children.length;
+  });
+  expect(rectNum).toBe(1);
+});

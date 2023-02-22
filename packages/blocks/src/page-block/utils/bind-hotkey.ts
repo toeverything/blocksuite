@@ -258,8 +258,8 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
           return;
         }
         selection.state.type = 'block';
-        selection.state.refreshBlockRectCache();
-        selection.setSelectedBlocks(selectBlocks);
+        selection.state.selectedBlocks = selectBlocks;
+        selection.refreshSelectedBlocksRects();
       });
       selection.clear();
       break;
