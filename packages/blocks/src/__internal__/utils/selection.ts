@@ -23,12 +23,7 @@ import {
   getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import type {
-  DomSelectionType,
-  SelectedBlock,
-  SelectionInfo,
-  SelectionPosition,
-} from './types.js';
+import type { BlockRange, SelectionPosition } from './types.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -890,47 +885,68 @@ export function isDatabase(e: SelectionEvent) {
   }
   return false;
 }
+/**
+ * Sometimes, the block in the block range is updated, we need to update the block range manually.
+ *
+ * Note: it will mutate the `blockRange` object.
+ */
+export function updateBlockRange(
+  blockRange: BlockRange,
+  oldModel: BaseBlockModel,
+  newModel: BaseBlockModel
+) {
+  if (blockRange.startModel === oldModel) {
+    blockRange.startModel = newModel;
+  }
+  if (blockRange.endModel === oldModel) {
+    blockRange.endModel = newModel;
+  }
+  blockRange.betweenModels = blockRange.betweenModels.map(model =>
+    model === oldModel ? newModel : model
+  );
+  return blockRange;
+}
 
 /**
  * Save the current block selection. Can be restored with {@link restoreSelection}.
  *
  * See also {@link restoreSelection}
- *
- * Note: If only one block is selected, this function will return the same block twice still.
- * Note: If select multiple blocks, blocks in the middle will be skipped, only the first and last block will be returned.
  */
-export const saveBlockSelection = (
-  selection = window.getSelection()
-): [SelectedBlock, SelectedBlock] => {
+export function saveBlockRange(selection = window.getSelection()): BlockRange {
   assertExists(selection);
   const models = getModelsByRange(getCurrentRange(selection));
-  const startPos = getQuillIndexByNativeSelection(
+  const startOffset = getQuillIndexByNativeSelection(
     selection.anchorNode,
     selection.anchorOffset,
     true
   );
-  const endPos = getQuillIndexByNativeSelection(
+  const endOffset = getQuillIndexByNativeSelection(
     selection.focusNode,
     selection.focusOffset,
     false
   );
-
-  return [
-    { id: models[0].id, startPos, children: [] },
-    { id: models[models.length - 1].id, endPos, children: [] },
-  ];
-};
+  return {
+    startModel: models[0],
+    startOffset,
+    endModel: models[models.length - 1],
+    endOffset,
+    betweenModels: [],
+  };
+}
 
 /**
  * Restore the block selection.
  * See also {@link resetNativeSelection}
  */
-export function restoreSelection(selectedBlocks: SelectedBlock[]) {
-  const startBlock = selectedBlocks[0];
-  const [startNode, startOffset] = getTextNodeBySelectedBlock(startBlock);
-
-  const endBlock = selectedBlocks[selectedBlocks.length - 1];
-  const [endNode, endOffset] = getTextNodeBySelectedBlock(endBlock);
+export function restoreSelection(blockRange: BlockRange) {
+  const [startNode, startOffset] = getTextNodeBySelectedBlock(
+    blockRange.startModel,
+    blockRange.startOffset
+  );
+  const [endNode, endOffset] = getTextNodeBySelectedBlock(
+    blockRange.endModel,
+    blockRange.endOffset
+  );
   if (!startNode || !endNode) {
     console.warn(
       'restoreSelection: startNode or endNode is null',

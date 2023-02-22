@@ -17,7 +17,10 @@ import {
   getQuillIndexByNativeSelection,
   getRichTextByModel,
 } from '../../__internal__/utils/query.js';
-import { getCurrentRange } from '../../__internal__/utils/selection.js';
+import {
+  getCurrentRange,
+  updateBlockRange,
+} from '../../__internal__/utils/selection.js';
 import {
   hasNativeSelection,
   isCollapsedNativeSelection,
@@ -25,7 +28,7 @@ import {
   isRangeNativeSelection,
   resetNativeSelection,
   restoreSelection,
-  saveBlockSelection,
+  saveBlockRange,
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema, ParagraphBlockModel } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
@@ -137,43 +140,40 @@ export async function updateBlockType(
     );
   }
   page.captureSync();
-  const selectedBlocks = saveBlockSelection();
+  const savedBlockRange = saveBlockRange();
   if (flavour === 'affine:code') {
     const id = mergeToCodeBlocks(page, models);
+    const model = page.getBlockById(id);
+    if (!model) {
+      throw new Error('Failed to get model after merge code block!');
+    }
     requestAnimationFrame(() =>
-      restoreSelection([
-        {
-          id,
-          startPos: 0,
-          endPos: 0,
-          children: [],
-        },
-      ])
+      restoreSelection({
+        startModel: model,
+        endModel: model,
+        startOffset: 0,
+        endOffset: 0,
+        betweenModels: [],
+      })
     );
     return;
   }
+  // The lastNewId will not be null since we have checked models.length > 0
   let lastNewId: string | null = null;
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
     } else {
-      const oldId = model.id;
       const newId = transformBlock(model, flavour, type);
-
-      // Replace selected block id
-      const blocks = selectedBlocks.filter(block => block.id === oldId);
-      // Because selectedBlocks maybe contains same block when only select one block, so we need to replace all of them
-      blocks.forEach(block => {
-        block.id = newId;
-      });
+      const newModel = page.getBlockById(newId);
+      if (!newModel) {
+        throw new Error('Failed to get new model after transform block!');
+      }
+      updateBlockRange(savedBlockRange, model, newModel);
       lastNewId = newId;
     }
   });
-  if (lastNewId) {
-    await asyncFocusRichText(page, lastNewId);
-  }
-
   models.forEach(async model => {
     if (model.flavour === 'affine:paragraph' && type) {
       const service = await getServiceOrRegister(model.flavour);
@@ -181,7 +181,9 @@ export async function updateBlockType(
     }
   });
 
-  restoreSelection(selectedBlocks);
+  // Focus last new block
+  if (lastNewId) await asyncFocusRichText(page, lastNewId);
+  restoreSelection(savedBlockRange);
 }
 
 function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
@@ -289,7 +291,7 @@ function formatModelsByRange(
   key: keyof TextAttributes
 ) {
   const selection = window.getSelection();
-  const selectedBlocks = saveBlockSelection(selection);
+  const selectedBlocks = saveBlockRange(selection);
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);
