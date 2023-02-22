@@ -1,8 +1,5 @@
-import { isPointIn } from '../../utils/hit-utils.js';
 import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
-import { getRectanglePath } from './rect-utils.js';
-import { DashStyle, ShapeStyles, SizeStyle } from './shape-style.js';
 import { getShapeUtils } from './shape-utils/get-shape-utils.js';
 import type { RenderSequenceItem, ShapeType } from './types.js';
 
