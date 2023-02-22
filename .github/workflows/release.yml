@@ -31,7 +31,7 @@ jobs:
         run: pnpm install
 
       - name: Try Publishing to NPM
-        run: pnpm release
+        run: ./scripts/publish.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NIGHTLY: true
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
