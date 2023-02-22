@@ -44,16 +44,6 @@ export interface CommonBlockElement extends HTMLElement {
  */
 export type DomSelectionType = 'Caret' | 'Range' | 'None';
 
-/**
- * @deprecated Use {@link BlockRange} instead
- */
-export interface SelectedBlock {
-  id: string;
-  startPos?: number;
-  endPos?: number;
-  children: SelectedBlock[];
-}
-
 export type BlockRange = {
   startModel: BaseBlockModel;
   endModel: BaseBlockModel;
