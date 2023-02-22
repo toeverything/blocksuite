@@ -2087,6 +2087,48 @@ test('should keep native range selection when scrolling forward with the scroll 
   await assertClipItems(page, 'text/plain', '123456789');
 });
 
+test('undo should clear block selection', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'hello');
+  await pressEnter(page);
+  await type(page, 'world');
+  await pressEnter(page);
+
+  const rect = await page
+    .locator('[data-block-id="2"] .ql-editor')
+    .boundingBox();
+  if (!rect) {
+    throw new Error();
+  }
+  await dragBetweenCoords(
+    page,
+    { x: rect.x - 5, y: rect.y - 5 },
+    { x: rect.x + 5, y: rect.y + rect.height }
+  );
+
+  await redoByKeyboard(page);
+  let selectedBlocks = await page.evaluate(() => {
+    const selectedBlocks = document.querySelectorAll(
+      '.affine-page-selected-rects-container > *'
+    );
+    return Array.from(selectedBlocks).length === 1;
+  });
+  expect(selectedBlocks).toBe(true);
+
+  await undoByKeyboard(page);
+
+  selectedBlocks = await page.evaluate(() => {
+    const selectedBlocks = document.querySelectorAll(
+      '.affine-page-selected-rects-container > *'
+    );
+    return Array.from(selectedBlocks).length === 0;
+  });
+  expect(selectedBlocks).toBe(true);
+});
+
 test('should not draw rect for sub selected blocks when entering tab key', async ({
   page,
 }) => {

@@ -59,10 +59,12 @@ export function bindCommonHotkey(page: Page) {
   });
 
   hotkey.addListener(HOTKEYS.UNDO, e => {
+    if (page.canUndo) clearSelection(page);
     page.undo();
   });
 
   hotkey.addListener(HOTKEYS.REDO, e => {
+    if (page.canRedo) clearSelection(page);
     page.redo();
   });
 
@@ -476,6 +478,15 @@ export function bindHotkeys(
   // Don't forget to remove hotkeys at `removeHotkeys`
 }
 
+function clearSelection(page: Page) {
+  if (!page.root) return;
+  const defaultPageBlock = getDefaultPageBlock(page.root);
+
+  if ('selection' in defaultPageBlock) {
+    // this is not EdgelessPageBlockComponent
+    defaultPageBlock.selection.clear();
+  }
+}
 export function removeHotkeys() {
   removeCommonHotKey();
   hotkey.removeListener([
