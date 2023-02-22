@@ -62,8 +62,14 @@ export class SurfaceManager {
     const element = new BrushElement(id);
 
     const bound = Utils.getBoundsFromPoints(points);
+    const lineWidth = element.lineWidth;
 
-    element.setBound(point[0], point[1], bound.width, bound.height);
+    element.setBound(
+      point[0],
+      point[1],
+      bound.width < lineWidth ? lineWidth : bound.width + lineWidth,
+      bound.height < lineWidth ? lineWidth : bound.height + lineWidth
+    );
     element.color = color;
     element.points = points;
 
@@ -235,7 +241,13 @@ export class SurfaceManager {
 
           this._renderer.removeElement(element);
           (element as BrushElement).points = points;
-          element.setBound(element.x, element.y, bounds.width, bounds.height);
+          const lineWidth = (element as BrushElement).lineWidth;
+          element.setBound(
+            element.x,
+            element.y,
+            bounds.width + lineWidth,
+            bounds.height + lineWidth
+          );
           this._renderer.addElement(element);
         }
       }

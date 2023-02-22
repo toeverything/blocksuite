@@ -7,35 +7,46 @@ export class BrushElement extends BaseElement {
   type = 'brush' as const;
   color = '#000000';
   points: number[][] = [];
-  size = 4;
+  lineWidth = 4;
+
+  get tiny() {
+    return this.w <= this.lineWidth && this.h <= this.lineWidth;
+  }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
     const point = Vec.sub([x, y], [this.x, this.y]);
 
-    const tiny = this.w <= this.size / 2 && this.h <= this.size / 2;
-    if (tiny) {
-      return Utils.pointInCircle(point, [0, 0], this.size / 2);
+    if (this.tiny) {
+      return Utils.pointInCircle(point, [0, 0], this.lineWidth / 2);
     }
-    return Utils.pointInPolyline(point, this.points, this.size);
+    return Utils.pointInPolyline(point, this.points, this.lineWidth);
   }
 
   render(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath();
 
-    const tiny = this.w <= this.size / 2 && this.h <= this.size / 2;
-    if (tiny) {
+    if (this.tiny) {
       ctx.fillStyle = this.color;
-      ctx.ellipse(0, 0, this.size / 2, this.size / 2, 0, 0, 2 * Math.PI);
+      ctx.ellipse(
+        this.lineWidth / 2,
+        this.lineWidth / 2,
+        this.lineWidth / 2,
+        this.lineWidth / 2,
+        0,
+        0,
+        2 * Math.PI
+      );
       ctx.fill();
       return;
     }
 
+    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
     ctx.moveTo(0, 0);
     for (const [x, y] of this.points) {
       ctx.lineTo(x, y);
     }
     ctx.strokeStyle = this.color;
-    ctx.lineWidth = this.size;
+    ctx.lineWidth = this.lineWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.stroke();
