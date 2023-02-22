@@ -28,7 +28,6 @@ import {
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
-  nativeRangeToBlockRange,
   resetNativeSelection,
   restoreSelection,
   saveBlockRange,
@@ -339,33 +338,6 @@ export function handleFormat(page: Page, key: keyof TextAttributes) {
   formatBlockRange(blockRange, key);
 }
 
-/**
- * @deprecated
- */
-export function handleNativeSelectAll() {
-  const blocks = document.querySelectorAll('.ql-editor');
-  const firstRichText = blocks[0];
-  const lastRichText = blocks[blocks.length - 1];
-  const range = document.createRange();
-  assertExists(firstRichText);
-  assertExists(lastRichText);
-  assertExists(range);
-
-  const lastNode = findLastNode(lastRichText);
-  const firstNode = findFirstNode(firstRichText);
-  range.setStart(firstNode, 0);
-  // @ts-ignore
-  range.setEnd(lastNode, lastNode.length);
-
-  const nearestCommonAncestor = findNearestCommonAncestor(
-    firstRichText,
-    lastRichText,
-    document.querySelector('body') as Node
-  );
-  initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor);
-  resetNativeSelection(range);
-}
-
 export function handleSelectAll(selection: DefaultSelectionManager) {
   const currentSelection = window.getSelection();
   if (
@@ -383,56 +355,6 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
   }
 
   resetNativeSelection(null);
-}
-
-// TODO should show format bar after select all
-function initQuickBarEventHandlersAfterSelectAll(nearestCommonAncestor: Node) {
-  nearestCommonAncestor.addEventListener(
-    'mousemove',
-    e => {
-      e.stopPropagation();
-      // SelectedBlockType 总是 text, DragDirection 总是 never
-      console.log(nearestCommonAncestor);
-    },
-    { once: true }
-  );
-}
-
-function findLastNode(ele: Element | Node): Node {
-  if (ele.lastChild) {
-    return findLastNode(ele.lastChild);
-  }
-  return ele;
-}
-
-function findFirstNode(ele: Element | Node): Node {
-  if (ele.firstChild) {
-    return findFirstNode(ele.firstChild);
-  }
-  return ele;
-}
-
-function findNearestCommonAncestor(
-  node1: Node,
-  node2: Node,
-  root: Node = document.querySelector('body') as Node
-): Node {
-  const ancestors: Node[][] = new Array(2).fill(0).map(() => []);
-  [node1, node2].forEach((node, index) => {
-    while (node !== root && node.parentElement) {
-      node = node.parentElement;
-      ancestors[index].push(node);
-    }
-  });
-
-  for (let i = 0; i < ancestors[0].length; i++) {
-    for (let j = 0; j < ancestors[1].length; j++) {
-      if (ancestors[0][i] === ancestors[1][j]) {
-        return ancestors[0][i];
-      }
-    }
-  }
-  return root;
 }
 
 export function handleBlockSelectionBatchDelete(
