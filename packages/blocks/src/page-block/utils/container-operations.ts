@@ -291,7 +291,7 @@ function formatModelsByRange(
   key: keyof TextAttributes
 ) {
   const selection = window.getSelection();
-  const selectedBlocks = saveBlockRange(selection);
+  const selectedBlocks = saveBlockRange();
   const first = models[0];
   const last = models[models.length - 1];
   const firstRichText = getRichTextByModel(first);

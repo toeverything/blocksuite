@@ -30,7 +30,7 @@ export interface SelectedBlock {
 }
 
 /**
- * @deprecated
+ * @deprecated Use `BlockRange` instead
  */
 export interface SelectionInfo {
   type: 'Block' | DomSelectionType;

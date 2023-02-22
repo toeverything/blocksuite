@@ -807,6 +807,51 @@ export function isDatabase(e: SelectionEvent) {
   }
   return false;
 }
+
+export function blockRangeToNativeRange(blockRange: BlockRange) {
+  const [startNode, startOffset] = getTextNodeBySelectedBlock(
+    blockRange.startModel,
+    blockRange.startOffset
+  );
+  if (!startNode) {
+    throw new Error(
+      'Failed to convert block range to native range. Start node is null.'
+    );
+  }
+  const [endNode, endOffset] = getTextNodeBySelectedBlock(
+    blockRange.endModel,
+    blockRange.endOffset
+  );
+  if (!startNode) {
+    throw new Error(
+      'Failed to convert block range to native range. End node is null.'
+    );
+  }
+  const range = new Range();
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
+  return range;
+}
+
+export function nativeRangeToBlockRange(range: Range): BlockRange {
+  const models = getModelsByRange(range);
+  const startOffset = getQuillIndexByNativeSelection(
+    range.startContainer,
+    range.startOffset
+  );
+  const endOffset = getQuillIndexByNativeSelection(
+    range.endContainer,
+    range.endOffset
+  );
+  return {
+    startModel: models[0],
+    startOffset,
+    endModel: models[models.length - 1],
+    endOffset,
+    betweenModels: models.slice(1, -1),
+  };
+}
+
 /**
  * Sometimes, the block in the block range is updated, we need to update the block range manually.
  *
@@ -834,26 +879,8 @@ export function updateBlockRange(
  *
  * See also {@link restoreSelection}
  */
-export function saveBlockRange(selection = window.getSelection()): BlockRange {
-  assertExists(selection);
-  const models = getModelsByRange(getCurrentRange(selection));
-  const startOffset = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset,
-    true
-  );
-  const endOffset = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset,
-    false
-  );
-  return {
-    startModel: models[0],
-    startOffset,
-    endModel: models[models.length - 1],
-    endOffset,
-    betweenModels: [],
-  };
+export function saveBlockRange(range = getCurrentRange()): BlockRange {
+  return nativeRangeToBlockRange(range);
 }
 
 /**
@@ -861,28 +888,8 @@ export function saveBlockRange(selection = window.getSelection()): BlockRange {
  * See also {@link resetNativeSelection}
  */
 export function restoreSelection(blockRange: BlockRange) {
-  const [startNode, startOffset] = getTextNodeBySelectedBlock(
-    blockRange.startModel,
-    blockRange.startOffset
-  );
-  const [endNode, endOffset] = getTextNodeBySelectedBlock(
-    blockRange.endModel,
-    blockRange.endOffset
-  );
-  if (!startNode || !endNode) {
-    console.warn(
-      'restoreSelection: startNode or endNode is null',
-      startNode,
-      endNode
-    );
-    return;
-  }
-
-  const range = getCurrentRange();
-  range.setStart(startNode, startOffset);
-  range.setEnd(endNode, endOffset);
+  const range = blockRangeToNativeRange(blockRange);
   resetNativeSelection(range);
-  return range;
 }
 
 /**
