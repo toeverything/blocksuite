@@ -2146,9 +2146,8 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page
-  prop:title=""
->
+    `
+<affine:page>
   <affine:frame>
     <affine:paragraph
       prop:text="123"
