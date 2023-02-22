@@ -3,49 +3,53 @@ import { deserializeXYWH, serializeXYWH } from '../../utils/xywh.js';
 import { BaseElement, HitTestOptions } from '../base-element.js';
 import { getRectanglePath } from './rect-utils.js';
 import { DashStyle, ShapeStyles, SizeStyle } from './shape-style.js';
-
-export type ShapeType = 'rect' | 'triangle';
+import { getShapeUtils } from './shape-utils/get-shape-utils.js';
+import type { RenderSequenceItem, ShapeType } from './types.js';
 
 export class ShapeElement extends BaseElement {
   type = 'shape' as const;
-  path: Path2D;
   shapeType: ShapeType;
   color: `#${string}` = '#000000';
+
+  private _renderSequence: RenderSequenceItem[] = [];
+
   constructor(id: string, shapeType: ShapeType) {
     super(id);
     this.shapeType = shapeType;
-
-    const path = new Path2D();
-    this.path = path;
   }
 
   setBound(x: number, y: number, w: number, h: number): void {
     super.setBound(x, y, w, h);
 
-    // temp workaround
-    if (this.shapeType === 'rect') {
-      const path = new Path2D();
-      path.rect(0, 0, w, h);
-      this.path = path;
-    }
-
-    const shapeStyles: ShapeStyles = {
-      color: this.color,
-      dash: DashStyle.Draw,
-      size: SizeStyle.Small,
-    };
-    const size = [w, h];
-    const path = getRectanglePath(this.id, shapeStyles, size);
-    this.path = path;
+    const shapeUtils = getShapeUtils(this.shapeType);
+    this._renderSequence = shapeUtils.createRenderSequence({
+      width: this.w,
+      height: this.h,
+      fillColor: undefined,
+      strokeWidth: 4,
+      strokeColor: '#000',
+      strokeStyle: 'solid',
+    });
   }
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
-    return isPointIn(this, x, y);
+    const shapeUtils = getShapeUtils(this.shapeType);
+    return shapeUtils.hitTest([x, y], this, options);
   }
 
   render(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = this.color;
-    ctx.fill(this.path);
+    this._renderSequence.forEach(seq => {
+      ctx.save();
+      if (seq.type === 'fill') {
+        ctx.fillStyle = seq.color;
+        ctx.fill(seq.path2d);
+      } else if (seq.type === 'stroke') {
+        ctx.strokeStyle = seq.color ?? '#000';
+        ctx.lineWidth = seq.width;
+        ctx.stroke(seq.path2d);
+      }
+      ctx.restore();
+    });
   }
 
   serialize(): Record<string, unknown> {

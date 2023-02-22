@@ -29,6 +29,15 @@ function main() {
 
   surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
   surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
+  surface.addShapeElement(new Bound(200, 0, 100, 100), 'rect', 'black');
+  surface.addShapeElement(new Bound(200, 110, 100, 100), 'triangle', 'black');
+  surface.addShapeElement(new Bound(200, 220, 210, 100), 'ellipse', 'black');
+  surface.addShapeElement(new Bound(310, 0, 100, 100), 'diamond', 'black');
+  surface.addShapeElement(
+    new Bound(310, 110, 100, 100),
+    'roundedRect',
+    'black'
+  );
 
   // Uncomment to batch load mock data
   // initMockData(surface, 100, 1000, 1000);
