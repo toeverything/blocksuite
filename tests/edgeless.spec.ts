@@ -4,6 +4,7 @@ import { expect, Page } from '@playwright/test';
 
 import type { FrameBlockModel } from '../packages/blocks/src/index.js';
 import {
+  assertHoverRect,
   clickBlockById,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -282,11 +283,7 @@ test('selection box of shape element sync on fast dragging', async ({
   const box = await page
     .locator('.affine-edgeless-selected-rect')
     .boundingBox();
-  if (!box) {
-    throw new Error('box is null');
-  }
-  const { x, y, width, height } = box;
-  expect([x, y, width, height]).toStrictEqual([650, 450, 100, 100]);
+  assertHoverRect(box, ['x', 'y', 'width', 'height'], [650, 450, 100, 100]);
 });
 
 test('hover state for shape element', async ({ page }) => {
@@ -302,10 +299,8 @@ test('hover state for shape element', async ({ page }) => {
 
   const hoverRect = page.locator('.affine-edgeless-hover-rect');
   const box = await hoverRect.boundingBox();
-  if (box === null) throw new Error();
 
-  const { x, y, width, height } = box;
-  expect([x, y, width, height]).toStrictEqual([100, 100, 100, 100]);
+  assertHoverRect(box, ['x', 'y', 'width', 'height'], [100, 100, 100, 100]);
 });
 
 test('hovering on shape should not have effect on underlying block', async ({
@@ -322,7 +317,7 @@ test('hovering on shape should not have effect on underlying block', async ({
 
   const block = page.locator('.affine-edgeless-block-child');
   const blockBox = await block.boundingBox();
-  if (blockBox === null) throw new Error();
+  if (blockBox === null) throw new Error('Unexpected box value: box is null');
 
   const { x, y } = blockBox;
 
@@ -334,10 +329,8 @@ test('hovering on shape should not have effect on underlying block', async ({
 
   const hoverRect = page.locator('.affine-edgeless-hover-rect');
   const box = await hoverRect.boundingBox();
-  if (box === null) throw new Error();
+
+  assertHoverRect(box, ['width', 'height'], [100, 100]);
 
   await expect(hoverRect).toHaveCount(1);
-
-  const { width, height } = box;
-  expect([width, height]).toStrictEqual([100, 100]);
 });

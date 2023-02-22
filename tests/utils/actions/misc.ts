@@ -514,3 +514,14 @@ export async function getIndexCoordinate(
   );
   return coord;
 }
+
+type BoundingBox = Record<'x' | 'y' | 'width' | 'height', number>;
+export const assertHoverRect = (
+  box: BoundingBox | null,
+  boxKeys: (keyof BoundingBox)[],
+  values: number[]
+) => {
+  if (box === null) throw new Error('Unexpected box value: box is null');
+
+  expect(boxKeys.map(key => box[key])).toStrictEqual(values);
+};
