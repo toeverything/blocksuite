@@ -62,7 +62,6 @@ export class SurfaceManager {
     const element = new BrushElement(id);
 
     const bound = Utils.getBoundsFromPoints(points);
-    console.log('ppp', point, bound);
 
     element.setBound(point[0], point[1], bound.width, bound.height);
     element.color = color;
@@ -105,7 +104,7 @@ export class SurfaceManager {
   }
 
   pick(x: number, y: number, options?: HitTestOptions): PhasorElement[] {
-    const bound: IBound = { x, y, w: 1, h: 1 };
+    const bound: IBound = { x: x - 1, y: y - 1, w: 3, h: 3 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: PhasorElement) => {
       return element.hitTest(x, y, options);

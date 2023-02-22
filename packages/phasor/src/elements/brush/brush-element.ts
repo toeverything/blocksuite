@@ -10,8 +10,13 @@ export class BrushElement extends BaseElement {
   size = 4;
 
   hitTest(x: number, y: number, options?: HitTestOptions) {
-    const ptA = Vec.sub([x, y], [this.x, this.y]);
-    return Utils.pointInPolyline(ptA, this.points);
+    const point = Vec.sub([x, y], [this.x, this.y]);
+
+    const tiny = this.w <= this.size / 2 && this.h <= this.size / 2;
+    if (tiny) {
+      return Utils.pointInCircle(point, [0, 0], this.size / 2);
+    }
+    return Utils.pointInPolyline(point, this.points, this.size);
   }
 
   render(ctx: CanvasRenderingContext2D): void {

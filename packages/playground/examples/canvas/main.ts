@@ -31,6 +31,7 @@ function main() {
   surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
 
   surface.addBrushElement([300, 120], 'green', [
+    [0, 0],
     [0, 100],
     [20, 20],
     [40, 120],
@@ -40,8 +41,9 @@ function main() {
   surface.addBrushElement([300, 10], 'blue');
   const brushId = surface.addBrushElement([300, 20], 'purple');
   surface.updateBrushElementPoints(brushId, [
+    [0, 0],
     [10, 20],
-    [30, 60],
+    [30, 65],
     [15, 40],
   ]);
 
