@@ -74,7 +74,6 @@ export class RichText extends NonShadowLitElement {
       white-space: pre-wrap;
       word-wrap: break-word;
       margin: 3px 0;
-      padding: 0 4px;
     }
     .ql-editor > * {
       cursor: text;

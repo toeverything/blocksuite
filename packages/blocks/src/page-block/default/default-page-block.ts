@@ -120,7 +120,6 @@ export class DefaultPageBlockComponent
       border: 0;
       font-family: inherit;
       color: inherit;
-      padding: 0 4px;
     }
 
     .affine-default-page-block-title::placeholder {
