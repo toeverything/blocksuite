@@ -25,7 +25,7 @@ import {
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
   DragDirection,
-  getCombinedFormatFromRange,
+  getCurrentCombinedFormat,
   updateSelectedTextType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
@@ -53,6 +53,9 @@ export class FormatQuickBar extends LitElement {
   @property()
   direction!: DragDirection;
 
+  /**
+   * @deprecated
+   */
   @property()
   selectedModels?: BaseBlockModel[];
 
@@ -91,10 +94,10 @@ export class FormatQuickBar extends LitElement {
     if (!models.length) {
       return;
     }
-    this.format = getCombinedFormatFromRange(this.selectedModels);
     const startModel = models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.page = startModel.page as Page;
+    this.format = getCurrentCombinedFormat(this.page);
 
     this.addEventListener('mousedown', (e: MouseEvent) => {
       // Prevent click event from making selection lost
@@ -105,7 +108,10 @@ export class FormatQuickBar extends LitElement {
     });
 
     const mutationObserver = new MutationObserver(() => {
-      this.format = getCombinedFormatFromRange();
+      if (!this.page) {
+        return;
+      }
+      this.format = getCurrentCombinedFormat(this.page);
     });
     models.forEach(model => {
       const richText = getRichTextByModel(model);
@@ -258,7 +264,7 @@ export class FormatQuickBar extends LitElement {
               format: this.format,
             });
             // format state need to update after format
-            this.format = getCombinedFormatFromRange(this.selectedModels);
+            this.format = getCurrentCombinedFormat(page);
             this.positionUpdated.emit();
           }}
         >

@@ -219,21 +219,6 @@ export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
 }
 
 /**
- * @deprecated
- */
-function getFormatByModel(model: BaseBlockModel) {
-  const richText = getRichTextByModel(model);
-  assertExists(richText);
-  const { quill } = richText;
-
-  const format = quill.getFormat({
-    index: 0,
-    length: quill.getLength() - 1,
-  });
-  return format;
-}
-
-/**
  * Merge format of multiple blocks. Format will be active only when all blocks have the same format.
  *
  * Used for format quick bar.
@@ -277,14 +262,12 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
       startRichText.quill.getLength() - blockRange.startOffset
     );
     formatArr.push(startFormat);
-    console.log('start', startFormat);
   }
   if (!matchFlavours(blockRange.endModel, ['affine:code'])) {
     const endRichText = getRichTextByModel(blockRange.endModel);
     assertExists(endRichText);
     const endFormat = endRichText.quill.getFormat(0, blockRange.endOffset);
     formatArr.push(endFormat);
-    console.log('endFormat', endFormat, formatArr);
   }
   blockRange.betweenModels
     .filter(model => !model.text || model.text.length)
@@ -298,65 +281,16 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
       );
       formatArr.push(format);
     });
-  console.log('formatArr', formatArr);
 
   return mergeFormat(formatArr);
 }
 
-/**
- * @deprecated Use getCombinedFormat directly
- */
-export function getCombinedFormatFromRange(): TextAttributes {
-  const range = getCurrentRange();
-  const blockRange = nativeRangeToBlockRange(range);
-  return getCombinedFormat(blockRange);
-}
-
-/**
- * @deprecated
- */
-function formatModelsByRange(
-  models: BaseBlockModel[],
-  page: Page,
-  key: keyof TextAttributes
-) {
-  const selection = window.getSelection();
-  const selectedBlocks = saveBlockRange();
-  const first = models[0];
-  const last = models[models.length - 1];
-  const firstRichText = getRichTextByModel(first);
-  const lastRichText = getRichTextByModel(last);
-  assertExists(firstRichText);
-  assertExists(lastRichText);
-  assertExists(selection);
-
-  const firstIndex = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset,
-    true
-  );
-  const endIndex = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset,
-    false
-  );
-  const isFormatActive = getCombinedFormatFromRange()[key];
-  page.captureSync();
-  firstRichText.model.text?.format(
-    firstIndex,
-    firstRichText.quill.getLength() - firstIndex - 1,
-    { [key]: !isFormatActive }
-  );
-  lastRichText.model.text?.format(0, endIndex, { [key]: !isFormatActive });
-
-  for (let i = 1; i < models.length - 1; i++) {
-    const richText = getRichTextByModel(models[i]);
-    assertExists(richText);
-    richText.model.text?.format(0, richText.quill.getLength() - 1, {
-      [key]: !isFormatActive,
-    });
+export function getCurrentCombinedFormat(page: Page): TextAttributes {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) {
+    return {};
   }
-  restoreSelection(selectedBlocks);
+  return getCombinedFormat(blockRange);
 }
 
 function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
