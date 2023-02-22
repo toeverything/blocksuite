@@ -682,12 +682,14 @@ export class DefaultSelectionManager {
       this.blockSelectionFormatBarAbortController?.abort();
       this.blockSelectionFormatBarAbortController = new AbortController();
 
+      const selectedModels = this.state.selectedBlocks.map(block =>
+        getModelByElement(block)
+      );
+
       showFormatQuickBar({
-        direction,
+        direction: 'center-bottom',
         anchorEl: direction === 'right-bottom' ? lastBlock : firstBlock,
-        selectedModels: this.state.selectedBlocks.map(block =>
-          getModelByElement(block)
-        ),
+        selectedModels,
         abortController: this.blockSelectionFormatBarAbortController,
       });
     }
