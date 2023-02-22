@@ -30,6 +30,21 @@ function main() {
   surface.addDebugElement(new Bound(0, 0, 100, 100), 'red');
   surface.addDebugElement(new Bound(50, 50, 100, 100), 'black');
 
+  surface.addBrushElement([300, 120], 'green', [
+    [0, 100],
+    [20, 20],
+    [40, 120],
+    [100, 60],
+    [180, 10],
+  ]);
+  surface.addBrushElement([300, 10], 'blue');
+  const brushId = surface.addBrushElement([300, 20], 'purple');
+  surface.updateBrushElementPoints(brushId, [
+    [10, 20],
+    [30, 60],
+    [15, 40],
+  ]);
+
   // Uncomment to batch load mock data
   // initMockData(surface, 100, 1000, 1000);
 

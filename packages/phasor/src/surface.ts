@@ -6,6 +6,7 @@ import * as Y from 'yjs';
 import type { IBound } from './consts.js';
 import type { HitTestOptions } from './elements/base-element.js';
 import {
+  BrushElement,
   DebugElement,
   PhasorElement,
   PhasorElementType,
@@ -13,6 +14,7 @@ import {
   ShapeType,
 } from './elements/index.js';
 import { Renderer } from './renderer.js';
+import Utils from './utils/tl-utils.js';
 import { deserializeXYWH, serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -49,6 +51,30 @@ export class SurfaceManager {
     element.color = color;
 
     return this._addElement(element);
+  }
+
+  addBrushElement(
+    point: [number, number],
+    color: string,
+    points: number[][] = []
+  ): string {
+    const id = nanoid(10);
+    const element = new BrushElement(id);
+
+    const bound = Utils.getBoundsFromPoints(points);
+    console.log('ppp', point, bound);
+
+    element.setBound(point[0], point[1], bound.width, bound.height);
+    element.color = color;
+    element.points = points;
+
+    return this._addElement(element);
+  }
+
+  updateBrushElementPoints(id: string, points: number[][]) {
+    const yElement = this._yElements.get(id) as Y.Map<unknown>;
+    assertExists(yElement);
+    yElement.set('points', JSON.stringify(points));
   }
 
   setElementBound(id: string, bound: IBound) {
@@ -110,6 +136,12 @@ export class SurfaceManager {
         element = ShapeElement.deserialize(yElement.toJSON());
         break;
       }
+      case 'brush': {
+        element = BrushElement.deserialize(yElement.toJSON());
+        break;
+      }
+      default:
+        throw new Error('no element type matched.');
     }
     assertExists(element);
 
@@ -194,6 +226,17 @@ export class SurfaceManager {
           // refresh grid manager
           this._renderer.removeElement(element);
           element.setBound(x, y, w, h);
+          this._renderer.addElement(element);
+        }
+
+        if (key === 'points') {
+          const points: number[][] = JSON.parse(yElement.get(key) as string);
+
+          const bounds = Utils.getBoundsFromPoints(points);
+
+          this._renderer.removeElement(element);
+          (element as BrushElement).points = points;
+          element.setBound(element.x, element.y, bounds.width, bounds.height);
           this._renderer.addElement(element);
         }
       }
