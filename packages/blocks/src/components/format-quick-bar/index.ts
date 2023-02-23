@@ -1,12 +1,11 @@
 import './button.js';
 import './format-bar-node.js';
 
-import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
+import { Page, Signal } from '@blocksuite/store';
 
 import {
   getCurrentRange,
   getDefaultPageBlock,
-  getModelsByRange,
   throttle,
 } from '../../__internal__/utils/index.js';
 import {
@@ -24,7 +23,6 @@ export const showFormatQuickBar = async ({
   direction = 'right-bottom',
   container = document.body,
   abortController = new AbortController(),
-  selectedModels,
 }: {
   page: Page;
   anchorEl?:
@@ -36,7 +34,6 @@ export const showFormatQuickBar = async ({
   direction?: DragDirection;
   container?: HTMLElement;
   abortController?: AbortController;
-  selectedModels?: BaseBlockModel[];
 }) => {
   // Reuse previous format quick bar
   if (formatQuickBarInstance) {
@@ -98,11 +95,10 @@ export const showFormatQuickBar = async ({
     formatQuickBar.top = `${safeCoordinate.y}px`;
   }, 10);
 
-  const models = selectedModels ?? getModelsByRange(getCurrentRange());
-  if (!models.length) {
-    return;
+  if (!page.root) {
+    throw new Error("Failed to get page's root element");
   }
-  const pageBlock = getDefaultPageBlock(models[0]);
+  const pageBlock = getDefaultPageBlock(page.root);
   const scrollContainer = pageBlock.defaultViewportElement;
 
   if (scrollContainer) {
@@ -112,21 +108,23 @@ export const showFormatQuickBar = async ({
   positionUpdatedSignal.on(updatePos);
   window.addEventListener('resize', updatePos, { passive: true });
 
+  // Mount
+  container.appendChild(formatQuickBar);
+
   // Handle selection change
 
-  let isMouseDown = false;
-  const mouseDownHandler = () => {
-    isMouseDown = true;
-  };
-  const mouseUpHandler = () => {
-    isMouseDown = false;
+  const mouseUpHandler = (e: MouseEvent) => {
+    if (e.target === formatQuickBar) {
+      return;
+    }
+    abortController.abort();
   };
 
   const selectionChangeHandler = () => {
     const selection = document.getSelection();
     const selectNothing =
       !selection || selection.type === 'Caret' || selection.type === 'None';
-    if (selectNothing || isMouseDown) {
+    if (selectNothing) {
       abortController.abort();
       return;
     }
@@ -136,14 +134,10 @@ export const showFormatQuickBar = async ({
   const popstateHandler = () => {
     abortController.abort();
   };
-  document.addEventListener('mousedown', mouseDownHandler);
   document.addEventListener('mouseup', mouseUpHandler);
   document.addEventListener('selectionchange', selectionChangeHandler);
   // Fix https://github.com/toeverything/AFFiNE/issues/855
   window.addEventListener('popstate', popstateHandler);
-
-  // Mount
-  container.appendChild(formatQuickBar);
 
   requestAnimationFrame(() => {
     updatePos();
@@ -152,7 +146,6 @@ export const showFormatQuickBar = async ({
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
-    document.removeEventListener('mousedown', mouseDownHandler);
     document.removeEventListener('mouseup', mouseUpHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
     window.removeEventListener('popstate', popstateHandler);
