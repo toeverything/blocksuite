@@ -925,19 +925,17 @@ export class DefaultSelectionManager {
 
     if (selectedBlocks.length === 0) return;
 
+    const firstBlockRect = blockCache.get(selectedBlocks[0]) as DOMRect;
+
     // just refresh selected blocks
     if (focusedBlockIndex === -1) {
-      const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
-      const rects = clearSubtree(selectedBlocks, containerLeft).map(
+      const rects = clearSubtree(selectedBlocks, firstBlockRect.left).map(
         block => blockCache.get(block) as DOMRect
       );
       this._signals.updateSelectedRects.emit(rects);
     } else {
       // only current focused-block
-      const rects = selectedBlocks
-        .slice(0, 1)
-        .map(block => blockCache.get(block) as DOMRect);
-      this._signals.updateSelectedRects.emit(rects);
+      this._signals.updateSelectedRects.emit([firstBlockRect]);
     }
   }
 
@@ -1014,14 +1012,22 @@ export class DefaultSelectionManager {
   // `CMD-A`
   selectBlocksByRect(hitRect: DOMRect) {
     this.state.refreshBlockRectCache();
-    const { blockCache, focusedBlockIndex } = this.state;
+    const {
+      blockCache,
+      focusedBlockIndex,
+      selectedBlocks: prevSelectedBlocks,
+    } = this.state;
     const selectedBlocks = filterSelectedBlockByIndex(
       blockCache,
       focusedBlockIndex,
       hitRect
     );
 
-    if (this.state.blockCache.size === this.state.selectedBlocks.length) {
+    if (blockCache.size === prevSelectedBlocks.length) {
+      return;
+    }
+
+    if (selectedBlocks.length === 0) {
       return;
     }
 
@@ -1029,19 +1035,17 @@ export class DefaultSelectionManager {
     this.clear();
     this.state.type = 'block';
 
+    const firstBlockRect = blockCache.get(selectedBlocks[0]) as DOMRect;
+
     if (focusedBlockIndex === -1) {
       // SELECT_ALL
-      const containerLeft = (blockCache.get(selectedBlocks[0]) as DOMRect).left;
-      const rects = clearSubtree(selectedBlocks, containerLeft).map(
+      const rects = clearSubtree(selectedBlocks, firstBlockRect.left).map(
         block => blockCache.get(block) as DOMRect
       );
       this.setSelectedBlocks(selectedBlocks, rects);
     } else {
       // only current focused-block
-      const rects = selectedBlocks
-        .slice(0, 1)
-        .map(block => blockCache.get(block) as DOMRect);
-      this.setSelectedBlocks(selectedBlocks, rects);
+      this.setSelectedBlocks(selectedBlocks, [firstBlockRect]);
     }
   }
 

@@ -4,6 +4,7 @@ import {
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
 
@@ -33,7 +34,7 @@ import {
   saveBlockRange,
   updateBlockRange,
 } from '../../__internal__/utils/selection.js';
-import type { BlockSchema, ParagraphBlockModel } from '../../models.js';
+import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
@@ -176,12 +177,6 @@ export async function updateBlockType(
       }
       updateBlockRange(savedBlockRange, model, newModel);
       lastNewId = newId;
-    }
-  });
-  models.forEach(async model => {
-    if (model.flavour === 'affine:paragraph' && type) {
-      const service = await getServiceOrRegister(model.flavour);
-      service.updateTypeEffect(model as ParagraphBlockModel, type);
     }
   });
 
