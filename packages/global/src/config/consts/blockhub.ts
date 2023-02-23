@@ -218,7 +218,7 @@ export const BLOCKHUB_LIST_ITEMS = [
     flavour: 'affine:list',
     type: 'numbered',
     name: 'Numbered List',
-    description: '1. A list with numbering.',
+    description: 'A list with numbering.',
     icon: NumberedListIcon,
     toolTip: 'Drag to insert Numbered List.',
   },
