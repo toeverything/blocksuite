@@ -29,7 +29,7 @@ import {
   restoreSelection,
   saveBlockRange,
 } from '../../__internal__/utils/selection.js';
-import type { BlockSchema, ParagraphBlockModel } from '../../models.js';
+import type { BlockSchema } from '../../models.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import { DEFAULT_SPACING } from '../edgeless/utils.js';
 
