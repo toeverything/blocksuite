@@ -88,7 +88,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
     }
 
     .affine-code-block-container {
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       position: relative;
       padding: 32px 0;
@@ -105,7 +105,7 @@ export class CodeBlockComponent extends NonShadowLitElement {
 
     .affine-code-block-container .container {
       position: absolute;
-      font-size: var(--affine-font-xs);
+      font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       top: 12px;
       left: 12px;

@@ -18,7 +18,7 @@ export const toolTipStyle = css`
     top: 0;
     inline-size: max-content;
     text-align: center;
-    font-size: var(--affine-font-xs);
+    font-size: var(--affine-font-sm);
     padding: 4px 12px;
     border-radius: 10px 10px 10px 0;
     color: var(--affine-tooltip-color);
@@ -58,7 +58,7 @@ export const centeredToolTipStyle = css`
     position: absolute;
     inline-size: max-content;
     text-align: center;
-    font-size: var(--affine-font-xs);
+    font-size: var(--affine-font-sm);
     padding: 4px 12px;
     border-radius: 10px;
     color: var(--affine-tooltip-color);
