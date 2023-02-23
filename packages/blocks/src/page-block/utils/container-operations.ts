@@ -29,7 +29,6 @@ import {
   isMultiBlockRange,
   resetNativeSelection,
   restoreSelection,
-  saveBlockRange,
   updateBlockRange,
 } from '../../__internal__/utils/selection.js';
 import type { BlockSchema } from '../../models.js';
@@ -142,7 +141,7 @@ export async function updateBlockType(
     );
   }
   page.captureSync();
-  const savedBlockRange = saveBlockRange();
+  const savedBlockRange = getCurrentBlockRange(page);
   if (flavour === 'affine:code') {
     const id = mergeToCodeBlocks(page, models);
     const model = page.getBlockById(id);
@@ -173,14 +172,16 @@ export async function updateBlockType(
       if (!newModel) {
         throw new Error('Failed to get new model after transform block!');
       }
-      updateBlockRange(savedBlockRange, model, newModel);
+      savedBlockRange && updateBlockRange(savedBlockRange, model, newModel);
       lastNewId = newId;
     }
   });
 
   // Focus last new block
   if (lastNewId) await asyncFocusRichText(page, lastNewId);
-  restoreSelection(savedBlockRange);
+  if (savedBlockRange && savedBlockRange.type === 'Native') {
+    restoreSelection(savedBlockRange);
+  }
 }
 
 function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {

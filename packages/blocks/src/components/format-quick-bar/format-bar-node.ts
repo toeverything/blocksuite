@@ -25,7 +25,7 @@ import { formatConfig } from '../../page-block/utils/const.js';
 import {
   DragDirection,
   getCurrentCombinedFormat,
-  updateSelectedTextType,
+  updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import { toast } from '../toast.js';
@@ -196,11 +196,11 @@ export class FormatQuickBar extends LitElement {
         const { flavour: defaultFlavour, type: defaultType } =
           paragraphConfig[0];
         if (this.paragraphType === defaultType) return;
-        updateSelectedTextType(defaultFlavour, defaultType);
+        updateBlockType(this.models, defaultFlavour, defaultType);
         this.paragraphType = `${defaultFlavour}/${defaultType}`;
         return;
       }
-      updateSelectedTextType(flavour, type);
+      updateBlockType(this.models, flavour, type);
       this.paragraphType = `${flavour}/${type}`;
       this.positionUpdated.emit();
     };

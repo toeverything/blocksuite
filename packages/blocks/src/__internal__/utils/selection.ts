@@ -903,15 +903,6 @@ export function updateBlockRange(
 }
 
 /**
- * Save the current block selection. Can be restored with {@link restoreSelection}.
- *
- * See also {@link restoreSelection}
- */
-export function saveBlockRange(range = getCurrentRange()): BlockRange {
-  return nativeRangeToBlockRange(range);
-}
-
-/**
  * Restore the block selection.
  * See also {@link resetNativeSelection}
  */
