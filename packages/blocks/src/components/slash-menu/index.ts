@@ -19,7 +19,7 @@ function updateSlashMenuPosition(slashMenu: SlashMenu, range: Range) {
   const { placement, height } = compareTopAndBottomSpace(
     range,
     document.body,
-    30
+    16
   );
 
   const positioningElRect = range.getBoundingClientRect();
