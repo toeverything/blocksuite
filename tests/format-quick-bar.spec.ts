@@ -665,22 +665,17 @@ test('should format quick bar action status updated while undo', async ({
   await expect(boldBtn).not.toHaveAttribute('active', '');
 });
 
-test('should format quick bar show when do block selection', async ({
-  page,
-}) => {
+test('should format quick bar work in block selection', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   const coord = await getIndexCoordinate(page, [1, 2]);
 
-  //
-  // blur
-  await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x, coord.y);
-  await page.mouse.down();
-  // ←
-  await page.mouse.move(coord.x - 20, coord.y);
-  await page.mouse.up();
+  await dragBetweenCoords(
+    page,
+    { x: coord.x - 20, y: coord.y - 20 },
+    { x: coord.x + 20, y: coord.y }
+  );
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
 
@@ -688,13 +683,37 @@ test('should format quick bar show when do block selection', async ({
   if (!box) {
     throw new Error("formatQuickBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 20, 5);
-  assertAlmostEqual(box.y, 144, 116);
+  assertAlmostEqual(box.x, 285, 5);
+  assertAlmostEqual(box.y, 220, 5);
 
-  // Click the edge of the format quick bar
-  await page.mouse.click(box.x + 4, box.y + box.height / 2);
-  // Even not any button is clicked, the format quick bar should't be hidden
-  await expect(formatQuickBar).toBeVisible();
+  const boldBtn = formatQuickBar.getByTestId('bold');
+  await boldBtn.click();
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:frame>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text={
+      <>
+        <text
+          bold={true}
+          insert="456"
+        />
+      </>
+    }
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  />
+</affine:frame>`,
+    frameId
+  );
 
   await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();
