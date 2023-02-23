@@ -1,7 +1,7 @@
 import './button.js';
 import './format-bar-node.js';
 
-import { BaseBlockModel, Signal } from '@blocksuite/store';
+import { BaseBlockModel, Page, Signal } from '@blocksuite/store';
 
 import {
   getCurrentRange,
@@ -19,12 +19,14 @@ import type { FormatQuickBar } from './format-bar-node.js';
 let formatQuickBarInstance: FormatQuickBar | null = null;
 
 export const showFormatQuickBar = async ({
+  page,
   anchorEl,
   direction = 'right-bottom',
   container = document.body,
   abortController = new AbortController(),
   selectedModels,
 }: {
+  page: Page;
   anchorEl?:
     | {
         getBoundingClientRect: () => DOMRect;
@@ -44,11 +46,11 @@ export const showFormatQuickBar = async ({
   // Init format quick bar
 
   const formatQuickBar = document.createElement('format-quick-bar');
+  formatQuickBar.page = page;
   formatQuickBar.abortController = abortController;
   const positionUpdatedSignal = new Signal();
   formatQuickBar.positionUpdated = positionUpdatedSignal;
   formatQuickBar.direction = direction;
-  formatQuickBar.selectedModels = selectedModels;
 
   formatQuickBarInstance = formatQuickBar;
   abortController.signal.addEventListener('abort', () => {
@@ -65,7 +67,16 @@ export const showFormatQuickBar = async ({
     const positioningPoint =
       positioningEl instanceof Range
         ? calcPositionPointByRange(positioningEl, dir)
-        : positioningEl.getBoundingClientRect();
+        : (() => {
+            const rect = positioningEl.getBoundingClientRect();
+            const x = dir.includes('center')
+              ? rect.left + rect.width / 2
+              : dir.includes('left')
+              ? rect.left
+              : rect.right;
+            const y = dir.includes('bottom') ? rect.bottom : rect.top;
+            return { x, y };
+          })();
 
     // TODO maybe use the editor container as the boundary rect to avoid the format bar being covered by other elements
     const boundaryRect = document.body.getBoundingClientRect();

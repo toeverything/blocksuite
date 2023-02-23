@@ -18,8 +18,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  getCurrentRange,
-  getModelsByRange,
+  getCurrentBlockRange,
   getRichTextByModel,
 } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
@@ -35,6 +34,9 @@ import { formatQuickBarStyle } from './styles.js';
 @customElement('format-quick-bar')
 export class FormatQuickBar extends LitElement {
   static styles = formatQuickBarStyle;
+
+  @property()
+  page!: Page;
 
   @property()
   left: string | null = null;
@@ -53,17 +55,8 @@ export class FormatQuickBar extends LitElement {
   @property()
   direction!: DragDirection;
 
-  /**
-   * @deprecated
-   */
-  @property()
-  selectedModels?: BaseBlockModel[];
-
   @state()
   models: BaseBlockModel[] = [];
-
-  @state()
-  page: Page | null = null;
 
   @state()
   paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
@@ -89,14 +82,18 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    const models = this.selectedModels ?? getModelsByRange(getCurrentRange());
-    this.models = models;
-    if (!models.length) {
-      return;
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't get current block range");
     }
+    const models = [
+      blockRange.startModel,
+      ...blockRange.betweenModels,
+      blockRange.endModel,
+    ];
+    this.models = models;
     const startModel = models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
-    this.page = startModel.page as Page;
     this.format = getCurrentCombinedFormat(this.page);
 
     this.addEventListener('mousedown', (e: MouseEvent) => {
@@ -205,7 +202,7 @@ export class FormatQuickBar extends LitElement {
       this.positionUpdated.emit();
     };
 
-    return html` <div
+    return html`<div
       class="paragraph-panel"
       style="${styles}"
       @mouseover=${this._onHover}

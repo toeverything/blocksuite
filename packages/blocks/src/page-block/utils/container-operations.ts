@@ -339,6 +339,9 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
     .forEach(model => {
       model.text?.format(0, model.text.length, { [key]: !format[key] });
     });
+
+  // Native selection maybe shifted after format
+  // We need to restore it manually
   if (blockRange.type === 'Native') {
     restoreSelection(blockRange);
   }

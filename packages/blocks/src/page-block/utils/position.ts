@@ -38,6 +38,7 @@ export type DragDirection =
   | 'left-bottom'
   | 'left-top'
   | 'center-bottom'
+  | 'center-top'
   // no select direction, for example select all by `ctrl + a`
   | 'directionless';
 

@@ -653,19 +653,14 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    this._showFormatQuickBar(e);
-  };
-  private blockSelectionFormatBarAbortController: AbortController | null = null;
 
-  private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-
-      showFormatQuickBar({ direction });
+      showFormatQuickBar({ page: this.page, direction });
     } else if (this.state.type === 'block') {
       const blocks = this.state.selectedBlocks;
 
@@ -674,26 +669,15 @@ export class DefaultSelectionManager {
       }
       const firstBlock = blocks[0];
       const lastBlock = blocks[blocks.length - 1];
-      if (!firstBlock) {
-        return;
-      }
-      const direction = e.start.y < e.y ? 'right-bottom' : 'right-top';
 
-      this.blockSelectionFormatBarAbortController?.abort();
-      this.blockSelectionFormatBarAbortController = new AbortController();
-
-      const selectedModels = this.state.selectedBlocks.map(block =>
-        getModelByElement(block)
-      );
-
+      const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
-        direction: 'center-bottom',
-        anchorEl: direction === 'right-bottom' ? lastBlock : firstBlock,
-        selectedModels,
-        abortController: this.blockSelectionFormatBarAbortController,
+        page: this.page,
+        direction,
+        anchorEl: direction === 'center-bottom' ? lastBlock : firstBlock,
       });
     }
-  }
+  };
 
   private _onContainerClick = (e: SelectionEvent) => {
     // do nothing when clicking on scrollbar
@@ -773,7 +757,7 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ direction: 'center-bottom' });
+    showFormatQuickBar({ page: this.page, direction: 'center-bottom' });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -833,8 +817,6 @@ export class DefaultSelectionManager {
       return;
     }
 
-    // Fix selection direction after support multi-line selection by keyboard
-    // FIXME: if selection produced by mouse, it always be `left-right`
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
     let direction: 'left-right' | 'right-left' | 'none' = 'none';
 
@@ -843,7 +825,9 @@ export class DefaultSelectionManager {
     } else if (offsetDelta < 0) {
       direction = 'left-right';
     }
+    // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
+      page: this.page,
       direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
     });
   };
