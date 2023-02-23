@@ -37,4 +37,5 @@ jobs:
       - name: Try Publishing to NPM
         run: ./scripts/publish.sh
         env:
+          NIGHTLY: true
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

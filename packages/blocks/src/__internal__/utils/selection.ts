@@ -23,12 +23,7 @@ import {
   getTextNodeBySelectedBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import type {
-  DomSelectionType,
-  SelectedBlock,
-  SelectionInfo,
-  SelectionPosition,
-} from './types.js';
+import type { BlockRange, SelectionPosition } from './types.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -343,84 +338,6 @@ export function getCurrentRange(selection = window.getSelection()) {
     console.warn('getCurrentRange may be wrong, rangeCount > 1');
   }
   return selection.getRangeAt(0);
-}
-
-function getSelectedBlock(models: BaseBlockModel[]): SelectedBlock[] {
-  const result = [];
-  const parentMap = new Map<string, SelectedBlock>();
-  for (let i = 0; i < models.length; i++) {
-    const model = models[i];
-    const parent = model.page.getParent(model);
-    const block = { id: model.id, children: [] };
-    if (!parent || !parentMap.has(parent.id)) {
-      result.push(block);
-    } else {
-      parentMap.get(parent.id)?.children.push(block);
-    }
-    parentMap.set(model.id, block);
-  }
-  return result;
-}
-
-function getLastSelectBlock(blocks: SelectedBlock[]): SelectedBlock | null {
-  if (blocks.length === 0) {
-    return null;
-  }
-  const last = blocks[blocks.length - 1];
-  if (last.children.length === 0) {
-    return last;
-  }
-  return getLastSelectBlock(last.children);
-}
-
-export function getSelectInfo(page: Page): SelectionInfo {
-  if (!page.root) {
-    return {
-      type: 'None',
-      selectedBlocks: [],
-    };
-  }
-
-  let type: SelectionInfo['type'] = 'None';
-  let selectedBlocks: SelectedBlock[] = [];
-  let selectedModels: BaseBlockModel[] = [];
-  const pageBlock = getDefaultPageBlock(page.root);
-  // FIXME: missing selection in edgeless mode
-  const state = pageBlock.selection?.state;
-  const nativeSelection = window.getSelection();
-  if (state?.type === 'block') {
-    type = 'Block';
-    const { selectedBlocks } = state;
-    selectedModels = selectedBlocks.map(block => getModelByElement(block));
-  } else if (nativeSelection && nativeSelection.type !== 'None') {
-    type = nativeSelection.type as DomSelectionType;
-    selectedModels = getModelsByRange(getCurrentRange());
-  }
-  if (type !== 'None') {
-    selectedBlocks = getSelectedBlock(selectedModels);
-    if (type !== 'Block' && nativeSelection && selectedBlocks.length > 0) {
-      const range = nativeSelection.getRangeAt(0);
-      const firstIndex = getQuillIndexByNativeSelection(
-        range.startContainer,
-        range.startOffset as number,
-        true
-      );
-      const endIndex = getQuillIndexByNativeSelection(
-        range.endContainer,
-        range.endOffset as number,
-        false
-      );
-      selectedBlocks[0].startPos = firstIndex;
-      const lastBlock = getLastSelectBlock(selectedBlocks);
-      if (lastBlock) {
-        lastBlock.endPos = endIndex;
-      }
-    }
-  }
-  return {
-    type,
-    selectedBlocks,
-  };
 }
 
 function handleInFrameDragMove(
@@ -891,60 +808,88 @@ export function isDatabase(e: SelectionEvent) {
   return false;
 }
 
+export function blockRangeToNativeRange(blockRange: BlockRange) {
+  const [startNode, startOffset] = getTextNodeBySelectedBlock(
+    blockRange.startModel,
+    blockRange.startOffset
+  );
+  if (!startNode) {
+    throw new Error(
+      'Failed to convert block range to native range. Start node is null.'
+    );
+  }
+  const [endNode, endOffset] = getTextNodeBySelectedBlock(
+    blockRange.endModel,
+    blockRange.endOffset
+  );
+  if (!startNode) {
+    throw new Error(
+      'Failed to convert block range to native range. End node is null.'
+    );
+  }
+  const range = new Range();
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
+  return range;
+}
+
+export function nativeRangeToBlockRange(range: Range): BlockRange {
+  const models = getModelsByRange(range);
+  const startOffset = getQuillIndexByNativeSelection(
+    range.startContainer,
+    range.startOffset
+  );
+  const endOffset = getQuillIndexByNativeSelection(
+    range.endContainer,
+    range.endOffset
+  );
+  return {
+    startModel: models[0],
+    startOffset,
+    endModel: models[models.length - 1],
+    endOffset,
+    betweenModels: models.slice(1, -1),
+  };
+}
+
+/**
+ * Sometimes, the block in the block range is updated, we need to update the block range manually.
+ *
+ * Note: it will mutate the `blockRange` object.
+ */
+export function updateBlockRange(
+  blockRange: BlockRange,
+  oldModel: BaseBlockModel,
+  newModel: BaseBlockModel
+) {
+  if (blockRange.startModel === oldModel) {
+    blockRange.startModel = newModel;
+  }
+  if (blockRange.endModel === oldModel) {
+    blockRange.endModel = newModel;
+  }
+  blockRange.betweenModels = blockRange.betweenModels.map(model =>
+    model === oldModel ? newModel : model
+  );
+  return blockRange;
+}
+
 /**
  * Save the current block selection. Can be restored with {@link restoreSelection}.
  *
  * See also {@link restoreSelection}
- *
- * Note: If only one block is selected, this function will return the same block twice still.
- * Note: If select multiple blocks, blocks in the middle will be skipped, only the first and last block will be returned.
  */
-export const saveBlockSelection = (
-  selection = window.getSelection()
-): [SelectedBlock, SelectedBlock] => {
-  assertExists(selection);
-  const models = getModelsByRange(getCurrentRange(selection));
-  const startPos = getQuillIndexByNativeSelection(
-    selection.anchorNode,
-    selection.anchorOffset,
-    true
-  );
-  const endPos = getQuillIndexByNativeSelection(
-    selection.focusNode,
-    selection.focusOffset,
-    false
-  );
-
-  return [
-    { id: models[0].id, startPos, children: [] },
-    { id: models[models.length - 1].id, endPos, children: [] },
-  ];
-};
+export function saveBlockRange(range = getCurrentRange()): BlockRange {
+  return nativeRangeToBlockRange(range);
+}
 
 /**
  * Restore the block selection.
  * See also {@link resetNativeSelection}
  */
-export function restoreSelection(selectedBlocks: SelectedBlock[]) {
-  const startBlock = selectedBlocks[0];
-  const [startNode, startOffset] = getTextNodeBySelectedBlock(startBlock);
-
-  const endBlock = selectedBlocks[selectedBlocks.length - 1];
-  const [endNode, endOffset] = getTextNodeBySelectedBlock(endBlock);
-  if (!startNode || !endNode) {
-    console.warn(
-      'restoreSelection: startNode or endNode is null',
-      startNode,
-      endNode
-    );
-    return;
-  }
-
-  const range = getCurrentRange();
-  range.setStart(startNode, startOffset);
-  range.setEnd(endNode, endOffset);
+export function restoreSelection(blockRange: BlockRange) {
+  const range = blockRangeToNativeRange(blockRange);
   resetNativeSelection(range);
-  return range;
 }
 
 /**
