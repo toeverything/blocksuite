@@ -4,6 +4,7 @@ import './format-bar-node.js';
 import { Page, Signal } from '@blocksuite/store';
 
 import {
+  getCurrentBlockRange,
   getCurrentRange,
   getDefaultPageBlock,
   throttle,
@@ -121,10 +122,17 @@ export const showFormatQuickBar = async ({
   };
 
   const selectionChangeHandler = () => {
-    const selection = document.getSelection();
-    const selectNothing =
-      !selection || selection.type === 'Caret' || selection.type === 'None';
-    if (selectNothing) {
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      abortController.abort();
+      return;
+    }
+    // If the selection is collapsed, abort the format quick bar
+    if (
+      blockRange.type &&
+      blockRange.startModel === blockRange.endModel &&
+      blockRange.startOffset === blockRange.endOffset
+    ) {
       abortController.abort();
       return;
     }
