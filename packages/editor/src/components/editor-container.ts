@@ -149,6 +149,18 @@ export class EditorContainer extends NonShadowLitElement {
         this.requestUpdate();
       })
     );
+    this._disposables.add(
+      this.page.signals.blockUpdated.on(async ({ type, id }) => {
+        const block = this.page.getBlockById(id);
+
+        if (!block) return;
+
+        if (type === 'update') {
+          const service = await getServiceOrRegister(block.flavour);
+          service.updateEffect(block);
+        }
+      })
+    );
 
     this._placeholderInput?.focus();
   }

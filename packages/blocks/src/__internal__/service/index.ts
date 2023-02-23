@@ -1,7 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { DeltaOperation } from 'quill';
 
-import type { IService } from '../utils/index.js';
+import { handleUnindent } from '../rich-text/rich-text-operations.js';
+import { IService, supportsChildren } from '../utils/index.js';
 
 export class BaseService implements IService {
   onLoad?: () => Promise<void>;
@@ -55,5 +56,22 @@ export class BaseService implements IService {
       text = `<a href='${attributes.link}'>${text}</a>`;
     }
     return text;
+  }
+
+  /**
+   * side effect when update block
+   */
+  updateEffect(block: BaseBlockModel) {
+    if (!supportsChildren(block)) {
+      let len = block.children.length;
+      while (len > 0) {
+        if (block.children[0]) {
+          handleUnindent(block.page, block.children[0]);
+          len--;
+        } else {
+          break;
+        }
+      }
+    }
   }
 }

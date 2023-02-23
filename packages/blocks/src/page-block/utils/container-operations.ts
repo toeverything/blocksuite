@@ -1,4 +1,3 @@
-import { getServiceOrRegister } from '@blocksuite/blocks';
 import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
@@ -172,12 +171,6 @@ export async function updateBlockType(
       }
       updateBlockRange(savedBlockRange, model, newModel);
       lastNewId = newId;
-    }
-  });
-  models.forEach(async model => {
-    if (model.flavour === 'affine:paragraph' && type) {
-      const service = await getServiceOrRegister(model.flavour);
-      service.updateTypeEffect(model as ParagraphBlockModel, type);
     }
   });
 
