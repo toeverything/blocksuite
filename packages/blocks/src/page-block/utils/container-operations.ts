@@ -1,10 +1,8 @@
-import { getServiceOrRegister } from '@blocksuite/blocks';
 import {
   assertExists,
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import { assertExists, assertFlavours } from '@blocksuite/global/utils';
 import { BaseBlockModel, Page, Text } from '@blocksuite/store';
 import type { TextAttributes } from '@blocksuite/virgo';
 

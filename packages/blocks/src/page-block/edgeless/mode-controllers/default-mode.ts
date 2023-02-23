@@ -264,7 +264,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({ direction });
+      showFormatQuickBar({ page: this._page, direction });
     } else if (this.blockSelectionState.type === 'single') {
       if (!this._frameSelectionState) {
         this._page.captureSync();
