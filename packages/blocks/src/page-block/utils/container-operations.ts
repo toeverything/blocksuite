@@ -252,8 +252,13 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
     return format;
   }
   const formatArr = [];
-  // Skip code block
-  if (!matchFlavours(blockRange.startModel, ['affine:code'])) {
+  // Start block
+  // Skip code block or empty block
+  if (
+    !matchFlavours(blockRange.startModel, ['affine:code']) &&
+    blockRange.startModel.text &&
+    blockRange.startModel.text.length
+  ) {
     const startRichText = getRichTextByModel(blockRange.startModel);
     assertExists(startRichText);
     const startFormat = startRichText.quill.getFormat(
@@ -262,15 +267,21 @@ export function getCombinedFormat(blockRange: BlockRange): TextAttributes {
     );
     formatArr.push(startFormat);
   }
-  if (!matchFlavours(blockRange.endModel, ['affine:code'])) {
+  // End block
+  if (
+    !matchFlavours(blockRange.endModel, ['affine:code']) &&
+    blockRange.endModel.text &&
+    blockRange.endModel.text.length
+  ) {
     const endRichText = getRichTextByModel(blockRange.endModel);
     assertExists(endRichText);
     const endFormat = endRichText.quill.getFormat(0, blockRange.endOffset);
     formatArr.push(endFormat);
   }
+  // Between blocks
   blockRange.betweenModels
-    .filter(model => !model.text || model.text.length)
     .filter(model => !matchFlavours(model, ['affine:code']))
+    .filter(model => model.text && model.text.length)
     .forEach(model => {
       const richText = getRichTextByModel(model);
       assertExists(richText);
