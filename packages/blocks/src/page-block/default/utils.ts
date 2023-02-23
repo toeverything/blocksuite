@@ -485,22 +485,35 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
         skipX,
       });
     },
-    onDropCallback(e, start, end): void {
+    onDropCallback(e, blocks, end): void {
       const page = defaultPageBlock.page;
-      const startModel = start.model;
+      const firstDraggingModel = blocks[0].model;
       const rect = end.position;
-      const nextModel = end.model;
-      if (doesInSamePath(page, nextModel, startModel)) {
+      const targetModel = end.model;
+      if (
+        blocks.length === 1 &&
+        doesInSamePath(page, targetModel, firstDraggingModel)
+      ) {
         return;
       }
       page.captureSync();
       const distanceToTop = Math.abs(rect.top - e.y);
       const distanceToBottom = Math.abs(rect.bottom - e.y);
-      page.moveBlock(startModel, nextModel, distanceToTop < distanceToBottom);
+      page.moveBlocks(
+        blocks.map(b => b.model),
+        targetModel,
+        distanceToTop < distanceToBottom
+      );
       defaultPageBlock.signals.updateSelectedRects.emit([]);
       defaultPageBlock.signals.updateFrameSelectionRect.emit(null);
       defaultPageBlock.signals.updateEmbedEditingState.emit(null);
       defaultPageBlock.signals.updateEmbedRects.emit([]);
+
+      // ??? is there a better way?
+      setTimeout(() => {
+        // update selection rects
+        defaultPageBlock.selection.setSelectedBlocks(blocks);
+      });
     },
     setSelectedBlocks(
       selectedBlocks: EditingState | BlockComponentElement[] | null

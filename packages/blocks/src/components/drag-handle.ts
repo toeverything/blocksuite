@@ -1,4 +1,3 @@
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, svg } from 'lit';
@@ -118,7 +117,7 @@ export class DragHandle extends LitElement {
     container: HTMLElement;
     onDropCallback: (
       e: DragEvent,
-      dragged: EditingState,
+      dragged: BlockComponentElement[],
       lastModelState: EditingState
     ) => void;
     getBlockEditingStateByPosition: DragHandleGetModelStateCallback;
@@ -157,7 +156,7 @@ export class DragHandle extends LitElement {
   @property()
   public onDropCallback: (
     e: DragEvent,
-    startModelState: EditingState,
+    draggingBlockElements: BlockComponentElement[],
     lastModelState: EditingState
   ) => void;
 
@@ -460,9 +459,9 @@ export class DragHandle extends LitElement {
       // may drop to the same block position
       return;
     }
-    assertExists(this._startModelState);
+    assertExists(this._draggingElements);
 
-    this.onDropCallback?.(e, this._startModelState, this._lastModelState);
+    this.onDropCallback?.(e, this._draggingElements, this._lastModelState);
 
     this.hide();
   };
