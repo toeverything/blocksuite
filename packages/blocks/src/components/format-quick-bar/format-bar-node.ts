@@ -82,20 +82,8 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      throw new Error("Can't get current block range");
-    }
-    const models =
-      blockRange.startModel === blockRange.endModel
-        ? [blockRange.startModel]
-        : [
-            blockRange.startModel,
-            ...blockRange.betweenModels,
-            blockRange.endModel,
-          ];
-    this.models = models;
-    const startModel = models[0];
+    this.models = this._getCurrentModels();
+    const startModel = this.models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
     this.format = getCurrentCombinedFormat(this.page);
 
@@ -113,7 +101,7 @@ export class FormatQuickBar extends LitElement {
       }
       this.format = getCurrentCombinedFormat(this.page);
     });
-    models.forEach(model => {
+    this.models.forEach(model => {
       const richText = getRichTextByModel(model);
       if (!richText) {
         console.warn(
@@ -138,6 +126,22 @@ export class FormatQuickBar extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposableGroup.dispose();
+  }
+
+  private _getCurrentModels() {
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't get current block range");
+    }
+    const models =
+      blockRange.startModel === blockRange.endModel
+        ? [blockRange.startModel]
+        : [
+            blockRange.startModel,
+            ...blockRange.betweenModels,
+            blockRange.endModel,
+          ];
+    return models;
   }
 
   private _onHover() {
@@ -188,20 +192,13 @@ export class FormatQuickBar extends LitElement {
       flavour: BlockConfig['flavour'],
       type?: string
     ) => {
-      if (!this.page) {
-        throw new Error('Failed to format paragraph! Page not found.');
-      }
-      if (this.paragraphType === `${flavour}/${type}`) {
-        // Already in the target format, convert back to text
-        const { flavour: defaultFlavour, type: defaultType } =
-          paragraphConfig[0];
-        if (this.paragraphType === defaultType) return;
-        updateBlockType(this.models, defaultFlavour, defaultType);
-        this.paragraphType = `${defaultFlavour}/${defaultType}`;
-        return;
-      }
-      updateBlockType(this.models, flavour, type);
-      this.paragraphType = `${flavour}/${type}`;
+      // Already in the target format, should convert back to text
+      const alreadyTargetType = this.paragraphType === `${flavour}/${type}`;
+      const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
+      const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
+      const targetType = alreadyTargetType ? defaultType : type;
+      this.models = updateBlockType(this.models, targetFlavour, targetType);
+      this.paragraphType = `${targetFlavour}/${targetType}`;
       this.positionUpdated.emit();
     };
 

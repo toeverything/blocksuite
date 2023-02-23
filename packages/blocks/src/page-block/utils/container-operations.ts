@@ -123,13 +123,13 @@ export async function updateSelectedTextType(
   updateBlockType(modelsInRange, flavour, type);
 }
 
-export async function updateBlockType(
+export function updateBlockType(
   models: BaseBlockModel[],
   flavour: keyof BlockSchema,
   type?: string
 ) {
   if (!models.length) {
-    return;
+    return [];
   }
   const page = models[0].page;
   const hasSamePage = models.every(model => model.page === page);
@@ -158,30 +158,33 @@ export async function updateBlockType(
         betweenModels: [],
       })
     );
-    return;
+    return [model];
   }
   // The lastNewId will not be null since we have checked models.length > 0
-  let lastNewId: string | null = null;
+  const newModels: BaseBlockModel[] = [];
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
       page.updateBlock(model, { type });
-    } else {
-      const newId = transformBlock(model, flavour, type);
-      const newModel = page.getBlockById(newId);
-      if (!newModel) {
-        throw new Error('Failed to get new model after transform block!');
-      }
-      savedBlockRange && updateBlockRange(savedBlockRange, model, newModel);
-      lastNewId = newId;
+      newModels.push(model);
+      return;
     }
+    const newId = transformBlock(model, flavour, type);
+    const newModel = page.getBlockById(newId);
+    if (!newModel) {
+      throw new Error('Failed to get new model after transform block!');
+    }
+    savedBlockRange && updateBlockRange(savedBlockRange, model, newModel);
+    newModels.push(newModel);
   });
 
   // Focus last new block
-  if (lastNewId) await asyncFocusRichText(page, lastNewId);
+  const lastModel = newModels.at(-1);
+  if (lastModel) asyncFocusRichText(page, lastModel.id);
   if (savedBlockRange && savedBlockRange.type === 'Native') {
-    restoreSelection(savedBlockRange);
+    requestAnimationFrame(() => restoreSelection(savedBlockRange));
   }
+  return newModels;
 }
 
 function transformBlock(model: BaseBlockModel, flavour: string, type?: string) {
