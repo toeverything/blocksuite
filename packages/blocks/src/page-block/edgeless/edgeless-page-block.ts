@@ -120,6 +120,7 @@ export class EdgelessPageBlockComponent
     updateSelection: new Signal<EdgelessSelectionState>(),
     hoverUpdated: new Signal(),
     shapeUpdated: new Signal(),
+    mouseModeUpdated: new Signal<MouseMode>(),
   };
 
   surface!: SurfaceManager;
@@ -227,6 +228,7 @@ export class EdgelessPageBlockComponent
     this.signals.hoverUpdated.on(() => this.requestUpdate());
     this.signals.updateSelection.on(() => this.requestUpdate());
     this.signals.shapeUpdated.on(() => this.requestUpdate());
+    this.signals.mouseModeUpdated.on(mouseMode => (this.mouseMode = mouseMode));
     const historyDisposable = this.page.signals.historyUpdated.on(() => {
       this._clearSelection();
       this.requestUpdate();
@@ -249,12 +251,6 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
-
-    this._disposables.add(
-      this._toolbar.signals.change.on(mouseMode => {
-        this.mouseMode = mouseMode;
-      })
-    );
   }
 
   connectedCallback() {
@@ -268,6 +264,7 @@ export class EdgelessPageBlockComponent
     this.signals.viewportUpdated.dispose();
     this.signals.hoverUpdated.dispose();
     this.signals.shapeUpdated.dispose();
+    this.signals.mouseModeUpdated.dispose();
     this._disposables.dispose();
     this._selection.dispose();
     this.surface.dispose();
@@ -339,6 +336,7 @@ export class EdgelessPageBlockComponent
           : null}
       </div>
       <edgeless-toolbar-with-flag
+        .mouseMode=${this.mouseMode}
         .edgeless=${this}
         .mouseRoot=${this.mouseRoot}
       ></edgeless-toolbar-with-flag>

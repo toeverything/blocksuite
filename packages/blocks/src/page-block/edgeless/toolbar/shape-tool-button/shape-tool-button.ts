@@ -4,8 +4,10 @@ import './shapes-menu.js';
 import { ShapeIcon } from '@blocksuite/global/config';
 import { createPopper } from '@popperjs/core';
 import { html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
+import type { MouseMode } from '../../../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessShapesMenu } from './shapes-menu.js';
 
 interface ShapesMenuInstance {
@@ -39,6 +41,12 @@ function createShapesMenuPopper(reference: HTMLElement): ShapesMenuInstance {
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends LitElement {
+  @property()
+  mouseMode?: MouseMode;
+
+  @property()
+  edgeless?: EdgelessPageBlockComponent;
+
   private _shapesMenu?: ShapesMenuInstance;
 
   private _toggleShapesMenu() {
@@ -47,6 +55,15 @@ export class EdgelessShapeToolButton extends LitElement {
       this._shapesMenu = undefined;
     } else {
       this._shapesMenu = createShapesMenuPopper(this);
+      this._shapesMenu.element.mouseMode = this.mouseMode;
+      this._shapesMenu.element.edgeless = this.edgeless;
+    }
+  }
+
+  updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('mouseMode')) {
+      this._shapesMenu?.dispose();
+      this._shapesMenu = undefined;
     }
   }
 
@@ -57,8 +74,14 @@ export class EdgelessShapeToolButton extends LitElement {
   }
 
   render() {
+    const type = this.mouseMode?.type;
+
     return html`
-      <edgeless-tool-icon-button @tool.click=${this._toggleShapesMenu}>
+      <edgeless-tool-icon-button
+        .tooltips=${'Shape'}
+        .active=${type === 'shape'}
+        @tool.click=${() => this._toggleShapesMenu()}
+      >
         ${ShapeIcon}
       </edgeless-tool-icon-button>
     `;

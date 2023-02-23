@@ -9,11 +9,11 @@ import {
   SelectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
-import { Signal } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolBar extends LitElement {
@@ -52,13 +52,11 @@ export class EdgelessToolBar extends LitElement {
   @property()
   mouseMode?: MouseMode;
 
-  readonly signals = {
-    change: new Signal<MouseMode>(),
-  };
+  @property()
+  edgeless?: EdgelessPageBlockComponent;
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.signals.change.dispose();
+  private _setMouseMode(mouseMode: MouseMode) {
+    this.edgeless?.signals.mouseModeUpdated.emit(mouseMode);
   }
 
   render() {
@@ -69,19 +67,22 @@ export class EdgelessToolBar extends LitElement {
         <edgeless-tool-icon-button
           .tooltips=${'Select'}
           .active=${type === 'default'}
-          @tool.click=${() => this.signals.change.emit({ type: 'default' })}
+          @tool.click=${() => this._setMouseMode({ type: 'default' })}
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .disabled=${false}
+          .disabled=${true}
           .tooltips=${'Text'}
           .active=${false}
           @tool.click=${() => console.log('Text')}
         >
           ${TextIconLarge}
         </edgeless-tool-icon-button>
-        <edgeless-shape-tool-button></edgeless-shape-tool-button>
+        <edgeless-shape-tool-button
+          .mouseMode=${this.mouseMode}
+          .edgeless=${this.edgeless}
+        ></edgeless-shape-tool-button>
         <edgeless-tool-icon-button
           .disabled=${true}
           .tooltips=${'Image'}

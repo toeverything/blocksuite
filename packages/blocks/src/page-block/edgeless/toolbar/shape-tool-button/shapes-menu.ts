@@ -1,8 +1,10 @@
 import '../tool-icon-button.js';
 
 import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
+import type { MouseMode } from '../../../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { ShapeComponentConfig } from './shapes-menu-config.js';
 
 @customElement('edgeless-shapes-menu')
@@ -17,19 +19,38 @@ export class EdgelessShapesMenu extends LitElement {
       box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
       border-radius: 8px;
       fill: none;
-      stroke: var(--affine-line-number-color);
+      stroke: currentColor;
     }
   `;
 
+  @property()
+  mouseMode?: MouseMode;
+
+  @property()
+  edgeless?: EdgelessPageBlockComponent;
+
   render() {
+    const type =
+      this.mouseMode?.type === 'shape' ? this.mouseMode.shape : undefined;
+
     return html`
       <div class="shape-menu-container">
-        ${ShapeComponentConfig.map(({ name, icon, tooltip, disabled }) => {
+        ${ShapeComponentConfig.map(({ name, icon, tooltips, disabled }) => {
           return html`
             <edgeless-tool-icon-button
               .disabled=${disabled}
-              .tooltips=${tooltip}
-              @tool.click=${() => console.log('click', name)}
+              .tooltips=${tooltips}
+              .active=${type === name}
+              @tool.click=${() => {
+                if (disabled) {
+                  return;
+                }
+                this.edgeless?.signals.mouseModeUpdated.emit({
+                  type: 'shape',
+                  shape: name,
+                  color: '#000000',
+                });
+              }}
             >
               ${icon}
             </edgeless-tool-icon-button>

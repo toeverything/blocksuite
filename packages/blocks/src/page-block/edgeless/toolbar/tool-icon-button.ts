@@ -41,7 +41,7 @@ export class EdgelessToolIconButton extends LitElement {
       opacity: 0;
     }
 
-    .icon-container:not([active]):hover > arrow-tool-tip {
+    .icon-container:hover > arrow-tool-tip {
       opacity: 1;
       transition-delay: 200ms;
     }
