@@ -23,10 +23,7 @@ import {
   isCaptionElement,
   Point,
 } from '../../__internal__/utils/index.js';
-import type {
-  DefaultPageBlockComponent,
-  DefaultPageSignals,
-} from '../default/default-page-block.js';
+import type { DefaultPageSignals } from '../default/default-page-block.js';
 import type { DefaultSelectionManager } from '../default/selection-manager.js';
 import {
   handleBlockSelectionBatchDelete,
@@ -240,27 +237,17 @@ function handleTab(page: Page, selection: DefaultSelectionManager) {
       break;
     }
     case 'block': {
-      handleMultiBlockIndent(
-        page,
-        selection.state.selectedBlocks.map(block => getModelByElement(block))
+      const models = selection.state.selectedBlocks.map(block =>
+        getModelByElement(block)
       );
+      handleMultiBlockIndent(page, models);
 
-      const cachedSelectedBlocks = selection.state.selectedBlocks.concat();
       requestAnimationFrame(() => {
-        const selectBlocks: DefaultPageBlockComponent[] = [];
-        cachedSelectedBlocks.forEach(block => {
-          const newBlock = getBlockElementByModel(
-            (block as DefaultPageBlockComponent).model
-          );
-          if (newBlock) {
-            selectBlocks.push(newBlock as DefaultPageBlockComponent);
-          }
-        });
-        if (!selectBlocks.length) {
-          return;
-        }
         selection.state.type = 'block';
-        selection.state.selectedBlocks = selectBlocks;
+        // get fresh elements
+        selection.state.selectedBlocks = models
+          .map(model => getBlockElementByModel(model))
+          .filter(block => block !== null) as Element[];
         selection.refreshSelectedBlocksRects();
       });
       selection.clear();
