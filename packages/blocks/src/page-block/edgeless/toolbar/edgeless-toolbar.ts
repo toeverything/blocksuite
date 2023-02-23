@@ -14,7 +14,6 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../__internal__/index.js';
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolBar extends LitElement {
@@ -48,87 +47,37 @@ export class EdgelessToolBar extends LitElement {
     .edgeless-toolbar-container[hidden] {
       display: none;
     }
-
-    .icon-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      padding: 4px;
-      color: var(--affine-line-number-color);
-      margin-right: 8px;
-      margin-top: 8px;
-      margin-bottom: 8px;
-      border-radius: 5px;
-    }
-
-    .icon-container:first-child {
-      margin-left: 8px;
-    }
-
-    .icon-container:hover {
-      background: #f7f7f7;
-    }
-
-    .icon-container[clicked] {
-      color: var(--affine-primary-color);
-    }
-
-    .icon-container[disabled] {
-      cursor: not-allowed;
-      color: var(--affine-disable-color);
-    }
-
-    arrow-tool-tip {
-      transform: translateX(-50%) translateY(-50%);
-      left: calc(50%);
-      bottom: 24px;
-      opacity: 0;
-    }
-
-    .icon-container:not([clicked]):hover > arrow-tool-tip {
-      opacity: 1;
-      transition-delay: 200ms;
-    }
   `;
 
+  @property()
+  mouseMode?: MouseMode;
+
   readonly signals = {
-    select: new Signal<MouseMode>(),
+    change: new Signal<MouseMode>(),
   };
-
-  @property()
-  edgeless!: EdgelessPageBlockComponent;
-
-  @property()
-  secondaryToolBar: HTMLElement | null = null;
-
-  private _cleanSecondaryToolBar() {
-    if (this.secondaryToolBar) {
-      this.secondaryToolBar.remove();
-      this.secondaryToolBar = null;
-    }
-  }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._cleanSecondaryToolBar();
+    this.signals.change.dispose();
   }
 
   render() {
+    const type = this.mouseMode?.type;
+
     return html`
       <div class="edgeless-toolbar-container">
         <edgeless-tool-icon-button
-          .disabled=${false}
           .tooltips=${'Select'}
-          .active=${false}
-          @tool.click=${() => console.log('Select')}
+          .active=${type === 'default'}
+          @tool.click=${() => this.signals.change.emit({ type: 'default' })}
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .disabled=${true}
+          .disabled=${false}
           .tooltips=${'Text'}
           .active=${false}
-          .tool.click=${() => console.log('Text')}
+          @tool.click=${() => console.log('Text')}
         >
           ${TextIconLarge}
         </edgeless-tool-icon-button>
@@ -137,7 +86,7 @@ export class EdgelessToolBar extends LitElement {
           .disabled=${true}
           .tooltips=${'Image'}
           .active=${false}
-          .tool.click=${() => console.log('Image')}
+          @tool.click=${() => console.log('Image')}
         >
           ${ImageIcon}
         </edgeless-tool-icon-button>
@@ -145,7 +94,7 @@ export class EdgelessToolBar extends LitElement {
           .disabled=${true}
           .tooltips=${'Connector'}
           .active=${false}
-          .tool.click=${() => console.log('Connector')}
+          @tool.click=${() => console.log('Connector')}
         >
           ${ConnectorIcon}
         </edgeless-tool-icon-button>
@@ -153,7 +102,7 @@ export class EdgelessToolBar extends LitElement {
           .disabled=${true}
           .tooltips=${'Pen'}
           .active=${false}
-          .tool.click=${() => console.log('Pen')}
+          @tool.click=${() => console.log('Pen')}
         >
           ${PenIcon}
         </edgeless-tool-icon-button>
@@ -161,7 +110,7 @@ export class EdgelessToolBar extends LitElement {
           .disabled=${true}
           .tooltips=${'Hand'}
           .active=${false}
-          .tool.click=${() => console.log('Hand')}
+          @tool.click=${() => console.log('Hand')}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>

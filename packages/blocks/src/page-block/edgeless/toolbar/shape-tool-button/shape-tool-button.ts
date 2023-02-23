@@ -2,12 +2,18 @@ import '../tool-icon-button.js';
 import './shapes-menu.js';
 
 import { ShapeIcon } from '@blocksuite/global/config';
-import type { Disposable } from '@blocksuite/global/utils';
 import { createPopper } from '@popperjs/core';
 import { html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-function createShapesMenuPopper(reference: HTMLElement): Disposable {
+import type { EdgelessShapesMenu } from './shapes-menu.js';
+
+interface ShapesMenuInstance {
+  element: EdgelessShapesMenu;
+  dispose: () => void;
+}
+
+function createShapesMenuPopper(reference: HTMLElement): ShapesMenuInstance {
   const shapeComponent = document.createElement('edgeless-shapes-menu');
   document.body.appendChild(shapeComponent);
   const popper = createPopper(reference, shapeComponent, {
@@ -23,6 +29,7 @@ function createShapesMenuPopper(reference: HTMLElement): Disposable {
   });
 
   return {
+    element: shapeComponent,
     dispose: () => {
       shapeComponent.remove();
       popper.destroy();
@@ -32,21 +39,21 @@ function createShapesMenuPopper(reference: HTMLElement): Disposable {
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends LitElement {
-  private _disposeShapesMenu?: Disposable;
+  private _shapesMenu?: ShapesMenuInstance;
 
   private _toggleShapesMenu() {
-    if (this._disposeShapesMenu) {
-      this._disposeShapesMenu.dispose();
-      this._disposeShapesMenu = undefined;
+    if (this._shapesMenu) {
+      this._shapesMenu.dispose();
+      this._shapesMenu = undefined;
     } else {
-      this._disposeShapesMenu = createShapesMenuPopper(this);
+      this._shapesMenu = createShapesMenuPopper(this);
     }
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    this._disposeShapesMenu?.dispose?.();
-    this._disposeShapesMenu = undefined;
+    this._shapesMenu?.dispose?.();
+    this._shapesMenu = undefined;
   }
 
   render() {

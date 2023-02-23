@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
-import './toolbar/edgeless-tool-bar.js';
+import './toolbar/edgeless-toolbar-with-flag.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import type { XYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -40,7 +40,7 @@ import {
   EdgelessSelectionState,
   ViewportState,
 } from './selection-manager.js';
-import type { EdgelessToolBar } from './toolbar/edgeless-tool-bar.js';
+import type { EdgelessToolbarWithFlag } from './toolbar/edgeless-toolbar-with-flag.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -101,14 +101,16 @@ export class EdgelessPageBlockComponent
   @property()
   mouseRoot!: HTMLElement;
 
-  @property()
-  mouseMode!: MouseMode;
-
   @property({ hasChanged: () => true })
   pageModel!: PageBlockModel;
 
   @property({ hasChanged: () => true })
   surfaceModel!: SurfaceBlockModel;
+
+  @state()
+  mouseMode: MouseMode = {
+    type: 'default',
+  };
 
   @query('.affine-surface-canvas')
   private _canvas!: HTMLCanvasElement;
@@ -129,7 +131,8 @@ export class EdgelessPageBlockComponent
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
 
-  private _toolbar: EdgelessToolBar | null = null;
+  @query('edgeless-toolbar-with-flag')
+  private _toolbar!: EdgelessToolbarWithFlag;
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
@@ -196,32 +199,6 @@ export class EdgelessPageBlockComponent
     this._syncSurfaceViewport();
   }
 
-  private _initEdgelessToolBar() {
-    if (this.page.awarenessStore.getFlag('enable_edgeless_toolbar')) {
-      this._toolbar = document.createElement('edgeless-toolbar');
-      this.mouseRoot.appendChild(this._toolbar);
-    }
-    this._disposables.add(
-      this.page.awarenessStore.signals.update.subscribe(
-        msg => msg.state?.flags.enable_edgeless_toolbar,
-        enable => {
-          if (enable) {
-            if (!this._toolbar) {
-              this._toolbar = document.createElement('edgeless-toolbar');
-              this.mouseRoot.appendChild(this._toolbar);
-            }
-          } else {
-            this._toolbar?.remove();
-            this._toolbar = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
-  }
-
   update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseRoot') && changedProperties.has('page')) {
       this._selection = new EdgelessSelectionManager(this);
@@ -233,7 +210,7 @@ export class EdgelessPageBlockComponent
   }
 
   firstUpdated() {
-    this._initEdgelessToolBar();
+    // this._initEdgelessToolBar();
     // TODO: listen to new children
     this.pageModel.children.forEach(frame => {
       frame.propsUpdated.on(() => this._selection.syncSelectionRect());
@@ -272,6 +249,16 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
+
+    this._disposables.add(
+      this._toolbar.signals.change.on(mouseMode => {
+        this.mouseMode = mouseMode;
+      })
+    );
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
   }
 
   disconnectedCallback() {
@@ -285,10 +272,6 @@ export class EdgelessPageBlockComponent
     this._selection.dispose();
     this.surface.dispose();
     this._removeHotkeys();
-    if (this._toolbar) {
-      this._toolbar.remove();
-      this._toolbar = null;
-    }
   }
 
   render() {
@@ -355,6 +338,10 @@ export class EdgelessPageBlockComponent
             `
           : null}
       </div>
+      <edgeless-toolbar-with-flag
+        .edgeless=${this}
+        .mouseRoot=${this.mouseRoot}
+      ></edgeless-toolbar-with-flag>
     `;
   }
 }
