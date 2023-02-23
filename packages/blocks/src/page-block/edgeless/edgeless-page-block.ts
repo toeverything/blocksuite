@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import './toolbar.js';
+import './toolbar/edgeless-tool-bar.js';
 
 import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import type { XYWH } from '@blocksuite/phasor';
@@ -40,7 +40,7 @@ import {
   EdgelessSelectionState,
   ViewportState,
 } from './selection-manager.js';
-import type { EdgelessToolBar } from './toolbar.js';
+import type { EdgelessToolBar } from './toolbar/edgeless-tool-bar.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
