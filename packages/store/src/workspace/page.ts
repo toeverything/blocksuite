@@ -244,14 +244,18 @@ export class Page extends Space<PageData> {
     );
   }
 
-  getParentById(rootId: string, target: BaseBlockModel): BaseBlockModel | null {
-    if (rootId === target.id) return null;
+  getParentById(
+    rootId: string,
+    target: BaseBlockModel | string
+  ): BaseBlockModel | null {
+    const targetId = typeof target === 'string' ? target : target.id;
+    if (rootId === targetId) return null;
 
     const root = this._blockMap.get(rootId);
     if (!root) return null;
 
     for (const [childId] of root.childMap) {
-      if (childId === target.id) return root;
+      if (childId === targetId) return root;
 
       const parent = this.getParentById(childId, target);
       if (parent !== null) return parent;
@@ -259,7 +263,7 @@ export class Page extends Space<PageData> {
     return null;
   }
 
-  getParent(block: BaseBlockModel) {
+  getParent(block: BaseBlockModel | string) {
     if (!this.root) return null;
 
     return this.getParentById(this.root.id, block);

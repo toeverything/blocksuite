@@ -8,6 +8,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
 import {
+  BlockComponentElement,
   doesInSamePath,
   getBlockById,
   getBlockElementByModel,
@@ -28,6 +29,7 @@ export interface EditingState {
   model: BaseBlockModel;
   position: DOMRect;
   index: number;
+  element: BlockComponentElement;
 }
 
 function hasOptionBar(block: BaseBlockModel) {
@@ -196,6 +198,7 @@ function binarySearchBlockEditingState(
                 index: mid,
                 position: result.blockRect,
                 model: result.block,
+                element: result.hoverDom,
               };
             }
           }
@@ -211,6 +214,7 @@ function binarySearchBlockEditingState(
         index: mid,
         position: blockRect,
         model: block,
+        element: hoverDom,
       };
     }
 
@@ -498,14 +502,21 @@ export function createDragHandle(defaultPageBlock: DefaultPageBlockComponent) {
       defaultPageBlock.signals.updateEmbedEditingState.emit(null);
       defaultPageBlock.signals.updateEmbedRects.emit([]);
     },
-    setSelectedBlocks(selectedBlocks: EditingState | null): void {
-      if (selectedBlocks) {
+    setSelectedBlocks(
+      selectedBlocks: EditingState | BlockComponentElement[] | null
+    ): void {
+      if (Array.isArray(selectedBlocks)) {
+        defaultPageBlock.selection.setSelectedBlocks(selectedBlocks);
+      } else if (selectedBlocks) {
         const { position, index } = selectedBlocks;
         defaultPageBlock.selection.selectBlocksByIndexAndBounding(
           index,
           position
         );
       }
+    },
+    getSelectedBlocks() {
+      return defaultPageBlock.selection.state.selectedBlocks;
     },
   });
 }

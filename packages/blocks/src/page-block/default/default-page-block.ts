@@ -395,20 +395,24 @@ export class DefaultPageBlockComponent
   private _initDragHandle = () => {
     const createHandle = () => {
       this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getDropAllowedBlocks = draggingBlock => {
+      this.components.dragHandle.getDropAllowedBlocks = draggingBlockIds => {
         if (
-          draggingBlock &&
+          draggingBlockIds &&
+          draggingBlockIds.length === 1 &&
           Utils.doesInsideBlockByFlavour(
             this.page,
-            draggingBlock,
+            draggingBlockIds[0],
             'affine:database'
           )
         ) {
           return getAllowSelectedBlocks(
-            this.page.getParent(draggingBlock) as BaseBlockModel
+            this.page.getParent(draggingBlockIds[0]) as BaseBlockModel
           );
         }
-        return getAllowSelectedBlocks(this.model);
+
+        return getAllowSelectedBlocks(this.model).filter(block => {
+          return !draggingBlockIds?.includes(block.id);
+        });
       };
     };
     if (
