@@ -114,7 +114,7 @@ export const showFormatQuickBar = async ({
 
   // Handle selection change
 
-  const mouseUpHandler = (e: MouseEvent) => {
+  const mouseDownHandler = (e: MouseEvent) => {
     if (e.target === formatQuickBar) {
       return;
     }
@@ -142,7 +142,7 @@ export const showFormatQuickBar = async ({
   const popstateHandler = () => {
     abortController.abort();
   };
-  document.addEventListener('mouseup', mouseUpHandler);
+  document.addEventListener('mousedown', mouseDownHandler);
   document.addEventListener('selectionchange', selectionChangeHandler);
   // Fix https://github.com/toeverything/AFFiNE/issues/855
   window.addEventListener('popstate', popstateHandler);
@@ -154,7 +154,7 @@ export const showFormatQuickBar = async ({
   abortController.signal.addEventListener('abort', () => {
     scrollContainer?.removeEventListener('scroll', updatePos);
     window.removeEventListener('resize', updatePos);
-    document.removeEventListener('mouseup', mouseUpHandler);
+    document.removeEventListener('mouseup', mouseDownHandler);
     document.removeEventListener('selectionchange', selectionChangeHandler);
     window.removeEventListener('popstate', popstateHandler);
     positionUpdatedSignal.dispose();
