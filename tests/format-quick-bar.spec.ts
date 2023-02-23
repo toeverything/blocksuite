@@ -666,7 +666,7 @@ test('should format quick bar action status updated while undo', async ({
 });
 
 test('should format quick bar work in block selection', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, { enable_block_selection_format_bar: true });
   const { frameId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   const coord = await getIndexCoordinate(page, [1, 2]);

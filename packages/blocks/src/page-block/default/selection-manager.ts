@@ -662,6 +662,11 @@ export class DefaultSelectionManager {
       }
       showFormatQuickBar({ page: this.page, direction });
     } else if (this.state.type === 'block') {
+      if (
+        !this.page.awarenessStore.getFlag('enable_block_selection_format_bar')
+      ) {
+        return;
+      }
       const blocks = this.state.selectedBlocks;
 
       if (!blocks.length) {
