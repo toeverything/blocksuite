@@ -152,6 +152,7 @@ export async function updateBlockType(
     }
     requestAnimationFrame(() =>
       restoreSelection({
+        type: 'Native',
         startModel: model,
         endModel: model,
         startOffset: 0,
@@ -323,7 +324,6 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
   }
   // common case
   // format start model
-  const savedBlockRange = saveBlockRange();
   if (!matchFlavours(startModel, ['affine:code'])) {
     startModel.text?.format(startOffset, startModel.text.length - startOffset, {
       [key]: !format[key],
@@ -339,7 +339,9 @@ function formatBlockRange(blockRange: BlockRange, key: keyof TextAttributes) {
     .forEach(model => {
       model.text?.format(0, model.text.length, { [key]: !format[key] });
     });
-  restoreSelection(savedBlockRange);
+  if (blockRange.type === 'Native') {
+    restoreSelection(blockRange);
+  }
 }
 
 export function handleFormat(page: Page, key: keyof TextAttributes) {

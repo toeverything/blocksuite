@@ -349,6 +349,7 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
       // .filter(model => model.text);
       if (models.length) {
         return {
+          type: 'Block',
           startModel: models[0],
           startOffset: 0,
           endModel: models[models.length - 1],
@@ -870,6 +871,7 @@ export function nativeRangeToBlockRange(range: Range): BlockRange {
     range.endOffset
   );
   return {
+    type: 'Native',
     startModel: models[0],
     startOffset,
     endModel: models[models.length - 1],
