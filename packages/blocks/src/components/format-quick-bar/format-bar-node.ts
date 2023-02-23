@@ -18,15 +18,14 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  getCurrentRange,
-  getModelsByRange,
+  getCurrentBlockRange,
   getRichTextByModel,
 } from '../../__internal__/utils/index.js';
 import { formatConfig } from '../../page-block/utils/const.js';
 import {
   DragDirection,
-  getFormat,
-  updateSelectedTextType,
+  getCurrentCombinedFormat,
+  updateBlockType,
 } from '../../page-block/utils/index.js';
 import { compareTopAndBottomSpace } from '../../page-block/utils/position.js';
 import { toast } from '../toast.js';
@@ -35,6 +34,9 @@ import { formatQuickBarStyle } from './styles.js';
 @customElement('format-quick-bar')
 export class FormatQuickBar extends LitElement {
   static styles = formatQuickBarStyle;
+
+  @property()
+  page!: Page;
 
   @property()
   left: string | null = null;
@@ -55,9 +57,6 @@ export class FormatQuickBar extends LitElement {
 
   @state()
   models: BaseBlockModel[] = [];
-
-  @state()
-  page: Page | null = null;
 
   @state()
   paragraphType: `${string}/${string}` = `${paragraphConfig[0].flavour}/${paragraphConfig[0].type}`;
@@ -83,16 +82,10 @@ export class FormatQuickBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    // TODO handle multiple selection
-    const models = getModelsByRange(getCurrentRange());
-    this.models = models;
-    if (!models.length) {
-      return;
-    }
-    const startModel = models[0];
-    this.format = getFormat();
+    this.models = this._getCurrentModels();
+    const startModel = this.models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;
-    this.page = startModel.page as Page;
+    this.format = getCurrentCombinedFormat(this.page);
 
     this.addEventListener('mousedown', (e: MouseEvent) => {
       // Prevent click event from making selection lost
@@ -103,9 +96,12 @@ export class FormatQuickBar extends LitElement {
     });
 
     const mutationObserver = new MutationObserver(() => {
-      this.format = getFormat();
+      if (!this.page) {
+        return;
+      }
+      this.format = getCurrentCombinedFormat(this.page);
     });
-    models.forEach(model => {
+    this.models.forEach(model => {
       const richText = getRichTextByModel(model);
       if (!richText) {
         console.warn(
@@ -130,6 +126,22 @@ export class FormatQuickBar extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._disposableGroup.dispose();
+  }
+
+  private _getCurrentModels() {
+    const blockRange = getCurrentBlockRange(this.page);
+    if (!blockRange) {
+      throw new Error("Can't get current block range");
+    }
+    const models =
+      blockRange.startModel === blockRange.endModel
+        ? [blockRange.startModel]
+        : [
+            blockRange.startModel,
+            ...blockRange.betweenModels,
+            blockRange.endModel,
+          ];
+    return models;
   }
 
   private _onHover() {
@@ -180,24 +192,17 @@ export class FormatQuickBar extends LitElement {
       flavour: BlockConfig['flavour'],
       type?: string
     ) => {
-      if (!this.page) {
-        throw new Error('Failed to format paragraph! Page not found.');
-      }
-      if (this.paragraphType === `${flavour}/${type}`) {
-        // Already in the target format, convert back to text
-        const { flavour: defaultFlavour, type: defaultType } =
-          paragraphConfig[0];
-        if (this.paragraphType === defaultType) return;
-        updateSelectedTextType(defaultFlavour, defaultType);
-        this.paragraphType = `${defaultFlavour}/${defaultType}`;
-        return;
-      }
-      updateSelectedTextType(flavour, type);
-      this.paragraphType = `${flavour}/${type}`;
+      // Already in the target format, should convert back to text
+      const alreadyTargetType = this.paragraphType === `${flavour}/${type}`;
+      const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
+      const targetFlavour = alreadyTargetType ? defaultFlavour : flavour;
+      const targetType = alreadyTargetType ? defaultType : type;
+      this.models = updateBlockType(this.models, targetFlavour, targetType);
+      this.paragraphType = `${targetFlavour}/${targetType}`;
       this.positionUpdated.emit();
     };
 
-    return html` <div
+    return html`<div
       class="paragraph-panel"
       style="${styles}"
       @mouseover=${this._onHover}
@@ -255,6 +260,8 @@ export class FormatQuickBar extends LitElement {
               abortController: this.abortController,
               format: this.format,
             });
+            // format state need to update after format
+            this.format = getCurrentCombinedFormat(page);
             this.positionUpdated.emit();
           }}
         >

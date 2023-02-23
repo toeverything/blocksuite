@@ -30,7 +30,7 @@ const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
 const notStrictCharacterAndSpaceReg =
   /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}\s]/u;
 
-export function setStartRange(editableContainer: Element) {
+function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();
   let firstNode = editableContainer.firstChild;
   while (firstNode?.firstChild) {
@@ -43,7 +43,7 @@ export function setStartRange(editableContainer: Element) {
   return newRange;
 }
 
-export function setEndRange(editableContainer: Element) {
+function setEndRange(editableContainer: Element) {
   const newRange = document.createRange();
   let lastNode = editableContainer.lastChild;
   while (lastNode?.lastChild) {
@@ -135,7 +135,6 @@ export async function focusRichText(
         newLeft = right - 1;
       }
       range = caretRangeFromPoint(newLeft, newTop);
-      resetNativeSelection(range);
       break;
     }
   }
@@ -338,6 +337,34 @@ export function getCurrentRange(selection = window.getSelection()) {
     console.warn('getCurrentRange may be wrong, rangeCount > 1');
   }
   return selection.getRangeAt(0);
+}
+
+export function getCurrentBlockRange(page: Page): BlockRange | null {
+  // check exist block selection
+  if (page.root) {
+    const pageBlock = getDefaultPageBlock(page.root);
+    if (pageBlock.selection) {
+      const selectedBlock = pageBlock.selection.state.selectedBlocks;
+      const models = selectedBlock.map(element => getModelByElement(element));
+      // .filter(model => model.text);
+      if (models.length) {
+        return {
+          type: 'Block',
+          startModel: models[0],
+          startOffset: 0,
+          endModel: models[models.length - 1],
+          endOffset: models[models.length - 1].text?.length ?? 0,
+          betweenModels: models.slice(1, models.length - 1),
+        };
+      }
+    }
+  }
+  // check exist native selection
+  if (hasNativeSelection()) {
+    const range = getCurrentRange();
+    return nativeRangeToBlockRange(range);
+  }
+  return null;
 }
 
 function handleInFrameDragMove(
@@ -844,6 +871,7 @@ export function nativeRangeToBlockRange(range: Range): BlockRange {
     range.endOffset
   );
   return {
+    type: 'Native',
     startModel: models[0],
     startOffset,
     endModel: models[models.length - 1],
@@ -872,15 +900,6 @@ export function updateBlockRange(
     model === oldModel ? newModel : model
   );
   return blockRange;
-}
-
-/**
- * Save the current block selection. Can be restored with {@link restoreSelection}.
- *
- * See also {@link restoreSelection}
- */
-export function saveBlockRange(range = getCurrentRange()): BlockRange {
-  return nativeRangeToBlockRange(range);
 }
 
 /**

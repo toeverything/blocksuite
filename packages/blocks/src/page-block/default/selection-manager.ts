@@ -653,41 +653,36 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    this._showFormatQuickBar(e);
-  };
 
-  private _showFormatQuickBar(e: SelectionEvent) {
     if (this.state.type === 'native') {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-
-      showFormatQuickBar({ direction });
+      showFormatQuickBar({ page: this.page, direction });
     } else if (this.state.type === 'block') {
-      // TODO handle block selection
-      // const direction = getDragDirection(e);
-      // const { selectedRichTexts } = this._getSelectedBlockInfo(e);
-      // if (selectedRichTexts.length === 0) {
-      //   // Selecting nothing
-      //   return;
-      // }
-      // const selectedBlocks = selectedRichTexts.map(richText => {
-      //   return getBlockById(richText.model.id) as unknown as HTMLElement;
-      // });
-      // const selectedType: SelectedBlockType = selectedBlocks.every(block => {
-      //   return /paragraph-block/i.test(block.tagName);
-      // })
-      //   ? 'text'
-      //   : 'other';
-      // console.log(`selectedType: ${selectedType}`, this.state.type);
-      // const anchor = ['rightDown', 'leftDown'].includes(direction)
-      //   ? selectedBlocks[selectedBlocks.length - 1]
-      //   : selectedBlocks[0];
-      // showFormatQuickBar({ anchorEl: anchor });
+      if (
+        !this.page.awarenessStore.getFlag('enable_block_selection_format_bar')
+      ) {
+        return;
+      }
+      const blocks = this.state.selectedBlocks;
+
+      if (!blocks.length) {
+        return;
+      }
+      const firstBlock = blocks[0];
+      const lastBlock = blocks[blocks.length - 1];
+
+      const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
+      showFormatQuickBar({
+        page: this.page,
+        direction,
+        anchorEl: direction === 'center-bottom' ? lastBlock : firstBlock,
+      });
     }
-  }
+  };
 
   private _onContainerClick = (e: SelectionEvent) => {
     // do nothing when clicking on scrollbar
@@ -767,7 +762,7 @@ export class DefaultSelectionManager {
     if (this._container.readonly) {
       return;
     }
-    showFormatQuickBar({ direction: 'center-bottom' });
+    showFormatQuickBar({ page: this.page, direction: 'center-bottom' });
   };
 
   private _onContainerContextMenu = (e: SelectionEvent) => {
@@ -827,8 +822,6 @@ export class DefaultSelectionManager {
       return;
     }
 
-    // Fix selection direction after support multi-line selection by keyboard
-    // FIXME: if selection produced by mouse, it always be `left-right`
     const offsetDelta = selection.anchorOffset - selection.focusOffset;
     let direction: 'left-right' | 'right-left' | 'none' = 'none';
 
@@ -837,7 +830,9 @@ export class DefaultSelectionManager {
     } else if (offsetDelta < 0) {
       direction = 'left-right';
     }
+    // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
+      page: this.page,
       direction: direction === 'left-right' ? 'right-bottom' : 'left-top',
     });
   };
