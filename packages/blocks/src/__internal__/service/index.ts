@@ -62,16 +62,16 @@ export class BaseService implements IService {
    * side effect when update block
    */
   updateEffect(block: BaseBlockModel) {
-    if (!supportsChildren(block)) {
-      let len = block.children.length;
-      while (len > 0) {
-        if (block.children[0]) {
-          handleUnindent(block.page, block.children[0]);
-          len--;
-        } else {
-          break;
-        }
-      }
+    // we need to unindent the first child of the block if it not
+    // support children
+    if (supportsChildren(block)) {
+      return;
     }
+
+    if (!block.children.length) {
+      return;
+    }
+
+    handleUnindent(block.page, block.children[0], 0, false);
   }
 }

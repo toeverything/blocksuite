@@ -321,11 +321,20 @@ test('update paragraph with children to head type', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
+
   await type(page, '# ');
 
-  // # aaa
-  // bbb
-  //   ccc
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
+  await assertBlockChildrenIds(page, '2', []);
+  await assertBlockChildrenIds(page, '3', ['4']);
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['# aaa', 'bbb', 'ccc']);
+  await assertBlockChildrenIds(page, '1', ['2']);
+  await assertBlockChildrenIds(page, '2', ['3', '4']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['aaa', 'bbb', 'ccc']);
   await assertBlockChildrenIds(page, '2', []);
   await assertBlockChildrenIds(page, '3', ['4']);
 });
