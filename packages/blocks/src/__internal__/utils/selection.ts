@@ -343,18 +343,19 @@ export function getCurrentBlockRange(page: Page): BlockRange | null {
   // check exist block selection
   if (page.root) {
     const pageBlock = getDefaultPageBlock(page.root);
-    // TODO fix edgeless mode
-    const selectedBlock = pageBlock.selection.state.selectedBlocks;
-    const models = selectedBlock.map(element => getModelByElement(element));
-    // .filter(model => model.text);
-    if (models.length) {
-      return {
-        startModel: models[0],
-        startOffset: 0,
-        endModel: models[models.length - 1],
-        endOffset: models[models.length - 1].text?.length ?? 0,
-        betweenModels: models.slice(1, models.length - 1),
-      };
+    if (pageBlock.selection) {
+      const selectedBlock = pageBlock.selection.state.selectedBlocks;
+      const models = selectedBlock.map(element => getModelByElement(element));
+      // .filter(model => model.text);
+      if (models.length) {
+        return {
+          startModel: models[0],
+          startOffset: 0,
+          endModel: models[models.length - 1],
+          endOffset: models[models.length - 1].text?.length ?? 0,
+          betweenModels: models.slice(1, models.length - 1),
+        };
+      }
     }
   }
   // check exist native selection
