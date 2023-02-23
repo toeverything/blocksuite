@@ -16,6 +16,7 @@ export const styles = css`
   }
 
   .slash-menu {
+    box-sizing: border-box;
     font-size: var(--affine-font-base);
     position: absolute;
     padding: 12px 0;
