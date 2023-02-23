@@ -429,25 +429,23 @@ test('drag select code block can delete it', async ({ page }) => {
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const position = await page.evaluate(() => {
-    const code = document.querySelector('affine-code');
-    const bbox = code?.getBoundingClientRect() as DOMRect;
-    return {
-      startX: bbox.left,
-      startY: bbox.bottom - bbox.height / 2,
-      endX: bbox.right,
-      endY: bbox.bottom - bbox.height / 2,
-    };
-  });
+  const bbox = await page.locator('affine-code').boundingBox();
+  if (!bbox) {
+    throw new Error("Failed to get code block's bounding box");
+  }
+  const position = {
+    startX: bbox.x,
+    startY: bbox.y + bbox.height / 2,
+    endX: bbox.x + bbox.width,
+    endY: bbox.y + bbox.height / 2,
+  };
   await page.mouse.click(position.endX + 150, position.endY + 150);
   await dragBetweenCoords(
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY }
   );
-  await page.locator('.ql-syntax').evaluate(e => e.blur());
   await page.keyboard.press('Backspace');
-
   const locator = page.locator('affine-code');
   await expect(locator).toBeHidden();
 });

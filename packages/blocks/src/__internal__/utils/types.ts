@@ -45,6 +45,10 @@ export interface CommonBlockElement extends HTMLElement {
 export type DomSelectionType = 'Caret' | 'Range' | 'None';
 
 export type BlockRange = {
+  /**
+   * 'Native' for native selection, 'Block' for block selection
+   */
+  type: 'Native' | 'Block';
   startModel: BaseBlockModel;
   endModel: BaseBlockModel;
   startOffset: number;
@@ -53,7 +57,7 @@ export type BlockRange = {
    * Models between startModel and endModel, not including startModel and endModel
    */
   betweenModels: BaseBlockModel[];
-  // startModel === endModel && startOffset === endOffset
+  // collapsed is true when startModel === endModel && startOffset === endOffset
   // collapsed: true;
 };
 
