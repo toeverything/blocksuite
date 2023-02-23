@@ -40,7 +40,6 @@ import {
   EdgelessSelectionState,
   ViewportState,
 } from './selection-manager.js';
-import type { EdgelessToolbarWithFlag } from './toolbar/edgeless-toolbar-with-flag.js';
 
 export interface EdgelessContainer extends HTMLElement {
   readonly page: Page;
@@ -131,9 +130,6 @@ export class EdgelessPageBlockComponent
 
   private _disposables = new DisposableGroup();
   private _selection!: EdgelessSelectionManager;
-
-  @query('edgeless-toolbar-with-flag')
-  private _toolbar!: EdgelessToolbarWithFlag;
 
   private _bindHotkeys() {
     hotkey.addListener(HOTKEYS.BACKSPACE, this._handleBackspace);
