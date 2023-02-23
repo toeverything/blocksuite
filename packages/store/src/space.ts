@@ -1,13 +1,12 @@
 import type * as Y from 'yjs';
 
-import type { SelectionRange } from './awareness.js';
-import type { AwarenessStore } from './awareness.js';
+import type { AwarenessStore, UserRange } from './awareness.js';
 import type { RichTextAdapter } from './text-adapter.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
 import type { DataInitializer } from './yjs/proxy.js';
 
 export interface StackItem {
-  meta: Map<'cursor-location', SelectionRange | undefined>;
+  meta: Map<'cursor-location', UserRange | undefined>;
   type: 'undo' | 'redo';
 }
 

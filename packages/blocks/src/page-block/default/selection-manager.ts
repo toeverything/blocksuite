@@ -6,17 +6,16 @@ import {
   caretRangeFromPoint,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Page, UserRange } from '@blocksuite/store';
 import { BaseBlockModel, DisposableGroup } from '@blocksuite/store';
 
 import {
-  flatSelectedBlocks,
   getAllBlocks,
   getBlockElementByModel,
+  getCurrentBlockRange,
   getCurrentRange,
   getDefaultPageBlock,
   getModelByElement,
-  getSelectInfo,
   handleNativeRangeClick,
   handleNativeRangeDblClick,
   handleNativeRangeDragMove,
@@ -1110,15 +1109,16 @@ export class DefaultSelectionManager {
 
   updateLocalSelection() {
     const page = this.page;
-    const selectInfo = getSelectInfo(page);
-    if (
-      selectInfo.type === 'Range' ||
-      (selectInfo.type === 'Caret' && selectInfo.selectedBlocks.length > 0)
-    ) {
-      page.awarenessStore.setLocalCursor(
-        page,
-        flatSelectedBlocks(selectInfo.selectedBlocks)
-      );
+    const blockRange = getCurrentBlockRange(page);
+    if (blockRange) {
+      const userRange: UserRange = {
+        startOffset: blockRange.startOffset,
+        endOffset: blockRange.endOffset,
+        startBlockId: blockRange.startModel.id,
+        endBlockId: blockRange.endModel.id,
+        betweenBlockIds: blockRange.betweenModels.map(m => m.id),
+      };
+      page.awarenessStore.setLocalRange(page, userRange);
     }
   }
 }

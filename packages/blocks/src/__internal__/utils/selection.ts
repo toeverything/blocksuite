@@ -340,6 +340,33 @@ export function getCurrentRange(selection = window.getSelection()) {
   return selection.getRangeAt(0);
 }
 
+export function getCurrentBlockRange(page: Page): BlockRange | null {
+  // check exist block selection
+  if (page.root) {
+    const pageBlock = getDefaultPageBlock(page.root);
+    if (pageBlock.selection) {
+      const selectedBlock = pageBlock.selection.state.selectedBlocks;
+      const models = selectedBlock.map(element => getModelByElement(element));
+      // .filter(model => model.text);
+      if (models.length) {
+        return {
+          startModel: models[0],
+          startOffset: 0,
+          endModel: models[models.length - 1],
+          endOffset: models[models.length - 1].text?.length ?? 0,
+          betweenModels: models.slice(1, models.length - 1),
+        };
+      }
+    }
+  }
+  // check exist native selection
+  if (hasNativeSelection()) {
+    const range = getCurrentRange();
+    return nativeRangeToBlockRange(range);
+  }
+  return null;
+}
+
 function handleInFrameDragMove(
   startContainer: Node,
   startOffset: number,
@@ -969,24 +996,4 @@ export function getClosestEditor(clientY: number, container = document.body) {
  */
 export function getClosestFrame(clientY: number) {
   return getHorizontalClosestElement(clientY, 'affine-frame');
-}
-
-/**
- * flat the selected blocks
- */
-export function flatSelectedBlocks(
-  selectedBlocks: SelectedBlock[]
-): Omit<SelectedBlock, 'children'>[] {
-  const result: Omit<SelectedBlock, 'children'>[] = [];
-  for (const block of selectedBlocks) {
-    result.push({
-      id: block.id,
-      startPos: block.startPos,
-      endPos: block.endPos,
-    });
-    if (block.children.length > 0) {
-      result.push(...flatSelectedBlocks(block.children));
-    }
-  }
-  return result;
 }

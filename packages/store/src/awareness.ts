@@ -6,11 +6,13 @@ import type { Space } from './space.js';
 import type { Store } from './store.js';
 import { uuidv4 } from './utils/id-generator.js';
 
-export type SelectionRange = Array<{
-  id: string;
-  startPos?: number;
-  endPos?: number;
-}>;
+export interface UserRange {
+  startOffset: number;
+  endOffset: number;
+  startBlockId: string;
+  endBlockId: string;
+  betweenBlockIds: string[];
+}
 
 export interface UserInfo {
   id: number;
@@ -36,7 +38,7 @@ type Response = {
 export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > = {
-  cursor?: Record<Space['prefixedId'], SelectionRange>;
+  rangeMap?: Record<Space['prefixedId'], UserRange>;
   user?: UserInfo;
   flags: Flags;
   request?: Request<Flags>[];
@@ -182,21 +184,21 @@ export class AwarenessStore<
     ] satisfies Request<Flags>[]);
   }
 
-  setLocalCursor(space: Space, range: SelectionRange | null) {
-    const cursor = this.awareness.getLocalState()?.cursor ?? {};
+  setLocalRange(space: Space, range: UserRange | null) {
+    const rangeMap = this.awareness.getLocalState()?.rangeMap ?? {};
     if (range === null) {
-      delete cursor[space.prefixedId];
-      this.awareness.setLocalStateField('cursor', cursor);
+      delete rangeMap[space.prefixedId];
+      this.awareness.setLocalStateField('rangeMap', rangeMap);
     } else {
-      this.awareness.setLocalStateField('cursor', {
-        ...cursor,
+      this.awareness.setLocalStateField('rangeMap', {
+        ...rangeMap,
         [space.prefixedId]: range,
       });
     }
   }
 
-  getLocalCursor(space: Space): SelectionRange | undefined {
-    return this.awareness.getLocalState()?.['cursor']?.[space.prefixedId];
+  getLocalRange(space: Space): UserRange | undefined {
+    return this.awareness.getLocalState()?.['rangeMap']?.[space.prefixedId];
   }
 
   getStates(): Map<number, RawAwarenessState<Flags>> {

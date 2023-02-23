@@ -160,7 +160,7 @@ export class EditorContainer extends NonShadowLitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.page.awarenessStore.setLocalCursor(this.page, null);
+    this.page.awarenessStore.setLocalRange(this.page, null);
     this._disposables.dispose();
   }
 

@@ -697,7 +697,7 @@ export class Page extends Space<PageData> {
     if (isWeb) {
       event.stackItem.meta.set(
         'cursor-location',
-        this.awarenessStore.getLocalCursor(this)
+        this.awarenessStore.getLocalRange(this)
       );
     }
 
@@ -705,12 +705,12 @@ export class Page extends Space<PageData> {
   };
 
   private _historyPopObserver = (event: { stackItem: StackItem }) => {
-    const cursor = event.stackItem.meta.get('cursor-location');
-    if (!cursor) {
+    const range = event.stackItem.meta.get('cursor-location');
+    if (!range) {
       return;
     }
 
-    this.awarenessStore.setLocalCursor(this, cursor);
+    this.awarenessStore.setLocalRange(this, range);
     this._historyObserver();
   };
 
