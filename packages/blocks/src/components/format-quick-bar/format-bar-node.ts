@@ -86,11 +86,14 @@ export class FormatQuickBar extends LitElement {
     if (!blockRange) {
       throw new Error("Can't get current block range");
     }
-    const models = [
-      blockRange.startModel,
-      ...blockRange.betweenModels,
-      blockRange.endModel,
-    ];
+    const models =
+      blockRange.startModel === blockRange.endModel
+        ? [blockRange.startModel]
+        : [
+            blockRange.startModel,
+            ...blockRange.betweenModels,
+            blockRange.endModel,
+          ];
     this.models = models;
     const startModel = models[0];
     this.paragraphType = `${startModel.flavour}/${startModel.type}`;

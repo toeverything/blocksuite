@@ -67,15 +67,41 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
 
 test('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'Hello');
   await selectAllByKeyboard(page);
   await inlineCode(page);
-  await page.keyboard.press('ArrowRight');
+  await assertTextFormat(page, 0, 5, { code: true });
+
+  await focusRichText(page);
+  await page.keyboard.press(`${SHORT_KEY}+ArrowRight`);
   await type(page, 'block suite');
+  // TODO fix the `code={false}` text
   // block suite should not be code
-  await assertTextFormat(page, 0, 6, {});
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        code={true}
+        insert="Hello"
+      />
+      <text
+        code={false}
+        insert=" b"
+      />
+      <text
+        insert="lock suite"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
 });
 
 test('multi line rich-text inline code hotkey', async ({ page }) => {
