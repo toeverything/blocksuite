@@ -5,7 +5,7 @@ import { BLOCK_ID_ATTR, HOTKEYS } from '@blocksuite/global/config';
 import type { XYWH } from '@blocksuite/phasor';
 import { SurfaceManager } from '@blocksuite/phasor';
 import { DisposableGroup, Page, Signal } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -356,10 +356,12 @@ export class EdgelessPageBlockComponent
             `
           : null}
       </div>
-      <edgeless-toolbar
-        .mouseMode=${this.mouseMode}
-        .edgeless=${this}
-      ></edgeless-toolbar>
+      ${this._toolbarEnabled
+        ? html`<edgeless-toolbar
+            .mouseMode=${this.mouseMode}
+            .edgeless=${this}
+          ></edgeless-toolbar>`
+        : nothing}
     `;
   }
 }
