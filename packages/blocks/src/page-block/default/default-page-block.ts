@@ -103,8 +103,6 @@ export class DefaultPageBlockComponent
       cursor: default;
 
       min-height: calc(100% - 78px);
-      height: auto;
-      overflow: hidden;
       padding-bottom: 150px;
     }
 

@@ -942,7 +942,7 @@ export function restoreSelection(blockRange: BlockRange) {
   defaultPageBlock.selection.state.type = 'block';
   defaultPageBlock.selection.state.selectedBlocks = models
     .map(model => getBlockElementByModel(model))
-    .filter(Boolean) as Element[];
+    .filter(Boolean) as BlockComponentElement[];
   defaultPageBlock.selection.refreshSelectedBlocksRects();
   // Try clean native selection
   resetNativeSelection(null);
